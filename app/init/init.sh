@@ -26,6 +26,7 @@ sudo -u postgres psql -c "CREATE EXTENSION postgis; CREATE EXTENSION postgis_top
 # Install NPM and Node.js
 sudo apt-get -y install nodejs
 sudo apt-get -y install npm
+npm install forever -g
 # For some reason, 'nodejs' brings up the node console, but 'node' doesn't unless you symlink it
 sudo ln -s /usr/bin/nodejs /usr/sbin/node  
 
