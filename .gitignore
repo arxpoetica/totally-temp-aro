@@ -1,1 +1,3 @@
+app/.vagrant/
+app/Vagrantfile
 app/node_modules
