@@ -25,3 +25,5 @@ sudo su postgres -c "psql -d ${PGDATABASE} -a -f create_aro_edges.sql"
 
 # Create graph using pgRouting
 sudo su postgres -c "psql -d ${PGDATABASE} -a -f build_graph.sql"
+
+exit

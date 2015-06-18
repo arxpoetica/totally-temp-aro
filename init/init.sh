@@ -1,8 +1,5 @@
 #!/bin/bash
 
-export PGBIN=/usr/bin
-export PGPORT=5432
-export PGHOST=localhost
 export PGUSER=aro
 export PGPASSWORD=aro
 export PGDATABASE=aro

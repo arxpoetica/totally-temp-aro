@@ -21,3 +21,5 @@ sudo su postgres -c "shp2pgsql -I -s 26918 shapefiles/tl_2014_36_cousub/tl_2014_
 
 # Reduce the number of columns in tiger_cousub to only those relevant to the app and store result in aro_cousub
 sudo su postgres -c "psql -d ${PGDATABASE} -a -f create_aro_cousub.sql"
+
+exit
