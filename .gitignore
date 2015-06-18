@@ -1,6 +1,7 @@
-app/.vagrant/
-app/Vagrantfile
 .vagrant
 .DS_Store
 Vagrantfile
+
 app/node_modules
+
+etl/tiger_cousub/shapefiles
