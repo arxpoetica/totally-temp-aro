@@ -5,3 +5,4 @@ Vagrantfile
 app/node_modules
 
 etl/tiger_cousub/shapefiles
+etl/tiger_edges/shapefiles
