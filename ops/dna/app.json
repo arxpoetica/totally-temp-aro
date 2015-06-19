@@ -4,11 +4,9 @@
       "recipe[opsworks_initial_setup]",
       "recipe[ssh_host_keys]",
       "recipe[ssh_users]",
-      "recipe[mysql::client]",
       "recipe[dependencies]",
       "recipe[ebs]",
       "recipe[opsworks_ganglia::client]",
-      "recipe[nginx]",
       "recipe[aro::local]",
       "recipe[opsworks_ganglia::configure-client]",
       "recipe[agent_version]"

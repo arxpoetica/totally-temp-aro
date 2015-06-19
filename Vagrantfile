@@ -13,10 +13,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
 
   config.vm.provider "virtualbox" do |vb|
-  #   # Don't boot with headless mode
-  #   vb.gui = true
-  #
-  #   
     vb.memory = 2048
     vb.cpus = 2
   end
@@ -49,10 +45,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         args: "--volumes-from=postgres-data -e POSTGRES_PASSWORD=aro -e POSTGRES_USER=aro -d -p 5432:5432"
     end
 
-    # layer.vm.provision :opsworks, type: 'shell', args:[
-    #   'ops/dna/stack.json',
-    #   'ops/dna/app.json'
-    # ]
+    layer.vm.provision :opsworks, type: 'shell', args:[
+      'ops/dna/stack.json',
+      'ops/dna/app.json'
+    ]
 
     # Forward ports
     layer.vm.network "forwarded_port", guest: 8000, host: 8000, auto_correct: true     #application: node webapp
