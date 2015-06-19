@@ -25,7 +25,6 @@ app.get('/', function(request, response){
 // County Subdivisions
 app.get('/county_subdivisions/:state_id', function(request, response) {
 	var sql = "SELECT ST_AsGeoJSON(geom)::json AS geom, name FROM aro_cousub WHERE statefp = $1";
-
 	var query = client.query(sql, [request.params.state_id]);
 
 	query.on('row', function(row, result){
@@ -40,6 +39,36 @@ app.get('/county_subdivisions/:state_id', function(request, response) {
 				'properties': {
 					'color':'green',
 					'name': result.rows[i].name
+				},
+				'geometry': result.rows[i].geom			
+			}
+		}
+
+		var out = {
+			'type':'FeatureCollection',
+			'features': features
+		};
+
+		response.send(out);
+	});
+});
+
+// Road Segments
+app.get('/road_segments/:county_id', function(request, response) {
+	var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro_edges WHERE countyfp = $1';
+	var query = client.query(sql, [request.params.county_id]);
+
+	query.on('row', function(row, result) {
+		result.addRow(row);
+	});
+
+	query.on('end', function(result) {
+		features = [];
+		for (var i in result.rows) {
+			features[i] = {
+				'type':'Feature',
+				'properties': {
+					'color':'red'
 				},
 				'geometry': result.rows[i].geom			
 			}
