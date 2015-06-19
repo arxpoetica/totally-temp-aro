@@ -22,24 +22,37 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
 # Configure provisioner script
-  config.vm.synced_folder 'init/ops/provisioner', '/tmp/provisioner'
+  config.vm.synced_folder 'ops/provisioner', '/tmp/provisioner'
   config.vm.provision :opsworks, type: 'shell' do |shell|
     shell.inline = '/bin/bash /tmp/provisioner/opsworks "$@"'
   end
+
+# Create docker data container
+  config.vm.synced_folder 'ops/docker', '/tmp/docker'
+  config.vm.provision "docker" do |d|
+    d.build_image "/tmp/docker",
+      args: "-t aro-postgis"
+    d.run 'postgres-data',
+      image: "aro-postgis",
+      args: "-v '/var/lib/postgresql/data'",
+      cmd: "bash -l"
+  end
+
 
   # Define application layer
   config.vm.define "app" do |layer|
 
     # Use docker container for local database
     layer.vm.provision "docker", run: "always" do |d|
-      d.pull_images 'postgres'
-      d.run 'postgres:9.4', args: "-e POSTGRES_PASSWORD=aro -e POSTGRES_USER=aro -d --name postgres -p 5432:5432"
+      d.run 'postgres',
+        image: "aro-postgis",
+        args: "--volumes-from=postgres-data -e POSTGRES_PASSWORD=aro -e POSTGRES_USER=aro -d -p 5432:5432"
     end
 
-    layer.vm.provision :opsworks, type: 'shell', args:[
-      'init/ops/dna/stack.json',
-      'init/ops/dna/app.json'
-    ]
+    # layer.vm.provision :opsworks, type: 'shell', args:[
+    #   'ops/dna/stack.json',
+    #   'ops/dna/app.json'
+    # ]
 
     # Forward ports
     layer.vm.network "forwarded_port", guest: 8000, host: 8000, auto_correct: true     #application: node webapp
