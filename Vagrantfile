@@ -22,7 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
 # Configure provisioner script
-  config.vm.synced_folder 'devInit/ops/provisioner', '/tmp/provisioner'
+  config.vm.synced_folder 'init/ops/provisioner', '/tmp/provisioner'
   config.vm.provision :opsworks, type: 'shell' do |shell|
     shell.inline = '/bin/bash /tmp/provisioner/opsworks "$@"'
   end
@@ -33,17 +33,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Use docker container for local database
     layer.vm.provision "docker", run: "always" do |d|
       d.pull_images 'postgres'
-      d.run 'postgres:9.4', args: "-e POSTGRES_PASSWORD=cmo -e POSTGRES_USER=cmo -d --name postgres -p 5432:5432"
+      d.run 'postgres:9.4', args: "-e POSTGRES_PASSWORD=aro -e POSTGRES_USER=aro -d --name postgres -p 5432:5432"
     end
 
     layer.vm.provision :opsworks, type: 'shell', args:[
-      'devInit/ops/dna/stack.json',
-      'devInit/ops/dna/flask-app.json'
+      'init/ops/dna/stack.json',
+      'init/ops/dna/app.json'
     ]
 
     # Forward ports
-    layer.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true     #application: nginx/uwsgi
-    layer.vm.network "forwarded_port", guest: 5000, host: 5000, auto_correct: true   #application: python debug
+    layer.vm.network "forwarded_port", guest: 8000, host: 8000, auto_correct: true     #application: node webapp
     layer.vm.network "forwarded_port", guest: 5432, host: 5432, auto_correct: true   #postgres
   end
 
