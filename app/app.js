@@ -4,10 +4,14 @@ var compression = require('compression');
 app.use(compression());
 app.listen(8000);
 
+// Database TODO: config file for databases
 var pg = require('pg');
-var con = 'postgres://aro:aro@localhost/aro';
-var client = new pg.Client(con);
-client.connect();
+var con_string = 'postgres://aro:aro@localhost/aro';
+
+
+// Models
+var CountySubdivision = require('./models/county_subdivision.js');
+var RoadSegment = require('./models/road_segment.js');
 
 /********
 * VIEWS *
@@ -23,62 +27,15 @@ app.get('/', function(request, response){
 *******/
 
 // County Subdivisions
-app.get('/county_subdivisions/:state_id', function(request, response) {
-	var sql = "SELECT ST_AsGeoJSON(geom)::json AS geom, name FROM aro_cousub WHERE statefp = $1";
-	var query = client.query(sql, [request.params.state_id]);
-
-	query.on('row', function(row, result){
-		result.addRow(row);
-	});
-	
-	query.on('end', function(result) {
-		features = [];
-		for (var i in result.rows) {
-			features[i] = {
-				'type':'Feature',
-				'properties': {
-					'color':'green',
-					'name': result.rows[i].name
-				},
-				'geometry': result.rows[i].geom			
-			}
-		}
-
-		var out = {
-			'type':'FeatureCollection',
-			'features': features
-		};
-
-		response.send(out);
+app.get('/county_subdivisions/:statefp', function(request, response) {
+	CountySubdivision.find_by_statefp(pg, con_string, request.params.statefp, function(data) {
+		response.send(data);
 	});
 });
 
 // Road Segments
-app.get('/road_segments/:county_id', function(request, response) {
-	var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro_edges WHERE countyfp = $1';
-	var query = client.query(sql, [request.params.county_id]);
-
-	query.on('row', function(row, result) {
-		result.addRow(row);
-	});
-
-	query.on('end', function(result) {
-		features = [];
-		for (var i in result.rows) {
-			features[i] = {
-				'type':'Feature',
-				'properties': {
-					'color':'red'
-				},
-				'geometry': result.rows[i].geom			
-			}
-		}
-
-		var out = {
-			'type':'FeatureCollection',
-			'features': features
-		};
-
-		response.send(out);
+app.get('/road_segments/:countyfp', function(request, response) {
+	RoadSegment.find_by_countyfp(pg, con_string, request.params.countyfp, function(data) {
+		response.send(data);
 	});
 });
