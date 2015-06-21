@@ -44,7 +44,7 @@ sudo apt-get -y install nodejs
 sudo apt-get -y install npm
 # forever need to be installed at the global level and not as part of the app's package.json
 sudo npm install forever -g
-# For some reason, 'nodejs' brings up the node console, but 'node' doesn't unless you symlink it
+sudo npm install mocha -g
 sudo ln -s /usr/bin/nodejs /usr/sbin/node  
 
 exit
