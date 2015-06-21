@@ -6,11 +6,11 @@ module.exports = {
 	build_feature_collection: function(data, properties) {
 		var features = [];
 
-			for (var i in data.rows) {
+			for (var i in data) {
 				features[i] = {
 					'type':'Feature',
 					'properties': properties,
-					'geometry': data.rows[i].geom			
+					'geometry': data[i].geom			
 				}
 			}
 

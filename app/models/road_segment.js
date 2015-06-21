@@ -25,7 +25,7 @@ RoadSegment.find_by_countyfp = function(database, con_string, countyfp, callback
 
 		query.on('end', function(result) {
 			var properties = {'color': 'red'}
-			var out = GeoJsonHelper.build_feature_collection(result, properties);
+			var out = GeoJsonHelper.build_feature_collection(result.rows, properties);
 			client.end();
 			callback(out);
 		});
