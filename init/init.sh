@@ -42,8 +42,6 @@ sudo -u postgres psql -c "ALTER DEFAULT PRIVILEGES IN SCHEMA topology GRANT ALL 
 # Install Node.js and NPM
 sudo apt-get -y install nodejs
 sudo apt-get -y install npm
-# forever need to be installed at the global level and not as part of the app's package.json
-sudo npm install forever -g
 sudo npm install mocha -g
 sudo ln -s /usr/bin/nodejs /usr/sbin/node  
 
