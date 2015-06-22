@@ -14,7 +14,7 @@
 * TIGER edges (road segments)
 3. In each data source directory, run `bash *.sh`
 
-## Application
+### Application
 1. From the ARO root directory, `cd app`
 2. `npm install` (maybe `sudo npm install` if that fails)
 3. To run the app on localhost (from the `app` directory): `node app.js`
