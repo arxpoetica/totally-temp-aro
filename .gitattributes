@@ -19,4 +19,6 @@
 *.yml      text
 *.rb       text
 opsworks   eol=lf
+Dockerfile	eol=lf
+Vagrantfile eol=lf
 
