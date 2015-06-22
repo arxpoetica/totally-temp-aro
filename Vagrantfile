@@ -23,6 +23,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     shell.inline = '/bin/bash /tmp/provisioner/opsworks "$@"'
   end
 
+  # Run apt-get update to prevent errors with future installations.
+  config.vm.provision "shell", inline: "apt-get -q update"
+
 # Create docker data container
   config.vm.synced_folder 'ops/docker', '/tmp/docker'
   config.vm.provision "docker" do |d|

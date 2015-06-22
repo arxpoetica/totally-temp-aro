@@ -21,4 +21,5 @@
 opsworks   eol=lf
 Dockerfile	eol=lf
 Vagrantfile eol=lf
-
+Makefile	eol=lf
+*.sh		eol=lf
