@@ -16,9 +16,6 @@ CREATE TABLE public.aro_cousub AS
     geom
   FROM tiger_cousub;
 
-ALTER TABLE public.aro_cousub
-  OWNER TO postgres;
-GRANT ALL ON TABLE public.aro_cousub TO aro;
 
 CREATE INDEX aro_cousub_geom_gist
   ON public.aro_cousub

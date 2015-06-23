@@ -4,22 +4,51 @@
 # 2. Reduce the raw TIGER COUSUB data into aro_cousub table format.
 #
 # GENERAL ASSUMPTIONS/HACKS: DON'T HARDCODE ALL OF THIS STUFF.
-# For now, we're just downloading one county for the base development environment.
+# For now, we're just downloading one state for the base development environment.
 
+# TODO: Add a configuration task to create this folder and make world-writeable, also mount to alternate volume if not running locally
+GISROOT=/gisdata
+TMPDIR=/gisdata/temp/
+UNZIPTOOL=unzip
 export PGDATABASE=aro
+export PGUSER=aro
+export PGPASSWORD=aro
+export PGHOST=localhost
+export PGBIN=/usr/bin
+PSQL=${PGBIN}/psql
+SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # We should download these to an S3 bucket when we load the rest of the country.
-sudo mkdir shapefiles
-sudo mkdir shapefiles/tl_2014_36_cousub
 
-sudo wget -P shapefiles/tl_2014_36_cousub/ "ftp://ftp2.census.gov/geo/tiger/TIGER2014/COUSUB/tl_2014_36_cousub.zip"
-unzip shapefiles/tl_2014_36_cousub/tl_2014_36_cousub.zip -d shapefiles/tl_2014_36_cousub/
-sudo rm shapefiles/tl_2014_36_cousub/tl_2014_36_cousub.zip
+###############
+# New York (36)
+STATEFIPS=36
+STATECODE=NY
 
-# Create & load the table for the raw TIGER COUSUB data
-sudo su postgres -c "shp2pgsql -I -s 26918 shapefiles/tl_2014_36_cousub/tl_2014_36_cousub.shp public.tiger_cousub | psql -U postgres -d ${PGDATABASE}"
+rm -f ${TMPDIR}/*.*
+${PSQL} -c "DROP SCHEMA IF EXISTS tiger_staging CASCADE;"
+${PSQL} -c "CREATE SCHEMA tiger_staging;"
+
+cd $GISROOT
+wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/COUSUB/tl_2014_${STATEFIPS}_cousub.zip
+unzip tl_2014_${STATEFIPS}_cousub.zip -d ${TMPDIR}
+cd $TMPDIR
+
+# Create table in tiger_data schema
+${PSQL} -c "CREATE TABLE tiger_data.${STATECODE}_cousub(CONSTRAINT pk_${STATECODE}_cousub PRIMARY KEY (cosbidfp), CONSTRAINT uidx_${STATECODE}_cousub_gid UNIQUE (gid)) INHERITS(cousub);" 
+# Load the table for the raw data into the tiger_staging schema
+${SHP2PGSQL} -c -s 4269 -g the_geom -W "latin1" tl_2014_${STATEFIPS}_cousub.dbf tiger_staging.${STATECODE}_cousub | psql
+# Transform and load into tiger_data schema, then add constraints and indexes
+${PSQL} -c "ALTER TABLE tiger_staging.${STATECODE}_cousub RENAME geoid TO cosbidfp;"
+${PSQL} -c "SELECT loader_load_staged_data(lower('${STATECODE}_cousub'), lower('${STATECODE}_cousub'));"
+${PSQL} -c "ALTER TABLE tiger_data.${STATECODE}_cousub ADD CONSTRAINT chk_statefp CHECK (statefp = '${STATEFIPS}');"
+${PSQL} -c "CREATE INDEX tiger_data_${STATECODE}_cousub_the_geom_gist ON tiger_data.${STATECODE}_cousub USING gist(the_geom);"
+${PSQL} -c "CREATE INDEX idx_tiger_data_${STATECODE}_cousub_countyfp ON tiger_data.${STATECODE}_cousub USING btree(countyfp);"
+
+
+
 
 # Reduce the number of columns in tiger_cousub to only those relevant to the app and store result in aro_cousub
-sudo su postgres -c "psql -d ${PGDATABASE} -a -f create_aro_cousub.sql"
+# sudo su postgres -c "psql -d ${PGDATABASE} -a -f create_aro_cousub.sql"
 
-exit
+# exit
