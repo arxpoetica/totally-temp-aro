@@ -2,7 +2,7 @@
 
 -- DROP TABLE public.aro_edges;
 
-CREATE TABLE public.aro_edges AS
+CREATE TABLE aro.edges AS
 	SELECT
 		gid,
 		statefp,
@@ -19,16 +19,16 @@ CREATE TABLE public.aro_edges AS
 		zipr,
 		tnidf,
 		tnidt,
-		ST_Length(geom) as length,
-		geom
-	FROM tiger_edges
+		ST_Length(the_geom) as length,
+		the_geom AS geom
+	FROM tiger.edges
 	WHERE featcat = 'S';
 
-ALTER TABLE public.aro_edges
-  OWNER TO postgres;
-GRANT ALL ON TABLE public.aro_edges TO aro;
+
+ALTER TABLE aro.edges
+  ADD CONSTRAINT pk_aro_edges PRIMARY KEY (gid);
 
 CREATE INDEX aro_edges_geom_gist
-  ON public.aro_edges
+  ON aro.edges
   USING gist
   (geom);

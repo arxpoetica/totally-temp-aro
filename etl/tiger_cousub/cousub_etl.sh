@@ -29,10 +29,10 @@ rm -f ${TMPDIR}/*.*
 ${PSQL} -c "DROP SCHEMA IF EXISTS tiger_staging CASCADE;"
 ${PSQL} -c "CREATE SCHEMA tiger_staging;"
 
-cd $GISROOT
-wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/COUSUB/tl_2014_${STATEFIPS}_cousub.zip
+cd $GISROOT;
+wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/COUSUB/tl_2014_${STATEFIPS}_cousub.zip --accept=zip --reject=html -nd -nc
 unzip tl_2014_${STATEFIPS}_cousub.zip -d ${TMPDIR}
-cd $TMPDIR
+cd $TMPDIR;
 
 # Create table in tiger_data schema
 ${PSQL} -c "CREATE TABLE tiger_data.${STATECODE}_cousub(CONSTRAINT pk_${STATECODE}_cousub PRIMARY KEY (cosbidfp), CONSTRAINT uidx_${STATECODE}_cousub_gid UNIQUE (gid)) INHERITS(cousub);" 
@@ -44,11 +44,3 @@ ${PSQL} -c "SELECT loader_load_staged_data(lower('${STATECODE}_cousub'), lower('
 ${PSQL} -c "ALTER TABLE tiger_data.${STATECODE}_cousub ADD CONSTRAINT chk_statefp CHECK (statefp = '${STATEFIPS}');"
 ${PSQL} -c "CREATE INDEX tiger_data_${STATECODE}_cousub_the_geom_gist ON tiger_data.${STATECODE}_cousub USING gist(the_geom);"
 ${PSQL} -c "CREATE INDEX idx_tiger_data_${STATECODE}_cousub_countyfp ON tiger_data.${STATECODE}_cousub USING btree(countyfp);"
-
-
-
-
-# Reduce the number of columns in tiger_cousub to only those relevant to the app and store result in aro_cousub
-# sudo su postgres -c "psql -d ${PGDATABASE} -a -f create_aro_cousub.sql"
-
-# exit
