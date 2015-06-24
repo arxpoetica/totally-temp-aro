@@ -33,7 +33,7 @@
       function initialize() {
         map = new google.maps.Map(document.getElementById('map-canvas'), {
           zoom: 7,
-          center: {lat: 42.75633, lng: -75.81028}, // Centroid of New York State
+          center: {lat: 47.6097, lng: -122.3331}, // Centroid of Seattle, WA
           mapTypeId: google.maps.MapTypeId.HYBRID
         });
 
@@ -62,7 +62,7 @@
           county_control.appendChild(county_control_text);
 
           google.maps.event.addDomListener(county_control, 'click', function() {
-            toggle_layer(county_subdivisions_layer, 'county_subdivisions_layer', '/county_subdivisions/36', county_control);
+            toggle_layer(county_subdivisions_layer, 'county_subdivisions_layer', '/county_subdivisions/53', county_control);
           });
 
           var road_control = document.createElement('div');
@@ -88,7 +88,7 @@
           road_control.appendChild(road_control_text);
 
           google.maps.event.addDomListener(road_control, 'click', function() {
-            toggle_layer(road_segments_layer, 'road_segments_layer', '/road_segments/047', road_control);
+            toggle_layer(road_segments_layer, 'road_segments_layer', '/road_segments/033', road_control);
           });
         }
 
