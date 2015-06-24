@@ -17,8 +17,8 @@ These instructions are for building, configuring, and managing your local develo
 By following the walkthrough you will accomplish the following:
  * Build and provision a Vagrant virtual machine for running the `jelly-donut` application locally
  * Load the following test dataset:
- 	* TIGER 2014 County-Subdivision objects for the state of New York
- 	* TIGER 2014 Edges (road segment) objects for Kings County New York (Brooklyn)
+ 	* TIGER 2014 County-Subdivision objects for the state of Washington
+ 	* TIGER 2014 Edges (road segment) objects for King County Washington (Seattle)
  * Generate routing topology for those road segments
  * Build, test, and run the webapp that allows viewing those objects on a map, toggling them, and creating simple routes
  	* App will continue to do more as development progresses

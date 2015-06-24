@@ -6,7 +6,7 @@ describe('RoadSegment', function() {
 
 	describe('#find_by_countyfp()', function() {
 		var con_string = 'postgres://aro:aro@localhost/aro';
-		var countyfp = '047';
+		var countyfp = '033';
 
 		it('should return a GeoJSON FeatureCollection', function(done) {
 			RoadSegment.find_by_countyfp(pg, con_string, countyfp, function(output) {
