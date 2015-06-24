@@ -14,6 +14,7 @@
 2. There are several directories in the `etl` directory - one for each data source currently supported by the application:
 * TIGER county subdivisions
 * TIGER edges (road segments)
+* Locations (locations, businesses, industries)
 3. In each data source directory, run `bash *.sh`
 
 ### Application
