@@ -23,6 +23,6 @@ The application is managed through the makefile, which exposes a number of comma
  - `make etl_reload_all`: Drops all data from the database, then runs all existing ETL scripts to download and import the data.
 
 #### Application
- -`make webapp`: Installs required node modules specified in `app/package.js`
- -`make test`: Runs mocha testing suite as defined in `app/package.js`
- -`make webserver`: Starts the express webserver to server the applciation in `app/app.js`
+ - `make webapp`: Installs required node modules specified in `app/package.js`
+ - `make test`: Runs mocha testing suite as defined in `app/package.js`
+ - `make webserver`: Starts the express webserver to server the applciation in `app/app.js`
