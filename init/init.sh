@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## This is not used anymore, but keeping it around for legacy/reference purposes, if needed
+
 export PGUSER=aro
 export PGPASSWORD=aro
 export PGDATABASE=aro
