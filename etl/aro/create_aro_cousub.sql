@@ -2,25 +2,26 @@
 
 -- DROP TABLE public.aro_cousub;
 
-CREATE TABLE public.aro_cousub AS
+CREATE TABLE aro.cousub AS
   SELECT
     gid,
     statefp,
     countyfp,
-    geoid,
+    cosbidfp AS geoid,
     name,
     aland,
     awater,
     intptlat,
     intptlon,
-    geom
-  FROM tiger_cousub;
+    the_geom AS geom
+  FROM tiger.cousub;
 
-ALTER TABLE public.aro_cousub
-  OWNER TO postgres;
-GRANT ALL ON TABLE public.aro_cousub TO aro;
+
+ALTER TABLE aro.cousub
+  ADD CONSTRAINT pk_aro_cousub PRIMARY KEY (geoid);
+
 
 CREATE INDEX aro_cousub_geom_gist
-  ON public.aro_cousub
+  ON aro.cousub
   USING gist
   (geom);

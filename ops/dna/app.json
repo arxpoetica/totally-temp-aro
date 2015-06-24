@@ -1,0 +1,15 @@
+{
+  "opsworks_custom_cookbooks": {
+    "recipes": [
+      "recipe[opsworks_initial_setup]",
+      "recipe[ssh_host_keys]",
+      "recipe[ssh_users]",
+      "recipe[dependencies]",
+      "recipe[ebs]",
+      "recipe[opsworks_ganglia::client]",
+      "recipe[aro::local]",
+      "recipe[opsworks_ganglia::configure-client]",
+      "recipe[agent_version]"
+    ]
+  }
+}
