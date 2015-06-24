@@ -121,7 +121,7 @@ The following instructions (Loading Data and Applicaiton Setup) are executed fro
 #### Loading Data
 The initial loading of sample data can be completed with a single command:
 ```console
-$make etl_reload_all
+$ make etl_reload_all
 etl/reset_tiger_data.sh
 DROP EXTENSION
 NOTICE:  schema "tiger_data" does not exist, skipping
@@ -153,7 +153,7 @@ psql:/vagrant/etl/aro/build_graph.sql:5: NOTICE:  ------------------------------
 (1 row)
 ```
 #### Application Setup
-1. Install node application dependencies using the following command:
+Install node application dependencies using the following command:
 ```console
 $ make webapp
 (cd app && npm install .)
