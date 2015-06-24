@@ -33,8 +33,9 @@ ${PSQL} -c "CREATE SCHEMA tiger_staging;"
 
 # Download all edges
 cd $GISROOT;
-wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATEFIPS}* --accept=zip --reject=html -nd -nc
-
+# wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATEFIPS}* --accept=zip --reject=html -nd -nc
+# TODO: Remove this and uncomment previous line
+wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATEFIPS}047_edges.zip --accept=zip --reject=html -nd -nc
 # Uncompress all zipfiles
 for z in tl_*_${STATEFIPS}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
 for z in */tl_*_${STATEFIPS}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done  #unsure what, if anything, this does

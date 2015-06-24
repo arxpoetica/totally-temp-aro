@@ -20,6 +20,12 @@ reset_aro:
 etl_reload_all: reset_tiger reset_aro etl_tiger etl_aro
 
 
-application:
+webapp:
 	(cd app && npm install .)
+
+test:
+	(cd app && npm test)
+
+webserver:
+	(cd app && node app.js)
 

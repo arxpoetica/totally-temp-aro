@@ -2,7 +2,7 @@
 
 -- DROP TABLE public.aro_cousub;
 
-CREATE TABLE public.aro_cousub AS
+CREATE TABLE aro.cousub AS
   SELECT
     gid,
     statefp,
@@ -17,7 +17,11 @@ CREATE TABLE public.aro_cousub AS
   FROM tiger.cousub;
 
 
+ALTER TABLE aro.cousub
+  ADD CONSTRAINT pk_aro_cousub PRIMARY KEY (geoid);
+
+
 CREATE INDEX aro_cousub_geom_gist
-  ON public.aro_cousub
+  ON aro.cousub
   USING gist
   (geom);
