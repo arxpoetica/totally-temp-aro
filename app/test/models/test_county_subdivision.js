@@ -6,7 +6,7 @@ describe('CountySubdivision', function() {
 
 	describe('#find_by_statefp()', function() {
 		var con_string = 'postgres://aro:aro@localhost/aro';
-		var statefp = '36';
+		var statefp = '53';
 
 		it('should return a GeoJSON FeatureCollection', function(done) {
 			CountySubdivision.find_by_statefp(pg, con_string, statefp, function(output) {

@@ -16,7 +16,7 @@ function RoadSegment() {
 // 4. callback: function to return a GeoJSON object
 RoadSegment.find_by_countyfp = function(database, con_string, countyfp, callback) {
 	database.connect(con_string, function(err, client, done) {
-		var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.edges WHERE countyfp = $1';
+		var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.edges WHERE countyfp = $1 LIMIT 10000'; //hardcoded limit so app doesn't crash
 		var query = client.query(sql, [countyfp]);
 
 		query.on('row', function(row, result){
