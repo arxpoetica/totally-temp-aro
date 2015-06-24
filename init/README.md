@@ -31,7 +31,7 @@ After the walkthrough, there are instructions for updating and reprovisioning th
 
 ## Walkthrough
 #### Instance Setup
-1. Clone repository, then navigate to the root of the repository: 
+Clone repository, then navigate to the root of the repository: 
 ```console
 $ git clone git@github.com:AVCo/ARO-Platform
 Cloning into 'ARO-Platform'...
@@ -43,12 +43,12 @@ Resolving deltas: 100% (46/46), done.
 Checking connectivity... done.
 $ cd ARO-Platform
 ```
-2. Initialize configuration submodule: 
+Initialize configuration submodule: 
 ```console
 $ git submodule init
 Submodule 'ops/config' (git@github.com:AVCo/ARO-config) registered for path 'ops/config'
 ```
-3. Update the configuration submodule:
+Update the configuration submodule:
 ```console
 $ git submodule update
 Cloning into 'ops/config'...
@@ -60,7 +60,7 @@ Resolving deltas: 100% (2/2), done.
 Checking connectivity... done.
 Submodule path 'ops/config': checked out '91cf362cfa843c895170f0e34143d192d201ecc8'
 ```
-4. Start the Vagrant machine, which will automatically kick-off provisioning:
+Start the Vagrant machine, which will automatically kick-off provisioning:
 ```console
 $ vagrant up
 Bringing machine 'app' up with 'virtualbox' provider...
@@ -89,7 +89,7 @@ This will go on for a while. At the end of successful provisioning you will see 
 ```console
 ==> app: [2015-06-24 15:09:13]  INFO [opsworks-agent(20040)]: Finished Chef run with exitcode 0
 ```
-5. Connect into the Vagrant virtual machine and navigate to the application root:
+Connect into the Vagrant virtual machine and navigate to the application root:
 ```console
 $ vagrant ssh
 Welcome to Ubuntu 14.04.2 LTS (GNU/Linux 3.13.0-55-generic x86_64)
@@ -170,7 +170,7 @@ compression@1.5.0 node_modules/compression
 ├── semver@4.3.6
 └── pgpass@0.0.3 (split@0.3.3)
 ```
-2. Run the test suite.
+Run the test suite.
 ```console
 $ make test
 
@@ -203,7 +203,7 @@ $ make test
   11 passing (5s)
 
 ```
-3. Finally, start the webserver
+Finally, start the webserver
 ```console
 $ make webserver
 
@@ -215,13 +215,13 @@ Now you can access the application by browsing to `http://localhost:8000` from y
 
 
 ## Config Updates
-1. Update the config submodule:
+Update the config submodule:
 ```console
 $ git submodule update
 ```
 If there is no output to that command, then the configuration has not been modified. 
 
-2. If the previous command results in a configuration update, you will need to reprovision your Vagrant virtual machine to keep your environment setup consistent. 
+If the previous command results in a configuration update, you will need to reprovision your Vagrant virtual machine to keep your environment setup consistent. 
 If your machine is already running:
 ```console
 $ vagrant provision
