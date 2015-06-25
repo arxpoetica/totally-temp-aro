@@ -18,12 +18,6 @@ unzip shapefiles/tl_2014_53033_edges/tl_2014_53033_edges.zip -d shapefiles/tl_20
 sudo rm shapefiles/tl_2014_53033_edges/tl_2014_53033_edges.zip
 
 # Create & load the table for the raw TIGER EDGES data
-sudo su postgres -c "shp2pgsql -I -s 26918 shapefiles/tl_2014_53033_edges/tl_2014_53033_edges.shp public.tiger_edges | psql -U postgres -d ${PGDATABASE}"
-
-# Reduce tiger_edges by removing features that are not roads, and eliminate unneeded columns
-sudo su postgres -c "psql -d ${PGDATABASE} -a -f create_aro_edges.sql"
-
-# Create graph using pgRouting
-sudo su postgres -c "psql -d ${PGDATABASE} -a -f build_graph.sql"
+sudo su postgres -c "shp2pgsql -I -s 4326 shapefiles/tl_2014_53033_edges/tl_2014_53033_edges.shp public.tiger_edges | psql -U postgres -d ${PGDATABASE}"
 
 exit
