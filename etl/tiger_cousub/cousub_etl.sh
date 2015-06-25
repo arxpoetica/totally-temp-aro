@@ -17,7 +17,7 @@ unzip shapefiles/tl_2014_53_cousub/tl_2014_53_cousub.zip -d shapefiles/tl_2014_5
 sudo rm shapefiles/tl_2014_53_cousub/tl_2014_53_cousub.zip
 
 # Create & load the table for the raw TIGER COUSUB data
-sudo su postgres -c "shp2pgsql -I -s 26918 shapefiles/tl_2014_53_cousub/tl_2014_53_cousub.shp public.tiger_cousub | psql -U postgres -d ${PGDATABASE}"
+sudo su postgres -c "shp2pgsql -I -s 4326 shapefiles/tl_2014_53_cousub/tl_2014_53_cousub.shp public.tiger_cousub | psql -U postgres -d ${PGDATABASE}"
 
 # Reduce the number of columns in tiger_cousub to only those relevant to the app and store result in aro_cousub
 sudo su postgres -c "psql -d ${PGDATABASE} -a -f create_aro_cousub.sql"
