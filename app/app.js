@@ -11,7 +11,7 @@ var con_string = 'postgres://aro:aro@localhost/aro';
 
 // Models
 var CountySubdivision = require('./models/county_subdivision.js');
-var RoadSegment = require('./models/road_segment.js');
+var Location = require('./models/location.js');
 
 /********
 * VIEWS *
@@ -33,9 +33,9 @@ app.get('/county_subdivisions/:statefp', function(request, response) {
 	});
 });
 
-// Road Segments
-app.get('/road_segments/:countyfp', function(request, response) {
-	RoadSegment.find_by_countyfp(pg, con_string, request.params.countyfp, function(data) {
+// Locations
+app.get('/locations', function(request, response) {
+	Location.find_all(pg, con_string, function(data) {
 		response.send(data);
 	});
 });

@@ -1,0 +1,1 @@
+COPY infousa_businesses FROM '/vagrant/etl/locations/sample_data/infousa_businesses.csv' DELIMITER ',' CSV HEADER;
