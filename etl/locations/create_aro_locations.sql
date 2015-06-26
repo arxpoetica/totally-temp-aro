@@ -12,10 +12,9 @@ CREATE TABLE public.aro_locations
 	entry_fee numeric,
 	lat double precision,
 	lon double precision,
+	geog geography(POINT, 4326),
 	CONSTRAINT aro_locations_pkey PRIMARY KEY (id)
 );
-
-SELECT AddGeometryColumn('public', 'aro_locations', 'geom', 4326, 'POINT', 2);
 
 CREATE INDEX aro_locations_geom_gist
   ON public.aro_locations
