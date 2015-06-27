@@ -15,7 +15,7 @@ function Location() {
 // 3. callback: function to return a GeoJSON object
 Location.find_all = function(database, con_string, callback) {
 	database.connect(con_string, function(err, client, done) {
-		var sql = "SELECT ST_AsGeoJSON(geog)::json AS geom FROM aro_locations";
+		var sql = "SELECT ST_AsGeoJSON(geog)::json AS geom FROM aro.locations";
 		var query = client.query(sql);
 
 		query.on('row', function(row, result){

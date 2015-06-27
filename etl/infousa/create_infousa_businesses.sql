@@ -2,7 +2,7 @@
 
 -- DROP TABLE public.infousa_businesses;
 
-CREATE TABLE public.infousa_businesses
+CREATE TABLE infousa.businesses
 (
 	business varchar,
 	address varchar,
@@ -24,7 +24,3 @@ CREATE TABLE public.infousa_businesses
 	familymsas integer,
 	geog varchar
 );
-
-ALTER TABLE public.infousa_businesses
-  OWNER TO postgres;
-GRANT ALL ON TABLE public.infousa_businesses TO aro;

@@ -1,8 +1,8 @@
--- Table: public.aro_locations
+-- Table: aro.locations
 
--- DROP TABLE public.aro_locations;
+-- DROP TABLE aro.locations;
 
-CREATE TABLE public.aro_locations
+CREATE TABLE aro.locations
 (
 	id bigint,
 	address varchar,
@@ -17,16 +17,13 @@ CREATE TABLE public.aro_locations
 );
 
 CREATE INDEX aro_locations_geom_gist
-  ON public.aro_locations
+  ON aro.locations
   USING gist
-  (geom);
+  (geog);
 
-ALTER TABLE public.aro_locations
-  OWNER TO postgres;
-GRANT ALL ON TABLE public.aro_locations TO aro;
 
 -- Load locations from infousa_businesses
-INSERT INTO aro_locations(id, address, city, state, zipcode, lat, lon, geog)
+INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog)
 	SELECT DISTINCT ON (ST_AsText(geog))
 		bldgid as id,
 		address,
@@ -36,7 +33,7 @@ INSERT INTO aro_locations(id, address, city, state, zipcode, lat, lon, geog)
 		lat,
 		long AS lon,
 		ST_GeographyFromText(ST_AsText(geog)) AS geog
-	FROM infousa_businesses
+	FROM infousa.businesses
 	GROUP BY id, address, city, state, zipcode, lat, lon, geog;
 
 
