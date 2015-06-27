@@ -17,6 +17,7 @@
       var map;
       var county_subdivisions_layer = new google.maps.Data();
       var road_segments_layer = new google.maps.Data();
+      var locations_layer = new google.maps.Data();
 
       // Available map layers (should be stored in config or controller eventually)
       var layer_properties = {
@@ -24,7 +25,7 @@
           visible: false,
           loaded: false
         },
-        road_segments_layer: {
+        locations_layer: {
           visible: false,
           loaded: false
         }
@@ -65,30 +66,30 @@
             toggle_layer(county_subdivisions_layer, 'county_subdivisions_layer', '/county_subdivisions/53', county_control);
           });
 
-          var road_control = document.createElement('div');
-          road_control.style.backgroundColor = '#fff';
-          road_control.style.border = '2px solid #000';
-          road_control.style.borderRadius = '3px';
-          road_control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-          road_control.style.cursor = 'pointer';
-          road_control.style.marginBottom = '22px';
-          road_control.style.marginLeft = '10px';
-          road_control.style.textAlign = 'center';
-          road_control.title = 'Roads';
-          controlDiv.appendChild(road_control);
+          var location_control = document.createElement('div');
+          location_control.style.backgroundColor = '#fff';
+          location_control.style.border = '2px solid #000';
+          location_control.style.borderRadius = '3px';
+          location_control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+          location_control.style.cursor = 'pointer';
+          location_control.style.marginBottom = '22px';
+          location_control.style.marginLeft = '10px';
+          location_control.style.textAlign = 'center';
+          location_control.title = 'Locations';
+          controlDiv.appendChild(location_control);
 
-          var road_control_text = document.createElement('div');
-          road_control_text.style.color = 'rgb(25,25,25)';
-          road_control_text.style.fontFamily = 'Roboto,Arial,sans-serif';
-          road_control_text.style.fontSize = '12px';
-          road_control_text.style.lineHeight = '38px';
-          road_control_text.style.paddingLeft = '5px';
-          road_control_text.style.paddingRight = '5px';
-          road_control_text.innerHTML = 'R';
-          road_control.appendChild(road_control_text);
+          var location_control_text = document.createElement('div');
+          location_control_text.style.color = 'rgb(25,25,25)';
+          location_control_text.style.fontFamily = 'Roboto,Arial,sans-serif';
+          location_control_text.style.fontSize = '12px';
+          location_control_text.style.lineHeight = '38px';
+          location_control_text.style.paddingLeft = '5px';
+          location_control_text.style.paddingRight = '5px';
+          location_control_text.innerHTML = 'L';
+          location_control.appendChild(location_control_text);
 
-          google.maps.event.addDomListener(road_control, 'click', function() {
-            toggle_layer(road_segments_layer, 'road_segments_layer', '/road_segments/033', road_control);
+          google.maps.event.addDomListener(location_control, 'click', function() {
+            toggle_layer(locations_layer, 'locations_layer', '/locations', location_control);
           });
         }
 
