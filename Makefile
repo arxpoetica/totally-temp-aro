@@ -12,6 +12,9 @@ etl_infousa:
 etl_aro:
 	etl/aro/aro_etl.sh
 
+etl_routing_topology:
+	etl/aro/aro_routing_topology.sh
+
 reset_tiger:
 	etl/reset_tiger_data.sh
 
@@ -22,7 +25,7 @@ reset_infousa:
 	etl/reset_infousa_data.sh
 
 
-etl_reload_all: reset_tiger reset_aro reset_infousa etl_tiger etl_infousa etl_aro
+etl_reload_all: reset_tiger reset_aro reset_infousa etl_tiger etl_infousa etl_aro etl_routing_topology
 
 
 webapp:
