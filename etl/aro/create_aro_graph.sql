@@ -23,7 +23,7 @@ INSERT INTO aro.graph (gid, statefp, countyfp, edge_type, edge_length, geom)
 		gid,
 		statefp,
 		countyfp,
-		featcat,
+		'road_segment'::text AS edge_type,
 		ST_Length(ST_Transform(the_geom, 4326)),
 		ST_GeometryN(ST_Transform(the_geom, 4326),1)
 	FROM tiger.edges
@@ -50,13 +50,10 @@ INSERT INTO aro.graph
 -- FROM aro.locations
 
 SELECT
-	'location-to-node',
+	'location_link',
 	ST_Length(Geography(ST_MakeLine(locations.geom, (SELECT road_nodes.geom FROM aro.road_nodes ORDER by locations.geom <-> road_nodes.geom LIMIT 1)))),
 	ST_MakeLine(locations.geom, (SELECT road_nodes.geom FROM aro.road_nodes ORDER by locations.geom <-> road_nodes.geom LIMIT 1))
-FROM aro.locations
-
-
-;
+FROM aro.locations;
 
 -- After all edges and vertices have been added to the graph, we use pgRouting to create a topology:
 -- Need to figure out how to tune the 'precision' argument here (0.00001 is the suggested value in the pgRouting docs)
