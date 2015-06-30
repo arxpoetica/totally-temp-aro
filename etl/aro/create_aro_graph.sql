@@ -43,15 +43,13 @@ INSERT INTO aro.graph
 	edge_length,
 	geom
 )
--- SELECT
--- 	'location-to-node',
--- 	ST_Length(Geography(ST_MakeLine(locations.geom::geometry, (SELECT road_nodes.coordinates FROM aro.road_nodes ORDER by locations.geog::geometry <-> road_nodes.coordinates::geometry LIMIT 1)::geometry))),
--- 	ST_MakeLine(locations.geog::geometry, (SELECT road_nodes.coordinates FROM aro.road_nodes ORDER by locations.geog::geometry <-> road_nodes.coordinates::geometry LIMIT 1)::geometry)
--- FROM aro.locations
-
 SELECT
 	'location_link',
 	ST_Length(Geography(ST_MakeLine(locations.geom, (SELECT road_nodes.geom FROM aro.road_nodes ORDER by locations.geom <-> road_nodes.geom LIMIT 1)))),
 	ST_MakeLine(locations.geom, (SELECT road_nodes.geom FROM aro.road_nodes ORDER by locations.geom <-> road_nodes.geom LIMIT 1))
-FROM aro.locations;
+FROM 
+	aro.locations
+WHERE
+	ST_Distance(locations.geog, (SELECT edges.geom FROM aro.edges ORDER by locations.geom <-> edges.geom LIMIT 1)::geography) <= 452.7
+;
 
