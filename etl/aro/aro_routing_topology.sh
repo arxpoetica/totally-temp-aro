@@ -12,4 +12,4 @@ PSQL=${PGBIN}/psql
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-${PSQL} -a -f $DIR/create_routing_graph.sql
+${PSQL} -a -f $DIR/create_routing_topology.sql
