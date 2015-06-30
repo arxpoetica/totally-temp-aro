@@ -21,3 +21,5 @@ ALTER TABLE aro.edges
 
 CREATE INDEX idx_aro_edges_geom_gist ON aro.edges USING gist(geom);
 CREATE INDEX idx_aro_edges_geog_gist ON aro.edges USING gist(geog);
+
+VACUUM ANALYZE aro.edges;
