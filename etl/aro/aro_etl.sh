@@ -20,6 +20,9 @@ ${PSQL} -a -f $DIR/create_aro_industries.sql
 # Create aro_businesses table from infousa_businesses table
 ${PSQL} -a -f $DIR/create_aro_businesses.sql
 
+# Create aro edges from tiger edges
+${PSQL} -a -f $DIR/create_aro_edges.sql
+
 # Create road nodes from tiger edges
 ${PSQL} -a -f $DIR/create_aro_road_nodes.sql
 
