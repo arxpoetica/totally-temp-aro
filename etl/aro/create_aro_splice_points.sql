@@ -16,7 +16,7 @@ CREATE INDEX aro_splice_points_geog_gist ON aro.splice_points USING gist (geog);
 INSERT INTO aro.splice_points (carrier_name, geog, geom)
 	SELECT
 		carrier_name,
-		Geography(ST_Transform(ST_Line_Interpolate_Point(plant.geom, 0.5), 4326)) as geog,
+		Geography(ST_Line_Interpolate_Point(plant.geom, 0.5)) as geog,
 		ST_Line_Interpolate_Point(plant.geom, 0.5) as geom
 	FROM aro.fiber_plant plant
 	WHERE ST_Length(plant.geog) >= 500.0;
