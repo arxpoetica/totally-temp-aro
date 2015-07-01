@@ -23,4 +23,4 @@ unzip Geotel2015_KingWA.zip -d ${TMPDIR}
 cd $TMPDIR;
 
 # Create and load geotel.fiber_plant table
-${SHP2PGSQL} -c -s 4269 -g the_geom -W "latin1" Geotel2015_KingWA_Shapefile.dbf geotel.fiber_plant | ${PSQL}
+${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" Geotel2015_KingWA_Shapefile.dbf geotel.fiber_plant | ${PSQL}
