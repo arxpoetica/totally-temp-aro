@@ -12,8 +12,13 @@ etl_infousa:
 etl_aro:
 	etl/aro/aro_etl.sh
 
+<<<<<<< HEAD
 etl_routing_topology:
 	etl/aro/aro_routing_topology.sh
+=======
+etl_geotel:
+	etl/geotel/geotel_etl.sh
+>>>>>>> network_equip_etl
 
 reset_tiger:
 	etl/reset_tiger_data.sh
@@ -24,8 +29,10 @@ reset_aro:
 reset_infousa:
 	etl/reset_infousa_data.sh
 
+reset_geotel:
+	etl/reset_geotel_data.sh
 
-etl_reload_all: reset_tiger reset_aro reset_infousa etl_tiger etl_infousa etl_aro etl_routing_topology
+etl_reload_all: reset_tiger reset_infousa reset_geotel reset_aro etl_tiger etl_infousa etl_geotel etl_aro etl_routing_topology
 
 
 webapp:

@@ -11,13 +11,13 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 ${PSQL} -a -f $DIR/create_aro_cousub.sql
 
-# Create aro_locations table from infousa_businesses table
+# Create aro.locations table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_locations.sql
 
-# Create aro_industries table from infousa_businesses table
+# Create aro.industries table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_industries.sql
 
-# Create aro_businesses table from infousa_businesses table
+# Create aro.businesses table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_businesses.sql
 
 # Create aro edges from tiger edges
@@ -26,5 +26,12 @@ ${PSQL} -a -f $DIR/create_aro_edges.sql
 # Create road nodes from tiger edges
 ${PSQL} -a -f $DIR/create_aro_road_nodes.sql
 
+# Create and load aro.fiber_plant table from geotel.fiber_plant table
+${PSQL} -a -f $DIR/create_aro_fiber_plant.sql
+
+# Create and load aro.splice_points table from aro.fiber_plant table
+${PSQL} -a -f $DIR/create_aro_splice_points.sql
+
 # Create graph from road nodes and locations
 ${PSQL} -a -f $DIR/create_aro_graph.sql
+
