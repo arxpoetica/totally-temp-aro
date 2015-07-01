@@ -9,16 +9,14 @@ etl_tiger: etl_tiger_cousub etl_tiger_edges
 etl_infousa:
 	etl/infousa/infousa_etl.sh
 
+etl_geotel:
+	etl/geotel/geotel_etl.sh
+
 etl_aro:
 	etl/aro/aro_etl.sh
 
-<<<<<<< HEAD
 etl_routing_topology:
 	etl/aro/aro_routing_topology.sh
-=======
-etl_geotel:
-	etl/geotel/geotel_etl.sh
->>>>>>> network_equip_etl
 
 reset_tiger:
 	etl/reset_tiger_data.sh
