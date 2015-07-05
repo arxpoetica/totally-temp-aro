@@ -3,6 +3,7 @@
 // A Location is a point in space which can contain other objects such as businesses and households
 
 var GeoJsonHelper = require('../helpers/geojson_helper.js');
+var icon = 'location_business.png'
 
 // Empty constructor for now
 function Location() {
@@ -23,7 +24,7 @@ Location.find_all = function(database, con_string, callback) {
 		});
 
 		query.on('end', function(result) {
-			var properties = {'color': 'red'}
+			var properties = {'icon': icon}
 			var out = GeoJsonHelper.build_feature_collection(result.rows, properties);
 			client.end();
 			callback(out);
