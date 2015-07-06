@@ -33,7 +33,7 @@ INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geo
         ST_GeographyFromText(ST_AsText(geog))::geometry as geom
 
     FROM infousa.businesses JOIN aro.cousub
-      ON ST_Within(ST_GeographyFromText(ST_AsText(businesses.geog))::geometry), cousub.geom)
+      ON ST_Within(ST_GeographyFromText(ST_AsText(businesses.geog))::geometry, cousub.geom)
     WHERE 
       cousub.countyfp = '033'
     GROUP BY id, address, city, state, zipcode, lat, lon, geog;
