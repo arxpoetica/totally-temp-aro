@@ -1,0 +1,29 @@
+html, body, #map-canvas {
+  height: 100%;
+  margin: 0px;
+  padding: 0px
+}
+
+hr {
+  margin-top: 20px;
+}
+
+#left-col {
+  position: absolute;
+  padding: 10px;
+  height: 100%;
+  z-index: 1;
+  background-color: #fff;
+}
+
+.layer-toggle, .tool-toggle {
+  background-color: #fff;
+  border: 2px solid #000;
+  border-radius: 3px;
+  padding: 5px;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 20px;
+  font-family: Arial;
+  font-size: 12px;
+}

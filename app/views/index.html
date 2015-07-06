@@ -4,13 +4,7 @@
     <title>ARO</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <style>
-      html, body, #map-canvas {
-        height: 100%;
-        margin: 0px;
-        padding: 0px
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
     <script>
       // Global variables
@@ -46,96 +40,31 @@
           panControl: false,
           zoomControlOptions: {
             style: google.maps.ZoomControlStyle.SMALL,
-            position: google.maps.ControlPosition.TOP_LEFT
+            position: google.maps.ControlPosition.TOP_RIGHT
           },
           mapTypeControlOptions: {
-            position: google.maps.ControlPosition.LEFT_TOP
+            position: google.maps.ControlPosition.TOP_RIGHT
           }
         });
 
-        // Set up layer toggle control elements
-        function MapLayerControls(controlDiv, map) {
-          // County Subdivisions Control
-          var county_control = document.createElement('div');
-          county_control.style.backgroundColor = '#fff';
-          county_control.style.border = '2px solid #000';
-          county_control.style.borderRadius = '3px';
-          county_control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-          county_control.style.cursor = 'pointer';
-          county_control.style.marginBottom = '22px';
-          county_control.style.marginRight = '10px';
-          county_control.style.textAlign = 'center';
-          county_control.title = 'County Subdivisions';
-          controlDiv.appendChild(county_control);
+        // Add Layer toggle listeners
+        var county_control = document.getElementById('county_subdivisions_layer_toggle');
 
-          var county_control_text = document.createElement('div');
-          county_control_text.style.color = 'rgb(25,25,25)';
-          county_control_text.style.fontFamily = 'Roboto,Arial,sans-serif';
-          county_control_text.style.fontSize = '12px';
-          county_control_text.style.lineHeight = '38px';
-          county_control_text.style.paddingLeft = '5px';
-          county_control_text.style.paddingRight = '5px';
-          county_control_text.innerHTML = 'CS';
-          county_control.appendChild(county_control_text);
+        google.maps.event.addDomListener(county_control, 'click', function() {
+          toggle_layer(county_subdivisions_layer, 'county_subdivisions_layer', '/county_subdivisions/53', county_control);
+        });
 
-          google.maps.event.addDomListener(county_control, 'click', function() {
-            toggle_layer(county_subdivisions_layer, 'county_subdivisions_layer', '/county_subdivisions/53', county_control);
-          });
+        var location_control = document.getElementById('locations_layer_toggle');
 
-          // Locations Control
-          var location_control = document.createElement('div');
-          location_control.style.backgroundColor = '#fff';
-          location_control.style.border = '2px solid #000';
-          location_control.style.borderRadius = '3px';
-          location_control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-          location_control.style.cursor = 'pointer';
-          location_control.style.marginBottom = '22px';
-          location_control.style.marginRight = '10px';
-          location_control.style.textAlign = 'center';
-          location_control.title = 'Locations';
-          controlDiv.appendChild(location_control);
+        google.maps.event.addDomListener(location_control, 'click', function() {
+          toggle_layer(locations_layer, 'locations_layer', '/locations', location_control);
+        });
 
-          var location_control_text = document.createElement('div');
-          location_control_text.style.color = 'rgb(25,25,25)';
-          location_control_text.style.fontFamily = 'Roboto,Arial,sans-serif';
-          location_control_text.style.fontSize = '12px';
-          location_control_text.style.lineHeight = '38px';
-          location_control_text.style.paddingLeft = '5px';
-          location_control_text.style.paddingRight = '5px';
-          location_control_text.innerHTML = 'L';
-          location_control.appendChild(location_control_text);
+        var splice_point_control = document.getElementById('splice_points_layer_toggle');
 
-          google.maps.event.addDomListener(location_control, 'click', function() {
-            toggle_layer(locations_layer, 'locations_layer', '/locations', location_control);
-          });
-
-          // Splice Points Control
-          var splice_point_control = document.createElement('div');
-          splice_point_control.style.backgroundColor = '#fff';
-          splice_point_control.style.border = '2px solid #000';
-          splice_point_control.style.borderRadius = '3px';
-          splice_point_control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-          splice_point_control.style.cursor = 'pointer';
-          splice_point_control.style.marginBottom = '22px';
-          splice_point_control.style.marginRight = '10px';
-          splice_point_control.style.textAlign = 'center';
-          splice_point_control.title = 'Splice Points';
-          controlDiv.appendChild(splice_point_control);
-
-          var splice_point_control_text = document.createElement('div');
-          splice_point_control_text.style.color = 'rgb(25,25,25)';
-          splice_point_control_text.style.fontFamily = 'Roboto,Arial,sans-serif';
-          splice_point_control_text.style.fontSize = '12px';
-          splice_point_control_text.style.lineHeight = '38px';
-          splice_point_control_text.style.paddingLeft = '5px';
-          splice_point_control_text.style.paddingRight = '5px';
-          splice_point_control_text.innerHTML = 'SP';
-          splice_point_control.appendChild(splice_point_control_text);
-
-          google.maps.event.addDomListener(splice_point_control, 'click', function() {
-            toggle_layer(splice_points_layer, 'splice_points_layer', '/splice_points/VERIZON', splice_point_control);
-          });
-        }
+        google.maps.event.addDomListener(splice_point_control, 'click', function() {
+          toggle_layer(splice_points_layer, 'splice_points_layer', '/splice_points/VERIZON', splice_point_control);
+        });
 
         // Toggle map data layers
         //
@@ -180,16 +109,35 @@
 
         var mapLayerControlDiv = document.createElement('div');
         var mapLayerControl = new MapLayerControls(mapLayerControlDiv, map);
-
         mapLayerControlDiv.index = 1;
-        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(mapLayerControlDiv);
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(mapLayerControlDiv);
 
+        var mapToolControlDiv = document.createElement('div');
+        var mapToolControl = new MapToolControls(mapToolControlDiv, map);
+        mapToolControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(mapToolControlDiv);
       }
 
       google.maps.event.addDomListener(window, 'load', initialize);
     </script>
   </head>
   <body>
-    <div id="map-canvas"></div>
+      <div id="left-col">
+        <div class="layer-toggle" id="county_subdivisions_layer_toggle">
+          CS
+        </div>
+        <div class="layer-toggle" id="locations_layer_toggle">
+          L
+        </div>
+        <div class="layer-toggle" id="splice_points_layer_toggle">
+          SP
+        </div>
+        <hr />
+        <div class="tool-toggle" id="shortest_path_optimizer_toggle">
+          SPO
+        </div>
+      </div>
+      <div id="map-canvas"></div>
+    
   </body>
 </html>
