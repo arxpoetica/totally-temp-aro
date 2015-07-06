@@ -5,23 +5,6 @@
 
 -- DROP TABLE client.graph;
 
-CREATE TABLE client.graph
-(
-    id serial,
-    gid bigint,
-    statefp character varying(2),
-    countyfp character varying(3),
-    edge_type varchar,
-    edge_length double precision,
-    source integer,
-    target integer,
-
-    CONSTRAINT pkey_client_graph_id PRIMARY KEY (id)
-);
-
-SELECT AddGeometryColumn('client', 'graph', 'geom', 4326, 'LINESTRING', 2);
-
-
 
 -- Create edge_network table used to aggregate all edges eventually used in the graph
 -- DROP TABLE client.edge_network;
@@ -97,19 +80,6 @@ SELECT pgr_createTopology('client.edge_network', 0.00001, 'geom');
 
 -- Create noded network
 SELECT pgr_nodeNetwork('client.edge_network', 0.00001, 'id', 'geom');
-
-SELECT
-    net.gid,
-    net.statefp,
-    net.countyfp,
-    net.edge_type,
-    noded.geom
-
-FROM
-    client.edge_network_noded AS noded
-    LEFT JOIN client.edge_network AS net
-        ON noded.old_id = net.id
-;
 
 
 -- Rename the noded result table as the graph table, and add columns to pull in additional information
