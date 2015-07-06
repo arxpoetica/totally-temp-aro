@@ -137,7 +137,7 @@ SET
     statefp = net.statefp,
     countyfp = net.countyfp,
     edge_type = net.edge_type,
-    edge_length = ST_Length(Geography(geom))
+    edge_length = ST_Length(Geography(graph.geom))
 FROM
     client.edge_network AS net
 WHERE
@@ -145,7 +145,7 @@ WHERE
 
 
 -- Create routing topology on graph table
-SELECT pgr_createTopology('client.graph', 0.00001, 'geom')
+SELECT pgr_createTopology('client.graph', 0.00001, 'geom');
 
 
 

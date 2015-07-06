@@ -16,7 +16,7 @@ etl_aro:
 	etl/aro/aro_etl.sh
 
 etl_client:
-	etl/client_etl.sh
+	etl/client/client_etl.sh
 
 reset_tiger:
 	etl/reset_tiger_data.sh
