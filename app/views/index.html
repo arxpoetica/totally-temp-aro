@@ -1,141 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="aro">
   <head>
     <title>ARO</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <style>
-      html, body, #map-canvas {
-        height: 100%;
-        margin: 0px;
-        padding: 0px
-      }
-    </style>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
     <script>
-      // Global variables
+
+      var app = angular.module('aro', []);
       var map;
-      var county_subdivisions_layer = new google.maps.Data();
-      var road_segments_layer = new google.maps.Data();
-      var locations_layer = new google.maps.Data();
-
-      // Available map layers (should be stored in config or controller eventually)
-      var layer_properties = {
-        county_subdivisions_layer: {
-          visible: false,
-          loaded: false
-        },
-        locations_layer: {
-          visible: false,
-          loaded: false
-        }
-      };
-
+      
       function initialize() {
         map = new google.maps.Map(document.getElementById('map-canvas'), {
           zoom: 7,
           center: {lat: 47.6097, lng: -122.3331}, // Centroid of Seattle, WA
-          mapTypeId: google.maps.MapTypeId.HYBRID
-        });
-
-        // Set up layer toggle control elements
-        function Controls(controlDiv, map) {
-          var county_control = document.createElement('div');
-          county_control.style.backgroundColor = '#fff';
-          county_control.style.border = '2px solid #000';
-          county_control.style.borderRadius = '3px';
-          county_control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-          county_control.style.cursor = 'pointer';
-          county_control.style.marginBottom = '22px';
-          county_control.style.marginLeft = '10px';
-          county_control.style.textAlign = 'center';
-          county_control.title = 'County Subdivisions';
-          controlDiv.appendChild(county_control);
-
-          var county_control_text = document.createElement('div');
-          county_control_text.style.color = 'rgb(25,25,25)';
-          county_control_text.style.fontFamily = 'Roboto,Arial,sans-serif';
-          county_control_text.style.fontSize = '12px';
-          county_control_text.style.lineHeight = '38px';
-          county_control_text.style.paddingLeft = '5px';
-          county_control_text.style.paddingRight = '5px';
-          county_control_text.innerHTML = 'CS';
-          county_control.appendChild(county_control_text);
-
-          google.maps.event.addDomListener(county_control, 'click', function() {
-            toggle_layer(county_subdivisions_layer, 'county_subdivisions_layer', '/county_subdivisions/53', county_control);
-          });
-
-          var location_control = document.createElement('div');
-          location_control.style.backgroundColor = '#fff';
-          location_control.style.border = '2px solid #000';
-          location_control.style.borderRadius = '3px';
-          location_control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-          location_control.style.cursor = 'pointer';
-          location_control.style.marginBottom = '22px';
-          location_control.style.marginLeft = '10px';
-          location_control.style.textAlign = 'center';
-          location_control.title = 'Locations';
-          controlDiv.appendChild(location_control);
-
-          var location_control_text = document.createElement('div');
-          location_control_text.style.color = 'rgb(25,25,25)';
-          location_control_text.style.fontFamily = 'Roboto,Arial,sans-serif';
-          location_control_text.style.fontSize = '12px';
-          location_control_text.style.lineHeight = '38px';
-          location_control_text.style.paddingLeft = '5px';
-          location_control_text.style.paddingRight = '5px';
-          location_control_text.innerHTML = 'L';
-          location_control.appendChild(location_control_text);
-
-          google.maps.event.addDomListener(location_control, 'click', function() {
-            toggle_layer(locations_layer, 'locations_layer', '/locations', location_control);
-          });
-        }
-
-        // Toggle map data layers
-        //
-        // layer: google.maps.Data() (ex. var my_layer = new google.maps.Data())
-        // layer: String (ex. 'my_layer')
-        // api_endpoint: String (ex. '/collection/:id')
-        // control_element: document element (ex. var my_control = document.createElement('div'))
-        function toggle_layer(layer, layer_name, api_endpoint, control_element) {
-          if (!layer_properties[layer_name].visible) {
-            // Load the layer's data if it's not already loaded
-            // Should be cached eventually, not done like this
-            if (!layer_properties[layer_name].loaded) {
-              layer.loadGeoJson(api_endpoint);
-              layer.setStyle(function(feature) {
-                var color = feature.getProperty('color');
-                return ({
-                  fillColor: color,
-                  strokeColor: color,
-                  strokeWeight: 2
-                });
-              });
-              layer_properties[layer_name].loaded = true;
-            }
-            layer.setMap(map);
-            layer_properties[layer_name].visible = true;
-            control_element.style.backgroundColor = '#f00';
-          } else {
-            layer.setMap(null)
-            layer_properties[layer_name].visible = false;
-            control_element.style.backgroundColor = '#fff';
+          mapTypeId: google.maps.MapTypeId.HYBRID,
+          panControl: false,
+          zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.SMALL,
+            position: google.maps.ControlPosition.TOP_RIGHT
+          },
+          mapTypeControlOptions: {
+            position: google.maps.ControlPosition.TOP_RIGHT
           }
-        }
-
-        var centerControlDiv = document.createElement('div');
-        var centerControl = new Controls(centerControlDiv, map);
-
-        centerControlDiv.index = 1;
-        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(centerControlDiv);
+        });
       }
 
       google.maps.event.addDomListener(window, 'load', initialize);
+
     </script>
   </head>
   <body>
+      <div id="left-col">
+        <div ng-controller="map_layers_controller">
+          <div class="layer-toggle">
+            <a href="#" ng-click="toggle_layer_visibility(county_subdivisions_layer, 'county_subdivisions_layer')">CS</a>
+          </div>
+          <div class="layer-toggle">
+            <a href="#" ng-click="toggle_layer_visibility(locations_layer, 'locations_layer')">L</a>
+          </div>
+          <div class="layer-toggle">
+            <a href="#" ng-click="toggle_layer_visibility(splice_points_layer, 'splice_points_layer')">SP</a>
+          </div>
+        </div>
+
+        <hr />
+
+        <div ng-controller="map_tools_controller">
+          <div class="tool-toggle">
+            <a href="#" ng-click="toggle_tool_visibility()">DBR</a>
+          </div>
+        </div>
+      </div>
+
+      <div ng-controller="map_modals_controller">
+        <div ng-show="is_visible" class="tool-opts-container">
+          <div class="tool-opts-title">Distance Based Route Plan</div>
+          <div class="tool-opts">
+            <p>Source: {{source_id}}</p>
+            <p>Target: {{target_id}}</p>
+            <button ng-click="create_route()" type="button">Plan Route</button>
+          </div>
+        </div>
+      </div>
+
     <div id="map-canvas"></div>
+    
   </body>
+  <script src="javascripts/controllers/map_layers_controller.js"></script>
+  <script src="javascripts/controllers/map_tools_controller.js"></script>
+  <script src="javascripts/controllers/map_modals_controller.js"></script>
 </html>
