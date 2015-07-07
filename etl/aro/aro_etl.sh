@@ -33,5 +33,5 @@ ${PSQL} -a -f $DIR/create_aro_fiber_plant.sql
 ${PSQL} -a -f $DIR/create_aro_splice_points.sql
 
 # Create graph from road nodes and locations
-${PSQL} -a -f $DIR/create_aro_graph.sql
+# ${PSQL} -a -f $DIR/create_aro_graph.sql
 

@@ -19,6 +19,7 @@ CREATE TABLE aro.locations
 SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 
 -- Load locations from infousa_businesses
+-- ONLY using King County for now
 INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geom)
     SELECT DISTINCT ON (ST_AsText(geog))
         bldgid as id,
@@ -31,7 +32,10 @@ INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geo
         ST_GeographyFromText(ST_AsText(geog)) AS geog,
         ST_GeographyFromText(ST_AsText(geog))::geometry as geom
 
-    FROM infousa.businesses
+    FROM infousa.businesses JOIN aro.cousub
+      ON ST_Within(ST_GeographyFromText(ST_AsText(businesses.geog))::geometry, cousub.geom)
+    WHERE 
+      cousub.countyfp = '033'
     GROUP BY id, address, city, state, zipcode, lat, lon, geog;
 
 CREATE INDEX aro_locations_geog_gist

@@ -1,6 +1,6 @@
--- Table: public.aro_cousub
+-- Table: aro.cousub
 
--- DROP TABLE public.aro_cousub;
+-- DROP TABLE aro.cousub;
 
 CREATE TABLE aro.cousub AS
   SELECT
@@ -13,7 +13,7 @@ CREATE TABLE aro.cousub AS
     awater,
     intptlat,
     intptlon,
-    the_geom AS geom
+    ST_Transform(the_geom, 4326) AS geom
   FROM tiger.cousub;
 
 

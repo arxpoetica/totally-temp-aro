@@ -60,6 +60,10 @@ Resolving deltas: 100% (2/2), done.
 Checking connectivity... done.
 Submodule path 'ops/config': checked out '91cf362cfa843c895170f0e34143d192d201ecc8'
 ```
+Copy the Vagranfile template from the init subfolder to the root, then customize (adjust ports, resources) as desired:
+```console
+$ cp init/Vagrantfile.base ./Vagrantfile
+```
 Start the Vagrant machine, which will automatically kick-off provisioning:
 ```console
 $ vagrant up
