@@ -1,7 +1,8 @@
 html, body, #map-canvas {
   height: 100%;
   margin: 0px;
-  padding: 0px
+  padding: 0px;
+  font-family: Arial;
 }
 
 hr {
@@ -14,6 +15,30 @@ hr {
   height: 100%;
   z-index: 1;
   background-color: #fff;
+}
+
+.tool-opts-container {
+  position: absolute;
+  background-color: #fff;
+  margin-left: 75px;
+  margin-top: 20px;
+  z-index: 1;
+}
+
+.tool-opts-title {
+  font-family: Arial;
+  font-weight: bold;
+  color: white;
+  padding: 5px;
+  background-color: gray;
+}
+
+.tool-opts {
+  padding: 5px;
+}
+
+.tool-opts button {
+  width: 100%;
 }
 
 .layer-toggle, .tool-toggle {
