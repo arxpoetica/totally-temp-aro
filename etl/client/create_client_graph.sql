@@ -46,9 +46,10 @@ INSERT INTO client.edge_network
 )
 SELECT
     'location_link',
-    -- ST_Length(Geography(ST_MakeLine(locations.geom, (SELECT road_nodes.geom FROM aro.road_nodes ORDER by locations.geom <-> road_nodes.geom LIMIT 1)))),
-    -- ST_MakeLine(locations.geom, (SELECT road_nodes.geom FROM aro.road_nodes ORDER by locations.geom <-> road_nodes.geom LIMIT 1)),
-    ST_ShortestLine(locations.geom, (SELECT edges.geom FROM aro.edges ORDER BY locations.geom <-> edges.geom LIMIT 1))
+    -- First retrieve the 5 closest edges to each location, using index-based bounding box search.
+    -- Then measure geographic distance to each (spheroid calcualtion) and find the closest.
+    -- Draw line connecting location to edge.
+    ST_ShortestLine(locations.geom, (SELECT geom FROM ( SELECT edges.geom, ST_Distance(edges.geom::geography, locations.geom::geography) AS distance FROM aro.edges ORDER BY locations.geom <#> edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1))
 FROM 
     aro.locations
 WHERE
@@ -64,16 +65,17 @@ INSERT INTO client.edge_network
 )
 SELECT
     'splice_point_link',
-    -- ST_Length(Geography(ST_MakeLine(splice_points.geom, ST_ClosestPoint(( SELECT edges.geom FROM edges ORDER BY splice_points.geom <-> edges.geom LIMIT 1), splice_points.geom)))),
-    -- ST_MakeLine(splice_points.geom, ST_ClosestPoint(( SELECT edges.geom FROM edges ORDER BY splice_points.geom <-> edges.geom LIMIT 1), splice_points.geom)),
-    ST_ShortestLine(splice_points.geom, (SELECT edges.geom FROM aro.edges ORDER BY splice_points.geom <-> edges.geom LIMIT 1))
+    -- First retrieve the 5 closest edges to each splice_point, using index-based bounding box search.
+    -- Then measure geographic distance to each (spheroid calcualtion) and find the closest.
+    -- Draw line connecting splice_point to edge.
+    ST_ShortestLine(splice_points.geom, (SELECT geom FROM ( SELECT edges.geom, ST_Distance(edges.geom::geography, splice_points.geom::geography) AS distance FROM aro.edges ORDER BY splice_points.geom <#> edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1))
 FROM
     aro.splice_points
 WHERE
     splice_points.carrier_name = 'VERIZON'
 ;
-
 CREATE INDEX idx_client_edge_network_geom_gist ON client.edge_network USING gist(geom);
+
 
 -- Create first-pass graph on edge_network table
 SELECT pgr_createTopology('client.edge_network', 0.00001, 'geom');
