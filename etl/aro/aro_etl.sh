@@ -24,14 +24,11 @@ ${PSQL} -a -f $DIR/create_aro_businesses.sql
 ${PSQL} -a -f $DIR/create_aro_edges.sql
 
 # Create road nodes from tiger edges
-${PSQL} -a -f $DIR/create_aro_road_nodes.sql
+# ${PSQL} -a -f $DIR/create_aro_road_nodes.sql
 
 # Create and load aro.fiber_plant table from geotel.fiber_plant table
 ${PSQL} -a -f $DIR/create_aro_fiber_plant.sql
 
 # Create and load aro.splice_points table from aro.fiber_plant table
 ${PSQL} -a -f $DIR/create_aro_splice_points.sql
-
-# Create graph from road nodes and locations
-# ${PSQL} -a -f $DIR/create_aro_graph.sql
 
