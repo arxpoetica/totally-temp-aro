@@ -20,7 +20,7 @@ INSERT INTO aro.splice_points (carrier_name, geog, geom)
 		ST_Line_Interpolate_Point(plant.geom, 0.5) as geom
 	FROM aro.fiber_plant plant
 	WHERE 
-		plant_type = 'ON ROAD'
+		plant_type = 'ON_ROAD'
 		AND
 		ST_Length(plant.geog) >= 500.0
 ;
