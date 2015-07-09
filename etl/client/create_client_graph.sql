@@ -117,9 +117,5 @@ WHERE
 
 
 -- Create routing topology on graph table
-SELECT pgr_createTopology('client.graph', 0.00001, 'geom');
-
-
-
-
+SELECT pgr_createTopology('client.graph', 0.000001, 'geom');
 
