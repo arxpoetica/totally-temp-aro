@@ -14,7 +14,7 @@
       
       function initialize() {
         map = new google.maps.Map(document.getElementById('map-canvas'), {
-          zoom: 7,
+          zoom: 12,
           center: {lat: 47.6097, lng: -122.3331}, // Centroid of Seattle, WA
           mapTypeId: google.maps.MapTypeId.HYBRID,
           panControl: false,
@@ -59,8 +59,8 @@
         <div ng-show="is_visible" class="tool-opts-container">
           <div class="tool-opts-title">Distance Based Route Plan</div>
           <div class="tool-opts">
-            <p>Source: {{source_id}}</p>
-            <p>Target: {{target_id}}</p>
+            <p>Sources: {{sources.length}}</p>
+            <p>Targets: {{targets.length}}</p>
             <button ng-click="create_route()" type="button">Plan Route</button>
           </div>
         </div>
@@ -69,7 +69,12 @@
     <div id="map-canvas"></div>
     
   </body>
+
+  <!-- Angular controllers and services -->
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/map_modals_controller.js"></script>
+  <script src="javascripts/services/sources_service.js"></script>
+  <script src="javascripts/services/targets_service.js"></script>
+
 </html>

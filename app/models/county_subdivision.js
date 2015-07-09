@@ -16,7 +16,7 @@ function CountySubdivision() {
 // 4. callback: function to return a GeoJSON object
 CountySubdivision.find_by_statefp = function(database, con_string, statefp, callback) {
 	database.connect(con_string, function(err, client, done) {
-		var sql = "SELECT ST_AsGeoJSON(geom)::json AS geom, name FROM aro.cousub WHERE statefp = $1";
+		var sql = "SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.cousub WHERE statefp = $1";
 		var query = client.query(sql, [statefp]);
 
 		query.on('row', function(row, result){
