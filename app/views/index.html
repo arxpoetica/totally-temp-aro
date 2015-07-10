@@ -36,13 +36,13 @@
       <div id="left-col">
         <div ng-controller="map_layers_controller">
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer_visibility(county_subdivisions_layer, 'county_subdivisions_layer')">CS</a>
+            <a href="#" ng-click="toggle_layer(county_subdivisions_layer)">CS</a>
           </div>
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer_visibility(locations_layer, 'locations_layer')">L</a>
+            <a href="#" ng-click="toggle_layer(locations_layer)">L</a>
           </div>
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer_visibility(splice_points_layer, 'splice_points_layer')">SP</a>
+            <a href="#" ng-click="toggle_layer(splice_points_layer)">SP</a>
           </div>
         </div>
 
@@ -76,5 +76,5 @@
   <script src="javascripts/controllers/map_modals_controller.js"></script>
   <script src="javascripts/services/sources_service.js"></script>
   <script src="javascripts/services/targets_service.js"></script>
-
+  <script src="javascripts/models/map_layer.js"></script>
 </html>

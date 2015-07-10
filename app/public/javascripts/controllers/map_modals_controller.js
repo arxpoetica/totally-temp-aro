@@ -1,5 +1,5 @@
 // Map Modals Controller
-app.controller('map_modals_controller', ['$scope', '$rootScope', '$http', 'sources', 'targets', function($scope, $rootScope, $http, sources, targets) {
+app.controller('map_modals_controller', ['$scope', '$rootScope', '$http', 'sources', 'targets', 'MapLayer', function($scope, $rootScope, $http, sources, targets, MapLayer) {
   // Controller instance variables
   $scope.is_visible = false;
   $scope.sources = sources;
@@ -18,17 +18,14 @@ app.controller('map_modals_controller', ['$scope', '$rootScope', '$http', 'sourc
   	var source = $scope.sources[0].vertex_id;
   	var target = $scope.targets[0].vertex_id;
     console.log('/route_optimizer/shortest_path/' + source + '/' + target);
-  	$http.get('/route_optimizer/shortest_path/' + source + '/' + target).success(function(response) {
-  		$scope.route_layer = new google.maps.Data();
-  		$scope.route_layer.addGeoJson(response);
-  		$scope.route_layer.setStyle(function(feature) {
-  			var color = feature.getProperty('color');
-  			return ({
-  				strokeColor: color
-  			});
-  		});
-  		$scope.route_layer.setMap(map);
-  	});
+    var route_layer_style = {
+      strokeColor: 'red'
+    };
+    $scope.route_layer = new MapLayer('/route_optimizer/shortest_path/' + source + '/' + target, route_layer_style, map);
+    $scope.route_layer.load_data();
+    $scope.route_layer.apply_style();
+    $scope.route_layer.data_layer.setMap(map);
+    $scope.route_layer.visible = true;
   }
 
 }]);
