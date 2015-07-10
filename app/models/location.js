@@ -58,7 +58,7 @@ Location.get_closest_vertex = function(database, con_string, location_id, callba
 	database.connect(con_string, function(err, client, done) {
 		var sql = "SELECT vertex.id AS vertex_id FROM client.graph_vertices_pgr AS vertex ";
 		sql += "JOIN aro.locations locations ";
-		sql += "ON locations.geom = vertex.the_geom ";
+		sql += "ON locations.geom && vertex.the_geom ";
 		sql += "WHERE locations.id = $1";
 		var query = client.query(sql, [location_id]);
 

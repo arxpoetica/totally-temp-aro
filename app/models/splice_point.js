@@ -59,7 +59,7 @@ SplicePoint.get_closest_vertex = function(database, con_string, splice_point_id,
 	database.connect(con_string, function(err, client, done) {
 		var sql = "SELECT vertex.id AS vertex_id FROM client.graph_vertices_pgr AS vertex ";
 		sql += "JOIN aro.splice_points splice_points ";
-		sql += "ON splice_points.geom = vertex.the_geom ";
+		sql += "ON splice_points.geom && vertex.the_geom ";
 		sql += "WHERE splice_points.id = $1";
 		var query = client.query(sql, [splice_point_id]);
 
