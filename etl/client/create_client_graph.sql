@@ -53,7 +53,7 @@ SELECT
 FROM 
     aro.locations
 WHERE
-    ST_Distance(locations.geog, (SELECT edges.geom FROM aro.edges ORDER by locations.geom <-> edges.geom LIMIT 1)::geography) <= 452.7
+    ST_Distance(locations.geog, (SELECT geom FROM ( SELECT edges.geom, ST_Distance(edges.geom::geography, locations.geom::geography) AS distance FROM aro.edges ORDER BY locations.geom <#> edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1)::geography) <= 452.7
 ;
 
 -- Draw segment from each of the client's splice points to the nearest road segment and add to edge_network
