@@ -14,6 +14,7 @@ var con_string = 'postgres://aro:aro@localhost/aro';
 var CountySubdivision = require('./models/county_subdivision.js');
 var Location = require('./models/location.js');
 var SplicePoint = require('./models/splice_point.js');
+var RouteOptimizer = require('./models/route_optimizer.js');
 
 /********
 * VIEWS *
@@ -42,9 +43,28 @@ app.get('/locations', function(request, response) {
 	});
 });
 
+app.get('/locations/closest_vertex/:location_id', function(request, response) {
+	Location.get_closest_vertex(pg, con_string, request.params.location_id, function(data) {
+		response.json(data);
+	});
+});
+
 // Splice Points
 app.get('/splice_points/:carrier_name', function(request, response) {
 	SplicePoint.find_by_carrier(pg, con_string, request.params.carrier_name, function(data) {
+		response.send(data);
+	});
+});
+
+app.get('/splice_points/closest_vertex/:splice_point_id', function(request, response) {
+	SplicePoint.get_closest_vertex(pg, con_string, request.params.splice_point_id, function(data) {
+		response.json(data);
+	});
+});
+
+// Route Optimizer
+app.get('/route_optimizer/shortest_path/:source_id/:target_id', function(request, response) {
+	RouteOptimizer.shortest_path(pg, con_string, request.params.source_id, request.params.target_id, function(data) {
 		response.send(data);
 	});
 });

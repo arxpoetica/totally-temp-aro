@@ -1,6 +1,5 @@
 var expect = require('chai').expect;
 var pg = require('pg');
-var CountySubdivision = ('../../models/county_subdivision.js');
 var GeoJsonHelper = require('../../helpers/geojson_helper.js');
 
 describe('GeoJsonHelper', function() {
