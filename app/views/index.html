@@ -59,9 +59,22 @@
         <div ng-show="is_visible" class="tool-opts-container">
           <div class="tool-opts-title">Distance Based Route Plan</div>
           <div class="tool-opts">
-            <p>Sources: {{sources.length}}</p>
-            <p>Targets: {{targets.length}}</p>
-            <button ng-click="create_route()" type="button">Plan Route</button>
+            <div>
+              <label>Sources: </label> {{sources.length}}
+            </div>
+            <div>
+              <label>Targets: </label> {{targets.length}}
+            </div>
+            <div>
+              <label>Cable Type:</label>
+              <select>
+                <option value="aerial">Aerial</option>
+                <option value="buried">Buried</option>
+              </select>
+            </div>
+            <div>
+              <button class="tool-button" ng-click="create_route()" type="button">Plan Route</button>
+            </div>
           </div>
         </div>
       </div>

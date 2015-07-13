@@ -37,9 +37,15 @@ hr {
   padding: 5px;
 }
 
+.tool-opts div {
+  margin: 5px;
+}
+
 .tool-opts button {
   width: 100%;
+  margin-top: 5px;
 }
+
 
 .layer-toggle, .tool-toggle {
   background-color: #fff;
