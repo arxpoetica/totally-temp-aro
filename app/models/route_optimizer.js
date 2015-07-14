@@ -2,8 +2,6 @@
 //
 // A Location is a point in space which can contain other objects such as businesses and households
 
-var GeoJsonHelper = require('../helpers/geojson_helper.js');
-
 // Empty constructor for now
 function RouteOptimizer() {
 }
@@ -15,9 +13,9 @@ function RouteOptimizer() {
 // 3. source: integer. From the 'source' column of aro.graph. This will be the source id of the edge that joins the source location to the graph.
 // 4. target: integer. From the 'target' column of aro.graph. This will be the source id of the edge that joins the target location to the graph.
 // 3. callback: function to return a GeoJSON object
-RouteOptimizer.shortest_path = function(database, con_string, source, target, callback) {
+RouteOptimizer.shortest_path = function(database, con_string, source, target, cost_multiplier, callback) {
 	database.connect(con_string, function(err, client, done) {
-		var sql = "SELECT id, ST_AsGeoJSON(edge.geom)::json AS geom FROM ";
+		var sql = "SELECT id, edge_length, ST_AsGeoJSON(edge.geom)::json AS geom FROM ";
 		sql += "pgr_dijkstra('SELECT id, source::integer, target::integer, edge_length::double precision AS cost FROM client.graph', ";
 		sql += "$1, $2, false, false) AS dk ";
 		sql += "JOIN client.graph edge ";
@@ -29,12 +27,48 @@ RouteOptimizer.shortest_path = function(database, con_string, source, target, ca
 		});
 
 		query.on('end', function(result) {
-			var properties = {'color': 'red'};
-			var out = GeoJsonHelper.build_feature_collection(result.rows, properties);
+			var features = [];
+
+			for (var i in result.rows) {
+				features[i] = {
+					'type':'Feature',
+					'properties': {
+						'length_in_meters': result.rows[i].edge_length
+					},
+					'geometry': result.rows[i].geom			
+				}
+			}
+
+			var feature_collection = {
+				'type':'FeatureCollection',
+				'features': features
+			};
+
+			var metadata = {
+				'total_cost': total_cost_of_route(feature_collection, cost_multiplier)
+			};
+
+			var output = {
+				'feature_collection': feature_collection,
+				'metadata': metadata
+			};
+
 			client.end();
-			callback(out);
+			callback(output);
 		});
 	});
+};
+
+function total_cost_of_route(route, cost_per_meter) {
+	var lengths = [];
+
+	for (var i in route.features) {
+		lengths.push(route.features[i].properties.length_in_meters);
+	}
+
+	var total_length = lengths.reduce(function(total, segment_length) { return total + segment_length });
+
+	return total_length * cost_per_meter
 };
 
 module.exports = RouteOptimizer;

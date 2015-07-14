@@ -55,9 +55,11 @@
         </div>
       </div>
 
-      <div ng-controller="map_modals_controller">
+      <div ng-controller="shortest_path_controller">
         <div ng-show="is_visible" class="tool-opts-container">
           <div class="tool-opts-title">Distance Based Route Plan</div>
+
+          <!-- Route Creation Inputs -->
           <div class="tool-opts">
             <div>
               <label>Sources: </label> {{sources.length}}
@@ -75,6 +77,12 @@
             <div>
               <button class="tool-button" ng-click="create_route()" type="button">Plan Route</button>
             </div>
+
+            <!-- Route Financials -->
+            <div ng-show="route_layer.visible">
+              <p>Route Financials:</p>
+              <label>Total Cost: </label> {{route_layer.metadata.total_cost | currency}}
+            </div>
           </div>
         </div>
       </div>
@@ -86,7 +94,7 @@
   <!-- Angular controllers and services -->
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
-  <script src="javascripts/controllers/map_modals_controller.js"></script>
+  <script src="javascripts/controllers/shortest_path_controller.js"></script>
   <script src="javascripts/services/sources_service.js"></script>
   <script src="javascripts/services/targets_service.js"></script>
   <script src="javascripts/models/map_layer.js"></script>

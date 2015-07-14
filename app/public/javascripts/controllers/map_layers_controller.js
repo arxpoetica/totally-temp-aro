@@ -55,7 +55,13 @@ app.controller('map_layers_controller', function($scope, $http, sources, targets
 
   $scope.toggle_layer = function(layer) {
     if (!layer.visible) {
-      layer.load_data();
+      if (!layer.data_loaded) {
+        layer.load_data().then(function(data) {
+          layer.data_layer.addGeoJson(data.feature_collection);
+          layer.metadata = data.metadata;
+          layer.data_loaded = true;
+        });
+      }
       layer.apply_style();
       layer.data_layer.setMap(map);
       layer.visible = true;

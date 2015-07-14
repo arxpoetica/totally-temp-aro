@@ -63,8 +63,8 @@ app.get('/splice_points/closest_vertex/:splice_point_id', function(request, resp
 });
 
 // Route Optimizer
-app.get('/route_optimizer/shortest_path/:source_id/:target_id', function(request, response) {
-	RouteOptimizer.shortest_path(pg, con_string, request.params.source_id, request.params.target_id, function(data) {
+app.get('/route_optimizer/shortest_path/:source_id/:target_id/:cost_multplier', function(request, response) {
+	RouteOptimizer.shortest_path(pg, con_string, request.params.source_id, request.params.target_id, request.params.cost_multplier, function(data) {
 		response.send(data);
 	});
 });

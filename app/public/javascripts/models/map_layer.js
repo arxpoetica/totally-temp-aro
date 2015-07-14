@@ -1,21 +1,22 @@
-app.service('MapLayer', function() {
+app.service('MapLayer', function($http) {
 
 	function MapLayer(api_endpoint, style_options, map) {
 		this.api_endpoint = api_endpoint;
 		this.map = map;
 		this.data_layer = new google.maps.Data();
+		this.metadata = {};
 		this.style_options = style_options;
-		// Default settings
 		this.data_loaded = false;
 		this.visible = false;
 	}
 
 	// Load GeoJSON data into the layer if it's not already loaded
 	MapLayer.prototype.load_data = function() {
-		if (!this.data_loaded) {
-			this.data_layer.loadGeoJson(this.api_endpoint);
-			this.data_loaded = true;
-		}
+		var promise = $http.get(this.api_endpoint).then(function(response) {
+			return response.data;
+		});
+
+		return promise;
 	};
 
 	// Style the layer using options from a hash
