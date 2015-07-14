@@ -42,7 +42,6 @@ app.controller('map_layers_controller', function($scope, $http, sources, targets
   // Locations click listener
   $scope.locations_layer.data_layer.addListener('click', function(event) {
     var location_id = event.feature.getProperty('id');
-    console.log()
     $http.get('/locations/closest_vertex/' + location_id).success(function(response) {
       targets.add(response);
     });

@@ -57,6 +57,17 @@ describe('Location', function() {
 		});
 	});
 
+	describe('#total_service_cost()', function() {
+		var con_string = 'postgres://aro:aro@localhost/aro';
+
+		it('should return the cost of entering the location', function(done) {
+			Location.total_service_cost(pg, con_string, 199451191, function(output) {
+				expect(output).to.have.keys('entry_fee', 'total_install_costs');
+				done();
+			});
+		});
+	});
+
 });
 
 				

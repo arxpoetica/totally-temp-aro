@@ -77,4 +77,25 @@ Location.get_closest_vertex = function(database, con_string, location_id, callba
 	});
 }
 
+Location.total_service_cost = function(database, con_string, location_id, callback) {
+	database.connect(con_string, function(err, client, done) {
+		var sql = "SELECT locations.entry_fee, sum(businesses.install_cost) total_install_costs ";
+		sql += "FROM aro.locations locations ";
+		sql += "JOIN aro.businesses businesses ";
+		sql += "ON businesses.location_id = $1 ";
+		sql += "GROUP BY locations.entry_fee";
+
+		var query = client.query(sql, [location_id]);
+
+		query.on('row', function(row, result) {
+			result.addRow(row);
+		});
+
+		query.on('end', function(result) {
+			client.end();
+			callback(result.rows[0]);
+		});
+	});
+}
+
 module.exports = Location;
