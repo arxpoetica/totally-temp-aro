@@ -36,13 +36,17 @@ Location.find_all = function(database, con_string, callback) {
 				}
 			}
 
-			var out = {
+			var feature_collection = {
 				'type':'FeatureCollection',
 				'features': features
 			};
 
+			var output = {
+				'feature_collection': feature_collection
+			};
+
 			client.end();
-			callback(out);
+			callback(output);
 		});
 	});
 };

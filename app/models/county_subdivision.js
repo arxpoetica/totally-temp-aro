@@ -24,10 +24,26 @@ CountySubdivision.find_by_statefp = function(database, con_string, statefp, call
 		});
 
 		query.on('end', function(result) {
-			var properties = {'color': 'green'}
-			var out = GeoJsonHelper.build_feature_collection(result.rows, properties);
+			var features = [];
+
+			for (var i in result.rows) {
+				features[i] = {
+					'type':'Feature',
+					'geometry': result.rows[i].geom			
+				}
+			}
+
+			var feature_collection = {
+				'type':'FeatureCollection',
+				'features': features
+			};
+
+			var output = {
+				'feature_collection': feature_collection
+			};
+
 			client.end();
-			callback(out);
+			callback(output);
 		});
 	});
 };

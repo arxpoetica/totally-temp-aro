@@ -37,13 +37,17 @@ SplicePoint.find_by_carrier = function(database, con_string, carrier_name, callb
 				}
 			}
 
-			var out = {
+			var feature_collection = {
 				'type':'FeatureCollection',
 				'features': features
 			};
 
+			var output = {
+				'feature_collection': feature_collection
+			};
+
 			client.end();
-			callback(out);
+			callback(output);
 		});
 	});
 };
