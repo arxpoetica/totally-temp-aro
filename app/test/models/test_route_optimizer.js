@@ -6,8 +6,8 @@ describe('RouteOptimizer', function() {
 
 	describe('#shortest_path()', function() {
 		var con_string = 'postgres://aro:aro@localhost/aro';
-		var source = 13206;
-		var target = 66457;
+		var source = '13206';
+		var target = '66457';
 		var cost_multiplier = 1.5;
 
 		it('should return a feature collection', function(done) {
@@ -51,7 +51,7 @@ describe('RouteOptimizer', function() {
 
 		it('should inlude the length in meters of each segment in the route', function(done) {
 			RouteOptimizer.shortest_path(pg, con_string, source, target, cost_multiplier, function(output) {
-				first_feature = output.feature_collection.features[0];
+				var first_feature = output.feature_collection.features[0];
 				expect(first_feature.properties.length_in_meters).to.equal(0.425293090686502);
 				done();
 			});
@@ -60,6 +60,17 @@ describe('RouteOptimizer', function() {
 		it('should inlude the total cost of the route', function(done) {
 			RouteOptimizer.shortest_path(pg, con_string, source, target, cost_multiplier, function(output) {
 				expect(output.metadata.total_cost).to.equal(6254.525397530297);
+				done();
+			});
+		});
+
+		// Yet another shitty test.
+		it('should find multiple shortest paths from a single source to multiple targets', function(done) {
+			var source_id = '145609';
+			var target_ids = '145550, 131374, 145559';
+			RouteOptimizer.shortest_path(pg, con_string, source_id, target_ids, cost_multiplier, function(output) {
+				var first_feature = output.feature_collection.features[0];
+				expect(first_feature.geometry).to.have.property('type', 'LineString');
 				done();
 			});
 		});

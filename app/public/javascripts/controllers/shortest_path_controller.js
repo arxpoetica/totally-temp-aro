@@ -14,17 +14,18 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'so
     $scope.is_visible = !$scope.is_visible;
   });
   
+  // Handles one source and many targets.
   $scope.create_route = function() {
-  	var source = $scope.sources[0].vertex_id;
-  	var target = $scope.targets[0].vertex_id;
+  	var source = $scope.sources[0]
+  	var targets = $scope.targets;
     var cost_multiplier = 200.0; // This will eventually be a user input which will vary
-    console.log('/route_optimizer/shortest_path/' + source + '/' + target + '/' + cost_multiplier);
+    console.log('/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier);
 
     var route_layer_style = {
       strokeColor: 'red'
     };
     
-    $scope.route_layer = new MapLayer('/route_optimizer/shortest_path/' + source + '/' + target + '/' + cost_multiplier, route_layer_style, map);
+    $scope.route_layer = new MapLayer('/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier, route_layer_style, map);
 
     if (!$scope.route_layer.data_loaded) {
       $scope.route_layer.load_data().then(function(data) {

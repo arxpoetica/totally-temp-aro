@@ -34,7 +34,7 @@ app.controller('map_layers_controller', function($scope, $http, sources, targets
   $scope.splice_points_layer.data_layer.addListener('click', function(event) {
     var splice_point_id = event.feature.getProperty('id');
     $http.get('/splice_points/closest_vertex/' + splice_point_id).success(function(response) {
-      sources.add(response);
+      sources.add(response.vertex_id);
     });
     event.feature.setProperty('icon', '/images/map_icons/splice_point_selected.png');
   });
@@ -43,7 +43,7 @@ app.controller('map_layers_controller', function($scope, $http, sources, targets
   $scope.locations_layer.data_layer.addListener('click', function(event) {
     var location_id = event.feature.getProperty('id');
     $http.get('/locations/closest_vertex/' + location_id).success(function(response) {
-      targets.add(response);
+      targets.add(response.vertex_id);
     });
     event.feature.setProperty('icon', '/images/map_icons/location_business_selected.png');
   });
