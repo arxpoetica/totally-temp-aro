@@ -7,9 +7,7 @@ var database = helpers.database;
 var GeoJsonHelper = helpers.GeoJsonHelper;
 var txain = require('txain');
 
-// Empty constructor for now
-function CountySubdivision() {
-}
+var CountySubdivision = {};
 
 // Find all County Subdivisions in a US state by querying the `statefp` field
 //

@@ -9,8 +9,7 @@ var multiline = require('multiline');
 var txain = require('txain');
 
 // Empty constructor for now
-function SplicePoint() {
-}
+var SplicePoint = {};
 
 // Find all Splice Points for a given carrier
 //
@@ -31,7 +30,7 @@ SplicePoint.find_by_carrier = function(carrier_name, callback) {
 				},
 				'geometry': row.geom,
 			}
-		})
+		});
 		var feature_collection = {
 			'type':'FeatureCollection',
 			'features': features,

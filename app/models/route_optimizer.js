@@ -7,9 +7,7 @@ var database = helpers.database;
 var multiline = require('multiline');
 var txain = require('txain');
 
-// Empty constructor for now
-function RouteOptimizer() {
-}
+var RouteOptimizer = {};
 
 // Find the shortest path between a source and target
 //

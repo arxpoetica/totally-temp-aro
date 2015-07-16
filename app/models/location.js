@@ -8,9 +8,7 @@ var database = helpers.database;
 var txain = require('txain');
 var multiline = require('multiline');
 
-// Empty constructor for now
-function Location() {
-}
+var Location = {};
 
 // Find all Locations
 //
@@ -30,14 +28,14 @@ Location.find_all = function(callback) {
 					'id': row.id,
 				},
 				'geometry': row.geom,
-			}
+			};
 		});
 
 		var output = {
 			'feature_collection': {
 				'type':'FeatureCollection',
 				'features': features,
-			}
+			},
 		};
 		callback(null, output);
 	})
