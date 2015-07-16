@@ -1,70 +1,92 @@
 var express = require('express');
 var app = express();
 var compression = require('compression');
+var path = require('path');
+
+var port = process.env.PORT || 8000
 app.use(compression());
-app.listen(8000);
 app.use(express.static('public'));
 
-// Database TODO: config file for databases
-var pg = require('pg');
-var con_string = 'postgres://aro:aro@localhost/aro';
-
-
 // Models
-var CountySubdivision = require('./models/county_subdivision.js');
-var Location = require('./models/location.js');
-var SplicePoint = require('./models/splice_point.js');
-var RouteOptimizer = require('./models/route_optimizer.js');
+var models = require('./models')
+var CountySubdivision = models.CountySubdivision;
+var Location = models.Location;
+var SplicePoint = models.SplicePoint;
+var RouteOptimizer = models.RouteOptimizer;
 
 /********
 * VIEWS *
 *********/
 
 // Map view
-app.get('/', function(request, response){
-	response.sendfile('./views/index.html');
+app.get('/', function(request, response, next) {
+	response.sendFile(path.join(__dirname, './views/index.html'));
 });
 
 /******
 * API *
 *******/
 
+function jsonHandler(response, next) {
+	return function(err, data) {
+		if (err) return next(err)
+		response.json(data)
+	}
+}
+
 // County Subdivisions
-app.get('/county_subdivisions/:statefp', function(request, response) {
-	CountySubdivision.find_by_statefp(pg, con_string, request.params.statefp, function(data) {
-		response.send(data);
-	});
+app.get('/county_subdivisions/:statefp', function(request, response, next) {
+	var statefp = request.params.statefp;
+	CountySubdivision.find_by_statefp(statefp, jsonHandler(response, next));
 });
 
 // Locations
-app.get('/locations', function(request, response) {
-	Location.find_all(pg, con_string, function(data) {
-		response.send(data);
-	});
+app.get('/locations', function(request, response, next) {
+	Location.find_all(jsonHandler(response, next));
 });
 
-app.get('/locations/closest_vertex/:location_id', function(request, response) {
-	Location.get_closest_vertex(pg, con_string, request.params.location_id, function(data) {
-		response.json(data);
-	});
+app.get('/locations/closest_vertex/:location_id', function(request, response, next) {
+	var location_id = request.params.location_id;
+	Location.get_closest_vertex(location_id, jsonHandler(response, next));
 });
 
 // Splice Points
-app.get('/splice_points/:carrier_name', function(request, response) {
-	SplicePoint.find_by_carrier(pg, con_string, request.params.carrier_name, function(data) {
-		response.send(data);
-	});
+app.get('/splice_points/:carrier_name', function(request, response, next) {
+	var carrier_name = request.params.carrier_name;
+	SplicePoint.find_by_carrier(carrier_name, jsonHandler(response, next));
 });
 
-app.get('/splice_points/closest_vertex/:splice_point_id', function(request, response) {
-	SplicePoint.get_closest_vertex(pg, con_string, request.params.splice_point_id, function(data) {
-		response.json(data);
-	});
+app.get('/splice_points/closest_vertex/:splice_point_id', function(request, response, next) {
+	var splice_point_id = request.params.splice_point_id;
+	SplicePoint.get_closest_vertex(splice_point_id, jsonHandler(response, next));
 });
 
 // Route Optimizer
-app.get('/route_optimizer/shortest_path/:source_id/:target_ids/:cost_per_meter', function(request, response) {
-	RouteOptimizer.shortest_path(pg, con_string, request.params.source_id, request.params.target_ids, request.params.cost_per_meter, function(data) {
-		response.send(data);
-	});
+app.get('/route_optimizer/shortest_path/:source_id/:target_ids/:cost_per_meter', function(request, response, next) {
+	var source_id = request.params.source_id;
+	var target_ids = request.params.target_ids;
+	var cost_per_meter = request.params.cost_per_meter;
+	RouteOptimizer.shortest_path(source_id, target_ids, cost_per_meter, jsonHandler(response, next));
 });
+
+// For testing the error handler
+app.get('/error', function(request, response, next) {
+	next(new Error('test'))
+});
+
+// 404 for any URL that doesn't match the previous ones
+app.all('*', function(request, response, next) {
+	response.status(404).json({
+		error: 'Not found',
+	})
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).json({
+  	error: err.message,
+  });
+});
+
+app.listen(port);
