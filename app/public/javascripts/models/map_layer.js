@@ -38,7 +38,6 @@ app.service('MapLayer', function($http) {
 				layer.collection.add(response.vertex_id);
 			});
 		}
-		console.log('overrideStyle', layer.style_options)
 		if (layer.style_options.selected) {
 			data_layer.overrideStyle(feature, layer.style_options.selected);
 		}

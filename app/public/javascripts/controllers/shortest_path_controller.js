@@ -52,6 +52,12 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'so
 
   var rectangle;
   $scope.draw_rectangle = function() {
+    if (rectangle) {
+      rectangle.setMap(null);
+      rectangle = null;
+      return;
+    }
+
     var latLng = map.getCenter();
     var radius = google.maps.geometry.spherical.computeDistanceBetween(map.getBounds().getNorthEast(), map.getBounds().getSouthWest()) / 10;
     var bounds = new google.maps.Circle({center: latLng, radius: radius}).getBounds();
