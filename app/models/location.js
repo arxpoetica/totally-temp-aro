@@ -20,7 +20,7 @@ Location.find_all = function(callback) {
 		database.query(sql, callback);
 	})
 	.then(function(rows, callback) {
-		var features = rows.forEach(function(row) {
+		var features = rows.map(function(row) {
 			return {
 				'type':'Feature',
 				'properties': {
