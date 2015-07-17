@@ -52,12 +52,14 @@ SplicePoint.find_by_carrier = function(carrier_name, callback) {
 // 2. callback: function to return a GeoJSON object
 SplicePoint.get_closest_vertex = function(splice_point_id, callback) {
 	var sql = multiline(function() {/*
-		SELECT id, edge_length, ST_AsGeoJSON(edge.geom)::json AS geom
-		FROM 
-			pgr_kdijkstraPath('SELECT id, source::integer, target::integer, edge_length::double precision AS cost FROM client.graph',
-				$1, $2, false, false) AS dk
-		JOIN client.graph edge
-			ON edge.id = dk.id3
+		SELECT
+			vertex.id AS vertex_id
+		FROM
+			client.graph_vertices_pgr AS vertex
+		JOIN aro.splice_points splice_points
+			ON splice_points.geom && vertex.the_geom
+		WHERE
+			splice_points.id = $1
 	*/});
 	database.findOne(sql, [splice_point_id], callback);
 }
