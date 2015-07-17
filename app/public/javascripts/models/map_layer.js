@@ -1,6 +1,9 @@
 app.service('MapLayer', function($http) {
 
-	function MapLayer(api_endpoint, map, style_options) {
+	// one infowindow for all layers
+	var infowindow = new google.maps.InfoWindow();
+
+	function MapLayer(api_endpoint, style_options) {
 		this.api_endpoint = api_endpoint;
 		this.map = map;
 		this.data_layer = new google.maps.Data();
@@ -13,6 +16,14 @@ app.service('MapLayer', function($http) {
 		var layer = this;
 
 		data_layer.addListener('click', function(event) {
+			/*
+			var position = event.feature.getGeometry().get();
+			infowindow.setContent("<p>Hello!!</p>");
+			infowindow.setPosition(position);
+			infowindow.setZIndex(1000);
+			infowindow.open(map);
+			*/
+			
 			if (layer.selection_endpoint) {
 				var id = event.feature.getProperty('id');
 				$http.get(layer.selection_endpoint + id).success(function(response) {

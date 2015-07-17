@@ -21,7 +21,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'so
     var cost_multiplier = 200.0; // This will eventually be a user input which will vary
     console.log('/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier);
 
-    $scope.route_layer = new MapLayer('/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier, map, {
+    $scope.route_layer = new MapLayer('/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier, {
       normal: {
         strokeColor: 'red'
       },

@@ -6,7 +6,7 @@ app.controller('map_layers_controller', function($rootScope, $http, sources, tar
   * LAYERS *
   **********/
 
-  $rootScope.county_subdivisions_layer = new MapLayer('/county_subdivisions/53', map, {
+  $rootScope.county_subdivisions_layer = new MapLayer('/county_subdivisions/53', {
     normal: {
       fillColor: 'green',
       strokeColor: 'green',
@@ -14,7 +14,7 @@ app.controller('map_layers_controller', function($rootScope, $http, sources, tar
     }
   });
   
-  $rootScope.locations_layer = new MapLayer('/locations', map, {
+  $rootScope.locations_layer = new MapLayer('/locations', {
     normal: {
       icon: '/images/map_icons/location_business_gray.png',
     },
@@ -24,7 +24,7 @@ app.controller('map_layers_controller', function($rootScope, $http, sources, tar
   });
   $rootScope.locations_layer.set_selection_action('/locations/closest_vertex/', targets);
 
-  $rootScope.splice_points_layer = new MapLayer('/splice_points/VERIZON', map, {
+  $rootScope.splice_points_layer = new MapLayer('/splice_points/VERIZON', {
     normal: {
       icon: '/images/map_icons/splice_point.png',
     },
