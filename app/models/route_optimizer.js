@@ -64,9 +64,12 @@ RouteOptimizer.shortest_path = function(source, targets, cost_per_meter, callbac
 // route: GeoJSON FeatureCollection output by the `shortest_path` function above
 // cost_per_meter: decimal number. ex. 12.3
 function total_cost_of_route(route, cost_per_meter) {
-	return cost_per_meter * route.features.reduce(function(total, feature) {
-		return total + feature.properties.length_in_meters
-	});
+	return cost_per_meter * route.features.map(function(feature) {
+		return feature.properties.length_in_meters
+	})
+	.reduce(function(total, current) {
+		return total + current
+	})
 };
 
 module.exports = RouteOptimizer;
