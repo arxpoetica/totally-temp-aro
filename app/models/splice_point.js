@@ -2,7 +2,6 @@
 //
 // The Splice Point is a point on the carrier's network from which fiber may be extended.
 
-var icon = 'splice_point.png'
 var helpers = require('../helpers');
 var database = helpers.database;
 var multiline = require('multiline');
@@ -25,7 +24,6 @@ SplicePoint.find_by_carrier = function(carrier_name, callback) {
 			return {
 				'type':'Feature',
 				'properties': {
-					'icon': icon,
 					'id': row.id,
 				},
 				'geometry': row.geom,

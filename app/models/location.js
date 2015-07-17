@@ -2,7 +2,6 @@
 //
 // A Location is a point in space which can contain other objects such as businesses and households
 
-var icon = 'location_business_gray.png'
 var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
@@ -24,7 +23,6 @@ Location.find_all = function(callback) {
 			return {
 				'type':'Feature',
 				'properties': {
-					'icon': icon,
 					'id': row.id,
 				},
 				'geometry': row.geom,

@@ -36,13 +36,13 @@
       <div id="left-col">
         <div ng-controller="map_layers_controller">
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer(county_subdivisions_layer)">CS</a>
+            <a href="#" ng-click="county_subdivisions_layer.toggle_visibility()">CS</a>
           </div>
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer(locations_layer)">L</a>
+            <a href="#" ng-click="locations_layer.toggle_visibility()">L</a>
           </div>
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer(splice_points_layer)">SP</a>
+            <a href="#" ng-click="splice_points_layer.toggle_visibility()">SP</a>
           </div>
         </div>
 
