@@ -82,6 +82,7 @@
             <div ng-show="route_layer.visible">
               <p>Route Financials:</p>
               <label>Total Cost: </label> {{route_layer.metadata.total_cost | currency}}
+              <button class="tool-button" ng-click="clear_route()" type="button">Clear Route</button>
             </div>
           </div>
         </div>

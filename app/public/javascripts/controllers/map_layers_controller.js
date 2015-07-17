@@ -1,12 +1,12 @@
 // Map Layers Controller
 //
 // Handles display of and interaction with all layers of the map
-app.controller('map_layers_controller', function($scope, $http, sources, targets, MapLayer) {
+app.controller('map_layers_controller', function($rootScope, $http, sources, targets, MapLayer) {
   /*********
   * LAYERS *
   **********/
 
-  $scope.county_subdivisions_layer = new MapLayer('/county_subdivisions/53', map, {
+  $rootScope.county_subdivisions_layer = new MapLayer('/county_subdivisions/53', map, {
     normal: {
       fillColor: 'green',
       strokeColor: 'green',
@@ -14,7 +14,7 @@ app.controller('map_layers_controller', function($scope, $http, sources, targets
     }
   });
   
-  $scope.locations_layer = new MapLayer('/locations', map, {
+  $rootScope.locations_layer = new MapLayer('/locations', map, {
     normal: {
       icon: '/images/map_icons/location_business_gray.png',
     },
@@ -22,9 +22,9 @@ app.controller('map_layers_controller', function($scope, $http, sources, targets
       icon: '/images/map_icons/location_business_selected.png',
     }
   });
-  $scope.locations_layer.set_selection_action('/locations/closest_vertex/', targets);
+  $rootScope.locations_layer.set_selection_action('/locations/closest_vertex/', targets);
 
-  $scope.splice_points_layer = new MapLayer('/splice_points/VERIZON', map, {
+  $rootScope.splice_points_layer = new MapLayer('/splice_points/VERIZON', map, {
     normal: {
       icon: '/images/map_icons/splice_point.png',
     },
@@ -32,6 +32,6 @@ app.controller('map_layers_controller', function($scope, $http, sources, targets
       icon: '/images/map_icons/splice_point_selected.png',
     }
   });
-  $scope.splice_points_layer.set_selection_action('/splice_points/closest_vertex/', sources);
+  $rootScope.splice_points_layer.set_selection_action('/splice_points/closest_vertex/', sources);
 
 });

@@ -67,5 +67,16 @@ app.service('MapLayer', function($http) {
 		}
 	}
 
+	MapLayer.prototype.clear_data = function() {
+		var data = this.data_layer
+		data.forEach(function(feature) {
+			data.remove(feature);
+		});
+	}
+
+	MapLayer.prototype.revert_styles = function() {
+		this.data_layer.revertStyle();
+	}
+
 	return MapLayer;
 });

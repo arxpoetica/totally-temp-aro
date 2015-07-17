@@ -41,4 +41,13 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'so
     $scope.route_layer.visible = true;
   }
 
+  $scope.clear_route = function() {
+    sources.splice(0, sources.length);
+    targets.splice(0, targets.length);
+    $rootScope.locations_layer.revert_styles();
+    $rootScope.splice_points_layer.revert_styles();
+    $scope.route_layer.clear_data();
+    $scope.route_layer.metadata = {}
+  }
+
 }]);
