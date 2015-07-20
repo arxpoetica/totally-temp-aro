@@ -2,11 +2,12 @@
 //
 // The County Subdivision is a geographic area used in map layers.
 
-var GeoJsonHelper = require('../helpers/geojson_helper.js');
+var helpers = require('../helpers');
+var database = helpers.database;
+var GeoJsonHelper = helpers.GeoJsonHelper;
+var txain = require('txain');
 
-// Empty constructor for now
-function CountySubdivision() {
-}
+var CountySubdivision = {};
 
 // Find all County Subdivisions in a US state by querying the `statefp` field
 //
@@ -14,22 +15,30 @@ function CountySubdivision() {
 // 2. con_string: 'con_string' from var con_string = 'postgres://aro:aro@localhost/aro'
 // 3. statefp: String. ex. '36' is New York state
 // 4. callback: function to return a GeoJSON object
-CountySubdivision.find_by_statefp = function(database, con_string, statefp, callback) {
-	database.connect(con_string, function(err, client, done) {
-		var sql = "SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.cousub WHERE statefp = $1";
-		var query = client.query(sql, [statefp]);
+CountySubdivision.find_by_statefp = function(statefp, callback) {
+	var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.cousub WHERE statefp = $1';
+	var params = [statefp];
 
-		query.on('row', function(row, result){
-			result.addRow(row);
-		});
+	txain(function(callback) {
+	  database.query(sql, params, callback);
+	})
+	.then(function(rows, callback) {
+		var features = rows.map(function(row) {
+			return {
+				'type': 'Feature',
+				'geometry': row.geom,
+			}
+		})
 
-		query.on('end', function(result) {
-			var properties = {'color': 'green'}
-			var out = GeoJsonHelper.build_feature_collection(result.rows, properties);
-			client.end();
-			callback(out);
-		});
-	});
+		var output = {
+			'feature_collection': {
+				'type':'FeatureCollection',
+				'features': features
+			},
+		};
+		callback(null, output)
+	})
+	.end(callback)
 };
 
 module.exports = CountySubdivision;

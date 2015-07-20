@@ -36,13 +36,13 @@
       <div id="left-col">
         <div ng-controller="map_layers_controller">
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer(county_subdivisions_layer)">CS</a>
+            <a href="#" ng-click="county_subdivisions_layer.toggle_visibility()">CS</a>
           </div>
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer(locations_layer)">L</a>
+            <a href="#" ng-click="locations_layer.toggle_visibility()">L</a>
           </div>
           <div class="layer-toggle">
-            <a href="#" ng-click="toggle_layer(splice_points_layer)">SP</a>
+            <a href="#" ng-click="splice_points_layer.toggle_visibility()">SP</a>
           </div>
         </div>
 
@@ -55,13 +55,35 @@
         </div>
       </div>
 
-      <div ng-controller="map_modals_controller">
+      <div ng-controller="shortest_path_controller">
         <div ng-show="is_visible" class="tool-opts-container">
           <div class="tool-opts-title">Distance Based Route Plan</div>
+
+          <!-- Route Creation Inputs -->
           <div class="tool-opts">
-            <p>Sources: {{sources.length}}</p>
-            <p>Targets: {{targets.length}}</p>
-            <button ng-click="create_route()" type="button">Plan Route</button>
+            <div>
+              <label>Sources: </label> {{sources.length}}
+            </div>
+            <div>
+              <label>Targets: </label> {{targets.length}}
+            </div>
+            <div>
+              <label>Cable Type:</label>
+              <select>
+                <option value="aerial">Aerial</option>
+                <option value="buried">Buried</option>
+              </select>
+            </div>
+            <div>
+              <button class="tool-button" ng-click="create_route()" type="button">Plan Route</button>
+            </div>
+
+            <!-- Route Financials -->
+            <div ng-show="route_layer.visible">
+              <p>Route Financials:</p>
+              <label>Total Cost: </label> {{route_layer.metadata.total_cost | currency}}
+              <button class="tool-button" ng-click="clear_route()" type="button">Clear Route</button>
+            </div>
           </div>
         </div>
       </div>
@@ -73,7 +95,7 @@
   <!-- Angular controllers and services -->
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
-  <script src="javascripts/controllers/map_modals_controller.js"></script>
+  <script src="javascripts/controllers/shortest_path_controller.js"></script>
   <script src="javascripts/services/sources_service.js"></script>
   <script src="javascripts/services/targets_service.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
