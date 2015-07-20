@@ -22,5 +22,5 @@ CREATE TABLE infousa.businesses
 	familyid bigint,
 	familybus bigint,
 	familymsas integer,
-	geog varchar
+	geog geography (POINT, 4326)
 );

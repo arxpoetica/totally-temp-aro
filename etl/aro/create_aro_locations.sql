@@ -1,6 +1,6 @@
 -- Table: aro.locations
 
--- DROP TABLE aro.locations;
+DROP TABLE aro.locations;
 
 CREATE TABLE aro.locations
 (
@@ -13,30 +13,33 @@ CREATE TABLE aro.locations
     lat double precision,
     lon double precision,
     geog geography(POINT, 4326),
-    CONSTRAINT aro_locations_pkey PRIMARY KEY (id)
+    wirecenter_id varchar
+    --CONSTRAINT aro_locations_pkey PRIMARY KEY (id)
 );
 
 SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 
 -- Load locations from infousa_businesses
--- ONLY using King County for now
-INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geom)
-    SELECT DISTINCT ON (ST_AsText(geog))
+-- ONLY using UES wirecenter for Verizon
+INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geom, wirecenter_id)
+    SELECT DISTINCT ON (businesses.geog, bldgid)
         bldgid as id,
         address,
         city,
-        state,
+        businesses.state,
         zip AS zipcode,
         lat,
         long AS lon,
-        ST_GeographyFromText(ST_AsText(geog)) AS geog,
-        ST_GeographyFromText(ST_AsText(geog))::geometry as geom
+        --ST_GeographyFromText(ST_AsText(businesses.geog)) AS geog,
+        --ST_GeographyFromText(ST_AsText(businesses.geog))::geometry as geom
+        businesses.geog as geog,
+        businesses.geog::geometry as geom,
+        wirecenters.wirecenter
 
-    FROM infousa.businesses JOIN aro.cousub
-      ON ST_Within(ST_GeographyFromText(ST_AsText(businesses.geog))::geometry, cousub.geom)
-    WHERE 
-      cousub.countyfp = '033'
-    GROUP BY id, address, city, state, zipcode, lat, lon, geog;
+    FROM infousa.businesses JOIN aro.wirecenters
+      ON businesses.geog && wirecenters.geog
+    --WHERE 
+      --wirecenters.aocn = '9100';
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations

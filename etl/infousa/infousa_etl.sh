@@ -23,3 +23,6 @@ ${PSQL} -a -f $DIR/create_infousa_businesses.sql
 
 # TOTO: remove hard-coded path and find a better way of loading this data
 cat /$TMPDIR/infousa_ny.csv | ${PSQL} -a -c "COPY infousa.businesses FROM STDIN DELIMITER ',' CSV HEADER;"
+
+# Optimize buisnesses table
+${PSQL} -a -f $DIR/optimize_infousa_businesses.sql
