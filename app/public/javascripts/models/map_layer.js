@@ -8,7 +8,7 @@ app.service('MapLayer', function($http) {
 		this.map = map;
 		this.data_layer = new google.maps.Data();
 		this.metadata = {};
-		this.style_options = style_options.normal;
+		this.style_options = style_options;
 		this.data_loaded = false;
 		this.visible = false;
 
@@ -23,17 +23,24 @@ app.service('MapLayer', function($http) {
 			infowindow.setZIndex(1000);
 			infowindow.open(map);
 			*/
-			
-			if (layer.selection_endpoint) {
-				var id = event.feature.getProperty('id');
-				$http.get(layer.selection_endpoint + id).success(function(response) {
-					layer.collection.add(response.vertex_id);
-				});
-			}
-			if (style_options.selected) {
-				data_layer.overrideStyle(event.feature, style_options.selected)
-			}
+
+			layer.select_feature(event.feature);
 		});
+	}
+
+	MapLayer.prototype.select_feature = function(feature) {
+		var layer = this;
+		var data_layer = this.data_layer;
+
+		if (layer.selection_endpoint) {
+			var id = feature.getProperty('id');
+			$http.get(layer.selection_endpoint + id).success(function(response) {
+				layer.collection.add(response.vertex_id);
+			});
+		}
+		if (layer.style_options.selected) {
+			data_layer.overrideStyle(feature, layer.style_options.selected);
+		}
 	}
 
 	MapLayer.prototype.set_selection_action = function(selection_endpoint, collection) {
@@ -52,10 +59,8 @@ app.service('MapLayer', function($http) {
 
 	// Style the layer using options from a hash
 	MapLayer.prototype.apply_style = function() {
-		if (this.style_options.icon) {
-			this.data_layer.setStyle({icon: this.style_options.icon});
-		} else {
-			this.data_layer.setStyle(this.style_options);
+		if (this.style_options) {
+			this.data_layer.setStyle(this.style_options.normal);
 		}
 	}
 
@@ -87,6 +92,17 @@ app.service('MapLayer', function($http) {
 
 	MapLayer.prototype.revert_styles = function() {
 		this.data_layer.revertStyle();
+	}
+
+	MapLayer.prototype.select_in_bounds = function(bounds) {
+		var layer = this;
+		if (!layer.visible) return;
+		var data = this.data_layer
+		data.forEach(function(feature) {
+			if (bounds.contains(feature.getGeometry().get())) {
+				layer.select_feature(feature);
+			}
+		});
 	}
 
 	return MapLayer;
