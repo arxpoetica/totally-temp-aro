@@ -1,9 +1,8 @@
 // Shortest Path Controller
-app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'sources', 'targets', 'MapLayer', function($scope, $rootScope, $http, sources, targets, MapLayer) {
+app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', function($scope, $rootScope, $http, selection, MapLayer) {
   // Controller instance variables
   $scope.is_visible = false;
-  $scope.sources = sources;
-  $scope.targets = targets;
+  $scope.selection = selection;
 
   /************
   * FUNCTIONS *
@@ -16,12 +15,12 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'so
   
   // Handles one source and many targets.
   $scope.create_route = function() {
-  	var source = $scope.sources[0];
-  	var targets = $scope.targets;
+  	var source = selection.sources[0];
+  	var targets = selection.targets;
     var cost_multiplier = 200.0; // This will eventually be a user input which will vary
     console.log('/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier);
 
-    $scope.route_layer = new MapLayer('/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier, {
+    $scope.route_layer = new MapLayer(null, '/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier, {
       normal: {
         strokeColor: 'red'
       },

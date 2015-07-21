@@ -3,7 +3,8 @@ app.service('MapLayer', function($http) {
 	// one infowindow for all layers
 	var infowindow = new google.maps.InfoWindow();
 
-	function MapLayer(api_endpoint, style_options) {
+	function MapLayer(short_name, api_endpoint, style_options) {
+		this.short_name = short_name;
 		this.api_endpoint = api_endpoint;
 		this.map = map;
 		this.data_layer = new google.maps.Data();
@@ -32,14 +33,25 @@ app.service('MapLayer', function($http) {
 		var layer = this;
 		var data_layer = this.data_layer;
 
-		if (layer.selection_endpoint) {
+		if (feature.selected) {
+			feature.selected = false;
+			data_layer.overrideStyle(feature, layer.style_options.normal);
 			var id = feature.getProperty('id');
-			$http.get(layer.selection_endpoint + id).success(function(response) {
-				layer.collection.add(response.vertex_id);
+			$http.get(layer.selection_endpoint + id).success(function(response) { // TODO: remove this api call
+				layer.collection.remove(feature.vertex_id, feature);
 			});
-		}
-		if (layer.style_options.selected) {
-			data_layer.overrideStyle(feature, layer.style_options.selected);
+		} else {
+			feature.selected = true;
+			if (layer.selection_endpoint) {
+				var id = feature.getProperty('id');
+				$http.get(layer.selection_endpoint + id).success(function(response) {
+					feature.vertex_id = response.vertex_id;
+					layer.collection.add(response.vertex_id, feature);
+				});
+			}
+			if (layer.style_options.selected) {
+				data_layer.overrideStyle(feature, layer.style_options.selected);
+			}
 		}
 	}
 

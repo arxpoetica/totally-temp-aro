@@ -35,14 +35,15 @@
   <body>
       <div id="left-col">
         <div ng-controller="map_layers_controller">
-          <div class="layer-toggle">
-            <a href="#" ng-click="county_subdivisions_layer.toggle_visibility()">CS</a>
+          <div ng-repeat="(key, layer) in area_layers">
+            <div class="layer-toggle">
+              <a href="#" ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
+            </div>
           </div>
-          <div class="layer-toggle">
-            <a href="#" ng-click="locations_layer.toggle_visibility()">L</a>
-          </div>
-          <div class="layer-toggle">
-            <a href="#" ng-click="splice_points_layer.toggle_visibility()">SP</a>
+          <div ng-repeat="(key, layer) in feature_layers">
+            <div class="layer-toggle">
+              <a href="#" ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
+            </div>
           </div>
         </div>
 
@@ -62,10 +63,10 @@
           <!-- Route Creation Inputs -->
           <div class="tool-opts">
             <div>
-              <label>Sources: </label> {{sources.length}}
+              <label>Sources: </label> {{selection.sources.length}}
             </div>
             <div>
-              <label>Targets: </label> {{targets.length}}
+              <label>Targets: </label> {{selection.targets.length}}
             </div>
             <div>
               <button class="tool-button" ng-click="draw_rectangle()" type="button">Select drawing rectangle</button>
@@ -99,10 +100,12 @@
   </body>
 
   <!-- Angular controllers and services -->
+  <script src="javascripts/libs/underscore.js"></script>
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
   <script src="javascripts/services/sources_service.js"></script>
   <script src="javascripts/services/targets_service.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
+  <script src="javascripts/models/selection.js"></script>
 </html>
