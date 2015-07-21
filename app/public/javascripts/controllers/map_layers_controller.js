@@ -48,7 +48,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   /**************
   * AREA LAYERS *
   ***************/
-  feature_layers['county_subdivisions_layer'] = new MapLayer({
+  area_layers['county_subdivisions_layer'] = new MapLayer({
     short_name: 'CS',
     api_endpoint: '/county_subdivisions/53',
     style_options: {
