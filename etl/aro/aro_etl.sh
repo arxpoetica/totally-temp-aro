@@ -25,10 +25,10 @@ ${PSQL} -a -f $DIR/create_aro_fiber_plant.sql
 ${PSQL} -a -f $DIR/create_aro_wirecenters.sql
 
 # Create and load aro.splice_points table from aro.fiber_plant table
-# ${PSQL} -a -f $DIR/create_aro_splice_points.sql
+${PSQL} -a -f $DIR/create_aro_splice_points.sql
 
 # # Create aro.industries table from infousa.businesses table
-# ${PSQL} -a -f $DIR/create_aro_industries.sql
+${PSQL} -a -f $DIR/create_aro_industries.sql
 
 # Create aro.businesses table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_businesses.sql
