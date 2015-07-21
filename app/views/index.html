@@ -63,10 +63,10 @@
           <!-- Route Creation Inputs -->
           <div class="tool-opts">
             <div>
-              <label>Sources: </label> {{selection.sources.length}}
+              <label>Sources: </label> {{selection.sources.length()}}
             </div>
             <div>
-              <label>Targets: </label> {{selection.targets.length}}
+              <label>Targets: </label> {{selection.targets.length()}}
             </div>
             <div>
               <button class="tool-button" ng-click="draw_rectangle()" type="button">Select drawing rectangle</button>
@@ -104,8 +104,6 @@
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
-  <script src="javascripts/services/sources_service.js"></script>
-  <script src="javascripts/services/targets_service.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
   <script src="javascripts/models/selection.js"></script>
 </html>

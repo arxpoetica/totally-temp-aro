@@ -1,25 +1,52 @@
-app.service('selection', function($http) {
+app.service('selection', function($rootScope, $http) {
 
   var selection = {};
+  var collectionNames = [];
 
   function add_selection_collection(name) {
-    var collection = [];
+    collectionNames.push(name);
+    var arr = [];
+    var collection = {};
     collection.add = function(id, feature) {
-      collection.push(id);
-      selection[name] = _.uniq(collection);
+      arr.push(id);
+      arr = _.uniq(arr);
     };
     collection.remove = function(id, feature) {
-      var i = _.indexOf(collection, id);
+      var i = _.indexOf(arr, id);
       if (i >= 0) {
-        collection.splice(i, 1);
-        selection[name] = _.uniq(collection);
+        arr.splice(i, 1);
       }
     };
+    collection.removeAll = function() {
+      arr.splice(0, arr.length);
+    }
+    collection.length = function() {
+      return arr.length;
+    }
+    collection.join = function(str) {
+      return arr.join(',')
+    }
+    collection.first = function() {
+      return arr[0];
+    }
     selection[name] = collection;
   }
 
   add_selection_collection('sources');
   add_selection_collection('targets');
+
+  selection.clear_selection = function() {
+    collectionNames.forEach(function(name) {
+      selection[name].removeAll();
+    });
+
+    var feature_layers = $rootScope.feature_layers;
+    for (var key in feature_layers) {
+      if (feature_layers.hasOwnProperty(key)) {
+        feature_layers[key].revert_styles();
+      }
+    }
+  }
 
   return selection;
 

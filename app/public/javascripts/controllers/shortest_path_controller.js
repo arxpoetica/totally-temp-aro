@@ -15,38 +15,31 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   
   // Handles one source and many targets.
   $scope.create_route = function() {
-  	var source = selection.sources[0];
-  	var targets = selection.targets;
+  	var source = selection.sources.first();
+  	var targets = selection.targets.join(',');
     var cost_multiplier = 200.0; // This will eventually be a user input which will vary
-    console.log('/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier);
+    var url = '/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier
 
-    $scope.route_layer = new MapLayer(null, '/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier, {
-      normal: {
-        strokeColor: 'red'
+    var route = new MapLayer({
+      api_endpoint: url,
+      style_options: {
+        normal: {
+          strokeColor: 'red'
+        },
       },
     });
+    route.show();
 
-    if (!$scope.route_layer.data_loaded) {
-      $scope.route_layer.load_data().then(function(data) {
-        $scope.route_layer.data_layer.addGeoJson(data.feature_collection);
-        $scope.route_layer.metadata = data.metadata;
-        $scope.route_layer.data_loaded = true;
-        console.log($scope.route_layer.metadata);
-      });
+    if ($scope.route_layer) {
+      $scope.route_layer.remove();
     }
-    
-    $scope.route_layer.apply_style();
-    $scope.route_layer.data_layer.setMap(map);
-    $scope.route_layer.visible = true;
+    $scope.route_layer = route;
   }
 
   $scope.clear_route = function() {
-    sources.splice(0, sources.length);
-    targets.splice(0, targets.length);
-    $rootScope.locations_layer.revert_styles();
-    $rootScope.splice_points_layer.revert_styles();
+    selection.clear_selection();
     $scope.route_layer.clear_data();
-    $scope.route_layer.metadata = {}
+    $scope.route_layer.hide();
   }
 
   var rectangle;
