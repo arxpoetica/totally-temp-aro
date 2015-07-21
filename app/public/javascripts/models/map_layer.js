@@ -13,6 +13,7 @@ app.service('MapLayer', function($http) {
 		this.metadata = {};
 		this.data_loaded = false;
 		this.visible = false;
+		this.data = options.data;
 
 		this.selection_endpoint = options.selection_endpoint;
 		this.collection = options.collection;
@@ -63,6 +64,11 @@ app.service('MapLayer', function($http) {
 	MapLayer.prototype.load_data = function() {
 		var layer = this;
 		if (!layer.data_loaded) {
+			if (layer.data) {
+				this.data_layer.addGeoJson(layer.data);
+				layer.data_loaded = true;
+				return;
+			}
 			var promise = $http.get(this.api_endpoint).then(function(response) {
 				var data = response.data;
 				layer.data_layer.addGeoJson(data.feature_collection);
