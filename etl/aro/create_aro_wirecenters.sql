@@ -7,11 +7,11 @@ CREATE TABLE aro.wirecenters
 	wirecenter varchar,
 	aocn varchar,
 	aocn_name varchar,
-	geog geography('POLYGON', 4326),
+	geog geography('MULTIPOLYGON', 4326),
 	CONSTRAINT aro_wirecenters_pkey PRIMARY KEY (id)
 );
 
-SELECT AddGeometryColumn('aro', 'wirecenters', 'geom', 4326, 'POLYGON', 2);
+SELECT AddGeometryColumn('aro', 'wirecenters', 'geom', 4326, 'MULTIPOLYGON', 2);
 
 CREATE INDEX aro_wirecenters_geom_gist ON aro.wirecenters USING gist (geom);
 CREATE INDEX aro_wirecenters_geog_gist ON aro.wirecenters USING gist (geog);
@@ -25,6 +25,8 @@ INSERT INTO aro.wirecenters (gid, state, wirecenter, aocn, aocn_name, geog, geom
 		wirecenter,
 		aocn,
 		aocn_name,
-		Geography(ST_GeometryN(ST_Force_2D(the_geom),1)) as geog, -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
-		ST_GeometryN(ST_Force_2D(the_geom),1) AS geom -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
+		-- Geography(ST_GeometryN(ST_Force_2D(the_geom),1)) as geog, -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
+		-- ST_GeometryN(ST_Force_2D(the_geom),1) AS geom -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
+		Geography(ST_Force_2D(the_geom)) as geog, -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
+		ST_Force_2D(the_geom) AS geom -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
 	FROM geotel.wirecenters;
