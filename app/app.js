@@ -34,6 +34,11 @@ function jsonHandler(response, next) {
 	}
 }
 
+// Wirecenters
+app.get('/wirecenters', function(request, response, next) {
+	models.Wirecenter.find_all(jsonHandler(response, next));
+});
+
 // County Subdivisions
 app.get('/county_subdivisions/:statefp', function(request, response, next) {
 	var statefp = request.params.statefp;

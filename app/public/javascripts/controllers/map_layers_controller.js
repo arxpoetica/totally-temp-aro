@@ -2,6 +2,21 @@
 //
 // Handles display of and interaction with all layers of the map
 app.controller('map_layers_controller', function($rootScope, $http, selection, MapLayer) {
+  /**************
+  * WIRECENTERS *
+  ***************/
+  $http.get('/wirecenters').success(function(response) {
+    var wirecenters = response;
+    var first = wirecenters[0];
+    var centroid = first.centroid;
+    map.setCenter({
+      lat: centroid.coordinates[1],
+      lng: centroid.coordinates[0],
+    });
+    map.setZoom(14);
+  });
+
+
   /*********
   * LAYERS *
   **********/
