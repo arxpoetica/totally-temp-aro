@@ -21,6 +21,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     var url = '/route_optimizer/shortest_path/' + source + '/' + targets + '/' + cost_multiplier
 
     var route = new MapLayer({
+      short_name: 'RT',
       api_endpoint: url,
       style_options: {
         normal: {
@@ -34,6 +35,8 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
       $scope.route_layer.remove();
     }
     $scope.route_layer = route;
+
+    $rootScope.area_layers['route'] = route;
   }
 
   $scope.clear_route = function() {
