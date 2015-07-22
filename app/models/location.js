@@ -59,6 +59,22 @@ Location.get_closest_vertex = function(location_id, callback) {
 	database.findOne(sql, [location_id], callback)
 }
 
+// Get house hold summary information for a given location
+//
+// 1. location_id: integer. ex. 1738
+// 2. callback: function to return the information
+Location.get_house_hold_summary = function(location_id, callback) {
+	var sql = multiline(function() {/*
+		SELECT
+			number_of_households, install_cost_per_hh, annual_recurring_cost_per_hh
+		FROM
+			aro.household_summary
+		WHERE
+			location_id = $1
+	*/});
+	database.findOne(sql, [location_id], callback)
+}
+
 Location.total_service_cost = function(location_id, callback) {
 	var sql = multiline(function() {/*
 		SELECT

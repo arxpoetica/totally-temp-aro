@@ -18,7 +18,6 @@ Wirecenter.find_all = function(callback) {
     database.query(sql, ['NYCMNY79'], callback);
   })
   .then(function(rows, callback) {
-    console.log('rows', rows)
     callback(null, rows);
   })
   .end(callback);

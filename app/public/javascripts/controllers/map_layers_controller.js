@@ -12,6 +12,10 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   $rootScope.area_layers = area_layers;
   $rootScope.feature_layers = feature_layers;
 
+  // one infowindow for all layers
+  var infoWindow = new google.maps.InfoWindow();
+  $rootScope.infoWindow = infoWindow;
+
   /**************
   * WIRECENTERS *
   ***************/
@@ -41,7 +45,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     });
   });
 
-
   /*****************
   * FEATURE LAYERS *
   ******************/
@@ -56,8 +59,33 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         icon: '/images/map_icons/location_business_selected.png',
       }
     },
-    selection_endpoint: '/locations/closest_vertex/',
-    collection: selection.targets,
+    events: {
+      rightclick: function(feature) {
+        var id = feature.getProperty('id');
+        $http.get('/locations/house_hold_summary/' + id).success(function(response) {
+          var number_of_households = response.number_of_households || 0;
+          var install_cost_per_hh = response.install_cost_per_hh || 0;
+          var annual_recurring_cost_per_hh = response.annual_recurring_cost_per_hh || 0;
+
+          var position = feature.getGeometry().get();
+          infoWindow.setContent('<p>Number of households: '+number_of_households+'</p>');
+          infoWindow.setPosition(position);
+          infoWindow.open(map);
+        });
+      },
+      selected: function(feature) {
+        var id = feature.getProperty('id');
+        $http.get('/locations/closest_vertex/'+id).success(function(response) {
+          feature.vertex_id = response.vertex_id;
+          selection.targets.add(feature.vertex_id, feature);
+        });
+      },
+      deselected: function(feature) {
+        var id = feature.getProperty('id');
+        selection.targets.remove(feature.vertex_id, feature);
+        $rootScope.$apply();
+      }
+    },
   });
 
   feature_layers['splice_points'] = new MapLayer({
@@ -71,8 +99,20 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         icon: '/images/map_icons/splice_point_selected.png',
       }
     },
-    selection_endpoint: '/splice_points/closest_vertex/',
-    collection: selection.sources,
+    events: {
+      selected: function(feature) {
+        var id = feature.getProperty('id');
+        $http.get('/splice_points/closest_vertex/'+id).success(function(response) {
+          feature.vertex_id = response.vertex_id;
+          selection.sources.add(feature.vertex_id, feature);
+        });
+      },
+      deselected: function(feature) {
+        var id = feature.getProperty('id');
+        selection.sources.remove(feature.vertex_id, feature);
+        $rootScope.$apply();
+      }
+    },
   });
 
   /**************

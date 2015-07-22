@@ -1,7 +1,4 @@
-app.service('MapLayer', function($http) {
-
-	// one infowindow for all layers
-	var infowindow = new google.maps.InfoWindow();
+app.service('MapLayer', function($http, $rootScope) {
 
 	function MapLayer(options) {
 		this.short_name = options.short_name;
@@ -15,47 +12,40 @@ app.service('MapLayer', function($http) {
 		this.visible = false;
 		this.data = options.data;
 
-		this.selection_endpoint = options.selection_endpoint;
-		this.collection = options.collection;
+		this.event_handlers = options.events || {};
 
 		var data_layer = this.data_layer;
 		var layer = this;
 
 		data_layer.addListener('click', function(event) {
-			/*
-			var position = event.feature.getGeometry().get();
-			infowindow.setContent("<p>Hello!!</p>");
-			infowindow.setPosition(position);
-			infowindow.setZIndex(1000);
-			infowindow.open(map);
-			*/
-
 			layer.select_feature(event.feature);
 		});
+
+		data_layer.addListener('rightclick', function(event) {
+			if (layer.event_handlers.rightclick) {
+				layer.event_handlers.rightclick(event.feature);
+			}
+		})
 	}
 
 	MapLayer.prototype.select_feature = function(feature) {
 		var layer = this;
 		var data_layer = this.data_layer;
+		$rootScope.infoWindow.setMap(null);
 
 		if (feature.selected) {
 			feature.selected = false;
 			data_layer.overrideStyle(feature, layer.style_options.normal);
-			var id = feature.getProperty('id');
-			$http.get(layer.selection_endpoint + id).success(function(response) { // TODO: remove this api call
-				layer.collection.remove(feature.vertex_id, feature);
-			});
+			if (layer.event_handlers.deselected) {
+				layer.event_handlers.deselected(feature);
+			}
 		} else {
 			feature.selected = true;
-			if (layer.selection_endpoint) {
-				var id = feature.getProperty('id');
-				$http.get(layer.selection_endpoint + id).success(function(response) {
-					feature.vertex_id = response.vertex_id;
-					layer.collection.add(response.vertex_id, feature);
-				});
-			}
 			if (layer.style_options.selected) {
 				data_layer.overrideStyle(feature, layer.style_options.selected);
+			}
+			if (layer.event_handlers.selected) {
+				layer.event_handlers.selected(feature);
 			}
 		}
 	}
@@ -79,12 +69,14 @@ app.service('MapLayer', function($http) {
 	}
 
 	MapLayer.prototype.show = function() {
+		$rootScope.infoWindow.setMap(null);
 		this.load_data();
 		this.data_layer.setMap(map);
 		this.visible = true;
 	}
 
 	MapLayer.prototype.hide = function() {
+		$rootScope.infoWindow.setMap(null);
 		this.data_layer.setMap(null);
 		this.visible = false;
 	}
