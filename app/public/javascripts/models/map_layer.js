@@ -3,14 +3,20 @@ app.service('MapLayer', function($http) {
 	// one infowindow for all layers
 	var infowindow = new google.maps.InfoWindow();
 
-	function MapLayer(api_endpoint, style_options) {
-		this.api_endpoint = api_endpoint;
-		this.map = map;
+	function MapLayer(options) {
+		this.short_name = options.short_name;
+		this.api_endpoint = options.api_endpoint;
+		this.style_options = options.style_options;
 		this.data_layer = new google.maps.Data();
+		this.data_layer.setStyle(this.style_options.normal);
+		this.data_layer.setMap(map);
 		this.metadata = {};
-		this.style_options = style_options;
 		this.data_loaded = false;
 		this.visible = false;
+		this.data = options.data;
+
+		this.selection_endpoint = options.selection_endpoint;
+		this.collection = options.collection;
 
 		var data_layer = this.data_layer;
 		var layer = this;
@@ -32,55 +38,59 @@ app.service('MapLayer', function($http) {
 		var layer = this;
 		var data_layer = this.data_layer;
 
-		if (layer.selection_endpoint) {
+		if (feature.selected) {
+			feature.selected = false;
+			data_layer.overrideStyle(feature, layer.style_options.normal);
 			var id = feature.getProperty('id');
-			$http.get(layer.selection_endpoint + id).success(function(response) {
-				layer.collection.add(response.vertex_id);
+			$http.get(layer.selection_endpoint + id).success(function(response) { // TODO: remove this api call
+				layer.collection.remove(feature.vertex_id, feature);
 			});
+		} else {
+			feature.selected = true;
+			if (layer.selection_endpoint) {
+				var id = feature.getProperty('id');
+				$http.get(layer.selection_endpoint + id).success(function(response) {
+					feature.vertex_id = response.vertex_id;
+					layer.collection.add(response.vertex_id, feature);
+				});
+			}
+			if (layer.style_options.selected) {
+				data_layer.overrideStyle(feature, layer.style_options.selected);
+			}
 		}
-		if (layer.style_options.selected) {
-			data_layer.overrideStyle(feature, layer.style_options.selected);
-		}
-	}
-
-	MapLayer.prototype.set_selection_action = function(selection_endpoint, collection) {
-		this.selection_endpoint = selection_endpoint;
-		this.collection = collection;
 	}
 
 	// Load GeoJSON data into the layer if it's not already loaded
 	MapLayer.prototype.load_data = function() {
-		var promise = $http.get(this.api_endpoint).then(function(response) {
-			return response.data;
-		});
-
-		return promise;
-	};
-
-	// Style the layer using options from a hash
-	MapLayer.prototype.apply_style = function() {
-		if (this.style_options) {
-			this.data_layer.setStyle(this.style_options.normal);
+		var layer = this;
+		if (!layer.data_loaded) {
+			if (layer.data) {
+				this.data_layer.addGeoJson(layer.data);
+				layer.data_loaded = true;
+				return;
+			}
+			var promise = $http.get(this.api_endpoint).then(function(response) {
+				var data = response.data;
+				layer.data_layer.addGeoJson(data.feature_collection);
+				layer.metadata = data.metadata;
+				layer.data_loaded = true;
+			});
 		}
 	}
 
+	MapLayer.prototype.show = function() {
+		this.load_data();
+		this.data_layer.setMap(map);
+		this.visible = true;
+	}
+
+	MapLayer.prototype.hide = function() {
+		this.data_layer.setMap(null);
+		this.visible = false;
+	}
+
 	MapLayer.prototype.toggle_visibility = function() {
-		var layer = this
-		if (!layer.visible) {
-			if (!layer.data_loaded) {
-				layer.load_data().then(function(data) {
-					layer.data_layer.addGeoJson(data.feature_collection);
-					layer.metadata = data.metadata;
-					layer.data_loaded = true;
-				});
-			}
-			layer.apply_style();
-			layer.data_layer.setMap(map);
-			layer.visible = true;
-		} else {
-			layer.data_layer.setMap(null);
-			layer.visible = false;
-		}
+		this.visible ? this.hide() : this.show();
 	}
 
 	MapLayer.prototype.clear_data = function() {
@@ -88,10 +98,15 @@ app.service('MapLayer', function($http) {
 		data.forEach(function(feature) {
 			data.remove(feature);
 		});
+		this.metadata = {};
 	}
 
 	MapLayer.prototype.revert_styles = function() {
 		this.data_layer.revertStyle();
+		this.data_layer.forEach(function(feature) {
+			delete feature.selected;
+			delete feature.vertex_id;
+		});
 	}
 
 	MapLayer.prototype.select_in_bounds = function(bounds) {
@@ -103,6 +118,10 @@ app.service('MapLayer', function($http) {
 				layer.select_feature(feature);
 			}
 		});
+	}
+
+	MapLayer.prototype.remove = function() {
+		this.data_layer.setMap(null);
 	}
 
 	return MapLayer;

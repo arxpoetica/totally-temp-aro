@@ -34,10 +34,21 @@ function jsonHandler(response, next) {
 	}
 }
 
+// Wirecenters
+app.get('/wirecenters', function(request, response, next) {
+	models.Wirecenter.find_all(jsonHandler(response, next));
+});
+
 // County Subdivisions
 app.get('/county_subdivisions/:statefp', function(request, response, next) {
 	var statefp = request.params.statefp;
 	CountySubdivision.find_by_statefp(statefp, jsonHandler(response, next));
+});
+
+// Existing equipment
+app.get('/equipment/:carrier_name', function(request, response, next) {
+	var carrier_name = request.params.carrier_name;
+	models.Equipment.find_by_carrier(carrier_name, jsonHandler(response, next));
 });
 
 // Locations
