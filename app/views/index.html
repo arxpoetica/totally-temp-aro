@@ -60,10 +60,13 @@
 
       <div ng-controller="selected_location_controller">
         <div ng-show="is_visible" class="tool-location-container">
-          <form>
+          <form ng-show="location.location_id">
             <p><label>Number of households: </label> <input ng-model="location.number_of_households"></input></p>
             <button type="submit" ng-click="update()">Update</button>
           </form>
+          <div ng-show="!location.location_id">
+            Right click on any location
+          </div>
         </div>
       </div>
 
