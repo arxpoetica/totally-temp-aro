@@ -4,7 +4,7 @@ DROP TABLE aro.locations;
 
 CREATE TABLE aro.locations
 (
-    id bigint,
+    id serial,
     address varchar,
     city varchar,
     state varchar(2),

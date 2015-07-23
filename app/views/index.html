@@ -4,7 +4,10 @@
     <title>ARO</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
+    <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/sweetalert.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry"></script>
     <script>
@@ -36,23 +39,38 @@
       <div id="left-col">
         <div ng-controller="map_layers_controller">
           <div ng-repeat="(key, layer) in area_layers">
-            <div class="layer-toggle">
+            <div class="layer-toggle" ng-class="{'layer-toggle-visible': layer.visible}">
               <a href="#" ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
             </div>
           </div>
           <div ng-repeat="(key, layer) in feature_layers">
-            <div class="layer-toggle">
+            <div class="layer-toggle" ng-class="{'layer-toggle-visible': layer.visible}">
               <a href="#" ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
             </div>
           </div>
         </div>
 
-        <hr />
+        <hr>
 
         <div ng-controller="map_tools_controller">
           <div class="tool-toggle">
             <a href="#" ng-click="toggle_tool_visibility()">DBR</a>
           </div>
+        </div>
+      </div>
+
+      <div ng-controller="selected_location_controller">
+        <div ng-show="is_visible" class="tool-location-container">
+          <form ng-show="location.location_id">
+            <p><label>Number of households: </label> <input ng-model="location.number_of_households"></input></p>
+            <button type="submit" ng-click="update()">Update</button>
+          </form>
+          <div ng-show="!location.location_id">
+            Right click on any existing location to see a summary
+          </div>
+          <p>
+            Right click on the map to add a new location
+          </p>
         </div>
       </div>
 
@@ -101,9 +119,12 @@
 
   <!-- Angular controllers and services -->
   <script src="javascripts/libs/underscore.js"></script>
+  <script src="javascripts/libs/sweetalert.min.js"></script>
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
+  <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
   <script src="javascripts/models/selection.js"></script>
+  <script src="javascripts/interceptors/http_error_handler.js"></script>
 </html>

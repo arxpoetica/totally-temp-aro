@@ -1,7 +1,4 @@
-app.service('MapLayer', function($http) {
-
-	// one infowindow for all layers
-	var infowindow = new google.maps.InfoWindow();
+app.service('MapLayer', function($http, $rootScope) {
 
 	function MapLayer(options) {
 		this.short_name = options.short_name;
@@ -14,24 +11,23 @@ app.service('MapLayer', function($http) {
 		this.data_loaded = false;
 		this.visible = false;
 		this.data = options.data;
+		this.type = options.type;
 
-		this.selection_endpoint = options.selection_endpoint;
-		this.collection = options.collection;
+		this.event_handlers = options.events || {};
 
 		var data_layer = this.data_layer;
 		var layer = this;
 
 		data_layer.addListener('click', function(event) {
-			/*
-			var position = event.feature.getGeometry().get();
-			infowindow.setContent("<p>Hello!!</p>");
-			infowindow.setPosition(position);
-			infowindow.setZIndex(1000);
-			infowindow.open(map);
-			*/
-
 			layer.select_feature(event.feature);
 		});
+
+		data_layer.addListener('rightclick', function(event) {
+			if (layer.event_handlers.rightclick) {
+				layer.event_handlers.rightclick(event.feature);
+			}
+			$rootScope.$broadcast('map_Layer_rightclicked_feature', layer, event.feature);
+		})
 	}
 
 	MapLayer.prototype.select_feature = function(feature) {
@@ -41,22 +37,19 @@ app.service('MapLayer', function($http) {
 		if (feature.selected) {
 			feature.selected = false;
 			data_layer.overrideStyle(feature, layer.style_options.normal);
-			var id = feature.getProperty('id');
-			$http.get(layer.selection_endpoint + id).success(function(response) { // TODO: remove this api call
-				layer.collection.remove(feature.vertex_id, feature);
-			});
+			if (layer.event_handlers.deselected) {
+				layer.event_handlers.deselected(feature);
+			}
+			$rootScope.$broadcast('map_Layer_selected_feature', layer, feature);
 		} else {
 			feature.selected = true;
-			if (layer.selection_endpoint) {
-				var id = feature.getProperty('id');
-				$http.get(layer.selection_endpoint + id).success(function(response) {
-					feature.vertex_id = response.vertex_id;
-					layer.collection.add(response.vertex_id, feature);
-				});
-			}
 			if (layer.style_options.selected) {
 				data_layer.overrideStyle(feature, layer.style_options.selected);
 			}
+			if (layer.event_handlers.selected) {
+				layer.event_handlers.selected(feature);
+			}
+			$rootScope.$broadcast('map_Layer_deselected_feature', layer, feature);
 		}
 	}
 
@@ -82,11 +75,13 @@ app.service('MapLayer', function($http) {
 		this.load_data();
 		this.data_layer.setMap(map);
 		this.visible = true;
+		$rootScope.$broadcast('map_Layer_changed_visibility', this);
 	}
 
 	MapLayer.prototype.hide = function() {
 		this.data_layer.setMap(null);
 		this.visible = false;
+		$rootScope.$broadcast('map_Layer_changed_visibility', this);
 	}
 
 	MapLayer.prototype.toggle_visibility = function() {

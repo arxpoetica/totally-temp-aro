@@ -2,9 +2,11 @@ var express = require('express');
 var app = express();
 var compression = require('compression');
 var path = require('path');
+var bodyParser = require('body-parser');
 
 var port = process.env.PORT || 8000
 app.use(compression());
+app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Models
@@ -29,8 +31,8 @@ app.get('/', function(request, response, next) {
 
 function jsonHandler(response, next) {
 	return function(err, data) {
-		if (err) return next(err)
-		response.json(data)
+		if (err) return next(err);
+		response.json(data || {});
 	}
 }
 
@@ -59,6 +61,25 @@ app.get('/locations', function(request, response, next) {
 app.get('/locations/closest_vertex/:location_id', function(request, response, next) {
 	var location_id = request.params.location_id;
 	Location.get_closest_vertex(location_id, jsonHandler(response, next));
+});
+
+app.get('/locations/house_hold_summary/:location_id', function(request, response, next) {
+	var location_id = request.params.location_id;
+	Location.get_house_hold_summary(location_id, jsonHandler(response, next));
+});
+
+app.post('/locations/create/', function(request, response, next) {
+	var location_id = request.params.location_id;
+	var data = request.body
+	Location.create_location(data, jsonHandler(response, next));
+});
+
+app.post('/locations/update/:location_id', function(request, response, next) {
+	var location_id = request.params.location_id;
+	var values = {
+		number_of_households: request.body.number_of_households,
+	}
+	Location.update_house_hold_summary(location_id, values, jsonHandler(response, next));
 });
 
 // Splice Points
