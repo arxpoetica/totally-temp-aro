@@ -63,14 +63,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       rightclick: function(feature) {
         var id = feature.getProperty('id');
         $http.get('/locations/house_hold_summary/' + id).success(function(response) {
-          var number_of_households = response.number_of_households || 0;
-          var install_cost_per_hh = response.install_cost_per_hh || 0;
-          var annual_recurring_cost_per_hh = response.annual_recurring_cost_per_hh || 0;
-
-          var position = feature.getGeometry().get();
-          infoWindow.setContent('<p>Number of households: '+number_of_households+'</p>');
-          infoWindow.setPosition(position);
-          infoWindow.open(map);
+          $rootScope.set_selected_location(response);
         });
       },
       selected: function(feature) {

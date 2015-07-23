@@ -66,13 +66,46 @@ Location.get_closest_vertex = function(location_id, callback) {
 Location.get_house_hold_summary = function(location_id, callback) {
 	var sql = multiline(function() {/*
 		SELECT
-			number_of_households, install_cost_per_hh, annual_recurring_cost_per_hh
+			location_id, number_of_households, install_cost_per_hh, annual_recurring_cost_per_hh
 		FROM
 			aro.household_summary
 		WHERE
 			location_id = $1
 	*/});
-	database.findOne(sql, [location_id], callback)
+	var def = {
+		location_id: location_id,
+		number_of_households: 0,
+		install_cost_per_hh: 0,
+		annual_recurring_cost_per_hh: 0,
+	}
+	database.findOne(sql, [location_id], def, callback)
+}
+
+Location.update_house_hold_summary = function(location_id, values, callback) {
+	var params = [
+		values.number_of_households,
+		location_id,
+	];
+	txain(function(callback) {
+		var sql = multiline(function() {/*
+			UPDATE aro.household_summary
+			SET
+				number_of_households = $1
+			WHERE
+				location_id = $2;
+		*/});
+		database.execute(sql, params, callback);
+	})
+	.then(function(rowCount, callback) {
+		if (rowCount > 0) return callback();
+		var sql = multiline(function() {/*
+			INSERT INTO aro.household_summary
+				(number_of_households, location_id)
+			VALUES ($1, $2)
+		*/});
+		database.execute(sql, params, callback);
+	})
+	.end(callback);
 }
 
 Location.total_service_cost = function(location_id, callback) {

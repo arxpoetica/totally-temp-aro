@@ -2,7 +2,7 @@
 
 CREATE TABLE aro.household_summary
 (
-	id bigint,
+	id SERIAL,
 	location_id bigint REFERENCES aro.locations,
 	number_of_households int CHECK (number_of_households >= 0),
 	install_cost_per_hh numeric CHECK (number_of_households >= 0),

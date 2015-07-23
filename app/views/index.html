@@ -49,12 +49,21 @@
           </div>
         </div>
 
-        <hr />
+        <hr>
 
         <div ng-controller="map_tools_controller">
           <div class="tool-toggle">
             <a href="#" ng-click="toggle_tool_visibility()">DBR</a>
           </div>
+        </div>
+      </div>
+
+      <div ng-controller="selected_location_controller">
+        <div ng-show="is_visible" class="tool-location-container">
+          <form>
+            <p><label>Number of households: </label> <input ng-model="location.number_of_households"></input></p>
+            <button type="submit" ng-click="update()">Update</button>
+          </form>
         </div>
       </div>
 
@@ -106,6 +115,7 @@
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
+  <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
   <script src="javascripts/models/selection.js"></script>
 </html>

@@ -31,7 +31,6 @@ app.service('MapLayer', function($http, $rootScope) {
 	MapLayer.prototype.select_feature = function(feature) {
 		var layer = this;
 		var data_layer = this.data_layer;
-		$rootScope.infoWindow.setMap(null);
 
 		if (feature.selected) {
 			feature.selected = false;
@@ -69,14 +68,12 @@ app.service('MapLayer', function($http, $rootScope) {
 	}
 
 	MapLayer.prototype.show = function() {
-		$rootScope.infoWindow.setMap(null);
 		this.load_data();
 		this.data_layer.setMap(map);
 		this.visible = true;
 	}
 
 	MapLayer.prototype.hide = function() {
-		$rootScope.infoWindow.setMap(null);
 		this.data_layer.setMap(null);
 		this.visible = false;
 	}
