@@ -47,6 +47,12 @@ app.get('/county_subdivisions/:statefp', function(request, response, next) {
 	CountySubdivision.find_by_statefp(statefp, jsonHandler(response, next));
 });
 
+// Existing equipment
+app.get('/equipment/:carrier_name', function(request, response, next) {
+	var carrier_name = request.params.carrier_name;
+	models.Equipment.find_by_carrier(carrier_name, jsonHandler(response, next));
+});
+
 // Locations
 app.get('/locations', function(request, response, next) {
 	Location.find_all(jsonHandler(response, next));

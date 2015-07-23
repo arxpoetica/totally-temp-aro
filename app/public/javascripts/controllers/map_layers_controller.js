@@ -151,4 +151,15 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     });
   });
 
+  area_layers['fiber_plant'] = new MapLayer({
+    short_name: 'FB',
+    api_endpoint: '/equipment/VERIZON',
+    style_options: {
+      normal: {
+        strokeColor: 'red',
+        strokeWeight: 2,
+      }
+    },
+  });
+
 });
