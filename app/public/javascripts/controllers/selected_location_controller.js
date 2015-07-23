@@ -8,7 +8,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     if (map_layer.type === 'locations') {
       $scope.is_visible = map_layer.visible;
     }
-  })
+  });
 
   $rootScope.$on('map_Layer_rightclicked_feature', function(event, map_layer, feature) {
     if (map_layer.type === 'locations') {
@@ -17,7 +17,41 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
         set_selected_location(response);
       });
     }
-  })
+  });
+
+  $rootScope.$on('map_rightclick', function(e, event) {
+    if (!$scope.is_visible) return;
+    var lat = event.latLng.lat();
+    var lng = event.latLng.lng();
+    var address = encodeURIComponent(lat+','+lng);
+    $http.get('https://maps.googleapis.com/maps/api/geocode/json?address='+address)
+      .success(function(response) {
+        var results = response.results;
+        var result = results[0];
+        if (!result) return;
+        var data = {
+          address: result.formatted_address,
+          lat: lat,
+          lon: lng,
+        };
+        var components = result.address_components;
+        components.forEach(function(component) {
+          var types = component.types
+          if (types.indexOf('postal_code') >= 0) {
+            data.zipcode = component.long_name;
+          } else if (types.indexOf('locality') >= 0) {
+            data.city = component.long_name.toUpperCase();
+          } else if (types.indexOf('administrative_area_level_1') >= 0) {
+            data.state = component.short_name.toUpperCase();
+          }
+        });
+        $http.post('/locations/create', data)
+          .success(function(response) {
+            console.log('response', response)
+            $rootScope.feature_layers.locations.data_layer.addGeoJson(response);
+          })
+      })
+  });
 
   $scope.update = function() {
     var location = $scope.location

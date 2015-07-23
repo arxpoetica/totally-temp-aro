@@ -81,6 +81,42 @@ Location.get_house_hold_summary = function(location_id, callback) {
 	database.findOne(sql, [location_id], def, callback)
 }
 
+Location.create_location = function(values, callback) {
+	txain(function(callback) {
+		var params = [
+			values.address,
+			values.lat,
+			values.lon,
+			values.city,
+			values.state,
+			values.zipcode,
+			'POINT('+values.lon+' '+values.lat+')',
+		]
+		var sql = multiline(function() {/*
+			INSERT INTO aro.locations
+				(address, lat, lon, city, state, zipcode, geog)
+			VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7))
+			RETURNING id
+		*/});
+		database.findOne(sql, params, callback);
+	})
+	.then(function(row, callback) {
+		var location_id = row.id;
+		var sql = 'SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations where id=$1';
+		database.findOne(sql, [location_id], callback);
+	})
+	.then(function(row, callback) {
+		callback(null, {
+			'type':'Feature',
+			'properties': {
+				'id': row.id,
+			},
+			'geometry': row.geom,
+		});
+	})
+	.end(callback);
+}
+
 Location.update_house_hold_summary = function(location_id, values, callback) {
 	var params = [
 		values.number_of_households,

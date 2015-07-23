@@ -62,6 +62,12 @@ app.get('/locations/house_hold_summary/:location_id', function(request, response
 	Location.get_house_hold_summary(location_id, jsonHandler(response, next));
 });
 
+app.post('/locations/create/', function(request, response, next) {
+	var location_id = request.params.location_id;
+	var data = request.body
+	Location.create_location(data, jsonHandler(response, next));
+});
+
 app.post('/locations/update/:location_id', function(request, response, next) {
 	var location_id = request.params.location_id;
 	var values = {

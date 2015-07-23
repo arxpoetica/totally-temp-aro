@@ -19,29 +19,31 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   /**************
   * WIRECENTERS *
   ***************/
-  $http.get('/wirecenters').success(function(response) {
-    var wirecenters = response;
-    var wirecenter = wirecenters[0];
-    var centroid = wirecenter.centroid;
-    map.setCenter({
-      lat: centroid.coordinates[1],
-      lng: centroid.coordinates[0],
-    });
-    map.setZoom(14);
+  google.maps.event.addDomListener(window, 'load', function() {
+    $http.get('/wirecenters').success(function(response) {
+      var wirecenters = response;
+      var wirecenter = wirecenters[0];
+      var centroid = wirecenter.centroid;
+      map.setCenter({
+        lat: centroid.coordinates[1],
+        lng: centroid.coordinates[0],
+      });
+      map.setZoom(14);
 
-    area_layers['wirecenter'] = new MapLayer({
-      short_name: 'WC',
-      data: {
-        'type': 'Feature',
-        'geometry': wirecenter.geom,
-      },
-      style_options: {
-        normal: {
-          fillColor: 'green',
-          strokeColor: 'green',
-          strokeWeight: 2,
-        }
-      },
+      area_layers['wirecenter'] = new MapLayer({
+        short_name: 'WC',
+        data: {
+          'type': 'Feature',
+          'geometry': wirecenter.geom,
+        },
+        style_options: {
+          normal: {
+            fillColor: 'green',
+            strokeColor: 'green',
+            strokeWeight: 2,
+          }
+        },
+      });
     });
   });
 
@@ -117,6 +119,36 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 2,
       }
     },
+  });
+
+  var events = [
+    'bounds_changed',
+    'center_changed',
+    'click',
+    'dblclick',
+    'drag',
+    'dragend',
+    'dragstart',
+    'heading_changed',
+    'idle',
+    'maptypeid_changed',
+    'mousemove',
+    'mouseout',
+    'mouseover',
+    'projection_changed',
+    'resize',
+    'rightclick',
+    'tilesloaded',
+    'tilt_changed',
+    'zoom_changed',
+  ];
+
+  google.maps.event.addDomListener(window, 'load', function() {
+    events.forEach(function(eventName) {
+      google.maps.event.addListener(map, eventName, function(event) {
+        $rootScope.$broadcast('map_'+eventName, event);
+      });
+    });
   });
 
 });
