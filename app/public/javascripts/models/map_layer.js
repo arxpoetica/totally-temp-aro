@@ -11,6 +11,7 @@ app.service('MapLayer', function($http, $rootScope) {
 		this.data_loaded = false;
 		this.visible = false;
 		this.data = options.data;
+		this.type = options.type;
 
 		this.event_handlers = options.events || {};
 
@@ -25,6 +26,7 @@ app.service('MapLayer', function($http, $rootScope) {
 			if (layer.event_handlers.rightclick) {
 				layer.event_handlers.rightclick(event.feature);
 			}
+			$rootScope.$broadcast('map_Layer_rightclicked_feature', layer, event.feature);
 		})
 	}
 
@@ -38,6 +40,7 @@ app.service('MapLayer', function($http, $rootScope) {
 			if (layer.event_handlers.deselected) {
 				layer.event_handlers.deselected(feature);
 			}
+			$rootScope.$broadcast('map_Layer_selected_feature', layer, feature);
 		} else {
 			feature.selected = true;
 			if (layer.style_options.selected) {
@@ -46,6 +49,7 @@ app.service('MapLayer', function($http, $rootScope) {
 			if (layer.event_handlers.selected) {
 				layer.event_handlers.selected(feature);
 			}
+			$rootScope.$broadcast('map_Layer_deselected_feature', layer, feature);
 		}
 	}
 
@@ -71,11 +75,13 @@ app.service('MapLayer', function($http, $rootScope) {
 		this.load_data();
 		this.data_layer.setMap(map);
 		this.visible = true;
+		$rootScope.$broadcast('map_Layer_changed_visibility', this);
 	}
 
 	MapLayer.prototype.hide = function() {
 		this.data_layer.setMap(null);
 		this.visible = false;
+		$rootScope.$broadcast('map_Layer_changed_visibility', this);
 	}
 
 	MapLayer.prototype.toggle_visibility = function() {

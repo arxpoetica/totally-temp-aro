@@ -49,6 +49,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   * FEATURE LAYERS *
   ******************/
   feature_layers['locations'] = new MapLayer({
+    type: 'locations',
     short_name: 'L',
     api_endpoint: '/locations',
     style_options: {
@@ -60,12 +61,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       }
     },
     events: {
-      rightclick: function(feature) {
-        var id = feature.getProperty('id');
-        $http.get('/locations/house_hold_summary/' + id).success(function(response) {
-          $rootScope.set_selected_location(response);
-        });
-      },
       selected: function(feature) {
         var id = feature.getProperty('id');
         $http.get('/locations/closest_vertex/'+id).success(function(response) {
@@ -82,6 +77,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   });
 
   feature_layers['splice_points'] = new MapLayer({
+    type: 'splice_points',
     short_name: 'SP',
     api_endpoint: '/splice_points/VERIZON',
     style_options: {
