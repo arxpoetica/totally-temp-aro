@@ -45,32 +45,4 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     $scope.route_layer.hide();
   }
 
-  var rectangle;
-  $scope.draw_rectangle = function() {
-    if (rectangle) {
-      rectangle.setMap(null);
-      rectangle = null;
-      return;
-    }
-
-    var latLng = map.getCenter();
-    var radius = google.maps.geometry.spherical.computeDistanceBetween(map.getBounds().getNorthEast(), map.getBounds().getSouthWest()) / 10;
-    var bounds = new google.maps.Circle({center: latLng, radius: radius}).getBounds();
-
-    // Define the rectangle and set its editable property to true.
-    rectangle = new google.maps.Rectangle({
-      bounds: bounds,
-      editable: true,
-      draggable: true
-    });
-
-    rectangle.setMap(map);
-  }
-
-  $scope.select_in_rectangle = function() {
-    rectangle.setMap(null);
-    $rootScope.locations_layer.select_in_bounds(rectangle.getBounds());
-    $rootScope.splice_points_layer.select_in_bounds(rectangle.getBounds());
-  }
-
 }]);

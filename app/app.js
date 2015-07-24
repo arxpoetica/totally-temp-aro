@@ -68,6 +68,11 @@ app.get('/locations/house_hold_summary/:location_id', function(request, response
 	Location.get_house_hold_summary(location_id, jsonHandler(response, next));
 });
 
+app.get('/locations/businesses/:location_id', function(request, response, next) {
+	var location_id = request.params.location_id;
+	Location.show_businesses(location_id, jsonHandler(response, next));
+});
+
 app.post('/locations/create/', function(request, response, next) {
 	var location_id = request.params.location_id;
 	var data = request.body

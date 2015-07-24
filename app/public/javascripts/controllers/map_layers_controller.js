@@ -32,6 +32,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
       area_layers['wirecenter'] = new MapLayer({
         short_name: 'WC',
+        name: 'Wirecenter',
         data: {
           'type': 'Feature',
           'geometry': wirecenter.geom,
@@ -52,6 +53,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   ******************/
   feature_layers['locations'] = new MapLayer({
     type: 'locations',
+    name: 'Locations',
     short_name: 'L',
     api_endpoint: '/locations',
     style_options: {
@@ -67,7 +69,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         var id = feature.getProperty('id');
         $http.get('/locations/closest_vertex/'+id).success(function(response) {
           feature.vertex_id = response.vertex_id;
-          selection.targets.add(feature.vertex_id, feature);
+          if (!feature.vertex_id) return;
+          var id = feature.vertex_id + ':' + feature.getProperty('id')
+          selection.targets.add(id, feature);
         });
       },
       deselected: function(feature) {
@@ -80,6 +84,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
   feature_layers['splice_points'] = new MapLayer({
     type: 'splice_points',
+    name: 'Splice points',
     short_name: 'SP',
     api_endpoint: '/splice_points/VERIZON',
     style_options: {
@@ -106,11 +111,16 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
   });
 
+  $rootScope.$on('selection_tool_rectangle', function(e, bounds) {
+    feature_layers.locations.toggle_features_in_bounds(bounds);
+  });
+
   /**************
   * AREA LAYERS *
   ***************/
   area_layers['county_subdivisions_layer'] = new MapLayer({
     short_name: 'CS',
+    name: 'County subdivisions layer',
     api_endpoint: '/county_subdivisions/53',
     style_options: {
       normal: {
@@ -141,6 +151,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     'tilesloaded',
     'tilt_changed',
     'zoom_changed',
+    'mousedown',
+    'mouseup',
   ];
 
   google.maps.event.addDomListener(window, 'load', function() {
@@ -152,6 +164,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   });
 
   area_layers['fiber_plant'] = new MapLayer({
+    name: 'Fiber plant',
     short_name: 'FB',
     api_endpoint: '/equipment/VERIZON',
     style_options: {

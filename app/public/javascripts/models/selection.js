@@ -8,10 +8,6 @@ app.service('selection', function($rootScope, $http) {
     var arr = [];
     var collection = {};
     collection.add = function(id, feature) {
-      // this is a quick workaround. For targets we need the vertex_id and the location_id
-      if (name === 'targets') {
-        id += ':' + feature.getProperty('id')
-      }
       arr.push(id);
       arr = _.uniq(arr);
     };
