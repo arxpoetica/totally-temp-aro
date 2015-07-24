@@ -145,6 +145,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     'tilesloaded',
     'tilt_changed',
     'zoom_changed',
+    'mousedown',
+    'mouseup',
   ];
 
   google.maps.event.addDomListener(window, 'load', function() {
