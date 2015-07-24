@@ -21,7 +21,7 @@ html, body, #map-canvas {
   width: 300px;
 }
 
-#selected_location_controller {
+#selected_location_controller, #location_show_businesses {
   position: absolute;
   z-index: 1;
   border: 2px solid #eee;

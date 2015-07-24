@@ -144,6 +144,17 @@ Location.update_house_hold_summary = function(location_id, values, callback) {
 	.end(callback);
 }
 
+Location.show_businesses = function(location_id, callback) {
+	var sql = multiline(function() {/*
+		SELECT id, industry_id, name, number_of_employees, install_cost, annual_recurring_cost
+		FROM
+			businesses
+		WHERE
+			location_id = $1;
+	*/});
+	database.query(sql, [location_id], callback);
+}
+
 Location.total_service_cost = function(location_id, callback) {
 	var sql = multiline(function() {/*
 		SELECT

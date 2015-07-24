@@ -95,6 +95,29 @@
       </div>
     </div>
 
+    <div ng-controller="location_show_businesses">
+      <div ng-show="is_visible"  class="panel panel-primary" id="location_show_businesses">
+        <div class="panel-heading">Businesses</div>
+          <div class="panel-body">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th class="text-right"># employees</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="business in businesses">
+                  <td>{{business.name}}</th>
+                  <td class="text-right">{{business.number_of_employees}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div ng-controller="shortest_path_controller">
       <div ng-show="is_visible" class="panel panel-primary" id="shortest_path_controller">
         <div class="panel-heading">Distance Based Route Plan</div>
@@ -174,6 +197,7 @@
   <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/controllers/selection_tools_controller.js"></script>
+  <script src="javascripts/controllers/location_show_businesses.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
   <script src="javascripts/models/selection.js"></script>
   <script src="javascripts/interceptors/http_error_handler.js"></script>

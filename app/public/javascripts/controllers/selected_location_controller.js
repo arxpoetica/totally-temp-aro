@@ -15,7 +15,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   });
 
   $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
-    if (!map_layer.type === 'locations') return;
+    if (map_layer.type !== 'locations') return;
     options.add('Edit location', function(map_layer, feature) {
       var id = feature.getProperty('id');
       $http.get('/locations/house_hold_summary/' + id).success(function(response) {
