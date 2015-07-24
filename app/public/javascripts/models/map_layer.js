@@ -20,7 +20,7 @@ app.service('MapLayer', function($http, $rootScope) {
 		var layer = this;
 
 		data_layer.addListener('click', function(event) {
-			layer.select_feature(event.feature);
+			layer.toggle_feature(event.feature);
 		});
 
 		data_layer.addListener('rightclick', function(event) {
@@ -31,7 +31,7 @@ app.service('MapLayer', function($http, $rootScope) {
 		})
 	}
 
-	MapLayer.prototype.select_feature = function(feature) {
+	MapLayer.prototype.toggle_feature = function(feature) {
 		var layer = this;
 		var data_layer = this.data_layer;
 
@@ -105,13 +105,13 @@ app.service('MapLayer', function($http, $rootScope) {
 		});
 	}
 
-	MapLayer.prototype.select_in_bounds = function(bounds) {
+	MapLayer.prototype.toggle_features_in_bounds = function(bounds) {
 		var layer = this;
 		if (!layer.visible) return;
 		var data = this.data_layer
 		data.forEach(function(feature) {
 			if (bounds.contains(feature.getGeometry().get())) {
-				layer.select_feature(feature);
+				layer.toggle_feature(feature);
 			}
 		});
 	}

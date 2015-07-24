@@ -111,6 +111,10 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
   });
 
+  $rootScope.$on('selection_tool_rectangle', function(e, bounds) {
+    feature_layers.locations.toggle_features_in_bounds(bounds);
+  });
+
   /**************
   * AREA LAYERS *
   ***************/

@@ -43,7 +43,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   }
 
   function mouse_up(event) {
-    $rootScope.feature_layers.locations.select_in_bounds(rectangle.getBounds());
+    $rootScope.$broadcast('selection_tool_rectangle', rectangle.getBounds());
     rectangle.setMap(null);
     rectangle = null;
   }
