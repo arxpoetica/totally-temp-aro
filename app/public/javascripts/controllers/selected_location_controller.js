@@ -4,9 +4,13 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
 
   $scope.location = {};
 
+  $scope.hide = function() {
+    $scope.is_visible = false;
+  }
+
   $rootScope.$on('map_Layer_changed_visibility', function(event, map_layer) {
-    if (map_layer.type === 'locations') {
-      $scope.is_visible = map_layer.visible;
+    if (map_layer.type === 'locations' && !map_layer.visible) {
+      $scope.is_visible = false;
     }
   });
 
@@ -15,6 +19,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     options.add('Edit location', function(map_layer, feature) {
       var id = feature.getProperty('id');
       $http.get('/locations/house_hold_summary/' + id).success(function(response) {
+        $scope.is_visible = true;
         set_selected_location(response);
       });
     });

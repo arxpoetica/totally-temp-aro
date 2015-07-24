@@ -79,7 +79,7 @@
 
     <div ng-controller="selected_location_controller">
       <div ng-show="is_visible"  class="panel panel-primary" id="selected_location_controller">
-        <div class="panel-heading">Locations tool</div>
+        <div class="panel-heading">Edit location</div>
           <div class="panel-body">
             <form ng-show="location.location_id">
               <div class="form-group form-group-sm">
@@ -87,10 +87,8 @@
                 <input type="text" class="form-control" ng-model="location.number_of_households">
               </div>
               <button class="btn btn-sm btn-primary" ng-click="update()" type="button">Update</button>
+              or <a href="#" ng-click="hide()">Cancel</a>
             </form>
-            <div ng-show="!location.location_id">
-              Right click on any existing location to see a summary
-            </div>
           </div>
         </div>
       </div>
