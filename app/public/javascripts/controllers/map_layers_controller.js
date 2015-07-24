@@ -69,7 +69,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         var id = feature.getProperty('id');
         $http.get('/locations/closest_vertex/'+id).success(function(response) {
           feature.vertex_id = response.vertex_id;
-          selection.targets.add(feature.vertex_id, feature);
+          if (!feature.vertex_id) return;
+          var id = feature.vertex_id + ':' + feature.getProperty('id')
+          selection.targets.add(id, feature);
         });
       },
       deselected: function(feature) {
