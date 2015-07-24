@@ -4,10 +4,9 @@
     <title>ARO</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/sweetalert.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry"></script>
     <script>
@@ -19,7 +18,7 @@
         map = new google.maps.Map(document.getElementById('map-canvas'), {
           zoom: 12,
           center: {lat: 47.6097, lng: -122.3331}, // Centroid of Seattle, WA
-          mapTypeId: google.maps.MapTypeId.HYBRID,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
           panControl: false,
           zoomControlOptions: {
             style: google.maps.ZoomControlStyle.SMALL,
@@ -36,95 +35,146 @@
     </script>
   </head>
   <body>
-      <div id="left-col">
-        <div ng-controller="map_layers_controller">
-          <div ng-repeat="(key, layer) in area_layers">
-            <div class="layer-toggle" ng-class="{'layer-toggle-visible': layer.visible}">
-              <a href="#" ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
-            </div>
-          </div>
-          <div ng-repeat="(key, layer) in feature_layers">
-            <div class="layer-toggle" ng-class="{'layer-toggle-visible': layer.visible}">
-              <a href="#" ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
-            </div>
-          </div>
-        </div>
-
-        <hr>
-
-        <div ng-controller="map_tools_controller">
-          <div class="tool-toggle">
-            <a href="#" ng-click="toggle_tool_visibility()">DBR</a>
-          </div>
-        </div>
-      </div>
-
-      <div ng-controller="selected_location_controller">
-        <div ng-show="is_visible" class="tool-location-container">
-          <form ng-show="location.location_id">
-            <p><label>Number of households: </label> <input ng-model="location.number_of_households"></input></p>
-            <button type="submit" ng-click="update()">Update</button>
-          </form>
-          <div ng-show="!location.location_id">
-            Right click on any existing location to see a summary
-          </div>
+    <div id="left-col">
+      <div ng-controller="map_layers_controller">
+        <div ng-repeat="(key, layer) in area_layers">
           <p>
-            Right click on the map to add a new location
+            <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
+              ng-class="{'btn-success active': layer.visible}"
+              ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
+          </p>
+        </div>
+        <hr>
+        <div ng-repeat="(key, layer) in feature_layers">
+          <p>
+            <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
+              ng-class="{'btn-success active': layer.visible}"
+              ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
           </p>
         </div>
       </div>
 
-      <div ng-controller="shortest_path_controller">
-        <div ng-show="is_visible" class="tool-opts-container">
-          <div class="tool-opts-title">Distance Based Route Plan</div>
+      <hr>
 
-          <!-- Route Creation Inputs -->
-          <div class="tool-opts">
-            <div>
-              <label>Sources: </label> {{selection.sources.length()}}
-            </div>
-            <div>
-              <label>Targets: </label> {{selection.targets.length()}}
-            </div>
-            <div>
-              <button class="tool-button" ng-click="draw_rectangle()" type="button">Select drawing rectangle</button>
-            </div>
-            <div>
-              <button class="tool-button" ng-click="select_in_rectangle()" type="button">Add features within rectangle</button>
-            </div>
-            <div>
-              <label>Cable Type:</label>
-              <select>
-                <option value="aerial">Aerial</option>
-                <option value="buried">Buried</option>
-              </select>
-            </div>
-            <div>
-              <button class="tool-button" ng-click="create_route()" type="button">Plan Route</button>
-            </div>
+      <div ng-controller="map_tools_controller">
+        <p>
+          <a href="#" class="btn btn-primary btn-block btn-sm" title="Route planner" data-toggle="tooltip" data-placement="right"
+            ng-click="toggle_tool_visibility()">DBR</a>
+        </p>
+      </div>
+    </div>
 
-            <!-- Route Financials -->
-            <div ng-show="route_layer.visible">
-              <p>Route Financials:</p>
-              <label>Total Cost: </label> {{route_layer.metadata.total_cost | currency}}
-              <button class="tool-button" ng-click="clear_route()" type="button">Clear Route</button>
+    <div ng-controller="selected_location_controller">
+      <div ng-show="is_visible"  class="panel panel-primary" id="selected_location_controller">
+        <div class="panel-heading">Locations tool</div>
+          <div class="panel-body">
+            <form ng-show="location.location_id">
+              <div class="form-group form-group-sm">
+                <label>Number of households</label>
+                <input type="text" class="form-control" ng-model="location.number_of_households">
+              </div>
+              <button class="btn btn-sm btn-primary" ng-click="update()" type="button">Update</button>
+            </form>
+            <div ng-show="!location.location_id">
+              Right click on any existing location to see a summary
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <div ng-controller="shortest_path_controller">
+      <div ng-show="is_visible" class="panel panel-primary" id="shortest_path_controller">
+        <div class="panel-heading">Distance Based Route Plan</div>
+          <div class="panel-body">
+
+            <form class="form-horizontal">
+              <div class="form-group form-group-sm">
+                <label class="col-sm-3 control-label">Sources</label>
+                <div class="col-sm-2">
+                  <p class="form-control-static">{{selection.sources.length()}}</p>
+                </div>
+                <label class="col-sm-offset-2 col-sm-3 control-label">Targets</label>
+                <div class="col-sm-2">
+                  <p class="form-control-static">{{selection.targets.length()}}</p>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <label class="col-sm-3 control-label">Name</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" placeholder="Route name">
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <label class="col-sm-3 control-label">Strands</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" placeholder="Number of fiber strands">
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <label class="col-sm-3 control-label">Cable type</label>
+                <div class="col-sm-9">
+                  <select class="form-control">
+                    <option value="aerial">Aerial</option>
+                    <option value="buried">Buried</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <div class="col-sm-offset-3 col-sm-9">
+                  <button class="btn btn-sm btn-primary" ng-click="create_route()" type="button">Plan Route</button>
+                  <button class="btn btn-sm btn-danger" ng-show="route_layer.visible" ng-click="clear_route()" type="button">Clear Route</button>
+                </div>
+              </div>
+              <div class="form-group form-group-sm" ng-show="route_layer.visible">
+                <label class="col-sm-3 control-label">Total cost</label>
+                <div class="col-sm-9">
+                  <p class="form-control-static">{{route_layer.metadata.total_cost | currency}}</p>
+                </div>
+              </div>
+            </form>
+            <hr>
+            <div class="row">
+              <div class="col-sm-offset-3 col-sm-9">
+                <button class="btn btn-sm btn-default" ng-click="draw_rectangle()" type="button"><span class="glyphicon glyphicon-fullscreen"></span></button>
+                <button class="btn btn-sm btn-default" ng-click="select_in_rectangle()" type="button"><span class="glyphicon glyphicon-plus"></span></button>
+                <small>&larr; Selection tools</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div id="map-canvas"></div>
+
+    <div ng-controller="contextual_menu_controller">
+      <ul class="dropdown-menu" id="contextual_menu">
+        <li ng-repeat="option in options">
+          <a href="#" ng-click="select_option($index)">{{option.label}}</a>
+        </li>
+      </ul>
+    </div>
+
     
   </body>
 
   <!-- Angular controllers and services -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="javascripts/libs/bootstrap.min.js"></script>
   <script src="javascripts/libs/underscore.js"></script>
   <script src="javascripts/libs/sweetalert.min.js"></script>
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
   <script src="javascripts/controllers/selected_location_controller.js"></script>
+  <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
   <script src="javascripts/models/selection.js"></script>
   <script src="javascripts/interceptors/http_error_handler.js"></script>
+  <script>
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
+  </script>
 </html>

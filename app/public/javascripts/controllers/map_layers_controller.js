@@ -32,6 +32,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
       area_layers['wirecenter'] = new MapLayer({
         short_name: 'WC',
+        name: 'Wirecenter',
         data: {
           'type': 'Feature',
           'geometry': wirecenter.geom,
@@ -52,6 +53,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   ******************/
   feature_layers['locations'] = new MapLayer({
     type: 'locations',
+    name: 'Locations',
     short_name: 'L',
     api_endpoint: '/locations',
     style_options: {
@@ -80,6 +82,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
   feature_layers['splice_points'] = new MapLayer({
     type: 'splice_points',
+    name: 'Splice points',
     short_name: 'SP',
     api_endpoint: '/splice_points/VERIZON',
     style_options: {
@@ -111,6 +114,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   ***************/
   area_layers['county_subdivisions_layer'] = new MapLayer({
     short_name: 'CS',
+    name: 'County subdivisions layer',
     api_endpoint: '/county_subdivisions/53',
     style_options: {
       normal: {
@@ -152,6 +156,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   });
 
   area_layers['fiber_plant'] = new MapLayer({
+    name: 'Fiber plant',
     short_name: 'FB',
     api_endpoint: '/equipment/VERIZON',
     style_options: {

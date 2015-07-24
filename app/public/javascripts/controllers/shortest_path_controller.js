@@ -68,9 +68,10 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   }
 
   $scope.select_in_rectangle = function() {
+    if (!rectangle) return;
     rectangle.setMap(null);
-    $rootScope.locations_layer.select_in_bounds(rectangle.getBounds());
-    $rootScope.splice_points_layer.select_in_bounds(rectangle.getBounds());
+    $rootScope.feature_layers.locations.select_in_bounds(rectangle.getBounds());
+    // $rootScope.feature_layers.splice_points.select_in_bounds(rectangle.getBounds());
   }
 
 }]);

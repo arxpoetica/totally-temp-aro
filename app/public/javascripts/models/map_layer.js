@@ -1,6 +1,7 @@
 app.service('MapLayer', function($http, $rootScope) {
 
 	function MapLayer(options) {
+		this.name = options.name;
 		this.short_name = options.short_name;
 		this.api_endpoint = options.api_endpoint;
 		this.style_options = options.style_options;
@@ -26,7 +27,7 @@ app.service('MapLayer', function($http, $rootScope) {
 			if (layer.event_handlers.rightclick) {
 				layer.event_handlers.rightclick(event.feature);
 			}
-			$rootScope.$broadcast('map_Layer_rightclicked_feature', layer, event.feature);
+			$rootScope.$broadcast('map_layer_rightclicked_feature', event, layer);
 		})
 	}
 
