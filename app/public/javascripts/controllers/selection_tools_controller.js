@@ -7,6 +7,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   $scope.available_tools = {
     'SELECTION_TOOL_RECTANGLE': {
       icon: 'glyphicon glyphicon-fullscreen',
+      name: 'Rectangle selection tool',
     },
   };
   var rectangle = null;
@@ -63,13 +64,13 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   });
 
   $rootScope.$on('map_mouseup', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE') {
+    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
       mouse_up(event);
     }
   });
 
   $rootScope.$on('map_mousemove', function(e, event) {
-    if (rectangle) {
+    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
       mouse_move(event);
     }
   });

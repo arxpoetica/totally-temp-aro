@@ -69,7 +69,8 @@
         <div ng-repeat="(key, tool) in available_tools">
           <p>
             <a href="#" class="btn btn-default btn-block btn-sm"
-              ng-class="{'btn-primary active': selected_tool == key}"
+              ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
+              ng-class="{'btn-success active': selected_tool == key}"
               ng-click="toggle_tool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
           </p>
         </div>
