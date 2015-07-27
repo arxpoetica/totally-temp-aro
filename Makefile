@@ -42,7 +42,7 @@ reset_demographics:
 reset_client:
 	etl/reset_client_data.sh
 
-etl_reload_general: reset_tiger reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_infousa etl_geotel etl_aro
+etl_reload_general: reset_tiger reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_infousa etl_geotel etl_demographics etl_aro
 
 etl_reload_client: reset_client etl_client
 
