@@ -10,8 +10,9 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Models
-var models = require('./models')
+var models = require('./models');
 var CountySubdivision = models.CountySubdivision;
+var CensusBlock = models.CensusBlock;
 var Location = models.Location;
 var SplicePoint = models.SplicePoint;
 var RouteOptimizer = models.RouteOptimizer;
@@ -47,6 +48,18 @@ app.get('/county_subdivisions/:statefp', function(request, response, next) {
 	CountySubdivision.find_by_statefp(statefp, jsonHandler(response, next));
 });
 
+// Census Blocks
+app.get('/census_blocks/:statefp', function(request, response, next) {
+	var statefp = request.params.statefp;
+	CensusBlock.find_by_statefp(statefp, jsonHandler(response, next));
+});
+
+app.get('/census_blocks/:statefp/:countyfp', function(request, response, next) {
+	var statefp = request.params.statefp;
+	var countyfp = request.params.countyfp
+	CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, jsonHandler(response, next));
+});
+
 // Existing equipment
 app.get('/equipment/:carrier_name', function(request, response, next) {
 	var carrier_name = request.params.carrier_name;
@@ -63,9 +76,9 @@ app.get('/locations/closest_vertex/:location_id', function(request, response, ne
 	Location.get_closest_vertex(location_id, jsonHandler(response, next));
 });
 
-app.get('/locations/house_hold_summary/:location_id', function(request, response, next) {
+app.get('/locations/households/:location_id', function(request, response, next) {
 	var location_id = request.params.location_id;
-	Location.get_house_hold_summary(location_id, jsonHandler(response, next));
+	Location.get_households(location_id, jsonHandler(response, next));
 });
 
 app.get('/locations/businesses/:location_id', function(request, response, next) {
@@ -84,7 +97,7 @@ app.post('/locations/update/:location_id', function(request, response, next) {
 	var values = {
 		number_of_households: request.body.number_of_households,
 	}
-	Location.update_house_hold_summary(location_id, values, jsonHandler(response, next));
+	Location.update_households(location_id, values, jsonHandler(response, next));
 });
 
 // Splice Points

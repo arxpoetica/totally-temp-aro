@@ -15,6 +15,9 @@ ${PSQL} -a -f $DIR/create_aro_cousub.sql
 # Create aro edges from tiger edges
 ${PSQL} -a -f $DIR/create_aro_edges.sql
 
+# Create aro census_blocks from tiger tabblock
+${PSQL} -a -f $DIR/create_aro_census_blocks.sql
+
 # Create road nodes from tiger edges
 # ${PSQL} -a -f $DIR/create_aro_road_nodes.sql
 
@@ -37,4 +40,4 @@ ${PSQL} -a -f $DIR/create_aro_businesses.sql
 ${PSQL} -a -f $DIR/create_aro_locations.sql
 
 # Create aro.aro_household_summary table. This will reference the locations table
-${PSQL} -a -f $DIR/create_aro_household_summary.sql
+${PSQL} -a -f $DIR/create_aro_households.sql
