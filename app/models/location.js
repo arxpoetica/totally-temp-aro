@@ -63,7 +63,7 @@ Location.get_closest_vertex = function(location_id, callback) {
 //
 // 1. location_id: integer. ex. 1738
 // 2. callback: function to return the information
-Location.get_household_summary = function(location_id, callback) {
+Location.get_households = function(location_id, callback) {
 	var sql = multiline(function() {/*
 		SELECT
 			location_id, number_of_households, install_cost_per_hh, annual_recurring_cost_per_hh

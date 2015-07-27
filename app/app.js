@@ -76,9 +76,9 @@ app.get('/locations/closest_vertex/:location_id', function(request, response, ne
 	Location.get_closest_vertex(location_id, jsonHandler(response, next));
 });
 
-app.get('/locations/household_summary/:location_id', function(request, response, next) {
+app.get('/locations/households/:location_id', function(request, response, next) {
 	var location_id = request.params.location_id;
-	Location.get_household_summary(location_id, jsonHandler(response, next));
+	Location.get_households(location_id, jsonHandler(response, next));
 });
 
 app.get('/locations/businesses/:location_id', function(request, response, next) {
