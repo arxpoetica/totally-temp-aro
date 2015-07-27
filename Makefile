@@ -4,7 +4,10 @@ etl_tiger_cousub:
 etl_tiger_edges:
 	etl/tiger/edges_etl.sh
 
-etl_tiger: etl_tiger_cousub etl_tiger_edges
+etl_tiger_census_blocks:
+	etl/tiger/census_blocks_etl.sh
+
+etl_tiger: etl_tiger_cousub etl_tiger_edges etl_tiger_census_blocks
 
 etl_infousa:
 	etl/infousa/infousa_etl.sh
