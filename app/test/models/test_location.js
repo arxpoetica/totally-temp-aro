@@ -134,14 +134,14 @@ describe('Location', function() {
 	describe('#show_businesses()', function(done) {
 		var location_id = 31367;
 
-		it('should return a list of all the businesses at the location', function() {
+		it('should return a list of all the businesses at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				expect(output.length).to.equal(4);
 				done();
 			});
 		});
 
-		it('should return the id of each business at the location', function() {
+		it('should return the id of each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var number_of_businesses = output.length;
 				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
@@ -150,7 +150,7 @@ describe('Location', function() {
 			});
 		});
 
-		it('should return the industry id of each business at the location', function() {
+		it('should return the industry id of each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var number_of_businesses = output.length;
 				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
@@ -159,7 +159,7 @@ describe('Location', function() {
 			});
 		});
 
-		it('should return the name of each business at the location', function() {
+		it('should return the name of each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var business_to_check = output[0];
 				expect(business_to_check.name).to.equal('AVATAR CONSTRUCTION');
@@ -167,7 +167,7 @@ describe('Location', function() {
 			});
 		});
 
-		it('should return the number of employees at each business at the location', function() {
+		it('should return the number of employees at each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var number_of_businesses = output.length;
 				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
@@ -176,7 +176,7 @@ describe('Location', function() {
 			});
 		});
 
-		it('should return the install cost for each business at the location', function() {
+		it('should return the install cost for each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var number_of_businesses = output.length;
 				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
@@ -185,7 +185,7 @@ describe('Location', function() {
 			});
 		});
 
-		it('should return the annual recurring cost for each business at the location', function() {
+		it('should return the annual recurring cost for each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var number_of_businesses = output.length;
 				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
