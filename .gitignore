@@ -1,6 +1,7 @@
 .vagrant
 .DS_Store
 Vagrantfile
+npm-debug.log
 
 app/node_modules
 
