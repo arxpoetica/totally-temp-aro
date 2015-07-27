@@ -15,6 +15,9 @@ etl_infousa:
 etl_geotel:
 	etl/geotel/geotel_etl.sh
 
+etl_demographics:
+	etl/demographics/demographics_etl.sh
+
 etl_aro:
 	etl/aro/aro_etl.sh
 
@@ -32,6 +35,9 @@ reset_infousa:
 
 reset_geotel:
 	etl/reset_geotel_data.sh
+
+reset_demographics:
+	etl/reset_demographics_data.sh
 
 reset_client:
 	etl/reset_client_data.sh

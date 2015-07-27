@@ -40,4 +40,4 @@ ${PSQL} -a -f $DIR/create_aro_businesses.sql
 ${PSQL} -a -f $DIR/create_aro_locations.sql
 
 # Create aro.aro_household_summary table. This will reference the locations table
-${PSQL} -a -f $DIR/create_aro_household_summary.sql
+${PSQL} -a -f $DIR/create_aro_households.sql
