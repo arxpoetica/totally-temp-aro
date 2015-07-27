@@ -49,11 +49,6 @@ app.get('/county_subdivisions/:statefp', function(request, response, next) {
 });
 
 // Census Blocks
-app.get('/census_blocks/:statefp', function(request, response, next) {
-	var statefp = request.params.statefp;
-	CensusBlock.find_by_statefp(statefp, jsonHandler(response, next));
-});
-
 app.get('/census_blocks/:statefp/:countyfp', function(request, response, next) {
 	var statefp = request.params.statefp;
 	var countyfp = request.params.countyfp
