@@ -121,11 +121,24 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   area_layers['county_subdivisions_layer'] = new MapLayer({
     short_name: 'CS',
     name: 'County subdivisions layer',
-    api_endpoint: '/county_subdivisions/53',
+    api_endpoint: '/county_subdivisions/36',
     style_options: {
       normal: {
         fillColor: 'green',
         strokeColor: 'green',
+        strokeWeight: 2,
+      }
+    },
+  });
+
+  area_layers['census_blocks_layer'] = new MapLayer({
+    short_name: 'CB',
+    name: 'Census Blocks layer',
+    api_endpoint: '/census_blocks/36/061',
+    style_options: {
+      normal: {
+        fillColor: 'blue',
+        strokeColor: 'blue',
         strokeWeight: 2,
       }
     },

@@ -10,8 +10,9 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Models
-var models = require('./models')
+var models = require('./models');
 var CountySubdivision = models.CountySubdivision;
+var CensusBlock = models.CensusBlock;
 var Location = models.Location;
 var SplicePoint = models.SplicePoint;
 var RouteOptimizer = models.RouteOptimizer;
@@ -45,6 +46,18 @@ app.get('/wirecenters', function(request, response, next) {
 app.get('/county_subdivisions/:statefp', function(request, response, next) {
 	var statefp = request.params.statefp;
 	CountySubdivision.find_by_statefp(statefp, jsonHandler(response, next));
+});
+
+// Census Blocks
+app.get('/census_blocks/:statefp', function(request, response, next) {
+	var statefp = request.params.statefp;
+	CensusBlock.find_by_statefp(statefp, jsonHandler(response, next));
+});
+
+app.get('/census_blocks/:statefp/:countyfp', function(request, response, next) {
+	var statefp = request.params.statefp;
+	var countyfp = request.params.countyfp
+	CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, jsonHandler(response, next));
 });
 
 // Existing equipment
