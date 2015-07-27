@@ -70,13 +70,15 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         $http.get('/locations/closest_vertex/'+id).success(function(response) {
           feature.vertex_id = response.vertex_id;
           if (!feature.vertex_id) return;
-          var id = feature.vertex_id + ':' + feature.getProperty('id')
+          var id = feature.vertex_id + ':' + feature.getProperty('id');
           selection.targets.add(id, feature);
         });
       },
       deselected: function(feature) {
         var id = feature.getProperty('id');
-        selection.targets.remove(feature.vertex_id, feature);
+        if (!feature.vertex_id) return;
+        var id = feature.vertex_id + ':' + feature.getProperty('id');
+        selection.targets.remove(id, feature);
         $rootScope.$apply();
       }
     },
