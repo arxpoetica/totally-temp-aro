@@ -76,9 +76,9 @@ app.get('/locations/closest_vertex/:location_id', function(request, response, ne
 	Location.get_closest_vertex(location_id, jsonHandler(response, next));
 });
 
-app.get('/locations/house_hold_summary/:location_id', function(request, response, next) {
+app.get('/locations/household_summary/:location_id', function(request, response, next) {
 	var location_id = request.params.location_id;
-	Location.get_house_hold_summary(location_id, jsonHandler(response, next));
+	Location.get_household_summary(location_id, jsonHandler(response, next));
 });
 
 app.get('/locations/businesses/:location_id', function(request, response, next) {
@@ -97,7 +97,7 @@ app.post('/locations/update/:location_id', function(request, response, next) {
 	var values = {
 		number_of_households: request.body.number_of_households,
 	}
-	Location.update_house_hold_summary(location_id, values, jsonHandler(response, next));
+	Location.update_households(location_id, values, jsonHandler(response, next));
 });
 
 // Splice Points

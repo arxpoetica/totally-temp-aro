@@ -18,7 +18,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     if (map_layer.type !== 'locations') return;
     options.add('Edit location', function(map_layer, feature) {
       var id = feature.getProperty('id');
-      $http.get('/locations/house_hold_summary/' + id).success(function(response) {
+      $http.get('/locations/household_summary/' + id).success(function(response) {
         $scope.is_visible = true;
         set_selected_location(response);
       });
