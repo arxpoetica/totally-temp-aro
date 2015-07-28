@@ -1,7 +1,10 @@
 var pg = require('pg');
-var con_string = process.env.DATABASE_URL || 'postgres://aro:aro@localhost/aro';
 var txain = require('txain');
 var _ = require('underscore')
+
+function con_string() {
+	return process.env.DATABASE_URL || 'postgres://aro:aro@localhost/aro';
+}
 
 function processQuery(sql, params) {
 	var length = params.length;
@@ -32,7 +35,7 @@ exports.query = function(sql, params, callback) {
 		callback = params;
 		params = [];
 	}
-	pg.connect(con_string, function(err, client, done) {
+	pg.connect(con_string(), function(err, client, done) {
 		if (err) return callback(err);
 		sql = processQuery(sql, params);
 		client.query(sql, params, function(err, result) {
@@ -49,7 +52,7 @@ exports.execute = function(sql, params, callback) {
 		callback = params;
 		params = [];
 	}
-	pg.connect(con_string, function(err, client, done) {
+	pg.connect(con_string(), function(err, client, done) {
 		if (err) return callback(err);
 		sql = processQuery(sql, params);
 		client.query(sql, params, function(err, result) {
