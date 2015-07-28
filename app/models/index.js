@@ -5,4 +5,4 @@ exports.Location = require('./location.js');
 exports.SplicePoint = require('./splice_point.js');
 exports.RouteOptimizer = require('./route_optimizer.js');
 exports.Wirecenter = require('./wirecenter.js');
-exports.Equipment = require('./equipment.js');
+exports.Network = require('./network.js');
