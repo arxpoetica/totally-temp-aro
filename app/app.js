@@ -14,8 +14,10 @@ var models = require('./models');
 var CountySubdivision = models.CountySubdivision;
 var CensusBlock = models.CensusBlock;
 var Location = models.Location;
+var Network = models.Network;
 var SplicePoint = models.SplicePoint;
 var RouteOptimizer = models.RouteOptimizer;
+var Wirecenter = models.Wirecenter;
 
 /********
 * VIEWS *
@@ -38,8 +40,9 @@ function jsonHandler(response, next) {
 }
 
 // Wirecenters
-app.get('/wirecenters', function(request, response, next) {
-	models.Wirecenter.find_all(jsonHandler(response, next));
+app.get('/wirecenters/:wirecenter_code', function(request, response, next) {
+	var wirecenter_code = request.params.wirecenter_code;
+	Wirecenter.find_by_wirecenter_code(wirecenter_code, jsonHandler(response, next));
 });
 
 // County Subdivisions
@@ -49,21 +52,10 @@ app.get('/county_subdivisions/:statefp', function(request, response, next) {
 });
 
 // Census Blocks
-app.get('/census_blocks/:statefp', function(request, response, next) {
-	var statefp = request.params.statefp;
-	CensusBlock.find_by_statefp(statefp, jsonHandler(response, next));
-});
-
 app.get('/census_blocks/:statefp/:countyfp', function(request, response, next) {
 	var statefp = request.params.statefp;
 	var countyfp = request.params.countyfp
 	CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, jsonHandler(response, next));
-});
-
-// Existing equipment
-app.get('/equipment/:carrier_name', function(request, response, next) {
-	var carrier_name = request.params.carrier_name;
-	models.Equipment.find_by_carrier(carrier_name, jsonHandler(response, next));
 });
 
 // Locations
@@ -98,6 +90,12 @@ app.post('/locations/update/:location_id', function(request, response, next) {
 		number_of_households: request.body.number_of_households,
 	}
 	Location.update_households(location_id, values, jsonHandler(response, next));
+});
+
+// Network equipment (existing)
+app.get('/network/fiber_plant/:carrier_name', function(request, response, next) {
+	var carrier_name = request.params.carrier_name;
+	Network.view_fiber_plant_for_carrier(carrier_name, jsonHandler(response, next));
 });
 
 // Splice Points

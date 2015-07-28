@@ -24,17 +24,19 @@ RouteOptimizer.shortest_path = function(source, targets, cost_per_meter, callbac
 		JOIN client.graph edge
 			ON edge.id = dk.id3
 	*/});
+
+	var output = {};
 	var target_array = [];
 	var location_array = [];
 	var components = targets.split(',');
+
 	components.forEach(function(component) {
 		var arr = component.split(':');
 		target_array.push(+arr[0]);
 		location_array.push(+arr[1]);
-	})
+	});
+
 	targets = '{' + target_array.join(',') + '}';
-	var output = {};
-	console.log('locations', location_array)
 
 	txain(function(callback) {
 		database.query(sql, [source, target_array], callback);
@@ -48,7 +50,7 @@ RouteOptimizer.shortest_path = function(source, targets, cost_per_meter, callbac
 				},
 				'geometry': row.geom,
 			}
-		})
+		});
 
 		var feature_collection = {
 			'type':'FeatureCollection',

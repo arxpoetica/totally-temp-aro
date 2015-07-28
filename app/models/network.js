@@ -1,4 +1,4 @@
-// Equipment
+// Network
 //
 
 var helpers = require('../helpers');
@@ -6,12 +6,12 @@ var database = helpers.database;
 var txain = require('txain');
 var multiline = require('multiline');
 
-var Equipment = {};
+var Network = {};
 
-// Find equipment for a given carrier
+// View existing fiber plant for a carrier
 //
-// 1. callback: function to return the list of wirecenters
-Equipment.find_by_carrier = function(carrier_name, callback) {
+// 1. callback: function to return the GeoJSON for a wirecenter
+Network.view_fiber_plant_for_carrier = function(carrier_name, callback) {
   var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.fiber_plant WHERE carrier_name = $1';
 
   txain(function(callback) {
@@ -36,4 +36,4 @@ Equipment.find_by_carrier = function(carrier_name, callback) {
   .end(callback)
 };
 
-module.exports = Equipment;
+module.exports = Network;
