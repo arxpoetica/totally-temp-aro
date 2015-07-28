@@ -39,8 +39,9 @@ function jsonHandler(response, next) {
 }
 
 // Wirecenters
-app.get('/wirecenters', function(request, response, next) {
-	models.Wirecenter.find_all(jsonHandler(response, next));
+app.get('/wirecenters/:wirecenter_code', function(request, response, next) {
+	var wirecenter_code = request.params.wirecenter_code;
+	models.Wirecenter.find_by_wirecenter_code(wirecenter_code, jsonHandler(response, next));
 });
 
 // County Subdivisions

@@ -20,7 +20,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   * WIRECENTERS *
   ***************/
   google.maps.event.addDomListener(window, 'load', function() {
-    $http.get('/wirecenters').success(function(response) {
+    $http.get('/wirecenters/NYCMNY79').success(function(response) {
       var wirecenters = response;
       var wirecenter = wirecenters[0];
       var centroid = wirecenter.centroid;
