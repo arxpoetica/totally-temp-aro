@@ -14,6 +14,7 @@ var models = require('./models');
 var CountySubdivision = models.CountySubdivision;
 var CensusBlock = models.CensusBlock;
 var Location = models.Location;
+var Network = models.Network;
 var SplicePoint = models.SplicePoint;
 var RouteOptimizer = models.RouteOptimizer;
 
@@ -55,12 +56,6 @@ app.get('/census_blocks/:statefp/:countyfp', function(request, response, next) {
 	CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, jsonHandler(response, next));
 });
 
-// Existing equipment
-app.get('/equipment/:carrier_name', function(request, response, next) {
-	var carrier_name = request.params.carrier_name;
-	models.Equipment.find_by_carrier(carrier_name, jsonHandler(response, next));
-});
-
 // Locations
 app.get('/locations', function(request, response, next) {
 	Location.find_all(jsonHandler(response, next));
@@ -93,6 +88,12 @@ app.post('/locations/update/:location_id', function(request, response, next) {
 		number_of_households: request.body.number_of_households,
 	}
 	Location.update_households(location_id, values, jsonHandler(response, next));
+});
+
+// Network equipment (existing)
+app.get('/network/fiber_plant/:carrier_name', function(request, response, next) {
+	var carrier_name = request.params.carrier_name;
+	Network.view_fiber_plant_for_carrier(carrier_name, jsonHandler(response, next));
 });
 
 // Splice Points

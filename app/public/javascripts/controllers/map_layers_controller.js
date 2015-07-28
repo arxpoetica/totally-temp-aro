@@ -181,7 +181,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   area_layers['fiber_plant'] = new MapLayer({
     name: 'Fiber plant',
     short_name: 'FB',
-    api_endpoint: '/equipment/VERIZON',
+    api_endpoint: '/network/fiber_plant/VERIZON',
     style_options: {
       normal: {
         strokeColor: 'red',
