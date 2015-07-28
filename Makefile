@@ -24,6 +24,9 @@ etl_aro:
 etl_client:
 	etl/client/client_etl.sh
 
+etl_custom:
+	etl/custom/custom_etl.sh
+
 reset_tiger:
 	etl/reset_tiger_data.sh
 
@@ -42,9 +45,12 @@ reset_demographics:
 reset_client:
 	etl/reset_client_data.sh
 
+reset_custom:
+	etl/reset_custom_data.sh
+
 etl_reload_general: reset_tiger reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_infousa etl_geotel etl_demographics etl_aro
 
-etl_reload_client: reset_client etl_client
+etl_reload_client: reset_client reset_custom etl_client etl_custom
 
 etl_reload_all: etl_reload_general etl_reload_client
 

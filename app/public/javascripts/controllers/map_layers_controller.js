@@ -97,20 +97,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         icon: '/images/map_icons/splice_point_selected.png',
       }
     },
-    events: {
-      selected: function(feature) {
-        var id = feature.getProperty('id');
-        $http.get('/splice_points/closest_vertex/'+id).success(function(response) {
-          feature.vertex_id = response.vertex_id;
-          selection.sources.add(feature.vertex_id, feature);
-        });
-      },
-      deselected: function(feature) {
-        var id = feature.getProperty('id');
-        selection.sources.remove(feature.vertex_id, feature);
-        $rootScope.$apply();
-      }
-    },
   });
 
   $rootScope.$on('selection_tool_rectangle', function(e, bounds) {

@@ -1,4 +1,4 @@
-app.service('MapLayer', function($http, $rootScope) {
+app.service('MapLayer', function($http, $rootScope, selection) {
 
 	function MapLayer(options) {
 		this.name = options.name;
@@ -14,43 +14,69 @@ app.service('MapLayer', function($http, $rootScope) {
 		this.data = options.data;
 		this.type = options.type;
 
-		this.event_handlers = options.events || {};
+		if (this.type === 'locations') {
+			collection = selection.targets;
+		} else if (this.type === 'splice_points') {
+			collection = selection.sources;
+		}
+		this.collection = collection;
 
 		var data_layer = this.data_layer;
 		var layer = this;
 
 		data_layer.addListener('click', function(event) {
-			layer.toggle_feature(event.feature);
+			var changes = create_empty_changes(layer);
+			layer.toggle_feature(event.feature, changes);
+			broadcast_changes(layer, changes);
 		});
 
 		data_layer.addListener('rightclick', function(event) {
-			if (layer.event_handlers.rightclick) {
-				layer.event_handlers.rightclick(event.feature);
-			}
 			$rootScope.$broadcast('map_layer_rightclicked_feature', event, layer);
 		})
 	}
 
-	MapLayer.prototype.toggle_feature = function(feature) {
-		var layer = this;
+	function create_empty_changes(layer) {
+		var type = layer.type
+		var changes = { insertions: {}, deletions: {} };
+		changes.insertions[type] = [];
+		changes.deletions[type] = [];
+		return changes;
+	}
+
+	function broadcast_changes(layer, changes) {
+		$rootScope.$broadcast('map_Layer_changed_selection', layer, changes);
+	}
+
+	MapLayer.prototype.select_feature = function(feature) {
+		feature.selected = true;
+		if (this.style_options.selected) {
+			this.data_layer.overrideStyle(feature, this.style_options.selected);
+		}
+	};
+
+	MapLayer.prototype.deselect_feature = function(feature) {
+		feature.selected = false;
+		if (this.style_options.selected) {
+			this.data_layer.overrideStyle(feature, this.style_options.normal);
+		}
+	};
+
+	MapLayer.prototype.toggle_feature = function(feature, changes) {
 		var data_layer = this.data_layer;
+		var id = feature.getProperty('id');
 
 		if (feature.selected) {
-			feature.selected = false;
-			data_layer.overrideStyle(feature, layer.style_options.normal);
-			if (layer.event_handlers.deselected) {
-				layer.event_handlers.deselected(feature);
+			this.deselect_feature(feature);
+			if (this.collection) {
+				this.collection.remove(id);
 			}
-			$rootScope.$broadcast('map_Layer_selected_feature', layer, feature);
+			changes.deletions[this.type].push(id);
 		} else {
-			feature.selected = true;
-			if (layer.style_options.selected) {
-				data_layer.overrideStyle(feature, layer.style_options.selected);
+			this.select_feature(feature);
+			if (this.collection) {
+				this.collection.add(id);
 			}
-			if (layer.event_handlers.selected) {
-				layer.event_handlers.selected(feature);
-			}
-			$rootScope.$broadcast('map_Layer_deselected_feature', layer, feature);
+			changes.insertions[this.type].push(id);
 		}
 	}
 
@@ -68,6 +94,22 @@ app.service('MapLayer', function($http, $rootScope) {
 				layer.data_layer.addGeoJson(data.feature_collection);
 				layer.metadata = data.metadata;
 				layer.data_loaded = true;
+
+				layer.sync_selection();
+			});
+		}
+	}
+
+	MapLayer.prototype.sync_selection = function() {
+		var layer = this;
+		var collection = this.collection;
+
+		if (collection) {
+			layer.data_layer.forEach(function(feature) {
+				var id = feature.getProperty('id');
+				if (collection.contains(id)) {
+					layer.select_feature(feature);
+				}
 			});
 		}
 	}
@@ -90,7 +132,7 @@ app.service('MapLayer', function($http, $rootScope) {
 	}
 
 	MapLayer.prototype.clear_data = function() {
-		var data = this.data_layer
+		var data = this.data_layer;
 		data.forEach(function(feature) {
 			data.remove(feature);
 		});
@@ -108,12 +150,15 @@ app.service('MapLayer', function($http, $rootScope) {
 	MapLayer.prototype.toggle_features_in_bounds = function(bounds) {
 		var layer = this;
 		if (!layer.visible) return;
-		var data = this.data_layer
+		var data = this.data_layer;
+		var changes = create_empty_changes(layer);
+
 		data.forEach(function(feature) {
 			if (bounds.contains(feature.getGeometry().get())) {
-				layer.toggle_feature(feature);
+				layer.toggle_feature(feature, changes);
 			}
 		});
+		broadcast_changes(layer, changes);
 	}
 
 	MapLayer.prototype.remove = function() {

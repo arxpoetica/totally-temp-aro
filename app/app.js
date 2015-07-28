@@ -117,6 +117,42 @@ app.get('/route_optimizer/shortest_path/:source_id/:target_ids/:cost_per_meter',
 	RouteOptimizer.shortest_path(source_id, target_ids, cost_per_meter, jsonHandler(response, next));
 });
 
+// Find all created routes
+app.get('/route_optimizer/find_all', function(request, response, next) {
+	RouteOptimizer.find_all(jsonHandler(response, next));
+});
+
+// Create a new empty route
+app.post('/route_optimizer/create', function(request, response, next) {
+	RouteOptimizer.create_route(jsonHandler(response, next));
+});
+
+// Return data of an existing route
+app.get('/route_optimizer/:route_id', function(request, response, next) {
+	var route_id = request.params.route_id;
+	RouteOptimizer.find_route(route_id, jsonHandler(response, next));
+});
+
+// Edits nodes of an existing route
+app.post('/route_optimizer/:route_id/edit', function(request, response, next) {
+	var route_id = request.params.route_id;
+	var changes = request.body;
+	RouteOptimizer.edit_route(route_id, changes, jsonHandler(response, next));
+});
+
+// Edits basic information of an existing route
+app.post('/route_optimizer/:route_id/save', function(request, response, next) {
+	var route_id = request.params.route_id;
+	var changes = request.body;
+	RouteOptimizer.save_route(route_id, changes, jsonHandler(response, next));
+});
+
+// Delete an existing route
+app.post('/route_optimizer/:route_id/delete', function(request, response, next) {
+	var route_id = request.params.route_id;
+	RouteOptimizer.delete_route(route_id, jsonHandler(response, next));
+});
+
 // For testing the error handler
 app.get('/error', function(request, response, next) {
 	next(new Error('test'))

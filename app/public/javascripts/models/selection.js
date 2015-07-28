@@ -23,11 +23,8 @@ app.service('selection', function($rootScope, $http) {
     collection.length = function() {
       return arr.length;
     }
-    collection.join = function(str) {
-      return arr.join(',')
-    }
-    collection.first = function() {
-      return arr[0];
+    collection.contains = function(id) {
+      return arr.indexOf(id) >= 0;
     }
     selection[name] = collection;
   }
@@ -46,7 +43,16 @@ app.service('selection', function($rootScope, $http) {
         feature_layers[key].revert_styles();
       }
     }
-  }
+  };
+
+  selection.sync_selection = function() {
+    var feature_layers = $rootScope.feature_layers;
+    for (var key in feature_layers) {
+      if (feature_layers.hasOwnProperty(key)) {
+        feature_layers[key].sync_selection();
+      }
+    }
+  };
 
   return selection;
 
