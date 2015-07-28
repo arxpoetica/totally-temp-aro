@@ -1,5 +1,4 @@
-function GeoJsonHelper() {
-}
+var GeoJsonHelper = {};
 
 // Builds a GeoJSON FeatureCollection with an array of features inside it.
 //
@@ -12,7 +11,7 @@ GeoJsonHelper.build_feature_collection = function(data, properties) {
 			features[i] = {
 				'type':'Feature',
 				'properties': properties,
-				'geometry': data[i].geom			
+				'geometry': data[i].geom,
 			}
 		}
 

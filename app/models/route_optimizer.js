@@ -16,9 +16,9 @@ RouteOptimizer.find_route = function(route_id, callback) {
   var output = {};
 
   txain(function(callback) {
-    var sql = multiline(function() {/*
+    var sql = multiline(function() {;/*
       SELECT edge.id, edge.edge_length, ST_AsGeoJSON(edge.geom)::json AS geom
-      FROM route_edges
+      FROM custom.route_edges
       JOIN client.graph edge
         ON edge.id = route_edges.edge_id
       WHERE route_edges.route_id=$1
@@ -52,18 +52,18 @@ RouteOptimizer.find_route = function(route_id, callback) {
     callback();
   })
   .then(function(output, callback) {
-    var sql = multiline(function() {/*
+    var sql = multiline(function() {;/*
       SELECT location_id AS id
-      FROM route_targets
+      FROM custom.route_targets
       WHERE route_id=$1
     */});
     database.query(sql, [route_id], callback);
   })
   .then(function(targets, callback) {
     output.metadata.targets = targets.map(function(row) { return +row.id });
-    var sql = multiline(function() {/*
+    var sql = multiline(function() {;/*
       SELECT splice_point_id AS id
-      FROM route_sources
+      FROM custom.route_sources
       WHERE route_id=$1
     */});
     database.query(sql, [route_id], callback);
@@ -77,23 +77,23 @@ RouteOptimizer.find_route = function(route_id, callback) {
 
 RouteOptimizer.recalculate_route = function(route_id, callback) {
   txain(function(callback) {
-    var sql = 'DELETE FROM route_edges WHERE route_id=$1'
+    var sql = 'DELETE FROM custom.route_edges WHERE route_id=$1'
     database.query(sql, [route_id], callback);
   })
   .then(function(callback) {
-    var sql = multiline(function() {/*
+    var sql = multiline(function() {;/*
       WITH edges AS (
         SELECT DISTINCT edge_id FROM
           (SELECT id as edge_id
               FROM
                 pgr_kdijkstraPath('SELECT id, source::integer, target::integer, edge_length::double precision AS cost FROM client.graph',
-                  (select vertex_id from route_sources where route_id=$1 limit 1)::integer,
-                  array(select vertex_id from route_targets where route_id=$1)::integer[],
+                  (select vertex_id from custom.route_sources where route_id=$1 limit 1)::integer,
+                  array(select vertex_id from custom.route_targets where route_id=$1)::integer[],
                   false, false) AS dk
               JOIN client.graph edge
                 ON edge.id = dk.id3) as edge_id
       )
-      INSERT INTO route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
+      INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
     */});
     database.execute(sql, [route_id], function(err) {
       if (err && err.message.indexOf('One of the target vertices was not found or several targets are the same') >= 0) return callback(); // ignore this error
@@ -127,25 +127,25 @@ function total_cost_of_route(route, cost_per_meter) {
 };
 
 RouteOptimizer.find_all = function(callback) {
-  var sql = 'SELECT id, name, number_of_strands FROM route;';
+  var sql = 'SELECT id, name, number_of_strands FROM custom.route;';
   database.query(sql, callback);
 };
 
 RouteOptimizer.create_route = function(callback) {
   txain(function(callback) {
-    var sql = 'INSERT INTO route (name) VALUES ($1) RETURNING id;';
+    var sql = 'INSERT INTO custom.route (name) VALUES ($1) RETURNING id;';
     database.findOne(sql, ['Untitled route'], callback);
   })
   .then(function(row, callback) {
-    var sql = 'SELECT id, name, number_of_strands FROM route WHERE id=$1;';
+    var sql = 'SELECT id, name, number_of_strands FROM custom.route WHERE id=$1;';
     database.findOne(sql, [row.id], callback);
   })
   .end(callback);
 };
 
 RouteOptimizer.delete_route = function(route_id, callback) {
-  var sql = multiline(function() {/*
-    DELETE FROM route WHERE id=$1;
+  var sql = multiline(function() {;/*
+    DELETE FROM custom.route WHERE id=$1;
   */});
   database.execute(sql, [route_id], callback);
 };
@@ -161,7 +161,7 @@ RouteOptimizer.save_route = function(route_id, data, callback) {
   if (fields.length === 0) return callback();
 
   params.push(route_id);
-  var sql = 'UPDATE route SET '+fields.join(', ')+' WHERE id=$'+params.length;
+  var sql = 'UPDATE custom.route SET '+fields.join(', ')+' WHERE id=$'+params.length;
   database.execute(sql, params, callback);
 };
 
@@ -189,16 +189,16 @@ function add_sources(route_id, splice_point_ids, callback) {
 
   txain(function(callback) {
     // avoid duplicates
-    var sql = multiline(function() {/*
-      DELETE FROM route_sources
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_sources
       WHERE route_id=$1 AND splice_point_id IN ($2)
     */});
     database.execute(sql, [route_id, splice_point_ids], callback);
   })
   .then(function(callback) {
     // calculate closest vertex
-    var sql = multiline(function() {/*
-      INSERT INTO route_sources (vertex_id, splice_point_id, route_id)
+    var sql = multiline(function() {;/*
+      INSERT INTO custom.route_sources (vertex_id, splice_point_id, route_id)
       (SELECT
         vertex.id AS vertex_id, splice_points.id, $2
       FROM
@@ -218,16 +218,16 @@ function add_targets(route_id, location_ids, callback) {
 
   txain(function(callback) {
     // avoid duplicates
-    var sql = multiline(function() {/*
-      DELETE FROM route_targets
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_targets
       WHERE route_id=$1 AND location_id IN ($2)
     */});
     database.execute(sql, [route_id, location_ids], callback);
   })
   .then(function(callback) {
     // calculate closest vertex
-    var sql = multiline(function() {/*
-      INSERT INTO route_targets (vertex_id, location_id, route_id)
+    var sql = multiline(function() {;/*
+      INSERT INTO custom.route_targets (vertex_id, location_id, route_id)
       (SELECT
         vertex.id AS vertex_id, locations.id, $2 AS route_id
       FROM
@@ -247,8 +247,8 @@ function delete_sources(route_id, splice_point_ids, callback) {
 
   txain(splice_point_ids)
   .each(function(splice_point_id, callback) {
-    var sql = multiline(function() {/*
-      DELETE FROM route_sources
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_sources
       WHERE route_id=$1 AND splice_point_id=$2
     */});
     database.execute(sql, [route_id, splice_point_id], callback);
@@ -264,8 +264,8 @@ function delete_targets(route_id, location_ids, callback) {
 
   txain(location_ids)
   .each(function(location_id, callback) {
-    var sql = multiline(function() {/*
-      DELETE FROM route_targets
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_targets
       WHERE route_id=$1 AND location_id=$2
     */});
     database.execute(sql, [route_id, location_id], callback);

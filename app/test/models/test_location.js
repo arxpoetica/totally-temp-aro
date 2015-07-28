@@ -205,6 +205,19 @@ describe('Location', function() {
 		});
 	});
 
+	describe('#update_households()', function() {
+
+		it('should update the number of households', function(done) {
+			var values = {
+				number_of_households: 100,
+			};
+			Location.update_households(31367, values, function(err, output) {
+				expect(!!output).to.be.true;
+				done();
+			});
+		});
+	});
+
 });
 
 				
