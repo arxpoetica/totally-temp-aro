@@ -95,7 +95,10 @@ RouteOptimizer.recalculate_route = function(route_id, callback) {
       )
       INSERT INTO route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
     */});
-    database.query(sql, [route_id], callback);
+    database.execute(sql, [route_id], function(err) {
+      if (err && err.message.indexOf('One of the target vertices was not found or several targets are the same') >= 0) return callback(); // ignore this error
+      return callback(err);
+    });
   })
   .end(callback);
 };
