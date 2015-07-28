@@ -6,4 +6,5 @@ npm-debug.log
 app/node_modules
 
 etl/tiger_cousub/shapefiles
-etl/tiger_edges/shapefiles
+
+app/coverage

@@ -4,7 +4,8 @@
   "description": "Network infrastructure planning application",
   "main": "app.js",
   "scripts": {
-    "test": "mocha --recursive"
+    "test": "mocha --recursive",
+    "test-cov": "istanbul --preserve-comments cover _mocha -- --recursive -R spec"
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
@@ -17,5 +18,8 @@
     "pg": "~4.4.0",
     "txain": "^0.4.0",
     "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "istanbul": "^0.3.17"
   }
 }

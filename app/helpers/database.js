@@ -36,7 +36,7 @@ exports.query = function(sql, params, callback) {
 		if (err) return callback(err);
 		sql = processQuery(sql, params);
 		client.query(sql, params, function(err, result) {
-			if (err) console.log('sql failed', sql, params)
+			if (err) console.log('sql failed', sql, params, err.message);
 			done();
 			if (err) return callback(err);
 			callback(null, result.rows);
@@ -53,7 +53,7 @@ exports.execute = function(sql, params, callback) {
 		if (err) return callback(err);
 		sql = processQuery(sql, params);
 		client.query(sql, params, function(err, result) {
-			if (err) console.log('sql failed', sql, params)
+			if (err) console.log('sql failed', sql, params, err.message);
 			done();
 			if (err) return callback(err);
 			callback(null, result.rowCount);

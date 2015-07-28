@@ -4,71 +4,92 @@ var RouteOptimizer = require('../../models/route_optimizer.js');
 describe('RouteOptimizer', function() {
 
 	describe('#shortest_path()', function() {
-		var source = '13206';
-		var target = '13693:39169305';
+		var source = '1';
+		var target = '40103873';
 		var cost_multiplier = 1.5;
+		var route_id;
 
-		it('should return a feature collection', function(done) {
+		it('should create a new empty route', function(done) {
+			RouteOptimizer.create_route(function(err, route) {
+				expect(route).to.have.property('id');
+				expect(route).to.have.property('name');
+				route_id = route.id;
+				done();
+			});
+		});
+
+		it('should should find all routes', function(done) {
+			RouteOptimizer.find_all(function(err, routes) {
+				expect(routes.length > 0).to.equal(true);
+				var route = routes[0];
+				expect(route).to.have.property('id');
+				expect(route).to.have.property('name');
+				done();
+			});
+		});
+
+		it('should edit basic properties of an existing routes', function(done) {
+			var data = {
+				name: 'Other name',
+			};
+			RouteOptimizer.save_route(route_id, data, function(err, output) {
+				expect(!!output).to.be.equal(true);
+				done();
+			});
+		});
+
+		it('should edit the sources and targets of an existing route', function(done) {
+			var changes = {
+				insertions: {
+					locations: [target],
+					splice_points: [source],
+				},
+			};
+			RouteOptimizer.edit_route(route_id, changes, function(err, route) {
+				expect(route).to.have.property('metadata');
+				expect(route).to.have.property('feature_collection');
+				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
+				expect(route.feature_collection.features.length > 0).to.be.equal(true);
+				done();
+			});
+		});
+
+		it('should return the information of an existing route', function(done) {
+			RouteOptimizer.find_route(route_id, function(err, route) {
+				expect(route).to.have.property('metadata');
+				expect(route).to.have.property('feature_collection');
+				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
+				expect(route.feature_collection.features.length > 0).to.be.equal(true);
+				done();
+			});
+		});
+
+		it('should delete the sources and targets of an existing route', function(done) {
+			var changes = {
+				deletions: {
+					locations: [target],
+					splice_points: [source],
+				},
+			};
+			RouteOptimizer.edit_route(route_id, changes, function(err, route) {
+				expect(route).to.have.property('metadata');
+				expect(route).to.have.property('feature_collection');
+				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
+				expect(route.feature_collection.features.length).to.be.equal(0);
+				done();
+			});
+		});
+
+		it('should delete an existing route', function(done) {
+			RouteOptimizer.delete_route(route_id, function(err, output) {
+				expect(!!output).to.be.equal(true);
+				done();
+			});
+		});
+
+		it.skip('should return a feature collection', function(done) {
 			RouteOptimizer.shortest_path(source, target, cost_multiplier, function(err, output) {
 				expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
-				done();
-			});
-		});
-
-		it('should return cost metadata for the route', function(done) {
-			RouteOptimizer.shortest_path(source, target, cost_multiplier, function(err, output) {
-				expect(output.metadata).to.have.keys('total_cost');
-				done();
-			});
-		});
-
-		it('should return a collection of LineStrings', function(done) {
-			RouteOptimizer.shortest_path(source, target, cost_multiplier, function(err, output) {
-				var first_feature = output.feature_collection.features[0];
-				expect(first_feature.geometry.type).to.equal('LineString');
-				done();
-			});
-		});
-
-		it('should have nonzero coordinates in its geometry', function(done) {
-			RouteOptimizer.shortest_path(source, target, cost_multiplier, function(err, output) {
-				var first_feature = output.feature_collection.features[0];
-				expect(first_feature.geometry.coordinates[0][0]).to.not.equal(0);
-				expect(first_feature.geometry.coordinates[0][1]).to.not.equal(0);
-				done();
-			});
-		});
-
-		// This is a shitty test. We need to rigoursly test the shortest path, but this is a substitute for that now.
-		it('should have multiple segments in the shortest path from source to target', function(done) {
-			RouteOptimizer.shortest_path(source, target, cost_multiplier, function(err, output) {
-				expect(output.feature_collection.features.length).to.be.above(5);
-				done();
-			});
-		});
-
-		it('should inlude the length in meters of each segment in the route', function(done) {
-			RouteOptimizer.shortest_path(source, target, cost_multiplier, function(err, output) {
-				var first_feature = output.feature_collection.features[0];
-				expect(first_feature.properties.length_in_meters).to.be.above(0);
-				done();
-			});
-		});
-
-		it('should include the total cost of the route', function(done) {
-			RouteOptimizer.shortest_path(source, target, cost_multiplier, function(err, output) {
-				expect(output.metadata.total_cost).to.be.above(0);
-				done();
-			});
-		});
-
-		// Yet another shitty test.
-		it('should find multiple shortest paths from a single source to multiple targets', function(done) {
-			var source_id = '13206';
-			var target_ids = '13693:39169305,13344:36791651,3887:478586';
-			RouteOptimizer.shortest_path(source_id, target_ids, cost_multiplier, function(err, output) {
-				var first_feature = output.feature_collection.features[0];
-				expect(first_feature.geometry).to.have.property('type', 'LineString');
 				done();
 			});
 		});

@@ -46,7 +46,7 @@ Location.find_all = function(callback) {
 // 1. location_id: integer. ex. 1738
 // 2. callback: function to return a GeoJSON object
 Location.get_closest_vertex = function(location_id, callback) {
-	var sql = multiline(function() {/*
+	var sql = multiline(function() {;/*
 		SELECT
 			vertex.id AS vertex_id
 		FROM
@@ -64,7 +64,7 @@ Location.get_closest_vertex = function(location_id, callback) {
 // 1. location_id: integer. ex. 1738
 // 2. callback: function to return the information
 Location.get_households = function(location_id, callback) {
-	var sql = multiline(function() {/*
+	var sql = multiline(function() {;/*
 		SELECT
 			location_id, number_of_households, install_cost_per_hh, annual_recurring_cost_per_hh
 		FROM
@@ -92,7 +92,7 @@ Location.create_location = function(values, callback) {
 			values.zipcode,
 			'POINT('+values.lon+' '+values.lat+')',
 		]
-		var sql = multiline(function() {/*
+		var sql = multiline(function() {;/*
 			INSERT INTO aro.locations
 				(address, lat, lon, city, state, zipcode, geog)
 			VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7))
@@ -123,7 +123,7 @@ Location.update_households = function(location_id, values, callback) {
 		location_id,
 	];
 	txain(function(callback) {
-		var sql = multiline(function() {/*
+		var sql = multiline(function() {;/*
 			UPDATE aro.households
 			SET
 				number_of_households = $1
@@ -133,8 +133,8 @@ Location.update_households = function(location_id, values, callback) {
 		database.execute(sql, params, callback);
 	})
 	.then(function(rowCount, callback) {
-		if (rowCount > 0) return callback();
-		var sql = multiline(function() {/*
+		if (rowCount > 0) return callback(null, 1);
+		var sql = multiline(function() {;/*
 			INSERT INTO aro.households
 				(number_of_households, location_id)
 			VALUES ($1, $2)
@@ -145,7 +145,7 @@ Location.update_households = function(location_id, values, callback) {
 }
 
 Location.show_businesses = function(location_id, callback) {
-	var sql = multiline(function() {/*
+	var sql = multiline(function() {;/*
 		SELECT id, industry_id, name, number_of_employees, install_cost, annual_recurring_cost
 		FROM
 			businesses
@@ -156,7 +156,7 @@ Location.show_businesses = function(location_id, callback) {
 }
 
 Location.total_service_cost = function(location_id, callback) {
-	var sql = multiline(function() {/*
+	var sql = multiline(function() {;/*
 		SELECT
 			locations.entry_fee, sum(businesses.install_cost) total_install_costs
 		FROM

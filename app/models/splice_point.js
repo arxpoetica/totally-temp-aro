@@ -49,7 +49,7 @@ SplicePoint.find_by_carrier = function(carrier_name, callback) {
 // 1. splice_point_id: integer. ex. 1738
 // 2. callback: function to return a GeoJSON object
 SplicePoint.get_closest_vertex = function(splice_point_id, callback) {
-	var sql = multiline(function() {/*
+	var sql = multiline(function() {;/*
 		SELECT
 			vertex.id AS vertex_id
 		FROM
