@@ -17,6 +17,7 @@ var Location = models.Location;
 var Network = models.Network;
 var SplicePoint = models.SplicePoint;
 var RouteOptimizer = models.RouteOptimizer;
+var Wirecenter = models.Wirecenter;
 
 /********
 * VIEWS *
@@ -41,7 +42,7 @@ function jsonHandler(response, next) {
 // Wirecenters
 app.get('/wirecenters/:wirecenter_code', function(request, response, next) {
 	var wirecenter_code = request.params.wirecenter_code;
-	models.Wirecenter.find_by_wirecenter_code(wirecenter_code, jsonHandler(response, next));
+	Wirecenter.find_by_wirecenter_code(wirecenter_code, jsonHandler(response, next));
 });
 
 // County Subdivisions
