@@ -2,7 +2,8 @@ CREATE TABLE aro.splice_points
 (
 	id serial,
 	carrier_name varchar,
-	geog geography('POINT', 4326)
+	geog geography('POINT', 4326),
+	CONSTRAINT splice_points_pkey PRIMARY KEY (id)
 );
 
 SELECT AddGeometryColumn('aro', 'splice_points', 'geom', 4326, 'POINT', 2);

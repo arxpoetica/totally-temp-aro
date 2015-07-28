@@ -38,3 +38,15 @@ ${PSQL} -a -f $DIR/create_aro_locations.sql
 
 # Create aro.aro_household_summary table. This will reference the locations table
 ${PSQL} -a -f $DIR/create_aro_household_summary.sql
+
+# Create aro.route table
+${PSQL} -a -f $DIR/create_aro_route.sql
+
+# Create aro.route_sources table
+${PSQL} -a -f $DIR/create_aro_route_sources.sql
+
+# Create aro.route_targets table
+${PSQL} -a -f $DIR/create_aro_route_targets.sql
+
+# Create aro.route_edges table
+${PSQL} -a -f $DIR/create_aro_route_edges.sql
