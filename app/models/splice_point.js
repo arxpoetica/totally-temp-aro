@@ -43,23 +43,4 @@ SplicePoint.find_by_carrier = function(carrier_name, callback) {
 	.end(callback)
 };
 
-// Get the closest vertex to a Splice Point.
-// This is used when selecting a splice point to be the source in a route plan, since it overlaps with a vertex
-//
-// 1. splice_point_id: integer. ex. 1738
-// 2. callback: function to return a GeoJSON object
-SplicePoint.get_closest_vertex = function(splice_point_id, callback) {
-	var sql = multiline(function() {;/*
-		SELECT
-			vertex.id AS vertex_id
-		FROM
-			client.graph_vertices_pgr AS vertex
-		JOIN aro.splice_points splice_points
-			ON splice_points.geom && vertex.the_geom
-		WHERE
-			splice_points.id = $1
-	*/});
-	database.findOne(sql, [splice_point_id], callback);
-}
-
 module.exports = SplicePoint;

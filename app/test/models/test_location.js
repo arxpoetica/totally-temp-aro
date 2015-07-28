@@ -44,46 +44,20 @@ describe('Location', function() {
 
 	});
 
-	describe('#get_closest_vertex()', function() {
-
-		it('should return the id of the closest vertex in the graph', function(done) {
-			Location.get_closest_vertex(3756, function(err, output) {
-				expect(output.vertex_id).to.equal('7749');
-				done();
-			});
-		});
-	});
-
-	describe('#get_households()', function() {
+	describe('#show_information()', function() {
 		var location_id = 1399894; 
 
-		it('should return the location id passed in', function(done) {
-			Location.get_households(location_id, function(err, output) {
+		it('should return information of the given location', function(done) {
+			Location.show_information(location_id, function(err, output) {
 				expect(output.location_id).to.equal('1399894');
-				done();
-			});
-		});
-
-		it('should return the number of households', function(done) {
-			Location.get_households(location_id, function(err, output) {
 				expect(output.number_of_households).to.equal(23);
+				expect(output.number_of_businesses).to.equal(1);
+				expect(output.business_install_costs).to.be.above(0);
+				expect(output.household_install_costs).to.be.above(0);
 				done();
 			});
 		});
 
-		it('should return the install cost per household', function(done) {
-			Location.get_households(location_id, function(err, output) {
-				expect(output.install_cost_per_hh).to.be.above(0);
-				done();
-			});
-		});
-
-		it('should return the annual recurring costs per household', function(done) {
-			Location.get_households(location_id, function(err, output) {
-				expect(output.annual_recurring_cost_per_hh).to.be.above(0);
-				done();
-			});
-		});
 	});
 
 	describe('#create_location()', function() {
