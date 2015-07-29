@@ -184,6 +184,15 @@ describe('Location', function() {
 				done();
 			});
 		});
+
+		it('should return the annual recurring cost for each business at the location', function(done) {
+			Location.show_businesses(location_id, function(err, output) {
+				var number_of_businesses = output.length;
+				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
+				expect(business_to_check.annual_recurring_cost).to.be.above(0);
+				done();
+			});
+		});
 	});
 
 });

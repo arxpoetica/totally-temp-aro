@@ -151,7 +151,8 @@ Location.show_businesses = function(location_id, callback) {
 			businesses.industry_id,
 			businesses.name,
 			businesses.number_of_employees,
-			costs.install_cost
+			costs.install_cost,
+			costs.annual_recurring_cost
 		FROM
 			aro.businesses businesses
 		JOIN
