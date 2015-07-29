@@ -155,16 +155,4 @@ Location.show_businesses = function(location_id, callback) {
 	database.query(sql, [location_id], callback);
 }
 
-Location.total_service_cost = function(location_id, callback) {
-	var sql = multiline(function() {/*
-		SELECT location.entry_fee, sum(businesses.install_cost) total_install_costs
-		FROM
-			aro.businesses businesses
-		JOIN client.location_entry_fees location
-		ON location.location_id = $1
-		GROUP BY location.entry_fee
-	*/});
-	database.findOne(sql, [location_id], callback)
-}
-
 module.exports = Location;
