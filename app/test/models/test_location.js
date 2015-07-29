@@ -162,7 +162,7 @@ describe('Location', function() {
 		it('should return the name of each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var business_to_check = output[0];
-				expect(business_to_check.name).to.equal('AVATAR CONSTRUCTION');
+				expect(business_to_check.name).to.not.be.null;
 				done();
 			});
 		});
@@ -180,26 +180,7 @@ describe('Location', function() {
 			Location.show_businesses(location_id, function(err, output) {
 				var number_of_businesses = output.length;
 				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
-				expect(business_to_check.install_cost).to.be.null; // Because we have no data
-				done();
-			});
-		});
-
-		it('should return the annual recurring cost for each business at the location', function(done) {
-			Location.show_businesses(location_id, function(err, output) {
-				var number_of_businesses = output.length;
-				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
-				expect(business_to_check.annual_recurring_cost).to.be.null; // Because we have no data
-				done();
-			});
-		});
-	});
-
-	describe('#total_service_cost()', function() {
-
-		it('should return the cost of entering the location', function(done) {
-			Location.total_service_cost(31367, function(output) {
-				expect(output).to.be.null; // Because we have no data for this yet.
+				expect(business_to_check.install_cost).to.be.above(0);
 				done();
 			});
 		});

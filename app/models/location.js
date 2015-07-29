@@ -146,11 +146,20 @@ Location.update_households = function(location_id, values, callback) {
 
 Location.show_businesses = function(location_id, callback) {
 	var sql = multiline(function() {/*
-		SELECT id, industry_id, name, number_of_employees, install_cost, annual_recurring_cost
+		SELECT
+			businesses.id,
+			businesses.industry_id,
+			businesses.name,
+			businesses.number_of_employees,
+			costs.install_cost
 		FROM
-			businesses
+			aro.businesses businesses
+		JOIN
+			client.business_install_costs costs
+		ON
+			costs.business_id = businesses.id
 		WHERE
-			location_id = $1;
+			location_id = $1
 	*/});
 	database.query(sql, [location_id], callback);
 }
