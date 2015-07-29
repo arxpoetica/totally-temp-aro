@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "mocha --recursive",
-    "test-cov": "istanbul --preserve-comments cover _mocha -- --recursive -R spec"
+    "test-cov": "istanbul --preserve-comments cover _mocha -- --recursive -R spec",
+    "test-ui": "karma start"
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
@@ -20,6 +21,16 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "istanbul": "^0.3.17"
+    "angular": "^1.4.3",
+    "angular-mocks": "^1.4.3",
+    "istanbul": "^0.3.17",
+    "karma": "^0.13.3",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-mocha": "^0.2.0",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "mocha": "^2.2.5",
+    "phantomjs": "^1.9.17"
   }
 }
