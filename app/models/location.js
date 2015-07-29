@@ -157,13 +157,12 @@ Location.show_businesses = function(location_id, callback) {
 
 Location.total_service_cost = function(location_id, callback) {
 	var sql = multiline(function() {/*
-		SELECT
-			locations.entry_fee, sum(businesses.install_cost) total_install_costs
+		SELECT location.entry_fee, sum(businesses.install_cost) total_install_costs
 		FROM
-			aro.locations locations
-		JOIN aro.businesses businesses
-			ON businesses.location_id = $1
-		GROUP BY locations.entry_fee
+			aro.businesses businesses
+		JOIN client.location_entry_fees location
+		ON location.location_id = $1
+		GROUP BY location.entry_fee
 	*/});
 	database.findOne(sql, [location_id], callback)
 }

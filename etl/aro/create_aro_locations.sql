@@ -9,7 +9,6 @@ CREATE TABLE aro.locations
     city varchar,
     state varchar(2),
     zipcode varchar,
-    entry_fee numeric,
     lat double precision,
     lon double precision,
     geog geography(POINT, 4326),
