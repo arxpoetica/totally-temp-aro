@@ -8,7 +8,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     $scope.is_visible = false;
   }
 
-  $rootScope.$on('map_Layer_changed_visibility', function(event, map_layer) {
+  $rootScope.$on('map_layer_changed_visibility', function(event, map_layer) {
     if (map_layer.type === 'locations' && !map_layer.visible) {
       $scope.is_visible = false;
     }

@@ -64,24 +64,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         icon: '/images/map_icons/location_business_selected.png',
       }
     },
-    events: {
-      selected: function(feature) {
-        var id = feature.getProperty('id');
-        $http.get('/locations/closest_vertex/'+id).success(function(response) {
-          feature.vertex_id = response.vertex_id;
-          if (!feature.vertex_id) return;
-          var id = feature.vertex_id + ':' + feature.getProperty('id');
-          selection.targets.add(id, feature);
-        });
-      },
-      deselected: function(feature) {
-        var id = feature.getProperty('id');
-        if (!feature.vertex_id) return;
-        var id = feature.vertex_id + ':' + feature.getProperty('id');
-        selection.targets.remove(id, feature);
-        $rootScope.$apply();
-      }
-    },
   });
 
   feature_layers['splice_points'] = new MapLayer({

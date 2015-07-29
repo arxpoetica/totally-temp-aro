@@ -44,7 +44,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 	}
 
 	function broadcast_changes(layer, changes) {
-		$rootScope.$broadcast('map_Layer_changed_selection', layer, changes);
+		$rootScope.$broadcast('map_layer_changed_selection', layer, changes);
 	}
 
 	MapLayer.prototype.select_feature = function(feature) {
@@ -87,13 +87,15 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			if (layer.data) {
 				this.data_layer.addGeoJson(layer.data);
 				layer.data_loaded = true;
+				$rootScope.$broadcast('map_layer_loaded_data', layer);
 				return;
 			}
-			var promise = $http.get(this.api_endpoint).then(function(response) {
-				var data = response.data;
+			$http.get(this.api_endpoint).success(function(response) {
+				var data = response;
 				layer.data_layer.addGeoJson(data.feature_collection);
 				layer.metadata = data.metadata;
 				layer.data_loaded = true;
+				$rootScope.$broadcast('map_layer_loaded_data', layer);
 
 				layer.sync_selection();
 			});
@@ -118,13 +120,13 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.load_data();
 		this.data_layer.setMap(map);
 		this.visible = true;
-		$rootScope.$broadcast('map_Layer_changed_visibility', this);
+		$rootScope.$broadcast('map_layer_changed_visibility', this);
 	}
 
 	MapLayer.prototype.hide = function() {
 		this.data_layer.setMap(null);
 		this.visible = false;
-		$rootScope.$broadcast('map_Layer_changed_visibility', this);
+		$rootScope.$broadcast('map_layer_changed_visibility', this);
 	}
 
 	MapLayer.prototype.toggle_visibility = function() {
@@ -163,6 +165,12 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 	MapLayer.prototype.remove = function() {
 		this.data_layer.setMap(null);
+	}
+
+	MapLayer.prototype.number_of_features = function() {
+		var i = 0;
+		this.data_layer.forEach(function(feature) { i++; });
+		return i;
 	}
 
 	return MapLayer;
