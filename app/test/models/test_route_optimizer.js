@@ -87,13 +87,6 @@ describe('RouteOptimizer', function() {
 			});
 		});
 
-		it.skip('should return a feature collection', function(done) {
-			RouteOptimizer.shortest_path(source, target, cost_multiplier, function(err, output) {
-				expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
-				done();
-			});
-		});
-
 	});
 
 });
