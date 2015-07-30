@@ -66,11 +66,18 @@ Location.get_closest_vertex = function(location_id, callback) {
 Location.get_households = function(location_id, callback) {
 	var sql = multiline(function() {/*
 		SELECT
-			location_id, number_of_households, install_cost_per_hh, annual_recurring_cost_per_hh
+			households.location_id,
+			households.number_of_households,
+			costs.install_cost_per_hh,
+			costs.annual_recurring_cost_per_hh
 		FROM
-			aro.households
+			aro.households households
+		JOIN
+			client.household_install_costs costs
+		ON
+			households.location_id = costs.location_id
 		WHERE
-			location_id = $1
+			households.location_id = $1
 	*/});
 	var def = {
 		location_id: location_id,

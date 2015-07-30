@@ -7,8 +7,6 @@ CREATE TABLE aro.households
 	id SERIAL,
 	location_id bigint REFERENCES aro.locations,
 	number_of_households int CHECK (number_of_households >= 0),
-	install_cost_per_hh numeric,
-	annual_recurring_cost_per_hh numeric,
 	CONSTRAINT aro_household_summary_pkey PRIMARY KEY (id)
 );
 

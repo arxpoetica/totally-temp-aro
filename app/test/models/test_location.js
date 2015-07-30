@@ -55,31 +55,32 @@ describe('Location', function() {
 	});
 
 	describe('#get_households()', function() {
+		var location_id = 1399894; 
 
 		it('should return the location id passed in', function(done) {
-			Location.get_households(1399894, function(err, output) {
+			Location.get_households(location_id, function(err, output) {
 				expect(output.location_id).to.equal('1399894');
 				done();
 			});
 		});
 
 		it('should return the number of households', function(done) {
-			Location.get_households(1399894, function(err, output) {
+			Location.get_households(location_id, function(err, output) {
 				expect(output.number_of_households).to.equal(23);
 				done();
 			});
 		});
 
 		it('should return the install cost per household', function(done) {
-			Location.get_households(1399894, function(err, output) {
-				expect(output.install_cost_per_hh).to.be.null; // Because we have no data for install costs yet
+			Location.get_households(location_id, function(err, output) {
+				expect(output.install_cost_per_hh).to.be.above(0);
 				done();
 			});
 		});
 
 		it('should return the annual recurring costs per household', function(done) {
-			Location.get_households(1399894, function(err, output) {
-				expect(output.annual_recurring_cost_per_hh).to.be.null; // Because we have no data for install costs yet
+			Location.get_households(location_id, function(err, output) {
+				expect(output.annual_recurring_cost_per_hh).to.be.above(0);
 				done();
 			});
 		});
