@@ -56,7 +56,9 @@
           <p>
             <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
               ng-class="{'btn-success active': layer.visible}"
+              ng-attr-data-loaded="{{layer.data_loaded}}"
               ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
+            <a href="#" class="<%= show_on_test %>" ng-click="layer.select_random_features()">.</a>
           </p>
         </div>
       </div>
@@ -208,7 +210,7 @@
               <div class="form-group form-group-sm" ng-show="route_layer.visible">
                 <label class="col-sm-3 control-label">Total cost</label>
                 <div class="col-sm-9">
-                  <p class="form-control-static">{{route.metadata.total_cost | currency}}</p>
+                  <p class="form-control-static" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</p>
                 </div>
               </div>
             </form>
@@ -241,6 +243,7 @@
   <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/controllers/selection_tools_controller.js"></script>
   <script src="javascripts/controllers/location_show_businesses.js"></script>
+  <script src="javascripts/models/map_utils.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
   <script src="javascripts/models/selection.js"></script>
   <script src="javascripts/interceptors/http_error_handler.js"></script>

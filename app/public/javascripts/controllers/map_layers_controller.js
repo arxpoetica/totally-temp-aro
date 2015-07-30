@@ -19,7 +19,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   /**************
   * WIRECENTERS *
   ***************/
-  google.maps.event.addDomListener(window, 'load', function() {
+  // google.maps.event.addDomListener(window, 'load', callback) does not work on integration tests for some reason
+  $(document).ready(function() { // we need to wait until de map is ready
     $http.get('/wirecenters/NYCMNY79').success(function(response) {
       var wirecenters = response;
       var wirecenter = wirecenters[0];

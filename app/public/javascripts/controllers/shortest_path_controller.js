@@ -92,7 +92,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     $rootScope.area_layers['route'] = route;
   }
 
-  $rootScope.$on('map_Layer_changed_selection', function(e, layer, changes) {
+  $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {
     if (!$scope.route) return;
 
     if (layer.type === 'locations' || layer.type === 'splice_points') {

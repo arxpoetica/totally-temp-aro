@@ -78,7 +78,25 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			}
 			changes.insertions[this.type].push(id);
 		}
-	}
+		// This is needed because if the event is triggered from a google maps event
+		// then we need angular to do its stuff. Otherwise couters for sources and targets
+		// won't be updated. And if angular is already doing its stuff we cannot call $rootScope.$apply()
+		// directly because it will throw an error
+		if (!$rootScope.$$phase) { $rootScope.$apply(); }
+	};
+
+	MapLayer.prototype.select_random_features = function() {
+		var self = this;
+		var i = 0;
+		var changes = create_empty_changes(self);
+		self.data_layer.forEach(function(feature) {
+			if (i < 3 && !feature.selected) {
+				self.toggle_feature(feature, changes);
+				i++;
+			}
+		});
+		broadcast_changes(self, changes);
+	};
 
 	// Load GeoJSON data into the layer if it's not already loaded
 	MapLayer.prototype.load_data = function() {
