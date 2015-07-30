@@ -66,11 +66,18 @@ Location.get_closest_vertex = function(location_id, callback) {
 Location.get_households = function(location_id, callback) {
 	var sql = multiline(function() {;/*
 		SELECT
-			location_id, number_of_households, install_cost_per_hh, annual_recurring_cost_per_hh
+			households.location_id,
+			households.number_of_households,
+			costs.install_cost_per_hh,
+			costs.annual_recurring_cost_per_hh
 		FROM
-			aro.households
+			aro.households households
+		JOIN
+			client.household_install_costs costs
+		ON
+			households.location_id = costs.location_id
 		WHERE
-			location_id = $1
+			households.location_id = $1
 	*/});
 	var def = {
 		location_id: location_id,
@@ -145,12 +152,22 @@ Location.update_households = function(location_id, values, callback) {
 }
 
 Location.show_businesses = function(location_id, callback) {
-	var sql = multiline(function() {;/*
-		SELECT id, industry_id, name, number_of_employees, install_cost, annual_recurring_cost
+	var sql = multiline(function() {/*
+		SELECT
+			businesses.id,
+			businesses.industry_id,
+			businesses.name,
+			businesses.number_of_employees,
+			costs.install_cost,
+			costs.annual_recurring_cost
 		FROM
-			businesses
+			aro.businesses businesses
+		JOIN
+			client.business_install_costs costs
+		ON
+			costs.business_id = businesses.id
 		WHERE
-			location_id = $1;
+			location_id = $1
 	*/});
 	database.query(sql, [location_id], callback);
 }

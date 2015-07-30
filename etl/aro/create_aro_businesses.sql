@@ -10,7 +10,6 @@ CREATE TABLE aro.businesses
 	name varchar,
 	address varchar,
 	number_of_employees integer,
-	install_cost numeric,
 	annual_recurring_cost numeric,
 	geog geography (POINT, 4326),
 	CONSTRAINT aro_businesses_pkey PRIMARY KEY (id)

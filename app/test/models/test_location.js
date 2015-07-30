@@ -55,31 +55,32 @@ describe('Location', function() {
 	});
 
 	describe('#get_households()', function() {
+		var location_id = 1399894; 
 
 		it('should return the location id passed in', function(done) {
-			Location.get_households(1399894, function(err, output) {
+			Location.get_households(location_id, function(err, output) {
 				expect(output.location_id).to.equal('1399894');
 				done();
 			});
 		});
 
 		it('should return the number of households', function(done) {
-			Location.get_households(1399894, function(err, output) {
+			Location.get_households(location_id, function(err, output) {
 				expect(output.number_of_households).to.equal(23);
 				done();
 			});
 		});
 
 		it('should return the install cost per household', function(done) {
-			Location.get_households(1399894, function(err, output) {
-				expect(output.install_cost_per_hh).to.be.null; // Because we have no data for install costs yet
+			Location.get_households(location_id, function(err, output) {
+				expect(output.install_cost_per_hh).to.be.above(0);
 				done();
 			});
 		});
 
 		it('should return the annual recurring costs per household', function(done) {
-			Location.get_households(1399894, function(err, output) {
-				expect(output.annual_recurring_cost_per_hh).to.be.null; // Because we have no data for install costs yet
+			Location.get_households(location_id, function(err, output) {
+				expect(output.annual_recurring_cost_per_hh).to.be.above(0);
 				done();
 			});
 		});
@@ -162,7 +163,7 @@ describe('Location', function() {
 		it('should return the name of each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var business_to_check = output[0];
-				expect(business_to_check.name).to.equal('AVATAR CONSTRUCTION');
+				expect(business_to_check.name).to.not.be.null;
 				done();
 			});
 		});
@@ -180,7 +181,7 @@ describe('Location', function() {
 			Location.show_businesses(location_id, function(err, output) {
 				var number_of_businesses = output.length;
 				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
-				expect(business_to_check.install_cost).to.be.null; // Because we have no data
+				expect(business_to_check.install_cost).to.be.above(0);
 				done();
 			});
 		});
@@ -189,17 +190,7 @@ describe('Location', function() {
 			Location.show_businesses(location_id, function(err, output) {
 				var number_of_businesses = output.length;
 				var business_to_check = output[Math.floor(Math.random() * number_of_businesses ) + 0];
-				expect(business_to_check.annual_recurring_cost).to.be.null; // Because we have no data
-				done();
-			});
-		});
-	});
-
-	describe('#total_service_cost()', function() {
-
-		it('should return the cost of entering the location', function(done) {
-			Location.total_service_cost(31367, function(output) {
-				expect(output).to.be.null; // Because we have no data for this yet.
+				expect(business_to_check.annual_recurring_cost).to.be.above(0);
 				done();
 			});
 		});
