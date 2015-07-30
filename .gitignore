@@ -8,3 +8,5 @@ app/node_modules
 etl/tiger_cousub/shapefiles
 
 app/coverage
+
+app/npm-debug*.*
