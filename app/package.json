@@ -4,9 +4,11 @@
   "description": "Network infrastructure planning application",
   "main": "app.js",
   "scripts": {
-    "test": "mocha --recursive",
-    "test-cov": "istanbul --preserve-comments cover _mocha -- --recursive -R spec",
-    "test-ui": "karma start"
+    "test": "mocha test/models/*.js test/helpers/*.js",
+    "test-cov": "istanbul --preserve-comments cover _mocha -- test/models/*.js test/helpers/*.js -R spec",
+    "test-ui": "karma start",
+    "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
+    "test-all": "npm test && npm run test-ui && npm run test-integration"
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
@@ -14,6 +16,7 @@
     "body-parser": "^1.13.2",
     "chai": "~3.0.0",
     "compression": "~1.5.0",
+    "ejs": "^2.3.3",
     "express": "^4.13.1",
     "multiline": "^1.0.2",
     "pg": "~4.4.0",
@@ -31,6 +34,7 @@
     "karma-mocha": "^0.2.0",
     "karma-phantomjs-launcher": "^0.2.0",
     "mocha": "^2.2.5",
-    "phantomjs": "^1.9.17"
+    "phantomjs": "^1.9.17",
+    "protractor": "^2.1.0"
   }
 }

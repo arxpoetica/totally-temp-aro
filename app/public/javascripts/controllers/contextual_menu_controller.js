@@ -1,14 +1,5 @@
 // Contextual Menu Controller
-app.controller('contextual_menu_controller', function($scope, $rootScope) {
-
-  function fromLatLngToPoint(latLng) {
-    var projection = map.getProjection();
-    var topRight = projection.fromLatLngToPoint(map.getBounds().getNorthEast());
-    var bottomLeft = projection.fromLatLngToPoint(map.getBounds().getSouthWest());
-    var scale = Math.pow(2, map.getZoom());
-    var worldPoint = projection.fromLatLngToPoint(latLng);
-    return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
-  }
+app.controller('contextual_menu_controller', function($scope, $rootScope, map_utils) {
 
   var options = $scope.options = [];
   var callbackParameters = null;
@@ -21,7 +12,7 @@ app.controller('contextual_menu_controller', function($scope, $rootScope) {
   }
 
   function show_contextual_menu(gm_event, event_name) {
-    var pixel = fromLatLngToPoint(gm_event.latLng);
+    var pixel = map_utils.fromLatLngToPoint(gm_event.latLng);
     options.splice(0, options.length);
     $rootScope.$broadcast.apply($rootScope, [event_name, options].concat(callbackParameters));
     $scope.$apply();

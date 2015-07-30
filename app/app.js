@@ -3,11 +3,14 @@ var app = express();
 var compression = require('compression');
 var path = require('path');
 var bodyParser = require('body-parser');
+var ejs = require('ejs');
 
 var port = process.env.PORT || 8000
 app.use(compression());
 app.use(bodyParser.json());
 app.use(express.static('public'));
+app.set('views', './views');
+app.engine('html', ejs.renderFile);
 
 // Models
 var models = require('./models');
@@ -25,7 +28,10 @@ var Wirecenter = models.Wirecenter;
 
 // Map view
 app.get('/', function(request, response, next) {
-	response.sendFile(path.join(__dirname, './views/index.html'));
+	response.render('index.html', {
+		env: process.env.NODE_ENV,
+		show_on_test: process.env.NODE_ENV === 'test' ? '' : 'hidden',
+	})
 });
 
 /******
