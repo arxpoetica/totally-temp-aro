@@ -69,8 +69,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
   feature_layers['splice_points'] = new MapLayer({
     type: 'splice_points',
-    name: 'Splice points',
-    short_name: 'SP',
+    name: 'Central offices',
+    short_name: 'CO',
     api_endpoint: '/splice_points/VERIZON',
     style_options: {
       normal: {
