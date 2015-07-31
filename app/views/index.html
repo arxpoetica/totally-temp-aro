@@ -220,22 +220,22 @@
               <div class="form-group form-group-sm">
                 <div class="col-sm-offset-3 col-sm-9">
                   <button class="btn btn-sm btn-primary" ng-click="save_changes()" type="button">Save changes</button>
-                  <button class="btn btn-sm btn-danger" ng-show="route_layer.visible" ng-click="clear_route()" type="button">Clear Route</button>
+                  <button class="btn btn-sm btn-danger" ng-click="clear_route()" type="button">Clear Route</button>
                 </div>
               </div>
-              <div class="form-group form-group-sm" ng-show="route_layer.visible">
+              <div class="form-group form-group-sm">
                 <label class="col-sm-7 control-label">Locations cost</label>
                 <div class="col-sm-5">
                   <p class="form-control-static">{{route.metadata.locations_cost | currency}}</p>
                 </div>
               </div>
-              <div class="form-group form-group-sm" ng-show="route_layer.visible">
+              <div class="form-group form-group-sm">
                 <label class="col-sm-7 control-label">Fiber cost</label>
                 <div class="col-sm-5">
                   <p class="form-control-static">{{route.metadata.fiber_cost | currency}}</p>
                 </div>
               </div>
-              <div class="form-group form-group-sm" ng-show="route_layer.visible">
+              <div class="form-group form-group-sm">
                 <label class="col-sm-7 control-label">Total cost</label>
                 <div class="col-sm-5">
                   <p class="form-control-static" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</p>
