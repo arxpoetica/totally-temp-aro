@@ -37,17 +37,4 @@ describe('SplicePoint', function() {
 		});
 	});
 
-	describe('#get_closest_vertex()', function() {
-
-		it('should return the id of the closest vertex in the graph', function(done) {
-			SplicePoint.get_closest_vertex(1, function(err, output) {
-				expect(output.vertex_id).to.equal('10084');
-				done();
-			});
-		});
-	});
-
 });
-
-				
-				

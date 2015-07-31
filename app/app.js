@@ -69,14 +69,9 @@ app.get('/locations', function(request, response, next) {
 	Location.find_all(jsonHandler(response, next));
 });
 
-app.get('/locations/closest_vertex/:location_id', function(request, response, next) {
+app.get('/locations/:location_id', function(request, response, next) {
 	var location_id = request.params.location_id;
-	Location.get_closest_vertex(location_id, jsonHandler(response, next));
-});
-
-app.get('/locations/households/:location_id', function(request, response, next) {
-	var location_id = request.params.location_id;
-	Location.get_households(location_id, jsonHandler(response, next));
+	Location.show_information(location_id, jsonHandler(response, next));
 });
 
 app.get('/locations/businesses/:location_id', function(request, response, next) {
@@ -90,7 +85,7 @@ app.post('/locations/create/', function(request, response, next) {
 	Location.create_location(data, jsonHandler(response, next));
 });
 
-app.post('/locations/update/:location_id', function(request, response, next) {
+app.post('/locations/:location_id/update', function(request, response, next) {
 	var location_id = request.params.location_id;
 	var values = {
 		number_of_households: request.body.number_of_households,
@@ -108,11 +103,6 @@ app.get('/network/fiber_plant/:carrier_name', function(request, response, next) 
 app.get('/splice_points/:carrier_name', function(request, response, next) {
 	var carrier_name = request.params.carrier_name;
 	SplicePoint.find_by_carrier(carrier_name, jsonHandler(response, next));
-});
-
-app.get('/splice_points/closest_vertex/:splice_point_id', function(request, response, next) {
-	var splice_point_id = request.params.splice_point_id;
-	SplicePoint.get_closest_vertex(splice_point_id, jsonHandler(response, next));
 });
 
 // Route Optimizer
@@ -157,6 +147,12 @@ app.post('/route_optimizer/:route_id/save', function(request, response, next) {
 app.post('/route_optimizer/:route_id/delete', function(request, response, next) {
 	var route_id = request.params.route_id;
 	RouteOptimizer.delete_route(route_id, jsonHandler(response, next));
+});
+
+// Clear an existing route
+app.post('/route_optimizer/:route_id/clear', function(request, response, next) {
+	var route_id = request.params.route_id;
+	RouteOptimizer.clear_route(route_id, jsonHandler(response, next));
 });
 
 // For testing the error handler

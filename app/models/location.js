@@ -40,52 +40,70 @@ Location.find_all = function(callback) {
 	.end(callback);
 };
 
-// Get the closest vertex to a Location.
-// This is used when selecting a Location to be the target in a route plan, since it overlaps with a vertex
-//
-// 1. location_id: integer. ex. 1738
-// 2. callback: function to return a GeoJSON object
-Location.get_closest_vertex = function(location_id, callback) {
-	var sql = multiline(function() {;/*
-		SELECT
-			vertex.id AS vertex_id
-		FROM
-			client.graph_vertices_pgr AS vertex
-		JOIN aro.locations locations
-			ON locations.geom && vertex.the_geom
-		WHERE
-			locations.id = $1
-	*/});
-	database.findOne(sql, [location_id], callback)
-}
-
-// Get house hold summary information for a given location
+// Get summary information for a given location
 //
 // 1. location_id: integer. ex. 1738
 // 2. callback: function to return the information
-Location.get_households = function(location_id, callback) {
+Location.show_information = function(location_id, callback) {
 	var sql = multiline(function() {;/*
-		SELECT
-			households.location_id,
-			households.number_of_households,
-			costs.install_cost_per_hh,
-			costs.annual_recurring_cost_per_hh
-		FROM
-			aro.households households
-		JOIN
-			client.household_install_costs costs
-		ON
-			households.location_id = costs.location_id
-		WHERE
-			households.location_id = $1
+		select
+		  location_id,
+		  sum(entry_fee)::integer as entry_fee,
+		  sum(install_cost)::integer as business_install_costs,
+		  sum(install_cost_per_hh)::integer as household_install_costs,
+		  sum(number_of_households)::integer as number_of_households,
+		  sum(number_of_businesses)::integer as number_of_businesses
+		from (
+		  select
+		    location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
+		  from
+		    client.location_entry_fees
+		  where
+		    location_id=$1
+
+		  union
+
+		  select
+		    location_id, 0, install_cost, 0, 0, 0
+		  from
+		    client.business_install_costs
+		  join businesses
+		    on businesses.id = business_install_costs.business_id
+		  where
+		    location_id=$1
+
+		  union
+
+		  select
+		    location_id, 0, 0, install_cost_per_hh, 0, 0
+		  from
+		    client.household_install_costs
+		  where
+		    location_id=$1
+
+		  union
+
+		  select
+		    location_id, 0, 0, 0, households.number_of_households, 0
+		  from
+		    aro.households
+		  where
+		    households.location_id=$1
+
+		  union
+
+		  select
+		    location_id, 0, 0, 0, 0, count(*)
+		  from
+		    businesses
+		  where
+		    location_id=$1
+		  group by
+		    location_id
+
+		) t group by location_id;
 	*/});
-	var def = {
-		location_id: location_id,
-		number_of_households: 0,
-		install_cost_per_hh: 0,
-		annual_recurring_cost_per_hh: 0,
-	}
-	database.findOne(sql, [location_id], def, callback)
+	database.findOne(sql, [location_id], callback)
 }
 
 Location.create_location = function(values, callback) {
@@ -152,7 +170,7 @@ Location.update_households = function(location_id, values, callback) {
 }
 
 Location.show_businesses = function(location_id, callback) {
-	var sql = multiline(function() {/*
+	var sql = multiline(function() {;/*
 		SELECT
 			businesses.id,
 			businesses.industry_id,
@@ -170,19 +188,6 @@ Location.show_businesses = function(location_id, callback) {
 			location_id = $1
 	*/});
 	database.query(sql, [location_id], callback);
-}
-
-Location.total_service_cost = function(location_id, callback) {
-	var sql = multiline(function() {;/*
-		SELECT
-			locations.entry_fee, sum(businesses.install_cost) total_install_costs
-		FROM
-			aro.locations locations
-		JOIN aro.businesses businesses
-			ON businesses.location_id = $1
-		GROUP BY locations.entry_fee
-	*/});
-	database.findOne(sql, [location_id], callback)
 }
 
 module.exports = Location;

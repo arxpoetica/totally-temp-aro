@@ -42,7 +42,7 @@ RouteOptimizer.find_route = function(route_id, callback) {
     };
 
     var metadata = {
-      'total_cost': total_cost_of_route(feature_collection, cost_per_meter),
+      'fiber_cost': fiber_cost_of_route(feature_collection, cost_per_meter),
     };
 
     output = {
@@ -51,7 +51,86 @@ RouteOptimizer.find_route = function(route_id, callback) {
     };
     callback();
   })
-  .then(function(output, callback) {
+  .then(function(callback) {
+    var sql = multiline(function() {;/*
+      select
+        sum(location_total)::integer as locations_cost
+      from
+        (select
+          $1 as route_id,
+          (entry_fee + business_install_costs * number_of_businesses + household_install_costs * number_of_households) as location_total
+        from (
+          select
+            location_id,
+            sum(entry_fee)::integer as entry_fee,
+            sum(install_cost)::integer as business_install_costs,
+            sum(install_cost_per_hh)::integer as household_install_costs,
+            sum(number_of_households)::integer as number_of_households,
+            sum(number_of_businesses)::integer as number_of_businesses
+          from (
+            select
+              location_entry_fees.location_id as location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
+            from
+              client.location_entry_fees
+            join custom.route_targets on
+              location_entry_fees.location_id = route_targets.location_id
+              and route_targets.route_id=$1
+
+            union
+
+            select
+              businesses.location_id, 0, install_cost, 0, 0, 0
+            from
+              client.business_install_costs
+            join businesses
+              on businesses.id = business_install_costs.business_id
+            join custom.route_targets on
+              businesses.location_id = route_targets.location_id
+              and route_targets.route_id=$1
+
+            union
+
+            select
+              household_install_costs.location_id, 0, 0, install_cost_per_hh, 0, 0
+            from
+              client.household_install_costs
+            join custom.route_targets on
+              household_install_costs.location_id = route_targets.location_id
+              and route_targets.route_id=$1
+
+            union
+
+            select
+              households.location_id, 0, 0, 0, households.number_of_households, 0
+            from
+              aro.households
+            join custom.route_targets on
+              households.location_id = route_targets.location_id
+              and route_targets.route_id=$1
+
+            union
+
+            select
+              businesses.location_id, 0, 0, 0, 0, count(*)
+            from
+              businesses
+            join custom.route_targets on
+              businesses.location_id = route_targets.location_id
+              and route_targets.route_id=$1
+            group by
+              businesses.location_id
+
+          ) t group by location_id
+        ) t
+      ) t group by route_id;
+    */});
+    database.findOne(sql, [route_id], callback);
+  })
+  .then(function(row, callback) {
+    var locations_cost = (row && row.locations_cost) || 0;
+    output.metadata.locations_cost = locations_cost;
+    output.metadata.total_cost = locations_cost + output.metadata.fiber_cost;
+
     var sql = multiline(function() {;/*
       SELECT location_id AS id
       FROM custom.route_targets
@@ -97,6 +176,7 @@ RouteOptimizer.recalculate_route = function(route_id, callback) {
     */});
     database.execute(sql, [route_id], function(err) {
       if (err && err.message.indexOf('One of the target vertices was not found or several targets are the same') >= 0) return callback(); // ignore this error
+      if (err && err.message.indexOf('None of the target vertices has been found') >= 0) return callback(); // ignore this error
       return callback(err);
     });
   })
@@ -113,11 +193,11 @@ RouteOptimizer.recalculate_and_find_route = function(route_id, callback) {
   .end(callback);
 };
 
-// Get the total CapEx for creating a route
+// Get the total fiber cost of a route
 //
 // route: GeoJSON FeatureCollection output by the `shortest_path` function above
 // cost_per_meter: decimal number. ex. 12.3
-function total_cost_of_route(route, cost_per_meter) {
+function fiber_cost_of_route(route, cost_per_meter) {
   return cost_per_meter * route.features.map(function(feature) {
     return feature.properties.length_in_meters
   })
@@ -148,6 +228,28 @@ RouteOptimizer.delete_route = function(route_id, callback) {
     DELETE FROM custom.route WHERE id=$1;
   */});
   database.execute(sql, [route_id], callback);
+};
+
+RouteOptimizer.clear_route = function(route_id, callback) {
+  txain(function(callback) {
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_targets WHERE route_id=$1;
+    */});
+    database.execute(sql, [route_id], callback);
+  })
+  .then(function(callback) {
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_sources WHERE route_id=$1;
+    */});
+    database.execute(sql, [route_id], callback);
+  })
+  .then(function(callback) {
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_edges WHERE route_id=$1;
+    */});
+    database.execute(sql, [route_id], callback);
+  })
+  .end(callback);
 };
 
 RouteOptimizer.save_route = function(route_id, data, callback) {

@@ -1,32 +1,21 @@
 // Selected location controller
 app.controller('selected_location_controller', function($rootScope, $scope, $http) {
-  $scope.is_visible = false;
-
   $scope.location = {};
-
-  $scope.hide = function() {
-    $scope.is_visible = false;
-  }
-
-  $rootScope.$on('map_layer_changed_visibility', function(event, map_layer) {
-    if (map_layer.type === 'locations' && !map_layer.visible) {
-      $scope.is_visible = false;
-    }
-  });
 
   $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
     if (map_layer.type !== 'locations') return;
-    options.add('Edit location', function(map_layer, feature) {
+    options.add('See more information', function(map_layer, feature) {
       var id = feature.getProperty('id');
-      $http.get('/locations/households/' + id).success(function(response) {
-        $scope.is_visible = true;
+      $http.get('/locations/' + id).success(function(response) {
         set_selected_location(response);
+        $('#selected_location_controller').modal('show');
       });
     });
   });
 
   $rootScope.$on('contextual_menu_map', function(e, options) {
-    if (!$scope.is_visible) return;
+    if (!rootScope.feature_layers.locations.is_visible) return;
+
     options.add('Add location here', function(event) {
       var lat = event.latLng.lat();
       var lng = event.latLng.lng();
@@ -63,14 +52,18 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   $scope.update = function() {
     var location = $scope.location
     var location_id = location.location_id;
-    $http.post('/locations/update/'+location_id, {
+    $http.post('/locations/'+location_id+'/update', {
       number_of_households: location.number_of_households,
     }).success(function(response) {
-      $scope.is_visible = false;
+      $('#selected_location_controller').modal('hide');
     })
   }
 
   function set_selected_location(location) {
+    location.total = location.entry_fee
+                      + location.household_install_costs * location.number_of_households
+                      + location.business_install_costs * location.number_of_businesses;
+    console.log('location', location);
     $scope.location = location;
   };
 

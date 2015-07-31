@@ -14,6 +14,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.data = options.data;
 		this.type = options.type;
 
+		var collection;
 		if (this.type === 'locations') {
 			collection = selection.targets;
 		} else if (this.type === 'splice_points') {
@@ -99,24 +100,32 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 	};
 
 	// Load GeoJSON data into the layer if it's not already loaded
-	MapLayer.prototype.load_data = function() {
+	MapLayer.prototype.load_data = function(val) {
 		var layer = this;
+		if (val) {
+			if (typeof val === 'string') {
+				layer.api_endpoint = val;
+			} else {
+				layer.data = val;
+			}
+		}
 		if (!layer.data_loaded) {
 			if (layer.data) {
 				this.data_layer.addGeoJson(layer.data);
 				layer.data_loaded = true;
 				$rootScope.$broadcast('map_layer_loaded_data', layer);
 				return;
-			}
-			$http.get(this.api_endpoint).success(function(response) {
-				var data = response;
-				layer.data_layer.addGeoJson(data.feature_collection);
-				layer.metadata = data.metadata;
-				layer.data_loaded = true;
-				$rootScope.$broadcast('map_layer_loaded_data', layer);
+			} else if (this.api_endpoint) {
+				$http.get(this.api_endpoint).success(function(response) {
+					var data = response;
+					layer.data_layer.addGeoJson(data.feature_collection);
+					layer.metadata = data.metadata;
+					layer.data_loaded = true;
+					$rootScope.$broadcast('map_layer_loaded_data', layer);
 
-				layer.sync_selection();
-			});
+					layer.sync_selection();
+				});
+			}
 		}
 	}
 
