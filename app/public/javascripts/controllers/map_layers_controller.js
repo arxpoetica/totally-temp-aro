@@ -20,6 +20,18 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   * WIRECENTERS *
   ***************/
   // google.maps.event.addDomListener(window, 'load', callback) does not work on integration tests for some reason
+  area_layers['wirecenter'] = new MapLayer({
+    short_name: 'WC',
+    name: 'Wirecenter',
+    style_options: {
+      normal: {
+        fillColor: 'green',
+        strokeColor: 'green',
+        strokeWeight: 2,
+      }
+    },
+  });
+
   $(document).ready(function() { // we need to wait until de map is ready
     $http.get('/wirecenters/NYCMNY79').success(function(response) {
       var wirecenters = response;
@@ -30,21 +42,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         lng: centroid.coordinates[0],
       });
       map.setZoom(14);
-
-      area_layers['wirecenter'] = new MapLayer({
-        short_name: 'WC',
-        name: 'Wirecenter',
-        data: {
-          'type': 'Feature',
-          'geometry': wirecenter.geom,
-        },
-        style_options: {
-          normal: {
-            fillColor: 'green',
-            strokeColor: 'green',
-            strokeWeight: 2,
-          }
-        },
+      area_layers['wirecenter'].load_data({
+        'type': 'Feature',
+        'geometry': wirecenter.geom,
       });
     });
   });
