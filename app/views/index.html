@@ -311,7 +311,11 @@
   <script>app.run(function(loader){})</script>
   <script>
     $(function () {
-      $('[data-toggle="tooltip"]').tooltip()
+      var tooltips = $('[data-toggle="tooltip"]');
+      tooltips.tooltip();
+      tooltips.on('click mouseout', function() {
+        $(this).tooltip('hide');
+      })
     })
   </script>
 </html>
