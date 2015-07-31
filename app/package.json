@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha test/models/*.js test/helpers/*.js",
     "test-cov": "istanbul --preserve-comments cover _mocha -- test/models/*.js test/helpers/*.js -R spec",
-    "test-ui": "karma start",
+    "test-ui": "./node_modules/.bin/karma start",
     "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
     "test-all": "npm test && npm run test-ui && npm run test-integration"
   },
