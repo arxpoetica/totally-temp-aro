@@ -45,7 +45,7 @@ Location.find_all = function(callback) {
 // 1. location_id: integer. ex. 1738
 // 2. callback: function to return the information
 Location.show_information = function(location_id, callback) {
-	var sql = multiline(function() {/*
+	var sql = multiline(function() {;/*
 		select
 		  location_id,
 		  sum(entry_fee)::integer as entry_fee,
@@ -170,7 +170,7 @@ Location.update_households = function(location_id, values, callback) {
 }
 
 Location.show_businesses = function(location_id, callback) {
-	var sql = multiline(function() {/*
+	var sql = multiline(function() {;/*
 		SELECT
 			businesses.id,
 			businesses.industry_id,
@@ -188,19 +188,6 @@ Location.show_businesses = function(location_id, callback) {
 			location_id = $1
 	*/});
 	database.query(sql, [location_id], callback);
-}
-
-Location.total_service_cost = function(location_id, callback) {
-	var sql = multiline(function() {;/*
-		SELECT
-			locations.entry_fee, sum(businesses.install_cost) total_install_costs
-		FROM
-			aro.locations locations
-		JOIN aro.businesses businesses
-			ON businesses.location_id = $1
-		GROUP BY locations.entry_fee
-	*/});
-	database.findOne(sql, [location_id], callback)
 }
 
 module.exports = Location;

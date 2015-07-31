@@ -149,6 +149,12 @@ app.post('/route_optimizer/:route_id/delete', function(request, response, next) 
 	RouteOptimizer.delete_route(route_id, jsonHandler(response, next));
 });
 
+// Clear an existing route
+app.post('/route_optimizer/:route_id/clear', function(request, response, next) {
+	var route_id = request.params.route_id;
+	RouteOptimizer.clear_route(route_id, jsonHandler(response, next));
+});
+
 // For testing the error handler
 app.get('/error', function(request, response, next) {
 	next(new Error('test'))

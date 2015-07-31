@@ -109,9 +109,22 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   };
 
   $scope.clear_route = function() {
-    selection.clear_selection();
-    $scope.route_layer.clear_data();
-    $scope.route_layer.hide();
+    swal({
+      title: "Are you sure?",
+      text: "You will not be able to recover the deleted data!",
+      type: "warning",
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: "Yes, clear it!",
+      showCancelButton: true,
+      closeOnConfirm: true,
+    }, function() {
+      selection.clear_selection();
+      $scope.route_layer.clear_data();
+      $scope.route.metadata = { total_cost: 0 };
+      $http.post('/route_optimizer/'+$scope.route.id+'/clear').success(function(response) {
+        // success
+      });
+    });
   }
 
   $scope.show_routes();

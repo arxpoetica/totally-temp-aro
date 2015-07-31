@@ -80,6 +80,13 @@ describe('RouteOptimizer', function() {
 			});
 		});
 
+		it('should delete all the information of an existing route', function(done) {
+			RouteOptimizer.clear_route(route_id, function(err) {
+				expect(err).to.be.null;
+				done();
+			});
+		});
+
 		it('should delete an existing route', function(done) {
 			RouteOptimizer.delete_route(route_id, function(err, output) {
 				expect(!!output).to.be.equal(true);

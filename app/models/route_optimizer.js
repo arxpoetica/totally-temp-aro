@@ -97,6 +97,7 @@ RouteOptimizer.recalculate_route = function(route_id, callback) {
     */});
     database.execute(sql, [route_id], function(err) {
       if (err && err.message.indexOf('One of the target vertices was not found or several targets are the same') >= 0) return callback(); // ignore this error
+      if (err && err.message.indexOf('None of the target vertices has been found') >= 0) return callback(); // ignore this error
       return callback(err);
     });
   })
@@ -148,6 +149,28 @@ RouteOptimizer.delete_route = function(route_id, callback) {
     DELETE FROM custom.route WHERE id=$1;
   */});
   database.execute(sql, [route_id], callback);
+};
+
+RouteOptimizer.clear_route = function(route_id, callback) {
+  txain(function(callback) {
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_targets WHERE route_id=$1;
+    */});
+    database.execute(sql, [route_id], callback);
+  })
+  .then(function(callback) {
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_sources WHERE route_id=$1;
+    */});
+    database.execute(sql, [route_id], callback);
+  })
+  .then(function(callback) {
+    var sql = multiline(function() {;/*
+      DELETE FROM custom.route_edges WHERE route_id=$1;
+    */});
+    database.execute(sql, [route_id], callback);
+  })
+  .end(callback);
 };
 
 RouteOptimizer.save_route = function(route_id, data, callback) {
