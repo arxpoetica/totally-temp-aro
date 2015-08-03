@@ -33,7 +33,15 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 		data_layer.addListener('rightclick', function(event) {
 			$rootScope.$broadcast('map_layer_rightclicked_feature', event, layer);
-		})
+		});
+
+		if (options.heatmap) {
+			layer.heatmap_layer = new google.maps.visualization.HeatmapLayer();
+			layer.heatmap_layer.set('radius', 30);
+			$rootScope.$on('map_zoom_changed', function() {
+				layer.visible && layer.show();
+			});
+		}
 	}
 
 	function create_empty_changes(layer) {
@@ -112,6 +120,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		if (!layer.data_loaded) {
 			if (layer.data) {
 				this.data_layer.addGeoJson(layer.data);
+				load_heatmap_layer();
 				layer.data_loaded = true;
 				$rootScope.$broadcast('map_layer_loaded_data', layer);
 				return;
@@ -119,6 +128,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				$http.get(this.api_endpoint).success(function(response) {
 					var data = response;
 					layer.data_layer.addGeoJson(data.feature_collection);
+					load_heatmap_layer();
 					layer.metadata = data.metadata;
 					layer.data_loaded = true;
 					$rootScope.$broadcast('map_layer_loaded_data', layer);
@@ -126,6 +136,15 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 					layer.sync_selection();
 				});
 			}
+		}
+
+		function load_heatmap_layer() {
+			if (!layer.heatmap_layer) return;
+			var arr = [];
+			layer.data_layer.forEach(function(feature) {
+				arr.push(feature.getGeometry().get());
+			});
+			layer.heatmap_layer.setData(new google.maps.MVCArray(arr));
 		}
 	}
 
@@ -145,13 +164,26 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 	MapLayer.prototype.show = function() {
 		this.load_data();
-		this.data_layer.setMap(map);
+		if (this.heatmap_layer) {
+			if (map.getZoom() > 16) {
+				this.heatmap_layer.setMap(null);
+				this.data_layer.setMap(map);
+			} else {
+				this.heatmap_layer.setMap(map);
+				this.data_layer.setMap(null);
+			}
+		} else {
+			this.data_layer.setMap(map);
+		}
 		this.visible = true;
 		$rootScope.$broadcast('map_layer_changed_visibility', this);
 	}
 
 	MapLayer.prototype.hide = function() {
 		this.data_layer.setMap(null);
+		if (this.heatmap_layer) {
+			this.heatmap_layer.setMap(null);
+		}
 		this.visible = false;
 		$rootScope.$broadcast('map_layer_changed_visibility', this);
 	}

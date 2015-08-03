@@ -65,6 +65,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         icon: '/images/map_icons/location_business_selected.png',
       }
     },
+    heatmap: true,
   });
 
   feature_layers['splice_points'] = new MapLayer({
