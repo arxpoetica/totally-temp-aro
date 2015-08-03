@@ -13,5 +13,14 @@ app.controller('market_size_controller', ['$scope', '$rootScope', '$http', 'sele
     $scope.is_visible = !$scope.is_visible;
   });
 
+  // Hide if DBR tool is selected and this is open
+  $rootScope.$on('toggle_tool_visibility', function() {
+
+    if($scope.is_visible){
+
+      $scope.is_visible = !$scope.is_visible;
+    }
+  });
+
 
 }]);

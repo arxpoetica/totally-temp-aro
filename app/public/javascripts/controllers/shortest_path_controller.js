@@ -22,6 +22,15 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     $scope.is_visible = !$scope.is_visible;
   });
 
+  // Hide if Market Size tool is selected and this is open
+  $rootScope.$on('toggle_market_size_visibility', function() {
+
+    if($scope.is_visible){
+
+      $scope.is_visible = !$scope.is_visible;
+    }
+  });
+
   $scope.select_route = function(route) {
     $scope.route = route;
     $scope.is_visible = true;
