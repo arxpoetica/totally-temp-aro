@@ -18,14 +18,13 @@ def init(parser):
     subparser = parser.add_subparsers()
 
     spend_subparser = subparser.add_parser('spend').add_subparsers()
-    _init_spend_csv_load(spend_subparser, 'values', 
-                          add_spend, delete_spend)
     
-    #===========================================================================
-    # _init_spend_csv_load(spend_subparser, 'mapping',
-    #                        mapping_add, 
-    #                        mapping_delete)
-    #===========================================================================
+    _init_spend_csv_load(spend_subparser, 'values', 
+                         add_spend, delete_spend)
+    
+    _init_spend_csv_load(spend_subparser, 'mapping',
+                         add_industry_mapping, 
+                         delete_industry_mapping)
 
 def _init_spend_csv_load(subparser, subparser_name, add_func, delete_func):
     base = subparser.add_parser(subparser_name).add_subparsers()
@@ -49,18 +48,20 @@ def add_spend(options):
     db = get_DBConn()
     df = pd.read_csv(options.csv_file)
     spend.import_spend(db, df)
+    db.close()
 
 def delete_spend(options):
     db = get_DBConn()
     spend.delete_spend(db, options.year)
+    db.close()
     
-#===============================================================================
-# def mapping_add(options):
-#     db = get_DBConn()
-#     industry_mapping = pd.read_csv(options.csv_file)
-#     surveys.import_industry_mapping(db, industry_mapping)
-# 
-# def mapping_delete(options):
-#     db = get_DBConn()
-#     surveys.delete_industry_mapping(db, options.year)
-#===============================================================================
+def add_industry_mapping(options):
+    db = get_DBConn()
+    industry_mapping = pd.read_csv(options.csv_file)
+    spend.import_industry_mapping(db, industry_mapping)
+    db.close()
+ 
+def delete_industry_mapping(options):
+    db = get_DBConn()
+    spend.delete_industry_mapping(db)
+    db.close()
