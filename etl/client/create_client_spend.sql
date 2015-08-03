@@ -12,9 +12,9 @@ CREATE TABLE client.spend
 	id serial,
 	product_id integer, 
 	industry_name varchar,
-	employees_at_location integer, 
+	employees_at_location varchar, 
 	year integer, 
-	monthly_spend integer,
+	monthly_spend numeric,
 	
 	CONSTRAINT pkey_spend_id PRIMARY KEY (id), 
 	CONSTRAINT fkey_spend_product_id FOREIGN KEY (product_id) REFERENCES client.products (id) ON DELETE CASCADE
