@@ -37,6 +37,12 @@
           <a href="#" class="btn btn-primary btn-block btn-sm" title="Route planner" data-toggle="tooltip" data-placement="right"
             ng-click="toggle_tool_visibility()">DBR</a>
         </p>
+
+        <p>
+          <a href="#" class="btn btn-primary btn-block btn-sm" title="Market size" data-toggle="tooltip" data-placement="right"
+            ng-click="toggle_market_size_visibility()">MS</a>
+
+        </p>
       </div>
 
       <hr>
@@ -264,6 +270,17 @@
       </div>
     </div>
 
+    <div ng-controller="market_size_controller">
+
+      <div ng-show="is_visible" class="panel panel-primary" id="market_size_controller">
+        <div class="panel-heading">Market Size</div>
+          <div class="panel-body">
+            <span> Market Size Tool Goes Here </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="map-canvas"></div>
 
     <div ng-controller="contextual_menu_controller">
@@ -316,6 +333,7 @@
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
+  <script src="javascripts/controllers/market_size_controller.js"></script>
   <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/controllers/selection_tools_controller.js"></script>
