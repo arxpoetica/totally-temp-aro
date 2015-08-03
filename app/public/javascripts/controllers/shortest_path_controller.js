@@ -7,6 +7,9 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   $scope.route = null;
   $scope.routes = [];
 
+  $scope.always_shows_sources = true;
+  $scope.always_shows_targets = true;
+
   /************
   * FUNCTIONS *
   *************/
@@ -23,6 +26,9 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     $scope.route = route;
     $scope.is_visible = true;
     $('#select-route').modal('hide');
+
+    $rootScope.feature_layers.splice_points.set_always_show_selected($scope.always_shows_sources);
+    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
 
     $http.get('/route_optimizer/'+route.id).success(function(response) {
       redraw_route(response);
@@ -101,6 +107,14 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
       });
     }
   });
+
+  $scope.toggle_always_show_sources = function() {
+    $rootScope.feature_layers.splice_points.set_always_show_selected($scope.always_shows_sources);
+  };
+
+  $scope.toggle_always_show_targets = function() {
+    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
+  };
 
   $scope.save_changes = function() {
     $http.post('/route_optimizer/'+$scope.route.id+'/save', $scope.route).success(function(response) {

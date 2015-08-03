@@ -60,9 +60,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     style_options: {
       normal: {
         icon: '/images/map_icons/location_business_gray.png',
+        visible: true,
       },
       selected: {
         icon: '/images/map_icons/location_business_selected.png',
+        visible: true,
       }
     },
     heatmap: true,
@@ -76,9 +78,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     style_options: {
       normal: {
         icon: '/images/map_icons/splice_point.png',
+        visible: true,
       },
       selected: {
         icon: '/images/map_icons/splice_point_selected.png',
+        visible: true,
       }
     },
   });

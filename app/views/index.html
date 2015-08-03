@@ -207,13 +207,31 @@
                   <input type="text" class="form-control" placeholder="Number of fiber strands" ng-model="route.number_of_strands">
                 </div>
               </div>
-              <div class="form-group form-group-sm">
+              <div class="form-group form-group-sm" style="margin-bottom: 0">
                 <label class="col-sm-3 control-label">Cable type</label>
                 <div class="col-sm-9">
                   <select class="form-control">
                     <option value="aerial">Aerial</option>
                     <option value="buried">Buried</option>
                   </select>
+                </div>
+              </div>
+              <div class="form-group form-group-sm" style="margin-bottom: 0">
+                <div class="col-sm-offset-3 col-sm-9">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" ng-model="always_shows_sources" ng-change="toggle_always_show_sources()"> Show selected sources
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <div class="col-sm-offset-3 col-sm-9">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" ng-model="always_shows_targets" ng-change="toggle_always_show_targets()"> Show selected targets
+                    </label>
+                  </div>
                 </div>
               </div>
               <div class="form-group form-group-sm">
