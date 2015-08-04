@@ -22,5 +22,12 @@ app.controller('market_size_controller', ['$scope', '$rootScope', '$http', 'sele
     }
   });
 
+  $rootScope.$on('map_layer_clicked_feature', function(e, event, layer) {
+    if (layer.type === 'census_blocks') {
+      console.log('selected census block gid =', event.feature.getProperty('id'));
+      // TODO: show market size tool and load the data
+    }
+  });
+
 
 }]);

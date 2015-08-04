@@ -30,6 +30,19 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			var changes = create_empty_changes(layer);
 			layer.toggle_feature(event.feature, changes);
 			broadcast_changes(layer, changes);
+			$rootScope.$broadcast('map_layer_clicked_feature', event, layer);
+		});
+
+		data_layer.addListener('mouseover', function(event) {
+			if (layer.style_options.highlight && event.feature) {
+				layer.data_layer.overrideStyle(event.feature, layer.style_options.highlight);
+			}
+		});
+
+		data_layer.addListener('mouseout', function(event) {
+			if (layer.style_options.highlight && event.feature) {
+				layer.data_layer.overrideStyle(event.feature, layer.style_options.normal);
+			}
 		});
 
 		data_layer.addListener('rightclick', function(event) {
@@ -188,6 +201,8 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 		if (type === 'normal') {
 			this.data_layer.setStyle(this.style_options.normal);
+		} else if (type === 'highlight') {
+			this.data_layer.setStyle(this.style_options.highlight);
 		} else if (type === 'hidden') {
 			this.data_layer.setStyle({
 				visible: false,
