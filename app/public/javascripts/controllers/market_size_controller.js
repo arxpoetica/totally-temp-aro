@@ -11,6 +11,8 @@ app.controller('market_size_controller', ['$scope', '$rootScope', '$http', 'sele
   $rootScope.$on('toggle_market_size_visibility', function() {
 
     $scope.is_visible = !$scope.is_visible;
+
+    $rootScope.area_layers.census_blocks_layer.set_highlighteable($scope.is_visible);
   });
 
   // Hide if DBR tool is selected and this is open
@@ -23,9 +25,9 @@ app.controller('market_size_controller', ['$scope', '$rootScope', '$http', 'sele
   });
 
   $rootScope.$on('map_layer_clicked_feature', function(e, event, layer) {
-    if (layer.type === 'census_blocks') {
+    if (layer.type === 'census_blocks' && $scope.is_visible) {
       console.log('selected census block gid =', event.feature.getProperty('id'));
-      // TODO: show market size tool and load the data
+      // TODO: load data for this census_block
     }
   });
 

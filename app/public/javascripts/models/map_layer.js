@@ -34,13 +34,13 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		});
 
 		data_layer.addListener('mouseover', function(event) {
-			if (layer.style_options.highlight && event.feature) {
+			if (layer.highlighteable && event.feature) {
 				layer.data_layer.overrideStyle(event.feature, layer.style_options.highlight);
 			}
 		});
 
 		data_layer.addListener('mouseout', function(event) {
-			if (layer.style_options.highlight && event.feature) {
+			if (layer.highlighteable && event.feature) {
 				layer.data_layer.overrideStyle(event.feature, layer.style_options.normal);
 			}
 		});
@@ -57,6 +57,13 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			});
 		}
 	}
+
+	MapLayer.prototype.set_highlighteable = function(highlighteable) {
+		if (!highlighteable) {
+			this.data_layer.revertStyle();
+		}
+		this.highlighteable = highlighteable;
+	};
 
 	function create_empty_changes(layer) {
 		var type = layer.type
