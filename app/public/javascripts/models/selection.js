@@ -2,6 +2,7 @@ app.service('selection', function($rootScope, $http) {
 
   var selection = {};
   var collectionNames = [];
+  var enabled = false;
 
   function add_selection_collection(name) {
     collectionNames.push(name);
@@ -52,6 +53,14 @@ app.service('selection', function($rootScope, $http) {
         feature_layers[key].sync_selection();
       }
     }
+  };
+
+  selection.set_enabled = function(_enabled) {
+    enabled = _enabled;
+  };
+
+  selection.is_enabled = function() {
+    return enabled;
   };
 
   return selection;

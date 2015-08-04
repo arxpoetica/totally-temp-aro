@@ -32,6 +32,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
 
     $http.get('/route_optimizer/'+route.id).success(function(response) {
       redraw_route(response);
+      selection.set_enabled(true);
     });
   };
 
@@ -140,7 +141,5 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
       });
     });
   }
-
-  $scope.show_routes();
 
 }]);
