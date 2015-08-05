@@ -56,7 +56,7 @@ WHERE
     ST_Distance(locations.geog, (SELECT geom FROM ( SELECT edges.geom, ST_Distance(edges.geom::geography, locations.geom::geography) AS distance FROM aro.edges ORDER BY locations.geom <#> edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1)::geography) <= 452.7
 ;
 
--- Draw segment from each of the client's splice points to the nearest road segment and add to edge_network
+-- Draw segment from each of the client's network nodes to the nearest road segment and add to edge_network
 INSERT INTO client.edge_network
 (
     edge_type,
@@ -64,15 +64,13 @@ INSERT INTO client.edge_network
     geom
 )
 SELECT
-    'splice_point_link',
-    -- First retrieve the 5 closest edges to each splice_point, using index-based bounding box search.
+    'network_node_link',
+    -- First retrieve the 5 closest edges to each network_node, using index-based bounding box search.
     -- Then measure geographic distance to each (spheroid calcualtion) and find the closest.
-    -- Draw line connecting splice_point to edge.
-    ST_ShortestLine(splice_points.geom, (SELECT geom FROM ( SELECT edges.geom, ST_Distance(edges.geom::geography, splice_points.geom::geography) AS distance FROM aro.edges ORDER BY splice_points.geom <#> edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1))
+    -- Draw line connecting network_node to edge.
+    ST_ShortestLine(network_nodes.geom, (SELECT geom FROM ( SELECT edges.geom, ST_Distance(edges.geom::geography, network_nodes.geom::geography) AS distance FROM aro.edges ORDER BY network_nodes.geom <#> edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1))
 FROM
-    aro.splice_points
-WHERE
-    splice_points.carrier_name = 'VERIZON'
+    client.network_nodes
 ;
 CREATE INDEX idx_client_edge_network_geom_gist ON client.edge_network USING gist(geom);
 

@@ -18,7 +18,6 @@ var CountySubdivision = models.CountySubdivision;
 var CensusBlock = models.CensusBlock;
 var Location = models.Location;
 var Network = models.Network;
-var SplicePoint = models.SplicePoint;
 var RouteOptimizer = models.RouteOptimizer;
 var Wirecenter = models.Wirecenter;
 
@@ -99,11 +98,12 @@ app.get('/network/fiber_plant/:carrier_name', function(request, response, next) 
 	Network.view_fiber_plant_for_carrier(carrier_name, jsonHandler(response, next));
 });
 
-// Splice Points
-app.get('/splice_points/:carrier_name', function(request, response, next) {
-	var carrier_name = request.params.carrier_name;
-	SplicePoint.find_by_carrier(carrier_name, jsonHandler(response, next));
+// Network nodes for user client by node type
+app.get('/network/nodes/:node_type', function(request, response, next) {
+	var node_type = request.params.node_type;
+	Network.view_network_nodes_by_type(node_type, jsonHandler(response, next));
 });
+
 
 // Route Optimizer
 app.get('/route_optimizer/shortest_path/:source_id/:target_ids/:cost_per_meter', function(request, response, next) {

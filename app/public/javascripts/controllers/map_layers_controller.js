@@ -70,11 +70,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     heatmap: true,
   });
 
-  feature_layers['splice_points'] = new MapLayer({
-    type: 'splice_points',
+  feature_layers['network_nodes'] = new MapLayer({
+    type: 'network_nodes',
     name: 'Central offices',
     short_name: 'CO',
-    api_endpoint: '/splice_points/VERIZON',
+    api_endpoint: '/network/nodes/central_office',
     style_options: {
       normal: {
         icon: '/images/map_icons/splice_point.png',

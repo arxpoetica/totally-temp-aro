@@ -27,7 +27,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     $scope.is_visible = true;
     $('#select-route').modal('hide');
 
-    $rootScope.feature_layers.splice_points.set_always_show_selected($scope.always_shows_sources);
+    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
     $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
 
     $http.get('/route_optimizer/'+route.id).success(function(response) {
@@ -102,7 +102,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {
     if (!$scope.route) return;
 
-    if (layer.type === 'locations' || layer.type === 'splice_points') {
+    if (layer.type === 'locations' || layer.type === 'network_nodes') {
       $http.post('/route_optimizer/'+$scope.route.id+'/edit', changes).success(function(response) {
         redraw_route(response);
       });
@@ -110,7 +110,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   });
 
   $scope.toggle_always_show_sources = function() {
-    $rootScope.feature_layers.splice_points.set_always_show_selected($scope.always_shows_sources);
+    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
   };
 
   $scope.toggle_always_show_targets = function() {
