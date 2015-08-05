@@ -14,6 +14,12 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   * FUNCTIONS *
   *************/
 
+  $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
+    if (tool === 'route' && !$scope.route) {
+      $scope.show_routes();
+    }
+  });
+
   $scope.select_route = function(route) {
     $scope.route = route;
     map_tools.show('route');
