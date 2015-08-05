@@ -14,7 +14,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   });
 
   $rootScope.$on('contextual_menu_map', function(e, options) {
-    if (!rootScope.feature_layers.locations.is_visible) return;
+    if (!$rootScope.feature_layers.locations.is_visible) return;
 
     options.add('Add location here', function(event) {
       var lat = event.latLng.lat();

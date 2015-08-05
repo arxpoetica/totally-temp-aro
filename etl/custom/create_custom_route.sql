@@ -8,3 +8,6 @@ CREATE TABLE custom.route
   cable_type varchar,
   CONSTRAINT custom_route_pkey PRIMARY KEY (id)
 );
+
+-- Add reference to route in client.network_nodes
+ALTER TABLE client.network_nodes ADD COLUMN route_id bigint REFERENCES custom.route ON DELETE CASCADE;
