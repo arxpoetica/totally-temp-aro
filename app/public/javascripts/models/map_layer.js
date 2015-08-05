@@ -18,7 +18,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		var collection;
 		if (this.type === 'locations') {
 			collection = selection.targets;
-		} else if (this.type === 'splice_points') {
+		} else if (this.type === 'network_nodes') {
 			collection = selection.sources;
 		}
 		this.collection = collection;
