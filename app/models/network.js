@@ -69,4 +69,10 @@ Network.view_network_nodes_by_type = function(node_type, callback) {
   .end(callback)
 };
 
+// View all the available network node types
+Network.view_network_node_types = function(callback) {
+  var sql = 'SELECT * FROM client.network_node_types';
+  database.query(sql, callback);
+};
+
 module.exports = Network;

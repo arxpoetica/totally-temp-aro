@@ -78,6 +78,19 @@ describe('Network', function() {
 				done();
 			});
 		});
-
 	});
+
+	describe('#view_network_node_types()', function() {
+		it('should return all available network node types', function(done) {
+			Network.view_network_node_types(function(err, output) {
+				expect(err).to.be.null;
+				expect(output.length).to.be.above(0);
+				expect(output[0]).to.have.property('id');
+				expect(output[0]).to.have.property('name');
+				expect(output[0]).to.have.property('description');
+				done();
+			});
+		});
+	});
+
 });

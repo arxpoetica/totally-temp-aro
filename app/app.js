@@ -104,6 +104,10 @@ app.get('/network/nodes/:node_type', function(request, response, next) {
 	Network.view_network_nodes_by_type(node_type, jsonHandler(response, next));
 });
 
+// Network node types
+app.get('/network/nodes', function(request, response, next) {
+	Network.view_network_node_types(jsonHandler(response, next));
+});
 
 // Route Optimizer
 app.get('/route_optimizer/shortest_path/:source_id/:target_ids/:cost_per_meter', function(request, response, next) {
