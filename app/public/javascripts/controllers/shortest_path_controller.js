@@ -33,6 +33,9 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     $http.get('/route_optimizer/'+route.id).success(function(response) {
       redraw_route(response);
       selection.set_enabled(true);
+      if ((response.metadata.sources || []).length > 0) {
+        $rootScope.feature_layers.network_nodes.show();
+      }
     });
   };
 

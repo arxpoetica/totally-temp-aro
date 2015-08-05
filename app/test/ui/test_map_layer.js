@@ -13,7 +13,7 @@ describe('Map layer', function() {
     $httpBackend = _$httpBackend_;
 
     $httpBackend
-      .when('GET', '/network_nodes/central_office')
+      .when('GET', '/network/nodes/central_office')
       .respond(features);
 
     MapLayer = $injector.get('MapLayer');
@@ -28,9 +28,9 @@ describe('Map layer', function() {
 
     layer = new MapLayer({
       type: 'network_nodes',
-      name: 'Splice points',
+      name: 'Central offices',
       short_name: 'SP',
-      api_endpoint: '/network_nodes/VERIZON',
+      api_endpoint: '/network/nodes/central_office',
       style_options: {
         normal: {
           icon: '/images/map_icons/splice_point.png',
