@@ -41,7 +41,7 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, callback) {
 // 
 // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
 Network.view_network_nodes_by_type = function(node_type, callback) {
-  var sql = 'SELECT id, ST_AsGeoJSON(geom)::json AS geom FROM client.network_nodes WHERE node_type = $1';
+  var sql = 'SELECT n.id, ST_AsGeoJSON(geom)::json AS geom FROM client.network_nodes n join client.network_node_types t on n.node_type_id = t.id WHERE n.name = $1';
 
   txain(function(callback) {
     database.query(sql, [node_type], callback);
@@ -51,7 +51,8 @@ Network.view_network_nodes_by_type = function(node_type, callback) {
       return {
         'type': 'Feature',
         'properties': {
-          'id': row.id
+          'id': row.id,
+          'type' : node_type
         },
         'geometry': row.geom,
       }

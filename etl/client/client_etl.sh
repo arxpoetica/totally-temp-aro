@@ -9,6 +9,9 @@ PSQL=${PGBIN}/psql
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
+# Create and load network node types table
+${PSQL} -a -f $DIR/create_client_network_node_types.sql
+
 # Create and load network nodes table
 ${PSQL} -a -f $DIR/create_client_network_nodes.sql
 
