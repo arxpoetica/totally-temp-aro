@@ -28,7 +28,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 		data_layer.addListener('click', function(event) {
 			$rootScope.$broadcast('map_layer_clicked_feature', event, layer);
-			if (!selection.is_enabled()) return;
+			if (!selection.is_enabled() || !event.feature.getProperty('id')) return;
 			var changes = create_empty_changes(layer);
 			layer.toggle_feature(event.feature, changes);
 			broadcast_changes(layer, changes);
