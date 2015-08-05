@@ -42,6 +42,11 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
       name: 'Market Size',
       short_name: 'MS',
     },
+    {
+      id: 'equipment_nodes',
+      name: 'Equipment nodes',
+      short_name: 'ENT',
+    },
   ];
 
   return tools;

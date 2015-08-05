@@ -180,10 +180,9 @@
         </div>
       </div>
 
-      <div ng-show="map_tools.is_visible('route')" class="panel panel-primary" id="shortest_path_controller">
+      <div ng-show="map_tools.is_visible('route') && route != null" class="panel panel-primary" id="shortest_path_controller">
         <div class="panel-heading">Distance Based Route Plan</div>
           <div class="panel-body">
-
             <form class="form-horizontal">
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Sources</label>
@@ -277,6 +276,27 @@
       </div>
     </div>
 
+    <div ng-controller="equipment_nodes_controller">
+      <div ng-show="map_tools.is_visible('equipment_nodes')" class="panel panel-primary" id="equipment_nodes_controller">
+        <div class="panel-heading">Add equipment nodes</div>
+          <div class="panel-body">
+            <form class="form-horizontal">
+              <div class="form-group form-group-sm" style="margin-bottom: 0">
+                <label class="col-sm-3 control-label">Node type</label>
+                <div class="col-sm-9">
+                  <select class="form-control">
+                    <option value="splice_point">Splice Point</option>
+                    <option value="fiber_deployment_hub" selected>Fiber Deployment Hub</option>
+                    <option value="fiber_deployent_terminal">Fiber Deployment Terminal</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="map-canvas"></div>
 
     <div ng-controller="contextual_menu_controller">
@@ -330,6 +350,7 @@
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
   <script src="javascripts/controllers/market_size_controller.js"></script>
+  <script src="javascripts/controllers/equipment_nodes_controller.js"></script>
   <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/controllers/selection_tools_controller.js"></script>
