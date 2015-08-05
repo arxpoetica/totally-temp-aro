@@ -141,7 +141,7 @@ RouteOptimizer.find_route = function(route_id, callback) {
   .then(function(targets, callback) {
     output.metadata.targets = targets.map(function(row) { return +row.id });
     var sql = multiline(function() {;/*
-      SELECT splice_point_id AS id
+      SELECT network_node_id AS id
       FROM custom.route_sources
       WHERE route_id=$1
     */});
@@ -269,13 +269,13 @@ RouteOptimizer.save_route = function(route_id, data, callback) {
 
 RouteOptimizer.edit_route = function(route_id, changes, callback) {
   txain(function(callback) {
-    add_sources(route_id, changes.insertions && changes.insertions.splice_points, callback);
+    add_sources(route_id, changes.insertions && changes.insertions.network_nodes, callback);
   })
   .then(function(callback) {
     add_targets(route_id, changes.insertions && changes.insertions.locations, callback);
   })
   .then(function(callback) {
-    delete_sources(route_id, changes.deletions && changes.deletions.splice_points, callback);
+    delete_sources(route_id, changes.deletions && changes.deletions.network_nodes, callback);
   })
   .then(function(callback) {
     delete_targets(route_id, changes.deletions && changes.deletions.locations, callback);
@@ -286,31 +286,31 @@ RouteOptimizer.edit_route = function(route_id, changes, callback) {
   .end(callback);
 };
 
-function add_sources(route_id, splice_point_ids, callback) {
-  if (!_.isArray(splice_point_ids) || splice_point_ids.length === 0) return callback();
+function add_sources(route_id, network_node_ids, callback) {
+  if (!_.isArray(network_node_ids) || network_node_ids.length === 0) return callback();
 
   txain(function(callback) {
     // avoid duplicates
     var sql = multiline(function() {;/*
       DELETE FROM custom.route_sources
-      WHERE route_id=$1 AND splice_point_id IN ($2)
+      WHERE route_id=$1 AND network_node_id IN ($2)
     */});
-    database.execute(sql, [route_id, splice_point_ids], callback);
+    database.execute(sql, [route_id, network_node_ids], callback);
   })
   .then(function(callback) {
     // calculate closest vertex
     var sql = multiline(function() {;/*
-      INSERT INTO custom.route_sources (vertex_id, splice_point_id, route_id)
+      INSERT INTO custom.route_sources (vertex_id, network_node_id, route_id)
       (SELECT
-        vertex.id AS vertex_id, splice_points.id, $2
+        vertex.id AS vertex_id, network_nodes.id, $2
       FROM
         client.graph_vertices_pgr AS vertex
-      JOIN aro.splice_points splice_points
-        ON splice_points.geom && vertex.the_geom
+      JOIN client.network_nodes network_nodes
+        ON network_nodes.geom && vertex.the_geom
       WHERE
-        splice_points.id IN ($1))
+        network_nodes.id IN ($1))
     */});
-    database.execute(sql, [splice_point_ids, route_id], callback);
+    database.execute(sql, [network_node_ids, route_id], callback);
   })
   .end(callback);
 };
@@ -344,16 +344,16 @@ function add_targets(route_id, location_ids, callback) {
   .end(callback);
 };
 
-function delete_sources(route_id, splice_point_ids, callback) {
-  if (!_.isArray(splice_point_ids) || splice_point_ids.length === 0) return callback();
+function delete_sources(route_id, network_node_ids, callback) {
+  if (!_.isArray(network_node_ids) || network_node_ids.length === 0) return callback();
 
-  txain(splice_point_ids)
-  .each(function(splice_point_id, callback) {
+  txain(network_node_ids)
+  .each(function(network_node_id, callback) {
     var sql = multiline(function() {;/*
       DELETE FROM custom.route_sources
-      WHERE route_id=$1 AND splice_point_id=$2
+      WHERE route_id=$1 AND network_node_id=$2
     */});
-    database.execute(sql, [route_id, splice_point_id], callback);
+    database.execute(sql, [route_id, network_node_id], callback);
   })
   .then(function() {
     RouteOptimizer.recalculate_and_find_route(route_id, callback);

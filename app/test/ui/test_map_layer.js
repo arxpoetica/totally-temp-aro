@@ -13,7 +13,7 @@ describe('Map layer', function() {
     $httpBackend = _$httpBackend_;
 
     $httpBackend
-      .when('GET', '/splice_points/VERIZON')
+      .when('GET', '/network/nodes/central_office')
       .respond(features);
 
     MapLayer = $injector.get('MapLayer');
@@ -27,10 +27,10 @@ describe('Map layer', function() {
     });
 
     layer = new MapLayer({
-      type: 'splice_points',
-      name: 'Splice points',
+      type: 'network_nodes',
+      name: 'Central offices',
       short_name: 'SP',
-      api_endpoint: '/splice_points/VERIZON',
+      api_endpoint: '/network/nodes/central_office',
       style_options: {
         normal: {
           icon: '/images/map_icons/splice_point.png',
@@ -84,7 +84,7 @@ describe('Map layer', function() {
 
   it('should create and show a layer with data already loaded', function() {
     var layer = new MapLayer({
-      type: 'splice_points',
+      type: 'network_nodes',
       name: 'Splice points',
       short_name: 'SP',
       data: features.feature_collection,

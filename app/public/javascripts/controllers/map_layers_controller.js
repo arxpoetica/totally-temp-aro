@@ -60,24 +60,29 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     style_options: {
       normal: {
         icon: '/images/map_icons/location_business_gray.png',
+        visible: true,
       },
       selected: {
         icon: '/images/map_icons/location_business_selected.png',
+        visible: true,
       }
     },
+    heatmap: true,
   });
 
-  feature_layers['splice_points'] = new MapLayer({
-    type: 'splice_points',
+  feature_layers['network_nodes'] = new MapLayer({
+    type: 'network_nodes',
     name: 'Central offices',
     short_name: 'CO',
-    api_endpoint: '/splice_points/VERIZON',
+    api_endpoint: '/network/nodes/central_office',
     style_options: {
       normal: {
         icon: '/images/map_icons/splice_point.png',
+        visible: true,
       },
       selected: {
         icon: '/images/map_icons/splice_point_selected.png',
+        visible: true,
       }
     },
   });
@@ -103,6 +108,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   });
 
   area_layers['census_blocks_layer'] = new MapLayer({
+    type: 'census_blocks',
     short_name: 'CB',
     name: 'Census Blocks layer',
     api_endpoint: '/census_blocks/36/061',
@@ -111,6 +117,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         fillColor: 'blue',
         strokeColor: 'blue',
         strokeWeight: 2,
+      },
+      highlight: {
+        fillColor: 'blue',
+        strokeColor: 'blue',
+        strokeWeight: 5,
       }
     },
   });

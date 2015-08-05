@@ -1,31 +1,39 @@
 // Shortest Path Controller
-app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', function($scope, $rootScope, $http, selection, MapLayer) {
+app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', function($scope, $rootScope, $http, selection, MapLayer, map_tools) {
   // Controller instance variables
-  $scope.is_visible = false;
+  $scope.map_tools = map_tools;
   $scope.selection = selection;
 
   $scope.route = null;
   $scope.routes = [];
 
+  $scope.always_shows_sources = true;
+  $scope.always_shows_targets = true;
+
   /************
   * FUNCTIONS *
   *************/
 
-  // Listen for visibility toggle to be broadcast through $rootScope from other controller (map_tools_controller)
-  $rootScope.$on('toggle_tool_visibility', function() {
-    if (!$scope.is_visible && !$scope.route) {
-      return $scope.show_routes();
+  $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
+    if (tool === 'route' && !$scope.route) {
+      $scope.show_routes();
     }
-    $scope.is_visible = !$scope.is_visible;
   });
 
   $scope.select_route = function(route) {
     $scope.route = route;
-    $scope.is_visible = true;
+    map_tools.show('route');
     $('#select-route').modal('hide');
+
+    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
+    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
 
     $http.get('/route_optimizer/'+route.id).success(function(response) {
       redraw_route(response);
+      selection.set_enabled(true);
+      if ((response.metadata.sources || []).length > 0) {
+        $rootScope.feature_layers.network_nodes.show();
+      }
     });
   };
 
@@ -95,12 +103,20 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {
     if (!$scope.route) return;
 
-    if (layer.type === 'locations' || layer.type === 'splice_points') {
+    if (layer.type === 'locations' || layer.type === 'network_nodes') {
       $http.post('/route_optimizer/'+$scope.route.id+'/edit', changes).success(function(response) {
         redraw_route(response);
       });
     }
   });
+
+  $scope.toggle_always_show_sources = function() {
+    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
+  };
+
+  $scope.toggle_always_show_targets = function() {
+    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
+  };
 
   $scope.save_changes = function() {
     $http.post('/route_optimizer/'+$scope.route.id+'/save', $scope.route).success(function(response) {
@@ -126,7 +142,5 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
       });
     });
   }
-
-  $scope.show_routes();
 
 }]);

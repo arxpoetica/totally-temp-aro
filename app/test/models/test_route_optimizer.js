@@ -42,7 +42,7 @@ describe('RouteOptimizer', function() {
 			var changes = {
 				insertions: {
 					locations: [target],
-					splice_points: [source],
+					network_nodes: [source],
 				},
 			};
 			RouteOptimizer.edit_route(route_id, changes, function(err, route) {
@@ -71,7 +71,7 @@ describe('RouteOptimizer', function() {
 			var changes = {
 				deletions: {
 					locations: [target],
-					splice_points: [source],
+					network_nodes: [source],
 				},
 			};
 			RouteOptimizer.edit_route(route_id, changes, function(err, route) {

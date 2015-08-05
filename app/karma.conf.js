@@ -17,7 +17,7 @@ module.exports = function(config) {
     files: [
       'node_modules/angular/angular.js',
       'node_modules/angular-mocks/angular-mocks.js',
-      'https://maps.googleapis.com/maps/api/js?v=3.exp',
+      'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization',
       'https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js',
       'test/ui/chai.js',
       'test/ui/init.js',
