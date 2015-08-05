@@ -108,6 +108,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   });
 
   area_layers['census_blocks_layer'] = new MapLayer({
+    type: 'census_blocks',
     short_name: 'CB',
     name: 'Census Blocks layer',
     api_endpoint: '/census_blocks/36/061',
@@ -116,6 +117,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         fillColor: 'blue',
         strokeColor: 'blue',
         strokeWeight: 2,
+      },
+      highlight: {
+        fillColor: 'blue',
+        strokeColor: 'blue',
+        strokeWeight: 5,
       }
     },
   });

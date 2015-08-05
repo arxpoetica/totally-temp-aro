@@ -1,7 +1,7 @@
 // Shortest Path Controller
-app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', function($scope, $rootScope, $http, selection, MapLayer) {
+app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', function($scope, $rootScope, $http, selection, MapLayer, map_tools) {
   // Controller instance variables
-  $scope.is_visible = false;
+  $scope.map_tools = map_tools;
   $scope.selection = selection;
 
   $scope.route = null;
@@ -14,17 +14,9 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   * FUNCTIONS *
   *************/
 
-  // Listen for visibility toggle to be broadcast through $rootScope from other controller (map_tools_controller)
-  $rootScope.$on('toggle_tool_visibility', function() {
-    if (!$scope.is_visible && !$scope.route) {
-      return $scope.show_routes();
-    }
-    $scope.is_visible = !$scope.is_visible;
-  });
-
   $scope.select_route = function(route) {
     $scope.route = route;
-    $scope.is_visible = true;
+    map_tools.show('route');
     $('#select-route').modal('hide');
 
     $rootScope.feature_layers.splice_points.set_always_show_selected($scope.always_shows_sources);
