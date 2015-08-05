@@ -36,6 +36,7 @@
         <div ng-repeat="tool in map_tools.available_tools">
           <p>
             <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
+              ng-attr-id="map_tools_toggle_{{tool.id}}"
               ng-class="{'btn-success active': map_tools.is_visible(tool.id)}"
               ng-click="map_tools.toggle(tool.id)">{{tool.short_name}}</a>
           </p>

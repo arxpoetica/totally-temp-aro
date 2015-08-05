@@ -28,7 +28,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 		data_layer.addListener('click', function(event) {
 			$rootScope.$broadcast('map_layer_clicked_feature', event, layer);
-			if (!selection.is_enabled() || !event.feature.getProperty('id')) return;
+			if (!selection.is_enabled() || !event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return;
 			var changes = create_empty_changes(layer);
 			layer.toggle_feature(event.feature, changes);
 			broadcast_changes(layer, changes);
@@ -144,6 +144,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			} else {
 				layer.data = val;
 			}
+			layer.clear_data();
 		}
 		if (!layer.data_loaded) {
 			if (layer.data) {
@@ -151,7 +152,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				load_heatmap_layer();
 				layer.data_loaded = true;
 				$rootScope.$broadcast('map_layer_loaded_data', layer);
-				return;
+				this.configure_icons();
 			} else if (this.api_endpoint) {
 				$http.get(this.api_endpoint).success(function(response) {
 					var data = response;
@@ -161,6 +162,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 					layer.data_loaded = true;
 					$rootScope.$broadcast('map_layer_loaded_data', layer);
 
+					layer.configure_icons();
 					layer.sync_selection();
 				});
 			}
@@ -174,6 +176,21 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			});
 			layer.heatmap_layer.setData(new google.maps.MVCArray(arr));
 		}
+	}
+
+	MapLayer.prototype.reload_data = function() {
+		this.clear_data();
+		this.load_data();
+	};
+
+	MapLayer.prototype.configure_icons = function() {
+		var data = this.data_layer;
+		data.forEach(function(feature) {
+			var icon = feature.getProperty('icon');
+			if (icon) {
+				data.overrideStyle(feature, { icon: icon });
+			}
+		});
 	}
 
 	MapLayer.prototype.sync_selection = function() {
@@ -257,14 +274,19 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		data.forEach(function(feature) {
 			data.remove(feature);
 		});
+		this.data_loaded = false;
 		this.metadata = {};
 	}
 
 	MapLayer.prototype.revert_styles = function() {
-		this.data_layer.revertStyle();
-		this.data_layer.forEach(function(feature) {
+		var data = this.data_layer;
+		data.revertStyle();
+		data.forEach(function(feature) {
 			delete feature.selected;
-			delete feature.vertex_id;
+			var icon = feature.getProperty('icon');
+			if (icon) {
+				data.overrideStyle(feature, { icon: icon });
+			}
 		});
 	}
 

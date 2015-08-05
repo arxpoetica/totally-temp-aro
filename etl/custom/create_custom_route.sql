@@ -11,3 +11,5 @@ CREATE TABLE custom.route
 
 -- Add reference to route in client.network_nodes
 ALTER TABLE client.network_nodes ADD COLUMN route_id bigint REFERENCES custom.route ON DELETE CASCADE;
+
+CREATE INDEX client_network_nodes_route_index ON client.network_nodes(route_id);
