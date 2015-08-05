@@ -24,7 +24,7 @@ html, body, #map-canvas {
 #market_size_controller {
   position: absolute;
   margin-left: 75px;
-  margin-top: 50px;
+  margin-top: 20px;
   z-index: 1;
   border: 2px solid #eee;
   width: 300px;
