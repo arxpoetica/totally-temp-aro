@@ -41,27 +41,30 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   });
 
   $scope.clear_area = function() {
-    var bounds = map.getBounds();
-    var ne = bounds.getNorthEast();
-    var sw = bounds.getSouthWest();
-    var nw = new google.maps.LatLng(ne.lat(), sw.lng());
-    var se = new google.maps.LatLng(sw.lat(), ne.lng());
-
-    geo_json = JSON.stringify({
-      "type":"MultiPolygon",
-      "coordinates":[[[
-        [ne.lng(),ne.lat()],
-        [se.lng(),se.lat()],
-        [sw.lng(),sw.lat()],
-        [nw.lng(),nw.lat()],
-        [ne.lng(),ne.lat()],
-      ]]]
-    });
+    $scope.area = null;
     $scope.calculate_market_size();
   }
 
   var canceller = null;
   $scope.calculate_market_size = function() {
+    if (!$scope.area) {
+      var bounds = map.getBounds();
+      var ne = bounds.getNorthEast();
+      var sw = bounds.getSouthWest();
+      var nw = new google.maps.LatLng(ne.lat(), sw.lng());
+      var se = new google.maps.LatLng(sw.lat(), ne.lng());
+
+      geo_json = JSON.stringify({
+        "type":"MultiPolygon",
+        "coordinates":[[[
+          [ne.lng(),ne.lat()],
+          [se.lng(),se.lat()],
+          [sw.lng(),sw.lat()],
+          [nw.lng(),nw.lat()],
+          [ne.lng(),ne.lat()],
+        ]]]
+      });
+    }
     var params = {
       geo_json: geo_json,
       industry: $scope.industry && $scope.industry.id,
@@ -70,7 +73,10 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     };
     if (canceller) canceller.resolve();
     canceller = $q.defer();
-    var args = { params: params, timeout: canceller.promise };
+    var args = {
+      params: params,
+      timeout: canceller.promise,
+    };
     $scope.total = [];
     $http.get('/market_size/calculate', args).success(function(response) {
       $scope.total = _.reject(response, function(row) {
@@ -78,6 +84,27 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       });
     })
   }
+
+  var dragging = false;
+  $rootScope.$on('map_dragstart', function() {
+    dragging = true;
+  });
+  $rootScope.$on('map_dragend', function() {
+    dragging = false;
+    $scope.calculate_market_size();
+  });
+
+  $rootScope.$on('map_bounds_changed', function() {
+    if (map_tools.is_visible('market_size') && !dragging) {
+      $scope.calculate_market_size();
+    }
+  });
+
+  $rootScope.$on('map_tool_changed_visibility', function() {
+    if (map_tools.is_visible('market_size')) {
+      $scope.calculate_market_size();
+    }
+  });
 
 
 }]);

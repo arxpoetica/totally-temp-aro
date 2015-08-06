@@ -16,7 +16,11 @@ app.config(function($httpProvider) {
       },
 
       'responseError': function(rejection) {
-        handleRejection(rejection);
+        if (rejection.config.timeout && rejection.status === 0) {
+          // do nothing
+        } else {
+          handleRejection(rejection);
+        }
         return $q.reject(rejection);
       }
     };
