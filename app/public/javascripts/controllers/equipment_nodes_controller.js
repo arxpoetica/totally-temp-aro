@@ -2,15 +2,18 @@
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', function($scope, $rootScope, $http, selection, map_tools) {
   // Controller instance variables
   $scope.map_tools = map_tools;
-  $scope.node_type = 'splice_point';
+  $scope.node_type;
 
   // TODO: fetch this information from the server
-  var node_types = $scope.node_types = [
-    { id: 1, name: 'central_office', description: 'Central Office' },
-    { id: 2, name: 'splice_point', description: 'Splice Point' },
-    { id: 3, name: 'fiber_deployment_hub', description: 'Fiber Deployment Hub' },
-    { id: 4, name: 'fiber_deployent_terminal', description: 'Fiber Deployment Terminal' },
-  ];
+  var node_types = $scope.node_types = [];
+
+  $http.get('/network/nodes').success(function(response) {
+    response = _.reject(response, function(type) {
+      return type.name === 'central_office';
+    });
+    node_types = $scope.node_types = response;
+    $scope.node_type = response[0];
+  })
 
   function empty_changes() {
     return { insertions:[] };
@@ -58,7 +61,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('map_click', function(e, gm_event) {
     if (!map_tools.is_visible('equipment_nodes') || !route) return;
 
-    var type = $scope.node_type;
+    var type = $scope.node_type.name;
     var coordinates = gm_event.latLng;
     var feature = {
       type: 'Feature',
