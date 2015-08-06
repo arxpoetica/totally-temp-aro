@@ -87,12 +87,23 @@ def delete_industry_mapping(db):
 
 def add_employees_by_location(db, loc_sizes):
     print "Adding employee information..."
+
+    split = [x.replace(' Emp', '').replace('+', '').split('-') for x in loc_sizes.loc[:,'employees_at_location_range']]
+    min_ranges = [int(x[0]) for x in split]
+    max_ranges = [int(x[1]) for x in split if len(x) > 1]
+    max_ranges.append(1000000)
+    
+    loc_sizes.loc[:,'min_value'] = min_ranges
+    loc_sizes.loc[:,'max_value'] = max_ranges
+    
     cur = db.cursor()
     
     values = loc_sizes.to_dict('split')['data']
 
-    sql_query = """INSERT INTO client.employees_by_location (value_range)
-                    VALUES (%s);
+    sql_query = """INSERT INTO client.employees_by_location (value_range, 
+                                                             min_value, 
+                                                             max_value)
+                    VALUES (%s, %s, %s);
                 """
     
     cur.executemany(sql_query, values)
