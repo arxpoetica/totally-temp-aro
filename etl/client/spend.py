@@ -224,7 +224,54 @@ def delete_spend(db):
     sql_query = """DELETE FROM client.spend;
                 """
     
+    cur = db.cursor()
+    
     cur.execute(sql_query)
+    cur.close()
+    
+    db.commit()
+        
+def delete_industry_mapping(db):
+    sql_query = """DROP TABLE client.industry_mapping CASCADE;
+                """
+    
+    cur = db.cursor()
+    
+    cur.execute(sql_query)
+    
+def delete_industries(db):
+    sql_query = """DELETE FROM client.industries;
+                """
+    
+    cur = db.cursor()
+    
+    cur.execute(sql_query)
+    cur.close()
+
+    db.commit()
+
+def delete_products(db):
+    sql_query = """DELETE FROM client.products;
+                """
+    
+    cur = db.cursor()
+    
+    cur.execute(sql_query)
+    cur.close()
+
+    db.commit()
+
+def delete_emps_by_location(db):
+    sql_query = """DELETE FROM client.employees_by_location;
+                """
+    
+    cur = db.cursor()
+    
+    cur.execute(sql_query)
+    cur.close()
+
+    db.commit()
+
     cur.close()
 
     db.commit()
