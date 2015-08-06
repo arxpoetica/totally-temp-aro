@@ -2,6 +2,7 @@ var expect = require('chai').expect;
 var CountySubdivision = require('../../models/county_subdivision.js');
 
 describe('CountySubdivision', function() {
+	this.timeout(5000);
 
 	describe('#find_by_statefp()', function() {
 		var statefp = '53';
