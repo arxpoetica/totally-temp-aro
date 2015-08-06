@@ -20,6 +20,8 @@ CREATE TABLE client.employees_by_location
 (
 	id serial,
 	value_range varchar,
+	min_value integer, 
+	max_value integer,
 	
 	CONSTRAINT pkey_employees_by_location_id PRIMARY KEY (id)
 );
