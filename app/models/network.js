@@ -52,7 +52,7 @@ Network.view_network_nodes_by_type = function(node_type, callback) {
         'type': 'Feature',
         'properties': {
           'id': row.id,
-          'type' : node_type
+          'type' : node_type,
         },
         'geometry': row.geom,
       }

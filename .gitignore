@@ -11,3 +11,5 @@ etl/client/*.pyc
 app/coverage
 
 app/npm-debug*.*
+
+*.pyc
