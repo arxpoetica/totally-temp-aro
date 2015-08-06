@@ -70,8 +70,8 @@ MarketSize.calculate = function(geo_json, threshold, filters, callback) {
       client.employees_by_location e
     ON
       e.id = spend.employees_by_location_id
-      AND ((regexp_split_to_array(e.value_range, '\D+'))[1]::integer <= b.number_of_employees)
-      AND (((regexp_split_to_array(e.value_range, '\D+'))[2] || '9999999999999999999')::numeric >= b.number_of_employees)
+      AND e.min_value <= b.number_of_employees
+      AND e.max_value >= b.number_of_employees
     WHERE
       ST_Intersects(ST_Buffer(ST_GeomFromGeoJSON($x1)::geography, $x2), b.geog)
   */});
