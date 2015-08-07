@@ -49,6 +49,8 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   var canceller = null;
   $scope.calculate_market_size = function() {
     if (!$scope.area) {
+      return; // disable visible area feature by now
+
       var bounds = map.getBounds();
       var ne = bounds.getNorthEast();
       var sw = bounds.getSouthWest();
