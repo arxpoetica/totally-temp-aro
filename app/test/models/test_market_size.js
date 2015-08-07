@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var MarketSize = require('../../models/market_size.js');
 
-describe.only('MarketSize', function() {
+describe('MarketSize', function() {
   var filters;
 
   describe('#filters()', function() {

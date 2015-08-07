@@ -2,6 +2,7 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
 
   var tools = {};
   var visible = [];
+  var collapsed = {};
 
   tools.is_visible = function(name) {
     return visible.indexOf(name) >= 0;
@@ -29,6 +30,18 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
 
   tools.toggle = function(name) {
     tools.is_visible(name) ? tools.hide(name) : tools.show(name);
+  }
+
+  tools.expand = function(name) {
+    delete collapsed[name];
+  }
+
+  tools.collapse = function(name) {
+    collapsed[name] = true;
+  }
+
+  tools.is_expanded = function(name) {
+    return !collapsed[name];
   }
 
   tools.available_tools = [

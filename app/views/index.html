@@ -182,8 +182,17 @@
       </div>
 
       <div ng-show="map_tools.is_visible('route') && route != null" class="panel panel-primary" id="shortest_path_controller">
-        <div class="panel-heading">Distance Based Route Plan</div>
-          <div class="panel-body">
+        <div class="panel-heading">
+          <a href="#" class="pull-right" ng-show="map_tools.is_expanded('route')" ng-click="map_tools.collapse('route')">
+            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+          </a>
+          <a href="#" class="pull-right" ng-show="!map_tools.is_expanded('route')" ng-click="map_tools.expand('route')">
+            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+          </a>
+          Distance Based Route Plan
+        </div>
+        <div class="panel-body" ng-show="map_tools.is_expanded('route')">
+          <div>
             <form class="form-horizontal">
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Sources</label>
@@ -269,8 +278,17 @@
 
     <div ng-controller="market_size_controller">
       <div ng-show="map_tools.is_visible('market_size')" class="panel panel-primary" id="market_size_controller">
-        <div class="panel-heading">Market Size</div>
-          <div class="panel-body">
+        <div class="panel-heading">
+          <a href="#" class="pull-right" ng-show="map_tools.is_expanded('market_size')" ng-click="map_tools.collapse('market_size')">
+            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+          </a>
+          <a href="#" class="pull-right" ng-show="!map_tools.is_expanded('market_size')" ng-click="map_tools.expand('market_size')">
+            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+          </a>
+          Market Size
+        </div>
+        <div class="panel-body" ng-show="map_tools.is_expanded('market_size')">
+          <div>
             <form class="form-horizontal">
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Industry</label>
@@ -343,8 +361,17 @@
 
     <div ng-controller="equipment_nodes_controller">
       <div ng-show="map_tools.is_visible('equipment_nodes')" class="panel panel-primary" id="equipment_nodes_controller">
-        <div class="panel-heading">Add equipment nodes</div>
-          <div class="panel-body">
+        <div class="panel-heading">
+          <a href="#" class="pull-right" ng-show="map_tools.is_expanded('equipment_nodes')" ng-click="map_tools.collapse('equipment_nodes')">
+            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+          </a>
+          <a href="#" class="pull-right" ng-show="!map_tools.is_expanded('equipment_nodes')" ng-click="map_tools.expand('equipment_nodes')">
+            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+          </a>
+          Add equipment nodes
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('equipment_nodes')">
             <form class="form-horizontal">
               <div class="form-group form-group-sm" style="margin-bottom: 0">
                 <label class="col-sm-3 control-label">Node type</label>
