@@ -102,7 +102,26 @@ app.get('/network/fiber_plant/:carrier_name', function(request, response, next) 
 // Network nodes for user client by node type
 app.get('/network/nodes/:node_type', function(request, response, next) {
 	var node_type = request.params.node_type;
-	Network.view_network_nodes_by_type(node_type, jsonHandler(response, next));
+	Network.view_network_nodes(node_type, null, jsonHandler(response, next));
+});
+
+// Network nodes of an existing route
+app.get('/network/nodes/:route_id/find', function(request, response, next) {
+	var route_id = request.params.route_id;
+	Network.view_network_nodes(null, route_id, jsonHandler(response, next));
+});
+
+// Edit network nodes in a route
+app.post('/network/nodes/:route_id/edit', function(request, response, next) {
+	var route_id = request.params.route_id;
+	var changes = request.body;
+	Network.edit_network_nodes(route_id, changes, jsonHandler(response, next));
+});
+
+// Clear network nodes in a route
+app.post('/network/nodes/:route_id/clear', function(request, response, next) {
+	var route_id = request.params.route_id;
+	Network.clear_network_nodes(route_id, jsonHandler(response, next));
 });
 
 // Network node types

@@ -72,6 +72,7 @@ describe('Location', function() {
 
 		it('should create a location and give it an id', function(done) {
 			Location.create_location(values, function(err, output) {
+				expect(err).to.be.null;
 				expect(output.properties.id).to.not.be.null;
 				done();
 			});

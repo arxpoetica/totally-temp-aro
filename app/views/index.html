@@ -36,6 +36,7 @@
         <div ng-repeat="tool in map_tools.available_tools">
           <p>
             <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
+              ng-attr-id="map_tools_toggle_{{tool.id}}"
               ng-class="{'btn-success active': map_tools.is_visible(tool.id)}"
               ng-click="map_tools.toggle(tool.id)">{{tool.short_name}}</a>
           </p>
@@ -180,7 +181,7 @@
         </div>
       </div>
 
-      <div ng-show="map_tools.is_visible('route')" class="panel panel-primary" id="shortest_path_controller">
+      <div ng-show="map_tools.is_visible('route') && route != null" class="panel panel-primary" id="shortest_path_controller">
         <div class="panel-heading">Distance Based Route Plan</div>
           <div class="panel-body">
             <form class="form-horizontal">
@@ -340,6 +341,30 @@
       </div>
     </div>
 
+    <div ng-controller="equipment_nodes_controller">
+      <div ng-show="map_tools.is_visible('equipment_nodes')" class="panel panel-primary" id="equipment_nodes_controller">
+        <div class="panel-heading">Add equipment nodes</div>
+          <div class="panel-body">
+            <form class="form-horizontal">
+              <div class="form-group form-group-sm" style="margin-bottom: 0">
+                <label class="col-sm-3 control-label">Node type</label>
+                <div class="col-sm-9">
+                  <select class="form-control" ng-model="node_type" ng-options="node.description for node in node_types">
+                  </select>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <div class="col-sm-offset-3 col-sm-9">
+                  <button class="btn btn-sm btn-primary" ng-click="save_nodes()" type="button">Save nodes</button>
+                  <button class="btn btn-sm btn-danger" ng-click="clear_nodes()" type="button">Clear</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="map-canvas"></div>
 
     <div ng-controller="contextual_menu_controller">
@@ -393,6 +418,7 @@
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
   <script src="javascripts/controllers/market_size_controller.js"></script>
+  <script src="javascripts/controllers/equipment_nodes_controller.js"></script>
   <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/controllers/selection_tools_controller.js"></script>

@@ -77,11 +77,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     api_endpoint: '/network/nodes/central_office',
     style_options: {
       normal: {
-        icon: '/images/map_icons/splice_point.png',
+        icon: '/images/map_icons/central_office.png',
         visible: true,
       },
       selected: {
-        icon: '/images/map_icons/splice_point_selected.png',
+        icon: '/images/map_icons/central_office_selected.png',
         visible: true,
       }
     },
@@ -168,6 +168,10 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 2,
       }
     },
+  });
+
+  $rootScope.$on('route_selected', function(e, route) {
+    feature_layers.network_nodes.load_data('/network/nodes/'+route.id+'/find');
   });
 
 });

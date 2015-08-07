@@ -1,4 +1,5 @@
 var expect = require('chai').expect;
+var RouteOptimizer = require('../../models/route_optimizer.js');
 var Network = require('../../models/network.js');
 
 describe('Network', function() {
@@ -38,25 +39,26 @@ describe('Network', function() {
 
 	});
 
-	describe('#view_network_nodes_by_type()', function() {
+	describe('#view_network_nodes()', function() {
 		var node_type = 'central_office';
 
 		it('should return a feature collection', function(done) {
-			Network.view_network_nodes_by_type(node_type, function(err, output) {
+			Network.view_network_nodes(node_type, null, function(err, output) {
+				expect(err).to.be.null;
 				expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
 				done();
 			});
 		});
 
 		it('should return more than one feature', function(done) {
-			Network.view_network_nodes_by_type(node_type, function(err, output) {
+			Network.view_network_nodes(node_type, null, function(err, output) {
 				expect(output.feature_collection.features).to.have.length.above(0);
 				done();
 			});
 		});
 
 		it('should have a geometry feature which includes an array of Points', function(done) {
-			Network.view_network_nodes_by_type(node_type, function(err, output) {
+			Network.view_network_nodes(node_type, null, function(err, output) {
 				var first_feature = output.feature_collection.features[0];
 				expect(first_feature.geometry.type).to.equal('Point');
 				done();
@@ -64,7 +66,7 @@ describe('Network', function() {
 		});
 
 		it('should return a node id in its properties', function(done) {
-			Network.view_network_nodes_by_type(node_type, function(err, output) {
+			Network.view_network_nodes(node_type, null, function(err, output) {
 				var first_feature = output.feature_collection.features[0];
 				expect(first_feature.properties.id).to.be.above(0);
 				done();
@@ -72,7 +74,7 @@ describe('Network', function() {
 		});
 
 		it('should have an array of Points each with multiple coordinates', function(done) {
-			Network.view_network_nodes_by_type(node_type, function(err, output) {
+			Network.view_network_nodes(node_type, null, function(err, output) {
 				var first_geom = output.feature_collection.features[0].geometry.coordinates;
 				expect(first_geom).to.have.length.above(0);
 				done();
@@ -91,6 +93,75 @@ describe('Network', function() {
 				done();
 			});
 		});
+	});
+
+	describe('#edit_network_nodes() and #clear_network_nodes()', function() {
+		var route_id;
+		var nodes;
+
+		before(function(done) {
+			RouteOptimizer.create_route(function(err, route) {
+				expect(route).to.have.property('id');
+				expect(route).to.have.property('name');
+				route_id = route.id;
+				done();
+			});
+		});
+
+		it('should count the network nodes not associated to a route', function(done) {
+			Network.view_network_nodes(null, null, function(err, output) {
+				expect(err).to.be.null;
+				nodes = output.feature_collection.features.length;
+				done();
+			});
+		});
+
+		it('should not fail with empty changes', function(done) {
+			var changes = {};
+			Network.edit_network_nodes(route_id, changes, function(err, output) {
+				expect(err).to.not.exist;
+				done();
+			});
+		});
+
+		it('should return more than one feature', function(done) {
+			var changes = {
+				insertions: [
+					{
+						lat: 40.7752768348037,
+						lon: -73.9540386199951,
+						type: 2,
+					}
+				],
+			};
+			Network.edit_network_nodes(route_id, changes, function(err, output) {
+				expect(err).to.be.null;
+				done();
+			});
+		});
+
+		it('should count the network nodes associated to our route', function(done) {
+			Network.view_network_nodes(null, route_id, function(err, output) {
+				expect(err).to.be.null;
+				var diff = output.feature_collection.features.length - nodes;
+				expect(diff).to.be.equal(1);
+				done();
+			});
+		});
+
+		it('should clear the network nodes in a route', function(done) {
+			Network.clear_network_nodes(route_id, function(err, output) {
+				expect(err).to.be.null;
+
+				Network.view_network_nodes(null, route_id, function(err, output) {
+					expect(err).to.be.null;
+					var diff = output.feature_collection.features.length - nodes;
+					expect(diff).to.be.equal(0);
+					done();
+				});
+			});
+		});
+
 	});
 
 });
