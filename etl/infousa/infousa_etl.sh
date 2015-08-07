@@ -1,10 +1,5 @@
 #!/bin/bash
 
-export PGDATABASE=aro
-export PGUSER=aro
-export PGPASSWORD=aro
-export PGHOST=localhost
-export PGBIN=/usr/bin
 PSQL=${PGBIN}/psql
 GISROOT=/gisdata
 TMPDIR=/gisdata/temp/
