@@ -52,7 +52,11 @@ def add_spend(options):
 
 def delete_spend(options):
     db = get_DBConn()
-    spend.delete_spend(db, options.year)
+    spend.delete_spend(db)
+    spend.delete_industries(db)
+    spend.delete_products(db)
+    spend.delete_emps_by_location(db)
+    spend.delete_industry_mapping(db)
     db.close()
     
 def add_industry_mapping(options):
