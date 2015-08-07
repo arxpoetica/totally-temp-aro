@@ -41,7 +41,7 @@ MarketSize.calculate = function(geo_json, threshold, filters, callback) {
   var params = [];
   var sql = multiline(function() {;/*
     SELECT
-      spend.year, SUM(spend.monthly_spend * 12)::numeric as total
+      spend.year, SUM(spend.monthly_spend * 12)::float as total
     FROM
       businesses b
     JOIN
@@ -52,6 +52,7 @@ MarketSize.calculate = function(geo_json, threshold, filters, callback) {
       client.spend
     ON
       spend.industry_id = m.industry_id
+      AND spend.monthly_spend <> 'NaN'
   */});
   if (filters.industry) {
     params.push(filters.industry)

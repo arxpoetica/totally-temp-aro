@@ -11,14 +11,14 @@ app.config(function($httpProvider) {
   $httpProvider.interceptors.push(function($q) {
     return {
      'requestError': function(rejection) {
-        handleRejection(rejection);
+        if (!rejection.config.customErrorHandling) {
+          handleRejection(rejection);
+        }
         return $q.reject(rejection);
       },
 
       'responseError': function(rejection) {
-        if (rejection.config.timeout && rejection.status === 0) {
-          // do nothing
-        } else {
+        if (!rejection.config.customErrorHandling) {
           handleRejection(rejection);
         }
         return $q.reject(rejection);

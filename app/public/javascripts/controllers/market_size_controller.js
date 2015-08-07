@@ -4,9 +4,10 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   $scope.map_tools = map_tools;
   $scope.total = [];
   $scope.filters = null;
+  $scope.loading = false;
 
   // filters
-  $scope.threshold = 0;
+  $scope.threshold = 152.4; // 500 feet in meters
   $scope.industry = null;
   $scope.product = null;
   $scope.employees_range = null;
@@ -76,13 +77,16 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     var args = {
       params: params,
       timeout: canceller.promise,
+      customErrorHandling: true,
     };
     $scope.total = [];
+    $scope.loading = true;
     $http.get('/market_size/calculate', args).success(function(response) {
-      $scope.total = _.reject(response, function(row) {
-        return !(+row.total);
-      });
-    })
+      $scope.total = response;
+      $scope.loading = false;
+    }).error(function() {
+      $scope.loading = false;
+    });
   }
 
   var dragging = false;
@@ -91,7 +95,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   });
   $rootScope.$on('map_dragend', function() {
     dragging = false;
-    $scope.calculate_market_size();
+    if (map_tools.is_visible('market_size')) {
+      $scope.calculate_market_size();
+    }
   });
 
   $rootScope.$on('map_bounds_changed', function() {
