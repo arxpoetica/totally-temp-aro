@@ -34,10 +34,15 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			broadcast_changes(layer, changes);
 		});
 
+		data_layer.addListener('mouseup', function(event) {
+			$rootScope.$broadcast('map_layer_mouseup_feature', event, layer);
+		});
+
 		data_layer.addListener('mouseover', function(event) {
 			if (layer.highlighteable && event.feature) {
 				layer.data_layer.overrideStyle(event.feature, layer.style_options.highlight);
 			}
+			$rootScope.$broadcast('map_layer_mouseover_feature', event, layer);
 		});
 
 		data_layer.addListener('mouseout', function(event) {
