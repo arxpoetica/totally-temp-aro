@@ -10,7 +10,7 @@ var txain = require('txain');
 var CensusBlock = {};
 
 CensusBlock.find_by_statefp_and_countyfp = function(statefp, countyfp, callback) {
-	var sql = 'SELECT gid AS id, ST_AsGeoJSON(geom)::json AS geom FROM aro.census_blocks WHERE statefp = $1 AND countyfp = $2';
+	var sql = 'SELECT gid as id, name, ST_AsGeoJSON(geom)::json AS geom FROM aro.census_blocks WHERE statefp = $1 AND countyfp = $2';
 	var params = [statefp, countyfp];
 
 	txain(function(callback) {
@@ -22,6 +22,7 @@ CensusBlock.find_by_statefp_and_countyfp = function(statefp, countyfp, callback)
 				'type': 'Feature',
 				'properties': {
 					'id': row.id,
+					'name': row.name,
 				},
 				'geometry': row.geom,
 			}

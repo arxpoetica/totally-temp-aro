@@ -8,7 +8,7 @@ describe('ARO homepage', function() {
   });
   
   it('should create a route', function(done) {
-    element(by.css('[ng-click="toggle_tool_visibility()"]')).click();
+    element(by.id('map_tools_toggle_route')).click();
     element(by.css('[ng-controller="shortest_path_controller"] [ng-click="create_route()"]')).click();
 
     var input = element(by.css('#shortest_path_controller [ng-model="route.name"]'));

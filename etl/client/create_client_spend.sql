@@ -20,9 +20,13 @@ CREATE TABLE client.employees_by_location
 (
 	id serial,
 	value_range varchar,
+	min_value integer, 
+	max_value integer,
 	
 	CONSTRAINT pkey_employees_by_location_id PRIMARY KEY (id)
 );
+
+CREATE INDEX client_employees_by_location_min_max_values ON client.employees_by_location(min_value, max_value);
 
 CREATE TABLE client.spend
 (

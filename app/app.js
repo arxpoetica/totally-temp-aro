@@ -20,6 +20,7 @@ var Location = models.Location;
 var Network = models.Network;
 var RouteOptimizer = models.RouteOptimizer;
 var Wirecenter = models.Wirecenter;
+var MarketSize = models.MarketSize;
 
 /********
 * VIEWS *
@@ -101,7 +102,26 @@ app.get('/network/fiber_plant/:carrier_name', function(request, response, next) 
 // Network nodes for user client by node type
 app.get('/network/nodes/:node_type', function(request, response, next) {
 	var node_type = request.params.node_type;
-	Network.view_network_nodes_by_type(node_type, jsonHandler(response, next));
+	Network.view_network_nodes(node_type, null, jsonHandler(response, next));
+});
+
+// Network nodes of an existing route
+app.get('/network/nodes/:route_id/find', function(request, response, next) {
+	var route_id = request.params.route_id;
+	Network.view_network_nodes(null, route_id, jsonHandler(response, next));
+});
+
+// Edit network nodes in a route
+app.post('/network/nodes/:route_id/edit', function(request, response, next) {
+	var route_id = request.params.route_id;
+	var changes = request.body;
+	Network.edit_network_nodes(route_id, changes, jsonHandler(response, next));
+});
+
+// Clear network nodes in a route
+app.post('/network/nodes/:route_id/clear', function(request, response, next) {
+	var route_id = request.params.route_id;
+	Network.clear_network_nodes(route_id, jsonHandler(response, next));
 });
 
 // Network node types
@@ -157,6 +177,23 @@ app.post('/route_optimizer/:route_id/delete', function(request, response, next) 
 app.post('/route_optimizer/:route_id/clear', function(request, response, next) {
 	var route_id = request.params.route_id;
 	RouteOptimizer.clear_route(route_id, jsonHandler(response, next));
+});
+
+// Market size filters
+app.get('/market_size/filters', function(request, response, next) {
+	MarketSize.filters(jsonHandler(response, next));
+});
+
+// Market size filters
+app.get('/market_size/calculate', function(request, response, next) {
+	var geo_json = request.query.geo_json;
+	var threshold = request.query.threshold;
+	var filters = {
+		industry: request.query.industry,
+		employees_range: request.query.employees_range,
+		product: request.query.product,
+	}
+	MarketSize.calculate(geo_json, threshold, filters, jsonHandler(response, next));
 });
 
 // For testing the error handler
