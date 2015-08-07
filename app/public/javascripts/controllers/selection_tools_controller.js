@@ -75,4 +75,16 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
     }
   });
 
+  $rootScope.$on('map_layer_mouseover_feature', function(e, event) {
+    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
+      mouse_move(event);
+    }
+  });
+
+  $rootScope.$on('map_layer_mouseup_feature', function(e, event) {
+    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
+      mouse_up(event);
+    }
+  });
+
 });
