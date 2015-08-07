@@ -22,6 +22,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
 
   $scope.select_route = function(route) {
     $scope.route = route;
+    $rootScope.$broadcast('route_selected', route);
     map_tools.show('route');
     $('#select-route').modal('hide');
 

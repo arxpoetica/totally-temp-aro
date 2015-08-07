@@ -116,11 +116,12 @@ Location.create_location = function(values, callback) {
 			values.state,
 			values.zipcode,
 			'POINT('+values.lon+' '+values.lat+')',
+			'POINT('+values.lon+' '+values.lat+')',
 		]
 		var sql = multiline(function() {;/*
 			INSERT INTO aro.locations
-				(address, lat, lon, city, state, zipcode, geog)
-			VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7))
+				(address, lat, lon, city, state, zipcode, geog, geom)
+			VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7), ST_GeomFromText($8, 4326))
 			RETURNING id
 		*/});
 		database.findOne(sql, params, callback);
