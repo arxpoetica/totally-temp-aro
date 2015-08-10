@@ -150,6 +150,7 @@ RouteOptimizer.find_route = function(route_id, callback) {
   .then(function(sources, callback) {
     output.metadata.sources = sources.map(function(row) { return +row.id });
 
+    var year = new Date().getFullYear();
     var sql = multiline(function() {;/*
       SELECT
         spend.year, SUM(spend.monthly_spend * 12)::float as total
@@ -168,6 +169,7 @@ RouteOptimizer.find_route = function(route_id, callback) {
       ON
         spend.industry_id = m.industry_id
         AND spend.monthly_spend <> 'NaN'
+        AND spend.year <= $2
       JOIN
         client.employees_by_location e
       ON
@@ -180,9 +182,11 @@ RouteOptimizer.find_route = function(route_id, callback) {
         spend.year
       ORDER BY spend.year DESC LIMIT 5
     */});
-    database.query(sql, [route_id], callback);
+    database.query(sql, [route_id, year], callback);
   })
   .then(function(route_annual_revenues, callback) {
+    route_annual_revenues = route_annual_revenues.reverse(); // sort in ascending order
+
     // Calculate NPV
     // route_annual_revenues = Annual route revenues based on revenues generated from 5 years total spends from customers connected to route
 
@@ -219,7 +223,7 @@ RouteOptimizer.find_route = function(route_id, callback) {
       });
     });
 
-    output.metadata.npv = annual_pvs.reverse();
+    output.metadata.npv = annual_pvs;
     callback(null, output);
   })
   .end(callback);
