@@ -60,6 +60,14 @@ describe('RouteOptimizer', function() {
 				expect(route.metadata).to.have.property('total_cost');
 				expect(route.metadata).to.have.property('fiber_cost');
 				expect(route.metadata).to.have.property('locations_cost');
+				
+				var year = new Date().getFullYear();
+				expect(route.metadata.npv).to.be.an('array');
+				expect(route.metadata.npv).to.have.length(5);
+				expect(route.metadata.npv[0].year).to.be.a('number');
+				expect(route.metadata.npv[0].year).to.be.equal(year+1);
+				expect(route.metadata.npv[0].value).to.be.a('number');
+
 				expect(route).to.have.property('feature_collection');
 				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
 				expect(route.feature_collection.features.length > 0).to.be.equal(true);
