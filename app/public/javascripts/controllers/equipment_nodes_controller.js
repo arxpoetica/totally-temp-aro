@@ -20,27 +20,24 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   var changes = empty_changes();
-  var route = null;
+  $scope.route = null;
 
   /************
   * FUNCTIONS *
   *************/
 
-  $rootScope.$on('route_selected', function(e, _route) {
-    route = _route;
+  $rootScope.$on('route_selected', function(e, route) {
+    $scope.route = route;
   });
 
   $scope.save_nodes = function() {
-    if (!route) return;
-
-    $http.post('/network/nodes/'+route.id+'/edit', changes).success(function(response) {
+    $http.post('/network/nodes/'+$scope.route.id+'/edit', changes).success(function(response) {
       changes = empty_changes();
       $rootScope.feature_layers.network_nodes.reload_data(); // to get the ids so they can be selected
     });
   };
 
   $scope.clear_nodes = function() {
-    if (!route) return;
     swal({
       title: "Are you sure?",
       text: "You will not be able to recover the deleted data!",
@@ -50,16 +47,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       showCancelButton: true,
       closeOnConfirm: true,
     }, function() {
-      console.log('bar')
-      $http.post('/network/nodes/'+route.id+'/clear').success(function(response) {
-        console.log('foo');
+      $http.post('/network/nodes/'+$scope.route.id+'/clear').success(function(response) {
         $rootScope.feature_layers.network_nodes.reload_data();
       });
     });
   };
 
   $rootScope.$on('map_click', function(e, gm_event) {
-    if (!map_tools.is_visible('equipment_nodes') || !route) return;
+    if (!map_tools.is_visible('equipment_nodes') || !$scope.route) return;
 
     var type = $scope.node_type.name;
     var coordinates = gm_event.latLng;
