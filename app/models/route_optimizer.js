@@ -149,6 +149,77 @@ RouteOptimizer.find_route = function(route_id, callback) {
   })
   .then(function(sources, callback) {
     output.metadata.sources = sources.map(function(row) { return +row.id });
+
+    var sql = multiline(function() {;/*
+      SELECT
+        spend.year, SUM(spend.monthly_spend * 12)::float as total
+      FROM
+        custom.route_targets
+      JOIN
+        businesses b
+      ON
+        route_targets.location_id = b.location_id
+      JOIN
+        client.industry_mapping m
+      ON
+        m.sic4 = b.industry_id
+      JOIN
+        client.spend
+      ON
+        spend.industry_id = m.industry_id
+        AND spend.monthly_spend <> 'NaN'
+      JOIN
+        client.employees_by_location e
+      ON
+        e.id = spend.employees_by_location_id
+        AND e.min_value <= b.number_of_employees
+        AND e.max_value >= b.number_of_employees
+      WHERE
+        route_targets.route_id=$1
+      GROUP BY
+        spend.year
+      ORDER BY spend.year DESC LIMIT 5
+    */});
+    database.query(sql, [route_id], callback);
+  })
+  .then(function(route_annual_revenues, callback) {
+    // Calculate NPV
+    // route_annual_revenues = Annual route revenues based on revenues generated from 5 years total spends from customers connected to route
+
+    // Total up front costs, used ONLY in the first year of NPV
+    var fiber_cost = output.metadata.fiber_cost; // Total cost of laying the new fiber
+    var commission_rate = 3.30; // Commission rate on sales of new accounts - this is a variable that might go away
+
+    // Annual recurring costs
+    var customer_cost_rate = 0.2; // Per year, we assume route costs are 20% of the route revenue for that year
+    var discount_rate = 0.05; // Arbitrarily assigned as 5%. This value may differ between clients.
+
+    // Present Values for 5 years
+    var annual_pvs = [];
+
+    // Get Present Value of route for each year in 5 year period
+    route_annual_revenues.forEach(function(row) {
+      var revenue = row.total;
+      var costs = 0;
+      if (annual_pvs.length === 0) {
+        // Year 1 Present Value includes fixed costs as well as recurring costs
+        costs += fiber_cost;
+        costs += (revenue / 12) * commission_rate; // commission cost uses monthly revenue so I just divided annual to get it
+        costs += revenue * customer_cost_rate;
+      } else {
+        // Other years just include recurring costs
+        costs += revenue * customer_cost_rate;
+      }
+      var cash_flow = revenue - costs;
+      var pv = cash_flow / Math.pow(1+discount_rate, 1+annual_pvs.length);
+
+      annual_pvs.push({
+        year: row.year + route_annual_revenues.length,
+        value: pv,
+      });
+    });
+
+    output.metadata.npv = annual_pvs.reverse();
     callback(null, output);
   })
   .end(callback);
