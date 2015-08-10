@@ -9,7 +9,7 @@ PSQL=${PGBIN}/psql
 SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # Set array of states and FIPS codes to iterate through
-declare -A STATE_FIPS_ARRAY=( [NY]=36 [OR]=41 [WA]=53 )
+declare -A STATE_FIPS_ARRAY=( [NY]=36 )
 # declare -A state_array
 # state_array[NY]=36
 # state_array[WA]=53

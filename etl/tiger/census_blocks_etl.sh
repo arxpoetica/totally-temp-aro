@@ -29,7 +29,7 @@ do
 
 	${SHP2PGSQL}  -D -s 4269 -g the_geom -W "latin1" tl_2014_${STATE_FIPS_ARRAY[$STATE]}_tabblock10.dbf tiger_staging.${STATE}_tabblock | ${PSQL} 
 	${PSQL} -c "ALTER TABLE tiger_staging.${STATE}_tabblock DROP uatyp10;"
-	${PSQL} -c "ALTER TABLE tiger_data.${STATE}_tabblock RENAME geoid TO tabblock_id;"
+	# ${PSQL} -c "ALTER TABLE tiger_data.${STATE}_tabblock RENAME geoid TO tabblock_id;"
 	${PSQL} -c "SELECT loader_load_staged_data(lower('${STATE}_tabblock'), lower('${STATE}_tabblock'));"
 
 	# Modify table and add constraints/indexes
