@@ -12,9 +12,6 @@ ${PSQL} -a -f $DIR/create_aro_edges.sql
 # Create aro census_blocks from tiger tabblock
 ${PSQL} -a -f $DIR/create_aro_census_blocks.sql
 
-# Create road nodes from tiger edges
-# ${PSQL} -a -f $DIR/create_aro_road_nodes.sql
-
 # Create and load aro.fiber_plant table from geotel.fiber_plant table
 ${PSQL} -a -f $DIR/create_aro_fiber_plant.sql
 

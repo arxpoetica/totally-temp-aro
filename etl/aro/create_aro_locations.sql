@@ -29,8 +29,6 @@ INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geo
         zip AS zipcode,
         lat,
         long AS lon,
-        --ST_GeographyFromText(ST_AsText(businesses.geog)) AS geog,
-        --ST_GeographyFromText(ST_AsText(businesses.geog))::geometry as geom
         businesses.geog as geog,
         businesses.geog::geometry as geom
 

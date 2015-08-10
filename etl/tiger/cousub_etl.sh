@@ -10,15 +10,6 @@ SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # Set array of states and FIPS codes to iterate through
 declare -A STATE_FIPS_ARRAY=( [NY]=36 )
-# declare -A state_array
-# state_array[NY]=36
-# state_array[WA]=53
-
-# for state in "${!state_fips_array[@]}"
-# do
-#   echo "key  : $i"
-#   echo "value: ${state_fips_array[$state]}"
-# done
 
 for STATE in "${!STATE_FIPS_ARRAY[@]}"
 do
