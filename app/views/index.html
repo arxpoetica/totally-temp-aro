@@ -9,53 +9,193 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
   </head>
   <body>
-    <div id="left-col">
-      <div ng-controller="map_layers_controller">
-        <div ng-repeat="(key, layer) in area_layers">
-          <p>
-            <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
-              ng-class="{'btn-success active': layer.visible}"
-              ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
-          </p>
+
+    <div ng-controller="navigation_menu_controller">
+      <div class="modal" id="select-route" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Select a route</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="route in routes">
+                    <td>{{route.name}}</th>
+                    <td class="text-right">
+                      <a href="#" class="btn btn-primary btn-sm" ng-click="select_route(route)">View</a>
+                      <a href="#" class="btn btn-danger btn-sm" ng-click="delete_route(route)">Delete</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="modal" id="new-route" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">New route</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Plan name</label>
+                  <div class="col-sm-8">
+                    <input type="text" class="form-control" ng-model="new_route_name">
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" ng-click="save_new_route()">Create route</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="edit-route" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Save as</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Plan name</label>
+                  <div class="col-sm-8">
+                    <input type="text" class="form-control" ng-model="edit_route_name">
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" ng-click="save_changes()">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="navbar navbar-default" style="margin-bottom:0">
+        <div class="container-fluid">
+
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">ARO</a>
+          </div>
+
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav" id="network_plans_menu">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  Network plans
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a href="#" ng-click="new_route()">New…</a></li>
+                  <li><a href="#" ng-click="show_routes()">Open…</a></li>
+                  <li><a href="#" ng-click="save_as()">Save as…</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li><a href="#" ng-click="clear_route()">Clear current</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li><a href="#">Export KML…</a></li>
+                </ul>
+              </li>
+            </ul>
+            <button ng-show="route" type="button" class="btn btn-default navbar-btn" disabled>{{route.name}}</button>
+            <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  <span class="glyphicon glyphicon-user"></span>
+                  you@yours.com <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">
+                    <span class="glyphicon glyphicon-off"></span>
+                    Log out
+                  </a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+
+
+    <div id="left-col-wrapper">
+      <div id="left-col">
+        <div ng-controller="map_layers_controller">
+          <div ng-repeat="(key, layer) in area_layers">
+            <p>
+              <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
+                ng-class="{'btn-success active': layer.visible}"
+                ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
+            </p>
+          </div>
+          <hr>
+          <div ng-repeat="(key, layer) in feature_layers">
+            <p>
+              <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
+                ng-class="{'btn-success active': layer.visible}"
+                ng-attr-data-loaded="{{layer.data_loaded}}"
+                ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
+              <a href="#" class="<%= show_on_test %>" ng-click="layer.select_random_features()">.</a>
+            </p>
+          </div>
+        </div>
+
         <hr>
-        <div ng-repeat="(key, layer) in feature_layers">
-          <p>
-            <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
-              ng-class="{'btn-success active': layer.visible}"
-              ng-attr-data-loaded="{{layer.data_loaded}}"
-              ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
-            <a href="#" class="<%= show_on_test %>" ng-click="layer.select_random_features()">.</a>
-          </p>
+
+        <div ng-controller="map_tools_controller">
+          <div ng-repeat="tool in map_tools.available_tools">
+            <p>
+              <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
+                ng-attr-id="map_tools_toggle_{{tool.id}}"
+                ng-class="{'btn-success active': map_tools.is_visible(tool.id)}"
+                ng-click="map_tools.toggle(tool.id)">{{tool.short_name}}</a>
+            </p>
+          </div>
         </div>
-      </div>
 
-      <hr>
+        <hr>
 
-      <div ng-controller="map_tools_controller">
-        <div ng-repeat="tool in map_tools.available_tools">
-          <p>
-            <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
-              ng-attr-id="map_tools_toggle_{{tool.id}}"
-              ng-class="{'btn-success active': map_tools.is_visible(tool.id)}"
-              ng-click="map_tools.toggle(tool.id)">{{tool.short_name}}</a>
-          </p>
+        <div ng-controller="selection_tools_controller">
+          <div ng-repeat="(key, tool) in available_tools">
+            <p>
+              <a href="#" class="btn btn-default btn-block btn-sm"
+                ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
+                ng-class="{'btn-success active': selected_tool == key}"
+                ng-click="toggle_tool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
+            </p>
+          </div>
         </div>
+
       </div>
-
-      <hr>
-
-      <div ng-controller="selection_tools_controller">
-        <div ng-repeat="(key, tool) in available_tools">
-          <p>
-            <a href="#" class="btn btn-default btn-block btn-sm"
-              ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
-              ng-class="{'btn-success active': selected_tool == key}"
-              ng-click="toggle_tool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
-          </p>
-        </div>
-      </div>
-
     </div>
 
     <div ng-controller="selected_location_controller">
@@ -146,40 +286,7 @@
     </div>
 
     <div ng-controller="shortest_path_controller">
-      <div class="modal" id="select-route" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
-              <h4 class="modal-title" id="myModalLabel">Select a route</h4>
-            </div>
-            <div class="modal-body">
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr ng-repeat="route in routes">
-                    <td>{{route.name}}</th>
-                    <td class="text-right">
-                      <a href="#" class="btn btn-primary btn-sm" ng-click="select_route(route)">View</a>
-                      <a href="#" class="btn btn-danger btn-sm" ng-click="delete_route(route)">Delete</a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary" ng-click="create_route()">Create a new route</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div ng-show="map_tools.is_visible('route') && route != null" class="panel panel-primary" id="shortest_path_controller">
+      <div ng-show="map_tools.is_visible('route')" class="panel panel-primary" id="shortest_path_controller">
         <div class="panel-heading">
           <a href="#" class="pull-right" ng-show="map_tools.is_expanded('route')" ng-click="map_tools.collapse('route')">
             <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
@@ -190,7 +297,10 @@
           Distance Based Route Plan
         </div>
         <div class="panel-body" ng-show="map_tools.is_expanded('route')">
-          <div>
+          <div ng-show="!route" class="text-center">
+            Select a plan to start using the distance based route plan tool
+          </div>
+          <div ng-show="route">
             <form class="form-horizontal">
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Sources</label>
@@ -205,10 +315,7 @@
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Name</label>
                 <div class="col-sm-9">
-                  <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Route name" ng-model="route.name">
-                    <span class="input-group-btn"><a class="btn btn-default btn-sm" ng-click="show_routes()">...</a></span>
-                  </div>
+                  <input type="text" class="form-control" ng-model="route.name" readonly>
                 </div>
               </div>
               <div class="form-group form-group-sm">
@@ -244,12 +351,6 @@
                   </div>
                 </div>
               </div>
-              <div class="form-group form-group-sm">
-                <div class="col-sm-offset-3 col-sm-9">
-                  <button class="btn btn-sm btn-primary" ng-click="save_changes()" type="button">Save changes</button>
-                  <button class="btn btn-sm btn-danger" ng-click="clear_route()" type="button">Clear Route</button>
-                </div>
-              </div>
               <table class="table">
                 <tbody>
                   <tr>
@@ -262,12 +363,21 @@
                   </tr>
                   <tr>
                     <th>Total cost</th>
-                    <td colspan="2" class="text-right">{{route.metadata.total_cost | currency}}</td>
+                    <td colspan="2" class="text-right" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</td>
                   </tr>
                   <tr ng-repeat="customer_type in route.metadata.customer_types">
                     <th>{{customer_type.name}}</th>
                     <td class="text-right">{{customer_type.total}}</td>
                     <td class="text-right">{{customer_type.total*100 / route.metadata.customers_total | number : 1}}%</td>
+                  </tr>
+                  <tr ng-show="route.metadata.npv && route.metadata.npv.length > 0">
+                    <th ng-attr-rowspan="{{route.metadata.npv.length + 1}}" style="vertical-align: middle">NPV</th>
+                    <th class="text-right">Year</th>
+                    <th class="text-right">Value</th>
+                  </tr>
+                  <tr ng-repeat="revenue in route.metadata.npv">
+                    <td class="text-right">{{revenue.year}}</td>
+                    <td class="text-right">{{revenue.value | currency}}</td>
                   </tr>
                 </tbody>
               </table>
@@ -302,7 +412,7 @@
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Product</label>
                 <div class="col-sm-9">
-                  <select class="form-control" ng-options="product.product_name for product in filters.products" ng-model="product" ng-change="calculate_market_size()">
+                  <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculate_market_size()">
                     <option value="">All products</option>
                   </select>
                 </div>
@@ -373,27 +483,34 @@
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('equipment_nodes')">
-            <form class="form-horizontal">
-              <div class="form-group form-group-sm" style="margin-bottom: 0">
-                <label class="col-sm-3 control-label">Node type</label>
-                <div class="col-sm-9">
-                  <select class="form-control" ng-model="node_type" ng-options="node.description for node in node_types">
-                  </select>
+            <div ng-show="!route" class="text-center">
+              Select a plan to start using the equipment nodes tool
+            </div>
+            <div ng-show="route">
+              <form class="form-horizontal">
+                <div class="form-group form-group-sm" style="margin-bottom: 0">
+                  <label class="col-sm-3 control-label">Node type</label>
+                  <div class="col-sm-9">
+                    <select class="form-control" ng-model="node_type" ng-options="node.description for node in node_types">
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div class="form-group form-group-sm">
-                <div class="col-sm-offset-3 col-sm-9">
-                  <button class="btn btn-sm btn-primary" ng-click="save_nodes()" type="button">Save nodes</button>
-                  <button class="btn btn-sm btn-danger" ng-click="clear_nodes()" type="button">Clear</button>
+                <div class="form-group form-group-sm">
+                  <div class="col-sm-offset-3 col-sm-9">
+                    <button class="btn btn-sm btn-primary" ng-click="save_nodes()" type="button">Save nodes</button>
+                    <button class="btn btn-sm btn-danger" ng-click="clear_nodes()" type="button">Clear</button>
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="map-canvas"></div>
+    <div id="map-canvas-wrapper">
+      <div id="map-canvas"></div>
+    </div>
 
     <div ng-controller="contextual_menu_controller">
       <ul class="dropdown-menu" id="contextual_menu">
@@ -442,6 +559,7 @@
   <script src="javascripts/libs/bootstrap.min.js"></script>
   <script src="javascripts/libs/underscore.js"></script>
   <script src="javascripts/libs/sweetalert.min.js"></script>
+  <script src="javascripts/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>

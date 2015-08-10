@@ -10,7 +10,7 @@ describe('RouteOptimizer', function() {
 		var route_id;
 
 		it('should create a new empty route', function(done) {
-			RouteOptimizer.create_route(function(err, route) {
+			RouteOptimizer.create_route('Untitled route', function(err, route) {
 				expect(route).to.have.property('id');
 				expect(route).to.have.property('name');
 				route_id = route.id;
@@ -65,6 +65,17 @@ describe('RouteOptimizer', function() {
 				expect(route.metadata.customer_types[0]).to.be.an('object');
 				expect(route.metadata.customer_types[0].name).to.be.a('string');
 				expect(route.metadata.customer_types[0].total).to.be.a('number');
+				expect(route.metadata).to.have.property('total_cost');
+				expect(route.metadata).to.have.property('fiber_cost');
+				expect(route.metadata).to.have.property('locations_cost');
+				
+				var year = new Date().getFullYear();
+				expect(route.metadata.npv).to.be.an('array');
+				expect(route.metadata.npv).to.have.length(5);
+				expect(route.metadata.npv[0].year).to.be.a('number');
+				expect(route.metadata.npv[0].year).to.be.equal(year+1);
+				expect(route.metadata.npv[0].value).to.be.a('number');
+
 				expect(route).to.have.property('feature_collection');
 				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
 				expect(route.feature_collection.features.length > 0).to.be.equal(true);

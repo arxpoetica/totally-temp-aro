@@ -5,7 +5,6 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   $scope.selection = selection;
 
   $scope.route = null;
-  $scope.routes = [];
 
   $scope.always_shows_sources = true;
   $scope.always_shows_targets = true;
@@ -14,17 +13,8 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   * FUNCTIONS *
   *************/
 
-  $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
-    if (tool === 'route' && !$scope.route) {
-      $scope.show_routes();
-    }
-  });
-
-  $scope.select_route = function(route) {
+  $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
-    $rootScope.$broadcast('route_selected', route);
-    map_tools.show('route');
-    $('#select-route').modal('hide');
 
     $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
     $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
@@ -36,36 +26,13 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
         $rootScope.feature_layers.network_nodes.show();
       }
     });
-  };
+  });
 
-  $scope.create_route = function() {
-    $http.post('/route_optimizer/create').success(function(response) {
-      $scope.select_route(response);
-    });
-  };
-
-  $scope.delete_route = function(route) {
-    swal({
-      title: "Are you sure?",
-      text: "You will not be able to recover the deleted route!",
-      type: "warning",
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: "Yes, delete it!",
-      showCancelButton: true,
-      closeOnConfirm: true,
-    }, function() {
-      $http.post('/route_optimizer/'+route.id+'/delete').success(function(response) {
-        $scope.show_routes();
-      });
-    });
-  };
-
-  $scope.show_routes = function() {
-    $http.get('/route_optimizer/find_all').success(function(response) {
-      $scope.routes = response;
-    });
-    $('#select-route').modal('show');
-  };
+  $rootScope.$on('route_cleared', function(e, route) {
+    selection.clear_selection();
+    $scope.route_layer.clear_data();
+    $scope.route.metadata = {};
+  });
 
   function redraw_route(data) {
     if (data.metadata) {
@@ -118,30 +85,5 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   $scope.toggle_always_show_targets = function() {
     $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
   };
-
-  $scope.save_changes = function() {
-    $http.post('/route_optimizer/'+$scope.route.id+'/save', $scope.route).success(function(response) {
-      // success
-    });
-  };
-
-  $scope.clear_route = function() {
-    swal({
-      title: "Are you sure?",
-      text: "You will not be able to recover the deleted data!",
-      type: "warning",
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: "Yes, clear it!",
-      showCancelButton: true,
-      closeOnConfirm: true,
-    }, function() {
-      selection.clear_selection();
-      $scope.route_layer.clear_data();
-      $scope.route.metadata = { total_cost: 0 };
-      $http.post('/route_optimizer/'+$scope.route.id+'/clear').success(function(response) {
-        // success
-      });
-    });
-  }
 
 }]);
