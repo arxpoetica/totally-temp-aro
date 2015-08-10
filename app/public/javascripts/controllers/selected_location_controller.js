@@ -60,10 +60,9 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   }
 
   function set_selected_location(location) {
-    location.total = location.entry_fee
-                      + location.household_install_costs * location.number_of_households
-                      + location.business_install_costs * location.number_of_businesses;
-    console.log('location', location);
+    location.total_costs = location.entry_fee
+                          + location.household_install_costs * location.number_of_households
+                          + location.business_install_costs * location.number_of_businesses;
     $scope.location = location;
   };
 
