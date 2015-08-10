@@ -9,14 +9,15 @@ describe('ARO homepage', function() {
   
   it('should create a named route', function(done) {
 
-    element(by.id('map_tools_toggle_route')).click();
-    element(by.css('[ng-controller="shortest_path_controller"] [ng-click="create_route()"]')).click();
-    element(by.css('input[ng-model="route.name"]')).clear().sendKeys("test-delete-route").then(function(text){
+    element(by.css('#network_plans_menu > li > a')).click();
+    element(by.css('[ng-click="new_route()"]')).click();
+    element(by.css('input[ng-model="new_route_name"]')).clear().sendKeys("test-delete-route").then(function(text){
 
-      element(by.css('[ng-controller="shortest_path_controller"] [ng-click="save_changes()"]')).click().then(function(){
+      element(by.css('[ng-click="save_new_route()"]')).click().then(function(){
 
         browser.get('http://localhost:8000');
-        element(by.id('map_tools_toggle_route')).click();
+        element(by.css('#network_plans_menu > li > a')).click();
+        element(by.css('[ng-click="show_routes()"]')).click();
 
         browser.wait(function(){
           return element.all(by.repeater('route in routes')).then(function(routes){

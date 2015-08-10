@@ -8,12 +8,14 @@ describe('ARO homepage', function() {
   });
   
   it('should create a route', function(done) {
-    element(by.id('map_tools_toggle_route')).click();
-    element(by.css('[ng-controller="shortest_path_controller"] [ng-click="create_route()"]')).click();
+    element(by.css('#network_plans_menu > li > a')).click();
+    element(by.css('[ng-click="new_route()"]')).click();
+
+    element(by.css('[ng-click="save_new_route()"]')).click();
 
     var input = element(by.css('#shortest_path_controller [ng-model="route.name"]'));
     input.getAttribute('value').then(function(value) {
-      expect(value).to.be.equal('Untitled route');
+      expect(value).to.be.equal('Untitled plan');
 
       // zoom
       element(by.css('[title="Zoom in"]')).click();
@@ -54,15 +56,17 @@ describe('ARO homepage', function() {
   });
 
   it('should clear a route', function(done) {
-    element(by.css('[ng-controller="shortest_path_controller"] [ng-click="clear_route()"]')).click();
+    element(by.css('#network_plans_menu > li > a')).click();
+    element(by.css('[ng-click="clear_route()"]')).click();
+
     browser.sleep(500);
     element(by.css('button.confirm')).click().then(function(){
 
       element(by.id('shortest_path_total_cost')).getText().then(function(text) {
-        var amount =  +text.replace(/[\$,\.]/g, '');
-        expect(amount == 0).to.be.true;
+        expect(text == '').to.be.true;
         done();
       });
+
     });
   });
 
