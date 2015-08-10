@@ -72,3 +72,11 @@ html, body, #map-canvas {
   z-index: 9999999;
   background-color: #eee;
 }
+
+.locations-table {
+  width: 100%;
+}
+
+.locations-table td, .locations-table th {
+  padding: 0.7em;
+}

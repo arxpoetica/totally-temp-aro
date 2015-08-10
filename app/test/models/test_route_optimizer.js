@@ -57,9 +57,14 @@ describe('RouteOptimizer', function() {
 		it('should return the information of an existing route', function(done) {
 			RouteOptimizer.find_route(route_id, function(err, route) {
 				expect(route).to.have.property('metadata');
-				expect(route.metadata).to.have.property('total_cost');
-				expect(route.metadata).to.have.property('fiber_cost');
-				expect(route.metadata).to.have.property('locations_cost');
+				expect(route.metadata.total_cost).to.be.a('number');
+				expect(route.metadata.fiber_cost).to.be.a('number');
+				expect(route.metadata.locations_cost).to.be.a('number');
+				expect(route.metadata.customers_total).to.be.a('number');
+				expect(route.metadata.customer_types).to.be.an('array');
+				expect(route.metadata.customer_types[0]).to.be.an('object');
+				expect(route.metadata.customer_types[0].name).to.be.a('string');
+				expect(route.metadata.customer_types[0].total).to.be.a('number');
 				expect(route).to.have.property('feature_collection');
 				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
 				expect(route.feature_collection.features.length > 0).to.be.equal(true);
