@@ -54,6 +54,11 @@ etl_reload_client: reset_client reset_custom etl_client etl_custom
 
 etl_reload_all: etl_reload_general etl_reload_client
 
+etl_test_client:
+	etl/test/client.sh
+
+etl_test_all: etl_test_client
+
 
 webapp:
 	(cd app && npm install .)
