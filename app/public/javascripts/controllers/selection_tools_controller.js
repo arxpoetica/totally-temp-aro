@@ -19,6 +19,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
       if ($scope.selected_tool === tool) {
         $scope.selected_tool = null;
         map.setOptions({draggable: true});
+        map.setOptions({draggableCursor:null});
         if (rectangle) {
           rectangle.setMap(null);
           rectangle = null;
@@ -26,6 +27,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
       } else {
         $scope.selected_tool = 'SELECTION_TOOL_RECTANGLE';
         map.setOptions({draggable: false});
+        map.setOptions({draggableCursor:'crosshair'});
       }
     }
   }

@@ -8,8 +8,10 @@ describe('ARO homepage', function() {
   });
   
   it('should create a route', function(done) {
-    element(by.id('map_tools_toggle_route')).click();
-    element(by.css('[ng-controller="shortest_path_controller"] [ng-click="create_route()"]')).click();
+    element(by.css('#network_plans_menu [data-toggle="dropdown"]')).click();
+    element(by.css('[ng-click="new_route()"]')).click();
+    element(by.css('#new-route input')).clear().sendKeys('Untitled route');
+    element(by.css('#new-route [ng-click="save_new_route()"]')).click();
 
     var input = element(by.css('#shortest_path_controller [ng-model="route.name"]'));
     input.getAttribute('value').then(function(value) {

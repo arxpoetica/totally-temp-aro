@@ -211,10 +211,10 @@ RouteOptimizer.find_all = function(callback) {
   database.query(sql, callback);
 };
 
-RouteOptimizer.create_route = function(callback) {
+RouteOptimizer.create_route = function(name, callback) {
   txain(function(callback) {
     var sql = 'INSERT INTO custom.route (name) VALUES ($1) RETURNING id;';
-    database.findOne(sql, ['Untitled route'], callback);
+    database.findOne(sql, [name], callback);
   })
   .then(function(row, callback) {
     var sql = 'SELECT id, name, number_of_strands FROM custom.route WHERE id=$1;';

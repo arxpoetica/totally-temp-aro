@@ -100,7 +100,7 @@ describe('Network', function() {
 		var nodes;
 
 		before(function(done) {
-			RouteOptimizer.create_route(function(err, route) {
+			RouteOptimizer.create_route('Untitled route', function(err, route) {
 				expect(route).to.have.property('id');
 				expect(route).to.have.property('name');
 				route_id = route.id;
