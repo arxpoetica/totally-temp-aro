@@ -402,7 +402,7 @@
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Product</label>
                 <div class="col-sm-9">
-                  <select class="form-control" ng-options="product.product_name for product in filters.products" ng-model="product" ng-change="calculate_market_size()">
+                  <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculate_market_size()">
                     <option value="">All products</option>
                   </select>
                 </div>
