@@ -8,10 +8,8 @@ describe('ARO homepage', function() {
   });
   
   it('should create a route', function(done) {
-    element(by.css('#network_plans_menu [data-toggle="dropdown"]')).click();
-    element(by.css('[ng-click="new_route()"]')).click();
-    element(by.css('#new-route input')).clear().sendKeys('Untitled route');
-    element(by.css('#new-route [ng-click="save_new_route()"]')).click();
+    element(by.id('map_tools_toggle_route')).click();
+    element(by.css('[ng-controller="shortest_path_controller"] [ng-click="create_route()"]')).click();
 
     var input = element(by.css('#shortest_path_controller [ng-model="route.name"]'));
     input.getAttribute('value').then(function(value) {
@@ -54,5 +52,20 @@ describe('ARO homepage', function() {
       done();
     });
   });
+
+  it('should clear a route', function(done) {
+    element(by.css('[ng-controller="shortest_path_controller"] [ng-click="clear_route()"]')).click();
+    browser.sleep(500);
+    element(by.css('button.confirm')).click().then(function(){
+
+      element(by.id('shortest_path_total_cost')).getText().then(function(text) {
+        var amount =  +text.replace(/[\$,\.]/g, '');
+        expect(amount == 0).to.be.true;
+        done();
+      });
+    });
+  });
+
+
 
 });
