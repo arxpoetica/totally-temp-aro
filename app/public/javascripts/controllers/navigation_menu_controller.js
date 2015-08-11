@@ -87,6 +87,20 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         // success
       });
     });
-  }
+  };
+
+  $scope.export_kml_name = function() {
+    $('#export-route').modal('show');
+  };
+
+  $scope.export_kml = function() {
+      var params = { name: $scope.kml_file_name };
+    
+      console.log(params.name);
+      $http.post('/route_optimizer/' + $scope.route.id + '/' + params.name + '/export').success(function(response) {
+        console.log('ay');
+        
+      });
+  };
 
 }]);

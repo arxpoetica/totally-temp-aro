@@ -180,6 +180,13 @@ app.post('/route_optimizer/:route_id/clear', function(request, response, next) {
 	RouteOptimizer.clear_route(route_id, jsonHandler(response, next));
 });
 
+// Export a route as KML
+app.post('/route_optimizer/:route_id/:file_name/export', function(request, response, next) {
+	var route_id = request.params.route_id;
+	var file_name = request.params.file_name;
+	RouteOptimizer.export_kml(route_id, file_name, jsonHandler(response, next));
+});
+
 // Market size filters
 app.get('/market_size/filters', function(request, response, next) {
 	MarketSize.filters(jsonHandler(response, next));

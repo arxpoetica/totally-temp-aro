@@ -6,6 +6,7 @@ var helpers = require('../helpers');
 var database = helpers.database;
 var multiline = require('multiline');
 var txain = require('txain');
+var fs = require('fs');
 var Location = require('./location');
 var _ = require('underscore');
 
@@ -479,5 +480,35 @@ function delete_targets(route_id, location_ids, callback) {
   })
   .end(callback);
 };
+
+RouteOptimizer.export_kml = function(route_id, file_name, callback) {
+
+  txain(function(callback){
+
+    console.log('hi');
+
+    var sql = multiline(function() {;/*
+      SELECT ST_AsKML(edge.geom) AS geom
+      FROM custom.route_edges
+      JOIN client.graph edge
+      ON edge.id = route_edges.edge_id
+      WHERE route_edges.route_id = $1
+    */});
+
+    database.query(sql, [route_id], callback)
+  })
+  .then(function (rows, callback){
+
+    console.log('next')
+    console.log(file_name)
+    console.log(rows)
+
+    fs.writeFile('helloworld.txt', 'Hello, world!');
+
+  })
+  .end(callback);
+
+};
+
 
 module.exports = RouteOptimizer;
