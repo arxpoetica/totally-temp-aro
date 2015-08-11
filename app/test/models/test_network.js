@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var RouteOptimizer = require('../../models/route_optimizer.js');
+var NetworkPlan = require('../../models/network_plan.js');
 var Network = require('../../models/network.js');
 
 describe('Network', function() {
@@ -100,7 +100,7 @@ describe('Network', function() {
 		var nodes;
 
 		before(function(done) {
-			RouteOptimizer.create_route('Untitled route', function(err, route) {
+			NetworkPlan.create_route('Untitled route', function(err, route) {
 				expect(route).to.have.property('id');
 				expect(route).to.have.property('name');
 				route_id = route.id;

@@ -82,3 +82,41 @@ exports.findOne = function(sql, params, def, callback) {
 	})
 	.end(callback);
 }
+
+exports.findValue = function(sql, params, field, def, callback) {
+	if (arguments.length === 4) {
+		callback = def;
+		def = void 0;
+	}
+	if (arguments.length === 3) {
+		callback = field;
+		def = void 0;
+		field = params;
+		params = [];
+	}
+	txain(function(callback) {
+		exports.query(sql, params, callback)
+	})
+	.then(function(rows, callback) {
+		callback(null, (rows[0] && rows[0][field]) || def);
+	})
+	.end(callback);
+}
+
+exports.findValues = function(sql, params, field, callback) {
+	if (arguments.length === 3) {
+		callback = field;
+		field = params;
+		params = [];
+	}
+	txain(function(callback) {
+		exports.query(sql, params, callback)
+	})
+	.then(function(rows, callback) {
+		rows = rows.map(function(row) {
+			return row[field];
+		});
+		callback(null, rows);
+	})
+	.end(callback);
+}

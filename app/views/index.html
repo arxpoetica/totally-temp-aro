@@ -353,13 +353,9 @@
               </div>
               <table class="table">
                 <tbody>
-                  <tr>
-                    <th>Locations cost</th>
-                    <td colspan="2" class="text-right">{{route.metadata.locations_cost | currency}}</td>
-                  </tr>
-                  <tr>
-                    <th>Fiber cost</th>
-                    <td colspan="2" class="text-right">{{route.metadata.fiber_cost | currency}}</td>
+                  <tr ng-repeat="cost in route.metadata.costs">
+                    <th>{{cost.name}}</th>
+                    <td colspan="2" class="text-right">{{cost.value | currency}}</td>
                   </tr>
                   <tr>
                     <th>Total cost</th>

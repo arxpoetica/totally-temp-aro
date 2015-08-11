@@ -18,7 +18,7 @@ var CountySubdivision = models.CountySubdivision;
 var CensusBlock = models.CensusBlock;
 var Location = models.Location;
 var Network = models.Network;
-var RouteOptimizer = models.RouteOptimizer;
+var NetworkPlan = models.NetworkPlan;
 var Wirecenter = models.Wirecenter;
 var MarketSize = models.MarketSize;
 
@@ -134,50 +134,50 @@ app.get('/route_optimizer/shortest_path/:source_id/:target_ids/:cost_per_meter',
 	var source_id = request.params.source_id;
 	var target_ids = request.params.target_ids;
 	var cost_per_meter = request.params.cost_per_meter;
-	RouteOptimizer.shortest_path(source_id, target_ids, cost_per_meter, jsonHandler(response, next));
+	NetworkPlan.shortest_path(source_id, target_ids, cost_per_meter, jsonHandler(response, next));
 });
 
 // Find all created routes
 app.get('/route_optimizer/find_all', function(request, response, next) {
-	RouteOptimizer.find_all(jsonHandler(response, next));
+	NetworkPlan.find_all(jsonHandler(response, next));
 });
 
 // Create a new empty route
 app.post('/route_optimizer/create', function(request, response, next) {
 	var name = request.body.name;
-	RouteOptimizer.create_route(name, jsonHandler(response, next));
+	NetworkPlan.create_route(name, jsonHandler(response, next));
 });
 
 // Return data of an existing route
 app.get('/route_optimizer/:route_id', function(request, response, next) {
 	var route_id = request.params.route_id;
-	RouteOptimizer.find_route(route_id, jsonHandler(response, next));
+	NetworkPlan.find_route(route_id, jsonHandler(response, next));
 });
 
 // Edits nodes of an existing route
 app.post('/route_optimizer/:route_id/edit', function(request, response, next) {
 	var route_id = request.params.route_id;
 	var changes = request.body;
-	RouteOptimizer.edit_route(route_id, changes, jsonHandler(response, next));
+	NetworkPlan.edit_route(route_id, changes, jsonHandler(response, next));
 });
 
 // Edits basic information of an existing route
 app.post('/route_optimizer/:route_id/save', function(request, response, next) {
 	var route_id = request.params.route_id;
 	var changes = request.body;
-	RouteOptimizer.save_route(route_id, changes, jsonHandler(response, next));
+	NetworkPlan.save_route(route_id, changes, jsonHandler(response, next));
 });
 
 // Delete an existing route
 app.post('/route_optimizer/:route_id/delete', function(request, response, next) {
 	var route_id = request.params.route_id;
-	RouteOptimizer.delete_route(route_id, jsonHandler(response, next));
+	NetworkPlan.delete_route(route_id, jsonHandler(response, next));
 });
 
 // Clear an existing route
 app.post('/route_optimizer/:route_id/clear', function(request, response, next) {
 	var route_id = request.params.route_id;
-	RouteOptimizer.clear_route(route_id, jsonHandler(response, next));
+	NetworkPlan.clear_route(route_id, jsonHandler(response, next));
 });
 
 // Market size filters
