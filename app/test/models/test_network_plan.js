@@ -60,11 +60,13 @@ describe('NetworkPlan', function() {
 				expect(route.metadata.total_cost).to.be.a('number');
 
 				expect(route.metadata.costs).to.be.an('array');
-				expect(route.metadata.costs).to.have.length(2);
+				expect(route.metadata.costs).to.have.length(3);
 				expect(route.metadata.costs[0].name).to.be.equal('Fiber cost');
 				expect(route.metadata.costs[0].value).to.be.a('number');
 				expect(route.metadata.costs[1].name).to.be.equal('Locations cost');
 				expect(route.metadata.costs[1].value).to.be.a('number');
+				expect(route.metadata.costs[2].name).to.be.equal('Equipment nodes cost');
+				expect(route.metadata.costs[2].value).to.be.a('number');
 				expect(route.metadata.total_cost).to.be.a('number');
 
 				expect(route.metadata.customers_total).to.be.a('number');

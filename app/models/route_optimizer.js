@@ -96,15 +96,20 @@ RouteOptimizer.calculate_locations_cost = function(route_id, callback) {
   database.findValue(sql, [route_id], 'locations_cost', 0, callback);
 };
 
-RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, output, callback) {
+RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, callback) {
+  // hard coded values by now
+  var cost = {
+    'fiber_deployment_hub': 5000,
+    'fiber_deployent_terminal': 2000,
+  };
   txain(function(callback) {
     var sql = multiline(function() {;/*
       SELECT
-        nt.name, COUNT(*)
+        nt.name, COUNT(*)::integer as count
       FROM
         client.network_nodes n
       JOIN
-        client.netowrk_node_types nt
+        client.network_node_types nt
       ON
         nt.id = n.node_type_id
       WHERE
@@ -112,6 +117,12 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, output, callb
       GROUP BY nt.id
     */});
     database.query(sql, [route_id], callback);
+  })
+  .then(function(nodes, callback) {
+    var total = nodes.reduce(function(total, node) {
+      return total + (cost[node.name] || 0) * node.count;
+    }, 0);
+    callback(null, total);
   })
   .end(callback);
 };

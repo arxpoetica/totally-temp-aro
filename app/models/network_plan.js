@@ -92,14 +92,14 @@ NetworkPlan.find_route = function(route_id, callback) {
     output.metadata.costs.push({
       name: 'Fiber cost',
       value: fiber_cost,
-    })
+    });
     RouteOptimizer.calculate_locations_cost(route_id, callback);
   })
   .then(function(locations_cost, callback) {
     output.metadata.costs.push({
       name: 'Locations cost',
       value: locations_cost,
-    })
+    });
 
     NetworkPlan.find_target_ids(route_id, callback);
   })
@@ -123,6 +123,14 @@ NetworkPlan.find_route = function(route_id, callback) {
   })
   .then(function(annual_pvs, callback) {
     output.metadata.npv = annual_pvs;
+
+    RouteOptimizer.calculate_equipment_nodes_cost(route_id, callback);
+  })
+  .then(function(equipment_nodes_cost, callback) {
+    output.metadata.costs.push({
+      name: 'Equipment nodes cost',
+      value: equipment_nodes_cost,
+    });
 
     output.metadata.total_cost = output.metadata.costs.reduce(function(total, cost) {
       return total+cost.value;
