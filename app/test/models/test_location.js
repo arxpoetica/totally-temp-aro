@@ -56,11 +56,13 @@ describe('Location', function() {
 				expect(output.business_install_costs).to.be.above(0);
 				expect(output.household_install_costs).to.be.above(0);
 
-				expect(output.customers_total).to.be.a('number');
+				expect(output.customers_businesses_total).to.be.a('number');
+				expect(output.customers_households_total).to.be.a('number');
 				expect(output.customer_types).to.be.an('array');
 				expect(output.customer_types[0]).to.be.an('object');
 				expect(output.customer_types[0].name).to.be.a('string');
-				expect(output.customer_types[0].total).to.be.a('number');
+				expect(output.customer_types[0].households).to.be.a('number');
+				expect(output.customer_types[0].businesses).to.be.a('number');
 
 				done();
 			});

@@ -1,4 +1,5 @@
 var expect = require('chai').expect;
+var NetworkPlan = require('../../models/network_plan.js');
 var RouteOptimizer = require('../../models/route_optimizer.js');
 var Network = require('../../models/network.js');
 
@@ -100,7 +101,7 @@ describe('Network', function() {
 		var nodes;
 
 		before(function(done) {
-			RouteOptimizer.create_route('Untitled route', function(err, route) {
+			NetworkPlan.create_route('Untitled route', function(err, route) {
 				expect(route).to.have.property('id');
 				expect(route).to.have.property('name');
 				route_id = route.id;
@@ -124,7 +125,7 @@ describe('Network', function() {
 			});
 		});
 
-		it('should return more than one feature', function(done) {
+		it('should add new network nodes', function(done) {
 			var changes = {
 				insertions: [
 					{
@@ -145,6 +146,15 @@ describe('Network', function() {
 				expect(err).to.be.null;
 				var diff = output.feature_collection.features.length - nodes;
 				expect(diff).to.be.equal(1);
+				done();
+			});
+		});
+
+		it('should calculate the cost of new network nodes', function(done) {
+			RouteOptimizer.calculate_equipment_nodes_cost(route_id, function(err, output) {
+				expect(err).to.not.be.ok;
+				expect(output.equipment_node_types).to.be.an('array');
+				expect(output.total).to.be.a('number');
 				done();
 			});
 		});
