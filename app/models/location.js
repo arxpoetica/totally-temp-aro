@@ -45,65 +45,98 @@ Location.find_all = function(callback) {
 // 1. location_id: integer. ex. 1738
 // 2. callback: function to return the information
 Location.show_information = function(location_id, callback) {
-	var sql = multiline(function() {;/*
-		select
-		  location_id,
-		  sum(entry_fee)::integer as entry_fee,
-		  sum(install_cost)::integer as business_install_costs,
-		  sum(install_cost_per_hh)::integer as household_install_costs,
-		  sum(number_of_households)::integer as number_of_households,
-		  sum(number_of_businesses)::integer as number_of_businesses
-		from (
-		  select
-		    location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
-		  from
-		    client.location_entry_fees
-		  where
-		    location_id=$1
+	var info;
+	txain(function(callback) {
+		var sql = multiline(function() {;/*
+			select
+			  location_id,
+			  sum(entry_fee)::integer as entry_fee,
+			  sum(install_cost)::integer as business_install_costs,
+			  sum(install_cost_per_hh)::integer as household_install_costs,
+			  sum(number_of_households)::integer as number_of_households,
+			  sum(number_of_businesses)::integer as number_of_businesses
+			from (
+			  select
+			    location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
+			  from
+			    client.location_entry_fees
+			  where
+			    location_id=$1
 
-		  union
+			  union
 
-		  select
-		    location_id, 0, install_cost, 0, 0, 0
-		  from
-		    client.business_install_costs
-		  join businesses
-		    on businesses.id = business_install_costs.business_id
-		  where
-		    location_id=$1
+			  select
+			    location_id, 0, install_cost, 0, 0, 0
+			  from
+			    client.business_install_costs
+			  join businesses
+			    on businesses.id = business_install_costs.business_id
+			  where
+			    location_id=$1
 
-		  union
+			  union
 
-		  select
-		    location_id, 0, 0, install_cost_per_hh, 0, 0
-		  from
-		    client.household_install_costs
-		  where
-		    location_id=$1
+			  select
+			    location_id, 0, 0, install_cost_per_hh, 0, 0
+			  from
+			    client.household_install_costs
+			  where
+			    location_id=$1
 
-		  union
+			  union
 
-		  select
-		    location_id, 0, 0, 0, households.number_of_households, 0
-		  from
-		    aro.households
-		  where
-		    households.location_id=$1
+			  select
+			    location_id, 0, 0, 0, households.number_of_households, 0
+			  from
+			    aro.households
+			  where
+			    households.location_id=$1
 
-		  union
+			  union
 
-		  select
-		    location_id, 0, 0, 0, 0, count(*)
-		  from
-		    businesses
-		  where
-		    location_id=$1
-		  group by
-		    location_id
+			  select
+			    location_id, 0, 0, 0, 0, count(*)
+			  from
+			    businesses
+			  where
+			    location_id=$1
+			  group by
+			    location_id
 
-		) t group by location_id;
-	*/});
-	database.findOne(sql, [location_id], callback)
+			) t group by location_id;
+		*/});
+		database.findOne(sql, [location_id], {}, callback);
+	})
+	.then(function(_info, callback) {
+		info = _info;
+		var sql = multiline(function() {;/*
+			SELECT
+			  ct.id, ct.name, COUNT(*)::integer AS total
+			FROM
+			  businesses b
+			JOIN
+			  client.business_customer_types bct
+			ON
+			  bct.business_id = b.id
+			JOIN
+			  client.customer_types ct
+			ON
+			  ct.id=bct.customer_type_id
+			WHERE
+			  b.location_id=$1
+			GROUP BY ct.id
+			ORDER BY ct.name
+		*/});
+		database.query(sql, [location_id], callback);
+	})
+	.then(function(customer_types, callback) {
+		info.customer_types = customer_types;
+		info.customers_total = customer_types.reduce(function(total, customer_type) {
+		  return total + customer_type.total;
+		}, 0);
+		callback(null, info);
+	})
+	.end(callback);
 }
 
 Location.create_location = function(values, callback) {

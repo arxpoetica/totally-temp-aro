@@ -49,11 +49,19 @@ describe('Location', function() {
 
 		it('should return information of the given location', function(done) {
 			Location.show_information(location_id, function(err, output) {
+				expect(err).to.not.be.ok;
 				expect(output.location_id).to.equal('1399894');
 				expect(output.number_of_households).to.equal(23);
 				expect(output.number_of_businesses).to.equal(1);
 				expect(output.business_install_costs).to.be.above(0);
 				expect(output.household_install_costs).to.be.above(0);
+
+				expect(output.customers_total).to.be.a('number');
+				expect(output.customer_types).to.be.an('array');
+				expect(output.customer_types[0]).to.be.an('object');
+				expect(output.customer_types[0].name).to.be.a('string');
+				expect(output.customer_types[0].total).to.be.a('number');
+
 				done();
 			});
 		});
