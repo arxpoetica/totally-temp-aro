@@ -146,10 +146,11 @@ NetworkPlan.find_route = function(route_id, callback) {
       return total + customer_type.households;
     }, 0);
 
-    RouteOptimizer.calculate_npv(route_id, fiber_cost, callback);
+    RouteOptimizer.calculate_revenue_and_npv(route_id, fiber_cost, callback);
   })
-  .then(function(annual_pvs, callback) {
-    output.metadata.npv = annual_pvs;
+  .then(function(calculation, callback) {
+    output.metadata.revenue = calculation.revenue;
+    output.metadata.npv = calculation.npv;
 
     RouteOptimizer.calculate_equipment_nodes_cost(route_id, callback);
   })
