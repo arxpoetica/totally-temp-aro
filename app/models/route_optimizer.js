@@ -100,12 +100,13 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, callback) {
   // hard coded values by now
   var cost = {
     'fiber_deployment_hub': 5000,
-    'fiber_deployent_terminal': 2000,
+    'fiber_deployment_terminal': 2000,
+    'splice_point': 1000,
   };
   txain(function(callback) {
     var sql = multiline(function() {;/*
       SELECT
-        nt.name, COUNT(*)::integer as count
+        nt.name as key, nt.description as name, COUNT(*)::integer as count
       FROM
         client.network_nodes n
       JOIN
@@ -118,11 +119,18 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, callback) {
     */});
     database.query(sql, [route_id], callback);
   })
+  .debug()
   .then(function(nodes, callback) {
+    nodes.forEach(function(node) {
+      node.value = (cost[node.key] || 0) * node.count;
+    });
     var total = nodes.reduce(function(total, node) {
-      return total + (cost[node.name] || 0) * node.count;
+      return total + node.value;
     }, 0);
-    callback(null, total);
+    callback(null, {
+      equipment_node_types: nodes,
+      total: total,
+    });
   })
   .end(callback);
 };

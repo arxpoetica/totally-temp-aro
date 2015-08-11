@@ -156,7 +156,8 @@ NetworkPlan.find_route = function(route_id, callback) {
   .then(function(equipment_nodes_cost, callback) {
     output.metadata.costs.push({
       name: 'Equipment nodes cost',
-      value: equipment_nodes_cost,
+      value: equipment_nodes_cost.total,
+      itemized: equipment_nodes_cost.equipment_node_types,
     });
 
     output.metadata.total_cost = output.metadata.costs.reduce(function(total, cost) {

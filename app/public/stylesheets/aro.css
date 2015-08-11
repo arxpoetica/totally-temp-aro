@@ -28,19 +28,19 @@ html, body, #map-canvas, #map-canvas-wrapper {
 
 .map-tool-wrapper {
   position: absolute;
+  top: 75px;
   left: 75px;
-  padding-top: 70px;
-  padding-bottom: 20px;
   z-index: 1;
-  max-height: 100%;
-  height: 100%;
-  top: 0;
 }
 
 .map-tool {
   border: 2px solid #eee;
   width: 320px;
-  max-height: 100%;
+  margin: 0;
+}
+
+.map-tool .panel-body {
+  max-height: 400px;
   overflow: auto;
 }
 
