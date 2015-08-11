@@ -43,26 +43,49 @@ NetworkPlan.find_target_ids = function(route_id, callback) {
 
 NetworkPlan.find_customer_types = function(route_id, callback) {
   var sql = multiline(function(){;/*
-    SELECT
-      ct.id, ct.name, COUNT(*)::integer AS total
-    FROM
-      custom.route_targets t
-    JOIN
-      businesses b
-    ON
-      b.location_id=t.location_id
-    JOIN
-      client.business_customer_types bct
-    ON
-      bct.business_id = b.id
+    SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
+      (SELECT
+        hct.customer_type_id AS id, COUNT(*)::integer AS households, 0 as businesses
+      FROM
+        custom.route_targets t
+      JOIN
+        households h
+      ON
+        h.location_id=t.location_id
+      JOIN
+        client.household_customer_types hct
+      ON
+        hct.household_id = h.id
+      WHERE
+        route_id=$1
+      GROUP BY hct.customer_type_id)
+
+      UNION
+
+      (SELECT
+        bct.customer_type_id as id, 0 as households, COUNT(*)::integer as businesses
+      FROM
+        custom.route_targets t
+      JOIN
+        businesses b
+      ON
+        b.location_id=t.location_id
+      JOIN
+        client.business_customer_types bct
+      ON
+        bct.business_id = b.id
+      WHERE
+        route_id=$1
+      GROUP BY bct.customer_type_id)
+      ) t
     JOIN
       client.customer_types ct
     ON
-      ct.id=bct.customer_type_id
-    WHERE
-      route_id=$1
-    GROUP BY ct.id
-    ORDER BY ct.name
+      ct.id=t.id
+    GROUP BY
+      ct.name
+    ORDER BY
+      ct.name
   */});
   database.query(sql, [route_id], callback);
 };
@@ -115,8 +138,12 @@ NetworkPlan.find_route = function(route_id, callback) {
   })
   .then(function(customer_types, callback) {
     output.metadata.customer_types = customer_types;
-    output.metadata.customers_total = customer_types.reduce(function(total, customer_type) {
-      return total + customer_type.total;
+
+    output.metadata.customers_businesses_total = customer_types.reduce(function(total, customer_type) {
+      return total + customer_type.businesses;
+    }, 0);
+    output.metadata.customers_households_total = customer_types.reduce(function(total, customer_type) {
+      return total + customer_type.households;
     }, 0);
 
     RouteOptimizer.calculate_npv(route_id, fiber_cost, callback);

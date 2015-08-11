@@ -110,30 +110,55 @@ Location.show_information = function(location_id, callback) {
 	.then(function(_info, callback) {
 		info = _info;
 		var sql = multiline(function() {;/*
-			SELECT
-			  ct.id, ct.name, COUNT(*)::integer AS total
-			FROM
-			  businesses b
-			JOIN
-			  client.business_customer_types bct
-			ON
-			  bct.business_id = b.id
+			SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
+			  (SELECT
+			    bct.customer_type_id as id, COUNT(*)::integer AS households, 0 as businesses
+			  FROM
+			    businesses b
+			  JOIN
+			    client.business_customer_types bct
+			  ON
+			    bct.business_id = b.id
+			  WHERE
+			    b.location_id=$1
+			  GROUP BY bct.customer_type_id)
+
+			  UNION
+
+			  (SELECT
+			    hct.customer_type_id as id, 0 as households, COUNT(*)::integer AS businesses
+			  FROM
+			    households h
+			  JOIN
+			    client.household_customer_types hct
+			  ON
+			    hct.household_id = h.id
+			  WHERE
+			    h.location_id=$1
+			  GROUP BY hct.customer_type_id)
+
+			  ) t
 			JOIN
 			  client.customer_types ct
 			ON
-			  ct.id=bct.customer_type_id
-			WHERE
-			  b.location_id=$1
-			GROUP BY ct.id
-			ORDER BY ct.name
+			  ct.id=t.id
+			GROUP BY
+			  ct.name
+			ORDER BY
+			  ct.name
 		*/});
 		database.query(sql, [location_id], callback);
 	})
 	.then(function(customer_types, callback) {
 		info.customer_types = customer_types;
-		info.customers_total = customer_types.reduce(function(total, customer_type) {
-		  return total + customer_type.total;
+
+		info.customers_businesses_total = customer_types.reduce(function(total, customer_type) {
+		  return total + customer_type.businesses;
 		}, 0);
+		info.customers_households_total = customer_types.reduce(function(total, customer_type) {
+		  return total + customer_type.households;
+		}, 0);
+
 		callback(null, info);
 	})
 	.end(callback);

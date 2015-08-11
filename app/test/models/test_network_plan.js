@@ -69,11 +69,13 @@ describe('NetworkPlan', function() {
 				expect(route.metadata.costs[2].value).to.be.a('number');
 				expect(route.metadata.total_cost).to.be.a('number');
 
-				expect(route.metadata.customers_total).to.be.a('number');
+				expect(route.metadata.customers_businesses_total).to.be.a('number');
+				expect(route.metadata.customers_households_total).to.be.a('number');
 				expect(route.metadata.customer_types).to.be.an('array');
 				expect(route.metadata.customer_types[0]).to.be.an('object');
 				expect(route.metadata.customer_types[0].name).to.be.a('string');
-				expect(route.metadata.customer_types[0].total).to.be.a('number');
+				expect(route.metadata.customer_types[0].businesses).to.be.a('number');
+				expect(route.metadata.customer_types[0].households).to.be.a('number');
 				
 				var year = new Date().getFullYear();
 				expect(route.metadata.npv).to.be.an('array');

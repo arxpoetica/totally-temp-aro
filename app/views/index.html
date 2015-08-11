@@ -207,42 +207,76 @@
               <h4 class="modal-title">Location details</h4>
             </div>
             <div class="modal-body">
-              <table class="locations-table">
-                <tbody>
-                  <tr>
-                    <th>Entry fee</th>
-                    <td colspan="2" class="text-right">{{location.entry_fee | currency}}</td>
-                  </tr>
-                  <tr>
-                    <th>Number of businesses</th>
-                    <td colspan="2" class="text-right">{{location.number_of_businesses}}</td>
-                  </tr>
-                  <tr>
-                    <th>Business install costs</th>
-                    <td colspan="2" class="text-right">{{location.business_install_costs | currency}}</td>
-                  </tr>
-                  <tr>
-                    <th>Number of households</th>
-                    <td></td>
-                    <td class="text-right">
-                      <input type="text" class="form-control input-sm" style="text-align:right" ng-model="location.number_of_households">
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>Household install costs</th>
-                    <td colspan="2" class="text-right">{{location.household_install_costs | currency}}</td>
-                  </tr>
-                  <tr>
-                    <th>Total costs</th>
-                    <td colspan="2" class="text-right">{{location.total_costs | currency}}</td>
-                  </tr>
-                  <tr ng-repeat="customer_type in location.customer_types">
-                    <th>{{customer_type.name}}</th>
-                    <td class="text-right">{{customer_type.total}}</td>
-                    <td class="text-right">{{customer_type.total*100 / location.customers_total | number : 1}}%</td>
-                  </tr>
-                </tbody>
-              </table>
+              <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                  <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Install costs</a>
+                </li>
+                <li role="presentation">
+                  <a href="#selected_location_client_information" aria-controls="profile" role="tab" data-toggle="tab">Client information</a>
+                </li>
+              </ul>
+
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="selected_location_costs">
+                  <table class="locations-table">
+                    <tbody>
+                      <tr>
+                        <th>Entry fee</th>
+                        <td colspan="2" class="text-right">{{location.entry_fee | currency}}</td>
+                      </tr>
+                      <tr>
+                        <th>Number of businesses</th>
+                        <td colspan="2" class="text-right">{{location.number_of_businesses}}</td>
+                      </tr>
+                      <tr>
+                        <th>Business install costs</th>
+                        <td colspan="2" class="text-right">{{location.business_install_costs | currency}}</td>
+                      </tr>
+                      <tr>
+                        <th>Number of households</th>
+                        <td></td>
+                        <td class="text-right">
+                          <input type="text" class="form-control input-sm" style="text-align:right" ng-model="location.number_of_households">
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Household install costs</th>
+                        <td colspan="2" class="text-right">{{location.household_install_costs | currency}}</td>
+                      </tr>
+                      <tr>
+                        <th>Total costs</th>
+                        <td colspan="2" class="text-right">{{location.total_costs | currency}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="selected_location_client_information">
+                  <table class="locations-table">
+                    <tbody>
+                      <tr>
+                        <td></td>
+                        <th class="text-right" colspan="2">Businesses</th>
+                        <th class="text-right" colspan="2">Households</th>
+                      </tr>
+                      <tr ng-repeat="customer_type in location.customer_types">
+                        <th>{{customer_type.name}}</th>
+                        <td class="text-right">
+                          {{customer_type.businesses}}
+                        </td>
+                        <td class="text-right">
+                          {{customer_type.businesses*100 / location.customers_businesses_total | number : 0}}%
+                        </td>
+                        <td class="text-right">
+                          {{customer_type.households}}
+                        </td>
+                        <td class="text-right">
+                          {{customer_type.households*100 / location.customers_households_total | number : 0}}%
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -355,25 +389,40 @@
                 <tbody>
                   <tr ng-repeat="cost in route.metadata.costs">
                     <th>{{cost.name}}</th>
-                    <td colspan="2" class="text-right">{{cost.value | currency}}</td>
+                    <td colspan="4" class="text-right">{{cost.value | currency}}</td>
                   </tr>
                   <tr>
                     <th>Total cost</th>
-                    <td colspan="2" class="text-right" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</td>
+                    <td colspan="4" class="text-right" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</td>
+                  </tr>
+                  <tr ng-show="route.metadata.customer_types && route.metadata.customer_types.length > 0">
+                    <td></td>
+                    <th class="text-right" colspan="2">Businesses</th>
+                    <th class="text-right" colspan="2">Households</th>
                   </tr>
                   <tr ng-repeat="customer_type in route.metadata.customer_types">
                     <th>{{customer_type.name}}</th>
-                    <td class="text-right">{{customer_type.total}}</td>
-                    <td class="text-right">{{customer_type.total*100 / route.metadata.customers_total | number : 1}}%</td>
+                    <td class="text-right">
+                      {{customer_type.businesses}}
+                    </td>
+                    <td class="text-right">
+                      {{customer_type.businesses*100 / route.metadata.customers_businesses_total | number : 0}}%
+                    </td>
+                    <td class="text-right">
+                      {{customer_type.households}}
+                    </td>
+                    <td class="text-right">
+                      {{customer_type.households*100 / route.metadata.customers_households_total | number : 0}}%
+                    </td>
                   </tr>
                   <tr ng-show="route.metadata.npv && route.metadata.npv.length > 0">
                     <th ng-attr-rowspan="{{route.metadata.npv.length + 1}}" style="vertical-align: middle">NPV</th>
-                    <th class="text-right">Year</th>
-                    <th class="text-right">Value</th>
+                    <th class="text-right" colspan="2">Year</th>
+                    <th class="text-right" colspan="2">Value</th>
                   </tr>
                   <tr ng-repeat="revenue in route.metadata.npv">
-                    <td class="text-right">{{revenue.year}}</td>
-                    <td class="text-right">{{revenue.value | currency}}</td>
+                    <td class="text-right" colspan="2">{{revenue.year}}</td>
+                    <td class="text-right" colspan="2">{{revenue.value | currency}}</td>
                   </tr>
                 </tbody>
               </table>
