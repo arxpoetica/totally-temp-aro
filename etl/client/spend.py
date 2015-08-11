@@ -1,6 +1,9 @@
 import pandas as pd
 
 def import_spend(db, spend_data):
+    spend_data.loc[:,'spend'].fillna(value = 0, 
+                                     inplace = True)
+    
     spend_data['monthly_spend'] = spend_data.loc[:,'spend'] / 12
     
     spend_data = create_normalized_table(db, spend_data, 
