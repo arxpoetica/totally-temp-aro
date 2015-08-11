@@ -1,5 +1,10 @@
 #!/bin/sh
 
+function assert_sql {
+  OUTPUT=$($PSQL -c "$2" -t -P format=unaligned)
+  echo ✓ $1
+}
+
 function assert_sql_equals {
   OUTPUT=$($PSQL -c "$2" -t -P format=unaligned)
   if [ "$OUTPUT" = $3 ]; then
