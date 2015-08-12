@@ -154,10 +154,12 @@
       <div id="left-col">
         <div ng-controller="map_layers_controller">
           <div ng-repeat="(key, layer) in area_layers">
-            <p>
+            <p ng-attr-id="map_layers_toggle_{{key}}">
               <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
                 ng-class="{'btn-success active': layer.visible}"
+                ng-attr-data-loaded="{{layer.data_loaded}}"
                 ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
+              <a href="#" class="<%= show_on_test %>" ng-click="layer.select_random_area()">.</a>
             </p>
           </div>
           <hr>
@@ -508,7 +510,7 @@
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Total</label>
                 <div class="col-sm-9">
-                  <table class="table" style="max-height: 200px; overflow: scroll; display: block; width: 100%" ng-show="!loading && total.length > 0">
+                  <table class="table" ng-show="!loading && total.length > 0">
                     <thead>
                       <tr>
                         <th>Year</th>

@@ -2,7 +2,7 @@ var chai = require('chai');
 var expect = chai.expect;
 require('./util').extendBrowser(browser);
 
-describe('Rename a route', function() {
+describe('Market size', function() {
 
   before(function() {
     browser.get('http://localhost:8000');
@@ -17,13 +17,14 @@ describe('Rename a route', function() {
     browser.waitForText(element(by.css('.btn.btn-default.navbar-btn')), name);
   });
 
-  it('should rename the named route', function() {
-    var new_name = 'My other name';
-    element(by.css('#network_plans_menu > li > a')).click();
-    element(by.css('[ng-click="save_as()"]')).click();
-    element(by.css('#edit-route [ng-model="edit_route_name"]')).clear().sendKeys(new_name);
-    element(by.css('#edit-route [ng-click="save_changes()"]')).click();
+  it('should show the census blocks layer', function() {
+    var btn = element(by.linkText('CB'));
+    btn.click();
+    browser.waitForAttribute(btn, 'data-loaded', 'true');
 
-    browser.waitForText(element(by.css('.btn.btn-default.navbar-btn')), new_name);
+    element(by.linkText('MS')).click();
+    element(by.css('#map_layers_toggle_census_blocks_layer [ng-click="layer.select_random_area()"]')).click();
+
+    browser.waitForRepeaterToHaveData('row in total');
   });
 });

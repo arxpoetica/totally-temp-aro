@@ -140,6 +140,17 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		broadcast_changes(self, changes);
 	};
 
+	MapLayer.prototype.select_random_area = function() {
+		var feature;
+		this.data_layer.forEach(function(f) {
+			if (f.getProperty('id') === 216835) feature = f;
+		});
+		var event = {
+			feature: feature,
+		}
+		$rootScope.$broadcast('map_layer_clicked_feature', event, this);
+	}
+
 	// Load GeoJSON data into the layer if it's not already loaded
 	MapLayer.prototype.load_data = function(val) {
 		var layer = this;
