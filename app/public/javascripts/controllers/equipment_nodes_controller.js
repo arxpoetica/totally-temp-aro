@@ -53,6 +53,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     });
   };
 
+  $scope.place_random_equipment = function() {
+    var gm_event = {
+      latLng: new google.maps.LatLng(40.77682494132765, -73.95257949829102),
+    }
+    $rootScope.$broadcast('map_click', gm_event);
+  };
+
   $rootScope.$on('map_click', function(e, gm_event) {
     if (!map_tools.is_visible('equipment_nodes') || !$scope.route) return;
 
