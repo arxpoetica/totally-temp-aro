@@ -60,6 +60,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $rootScope.$broadcast('map_click', gm_event);
   };
 
+  $scope.show_number_of_features = function() {
+    $scope.number_of_features = $rootScope.feature_layers.network_nodes.number_of_features();
+  };
+
   $rootScope.$on('map_click', function(e, gm_event) {
     if (!map_tools.is_visible('equipment_nodes') || !$scope.route) return;
 
