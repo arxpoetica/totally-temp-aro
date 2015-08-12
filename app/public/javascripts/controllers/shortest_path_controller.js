@@ -31,7 +31,15 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   $rootScope.$on('route_cleared', function(e, route) {
     selection.clear_selection();
     $scope.route_layer.clear_data();
-    $scope.route.metadata = {};
+    $scope.route.metadata = {
+      total_cost: 0,
+      costs: [
+        { name: 'Fiber cost', value: 0 },
+        { name: 'Locations cost', value: 0 },
+        { name: 'Equipment nodes cost', value: 0 },
+      ],
+      revenue: 0,
+    };
   });
 
   function redraw_route(data) {

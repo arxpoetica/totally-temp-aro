@@ -46,6 +46,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         'type': 'Feature',
         'geometry': wirecenter.geom,
       });
+      area_layers['wirecenter'].hide(); // hidden by default
     });
   });
 

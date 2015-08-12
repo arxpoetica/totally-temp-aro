@@ -30,7 +30,7 @@ var MarketSize = models.MarketSize;
 app.get('/', function(request, response, next) {
 	response.render('index.html', {
 		env: process.env.NODE_ENV,
-		show_on_test: process.env.NODE_ENV === 'test' ? '' : 'hidden',
+		env_is_test: process.env.NODE_ENV === 'test',
 	})
 });
 
