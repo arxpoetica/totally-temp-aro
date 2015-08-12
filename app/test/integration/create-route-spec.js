@@ -1,5 +1,6 @@
 var chai = require('chai');
 var expect = chai.expect;
+var fs = require('fs');
 
 describe('ARO homepage', function() {
 
@@ -52,6 +53,34 @@ describe('ARO homepage', function() {
       var amount =  +text.replace(/[\$,\.]/g, '');
       expect(amount > 0).to.be.true;
       done();
+    });
+  });
+
+  it('should export a route to KML', function(done) {
+    element(by.css('#network_plans_menu > li > a')).click();
+    element(by.css('[ng-click="export_kml_name()"]')).click();
+
+    var fileName = "./e2e/downloads/test-kml-export";
+    element(by.css('input[ng-model="kml_file_name"]')).clear().sendKeys(fileName).then(function(){
+
+      if(fs.existsSync(fileName + '.kml')){
+        fs.unlinkSync(fileName + '.kml');
+      }
+
+      element(by.css('[ng-click="export_kml()"]')).click();
+
+      browser.driver.wait(function(){
+
+        return fs.existsSync(fileName + '.kml');
+      }, 30000).then(function(){
+
+        console.log('file exists');
+        fs.unlinkSync(fileName + '.kml');
+        
+        done();
+      })
+
+
     });
   });
 

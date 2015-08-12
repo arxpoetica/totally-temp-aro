@@ -107,11 +107,13 @@
             <div class="modal-body">
               <form class="form-horizontal">
                 <div class="form-group">
-                  <label class="col-sm-4 control-label">Filename</label>
-                  <div class="col-sm-8">
+                  <label class="col-sm-3 control-label">Filename</label>
+                  <div class="col-sm-7">
                     <input type="text" class="form-control" ng-model="kml_file_name">
                   </div>
+                  <span class="col-sm-2 control-label">.kml</span>
                 </div>
+                <span id="export-error" style="display: none">Filename can only contain letters and numbers!</span>
               </form>
             </div>
             <div class="modal-footer">

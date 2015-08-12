@@ -290,7 +290,7 @@ NetworkPlan.edit_route = function(route_id, changes, callback) {
   .end(callback);
 };
 
-NetworkPlan.export_kml = function(route_id, file_name, response, callback) {
+NetworkPlan.export_kml = function(route_id, callback) {
 
   txain(function(callback){
 
@@ -303,21 +303,6 @@ NetworkPlan.export_kml = function(route_id, file_name, response, callback) {
     */});
 
     database.query(sql, [route_id], callback)
-  })
-  .then(function (rows, callback){
-
-    var kml_output = '<kml xmlns="http://www.opengis.net/kml/2.2">';
-
-    for (var row in rows){
-
-      kml_output += rows[row]['geom'];
-    }
-
-    kml_output += '</kml>';
-
-    response.attachment(file_name + '.kml');
-    response.send(kml_output);
-
   })
   .end(callback);
 

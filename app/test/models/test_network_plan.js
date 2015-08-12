@@ -18,7 +18,7 @@ describe('NetworkPlan', function() {
 			});
 		});
 
-		it('should should find all routes', function(done) {
+		it('should find all routes', function(done) {
 			NetworkPlan.find_all(function(err, routes) {
 				expect(routes.length > 0).to.equal(true);
 				var route = routes[0];
@@ -87,6 +87,13 @@ describe('NetworkPlan', function() {
 				expect(route).to.have.property('feature_collection');
 				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
 				expect(route.feature_collection.features.length > 0).to.be.equal(true);
+				done();
+			});
+		});
+
+		it('should export a route to KML form', function(done) {
+			NetworkPlan.export_kml(route_id, function(err, rows) {
+				expect(rows[0]).to.have.property('geom');
 				done();
 			});
 		});

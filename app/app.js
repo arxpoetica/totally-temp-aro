@@ -184,8 +184,21 @@ app.post('/route_optimizer/:route_id/clear', function(request, response, next) {
 app.get('/route_optimizer/:route_id/:file_name/export', function(request, response, next) {
 	var route_id = request.params.route_id;
 	var file_name = request.params.file_name;
-	NetworkPlan.export_kml(route_id, file_name, response, jsonHandler(response, next));
 
+	NetworkPlan.export_kml(route_id, function(err, rows){
+
+		var kml_output = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>';
+
+	    for (var row in rows){
+
+	      kml_output += rows[row]['geom'];
+	    }
+
+	    kml_output += '</Document></kml>';
+
+	    response.attachment(file_name + '.kml');
+	    response.send(kml_output);
+	});
 });
 
 // Market size filters
