@@ -1,75 +1,46 @@
 var chai = require('chai');
 var expect = chai.expect;
+require('./util').extendBrowser(browser);
 
-describe('ARO homepage', function() {
+describe('Create a route', function() {
 
   before(function() {
     browser.get('http://localhost:8000');
   });
   
-  it('should create a route', function(done) {
+  it('should create a route', function() {
+    var name = 'My plan';
     element(by.css('#network_plans_menu > li > a')).click();
     element(by.css('[ng-click="new_route()"]')).click();
-
+    element(by.css('input[ng-model="new_route_name"]')).clear().sendKeys(name);
     element(by.css('[ng-click="save_new_route()"]')).click();
-
-    var input = element(by.css('#shortest_path_controller [ng-model="route.name"]'));
-    input.getAttribute('value').then(function(value) {
-      expect(value).to.be.equal('Untitled plan');
-
-      // zoom
-      element(by.css('[title="Zoom in"]')).click();
-      element(by.css('[title="Zoom in"]')).click();
-      done();
-    });
+    browser.waitForText(element(by.css('.btn.btn-default.navbar-btn')), name);
   });
 
   it('should show a layer', function() {
     var btn = element(by.repeater('(key, layer) in feature_layers').row(0)).element(by.css('[ng-click="layer.toggle_visibility()"]'));
     btn.click();
-    browser.wait(function() {
-      return btn.getAttribute('data-loaded').then(function(value) {
-        return value === 'true';
-      })
-    }, 10000);
+    browser.waitForAttribute(btn, 'data-loaded', 'true');
   });
 
   it('should show the other layer', function() {
     var btn = element(by.repeater('(key, layer) in feature_layers').row(1)).element(by.css('[ng-click="layer.toggle_visibility()"]'));
     btn.click();
-    browser.wait(function() {
-      return btn.getAttribute('data-loaded').then(function(value) {
-        return value === 'true';
-      })
-    }, 10000);
+    browser.waitForAttribute(btn, 'data-loaded', 'true');
   });
 
-  it('should select a few features', function(done) {
+  it('should select a few features', function() {
     element(by.repeater('(key, layer) in feature_layers').row(0)).element(by.css('[ng-click="layer.select_random_features()"]')).click();
     element(by.repeater('(key, layer) in feature_layers').row(1)).element(by.css('[ng-click="layer.select_random_features()"]')).click();
 
-    element(by.id('shortest_path_total_cost')).getText().then(function(text) {
-      var amount =  +text.replace(/[\$,\.]/g, '');
-      expect(amount > 0).to.be.true;
-      done();
-    });
+    browser.waitForAmount(element(by.id('shortest_path_total_cost')));
   });
 
-  it('should clear a route', function(done) {
+  it('should clear a route', function() {
     element(by.css('#network_plans_menu > li > a')).click();
     element(by.css('[ng-click="clear_route()"]')).click();
-
-    browser.sleep(500);
-    element(by.css('button.confirm')).click().then(function(){
-
-      element(by.id('shortest_path_total_cost')).getText().then(function(text) {
-        expect(text == '').to.be.true;
-        done();
-      });
-
-    });
+    browser.confirmAlert();
+    browser.waitForText(element(by.id('shortest_path_total_cost')), '$0.00');
   });
-
-
 
 });

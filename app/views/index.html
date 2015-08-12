@@ -645,7 +645,9 @@
       tooltips.on('click mouseout', function() {
         $(this).tooltip('hide');
       })
-    })
+    });
+
+    swal.setDefaults({ animation: <%- show_on_test ? 'true' : 'null' %> });
   </script>
   <script type="text/javascript">
     (function() {
