@@ -94,13 +94,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   };
 
   $scope.export_kml = function() {
+      $('#export-route').modal('hide');
       var params = { name: $scope.kml_file_name };
     
-      console.log(params.name);
-      $http.post('/route_optimizer/' + $scope.route.id + '/' + params.name + '/export').success(function(response) {
-        console.log('ay');
-        
-      });
+      location.href = '/route_optimizer/' + $scope.route.id + '/' + params.name + '/export';
   };
 
 }]);

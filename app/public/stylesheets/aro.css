@@ -26,13 +26,22 @@ html, body, #map-canvas, #map-canvas-wrapper {
   overflow: scroll;
 }
 
-#shortest_path_controller, #market_size_controller, #equipment_nodes_controller {
+.map-tool-wrapper {
   position: absolute;
-  margin-left: 75px;
-  margin-top: 20px;
+  top: 75px;
+  left: 75px;
   z-index: 1;
+}
+
+.map-tool {
   border: 2px solid #eee;
-  width: 300px;
+  width: 320px;
+  margin: 0;
+}
+
+.map-tool .panel-body {
+  max-height: 400px;
+  overflow: auto;
 }
 
 .loader {
@@ -89,6 +98,7 @@ html, body, #map-canvas, #map-canvas-wrapper {
 
 .locations-table {
   width: 100%;
+  margin-top: 20px;
 }
 
 .locations-table td, .locations-table th {
