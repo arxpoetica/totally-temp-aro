@@ -25,16 +25,33 @@
               <table class="table table-striped" ng-show="routes.length > 0">
                 <thead>
                   <tr>
-                    <th>Name</th>
+                    <th>
+                      Name
+                      <a href="#" ng-click="sort_by('name', true)">↓</a>
+                      <a href="#" ng-click="sort_by('name', false)">↑</a>
+                    </th>
+                    <th>
+                      Created at
+                      <a href="#" ng-click="sort_by('created_at', true)">↓</a>
+                      <a href="#" ng-click="sort_by('created_at', false)">↑</a>
+                    </th>
+                    <th>
+                      Updated at
+                      <a href="#" ng-click="sort_by('updated_at', true)">↓</a>
+                      <a href="#" ng-click="sort_by('updated_at', false)">↑</a>
+                    </th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr ng-repeat="route in routes">
-                    <td>{{route.name}}</th>
+                    <td><a href="#" ng-click="select_route(route)">{{route.name}}</a></th>
+                    <td>{{route.updated_at | date:'shortDate'}}</th>
+                    <td>{{route.created_at | date:'shortDate'}}</th>
                     <td class="text-right">
-                      <a href="#" class="btn btn-primary btn-sm" ng-click="select_route(route)">View</a>
-                      <a href="#" class="btn btn-danger btn-sm" ng-click="delete_route(route)">Delete</a>
+                      <a href="#" class="btn btn-danger btn-sm" ng-click="delete_route(route)">
+                        <span class="glyphicon glyphicon-remove"></span>
+                      </a>
                     </td>
                   </tr>
                 </tbody>
@@ -120,11 +137,11 @@
                 <ul class="dropdown-menu">
                   <li><a href="#" ng-click="new_route()">New…</a></li>
                   <li><a href="#" ng-click="show_routes()">Open…</a></li>
-                  <li><a href="#" ng-click="save_as()">Save as…</a></li>
+                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="save_as()">Save as…</a></li>
                   <li role="separator" class="divider"></li>
-                  <li><a href="#" ng-click="clear_route()">Clear current</a></li>
+                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="clear_route()">Clear current</a></li>
                   <li role="separator" class="divider"></li>
-                  <li><a href="#">Export KML…</a></li>
+                  <li ng-class="{'disabled': !route}"><a href="#">Export KML…</a></li>
                 </ul>
               </li>
             </ul>

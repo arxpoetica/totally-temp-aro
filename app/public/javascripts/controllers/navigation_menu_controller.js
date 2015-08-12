@@ -47,6 +47,15 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     });
   };
 
+  $scope.sort_by = function(key, descending) {
+    $scope.routes = _.sortBy($scope.routes, function(route) {
+      return route[key];
+    });
+    if (descending) {
+      $scope.routes = $scope.routes.reverse();
+    }
+  };
+
   $scope.new_route = function() {
     $('#new-route').modal('show');
   };
