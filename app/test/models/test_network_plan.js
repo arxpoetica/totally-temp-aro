@@ -83,6 +83,7 @@ describe('NetworkPlan', function() {
 				expect(route.metadata.npv[0].year).to.be.a('number');
 				expect(route.metadata.npv[0].year).to.be.equal(year);
 				expect(route.metadata.npv[0].value).to.be.a('number');
+				expect(route.metadata.revenue).to.be.a('number');
 
 				expect(route).to.have.property('feature_collection');
 				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');

@@ -413,6 +413,10 @@
                     <th>Total cost</th>
                     <td colspan="4" class="text-right" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</td>
                   </tr>
+                  <tr>
+                    <th>Revenue</th>
+                    <td colspan="4" class="text-right">{{route.metadata.revenue | currency}}</td>
+                  </tr>
                   <tr ng-show="route.metadata.customer_types && route.metadata.customer_types.length > 0">
                     <td></td>
                     <th class="text-right" colspan="2">Businesses</th>
@@ -442,16 +446,6 @@
                     <td class="text-right" colspan="2">{{revenue.year}}</td>
                     <td class="text-right" colspan="2">{{revenue.value | currency}}</td>
                   </tr>
-                  <tr ng-show="route.metadata.revenue && route.metadata.revenue.length > 0">
-                    <th ng-attr-rowspan="{{route.metadata.revenue.length + 1}}" style="vertical-align: middle">Revenue</th>
-                    <th class="text-right" colspan="2">Year</th>
-                    <th class="text-right" colspan="2">Value</th>
-                  </tr>
-                  <tr ng-repeat="revenue in route.metadata.revenue">
-                    <td class="text-right" colspan="2">{{revenue.year}}</td>
-                    <td class="text-right" colspan="2">{{revenue.value | currency}}</td>
-                  </tr>
-
                 </tbody>
               </table>
             </form>
