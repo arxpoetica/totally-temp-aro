@@ -108,6 +108,10 @@ Network.edit_network_nodes = function(route_id, changes, callback) {
   txain(function(callback) {
     add_nodes(route_id, changes.insertions, callback);
   })
+  .then(function(callback) {
+    var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
+    database.query(sql, [route_id], callback);
+  })
   .end(callback);
 };
 
