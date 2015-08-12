@@ -1,7 +1,7 @@
 var chai = require('chai');
 var expect = chai.expect;
 
-describe('ARO homepage', function() {
+describe('Create a route', function() {
 
   before(function() {
     browser.get('http://localhost:8000');
