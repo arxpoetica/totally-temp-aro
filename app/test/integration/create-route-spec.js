@@ -1,11 +1,12 @@
 var chai = require('chai');
 var expect = chai.expect;
-require('./util').extendBrowser(browser);
+var utils = require('./utils');
+utils.extendBrowser(browser);
 
 describe('Create a route', function() {
 
   before(function() {
-    browser.get('http://localhost:8000');
+    browser.getHomepage();
   });
   
   it('should create a route', function() {

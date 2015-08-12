@@ -2,6 +2,10 @@ var timeout = 10000;
 
 exports.extendBrowser = function(browser) {
 
+  browser.getHomepage = function() {
+    browser.get('http://localhost:8000');
+  };
+
   browser.waitForAttribute = function(elem, name, value) {
     browser.wait(function() {
       return elem.getAttribute(name).then(function(val) {

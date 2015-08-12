@@ -159,7 +159,9 @@
                 ng-class="{'btn-success active': layer.visible}"
                 ng-attr-data-loaded="{{layer.data_loaded}}"
                 ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
-              <a href="#" class="<%= show_on_test %>" ng-click="layer.select_random_area()">.</a>
+              <% if (env_is_test) { %>
+                <a href="#" ng-click="layer.select_random_area()">.</a>
+              <% } %>
             </p>
           </div>
           <hr>
@@ -169,7 +171,9 @@
                 ng-class="{'btn-success active': layer.visible}"
                 ng-attr-data-loaded="{{layer.data_loaded}}"
                 ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
-              <a href="#" class="<%= show_on_test %>" ng-click="layer.select_random_features()">.</a>
+              <% if (env_is_test) { %>
+                <a href="#" ng-click="layer.select_random_features()">.</a>
+              <% } %>
             </p>
           </div>
         </div>
@@ -204,6 +208,11 @@
     </div>
 
     <div ng-controller="selected_location_controller">
+
+      <% if (env_is_test) { %>
+        <a class="pull-right" ng-click="select_random_location()">.</a>
+      <% } %>
+
       <div class="modal" id="selected_location_controller" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
@@ -563,9 +572,11 @@
                   <div class="col-sm-offset-3 col-sm-9">
                     <button class="btn btn-sm btn-primary" ng-click="save_nodes()" type="button">Save nodes</button>
                     <button class="btn btn-sm btn-danger" ng-click="clear_nodes()" type="button">Clear</button>
-                    <a href="#" class="<%= show_on_test %>" ng-click="place_random_equipment()">.</a>
-                    <a href="#" class="<%= show_on_test %>" ng-click="show_number_of_features()">.</a>
-                    <span class="<%= show_on_test %>">{{number_of_features}}</span>
+                    <% if (env_is_test) { %>
+                      <a href="#" ng-click="place_random_equipment()">.</a>
+                      <a href="#" ng-click="show_number_of_features()">.</a>
+                      <span>{{number_of_features}}</span>
+                    <% } %>
                   </div>
                 </div>
               </form>
@@ -652,7 +663,7 @@
       })
     });
 
-    swal.setDefaults({ animation: <%- show_on_test ? 'true' : 'null' %> });
+    swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> });
   </script>
   <script type="text/javascript">
     (function() {
