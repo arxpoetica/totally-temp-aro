@@ -95,7 +95,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.export_kml = function() {
     var params = { name: $scope.kml_file_name };
-    if(!params.name.match(/^[0-9a-z]+$/)){
+    if(!params.name.match(/^[a-zA-Z0-9-_]+$/)){
       $('#export-error').show();
     }
     else{
