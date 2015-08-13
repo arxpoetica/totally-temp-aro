@@ -18,16 +18,14 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
     if (tool === 'SELECTION_TOOL_RECTANGLE') {
       if ($scope.selected_tool === tool) {
         $scope.selected_tool = null;
-        map.setOptions({draggable: true});
-        map.setOptions({draggableCursor:null});
+        map.setOptions({ draggable: true, draggableCursor: null });
         if (rectangle) {
           rectangle.setMap(null);
           rectangle = null;
         }
       } else {
         $scope.selected_tool = 'SELECTION_TOOL_RECTANGLE';
-        map.setOptions({draggable: false});
-        map.setOptions({draggableCursor:'crosshair'});
+        map.setOptions({ draggable: false, draggableCursor:'crosshair' });
       }
     }
   }

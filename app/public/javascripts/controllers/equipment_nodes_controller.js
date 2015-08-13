@@ -16,7 +16,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   function empty_changes() {
-    return { insertions:[] };
+    return { insertions: [], deletions: [], updates: [] };
   }
 
   var changes = empty_changes();
@@ -32,8 +32,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.save_nodes = function() {
     $http.post('/network/nodes/'+$scope.route.id+'/edit', changes).success(function(response) {
+      if (changes.insertions.length > 0) {
+        $rootScope.feature_layers.network_nodes.reload_data(); // to get the ids so they can be selected
+      }
       changes = empty_changes();
-      $rootScope.feature_layers.network_nodes.reload_data(); // to get the ids so they can be selected
     });
   };
 
@@ -64,6 +66,33 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.number_of_features = $rootScope.feature_layers.network_nodes.number_of_features();
   };
 
+  function update_map_cursor() {
+    var layer = $rootScope.feature_layers.network_nodes;
+    var editing = layer.visible && $scope.route && map_tools.is_visible('equipment_nodes')
+    map.setOptions({ draggableCursor: editing ? 'crosshair' : null });
+  }
+
+  $rootScope.$on('route_selected', function(e, route) {
+    $scope.route = route;
+    update_map_cursor();
+  });
+
+  $rootScope.$on('map_tool_changed_visibility', function(e, name) {
+    if (name === 'equipment_nodes') {
+      update_map_cursor();
+    }
+  });
+
+  $rootScope.$on('map_layer_dragged_feature', function(e, gm_event, feature) {
+    var coordinates = feature.getGeometry().get();
+    changes.updates.push({
+      lat: coordinates.lat(),
+      lon: coordinates.lng(),
+      id: feature.getProperty('id'),
+    });
+    $scope.save_nodes();
+  });
+
   $rootScope.$on('map_click', function(e, gm_event) {
     if (!map_tools.is_visible('equipment_nodes') || !$scope.route) return;
 
@@ -86,9 +115,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     arr.forEach(function(feature) {
       layer.data_layer.overrideStyle(feature, {
         icon: '/images/map_icons/'+type+'.png',
+        draggable: true,
       });
     });
     layer.show();
+    $scope.save_nodes();
   });
 
 }]);

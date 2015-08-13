@@ -172,7 +172,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   });
 
   $rootScope.$on('route_selected', function(e, route) {
-    feature_layers.network_nodes.load_data('/network/nodes/'+route.id+'/find');
+    var layer = feature_layers.network_nodes;
+    var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
+    layer.set_api_endpoint(api_endpoint);
   });
 
 });

@@ -45,7 +45,7 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, callback) {
 Network.view_network_nodes = function(node_type, route_id, callback) {
   var sql = multiline(function() {;/*
     SELECT
-      n.id, ST_AsGeoJSON(geog)::json AS geom, t.name AS name
+      n.id, ST_AsGeoJSON(geog)::json AS geom, t.name AS name, n.route_id
     FROM client.network_nodes n
     JOIN client.network_node_types t
       ON n.node_type_id = t.id
@@ -82,6 +82,7 @@ Network.view_network_nodes = function(node_type, route_id, callback) {
           'type' : row.name,
           'icon': '/images/map_icons/'+row.name+'.png',
           'unselectable': row.name !== 'central_office',
+          'draggable': !!row.route_id,
         },
         'geometry': row.geom,
       }
@@ -109,6 +110,10 @@ Network.edit_network_nodes = function(route_id, changes, callback) {
     add_nodes(route_id, changes.insertions, callback);
   })
   .then(function(callback) {
+    console.log('updates', changes.updates)
+    update_nodes(route_id, changes.updates, callback);
+  })
+  .then(function(callback) {
     var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
     database.query(sql, [route_id], callback);
   })
@@ -130,6 +135,21 @@ function add_nodes(route_id, insertions, callback) {
   });
   sql += arr.join(', ');
   database.execute(sql, params, callback);
+};
+
+function update_nodes(route_id, updates, callback) {
+  if (!_.isArray(updates) || updates.length === 0) return callback();
+  txain(updates)
+  .each(function(node, callback) {
+    var sql = 'UPDATE client.network_nodes SET geog=ST_GeogFromText($1), geom=ST_GeomFromText($2, 4326) WHERE id=$3'
+    var params = [
+      'POINT('+node.lon+' '+node.lat+')',
+      'POINT('+node.lon+' '+node.lat+')',
+      node.id
+    ];
+    database.execute(sql, params, callback);
+  })
+  .end(callback);
 };
 
 Network.clear_network_nodes = function(route_id, callback) {
