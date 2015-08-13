@@ -172,7 +172,7 @@ RouteOptimizer.calculate_revenue_and_npv = function(route_id, fiber_cost, callba
     var year = new Date().getFullYear();
 
     var revenue = _.findWhere(route_annual_revenues, { year: year });
-    revenue = revenue && revenue.value;
+    revenue = (revenue && revenue.value) || 0;
     var past_five_years = _.filter(route_annual_revenues, function(row) {
       return row.year >= year-5 && row.year < year;
     });

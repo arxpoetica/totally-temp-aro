@@ -14,7 +14,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.select_route = function(route) {
     $scope.route = route;
     $rootScope.$broadcast('route_selected', route);
-    map_tools.show('route');
     $('#select-route').modal('hide');
   };
 
