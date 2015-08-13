@@ -11,91 +11,12 @@
   <body>
 
     <div ng-controller="navigation_menu_controller">
-      <div class="modal" id="select-route" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Select a route</h4>
-            </div>
-            <div class="modal-body">
-              <p ng-show="routes.length < 1" class="text-center">
-                No routes stored in the database yet
-              </p>
-              <table class="table table-striped" ng-show="routes.length > 0">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr ng-repeat="route in routes">
-                    <td>{{route.name}}</th>
-                    <td class="text-right">
-                      <a href="#" class="btn btn-primary btn-sm" ng-click="select_route(route)">View</a>
-                      <a href="#" class="btn btn-danger btn-sm" ng-click="delete_route(route)">Delete</a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="modal" id="new-route" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">New route</h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal">
-                <div class="form-group">
-                  <label class="col-sm-4 control-label">Plan name</label>
-                  <div class="col-sm-8">
-                    <input type="text" class="form-control" ng-model="new_route_name">
-                  </div>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" ng-click="save_new_route()">Create route</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <% include modal_select_route.html %>
 
-      <div class="modal" id="edit-route" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Save as</h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal">
-                <div class="form-group">
-                  <label class="col-sm-4 control-label">Plan name</label>
-                  <div class="col-sm-8">
-                    <input type="text" class="form-control" ng-model="edit_route_name">
-                  </div>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" ng-click="save_changes()">Save changes</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <% include modal_new_route.html %>
+
+      <% include modal_edit_route.html %>
 
       <div class="modal" id="export-route" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -147,11 +68,12 @@
                 <ul class="dropdown-menu">
                   <li><a href="#" ng-click="new_route()">New…</a></li>
                   <li><a href="#" ng-click="show_routes()">Open…</a></li>
-                  <li><a href="#" ng-click="save_as()">Save as…</a></li>
+                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="save_as()">Save as…</a></li>
                   <li role="separator" class="divider"></li>
-                  <li><a href="#" ng-click="clear_route()">Clear current</a></li>
+                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="clear_route()">Clear current</a></li>
+                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="delete_route(route)">Delete selected</a></li>
                   <li role="separator" class="divider"></li>
-                  <li><a href="#" ng-click="export_kml_name()">Export KML…</a></li>
+                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="export_kml_name()">Export KML…</a></li>
                 </ul>
               </li>
             </ul>
@@ -181,10 +103,14 @@
       <div id="left-col">
         <div ng-controller="map_layers_controller">
           <div ng-repeat="(key, layer) in area_layers">
-            <p>
+            <p ng-attr-id="map_layers_toggle_{{key}}">
               <a href="#" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{layer.name}}" data-toggle="tooltip" data-placement="right"
                 ng-class="{'btn-success active': layer.visible}"
+                ng-attr-data-loaded="{{layer.data_loaded}}"
                 ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
+              <% if (env_is_test) { %>
+                <a href="#" ng-click="layer.select_random_area()">.</a>
+              <% } %>
             </p>
           </div>
           <hr>
@@ -194,7 +120,9 @@
                 ng-class="{'btn-success active': layer.visible}"
                 ng-attr-data-loaded="{{layer.data_loaded}}"
                 ng-click="layer.toggle_visibility()">{{layer.short_name}}</a>
-              <a href="#" class="<%= show_on_test %>" ng-click="layer.select_random_features()">.</a>
+              <% if (env_is_test) { %>
+                <a href="#" ng-click="layer.select_random_features()">.</a>
+              <% } %>
             </p>
           </div>
         </div>
@@ -229,124 +157,19 @@
     </div>
 
     <div ng-controller="selected_location_controller">
-      <div class="modal" id="selected_location_controller" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Location details</h4>
-            </div>
-            <div class="modal-body">
-              <ul class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active">
-                  <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Install costs</a>
-                </li>
-                <li role="presentation">
-                  <a href="#selected_location_client_information" aria-controls="profile" role="tab" data-toggle="tab">Client information</a>
-                </li>
-              </ul>
 
-              <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="selected_location_costs">
-                  <table class="locations-table">
-                    <tbody>
-                      <tr>
-                        <th>Entry fee</th>
-                        <td colspan="2" class="text-right">{{location.entry_fee | currency}}</td>
-                      </tr>
-                      <tr>
-                        <th>Number of businesses</th>
-                        <td colspan="2" class="text-right">{{location.number_of_businesses}}</td>
-                      </tr>
-                      <tr>
-                        <th>Business install costs</th>
-                        <td colspan="2" class="text-right">{{location.business_install_costs | currency}}</td>
-                      </tr>
-                      <tr>
-                        <th>Number of households</th>
-                        <td></td>
-                        <td class="text-right">
-                          <input type="text" class="form-control input-sm" style="text-align:right" ng-model="location.number_of_households">
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>Household install costs</th>
-                        <td colspan="2" class="text-right">{{location.household_install_costs | currency}}</td>
-                      </tr>
-                      <tr>
-                        <th>Total costs</th>
-                        <td colspan="2" class="text-right">{{location.total_costs | currency}}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div role="tabpanel" class="tab-pane" id="selected_location_client_information">
-                  <table class="locations-table">
-                    <tbody>
-                      <tr>
-                        <td></td>
-                        <th class="text-right" colspan="2">Businesses</th>
-                        <th class="text-right" colspan="2">Households</th>
-                      </tr>
-                      <tr ng-repeat="customer_type in location.customer_types">
-                        <th>{{customer_type.name}}</th>
-                        <td class="text-right">
-                          {{customer_type.businesses}}
-                        </td>
-                        <td class="text-right">
-                          {{customer_type.businesses*100 / location.customers_businesses_total | number : 0}}%
-                        </td>
-                        <td class="text-right">
-                          {{customer_type.households}}
-                        </td>
-                        <td class="text-right">
-                          {{customer_type.households*100 / location.customers_households_total | number : 0}}%
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" ng-click="update()">Update</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <% if (env_is_test) { %>
+        <a class="pull-right" ng-click="select_random_location()">.</a>
+      <% } %>
+
+      <% include modal_selected_location.html %>
+
     </div>
 
     <div ng-controller="location_show_businesses">
-      <div class="modal" id="location_show_businesses" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title" id="myModalLabel">Businesses</h4>
-            </div>
-            <div class="modal-body">
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th class="text-right"># employees</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr ng-repeat="business in businesses">
-                    <td>{{business.name}}</th>
-                    <td class="text-right">{{business.number_of_employees}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
+
+      <% include modal_show_businesses.html %>
+
     </div>
 
     <div ng-controller="shortest_path_controller" class="map-tool-wrapper">
@@ -429,6 +252,10 @@
                     <th>Total cost</th>
                     <td colspan="4" class="text-right" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</td>
                   </tr>
+                  <tr>
+                    <th>Revenue</th>
+                    <td colspan="4" class="text-right">{{route.metadata.revenue | currency}}</td>
+                  </tr>
                   <tr ng-show="route.metadata.customer_types && route.metadata.customer_types.length > 0">
                     <td></td>
                     <th class="text-right" colspan="2">Businesses</th>
@@ -458,16 +285,6 @@
                     <td class="text-right" colspan="2">{{revenue.year}}</td>
                     <td class="text-right" colspan="2">{{revenue.value | currency}}</td>
                   </tr>
-                  <tr ng-show="route.metadata.revenue && route.metadata.revenue.length > 0">
-                    <th ng-attr-rowspan="{{route.metadata.revenue.length + 1}}" style="vertical-align: middle">Revenue</th>
-                    <th class="text-right" colspan="2">Year</th>
-                    <th class="text-right" colspan="2">Value</th>
-                  </tr>
-                  <tr ng-repeat="revenue in route.metadata.revenue">
-                    <td class="text-right" colspan="2">{{revenue.year}}</td>
-                    <td class="text-right" colspan="2">{{revenue.value | currency}}</td>
-                  </tr>
-
                 </tbody>
               </table>
             </form>
@@ -535,7 +352,7 @@
               <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Total</label>
                 <div class="col-sm-9">
-                  <table class="table" style="max-height: 200px; overflow: scroll; display: block; width: 100%" ng-show="!loading && total.length > 0">
+                  <table class="table" ng-show="!loading && total.length > 0">
                     <thead>
                       <tr>
                         <th>Year</th>
@@ -586,8 +403,12 @@
                 </div>
                 <div class="form-group form-group-sm">
                   <div class="col-sm-offset-3 col-sm-9">
-                    <button class="btn btn-sm btn-primary" ng-click="save_nodes()" type="button">Save nodes</button>
                     <button class="btn btn-sm btn-danger" ng-click="clear_nodes()" type="button">Clear</button>
+                    <% if (env_is_test) { %>
+                      <a href="#" ng-click="place_random_equipment()">.</a>
+                      <a href="#" ng-click="show_number_of_features()">.</a>
+                      <span>{{number_of_features}}</span>
+                    <% } %>
                   </div>
                 </div>
               </form>
@@ -672,7 +493,9 @@
       tooltips.on('click mouseout', function() {
         $(this).tooltip('hide');
       })
-    })
+    });
+
+    swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> });
   </script>
   <script type="text/javascript">
     (function() {

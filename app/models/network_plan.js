@@ -177,6 +177,10 @@ NetworkPlan.recalculate_route = function(route_id, callback) {
     database.query(sql, [route_id], callback);
   })
   .then(function(callback) {
+    var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
+    database.query(sql, [route_id], callback);
+  })
+  .then(function(callback) {
     var sql = multiline(function() {;/*
       WITH edges AS (
         SELECT DISTINCT edge_id FROM
@@ -211,13 +215,13 @@ NetworkPlan.recalculate_and_find_route = function(route_id, callback) {
 };
 
 NetworkPlan.find_all = function(callback) {
-  var sql = 'SELECT id, name, number_of_strands FROM custom.route;';
+  var sql = 'SELECT id, name, number_of_strands, created_at, updated_at FROM custom.route;';
   database.query(sql, callback);
 };
 
 NetworkPlan.create_route = function(name, callback) {
   txain(function(callback) {
-    var sql = 'INSERT INTO custom.route (name) VALUES ($1) RETURNING id;';
+    var sql = 'INSERT INTO custom.route (name, created_at, updated_at) VALUES ($1, NOW(), NOW()) RETURNING id;';
     database.findOne(sql, [name], callback);
   })
   .then(function(row, callback) {
@@ -253,6 +257,12 @@ NetworkPlan.clear_route = function(route_id, callback) {
     */});
     database.execute(sql, [route_id], callback);
   })
+  .then(function(callback) {
+    var sql = multiline(function() {;/*
+      DELETE FROM client.network_nodes WHERE route_id=$1;
+    */});
+    database.execute(sql, [route_id], callback);
+  })
   .end(callback);
 };
 
@@ -267,7 +277,7 @@ NetworkPlan.save_route = function(route_id, data, callback) {
   if (fields.length === 0) return callback();
 
   params.push(route_id);
-  var sql = 'UPDATE custom.route SET '+fields.join(', ')+' WHERE id=$'+params.length;
+  var sql = 'UPDATE custom.route SET '+fields.join(', ')+', updated_at=NOW() WHERE id=$'+params.length;
   database.execute(sql, params, callback);
 };
 
@@ -372,7 +382,6 @@ NetworkPlan.export_kml = function(route_id, callback) {
     database.query(sql, [route_id], callback)
   })
   .then(function(sources, callback) {
-    console.log('sources', sources.length)
     sources.forEach(function(source) {
       kml_output += '<Placemark><styleUrl>#sourceColor</styleUrl>';
       kml_output += source.geom;

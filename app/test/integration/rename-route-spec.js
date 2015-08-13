@@ -3,7 +3,7 @@ var expect = chai.expect;
 var utils = require('./utils');
 utils.extendBrowser(browser);
 
-describe('Delete a route', function() {
+describe('Rename a route', function() {
 
   before(function() {
     browser.getHomepage();
@@ -18,17 +18,13 @@ describe('Delete a route', function() {
     browser.waitForText(element(by.css('.btn.btn-default.navbar-btn')), name);
   });
 
-  it('should delete the named route', function() {
+  it('should rename the named route', function() {
+    var new_name = 'My other name';
     element(by.css('#network_plans_menu > li > a')).click();
-    browser.waitForRepeaterToHaveData('route in routes');
-    element.all(by.repeater('route in routes')).then(function(arr) {
-      var count = arr.length;
-      element(by.css('[ng-click="delete_route(route)"]')).click();
-      browser.confirmAlert();
+    element(by.css('[ng-click="save_as()"]')).click();
+    element(by.css('#edit-route [ng-model="edit_route_name"]')).clear().sendKeys(new_name);
+    element(by.css('#edit-route [ng-click="save_changes()"]')).click();
 
-      element.all(by.repeater('route in routes')).then(function(arr) {
-        expect(arr.length).to.be.equal(count-1);
-      });
-    });
+    browser.waitForText(element(by.css('.btn.btn-default.navbar-btn')), new_name);
   });
 });

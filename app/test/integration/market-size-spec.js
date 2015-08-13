@@ -3,7 +3,7 @@ var expect = chai.expect;
 var utils = require('./utils');
 utils.extendBrowser(browser);
 
-describe('Delete a route', function() {
+describe('Market size', function() {
 
   before(function() {
     browser.getHomepage();
@@ -18,17 +18,14 @@ describe('Delete a route', function() {
     browser.waitForText(element(by.css('.btn.btn-default.navbar-btn')), name);
   });
 
-  it('should delete the named route', function() {
-    element(by.css('#network_plans_menu > li > a')).click();
-    browser.waitForRepeaterToHaveData('route in routes');
-    element.all(by.repeater('route in routes')).then(function(arr) {
-      var count = arr.length;
-      element(by.css('[ng-click="delete_route(route)"]')).click();
-      browser.confirmAlert();
+  it('should show the census blocks layer', function() {
+    var btn = element(by.linkText('CB'));
+    btn.click();
+    browser.waitForAttribute(btn, 'data-loaded', 'true');
 
-      element.all(by.repeater('route in routes')).then(function(arr) {
-        expect(arr.length).to.be.equal(count-1);
-      });
-    });
+    element(by.linkText('MS')).click();
+    element(by.css('#map_layers_toggle_census_blocks_layer [ng-click="layer.select_random_area()"]')).click();
+
+    browser.waitForRepeaterToHaveData('row in total');
   });
 });

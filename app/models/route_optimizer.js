@@ -99,8 +99,8 @@ RouteOptimizer.calculate_locations_cost = function(route_id, callback) {
 RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, callback) {
   // hard coded values by now
   var cost = {
-    'fiber_deployment_hub': 5000,
-    'fiber_deployment_terminal': 2000,
+    'fiber_distribution_hub': 5000,
+    'fiber_distribution_terminal': 2000,
     'splice_point': 1000,
   };
   txain(function(callback) {
@@ -171,9 +171,8 @@ RouteOptimizer.calculate_revenue_and_npv = function(route_id, fiber_cost, callba
   .then(function(route_annual_revenues, callback) {
     var year = new Date().getFullYear();
 
-    var revenue = _.filter(route_annual_revenues, function(row) {
-      return row.year >= year && row.year < year+5;
-    });
+    var revenue = _.findWhere(route_annual_revenues, { year: year });
+    revenue = (revenue && revenue.value) || 0;
     var past_five_years = _.filter(route_annual_revenues, function(row) {
       return row.year >= year-5 && row.year < year;
     });

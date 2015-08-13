@@ -2,6 +2,22 @@
 app.controller('selected_location_controller', function($rootScope, $scope, $http) {
   $scope.location = {};
 
+  $scope.select_random_location = function() {
+    var map_layer = $rootScope.feature_layers.locations;
+    var feature;
+    map_layer.data_layer.forEach(function(f) {
+      feature = feature || f;
+    });
+    var options = {
+      add: function(text, func) {
+        if (text === 'See more information') {
+          func(map_layer, feature);
+        }
+      }
+    };
+    $rootScope.$broadcast('contextual_menu_feature', options, map_layer, feature);
+  };
+
   $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
     if (map_layer.type !== 'locations') return;
     options.add('See more information', function(map_layer, feature) {
