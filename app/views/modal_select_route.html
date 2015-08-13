@@ -1,0 +1,52 @@
+<div class="modal" id="select-route" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Select a route</h4>
+      </div>
+      <div class="modal-body">
+        <p ng-show="routes.length < 1" class="text-center">
+          No routes stored in the database yet
+        </p>
+        <table class="table table-striped" ng-show="routes.length > 0">
+          <thead>
+            <tr>
+              <th>
+                Name
+                <a href="#" ng-click="sort_by('name', true)">↓</a>
+                <a href="#" ng-click="sort_by('name', false)">↑</a>
+              </th>
+              <th>
+                Created at
+                <a href="#" ng-click="sort_by('created_at', true)">↓</a>
+                <a href="#" ng-click="sort_by('created_at', false)">↑</a>
+              </th>
+              <th>
+                Updated at
+                <a href="#" ng-click="sort_by('updated_at', true)">↓</a>
+                <a href="#" ng-click="sort_by('updated_at', false)">↑</a>
+              </th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="route in routes">
+              <td><a href="#" ng-click="select_route(route)">{{route.name}}</a></th>
+              <td>{{route.updated_at | date:'shortDate'}}</th>
+              <td>{{route.created_at | date:'shortDate'}}</th>
+              <td class="text-right">
+                <a href="#" class="btn btn-danger btn-sm" ng-click="delete_route(route)">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,86 @@
+<div class="modal" id="selected_location_controller" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Location details</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs" role="tablist">
+          <li role="presentation" class="active">
+            <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Install costs</a>
+          </li>
+          <li role="presentation">
+            <a href="#selected_location_client_information" aria-controls="profile" role="tab" data-toggle="tab">Client information</a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="selected_location_costs">
+            <table class="locations-table">
+              <tbody>
+                <tr>
+                  <th>Entry fee</th>
+                  <td colspan="2" class="text-right">{{location.entry_fee | currency}}</td>
+                </tr>
+                <tr>
+                  <th>Number of businesses</th>
+                  <td colspan="2" class="text-right">{{location.number_of_businesses}}</td>
+                </tr>
+                <tr>
+                  <th>Business install costs</th>
+                  <td colspan="2" class="text-right">{{location.business_install_costs | currency}}</td>
+                </tr>
+                <tr>
+                  <th>Number of households</th>
+                  <td></td>
+                  <td class="text-right">
+                    <input type="text" class="form-control input-sm" style="text-align:right" ng-model="location.number_of_households">
+                  </td>
+                </tr>
+                <tr>
+                  <th>Household install costs</th>
+                  <td colspan="2" class="text-right">{{location.household_install_costs | currency}}</td>
+                </tr>
+                <tr>
+                  <th>Total costs</th>
+                  <td colspan="2" class="text-right">{{location.total_costs | currency}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="selected_location_client_information">
+            <table class="locations-table">
+              <tbody>
+                <tr>
+                  <td></td>
+                  <th class="text-right" colspan="2">Businesses</th>
+                  <th class="text-right" colspan="2">Households</th>
+                </tr>
+                <tr ng-repeat="customer_type in location.customer_types">
+                  <th>{{customer_type.name}}</th>
+                  <td class="text-right">
+                    {{customer_type.businesses}}
+                  </td>
+                  <td class="text-right">
+                    {{customer_type.businesses*100 / location.customers_businesses_total | number : 0}}%
+                  </td>
+                  <td class="text-right">
+                    {{customer_type.households}}
+                  </td>
+                  <td class="text-right">
+                    {{customer_type.households*100 / location.customers_households_total | number : 0}}%
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" ng-click="update()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
