@@ -37,6 +37,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         $rootScope.feature_layers.network_nodes.reload_data();
       }
       changes = empty_changes();
+      $rootScope.$broadcast('equipment_nodes_changed');
     });
   };
 

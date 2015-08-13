@@ -50,7 +50,13 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     };
   });
 
-  function redraw_route(data) {
+  $rootScope.$on('equipment_nodes_changed', function() {
+    $http.get('/route_optimizer/'+$scope.route.id).success(function(response) {
+      redraw_route(response, true);
+    });
+  });
+
+  function redraw_route(data, only_metadata) {
     if (data.metadata) {
       $scope.route.metadata = data.metadata;
 
@@ -65,6 +71,8 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
 
       selection.sync_selection();
     }
+    if (only_metadata) return;
+
     var route = new MapLayer({
       short_name: 'RT',
       data: data.feature_collection,
