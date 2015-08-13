@@ -41,6 +41,7 @@ describe('Create a route', function() {
     element(by.css('#network_plans_menu > li > a')).click();
     element(by.css('[ng-click="clear_route()"]')).click();
     browser.confirmAlert();
+    element(by.id('map_tools_toggle_route')).click();
     browser.waitForText(element(by.id('shortest_path_total_cost')), '$0.00');
   });
 

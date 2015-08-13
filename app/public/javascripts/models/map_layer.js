@@ -26,12 +26,28 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		var data_layer = this.data_layer;
 		var layer = this;
 
+		var feature_dragged;
+
 		data_layer.addListener('click', function(event) {
 			$rootScope.$broadcast('map_layer_clicked_feature', event, layer);
 			if (!selection.is_enabled() || !event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return;
 			var changes = create_empty_changes(layer);
 			layer.toggle_feature(event.feature, changes);
 			broadcast_changes(layer, changes);
+		});
+
+		data_layer.addListener('mouseup', function(event) {
+			if (feature_dragged) {
+				$rootScope.$broadcast('map_layer_dragged_feature', event, feature_dragged);
+			}
+		});
+
+		data_layer.addListener('mousedown', function(event) {
+			feature_dragged = null;
+		});
+
+		data_layer.addListener('setgeometry', function(event) {
+			feature_dragged = event.feature;
 		});
 
 		data_layer.addListener('mouseup', function(event) {
@@ -168,7 +184,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				load_heatmap_layer();
 				layer.data_loaded = true;
 				$rootScope.$broadcast('map_layer_loaded_data', layer);
-				this.configure_icons();
+				this.configure_feature_styles();
 			} else if (this.api_endpoint) {
 				$http.get(this.api_endpoint).success(function(response) {
 					var data = response;
@@ -178,7 +194,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 					layer.data_loaded = true;
 					$rootScope.$broadcast('map_layer_loaded_data', layer);
 
-					layer.configure_icons();
+					layer.configure_feature_styles();
 					layer.sync_selection();
 				});
 			}
@@ -194,17 +210,32 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		}
 	}
 
+	MapLayer.prototype.set_api_endpoint = function(api_endpoint) {
+		if (this.api_endpoint === api_endpoint) return;
+		this.api_endpoint = api_endpoint;
+		this.data_loaded = false;
+		if (this.visible) {
+			this.load_data();
+		}
+	};
+
 	MapLayer.prototype.reload_data = function() {
 		this.clear_data();
 		this.load_data();
 	};
 
-	MapLayer.prototype.configure_icons = function() {
+	MapLayer.prototype.configure_feature_styles = function() {
 		var data = this.data_layer;
 		data.forEach(function(feature) {
+			var styles = {};
 			var icon = feature.getProperty('icon');
 			if (icon) {
-				data.overrideStyle(feature, { icon: icon });
+				styles.icon = icon;
+			}
+			var draggable = feature.getProperty('draggable');
+			styles.draggable = draggable;
+			if (_.size(styles) > 0) {
+				data.overrideStyle(feature, styles);
 			}
 		});
 	}
@@ -237,11 +268,12 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 	}
 
 	MapLayer.prototype.set_style = function(type) {
-		if (this.current_style === type) return; // this avoid repainting things
+		if (this.current_style === type) return; // this avoids repainting things when no needed
 		this.current_style = type;
 
 		if (type === 'normal') {
 			this.data_layer.setStyle(this.style_options.normal);
+			this.configure_feature_styles();
 		} else if (type === 'highlight') {
 			this.data_layer.setStyle(this.style_options.highlight);
 		} else if (type === 'hidden') {

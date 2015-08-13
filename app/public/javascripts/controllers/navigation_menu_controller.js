@@ -14,7 +14,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.select_route = function(route) {
     $scope.route = route;
     $rootScope.$broadcast('route_selected', route);
-    map_tools.show('route');
     $('#select-route').modal('hide');
   };
 
@@ -25,6 +24,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   };
 
   $scope.delete_route = function(route) {
+    if (!route) return;
+
     swal({
       title: "Are you sure?",
       text: "You will not be able to recover the deleted route!",
@@ -34,15 +35,25 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       showCancelButton: true,
       closeOnConfirm: true,
     }, function() {
+      if ($scope.route && route.id === $scope.route.id) {
+        $scope.route = null;
+        $rootScope.$broadcast('route_selected', null);
+      }
       $http.post('/route_optimizer/'+route.id+'/delete').success(function(response) {
-        $scope.show_routes();
+        $scope.load_routes();
       });
     });
   };
 
-  $scope.show_routes = function() {
+  $scope.load_routes = function(callback) {
     $http.get('/route_optimizer/find_all').success(function(response) {
       $scope.routes = response;
+      callback && callback();
+    });
+  };
+
+  $scope.show_routes = function() {
+    $scope.load_routes(function() {
       $('#select-route').modal('show');
     });
   };
@@ -65,7 +76,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/route_optimizer/create', params).success(function(response) {
       $scope.select_route(response);
       $('#new-route').modal('hide');
-      $scope.new_route_name = 'Untitled plan';
+      $scope.load_routes();
     });
   };
 
