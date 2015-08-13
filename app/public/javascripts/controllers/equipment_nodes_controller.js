@@ -32,8 +32,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.save_nodes = function() {
     $http.post('/network/nodes/'+$scope.route.id+'/edit', changes).success(function(response) {
-      if (changes.insertions.length > 0) {
-        $rootScope.feature_layers.network_nodes.reload_data(); // to get the ids so they can be selected
+      if (changes.insertions.length > 0 || changes.deletions.length > 0) {
+        // For insertions we need to get the ids so they can be selected
+        $rootScope.feature_layers.network_nodes.reload_data();
       }
       changes = empty_changes();
     });
@@ -121,5 +122,30 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     layer.show();
     $scope.save_nodes();
   });
+
+  $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
+    if (map_layer.type !== 'network_nodes'
+      || !map_tools.is_visible('equipment_nodes')
+      || !feature.getProperty('unselectable')) {
+      return;
+    }
+    options.add('Delete equipment node', function(map_layer, feature) {
+      swal({
+        title: "Are you sure?",
+        text: "You will not be able to recover the deleted data!",
+        type: "warning",
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, delete it!",
+        showCancelButton: true,
+        closeOnConfirm: true,
+      }, function() {
+        changes.deletions.push({
+          id: feature.getProperty('id'),
+        });
+        $scope.save_nodes();
+      });
+    });
+  });
+
 
 }]);

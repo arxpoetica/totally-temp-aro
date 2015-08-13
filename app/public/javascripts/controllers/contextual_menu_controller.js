@@ -16,13 +16,18 @@ app.controller('contextual_menu_controller', function($scope, $rootScope, map_ut
     options.splice(0, options.length);
     $rootScope.$broadcast.apply($rootScope, [event_name, options].concat(callbackParameters));
     $scope.$apply();
-    if (options.length === 0) return;
+    if (options.length === 0) {
+      $('#contextual_menu').css({
+        display: 'none',
+      });
+      return;
+    }
 
     $('#contextual_menu').css({
       left: pixel.x+'px',
       top: pixel.y+'px',
       display: 'block',
-    })
+    });
   }
 
   $rootScope.$on('map_rightclick', function(e, event) {

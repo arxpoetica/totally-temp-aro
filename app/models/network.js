@@ -110,8 +110,10 @@ Network.edit_network_nodes = function(route_id, changes, callback) {
     add_nodes(route_id, changes.insertions, callback);
   })
   .then(function(callback) {
-    console.log('updates', changes.updates)
     update_nodes(route_id, changes.updates, callback);
+  })
+  .then(function(callback) {
+    delete_nodes(route_id, changes.deletions, callback);
   })
   .then(function(callback) {
     var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
@@ -147,6 +149,17 @@ function update_nodes(route_id, updates, callback) {
       'POINT('+node.lon+' '+node.lat+')',
       node.id
     ];
+    database.execute(sql, params, callback);
+  })
+  .end(callback);
+};
+
+function delete_nodes(route_id, updates, callback) {
+  if (!_.isArray(updates) || updates.length === 0) return callback();
+  txain(updates)
+  .each(function(node, callback) {
+    var sql = 'DELETE FROM client.network_nodes WHERE id=$1 AND route_id IS NOT NULL';
+    var params = [node.id];
     database.execute(sql, params, callback);
   })
   .end(callback);
