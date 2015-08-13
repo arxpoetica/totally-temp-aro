@@ -7,6 +7,7 @@ var database = helpers.database;
 var multiline = require('multiline');
 var txain = require('txain');
 var Location = require('./location');
+var fs = require('fs');
 var RouteOptimizer = require('./route_optimizer');
 var _ = require('underscore');
 
@@ -295,6 +296,100 @@ NetworkPlan.edit_route = function(route_id, changes, callback) {
   })
   .then(function() {
     NetworkPlan.recalculate_and_find_route(route_id, callback);
+  })
+  .end(callback);
+};
+
+NetworkPlan.export_kml = function(route_id, callback) {
+  var kml_output = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
+
+  function escape(name) {
+    return name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  };
+
+  txain(function(callback) {
+    var sql = 'SELECT name FROM custom.route WHERE id=$1'
+    database.findOne(sql, [route_id], callback)
+  })
+  .then(function(route, callback) {
+    kml_output += '<name>'+escape(route.name)+'</name>'
+    kml_output += multiline(function() {;/*
+      <Style id="routeColor">
+       <LineStyle>
+         <color>ff0000ff</color>
+         <width>4</width>
+       </LineStyle>
+      </Style>
+      <Style id="targetColor">
+       <IconStyle>
+         <color>ffffff00</color>
+         <scale>1</scale>
+         <Icon>
+           <href>http://maps.google.com/mapfiles/kml/pushpin/wht-pushpin.png</href>
+         </Icon>
+       </IconStyle>
+      </Style>
+      <Style id="sourceColor">
+       <IconStyle>
+         <color>ffff00ffff</color>
+         <scale>1</scale>
+         <Icon>
+           <href>http://maps.google.com/mapfiles/kml/pushpin/wht-pushpin.png</href>
+         </Icon>
+       </IconStyle>
+      </Style>
+    */});
+    
+    var sql = multiline(function() {;/*
+      SELECT ST_AsKML(edge.geom) AS geom
+      FROM custom.route_edges
+      JOIN client.graph edge
+      ON edge.id = route_edges.edge_id
+      WHERE route_edges.route_id = $1
+    */});
+    database.query(sql, [route_id], callback)
+  })
+  .then(function(edges, callback) {
+    edges.forEach(function(edge) {
+      kml_output += '<Placemark><styleUrl>#routeColor</styleUrl>';
+      kml_output += edge.geom;
+      kml_output += '</Placemark>\n';
+    });
+
+    var sql = multiline(function() {;/*
+      SELECT ST_AsKML(locations.geom) AS geom
+      FROM custom.route_targets
+      JOIN locations
+      ON route_targets.location_id = locations.id
+      WHERE route_targets.route_id=$1
+    */});
+    database.query(sql, [route_id], callback)
+  })
+  .then(function(targets, callback) {
+    targets.forEach(function(target) {
+      kml_output += '<Placemark><styleUrl>#targetColor</styleUrl>';
+      kml_output += target.geom;
+      kml_output += '</Placemark>\n';
+    });
+
+    var sql = multiline(function() {;/*
+      SELECT ST_AsKML(network_nodes.geom) AS geom
+      FROM custom.route_sources
+      JOIN client.network_nodes
+      ON route_sources.network_node_id = network_nodes.id
+      WHERE route_sources.route_id=$1
+    */});
+    database.query(sql, [route_id], callback)
+  })
+  .then(function(sources, callback) {
+    sources.forEach(function(source) {
+      kml_output += '<Placemark><styleUrl>#sourceColor</styleUrl>';
+      kml_output += source.geom;
+      kml_output += '</Placemark>\n';
+    });
+
+    kml_output += '</Document></kml>';
+    callback(null, kml_output);
   })
   .end(callback);
 };

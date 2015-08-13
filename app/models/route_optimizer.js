@@ -222,4 +222,5 @@ RouteOptimizer.calculate_npv = function(route_annual_revenues, fiber_cost) {
   return annual_pvs;
 };
 
+
 module.exports = RouteOptimizer;

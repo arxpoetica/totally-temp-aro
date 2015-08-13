@@ -18,6 +18,33 @@
 
       <% include modal_edit_route.html %>
 
+      <div class="modal" id="export-route" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Export route</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-3 control-label">Filename</label>
+                  <div class="col-sm-7">
+                    <input type="text" class="form-control" ng-model="kml_file_name">
+                  </div>
+                  <span class="col-sm-2 control-label">.kml</span>
+                </div>
+                <span id="export-error" style="display: none">Filename can only contain letters and numbers!</span>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" ng-click="export_kml()">Export file</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <nav class="navbar navbar-default" style="margin-bottom:0;z-index:2">
         <div class="container-fluid">
 
@@ -46,7 +73,7 @@
                   <li ng-class="{'disabled': !route}"><a href="#" ng-click="clear_route()">Clear current</a></li>
                   <li ng-class="{'disabled': !route}"><a href="#" ng-click="delete_route(route)">Delete selected</a></li>
                   <li role="separator" class="divider"></li>
-                  <li ng-class="{'disabled': !route}"><a href="#">Export KML…</a></li>
+                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="export_kml_name()">Export KML…</a></li>
                 </ul>
               </li>
             </ul>

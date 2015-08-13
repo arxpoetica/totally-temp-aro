@@ -180,6 +180,18 @@ app.post('/route_optimizer/:route_id/clear', function(request, response, next) {
 	NetworkPlan.clear_route(route_id, jsonHandler(response, next));
 });
 
+// Export a route as KML
+app.get('/route_optimizer/:route_id/:file_name/export', function(request, response, next) {
+	var route_id = request.params.route_id;
+	var file_name = request.params.file_name;
+
+	NetworkPlan.export_kml(route_id, function(err, kml_output) {
+		if (err) return next(err);
+		response.attachment(file_name+'.kml');
+		response.send(kml_output);
+	});
+});
+
 // Market size filters
 app.get('/market_size/filters', function(request, response, next) {
 	MarketSize.filters(jsonHandler(response, next));

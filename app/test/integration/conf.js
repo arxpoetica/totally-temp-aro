@@ -7,7 +7,8 @@ exports.config = {
   directConnect: true,
   specs: ['*-spec.js'],
   capabilities: {
-    browserName: 'chrome'
+    browserName: 'chrome',
+    
   },
   framework: 'mocha',
   beforeLaunch: function() {

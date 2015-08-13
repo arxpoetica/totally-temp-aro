@@ -18,7 +18,7 @@ describe('NetworkPlan', function() {
 			});
 		});
 
-		it('should should find all routes', function(done) {
+		it('should find all routes', function(done) {
 			NetworkPlan.find_all(function(err, routes) {
 				expect(routes.length > 0).to.equal(true);
 				var route = routes[0];
@@ -89,6 +89,32 @@ describe('NetworkPlan', function() {
 				expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
 				expect(route.feature_collection.features.length > 0).to.be.equal(true);
 				done();
+			});
+		});
+
+		it('should export a route to KML form', function(done) {
+			NetworkPlan.export_kml(route_id, function(err, kml_output) {
+				expect(err).to.not.be.ok;
+				require('xml2js').parseString(kml_output, function(err, result) {
+					expect(err).to.not.be.ok;
+					expect(result).to.have.property('kml');
+					expect(result.kml).to.have.property('$');
+					expect(result.kml.$).to.have.property('xmlns');
+					expect(result.kml.$.xmlns).to.be.equal('http://www.opengis.net/kml/2.2');
+					expect(result.kml).to.have.property('Document');
+					expect(result.kml.Document).to.be.an('array');
+					expect(result.kml.Document[0]).to.have.property('name');
+					expect(result.kml.Document[0]).to.have.property('Style');
+					expect(result.kml.Document[0]).to.have.property('Placemark');
+					var placemark = result.kml.Document[0].Placemark;
+					expect(placemark).to.be.an('array');
+					expect(placemark[0]).to.have.property('styleUrl');
+					expect(placemark[0]).to.have.property('LineString');
+					expect(placemark[0].LineString).to.be.an('array');
+					expect(placemark[0].LineString[0]).to.have.property('coordinates');
+					expect(placemark[0].LineString[0].coordinates).to.be.an('array');
+					done();
+				})
 			});
 		});
 

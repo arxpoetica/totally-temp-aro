@@ -107,6 +107,24 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         // success
       });
     });
-  }
+  };
+
+  $scope.export_kml_name = function() {
+    $('#export-route').modal('show');
+  };
+
+  $scope.export_kml = function() {
+    var params = { name: $scope.kml_file_name };
+    if(!params.name.match(/^[a-zA-Z0-9-_]+$/)){
+      $('#export-error').show();
+    }
+    else{
+      $('#export-error').hide();
+      $('#export-route').modal('hide');
+
+    
+      location.href = '/route_optimizer/' + $scope.route.id + '/' + params.name + '/export';
+    }
+  };
 
 }]);
