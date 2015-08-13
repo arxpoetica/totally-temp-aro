@@ -20,13 +20,10 @@ describe('Delete a route', function() {
 
   it('should delete the named route', function() {
     element(by.css('#network_plans_menu > li > a')).click();
-    element(by.css('[ng-click="show_routes()"]')).click();
-
     browser.waitForRepeaterToHaveData('route in routes');
-
     element.all(by.repeater('route in routes')).then(function(arr) {
       var count = arr.length;
-      element.all(by.css('[ng-click="delete_route(route)"]')).last().click();
+      element(by.css('[ng-click="delete_route(route)"]')).click();
       browser.confirmAlert();
 
       element.all(by.repeater('route in routes')).then(function(arr) {

@@ -76,7 +76,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/route_optimizer/create', params).success(function(response) {
       $scope.select_route(response);
       $('#new-route').modal('hide');
-      $scope.new_route_name = 'Untitled plan';
+      $scope.load_routes();
     });
   };
 
