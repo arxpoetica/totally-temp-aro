@@ -21,12 +21,10 @@ describe('Equipment node spec', function() {
   it('should place a new equipment node', function() {
     element(by.linkText('ENT')).click();
     element(by.css('[ng-click="show_number_of_features()"]')).click();
+    browser.waitForText(element(by.css('[ng-controller="equipment_nodes_controller"] .form-group span')), '1');
     element(by.css('[ng-click="place_random_equipment()"]')).click();
+    element(by.css('[ng-click="show_number_of_features()"]')).click();
     browser.waitForText(element(by.css('[ng-controller="equipment_nodes_controller"] .form-group span')), '2');
-  });
-
-  it('should save the changes', function() {
-    element(by.css('[ng-click="save_nodes()"]')).click();
   });
 
   it('should clear the nodes', function() {

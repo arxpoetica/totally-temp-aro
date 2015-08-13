@@ -24,12 +24,13 @@ describe('Delete a route', function() {
 
     browser.waitForRepeaterToHaveData('route in routes');
 
-    element(by.id('select-route')).all(by.css('td.ng-binding')).count().then(function(count) {
+    element.all(by.repeater('route in routes')).then(function(arr) {
+      var count = arr.length;
       element.all(by.css('[ng-click="delete_route(route)"]')).last().click();
       browser.confirmAlert();
 
-      element(by.id('select-route')).all(by.css('td.ng-binding')).count().then(function(new_count) {
-        expect(new_count).to.be.equal(count-1);
+      element.all(by.repeater('route in routes')).then(function(arr) {
+        expect(arr.length).to.be.equal(count-1);
       });
     });
   });
