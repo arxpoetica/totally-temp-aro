@@ -256,6 +256,12 @@ NetworkPlan.clear_route = function(route_id, callback) {
     */});
     database.execute(sql, [route_id], callback);
   })
+  .then(function(callback) {
+    var sql = multiline(function() {;/*
+      DELETE FROM client.network_nodes WHERE route_id=$1;
+    */});
+    database.execute(sql, [route_id], callback);
+  })
   .end(callback);
 };
 
