@@ -16,6 +16,10 @@ describe('Map layer', function() {
       .when('GET', '/network/nodes/central_office')
       .respond(features);
 
+    $httpBackend
+      .when('GET', '/foo')
+      .respond(features);
+
     MapLayer = $injector.get('MapLayer');
     $rootScope = _$rootScope_;
     
@@ -76,6 +80,16 @@ describe('Map layer', function() {
   it('should clear the data', function() {
     layer.clear_data();
     expect(layer.number_of_features()).to.be.equal(0);
+  });
+
+  it('should change the API endpoint', function() {
+    layer.show();
+    $httpBackend.flush();
+
+    layer.set_api_endpoint('/foo');
+    expect(layer.number_of_features()).to.be.equal(0); // first clears the data
+    $httpBackend.flush();
+    expect(layer.number_of_features()).to.be.equal(1); // data should be loaded
   });
 
   it('should be removed', function() {

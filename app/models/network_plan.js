@@ -91,7 +91,12 @@ NetworkPlan.find_customer_types = function(route_id, callback) {
   database.query(sql, [route_id], callback);
 };
 
-NetworkPlan.find_route = function(route_id, callback) {
+NetworkPlan.find_route = function(route_id, metadata_only, callback) {
+  if (arguments.length === 2) {
+    callback = metadata_only;
+    metadata_only = false;
+  }
+
   var cost_per_meter = 200;
   var output = {
     'feature_collection': {
@@ -125,11 +130,13 @@ NetworkPlan.find_route = function(route_id, callback) {
       value: locations_cost,
     });
 
+    if (metadata_only) return callback();
     NetworkPlan.find_target_ids(route_id, callback);
   })
   .then(function(targets, callback) {
     output.metadata.targets = targets;
 
+    if (metadata_only) return callback();
     NetworkPlan.find_source_ids(route_id, callback);
   })
   .then(function(sources, callback) {
@@ -165,6 +172,8 @@ NetworkPlan.find_route = function(route_id, callback) {
     output.metadata.total_cost = output.metadata.costs.reduce(function(total, cost) {
       return total+cost.value;
     }, 0);
+
+    if (metadata_only) delete output.feature_collection;
 
     callback(null, output);
   })

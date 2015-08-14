@@ -214,6 +214,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		if (this.api_endpoint === api_endpoint) return;
 		this.api_endpoint = api_endpoint;
 		this.data_loaded = false;
+		this.clear_data();
 		if (this.visible) {
 			this.load_data();
 		}
