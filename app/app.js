@@ -154,6 +154,12 @@ app.get('/route_optimizer/:route_id', function(request, response, next) {
 	NetworkPlan.find_route(route_id, jsonHandler(response, next));
 });
 
+// Return the metadata of an existing route
+app.get('/route_optimizer/:route_id/metadata', function(request, response, next) {
+	var route_id = request.params.route_id;
+	NetworkPlan.find_route(route_id, true, jsonHandler(response, next));
+});
+
 // Edits nodes of an existing route
 app.post('/route_optimizer/:route_id/edit', function(request, response, next) {
 	var route_id = request.params.route_id;
