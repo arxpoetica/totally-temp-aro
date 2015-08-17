@@ -77,7 +77,15 @@
                 </ul>
               </li>
             </ul>
-            <button ng-show="route" type="button" class="btn btn-default navbar-btn" disabled>{{route.name}}</button>
+            
+            <button ng-show="route" type="button" style="float:left" class="btn btn-default navbar-btn" disabled>{{route.name}}</button>
+            <p class="navbar-text saving" id="plan-saving">
+              <small><span class="spin glyphicon glyphicon-repeat"></span> Saving plan…</small>
+            </p>
+            <p class="navbar-text saving" id="plan-saved">
+              <small><span class="glyphicon glyphicon-ok"></span> Plan saved</small>
+            </p>
+
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -485,6 +493,7 @@
   <script src="javascripts/models/loader.js"></script>
   <script src="javascripts/models/map_tools.js"></script>
   <script src="javascripts/interceptors/http_error_handler.js"></script>
+  <script src="javascripts/interceptors/saving_plan_handler.js"></script>
   <script>app.run(function(loader){})</script>
   <script>
     $(function () {

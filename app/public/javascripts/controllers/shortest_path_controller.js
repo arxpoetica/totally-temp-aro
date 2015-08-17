@@ -96,7 +96,14 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     if (!$scope.route) return;
 
     if (layer.type === 'locations' || layer.type === 'network_nodes') {
-      $http.post('/route_optimizer/'+$scope.route.id+'/edit', changes).success(function(response) {
+      var url = '/route_optimizer/'+$scope.route.id+'/edit'
+      var config = {
+        url: url,
+        method: 'post',
+        saving_plan: true,
+        data: changes,
+      }
+      $http(config).success(function(response) {
         redraw_route(response);
       });
     }
