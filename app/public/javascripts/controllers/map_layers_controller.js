@@ -88,8 +88,19 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
   });
 
-  $rootScope.$on('selection_tool_rectangle', function(e, bounds) {
-    feature_layers.locations.toggle_features_in_bounds(bounds);
+  $rootScope.$on('selection_tool_rectangle', function(e, overlay) {
+    var bounds = overlay.getBounds();
+    feature_layers.locations.change_selection_for_features_matching(function(feature) {
+      var latLng = feature.getGeometry().get();
+      return bounds.contains(latLng);
+    });
+  });
+
+  $rootScope.$on('selection_tool_polygon', function(e, overlay) {
+    feature_layers.locations.change_selection_for_features_matching(function(feature) {
+      var latLng = feature.getGeometry().get();
+      return google.maps.geometry.poly.containsLocation(latLng, overlay);
+    });
   });
 
   /**************

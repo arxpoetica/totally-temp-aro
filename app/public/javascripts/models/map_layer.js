@@ -119,7 +119,9 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		}
 	};
 
-	MapLayer.prototype.toggle_feature = function(feature, changes) {
+	MapLayer.prototype.set_feature_selected = function(feature, selected, changes) {
+		if (feature.selected === selected) return;
+
 		var data_layer = this.data_layer;
 		var id = feature.getProperty('id');
 
@@ -141,6 +143,10 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		// won't be updated. And if angular is already doing its stuff we cannot call $rootScope.$apply()
 		// directly because it will throw an error
 		if (!$rootScope.$$phase) { $rootScope.$apply(); }
+	};
+
+	MapLayer.prototype.toggle_feature = function(feature, changes) {
+		this.set_feature_selected(feature, !feature.selected, changes);
 	};
 
 	MapLayer.prototype.select_random_features = function() {
@@ -339,15 +345,15 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		});
 	}
 
-	MapLayer.prototype.toggle_features_in_bounds = function(bounds) {
+	MapLayer.prototype.change_selection_for_features_matching = function(func) {
 		var layer = this;
 		if (!layer.visible) return;
 		var data = this.data_layer;
 		var changes = create_empty_changes(layer);
 
 		data.forEach(function(feature) {
-			if (bounds.contains(feature.getGeometry().get())) {
-				layer.toggle_feature(feature, changes);
+			if (func(feature)) {
+				layer.set_feature_selected(feature, true, changes);
 			}
 		});
 		broadcast_changes(layer, changes);

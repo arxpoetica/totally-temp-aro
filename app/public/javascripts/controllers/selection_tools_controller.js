@@ -5,86 +5,57 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   
   $scope.selected_tool = null;
   $scope.available_tools = {
-    'SELECTION_TOOL_RECTANGLE': {
+    '': {
+      icon: 'glyphicon glyphicon-hand-up',
+      name: 'No selection',
+    },
+    'rectangle': {
       icon: 'glyphicon glyphicon-fullscreen',
       name: 'Rectangle selection tool',
     },
+    'polygon': {
+      icon: 'glyphicon glyphicon-screenshot',
+      name: 'Polygon selection tool',
+    },
   };
-  var rectangle = null;
-  var rectangleStart = null;
-  var rectangleEnd = null;
 
-  $scope.toggle_tool = function(tool) {
-    if (tool === 'SELECTION_TOOL_RECTANGLE') {
-      if ($scope.selected_tool === tool) {
-        $scope.selected_tool = null;
-        map.setOptions({ draggable: true, draggableCursor: null });
-        if (rectangle) {
-          rectangle.setMap(null);
-          rectangle = null;
-        }
-      } else {
-        $scope.selected_tool = 'SELECTION_TOOL_RECTANGLE';
-        map.setOptions({ draggable: false, draggableCursor:'crosshair' });
-      }
-    }
-  }
+  $scope.is_selected_tool = function(name) {
+    return drawingManager.getDrawingMode() === (name ? name : null);
+  };
 
-  function get_bounds_between_points(start, end) {
-    var bounds = new google.maps.LatLngBounds();
-    bounds.extend(start);
-    bounds.extend(end);
-    return bounds;
-  }
+  $scope.get_selected_tool = function() {
+    return drawingManager.getDrawingMode();
+  };
 
-  function mouse_move(event) {
-    rectangleEnd = event.latLng;
-    rectangle.setBounds(get_bounds_between_points(rectangleStart, rectangleEnd));
-  }
+  $scope.set_selected_tool = function(name) {
+    return drawingManager.setDrawingMode(name ? name : null);
+  };
 
-  function mouse_up(event) {
-    $rootScope.$broadcast('selection_tool_rectangle', rectangle.getBounds());
-    rectangle.setMap(null);
-    rectangle = null;
-  }
-
-  $rootScope.$on('map_mousedown', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE') {
-      rectangleStart = event.latLng;
-      rectangleEnd = rectangleStart;
-
-      rectangle = new google.maps.Rectangle({
-        bounds: get_bounds_between_points(rectangleStart, rectangleEnd),
-      });
-      rectangle.setMap(map);
-
-      google.maps.event.addListener(rectangle, 'mousemove', mouse_move);
-      google.maps.event.addListener(rectangle, 'mouseup', mouse_up);
-    }
+  var drawingManager = new google.maps.drawing.DrawingManager({
+    drawingMode: null,
+    drawingControl: false,
+    drawingControlOptions: {
+      position: google.maps.ControlPosition.TOP_CENTER,
+      drawingModes: [
+        google.maps.drawing.OverlayType.POLYGON,
+        google.maps.drawing.OverlayType.RECTANGLE,
+      ]
+    },
   });
 
-  $rootScope.$on('map_mouseup', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
-      mouse_up(event);
+  drawingManager.addListener('overlaycomplete', function(e) {
+    var overlay = e.overlay;
+    if (e.type !== drawingManager.getDrawingMode()) {
+      return overlay.setMap(null);
     }
+    $rootScope.$broadcast('selection_tool_'+e.type, overlay);
+    setTimeout(function() {
+      overlay.setMap(null);
+    }, 100);
   });
 
-  $rootScope.$on('map_mousemove', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
-      mouse_move(event);
-    }
-  });
-
-  $rootScope.$on('map_layer_mouseover_feature', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
-      mouse_move(event);
-    }
-  });
-
-  $rootScope.$on('map_layer_mouseup_feature', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
-      mouse_up(event);
-    }
+  $(document).ready(function() {
+    drawingManager.setMap(map);
   });
 
 });
