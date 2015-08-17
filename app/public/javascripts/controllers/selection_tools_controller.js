@@ -70,16 +70,13 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
     }
   }
 
-  document.addEventListener('keydown', function(e) {
+  function update_selection_tools(e) {
     $scope.deselect_mode = e.shiftKey;
     set_drawing_manager_enabled(!e.ctrlKey);
     if (!$rootScope.$$phase) { $rootScope.$apply(); } // refresh button state
-  });
+  }
 
-  document.addEventListener('keyup', function(e) {
-    $scope.deselect_mode = e.shiftKey;
-    set_drawing_manager_enabled(!e.ctrlKey);
-    if (!$rootScope.$$phase) { $rootScope.$apply(); } // refresh button state
-  });
+  document.addEventListener('keydown', update_selection_tools);
+  document.addEventListener('keyup', update_selection_tools);
 
 });
