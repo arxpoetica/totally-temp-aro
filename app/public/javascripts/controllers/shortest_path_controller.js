@@ -59,6 +59,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
   function redraw_route(data, only_metadata) {
     if (data.metadata) {
       $scope.route.metadata = data.metadata;
+      $rootScope.$broadcast('route_changed_metadata', $scope.route);
       if (only_metadata) return;
 
       selection.clear_selection();
