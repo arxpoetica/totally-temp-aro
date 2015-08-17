@@ -28,7 +28,9 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   };
 
   $scope.set_selected_tool = function(name) {
-    return drawingManager.setDrawingMode(name ? name : null);
+    name = name ? name : null;
+    drawingManager.old_drawing_mode = name;
+    return drawingManager.setDrawingMode(name);
   };
 
   var drawingManager = new google.maps.drawing.DrawingManager({
@@ -60,13 +62,23 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
     drawingManager.setMap(map);
   });
 
+  function set_drawing_manager_enabled(enabled) {
+    if (enabled) {
+      drawingManager.setDrawingMode(drawingManager.old_drawing_mode || null);
+    } else {
+      drawingManager.setDrawingMode(null);
+    }
+  }
+
   document.addEventListener('keydown', function(e) {
     $scope.deselect_mode = e.shiftKey;
+    set_drawing_manager_enabled(!e.ctrlKey);
     if (!$rootScope.$$phase) { $rootScope.$apply(); } // refresh button state
   });
 
   document.addEventListener('keyup', function(e) {
     $scope.deselect_mode = e.shiftKey;
+    set_drawing_manager_enabled(!e.ctrlKey);
     if (!$rootScope.$$phase) { $rootScope.$apply(); } // refresh button state
   });
 

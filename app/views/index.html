@@ -155,7 +155,7 @@
             <p>
               <a href="#" class="btn btn-default btn-block btn-sm"
                 ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
-                ng-class="{'btn-success active': is_selected_tool(key) && !deselect_mode, 'btn-danger active': is_selected_tool(key) && deselect_mode}"
+                ng-class="{'btn-success active': is_selected_tool(key) && (!key || !deselect_mode), 'btn-danger active': is_selected_tool(key) && key && deselect_mode}"
                 ng-click="set_selected_tool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
             </p>
           </div>
