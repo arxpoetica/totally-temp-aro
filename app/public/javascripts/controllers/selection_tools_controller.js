@@ -43,12 +43,14 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
     },
   });
 
+  $scope.deselect_mode = false;
+
   drawingManager.addListener('overlaycomplete', function(e) {
     var overlay = e.overlay;
     if (e.type !== drawingManager.getDrawingMode()) {
       return overlay.setMap(null);
     }
-    $rootScope.$broadcast('selection_tool_'+e.type, overlay);
+    $rootScope.$broadcast('selection_tool_'+e.type, overlay, $scope.deselect_mode);
     setTimeout(function() {
       overlay.setMap(null);
     }, 100);
@@ -56,6 +58,16 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
 
   $(document).ready(function() {
     drawingManager.setMap(map);
+  });
+
+  document.addEventListener('keydown', function(e) {
+    $scope.deselect_mode = e.shiftKey;
+    if (!$rootScope.$$phase) { $rootScope.$apply(); } // refresh button state
+  });
+
+  document.addEventListener('keyup', function(e) {
+    $scope.deselect_mode = e.shiftKey;
+    if (!$rootScope.$$phase) { $rootScope.$apply(); } // refresh button state
   });
 
 });

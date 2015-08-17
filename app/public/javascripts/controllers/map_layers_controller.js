@@ -88,16 +88,16 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
   });
 
-  $rootScope.$on('selection_tool_rectangle', function(e, overlay) {
+  $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
     var bounds = overlay.getBounds();
-    feature_layers.locations.change_selection_for_features_matching(function(feature) {
+    feature_layers.locations.change_selection_for_features_matching(!deselect_mode, function(feature) {
       var latLng = feature.getGeometry().get();
       return bounds.contains(latLng);
     });
   });
 
   $rootScope.$on('selection_tool_polygon', function(e, overlay) {
-    feature_layers.locations.change_selection_for_features_matching(function(feature) {
+    feature_layers.locations.change_selection_for_features_matching(!deselect_mode, function(feature) {
       var latLng = feature.getGeometry().get();
       return google.maps.geometry.poly.containsLocation(latLng, overlay);
     });

@@ -345,7 +345,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		});
 	}
 
-	MapLayer.prototype.change_selection_for_features_matching = function(func) {
+	MapLayer.prototype.change_selection_for_features_matching = function(select, func) {
 		var layer = this;
 		if (!layer.visible) return;
 		var data = this.data_layer;
@@ -353,7 +353,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 		data.forEach(function(feature) {
 			if (func(feature)) {
-				layer.set_feature_selected(feature, true, changes);
+				layer.set_feature_selected(feature, select, changes);
 			}
 		});
 		broadcast_changes(layer, changes);
