@@ -35,7 +35,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				var changes = create_empty_changes(layer);
 				layer.data_layer.forEach(function(feature) {
 					if (feature.selected) {
-						layer.data_layer.overrideStyle(feature, layer.style_options.normal);
+						layer.set_feature_selected(feature, false, changes);
 					}
 				});
 				layer.set_feature_selected(event.feature, true, changes);
