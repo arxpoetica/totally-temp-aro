@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS client.business_customer_types;
+
 CREATE TABLE client.business_customer_types
 (
 	id serial,
@@ -18,6 +20,8 @@ INSERT INTO client.business_customer_types(business_id)
 UPDATE client.business_customer_types
 SET customer_type_id = CAST((random() * 2) + 1 AS integer);
 
+
+DROP TABLE IF EXISTS client.household_customer_types;
 
 CREATE TABLE client.household_customer_types
 (

@@ -1,5 +1,7 @@
 -- Table: custom.route_targets
 
+DROP TABLE IF EXISTS custom.route_targets;
+
 CREATE TABLE custom.route_targets
 (
   id SERIAL,

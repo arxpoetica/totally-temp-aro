@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PSQL=${PGBIN}/psql
+PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
 GISROOT=/gisdata
 TMPDIR=/gisdata/temp/

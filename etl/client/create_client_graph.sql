@@ -3,7 +3,7 @@
 -- TODO: Once we have enough data such that it's partitioned into states,
 -- we'll need to do the same thing with the graph
 
--- DROP TABLE client.graph;
+DROP TABLE IF EXISTS client.edge_network;
 
 
 -- Create edge_network table used to aggregate all edges eventually used in the graph
@@ -79,10 +79,12 @@ CREATE INDEX idx_client_edge_network_geom_gist ON client.edge_network USING gist
 SELECT pgr_createTopology('client.edge_network', 0.00001, 'geom');
 
 -- Create noded network
+DROP TABLE IF EXISTS client.edge_network_noded;
 SELECT pgr_nodeNetwork('client.edge_network', 0.00001, 'id', 'geom');
 
 
 -- Rename the noded result table as the graph table, and add columns to pull in additional information
+DROP TABLE IF EXISTS client.graph;
 ALTER TABLE client.edge_network_noded
     RENAME TO graph;
 

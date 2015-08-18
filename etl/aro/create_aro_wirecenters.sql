@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS aro.wirecenters;
+
 -- Create the existing fiber plant table for display on the ARO map and for eventual incorporation into the ARO graph.
 CREATE TABLE aro.wirecenters
 (

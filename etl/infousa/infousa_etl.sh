@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PSQL=${PGBIN}/psql
+PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 GISROOT=/gisdata
 TMPDIR=/gisdata/temp/
 UNZIPTOOL=unzip

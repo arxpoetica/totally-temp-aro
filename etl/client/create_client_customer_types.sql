@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS client.customer_types;
+
 CREATE TABLE client.customer_types
 (
 	id serial,

@@ -1,5 +1,7 @@
 -- Table: custom.route
 
+DROP TABLE IF EXISTS custom.route;
+
 CREATE TABLE custom.route
 (
   id SERIAL,

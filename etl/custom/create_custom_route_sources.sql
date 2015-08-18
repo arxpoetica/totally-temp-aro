@@ -1,5 +1,7 @@
 -- Table: custom.route_sources
 
+DROP TABLE IF EXISTS custom.route_sources;
+
 CREATE TABLE custom.route_sources
 (
   id SERIAL,

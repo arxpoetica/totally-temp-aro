@@ -1,7 +1,7 @@
 -- Table: aro.edges
 -- Edges stored with additional geographic/geometric data for dramatically faster computations
 
--- DROP TABLE aro.edges;
+DROP TABLE IF EXISTS aro.edges;
 
 CREATE TABLE aro.edges AS 
 SELECT

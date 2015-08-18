@@ -1,6 +1,6 @@
 -- Table: aro.census_blocks
 
--- DROP TABLE aro.census_blocks;
+DROP TABLE IF EXISTS aro.census_blocks;
 
 CREATE TABLE aro.census_blocks AS
   SELECT

@@ -5,7 +5,7 @@
 GISROOT=/gisdata
 TMPDIR=/gisdata/temp/
 UNZIPTOOL=unzip
-PSQL=${PGBIN}/psql
+PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # Set array of states and FIPS codes to iterate through

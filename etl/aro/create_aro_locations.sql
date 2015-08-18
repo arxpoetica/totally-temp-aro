@@ -1,6 +1,6 @@
 -- Table: aro.locations
 
-DROP TABLE aro.locations;
+DROP TABLE IF EXISTS aro.locations;
 
 CREATE TABLE aro.locations
 (
