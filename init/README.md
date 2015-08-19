@@ -31,9 +31,15 @@ After the walkthrough, there are instructions for updating and reprovisioning th
 
 ## Walkthrough
 #### Instance Setup
-Clone repository, then navigate to the root of the repository: 
+Note: If your local platform is Windows, do not use the Github for Windows application. You can use the Git shell that is installed with that application for the following tasks.
+
+On Windows you must first run the following command in a Git shell:
 ```console
-$ git clone git@github.com:AVCo/ARO-Platform
+$ git config --global core.autocrlf false
+```
+Clone the repository, then navigate to the root of the repository: 
+```console
+$ git clone git@octocat.altvil.com:AIT/ARO-Platform
 Cloning into 'ARO-Platform'...
 remote: Counting objects: 133, done.
 remote: Compressing objects: 100% (6/6), done.
