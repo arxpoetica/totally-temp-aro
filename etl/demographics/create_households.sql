@@ -1,6 +1,6 @@
 -- Table demographics.households
 
--- DROP TABLE demographics.households;
+DROP TABLE IF EXISTS demographics.households;
 
 CREATE TABLE demographics.households
 (

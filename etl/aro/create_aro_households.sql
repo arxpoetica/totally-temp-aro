@@ -1,6 +1,6 @@
 -- Table: aro.households
 
--- DROP TABLE aro.households
+DROP TABLE IF EXISTS aro.households;
 
 CREATE TABLE aro.households
 (

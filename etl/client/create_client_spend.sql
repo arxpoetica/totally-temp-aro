@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS client.products;
+
 CREATE TABLE client.products
 (
 	id serial,
@@ -16,6 +18,8 @@ CREATE TABLE client.industries
 	CONSTRAINT pkey_industries_id PRIMARY KEY (id)
 );
 
+DROP TABLE IF EXISTS client.employees_by_location;
+
 CREATE TABLE client.employees_by_location
 (
 	id serial,
@@ -27,6 +31,8 @@ CREATE TABLE client.employees_by_location
 );
 
 CREATE INDEX client_employees_by_location_min_max_values ON client.employees_by_location(min_value, max_value);
+
+DROP TABLE IF EXISTS client.spend;
 
 CREATE TABLE client.spend
 (
@@ -43,6 +49,8 @@ CREATE TABLE client.spend
 	CONSTRAINT fkey_spend_employees_by_location_id FOREIGN KEY (employees_by_location_id) REFERENCES client.employees_by_location (id) ON DELETE CASCADE
 	
 );
+
+DROP TABLE IF EXISTS client.industry_mapping;
 
 CREATE TABLE client.industry_mapping
 (

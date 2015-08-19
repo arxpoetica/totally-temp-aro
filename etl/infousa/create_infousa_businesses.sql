@@ -1,6 +1,6 @@
 -- Table: public.infousa_businesses
 
--- DROP TABLE public.infousa_businesses;
+DROP TABLE IF EXISTS infousa.businesses;
 
 CREATE TABLE infousa.businesses
 (

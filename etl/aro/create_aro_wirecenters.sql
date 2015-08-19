@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS aro.wirecenters;
+
 -- Create the existing fiber plant table for display on the ARO map and for eventual incorporation into the ARO graph.
 CREATE TABLE aro.wirecenters
 (
@@ -25,8 +27,6 @@ INSERT INTO aro.wirecenters (gid, state, wirecenter, aocn, aocn_name, geog, geom
 		wirecenter,
 		aocn,
 		aocn_name,
-		-- Geography(ST_GeometryN(ST_Force_2D(the_geom),1)) as geog, -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
-		-- ST_GeometryN(ST_Force_2D(the_geom),1) AS geom -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
 		Geography(ST_Force_2D(the_geom)) as geog, -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
 		ST_Force_2D(the_geom) AS geom -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
 	FROM geotel.wirecenters;

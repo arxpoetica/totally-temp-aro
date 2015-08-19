@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS client.network_node_types;
+
 CREATE TABLE client.network_node_types
 (
 	id serial,

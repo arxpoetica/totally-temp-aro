@@ -1,6 +1,6 @@
 -- Table: aro.cousub
 
--- DROP TABLE aro.cousub;
+DROP TABLE IF EXISTS aro.cousub;
 
 CREATE TABLE aro.cousub AS
   SELECT

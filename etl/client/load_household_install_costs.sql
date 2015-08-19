@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS client.household_install_costs;
+
 CREATE TABLE client.household_install_costs
 (
 	id serial,

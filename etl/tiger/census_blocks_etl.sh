@@ -1,15 +1,9 @@
 #!/bin/bash
 
-# TODO: Set env variables via config so we don't need to set them in each ETL script
 GISROOT=/gisdata
 TMPDIR=/gisdata/temp/
 UNZIPTOOL=unzip
-export PGDATABASE=aro
-export PGUSER=aro
-export PGPASSWORD=aro
-export PGHOST=localhost
-export PGBIN=/usr/bin
-PSQL=${PGBIN}/psql
+PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # Set array of states and FIPS codes to iterate through
@@ -35,7 +29,7 @@ do
 
 	${SHP2PGSQL}  -D -s 4269 -g the_geom -W "latin1" tl_2014_${STATE_FIPS_ARRAY[$STATE]}_tabblock10.dbf tiger_staging.${STATE}_tabblock | ${PSQL} 
 	${PSQL} -c "ALTER TABLE tiger_staging.${STATE}_tabblock DROP uatyp10;"
-	${PSQL} -c "ALTER TABLE tiger_data.${STATE}_tabblock RENAME geoid TO tabblock_id;"
+	# ${PSQL} -c "ALTER TABLE tiger_data.${STATE}_tabblock RENAME geoid TO tabblock_id;"
 	${PSQL} -c "SELECT loader_load_staged_data(lower('${STATE}_tabblock'), lower('${STATE}_tabblock'));"
 
 	# Modify table and add constraints/indexes

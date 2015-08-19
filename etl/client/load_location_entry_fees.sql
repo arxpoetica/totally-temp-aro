@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS client.location_entry_fees;
+
 CREATE TABLE client.location_entry_fees
 (
 	id serial,

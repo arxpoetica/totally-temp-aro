@@ -8,5 +8,21 @@
   "aro" : {
     "environment": "development",
     "client": "local"
+  },
+  "deploy" : {
+    "aro": {
+      "application_type" : "other",
+      "document_root" : "",
+      "scm" : {
+        "scm_type" : "git",
+        "repository" : "./"
+      },
+      "database" : {
+        "host" : "localhost",
+        "username" : "aro",
+        "password" : "aro",
+        "database" : "aro"
+      }
+    }
   }
 }

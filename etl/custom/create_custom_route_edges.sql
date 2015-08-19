@@ -1,5 +1,7 @@
 -- Table: custom.route_edges
 
+DROP TABLE IF EXISTS custom.route_edges;
+
 CREATE TABLE custom.route_edges
 (
   id SERIAL,

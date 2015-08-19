@@ -1,15 +1,9 @@
 #!/bin/bash
 
-# TODO: Set env variables via config so we don't need to set them in each ETL script
 GISROOT=/gisdata
 TMPDIR=/gisdata/temp/
 UNZIPTOOL=unzip
-export PGDATABASE=aro
-export PGUSER=aro
-export PGPASSWORD=aro
-export PGHOST=localhost
-export PGBIN=/usr/bin
-PSQL=${PGBIN}/psql
+PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # Set array of states and FIPS codes to iterate through

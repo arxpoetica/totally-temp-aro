@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS client.business_install_costs;
+
 CREATE TABLE client.business_install_costs
 (
 	id serial,

@@ -1,6 +1,6 @@
 -- Table: aro.businesses
 
--- DROP TABLE aro.businesses;
+DROP TABLE IF EXISTS aro.businesses;
 
 CREATE TABLE aro.businesses
 (

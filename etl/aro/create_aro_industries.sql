@@ -1,6 +1,6 @@
 -- Table: aro.industries
 
--- DROP TABLE aro.industries;
+DROP TABLE IF EXISTS aro.industries;
 
 CREATE TABLE aro.industries
 (

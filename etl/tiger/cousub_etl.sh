@@ -1,30 +1,15 @@
 #!/bin/bash
 
-# TODO: Set env variables via config so we don't need to set them in each ETL script
 # TODO: Create a loop to run through all states/areas rather than copy-pasting the code
 
 GISROOT=/gisdata
 TMPDIR=/gisdata/temp/
 UNZIPTOOL=unzip
-export PGDATABASE=aro
-export PGUSER=aro
-export PGPASSWORD=aro
-export PGHOST=localhost
-export PGBIN=/usr/bin
-PSQL=${PGBIN}/psql
+PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # Set array of states and FIPS codes to iterate through
-declare -A STATE_FIPS_ARRAY=( [NY]=36 [OR]=41 [WA]=53 )
-# declare -A state_array
-# state_array[NY]=36
-# state_array[WA]=53
-
-# for state in "${!state_fips_array[@]}"
-# do
-#   echo "key  : $i"
-#   echo "value: ${state_fips_array[$state]}"
-# done
+declare -A STATE_FIPS_ARRAY=( [NY]=36 )
 
 for STATE in "${!STATE_FIPS_ARRAY[@]}"
 do

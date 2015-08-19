@@ -7,7 +7,9 @@
       "recipe[dependencies]",
       "recipe[ebs]",
       "recipe[opsworks_ganglia::client]",
+      "recipe[aro::default]",
       "recipe[aro::local]",
+      "recipe[aro::python-dependencies]",
       "recipe[opsworks_ganglia::configure-client]",
       "recipe[agent_version]"
     ]
