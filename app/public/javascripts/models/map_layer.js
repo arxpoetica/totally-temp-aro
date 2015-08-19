@@ -13,7 +13,8 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.data = options.data;
 		this.type = options.type;
 		this.always_show_selected = false;
-		this.set_style('normal')
+		this.set_style('normal');
+		this.single_selection = options.single_selection;
 
 		var collection;
 		if (this.type === 'locations') {
@@ -30,10 +31,21 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 		data_layer.addListener('click', function(event) {
 			$rootScope.$broadcast('map_layer_clicked_feature', event, layer);
-			if (!selection.is_enabled() || !event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return;
-			var changes = create_empty_changes(layer);
-			layer.toggle_feature(event.feature, changes);
-			broadcast_changes(layer, changes);
+			if (layer.single_selection) {
+				var changes = create_empty_changes(layer);
+				layer.data_layer.forEach(function(feature) {
+					if (feature.selected) {
+						layer.set_feature_selected(feature, false, changes);
+					}
+				});
+				layer.set_feature_selected(event.feature, true, changes);
+				broadcast_changes(layer, changes);
+			} else {
+				if (!selection.is_enabled() || !event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return;
+				var changes = create_empty_changes(layer);
+				layer.toggle_feature(event.feature, changes);
+				broadcast_changes(layer, changes);
+			}
 		});
 
 		data_layer.addListener('mouseup', function(event) {
@@ -62,7 +74,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		});
 
 		data_layer.addListener('mouseout', function(event) {
-			if (layer.highlighteable && event.feature) {
+			if (layer.highlighteable && event.feature && !event.feature.selected) {
 				layer.data_layer.overrideStyle(event.feature, layer.style_options.normal);
 			}
 		});
@@ -119,11 +131,13 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		}
 	};
 
-	MapLayer.prototype.toggle_feature = function(feature, changes) {
+	MapLayer.prototype.set_feature_selected = function(feature, select, changes) {
+		if (feature.selected === select) return;
+
 		var data_layer = this.data_layer;
 		var id = feature.getProperty('id');
 
-		if (feature.selected) {
+		if (!select) {
 			this.deselect_feature(feature);
 			if (this.collection) {
 				this.collection.remove(id);
@@ -141,6 +155,10 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		// won't be updated. And if angular is already doing its stuff we cannot call $rootScope.$apply()
 		// directly because it will throw an error
 		if (!$rootScope.$$phase) { $rootScope.$apply(); }
+	};
+
+	MapLayer.prototype.toggle_feature = function(feature, changes) {
+		this.set_feature_selected(feature, !feature.selected, changes);
 	};
 
 	MapLayer.prototype.select_random_features = function() {
@@ -339,15 +357,15 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		});
 	}
 
-	MapLayer.prototype.toggle_features_in_bounds = function(bounds) {
+	MapLayer.prototype.change_selection_for_features_matching = function(select, func) {
 		var layer = this;
 		if (!layer.visible) return;
 		var data = this.data_layer;
 		var changes = create_empty_changes(layer);
 
 		data.forEach(function(feature) {
-			if (bounds.contains(feature.getGeometry().get())) {
-				layer.toggle_feature(feature, changes);
+			if (func(feature)) {
+				layer.set_feature_selected(feature, select, changes);
 			}
 		});
 		broadcast_changes(layer, changes);

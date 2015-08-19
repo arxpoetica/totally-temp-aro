@@ -88,8 +88,19 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
   });
 
-  $rootScope.$on('selection_tool_rectangle', function(e, bounds) {
-    feature_layers.locations.toggle_features_in_bounds(bounds);
+  $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
+    var bounds = overlay.getBounds();
+    feature_layers.locations.change_selection_for_features_matching(!deselect_mode, function(feature) {
+      var latLng = feature.getGeometry().get();
+      return bounds.contains(latLng);
+    });
+  });
+
+  $rootScope.$on('selection_tool_polygon', function(e, overlay, deselect_mode) {
+    feature_layers.locations.change_selection_for_features_matching(!deselect_mode, function(feature) {
+      var latLng = feature.getGeometry().get();
+      return google.maps.geometry.poly.containsLocation(latLng, overlay);
+    });
   });
 
   /**************
@@ -113,6 +124,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     short_name: 'CB',
     name: 'Census Blocks layer',
     api_endpoint: '/census_blocks/36/061',
+    single_selection: true,
     style_options: {
       normal: {
         fillColor: 'blue',
@@ -120,6 +132,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 2,
       },
       highlight: {
+        fillColor: 'blue',
+        strokeColor: 'blue',
+        strokeWeight: 5,
+      },
+      selected: {
         fillColor: 'blue',
         strokeColor: 'blue',
         strokeWeight: 5,

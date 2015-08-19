@@ -77,7 +77,15 @@
                 </ul>
               </li>
             </ul>
-            <button ng-show="route" type="button" class="btn btn-default navbar-btn" disabled>{{route.name}}</button>
+            
+            <button ng-show="route" type="button" style="float:left" class="btn btn-default navbar-btn" disabled>{{route.name}}</button>
+            <p class="navbar-text saving" id="plan-saving">
+              <small><span class="spin glyphicon glyphicon-repeat"></span> Saving plan…</small>
+            </p>
+            <p class="navbar-text saving" id="plan-saved">
+              <small><span class="glyphicon glyphicon-ok"></span> Plan saved</small>
+            </p>
+
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -147,8 +155,8 @@
             <p>
               <a href="#" class="btn btn-default btn-block btn-sm"
                 ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
-                ng-class="{'btn-success active': selected_tool == key}"
-                ng-click="toggle_tool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
+                ng-class="{'btn-success active': is_selected_tool(key) && (!key || !deselect_mode), 'btn-danger active': is_selected_tool(key) && key && deselect_mode}"
+                ng-click="set_selected_tool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
             </p>
           </div>
         </div>
@@ -189,39 +197,8 @@
           </div>
           <div ng-show="route">
             <form class="form-horizontal">
-              <div class="form-group form-group-sm">
-                <label class="col-sm-3 control-label">Sources</label>
-                <div class="col-sm-2">
-                  <p class="form-control-static">{{selection.sources.length()}}</p>
-                </div>
-                <label class="col-sm-offset-2 col-sm-3 control-label">Targets</label>
-                <div class="col-sm-2">
-                  <p class="form-control-static">{{selection.targets.length()}}</p>
-                </div>
-              </div>
-              <div class="form-group form-group-sm">
-                <label class="col-sm-3 control-label">Name</label>
-                <div class="col-sm-9">
-                  <input type="text" class="form-control" ng-model="route.name" readonly>
-                </div>
-              </div>
-              <div class="form-group form-group-sm">
-                <label class="col-sm-3 control-label">Strands</label>
-                <div class="col-sm-9">
-                  <input type="text" class="form-control" placeholder="Number of fiber strands" ng-model="route.number_of_strands">
-                </div>
-              </div>
               <div class="form-group form-group-sm" style="margin-bottom: 0">
-                <label class="col-sm-3 control-label">Cable type</label>
-                <div class="col-sm-9">
-                  <select class="form-control">
-                    <option value="aerial">Aerial</option>
-                    <option value="buried">Buried</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group form-group-sm" style="margin-bottom: 0">
-                <div class="col-sm-offset-3 col-sm-9">
+                <div class="col-sm-12">
                   <div class="checkbox">
                     <label>
                       <input type="checkbox" ng-model="always_shows_sources" ng-change="toggle_always_show_sources()"> Show selected sources
@@ -230,7 +207,7 @@
                 </div>
               </div>
               <div class="form-group form-group-sm">
-                <div class="col-sm-offset-3 col-sm-9">
+                <div class="col-sm-12">
                   <div class="checkbox">
                     <label>
                       <input type="checkbox" ng-model="always_shows_targets" ng-change="toggle_always_show_targets()"> Show selected targets
@@ -422,6 +399,29 @@
       <div id="map-canvas"></div>
     </div>
 
+    <footer ng-controller="footer_controller">
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-4" aria-expanded="false">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-4">
+            <div ng-show="route">
+              <p class="navbar-text">Sources: <span class="label label-primary">{{selection.sources.length()}}</span></p>
+              <p class="navbar-text">Targets: <span class="label label-primary">{{selection.targets.length()}}</span></p>
+              <p class="navbar-text">Total cost: <span class="label label-danger">{{route.metadata.total_cost | currency}}</span></p>
+              <p class="navbar-text">Revenue: <span class="label label-success">{{route.metadata.revenue | currency}}</span></p>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </footer>
+
     <div ng-controller="contextual_menu_controller">
       <ul class="dropdown-menu" id="contextual_menu">
         <li ng-repeat="option in options">
@@ -437,7 +437,7 @@
   <!-- Angular controllers and services -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=visualization"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=visualization,drawing"></script>
   <script>
     var app = angular.module('aro', []);
     var map;
@@ -470,6 +470,7 @@
   <script src="javascripts/libs/underscore.js"></script>
   <script src="javascripts/libs/sweetalert.min.js"></script>
   <script src="javascripts/controllers/navigation_menu_controller.js"></script>
+  <script src="javascripts/controllers/footer_controller.js"></script>
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>
@@ -485,6 +486,7 @@
   <script src="javascripts/models/loader.js"></script>
   <script src="javascripts/models/map_tools.js"></script>
   <script src="javascripts/interceptors/http_error_handler.js"></script>
+  <script src="javascripts/interceptors/saving_plan_handler.js"></script>
   <script>app.run(function(loader){})</script>
   <script>
     $(function () {

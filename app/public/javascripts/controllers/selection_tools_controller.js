@@ -5,86 +5,78 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   
   $scope.selected_tool = null;
   $scope.available_tools = {
-    'SELECTION_TOOL_RECTANGLE': {
+    '': {
+      icon: 'glyphicon glyphicon-hand-up',
+      name: 'No selection',
+    },
+    'rectangle': {
       icon: 'glyphicon glyphicon-fullscreen',
       name: 'Rectangle selection tool',
     },
+    'polygon': {
+      icon: 'glyphicon glyphicon-screenshot',
+      name: 'Polygon selection tool',
+    },
   };
-  var rectangle = null;
-  var rectangleStart = null;
-  var rectangleEnd = null;
 
-  $scope.toggle_tool = function(tool) {
-    if (tool === 'SELECTION_TOOL_RECTANGLE') {
-      if ($scope.selected_tool === tool) {
-        $scope.selected_tool = null;
-        map.setOptions({ draggable: true, draggableCursor: null });
-        if (rectangle) {
-          rectangle.setMap(null);
-          rectangle = null;
-        }
-      } else {
-        $scope.selected_tool = 'SELECTION_TOOL_RECTANGLE';
-        map.setOptions({ draggable: false, draggableCursor:'crosshair' });
-      }
+  $scope.is_selected_tool = function(name) {
+    return drawingManager.getDrawingMode() === (name ? name : null);
+  };
+
+  $scope.get_selected_tool = function() {
+    return drawingManager.getDrawingMode();
+  };
+
+  $scope.set_selected_tool = function(name) {
+    name = name ? name : null;
+    drawingManager.old_drawing_mode = name;
+    return drawingManager.setDrawingMode(name);
+  };
+
+  var drawingManager = new google.maps.drawing.DrawingManager({
+    drawingMode: null,
+    drawingControl: false,
+    drawingControlOptions: {
+      position: google.maps.ControlPosition.TOP_CENTER,
+      drawingModes: [
+        google.maps.drawing.OverlayType.POLYGON,
+        google.maps.drawing.OverlayType.RECTANGLE,
+      ]
+    },
+  });
+
+  $scope.deselect_mode = false;
+
+  drawingManager.addListener('overlaycomplete', function(e) {
+    var overlay = e.overlay;
+    if (e.type !== drawingManager.getDrawingMode()) {
+      return overlay.setMap(null);
+    }
+    $rootScope.$broadcast('selection_tool_'+e.type, overlay, $scope.deselect_mode);
+    setTimeout(function() {
+      overlay.setMap(null);
+    }, 100);
+  });
+
+  $(document).ready(function() {
+    drawingManager.setMap(map);
+  });
+
+  function set_drawing_manager_enabled(enabled) {
+    if (enabled) {
+      drawingManager.setDrawingMode(drawingManager.old_drawing_mode || null);
+    } else {
+      drawingManager.setDrawingMode(null);
     }
   }
 
-  function get_bounds_between_points(start, end) {
-    var bounds = new google.maps.LatLngBounds();
-    bounds.extend(start);
-    bounds.extend(end);
-    return bounds;
+  function update_selection_tools(e) {
+    $scope.deselect_mode = e.shiftKey;
+    set_drawing_manager_enabled(!e.ctrlKey);
+    if (!$rootScope.$$phase) { $rootScope.$apply(); } // refresh button state
   }
 
-  function mouse_move(event) {
-    rectangleEnd = event.latLng;
-    rectangle.setBounds(get_bounds_between_points(rectangleStart, rectangleEnd));
-  }
-
-  function mouse_up(event) {
-    $rootScope.$broadcast('selection_tool_rectangle', rectangle.getBounds());
-    rectangle.setMap(null);
-    rectangle = null;
-  }
-
-  $rootScope.$on('map_mousedown', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE') {
-      rectangleStart = event.latLng;
-      rectangleEnd = rectangleStart;
-
-      rectangle = new google.maps.Rectangle({
-        bounds: get_bounds_between_points(rectangleStart, rectangleEnd),
-      });
-      rectangle.setMap(map);
-
-      google.maps.event.addListener(rectangle, 'mousemove', mouse_move);
-      google.maps.event.addListener(rectangle, 'mouseup', mouse_up);
-    }
-  });
-
-  $rootScope.$on('map_mouseup', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
-      mouse_up(event);
-    }
-  });
-
-  $rootScope.$on('map_mousemove', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
-      mouse_move(event);
-    }
-  });
-
-  $rootScope.$on('map_layer_mouseover_feature', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
-      mouse_move(event);
-    }
-  });
-
-  $rootScope.$on('map_layer_mouseup_feature', function(e, event) {
-    if ($scope.selected_tool === 'SELECTION_TOOL_RECTANGLE' && rectangle) {
-      mouse_up(event);
-    }
-  });
+  document.addEventListener('keydown', update_selection_tools);
+  document.addEventListener('keyup', update_selection_tools);
 
 });

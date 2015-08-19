@@ -70,9 +70,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   function update_map_cursor() {
     var layer = $rootScope.feature_layers.network_nodes;
-    var editing = layer.visible && $scope.route && map_tools.is_visible('equipment_nodes')
-    map.setOptions({ draggableCursor: editing ? 'crosshair' : null });
+    var editing = layer.visible && $scope.route && map_tools.is_visible('equipment_nodes');
+    map.setOptions({ draggableCursor: editing ? 'sw-resize' : null });
   }
+
+  $rootScope.$on('map_layer_changed_visibility', function(e, name) {
+    update_map_cursor();
+  });
 
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
