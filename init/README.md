@@ -99,6 +99,30 @@ This will go on for a while. At the end of successful provisioning you will see 
 ```console
 ==> app: [2015-06-24 15:09:13]  INFO [opsworks-agent(20040)]: Finished Chef run with exitcode 0
 ```
+##### NOTE:
+There is currently a bug, possibly with the Opsworks agent (still being investigated), that may cause first-time provisioning to abort mid-way through the process.
+Rather than the output shown above, the Vagrant process may end with something similar to the following:
+```console
+==> app: Installing agent ruby
+==> app: Selecting previously unselected package opsworks-agent-ruby.
+==> app: (Reading database ... 91769 files and directories currently installed.)
+==> app: Preparing to unpack .../opsworks-agent-ruby_2.0.0-p645-1_amd64.deb ...
+==> app: Unpacking opsworks-agent-ruby (2.0.0-p645-1) ...
+==> app: Setting up opsworks-agent-ruby (2.0.0-p645-1) ...
+==> app: Installing instance agent
+==> app: Cleanning up
+==> app: Checking dependencies...
+==> app: Reading input...
+==> app: Processing 'ops/dna/stack.json'...
+==> app: Processing 'ops/dna/app.json'...
+==> app: Parsing deployments...
+```
+If this happens, you must issue the following command to reboot the virtual machine and resume the provisioning process:
+```console
+$ vagrant reload --provision
+```
+This should allow the provisioning process to complete and generate the "Chef run with exitcode 0" output that lets you know everything worked.
+
 Connect into the Vagrant virtual machine and navigate to the application root:
 ```console
 $ vagrant ssh
