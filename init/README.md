@@ -33,9 +33,10 @@ After the walkthrough, there are instructions for updating and reprovisioning th
 #### Instance Setup
 Note: If your local platform is Windows, do not use the Github for Windows application. You can use the Git shell that is installed with that application for the following tasks.
 
-On Windows you must first run the following command in a Git shell:
+On Windows you must first run the following commands in a Git shell:
 ```console
 $ git config --global core.autocrlf false
+$ git config --global core.eol lf
 ```
 Clone the repository, then navigate to the root of the repository: 
 ```console
@@ -99,7 +100,7 @@ This will go on for a while. At the end of successful provisioning you will see 
 ```console
 ==> app: [2015-06-24 15:09:13]  INFO [opsworks-agent(20040)]: Finished Chef run with exitcode 0
 ```
-##### NOTE:
+##### NOTE: BUG (as of 8-20-2015)
 There is currently a bug, possibly with the Opsworks agent (still being investigated), that may cause first-time provisioning to abort mid-way through the process.
 Rather than the output shown above, the Vagrant process may end with something similar to the following:
 ```console
