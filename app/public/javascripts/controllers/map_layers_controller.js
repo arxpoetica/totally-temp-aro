@@ -73,8 +73,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
   feature_layers['network_nodes'] = new MapLayer({
     type: 'network_nodes',
-    name: 'Central offices',
-    short_name: 'CO',
+    name: 'Network Nodes',
+    short_name: 'NN',
     api_endpoint: '/network/nodes/central_office',
     style_options: {
       normal: {
@@ -108,7 +108,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   ***************/
   area_layers['county_subdivisions_layer'] = new MapLayer({
     short_name: 'CS',
-    name: 'County subdivisions layer',
+    name: 'County Subdivisions',
     api_endpoint: '/county_subdivisions/36',
     style_options: {
       normal: {
@@ -122,7 +122,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   area_layers['census_blocks_layer'] = new MapLayer({
     type: 'census_blocks',
     short_name: 'CB',
-    name: 'Census Blocks layer',
+    name: 'Census Blocks',
     api_endpoint: '/census_blocks/36/061',
     single_selection: true,
     style_options: {
@@ -177,8 +177,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   });
 
   area_layers['fiber_plant'] = new MapLayer({
-    name: 'Fiber plant',
-    short_name: 'FB',
+    name: 'Fiber',
+    short_name: 'F',
     api_endpoint: '/network/fiber_plant/VERIZON',
     style_options: {
       normal: {

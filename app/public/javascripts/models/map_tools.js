@@ -57,7 +57,7 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
     },
     {
       id: 'equipment_nodes',
-      name: 'Equipment nodes',
+      name: 'Equipment',
       short_name: 'ENT',
     },
   ];
