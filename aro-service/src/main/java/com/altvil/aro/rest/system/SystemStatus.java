@@ -13,7 +13,7 @@ public class SystemStatus {
 	public String status() {
 		try {
 
- 			return "ARO-CORE " + MainEntry.service(ConfigService.class).getVersion() ;			
+ 			return "ARO-SERVICE " + MainEntry.service(ConfigService.class).getVersion() ;			
 			
 		} catch( Throwable err) {
 			err.printStackTrace(); 

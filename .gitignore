@@ -12,4 +12,6 @@ app/coverage
 
 app/npm-debug*.*
 
+aro-service/target
+
 *.pyc
