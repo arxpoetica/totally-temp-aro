@@ -13,5 +13,9 @@ app/coverage
 app/npm-debug*.*
 
 aro-service/target
+aro-service/.project
+aro-service/.settings
+aro-service/.classpath
+
 
 *.pyc
