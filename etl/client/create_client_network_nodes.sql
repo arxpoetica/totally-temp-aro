@@ -24,7 +24,19 @@ INSERT INTO client.network_nodes (node_type_id, geog, geom)
 	FROM
 		aro.wirecenters
 	WHERE
-		wirecenters.wirecenter = 'NYCMNY79';
+	  -- NYC Upper East Side (URBAN)
+    wirecenters.wirecenter = 'NYCMNY79'
+    OR
+    -- Buffalo, New York (URBAN)
+    wirecenters.wirecenter = 'BFLONYEL'
+    OR
+    wirecenters.wirecenter = 'BFLONYFR'
+    OR
+    -- Orchard Park, NY (SUBURBAN)
+    wirecenters.wirecenter = 'ORPKNYST'
+    OR
+    -- North Collins, NY (RURAL)
+    wirecenters.wirecenter = 'NCLNNYNO';
 
 
 
