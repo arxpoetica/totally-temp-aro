@@ -23,7 +23,9 @@ WHERE
         OR
         mtfcc = 'S1200')
         AND
-        countyfp = '061';
+        (countyfp = '061'
+        OR
+        countyfp = '029');
 
 ALTER TABLE aro.edges
     ADD CONSTRAINT pkey_aro_edges_gid
