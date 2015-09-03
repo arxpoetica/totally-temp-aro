@@ -1,9 +1,10 @@
 var pg = require('pg');
 var txain = require('txain');
-var _ = require('underscore')
+var _ = require('underscore');
+var config = require('./config');
 
 function con_string() {
-	return process.env.DATABASE_URL || 'postgres://aro:aro@localhost/aro';
+	return process.env.DATABASE_URL || config.database_url || 'postgres://aro:aro@localhost/aro';
 }
 
 function processQuery(sql, params) {
