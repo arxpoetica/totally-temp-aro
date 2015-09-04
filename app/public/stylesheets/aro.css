@@ -8,13 +8,13 @@ html, body, #map-canvas, #map-canvas-wrapper {
   padding-top: 50px;
   margin-top: -50px;
   margin-left: 65px; /* width of left-col */
-  padding-bottom: 50px; /* footer height */
+  padding-bottom: 0px; /* footer height */
 }
 
 #left-col-wrapper {
   position: absolute;
   top: 50px;
-  bottom: 50px; /* footer height */
+  bottom: 0px; /* footer height */
   left: 0;
   z-index: 1;
   background-color: #fff;
@@ -147,4 +147,32 @@ footer {
 
 footer nav {
   margin-bottom: 0 !important;
+}
+
+#home_screen {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  margin-top: 50px;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background: url(https://images.unsplash.com/photo-1437422061949-f6efbde0a471?q=80&fm=jpg&s=e23055c9ba7686b8fe583fb8318a1f88);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+#home_screen h1 {
+  color: white;
+}
+
+#home_screen_logo {
+  font-size: 30px;
+  color: white;
+}
+
+#new_route_map_canvas {
+  width: 100%;
+  height: 300px;
 }

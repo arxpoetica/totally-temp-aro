@@ -1,7 +1,11 @@
 // Navigation Menu Controller
-app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', function($scope, $rootScope, $http, map_tools) {
+app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'selection', function($scope, $rootScope, $http, map_tools, selection) {
   // Controller instance variables
+  $scope.selection = selection;
   $scope.new_route_name = 'Untitled plan';
+  $scope.new_route_area_name = '';
+  $scope.new_route_area_centroid;
+  $scope.new_route_area_bounds;
   $scope.edit_route_name;
 
   $scope.route = null;
@@ -11,16 +15,54 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   * FUNCTIONS *
   *************/
 
+  var new_route_map;
+
+  function init_map() {
+    if (new_route_map) return;
+
+    var styles = [{
+      featureType: 'poi',
+      elementType: 'labels',
+      stylers: [ { visibility: 'off' } ],
+    }];
+
+    new_route_map = new google.maps.Map(document.getElementById('new_route_map_canvas'), {
+      zoom: 12,
+      center: {lat: -34.397, lng: 150.644},
+      styles: styles,
+      disableDefaultUI: true,
+      draggable: false,
+    });
+  }
+
+  $scope.look_up_area = function() {
+    var address = encodeURIComponent($scope.new_route_area_name);
+    $http.get('https://maps.googleapis.com/maps/api/geocode/json?address='+address)
+      .success(function(response) {
+        var results = response.results;
+        var result = results[0];
+        if (!result) return;
+        $scope.new_route_area_name = result.formatted_address;
+        // use centroid...
+        new_route_map.setCenter(result.geometry.location);
+        // ...or use bounds
+        // var bounds = new google.maps.LatLngBounds();
+        // bounds.extend(new google.maps.LatLng(result.geometry.bounds.northeast.lat, result.geometry.bounds.northeast.lng));
+        // bounds.extend(new google.maps.LatLng(result.geometry.bounds.southwest.lat, result.geometry.bounds.southwest.lng));
+        // new_route_map.fitBounds(bounds);
+        $scope.new_route_area_centroid = result.geometry.location;
+        $scope.new_route_area_bounds = result.geometry.bounds;
+      });
+  };
+
   $scope.select_route = function(route) {
     $scope.route = route;
     $rootScope.$broadcast('route_selected', route);
     $('#select-route').modal('hide');
-  };
-
-  $scope.create_route = function() {
-    $http.post('/route_optimizer/create').success(function(response) {
-      $scope.select_route(response);
-    });
+    var centroid = route && route.area_centroid;
+    if (centroid) {
+      map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] });
+    }
   };
 
   $scope.delete_route = function(route) {
@@ -58,6 +100,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     });
   };
 
+  $scope.manage_network_plans = function() {
+    $scope.load_routes(function() {
+      $('#manage-network-plans').modal('show');
+    });
+  };
+
   $scope.sort_by = function(key, descending) {
     $scope.routes = _.sortBy($scope.routes, function(route) {
       return route[key];
@@ -69,10 +117,18 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.new_route = function() {
     $('#new-route').modal('show');
+    init_map();
   };
 
   $scope.save_new_route = function() {
-    var params = { name: $scope.new_route_name };
+    var params = {
+      name: $scope.new_route_name,
+      area: {
+        name: $scope.new_route_area_name,
+        centroid: $scope.new_route_area_centroid,
+        bounds: $scope.new_route_area_bounds,
+      },
+    };
     $http.post('/route_optimizer/create', params).success(function(response) {
       $scope.select_route(response);
       $('#new-route').modal('hide');
@@ -121,7 +177,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     else{
       $('#export-error').hide();
       $('#export-route').modal('hide');
-
     
       location.href = '/route_optimizer/' + $scope.route.id + '/' + params.name + '/export';
     }

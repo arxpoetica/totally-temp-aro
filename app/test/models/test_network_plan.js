@@ -10,7 +10,25 @@ describe('NetworkPlan', function() {
 		var route_id;
 
 		it('should create a new empty route', function(done) {
-			NetworkPlan.create_route('Untitled route', function(err, route) {
+			var area = {
+				name: 'Boston, MA, USA',
+				centroid: {
+					lat: 42.3600825,
+					lng: -71.0588801,
+				},
+				bounds: {
+					northeast: {
+						lat: 42.3988669,
+						lng: -70.9232011,
+					},
+					southwest: {
+						lat: 42.22788,
+						lng: -71.191113,
+					}
+				},
+			};
+			NetworkPlan.create_route('Untitled route', area, function(err, route) {
+				expect(err).to.not.be.ok;
 				expect(route).to.have.property('id');
 				expect(route).to.have.property('name');
 				route_id = route.id;

@@ -4,6 +4,7 @@
 
 var helpers = require('../helpers');
 var database = helpers.database;
+var validate = helpers.validate;
 var multiline = require('multiline');
 var txain = require('txain');
 var Location = require('./location');
@@ -173,6 +174,10 @@ NetworkPlan.find_route = function(route_id, metadata_only, callback) {
       return total+cost.value;
     }, 0);
 
+    output.metadata.total_customers = output.metadata.customer_types.reduce(function(total, type) {
+      return total + type.businesses + type.households;
+    }, 0);
+
     if (metadata_only) delete output.feature_collection;
 
     callback(null, output);
@@ -224,20 +229,44 @@ NetworkPlan.recalculate_and_find_route = function(route_id, callback) {
 };
 
 NetworkPlan.find_all = function(callback) {
-  var sql = 'SELECT id, name, number_of_strands, created_at, updated_at FROM custom.route;';
+  var sql = 'SELECT id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds, created_at, updated_at FROM custom.route;';
   database.query(sql, callback);
 };
 
-NetworkPlan.create_route = function(name, callback) {
-  txain(function(callback) {
-    var sql = 'INSERT INTO custom.route (name, created_at, updated_at) VALUES ($1, NOW(), NOW()) RETURNING id;';
-    database.findOne(sql, [name], callback);
-  })
-  .then(function(row, callback) {
-    var sql = 'SELECT id, name, number_of_strands FROM custom.route WHERE id=$1;';
-    database.findOne(sql, [row.id], callback);
-  })
-  .end(callback);
+NetworkPlan.create_route = function(name, area, callback) {
+
+  validate(function(expect) {
+    expect(area, 'area', 'object');
+    expect(area, 'area.centroid', 'object');
+    expect(area, 'area.centroid.lat', 'number');
+    expect(area, 'area.centroid.lng', 'number');
+    expect(area, 'area.bounds', 'object');
+    expect(area, 'area.bounds.northeast', 'object');
+    expect(area, 'area.bounds.northeast.lat', 'number');
+    expect(area, 'area.bounds.northeast.lng', 'number');
+    expect(area, 'area.bounds.southwest', 'object');
+    expect(area, 'area.bounds.southwest.lat', 'number');
+    expect(area, 'area.bounds.southwest.lng', 'number');
+  }, function() {
+    txain(function(callback) {
+      var sql = multiline(function(){;/*
+        INSERT INTO custom.route (name, area_name, area_centroid, area_bounds, created_at, updated_at)
+        VALUES ($1, $2, ST_GeomFromText($3), ST_Envelope(ST_GeomFromText($4)), NOW(), NOW()) RETURNING id;
+      */});
+      var params = [
+        name,
+        area.name,
+        'POINT('+area.centroid.lng+' '+area.centroid.lat+')',
+        'LINESTRING('+area.bounds.northeast.lng+' '+area.bounds.northeast.lat+', '+area.bounds.southwest.lng+' '+area.bounds.southwest.lat+')',
+      ];
+      database.findOne(sql, params, callback);
+    })
+    .then(function(row, callback) {
+      var sql = 'SELECT id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds, created_at, updated_at FROM custom.route WHERE id=$1;';
+      database.findOne(sql, [row.id], callback);
+    })
+    .end(callback);
+  }, callback);
 };
 
 NetworkPlan.delete_route = function(route_id, callback) {

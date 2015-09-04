@@ -1,9 +1,9 @@
-<div class="modal" id="select-route" tabindex="-1" role="dialog">
+<div class="modal" id="manage-network-plans" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Open Saved Plan</h4>
+        <h4 class="modal-title">Manage Network Plans</h4>
       </div>
       <div class="modal-body">
         <p ng-show="routes.length < 1" class="text-center">
@@ -27,19 +27,24 @@
                 <a href="#" ng-click="sort_by('updated_at', true)">↓</a>
                 <a href="#" ng-click="sort_by('updated_at', false)">↑</a>
               </th>
+              <th>
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr ng-repeat="route in routes">
-              <td><a href="#" ng-click="select_route(route)">{{route.name}}</a></th>
+              <td>{{route.name}}</th>
               <td>{{route.updated_at | date:'shortDate'}}</th>
               <td>{{route.created_at | date:'shortDate'}}</th>
+              <td>
+                <a class="pull-right btn btn-sm btn-danger" ng-click="delete_route(route)"><span class="glyphicon glyphicon-trash"></span></a>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
       </div>
     </div>
   </div>

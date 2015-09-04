@@ -12,7 +12,32 @@
 
     <div ng-controller="navigation_menu_controller">
 
+      <div id="home_screen" ng-show="!route">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-12">
+              <h1><span class="glyphicon glyphicon-globe" id="home_screen_logo"></span> Product name</h1>
+              <br>
+            </div>
+            <div class="col-sm-8">
+              <a href="#" class="btn btn-primary btn-block" ng-click="show_routes()">Open Network Plan</a>
+              <br>
+            </div>
+            <div class="col-sm-8">
+              <a href="#" class="btn btn-primary btn-block" ng-click="new_route()">Create New Network Plan</a>
+              <br>
+            </div>
+            <div class="col-sm-8">
+              <a href="#" class="btn btn-primary btn-block" ng-click="manage_network_plans()">Manage Network Plans</a>
+              <br>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <% include modal_select_route.html %>
+
+      <% include modal_manage_network_plans.html %>
 
       <% include modal_new_route.html %>
 
@@ -55,30 +80,20 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">ARO</a>
+            <button ng-show="route" type="button" style="float: left; margin-right: 10px" class="btn btn-default navbar-btn" ng-click="select_route(null)"><span class="glyphicon glyphicon-chevron-left"></span></button>
+            <a class="navbar-brand" href="#">{{route.name}}</a>
+
+            <p ng-show="route" class="navbar-text">
+              <span class="glyphicon glyphicon-usd"></span>
+              <span class="label label-danger">{{route.metadata.total_cost | currency}}</span>
+              <span class="label label-success">{{route.metadata.revenue | currency}}</span>
+              |
+              <span class="glyphicon glyphicon-scale"></span> {{ route.metadata.total_customers }} customers covered
+            </p>
+
           </div>
 
           <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav" id="network_plans_menu">
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                  Network plans
-                  <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a href="#" ng-click="new_route()">New…</a></li>
-                  <li><a href="#" ng-click="show_routes()">Open…</a></li>
-                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="save_as()">Save as…</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="clear_route()">Clear current</a></li>
-                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="delete_route(route)">Delete selected</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li ng-class="{'disabled': !route}"><a href="#" ng-click="export_kml_name()">Export KML…</a></li>
-                </ul>
-              </li>
-            </ul>
-            
-            <button ng-show="route" type="button" style="float:left" class="btn btn-default navbar-btn" disabled>{{route.name}}</button>
             <p class="navbar-text saving" id="plan-saving">
               <small><span class="spin glyphicon glyphicon-repeat"></span> Saving plan…</small>
             </p>
@@ -399,29 +414,6 @@
       <div id="map-canvas"></div>
     </div>
 
-    <footer ng-controller="footer_controller">
-      <nav class="navbar navbar-default">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-4" aria-expanded="false">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-          </div>
-          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-4">
-            <div ng-show="route">
-              <p class="navbar-text">Sources: <span class="label label-primary">{{selection.sources.length()}}</span></p>
-              <p class="navbar-text">Targets: <span class="label label-primary">{{selection.targets.length()}}</span></p>
-              <p class="navbar-text">Total cost: <span class="label label-danger">{{route.metadata.total_cost | currency}}</span></p>
-              <p class="navbar-text">Revenue: <span class="label label-success">{{route.metadata.revenue | currency}}</span></p>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </footer>
-
     <div ng-controller="contextual_menu_controller">
       <ul class="dropdown-menu" id="contextual_menu">
         <li ng-repeat="option in options">
@@ -470,7 +462,6 @@
   <script src="javascripts/libs/underscore.js"></script>
   <script src="javascripts/libs/sweetalert.min.js"></script>
   <script src="javascripts/controllers/navigation_menu_controller.js"></script>
-  <script src="javascripts/controllers/footer_controller.js"></script>
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
   <script src="javascripts/controllers/shortest_path_controller.js"></script>

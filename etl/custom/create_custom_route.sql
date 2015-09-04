@@ -6,8 +6,9 @@ CREATE TABLE custom.route
 (
   id SERIAL,
   name varchar NOT NULL,
-  number_of_strands int CHECK (number_of_strands >= 0),
-  cable_type varchar,
+  area_name varchar,
+  area_centroid geometry,
+  area_bounds geom,
   created_at timestamp NOT NULL,
   updated_at timestamp NOT NULL,
   CONSTRAINT custom_route_pkey PRIMARY KEY (id)

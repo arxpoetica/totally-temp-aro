@@ -145,7 +145,8 @@ app.get('/route_optimizer/find_all', function(request, response, next) {
 // Create a new empty route
 app.post('/route_optimizer/create', function(request, response, next) {
 	var name = request.body.name;
-	NetworkPlan.create_route(name, jsonHandler(response, next));
+	var area = request.body.area;
+	NetworkPlan.create_route(name, area, jsonHandler(response, next));
 });
 
 // Return data of an existing route
