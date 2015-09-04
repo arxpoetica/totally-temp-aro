@@ -10,6 +10,14 @@
   </head>
   <body>
 
+    <div ng-controller="financial_profile_controller">
+      <% include modal_financial_profile.html %>
+    </div>
+
+    <div ng-controller="customer_profile_controller">
+      <% include modal_customer_profile.html %>
+    </div>
+
     <div ng-controller="navigation_menu_controller">
 
       <div id="home_screen" ng-show="!route">
@@ -86,11 +94,15 @@
             <a class="navbar-brand" href="#">{{route.name}}</a>
 
             <p ng-show="route" class="navbar-text">
-              <span class="glyphicon glyphicon-usd"></span>
-              <span class="label label-danger">{{route.metadata.total_cost | currency}}</span>
-              <span class="label label-success">{{route.metadata.revenue | currency}}</span>
+              <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer">
+                <span class="glyphicon glyphicon-usd"></span>
+                <span class="label label-danger">{{route.metadata.total_cost | currency}}</span>
+                <span class="label label-success">{{route.metadata.revenue | currency}}</span>
+              </span>
               |
-              <span class="glyphicon glyphicon-scale"></span> {{ route.metadata.total_customers }} customers covered
+              <span data-toggle="modal" data-target="#modal-customer-profile" style="cursor:pointer">
+                <span class="glyphicon glyphicon-scale"></span> {{ route.metadata.total_customers }} customers covered
+              </span>
             </p>
 
           </div>
@@ -246,55 +258,6 @@
                   </div>
                 </div>
               </div>
-              <table class="table">
-                <tbody>
-                  <tr ng-repeat-start="cost in route.metadata.costs">
-                    <th colspan="3">{{cost.name}}</th>
-                    <td colspan="2" class="text-right">{{cost.value | currency}}</td>
-                  </tr>
-                  <tr ng-repeat-end ng-repeat="item in cost.itemized">
-                    <td colspan="3"><small> ↳ {{item.name}}</small></td>
-                    <td colspan="2" class="text-right"><small>{{item.value | currency}}</small></td>
-                  </tr>
-                  <tr>
-                    <th>Total cost</th>
-                    <td colspan="4" class="text-right" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</td>
-                  </tr>
-                  <tr>
-                    <th>Revenue</th>
-                    <td colspan="4" class="text-right">{{route.metadata.revenue | currency}}</td>
-                  </tr>
-                  <tr ng-show="route.metadata.customer_types && route.metadata.customer_types.length > 0">
-                    <td></td>
-                    <th class="text-right" colspan="2">Businesses</th>
-                    <th class="text-right" colspan="2">Households</th>
-                  </tr>
-                  <tr ng-repeat="customer_type in route.metadata.customer_types">
-                    <th>{{customer_type.name}}</th>
-                    <td class="text-right">
-                      {{customer_type.businesses}}
-                    </td>
-                    <td class="text-right">
-                      {{customer_type.businesses*100 / route.metadata.customers_businesses_total | number : 0}}%
-                    </td>
-                    <td class="text-right">
-                      {{customer_type.households}}
-                    </td>
-                    <td class="text-right">
-                      {{customer_type.households*100 / route.metadata.customers_households_total | number : 0}}%
-                    </td>
-                  </tr>
-                  <tr ng-show="route.metadata.npv && route.metadata.npv.length > 0">
-                    <th ng-attr-rowspan="{{route.metadata.npv.length + 1}}" style="vertical-align: middle">NPV</th>
-                    <th class="text-right" colspan="2">Year</th>
-                    <th class="text-right" colspan="2">Value</th>
-                  </tr>
-                  <tr ng-repeat="revenue in route.metadata.npv">
-                    <td class="text-right" colspan="2">{{revenue.year}}</td>
-                    <td class="text-right" colspan="2">{{revenue.value | currency}}</td>
-                  </tr>
-                </tbody>
-              </table>
             </form>
           </div>
         </div>
@@ -477,6 +440,9 @@
   <script src="javascripts/libs/bootstrap.min.js"></script>
   <script src="javascripts/libs/underscore.js"></script>
   <script src="javascripts/libs/sweetalert.min.js"></script>
+  <script src="javascripts/libs/Chart.min.js"></script>
+  <script src="javascripts/controllers/financial_profile_controller.js"></script>
+  <script src="javascripts/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
