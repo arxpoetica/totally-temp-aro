@@ -4,10 +4,19 @@ var compression = require('compression');
 var path = require('path');
 var bodyParser = require('body-parser');
 var ejs = require('ejs');
+var passport = require('passport');
 
 var port = process.env.PORT || 8000
 app.use(compression());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(require('cookie-session')({
+	name: 'session',
+	keys: ['key1', 'key2'],
+}));
+app.use(require('express-flash')());
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.static('public'));
 app.set('views', './views');
 app.engine('html', ejs.renderFile);
@@ -21,6 +30,42 @@ var Network = models.Network;
 var NetworkPlan = models.NetworkPlan;
 var Wirecenter = models.Wirecenter;
 var MarketSize = models.MarketSize;
+var User = models.User;
+
+var LocalStrategy = require('passport-local').Strategy;
+
+passport.use(new LocalStrategy({
+		usernameField: 'email',
+		passwordField: 'password'
+	},
+	function(email, password, callback) {
+		User.login(email, password, function(err, user) {
+			if (err && !require('node-errors').isCustomError(err)) return callback(err)
+			if (err) return callback(null, false, { message: err.message })
+			return callback(err, user);
+		});
+	}
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+	User.find_by_id(id, done);
+});
+
+app.get('/login', function(request, response, next) {
+	response.render('login.html', {
+		error: request.flash('error'),
+	});
+});
+
+app.post('/login',
+  passport.authenticate('local', { successRedirect: '/',
+                                   failureRedirect: '/login',
+                                   failureFlash: true })
+);
 
 /********
 * VIEWS *
@@ -230,10 +275,10 @@ app.all('*', function(request, response, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  console.error(err.stack);
-  res.status(500).json({
-  	error: err.message,
-  });
+	console.error(err.stack);
+	res.status(500).json({
+		error: err.message,
+	});
 });
 
 app.listen(port);

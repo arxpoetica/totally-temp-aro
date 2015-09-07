@@ -13,12 +13,16 @@
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
   "dependencies": {
+    "bcryptjs": "^2.2.1",
     "body-parser": "^1.13.2",
     "chai": "~3.0.0",
     "compression": "~1.5.0",
+    "cookie-session": "^1.2.0",
     "ejs": "^2.3.3",
     "express": "^4.13.1",
+    "express-flash": "0.0.2",
     "multiline": "^1.0.2",
+    "node-errors": "^0.2.0",
     "pg": "~4.4.0",
     "txain": "^0.4.0",
     "underscore": "^1.8.3"

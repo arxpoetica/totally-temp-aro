@@ -157,6 +157,7 @@ footer nav {
   top: 0;
   left: 0;
   z-index: 10;
+  background-color: white;
   background: url(https://images.unsplash.com/photo-1437422061949-f6efbde0a471?q=80&fm=jpg&s=e23055c9ba7686b8fe583fb8318a1f88);
   background-position: center;
   background-repeat: no-repeat;

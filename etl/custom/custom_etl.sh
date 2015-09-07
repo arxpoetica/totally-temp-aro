@@ -15,3 +15,6 @@ ${PSQL} -a -f $DIR/create_custom_route_targets.sql
 
 # Create custom.route_edges table
 ${PSQL} -a -f $DIR/create_custom_route_edges.sql
+
+# Create custom.users table
+${PSQL} -a -f $DIR/create_custom_users.sql
