@@ -8,6 +8,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.new_route_area_bounds;
   $scope.edit_route_name;
 
+  $scope.shared_route;
+
   $scope.route = null;
   $scope.routes = [];
 
@@ -180,6 +182,27 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     
       location.href = '/route_optimizer/' + $scope.route.id + '/' + params.name + '/export';
     }
+  };
+
+  $scope.show_share_route = function(route) {
+    $scope.shared_route = route;
+    $('#share-route').modal('show');
+    $('#share-route .modal-title').text('Share "'+route.name+'"');
+  };
+
+  $scope.share_route = function() {
+    $('#share-route').modal('hide');
+    var params = {
+      route: $scope.shared_route.id,
+      user: +$('#share-route-search').select2('val'), // will be removed in select2 4.1
+      message: $('#share-route textarea').val(),
+    }
+    $http.post('/permission/grant', params).success(function(response) {
+      swal({
+        title:'Network plan shared successfully',
+        type:'success'
+      });
+    });
   };
 
 }]);

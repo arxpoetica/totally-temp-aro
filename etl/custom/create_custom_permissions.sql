@@ -6,5 +6,6 @@ CREATE TABLE custom.permissions
 (
   route_id bigint NOT NULL REFERENCES custom.route ON DELETE CASCADE,
   user_id bigint NOT NULL REFERENCES custom.users ON DELETE CASCADE,
+  rol varchar NOT NULL,
   CONSTRAINT custom_permissions_pkey PRIMARY KEY (route_id, user_id)
 );

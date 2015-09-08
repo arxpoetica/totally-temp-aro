@@ -84,4 +84,11 @@ User.find_by_id = function(id, callback) {
   database.findOne(sql, [id], callback);
 };
 
+User.find_by_text = function(text, callback) {
+  console.log('text', text)
+  text = '%'+text+'%';
+  var sql = 'SELECT id, first_name, last_name, email FROM custom.users WHERE first_name LIKE $1 OR last_name LIKE $1 OR email LIKE $1';
+  database.query(sql, [text], callback);
+}
+
 module.exports = User;

@@ -262,6 +262,19 @@ api.get('/route_optimizer/:route_id/:file_name/export', function(request, respon
 	});
 });
 
+// Find users by text
+api.get('/user/find', function(request, response, next) {
+	var text = request.query.text;
+	models.User.find_by_text(text, jsonHandler(response, next));
+});
+
+// Share a plan
+api.post('/permission/grant', function(request, response, next) {
+	var route_id = request.body.route;
+	var user_id = request.body.user;
+	models.Permission.grant_access(route_id, user_id, 'guest', jsonHandler(response, next));
+});
+
 // Market size filters
 api.get('/market_size/filters', function(request, response, next) {
 	MarketSize.filters(jsonHandler(response, next));

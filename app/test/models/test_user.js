@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var User = require('../../models/user.js');
 
-describe.only('User', function() {
+describe('User', function() {
 
   var email = 'user_'
     + require('crypto').randomBytes(16).toString('hex')

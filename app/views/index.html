@@ -6,6 +6,8 @@
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/sweetalert.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/select2.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/select2-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
   </head>
   <body>
@@ -50,6 +52,8 @@
       <% include modal_new_route.html %>
 
       <% include modal_edit_route.html %>
+
+      <% include modal_share_route.html %>
 
       <div class="modal" id="export-route" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -441,6 +445,8 @@
   <script src="javascripts/libs/underscore.js"></script>
   <script src="javascripts/libs/sweetalert.min.js"></script>
   <script src="javascripts/libs/Chart.min.js"></script>
+  <script src="javascripts/libs/select2.min.js"></script>
+
   <script src="javascripts/controllers/financial_profile_controller.js"></script>
   <script src="javascripts/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/controllers/navigation_menu_controller.js"></script>
@@ -471,6 +477,34 @@
     });
 
     swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> });
+
+    $("#share-route-search").select2({
+      ajax: {
+        url: "/user/find",
+        dataType: 'json',
+        delay: 250,
+        data: function (text) {
+          return {
+            text: text,
+          };
+        },
+        processResults: function (data, page) {
+          // parse the results into the format expected by Select2.
+          // since we are using custom formatting functions we do not need to
+          // alter the remote JSON data
+          data.forEach(function(row) {
+            row.text = row.first_name+' '+row.last_name+' &lt;'+row.email+'&gt;';
+          })
+          return {
+            results: data,
+          };
+        },
+        cache: true
+      },
+      escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+      minimumInputLength: 1,
+    });
+
   </script>
   <script type="text/javascript">
     (function() {

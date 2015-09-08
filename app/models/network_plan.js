@@ -280,7 +280,7 @@ NetworkPlan.create_route = function(name, area, user, callback) {
     .then(function(row, callback) {
       id = row.id;
       if (!user) return callback();
-      models.Permission.grant_access(id, user.id, 'owner', callback);
+      Permission.grant_access(id, user.id, 'owner', callback);
     })
     .then(function(callback) {
       var sql = 'SELECT id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds, created_at, updated_at FROM custom.route WHERE id=$1;';
