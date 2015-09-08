@@ -141,7 +141,7 @@
                   <li><a href="#" ng-click="save_as()">Save as…</a></li>
                   <li role="separator" class="divider"></li>
                   <li><a href="#" ng-click="clear_route()">Clear plan</a></li>
-                  <li><a href="#" ng-click="delete_route(route)">Delete plan</a></li>
+                  <li><a href="#" ng-click="delete_route(route)" ng-show="route.owner_id === user_id">Delete plan</a></li>
                   <li role="separator" class="divider"></li>
                   <li><a href="#" ng-click="show_share_route(route)">Share…</a></li>
                   <li><a href="#" ng-click="export_kml_name()">Export KML…</a></li>
@@ -505,6 +505,8 @@
       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
       minimumInputLength: 1,
     });
+
+    var user_id = <%= user.id %>;
 
   </script>
   <script type="text/javascript">

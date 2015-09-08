@@ -237,7 +237,7 @@ NetworkPlan.find_all = function(user, callback) {
   var sql = multiline(function() {;/*
     SELECT
       route.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
-      users.first_name as owner_first_name, users.last_name as owner_last_name,
+      users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
       created_at, updated_at
     FROM
       custom.route

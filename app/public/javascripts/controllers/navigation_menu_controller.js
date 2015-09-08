@@ -13,6 +13,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.route = null;
   $scope.routes = [];
 
+  $scope.user_id = user_id;
+
   /************
   * FUNCTIONS *
   *************/

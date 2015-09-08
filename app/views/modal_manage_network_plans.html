@@ -39,10 +39,8 @@
               <td>{{route.created_at | date:'shortDate'}}</th>
               <td>{{route.owner_first_name}} {{route.owner_last_name}}</th>
               <td>
-                <div class="btn-group pull-right">
-                  <a class="btn btn-sm btn-primary" ng-click="show_share_route(route)"><span class="glyphicon glyphicon-share"></span></a>
-                  <a class="btn btn-sm btn-danger" ng-click="delete_route(route)"><span class="glyphicon glyphicon-trash"></span></a>
-                </div>
+                <a class="btn btn-sm btn-primary" ng-click="show_share_route(route)"><span class="glyphicon glyphicon-share"></span></a>
+                <a class="btn btn-sm btn-danger" ng-click="delete_route(route)" ng-show="route.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
               </td>
             </tr>
           </tbody>
