@@ -82,6 +82,6 @@ User.register = function(user, callback) {
 User.find_by_id = function(id, callback) {
   var sql = 'SELECT id, first_name, last_name, email FROM custom.users WHERE id=$1';
   database.findOne(sql, [id], callback);
-}
+};
 
 module.exports = User;

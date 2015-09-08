@@ -23,9 +23,12 @@
     "express-flash": "0.0.2",
     "multiline": "^1.0.2",
     "node-errors": "^0.2.0",
+    "passport": "^0.3.0",
+    "passport-local": "^1.0.0",
     "pg": "~4.4.0",
     "txain": "^0.4.0",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "yargs": "^3.24.0"
   },
   "devDependencies": {
     "angular": "^1.4.3",

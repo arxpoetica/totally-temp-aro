@@ -12,4 +12,4 @@ CREATE TABLE custom.users
   CONSTRAINT custom_users_pkey PRIMARY KEY (id)
 );
 
-CREATE INDEX custom_users_email ON custom.users(email);
+CREATE UNIQUE INDEX custom_users_email ON custom.users(email);

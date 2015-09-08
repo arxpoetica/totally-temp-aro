@@ -3,10 +3,14 @@ var User = require('../../models/user.js');
 
 describe.only('User', function() {
 
+  var email = 'user_'
+    + require('crypto').randomBytes(16).toString('hex')
+    + '@example.com';
+
   var user = {
     first_name: 'Alberto',
     last_name: 'Gimeno',
-    email: 'alberto@clevertech.biz',
+    email: email,
     password: 'foobar1234',
   };
 

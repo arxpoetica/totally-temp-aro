@@ -10,6 +10,7 @@ var txain = require('txain');
 var Location = require('./location');
 var fs = require('fs');
 var RouteOptimizer = require('./route_optimizer');
+var Permission = require('./permission');
 var _ = require('underscore');
 
 var NetworkPlan = {};
@@ -228,12 +229,27 @@ NetworkPlan.recalculate_and_find_route = function(route_id, callback) {
   .end(callback);
 };
 
-NetworkPlan.find_all = function(callback) {
-  var sql = 'SELECT id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds, created_at, updated_at FROM custom.route;';
-  database.query(sql, callback);
+NetworkPlan.find_all = function(user, callback) {
+  if (arguments.length === 1) {
+    callback = user;
+    user = null;
+  }
+  var sql = 'SELECT id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds, created_at, updated_at FROM custom.route';
+  var params = [];
+  if (user) {
+    sql += ' JOIN custom.permissions ON permissions.user_id=$1';
+    params.push(user.id);
+  }
+  database.query(sql, params, callback);
 };
 
-NetworkPlan.create_route = function(name, area, callback) {
+NetworkPlan.create_route = function(name, area, user, callback) {
+  if (arguments.length === 3) {
+    callback = user;
+    user = null;
+  }
+
+  var id
 
   validate(function(expect) {
     expect(area, 'area', 'object');
@@ -262,8 +278,13 @@ NetworkPlan.create_route = function(name, area, callback) {
       database.findOne(sql, params, callback);
     })
     .then(function(row, callback) {
+      id = row.id;
+      if (!user) return callback();
+      models.Permission.grant_access(id, user.id, 'owner', callback);
+    })
+    .then(function(callback) {
       var sql = 'SELECT id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds, created_at, updated_at FROM custom.route WHERE id=$1;';
-      database.findOne(sql, [row.id], callback);
+      database.findOne(sql, [id], callback);
     })
     .end(callback);
   }, callback);
