@@ -234,10 +234,19 @@ NetworkPlan.find_all = function(user, callback) {
     callback = user;
     user = null;
   }
-  var sql = 'SELECT id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds, created_at, updated_at FROM custom.route';
+  var sql = multiline(function() {;/*
+    SELECT
+      route.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
+      users.first_name as owner_first_name, users.last_name as owner_last_name,
+      created_at, updated_at
+    FROM
+      custom.route
+    LEFT JOIN custom.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
+    LEFT JOIN custom.users ON users.id = permissions.user_id
+  */});
   var params = [];
   if (user) {
-    sql += ' JOIN custom.permissions ON permissions.user_id=$1';
+    sql += ' WHERE route.id IN (SELECT route_id FROM custom.permissions WHERE user_id=$1)';
     params.push(user.id);
   }
   database.query(sql, params, callback);

@@ -27,6 +27,7 @@
                 <a href="#" ng-click="sort_by('updated_at', true)">↓</a>
                 <a href="#" ng-click="sort_by('updated_at', false)">↑</a>
               </th>
+              <th>Owner</th>
               <th>
               </th>
             </tr>
@@ -36,6 +37,7 @@
               <td>{{route.name}}</th>
               <td>{{route.updated_at | date:'shortDate'}}</th>
               <td>{{route.created_at | date:'shortDate'}}</th>
+              <td>{{route.owner_first_name}} {{route.owner_last_name}}</th>
               <td>
                 <div class="btn-group pull-right">
                   <a class="btn btn-sm btn-primary" ng-click="show_share_route(route)"><span class="glyphicon glyphicon-share"></span></a>

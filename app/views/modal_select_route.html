@@ -27,6 +27,7 @@
                 <a href="#" ng-click="sort_by('updated_at', true)">↓</a>
                 <a href="#" ng-click="sort_by('updated_at', false)">↑</a>
               </th>
+              <th>Owner</th>
             </tr>
           </thead>
           <tbody>
@@ -34,6 +35,7 @@
               <td><a href="#" ng-click="select_route(route)">{{route.name}}</a></th>
               <td>{{route.updated_at | date:'shortDate'}}</th>
               <td>{{route.created_at | date:'shortDate'}}</th>
+              <td>{{route.owner_first_name}} {{route.owner_last_name}}</th>
             </tr>
           </tbody>
         </table>
