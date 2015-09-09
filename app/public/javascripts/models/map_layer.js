@@ -274,6 +274,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 	}
 
 	MapLayer.prototype.show = function() {
+		if (this.visible) return;
 		this.load_data();
 		this.visible = true;
 		this.configure_visibility();
@@ -281,6 +282,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 	}
 
 	MapLayer.prototype.hide = function() {
+		if (!this.visible) return;
 		this.visible = false;
 		this.configure_visibility();
 		$rootScope.$broadcast('map_layer_changed_visibility', this);

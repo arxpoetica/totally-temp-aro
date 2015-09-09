@@ -1,5 +1,5 @@
 // Navigation Menu Controller
-app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'selection', function($scope, $rootScope, $http, map_tools, selection) {
+app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'selection', '$location', function($scope, $rootScope, $http, map_tools, selection, $location) {
   // Controller instance variables
   $scope.selection = selection;
   $scope.new_route_name = 'Untitled plan';
@@ -67,6 +67,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     if (centroid) {
       map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] });
     }
+    $location.path(route ? '/plan/'+route.id : '/');
   };
 
   $scope.delete_route = function(route) {
@@ -97,6 +98,18 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       callback && callback();
     });
   };
+
+  // load plan depending on the URL
+  var path = $location.path();
+  if (path.indexOf('/plan/') === 0) {
+    var plan_id = +path.substring('/plan/'.length);
+    $scope.load_routes(function() {
+      var route = _.findWhere($scope.routes, { id: plan_id });
+      if (route) {
+        $scope.select_route(route);
+      }
+    });
+  }
 
   $scope.show_routes = function() {
     $scope.load_routes(function() {

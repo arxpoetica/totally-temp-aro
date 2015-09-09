@@ -4,7 +4,19 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.map_tools = map_tools;
   $scope.node_type;
 
-  // TODO: fetch this information from the server
+  $scope.show_network_nodes = true;
+
+  $scope.toggle_network_nodes = function() {
+    var layer = $rootScope.feature_layers.network_nodes;
+    $scope.show_network_nodes ? layer.show() : layer.hide();
+  };
+
+  $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
+    if (tool === 'network_nodes') {
+      $scope.toggle_network_nodes();
+    }
+  });
+
   var node_types = $scope.node_types = [];
 
   $http.get('/network/nodes').success(function(response) {

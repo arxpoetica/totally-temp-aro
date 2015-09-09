@@ -129,7 +129,8 @@ api.get('/census_blocks/:statefp/:countyfp', function(request, response, next) {
 
 // Locations
 api.get('/locations', function(request, response, next) {
-	Location.find_all(jsonHandler(response, next));
+	var type = request.query.type;
+	Location.find_all(type, jsonHandler(response, next));
 });
 
 api.get('/locations/:location_id', function(request, response, next) {

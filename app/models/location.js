@@ -12,8 +12,18 @@ var Location = {};
 // Find all Locations
 //
 // 1. callback: function to return a GeoJSON object
-Location.find_all = function(callback) {
-	var sql = 'SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations';
+Location.find_all = function(type, callback) {
+	if (arguments.length === 1) {
+		callback = arguments[0];
+		type = null;
+	}
+	var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
+	if (type === 'businesses') {
+		sql += ' JOIN businesses ON businesses.location_id = locations.id';
+	} else if (type === 'households') {
+		sql += ' JOIN households ON households.location_id = locations.id';
+	}
+	sql += ' GROUP BY locations.id';
 
 	txain(function(callback) {
 		database.query(sql, callback);

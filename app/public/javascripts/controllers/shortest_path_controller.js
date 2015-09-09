@@ -76,6 +76,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
 
     var route = new MapLayer({
       short_name: 'RT',
+      name: 'Route',
       data: data.feature_collection,
       style_options: {
         normal: {
