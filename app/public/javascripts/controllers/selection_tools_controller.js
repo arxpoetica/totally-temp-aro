@@ -36,13 +36,6 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: null,
     drawingControl: false,
-    drawingControlOptions: {
-      position: google.maps.ControlPosition.TOP_CENTER,
-      drawingModes: [
-        google.maps.drawing.OverlayType.POLYGON,
-        google.maps.drawing.OverlayType.RECTANGLE,
-      ]
-    },
   });
 
   $scope.deselect_mode = false;
