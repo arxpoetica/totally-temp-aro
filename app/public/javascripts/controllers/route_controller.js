@@ -1,13 +1,10 @@
-// Shortest Path Controller
-app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', function($scope, $rootScope, $http, selection, MapLayer, map_tools) {
+// Route Controller
+app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', function($scope, $rootScope, $http, selection, MapLayer, map_tools) {
   // Controller instance variables
   $scope.map_tools = map_tools;
   $scope.selection = selection;
 
   $scope.route = null;
-
-  $scope.always_shows_sources = true;
-  $scope.always_shows_targets = true;
 
   /************
   * FUNCTIONS *
@@ -23,9 +20,6 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
       delete $rootScope.area_layers['route'];
       return;
     }
-
-    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
-    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
 
     $http.get('/route_optimizer/'+route.id).success(function(response) {
       redraw_route(response);
@@ -110,13 +104,5 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
       });
     }
   });
-
-  $scope.toggle_always_show_sources = function() {
-    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
-  };
-
-  $scope.toggle_always_show_targets = function() {
-    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
-  };
 
 }]);

@@ -17,6 +17,17 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
   });
 
+  $scope.selected_tool = null;
+
+  $scope.select_tool = function(tool) {
+    if ($scope.selected_tool === tool) {
+      $scope.selected_tool = null;
+    } else {
+      $scope.selected_tool = tool;
+    }
+    map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' });
+  };
+
   var node_types = $scope.node_types = [];
 
   $http.get('/network/nodes').success(function(response) {
@@ -112,9 +123,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   });
 
   $rootScope.$on('map_click', function(e, gm_event) {
-    if (!map_tools.is_visible('equipment_nodes') || !$scope.route) return;
+    if (!map_tools.is_visible('network_nodes') || !$scope.route || !$scope.selected_tool) return;
 
-    var type = $scope.node_type.name;
+    var type = $scope.selected_tool;
     var coordinates = gm_event.latLng;
     var feature = {
       type: 'Feature',

@@ -143,10 +143,14 @@ api.get('/locations/businesses/:location_id', function(request, response, next) 
 	Location.show_businesses(location_id, jsonHandler(response, next));
 });
 
-api.post('/locations/create/', function(request, response, next) {
+api.post('/locations/create', function(request, response, next) {
 	var location_id = request.params.location_id;
-	var data = request.body
+	var data = request.body;
 	Location.create_location(data, jsonHandler(response, next));
+});
+
+api.get('/industries', function(request, response, next) {
+	Location.find_industries(jsonHandler(response, next));
 });
 
 api.post('/locations/:location_id/update', function(request, response, next) {

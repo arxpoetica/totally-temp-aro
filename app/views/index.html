@@ -203,45 +203,7 @@
 
     </div>
 
-    <div ng-controller="shortest_path_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('route')" class="map-tool panel panel-primary" id="shortest_path_controller">
-        <div class="panel-heading">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('route')" ng-click="map_tools.collapse('route')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('route')" ng-click="map_tools.expand('route')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
-          </a>
-          Distance Based Route Plan
-        </div>
-        <div class="panel-body" ng-show="map_tools.is_expanded('route')">
-          <div ng-show="!route" class="text-center">
-            Select a plan to start using the distance based route plan tool
-          </div>
-          <div ng-show="route">
-            <form class="form-horizontal">
-              <div class="form-group form-group-sm" style="margin-bottom: 0">
-                <div class="col-sm-12">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" ng-model="always_shows_sources" ng-change="toggle_always_show_sources()"> Show selected sources
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group form-group-sm">
-                <div class="col-sm-12">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" ng-model="always_shows_targets" ng-change="toggle_always_show_targets()"> Show selected targets
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+    <div ng-controller="route_controller">
     </div>
 
     <div ng-controller="boundaries_controller" class="map-tool-wrapper">
@@ -270,46 +232,91 @@
       </div>
     </div>
 
-    <div ng-controller="locations_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('locations')" class="map-tool panel panel-primary" id="locations_controller">
-        <div class="panel-heading">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
-          </a>
-          Locations
+    <div ng-controller="locations_controller">
+
+      <div class="modal" id="create-location" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Create location</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
+                  <label class="col-sm-4 control-label">Business name</label>
+                  <div class="col-sm-8">
+                    <input class="form-control" ng-model="new_location_data.business_name">
+                  </div>
+                </div>
+                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
+                  <label class="col-sm-4 control-label">Number of employees</label>
+                  <div class="col-sm-8">
+                    <input class="form-control" ng-model="new_location_data.number_of_employees">
+                  </div>
+                </div>
+                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
+                  <label class="col-sm-4 control-label">Business industry</label>
+                  <div class="col-sm-8">
+                    <select class="form-control" ng-model="new_location_data.business_industry" ng-options="industry.description for industry in industries"></select>
+                  </div>
+                </div>
+                <div class="form-group" ng-show="selected_tool === 'residential' || selected_tool === 'combo'">
+                  <label class="col-sm-4 control-label">Number of households</label>
+                  <div class="col-sm-8">
+                    <input class="form-control" ng-model="new_location_data.number_of_households">
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" ng-click="create_location()">Create location</button>
+            </div>
+          </div>
         </div>
-        <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" ng-model="show_businesses" ng-change="change_locations_layer()" checked> Commercial
-            </label>
+      </div>
+
+      <div class="map-tool-wrapper">
+        <div ng-show="map_tools.is_visible('locations')" class="map-tool panel panel-primary" id="locations_controller">
+          <div class="panel-heading">
+            <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
+              <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+            </a>
+            <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
+              <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+            </a>
+            Locations
           </div>
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" ng-model="show_households" ng-change="change_locations_layer()" checked> Residential
-            </label>
-          </div>
-          <hr>
-          <div class="row">
-            <div class="col-sm-6">
-              <a class="btn btn-block btn-default" ng-class="{'btn-success active': selected_tool === 'commercial'}" ng-click="select_tool('commercial')">Commercial</a>
+          <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
+            <h2>View</h2>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="show_businesses" ng-change="change_locations_layer()"> Commercial
+              </label>
             </div>
-            <div class="col-sm-6">
-              <a class="btn btn-block btn-default" ng-class="{'btn-success active': selected_tool === 'residential'}" ng-click="select_tool('residential')">Residential</a>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="show_households" ng-change="change_locations_layer()"> Residential
+              </label>
             </div>
-          </div>
-          <div class="row">
-            <p></p>
-          </div>
-          <div class="row">
-            <div class="col-sm-6">
-              <a class="btn btn-block btn-default" ng-class="{'btn-success active': selected_tool === 'apartments'}" ng-click="select_tool('apartments')">Apartments</a>
+            <hr>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="always_shows_sources" ng-change="toggle_always_show_sources()"> Always show selected sources
+              </label>
             </div>
-            <div class="col-sm-6">
-              <a class="btn btn-block btn-default" ng-class="{'btn-success active': selected_tool === 'combo'}" ng-click="select_tool('combo')">Combo</a>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="always_shows_targets" ng-change="toggle_always_show_targets()"> Always show selected targets
+              </label>
+            </div>
+            <hr>
+            <h2>Build</h2>
+            <div class="row">
+              <div class="col-sm-6" ng-repeat="tool in available_tools">
+                <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === tool.key}" ng-click="select_tool(tool.key)">{{tool.name}}</a>
+                <br>
+              </div>
             </div>
           </div>
         </div>
@@ -400,44 +407,37 @@
     </div>
 
     <div ng-controller="equipment_nodes_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('equipment_nodes')" class="map-tool panel panel-primary" id="equipment_nodes_controller">
+      <div ng-show="map_tools.is_visible('network_nodes')" class="map-tool panel panel-primary" id="equipment_nodes_controller">
         <div class="panel-heading">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('equipment_nodes')" ng-click="map_tools.collapse('equipment_nodes')">
+          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_nodes')" ng-click="map_tools.collapse('network_nodes')">
             <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
           </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('equipment_nodes')" ng-click="map_tools.expand('equipment_nodes')">
+          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_nodes')" ng-click="map_tools.expand('network_nodes')">
             <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
           </a>
-          Add equipment nodes
+          Network nodes
         </div>
         <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('equipment_nodes')">
+          <div class="panel-body" ng-show="map_tools.is_expanded('network_nodes')">
             <div ng-show="route">
-              <form class="form-horizontal">
-                <div class="form-group form-group-sm">
-                  <div class="col-sm-9 col-sm-offset-3">
-                    <input type="checkbox" ng-model="show_network_nodes" ng-change="toggle_network_nodes()" checked> Show network nodes
-                  </div>
+              <h2>View</h2>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" ng-model="show_network_nodes" ng-change="toggle_network_nodes()"> Show network nodes
+                </label>
+              </div>
+
+              <hr>
+              <h2>Build</h2>
+              <div class="row">
+                <p></p>
+              </div>
+              <div class="row">
+                <div class="col-sm-12" ng-repeat="node in node_types">
+                  <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === node.name}" ng-click="select_tool(node.name)">{{node.description}}</a>
+                  <br>
                 </div>
-                <hr>
-                <div class="form-group form-group-sm" style="margin-bottom: 0">
-                  <label class="col-sm-3 control-label">Node type</label>
-                  <div class="col-sm-9">
-                    <select class="form-control" ng-model="node_type" ng-options="node.description for node in node_types">
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group form-group-sm">
-                  <div class="col-sm-offset-3 col-sm-9">
-                    <button class="btn btn-sm btn-danger" ng-click="clear_nodes()" type="button">Clear</button>
-                    <% if (env_is_test) { %>
-                      <a href="javascript:void(0)" ng-click="place_random_equipment()">.</a>
-                      <a href="javascript:void(0)" ng-click="show_number_of_features()">.</a>
-                      <span>{{number_of_features}}</span>
-                    <% } %>
-                  </div>
-                </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
@@ -503,7 +503,7 @@
   <script src="javascripts/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/controllers/map_layers_controller.js"></script>
   <script src="javascripts/controllers/map_tools_controller.js"></script>
-  <script src="javascripts/controllers/shortest_path_controller.js"></script>
+  <script src="javascripts/controllers/route_controller.js"></script>
   <script src="javascripts/controllers/boundaries_controller.js"></script>
   <script src="javascripts/controllers/locations_controller.js"></script>
   <script src="javascripts/controllers/market_size_controller.js"></script>
@@ -559,7 +559,6 @@
     });
 
     var user_id = <%= user.id %>;
-
   </script>
   <script type="text/javascript">
     (function() {
