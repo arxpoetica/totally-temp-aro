@@ -127,7 +127,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
 
     overlay.marker = new google.maps.Marker({
-      title: 'Market size',
+      title: boundary.name,
       map: map,
     });
 

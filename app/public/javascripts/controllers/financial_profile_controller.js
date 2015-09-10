@@ -5,6 +5,8 @@ app.controller('financial_profile_controller', ['$scope', '$rootScope', function
     $scope.route = route;
   });
 
+  var chart = null;
+
   $('#modal-financial-profile').on('shown.bs.modal', function() {
     var dataset = {
       label: "NPV",
@@ -27,13 +29,13 @@ app.controller('financial_profile_controller', ['$scope', '$rootScope', function
       dataset.data.push(revenue.value);
     });
 
+    chart && chart.destroy();
     var options = {
       scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
       tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
     };
     var ctx = document.getElementById('financial-profile-chart').getContext('2d');
-    var myLineChart = new Chart(ctx).Line(data, options);
+    chart = new Chart(ctx).Line(data, options);
   });
-
 
 }]);

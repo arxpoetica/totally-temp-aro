@@ -5,6 +5,8 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', function(
     $scope.route = route;
   });
 
+  var chart = null;
+
   $('#modal-customer-profile').on('shown.bs.modal', function() {
     var colors = {
       'Existing Copper': {
@@ -29,9 +31,10 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', function(
       }
     });
 
+    chart && chart.destroy();
     var options = {};
     var ctx = document.getElementById('customer-profile-chart').getContext('2d');
-    var myPieChart = new Chart(ctx).Pie(data, options);
+    chart = new Chart(ctx).Pie(data, options);
   });
 
 }]);
