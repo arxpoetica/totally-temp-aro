@@ -108,7 +108,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $rootScope.$on('route_selected', function(e, route) {
     if (route) {
-      $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
+      $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
       $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
     }
   });

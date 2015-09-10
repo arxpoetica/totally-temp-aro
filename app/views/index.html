@@ -426,10 +426,15 @@
           <div class="panel-body" ng-show="map_tools.is_expanded('network_nodes')">
             <div ng-show="route">
               <h2>View</h2>
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" ng-model="show_network_nodes" ng-change="toggle_network_nodes()"> Show network nodes
-                </label>
+              <div ng-repeat="(key, layer) in equipment_layers">
+                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
+                  <label>
+                    <input type="checkbox" ng-click="layer.toggle_visibility()" ng-checked="layer.visible"> {{layer.name}}
+                  </label>
+                </div>
+                <% if (env_is_test) { %>
+                  <a href="javascript:void(0)" ng-click="layer.select_random_area()">.</a>
+                <% } %>
               </div>
 
               <hr>

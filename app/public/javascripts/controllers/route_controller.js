@@ -17,7 +17,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
         $scope.route_layer.remove();
       }
       $scope.route_layer = null;
-      delete $rootScope.area_layers['route'];
+      delete $rootScope.equipment_layers['route'];
       return;
     }
 
@@ -25,7 +25,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       redraw_route(response);
       selection.set_enabled(true);
       if ((response.metadata.sources || []).length > 0) {
-        $rootScope.feature_layers.network_nodes.show();
+        $rootScope.equipment_layers.network_nodes.show();
       }
     });
   });
@@ -85,7 +85,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     }
     $scope.route_layer = route;
 
-    $rootScope.area_layers['route'] = route;
+    $rootScope.equipment_layers['route'] = route;
   }
 
   $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {

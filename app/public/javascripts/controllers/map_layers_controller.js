@@ -8,9 +8,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
   var area_layers = {};
   var feature_layers = {};
+  var equipment_layers = {};
 
   $rootScope.area_layers = area_layers;
   $rootScope.feature_layers = feature_layers;
+  $rootScope.equipment_layers = equipment_layers;
 
   // one infowindow for all layers
   var infoWindow = new google.maps.InfoWindow();
@@ -35,23 +37,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       }
     },
     heatmap: true,
-  });
-
-  feature_layers['network_nodes'] = new MapLayer({
-    type: 'network_nodes',
-    name: 'Network Nodes',
-    short_name: 'NN',
-    api_endpoint: '/network/nodes/central_office',
-    style_options: {
-      normal: {
-        icon: '/images/map_icons/central_office.png',
-        visible: true,
-      },
-      selected: {
-        icon: '/images/map_icons/central_office_selected.png',
-        visible: true,
-      }
-    },
   });
 
   $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
@@ -168,7 +153,24 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     });
   });
 
-  area_layers['fiber_plant'] = new MapLayer({
+  equipment_layers['network_nodes'] = new MapLayer({
+    type: 'network_nodes',
+    name: 'Network Nodes',
+    short_name: 'NN',
+    api_endpoint: '/network/nodes/central_office',
+    style_options: {
+      normal: {
+        icon: '/images/map_icons/central_office.png',
+        visible: true,
+      },
+      selected: {
+        icon: '/images/map_icons/central_office_selected.png',
+        visible: true,
+      }
+    },
+  });
+
+  equipment_layers['fiber_plant'] = new MapLayer({
     name: 'Fiber',
     short_name: 'F',
     api_endpoint: '/network/fiber_plant/VERIZON',
@@ -181,7 +183,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   });
 
   $rootScope.$on('route_selected', function(e, route) {
-    var layer = feature_layers.network_nodes;
+    var layer = equipment_layers.network_nodes;
     var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
     layer.set_api_endpoint(api_endpoint);
   });
