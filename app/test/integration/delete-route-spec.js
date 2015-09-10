@@ -20,8 +20,8 @@ describe('Delete a route', function() {
   });
 
   it('should delete the named route', function() {
-    element(by.css('#network_plan_menu > a')).click();
-    element(by.css('li a[ng-click="delete_route(route)"]')).click();
+    element(by.css('#network_plan_menu a.dropdown-toggle')).click();
+    element(by.css('#network_plan_menu a[ng-click="delete_route(route)"]')).click();
     browser.confirmAlert();
   });
 });

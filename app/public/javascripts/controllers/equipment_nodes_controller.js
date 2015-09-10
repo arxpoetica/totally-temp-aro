@@ -36,12 +36,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   var changes = empty_changes();
-  $scope.route = null;
 
   /************
   * FUNCTIONS *
   *************/
 
+  $scope.route = null;
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
   });

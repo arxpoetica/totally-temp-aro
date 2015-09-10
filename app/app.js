@@ -82,6 +82,15 @@ app.get('/logout', function(request, response, next) {
 *******/
 
 api.use(function(request, response, next) {
+	if (process.env.NODE_ENV === 'test') {
+		request.user = {
+			id: 1,
+			first_name: 'test',
+			last_name: 'test',
+			email: 'test@example.com',
+		};
+		return next();
+	}
 	if (!request.user) {
 		if (request.xhr) {
 			response.status(403);

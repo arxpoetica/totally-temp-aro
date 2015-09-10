@@ -28,12 +28,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $scope.industries = [];
 
+  $scope.feature_layers = $rootScope.feature_layers;
+
   $http.get('/industries')
     .success(function(response) {
       $scope.industries = response;
       $('#create-location select').select2();
     });
 
+  $scope.route = null;
+  $rootScope.$on('route_selected', function(e, route) {
+    $scope.route = route;
+  });
 
   $scope.change_locations_layer = function() {
     var layer = $rootScope.feature_layers.locations;

@@ -58,7 +58,7 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
     {
       id: 'network_nodes',
       name: 'Network nodes',
-      short_name: 'NN',
+      short_name: 'E',
     },
   ];
 
