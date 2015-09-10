@@ -1,5 +1,5 @@
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', function($scope, $rootScope, $http, selection, map_tools) {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_utils', function($scope, $rootScope, $http, selection, map_tools, map_utils) {
 
   $scope.map_tools = map_tools;
   $scope.area_layers = $rootScope.area_layers;
@@ -37,8 +37,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
             paths.push(new google.maps.LatLng(p[1], p[0]))
           })
           var overlay = new google.maps.Polygon({ 
-              paths: paths, 
-              editable: true,
+            paths: paths, 
+            editable: true,
+            strokeWeight: 2,
           });
           boundary.overlay = overlay;
           make_boundary_editable(boundary);
@@ -86,12 +87,15 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
   });
 
-  function to_geo_json(overlay) {
+  function to_geo_json(overlay, closed) {
     var coordinates = [];
     var geo = { type: 'MultiPolygon', coordinates: [[ coordinates ]] };
     overlay.getPath().getArray().forEach(function(point) {
       coordinates.push([point.lng(), point.lat()]);
     });
+    if (closed) {
+      coordinates.push(coordinates[0]);
+    }
     return geo;
   }
 
@@ -113,6 +117,64 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     ['set_at', 'insert_at', 'remove_at'].forEach(function(event_name) {
       overlay.getPath().addListener(event_name, edit_boundary);
     });
+
+    overlay.marker = new google.maps.Marker({
+      title: 'Market size',
+      map: map,
+    });
+
+    overlay.marker.addListener('click', function() {
+      $('#market-size').modal('show');
+      $rootScope.$broadcast('boundary_selected', boundary, to_geo_json(overlay, true));
+    });
+
+    overlay.marker.addListener('mouseover', function() {
+      update_counter(1)
+    });
+
+    overlay.marker.addListener('mouseout', function() {
+      update_counter(-1)
+    });
+
+    var count = 0;
+    var timer = null;
+
+    function update_counter(i) {
+      count += i;
+      timer && clearTimeout(timer);
+      if (count > 0) {
+        !overlay.marker.getMap() && overlay.marker.setMap(map);
+        overlay.setOptions({
+          strokeWeight: 4,
+        });
+      } else {
+        timer = setTimeout(function() {
+          overlay.marker.setMap(null);
+          overlay.setOptions({
+            strokeWeight: 2,
+          });
+        }, 250);
+      }
+    }
+
+    overlay.addListener('mouseover', function() {
+      overlay.setOptions({
+        strokeWeight: 4,
+      });
+
+      var bounds = new google.maps.LatLngBounds();
+      overlay.getPath().getArray().forEach(function(point) {
+        bounds.extend(point);
+      });
+
+      overlay.marker.setPosition(bounds.getCenter());
+      update_counter(1);
+    });
+
+    overlay.addListener('mouseout', function() {
+      update_counter(-1);
+    });
+    
   }
 
 }]);

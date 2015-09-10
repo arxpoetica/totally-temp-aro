@@ -56,11 +56,6 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
       short_name: 'B',
     },
     {
-      id: 'market_size',
-      name: 'Market Size',
-      short_name: 'MS',
-    },
-    {
       id: 'network_nodes',
       name: 'Network nodes',
       short_name: 'NN',

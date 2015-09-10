@@ -91,25 +91,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.number_of_features = $rootScope.feature_layers.network_nodes.number_of_features();
   };
 
-  function update_map_cursor() {
-    var layer = $rootScope.feature_layers.network_nodes;
-    var editing = layer.visible && $scope.route && map_tools.is_visible('equipment_nodes');
-    map.setOptions({ draggableCursor: editing ? 'crosshair' : null });
-  }
-
-  $rootScope.$on('map_layer_changed_visibility', function(e, name) {
-    update_map_cursor();
-  });
-
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
-    update_map_cursor();
-  });
-
-  $rootScope.$on('map_tool_changed_visibility', function(e, name) {
-    if (name === 'equipment_nodes') {
-      update_map_cursor();
-    }
   });
 
   $rootScope.$on('map_layer_dragged_feature', function(e, gm_event, feature) {
@@ -153,7 +136,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
     if (map_layer.type !== 'network_nodes'
-      || !map_tools.is_visible('equipment_nodes')
+      || !map_tools.is_visible('network_nodes')
       || !feature.getProperty('unselectable')) {
       return;
     }
