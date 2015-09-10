@@ -15,6 +15,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.always_show_selected = false;
 		this.set_style('normal');
 		this.single_selection = options.single_selection;
+		this.highlighteable = !!options.highlighteable;
 
 		var collection;
 		if (this.type === 'locations') {

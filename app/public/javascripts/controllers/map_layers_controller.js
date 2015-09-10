@@ -16,40 +16,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   var infoWindow = new google.maps.InfoWindow();
   $rootScope.infoWindow = infoWindow;
 
-  /**************
-  * WIRECENTERS *
-  ***************/
-  // google.maps.event.addDomListener(window, 'load', callback) does not work on integration tests for some reason
-  area_layers['wirecenter'] = new MapLayer({
-    short_name: 'WC',
-    name: 'Wirecenter',
-    style_options: {
-      normal: {
-        fillColor: 'green',
-        strokeColor: 'green',
-        strokeWeight: 2,
-      }
-    },
-  });
-
-  $(document).ready(function() { // we need to wait until de map is ready
-    $http.get('/wirecenters/NYCMNY79').success(function(response) {
-      var wirecenters = response;
-      var wirecenter = wirecenters[0];
-      var centroid = wirecenter.centroid;
-      map.setCenter({
-        lat: centroid.coordinates[1],
-        lng: centroid.coordinates[0],
-      });
-      map.setZoom(14);
-      area_layers['wirecenter'].load_data({
-        'type': 'Feature',
-        'geometry': wirecenter.geom,
-      });
-      area_layers['wirecenter'].hide(); // hidden by default
-    });
-  });
-
   /*****************
   * FEATURE LAYERS *
   ******************/
@@ -106,16 +72,41 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   /**************
   * AREA LAYERS *
   ***************/
-  area_layers['county_subdivisions_layer'] = new MapLayer({
-    short_name: 'CS',
-    name: 'County Subdivisions',
-    api_endpoint: '/county_subdivisions/36',
+  area_layers['wirecenter'] = new MapLayer({
+    short_name: 'WC',
+    name: 'Wirecenter',
+    api_endpoint: '/wirecenters/NYCMNY79',
+    highlighteable: true,
     style_options: {
       normal: {
         fillColor: 'green',
         strokeColor: 'green',
         strokeWeight: 2,
-      }
+      },
+      highlight: {
+        fillColor: 'green',
+        strokeColor: 'green',
+        strokeWeight: 4,
+      },
+    },
+  });
+
+  area_layers['county_subdivisions_layer'] = new MapLayer({
+    short_name: 'CS',
+    name: 'County Subdivisions',
+    api_endpoint: '/county_subdivisions/36',
+    highlighteable: true,
+    style_options: {
+      normal: {
+        fillColor: 'green',
+        strokeColor: 'green',
+        strokeWeight: 2,
+      },
+      highlight: {
+        fillColor: 'green',
+        strokeColor: 'green',
+        strokeWeight: 2,
+      },
     },
   });
 
@@ -124,6 +115,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     short_name: 'CB',
     name: 'Census Blocks',
     api_endpoint: '/census_blocks/36/061',
+    highlighteable: true,
     single_selection: true,
     style_options: {
       normal: {
@@ -134,12 +126,12 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       highlight: {
         fillColor: 'blue',
         strokeColor: 'blue',
-        strokeWeight: 5,
+        strokeWeight: 4,
       },
       selected: {
         fillColor: 'blue',
         strokeColor: 'blue',
-        strokeWeight: 5,
+        strokeWeight: 4,
       }
     },
   });

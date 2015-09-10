@@ -21,16 +21,10 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     $scope.filters = response;
   });
 
-  $rootScope.$on('boundary_selected', function(e, boundary, json) {
+  $rootScope.$on('boundary_selected', function(e, json) {
+    $('#market-size').modal('show');
     geo_json = json;
     $scope.calculate_market_size();
-  });
-
-  $rootScope.$on('map_layer_clicked_feature', function(e, event, layer) {
-    event.feature.toGeoJson(function(obj) {
-      geo_json = JSON.stringify(obj.geometry);
-      console.log('geo_json', geo_json)
-    });
   });
 
   var canceller = null;
@@ -50,7 +44,6 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     };
     $scope.total = [];
     $scope.loading = true;
-    console.log('args', args)
     $http.get('/market_size/calculate', args).success(function(response) {
       $scope.total = response;
       $scope.loading = false;

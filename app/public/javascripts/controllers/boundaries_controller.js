@@ -99,6 +99,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     return geo;
   }
 
+  $rootScope.$on('map_layer_clicked_feature', function(e, event, layer) {
+    if (event.feature.getGeometry().getType() === 'MultiPolygon') {
+      event.feature.toGeoJson(function(obj) {
+        $rootScope.$broadcast('boundary_selected', obj.geometry);
+      });
+    }
+  });
+
   function make_boundary_editable(boundary) {
     var overlay = boundary.overlay;
 
@@ -125,15 +133,15 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
 
     overlay.marker.addListener('click', function() {
       $('#market-size').modal('show');
-      $rootScope.$broadcast('boundary_selected', boundary, to_geo_json(overlay, true));
+      $rootScope.$broadcast('boundary_selected', to_geo_json(overlay, true));
     });
 
     overlay.marker.addListener('mouseover', function() {
-      update_counter(1)
+      update_counter(1);
     });
 
     overlay.marker.addListener('mouseout', function() {
-      update_counter(-1)
+      update_counter(-1);
     });
 
     var count = 0;

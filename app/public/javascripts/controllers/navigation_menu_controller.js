@@ -66,6 +66,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     var centroid = route && route.area_centroid;
     if (centroid) {
       map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] });
+      map.setZoom(14);
     }
     $location.path(route ? '/plan/'+route.id : '/');
   };
