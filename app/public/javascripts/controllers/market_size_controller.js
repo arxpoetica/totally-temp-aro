@@ -44,6 +44,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       customErrorHandling: true,
     };
     $scope.loading = true;
+    chart && chart.destroy();
     $http.get('/market_size/calculate', args).success(function(response) {
       $scope.loading = false;
       $scope.values = response;
@@ -77,7 +78,6 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       dataset.data.push(row.total);
     });
 
-    chart && chart.destroy();
     var options = {
       scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
       tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",

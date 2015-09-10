@@ -8,7 +8,7 @@ CREATE TABLE custom.route
   name varchar NOT NULL,
   area_name varchar,
   area_centroid geometry,
-  area_bounds geom,
+  area_bounds geometry,
   created_at timestamp NOT NULL,
   updated_at timestamp NOT NULL,
   CONSTRAINT custom_route_pkey PRIMARY KEY (id)

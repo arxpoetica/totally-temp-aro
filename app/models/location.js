@@ -212,6 +212,8 @@ Location.create_location = function(values, callback) {
 				insert_household(callback);
 			})
 			.end(callback);
+		} else {
+			callback();
 		}
 	})
 	.then(function(callback) {
@@ -230,7 +232,7 @@ Location.create_location = function(values, callback) {
 	.end(callback);
 
 	function insert_business(callback) {
-		var sql = 'INSERT INTO businesses (id, location_id, industry_id, name, address, number_of_employees) VALUES ((select max(id)+1 from businesses), $1, $2, $3, $4, $5)';
+		var sql = 'INSERT INTO businesses (location_id, industry_id, name, address, number_of_employees) VALUES ($1, $2, $3, $4, $5)';
 		var params = [
 			location_id,
 			values.business_industry && values.business_industry.id,

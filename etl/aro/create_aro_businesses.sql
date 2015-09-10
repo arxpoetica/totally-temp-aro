@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS aro.businesses;
 
 CREATE TABLE aro.businesses
 (
-	id bigint,
+	id serial,
 	location_id bigint,
 	industry_id int,
 	name varchar,
