@@ -229,6 +229,13 @@
               <a href="javascript:void(0)" ng-click="layer.select_random_area()">.</a>
             <% } %>
           </div>
+          <div ng-repeat="boundary in boundaries">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
+              </label>
+            </div>
+          </div>
           <hr>
           <h2>Build</h2>
           <p>

@@ -280,6 +280,25 @@ api.post('/permission/grant', function(request, response, next) {
 	models.Permission.grant_access(route_id, user_id, 'guest', jsonHandler(response, next));
 });
 
+// Create a boundary
+api.post('/boundary/:route_id/create', function(request, response, next) {
+	var route_id = request.params.route_id;
+	var data = request.body;
+	models.Boundary.create_boundary(route_id, data, jsonHandler(response, next));
+});
+
+// Edit a boundary
+api.post('/boundary/:route_id/edit', function(request, response, next) {
+	var data = request.body;
+	models.Boundary.edit_boundary(data, jsonHandler(response, next));
+});
+
+// Find boundaries of a network plan
+api.get('/boundary/:route_id/find', function(request, response, next) {
+	var route_id = request.params.route_id;
+	models.Boundary.find_boundaries(route_id, jsonHandler(response, next));
+});
+
 // Market size filters
 api.get('/market_size/filters', function(request, response, next) {
 	MarketSize.filters(jsonHandler(response, next));

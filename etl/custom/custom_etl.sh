@@ -21,3 +21,6 @@ ${PSQL} -a -f $DIR/create_custom_users.sql
 
 # Create custom.permissions table
 ${PSQL} -a -f $DIR/create_custom_permissions.sql
+
+# Create custom.boundaries table
+${PSQL} -a -f $DIR/create_custom_boundaries.sql
