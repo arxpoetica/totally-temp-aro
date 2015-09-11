@@ -179,13 +179,14 @@ api.get('/network/fiber_plant/:carrier_name', function(request, response, next) 
 // Network nodes for user client by node type
 api.get('/network/nodes/:node_type', function(request, response, next) {
 	var node_type = request.params.node_type;
-	Network.view_network_nodes(node_type, null, jsonHandler(response, next));
+	Network.view_network_nodes([node_type], null, jsonHandler(response, next));
 });
 
 // Network nodes of an existing route
 api.get('/network/nodes/:route_id/find', function(request, response, next) {
 	var route_id = request.params.route_id;
-	Network.view_network_nodes(null, route_id, jsonHandler(response, next));
+	var node_types = request.query.node_types ? request.query.node_types.split(',') : null;
+	Network.view_network_nodes(node_types, route_id, jsonHandler(response, next));
 });
 
 // Edit network nodes in a route

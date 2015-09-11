@@ -42,7 +42,7 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, callback) {
 // 
 // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
 // 2. route_id Number Pass a route_id to find additionally the network nodes associated to that route
-Network.view_network_nodes = function(node_type, route_id, callback) {
+Network.view_network_nodes = function(node_types, route_id, callback) {
   var sql = multiline(function() {;/*
     SELECT
       n.id, ST_AsGeoJSON(geog)::json AS geom, t.name AS name, n.route_id
@@ -54,9 +54,13 @@ Network.view_network_nodes = function(node_type, route_id, callback) {
   var params = [];
   var constraints = [];
 
-  if (node_type) {
-    params.push(node_type);
-    constraints.push('t.name = $'+params.length);
+  if (node_types && node_types.length > 0) {
+    var arr = [];
+    node_types.forEach(function(node_type) {
+      params.push(node_type);
+      arr.push('t.name = $'+params.length);
+    });
+    constraints.push('('+arr.join(' OR ')+')');
   }
 
   if (route_id) {

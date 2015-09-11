@@ -2,7 +2,7 @@
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', function($scope, $rootScope, $http, selection, map_tools) {
   // Controller instance variables
   $scope.map_tools = map_tools;
-  $scope.node_type;
+  $scope.user_id = user_id;
 
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
     if (map_tools.is_visible('network_nodes')) {
@@ -28,7 +28,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       return type.name === 'central_office';
     });
     node_types = $scope.node_types = response;
-    $scope.node_type = response[0];
+    node_types.forEach(function(node_type) {
+      node_type.visible = true;
+    });
   })
 
   function empty_changes() {
@@ -46,11 +48,26 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.route = route;
   });
 
+  $scope.change_node_types_visibility = function() {
+    var types = ['central_office'];
+    node_types.forEach(function(node_type) {
+      if (node_type.visible) {
+        types.push(node_type.name);
+      }
+    });
+    if (types.length === 0) {
+      $rootScope.equipment_layers.network_nodes.hide();
+    } else {
+      $rootScope.equipment_layers.network_nodes.show();
+      $rootScope.equipment_layers.network_nodes.set_api_endpoint('/network/nodes/'+$scope.route.id+'/find?node_types='+types.join(','));
+    }
+  };
+
   $scope.save_nodes = function() {
     $http.post('/network/nodes/'+$scope.route.id+'/edit', changes).success(function(response) {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
-        $rootScope.feature_layers.network_nodes.reload_data();
+        $rootScope.equipment_layers.network_nodes.reload_data();
       }
       changes = empty_changes();
       $rootScope.$broadcast('equipment_nodes_changed');
@@ -115,7 +132,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       lon: coordinates.lng(),
       type: _.findWhere(node_types, { name: type }).id,
     });
-    var layer = $rootScope.feature_layers.network_nodes;
+    var layer = $rootScope.equipment_layers.network_nodes;
     var arr = layer.data_layer.addGeoJson(feature);
     arr.forEach(function(feature) {
       layer.data_layer.overrideStyle(feature, {

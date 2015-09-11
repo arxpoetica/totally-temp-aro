@@ -18,6 +18,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     }
   ];
 
+  $scope.user_id = user_id;
+
   $scope.show_businesses = true;
   $scope.show_households = true;
 

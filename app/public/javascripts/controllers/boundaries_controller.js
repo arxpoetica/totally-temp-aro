@@ -3,6 +3,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
 
   $scope.map_tools = map_tools;
   $scope.area_layers = $rootScope.area_layers;
+  $scope.user_id = user_id;
 
   $scope.selected_tool = false;
   $scope.boundaries = [];

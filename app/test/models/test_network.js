@@ -44,7 +44,7 @@ describe('Network', function() {
 		var node_type = 'central_office';
 
 		it('should return a feature collection', function(done) {
-			Network.view_network_nodes(node_type, null, function(err, output) {
+			Network.view_network_nodes([node_type], null, function(err, output) {
 				expect(err).to.be.null;
 				expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
 				done();
@@ -52,14 +52,14 @@ describe('Network', function() {
 		});
 
 		it('should return more than one feature', function(done) {
-			Network.view_network_nodes(node_type, null, function(err, output) {
+			Network.view_network_nodes([node_type], null, function(err, output) {
 				expect(output.feature_collection.features).to.have.length.above(0);
 				done();
 			});
 		});
 
 		it('should have a geometry feature which includes an array of Points', function(done) {
-			Network.view_network_nodes(node_type, null, function(err, output) {
+			Network.view_network_nodes([node_type], null, function(err, output) {
 				var first_feature = output.feature_collection.features[0];
 				expect(first_feature.geometry.type).to.equal('Point');
 				done();
@@ -67,7 +67,7 @@ describe('Network', function() {
 		});
 
 		it('should return a node id in its properties', function(done) {
-			Network.view_network_nodes(node_type, null, function(err, output) {
+			Network.view_network_nodes([node_type], null, function(err, output) {
 				var first_feature = output.feature_collection.features[0];
 				expect(first_feature.properties.id).to.be.above(0);
 				done();
@@ -75,7 +75,7 @@ describe('Network', function() {
 		});
 
 		it('should have an array of Points each with multiple coordinates', function(done) {
-			Network.view_network_nodes(node_type, null, function(err, output) {
+			Network.view_network_nodes([node_type], null, function(err, output) {
 				var first_geom = output.feature_collection.features[0].geometry.coordinates;
 				expect(first_geom).to.have.length.above(0);
 				done();

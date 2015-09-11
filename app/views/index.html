@@ -424,8 +424,17 @@
           <div class="panel-body" ng-show="map_tools.is_expanded('network_nodes')">
             <div ng-show="route">
               <h2>View</h2>
+
+              <div ng-repeat="node_type in node_types">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-model="node_type.visible" ng-change="change_node_types_visibility()"> {{node_type.description}}
+                  </label>
+                </div>
+              </div>
+
               <div ng-repeat="(key, layer) in equipment_layers">
-                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
+                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng_show="key !== 'network_nodes'">
                   <label>
                     <input type="checkbox" ng-click="layer.toggle_visibility()" ng-checked="layer.visible"> {{layer.name}}
                   </label>
