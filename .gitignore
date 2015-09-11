@@ -5,6 +5,8 @@ npm-debug.log
 
 app/node_modules
 
+conf/config_app.json
+
 etl/tiger_cousub/shapefiles
 etl/client/*.pyc
 

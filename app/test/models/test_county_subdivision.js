@@ -5,7 +5,7 @@ describe('CountySubdivision', function() {
 	this.timeout(5000);
 
 	describe('#find_by_statefp()', function() {
-		var statefp = '53';
+		var statefp = '36';
 
 		it('should return a null error', function(done) {
 			CountySubdivision.find_by_statefp(statefp, function(err, output) {
@@ -47,6 +47,3 @@ describe('CountySubdivision', function() {
 	});
 
 });
-
-				
-				
