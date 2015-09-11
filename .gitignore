@@ -4,6 +4,7 @@ Vagrantfile
 npm-debug.log
 
 app/node_modules
+bin/
 
 conf/config_app.json
 

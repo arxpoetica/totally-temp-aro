@@ -1,13 +1,10 @@
-// Shortest Path Controller
-app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', function($scope, $rootScope, $http, selection, MapLayer, map_tools) {
+// Route Controller
+app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', function($scope, $rootScope, $http, selection, MapLayer, map_tools) {
   // Controller instance variables
   $scope.map_tools = map_tools;
   $scope.selection = selection;
 
   $scope.route = null;
-
-  $scope.always_shows_sources = true;
-  $scope.always_shows_targets = true;
 
   /************
   * FUNCTIONS *
@@ -20,18 +17,15 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
         $scope.route_layer.remove();
       }
       $scope.route_layer = null;
-      delete $rootScope.area_layers['route'];
+      delete $rootScope.equipment_layers['route'];
       return;
     }
-
-    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
-    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
 
     $http.get('/route_optimizer/'+route.id).success(function(response) {
       redraw_route(response);
       selection.set_enabled(true);
       if ((response.metadata.sources || []).length > 0) {
-        $rootScope.feature_layers.network_nodes.show();
+        $rootScope.equipment_layers.network_nodes.show();
       }
     });
   });
@@ -76,6 +70,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
 
     var route = new MapLayer({
       short_name: 'RT',
+      name: 'Route',
       data: data.feature_collection,
       style_options: {
         normal: {
@@ -90,7 +85,7 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
     }
     $scope.route_layer = route;
 
-    $rootScope.area_layers['route'] = route;
+    $rootScope.equipment_layers['route'] = route;
   }
 
   $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {
@@ -109,13 +104,5 @@ app.controller('shortest_path_controller', ['$scope', '$rootScope', '$http', 'se
       });
     }
   });
-
-  $scope.toggle_always_show_sources = function() {
-    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
-  };
-
-  $scope.toggle_always_show_targets = function() {
-    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
-  };
 
 }]);

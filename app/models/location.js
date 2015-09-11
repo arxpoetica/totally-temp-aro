@@ -12,8 +12,18 @@ var Location = {};
 // Find all Locations
 //
 // 1. callback: function to return a GeoJSON object
-Location.find_all = function(callback) {
-	var sql = 'SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations';
+Location.find_all = function(type, callback) {
+	if (arguments.length === 1) {
+		callback = arguments[0];
+		type = null;
+	}
+	var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
+	if (type === 'businesses') {
+		sql += ' JOIN businesses ON businesses.location_id = locations.id';
+	} else if (type === 'households') {
+		sql += ' JOIN households ON households.location_id = locations.id';
+	}
+	sql += ' GROUP BY locations.id';
 
 	txain(function(callback) {
 		database.query(sql, callback);
@@ -165,6 +175,9 @@ Location.show_information = function(location_id, callback) {
 }
 
 Location.create_location = function(values, callback) {
+	var location_id;
+	var type = values.type;
+
 	txain(function(callback) {
 		var params = [
 			values.address,
@@ -185,8 +198,26 @@ Location.create_location = function(values, callback) {
 		database.findOne(sql, params, callback);
 	})
 	.then(function(row, callback) {
-		var location_id = row.id;
-		var sql = 'SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations where id=$1';
+		location_id = row.id;
+
+		if (type === 'commercial') {
+			insert_business(callback);
+		} else if (type === 'residential') {
+			insert_household(callback);
+		} else if (type === 'combo') {
+			txain(function(callback) {
+				insert_business(callback);
+			})
+			.then(function(callback) {
+				insert_household(callback);
+			})
+			.end(callback);
+		} else {
+			callback();
+		}
+	})
+	.then(function(callback) {
+		var sql = 'SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations WHERE id=$1';
 		database.findOne(sql, [location_id], callback);
 	})
 	.then(function(row, callback) {
@@ -199,7 +230,34 @@ Location.create_location = function(values, callback) {
 		});
 	})
 	.end(callback);
-}
+
+	function insert_business(callback) {
+		var sql = 'INSERT INTO businesses (location_id, industry_id, name, address, number_of_employees) VALUES ($1, $2, $3, $4, $5)';
+		var params = [
+			location_id,
+			values.business_industry && values.business_industry.id,
+			values.business_name,
+			values.address,
+			+values.number_of_employees,
+		];
+		database.execute(sql, params, callback);
+	}
+
+	function insert_household(callback) {
+		var sql = 'INSERT INTO households (location_id, number_of_households) VALUES ($1, $2)';
+		var params = [
+			location_id,
+			+values.number_of_households,
+		];
+		database.execute(sql, params, callback);
+	}
+
+};
+
+Location.find_industries = function(callback) {
+	var sql = 'SELECT * FROM industries ORDER BY description ASC'
+	database.query(sql, [], callback);
+};
 
 Location.update_households = function(location_id, values, callback) {
 	var params = [

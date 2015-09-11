@@ -2,9 +2,25 @@
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', function($scope, $rootScope, $http, selection, map_tools) {
   // Controller instance variables
   $scope.map_tools = map_tools;
-  $scope.node_type;
+  $scope.user_id = user_id;
 
-  // TODO: fetch this information from the server
+  $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
+    if (map_tools.is_visible('network_nodes')) {
+      $rootScope.equipment_layers.network_nodes.show();
+    }
+  });
+
+  $scope.selected_tool = null;
+
+  $scope.select_tool = function(tool) {
+    if ($scope.selected_tool === tool) {
+      $scope.selected_tool = null;
+    } else {
+      $scope.selected_tool = tool;
+    }
+    map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' });
+  };
+
   var node_types = $scope.node_types = [];
 
   $http.get('/network/nodes').success(function(response) {
@@ -12,7 +28,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       return type.name === 'central_office';
     });
     node_types = $scope.node_types = response;
-    $scope.node_type = response[0];
+    node_types.forEach(function(node_type) {
+      node_type.visible = true;
+    });
   })
 
   function empty_changes() {
@@ -20,21 +38,36 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   var changes = empty_changes();
-  $scope.route = null;
 
   /************
   * FUNCTIONS *
   *************/
 
+  $scope.route = null;
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
   });
+
+  $scope.change_node_types_visibility = function() {
+    var types = ['central_office'];
+    node_types.forEach(function(node_type) {
+      if (node_type.visible) {
+        types.push(node_type.name);
+      }
+    });
+    if (types.length === 0) {
+      $rootScope.equipment_layers.network_nodes.hide();
+    } else {
+      $rootScope.equipment_layers.network_nodes.show();
+      $rootScope.equipment_layers.network_nodes.set_api_endpoint('/network/nodes/'+$scope.route.id+'/find?node_types='+types.join(','));
+    }
+  };
 
   $scope.save_nodes = function() {
     $http.post('/network/nodes/'+$scope.route.id+'/edit', changes).success(function(response) {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
-        $rootScope.feature_layers.network_nodes.reload_data();
+        $rootScope.equipment_layers.network_nodes.reload_data();
       }
       changes = empty_changes();
       $rootScope.$broadcast('equipment_nodes_changed');
@@ -68,25 +101,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.number_of_features = $rootScope.feature_layers.network_nodes.number_of_features();
   };
 
-  function update_map_cursor() {
-    var layer = $rootScope.feature_layers.network_nodes;
-    var editing = layer.visible && $scope.route && map_tools.is_visible('equipment_nodes');
-    map.setOptions({ draggableCursor: editing ? 'crosshair' : null });
-  }
-
-  $rootScope.$on('map_layer_changed_visibility', function(e, name) {
-    update_map_cursor();
-  });
-
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
-    update_map_cursor();
-  });
-
-  $rootScope.$on('map_tool_changed_visibility', function(e, name) {
-    if (name === 'equipment_nodes') {
-      update_map_cursor();
-    }
   });
 
   $rootScope.$on('map_layer_dragged_feature', function(e, gm_event, feature) {
@@ -100,9 +116,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   });
 
   $rootScope.$on('map_click', function(e, gm_event) {
-    if (!map_tools.is_visible('equipment_nodes') || !$scope.route) return;
+    if (!map_tools.is_visible('network_nodes') || !$scope.route || !$scope.selected_tool) return;
 
-    var type = $scope.node_type.name;
+    var type = $scope.selected_tool;
     var coordinates = gm_event.latLng;
     var feature = {
       type: 'Feature',
@@ -116,7 +132,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       lon: coordinates.lng(),
       type: _.findWhere(node_types, { name: type }).id,
     });
-    var layer = $rootScope.feature_layers.network_nodes;
+    var layer = $rootScope.equipment_layers.network_nodes;
     var arr = layer.data_layer.addGeoJson(feature);
     arr.forEach(function(feature) {
       layer.data_layer.overrideStyle(feature, {
@@ -130,7 +146,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
     if (map_layer.type !== 'network_nodes'
-      || !map_tools.is_visible('equipment_nodes')
+      || !map_tools.is_visible('network_nodes')
       || !feature.getProperty('unselectable')) {
       return;
     }

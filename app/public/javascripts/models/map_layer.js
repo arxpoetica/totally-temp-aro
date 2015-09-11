@@ -15,6 +15,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.always_show_selected = false;
 		this.set_style('normal');
 		this.single_selection = options.single_selection;
+		this.highlighteable = !!options.highlighteable;
 
 		var collection;
 		if (this.type === 'locations') {
@@ -274,6 +275,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 	}
 
 	MapLayer.prototype.show = function() {
+		if (this.visible) return;
 		this.load_data();
 		this.visible = true;
 		this.configure_visibility();
@@ -281,6 +283,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 	}
 
 	MapLayer.prototype.hide = function() {
+		if (!this.visible) return;
 		this.visible = false;
 		this.configure_visibility();
 		$rootScope.$broadcast('map_layer_changed_visibility', this);

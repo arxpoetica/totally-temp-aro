@@ -26,15 +26,15 @@ CensusBlock.find_by_statefp_and_countyfp = function(statefp, countyfp, callback)
 				},
 				'geometry': row.geom,
 			}
-		})
+		});
 
 		var output = {
 			'feature_collection': {
 				'type':'FeatureCollection',
-				'features': features
+				'features': features,
 			},
 		};
-		callback(null, output)
+		callback(null, output);
 	})
 	.end(callback)
 };

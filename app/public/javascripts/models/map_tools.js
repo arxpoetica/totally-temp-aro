@@ -46,19 +46,19 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
 
   tools.available_tools = [
     {
-      id: 'route',
-      name: 'Route Planner',
-      short_name: 'DBR',
+      id: 'locations',
+      name: 'Locations',
+      short_name: 'L',
     },
     {
-      id: 'market_size',
-      name: 'Market Size',
-      short_name: 'MS',
+      id: 'boundaries',
+      name: 'Boundaries',
+      short_name: 'B',
     },
     {
-      id: 'equipment_nodes',
-      name: 'Equipment',
-      short_name: 'ENT',
+      id: 'network_nodes',
+      name: 'Network nodes',
+      short_name: 'E',
     },
   ];
 

@@ -9,6 +9,16 @@ describe('Show information of a location', function() {
     browser.getHomepage();
   });
 
+  it('should create a named route', function() {
+    var name = 'My plan';
+    element(by.css('[ng-click="new_route()"]')).click();
+    element(by.css('input[ng-model="new_route_name"]')).clear().sendKeys(name);
+    element(by.css('input[ng-model="new_route_area_name"]')).clear().sendKeys('Manhattan');
+    element(by.css('[ng-click="look_up_area()"]')).click();
+    element(by.css('[ng-click="save_new_route()"]')).click();
+    browser.waitForText(element(by.css('.navbar-brand')), name);
+  });
+
   it('should show the locations layer', function() {
     element(by.linkText('L')).click();
   });

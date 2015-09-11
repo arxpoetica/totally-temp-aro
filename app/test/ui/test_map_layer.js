@@ -60,10 +60,12 @@ describe('Map layer', function() {
   });
 
   it('should hide the layer', function() {
+    layer.show();
     layer.hide();
     expect(layer.visible).to.be.false;
-    expect(events.length).to.be.equal(1);
+    expect(events.length).to.be.equal(2);
     expect(events[0]).to.be.equal('map_layer_changed_visibility');
+    expect(events[1]).to.be.equal('map_layer_changed_visibility');
   });
 
   it('should toggle the visibility', function() {
