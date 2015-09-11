@@ -21,7 +21,7 @@ public class TestPlan {
 	@Test
 	public void testGenerate() {
 		try {
-			MainEntry.service(PlanService.class).computeNetworkNodes(4, NetworkNodeType.fiber_distribution_terminal);
+			MainEntry.service(PlanService.class).computeNetworkNodes(1, NetworkNodeType.fiber_distribution_terminal);
 		} catch( Throwable err) {
 			err.printStackTrace(); 
 		}

@@ -7,6 +7,7 @@ public interface GraphNodeVisitor {
 	public void visit(SpliceNode node) ;
 	public void visit(RoadNode node) ;
 	public void visit(FDTNode node) ;
+	public void visit(FDHNode node) ;
 	
 
 }

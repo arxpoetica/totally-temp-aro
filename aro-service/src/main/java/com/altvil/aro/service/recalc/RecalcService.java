@@ -1,6 +1,6 @@
 package com.altvil.aro.service.recalc;
 
-import com.altvil.aro.service.recalc.protocol.RecalcRequest;
+import com.altvil.aro.service.plan.RecalcRequest;
 
 public interface RecalcService {
 

@@ -2,6 +2,8 @@ package com.altvil.aro.service.recalc.protocol;
 
 import java.util.Date;
 
+import com.altvil.aro.service.plan.RecalcRequest;
+
 public class RecalcJob {
 
 	private long jobId;

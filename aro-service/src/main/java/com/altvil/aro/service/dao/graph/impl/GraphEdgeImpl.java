@@ -18,15 +18,17 @@ public class GraphEdgeImpl implements GraphEdge {
 		GraphEdgeImpl e = new GraphEdgeImpl();
 
 		e.id = rs.getLong(1);
-		e.source = rs.getLong(2);
-		e.target = rs.getLong(3);
+		e.source = rs.getLong(3);
+		e.target = rs.getLong(2);
 		e.gid = rs.getLong(4);
 		e.edgeType = EdgeTypeMapping.MAPPING.getEdgeType(rs.getInt(5));
-		e.edgeLength = rs.getDouble(5);
+		e.edgeLength = rs.getDouble(6);
 		// line
-		e.sourcePoint = (PGpoint) rs.getObject(8);
-		e.targetPoint = (PGpoint) rs.getObject(9);
-		e.locationId = rs.getLong(10);
+		e.sourcePoint = (PGpoint) rs.getObject(9);
+		e.targetPoint = (PGpoint) rs.getObject(8);
+		//e.locationId = rs.getLong(10);
+		
+		e.locationId = null ;
 
 		return e;
 	}
@@ -40,7 +42,7 @@ public class GraphEdgeImpl implements GraphEdge {
 	// line
 	private PGpoint sourcePoint;
 	private PGpoint targetPoint;
-	private long locationId;
+	private Long locationId;
 
 	@Override
 	public Long getId() {

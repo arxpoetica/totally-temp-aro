@@ -1,5 +1,6 @@
 package com.altvil.aro.service.graph.transform.impl;
 
+import com.altvil.aro.service.graph.node.FDHNode;
 import com.altvil.aro.service.graph.node.FDTNode;
 import com.altvil.aro.service.graph.node.GraphNodeVisitor;
 import com.altvil.aro.service.graph.node.LocationNode;
@@ -23,4 +24,10 @@ public class DefaultGraphNodeVisitor implements GraphNodeVisitor {
 	@Override
 	public void visit(FDTNode node) {
 	}
+
+	@Override
+	public void visit(FDHNode node) {
+	}
+	
+	
 }

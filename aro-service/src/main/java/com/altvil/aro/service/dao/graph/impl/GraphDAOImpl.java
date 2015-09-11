@@ -37,6 +37,22 @@ public class GraphDAOImpl extends DefaultAroDAO<GraphModel, Long> implements Gra
 	private static class FindGraphNodesByPlanId extends
 			AbstractQuery<Long, GraphEdge> {
 
+//		private static final String SQL_QUERY = "with \n"
+//				+ "paths as (\n"
+//				+ "SELECT distinct id, id2 source, case when id2 = target then source else target end as target, gid, (case edge_type when 'network_node_link' then 1 when 'road_segment' then 2 when 'location_link' then 3 else 0 end) as edge_type , edge_length, geom\n"
+//				+ "FROM\n"
+//				+ "	pgr_kdijkstraPath('SELECT id, source::integer, target::integer, edge_length::double precision AS cost FROM client.graph where source != target',\n"
+//				+ "	  (select vertex_id from custom.route_sources where route_id=? limit 1)::integer,\n"
+//				+ "	  array(select vertex_id from custom.route_targets where route_id=?)::integer[],\n"
+//				+ "	  false, false) AS dk\n"
+//				+ " JOIN client.graph edge\n"
+//				+ "	ON edge.id = dk.id3\n"
+//				+ ")\n"
+//				+ "select p.id, p.source, p.target, p.gid, p.edge_type, p.edge_length, p.geom, st_endpoint(p.geom)::point, st_endpoint(p.geom)::point as end_point, l.id as location_id\n"
+//				+ "from paths p\n"
+//				+ "left outer join aro.locations l on l.geom && st_startpoint(p.geom) and p.edge_type = 3\n";
+//
+
 		private static final String SQL_QUERY = "with \n"
 				+ "paths as (\n"
 				+ "SELECT distinct id, id2 source, case when id2 = target then source else target end as target, gid, (case edge_type when 'network_node_link' then 1 when 'road_segment' then 2 when 'location_link' then 3 else 0 end) as edge_type , edge_length, geom\n"
@@ -48,10 +64,12 @@ public class GraphDAOImpl extends DefaultAroDAO<GraphModel, Long> implements Gra
 				+ " JOIN client.graph edge\n"
 				+ "	ON edge.id = dk.id3\n"
 				+ ")\n"
-				+ "select p.id, p.source, p.target, p.gid, p.edge_type, p.edge_length, p.geom, st_endpoint(p.geom)::point, st_endpoint(p.geom)::point as end_point, l.id as location_id\n"
+				+ "select p.id, p.source, p.target, p.gid, p.edge_type, p.edge_length, p.geom, st_endpoint(p.geom)::point, st_endpoint(p.geom)::point as end_point \n"
 				+ "from paths p\n"
-				+ "left outer join aro.locations l on l.geom && st_startpoint(p.geom) and p.edge_type = 3\n";
+				;
 
+		
+		
 		public FindGraphNodesByPlanId(SessionFactory sessionFactory) {
 			super(sessionFactory, SQL_QUERY, rs ->  GraphEdgeImpl.create(rs));
 		}
