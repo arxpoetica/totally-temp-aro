@@ -6,11 +6,9 @@ import com.vividsolutions.jts.geom.Point;
 
 public class RoadNodeImpl extends AbstractNode implements RoadNode {
 
-	private Long gid;
 	
-	public RoadNodeImpl(Long id, Point point, Long gid) {
+	public RoadNodeImpl(Long id, Point point) {
 		super(id, point);
-		this.gid = gid;
 	}
 
 	@Override
@@ -18,14 +16,11 @@ public class RoadNodeImpl extends AbstractNode implements RoadNode {
 		visitor.visit(this);
 	}
 
-	@Override
-	public Long getGid() {
-		return gid;
-	}
+	
 	
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + ":" + getId()  + ":" + getGid() + " " + super.isConnectedToLocationNode();
+		return this.getClass().getSimpleName() + ":" + getId()  + " " + super.isConnectedToLocationNode();
 	}
 	
 	

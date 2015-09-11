@@ -1,7 +1,6 @@
 package com.altvil.aro.service.graph.node.impl;
 
 import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.node.GraphNodeVisitor;
 import com.vividsolutions.jts.geom.Point;
 
 public abstract class AbstractNode implements GraphNode {
@@ -38,11 +37,7 @@ public abstract class AbstractNode implements GraphNode {
 
 	}
 
-	@Override
-	public void accept(GraphNodeVisitor visitor) {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 	@Override
 	public boolean isConnectedToLocationNode() {

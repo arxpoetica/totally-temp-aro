@@ -7,6 +7,8 @@ import java.sql.SQLException;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.jdbc.Work;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.dao.DAOException;
 import com.altvil.aro.util.function.Aggregator;
@@ -18,6 +20,11 @@ public class AbstractQuery<A, T> {
 	private String query ;
 	private Transform<ResultSet, T> fResultSet ;
 	
+	
+	private static final Logger log = LoggerFactory
+			.getLogger(AbstractQuery.class.getName());
+
+
 	
 	public AbstractQuery(SessionFactory sessionFactory, String query,
 			Transform<ResultSet, T> fResultSet) {
@@ -32,6 +39,11 @@ public class AbstractQuery<A, T> {
 			@Override
 			public void execute(Connection connection) throws SQLException {
 				try {
+					
+					if( log.isDebugEnabled() ) {
+						log.debug("Execute SQL " + query);
+					}
+					
 					PreparedStatement ps = connection.prepareStatement(query) ;
 					applyBinding(ps, args);
 					try(ResultSet rs = ps.executeQuery()) {

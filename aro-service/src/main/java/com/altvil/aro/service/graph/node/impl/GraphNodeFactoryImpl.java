@@ -1,5 +1,6 @@
 package com.altvil.aro.service.graph.node.impl;
 
+import com.altvil.aro.service.graph.node.FDHNode;
 import com.altvil.aro.service.graph.node.FDTNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.node.LocationNode;
@@ -18,8 +19,8 @@ public class GraphNodeFactoryImpl implements GraphNodeFactory {
 	
 
 	@Override
-	public RoadNode createRoadNode(Long id, Point point, Long gid) {
-		return new RoadNodeImpl(id, point, gid);
+	public RoadNode createRoadNode(Long id, Point point) {
+		return new RoadNodeImpl(id, point);
 	}
 
 	@Override
@@ -28,8 +29,17 @@ public class GraphNodeFactoryImpl implements GraphNodeFactory {
 	}
 
 	@Override
-	public FDTNode createFDTNode(Long id, Point point, long gid) {
-		return new FDTNodeImpl(id, point, gid);
+	public FDTNode createFDTNode(Long id, Point point) {
+		return new FDTNodeImpl(id, point);
 	}
+
+
+	@Override
+	public FDHNode createFDHNode(Long id, Point point) {
+		return new FDHNodeImpl(id, point) ;
+	}
+	
+	
+	
 
 }

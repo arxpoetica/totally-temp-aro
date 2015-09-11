@@ -19,7 +19,7 @@ public class TestGraph {
 	@Test
 	public void testGraph() {
 		try {
-			GraphModel m = MainEntry.service(GraphService.class).getGraphForPlanId(4) ;
+			GraphModel<AroEdge> m = MainEntry.service(GraphService.class).getGraphForPlanId(4) ;
 			
 			GraphIterator<GraphNode, AroEdge> itr = m.depthFirstItr() ;
 			

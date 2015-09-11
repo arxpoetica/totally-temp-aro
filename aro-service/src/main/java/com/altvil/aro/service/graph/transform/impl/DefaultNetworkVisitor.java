@@ -1,5 +1,6 @@
 package com.altvil.aro.service.graph.transform.impl;
 
+import com.altvil.aro.service.graph.node.FDHNode;
 import com.altvil.aro.service.graph.node.FDTNode;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeVisitor;
@@ -33,6 +34,10 @@ public class DefaultNetworkVisitor<U extends DefaultNetworkVisitor<U>> implement
 
 	@Override
 	public void visit(FDTNode node) {
+	}
+
+	@Override
+	public void visit(FDHNode node) {
 	}
 
 }

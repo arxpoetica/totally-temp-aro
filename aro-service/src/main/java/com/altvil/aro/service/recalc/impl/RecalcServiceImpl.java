@@ -12,11 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.service.plan.PlanService;
+import com.altvil.aro.service.plan.RecalcRequest;
 import com.altvil.aro.service.recalc.Job;
 import com.altvil.aro.service.recalc.RecalcException;
 import com.altvil.aro.service.recalc.RecalcService;
 import com.altvil.aro.service.recalc.protocol.RecalcJob;
-import com.altvil.aro.service.recalc.protocol.RecalcRequest;
 import com.altvil.aro.service.recalc.protocol.RecalcResponse;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

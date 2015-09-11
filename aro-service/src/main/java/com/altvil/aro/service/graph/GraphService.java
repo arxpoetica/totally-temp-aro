@@ -1,6 +1,7 @@
 package com.altvil.aro.service.graph;
 
 
+
 public interface GraphService {
 
 	/**
@@ -9,6 +10,7 @@ public interface GraphService {
 	 * @return
 	 * @throws GraphException
 	 */
-	public GraphModel getGraphForPlanId(long planId) throws GraphException;
-
+	public GraphModel<AroEdge> getGraphForPlanId(long planId) throws GraphException;
+	
+	
 }

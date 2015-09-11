@@ -6,10 +6,12 @@ public interface GraphNodeFactory {
 
 	public SpliceNode createSpliceNode(Long id, Point point);
 	
-	public RoadNode createRoadNode(Long id, Point point, Long gid);
+	public RoadNode createRoadNode(Long id, Point point);
 
 	public LocationNode createLocationNode(Long id, Point point, long locationId);
 
-	public FDTNode createFDTNode(Long id, Point point, long gid);
+	public FDTNode createFDTNode(Long id, Point point);
+	
+	public FDHNode createFDHNode(Long id, Point point) ;
 
 }

@@ -13,27 +13,26 @@ import com.altvil.aro.service.dao.graph.impl.GraphModelImpl;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphException;
 import com.altvil.aro.service.graph.GraphModel;
-import com.altvil.aro.service.graph.builder.GraphModelBuilder;
+import com.altvil.aro.service.graph.builder.AroGraphModelBuilder;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.node.impl.LocationNodeImpl;
 
-public class BasicGraphBuilder implements GraphModelBuilder {
+public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(BasicGraphBuilder.class.getName());
 
 	private GraphNodeFactory nodeFactory;
-	
-	private boolean addLocationsToGraph ;
 
+	
 	private Map<Long, GraphNode> mapNodeById = new HashMap<Long, GraphNode>(
 			1000);
 
 	private SimpleDirectedWeightedGraph<GraphNode, AroEdge> graph = new SimpleDirectedWeightedGraph<GraphNode, AroEdge>(
 			AroEdgeFactory.FACTORY);
-	
+
 	private EdgeFactory<GraphNode, AroEdge> edgeFactory = graph
 			.getEdgeFactory();
 
@@ -49,31 +48,46 @@ public class BasicGraphBuilder implements GraphModelBuilder {
 		try {
 			Long srcNodeId = edge.getSource();
 			GraphNode srcNode = mapNodeById.get(srcNodeId);
+			boolean addSourceVertix = false;
 
 			if (srcNode == null) {
 				srcNode = createSourceNode(edge);
 				mapNodeById.put(srcNode.getId(), srcNode);
+				addSourceVertix = true;
 				graph.addVertex(srcNode);
 			}
 
 			Long targetNodeId = edge.getTarget();
 			GraphNode targetNode = mapNodeById.get(targetNodeId);
 
+			boolean addTargetVertix = false;
+
 			if (targetNode == null) {
 				targetNode = createTargetNode(edge);
 				mapNodeById.put(targetNode.getId(), targetNode);
-				graph.addVertex(targetNode);
+				addTargetVertix = true;
 			}
 
-			if( targetNode.isLocationNode() ) {
-				srcNode.addLocation(targetNode) ;
-				if( addLocationsToGraph ) {
-					add(srcNode, targetNode, edge.getEdgeLength());
+			if (!targetNode.isLocationNode()) {
+
+				if (addTargetVertix) {
+					graph.addVertex(targetNode);
+				}
+
+				if (srcNode.isLocationNode()) {
+					targetNode.addLocation(srcNode);
+
+				} else {
+					if (addSourceVertix) {
+						graph.addVertex(srcNode);
+					}
+					add(srcNode, targetNode, edge);
 				}
 			} else {
-				add(srcNode, targetNode, edge.getEdgeLength());
+				targetNode.addLocation(srcNode);
+				if( log.isWarnEnabled() ) log.warn("Inavlid Target Location " + targetNode);
 			}
-			
+
 		} catch (Throwable err) {
 			log.error(err.getMessage(), err);
 		}
@@ -81,13 +95,17 @@ public class BasicGraphBuilder implements GraphModelBuilder {
 		return this;
 	}
 
-	private void add(GraphNode src, GraphNode target, double weight) {
+	private void add(GraphNode src, GraphNode target, GraphEdge edge) {
 
-		log.debug(src.getId() + "->" + target.getId());
+		if (log.isDebugEnabled()) {
+			log.debug(src.getId() + "->" + target.getId() + " length= "
+					+ edge.getEdgeLength() + " type=" + edge.getEdgeType());
+		}
 
 		AroEdge ae = edgeFactory.createEdge(src, target);
 		graph.addEdge(src, target, ae);
-		graph.setEdgeWeight(ae, weight);
+		graph.setEdgeWeight(ae, edge.getEdgeLength());
+		ae.setGid(edge.getGID());
 
 	}
 
@@ -95,14 +113,13 @@ public class BasicGraphBuilder implements GraphModelBuilder {
 
 		switch (edge.getEdgeType()) {
 		case NETWORK_NODE_LINK:
-			return root = nodeFactory.createSpliceNode(edge.getSource(),
-					edge.getEndPoint());
+			break;
 		case ROAD_SEGMENT_LINK:
 		case UNDEFINED_LINK:
 			return nodeFactory.createRoadNode(edge.getSource(),
-					edge.getStartPoint(), edge.getGID());
+					edge.getStartPoint());
 		case LOCATION_LINK:
-			return new LocationNodeImpl(edge.getSource(), edge.getEndPoint(),
+			return new LocationNodeImpl(edge.getSource(), edge.getStartPoint(),
 					edge.getLocationId());
 		}
 
@@ -113,11 +130,12 @@ public class BasicGraphBuilder implements GraphModelBuilder {
 
 		switch (edge.getEdgeType()) {
 		case NETWORK_NODE_LINK:
-			break;
+			return root = nodeFactory.createSpliceNode(edge.getSource(),
+					edge.getEndPoint());
 		case ROAD_SEGMENT_LINK:
 		case UNDEFINED_LINK:
 			return nodeFactory.createRoadNode(edge.getTarget(),
-					edge.getStartPoint(), edge.getGID());
+					edge.getStartPoint());
 
 		case LOCATION_LINK:
 			return new LocationNodeImpl(edge.getTarget(), edge.getEndPoint(),
@@ -128,8 +146,8 @@ public class BasicGraphBuilder implements GraphModelBuilder {
 	}
 
 	@Override
-	public GraphModel build() {
-		return new GraphModelImpl(graph, root);
+	public GraphModel<AroEdge> build() {
+		return new GraphModelImpl<AroEdge>(graph, root);
 	}
 
 }

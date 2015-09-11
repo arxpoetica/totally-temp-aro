@@ -9,9 +9,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.altvil.aro.service.MainEntry;
+import com.altvil.aro.service.plan.DefaultRecalcRequest;
 import com.altvil.aro.service.recalc.RecalcException;
 import com.altvil.aro.service.recalc.RecalcService;
-import com.altvil.aro.service.recalc.protocol.RecalcRequest;
 import com.altvil.aro.service.recalc.protocol.RecalcResponse;
 
 @Path("recalc")
@@ -21,7 +21,7 @@ public class PlanRecalcResource {
 	@Path("plan")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public RecalcResponse postRecalc(RecalcRequest request)
+	public RecalcResponse postRecalc(DefaultRecalcRequest request)
 			throws RecalcException, InterruptedException, ExecutionException {
 
 		return MainEntry.service(RecalcService.class).submit(request)

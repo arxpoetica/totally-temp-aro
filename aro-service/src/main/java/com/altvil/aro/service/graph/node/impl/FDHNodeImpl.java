@@ -1,12 +1,12 @@
 package com.altvil.aro.service.graph.node.impl;
 
-import com.altvil.aro.service.graph.node.FDTNode;
+import com.altvil.aro.service.graph.node.FDHNode;
 import com.altvil.aro.service.graph.node.GraphNodeVisitor;
 import com.vividsolutions.jts.geom.Point;
 
-public class FDTNodeImpl extends RoadNodeImpl implements FDTNode {
+public class FDHNodeImpl extends RoadNodeImpl implements FDHNode {
 	
-	public FDTNodeImpl(Long id, Point point) {
+	public FDHNodeImpl(Long id, Point point) {
 		super(id, point);
 	}
 

@@ -24,8 +24,16 @@ public interface PlanService {
 	 * @return FDT for a given Plan
 	 * @throws PlanException
 	 */
-	public Collection<NetworkNode> computeNetworkNodes(long plan,
+	public Collection<NetworkNode> computeNetworkNodes(int plan,
 			NetworkNodeType type) throws PlanException;
+	
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 * @throws PlanException
+	 */
+	public Collection<NetworkNode> computeNetworkNodes(RecalcRequest request) throws PlanException ;
 
 	/**
 	 * 

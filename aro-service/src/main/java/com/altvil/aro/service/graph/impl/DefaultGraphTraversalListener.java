@@ -9,6 +9,7 @@ public class DefaultGraphTraversalListener<G, T> implements TraversalListener<G,
 
 	@Override
 	public void edgeTraversed(EdgeTraversalEvent<G, T> e) {
+		//System.out.println("edgeTraversed " + e.getEdge()) ;
 	}
 
 	@Override
