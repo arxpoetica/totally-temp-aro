@@ -1,13 +1,14 @@
 import psycopg2
 import pandas as pd
 import spend
+import os
 
 def get_DBConn():
     try:
-        db = psycopg2.connect(dbname = 'aro', 
-                                user = 'aro', 
-                                password  = 'aro',
-                                host = 'localhost', 
+        db = psycopg2.connect(dbname = os.environ["PGDATABASE"], 
+                                user = os.environ["PGUSER"], 
+                                password  = os.environ["PGPASSWORD"],
+                                host = os.environ["PGHOST"], 
                                 port = 5432)
     except:
         print "Unable to connect"
