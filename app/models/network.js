@@ -6,6 +6,8 @@ var database = helpers.database;
 var txain = require('txain');
 var multiline = require('multiline');
 var _ = require('underscore');
+var request = require('request');
+var config = helpers.config;
 
 var Network = {};
 
@@ -172,6 +174,26 @@ function delete_nodes(route_id, updates, callback) {
 Network.clear_network_nodes = function(route_id, callback) {
   var sql = 'DELETE FROM client.network_nodes WHERE route_id=$1;';
   database.execute(sql, [route_id], callback);
+};
+
+Network.recalculate_nodes = function(route_id, callback) {
+  txain(function(callback) {
+    var options = {
+      method: 'POST',
+      url: config.aro_service_url+'/rest/recalc/plan',
+      json: true,
+      body: {
+        planId: route_id,
+      },
+    };
+    console.log('options', options);
+    request(options, callback);
+  })
+  .then(function(res, body, callback) {
+    console.log('body', body);
+    callback();
+  })
+  .end(callback);
 };
 
 module.exports = Network;
