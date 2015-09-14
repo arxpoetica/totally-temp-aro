@@ -115,7 +115,27 @@ function jsonHandler(response, next) {
 		if (err) return next(err);
 		response.json(data || {});
 	}
-}
+};
+
+function check_permission(rol) {
+	return function(request, response, next) {
+		var user = request.user;
+		var route_id = request.params.route_id;
+		models.Permission.find_permission(route_id, user.id, function(err, permission) {
+			if (err) return next(err);
+			// !rol means any permission is ok
+			if (permission && (!rol || rol === permission.rol || permission.rol === 'owner')) {
+				return next();
+			}
+			response.status(403).json({
+				error: 'Forbidden',
+			});
+		});
+	};
+};
+
+var check_any_permission = check_permission(null);
+var check_owner_permission = check_permission('owner');
 
 // Wirecenters
 api.get('/wirecenters/:wirecenter_code', function(request, response, next) {
@@ -183,21 +203,21 @@ api.get('/network/nodes/:node_type', function(request, response, next) {
 });
 
 // Network nodes of an existing route
-api.get('/network/nodes/:route_id/find', function(request, response, next) {
+api.get('/network/nodes/:route_id/find', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	var node_types = request.query.node_types ? request.query.node_types.split(',') : null;
 	Network.view_network_nodes(node_types, route_id, jsonHandler(response, next));
 });
 
 // Edit network nodes in a route
-api.post('/network/nodes/:route_id/edit', function(request, response, next) {
+api.post('/network/nodes/:route_id/edit', check_owner_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	var changes = request.body;
 	Network.edit_network_nodes(route_id, changes, jsonHandler(response, next));
 });
 
 // Clear network nodes in a route
-api.post('/network/nodes/:route_id/clear', function(request, response, next) {
+api.post('/network/nodes/:route_id/clear', check_owner_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	Network.clear_network_nodes(route_id, jsonHandler(response, next));
 });
@@ -205,14 +225,6 @@ api.post('/network/nodes/:route_id/clear', function(request, response, next) {
 // Network node types
 api.get('/network/nodes', function(request, response, next) {
 	Network.view_network_node_types(jsonHandler(response, next));
-});
-
-// Route Optimizer
-api.get('/route_optimizer/shortest_path/:source_id/:target_ids/:cost_per_meter', function(request, response, next) {
-	var source_id = request.params.source_id;
-	var target_ids = request.params.target_ids;
-	var cost_per_meter = request.params.cost_per_meter;
-	NetworkPlan.shortest_path(source_id, target_ids, cost_per_meter, jsonHandler(response, next));
 });
 
 // Find all created routes
@@ -228,45 +240,45 @@ api.post('/route_optimizer/create', function(request, response, next) {
 });
 
 // Return data of an existing route
-api.get('/route_optimizer/:route_id', function(request, response, next) {
+api.get('/route_optimizer/:route_id', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	NetworkPlan.find_route(route_id, jsonHandler(response, next));
 });
 
 // Return the metadata of an existing route
-api.get('/route_optimizer/:route_id/metadata', function(request, response, next) {
+api.get('/route_optimizer/:route_id/metadata', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	NetworkPlan.find_route(route_id, true, jsonHandler(response, next));
 });
 
-// Edits nodes of an existing route
-api.post('/route_optimizer/:route_id/edit', function(request, response, next) {
+// Edits the route of an existing network plan
+api.post('/route_optimizer/:route_id/edit', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	var changes = request.body;
 	NetworkPlan.edit_route(route_id, changes, jsonHandler(response, next));
 });
 
 // Edits basic information of an existing route
-api.post('/route_optimizer/:route_id/save', function(request, response, next) {
+api.post('/route_optimizer/:route_id/save', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	var changes = request.body;
 	NetworkPlan.save_route(route_id, changes, jsonHandler(response, next));
 });
 
 // Delete an existing route
-api.post('/route_optimizer/:route_id/delete', function(request, response, next) {
+api.post('/route_optimizer/:route_id/delete', check_owner_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	NetworkPlan.delete_route(route_id, jsonHandler(response, next));
 });
 
 // Clear an existing route
-api.post('/route_optimizer/:route_id/clear', function(request, response, next) {
+api.post('/route_optimizer/:route_id/clear', check_owner_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	NetworkPlan.clear_route(route_id, jsonHandler(response, next));
 });
 
 // Export a route as KML
-api.get('/route_optimizer/:route_id/:file_name/export', function(request, response, next) {
+api.get('/route_optimizer/:route_id/:file_name/export', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	var file_name = request.params.file_name;
 
@@ -284,27 +296,36 @@ api.get('/user/find', function(request, response, next) {
 });
 
 // Share a plan
-api.post('/permission/grant', function(request, response, next) {
-	var route_id = request.body.route;
-	var user_id = request.body.user;
+api.post('/permissions/:route_id/grant', check_any_permission, function(request, response, next) {
+	var route_id = request.params.route_id;
+	var user_id = request.body.user_id;
 	models.Permission.grant_access(route_id, user_id, 'guest', jsonHandler(response, next));
 });
 
 // Create a boundary
-api.post('/boundary/:route_id/create', function(request, response, next) {
+api.post('/boundary/:route_id/create', check_owner_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	var data = request.body;
 	models.Boundary.create_boundary(route_id, data, jsonHandler(response, next));
 });
 
 // Edit a boundary
-api.post('/boundary/:route_id/edit', function(request, response, next) {
+api.post('/boundary/:route_id/edit/:boundary_id', check_owner_permission, function(request, response, next) {
 	var data = request.body;
+	data.id = request.params.boundary_id;
+	data.route_id = request.params.route_id;
 	models.Boundary.edit_boundary(data, jsonHandler(response, next));
 });
 
+// Delete a boundary
+api.post('/boundary/:route_id/delete/:boundary_id', check_owner_permission, function(request, response, next) {
+	var route_id = +request.params.route_id;
+	var boundary_id = +request.params.boundary_id;
+	models.Boundary.delete_boundary(route_id, boundary_id, jsonHandler(response, next));
+});
+
 // Find boundaries of a network plan
-api.get('/boundary/:route_id/find', function(request, response, next) {
+api.get('/boundary/:route_id/find', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	models.Boundary.find_boundaries(route_id, jsonHandler(response, next));
 });

@@ -140,7 +140,8 @@
                 <ul class="dropdown-menu">
                   <li><a href="javascript:void(0)" ng-click="save_as()">Save as…</a></li>
                   <li role="separator" class="divider"></li>
-                  <li><a href="javascript:void(0)" ng-click="clear_route()">Clear plan</a></li>
+                  <li><a href="javascript:void(0)" ng-click="clear_route()"
+                    <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Clear plan</a></li>
                   <li><a href="javascript:void(0)" ng-click="delete_route(route)"
                     <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Delete plan</a></li>
                   <li role="separator" class="divider"></li>
@@ -230,8 +231,12 @@
               <a href="javascript:void(0)" ng-click="layer.select_random_area()">.</a>
             <% } %>
           </div>
-          <div ng-repeat="boundary in boundaries">
+          <div ng-repeat="boundary in boundaries" class="hoverable">
             <div class="checkbox">
+              <div class="pull-right shown-on-hover btn-group">
+                <button class="btn btn-primary btn-xs" ng-click="rename_boundary(boundary)"><span class="glyphicon glyphicon-pencil"></span></button>
+                <button class="btn btn-danger btn-xs" ng-click="delete_boundary(boundary)"><span class="glyphicon glyphicon-remove"></span></button>
+              </div>
               <label>
                 <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
               </label>

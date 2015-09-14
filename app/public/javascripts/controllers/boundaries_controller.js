@@ -39,7 +39,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
           })
           var overlay = new google.maps.Polygon({ 
             paths: paths, 
-            editable: true,
+            editable: route.owner_id === user_id,
             strokeWeight: 2,
           });
           boundary.overlay = overlay;
@@ -55,7 +55,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
   $scope.toggle_tool = function() {
     $scope.selected_tool = !$scope.selected_tool;
     drawingManager.setMap($scope.selected_tool ? map : null);
-    map.setOptions({ draggable: !$scope.selected_tool })
+    map.setOptions({ draggable: !$scope.selected_tool });
   };
 
   drawingManager.addListener('overlaycomplete', function(e) {
@@ -113,11 +113,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
 
     function edit_boundary() {
       var data = {
-        id: boundary.id,
         name: boundary.name,
         geom: JSON.stringify(to_geo_json(overlay)),
       };
-      $http.post('/boundary/'+$scope.route.id+'/edit', data)
+      $http.post('/boundary/'+$scope.route.id+'/edit/'+boundary.id, data)
         .success(function(response) {
           // yay!
         });
@@ -185,5 +184,48 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
     
   }
+
+  $scope.rename_boundary = function(boundary) {
+    swal({
+      title: "Give it a new name",
+      text: "How do you want to name this boundary?",
+      type: "input",
+      showCancelButton: true,
+      closeOnConfirm: true,
+      animation: "slide-from-top",
+      inputPlaceholder: "Boundary name",
+      inputValue: boundary.name,
+    }, function(name) {
+      if (!name) return false;
+      var data = {
+        name: name || 'Untitled boundary',
+        geom: JSON.stringify(to_geo_json(boundary.overlay)),
+      };
+
+      $http.post('/boundary/'+$scope.route.id+'/edit/'+boundary.id, data)
+        .success(function(response) {
+          boundary.name = name;
+        });
+    });
+  };
+
+  $scope.delete_boundary = function(boundary) {
+    swal({
+      title: "Are you sure?",
+      text: "You will not be able to recover the deleted data!",
+      type: "warning",
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: "Yes, delete it!",
+      showCancelButton: true,
+      closeOnConfirm: true,
+    }, function() {
+      $http.post('/boundary/'+$scope.route.id+'/delete/'+boundary.id)
+        .success(function(response) {
+          boundary.overlay.setMap(null);
+          $scope.boundaries = _.reject($scope.boundaries, function(b) { return boundary.id === b.id; });
+        });
+    });
+
+  };
 
 }]);
