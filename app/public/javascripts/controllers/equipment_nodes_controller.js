@@ -85,7 +85,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       closeOnConfirm: true,
     }, function() {
       $http.post('/network/nodes/'+$scope.route.id+'/clear').success(function(response) {
-        $rootScope.feature_layers.network_nodes.reload_data();
+        $rootScope.equipment_layers.network_nodes.reload_data();
       });
     });
   };
@@ -93,12 +93,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.place_random_equipment = function() {
     var gm_event = {
       latLng: new google.maps.LatLng(40.77682494132765, -73.95257949829102),
-    }
+    };
+    $scope.selected_tool = node_types[0].name;
     $rootScope.$broadcast('map_click', gm_event);
   };
 
   $scope.show_number_of_features = function() {
-    $scope.number_of_features = $rootScope.feature_layers.network_nodes.number_of_features();
+    $scope.number_of_features = $rootScope.equipment_layers.network_nodes.number_of_features();
   };
 
   $rootScope.$on('route_selected', function(e, route) {
