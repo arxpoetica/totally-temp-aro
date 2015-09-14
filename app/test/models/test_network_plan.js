@@ -4,7 +4,7 @@ var NetworkPlan = require('../../models/network_plan.js');
 describe('NetworkPlan', function() {
 
 	describe('#shortest_path()', function() {
-		var source = '1';
+		var source = '3';
 		var target = '40103873';
 		var cost_multiplier = 1.5;
 		var route_id;
