@@ -1,3 +1,4 @@
 {
-  "database_url": "postgres://aro:aro@localhost/aro"
+  "database_url": "postgres://aro:aro@localhost/aro",
+  "aro_service_url": "http://localhost:8080/aro-service"
 }

@@ -31,7 +31,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     node_types.forEach(function(node_type) {
       node_type.visible = true;
     });
-  })
+  });
 
   function empty_changes() {
     return { insertions: [], deletions: [], updates: [] };
@@ -168,6 +168,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       });
     });
   });
+
+  $scope.recalculate_network_nodes = function() {
+    var data = {};
+    $http.post('/network/nodes/'+$scope.route.id+'/recalc', data).success(function(response) {
+      var layer = $rootScope.equipment_layers['network_nodes'];
+      layer.reload_data();
+    });
+  };
 
 
 }]);

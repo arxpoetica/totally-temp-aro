@@ -222,6 +222,12 @@ api.post('/network/nodes/:route_id/clear', check_owner_permission, function(requ
 	Network.clear_network_nodes(route_id, jsonHandler(response, next));
 });
 
+// Recalculate network nodes
+api.post('/network/nodes/:route_id/recalc', check_owner_permission, function(request, response, next) {
+	var route_id = +request.params.route_id;
+	Network.recalculate_nodes(route_id, jsonHandler(response, next));
+});
+
 // Network node types
 api.get('/network/nodes', function(request, response, next) {
 	Network.view_network_node_types(jsonHandler(response, next));
