@@ -10,6 +10,8 @@ import java.util.function.Consumer;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.event.TraversalListener;
 import org.jgrapht.traverse.GraphIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphModel;
@@ -17,6 +19,11 @@ import com.altvil.aro.service.graph.node.GraphNode;
 
 public class GraphModelImpl<E extends AroEdge> implements GraphModel<E> {
 
+	
+	private static final Logger log = LoggerFactory
+			.getLogger(GraphModelImpl.class.getName());
+
+	
 	private DirectedGraph<GraphNode, E> graph;
 	private GraphNode root;
 
@@ -115,7 +122,9 @@ public class GraphModelImpl<E extends AroEdge> implements GraphModel<E> {
 			if( !visited.contains(node) ) {
 				visited.add(node) ;
 				
-				System.out.println("outgoing = " + graph.outgoingEdgesOf(node) + " incomming = " + graph.incomingEdgesOf(node)) ;
+				if( log.isTraceEnabled() ) {
+					System.out.println("outgoing = " + graph.outgoingEdgesOf(node) + " incomming = " + graph.incomingEdgesOf(node)) ;
+				}
 			
 				for(AroEdge ae : graph.incomingEdgesOf(node)) {
 					tarverse(ae.getSourceNode()) ;
