@@ -292,7 +292,17 @@ NetworkPlan.create_route = function(name, area, user, callback) {
       Permission.grant_access(id, user.id, 'owner', callback);
     })
     .then(function(callback) {
-      var sql = 'SELECT id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds, created_at, updated_at FROM custom.route WHERE id=$1;';
+      var sql = multiline(function() {;/*
+        SELECT
+          route.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
+          users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
+          created_at, updated_at
+        FROM
+          custom.route
+        LEFT JOIN custom.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
+        LEFT JOIN custom.users ON users.id = permissions.user_id
+        WHERE route.id=$1
+      */});
       database.findOne(sql, [id], callback);
     })
     .end(callback);
