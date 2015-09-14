@@ -97,8 +97,8 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 
 	private void add(GraphNode src, GraphNode target, GraphEdge edge) {
 
-		if (log.isDebugEnabled()) {
-			log.debug(src.getId() + "->" + target.getId() + " length= "
+		if (log.isTraceEnabled()) {
+			log.trace(src.getId() + "->" + target.getId() + " length= "
 					+ edge.getEdgeLength() + " type=" + edge.getEdgeType());
 		}
 
