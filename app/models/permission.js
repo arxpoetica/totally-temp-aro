@@ -24,4 +24,9 @@ Permission.revoke_access = function(route_id, user_id, callback) {
   database.execute(sql, [route_id, user_id], callback);
 };
 
+Permission.find_permission = function(route_id, user_id, callback) {
+  var sql = 'SELECT rol FROM custom.permissions WHERE route_id=$1 AND user_id=$2';
+  database.findOne(sql, [route_id, user_id], callback);
+};
+
 module.exports = Permission;

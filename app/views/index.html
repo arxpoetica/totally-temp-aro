@@ -140,7 +140,8 @@
                 <ul class="dropdown-menu">
                   <li><a href="javascript:void(0)" ng-click="save_as()">Save as…</a></li>
                   <li role="separator" class="divider"></li>
-                  <li><a href="javascript:void(0)" ng-click="clear_route()">Clear plan</a></li>
+                  <li><a href="javascript:void(0)" ng-click="clear_route()"
+                    <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Clear plan</a></li>
                   <li><a href="javascript:void(0)" ng-click="delete_route(route)"
                     <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Delete plan</a></li>
                   <li role="separator" class="divider"></li>

@@ -209,11 +209,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.share_route = function() {
     $('#share-route').modal('hide');
     var params = {
-      route: $scope.shared_route.id,
-      user: +$('#share-route-search').select2('val'), // will be removed in select2 4.1
+      user_id: +$('#share-route-search').select2('val'), // will be removed in select2 4.1
       message: $('#share-route textarea').val(),
     }
-    $http.post('/permission/grant', params).success(function(response) {
+    $http.post('/permissions/'+$scope.shared_route.id+'/grant', params).success(function(response) {
       swal({
         title:'Network plan shared successfully',
         type:'success'

@@ -39,7 +39,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
           })
           var overlay = new google.maps.Polygon({ 
             paths: paths, 
-            editable: true,
+            editable: route.owner_id === user_id,
             strokeWeight: 2,
           });
           boundary.overlay = overlay;

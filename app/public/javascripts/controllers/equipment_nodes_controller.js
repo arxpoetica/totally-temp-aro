@@ -147,7 +147,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
     if (map_layer.type !== 'network_nodes'
       || !map_tools.is_visible('network_nodes')
-      || !feature.getProperty('unselectable')) {
+      || !feature.getProperty('unselectable')
+      || $scope.route.owner_id !== user_id) {
       return;
     }
     options.add('Delete equipment node', function(map_layer, feature) {
