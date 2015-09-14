@@ -276,7 +276,7 @@ NetworkPlan.create_route = function(name, area, user, callback) {
     txain(function(callback) {
       var sql = multiline(function(){;/*
         INSERT INTO custom.route (name, area_name, area_centroid, area_bounds, created_at, updated_at)
-        VALUES ($1, $2, ST_GeomFromText($3), ST_Envelope(ST_GeomFromText($4)), NOW(), NOW()) RETURNING id;
+        VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_Envelope(ST_GeomFromText($4, 4326)), NOW(), NOW()) RETURNING id;
       */});
       var params = [
         name,
@@ -557,6 +557,40 @@ function delete_targets(route_id, location_ids, callback) {
       WHERE route_id=$1 AND location_id=$2
     */});
     database.execute(sql, [route_id, location_id], callback);
+  })
+  .end(callback);
+};
+
+NetworkPlan.calculate_area_data = function(route_id, callback) {
+  var data = {};
+
+  txain(function(callback) {
+    var sql = multiline(function() {;/*
+      SELECT wirecenter, MIN(ST_distance(geom, (SELECT area_centroid FROM custom.route WHERE id=$1) )) AS distance
+      FROM aro.wirecenters
+      GROUP BY wirecenter
+      ORDER BY distance
+      LIMIT 1
+    */});
+    database.findOne(sql, [route_id], callback);
+  })
+  .then(function(row, callback) {
+    data.wirecenter = row.wirecenter;
+
+    var sql = multiline(function() {;/*
+      SELECT statefp, countyfp, MIN(ST_distance(geom, (SELECT area_centroid FROM custom.route WHERE id=$1) )) AS distance
+      FROM aro.cousub
+      GROUP BY statefp, countyfp
+      ORDER BY distance
+      LIMIT 1
+    */});
+    database.findOne(sql, [route_id], callback);
+  })
+  .then(function(row, callback) {
+    data.statefp = row.statefp;
+    data.countyfp = row.countyfp;
+
+    callback(null, data);
   })
   .end(callback);
 };

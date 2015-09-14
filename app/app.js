@@ -283,6 +283,12 @@ api.post('/route_optimizer/:route_id/clear', check_owner_permission, function(re
 	NetworkPlan.clear_route(route_id, jsonHandler(response, next));
 });
 
+// Clear an existing route
+api.get('/network_plan/:route_id/area_data', check_any_permission, function(request, response, next) {
+	var route_id = request.params.route_id;
+	NetworkPlan.calculate_area_data(route_id, jsonHandler(response, next));
+});
+
 // Export a route as KML
 api.get('/route_optimizer/:route_id/:file_name/export', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;

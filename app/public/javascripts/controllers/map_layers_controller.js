@@ -186,6 +186,15 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     var layer = equipment_layers.network_nodes;
     var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
     layer.set_api_endpoint(api_endpoint);
+
+    if (route) {
+      $http.get('/network_plan/'+route.id+'/area_data')
+        .success(function(response) {
+          area_layers['wirecenter'].set_api_endpoint('/wirecenters/'+response.wirecenter);
+          area_layers['county_subdivisions_layer'].set_api_endpoint('/county_subdivisions/'+response.statefp);
+          area_layers['census_blocks_layer'].set_api_endpoint('/census_blocks/'+response.statefp+'/'+response.countyfp);
+        });
+    }
   });
 
 });
