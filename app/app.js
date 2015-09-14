@@ -310,9 +310,18 @@ api.post('/boundary/:route_id/create', check_owner_permission, function(request,
 });
 
 // Edit a boundary
-api.post('/boundary/:route_id/edit', check_owner_permission, function(request, response, next) {
+api.post('/boundary/:route_id/edit/:boundary_id', check_owner_permission, function(request, response, next) {
 	var data = request.body;
+	data.id = request.params.boundary_id;
+	data.route_id = request.params.route_id;
 	models.Boundary.edit_boundary(data, jsonHandler(response, next));
+});
+
+// Delete a boundary
+api.post('/boundary/:route_id/delete/:boundary_id', check_owner_permission, function(request, response, next) {
+	var route_id = +request.params.route_id;
+	var boundary_id = +request.params.boundary_id;
+	models.Boundary.delete_boundary(route_id, boundary_id, jsonHandler(response, next));
 });
 
 // Find boundaries of a network plan
