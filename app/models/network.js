@@ -123,7 +123,7 @@ Network.edit_network_nodes = function(route_id, changes, callback) {
   })
   .then(function(callback) {
     var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
-    database.query(sql, [route_id], callback);
+    database.execute(sql, [route_id], callback);
   })
   .end(callback);
 };

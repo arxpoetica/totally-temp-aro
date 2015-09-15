@@ -258,7 +258,7 @@ NetworkPlan.create_route = function(name, area, user, callback) {
     user = null;
   }
 
-  var id
+  var id;
 
   validate(function(expect) {
     expect(area, 'area', 'object');
