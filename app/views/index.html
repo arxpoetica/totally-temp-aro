@@ -323,12 +323,14 @@
             <% if (env_is_test) { %>
               <a href="javascript:void(0)" ng-click="feature_layers.locations.select_random_features()" ng-attr-data-loaded="{{feature_layers.locations.data_loaded}}">.</a>
             <% } %>
+            <!--
             <hr>
             <div class="checkbox">
               <label>
                 <input type="checkbox" ng-model="always_shows_sources" ng-change="toggle_always_show_sources()"> Always show selected sources
               </label>
             </div>
+            -->
             <div class="checkbox">
               <label>
                 <input type="checkbox" ng-model="always_shows_targets" ng-change="toggle_always_show_targets()"> Always show selected targets

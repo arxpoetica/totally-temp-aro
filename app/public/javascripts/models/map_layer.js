@@ -252,7 +252,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		function load_heatmap_layer() {
 			if (!layer.heatmap_layer) return;
 			var arr = [];
-			layer.data_layer.forEach(function(feature) {
+			layer.features.forEach(function(feature) {
 				arr.push(feature.getGeometry().get());
 			});
 			layer.heatmap_layer.setData(new google.maps.MVCArray(arr));
