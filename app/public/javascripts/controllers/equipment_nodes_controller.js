@@ -175,6 +175,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/network/nodes/'+$scope.route.id+'/recalc', data).success(function(response) {
       var layer = $rootScope.equipment_layers['network_nodes'];
       layer.reload_data();
+      $rootScope.$broadcast('equipment_nodes_changed');
     });
   };
 
