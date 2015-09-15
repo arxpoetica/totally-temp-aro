@@ -99,6 +99,7 @@ describe('Network', function() {
 	describe('#edit_network_nodes() and #clear_network_nodes()', function() {
 		var route_id;
 		var nodes;
+		var node_id;
 
 		before(function(done) {
 			var area = {
@@ -172,6 +173,63 @@ describe('Network', function() {
 				expect(err).to.not.be.ok;
 				expect(output.equipment_node_types).to.be.an('array');
 				expect(output.total).to.be.a('number');
+				done();
+			});
+		});
+
+		it('should return network nodes of a type', function(done) {
+			Network.view_network_nodes(['splice_point'], route_id, function(err, output) {
+				expect(err).to.be.null;
+				expect(output.feature_collection.features).to.be.an('array');
+				expect(output.feature_collection.features).to.have.length(1);
+				node_id = output.feature_collection.features[0].properties.id;
+				done();
+			});
+		});
+
+		it('should edit network nodes', function(done) {
+			var changes = {
+				updates: [
+					{
+						lat: 40.7752768348037,
+						lon: -73.9540386199951,
+						type: 2,
+						id: node_id,
+					}
+				],
+			};
+			Network.edit_network_nodes(route_id, changes, function(err, output) {
+				expect(err).to.be.null;
+				done();
+			});
+		});
+
+		it('should add another network node', function(done) {
+			var changes = {
+				insertions: [
+					{
+						lat: 40.7752768348037,
+						lon: -73.9540386199951,
+						type: 2,
+					}
+				],
+			};
+			Network.edit_network_nodes(route_id, changes, function(err, output) {
+				expect(err).to.be.null;
+				done();
+			});
+		});
+
+		it('should delete network nodes', function(done) {
+			var changes = {
+				deletions: [
+					{
+						id: node_id,
+					}
+				],
+			};
+			Network.edit_network_nodes(route_id, changes, function(err, output) {
+				expect(err).to.be.null;
 				done();
 			});
 		});

@@ -22,3 +22,5 @@ aro-service/.classpath
 
 
 *.pyc
+
+app/models/test_permission.js

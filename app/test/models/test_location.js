@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
-var Location = require('../../models/location.js');
+var models = require('../../models');
+var Location = models.Location;
 
 describe('Location', function() {
 
@@ -14,6 +15,20 @@ describe('Location', function() {
 
 		it('should return a GeoJSON FeatureCollection', function(done) {
 			Location.find_all(function(err, output) {
+				expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
+				done();
+			});
+		});
+
+		it('should return only businesses', function(done) {
+			Location.find_all('businesses', function(err, output) {
+				expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
+				done();
+			});
+		});
+
+		it('should return only households', function(done) {
+			Location.find_all('households', function(err, output) {
 				expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
 				done();
 			});
@@ -115,6 +130,37 @@ describe('Location', function() {
 			});
 		});
 
+		it('should create a commercial location', function(done) {
+			values.type = 'commercial';
+			values.number_of_employees = 1;
+			Location.create_location(values, function(err, output) {
+				expect(err).to.be.null;
+				expect(output.properties.id).to.not.be.null;
+				done();
+			});
+		});
+
+		it('should create a residential location', function(done) {
+			values.type = 'residential';
+			values.number_of_households = 1;
+			Location.create_location(values, function(err, output) {
+				expect(err).to.be.null;
+				expect(output.properties.id).to.not.be.null;
+				done();
+			});
+		});
+
+		it('should create a combo location', function(done) {
+			values.type = 'combo';
+			values.number_of_households = 1;
+			values.number_of_employees = 1;
+			Location.create_location(values, function(err, output) {
+				expect(err).to.be.null;
+				expect(output.properties.id).to.not.be.null;
+				done();
+			});
+		});
+
 	});
 	
 	describe('#show_businesses()', function(done) {
@@ -192,6 +238,22 @@ describe('Location', function() {
 				done();
 			});
 		});
+	});
+
+	describe('#find_industries()', function() {
+
+		it('should return all the industries', function(done) {
+			models.Location.find_industries(function(err, industries) {
+				expect(err).to.not.be.ok;
+				expect(industries).to.be.an('array');
+				expect(industries).to.have.length.above(0);
+				var industry = industries[0];
+				expect(industry.id).to.be.a('number');
+				expect(industry.description).to.be.a('string');
+				done();
+			});
+		});
+
 	});
 
 });
