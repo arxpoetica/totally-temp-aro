@@ -18,6 +18,11 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
       name: 'Polygon selection tool',
     },
   };
+  $scope.user_id = user_id;
+  $scope.route = null;
+  $rootScope.$on('route_selected', function(e, route) {
+    $scope.route = route;
+  });
 
   $scope.is_selected_tool = function(name) {
     return drawingManager.getDrawingMode() === (name ? name : null);

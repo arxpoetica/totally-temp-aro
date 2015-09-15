@@ -31,6 +31,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		var feature_dragged;
 
 		data_layer.addListener('click', function(event) {
+			if (!selection.is_enabled()) return;
 			$rootScope.$broadcast('map_layer_clicked_feature', event, layer);
 			if (layer.single_selection) {
 				var changes = create_empty_changes(layer);
@@ -42,7 +43,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				layer.set_feature_selected(event.feature, true, changes);
 				broadcast_changes(layer, changes);
 			} else {
-				if (!selection.is_enabled() || !event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return;
+				if (!event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return;
 				var changes = create_empty_changes(layer);
 				layer.toggle_feature(event.feature, changes);
 				broadcast_changes(layer, changes);

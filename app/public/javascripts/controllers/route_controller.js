@@ -21,9 +21,10 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       return;
     }
 
+
     $http.get('/route_optimizer/'+route.id).success(function(response) {
       redraw_route(response);
-      selection.set_enabled(true);
+      selection.set_enabled(route.owner_id === user_id);
       if ((response.metadata.sources || []).length > 0) {
         $rootScope.equipment_layers.network_nodes.show();
       }

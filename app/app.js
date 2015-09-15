@@ -258,14 +258,14 @@ api.get('/route_optimizer/:route_id/metadata', check_any_permission, function(re
 });
 
 // Edits the route of an existing network plan
-api.post('/route_optimizer/:route_id/edit', check_any_permission, function(request, response, next) {
+api.post('/route_optimizer/:route_id/edit', check_owner_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	var changes = request.body;
 	NetworkPlan.edit_route(route_id, changes, jsonHandler(response, next));
 });
 
 // Edits basic information of an existing route
-api.post('/route_optimizer/:route_id/save', check_any_permission, function(request, response, next) {
+api.post('/route_optimizer/:route_id/save', check_owner_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	var changes = request.body;
 	NetworkPlan.save_route(route_id, changes, jsonHandler(response, next));
