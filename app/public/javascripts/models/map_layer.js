@@ -6,16 +6,16 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.api_endpoint = options.api_endpoint;
 		this.style_options = options.style_options;
 		this.data_layer = new google.maps.Data();
-		this.data_layer.setMap(map);
 		this.metadata = {};
 		this.data_loaded = false;
 		this.visible = false;
 		this.data = options.data;
 		this.type = options.type;
 		this.always_show_selected = false;
-		this.set_style('normal');
 		this.single_selection = options.single_selection;
 		this.highlighteable = !!options.highlighteable;
+		this.features = [];
+		this.set_style('normal');
 
 		var collection;
 		if (this.type === 'locations') {
@@ -137,6 +137,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 	MapLayer.prototype.select_feature = function(feature) {
 		feature.selected = true;
 		if (this.style_options.selected) {
+			this.data_layer.add(feature);
 			this.data_layer.overrideStyle(feature, this.style_options.selected);
 		}
 	};
@@ -202,20 +203,34 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		$rootScope.$broadcast('map_layer_clicked_feature', event, this);
 	}
 
-	// Load GeoJSON data into the layer if it's not already loaded
-	MapLayer.prototype.load_data = function(val) {
-		var layer = this;
-		if (val) {
-			if (typeof val === 'string') {
-				layer.api_endpoint = val;
+	MapLayer.prototype.addGeoJson = function(geo_json) {
+		this.features = this.features.concat(this.data_layer.addGeoJson(geo_json));
+		this.apply_filter();
+	}
+
+	MapLayer.prototype.set_filter = function(filter) {
+		this.filter = filter;
+		this.apply_filter();
+	}
+
+	MapLayer.prototype.apply_filter = function() {
+		var self = this;
+		var filter = self.filter || function() { return true; };
+		this.features.forEach(function(feature) {
+			if (!filter(feature)) {
+				self.data_layer.remove(feature);
 			} else {
-				layer.data = val;
+				self.data_layer.add(feature);
 			}
-			layer.clear_data();
-		}
+		});
+	}
+
+	// Load GeoJSON data into the layer if it's not already loaded
+	MapLayer.prototype.load_data = function() {
+		var layer = this;
 		if (!layer.data_loaded) {
 			if (layer.data) {
-				this.data_layer.addGeoJson(layer.data);
+				this.addGeoJson(layer.data);
 				load_heatmap_layer();
 				layer.data_loaded = true;
 				$rootScope.$broadcast('map_layer_loaded_data', layer);
@@ -223,7 +238,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			} else if (this.api_endpoint) {
 				$http.get(this.api_endpoint).success(function(response) {
 					var data = response;
-					layer.data_layer.addGeoJson(data.feature_collection);
+					layer.addGeoJson(data.feature_collection);
 					load_heatmap_layer();
 					layer.metadata = data.metadata;
 					layer.data_loaded = true;
@@ -280,7 +295,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		var collection = this.collection;
 
 		if (collection) {
-			layer.data_layer.forEach(function(feature) {
+			layer.features.forEach(function(feature) {
 				var id = feature.getProperty('id');
 				if (collection.contains(id)) {
 					layer.select_feature(feature);
@@ -310,12 +325,14 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 		if (type === 'normal') {
 			this.data_layer.setStyle(this.style_options.normal);
+			this.set_filter(null);
 			this.configure_feature_styles();
 		} else if (type === 'highlight') {
 			this.data_layer.setStyle(this.style_options.highlight);
 		} else if (type === 'hidden') {
-			this.data_layer.setStyle({
-				visible: false,
+			this.data_layer.setStyle(this.style_options.normal);
+			this.set_filter(function(feature) {
+				return feature.selected;
 			});
 		}
 	};
@@ -329,20 +346,20 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 					this.set_style('normal');
 				} else {
 					this.heatmap_layer.setMap(map);
-					this.data_layer.setMap(this.always_show_selected ? map : null);
 					this.set_style('hidden');
+					this.data_layer.setMap(this.always_show_selected ? map : null);
 				}
 			} else {
-				this.data_layer.setMap(map);
 				this.set_style('normal');
+				this.data_layer.setMap(map);
 			}
 		} else {
 			if (this.always_show_selected) {
 				this.set_style('hidden');
 				this.data_layer.setMap(map);
 			} else {
-				this.set_style('normal');
 				this.data_layer.setMap(null);
+				this.set_style('normal');
 			}
 			if (this.heatmap_layer) {
 				this.heatmap_layer.setMap(null);
@@ -361,6 +378,8 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		});
 		this.data_loaded = false;
 		this.metadata = {};
+		this.features.splice(0);
+		delete this.data;
 	}
 
 	MapLayer.prototype.revert_styles = function() {

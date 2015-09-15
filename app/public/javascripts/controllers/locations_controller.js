@@ -122,7 +122,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   });
 
   $scope.toggle_always_show_sources = function() {
-    $rootScope.feature_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
+    $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
   };
 
   $scope.toggle_always_show_targets = function() {
