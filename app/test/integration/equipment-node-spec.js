@@ -22,17 +22,17 @@ describe('Equipment node spec', function() {
   it('should place a new equipment node', function() {
     element(by.linkText('E')).click();
     element(by.css('[ng-click="show_number_of_features()"]')).click();
-    browser.waitForText(element(by.css('[ng-controller="equipment_nodes_controller"] .form-group span')), '1');
+    browser.waitForText(element(by.id('equipment_nodes_controller_number_of_features')), '5');
     element(by.css('[ng-click="place_random_equipment()"]')).click();
     element(by.css('[ng-click="show_number_of_features()"]')).click();
-    browser.waitForText(element(by.css('[ng-controller="equipment_nodes_controller"] .form-group span')), '2');
+    browser.waitForText(element(by.id('equipment_nodes_controller_number_of_features')), '6');
   });
 
   it('should clear the nodes', function() {
     element(by.css('[ng-click="clear_nodes()"]')).click();
     browser.confirmAlert();
     element(by.css('[ng-click="show_number_of_features()"]')).click();
-    browser.waitForText(element(by.css('[ng-controller="equipment_nodes_controller"] .form-group span')), '1');
+    browser.waitForText(element(by.id('equipment_nodes_controller_number_of_features')), '5');
   });
 
 });

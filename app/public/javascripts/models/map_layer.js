@@ -212,7 +212,6 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 					layer.metadata = data.metadata;
 					layer.data_loaded = true;
 					$rootScope.$broadcast('map_layer_loaded_data', layer);
-
 					layer.configure_feature_styles();
 					layer.sync_selection();
 				});

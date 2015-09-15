@@ -227,10 +227,10 @@
                 <input type="checkbox" ng-click="layer.toggle_visibility()"> {{layer.name}}
               </label>
             </div>
-            <% if (env_is_test) { %>
-              <a href="javascript:void(0)" ng-click="layer.select_random_area()">.</a>
-            <% } %>
           </div>
+          <% if (env_is_test) { %>
+            <a href="javascript:void(0)" ng-click="area_layers.census_blocks_layer.select_random_area()" ng-attr-data-loaded="{{area_layers.census_blocks_layer.data_loaded}}">.</a>
+          <% } %>
           <div ng-repeat="boundary in boundaries" class="hoverable">
             <div class="checkbox">
               <div class="pull-right shown-on-hover btn-group">
@@ -321,7 +321,7 @@
               </label>
             </div>
             <% if (env_is_test) { %>
-              <a href="javascript:void(0)" ng-click="feature_layers.locations.select_random_features()">.</a>
+              <a href="javascript:void(0)" ng-click="feature_layers.locations.select_random_features()" ng-attr-data-loaded="{{feature_layers.locations.data_loaded}}">.</a>
             <% } %>
             <hr>
             <div class="checkbox">
@@ -444,10 +444,15 @@
                     <input type="checkbox" ng-click="layer.toggle_visibility()" ng-checked="layer.visible"> {{layer.name}}
                   </label>
                 </div>
-                <% if (env_is_test) { %>
-                  <a href="javascript:void(0)" ng-click="layer.select_random_features()">.</a>
-                <% } %>
               </div>
+
+              <% if (env_is_test) { %>
+                <a href="javascript:void(0)" ng-click="equipment_layers.network_nodes.select_random_features()" ng-attr-data-loaded="{{equipment_layers.network_nodes.data_loaded}}">.</a>
+                <a href="javascript:void(0)" ng-click="show_number_of_features()">.</a>
+
+                <a href="javascript:void(0)" ng-click="place_random_equipment()">.</a>
+                <span id="equipment_nodes_controller_number_of_features">{{number_of_features}}</span>
+              <% } %>
 
               <div ng-show="route.owner_id === user_id">
                 <hr>
@@ -464,8 +469,9 @@
                 <hr>
                 <div class="row">
                   <div class="col-sm-12">
-                    <a class="btn btn-block btn-default btn-sm" ng-click="recalculate_network_nodes()">Recalculate network nodes</a>
+                    <button class="btn btn-block btn-default btn-sm" ng-click="recalculate_network_nodes()">Recalculate network nodes</button>
                     <br>
+                    <button class="btn btn-sm btn-danger btn-block" ng-click="clear_nodes()" type="button">Clear network nodes</button>
                   </div>
                 </div>
               </div>

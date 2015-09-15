@@ -21,20 +21,22 @@ describe('Create a route', function() {
   });
 
   it('should show a layer', function() {
-    var btn = element(by.repeater('(key, layer) in feature_layers').row(0)).element(by.css('[ng-click="layer.toggle_visibility()"]'));
-    btn.click();
-    browser.waitForAttribute(btn, 'data-loaded', 'true');
+    element(by.linkText('L')).click();
+    var elem = element(by.css('[ng-click="feature_layers.locations.select_random_features()"]'));
+    browser.waitForAttribute(elem, 'data-loaded', 'true');
   });
 
   it('should show the other layer', function() {
-    var btn = element(by.repeater('(key, layer) in feature_layers').row(1)).element(by.css('[ng-click="layer.toggle_visibility()"]'));
-    btn.click();
-    browser.waitForAttribute(btn, 'data-loaded', 'true');
+    element(by.linkText('E')).click();
+    var elem = element(by.css('[ng-click="equipment_layers.network_nodes.select_random_features()"]'));
+    browser.waitForAttribute(elem, 'data-loaded', 'true');
   });
 
   it('should select a few features', function() {
-    element(by.repeater('(key, layer) in feature_layers').row(0)).element(by.css('[ng-click="layer.select_random_features()"]')).click();
-    element(by.repeater('(key, layer) in feature_layers').row(1)).element(by.css('[ng-click="layer.select_random_features()"]')).click();
+    element(by.linkText('L')).click();
+    element(by.css('[ng-click="feature_layers.locations.select_random_features()"]')).click();
+    element(by.linkText('E')).click();
+    element(by.css('[ng-click="equipment_layers.network_nodes.select_random_features()"]')).click();
 
     browser.waitForAmount(element(by.id('shortest_path_total_cost')));
   });
@@ -63,7 +65,6 @@ describe('Create a route', function() {
     element(by.css('#network_plan_menu > a')).click();
     element(by.css('[ng-click="clear_route()"]')).click();
     browser.confirmAlert();
-    element(by.id('map_tools_toggle_route')).click();
     browser.waitForText(element(by.id('shortest_path_total_cost')), '$0.00');
   });
 
