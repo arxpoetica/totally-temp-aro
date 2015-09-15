@@ -35,7 +35,7 @@ Boundary.edit_boundary = function(data, callback) {
     data.name,
     data.geom,
     data.id,
-    data.route_id, // this may look redundant but it's for permissions checking
+    data.route_id, // this may look redundant but it's for checking permissions
   ];
   database.execute(sql, params, callback);
 };
