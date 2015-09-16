@@ -27,6 +27,18 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     $('#market-size').modal('show');
   });
 
+  $rootScope.$on('market_profile_selected', function(e, json, values) {
+    geo_json = json;
+    $('#market-size').modal('show');
+    if (values) {
+      chart && chart.destroy();
+      $scope.values = values;
+      show_chart();
+    } else {
+      $scope.calculate_market_size();
+    }
+  });
+
   var canceller = null;
   $scope.calculate_market_size = function() {
     $scope.values = [];

@@ -36,7 +36,7 @@ MarketSize.filters = function(callback) {
 };
 
 MarketSize.calculate = function(geo_json, threshold, filters, callback) {
-  threshold = +threshold || 0;
+  threshold = threshold || 152.4; // 500 feet in meters
   var def = { total: 10 };
   var params = [];
   var sql = multiline(function() {;/*
@@ -74,7 +74,7 @@ MarketSize.calculate = function(geo_json, threshold, filters, callback) {
       AND e.min_value <= b.number_of_employees
       AND e.max_value >= b.number_of_employees
     WHERE
-      ST_Intersects(ST_Buffer(ST_GeomFromGeoJSON($x1)::geography, $x2), b.geog)
+      ST_DWithin(ST_GeomFromGeoJSON($x1)::geography, b.geog, $x2)
   */});
   params.push(geo_json);
   sql = sql.replace('$x1', '$'+params.length);
@@ -82,6 +82,6 @@ MarketSize.calculate = function(geo_json, threshold, filters, callback) {
   sql = sql.replace('$x2', '$'+params.length);
   sql += ' GROUP BY spend.year ORDER BY spend.year ASC'
   database.query(sql, params, callback);
-}
+};
 
 module.exports = MarketSize;

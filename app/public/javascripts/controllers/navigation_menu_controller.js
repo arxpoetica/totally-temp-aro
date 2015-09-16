@@ -69,7 +69,40 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       map.setZoom(14);
     }
     $location.path(route ? '/plan/'+route.id : '/');
+
+    $scope.market_profile_values = [];
+    $scope.market_profile_current_year = {};
+    recalculate_market_profile();
   };
+
+  $rootScope.$on('route_changed', function(e) {
+    recalculate_market_profile();
+  });
+
+  function recalculate_market_profile() {
+    $scope.market_profile_calculating = true;
+    $http.get('/network_plan/'+$scope.route.id+'/route_geo_json')
+      .success(function(geo_json) {
+        $scope.route_geo_json = geo_json;
+        var args = {
+          params: { geo_json: JSON.stringify(geo_json) },
+        };
+        $http.get('/market_size/calculate', args)
+          .success(function(response) {
+            $scope.market_profile_values = response;
+            $scope.market_profile_current_year = _.findWhere($scope.market_profile_values, { year: new Date().getFullYear() });
+            $scope.market_profile_calculating = false;
+          })
+          .error(function() {
+            $scope.market_profile_calculating = false;
+          });
+      });
+  };
+
+  $scope.show_market_profile = function() {
+    if (!$scope.route_geo_json) return;
+    $rootScope.$broadcast('market_profile_selected', $scope.route_geo_json, $scope.market_profile_values);
+  }
 
   $scope.delete_route = function(route) {
     if (!route) return;

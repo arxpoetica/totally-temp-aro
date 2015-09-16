@@ -283,10 +283,16 @@ api.post('/route_optimizer/:route_id/clear', check_owner_permission, function(re
 	NetworkPlan.clear_route(route_id, jsonHandler(response, next));
 });
 
-// Clear an existing route
+// Calculate general map information from network plan
 api.get('/network_plan/:route_id/area_data', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	NetworkPlan.calculate_area_data(route_id, jsonHandler(response, next));
+});
+
+// Get the whole route as a single multiline string
+api.get('/network_plan/:route_id/route_geo_json', check_any_permission, function(request, response, next) {
+	var route_id = request.params.route_id;
+	NetworkPlan.route_geo_json(route_id, jsonHandler(response, next));
 });
 
 // Export a route as KML
@@ -350,12 +356,12 @@ api.get('/market_size/filters', function(request, response, next) {
 // Market size filters
 api.get('/market_size/calculate', function(request, response, next) {
 	var geo_json = request.query.geo_json;
-	var threshold = request.query.threshold;
+	var threshold = +request.query.threshold;
 	var filters = {
 		industry: request.query.industry,
 		employees_range: request.query.employees_range,
 		product: request.query.product,
-	}
+	};
 	MarketSize.calculate(geo_json, threshold, filters, jsonHandler(response, next));
 });
 
