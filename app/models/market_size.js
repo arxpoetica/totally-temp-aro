@@ -35,9 +35,8 @@ MarketSize.filters = function(callback) {
   .end(callback);
 };
 
-MarketSize.calculate = function(geo_json, threshold, filters, callback) {
-  threshold = threshold || 152.4; // 500 feet in meters
-  var def = { total: 10 };
+MarketSize.calculate = function(route_id, type, options, callback) {
+  var filters = options.filters;
   var params = [];
   var sql = multiline(function() {;/*
     SELECT
@@ -74,13 +73,22 @@ MarketSize.calculate = function(geo_json, threshold, filters, callback) {
       AND e.min_value <= b.number_of_employees
       AND e.max_value >= b.number_of_employees
     WHERE
-      ST_DWithin(ST_GeomFromGeoJSON($x1)::geography, b.geog, $x2)
   */});
-  params.push(geo_json);
-  sql = sql.replace('$x1', '$'+params.length);
-  params.push(threshold);
-  sql = sql.replace('$x2', '$'+params.length);
-  sql += ' GROUP BY spend.year ORDER BY spend.year ASC'
+  // 152.4 meters = 500 feet
+  if (type === 'boundary') {
+    params.push(options.boundary);
+    sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)'
+  } else if (type === 'route') {
+    params.push(route_id);
+    sql += '\n ST_DWithin((SELECT ST_Union(edge.geom)::geography FROM custom.route_edges JOIN client.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$'+params.length+'), b.geog, 152.4)';
+  } else if (type === 'addressable') {
+    params.push(route_id);
+    sql += '\n ST_DWithin((SELECT ST_Union(edge.geom)::geography FROM custom.route_edges JOIN client.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$'+params.length+'), b.geog, 152.4)';
+    sql += ' AND ';
+    params.push(options.boundary);
+    sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)'
+  }
+  sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
   database.query(sql, params, callback);
 };
 

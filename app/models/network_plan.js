@@ -15,17 +15,6 @@ var _ = require('underscore');
 
 var NetworkPlan = {};
 
-NetworkPlan.route_geo_json = function(route_id, callback) {
-  var sql = multiline(function() {;/*
-    SELECT ST_AsGeoJSON(ST_Union(edge.geom))::json AS geo_json
-    FROM custom.route_edges
-    JOIN client.graph edge
-      ON edge.id = route_edges.edge_id
-    WHERE route_edges.route_id=$1
-  */});
-  database.findValue(sql, [route_id], 'geo_json', callback);
-};
-
 NetworkPlan.find_edges = function(route_id, callback) {
   var sql = multiline(function() {;/*
     SELECT edge.id, edge.edge_length, ST_AsGeoJSON(edge.geom)::json AS geom

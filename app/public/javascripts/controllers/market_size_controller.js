@@ -23,12 +23,14 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   $rootScope.$on('boundary_selected', function(e, json) {
     geo_json = json;
+    $scope.market_type = 'boundary';
     $scope.calculate_market_size();
     $('#market-size').modal('show');
   });
 
-  $rootScope.$on('market_profile_selected', function(e, json, values) {
-    geo_json = json;
+  $rootScope.$on('market_profile_selected', function(e, values) {
+    geo_json = null;
+    $scope.market_type = 'route';
     $('#market-size').modal('show');
     if (values) {
       chart && chart.destroy();
@@ -39,11 +41,17 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     }
   });
 
+  $scope.route = null;
+  $rootScope.$on('route_selected', function(e, route) {
+    $scope.route = route;
+  });
+
   var canceller = null;
   $scope.calculate_market_size = function() {
     $scope.values = [];
     var params = {
-      geo_json:  JSON.stringify(geo_json),
+      boundary: geo_json && JSON.stringify(geo_json),
+      type: $scope.market_type,
       industry: $scope.industry && $scope.industry.id,
       employees_range: $scope.employees_range && $scope.employees_range.id,
       product: $scope.product && $scope.product.id,
@@ -57,7 +65,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     };
     $scope.loading = true;
     chart && chart.destroy();
-    $http.get('/market_size/calculate', args).success(function(response) {
+    $http.get('/market_size/'+$scope.route.id+'/calculate', args).success(function(response) {
       $scope.loading = false;
       $scope.values = response;
       show_chart();

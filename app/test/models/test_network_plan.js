@@ -155,16 +155,6 @@ describe('NetworkPlan', function() {
 		});
 	});
 
-	it('should return the route of a plan as a single feature', function(done) {
-		NetworkPlan.route_geo_json(route_id, function(err, data) {
-			expect(err).to.not.be.ok;
-			expect(data).to.be.an('object');
-			expect(data.type).to.be.equal('MultiLineString');
-			expect(data.coordinates).to.be.an('array');
-			done();
-		});
-	});
-
 	it('should export a route to KML form', function(done) {
 		NetworkPlan.export_kml(route_id, function(err, kml_output) {
 			expect(err).to.not.be.ok;
