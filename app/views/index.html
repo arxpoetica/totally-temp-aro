@@ -310,30 +310,31 @@
           </div>
           <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
             <h2>View</h2>
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" ng-model="show_businesses" ng-change="change_locations_layer()"> Commercial
-              </label>
-            </div>
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" ng-model="show_households" ng-change="change_locations_layer()"> Residential
-              </label>
-            </div>
+            <form>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" ng-model="show_locations_off" ng-change="change_locations_layer()"> Show locations off the route
+                </label>
+              </div>
+              <div class="radio" ng-class="{'disabled': !show_locations_off}">
+                <label>
+                  <input type="radio" ng-model="locations_filter" value="both" ng-change="change_locations_layer()" ng-disabled="!show_locations_off"> Any location
+                </label>
+              </div>
+              <div class="radio" ng-class="{'disabled': !show_locations_off}">
+                <label>
+                  <input type="radio" ng-model="locations_filter" value="businesses" ng-change="change_locations_layer()" ng-disabled="!show_locations_off"> Commercial
+                </label>
+              </div>
+              <div class="radio" ng-class="{'disabled': !show_locations_off}">
+                <label>
+                  <input type="radio" ng-model="locations_filter" value="households" ng-change="change_locations_layer()" ng-disabled="!show_locations_off"> Residential
+                </label>
+              </div>
+            </form>
             <% if (env_is_test) { %>
               <a href="javascript:void(0)" ng-click="feature_layers.locations.select_random_features()" ng-attr-data-loaded="{{feature_layers.locations.data_loaded}}">.</a>
             <% } %>
-            <hr>
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" ng-model="always_shows_sources" ng-change="toggle_always_show_sources()"> Always show selected sources
-              </label>
-            </div>
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" ng-model="always_shows_targets" ng-change="toggle_always_show_targets()"> Always show selected targets
-              </label>
-            </div>
             <div ng-show="route.owner_id === user_id">
               <hr>
               <h2>Build</h2>
