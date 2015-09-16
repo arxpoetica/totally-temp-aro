@@ -25,6 +25,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $scope.always_shows_sources = true;
   $scope.always_shows_targets = true;
+  $scope.show_locations_off = true;
+  $scope.locations_filter = 'both';
 
   $scope.new_location_data = null;
 
@@ -45,17 +47,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $scope.change_locations_layer = function() {
     var layer = $rootScope.feature_layers.locations;
-    if ($scope.show_businesses && $scope.show_households) {
-      layer.show();
-      layer.set_api_endpoint('/locations');
-    } else if ($scope.show_businesses) {
-      layer.show();
-      layer.set_api_endpoint('/locations?type=businesses');
-    } else if ($scope.show_households) {
-      layer.show();
-      layer.set_api_endpoint('/locations?type=households');
-    } else {
+    if (!$scope.show_locations_off) {
       layer.hide();
+    } else {
+      layer.show();
+      var filter = $scope.locations_filter === 'both' ? '' : '?type='+$scope.locations_filter;
+      layer.set_api_endpoint('/locations'+filter);
     }
   }
 
