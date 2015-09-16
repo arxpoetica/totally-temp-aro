@@ -138,13 +138,13 @@
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a href="javascript:void(0)" ng-click="save_as()">Save as…</a></li>
-                  <li role="separator" class="divider"></li>
+                  <li><a href="javascript:void(0)" ng-click="save_as()" ng-show="route.owner_id === user_id">Save as…</a></li>
+                  <li role="separator" class="divider" ng-show="route.owner_id === user_id"></li>
                   <li><a href="javascript:void(0)" ng-click="clear_route()"
                     <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Clear plan</a></li>
                   <li><a href="javascript:void(0)" ng-click="delete_route(route)"
                     <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Delete plan</a></li>
-                  <li role="separator" class="divider"></li>
+                  <li role="separator" class="divider" ng-show="route.owner_id === user_id"></li>
                   <li><a href="javascript:void(0)" ng-click="show_share_route(route)">Share…</a></li>
                   <li><a href="javascript:void(0)" ng-click="export_kml_name()">Export KML…</a></li>
                 </ul>
@@ -176,7 +176,7 @@
         <hr>
 
         <div ng-controller="selection_tools_controller">
-          <div ng-repeat="(key, tool) in available_tools">
+          <div ng-repeat="(key, tool) in available_tools" ng-show="route.owner_id === user_id">
             <p>
               <a href="javascript:void(0)" class="btn btn-default btn-block btn-sm"
                 ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
