@@ -17,8 +17,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
   });
 
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
-    if (!map_tools.is_visible('boundaries')) {
+    if (tool === 'boundaries' && !map_tools.is_visible('boundaries')) {
       drawingManager.setMap(null);
+      $scope.selected_tool = null;
+      map.setOptions({ draggableCursor: null, draggable: true });
     }
   });
 
