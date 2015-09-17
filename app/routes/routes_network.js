@@ -18,29 +18,29 @@ exports.configure = function(api, middleware) {
   });
 
   // Network nodes of an existing route
-  api.get('/network/nodes/:route_id/find', check_any_permission, function(request, response, next) {
-    var route_id = request.params.route_id;
+  api.get('/network/nodes/:plan_id/find', check_any_permission, function(request, response, next) {
+    var plan_id = request.params.plan_id;
     var node_types = request.query.node_types ? request.query.node_types.split(',') : null;
-    models.Network.view_network_nodes(node_types, route_id, jsonHandler(response, next));
+    models.Network.view_network_nodes(node_types, plan_id, jsonHandler(response, next));
   });
 
   // Edit network nodes in a route
-  api.post('/network/nodes/:route_id/edit', check_owner_permission, function(request, response, next) {
-    var route_id = request.params.route_id;
+  api.post('/network/nodes/:plan_id/edit', check_owner_permission, function(request, response, next) {
+    var plan_id = request.params.plan_id;
     var changes = request.body;
-    models.Network.edit_network_nodes(route_id, changes, jsonHandler(response, next));
+    models.Network.edit_network_nodes(plan_id, changes, jsonHandler(response, next));
   });
 
   // Clear network nodes in a route
-  api.post('/network/nodes/:route_id/clear', check_owner_permission, function(request, response, next) {
-    var route_id = request.params.route_id;
-    models.Network.clear_network_nodes(route_id, jsonHandler(response, next));
+  api.post('/network/nodes/:plan_id/clear', check_owner_permission, function(request, response, next) {
+    var plan_id = request.params.plan_id;
+    models.Network.clear_network_nodes(plan_id, jsonHandler(response, next));
   });
 
   // Recalculate network nodes
-  api.post('/network/nodes/:route_id/recalc', check_owner_permission, function(request, response, next) {
-    var route_id = +request.params.route_id;
-    models.Network.recalculate_nodes(route_id, jsonHandler(response, next));
+  api.post('/network/nodes/:plan_id/recalc', check_owner_permission, function(request, response, next) {
+    var plan_id = +request.params.plan_id;
+    models.Network.recalculate_nodes(plan_id, jsonHandler(response, next));
   });
 
   // Network node types

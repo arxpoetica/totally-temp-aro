@@ -10,8 +10,8 @@ function jsonHandler(response, next) {
 function check_permission(rol) {
   return function(request, response, next) {
     var user = request.user;
-    var route_id = request.params.route_id;
-    models.Permission.find_permission(route_id, user.id, function(err, permission) {
+    var plan_id = request.params.plan_id;
+    models.Permission.find_permission(plan_id, user.id, function(err, permission) {
       if (err) return next(err);
       // !rol means any permission is ok
       if (permission && (!rol || rol === permission.rol || permission.rol === 'owner')) {

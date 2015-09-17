@@ -26,7 +26,7 @@ describe('NetworkPlan', function() {
 				}
 			},
 		};
-		NetworkPlan.create_route('Untitled route', area, function(err, route) {
+		NetworkPlan.create_plan('Untitled route', area, function(err, route) {
 			expect(err).to.not.be.ok;
 			expect(route).to.have.property('id');
 			expect(route).to.have.property('name');
@@ -59,7 +59,7 @@ describe('NetworkPlan', function() {
 		var data = {
 			name: 'Other name',
 		};
-		NetworkPlan.save_route(route_id, data, function(err, output) {
+		NetworkPlan.save_plan(route_id, data, function(err, output) {
 			expect(!!output).to.be.equal(true);
 			done();
 		});
@@ -82,7 +82,7 @@ describe('NetworkPlan', function() {
 	});
 
 	it('should return the information of an existing route', function(done) {
-		NetworkPlan.find_route(route_id, function(err, route) {
+		NetworkPlan.find_plan(route_id, function(err, route) {
 			expect(route).to.have.property('metadata');
 			expect(route.metadata.total_cost).to.be.a('number');
 
@@ -120,7 +120,7 @@ describe('NetworkPlan', function() {
 	});
 
 	it('should return the metadata information of an existing route', function(done) {
-		NetworkPlan.find_route(route_id, true, function(err, route) {
+		NetworkPlan.find_plan(route_id, true, function(err, route) {
 			expect(route).to.have.property('metadata');
 			expect(route.metadata.total_cost).to.be.a('number');
 
@@ -205,7 +205,7 @@ describe('NetworkPlan', function() {
 	});
 
 	it('should delete an existing route', function(done) {
-		NetworkPlan.delete_route(route_id, function(err, output) {
+		NetworkPlan.delete_plan(route_id, function(err, output) {
 			expect(!!output).to.be.equal(true);
 			done();
 		});

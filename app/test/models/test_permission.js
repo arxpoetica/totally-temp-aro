@@ -43,7 +43,7 @@ describe('Permission', function() {
           }
         }
       };
-      models.NetworkPlan.create_route('Untitled route', area, owner, callback);
+      models.NetworkPlan.create_plan('Untitled route', area, owner, callback);
     })
     .then(function(route, callback) {
       route_id = route.id;

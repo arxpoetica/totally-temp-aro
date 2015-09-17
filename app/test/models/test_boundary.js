@@ -24,7 +24,7 @@ describe('Boundary', function() {
         }
       }
     };
-    models.NetworkPlan.create_route('Untitled route', area, function(err, route) {
+    models.NetworkPlan.create_plan('Untitled route', area, function(err, route) {
       expect(route).to.have.property('id');
       expect(route).to.have.property('name');
       route_id = route.id;

@@ -12,7 +12,7 @@ exports.configure = function(app, middleware) {
       passwordField: 'password'
     },
     function(email, password, callback) {
-      User.login(email, password, function(err, user) {
+      models.User.login(email, password, function(err, user) {
         if (err && !require('node-errors').isCustomError(err)) return callback(err)
         if (err) return callback(null, false, { message: err.message })
         return callback(err, user);
@@ -20,14 +20,14 @@ exports.configure = function(app, middleware) {
     }
   ));
 
-  passport.serializeUser(function(user, done) {
-    done(null, user.id);
+  passport.serializeUser(function(user, callback) {
+    callback(null, user.id);
   });
 
-  passport.deserializeUser(function(id, done) {
+  passport.deserializeUser(function(id, callback) {
     models.User.find_by_id(id, function(err, user) {
       if (err) return callback(err);
-      done(err, user || false);
+      callback(err, user || false);
     });
   });
 

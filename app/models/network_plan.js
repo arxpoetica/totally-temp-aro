@@ -93,7 +93,7 @@ NetworkPlan.find_customer_types = function(route_id, callback) {
   database.query(sql, [route_id], callback);
 };
 
-NetworkPlan.find_route = function(route_id, metadata_only, callback) {
+NetworkPlan.find_plan = function(route_id, metadata_only, callback) {
   if (arguments.length === 2) {
     callback = metadata_only;
     metadata_only = false;
@@ -224,7 +224,7 @@ NetworkPlan.recalculate_and_find_route = function(route_id, callback) {
     NetworkPlan.recalculate_route(route_id, callback);
   })
   .then(function(callback) {
-    NetworkPlan.find_route(route_id, callback);
+    NetworkPlan.find_plan(route_id, callback);
   })
   .end(callback);
 };
@@ -252,7 +252,7 @@ NetworkPlan.find_all = function(user, callback) {
   database.query(sql, params, callback);
 };
 
-NetworkPlan.create_route = function(name, area, user, callback) {
+NetworkPlan.create_plan = function(name, area, user, callback) {
   if (arguments.length === 3) {
     callback = user;
     user = null;
@@ -309,7 +309,7 @@ NetworkPlan.create_route = function(name, area, user, callback) {
   }, callback);
 };
 
-NetworkPlan.delete_route = function(route_id, callback) {
+NetworkPlan.delete_plan = function(route_id, callback) {
   var sql = multiline(function() {;/*
     DELETE FROM custom.route WHERE id=$1;
   */});
@@ -344,7 +344,7 @@ NetworkPlan.clear_route = function(route_id, callback) {
   .end(callback);
 };
 
-NetworkPlan.save_route = function(route_id, data, callback) {
+NetworkPlan.save_plan = function(route_id, data, callback) {
   var fields = [];
   var params = [];
   var allowed_fields = ['name'];
