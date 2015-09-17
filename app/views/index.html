@@ -107,6 +107,10 @@
               <span data-toggle="modal" data-target="#modal-customer-profile" style="cursor:pointer">
                 <span class="glyphicon glyphicon-scale"></span> {{ route.metadata.total_customers }} customers covered
               </span>
+              |
+              <span data-toggle="modal" ng-click="show_market_profile()" style="cursor:pointer">
+                <span class="glyphicon glyphicon-briefcase" ng-class="{'spin': market_profile_calculating}"></span> <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
+              </span>
             </p>
 
           </div>
@@ -361,6 +365,15 @@
             </div>
             <div class="modal-body">
               <form class="form-horizontal">
+                <div class="form-group form-group-sm" ng-hide="market_type === 'route'">
+                  <label class="col-sm-3 control-label">Market type</label>
+                  <div class="col-sm-9">
+                    <select class="form-control" ng-model="market_type" ng-change="calculate_market_size()">
+                      <option value="boundary">All</option>
+                      <option value="addressable">Addressable</option>
+                    </select>
+                  </div>
+                </div>
                 <div class="form-group form-group-sm">
                   <label class="col-sm-3 control-label">Industry</label>
                   <div class="col-sm-9">
@@ -385,15 +398,6 @@
                     </select>
                   </div>
                 </div>
-                <!--
-                <div class="form-group form-group-sm">
-                  <label class="col-sm-3 control-label">Distance threshold</label>
-                  <div class="col-sm-9">
-                    <input type="text" class="form-control" ng-model="threshold" ng-change="calculate_market_size()">
-                  </div>
-                </div>
-                -->
-
                 <div class="form-group form-group-sm">
                   <div class="col-sm-9 col-sm-offset-3">
                     <p class="form-control-static" ng-show="!loading && values.length === 0">No data available in this area with the selected filters</p>

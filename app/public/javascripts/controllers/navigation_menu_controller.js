@@ -69,7 +69,34 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       map.setZoom(14);
     }
     $location.path(route ? '/plan/'+route.id : '/');
+
+    $scope.market_profile_values = [];
+    $scope.market_profile_current_year = {};
   };
+
+  $rootScope.$on('route_changed', function(e) {
+    recalculate_market_profile();
+  });
+
+  function recalculate_market_profile() {
+    $scope.market_profile_calculating = true;
+    var args = {
+      params: { type: 'route' },
+    };
+    $http.get('/market_size/'+$scope.route.id+'/calculate', args)
+      .success(function(response) {
+        $scope.market_profile_values = response;
+        $scope.market_profile_current_year = _.findWhere($scope.market_profile_values, { year: new Date().getFullYear() });
+        $scope.market_profile_calculating = false;
+      })
+      .error(function() {
+        $scope.market_profile_calculating = false;
+      });
+  };
+
+  $scope.show_market_profile = function() {
+    $rootScope.$broadcast('market_profile_selected', $scope.market_profile_values);
+  }
 
   $scope.delete_route = function(route) {
     if (!route) return;

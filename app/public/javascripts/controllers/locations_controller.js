@@ -59,6 +59,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
     if (tool === 'locations') {
       $scope.change_locations_layer();
+      if (!map_tools.is_visible('locations')) {
+        $scope.selected_tool = null;
+        map.setOptions({ draggableCursor: null });
+      }
     }
   });
 

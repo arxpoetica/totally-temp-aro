@@ -86,6 +86,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     $scope.route_layer = route;
 
     $rootScope.equipment_layers['route'] = route;
+    $rootScope.$broadcast('route_changed');
   }
 
   $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {
