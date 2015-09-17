@@ -55,7 +55,7 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(id, done) {
 	User.find_by_id(id, function(err, user) {
-		if (err) return callback(err);
+		if (err) return done(err);
 		done(err, user || false);
 	});
 });
@@ -283,7 +283,7 @@ api.post('/route_optimizer/:route_id/clear', check_owner_permission, function(re
 	NetworkPlan.clear_route(route_id, jsonHandler(response, next));
 });
 
-// Clear an existing route
+// Calculate general map information from network plan
 api.get('/network_plan/:route_id/area_data', check_any_permission, function(request, response, next) {
 	var route_id = request.params.route_id;
 	NetworkPlan.calculate_area_data(route_id, jsonHandler(response, next));
@@ -348,15 +348,18 @@ api.get('/market_size/filters', function(request, response, next) {
 });
 
 // Market size filters
-api.get('/market_size/calculate', function(request, response, next) {
-	var geo_json = request.query.geo_json;
-	var threshold = request.query.threshold;
-	var filters = {
-		industry: request.query.industry,
-		employees_range: request.query.employees_range,
-		product: request.query.product,
+api.get('/market_size/:route_id/calculate', check_any_permission, function(request, response, next) {
+	var route_id = request.params.route_id;
+	var type = request.query.type;
+	var options = {
+		boundary: request.query.boundary,
+		filters: {
+			industry: request.query.industry,
+			employees_range: request.query.employees_range,
+			product: request.query.product,
+		},
 	}
-	MarketSize.calculate(geo_json, threshold, filters, jsonHandler(response, next));
+	MarketSize.calculate(route_id, type, options, jsonHandler(response, next));
 });
 
 // For testing the error handler
