@@ -7,6 +7,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
     if (map_tools.is_visible('network_nodes')) {
       $rootScope.equipment_layers.network_nodes.show();
+    } else if (tool === 'network_nodes') {
+      $scope.selected_tool = null;
+      map.setOptions({ draggableCursor: null });
     }
   });
 
