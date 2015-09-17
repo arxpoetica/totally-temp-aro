@@ -7,51 +7,51 @@ exports.configure = function(api, middleware) {
   var jsonHandler = middleware.jsonHandler;
 
   // Find all created routes
-  api.get('/route_optimizer/find_all', function(request, response, next) {
+  api.get('/network_plan/find_all', function(request, response, next) {
     models.NetworkPlan.find_all(request.user, jsonHandler(response, next));
   });
 
   // Create a new empty route
-  api.post('/route_optimizer/create', function(request, response, next) {
+  api.post('/network_plan/create', function(request, response, next) {
     var name = request.body.name;
     var area = request.body.area;
     models.NetworkPlan.create_route(name, area, request.user, jsonHandler(response, next));
   });
 
   // Return data of an existing route
-  api.get('/route_optimizer/:route_id', check_any_permission, function(request, response, next) {
+  api.get('/network_plan/:route_id', check_any_permission, function(request, response, next) {
     var route_id = request.params.route_id;
     models.NetworkPlan.find_route(route_id, jsonHandler(response, next));
   });
 
   // Return the metadata of an existing route
-  api.get('/route_optimizer/:route_id/metadata', check_any_permission, function(request, response, next) {
+  api.get('/network_plan/:route_id/metadata', check_any_permission, function(request, response, next) {
     var route_id = request.params.route_id;
     models.NetworkPlan.find_route(route_id, true, jsonHandler(response, next));
   });
 
   // Edits the route of an existing network plan
-  api.post('/route_optimizer/:route_id/edit', check_owner_permission, function(request, response, next) {
+  api.post('/network_plan/:route_id/edit', check_owner_permission, function(request, response, next) {
     var route_id = request.params.route_id;
     var changes = request.body;
     models.NetworkPlan.edit_route(route_id, changes, jsonHandler(response, next));
   });
 
   // Edits basic information of an existing route
-  api.post('/route_optimizer/:route_id/save', check_owner_permission, function(request, response, next) {
+  api.post('/network_plan/:route_id/save', check_owner_permission, function(request, response, next) {
     var route_id = request.params.route_id;
     var changes = request.body;
     models.NetworkPlan.save_route(route_id, changes, jsonHandler(response, next));
   });
 
   // Delete an existing route
-  api.post('/route_optimizer/:route_id/delete', check_owner_permission, function(request, response, next) {
+  api.post('/network_plan/:route_id/delete', check_owner_permission, function(request, response, next) {
     var route_id = request.params.route_id;
     models.NetworkPlan.delete_route(route_id, jsonHandler(response, next));
   });
 
   // Clear an existing route
-  api.post('/route_optimizer/:route_id/clear', check_owner_permission, function(request, response, next) {
+  api.post('/network_plan/:route_id/clear', check_owner_permission, function(request, response, next) {
     var route_id = request.params.route_id;
     models.NetworkPlan.clear_route(route_id, jsonHandler(response, next));
   });
@@ -63,7 +63,7 @@ exports.configure = function(api, middleware) {
   });
 
   // Export a route as KML
-  api.get('/route_optimizer/:route_id/:file_name/export', check_any_permission, function(request, response, next) {
+  api.get('/network_plan/:route_id/:file_name/export', check_any_permission, function(request, response, next) {
     var route_id = request.params.route_id;
     var file_name = request.params.file_name;
 

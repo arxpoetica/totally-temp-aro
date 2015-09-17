@@ -87,14 +87,14 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $scope.route = null;
         $rootScope.$broadcast('route_selected', null);
       }
-      $http.post('/route_optimizer/'+route.id+'/delete').success(function(response) {
+      $http.post('/network_plan/'+route.id+'/delete').success(function(response) {
         $scope.load_routes();
       });
     });
   };
 
   $scope.load_routes = function(callback) {
-    $http.get('/route_optimizer/find_all').success(function(response) {
+    $http.get('/network_plan/find_all').success(function(response) {
       $scope.routes = response;
       callback && callback();
     });
@@ -147,7 +147,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         bounds: $scope.new_route_area_bounds,
       },
     };
-    $http.post('/route_optimizer/create', params).success(function(response) {
+    $http.post('/network_plan/create', params).success(function(response) {
       $scope.select_route(response);
       $('#new-route').modal('hide');
       $scope.load_routes();
@@ -161,7 +161,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.save_changes = function() {
     $scope.route.name = $scope.edit_route_name;
-    $http.post('/route_optimizer/'+$scope.route.id+'/save', $scope.route).success(function(response) {
+    $http.post('/network_plan/'+$scope.route.id+'/save', $scope.route).success(function(response) {
       $('#edit-route').modal('hide');
     });
   };
@@ -177,7 +177,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       closeOnConfirm: true,
     }, function() {
       $rootScope.$broadcast('route_cleared', $scope.route);
-      $http.post('/route_optimizer/'+$scope.route.id+'/clear').success(function(response) {
+      $http.post('/network_plan/'+$scope.route.id+'/clear').success(function(response) {
         // success
       });
     });
@@ -196,7 +196,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       $('#export-error').hide();
       $('#export-route').modal('hide');
     
-      location.href = '/route_optimizer/' + $scope.route.id + '/' + params.name + '/export';
+      location.href = '/network_plan/' + $scope.route.id + '/' + params.name + '/export';
     }
   };
 

@@ -21,8 +21,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       return;
     }
 
-
-    $http.get('/route_optimizer/'+route.id).success(function(response) {
+    $http.get('/network_plan/'+route.id).success(function(response) {
       redraw_route(response);
       selection.set_enabled(route.owner_id === user_id);
       if ((response.metadata.sources || []).length > 0) {
@@ -46,7 +45,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   });
 
   $rootScope.$on('equipment_nodes_changed', function() {
-    $http.get('/route_optimizer/'+$scope.route.id+'/metadata').success(function(response) {
+    $http.get('/network_plan/'+$scope.route.id+'/metadata').success(function(response) {
       redraw_route(response, true);
     });
   });
@@ -93,7 +92,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     if (!$scope.route) return;
 
     if (layer.type === 'locations' || layer.type === 'network_nodes') {
-      var url = '/route_optimizer/'+$scope.route.id+'/edit'
+      var url = '/network_plan/'+$scope.route.id+'/edit'
       var config = {
         url: url,
         method: 'post',
