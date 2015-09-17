@@ -11,10 +11,8 @@ var CountySubdivision = {};
 
 // Find all County Subdivisions in a US state by querying the `statefp` field
 //
-// 1. database: 'pg' from var pg = require('pg')
-// 2. con_string: 'con_string' from var con_string = 'postgres://aro:aro@localhost/aro'
-// 3. statefp: String. ex. '36' is New York state
-// 4. callback: function to return a GeoJSON object
+// 1. statefp: String. ex. '36' is New York state
+// 2. callback: function to return a GeoJSON object
 CountySubdivision.find_by_statefp = function(statefp, callback) {
 	var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.cousub WHERE statefp = $1';
 	var params = [statefp];
@@ -28,7 +26,7 @@ CountySubdivision.find_by_statefp = function(statefp, callback) {
 				'type': 'Feature',
 				'geometry': row.geom,
 			}
-		})
+		});
 
 		var output = {
 			'feature_collection': {
@@ -36,9 +34,9 @@ CountySubdivision.find_by_statefp = function(statefp, callback) {
 				'features': features
 			},
 		};
-		callback(null, output)
+		callback(null, output);
 	})
-	.end(callback)
+	.end(callback);
 };
 
 module.exports = CountySubdivision;

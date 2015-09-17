@@ -98,7 +98,7 @@ describe('Network', function() {
 	});
 
 	describe('#edit_network_nodes() and #clear_network_nodes()', function() {
-		var route_id;
+		var plan_id;
 		var nodes;
 		var node_id;
 
@@ -120,15 +120,15 @@ describe('Network', function() {
 					}
 				},
 			};
-			NetworkPlan.create_plan('Untitled route', area, function(err, route) {
-				expect(route).to.have.property('id');
-				expect(route).to.have.property('name');
-				route_id = route.id;
+			NetworkPlan.create_plan('Untitled plan', area, function(err, plan) {
+				expect(plan).to.have.property('id');
+				expect(plan).to.have.property('name');
+				plan_id = plan.id;
 				done();
 			});
 		});
 
-		it('should count the network nodes not associated to a route', function(done) {
+		it('should count the network nodes not associated to a plan', function(done) {
 			Network.view_network_nodes(null, null, function(err, output) {
 				expect(err).to.be.null;
 				nodes = output.feature_collection.features.length;
@@ -138,7 +138,7 @@ describe('Network', function() {
 
 		it('should not fail with empty changes', function(done) {
 			var changes = {};
-			Network.edit_network_nodes(route_id, changes, function(err, output) {
+			Network.edit_network_nodes(plan_id, changes, function(err, output) {
 				expect(err).to.not.exist;
 				done();
 			});
@@ -154,14 +154,14 @@ describe('Network', function() {
 					}
 				],
 			};
-			Network.edit_network_nodes(route_id, changes, function(err, output) {
+			Network.edit_network_nodes(plan_id, changes, function(err, output) {
 				expect(err).to.be.null;
 				done();
 			});
 		});
 
-		it('should count the network nodes associated to our route', function(done) {
-			Network.view_network_nodes(null, route_id, function(err, output) {
+		it('should count the network nodes associated to our plan', function(done) {
+			Network.view_network_nodes(null, plan_id, function(err, output) {
 				expect(err).to.be.null;
 				var diff = output.feature_collection.features.length - nodes;
 				expect(diff).to.be.equal(1);
@@ -170,7 +170,7 @@ describe('Network', function() {
 		});
 
 		it('should calculate the cost of new network nodes', function(done) {
-			RouteOptimizer.calculate_equipment_nodes_cost(route_id, function(err, output) {
+			RouteOptimizer.calculate_equipment_nodes_cost(plan_id, function(err, output) {
 				expect(err).to.not.be.ok;
 				expect(output.equipment_node_types).to.be.an('array');
 				expect(output.total).to.be.a('number');
@@ -179,7 +179,7 @@ describe('Network', function() {
 		});
 
 		it('should return network nodes of a type', function(done) {
-			Network.view_network_nodes(['splice_point'], route_id, function(err, output) {
+			Network.view_network_nodes(['splice_point'], plan_id, function(err, output) {
 				expect(err).to.be.null;
 				expect(output.feature_collection.features).to.be.an('array');
 				expect(output.feature_collection.features).to.have.length(1);
@@ -199,7 +199,7 @@ describe('Network', function() {
 					}
 				],
 			};
-			Network.edit_network_nodes(route_id, changes, function(err, output) {
+			Network.edit_network_nodes(plan_id, changes, function(err, output) {
 				expect(err).to.be.null;
 				done();
 			});
@@ -215,7 +215,7 @@ describe('Network', function() {
 					}
 				],
 			};
-			Network.edit_network_nodes(route_id, changes, function(err, output) {
+			Network.edit_network_nodes(plan_id, changes, function(err, output) {
 				expect(err).to.be.null;
 				done();
 			});
@@ -229,17 +229,17 @@ describe('Network', function() {
 					}
 				],
 			};
-			Network.edit_network_nodes(route_id, changes, function(err, output) {
+			Network.edit_network_nodes(plan_id, changes, function(err, output) {
 				expect(err).to.be.null;
 				done();
 			});
 		});
 
-		it('should clear the network nodes in a route', function(done) {
-			Network.clear_network_nodes(route_id, function(err, output) {
+		it('should clear the network nodes in a plan', function(done) {
+			Network.clear_network_nodes(plan_id, function(err, output) {
 				expect(err).to.be.null;
 
-				Network.view_network_nodes(null, route_id, function(err, output) {
+				Network.view_network_nodes(null, plan_id, function(err, output) {
 					expect(err).to.be.null;
 					var diff = output.feature_collection.features.length - nodes;
 					expect(diff).to.be.equal(0);

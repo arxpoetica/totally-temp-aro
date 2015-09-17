@@ -6,7 +6,7 @@ describe('NetworkPlan', function() {
 	var source = '3';
 	var target = '40103873';
 	var cost_multiplier = 1.5;
-	var route_id;
+	var plan_id;
 
 	it('should create a new empty route', function(done) {
 		var area = {
@@ -26,27 +26,27 @@ describe('NetworkPlan', function() {
 				}
 			},
 		};
-		NetworkPlan.create_plan('Untitled route', area, function(err, route) {
+		NetworkPlan.create_plan('Untitled plan', area, function(err, plan) {
 			expect(err).to.not.be.ok;
-			expect(route).to.have.property('id');
-			expect(route).to.have.property('name');
-			route_id = route.id;
+			expect(plan).to.have.property('id');
+			expect(plan).to.have.property('name');
+			plan_id = plan.id;
 			done();
 		});
 	});
 
-	it('should find all routes', function(done) {
-		NetworkPlan.find_all(function(err, routes) {
-			expect(routes.length > 0).to.equal(true);
-			var route = routes[0];
-			expect(route).to.have.property('id');
-			expect(route).to.have.property('name');
+	it('should find all plans', function(done) {
+		NetworkPlan.find_all(function(err, plans) {
+			expect(plans.length > 0).to.equal(true);
+			var plan = plans[0];
+			expect(plan).to.have.property('id');
+			expect(plan).to.have.property('name');
 			done();
 		});
 	});
 
-	it('should return area data from a route', function(done) {
-		NetworkPlan.calculate_area_data(route_id, function(err, data) {
+	it('should return area data from a plan', function(done) {
+		NetworkPlan.calculate_area_data(plan_id, function(err, data) {
 			expect(err).to.not.be.ok;
 			expect(data.wirecenter).to.be.a('string');
 			expect(data.statefp).to.be.a('string');
@@ -55,108 +55,108 @@ describe('NetworkPlan', function() {
 		});
 	});
 
-	it('should edit basic properties of an existing routes', function(done) {
+	it('should edit basic properties of an existing plans', function(done) {
 		var data = {
 			name: 'Other name',
 		};
-		NetworkPlan.save_plan(route_id, data, function(err, output) {
+		NetworkPlan.save_plan(plan_id, data, function(err, output) {
 			expect(!!output).to.be.equal(true);
 			done();
 		});
 	});
 
-	it('should edit the sources and targets of an existing route', function(done) {
+	it('should edit the sources and targets of an existing plan', function(done) {
 		var changes = {
 			insertions: {
 				locations: [target],
 				network_nodes: [source],
 			},
 		};
-		NetworkPlan.edit_route(route_id, changes, function(err, route) {
-			expect(route).to.have.property('metadata');
-			expect(route).to.have.property('feature_collection');
-			expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
-			expect(route.feature_collection.features.length > 0).to.be.equal(true);
+		NetworkPlan.edit_route(plan_id, changes, function(err, plan) {
+			expect(plan).to.have.property('metadata');
+			expect(plan).to.have.property('feature_collection');
+			expect(plan.feature_collection).to.have.property('type', 'FeatureCollection');
+			expect(plan.feature_collection.features.length > 0).to.be.equal(true);
 			done();
 		});
 	});
 
-	it('should return the information of an existing route', function(done) {
-		NetworkPlan.find_plan(route_id, function(err, route) {
-			expect(route).to.have.property('metadata');
-			expect(route.metadata.total_cost).to.be.a('number');
+	it('should return the information of an existing plan', function(done) {
+		NetworkPlan.find_plan(plan_id, function(err, plan) {
+			expect(plan).to.have.property('metadata');
+			expect(plan.metadata.total_cost).to.be.a('number');
 
-			expect(route.metadata.costs).to.be.an('array');
-			expect(route.metadata.costs).to.have.length(3);
-			expect(route.metadata.costs[0].name).to.be.equal('Fiber cost');
-			expect(route.metadata.costs[0].value).to.be.a('number');
-			expect(route.metadata.costs[1].name).to.be.equal('Locations cost');
-			expect(route.metadata.costs[1].value).to.be.a('number');
-			expect(route.metadata.costs[2].name).to.be.equal('Equipment nodes cost');
-			expect(route.metadata.costs[2].value).to.be.a('number');
-			expect(route.metadata.total_cost).to.be.a('number');
+			expect(plan.metadata.costs).to.be.an('array');
+			expect(plan.metadata.costs).to.have.length(3);
+			expect(plan.metadata.costs[0].name).to.be.equal('Fiber cost');
+			expect(plan.metadata.costs[0].value).to.be.a('number');
+			expect(plan.metadata.costs[1].name).to.be.equal('Locations cost');
+			expect(plan.metadata.costs[1].value).to.be.a('number');
+			expect(plan.metadata.costs[2].name).to.be.equal('Equipment nodes cost');
+			expect(plan.metadata.costs[2].value).to.be.a('number');
+			expect(plan.metadata.total_cost).to.be.a('number');
 
-			expect(route.metadata.customers_businesses_total).to.be.a('number');
-			expect(route.metadata.customers_households_total).to.be.a('number');
-			expect(route.metadata.customer_types).to.be.an('array');
-			expect(route.metadata.customer_types[0]).to.be.an('object');
-			expect(route.metadata.customer_types[0].name).to.be.a('string');
-			expect(route.metadata.customer_types[0].businesses).to.be.a('number');
-			expect(route.metadata.customer_types[0].households).to.be.a('number');
+			expect(plan.metadata.customers_businesses_total).to.be.a('number');
+			expect(plan.metadata.customers_households_total).to.be.a('number');
+			expect(plan.metadata.customer_types).to.be.an('array');
+			expect(plan.metadata.customer_types[0]).to.be.an('object');
+			expect(plan.metadata.customer_types[0].name).to.be.a('string');
+			expect(plan.metadata.customer_types[0].businesses).to.be.a('number');
+			expect(plan.metadata.customer_types[0].households).to.be.a('number');
 			
 			var year = new Date().getFullYear();
-			expect(route.metadata.npv).to.be.an('array');
-			expect(route.metadata.npv).to.have.length(5);
-			expect(route.metadata.npv[0].year).to.be.a('number');
-			expect(route.metadata.npv[0].year).to.be.equal(year);
-			expect(route.metadata.npv[0].value).to.be.a('number');
-			expect(route.metadata.revenue).to.be.a('number');
+			expect(plan.metadata.npv).to.be.an('array');
+			expect(plan.metadata.npv).to.have.length(5);
+			expect(plan.metadata.npv[0].year).to.be.a('number');
+			expect(plan.metadata.npv[0].year).to.be.equal(year);
+			expect(plan.metadata.npv[0].value).to.be.a('number');
+			expect(plan.metadata.revenue).to.be.a('number');
 
-			expect(route).to.have.property('feature_collection');
-			expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
-			expect(route.feature_collection.features.length > 0).to.be.equal(true);
+			expect(plan).to.have.property('feature_collection');
+			expect(plan.feature_collection).to.have.property('type', 'FeatureCollection');
+			expect(plan.feature_collection.features.length > 0).to.be.equal(true);
 			done();
 		});
 	});
 
-	it('should return the metadata information of an existing route', function(done) {
-		NetworkPlan.find_plan(route_id, true, function(err, route) {
-			expect(route).to.have.property('metadata');
-			expect(route.metadata.total_cost).to.be.a('number');
+	it('should return the metadata information of an existing plan', function(done) {
+		NetworkPlan.find_plan(plan_id, true, function(err, plan) {
+			expect(plan).to.have.property('metadata');
+			expect(plan.metadata.total_cost).to.be.a('number');
 
-			expect(route.metadata.costs).to.be.an('array');
-			expect(route.metadata.costs).to.have.length(3);
-			expect(route.metadata.costs[0].name).to.be.equal('Fiber cost');
-			expect(route.metadata.costs[0].value).to.be.a('number');
-			expect(route.metadata.costs[1].name).to.be.equal('Locations cost');
-			expect(route.metadata.costs[1].value).to.be.a('number');
-			expect(route.metadata.costs[2].name).to.be.equal('Equipment nodes cost');
-			expect(route.metadata.costs[2].value).to.be.a('number');
-			expect(route.metadata.total_cost).to.be.a('number');
+			expect(plan.metadata.costs).to.be.an('array');
+			expect(plan.metadata.costs).to.have.length(3);
+			expect(plan.metadata.costs[0].name).to.be.equal('Fiber cost');
+			expect(plan.metadata.costs[0].value).to.be.a('number');
+			expect(plan.metadata.costs[1].name).to.be.equal('Locations cost');
+			expect(plan.metadata.costs[1].value).to.be.a('number');
+			expect(plan.metadata.costs[2].name).to.be.equal('Equipment nodes cost');
+			expect(plan.metadata.costs[2].value).to.be.a('number');
+			expect(plan.metadata.total_cost).to.be.a('number');
 
-			expect(route.metadata.customers_businesses_total).to.be.a('number');
-			expect(route.metadata.customers_households_total).to.be.a('number');
-			expect(route.metadata.customer_types).to.be.an('array');
-			expect(route.metadata.customer_types[0]).to.be.an('object');
-			expect(route.metadata.customer_types[0].name).to.be.a('string');
-			expect(route.metadata.customer_types[0].businesses).to.be.a('number');
-			expect(route.metadata.customer_types[0].households).to.be.a('number');
+			expect(plan.metadata.customers_businesses_total).to.be.a('number');
+			expect(plan.metadata.customers_households_total).to.be.a('number');
+			expect(plan.metadata.customer_types).to.be.an('array');
+			expect(plan.metadata.customer_types[0]).to.be.an('object');
+			expect(plan.metadata.customer_types[0].name).to.be.a('string');
+			expect(plan.metadata.customer_types[0].businesses).to.be.a('number');
+			expect(plan.metadata.customer_types[0].households).to.be.a('number');
 			
 			var year = new Date().getFullYear();
-			expect(route.metadata.npv).to.be.an('array');
-			expect(route.metadata.npv).to.have.length(5);
-			expect(route.metadata.npv[0].year).to.be.a('number');
-			expect(route.metadata.npv[0].year).to.be.equal(year);
-			expect(route.metadata.npv[0].value).to.be.a('number');
-			expect(route.metadata.revenue).to.be.a('number');
+			expect(plan.metadata.npv).to.be.an('array');
+			expect(plan.metadata.npv).to.have.length(5);
+			expect(plan.metadata.npv[0].year).to.be.a('number');
+			expect(plan.metadata.npv[0].year).to.be.equal(year);
+			expect(plan.metadata.npv[0].value).to.be.a('number');
+			expect(plan.metadata.revenue).to.be.a('number');
 
-			expect(route).to.not.have.property('feature_collection');
+			expect(plan).to.not.have.property('feature_collection');
 			done();
 		});
 	});
 
 	it('should export a route to KML form', function(done) {
-		NetworkPlan.export_kml(route_id, function(err, kml_output) {
+		NetworkPlan.export_kml(plan_id, function(err, kml_output) {
 			expect(err).to.not.be.ok;
 			require('xml2js').parseString(kml_output, function(err, result) {
 				expect(err).to.not.be.ok;
@@ -188,24 +188,24 @@ describe('NetworkPlan', function() {
 				network_nodes: [source],
 			},
 		};
-		NetworkPlan.edit_route(route_id, changes, function(err, route) {
-			expect(route).to.have.property('metadata');
-			expect(route).to.have.property('feature_collection');
-			expect(route.feature_collection).to.have.property('type', 'FeatureCollection');
-			expect(route.feature_collection.features.length).to.be.equal(0);
+		NetworkPlan.edit_route(plan_id, changes, function(err, plan) {
+			expect(plan).to.have.property('metadata');
+			expect(plan).to.have.property('feature_collection');
+			expect(plan.feature_collection).to.have.property('type', 'FeatureCollection');
+			expect(plan.feature_collection.features.length).to.be.equal(0);
 			done();
 		});
 	});
 
 	it('should delete all the information of an existing route', function(done) {
-		NetworkPlan.clear_route(route_id, function(err) {
+		NetworkPlan.clear_route(plan_id, function(err) {
 			expect(err).to.be.null;
 			done();
 		});
 	});
 
-	it('should delete an existing route', function(done) {
-		NetworkPlan.delete_plan(route_id, function(err, output) {
+	it('should delete an existing plan', function(done) {
+		NetworkPlan.delete_plan(plan_id, function(err, output) {
 			expect(!!output).to.be.equal(true);
 			done();
 		});

@@ -15,7 +15,7 @@ var _ = require('underscore');
 
 var NetworkPlan = {};
 
-NetworkPlan.find_edges = function(route_id, callback) {
+NetworkPlan.find_edges = function(plan_id, callback) {
   var sql = multiline(function() {;/*
     SELECT edge.id, edge.edge_length, ST_AsGeoJSON(edge.geom)::json AS geom
     FROM custom.route_edges
@@ -23,28 +23,28 @@ NetworkPlan.find_edges = function(route_id, callback) {
       ON edge.id = route_edges.edge_id
     WHERE route_edges.route_id=$1
   */});
-  database.query(sql, [route_id], callback);
+  database.query(sql, [plan_id], callback);
 };
 
-NetworkPlan.find_source_ids = function(route_id, callback) {
+NetworkPlan.find_source_ids = function(plan_id, callback) {
   var sql = multiline(function() {;/*
     SELECT network_node_id::integer AS id
     FROM custom.route_sources
     WHERE route_id=$1
   */});
-  database.findValues(sql, [route_id], 'id', callback);
+  database.findValues(sql, [plan_id], 'id', callback);
 };
 
-NetworkPlan.find_target_ids = function(route_id, callback) {
+NetworkPlan.find_target_ids = function(plan_id, callback) {
   var sql = multiline(function() {;/*
     SELECT location_id::integer AS id
     FROM custom.route_targets
     WHERE route_id=$1
   */});
-  database.findValues(sql, [route_id], 'id', callback);
+  database.findValues(sql, [plan_id], 'id', callback);
 };
 
-NetworkPlan.find_customer_types = function(route_id, callback) {
+NetworkPlan.find_customer_types = function(plan_id, callback) {
   var sql = multiline(function(){;/*
     SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
       (SELECT
@@ -90,10 +90,10 @@ NetworkPlan.find_customer_types = function(route_id, callback) {
     ORDER BY
       ct.name
   */});
-  database.query(sql, [route_id], callback);
+  database.query(sql, [plan_id], callback);
 };
 
-NetworkPlan.find_plan = function(route_id, metadata_only, callback) {
+NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   if (arguments.length === 2) {
     callback = metadata_only;
     metadata_only = false;
@@ -109,7 +109,7 @@ NetworkPlan.find_plan = function(route_id, metadata_only, callback) {
   var fiber_cost;
 
   txain(function(callback) {
-    NetworkPlan.find_edges(route_id, callback);
+    NetworkPlan.find_edges(plan_id, callback);
   })
   .then(function(edges, callback) {
     output.feature_collection.features = edges.map(function(edge) {
@@ -124,7 +124,7 @@ NetworkPlan.find_plan = function(route_id, metadata_only, callback) {
       name: 'Fiber cost',
       value: fiber_cost,
     });
-    RouteOptimizer.calculate_locations_cost(route_id, callback);
+    RouteOptimizer.calculate_locations_cost(plan_id, callback);
   })
   .then(function(locations_cost, callback) {
     output.metadata.costs.push({
@@ -133,18 +133,18 @@ NetworkPlan.find_plan = function(route_id, metadata_only, callback) {
     });
 
     if (metadata_only) return callback();
-    NetworkPlan.find_target_ids(route_id, callback);
+    NetworkPlan.find_target_ids(plan_id, callback);
   })
   .then(function(targets, callback) {
     output.metadata.targets = targets;
 
     if (metadata_only) return callback();
-    NetworkPlan.find_source_ids(route_id, callback);
+    NetworkPlan.find_source_ids(plan_id, callback);
   })
   .then(function(sources, callback) {
     output.metadata.sources = sources;
 
-    NetworkPlan.find_customer_types(route_id, callback);
+    NetworkPlan.find_customer_types(plan_id, callback);
   })
   .then(function(customer_types, callback) {
     output.metadata.customer_types = customer_types;
@@ -156,13 +156,13 @@ NetworkPlan.find_plan = function(route_id, metadata_only, callback) {
       return total + customer_type.households;
     }, 0);
 
-    RouteOptimizer.calculate_revenue_and_npv(route_id, fiber_cost, callback);
+    RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost, callback);
   })
   .then(function(calculation, callback) {
     output.metadata.revenue = calculation.revenue;
     output.metadata.npv = calculation.npv;
 
-    RouteOptimizer.calculate_equipment_nodes_cost(route_id, callback);
+    RouteOptimizer.calculate_equipment_nodes_cost(plan_id, callback);
   })
   .then(function(equipment_nodes_cost, callback) {
     output.metadata.costs.push({
@@ -186,14 +186,14 @@ NetworkPlan.find_plan = function(route_id, metadata_only, callback) {
   .end(callback);
 }
 
-NetworkPlan.recalculate_route = function(route_id, callback) {
+NetworkPlan.recalculate_route = function(plan_id, callback) {
   txain(function(callback) {
     var sql = 'DELETE FROM custom.route_edges WHERE route_id=$1'
-    database.query(sql, [route_id], callback);
+    database.query(sql, [plan_id], callback);
   })
   .then(function(callback) {
     var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
-    database.query(sql, [route_id], callback);
+    database.query(sql, [plan_id], callback);
   })
   .then(function(callback) {
     var sql = multiline(function() {;/*
@@ -210,7 +210,7 @@ NetworkPlan.recalculate_route = function(route_id, callback) {
       )
       INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
     */});
-    database.execute(sql, [route_id], function(err) {
+    database.execute(sql, [plan_id], function(err) {
       if (err && err.message.indexOf('One of the target vertices was not found or several targets are the same') >= 0) return callback(); // ignore this error
       if (err && err.message.indexOf('None of the target vertices has been found') >= 0) return callback(); // ignore this error
       return callback(err);
@@ -219,12 +219,12 @@ NetworkPlan.recalculate_route = function(route_id, callback) {
   .end(callback);
 };
 
-NetworkPlan.recalculate_and_find_route = function(route_id, callback) {
+NetworkPlan.recalculate_and_find_route = function(plan_id, callback) {
   txain(function(callback) {
-    NetworkPlan.recalculate_route(route_id, callback);
+    NetworkPlan.recalculate_route(plan_id, callback);
   })
   .then(function(callback) {
-    NetworkPlan.find_plan(route_id, callback);
+    NetworkPlan.find_plan(plan_id, callback);
   })
   .end(callback);
 };
@@ -309,42 +309,42 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
   }, callback);
 };
 
-NetworkPlan.delete_plan = function(route_id, callback) {
+NetworkPlan.delete_plan = function(plan_id, callback) {
   var sql = multiline(function() {;/*
     DELETE FROM custom.route WHERE id=$1;
   */});
-  database.execute(sql, [route_id], callback);
+  database.execute(sql, [plan_id], callback);
 };
 
-NetworkPlan.clear_route = function(route_id, callback) {
+NetworkPlan.clear_route = function(plan_id, callback) {
   txain(function(callback) {
     var sql = multiline(function() {;/*
       DELETE FROM custom.route_targets WHERE route_id=$1;
     */});
-    database.execute(sql, [route_id], callback);
+    database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
     var sql = multiline(function() {;/*
       DELETE FROM custom.route_sources WHERE route_id=$1;
     */});
-    database.execute(sql, [route_id], callback);
+    database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
     var sql = multiline(function() {;/*
       DELETE FROM custom.route_edges WHERE route_id=$1;
     */});
-    database.execute(sql, [route_id], callback);
+    database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
     var sql = multiline(function() {;/*
       DELETE FROM client.network_nodes WHERE route_id=$1;
     */});
-    database.execute(sql, [route_id], callback);
+    database.execute(sql, [plan_id], callback);
   })
   .end(callback);
 };
 
-NetworkPlan.save_plan = function(route_id, data, callback) {
+NetworkPlan.save_plan = function(plan_id, data, callback) {
   var fields = [];
   var params = [];
   var allowed_fields = ['name'];
@@ -354,31 +354,31 @@ NetworkPlan.save_plan = function(route_id, data, callback) {
   });
   if (fields.length === 0) return callback();
 
-  params.push(route_id);
+  params.push(plan_id);
   var sql = 'UPDATE custom.route SET '+fields.join(', ')+', updated_at=NOW() WHERE id=$'+params.length;
   database.execute(sql, params, callback);
 };
 
-NetworkPlan.edit_route = function(route_id, changes, callback) {
+NetworkPlan.edit_route = function(plan_id, changes, callback) {
   txain(function(callback) {
-    add_sources(route_id, changes.insertions && changes.insertions.network_nodes, callback);
+    add_sources(plan_id, changes.insertions && changes.insertions.network_nodes, callback);
   })
   .then(function(callback) {
-    add_targets(route_id, changes.insertions && changes.insertions.locations, callback);
+    add_targets(plan_id, changes.insertions && changes.insertions.locations, callback);
   })
   .then(function(callback) {
-    delete_sources(route_id, changes.deletions && changes.deletions.network_nodes, callback);
+    delete_sources(plan_id, changes.deletions && changes.deletions.network_nodes, callback);
   })
   .then(function(callback) {
-    delete_targets(route_id, changes.deletions && changes.deletions.locations, callback);
+    delete_targets(plan_id, changes.deletions && changes.deletions.locations, callback);
   })
   .then(function() {
-    NetworkPlan.recalculate_and_find_route(route_id, callback);
+    NetworkPlan.recalculate_and_find_route(plan_id, callback);
   })
   .end(callback);
 };
 
-NetworkPlan.export_kml = function(route_id, callback) {
+NetworkPlan.export_kml = function(plan_id, callback) {
   var kml_output = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
 
   function escape(name) {
@@ -387,7 +387,7 @@ NetworkPlan.export_kml = function(route_id, callback) {
 
   txain(function(callback) {
     var sql = 'SELECT name FROM custom.route WHERE id=$1'
-    database.findOne(sql, [route_id], callback)
+    database.findOne(sql, [plan_id], callback)
   })
   .then(function(route, callback) {
     kml_output += '<name>'+escape(route.name)+'</name>'
@@ -425,7 +425,7 @@ NetworkPlan.export_kml = function(route_id, callback) {
       ON edge.id = route_edges.edge_id
       WHERE route_edges.route_id = $1
     */});
-    database.query(sql, [route_id], callback)
+    database.query(sql, [plan_id], callback)
   })
   .then(function(edges, callback) {
     edges.forEach(function(edge) {
@@ -441,7 +441,7 @@ NetworkPlan.export_kml = function(route_id, callback) {
       ON route_targets.location_id = locations.id
       WHERE route_targets.route_id=$1
     */});
-    database.query(sql, [route_id], callback)
+    database.query(sql, [plan_id], callback)
   })
   .then(function(targets, callback) {
     targets.forEach(function(target) {
@@ -457,7 +457,7 @@ NetworkPlan.export_kml = function(route_id, callback) {
       ON route_sources.network_node_id = network_nodes.id
       WHERE route_sources.route_id=$1
     */});
-    database.query(sql, [route_id], callback)
+    database.query(sql, [plan_id], callback)
   })
   .then(function(sources, callback) {
     sources.forEach(function(source) {
@@ -472,7 +472,7 @@ NetworkPlan.export_kml = function(route_id, callback) {
   .end(callback);
 };
 
-function add_sources(route_id, network_node_ids, callback) {
+function add_sources(plan_id, network_node_ids, callback) {
   if (!_.isArray(network_node_ids) || network_node_ids.length === 0) return callback();
 
   txain(function(callback) {
@@ -481,7 +481,7 @@ function add_sources(route_id, network_node_ids, callback) {
       DELETE FROM custom.route_sources
       WHERE route_id=$1 AND network_node_id IN ($2)
     */});
-    database.execute(sql, [route_id, network_node_ids], callback);
+    database.execute(sql, [plan_id, network_node_ids], callback);
   })
   .then(function(callback) {
     // calculate closest vertex
@@ -496,12 +496,12 @@ function add_sources(route_id, network_node_ids, callback) {
       WHERE
         network_nodes.id IN ($1))
     */});
-    database.execute(sql, [network_node_ids, route_id], callback);
+    database.execute(sql, [network_node_ids, plan_id], callback);
   })
   .end(callback);
 };
 
-function add_targets(route_id, location_ids, callback) {
+function add_targets(plan_id, location_ids, callback) {
   if (!_.isArray(location_ids) || location_ids.length === 0) return callback();
 
   txain(function(callback) {
@@ -510,7 +510,7 @@ function add_targets(route_id, location_ids, callback) {
       DELETE FROM custom.route_targets
       WHERE route_id=$1 AND location_id IN ($2)
     */});
-    database.execute(sql, [route_id, location_ids], callback);
+    database.execute(sql, [plan_id, location_ids], callback);
   })
   .then(function(callback) {
     // calculate closest vertex
@@ -525,12 +525,12 @@ function add_targets(route_id, location_ids, callback) {
       WHERE
         locations.id IN ($1))
     */});
-    database.execute(sql, [location_ids, route_id], callback);
+    database.execute(sql, [location_ids, plan_id], callback);
   })
   .end(callback);
 };
 
-function delete_sources(route_id, network_node_ids, callback) {
+function delete_sources(plan_id, network_node_ids, callback) {
   if (!_.isArray(network_node_ids) || network_node_ids.length === 0) return callback();
 
   txain(network_node_ids)
@@ -539,15 +539,15 @@ function delete_sources(route_id, network_node_ids, callback) {
       DELETE FROM custom.route_sources
       WHERE route_id=$1 AND network_node_id=$2
     */});
-    database.execute(sql, [route_id, network_node_id], callback);
+    database.execute(sql, [plan_id, network_node_id], callback);
   })
   .then(function() {
-    NetworkPlan.recalculate_and_find_route(route_id, callback);
+    NetworkPlan.recalculate_and_find_route(plan_id, callback);
   })
   .end(callback);
 };
 
-function delete_targets(route_id, location_ids, callback) {
+function delete_targets(plan_id, location_ids, callback) {
   if (!_.isArray(location_ids) || location_ids.length === 0) return callback();
 
   txain(location_ids)
@@ -556,12 +556,12 @@ function delete_targets(route_id, location_ids, callback) {
       DELETE FROM custom.route_targets
       WHERE route_id=$1 AND location_id=$2
     */});
-    database.execute(sql, [route_id, location_id], callback);
+    database.execute(sql, [plan_id, location_id], callback);
   })
   .end(callback);
 };
 
-NetworkPlan.calculate_area_data = function(route_id, callback) {
+NetworkPlan.calculate_area_data = function(plan_id, callback) {
   var data = {};
 
   txain(function(callback) {
@@ -572,7 +572,7 @@ NetworkPlan.calculate_area_data = function(route_id, callback) {
       ORDER BY distance
       LIMIT 1
     */});
-    database.findOne(sql, [route_id], callback);
+    database.findOne(sql, [plan_id], callback);
   })
   .then(function(row, callback) {
     data.wirecenter = row.wirecenter;
@@ -584,7 +584,7 @@ NetworkPlan.calculate_area_data = function(route_id, callback) {
       ORDER BY distance
       LIMIT 1
     */});
-    database.findOne(sql, [route_id], callback);
+    database.findOne(sql, [plan_id], callback);
   })
   .then(function(row, callback) {
     data.statefp = row.statefp;

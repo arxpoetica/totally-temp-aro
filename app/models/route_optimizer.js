@@ -20,7 +20,7 @@ RouteOptimizer.calculate_fiber_cost = function(edges, cost_per_meter, callback) 
   }, 0);
 };
 
-RouteOptimizer.calculate_locations_cost = function(route_id, callback) {
+RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
   var sql = multiline(function() {;/*
     select
       sum(location_total)::integer as locations_cost
@@ -93,10 +93,10 @@ RouteOptimizer.calculate_locations_cost = function(route_id, callback) {
       ) t
     ) t group by route_id;
   */});
-  database.findValue(sql, [route_id], 'locations_cost', 0, callback);
+  database.findValue(sql, [plan_id], 'locations_cost', 0, callback);
 };
 
-RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, callback) {
+RouteOptimizer.calculate_equipment_nodes_cost = function(plan_id, callback) {
   // hard coded values by now
   var cost = {
     'fiber_distribution_hub': 5000,
@@ -117,7 +117,7 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, callback) {
         route_id=$1
       GROUP BY nt.id
     */});
-    database.query(sql, [route_id], callback);
+    database.query(sql, [plan_id], callback);
   })
   .then(function(nodes, callback) {
     nodes.forEach(function(node) {
@@ -134,7 +134,7 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(route_id, callback) {
   .end(callback);
 };
 
-RouteOptimizer.calculate_revenue_and_npv = function(route_id, fiber_cost, callback) {
+RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callback) {
   txain(function(callback) {
     var sql = multiline(function() {;/*
       SELECT
@@ -166,7 +166,7 @@ RouteOptimizer.calculate_revenue_and_npv = function(route_id, fiber_cost, callba
         spend.year
       ORDER BY spend.year
     */});
-    database.query(sql, [route_id], callback);
+    database.query(sql, [plan_id], callback);
   })
   .then(function(route_annual_revenues, callback) {
     var year = new Date().getFullYear();

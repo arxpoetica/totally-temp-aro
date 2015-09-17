@@ -3,7 +3,7 @@ var models = require('../../models');
 
 describe('Boundary', function() {
 
-  var route_id;
+  var plan_id;
   var boundary_id;
 
   before(function(done) {
@@ -24,10 +24,10 @@ describe('Boundary', function() {
         }
       }
     };
-    models.NetworkPlan.create_plan('Untitled route', area, function(err, route) {
-      expect(route).to.have.property('id');
-      expect(route).to.have.property('name');
-      route_id = route.id;
+    models.NetworkPlan.create_plan('Untitled route', area, function(err, plan) {
+      expect(plan).to.have.property('id');
+      expect(plan).to.have.property('name');
+      plan_id = plan.id;
       done();
     });
   });
@@ -37,7 +37,7 @@ describe('Boundary', function() {
       name: 'Boundary name',
       geom: '{"type":"MultiPolygon","coordinates":[[[[-73.95953178405762,40.77779987546684],[-73.94948959350586,40.775265016944275],[-73.95790100097656,40.76947997759306],[-73.96373748779297,40.77201505683673]]]]}'
     };
-    models.Boundary.create_boundary(route_id, data, function(err, boundary) {
+    models.Boundary.create_boundary(plan_id, data, function(err, boundary) {
       expect(err).to.not.be.ok;
       expect(boundary.id).to.be.a('number');
       expect(boundary.name).to.be.a('string');
@@ -53,7 +53,7 @@ describe('Boundary', function() {
   it('should edit a boundary', function(done) {
     var data = {
       id: boundary_id,
-      route_id: route_id,
+      plan_id: plan_id,
       name: 'New boundary name',
       geom: '{"type":"MultiPolygon","coordinates":[[[[-73.95953178405762,40.77779987546684],[-73.94948959350586,40.775265016944275],[-73.95790100097656,40.76947997759306],[-73.96373748779297,40.77201505683673]]]]}'
     };
@@ -64,10 +64,10 @@ describe('Boundary', function() {
     });
   });
 
-  it('should not edit a boundary with an invalid route_id', function(done) {
+  it('should not edit a boundary with an invalid plan_id', function(done) {
     var data = {
       id: boundary_id,
-      route_id: -1,
+      plan_id: -1,
       name: 'New boundary name',
       geom: '{"type":"MultiPolygon","coordinates":[[[[-73.95953178405762,40.77779987546684],[-73.94948959350586,40.775265016944275],[-73.95790100097656,40.76947997759306],[-73.96373748779297,40.77201505683673]]]]}'
     };
@@ -78,10 +78,10 @@ describe('Boundary', function() {
     });
   });
 
-  it('should not edit a boundary with an invalid route_id', function(done) {
+  it('should not edit a boundary with an invalid plan_id', function(done) {
     var data = {
       id: boundary_id,
-      route_id: -1,
+      plan_id: -1,
       name: 'New boundary name',
       geom: '{"type":"MultiPolygon","coordinates":[[[[-73.95953178405762,40.77779987546684],[-73.94948959350586,40.775265016944275],[-73.95790100097656,40.76947997759306],[-73.96373748779297,40.77201505683673]]]]}'
     };
@@ -93,7 +93,7 @@ describe('Boundary', function() {
   });
 
   it('should list the existing boundaries', function(done) {
-    models.Boundary.find_boundaries(route_id, function(err, list) {
+    models.Boundary.find_boundaries(plan_id, function(err, list) {
       expect(err).to.not.be.ok;
       expect(list).to.be.an('array');
       expect(list).to.have.length(1);
@@ -108,10 +108,10 @@ describe('Boundary', function() {
   });
 
   it('should delete a boundary', function(done) {
-    models.Boundary.delete_boundary(route_id, boundary_id, function(err, n) {
+    models.Boundary.delete_boundary(plan_id, boundary_id, function(err, n) {
       expect(err).to.not.be.ok;
       expect(n).to.be.equal(1);
-      models.Boundary.find_boundaries(route_id, function(err, list) {
+      models.Boundary.find_boundaries(plan_id, function(err, list) {
         expect(err).to.not.be.ok;
         expect(list).to.have.length(0);
         done();
