@@ -1,5 +1,7 @@
 var expect = require('chai').expect;
-var NetworkPlan = require('../../models/network_plan.js');
+var models = require('../../models');
+var NetworkPlan = models.NetworkPlan;
+var _ = require('underscore');
 
 describe('NetworkPlan', function() {
 
@@ -206,9 +208,24 @@ describe('NetworkPlan', function() {
 
 	it('should delete an existing plan', function(done) {
 		NetworkPlan.delete_plan(plan_id, function(err, output) {
-			expect(!!output).to.be.equal(true);
+			expect(err).to.not.be.ok;
+			expect(output).to.be.ok;
 			done();
 		});
+	});
+
+	it('should check NPV calculation', function() {
+		var year = new Date().getFullYear() - 5;
+		var revenues = [10.0, 12.0, 14.0, 16.0, 18.0].map(function(value) {
+			return { value: value, year: year++ };
+		});
+		var up_front_costs = 50;
+		var output = models.RouteOptimizer.calculate_npv(revenues, up_front_costs);
+		output = output.map(function(obj) {
+			return obj.value;
+		});
+		var expected = [-50.0, 7.155963302752293, 7.659287938725695, 8.030708192635068, 8.288574969462799];
+		expect(_.isEqual(output, expected)).to.be.true;
 	});
 
 });

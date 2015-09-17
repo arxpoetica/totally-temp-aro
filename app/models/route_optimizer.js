@@ -153,7 +153,7 @@ RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callbac
         client.spend
       ON
         spend.industry_id = m.industry_id
-        AND spend.monthly_spend <> 'NaN'
+        -- AND spend.monthly_spend <> 'NaN'
       JOIN
         client.employees_by_location e
       ON
@@ -185,37 +185,26 @@ RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callbac
 
 // Calculate NPV
 // route_annual_revenues Annual route revenues based on revenues generated from 5 years total spends from customers connected to route
-RouteOptimizer.calculate_npv = function(route_annual_revenues, fiber_cost) {
-  // Total up front costs, used ONLY in the first year of NPV
-  // fiber_cost = Total cost of laying the new fiber
-  var commission_rate = 3.30; // Commission rate on sales of new accounts - this is a variable that might go away
-
-  // Annual recurring costs
-  var customer_cost_rate = 0.2; // Per year, we assume route costs are 20% of the route revenue for that year
-  var discount_rate = 0.05; // Arbitrarily assigned as 5%. This value may differ between clients.
-
-  // Present Values for 5 years
+RouteOptimizer.calculate_npv = function(revenues, up_front_costs) {
+  var discount_rate = 0.09;
+  var commission_rate = 0.15; // This is negative cash flow
+  var customer_cost_rate = 0.2; // 20% of the revenue for the year is ongoing costs
   var annual_pvs = [];
 
-  // Get Present Value of route for each year in 5 year period
-  route_annual_revenues.forEach(function(row) {
+  revenues.forEach(function(row) {
     var revenue = row.value;
-    var costs = 0;
-    if (annual_pvs.length === 0) {
-      // Year 1 Present Value includes fixed costs as well as recurring costs
-      costs += fiber_cost;
-      costs += (revenue / 12) * commission_rate; // commission cost uses monthly revenue so I just divided annual to get it
-      costs += revenue * customer_cost_rate;
+    var i = annual_pvs.length;
+    var value;
+    if (i === 0) {
+      var cash_flow = up_front_costs;
+      value = -cash_flow;
     } else {
-      // Other years just include recurring costs
-      costs += revenue * customer_cost_rate;
+      var cash_flow = revenue - ((revenue * customer_cost_rate) + revenue * commission_rate);
+      value = cash_flow / Math.pow((1+discount_rate), i);
     }
-    var cash_flow = revenue - costs;
-    var pv = cash_flow / Math.pow(1+discount_rate, 1+annual_pvs.length);
-
     annual_pvs.push({
-      year: row.year + route_annual_revenues.length,
-      value: pv,
+      year: row.year + revenues.length,
+      value: value,
     });
   });
 

@@ -4,7 +4,7 @@
   "description": "Network infrastructure planning application",
   "main": "app.js",
   "scripts": {
-    "test": "mocha test/models/*.js test/helpers/*.js --timeout 5000",
+    "test": "mocha test/models/*.js test/helpers/*.js --timeout 10000",
     "test-cov": "istanbul --preserve-comments cover _mocha -- test/models/*.js test/helpers/*.js -R spec",
     "test-ui": "./node_modules/.bin/karma start",
     "test-integration": "NODE_ENV=test protractor test/integration/conf.js",

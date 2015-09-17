@@ -171,6 +171,13 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
       itemized: equipment_nodes_cost.equipment_node_types,
     });
 
+    var up_front_costs = equipment_nodes_cost.total + fiber_cost;
+    RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost, callback);
+  })
+  .then(function(calculation, callback) {
+    output.metadata.revenue = calculation.revenue;
+    output.metadata.npv = calculation.npv;
+
     output.metadata.total_cost = output.metadata.costs.reduce(function(total, cost) {
       return total+cost.value;
     }, 0);
