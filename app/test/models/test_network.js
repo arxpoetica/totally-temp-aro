@@ -1,7 +1,8 @@
 var expect = require('chai').expect;
-var NetworkPlan = require('../../models/network_plan.js');
-var RouteOptimizer = require('../../models/route_optimizer.js');
-var Network = require('../../models/network.js');
+var models = require('../../models');
+var NetworkPlan = models.NetworkPlan;
+var RouteOptimizer = models.RouteOptimizer;
+var Network = models.Network;
 
 describe('Network', function() {
 
