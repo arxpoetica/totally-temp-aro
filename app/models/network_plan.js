@@ -156,12 +156,6 @@ NetworkPlan.find_route = function(route_id, metadata_only, callback) {
       return total + customer_type.households;
     }, 0);
 
-    RouteOptimizer.calculate_revenue_and_npv(route_id, fiber_cost, callback);
-  })
-  .then(function(calculation, callback) {
-    output.metadata.revenue = calculation.revenue;
-    output.metadata.npv = calculation.npv;
-
     RouteOptimizer.calculate_equipment_nodes_cost(route_id, callback);
   })
   .then(function(equipment_nodes_cost, callback) {
@@ -170,6 +164,13 @@ NetworkPlan.find_route = function(route_id, metadata_only, callback) {
       value: equipment_nodes_cost.total,
       itemized: equipment_nodes_cost.equipment_node_types,
     });
+
+    var up_front_costs = equipment_nodes_cost.total + fiber_cost;
+    RouteOptimizer.calculate_revenue_and_npv(route_id, fiber_cost, callback);
+  })
+  .then(function(calculation, callback) {
+    output.metadata.revenue = calculation.revenue;
+    output.metadata.npv = calculation.npv;
 
     output.metadata.total_cost = output.metadata.costs.reduce(function(total, cost) {
       return total+cost.value;
