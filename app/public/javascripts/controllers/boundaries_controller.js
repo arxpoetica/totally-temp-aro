@@ -57,6 +57,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
   $scope.toggle_tool = function() {
     $scope.selected_tool = !$scope.selected_tool;
     drawingManager.setMap($scope.selected_tool ? map : null);
+    drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
     map.setOptions({ draggable: !$scope.selected_tool });
   };
 
@@ -134,7 +135,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
 
     overlay.marker.addListener('click', function() {
-      $('#market-size').modal('show');
       $rootScope.$broadcast('boundary_selected', to_geo_json(overlay, true));
     });
 

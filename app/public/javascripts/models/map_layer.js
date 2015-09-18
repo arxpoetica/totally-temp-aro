@@ -13,6 +13,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.type = options.type;
 		this.always_show_selected = false;
 		this.single_selection = options.single_selection;
+		this.reset_style_on_click = !!options.reset_style_on_click;
 		this.highlighteable = !!options.highlighteable;
 		this.features = [];
 		this.set_style('normal');
@@ -40,7 +41,11 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 						layer.set_feature_selected(feature, false, changes);
 					}
 				});
-				layer.set_feature_selected(event.feature, true, changes);
+				if (layer.reset_style_on_click) {
+					layer.data_layer.overrideStyle(event.feature, layer.style_options.normal);
+				} else {
+					layer.set_feature_selected(event.feature, true, changes);
+				}
 				broadcast_changes(layer, changes);
 			} else {
 				if (!event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return;
