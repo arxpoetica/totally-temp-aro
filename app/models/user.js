@@ -29,7 +29,7 @@ User.login = function(email, password, callback) {
   var user;
 
   txain(function(callback) {
-    database.findOne(sql, [email], callback);
+    database.findOne(sql, [email.toLowerCase()], callback);
   })
   .then(function(_user, callback) {
     user = _user;
@@ -65,7 +65,7 @@ User.register = function(user, callback) {
       var params = [
         user.first_name,
         user.last_name,
-        user.email,
+        user.email.toLowerCase(),
         hash,
       ];
       var sql = 'INSERT INTO custom.users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id';
@@ -75,7 +75,11 @@ User.register = function(user, callback) {
       var sql = 'SELECT id, first_name, last_name, email FROM custom.users WHERE id=$1';
       database.findOne(sql, [row.id], callback);
     })
-    .end(callback);
+    .end(function(err, usr) {
+      if (err && err.message.indexOf('duplicate key') >= 0) return callback(errors.request('There\'s already a user with that email address (%s)', user.email));
+      if (err) return callback(err);
+      return callback(null, usr);
+    });
   }, callback);
 };
 

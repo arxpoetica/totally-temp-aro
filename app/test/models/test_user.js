@@ -5,7 +5,7 @@ describe('User', function() {
 
   var email = 'user_'
     + require('crypto').randomBytes(16).toString('hex')
-    + '@example.com';
+    + '@Example.com';
 
   var user = {
     first_name: 'Alberto',
@@ -25,7 +25,7 @@ describe('User', function() {
         expect(usr.id).to.be.a('number');
         expect(usr.first_name).to.be.equal(user.first_name);
         expect(usr.last_name).to.be.equal(user.last_name);
-        expect(usr.email).to.be.equal(user.email);
+        expect(usr.email).to.be.equal(user.email.toLowerCase());
         expect(usr.password).to.not.be.ok;
         id = usr.id;
         done();
@@ -56,7 +56,20 @@ describe('User', function() {
         expect(usr.id).to.be.a('number');
         expect(usr.first_name).to.be.equal(user.first_name);
         expect(usr.last_name).to.be.equal(user.last_name);
-        expect(usr.email).to.be.equal(user.email);
+        expect(usr.email).to.be.equal(user.email.toLowerCase());
+        expect(usr.password).to.not.be.ok;
+        done();
+      });
+    });
+
+    it('should log in the user with email in different case', function(done) {
+      models.User.login(user.email.toUpperCase(), user.password, function(err, usr) {
+        expect(err).to.not.be.ok;
+        expect(usr).to.be.an('object');
+        expect(usr.id).to.be.a('number');
+        expect(usr.first_name).to.be.equal(user.first_name);
+        expect(usr.last_name).to.be.equal(user.last_name);
+        expect(usr.email).to.be.equal(user.email.toLowerCase());
         expect(usr.password).to.not.be.ok;
         done();
       });
@@ -69,7 +82,7 @@ describe('User', function() {
         expect(usr.id).to.be.a('number');
         expect(usr.first_name).to.be.equal(user.first_name);
         expect(usr.last_name).to.be.equal(user.last_name);
-        expect(usr.email).to.be.equal(user.email);
+        expect(usr.email).to.be.equal(user.email.toLowerCase());
         expect(usr.password).to.not.be.ok;
         done();
       });
@@ -87,6 +100,15 @@ describe('User', function() {
         expect(usr.last_name).to.be.a('string');
         expect(usr.email).to.be.a('string');
         expect(usr.password).to.not.be.ok;
+        done();
+      });
+    });
+
+    it('should prevent to register a user with the same email address', function(done) {
+      user.email = user.email.toLowerCase();
+      models.User.register(user, function(err, usr) {
+        expect(err).to.be.ok;
+        expect(err.message).to.contain('already');
         done();
       });
     });
