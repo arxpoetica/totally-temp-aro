@@ -44,7 +44,7 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, callback) {
 // 
 // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
 // 2. route_id Number Pass a route_id to find additionally the network nodes associated to that route
-Network.view_network_nodes = function(node_types, route_id, callback) {
+Network.view_network_nodes = function(node_types, plan_id, callback) {
   var sql = multiline(function() {;/*
     SELECT
       n.id, ST_AsGeoJSON(geog)::json AS geom, t.name AS name, n.route_id
@@ -65,8 +65,8 @@ Network.view_network_nodes = function(node_types, route_id, callback) {
     constraints.push('('+arr.join(' OR ')+')');
   }
 
-  if (route_id) {
-    params.push(route_id);
+  if (plan_id) {
+    params.push(plan_id);
     constraints.push('(route_id IS NULL OR route_id=$'+params.length+')');
   } else {
     constraints.push('route_id IS NULL');
@@ -111,24 +111,24 @@ Network.view_network_node_types = function(callback) {
   database.query(sql, callback);
 };
 
-Network.edit_network_nodes = function(route_id, changes, callback) {
+Network.edit_network_nodes = function(plan_id, changes, callback) {
   txain(function(callback) {
-    add_nodes(route_id, changes.insertions, callback);
+    add_nodes(plan_id, changes.insertions, callback);
   })
   .then(function(callback) {
-    update_nodes(route_id, changes.updates, callback);
+    update_nodes(plan_id, changes.updates, callback);
   })
   .then(function(callback) {
-    delete_nodes(route_id, changes.deletions, callback);
+    delete_nodes(plan_id, changes.deletions, callback);
   })
   .then(function(callback) {
     var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
-    database.execute(sql, [route_id], callback);
+    database.execute(sql, [plan_id], callback);
   })
   .end(callback);
 };
 
-function add_nodes(route_id, insertions, callback) {
+function add_nodes(plan_id, insertions, callback) {
   if (!_.isArray(insertions) || insertions.length === 0) return callback();
   var sql = 'INSERT INTO client.network_nodes (node_type_id, geog, geom, route_id) VALUES '
   var params = [];
@@ -138,59 +138,58 @@ function add_nodes(route_id, insertions, callback) {
     params.push(node.type);
     params.push('POINT('+node.lon+' '+node.lat+')');
     params.push('POINT('+node.lon+' '+node.lat+')');
-    params.push(route_id);
+    params.push(plan_id);
     arr.push('($'+(i+1)+', ST_GeogFromText($'+(i+2)+'), ST_GeomFromText($'+(i+3)+', 4326), $'+(i+4)+')');
   });
   sql += arr.join(', ');
   database.execute(sql, params, callback);
 };
 
-function update_nodes(route_id, updates, callback) {
+function update_nodes(plan_id, updates, callback) {
   if (!_.isArray(updates) || updates.length === 0) return callback();
   txain(updates)
   .each(function(node, callback) {
-    var sql = 'UPDATE client.network_nodes SET geog=ST_GeogFromText($1), geom=ST_GeomFromText($2, 4326) WHERE id=$3'
+    var sql = 'UPDATE client.network_nodes SET geog=ST_GeogFromText($1), geom=ST_GeomFromText($2, 4326) WHERE id=$3 AND route_id=$4'
     var params = [
       'POINT('+node.lon+' '+node.lat+')',
       'POINT('+node.lon+' '+node.lat+')',
-      node.id
+      node.id,
+      plan_id,
     ];
     database.execute(sql, params, callback);
   })
   .end(callback);
 };
 
-function delete_nodes(route_id, updates, callback) {
+function delete_nodes(plan_id, updates, callback) {
   if (!_.isArray(updates) || updates.length === 0) return callback();
   txain(updates)
   .each(function(node, callback) {
-    var sql = 'DELETE FROM client.network_nodes WHERE id=$1 AND route_id IS NOT NULL';
-    var params = [node.id];
+    var sql = 'DELETE FROM client.network_nodes WHERE id=$1 AND route_id=$2';
+    var params = [node.id, plan_id];
     database.execute(sql, params, callback);
   })
   .end(callback);
 };
 
-Network.clear_network_nodes = function(route_id, callback) {
+Network.clear_network_nodes = function(plan_id, callback) {
   var sql = 'DELETE FROM client.network_nodes WHERE route_id=$1;';
-  database.execute(sql, [route_id], callback);
+  database.execute(sql, [plan_id], callback);
 };
 
-Network.recalculate_nodes = function(route_id, callback) {
+Network.recalculate_nodes = function(plan_id, callback) {
   txain(function(callback) {
     var options = {
       method: 'POST',
       url: config.aro_service_url+'/rest/recalc/plan',
       json: true,
       body: {
-        planId: route_id,
+        planId: plan_id,
       },
     };
-    console.log('options', options);
     request(options, callback);
   })
   .then(function(res, body, callback) {
-    console.log('body', body);
     callback();
   })
   .end(callback);

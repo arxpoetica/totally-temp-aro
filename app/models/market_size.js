@@ -35,7 +35,7 @@ MarketSize.filters = function(callback) {
   .end(callback);
 };
 
-MarketSize.calculate = function(route_id, type, options, callback) {
+MarketSize.calculate = function(plan_id, type, options, callback) {
   var filters = options.filters;
   var params = [];
   var sql = multiline(function() {;/*
@@ -79,10 +79,10 @@ MarketSize.calculate = function(route_id, type, options, callback) {
     params.push(options.boundary);
     sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)'
   } else if (type === 'route') {
-    params.push(route_id);
+    params.push(plan_id);
     sql += '\n ST_DWithin((SELECT ST_Union(edge.geom)::geography FROM custom.route_edges JOIN client.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$'+params.length+'), b.geog, 152.4)';
   } else if (type === 'addressable') {
-    params.push(route_id);
+    params.push(plan_id);
     sql += '\n ST_DWithin((SELECT ST_Union(edge.geom)::geography FROM custom.route_edges JOIN client.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$'+params.length+'), b.geog, 152.4)';
     sql += ' AND ';
     params.push(options.boundary);

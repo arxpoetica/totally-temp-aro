@@ -4,7 +4,7 @@ var models = require('../../models');
 
 describe('Permission', function() {
 
-  var route_id;
+  var plan_id;
   var owner;
   var guest;
 
@@ -43,10 +43,10 @@ describe('Permission', function() {
           }
         }
       };
-      models.NetworkPlan.create_route('Untitled route', area, owner, callback);
+      models.NetworkPlan.create_plan('Untitled plan', area, owner, callback);
     })
-    .then(function(route, callback) {
-      route_id = route.id;
+    .then(function(plan, callback) {
+      plan_id = plan.id;
 
       // create guest user
       var email = 'user_'
@@ -72,7 +72,7 @@ describe('Permission', function() {
   });
 
   it('should check the owner\'s permission', function(done) {
-    models.Permission.find_permission(route_id, owner.id, function(err, permission) {
+    models.Permission.find_permission(plan_id, owner.id, function(err, permission) {
       expect(err).to.not.be.ok;
       expect(permission).to.be.an('object');
       expect(permission.rol).to.be.equal('owner');
@@ -90,7 +90,7 @@ describe('Permission', function() {
   });
 
   it('should grant access to the guest user', function(done) {
-    models.Permission.grant_access(route_id, guest.id, 'guest', function(err) {
+    models.Permission.grant_access(plan_id, guest.id, 'guest', function(err) {
       expect(err).to.not.be.ok;
       done();
     });
@@ -110,7 +110,7 @@ describe('Permission', function() {
   });
 
   it('should revoke access to the guest user', function(done) {
-    models.Permission.revoke_access(route_id, guest.id, function(err) {
+    models.Permission.revoke_access(plan_id, guest.id, function(err) {
       expect(err).to.not.be.ok;
       done();
     });

@@ -58,7 +58,7 @@ describe('MarketSize', function() {
           }
         },
       };
-      models.NetworkPlan.create_route('Untitled route', area, function(err, route) {
+      models.NetworkPlan.create_plan('Untitled plan', area, function(err, route) {
         route_id = route.id;
         
         var source = '3';
