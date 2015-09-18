@@ -102,6 +102,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     api_endpoint: '/census_blocks/36/061',
     highlighteable: true,
     single_selection: true,
+    reset_style_on_click: true,
     style_options: {
       normal: {
         fillColor: 'blue',
