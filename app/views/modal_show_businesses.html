@@ -1,5 +1,5 @@
 <div class="modal" id="location_show_businesses" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -10,12 +10,16 @@
           <thead>
             <tr>
               <th>Name</th>
-              <th class="text-right"># employees</th>
+              <th>Address</th>
+              <th>Industry</th>
+              <th class="text-right">#employees</th>
             </tr>
           </thead>
           <tbody>
             <tr ng-repeat="business in businesses">
               <td>{{business.name}}</th>
+              <td>{{business.address}}</th>
+              <td>{{business.industry_description}}</th>
               <td class="text-right">{{business.number_of_employees}}</td>
             </tr>
           </tbody>
