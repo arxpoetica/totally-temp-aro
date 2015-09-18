@@ -293,14 +293,20 @@ Location.show_businesses = function(location_id, callback) {
 			businesses.industry_id,
 			businesses.name,
 			businesses.number_of_employees,
+			businesses.address,
 			costs.install_cost,
-			costs.annual_recurring_cost
+			costs.annual_recurring_cost,
+			industries.description AS industry_description
 		FROM
 			aro.businesses businesses
 		JOIN
 			client.business_install_costs costs
 		ON
 			costs.business_id = businesses.id
+		JOIN
+			industries
+		ON
+			industries.id = businesses.industry_id
 		WHERE
 			location_id = $1
 	*/});

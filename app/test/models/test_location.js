@@ -194,7 +194,7 @@ describe('Location', function() {
 		it('should return the name of each business at the location', function(done) {
 			Location.show_businesses(location_id, function(err, output) {
 				var business_to_check = output[0];
-				expect(business_to_check.name).to.not.be.null;
+				expect(business_to_check.name).to.be.a('string');
 				done();
 			});
 		});
@@ -225,6 +225,23 @@ describe('Location', function() {
 				done();
 			});
 		});
+
+		it('should return the address of each business at the location', function(done) {
+			Location.show_businesses(location_id, function(err, output) {
+				var business_to_check = output[0];
+				expect(business_to_check.address).to.be.a('string');
+				done();
+			});
+		});
+
+		it('should return the industry description of each business at the location', function(done) {
+			Location.show_businesses(location_id, function(err, output) {
+				var business_to_check = output[0];
+				expect(business_to_check.industry_description).to.be.a('string');
+				done();
+			});
+		});
+
 	});
 
 	describe('#update_households()', function() {
