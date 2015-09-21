@@ -185,11 +185,3 @@ footer nav {
   font-weight: bold;
   text-align: center;
 }
-
-.hoverable .shown-on-hover {
-  visibility: hidden;
-}
-
-.hoverable:hover .shown-on-hover {
-  visibility: visible;
-}
