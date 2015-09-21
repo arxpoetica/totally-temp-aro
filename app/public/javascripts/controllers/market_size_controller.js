@@ -21,16 +21,18 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     $scope.filters = response;
   });
 
-  $rootScope.$on('boundary_selected', function(e, json) {
+  $rootScope.$on('boundary_selected', function(e, json, title) {
     geo_json = json;
     $scope.market_type = 'boundary';
     $scope.calculate_market_size();
+    $('#market-size .modal-title').text('Market profile · '+title);
     $('#market-size').modal('show');
   });
 
   $rootScope.$on('market_profile_selected', function(e, values) {
     geo_json = null;
     $scope.market_type = 'route';
+    $('#market-size .modal-title').text('Market profile');
     $('#market-size').modal('show');
     if (values) {
       chart && chart.destroy();
