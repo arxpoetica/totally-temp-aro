@@ -17,7 +17,7 @@ CREATE TABLE aro.businesses
 
 CREATE INDEX aro_businesses_location_index ON aro.businesses(location_id);
 CREATE INDEX aro_businesses_industry_index ON aro.businesses(industry_id);
-
+CREATE INDEX aro_businesses_geog_index ON aro.businesses USING gist(geog);
 
 
 INSERT INTO aro.businesses(id, location_id, industry_id, name, address, number_of_employees, geog)
