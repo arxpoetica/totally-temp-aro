@@ -74,6 +74,35 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     });
   }
 
+  $scope.export = function() {
+    $('#market-size').modal('hide');
+    swal({
+      title: "File name",
+      type: "input",
+      showCancelButton: true,
+      closeOnConfirm: true,
+      animation: "slide-from-top",
+      inputPlaceholder: "export",
+    }, function(name) {
+      if (name === false) return false;
+      var params = {
+        boundary: geo_json && JSON.stringify(geo_json),
+        type: $scope.market_type,
+        industry: $scope.industry && $scope.industry.id,
+        employees_range: $scope.employees_range && $scope.employees_range.id,
+        product: $scope.product && $scope.product.id,
+        filename: name,
+      };
+      var pairs = _.keys(params).map(function(key) {
+        var value = params[key];
+        if (!value) return null;
+        return key+'='+encodeURIComponent(value);
+      });
+      var href = '/market_size/'+$scope.route.id+'/export?'+_.compact(pairs).join('&');
+      location.href = href;
+    });
+  }
+
   var chart = null;
 
   function show_chart() {
