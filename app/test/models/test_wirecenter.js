@@ -15,6 +15,7 @@ describe('Wirecenter', function() {
 				expect(output.feature_collection.features[0].type).to.be.equal('Feature');
 				expect(output.feature_collection.features[0].properties).to.be.an('object');
 				expect(output.feature_collection.features[0].properties.id).to.be.equal(117);
+				expect(output.feature_collection.features[0].properties.name).to.be.equal('NYCMNY79');
 				expect(output.feature_collection.features[0].geometry).to.be.an('object');
 				expect(output.feature_collection.features[0].geometry.type).to.be.equal('MultiPolygon');
 				done();

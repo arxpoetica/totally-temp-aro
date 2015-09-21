@@ -14,7 +14,7 @@ var CountySubdivision = {};
 // 1. statefp: String. ex. '36' is New York state
 // 2. callback: function to return a GeoJSON object
 CountySubdivision.find_by_statefp = function(statefp, callback) {
-	var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.cousub WHERE statefp = $1';
+	var sql = 'SELECT gid AS id, name, ST_AsGeoJSON(geom)::json AS geom FROM aro.cousub WHERE statefp = $1';
 	var params = [statefp];
 
 	txain(function(callback) {
@@ -24,6 +24,10 @@ CountySubdivision.find_by_statefp = function(statefp, callback) {
 		var features = rows.map(function(row) {
 			return {
 				'type': 'Feature',
+				'properties': {
+					'id': row.id,
+					'name': row.name,
+				},
 				'geometry': row.geom,
 			}
 		});

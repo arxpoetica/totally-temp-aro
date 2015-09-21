@@ -2,7 +2,6 @@ var expect = require('chai').expect;
 var CountySubdivision = require('../../models/county_subdivision.js');
 
 describe('CountySubdivision', function() {
-	this.timeout(5000);
 
 	describe('#find_by_statefp()', function() {
 		var statefp = '36';
@@ -43,6 +42,21 @@ describe('CountySubdivision', function() {
 				done();
 			});
 		});
+
+		it('should have a name property', function(done) {
+			CountySubdivision.find_by_statefp(statefp, function(err, output) {
+				expect(output.feature_collection.features[0].properties.name).to.be.a('string');
+				done();
+			});
+		});
+
+		it('should have an id property', function(done) {
+			CountySubdivision.find_by_statefp(statefp, function(err, output) {
+				expect(output.feature_collection.features[0].properties.id).to.be.a('number');
+				done();
+			});
+		});
+
 
 	});
 

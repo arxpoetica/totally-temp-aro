@@ -12,7 +12,7 @@ var Wirecenter = {};
 //
 // 1. callback: function to return the list of wirecenters
 Wirecenter.find_by_wirecenter_code = function(wirecenter_code, callback) {
-  var sql = 'SELECT id, ST_AsGeoJSON(geom)::json as geom FROM aro.wirecenters WHERE wirecenter = $1;';
+  var sql = 'SELECT id, ST_AsGeoJSON(geom)::json AS geom, wirecenter AS name FROM aro.wirecenters WHERE wirecenter = $1;';
 
   txain(function(callback) {
     database.query(sql, [wirecenter_code], callback);

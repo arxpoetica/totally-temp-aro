@@ -104,9 +104,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
   }
 
   $rootScope.$on('map_layer_clicked_feature', function(e, event, layer) {
+    var name = event.feature.getProperty('name');
+    console.log('name', name);
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson(function(obj) {
-        $rootScope.$broadcast('boundary_selected', obj.geometry);
+        $rootScope.$broadcast('boundary_selected', obj.geometry, name);
       });
     }
   });
@@ -135,7 +137,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
 
     overlay.marker.addListener('click', function() {
-      $rootScope.$broadcast('boundary_selected', to_geo_json(overlay, true));
+      $scope.select_boundary(boundary);
     });
 
     overlay.marker.addListener('mouseover', function() {
@@ -227,7 +229,21 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
           $scope.boundaries = _.reject($scope.boundaries, function(b) { return boundary.id === b.id; });
         });
     });
+  };
 
+  $scope.select_boundary = function(boundary) {
+    $rootScope.$broadcast('boundary_selected', to_geo_json(boundary.overlay, true), boundary.name);
+  };
+
+  $scope.select_area = function(layer) {
+    var feature;
+    layer.data_layer.forEach(function(f) {
+      feature = f;
+    });
+    if (!feature) return console.log('no feature');
+    feature.toGeoJson(function(obj) {
+      $rootScope.$broadcast('boundary_selected', obj.geometry, layer.name);
+    });
   };
 
 }]);
