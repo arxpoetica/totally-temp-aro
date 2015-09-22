@@ -60,16 +60,16 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
         AND spend.monthly_spend <> 'NaN'
     */});
     if (filters.industry) {
-      params.push(filters.industry)
-      sql += ' AND spend.industry_id = $'+params.length
+      params.push(filters.industry);
+      sql += ' AND spend.industry_id = $'+params.length;
     }
     if (filters.product) {
-      params.push(filters.product)
-      sql += ' AND spend.product_id = $'+params.length
+      params.push(filters.product);
+      sql += ' AND spend.product_id = $'+params.length;
     }
     if (filters.employees_range) {
-      params.push(filters.employees_range)
-      sql += ' AND spend.employees_by_location_id = $'+params.length
+      params.push(filters.employees_range);
+      sql += ' AND spend.employees_by_location_id = $'+params.length;
     }
     sql += multiline(function() {;/*
       JOIN
@@ -83,7 +83,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     // 152.4 meters = 500 feet
     if (type === 'boundary') {
       params.push(options.boundary);
-      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)'
+      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
     } else if (type === 'route') {
       params.push(route);
       sql += '\n ST_DWithin(ST_GeogFromText($'+params.length+'), b.geog, 152.4)';
@@ -140,17 +140,20 @@ MarketSize.export_businesses = function(plan_id, type, options, callback) {
         spend.industry_id = m.industry_id
         AND spend.monthly_spend <> 'NaN'
     */});
+    params.push(new Date().getFullYear());
+    sql += ' AND spend.year = $'+params.length;
+
     if (filters.industry) {
-      params.push(filters.industry)
-      sql += ' AND spend.industry_id = $'+params.length
+      params.push(filters.industry);
+      sql += ' AND spend.industry_id = $'+params.length;
     }
     if (filters.product) {
-      params.push(filters.product)
-      sql += ' AND spend.product_id = $'+params.length
+      params.push(filters.product);
+      sql += ' AND spend.product_id = $'+params.length;
     }
     if (filters.employees_range) {
-      params.push(filters.employees_range)
-      sql += ' AND spend.employees_by_location_id = $'+params.length
+      params.push(filters.employees_range);
+      sql += ' AND spend.employees_by_location_id = $'+params.length;
     }
     sql += multiline(function() {;/*
       JOIN
@@ -164,7 +167,7 @@ MarketSize.export_businesses = function(plan_id, type, options, callback) {
     // 152.4 meters = 500 feet
     if (type === 'boundary') {
       params.push(options.boundary);
-      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)'
+      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
     } else if (type === 'route') {
       params.push(route);
       sql += '\n ST_DWithin(ST_GeogFromText($'+params.length+'), b.geog, 152.4)';
@@ -173,12 +176,16 @@ MarketSize.export_businesses = function(plan_id, type, options, callback) {
       sql += '\n ST_DWithin(ST_GeogFromText($'+params.length+'), b.geog, 152.4)';
       sql += ' AND ';
       params.push(options.boundary);
-      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)'
+      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
     }
     sql += '\n GROUP BY b.id';
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
+    var total = rows.reduce(function(total, row) {
+      return total + row.total;
+    }, 0);
+    console.log('Market size total for current year:', total);
     stringify(rows, callback);
   })
   .end(callback);
