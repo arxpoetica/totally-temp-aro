@@ -105,7 +105,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
 
   $rootScope.$on('map_layer_clicked_feature', function(e, event, layer) {
     var name = event.feature.getProperty('name');
-    console.log('name', name);
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson(function(obj) {
         $rootScope.$broadcast('boundary_selected', obj.geometry, name);
