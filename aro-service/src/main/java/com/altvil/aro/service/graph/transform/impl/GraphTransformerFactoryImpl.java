@@ -31,12 +31,12 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	}
 
 	@Override
-	public GraphTransformer<AroEdge, Collection<FDTNode>> createBasicFDTTransformer(
-			GraphModel<AroEdge> gm, int maxCount) {
+	public GraphTransformer<Long, Collection<FDTNode>> createBasicFDTTransformer(
+			GraphModel<Long> gm, int maxCount) {
 
-		return new GraphTransformer<AroEdge, Collection<FDTNode>>() {
+		return new GraphTransformer<Long, Collection<FDTNode>>() {
 			@Override
-			public Collection<FDTNode> apply(GraphModel<AroEdge> t) {
+			public Collection<FDTNode> apply(GraphModel<Long> t) {
 				List<FDTNode> result = new ArrayList<>();
 				createFTTXTransformer(gm, maxCount, 100).apply(t).forEach(
 						a -> {
@@ -50,14 +50,14 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	}
 
 	@Override
-	public <E extends AroEdge> GraphModelBuilder<E> createBuilder(
-			EdgeFactory<GraphNode, E> edgeFactory) {
-		return new DefaultGraphBuilder<E>(edgeFactory);
+	public <T> GraphModelBuilder<T> createBuilder(
+			EdgeFactory<GraphNode, AroEdge<T>> edgeFactory) {
+		return new DefaultGraphBuilder<T>(edgeFactory);
 	}
 
 	@Override
-	public GraphTransformer<AroEdge, Collection<FDHAssignments>> createFTTXTransformer(
-			GraphModel<AroEdge> gm, int maxFDTCount, int maxFDHCount) {
+	public GraphTransformer<Long, Collection<FDHAssignments>> createFTTXTransformer(
+			GraphModel<Long> gm, int maxFDTCount, int maxFDHCount) {
 
 		return new FTTXScanner(this, gm.getGraph(), factory, maxFDTCount,
 				maxFDHCount);

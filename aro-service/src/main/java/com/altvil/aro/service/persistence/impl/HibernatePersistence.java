@@ -56,6 +56,7 @@ public class HibernatePersistence implements PersistenceService {
 			return action.apply(session);
 		} finally {
 			ManagedSessionContext.unbind(sessionFactory);
+			session.close(); 
 		}
 	}
 
@@ -78,6 +79,7 @@ public class HibernatePersistence implements PersistenceService {
 			} else {
 				tx.rollback();
 			}
+			session.close(); 
 		}
 	}
 

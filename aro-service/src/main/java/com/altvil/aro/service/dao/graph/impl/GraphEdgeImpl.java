@@ -21,6 +21,10 @@ public class GraphEdgeImpl implements GraphEdge {
 		e.source = rs.getLong(3);
 		e.target = rs.getLong(2);
 		e.gid = rs.getLong(4);
+		if( rs.wasNull() ) {
+			e.gid = null ;
+		}
+			
 		e.edgeType = EdgeTypeMapping.MAPPING.getEdgeType(rs.getInt(5));
 		e.edgeLength = rs.getDouble(6);
 		// line
@@ -92,6 +96,11 @@ public class GraphEdgeImpl implements GraphEdge {
 	@Override
 	public Long getLocationId() {
 		return locationId;
+	}
+	
+	@Override
+	public String toString() {
+		return "edge " + source + "->" + target + " gid="+ gid + " w=" + edgeLength + " type" + edgeType ; 
 	}
 
 }

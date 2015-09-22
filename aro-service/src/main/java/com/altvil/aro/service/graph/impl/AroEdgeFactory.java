@@ -5,13 +5,12 @@ import org.jgrapht.EdgeFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.node.GraphNode;
 
-public class AroEdgeFactory implements EdgeFactory<GraphNode, AroEdge> {
+public class AroEdgeFactory<T> implements EdgeFactory<GraphNode, AroEdge<T>> {
 	
-	public static final AroEdgeFactory FACTORY = new AroEdgeFactory() ;
 	
 	@Override
-	public AroEdge createEdge(GraphNode sourceVertex, GraphNode targetVertex) {
-		return new AroEdge() ;
+	public AroEdge<T> createEdge(GraphNode sourceVertex, GraphNode targetVertex) {
+		return new AroEdge<T>() ;
 	}	
 	
 }

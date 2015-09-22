@@ -5,12 +5,12 @@ import org.jgrapht.traverse.GraphIterator;
 
 import com.altvil.aro.service.graph.node.GraphNode;
 
-public interface GraphModel<E extends AroEdge> {
+public interface GraphModel<T> {
 
-	public DirectedGraph<GraphNode, E> getGraph();
+	public DirectedGraph<GraphNode, AroEdge<T>> getGraph();
 
 	public GraphNode getRoot();
 
-	public GraphIterator<GraphNode, E> depthFirstItr();
+	public GraphIterator<GraphNode, AroEdge<T>> depthFirstItr();
 
 }

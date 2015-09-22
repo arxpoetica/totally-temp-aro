@@ -19,11 +19,11 @@ public class TestGraph {
 	@Test
 	public void testGraph() {
 		try {
-			GraphModel<AroEdge> m = MainEntry.service(GraphService.class).getGraphForPlanId(4) ;
+			GraphModel<Long> m = MainEntry.service(GraphService.class).getGraphForPlanId(4) ;
 			
-			GraphIterator<GraphNode, AroEdge> itr = m.depthFirstItr() ;
+			GraphIterator<GraphNode, AroEdge<Long>> itr = m.depthFirstItr() ;
 			
-			itr.addTraversalListener(new TraversalListener<GraphNode, AroEdge>() {
+			itr.addTraversalListener(new TraversalListener<GraphNode, AroEdge<Long>>() {
 				
 				@Override
 				public void vertexTraversed(VertexTraversalEvent<GraphNode> e) {
@@ -36,7 +36,7 @@ public class TestGraph {
 				}
 				
 				@Override
-				public void edgeTraversed(EdgeTraversalEvent<GraphNode, AroEdge> e) {
+				public void edgeTraversed(EdgeTraversalEvent<GraphNode, AroEdge<Long>> e) {
 					System.out.println("Edge Traversed src " + " edge " + e.getEdge()) ;
 				}
 				

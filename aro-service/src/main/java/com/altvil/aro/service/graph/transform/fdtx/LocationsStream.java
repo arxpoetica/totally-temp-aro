@@ -19,7 +19,7 @@ public class LocationsStream {
 	private static final Logger log = LoggerFactory
 			.getLogger(LocationsStream.class.getName());
 
-	private DirectedGraph<GraphNode, AroEdge> graph;
+	private DirectedGraph<GraphNode, AroEdge<Long>> graph;
 
 	private int nodeCount;
 	private double totalLength;
@@ -32,7 +32,7 @@ public class LocationsStream {
 
 	private List<LocationIntersection> nodes = new ArrayList<>(100);
 
-	public LocationsStream(DirectedGraph<GraphNode, AroEdge> graph) {
+	public LocationsStream(DirectedGraph<GraphNode, AroEdge<Long>> graph) {
 		this.graph = graph;
 	}
 
@@ -54,7 +54,7 @@ public class LocationsStream {
 		}
 	}
 
-	public void link(AroEdge edge) {
+	public void link(AroEdge<Long> edge) {
 
 		if (edge.getGid() == null) {
 			this.currentGid = edge.getGid();
@@ -66,21 +66,22 @@ public class LocationsStream {
 
 	}
 
-	public Collection<AroEdge> close() {
+	public Collection<AroEdge<Long>> close() {
 		this.endNode = previousNode;
 		return graph.outgoingEdgesOf(this.endNode);
 	}
 
 	public boolean groupBy(RoadNode node) {
 
-		AroEdge e = graph.getEdge(previousNode, node);
-
+		AroEdge<Long> e = graph.getEdge(previousNode, node);
+		
 		// Basis
 		if (e == null) {
 			if (graph.inDegreeOf(node) != 0 && log.isErrorEnabled())
 				log.error("Failed to traverse " + e);
 			return false;
 		}
+		
 
 		// if non Location node detected (Stop Condition)
 		if (graph.inDegreeOf(node) > 1) {
@@ -111,7 +112,11 @@ public class LocationsStream {
 	}
 
 	public List<LocationIntersection> getLocations() {
-		return new ArrayList<>(nodes);
+		return nodes;
+	}
+	
+	public int getLocationCount() {
+		return nodes.size() ;
 	}
 
 	public double getTotalLength() {

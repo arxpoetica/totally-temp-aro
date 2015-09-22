@@ -12,16 +12,16 @@ import com.altvil.aro.service.graph.node.GraphNode;
 
 public interface GraphTransformerFactory {
 	
-	public  GraphTransformer<AroEdge, Collection<FDTNode>> createBasicFDTTransformer(GraphModel<AroEdge> gm, int maxCount) ;
+	public  GraphTransformer<Long, Collection<FDTNode>> createBasicFDTTransformer(GraphModel<Long> gm, int maxCount) ;
 	
 	
-	public GraphTransformer<AroEdge, Collection<FDHAssignments>> createFTTXTransformer(GraphModel<AroEdge> gm, int maxFDTCount, int maxFDHCount) ;
+	public GraphTransformer<Long, Collection<FDHAssignments>> createFTTXTransformer(GraphModel<Long> gm, int maxFDTCount, int maxFDHCount) ;
 	
 	/**
 	 * 
 	 * @param edgeFactory
 	 * @return
 	 */
-	public <E extends AroEdge> GraphModelBuilder<E> createBuilder(EdgeFactory<GraphNode, E> edgeFactory) ;
+	public <T> GraphModelBuilder<T> createBuilder(EdgeFactory<GraphNode, AroEdge<T>> edgeFactory) ;
 
 }

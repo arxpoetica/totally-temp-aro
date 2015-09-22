@@ -12,7 +12,6 @@ import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.service.dao.Accessor;
 import com.altvil.aro.service.dao.DAOService;
 import com.altvil.aro.service.dao.generic.AroDAO;
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.GraphService;
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -71,7 +70,7 @@ public class PlanServiceImpl implements PlanService {
 
 	public Collection<NetworkNode> _computeNetworkNodes(RecalcRequest request)
 			throws PlanException {
-		GraphModel<AroEdge> gm = graphService.getGraphForPlanId(request
+		GraphModel<Long> gm = graphService.getGraphForPlanId(request
 				.getPlanId());
 
 		Collection<FDHAssignments> assigments = transformFactory
