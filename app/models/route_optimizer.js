@@ -40,7 +40,7 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
           select
             location_entry_fees.location_id as location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
           from
-            client.location_entry_fees
+            client_schema.location_entry_fees
           join custom.route_targets on
             location_entry_fees.location_id = route_targets.location_id
             and route_targets.route_id=$1
@@ -50,7 +50,7 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
           select
             businesses.location_id, 0, install_cost, 0, 0, 0
           from
-            client.business_install_costs
+            client_schema.business_install_costs
           join businesses
             on businesses.id = business_install_costs.business_id
           join custom.route_targets on
@@ -62,7 +62,7 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
           select
             household_install_costs.location_id, 0, 0, install_cost_per_hh, 0, 0
           from
-            client.household_install_costs
+            client_schema.household_install_costs
           join custom.route_targets on
             household_install_costs.location_id = route_targets.location_id
             and route_targets.route_id=$1
@@ -108,9 +108,9 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(plan_id, callback) {
       SELECT
         nt.name as key, nt.description as name, COUNT(*)::integer as count
       FROM
-        client.network_nodes n
+        client_schema.network_nodes n
       JOIN
-        client.network_node_types nt
+        client_schema.network_node_types nt
       ON
         nt.id = n.node_type_id
       WHERE
@@ -146,16 +146,16 @@ RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callbac
       ON
         route_targets.location_id = b.location_id
       JOIN
-        client.industry_mapping m
+        client_schema.industry_mapping m
       ON
         m.sic4 = b.industry_id
       JOIN
-        client.spend
+        client_schema.spend
       ON
         spend.industry_id = m.industry_id
         -- AND spend.monthly_spend <> 'NaN'
       JOIN
-        client.employees_by_location e
+        client_schema.employees_by_location e
       ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees

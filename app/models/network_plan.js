@@ -19,7 +19,7 @@ NetworkPlan.find_edges = function(plan_id, callback) {
   var sql = multiline(function() {;/*
     SELECT edge.id, edge.edge_length, ST_AsGeoJSON(edge.geom)::json AS geom
     FROM custom.route_edges
-    JOIN client.graph edge
+    JOIN client_schema.graph edge
       ON edge.id = route_edges.edge_id
     WHERE route_edges.route_id=$1
   */});
@@ -56,7 +56,7 @@ NetworkPlan.find_customer_types = function(plan_id, callback) {
       ON
         h.location_id=t.location_id
       JOIN
-        client.household_customer_types hct
+        client_schema.household_customer_types hct
       ON
         hct.household_id = h.id
       WHERE
@@ -74,7 +74,7 @@ NetworkPlan.find_customer_types = function(plan_id, callback) {
       ON
         b.location_id=t.location_id
       JOIN
-        client.business_customer_types bct
+        client_schema.business_customer_types bct
       ON
         bct.business_id = b.id
       WHERE
@@ -82,7 +82,7 @@ NetworkPlan.find_customer_types = function(plan_id, callback) {
       GROUP BY bct.customer_type_id)
       ) t
     JOIN
-      client.customer_types ct
+      client_schema.customer_types ct
     ON
       ct.id=t.id
     GROUP BY
@@ -208,11 +208,11 @@ NetworkPlan.recalculate_route = function(plan_id, callback) {
         SELECT DISTINCT edge_id FROM
           (SELECT id as edge_id
               FROM
-                pgr_kdijkstraPath('SELECT id, source::integer, target::integer, edge_length::double precision AS cost FROM client.graph',
+                pgr_kdijkstraPath('SELECT id, source::integer, target::integer, edge_length::double precision AS cost FROM client_schema.graph',
                   (select vertex_id from custom.route_sources where route_id=$1 limit 1)::integer,
                   array(select vertex_id from custom.route_targets where route_id=$1)::integer[],
                   false, false) AS dk
-              JOIN client.graph edge
+              JOIN client_schema.graph edge
                 ON edge.id = dk.id3) as edge_id
       )
       INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
@@ -344,7 +344,7 @@ NetworkPlan.clear_route = function(plan_id, callback) {
   })
   .then(function(callback) {
     var sql = multiline(function() {;/*
-      DELETE FROM client.network_nodes WHERE route_id=$1;
+      DELETE FROM client_schema.network_nodes WHERE route_id=$1;
     */});
     database.execute(sql, [plan_id], callback);
   })
@@ -428,7 +428,7 @@ NetworkPlan.export_kml = function(plan_id, callback) {
     var sql = multiline(function() {;/*
       SELECT ST_AsKML(edge.geom) AS geom
       FROM custom.route_edges
-      JOIN client.graph edge
+      JOIN client_schema.graph edge
       ON edge.id = route_edges.edge_id
       WHERE route_edges.route_id = $1
     */});
@@ -460,7 +460,7 @@ NetworkPlan.export_kml = function(plan_id, callback) {
     var sql = multiline(function() {;/*
       SELECT ST_AsKML(network_nodes.geom) AS geom
       FROM custom.route_sources
-      JOIN client.network_nodes
+      JOIN client_schema.network_nodes
       ON route_sources.network_node_id = network_nodes.id
       WHERE route_sources.route_id=$1
     */});
@@ -497,8 +497,8 @@ function add_sources(plan_id, network_node_ids, callback) {
       (SELECT
         vertex.id AS vertex_id, network_nodes.id, $2
       FROM
-        client.graph_vertices_pgr AS vertex
-      JOIN client.network_nodes network_nodes
+        client_schema.graph_vertices_pgr AS vertex
+      JOIN client_schema.network_nodes network_nodes
         ON network_nodes.geom && vertex.the_geom
       WHERE
         network_nodes.id IN ($1))
@@ -526,7 +526,7 @@ function add_targets(plan_id, location_ids, callback) {
       (SELECT
         vertex.id AS vertex_id, locations.id, $2 AS route_id
       FROM
-        client.graph_vertices_pgr AS vertex
+        client_schema.graph_vertices_pgr AS vertex
       JOIN aro.locations locations
         ON locations.geom && vertex.the_geom
       WHERE

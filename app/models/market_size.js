@@ -13,19 +13,19 @@ var MarketSize = {};
 MarketSize.filters = function(callback) {
   var output = {};
   txain(function(callback) {
-    var sql = 'SELECT * FROM client.products';
+    var sql = 'SELECT * FROM client_schema.products';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
     output.products = rows;
 
-    var sql = 'SELECT * FROM client.industries';
+    var sql = 'SELECT * FROM client_schema.industries';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
     output.industries = rows;
     
-    var sql = 'SELECT * FROM client.employees_by_location';
+    var sql = 'SELECT * FROM client_schema.employees_by_location';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
@@ -38,7 +38,7 @@ MarketSize.filters = function(callback) {
 
 MarketSize.calculate = function(plan_id, type, options, callback) {
   txain(function(callback) {
-    var sql = 'SELECT ST_AsText(ST_Union(edge.geom)::geography) AS route FROM custom.route_edges JOIN client.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1';
+    var sql = 'SELECT ST_AsText(ST_Union(edge.geom)::geography) AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1';
     database.findValue(sql, [plan_id], 'route', callback);
   })
   .then(function(route, callback) {
@@ -50,11 +50,11 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       FROM
         businesses b
       JOIN
-        client.industry_mapping m
+        client_schema.industry_mapping m
       ON
         m.sic4 = b.industry_id
       JOIN
-        client.spend
+        client_schema.spend
       ON
         spend.industry_id = m.industry_id
         AND spend.monthly_spend <> 'NaN'
@@ -73,7 +73,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     }
     sql += multiline(function() {;/*
       JOIN
-        client.employees_by_location e
+        client_schema.employees_by_location e
       ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
@@ -102,7 +102,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
 
 MarketSize.export_businesses = function(plan_id, type, options, callback) {
   txain(function(callback) {
-    var sql = 'SELECT ST_AsText(ST_Union(edge.geom)::geography) AS route FROM custom.route_edges JOIN client.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1';
+    var sql = 'SELECT ST_AsText(ST_Union(edge.geom)::geography) AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1';
     database.findValue(sql, [plan_id], 'route', callback);
   })
   .then(function(route, callback) {
@@ -123,19 +123,19 @@ MarketSize.export_businesses = function(plan_id, type, options, callback) {
       ON
         industries.id = b.industry_id
       JOIN
-        client.business_customer_types bct
+        client_schema.business_customer_types bct
       ON
         bct.business_id = b.id
       JOIN
-        client.customer_types ct
+        client_schema.customer_types ct
       ON
         ct.id=bct.customer_type_id
       JOIN
-        client.industry_mapping m
+        client_schema.industry_mapping m
       ON
         m.sic4 = b.industry_id
       JOIN
-        client.spend
+        client_schema.spend
       ON
         spend.industry_id = m.industry_id
         AND spend.monthly_spend <> 'NaN'
@@ -154,7 +154,7 @@ MarketSize.export_businesses = function(plan_id, type, options, callback) {
     }
     sql += multiline(function() {;/*
       JOIN
-        client.employees_by_location e
+        client_schema.employees_by_location e
       ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
