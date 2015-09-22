@@ -25,7 +25,7 @@ public class PlanRecalcResource {
 			throws RecalcException, InterruptedException, ExecutionException {
 
 		return MainEntry.service(RecalcService.class).submit(request)
-				.getFutureResponse().get();
+				.getResponse();
 	}
 
 }

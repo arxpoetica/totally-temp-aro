@@ -18,7 +18,7 @@ public class TestRecalc {
 		DefaultRecalcRequest request = new DefaultRecalcRequest();
 		request.setPlanId(4);
 		RecalcResponse response = MainEntry.service(RecalcService.class)
-				.submit(request).getFutureResponse().get();
+				.submit(request).getResponse();
 
 		System.out.println(response.getRunningTimeInMillis());
 

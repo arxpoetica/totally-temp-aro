@@ -91,7 +91,6 @@ public class StreamAggregator {
 			childStreams.addAll(analyzer.getChildStreams()) ;
 		}
 		
-		@SuppressWarnings("unused")
 		public boolean collect(VertexAnalyzer analyzer) {
 			
 			if( satisfiesConstraint(analyzer.getStreamCount()) ) {

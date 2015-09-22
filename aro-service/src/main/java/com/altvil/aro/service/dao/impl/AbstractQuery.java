@@ -53,6 +53,8 @@ public class AbstractQuery<A, T> {
 					}
 				} catch (Throwable e) {
 					throw new DAOException(e.getMessage(), e) ;
+				} finally {
+					connection.close(); 
 				}
 			}
 		});

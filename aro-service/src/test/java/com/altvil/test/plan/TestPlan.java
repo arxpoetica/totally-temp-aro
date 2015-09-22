@@ -41,9 +41,11 @@ public class TestPlan {
 				}
 			}; 
 			
-			MainEntry.service(PlanService.class).computeNetworkNodes(rr);
-			System.out.println("Done") ;
-		
+			for(int i=0 ; i<30 ; i++) {
+				MainEntry.service(PlanService.class).computeNetworkNodes(rr);
+				System.out.println("Done") ;
+			}
+			
 		} catch( Throwable err) {
 			err.printStackTrace(); 
 		}

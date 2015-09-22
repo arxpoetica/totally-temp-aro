@@ -30,10 +30,10 @@ public class RecalcServiceImpl implements RecalcService {
 	private PlanService planService;
 	private ExecutorService executorService;
 	private AtomicLong jobId = new AtomicLong(0);
-	
+
 	@Inject
 	public RecalcServiceImpl(PlanService planService) {
-		this.planService = planService ;
+		this.planService = planService;
 		this.executorService = Executors.newSingleThreadExecutor() ;
 	}
 
@@ -41,13 +41,14 @@ public class RecalcServiceImpl implements RecalcService {
 	public Job submit(RecalcRequest request) throws RecalcException {
 
 		RecalcJob recalcJob = toJob(request);
+
 		return new JobImpl(recalcJob, executorService.submit(new RecalcCommand(
 				recalcJob)));
 	}
 
 	private RecalcJob toJob(RecalcRequest request) {
 		RecalcJob job = new RecalcJob();
-		
+
 		job.setJobId(jobId.getAndIncrement());
 		job.setRequest(request);
 		job.setScheduledTime(new Date());
@@ -72,12 +73,17 @@ public class RecalcServiceImpl implements RecalcService {
 		}
 
 		@Override
-		public Future<RecalcResponse> getFutureResponse() {
-			return future;
+		public RecalcResponse getResponse() {
+			try {
+				return future.get();
+			} catch (Throwable e) {
+				throw new RecalcException(e.getMessage(), e);
+			}
 		}
 
 	}
 
+	
 	private class RecalcCommand implements Callable<RecalcResponse> {
 
 		private RecalcJob job;
@@ -105,7 +111,7 @@ public class RecalcServiceImpl implements RecalcService {
 						NetworkNodeType.fiber_distribution_terminal).size();
 
 				response.setSuccess(true);
-				response.setMessage("Updated FTDS = " + updateCount);
+				response.setMessage("Updated FDTs = " + updateCount);
 
 			} catch (Throwable err) {
 				response.setSuccess(false);
