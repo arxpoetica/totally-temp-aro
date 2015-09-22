@@ -185,8 +185,12 @@ MarketSize.export_businesses = function(plan_id, type, options, callback) {
     var total = rows.reduce(function(total, row) {
       return total + row.total;
     }, 0);
+    this.set('total', total);
     console.log('Market size total for current year:', total);
     stringify(rows, callback);
+  })
+  .then(function(csv, callback) {
+    callback(null, csv, this.get('total'));
   })
   .end(callback);
 };
