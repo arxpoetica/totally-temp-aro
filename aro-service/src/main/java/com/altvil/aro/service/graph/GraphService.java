@@ -10,7 +10,7 @@ public interface GraphService {
 	 * @return
 	 * @throws GraphException
 	 */
-	public GraphModel<AroEdge> getGraphForPlanId(long planId) throws GraphException;
+	public GraphModel<Long> getGraphForPlanId(long planId) throws GraphException;
 	
 	
 }

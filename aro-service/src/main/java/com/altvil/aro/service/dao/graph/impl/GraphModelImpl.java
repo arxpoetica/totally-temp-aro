@@ -17,17 +17,17 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.node.GraphNode;
 
-public class GraphModelImpl<E extends AroEdge> implements GraphModel<E> {
+public class GraphModelImpl<T> implements GraphModel<T> {
 
 	
 	private static final Logger log = LoggerFactory
 			.getLogger(GraphModelImpl.class.getName());
 
 	
-	private DirectedGraph<GraphNode, E> graph;
+	private DirectedGraph<GraphNode, AroEdge<T>> graph;
 	private GraphNode root;
 
-	public GraphModelImpl(DirectedGraph<GraphNode, E> graph,
+	public GraphModelImpl(DirectedGraph<GraphNode, AroEdge<T>> graph,
 			GraphNode root) {
 		super();
 		this.graph = graph;
@@ -35,7 +35,7 @@ public class GraphModelImpl<E extends AroEdge> implements GraphModel<E> {
 	}
 
 	@Override
-	public DirectedGraph<GraphNode, E> getGraph() {
+	public DirectedGraph<GraphNode, AroEdge<T>> getGraph() {
 		return graph;
 	}
 
@@ -45,14 +45,14 @@ public class GraphModelImpl<E extends AroEdge> implements GraphModel<E> {
 	}
 
 	@Override
-	public GraphIterator<GraphNode, E> depthFirstItr() {
+	public GraphIterator<GraphNode, AroEdge<T>> depthFirstItr() {
 		//return new DepthFirstIterator<GraphNode, E>(graph, root);
-		return new SimpleIterator<E>(new Dft().toItr(root)) ;
+		return new SimpleIterator<T>(new Dft().toItr(root)) ;
 	}
 	
 	
 	
-	private static class SimpleIterator<E> implements GraphIterator<GraphNode, E> {
+	private static class SimpleIterator<T> implements GraphIterator<GraphNode, AroEdge<T>> {
 
 		private Iterator<GraphNode> itr ;
 		
@@ -93,7 +93,7 @@ public class GraphModelImpl<E extends AroEdge> implements GraphModel<E> {
 		}
 
 		@Override
-		public void addTraversalListener(TraversalListener<GraphNode, E> l) {
+		public void addTraversalListener(TraversalListener<GraphNode, AroEdge<T>> l) {
 		}
 
 		@Override
@@ -101,7 +101,7 @@ public class GraphModelImpl<E extends AroEdge> implements GraphModel<E> {
 		}
 
 		@Override
-		public void removeTraversalListener(TraversalListener<GraphNode, E> l) {
+		public void removeTraversalListener(TraversalListener<GraphNode, AroEdge<T>> l) {
 		}
 		
 		
@@ -126,7 +126,7 @@ public class GraphModelImpl<E extends AroEdge> implements GraphModel<E> {
 					System.out.println("outgoing = " + graph.outgoingEdgesOf(node) + " incomming = " + graph.incomingEdgesOf(node)) ;
 				}
 			
-				for(AroEdge ae : graph.incomingEdgesOf(node)) {
+				for(AroEdge<T> ae : graph.incomingEdgesOf(node)) {
 					tarverse(ae.getSourceNode()) ;
 				}
 				

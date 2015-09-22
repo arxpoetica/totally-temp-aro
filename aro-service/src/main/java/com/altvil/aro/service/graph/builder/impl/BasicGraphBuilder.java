@@ -26,14 +26,13 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 
 	private GraphNodeFactory nodeFactory;
 
-	
 	private Map<Long, GraphNode> mapNodeById = new HashMap<Long, GraphNode>(
 			1000);
 
-	private SimpleDirectedWeightedGraph<GraphNode, AroEdge> graph = new SimpleDirectedWeightedGraph<GraphNode, AroEdge>(
-			AroEdgeFactory.FACTORY);
+	private SimpleDirectedWeightedGraph<GraphNode, AroEdge<Long>> graph = new SimpleDirectedWeightedGraph<GraphNode, AroEdge<Long>>(
+			new AroEdgeFactory<Long>());
 
-	private EdgeFactory<GraphNode, AroEdge> edgeFactory = graph
+	private EdgeFactory<GraphNode, AroEdge<Long>> edgeFactory = graph
 			.getEdgeFactory();
 
 	private GraphNode root;
@@ -46,46 +45,42 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 	public BasicGraphBuilder apply(GraphEdge edge) {
 
 		try {
+
 			Long srcNodeId = edge.getSource();
 			GraphNode srcNode = mapNodeById.get(srcNodeId);
-			boolean addSourceVertix = false;
+			boolean addSourceVertix = srcNode == null;
 
-			if (srcNode == null) {
+			if (addSourceVertix) {
 				srcNode = createSourceNode(edge);
 				mapNodeById.put(srcNode.getId(), srcNode);
-				addSourceVertix = true;
-				graph.addVertex(srcNode);
 			}
 
 			Long targetNodeId = edge.getTarget();
 			GraphNode targetNode = mapNodeById.get(targetNodeId);
+			boolean addTargetVertix = targetNode == null;
 
-			boolean addTargetVertix = false;
-
-			if (targetNode == null) {
+			if (addTargetVertix) {
 				targetNode = createTargetNode(edge);
 				mapNodeById.put(targetNode.getId(), targetNode);
-				addTargetVertix = true;
 			}
 
-			if (!targetNode.isLocationNode()) {
-
-				if (addTargetVertix) {
-					graph.addVertex(targetNode);
-				}
+			if (targetNode.isLocationNode()) {
 
 				if (srcNode.isLocationNode()) {
 					targetNode.addLocation(srcNode);
-
+					if (log.isWarnEnabled())
+						log.warn("Location linked to location " + targetNode);
 				} else {
-					if (addSourceVertix) {
-						graph.addVertex(srcNode);
-					}
-					add(srcNode, targetNode, edge);
+					if (log.isWarnEnabled())
+						log.warn("Intersection -> Location" + targetNode);
+
+					add(addTargetVertix, addSourceVertix, edge, targetNode,
+							srcNode);
 				}
+
 			} else {
-				targetNode.addLocation(srcNode);
-				if( log.isWarnEnabled() ) log.warn("Inavlid Target Location " + targetNode);
+				add(addSourceVertix, addTargetVertix, edge, srcNode, targetNode);
+
 			}
 
 		} catch (Throwable err) {
@@ -95,6 +90,22 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 		return this;
 	}
 
+	private void add(boolean addSourceVertix, boolean addTargetVertix,
+			GraphEdge edge, GraphNode srcNode, GraphNode targetNode) {
+		if (addTargetVertix) {
+			graph.addVertex(targetNode);
+		}
+
+		if (srcNode.isLocationNode()) {
+			targetNode.addLocation(srcNode);
+		} else {
+			if (addSourceVertix) {
+				graph.addVertex(srcNode);
+			}
+			add(srcNode, targetNode, edge);
+		}
+	}
+
 	private void add(GraphNode src, GraphNode target, GraphEdge edge) {
 
 		if (log.isTraceEnabled()) {
@@ -102,7 +113,7 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 					+ edge.getEdgeLength() + " type=" + edge.getEdgeType());
 		}
 
-		AroEdge ae = edgeFactory.createEdge(src, target);
+		AroEdge<Long> ae = edgeFactory.createEdge(src, target);
 		graph.addEdge(src, target, ae);
 		graph.setEdgeWeight(ae, edge.getEdgeLength());
 		ae.setGid(edge.getGID());
@@ -138,16 +149,16 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 					edge.getStartPoint());
 
 		case LOCATION_LINK:
-			return new LocationNodeImpl(edge.getTarget(), edge.getEndPoint(),
-					edge.getLocationId());
+			return nodeFactory.createRoadNode(edge.getSource(), edge.getStartPoint()) ;
+			
 		}
 
 		throw new GraphException("Invalid target type " + edge.getEdgeType());
 	}
 
 	@Override
-	public GraphModel<AroEdge> build() {
-		return new GraphModelImpl<AroEdge>(graph, root);
+	public GraphModel<Long> build() {
+		return new GraphModelImpl<Long>(graph, root);
 	}
 
 }

@@ -2,6 +2,7 @@ package com.altvil.aro.service.graph.transform.fdtx;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.FDHNode;
 import com.altvil.aro.service.graph.node.FDTNode;
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -25,8 +27,10 @@ public class StreamAggregator {
 			.getLogger(StreamAggregator.class.getName());
 
 	
-	private DirectedGraph<GraphNode, AroEdge> graph;
-	private Map<AroEdge, LocationsStream> assemblerMap;
+	//private GraphTransformerFactory graphFactory;
+	
+	private DirectedGraph<GraphNode, AroEdge<Long>> graph;
+	private Map<AroEdge<Long>, LocationsStream> assemblerMap;
 
 	private int maxlocationPerFDT;
 	private int maxLocationPerFDH;
@@ -37,9 +41,15 @@ public class StreamAggregator {
 	private int currentLocationCount = 0;
 
 	private List<FDHAssignments> fdhAssigments = new ArrayList<>();
+	
+	
+	//private GraphModelBuilder<LocationsStream> graphBuilder ;
+	//private List<GraphNode> visitedVertices ;
+	//private Map<AroEdge<Long>, LocationsStream> visitedStreams ;
+	
 
-	public StreamAggregator(GraphNodeFactory nodeFactory, DirectedGraph<GraphNode, AroEdge> graph,
-			Map<AroEdge, LocationsStream> assemblerMap, int maxlocationPerFDT,
+	public StreamAggregator(GraphNodeFactory nodeFactory, DirectedGraph<GraphNode, AroEdge<Long>> graph,
+			Map<AroEdge<Long>, LocationsStream> assemblerMap, int maxlocationPerFDT,
 			int maxLocationPerFDH) {
 		super();
 		this.nodeFactory = nodeFactory ;
@@ -57,6 +67,78 @@ public class StreamAggregator {
 		flushGroup(node);
 	}
 
+	
+	
+	public void aggregate1(GraphNode node) {
+		
+		
+	}
+	
+	@SuppressWarnings("unused")
+	private class FDHGroup {
+		
+		private GraphModelBuilder<LocationsStream> graphBuilder ;
+		private int streamCount ;
+		private List<LocationsStream> childStreams = new ArrayList<LocationsStream>() ;
+		
+		private boolean satisfiesConstraint(int delta) {
+			
+			return true ;
+		}
+		
+		private void flush(VertexAnalyzer analyzer) {
+			streamCount+= analyzer.getStreamCount() ;
+			childStreams.addAll(analyzer.getChildStreams()) ;
+		}
+		
+		@SuppressWarnings("unused")
+		public boolean collect(VertexAnalyzer analyzer) {
+			
+			if( satisfiesConstraint(analyzer.getStreamCount()) ) {
+				flush(analyzer) ;
+			} 
+			else {
+				
+			}
+			
+			return false ;
+		}
+		
+		
+	}
+	
+	private class VertexAnalyzer {
+		private int streamCount ;
+		private Map<AroEdge<Long>, LocationsStream> streams = new HashMap<AroEdge<Long>, LocationsStream>() ;
+		
+		@SuppressWarnings("unused")
+		public void aggregate(GraphNode node) {
+			Collection<AroEdge<Long>> incomingEdges = graph.incomingEdgesOf(node) ;
+			incomingEdges.stream().forEach(e -> {
+				LocationsStream childStream = assemblerMap.remove(e);
+				if( childStream == null ) {
+					if (log.isErrorEnabled())
+						log.error("Stream Error " + node + " edge = " + e);
+				} else  {
+					childStream.link(e);
+					streams.put(e, childStream) ;
+					streamCount += childStream.getLocationCount() ;
+				}
+			});
+		}
+		
+		public Collection<LocationsStream> getChildStreams() {
+			return streams.values() ;
+		}
+		
+		public int getStreamCount() {
+			return streamCount ;
+		}
+		
+		
+	}
+	
+	
 	public void aggregate(GraphNode node) {
 		graph.incomingEdgesOf(node).forEach(e -> {
 			LocationsStream childStream = assemblerMap.remove(e);
@@ -65,10 +147,14 @@ public class StreamAggregator {
 					log.error("Stream Error " + node + " edge = " + e);
 			} else {
 				childStream.link(e);
+				
+				
 				LocationGroup group = group(childStream);
+				
 				if (group.getLocationCount() + currentLocationCount > maxLocationPerFDH) {
 					flushGroup(e.getTargetNode());
 				}
+				
 				groups.add(group);
 				currentLocationCount += group.getLocationCount();
 			}
@@ -107,7 +193,7 @@ public class StreamAggregator {
 	}
 
 	private LocationGroup group(LocationsStream stream) {
-
+		
 		LocationGroup group = new LocationGroup(stream);
 		LocationAggregate la = new LocationAggregate(nodeFactory, maxlocationPerFDT);
 

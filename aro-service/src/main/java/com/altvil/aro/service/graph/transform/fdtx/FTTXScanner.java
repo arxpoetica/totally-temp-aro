@@ -20,7 +20,7 @@ import com.altvil.aro.service.graph.transform.impl.DepthFirstTransform;
 
 
 public class FTTXScanner extends
-		DepthFirstTransform<AroEdge, Collection<FDHAssignments>> {
+		DepthFirstTransform<Long, Collection<FDHAssignments>> {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(FTTXScanner.class.getName());
@@ -30,7 +30,7 @@ public class FTTXScanner extends
 	private GraphNodeFactory nodeFactory;
 
 	public FTTXScanner(GraphTransformerFactory graphFactory,
-			DirectedGraph<GraphNode, AroEdge> graph,
+			DirectedGraph<GraphNode, AroEdge<Long>> graph,
 			GraphNodeFactory nodeFactory, int maxFDTCount, int maxFDHCount) {
 
 		//this.graphFactory = graphFactory;
@@ -55,13 +55,13 @@ public class FTTXScanner extends
 
 		private LocationsStream stream;
 
-		private DirectedGraph<GraphNode, AroEdge> graph;
+		private DirectedGraph<GraphNode, AroEdge<Long>> graph;
 
 		// private GraphModelBuilder<LocationsEdge> graphBuilder;
-		private Map<AroEdge, LocationsStream> assemblerMap = new HashMap<>();
+		private Map<AroEdge<Long>, LocationsStream> assemblerMap = new HashMap<>();
 		private StreamAggregator streamAggregator;
 
-		public FDTBuilder(DirectedGraph<GraphNode, AroEdge> graph, int maxFDT,
+		public FDTBuilder(DirectedGraph<GraphNode, AroEdge<Long>> graph, int maxFDT,
 				int maxFDH) {
 			super();
 			this.maxCount = maxFDT;
@@ -82,7 +82,11 @@ public class FTTXScanner extends
 
 		public void flushStream(LocationsStream assembler) {
 
-			for (AroEdge e : assembler.close()) {
+			if( log.isTraceEnabled() ) {
+				log.trace("Flush gid=" + assembler.getGid() + " -> " + assembler.getLocationCount());
+			}
+			
+			for (AroEdge<Long> e : assembler.close()) {
 				assemblerMap.put(e, assembler);
 			}
 		}
@@ -106,8 +110,7 @@ public class FTTXScanner extends
 		public void visit(RoadNode node) {
 
 			if (log.isTraceEnabled()) {
-				log.trace("Vertix Processsing " + node.isLocationNode()
-						+ " id=" + node);
+				log.trace("Vertix -> " + graph.incomingEdgesOf(node) + " -> " +  graph.outgoingEdgesOf(node)) ;
 			}
 
 			if (stream == null) {

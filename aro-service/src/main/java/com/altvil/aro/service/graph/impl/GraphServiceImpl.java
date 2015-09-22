@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.dao.DAOService;
 import com.altvil.aro.service.dao.graph.GraphDAO;
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphException;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.GraphService;
@@ -31,7 +30,7 @@ public class GraphServiceImpl implements GraphService {
 	}
 
 	@Override
-	public GraphModel<AroEdge> getGraphForPlanId(long planId) throws GraphException {
+	public GraphModel<Long> getGraphForPlanId(long planId) throws GraphException {
 		try {
 			BasicGraphBuilder b = new BasicGraphBuilder(nodeFactory);
 			
