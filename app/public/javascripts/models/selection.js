@@ -42,6 +42,7 @@ app.service('selection', function($rootScope, $http) {
     for (var key in feature_layers) {
       if (feature_layers.hasOwnProperty(key)) {
         feature_layers[key].revert_styles();
+        feature_layers[key].apply_filter();
       }
     }
   };
