@@ -69,7 +69,7 @@ Location.show_information = function(location_id, callback) {
 			  select
 			    location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
 			  from
-			    client.location_entry_fees
+			    client_schema.location_entry_fees
 			  where
 			    location_id=$1
 
@@ -78,7 +78,7 @@ Location.show_information = function(location_id, callback) {
 			  select
 			    location_id, 0, install_cost, 0, 0, 0
 			  from
-			    client.business_install_costs
+			    client_schema.business_install_costs
 			  join businesses
 			    on businesses.id = business_install_costs.business_id
 			  where
@@ -89,7 +89,7 @@ Location.show_information = function(location_id, callback) {
 			  select
 			    location_id, 0, 0, install_cost_per_hh, 0, 0
 			  from
-			    client.household_install_costs
+			    client_schema.household_install_costs
 			  where
 			    location_id=$1
 
@@ -126,7 +126,7 @@ Location.show_information = function(location_id, callback) {
 			  FROM
 			    businesses b
 			  JOIN
-			    client.business_customer_types bct
+			    client_schema.business_customer_types bct
 			  ON
 			    bct.business_id = b.id
 			  WHERE
@@ -140,7 +140,7 @@ Location.show_information = function(location_id, callback) {
 			  FROM
 			    households h
 			  JOIN
-			    client.household_customer_types hct
+			    client_schema.household_customer_types hct
 			  ON
 			    hct.household_id = h.id
 			  WHERE
@@ -149,7 +149,7 @@ Location.show_information = function(location_id, callback) {
 
 			  ) t
 			JOIN
-			  client.customer_types ct
+			  client_schema.customer_types ct
 			ON
 			  ct.id=t.id
 			GROUP BY
@@ -300,7 +300,7 @@ Location.show_businesses = function(location_id, callback) {
 		FROM
 			aro.businesses businesses
 		JOIN
-			client.business_install_costs costs
+			client_schema.business_install_costs costs
 		ON
 			costs.business_id = businesses.id
 		JOIN
