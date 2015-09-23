@@ -26,6 +26,10 @@
                   <th>Revenue</th>
                   <td colspan="4" class="text-right">{{route.metadata.revenue | currency}}</td>
                 </tr>
+                <tr>
+                  <th>Profit</th>
+                  <td colspan="4" class="text-right" ng-class="{'text-success': route.metadata.profit > 0, 'text-danger': route.metadata.profit < 0}">{{route.metadata.profit | currency}}</td>
+                </tr>
               </tbody>
             </table>
           </div>
