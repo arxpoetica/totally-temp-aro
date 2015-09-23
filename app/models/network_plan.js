@@ -195,14 +195,25 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
 
 NetworkPlan.recalculate_route = function(plan_id, callback) {
   txain(function(callback) {
-    var sql = 'DELETE FROM custom.route_edges WHERE route_id=$1'
-    database.query(sql, [plan_id], callback);
+    var sql = 'DELETE FROM custom.route_edges WHERE route_id=$1';
+    database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
-    var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
-    database.query(sql, [plan_id], callback);
+    var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1';
+    database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
+    var sql = multiline(function() {;/*
+      (SELECT id FROM custom.route_sources WHERE route_id=$1 limit 1)
+      UNION
+      (SELECT id FROM custom.route_targets WHERE route_id=$1 limit 1)
+    */});
+    database.query(sql, [plan_id], callback);
+  })
+  .then(function(rows, callback) {
+    // the route needs at least one source and at least one target
+    if (rows.length < 2) return callback();
+
     var sql = multiline(function() {;/*
       WITH edges AS (
         SELECT DISTINCT edge_id FROM
@@ -217,11 +228,7 @@ NetworkPlan.recalculate_route = function(plan_id, callback) {
       )
       INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
     */});
-    database.execute(sql, [plan_id], function(err) {
-      if (err && err.message.indexOf('One of the target vertices was not found or several targets are the same') >= 0) return callback(); // ignore this error
-      if (err && err.message.indexOf('None of the target vertices has been found') >= 0) return callback(); // ignore this error
-      return callback(err);
-    });
+    database.execute(sql, [plan_id], callback);
   })
   .end(callback);
 };

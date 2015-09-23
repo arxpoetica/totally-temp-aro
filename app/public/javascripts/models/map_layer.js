@@ -308,6 +308,8 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				}
 			});
 		}
+
+		this.apply_filter();
 	}
 
 	MapLayer.prototype.show = function() {
