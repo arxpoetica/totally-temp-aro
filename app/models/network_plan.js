@@ -206,9 +206,9 @@ NetworkPlan.recalculate_route = function(plan_id, callback) {
   })
   .then(function(callback) {
     var sql = multiline(function() {;/*
-      (SELECT id FROM custom.route_sources WHERE route_id=$1 limit 1)
+      (SELECT id, 1 FROM custom.route_sources WHERE route_id=$1 limit 1)
       UNION
-      (SELECT id FROM custom.route_targets WHERE route_id=$1 limit 1)
+      (SELECT id, 2 FROM custom.route_targets WHERE route_id=$1 limit 1)
     */});
     database.query(sql, [plan_id], callback);
   })

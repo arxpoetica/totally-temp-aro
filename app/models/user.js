@@ -48,6 +48,11 @@ User.login = function(email, password, callback) {
   .end(callback);
 };
 
+User.find_by_email = function(email, callback) {
+  var sql = 'SELECT id, first_name, last_name, email FROM custom.users WHERE email=$1';
+  database.findOne(sql, [email.toLowerCase()], callback);
+};
+
 User.register = function(user, callback) {
   var user;
 
