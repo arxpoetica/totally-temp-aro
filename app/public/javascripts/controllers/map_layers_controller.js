@@ -198,4 +198,18 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     }
   });
 
+  var lastTime = null;
+
+  $rootScope.$on('map_idle', function() {
+    if (lastTime) {
+      console.log('It took', Date.now() - lastTime, 'ms', 'to zoom');
+      lastTime = null;
+    }
+  });
+
+  $rootScope.$on('map_zoom_changed', function() {
+    lastTime = Date.now();
+  });
+
+
 });
