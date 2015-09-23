@@ -186,6 +186,8 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
       return total + type.businesses + type.households;
     }, 0);
 
+    output.metadata.profit = output.metadata.revenue - output.metadata.total_cost;
+
     if (metadata_only) delete output.feature_collection;
 
     callback(null, output);
