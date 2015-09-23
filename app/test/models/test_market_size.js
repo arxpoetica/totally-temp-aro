@@ -2,39 +2,45 @@ var expect = require('chai').expect;
 var models = require('../../models');
 var MarketSize = models.MarketSize;
 var _ = require('underscore');
+var app = require('../../app');
+var request = require('supertest')(app);
 
 describe('MarketSize', function() {
   var filters;
-  var route_id;
+  var plan_id;
 
   describe('#filters()', function() {
     it('should return all available filters', function(done) {
-      MarketSize.filters(function(err, output) {
-        expect(err).to.not.be.ok;
-        expect(output).to.have.property('products');
-        expect(output.products).to.be.an('array');
-        expect(output.products).to.have.length.above(0);
-        expect(output.products[0].id).to.be.a('number');
-        expect(output.products[0].product_type).to.be.a('string');
-        expect(output.products[0].product_name).to.be.a('string');
+      request
+        .get('/market_size/filters')
+        .accept('application/json')
+        .end(function(err, res) {
+          if (err) return done(err);
+          var output = res.body;
+          expect(output).to.have.property('products');
+          expect(output.products).to.be.an('array');
+          expect(output.products).to.have.length.above(0);
+          expect(output.products[0].id).to.be.a('number');
+          expect(output.products[0].product_type).to.be.a('string');
+          expect(output.products[0].product_name).to.be.a('string');
 
-        expect(output).to.have.property('industries');
-        expect(output.industries).to.be.an('array');
-        expect(output.industries).to.have.length.above(0);
-        expect(output.industries[0].id).to.be.a('number');
-        expect(output.industries[0].industry_name).to.be.a('string');
+          expect(output).to.have.property('industries');
+          expect(output.industries).to.be.an('array');
+          expect(output.industries).to.have.length.above(0);
+          expect(output.industries[0].id).to.be.a('number');
+          expect(output.industries[0].industry_name).to.be.a('string');
 
-        expect(output).to.have.property('employees_by_location');
-        expect(output.employees_by_location).to.be.an('array');
-        expect(output.employees_by_location).to.have.length.above(0);
-        expect(output.employees_by_location[0].id).to.be.a('number');
-        expect(output.employees_by_location[0].value_range).to.be.a('string');
-        expect(output.employees_by_location[0].min_value).to.be.a('number');
-        expect(output.employees_by_location[0].max_value).to.be.a('number');
+          expect(output).to.have.property('employees_by_location');
+          expect(output.employees_by_location).to.be.an('array');
+          expect(output.employees_by_location).to.have.length.above(0);
+          expect(output.employees_by_location[0].id).to.be.a('number');
+          expect(output.employees_by_location[0].value_range).to.be.a('string');
+          expect(output.employees_by_location[0].min_value).to.be.a('number');
+          expect(output.employees_by_location[0].max_value).to.be.a('number');
 
-        filters = output;
+          filters = output;
 
-        done();
+          done();
       });
     });
   });
@@ -60,7 +66,7 @@ describe('MarketSize', function() {
         },
       };
       models.NetworkPlan.create_plan('Untitled plan', area, function(err, route) {
-        route_id = route.id;
+        plan_id = route.id;
         
         var source = '3';
         var target = '40103873';
@@ -70,7 +76,7 @@ describe('MarketSize', function() {
             network_nodes: [source],
           },
         };
-        models.NetworkPlan.edit_route(route_id, changes, function(err, route) {
+        models.NetworkPlan.edit_route(plan_id, changes, function(err, route) {
           expect(err).to.not.be.ok;
           done();
         });
@@ -109,17 +115,25 @@ describe('MarketSize', function() {
     });
 
     it('should return the market size calculation for a route', function(done) {
-      MarketSize.calculate(route_id, 'route', { filters: {} }, function(err, output) {
-        expect(err).to.not.be.ok;
-        expect(output).to.be.an('array');
-        expect(output).length.to.be.above(0);
-        expect(output[0].year).to.be.an('number');
-        expect(output[0].total).to.be.a('number');
+      var query = {
+        type: 'route',
+      };
+      request
+        .get('/market_size/'+plan_id+'/calculate')
+        .accept('application/json')
+        .query(query)
+        .end(function(err, res) {
+          if (err) return done(err);
+          var output = res.body;
+          expect(output).to.be.an('array');
+          expect(output).length.to.be.above(0);
+          expect(output[0].year).to.be.an('number');
+          expect(output[0].total).to.be.a('number');
 
-        var current = _.findWhere(output, { year: new Date().getFullYear() });
-        total_current_year_no_filters = current.total;
+          var current = _.findWhere(output, { year: new Date().getFullYear() });
+          total_current_year_no_filters = current.total;
 
-        done();
+          done();
       });
     });
 
@@ -133,45 +147,70 @@ describe('MarketSize', function() {
     }
 
     it('should return the market size calculation for a given area', function(done) {
-      var options = {
-        filters: {},
+      var query = {
+        type: 'boundary',
         boundary: boundary,
       };
-      MarketSize.calculate(route_id, 'boundary', options, function(err, output) {
-        expect(err).to.not.be.ok;
-        expect(output).to.be.an('array');
-        expect(output).length.to.be.above(0);
-        expect(output[0].year).to.be.an('number');
-        expect(output[0].total).to.be.a('number');
+      request
+        .get('/market_size/'+plan_id+'/calculate')
+        .accept('application/json')
+        .query(query)
+        .end(function(err, res) {
+          if (err) return done(err);
+          var output = res.body;
+          expect(output).to.be.an('array');
+          expect(output).length.to.be.above(0);
+          expect(output[0].year).to.be.an('number');
+          expect(output[0].total).to.be.a('number');
 
-        var current = _.findWhere(output, { year: new Date().getFullYear() });
-        total_current_year_no_filters = round_to_n_decimals(current.total);
+          var current = _.findWhere(output, { year: new Date().getFullYear() });
+          total_current_year_no_filters = round_to_n_decimals(current.total);
 
-        done();
+          done();
       });
     });
 
     it('should return the market size calculation for a given area with filters', function(done) {
-      var options = {
-        filters: {
-          industry: filters.industries[0].id,
-          product: filters.products[0].id,
-          employees_range: filters.employees_by_location[0].id,
-        },
+      var query = {
+        type: 'boundary',
+        industry: filters.industries[0].id,
+        product: filters.products[0].id,
+        employees_range: filters.employees_by_location[0].id,
         boundary: boundary,
       };
-      MarketSize.calculate(route_id, 'boundary', options, function(err, output) {
-        expect(err).to.not.be.ok;
-        expect(output).to.be.an('array');
-        expect(output).length.to.be.above(0);
-        expect(output[0].year).to.be.an('number');
-        expect(output[0].total).to.be.a('number');
+      request
+        .get('/market_size/'+plan_id+'/calculate')
+        .accept('application/json')
+        .query(query)
+        .end(function(err, res) {
+          if (err) return done(err);
+          var output = res.body;
+          expect(output).to.be.an('array');
+          expect(output).length.to.be.above(0);
+          expect(output[0].year).to.be.an('number');
+          expect(output[0].total).to.be.a('number');
 
-        var current = _.findWhere(output, { year: new Date().getFullYear() });
-        total_current_year_with_filters = round_to_n_decimals(current.total);
+          var current = _.findWhere(output, { year: new Date().getFullYear() });
+          total_current_year_with_filters = round_to_n_decimals(current.total);
 
-        done();
+          done();
       });
+    });
+
+    it('should test the export route', function(done) {
+      var query = {
+        type: 'boundary',
+        boundary: boundary,
+      };
+      request
+        .get('/market_size/'+plan_id+'/export')
+        .query(query)
+        .end(function(err, res) {
+          if (err) return done(err);
+          var output = res.text;
+          expect(output).to.be.a('string');
+          done();
+        });
     });
 
     it('should export the businesses in a CSV format for a given area', function(done) {
@@ -179,7 +218,7 @@ describe('MarketSize', function() {
         filters: {},
         boundary: boundary,
       };
-      MarketSize.export_businesses(route_id, 'boundary', options, function(err, output, total) {
+      MarketSize.export_businesses(plan_id, 'boundary', options, function(err, output, total) {
         expect(err).to.not.be.ok;
         expect(output).to.be.a('string');
         total = round_to_n_decimals(total);
@@ -198,7 +237,7 @@ describe('MarketSize', function() {
         },
         boundary: boundary,
       };
-      MarketSize.export_businesses(route_id, 'boundary', options, function(err, output, total) {
+      MarketSize.export_businesses(plan_id, 'boundary', options, function(err, output, total) {
         expect(err).to.not.be.ok;
         expect(output).to.be.a('string');
         total = round_to_n_decimals(total);

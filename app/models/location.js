@@ -294,8 +294,8 @@ Location.show_businesses = function(location_id, callback) {
 			businesses.name,
 			businesses.number_of_employees,
 			businesses.address,
-			costs.install_cost,
-			costs.annual_recurring_cost,
+			costs.install_cost::float,
+			costs.annual_recurring_cost::float,
 			industries.description AS industry_description
 		FROM
 			aro.businesses businesses

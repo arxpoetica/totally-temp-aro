@@ -1,5 +1,7 @@
 var expect = require('chai').expect;
-var models = require('../../models')
+var models = require('../../models');
+var app = require('../../app');
+var request = require('supertest')(app);
 
 describe('User', function() {
 
@@ -88,20 +90,26 @@ describe('User', function() {
       });
     });
 
-    it('should users by text', function(done) {
-      models.User.find_by_text('Gi', function(err, users) {
-        expect(err).to.not.be.ok;
-        expect(users).to.be.an('array');
-        expect(users).to.have.length.above(0);
-        var usr = users[0];
-        expect(usr).to.be.an('object');
-        expect(usr.id).to.be.a('number');
-        expect(usr.first_name).to.be.a('string');
-        expect(usr.last_name).to.be.a('string');
-        expect(usr.email).to.be.a('string');
-        expect(usr.password).to.not.be.ok;
-        done();
-      });
+    it('should find users by text', function(done) {
+      request
+        .get('/user/find')
+        .accept('application/json')
+        .query({ text: 'Gi' })
+        .end(function(err, res) {
+          if (err) return done(err);
+          var users = res.body;
+          expect(res.statusCode).to.be.equal(200);
+          expect(users).to.be.an('array');
+          expect(users).to.have.length.above(0);
+          var usr = users[0];
+          expect(usr).to.be.an('object');
+          expect(usr.id).to.be.a('number');
+          expect(usr.first_name).to.be.a('string');
+          expect(usr.last_name).to.be.a('string');
+          expect(usr.email).to.be.a('string');
+          expect(usr.password).to.not.be.ok;
+          done();
+        });
     });
 
     it('should prevent to register a user with the same email address', function(done) {

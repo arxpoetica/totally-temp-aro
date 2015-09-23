@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
-var CensusBlock = require('../../models/census_block.js');
+var app = require('../../app');
+var request = require('supertest')(app);
 
 describe('CensusBlock', function() {
 
@@ -8,33 +9,22 @@ describe('CensusBlock', function() {
 		var countyfp = '061';
 
 		it('should return a feature collection', function(done) {
-			CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, function(err, output) {
-				expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
-				done();
-			});
-		});
+			request
+				.get('/census_blocks/'+statefp+'/'+countyfp)
+				.accept('application/json')
+				.end(function(err, res) {
+					if (err) return done(err);
+					var output = res.body;
+					expect(res.statusCode).to.be.equal(200);
+					expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
+					expect(output.feature_collection.features).to.have.length.above(0);
 
-		it('should return more than one feature', function(done) {
-			CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, function(err, output) {
-				expect(output.feature_collection.features).to.have.length.above(0);
-				done();
-			});
-		});
+					var first_feature = output.feature_collection.features[0];
+					expect(first_feature.geometry.type).to.equal('MultiPolygon');
+					expect(first_feature.geometry.coordinates).to.have.length.above(0);
+					done();
+				});
 
-		it('should have a geometry feature which includes an array of MultiPolygons', function(done) {
-			CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, function(err, output) {
-				var first_feature = output.feature_collection.features[0];
-				expect(first_feature.geometry.type).to.equal('MultiPolygon');
-				done();
-			});
-		});
-
-		it('should have an array of MultiPolygons each with multiple coordinates', function(done) {
-			CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, function(err, output) {
-				var first_geom = output.feature_collection.features[0].geometry.coordinates;
-				expect(first_geom).to.have.length.above(0);
-				done();
-			});
 		});
 
 	});
