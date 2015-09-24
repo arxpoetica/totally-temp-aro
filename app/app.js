@@ -5,7 +5,7 @@ var passport = require('passport');
 var bodyParser = require('body-parser');
 var compression = require('compression');
 
-var app = express();
+var app = module.exports = express();
 app.use(compression());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -44,8 +44,6 @@ routes.forEach(function(route) {
 	require('./routes/routes_'+route).configure(api, middleware);
 });
 app.use(api);
-
-module.exports = app;
 
 if (module.id === require.main.id) {
 	var port = process.env.PORT || 8000;
