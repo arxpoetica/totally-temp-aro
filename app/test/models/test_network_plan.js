@@ -1,8 +1,7 @@
 var expect = require('chai').expect;
 var models = require('../../models');
 var _ = require('underscore');
-var app = require('../../app');
-var request = require('supertest')(app);
+var request = require('./test_utils').request;
 
 describe('NetworkPlan', function() {
 

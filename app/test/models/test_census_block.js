@@ -1,6 +1,5 @@
 var expect = require('chai').expect;
-var app = require('../../app');
-var request = require('supertest')(app);
+var request = require('./test_utils').request;
 
 describe('CensusBlock', function() {
 

@@ -3,8 +3,7 @@ var models = require('../../models');
 var NetworkPlan = models.NetworkPlan;
 var RouteOptimizer = models.RouteOptimizer;
 var Network = models.Network;
-var app = require('../../app');
-var request = require('supertest')(app);
+var request = require('./test_utils').request;
 
 describe('Network', function() {
 
