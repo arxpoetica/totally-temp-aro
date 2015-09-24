@@ -8,6 +8,7 @@ passport_stub.install(app);
 var test_user = null;
 
 exports.request = require('supertest')(app);
+exports.agent = require('supertest').agent(app);
 
 exports.create_test_user = function(callback) {
 	if (test_user) return callback(null, test_user);
