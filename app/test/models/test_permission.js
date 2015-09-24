@@ -1,6 +1,8 @@
 var expect = require('chai').expect;
 var txain = require('txain');
 var models = require('../../models');
+var request = require('./test_utils').request;
+var test_utils = require('./test_utils');
 
 describe('Permission', function() {
 
@@ -71,13 +73,8 @@ describe('Permission', function() {
     });
   });
 
-  it('should check the owner\'s permission', function(done) {
-    models.Permission.find_permission(plan_id, owner.id, function(err, permission) {
-      expect(err).to.not.be.ok;
-      expect(permission).to.be.an('object');
-      expect(permission.rol).to.be.equal('owner');
-      done();
-    });
+  after(function() {
+    test_utils.login_app();
   });
 
   it('should return an empty list for guest\'s plans', function(done) {
@@ -89,10 +86,31 @@ describe('Permission', function() {
     });
   });
 
+  it('should not have permission yet', function(done) {
+    test_utils.login_app(guest);
+    request
+      .get('/network_plan/'+plan_id+'/area_data')
+      .accept('application/json')
+      .end(function(err, res) {
+        if (err) return done(err);
+        var data = res.body;
+        expect(res.statusCode).to.be.equal(403);
+        expect(data.error).to.be.equal('Forbidden');
+        done();
+    });
+  });
+
   it('should grant access to the guest user', function(done) {
-    models.Permission.grant_access(plan_id, guest.id, 'guest', function(err) {
-      expect(err).to.not.be.ok;
-      done();
+    test_utils.login_app(owner);
+    request
+      .post('/permissions/'+plan_id+'/grant')
+      .accept('application/json')
+      .send({ user_id: guest.id })
+      .end(function(err, res) {
+        if (err) return done(err);
+        var plan = res.body;
+        expect(res.statusCode).to.be.equal(200);
+        done();
     });
   });
 

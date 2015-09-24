@@ -24,7 +24,7 @@ exports.create_test_user = function(callback) {
 		models.User.register(data, callback);
 	})
 	.then(function(user, callback) {
-		test_user = user;
+		exports.test_user = test_user = user;
 		callback(null, user);
 	})
 	.end(callback);
@@ -32,11 +32,11 @@ exports.create_test_user = function(callback) {
 
 exports.create_test_user(function(err, user) {
 	exports.login_app();
-	run();
+	global.run && run(); // mocha `run()` method
 });
 
-exports.login_app = function() {
-	passport_stub.login(test_user);
+exports.login_app = function(user) {
+	passport_stub.login(user || test_user);
 }
 
 exports.logout_app = function() {
