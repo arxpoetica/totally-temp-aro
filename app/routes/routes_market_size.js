@@ -40,7 +40,7 @@ exports.configure = function(api, middleware) {
       },
     };
     var filename = request.query.filename;
-    models.MarketSize.export_businesses(plan_id, type, options, function(err, output) {
+    models.MarketSize.export_businesses(plan_id, type, options, request.user, function(err, output) {
       if (err) return next(err);
       response.attachment(filename+'.csv');
       response.send(output);

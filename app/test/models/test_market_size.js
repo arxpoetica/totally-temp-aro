@@ -218,7 +218,7 @@ describe('MarketSize', function() {
         filters: {},
         boundary: boundary,
       };
-      MarketSize.export_businesses(plan_id, 'boundary', options, function(err, output, total) {
+      MarketSize.export_businesses(plan_id, 'boundary', options, null, function(err, output, total) {
         expect(err).to.not.be.ok;
         expect(output).to.be.a('string');
         total = round_to_n_decimals(total);
@@ -237,7 +237,7 @@ describe('MarketSize', function() {
         },
         boundary: boundary,
       };
-      MarketSize.export_businesses(plan_id, 'boundary', options, function(err, output, total) {
+      MarketSize.export_businesses(plan_id, 'boundary', options, null, function(err, output, total) {
         expect(err).to.not.be.ok;
         expect(output).to.be.a('string');
         total = round_to_n_decimals(total);
