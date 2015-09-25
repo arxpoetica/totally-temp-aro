@@ -1,4 +1,5 @@
 var models = require('../models');
+var nook = require('node-errors').nook;
 
 exports.configure = function(api, middleware) {
 
@@ -67,11 +68,10 @@ exports.configure = function(api, middleware) {
     var plan_id = request.params.plan_id;
     var file_name = request.params.file_name;
 
-    models.NetworkPlan.export_kml(plan_id, function(err, kml_output) {
-      if (err) return next(err);
+    models.NetworkPlan.export_kml(plan_id, nook(next, function(kml_output) {
       response.attachment(file_name+'.kml');
       response.send(kml_output);
-    });
+    }));
   });
 
 };

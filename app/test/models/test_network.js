@@ -3,8 +3,8 @@ var models = require('../../models');
 var NetworkPlan = models.NetworkPlan;
 var RouteOptimizer = models.RouteOptimizer;
 var Network = models.Network;
-var app = require('../../app');
-var request = require('supertest')(app);
+var test_utils = require('./test_utils');
+var request = test_utils.request;
 
 describe('Network', function() {
 
@@ -92,7 +92,7 @@ describe('Network', function() {
 					}
 				},
 			};
-			NetworkPlan.create_plan('Untitled plan', area, function(err, plan) {
+			NetworkPlan.create_plan('Untitled plan', area, test_utils.test_user, function(err, plan) {
 				expect(plan).to.have.property('id');
 				expect(plan).to.have.property('name');
 				plan_id = plan.id;

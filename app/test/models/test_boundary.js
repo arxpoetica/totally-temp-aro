@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var models = require('../../models');
-var app = require('../../app');
-var request = require('supertest')(app);
+var test_utils = require('./test_utils');
+var request = test_utils.request;
 
 describe('Boundary', function() {
 
@@ -27,7 +27,7 @@ describe('Boundary', function() {
         }
       }
     };
-    models.NetworkPlan.create_plan('Untitled route', area, function(err, plan) {
+    models.NetworkPlan.create_plan('Untitled route', area, test_utils.test_user, function(err, plan) {
       expect(plan).to.have.property('id');
       expect(plan).to.have.property('name');
       plan_id = plan.id;
@@ -94,8 +94,8 @@ describe('Boundary', function() {
       .end(function(err, res) {
         if (err) return done(err);
         var output = res.body;
-        expect(res.statusCode).to.be.equal(200);
-        expect(output).to.be.equal(0);
+        expect(res.statusCode).to.be.equal(403);
+        expect(output.error).to.be.equal('Forbidden');
         done();
     });
   });

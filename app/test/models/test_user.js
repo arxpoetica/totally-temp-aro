@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var models = require('../../models');
-var app = require('../../app');
-var request = require('supertest')(app);
+var test_utils = require('./test_utils');
+var request = test_utils.agent;
 
 describe('User', function() {
 
@@ -17,6 +17,14 @@ describe('User', function() {
   };
 
   var id;
+
+  before(function() {
+    test_utils.logout_app();
+  });
+
+  after(function() {
+    test_utils.login_app();
+  });
 
   describe('#register() and #login()', function() {
 
@@ -35,20 +43,47 @@ describe('User', function() {
     });
 
     it('should fail to log in the user with a wrong password', function(done) {
-      models.User.login(user.email, user.password+'x', function(err, usr) {
-        expect(err).to.be.ok;
-        expect(err.message).to.equal('Invalid password');
-        done();
-      });
+      request
+        .post('/login')
+        .type('form')
+        .send({ email: user.email, password: user.password+'x' })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/login');
+
+          request
+            .get('/login')
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('Invalid password');
+              done();
+            });
+        });
     });
 
     it('should fail to log in the user with a wrong email', function(done) {
       var email = 'x'+user.email;
-      models.User.login(email, user.password, function(err, usr) {
-        expect(err).to.be.ok;
-        expect(err.message).to.equal('No user found with that email ('+email+')');
-        done();
-      });
+      request
+        .post('/login')
+        .accept('application/json')
+        .type('form')
+        .send({ email: email, password: user.password })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/login');
+
+          request
+            .get('/login')
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('No user found with that email ('+email+')');
+              done();
+            });
+        });
     });
 
     it('should log in the user', function(done) {
@@ -64,6 +99,20 @@ describe('User', function() {
       });
     });
 
+    it('should log in the user through http', function(done) {
+      request
+        .post('/login')
+        .accept('application/json')
+        .type('form')
+        .send({ email: user.email, password: user.password })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/');
+          done();
+        });
+    });
+
     it('should log in the user with email in different case', function(done) {
       models.User.login(user.email.toUpperCase(), user.password, function(err, usr) {
         expect(err).to.not.be.ok;
@@ -77,17 +126,17 @@ describe('User', function() {
       });
     });
 
-    it('should find the user by id', function(done) {
-      models.User.find_by_id(id, function(err, usr) {
-        expect(err).to.not.be.ok;
-        expect(usr).to.be.an('object');
-        expect(usr.id).to.be.a('number');
-        expect(usr.first_name).to.be.equal(user.first_name);
-        expect(usr.last_name).to.be.equal(user.last_name);
-        expect(usr.email).to.be.equal(user.email.toLowerCase());
-        expect(usr.password).to.not.be.ok;
-        done();
-      });
+    it('should log in the user through http', function(done) {
+      request
+        .post('/login')
+        .type('form')
+        .send({ email: user.email.toUpperCase(), password: user.password })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/');
+          done();
+        });
     });
 
     it('should find users by text', function(done) {
@@ -109,6 +158,25 @@ describe('User', function() {
           expect(usr.email).to.be.a('string');
           expect(usr.password).to.not.be.ok;
           done();
+        });
+    });
+
+    it('should log out the user', function(done) {
+      request
+        .get('/logout')
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/login');
+          
+          request
+            .get('/')
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(302);
+              expect(res.headers.location).to.be.equal('/login');
+              done();
+            });
         });
     });
 

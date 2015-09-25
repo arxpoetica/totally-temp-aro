@@ -1,5 +1,6 @@
 var models = require('../models');
 var _ = require('underscore');
+var nook = require('node-errors').nook;
 
 exports.configure = function(api, middleware) {
 
@@ -40,11 +41,10 @@ exports.configure = function(api, middleware) {
       },
     };
     var filename = request.query.filename;
-    models.MarketSize.export_businesses(plan_id, type, options, request.user, function(err, output) {
-      if (err) return next(err);
+    models.MarketSize.export_businesses(plan_id, type, options, request.user, nook(function(output) {
       response.attachment(filename+'.csv');
       response.send(output);
-    });
+    }));
   });
 
   function arr(value) {

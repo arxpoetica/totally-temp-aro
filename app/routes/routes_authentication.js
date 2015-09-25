@@ -1,5 +1,6 @@
 var models = require('../models');
 var passport = require('passport');
+var nook = require('node-errors').nook;
 
 exports.configure = function(app, middleware) {
 
@@ -25,10 +26,9 @@ exports.configure = function(app, middleware) {
   });
 
   passport.deserializeUser(function(id, callback) {
-    models.User.find_by_id(id, function(err, user) {
-      if (err) return callback(err);
-      callback(err, user || false);
-    });
+    models.User.find_by_id(id, nook(callback, function(user) {
+      callback(null, user || false);
+    }));
   });
 
   app.get('/login', function(request, response, next) {
