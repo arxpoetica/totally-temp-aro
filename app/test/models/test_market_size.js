@@ -217,7 +217,7 @@ describe('MarketSize', function() {
         filters: {},
         boundary: boundary,
       };
-      MarketSize.export_businesses(plan_id, 'boundary', options, function(err, output, total) {
+      MarketSize.export_businesses(plan_id, 'boundary', options, null, function(err, output, total) {
         expect(err).to.not.be.ok;
         expect(output).to.be.a('string');
         total = round_to_n_decimals(total);
@@ -230,13 +230,13 @@ describe('MarketSize', function() {
     it('should export the businesses in a CSV format for a given area with filters', function(done) {
       var options = {
         filters: {
-          industry: filters.industries[0].id,
-          product: filters.products[0].id,
-          employees_range: filters.employees_by_location[0].id,
+          industry: [filters.industries[0].id],
+          product: [filters.products[0].id],
+          employees_range: [filters.employees_by_location[0].id],
         },
         boundary: boundary,
       };
-      MarketSize.export_businesses(plan_id, 'boundary', options, function(err, output, total) {
+      MarketSize.export_businesses(plan_id, 'boundary', options, null, function(err, output, total) {
         expect(err).to.not.be.ok;
         expect(output).to.be.a('string');
         total = round_to_n_decimals(total);
