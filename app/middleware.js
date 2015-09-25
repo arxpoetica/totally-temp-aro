@@ -1,21 +1,19 @@
 var models = require('./models');
 var _ = require('underscore');
+var nook = require('node-errors').nook;
 
 function jsonHandler(response, next) {
-  return function(err, data) {
-    if (err) return next(err);
+  return nook(next, function(data) {
     if (_.isUndefined(data) || _.isNull(data)) data = {};
     response.json(data);
-  }
+  });
 };
 
 function check_permission(rol) {
   return function(request, response, next) {
     var user = request.user;
     var plan_id = request.params.plan_id;
-    models.Permission.find_permission(plan_id, user.id, function(err, permission) {
-      if (err) return next(err);
-      if (process.env.NODE_ENV === 'test') return next();
+    models.Permission.find_permission(plan_id, user.id, nook(next, function(permission) {
       // !rol means any permission is ok
       if (permission && (!rol || rol === permission.rol || permission.rol === 'owner')) {
         return next();
@@ -23,7 +21,7 @@ function check_permission(rol) {
       response.status(403).json({
         error: 'Forbidden',
       });
-    });
+    }));
   };
 };
 
