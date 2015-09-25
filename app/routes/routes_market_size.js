@@ -1,4 +1,5 @@
 var models = require('../models');
+var _ = require('underscore');
 
 exports.configure = function(api, middleware) {
 
@@ -16,13 +17,13 @@ exports.configure = function(api, middleware) {
     var plan_id = +request.params.plan_id;
     var type = request.query.type;
     var options = {
-     boundary: request.query.boundary,
-     filters: {
-       industry: request.query.industry,
-       employees_range: request.query.employees_range,
-       product: request.query.product,
-     },
-    }
+      boundary: request.query.boundary,
+      filters: {
+        industry: arr(request.query.industry),
+        employees_range: arr(request.query.employees_range),
+        product: arr(request.query.product),
+      },
+    };
     models.MarketSize.calculate(plan_id, type, options, jsonHandler(response, next));
   });
 
@@ -31,12 +32,12 @@ exports.configure = function(api, middleware) {
     var plan_id = +request.params.plan_id;
     var type = request.query.type;
     var options = {
-     boundary: request.query.boundary,
-     filters: {
-       industry: request.query.industry,
-       employees_range: request.query.employees_range,
-       product: request.query.product,
-     },
+      boundary: request.query.boundary,
+      filters: {
+        industry: arr(request.query.industry),
+        employees_range: arr(request.query.employees_range),
+        product: arr(request.query.product),
+      },
     };
     var filename = request.query.filename;
     models.MarketSize.export_businesses(plan_id, type, options, function(err, output) {
@@ -45,5 +46,9 @@ exports.configure = function(api, middleware) {
       response.send(output);
     });
   });
+
+  function arr(value) {
+    return _.compact((value || '').split(','));
+  };
 
 };

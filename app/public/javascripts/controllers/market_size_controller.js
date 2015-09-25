@@ -19,6 +19,12 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   $http.get('/market_size/filters').success(function(response) {
     $scope.filters = response;
+    $('#market-size select[multiple]').each(function() {
+      var self = $(this);
+      self.select2({
+        placeholder: self.attr('data-placeholder'),
+      });
+    });
   });
 
   $rootScope.$on('boundary_selected', function(e, json, title) {
@@ -54,9 +60,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     var params = {
       boundary: geo_json && JSON.stringify(geo_json),
       type: $scope.market_type,
-      industry: $scope.industry && $scope.industry.id,
-      employees_range: $scope.employees_range && $scope.employees_range.id,
-      product: $scope.product && $scope.product.id,
+      industry: arr($scope.industry),
+      employees_range: arr($scope.employees_range),
+      product: arr($scope.product),
     };
     if (canceller) canceller.resolve();
     canceller = $q.defer();
@@ -76,6 +82,13 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     });
   }
 
+  function arr(value) {
+    if (!value) return value;
+    return value.map(function(elem) {
+      return elem.id;
+    }).join(',');
+  }
+
   $scope.export = function() {
     $('#market-size').modal('hide');
     swal({
@@ -90,9 +103,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       var params = {
         boundary: geo_json && JSON.stringify(geo_json),
         type: $scope.market_type,
-        industry: $scope.industry && $scope.industry.id,
-        employees_range: $scope.employees_range && $scope.employees_range.id,
-        product: $scope.product && $scope.product.id,
+        industry: arr($scope.industry),
+        employees_range: arr($scope.employees_range),
+        product: arr($scope.product),
         filename: name,
       };
       var pairs = _.keys(params).map(function(key) {

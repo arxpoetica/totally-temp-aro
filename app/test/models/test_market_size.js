@@ -231,9 +231,9 @@ describe('MarketSize', function() {
     it('should export the businesses in a CSV format for a given area with filters', function(done) {
       var options = {
         filters: {
-          industry: filters.industries[0].id,
-          product: filters.products[0].id,
-          employees_range: filters.employees_by_location[0].id,
+          industry: [filters.industries[0].id],
+          product: [filters.products[0].id],
+          employees_range: [filters.employees_by_location[0].id],
         },
         boundary: boundary,
       };

@@ -6,6 +6,7 @@ var database = helpers.database;
 var txain = require('txain');
 var multiline = require('multiline');
 var stringify = require('csv-stringify');
+var _ = require('underscore');
 
 var MarketSize = {};
 
@@ -36,6 +37,10 @@ MarketSize.filters = function(callback) {
   .end(callback);
 };
 
+function not_empty_array(arr) {
+  return _.isArray(arr) && arr.length > 0;
+}
+
 MarketSize.calculate = function(plan_id, type, options, callback) {
   txain(function(callback) {
     var sql = 'SELECT ST_AsText(ST_Union(edge.geom)::geography) AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1';
@@ -59,17 +64,17 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
         spend.industry_id = m.industry_id
         AND spend.monthly_spend <> 'NaN'
     */});
-    if (filters.industry) {
+    if (not_empty_array(filters.industry)) {
       params.push(filters.industry);
-      sql += ' AND spend.industry_id = $'+params.length;
+      sql += ' AND spend.industry_id IN ($'+params.length+')';
     }
-    if (filters.product) {
+    if (not_empty_array(filters.product)) {
       params.push(filters.product);
-      sql += ' AND spend.product_id = $'+params.length;
+      sql += ' AND spend.product_id IN ($'+params.length+')';
     }
-    if (filters.employees_range) {
+    if (not_empty_array(filters.employees_range)) {
       params.push(filters.employees_range);
-      sql += ' AND spend.employees_by_location_id = $'+params.length;
+      sql += ' AND spend.employees_by_location_id IN ($'+params.length+')';
     }
     sql += multiline(function() {;/*
       JOIN
@@ -143,17 +148,17 @@ MarketSize.export_businesses = function(plan_id, type, options, callback) {
     params.push(new Date().getFullYear());
     sql += ' AND spend.year = $'+params.length;
 
-    if (filters.industry) {
+    if (not_empty_array(filters.industry)) {
       params.push(filters.industry);
-      sql += ' AND spend.industry_id = $'+params.length;
+      sql += ' AND spend.industry_id IN ($'+params.length+')';
     }
-    if (filters.product) {
+    if (not_empty_array(filters.product)) {
       params.push(filters.product);
-      sql += ' AND spend.product_id = $'+params.length;
+      sql += ' AND spend.product_id IN ($'+params.length+')';
     }
-    if (filters.employees_range) {
+    if (not_empty_array(filters.employees_range)) {
       params.push(filters.employees_range);
-      sql += ' AND spend.employees_by_location_id = $'+params.length;
+      sql += ' AND spend.employees_by_location_id IN ($'+params.length+')';
     }
     sql += multiline(function() {;/*
       JOIN
