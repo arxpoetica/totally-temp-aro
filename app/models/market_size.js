@@ -7,6 +7,7 @@ var txain = require('txain');
 var multiline = require('multiline');
 var stringify = require('csv-stringify');
 var _ = require('underscore');
+var moment = require('moment');
 
 var MarketSize = {};
 
@@ -118,7 +119,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         b.id,
         b.name,
         b.address,
-        -- MAX(c_industries.industry_name) AS industry_name,
+        MAX(c_industries.industry_name) AS industry_name,
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
@@ -168,6 +169,10 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
         AND e.max_value >= b.number_of_employees
+      JOIN
+        client.industries c_industries
+      ON
+        spend.industry_id = c_industries.id
       WHERE
     */});
     // 152.4 meters = 500 feet
@@ -188,24 +193,38 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
+    var years = [];
+    rows.forEach(function(business) {
+      if (years.indexOf(business.year) === -1) {
+        years.push(business.year);
+      }
+    });
+    years = years.sort();
+    var columns = ['name', 'address', 'industry_name', 'industry_description', 'number_of_employees', 'type'].concat(years);
     var businesses = {};
     rows.forEach(function(business) {
       var id = business.id;
       business[business.year] = business.total;
-      delete business.total;
       businesses[id] = _.extend(businesses[id] || {}, business);
     });
-    var year = String(new Date().getFullYear());
     businesses = _.values(businesses);
+    var year = String(new Date().getFullYear());
     var total = businesses.reduce(function(total, business) {
       return total + (business[year] || 0);
     }, 0);
+    businesses = _.values(businesses).map(function(business) {
+      return columns.map(function(col) {
+        return business[col];
+      });
+    });
+    this.set('years', years);
     this.set('total', total);
     console.log('Market size total for current year:', total);
     stringify(businesses, callback);
   })
   .then(function(csv, callback) {
-    var header = ['Name', 'Address', 'Industry name', 'Number of employees', 'Type', 'Total spend'];
+    var years = this.get('years');
+    var header = ['Name', 'Address', 'Industry name', 'Industry description', 'Number of employees', 'Type'].concat(years);
     csv = header.join(',')+'\n'+csv;
     this.set('csv', csv);
 
@@ -237,9 +256,9 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     var footer = [[]];
     footer.push(['Export Attributes']);
     if (user) {
-      footer.push(['Created by:', user.last_name+' '+user.first_name]);
+      footer.push(['Created by:', user.first_name+' '+user.last_name]);
     }
-    footer.push(['Created on:', new Date().toISOString()]) // TODO date format
+    footer.push(['Created on:', moment().format('MMMM Do YYYY, h:mm:ss a')]);
     footer.push([]);
     footer.push(['User-specified Inputs']);
     footer.push(['Network plan:', plan.name]);
