@@ -208,6 +208,7 @@ describe('MarketSize', function() {
           if (err) return done(err);
           var output = res.text;
           expect(output).to.be.a('string');
+          expect(output).to.have.length.above(0);
           done();
         });
     });

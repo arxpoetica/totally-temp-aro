@@ -41,7 +41,7 @@ exports.configure = function(api, middleware) {
       },
     };
     var filename = request.query.filename;
-    models.MarketSize.export_businesses(plan_id, type, options, request.user, nook(function(output) {
+    models.MarketSize.export_businesses(plan_id, type, options, request.user, nook(next, function(output) {
       response.attachment(filename+'.csv');
       response.send(output);
     }));
