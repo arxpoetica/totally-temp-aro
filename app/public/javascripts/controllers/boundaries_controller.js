@@ -18,9 +18,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
 
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
     if (tool === 'boundaries' && !map_tools.is_visible('boundaries')) {
-      drawingManager.setMap(null);
-      $scope.selected_tool = null;
-      map.setOptions({ draggableCursor: null, draggable: true });
+      $scope.remove_drawing_manager();
     }
   });
 
@@ -56,16 +54,29 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
 
   $scope.toggle_tool = function() {
     $scope.selected_tool = !$scope.selected_tool;
-    drawingManager.setMap($scope.selected_tool ? map : null);
-    drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
-    map.setOptions({ draggable: !$scope.selected_tool });
+    if ($scope.selected_tool) {
+      drawingManager.setMap(map);
+      drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+      map.setOptions({ draggable: false });
+    } else {
+      $scope.remove_drawing_manager();
+    }
+  };
+
+  $scope.remove_drawing_manager = function() {
+    drawingManager.setDrawingMode(null);
+    drawingManager.setMap(null);
+    map.setOptions({ draggableCursor: null, draggable: true });
+    $scope.selected_tool = null;
+    // update the angular UI if this method is called for example
+    // from a google maps event
+    if (!$rootScope.$$phase) { $rootScope.$apply(); }
   };
 
   drawingManager.addListener('overlaycomplete', function(e) {
     var overlay = e.overlay;
 
-    drawingManager.setDrawingMode(null);
-    $scope.selected_tool = null;
+    $scope.remove_drawing_manager();
 
     swal({
       title: "Give it a name",
@@ -76,7 +87,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
       animation: "slide-from-top",
       inputPlaceholder: "Boundary name",
     }, function(name) {
-      if (name === false) return false;
+      if (!name) {
+        return overlay.setMap(null);
+      }
       var data = {
         name: name || 'Untitled boundary',
         geom: JSON.stringify(to_geo_json(overlay)),
