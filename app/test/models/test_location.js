@@ -133,12 +133,16 @@ describe('Location', function() {
 		it('should create a commercial location', function(done) {
 			values.type = 'commercial';
 			values.number_of_employees = 1;
+			values.annual_recurring_cost = 500;
+			values.install_cost = 500;
+			values.business_customer_type = { id: 1 };
 			create_location(values, done);
 		});
 
 		it('should create a residential location', function(done) {
 			values.type = 'residential';
 			values.number_of_households = 1;
+			values.household_customer_type = { id: 1 };
 			create_location(values, done);
 		});
 
@@ -146,6 +150,10 @@ describe('Location', function() {
 			values.type = 'combo';
 			values.number_of_households = 1;
 			values.number_of_employees = 1;
+			values.annual_recurring_cost = 500;
+			values.install_cost = 500;
+			values.business_customer_type = { id: 1 };
+			values.household_customer_type = { id: 1 };
 			create_location(values, done);
 		});
 
@@ -215,6 +223,27 @@ describe('Location', function() {
 					var industry = industries[0];
 					expect(industry.id).to.be.a('number');
 					expect(industry.description).to.be.a('string');
+					done();
+			});
+
+		});
+
+	});
+
+	describe('#find_customer_types()', function() {
+
+		it('should return all the customer types', function(done) {
+			request
+				.get('/customer_types')
+				.accept('application/json')
+				.end(function(err, res) {
+					if (err) return done(err);
+					var customer_types = res.body;
+					expect(customer_types).to.be.an('array');
+					expect(customer_types).to.have.length.above(0);
+					var customer_type = customer_types[0];
+					expect(customer_type.id).to.be.a('number');
+					expect(customer_type.name).to.be.a('string');
 					done();
 			});
 

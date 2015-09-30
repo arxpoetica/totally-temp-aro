@@ -31,6 +31,10 @@ exports.configure = function(api, middleware) {
     models.Location.find_industries(jsonHandler(response, next));
   });
 
+  api.get('/customer_types', function(request, response, next) {
+    models.Location.customer_types(jsonHandler(response, next));
+  });
+
   api.post('/locations/:location_id/update', function(request, response, next) {
     var location_id = request.params.location_id;
     var values = {
