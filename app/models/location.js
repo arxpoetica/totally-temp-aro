@@ -163,10 +163,10 @@ Location.show_information = function(location_id, callback) {
 		info.customer_types = customer_types;
 
 		info.customers_businesses_total = customer_types.reduce(function(total, customer_type) {
-		  return total + customer_type.businesses;
+			return total + customer_type.businesses;
 		}, 0);
 		info.customers_households_total = customer_types.reduce(function(total, customer_type) {
-		  return total + customer_type.households;
+			return total + customer_type.households;
 		}, 0);
 
 		callback(null, info);
@@ -232,30 +232,72 @@ Location.create_location = function(values, callback) {
 	.end(callback);
 
 	function insert_business(callback) {
-		var sql = 'INSERT INTO businesses (location_id, industry_id, name, address, number_of_employees) VALUES ($1, $2, $3, $4, $5)';
-		var params = [
-			location_id,
-			values.business_industry && values.business_industry.id,
-			values.business_name,
-			values.address,
-			+values.number_of_employees,
-		];
-		database.execute(sql, params, callback);
+		var business_id;
+		txain(function(callback) {
+			var sql = 'INSERT INTO businesses (location_id, industry_id, name, address, number_of_employees) VALUES ($1, $2, $3, $4, $5) RETURNING id';
+			var params = [
+				location_id,
+				values.business_industry && values.business_industry.id,
+				values.business_name,
+				values.address,
+				+values.number_of_employees,
+			];
+			database.findOne(sql, params, callback);
+		})
+		.then(function(row, callback) {
+			business_id = row.id;
+
+			var sql = 'INSERT INTO client_schema.business_install_costs (business_id, install_cost, annual_recurring_cost) VALUES ($1, $2, $3)';
+			var params = [
+				business_id,
+				+values.install_cost,
+				+values.annual_recurring_cost,
+			];
+			database.execute(sql, params, callback);
+		})
+		.then(function(callback) {
+			var sql = 'INSERT INTO client_schema.business_customer_types (business_id, customer_type_id) VALUES ($1, $2)';
+			var params = [
+				business_id,
+				values.business_customer_type && values.business_customer_type.id,
+			];
+			database.execute(sql, params, callback);
+		})
+		.end(callback);
 	}
 
 	function insert_household(callback) {
-		var sql = 'INSERT INTO households (location_id, number_of_households) VALUES ($1, $2)';
-		var params = [
-			location_id,
-			+values.number_of_households,
-		];
-		database.execute(sql, params, callback);
+		var household_id;
+		txain(function(callback) {
+			var sql = 'INSERT INTO households (location_id, number_of_households) VALUES ($1, $2) RETURNING id';
+			var params = [
+				location_id,
+				+values.number_of_households,
+			];
+			database.findOne(sql, params, callback);
+		})
+		.then(function(row, callback) {
+			household_id = row.id;
+
+			var sql = 'INSERT INTO client_schema.household_customer_types (household_id, customer_type_id) VALUES ($1, $2)';
+			var params = [
+				household_id,
+				values.household_customer_type && values.household_customer_type.id,
+			];
+			database.execute(sql, params, callback);
+		})
+		.end(callback);
 	}
 
 };
 
 Location.find_industries = function(callback) {
 	var sql = 'SELECT * FROM industries ORDER BY description ASC'
+	database.query(sql, [], callback);
+};
+
+Location.customer_types = function(callback) {
+	var sql = 'SELECT * FROM client_schema.customer_types ORDER BY name ASC'
 	database.query(sql, [], callback);
 };
 

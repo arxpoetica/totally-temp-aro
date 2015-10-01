@@ -37,8 +37,19 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $http.get('/industries')
     .success(function(response) {
       $scope.industries = response;
-      $('#create-location select').select2();
+      $('#create-location select.industries').select2({ placeholder: 'Select an industry' });
     });
+
+  $http.get('/customer_types')
+    .success(function(response) {
+      $scope.customer_types = response;
+      $('#create-location select.households_customer_types').select2({ placeholder: 'Select a customer type' });
+      $('#create-location select.businesses_customer_types').select2({ placeholder: 'Select a customer type' });
+    });
+
+  $('#create-location').on('shown.bs.modal', function() {
+    $('#create-location select').val('').trigger("change");
+  });
 
   $scope.route = null;
   $rootScope.$on('route_selected', function(e, route) {
