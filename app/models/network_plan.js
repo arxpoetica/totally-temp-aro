@@ -539,7 +539,7 @@ function add_targets(plan_id, location_ids, callback) {
       JOIN aro.locations locations
         ON locations.geom && vertex.the_geom
       WHERE
-        locations.id IN ($1))
+       st_contains(locations.geom, vertex.the_geom) and locations.id IN ($1))
     */});
     database.execute(sql, [location_ids, plan_id], callback);
   })
