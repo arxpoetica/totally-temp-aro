@@ -40,7 +40,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     $scope.market_type = 'route';
     $('#market-size .modal-title').text('Market profile');
     $('#market-size').modal('show');
+
     if (values) {
+      $('#market-size select').val('').trigger('change');
       chart && chart.destroy();
       $scope.values = values;
       show_chart();

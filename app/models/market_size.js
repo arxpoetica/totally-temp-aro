@@ -170,7 +170,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         AND e.min_value <= b.number_of_employees
         AND e.max_value >= b.number_of_employees
       JOIN
-        client.industries c_industries
+        client_schema.industries c_industries
       ON
         spend.industry_id = c_industries.id
       WHERE
@@ -229,26 +229,26 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     this.set('csv', csv);
 
     if (empty_array(filters.product)) return callback(null, []);
-    var sql = 'SELECT product_type, product_name FROM client.products WHERE id IN($1)';
+    var sql = 'SELECT product_type, product_name FROM client_schema.products WHERE id IN($1)';
     database.query(sql, [filters.product], callback);
   })
   .then(function(products, callback) {
     this.set('products', products);
 
     if (empty_array(filters.employees_range)) return callback(null, []);
-    var sql = 'SELECT value_range FROM client.employees_by_location WHERE id IN($1)';
+    var sql = 'SELECT value_range FROM client_schema.employees_by_location WHERE id IN($1)';
     database.query(sql, [filters.employees_range], callback);
   })
   .then(function(employees_by_location, callback) {
     this.set('employees_by_location', employees_by_location);
     
-    if (empty_array(filters.industries)) return callback(null, []);
-    var sql = 'SELECT industry_name FROM client.industries WHERE id IN($1)';
-    database.query(sql, [filters.industries], callback);
+    if (empty_array(filters.industry)) return callback(null, []);
+    var sql = 'SELECT industry_name FROM client_schema.industries WHERE id IN($1)';
+    database.query(sql, [filters.industry], callback);
   })
   .then(function(industries, callback) {
     this.set('industries', industries);
-    
+
     var sql = 'SELECT name, area_name FROM custom.route WHERE id=$1';
     database.findOne(sql, [plan_id], callback);
   })
