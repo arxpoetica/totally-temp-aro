@@ -1,25 +1,30 @@
 package com.altvil.aro.service.graph.builder.impl;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.altvil.aro.service.dao.graph.GraphData;
 import com.altvil.aro.service.dao.graph.GraphEdge;
+import com.altvil.aro.service.dao.graph.GraphVertex;
+import com.altvil.aro.service.dao.graph.LocationVertex;
 import com.altvil.aro.service.dao.graph.impl.GraphModelImpl;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphException;
 import com.altvil.aro.service.graph.GraphModel;
-import com.altvil.aro.service.graph.builder.AroGraphModelBuilder;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
-import com.altvil.aro.service.graph.node.impl.LocationNodeImpl;
+import com.vividsolutions.jts.geom.Point;
 
-public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
+public class BasicGraphBuilder  {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(BasicGraphBuilder.class.getName());
@@ -36,12 +41,30 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 			.getEdgeFactory();
 
 	private GraphNode root;
+	
+	private Map<Long, GraphVertex> verticesMap ;
+	private Map<Long, LocationVertex> locationVerticesMap ;
 
 	public BasicGraphBuilder(GraphNodeFactory nodeFactory) {
 		this.nodeFactory = nodeFactory;
 	}
+	
+	public GraphModel<Long> build(GraphData graphData) {
+		
+		verticesMap = graphData.getGraphVertices().stream().collect(Collectors.toMap(v -> v.getVertexId(), v -> v)) ;
+		locationVerticesMap = hash(graphData.getLocationVertices(), v -> v.getVertexId()) ;
+		graphData.getGraphEdges().forEach(e -> apply(e));
+		
+		return new GraphModelImpl<Long>(graph, root);
+	}
+	
+	private <K,T> Map<K,T> hash(Collection<T> values, Function<T, K> f) {
+		Map<K, T> map = new HashMap<K, T>() ;
+		values.forEach(v -> map.put(f.apply(v), v)); 
+		return map ;
+	}
+	
 
-	@Override
 	public BasicGraphBuilder apply(GraphEdge edge) {
 
 		try {
@@ -119,19 +142,30 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 		ae.setGid(edge.getGID());
 
 	}
+	
+	private Point getVertexPoint(Long vid) {
+		return this.verticesMap.get(vid).getPoint() ;
+	}
 
 	private GraphNode createSourceNode(GraphEdge edge) throws GraphException {
 
+		Long source = edge.getSource() ;
+		Point point = getVertexPoint(source) ;
+		
+		
 		switch (edge.getEdgeType()) {
 		case NETWORK_NODE_LINK:
 			break;
 		case ROAD_SEGMENT_LINK:
 		case UNDEFINED_LINK:
-			return nodeFactory.createRoadNode(edge.getSource(),
-					edge.getStartPoint());
+			return nodeFactory.createRoadNode(source, point);
 		case LOCATION_LINK:
-			return new LocationNodeImpl(edge.getSource(), edge.getStartPoint(),
-					edge.getLocationId());
+			LocationVertex lv = locationVerticesMap.get(source) ;
+			if( lv == null ) {
+				//Warn
+				return nodeFactory.createRoadNode(source, point);
+			}
+			return nodeFactory.createLocationNode(source, point, lv.getLocationId()) ;
 		}
 
 		throw new GraphException("Invalid source type " + edge.getEdgeType());
@@ -139,26 +173,30 @@ public class BasicGraphBuilder implements AroGraphModelBuilder<GraphEdge> {
 
 	private GraphNode createTargetNode(GraphEdge edge) throws GraphException {
 
+		Long target = edge.getTarget() ;
+		Point point = getVertexPoint(target) ;
+		
 		switch (edge.getEdgeType()) {
 		case NETWORK_NODE_LINK:
-			return root = nodeFactory.createSpliceNode(edge.getSource(),
-					edge.getEndPoint());
+			return root = nodeFactory.createSpliceNode(target,
+					point);
 		case ROAD_SEGMENT_LINK:
 		case UNDEFINED_LINK:
 			return nodeFactory.createRoadNode(edge.getTarget(),
-					edge.getStartPoint());
+					point);
 
 		case LOCATION_LINK:
-			return nodeFactory.createRoadNode(edge.getSource(), edge.getStartPoint()) ;
+			LocationVertex lv = locationVerticesMap.get(target) ;
+			if( lv == null ) {
+				return nodeFactory.createRoadNode(target, point);
+			}
+			return nodeFactory.createLocationNode(target, point, lv.getLocationId()) ;
 			
 		}
 
 		throw new GraphException("Invalid target type " + edge.getEdgeType());
 	}
 
-	@Override
-	public GraphModel<Long> build() {
-		return new GraphModelImpl<Long>(graph, root);
-	}
+	
 
 }
