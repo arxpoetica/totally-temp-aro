@@ -3,13 +3,9 @@ package com.altvil.aro.service.dao.graph.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.postgresql.geometric.PGpoint;
-
 import com.altvil.aro.service.dao.graph.EdgeType;
 import com.altvil.aro.service.dao.graph.EdgeTypeMapping;
 import com.altvil.aro.service.dao.graph.GraphEdge;
-import com.altvil.aro.util.geometry.GeometryUtil;
-import com.vividsolutions.jts.geom.Point;
 
 public class GraphEdgeImpl implements GraphEdge {
 
@@ -17,41 +13,24 @@ public class GraphEdgeImpl implements GraphEdge {
 
 		GraphEdgeImpl e = new GraphEdgeImpl();
 
-		e.id = rs.getLong(1);
-		e.source = rs.getLong(3);
-		e.target = rs.getLong(2);
-		e.gid = rs.getLong(4);
+		e.source = rs.getLong(2);
+		e.target = rs.getLong(1);
+		e.edgeType = EdgeTypeMapping.MAPPING.getEdgeType(rs.getInt(3));
+		e.edgeLength = rs.getDouble(4);
+		e.gid = rs.getLong(5);
 		if( rs.wasNull() ) {
 			e.gid = null ;
 		}
-			
-		e.edgeType = EdgeTypeMapping.MAPPING.getEdgeType(rs.getInt(5));
-		e.edgeLength = rs.getDouble(6);
-		// line
-		e.sourcePoint = (PGpoint) rs.getObject(9);
-		e.targetPoint = (PGpoint) rs.getObject(8);
-		//e.locationId = rs.getLong(10);
-		
-		e.locationId = null ;
-
+	
 		return e;
 	}
 
-	private Long id;
 	private Long source;
 	private Long target;
 	private Long gid;
 	private EdgeType edgeType;
 	private double edgeLength;
-	// line
-	private PGpoint sourcePoint;
-	private PGpoint targetPoint;
-	private Long locationId;
-
-	@Override
-	public Long getId() {
-		return id;
-	}
+	
 
 	@Override
 	public Long getSource() {
@@ -78,25 +57,7 @@ public class GraphEdgeImpl implements GraphEdge {
 		return edgeLength;
 	}
 
-	@Override
-	public Object getGeom() {
-		return null;
-	}
-
-	@Override
-	public Point getStartPoint() {
-		return GeometryUtil.asPoint(sourcePoint);
-	}
-
-	@Override
-	public Point getEndPoint() {
-		return GeometryUtil.asPoint(targetPoint);
-	}
-
-	@Override
-	public Long getLocationId() {
-		return locationId;
-	}
+	
 	
 	@Override
 	public String toString() {

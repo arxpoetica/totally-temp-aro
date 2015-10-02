@@ -30,22 +30,18 @@ public class GraphServiceImpl implements GraphService {
 	}
 
 	@Override
-	public GraphModel<Long> getGraphForPlanId(long planId) throws GraphException {
+	public GraphModel<Long> getGraphForPlanId(long planId)
+			throws GraphException {
 		try {
-			BasicGraphBuilder b = new BasicGraphBuilder(nodeFactory);
-			
-			daoService.dao(GraphDAO.class).read(dao -> {
-				dao.findNodesForPlanId(planId).forEach(e -> b.apply(e));
-				return b ;
-			});
-			
-			return b.build();
+			return daoService.dao(GraphDAO.class).read(
+					dao -> {
+						return new BasicGraphBuilder(nodeFactory).build(dao
+								.getGraphDataForPlanId(planId));
+					});
 
 		} catch (Throwable err) {
 			throw new GraphException(err.getMessage(), err);
 		}
 	}
-
-
 
 }
