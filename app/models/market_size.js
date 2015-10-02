@@ -253,7 +253,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     database.findOne(sql, [plan_id], callback);
   })
   .then(function(plan, callback) {
-    var footer = [[]];
+    var footer = [];
     footer.push(['Export Attributes']);
     if (user) {
       footer.push(['Created by:', user.first_name+' '+user.last_name]);
@@ -288,10 +288,11 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
       });
       footer.push([]);
     }
+    footer.push([]);
     stringify(footer, callback);
   })
   .then(function(footer, callback) {
-    var csv = this.get('csv') + footer;
+    var csv = footer + this.get('csv');
     callback(null, csv, this.get('total'));
   })
   .end(callback);
