@@ -11,4 +11,8 @@ exports.configure = function(api, middleware) {
     models.Wirecenter.find_by_wirecenter_code(wirecenter_code, jsonHandler(response, next));
   });
 
+  api.get('/wirecenters', function(request, response, next) {
+    models.Wirecenter.find_all(jsonHandler(response, next));
+  });
+
 };

@@ -60,7 +60,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   area_layers['wirecenter'] = new MapLayer({
     short_name: 'WC',
     name: 'Wirecenter',
-    api_endpoint: '/wirecenters/NYCMNY79',
+    api_endpoint: '/wirecenters',
     highlighteable: true,
     style_options: {
       normal: {
@@ -191,7 +191,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     if (route) {
       $http.get('/network_plan/'+route.id+'/area_data')
         .success(function(response) {
-          area_layers['wirecenter'].set_api_endpoint('/wirecenters/'+response.wirecenter);
+          // area_layers['wirecenter'].set_api_endpoint('/wirecenters/'+response.wirecenter);
           area_layers['county_subdivisions_layer'].set_api_endpoint('/county_subdivisions/'+response.statefp);
           area_layers['census_blocks_layer'].set_api_endpoint('/census_blocks/'+response.statefp+'/'+response.countyfp);
         });
