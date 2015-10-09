@@ -171,18 +171,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
   });
 
-  equipment_layers['fiber_plant'] = new MapLayer({
-    name: 'Fiber',
-    short_name: 'F',
-    api_endpoint: '/network/fiber_plant/VERIZON',
-    style_options: {
-      normal: {
-        strokeColor: 'red',
-        strokeWeight: 2,
-      }
-    },
-  });
-
   $rootScope.$on('route_selected', function(e, route) {
     var layer = equipment_layers.network_nodes;
     var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
