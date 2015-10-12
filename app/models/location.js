@@ -19,7 +19,6 @@ Location.find_all = function(type, viewport, callback) {
 
 	txain(function(callback) {
 		if (viewport.zoom > viewport.threshold) {
-			var linestring = helpers.geo.linestring_from_viewport(viewport);
 			var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
 			sql += '\n WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), locations.geom)'
 			if (type === 'businesses') {
@@ -28,7 +27,7 @@ Location.find_all = function(type, viewport, callback) {
 				sql += ' JOIN households ON households.location_id = locations.id';
 			}
 			sql += ' GROUP BY locations.id';
-			database.query(sql, [linestring], callback);
+			database.query(sql, [viewport.linestring], callback);
 		} else {
 			var cluster_name = 'locations_'+viewport.zoom;
 			var sql = 'SELECT ST_AsGeoJSON(ST_Simplify(geom, 0.0001))::json AS geom, density FROM custom.clusters WHERE name=$1';
