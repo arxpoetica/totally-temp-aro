@@ -37,7 +37,7 @@ Steps to convert:
  
 ### Script Overview
  
-First, the ETL script replaces missing values in the spend data with zeros and divides the values in the "spend" column by 12 to get a monthly spend value. The script creates mapping tables for products (using "product_type" and "product" columns), industries (using the "industry_name" column), and employees (using the "employees_at_location_range" column). The script merges the IDs generated for these mapping tables with the original data using the pandas merge function, and imports the reformatted DataFrame to the spend table.
+First, the ETL script `spend.py` replaces missing values in the spend data with zeros and divides the values in the "spend" column by 12 to get a monthly spend value. The script creates mapping tables for products (using "product_type" and "product" columns), industries (using the "industry_name" column), and employees (using the "employees_at_location_range" column). The script merges the IDs generated for these mapping tables with the original data using the pandas merge function, and imports the reformatted DataFrame to the spend table.
  
   
 
