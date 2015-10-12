@@ -15,11 +15,24 @@ var Network = {};
 // This does not show the user client's fiber plant by default since we need to handle competitors' fiber plant as well.
 //
 // 1. callback: function to return the GeoJSON for a wirecenter
-Network.view_fiber_plant_for_carrier = function(carrier_name, callback) {
-  var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.fiber_plant WHERE carrier_name = $1';
-
+Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback) {
   txain(function(callback) {
-    database.query(sql, [carrier_name], callback);
+    if (viewport.zoom > viewport.threshold) {
+      var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.fiber_plant WHERE carrier_name = $1 AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)';
+      database.query(sql, [carrier_name, viewport.linestring], callback);
+    } else {
+      var sql = multiline(function() {;/*
+        WITH grouped AS (
+          SELECT ST_Union(ST_Buffer(geom, $3)) AS geom
+          FROM aro.fiber_plant
+          WHERE carrier_name = $1
+          AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)
+          GROUP BY ST_Geohash(geom)
+        )
+        SELECT ST_AsGeoJSON(ST_Envelope((ST_Dump(ST_Union(geom))).geom))::json AS geom FROM grouped
+      */})
+      database.query(sql, [carrier_name, viewport.linestring, viewport.buffer], callback);
+    }
   })
   .then(function(rows, callback) {
     var features = rows.map(function(row) {

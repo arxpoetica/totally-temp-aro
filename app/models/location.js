@@ -12,21 +12,62 @@ var Location = {};
 // Find all Locations
 //
 // 1. callback: function to return a GeoJSON object
-Location.find_all = function(type, callback) {
-	if (arguments.length === 1) {
-		callback = arguments[0];
-		type = null;
+Location.find_all = function(type, viewport, callback) {
+	if (arguments.length !== 3) {
+		throw new Error('Missing parameters')
 	}
-	var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
-	if (type === 'businesses') {
-		sql += ' JOIN businesses ON businesses.location_id = locations.id';
-	} else if (type === 'households') {
-		sql += ' JOIN households ON households.location_id = locations.id';
-	}
-	sql += ' GROUP BY locations.id';
 
 	txain(function(callback) {
-		database.query(sql, callback);
+		if (viewport.zoom > viewport.threshold) {
+			var linestring = helpers.geo.linestring_from_viewport(viewport);
+			var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
+			sql += '\n WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), locations.geom)'
+			if (type === 'businesses') {
+				sql += ' JOIN businesses ON businesses.location_id = locations.id';
+			} else if (type === 'households') {
+				sql += ' JOIN households ON households.location_id = locations.id';
+			}
+			sql += ' GROUP BY locations.id';
+			database.query(sql, [linestring], callback);
+		} else {
+			var cluster_name = 'locations_'+viewport.zoom;
+			var sql = 'SELECT ST_AsGeoJSON(ST_Simplify(geom, 0.0001))::json AS geom, density FROM custom.clusters WHERE name=$1';
+			var params = [cluster_name];
+			txain(function(callback) {
+				database.query(sql, params, callback);
+			})
+			.then(function(rows, callback) {
+				if (rows.length > 0) return callback(null, rows);
+
+				txain(function(callback) {
+					var sql = multiline(function() {;/*
+						WITH grouped AS (
+							SELECT ST_Union(ST_Buffer(geom, $1, 'quad_segs=1')) AS geom
+							FROM locations
+							GROUP BY ST_Geohash(geom)
+						), clusters AS (
+							SELECT (ST_Dump(ST_Union(geom))).geom AS geom FROM grouped
+						)
+
+						INSERT INTO custom.clusters (name, geom, density, zoom)
+							SELECT $2 AS name, clusters.geom, COUNT(*)/ST_Area(clusters.geom) AS density, $3 AS zoom FROM clusters
+							JOIN locations ON ST_Contains(clusters.geom, locations.geom)
+							GROUP BY clusters.geom
+					*/});
+					var params = [
+						viewport.buffer,
+						cluster_name,
+						viewport.zoom,
+					];
+					database.execute(sql, params, callback);
+				})
+				.then(function(callback) {
+					database.query(sql, params, callback);
+				})
+				.end(callback);
+			})
+			.end(callback);
+		}
 	})
 	.then(function(rows, callback) {
 		var features = rows.map(function(row) {
@@ -34,6 +75,7 @@ Location.find_all = function(type, callback) {
 				'type':'Feature',
 				'properties': {
 					'id': row.id,
+					'density': row.density, // for clusters
 				},
 				'geometry': row.geom,
 			};

@@ -6,9 +6,10 @@ exports.configure = function(api, middleware) {
   var check_owner_permission = middleware.check_owner_permission;
   var jsonHandler = middleware.jsonHandler;
 
-  api.get('/network/fiber_plant/:carrier_name', function(request, response, next) {
+  api.get('/network/fiber_plant/:carrier_name', middleware.viewport, function(request, response, next) {
     var carrier_name = request.params.carrier_name;
-    models.Network.view_fiber_plant_for_carrier(carrier_name, jsonHandler(response, next));
+    var viewport = request.viewport;
+    models.Network.view_fiber_plant_for_carrier(carrier_name, viewport, jsonHandler(response, next));
   });
 
   api.get('/network/carriers', function(request, response, next) {

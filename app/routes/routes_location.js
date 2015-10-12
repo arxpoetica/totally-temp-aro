@@ -6,9 +6,10 @@ exports.configure = function(api, middleware) {
   var check_owner_permission = middleware.check_owner_permission;
   var jsonHandler = middleware.jsonHandler;
 
-  api.get('/locations', function(request, response, next) {
+  api.get('/locations', middleware.viewport, function(request, response, next) {
     var type = request.query.type;
-    models.Location.find_all(type, jsonHandler(response, next));
+    var viewport = request.viewport;
+    models.Location.find_all(type, viewport, jsonHandler(response, next));
   });
 
   api.get('/locations/:location_id', function(request, response, next) {

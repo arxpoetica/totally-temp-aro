@@ -28,8 +28,11 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
           normal: {
             strokeColor: carrier.color,
             strokeWeight: 2,
+            fillColor: carrier.color,
           }
         },
+        threshold: 11,
+        reload: 'always',
       });
 
     })

@@ -6,15 +6,28 @@ var helpers = require('../helpers');
 var database = helpers.database;
 var GeoJsonHelper = helpers.GeoJsonHelper;
 var txain = require('txain');
+var multiline = require('multiline');
 
 var CensusBlock = {};
 
-CensusBlock.find_by_statefp_and_countyfp = function(statefp, countyfp, callback) {
-	var sql = 'SELECT gid as id, name, ST_AsGeoJSON(geom)::json AS geom FROM aro.census_blocks WHERE statefp = $1 AND countyfp = $2';
-	var params = [statefp, countyfp];
-
+CensusBlock.find_by_statefp_and_countyfp = function(statefp, countyfp, viewport, callback) {
 	txain(function(callback) {
-	  database.query(sql, params, callback);
+		if (viewport.zoom > viewport.threshold) {
+			var sql = multiline(function() {;/*
+				SELECT gid as id, name, ST_AsGeoJSON(ST_Simplify(geom, $4))::json AS geom FROM aro.census_blocks
+				WHERE statefp = $1 AND countyfp = $2
+				AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($3)), 4326), geom)
+			*/});
+			var params = [statefp, countyfp, viewport.linestring, viewport.simplify_factor];
+		} else {
+			var sql = multiline(function() {;/*
+				SELECT ST_AsGeoJSON(ST_Simplify(ST_Union(geom), $4))::json AS geom FROM aro.census_blocks
+				WHERE statefp = $1 AND countyfp = $2
+				AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($3)), 4326), geom)
+			*/});
+			var params = [statefp, countyfp, viewport.linestring, viewport.simplify_factor];
+		}
+		database.query(sql, params, callback);
 	})
 	.then(function(rows, callback) {
 		var features = rows.map(function(row) {

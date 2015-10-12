@@ -128,8 +128,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $rootScope.$on('route_selected', function(e, route) {
     if (route) {
-      $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
-      $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
+      var timeout = map.getBounds() ? 0 : 2000
+      setTimeout(function() {
+        $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
+        $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
+      }, timeout)
     }
   });
 

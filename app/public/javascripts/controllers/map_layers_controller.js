@@ -30,13 +30,17 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       normal: {
         icon: '/images/map_icons/location_business_gray.png',
         visible: true,
+        fillColor: 'blue',
+        strokeColor: 'blue',
+        strokeWeight: 1,
       },
       selected: {
         icon: '/images/map_icons/location_business_selected.png',
         visible: true,
-      }
+      },
     },
-    heatmap: true,
+    threshold: 16,
+    reload: 'dynamic',
   });
 
   $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
@@ -74,6 +78,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 4,
       },
     },
+    reload: 'always',
   });
 
   area_layers['county_subdivisions_layer'] = new MapLayer({
@@ -93,6 +98,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 2,
       },
     },
+    reload: 'always',
   });
 
   area_layers['census_blocks_layer'] = new MapLayer({
@@ -120,6 +126,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 4,
       }
     },
+    threshold: 13,
+    reload: 'dynamic',
   });
 
   var events = [
