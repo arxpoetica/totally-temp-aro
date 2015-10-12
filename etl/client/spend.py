@@ -89,13 +89,12 @@ def delete_industry_mapping(db):
     db.commit()
 
 def replace_misc_phrases(emp_str):
-    print emp_str
     terms_to_replace = [' Emp', 'Very Small ', 'Small ', 'Medium ', 
                         'Large ', '+']
     
     for t in terms_to_replace:
         emp_str = emp_str.replace(t, '')
-    print emp_str
+
     return emp_str
 
 def add_employees_by_location(db, loc_sizes):
