@@ -42,6 +42,7 @@ CREATE TABLE client.spend
 	employees_by_location_id integer, 
 	year integer, 
 	monthly_spend numeric,
+	currency_abbrev character(3),
 	
 	CONSTRAINT pkey_spend_id PRIMARY KEY (id), 
 	CONSTRAINT fkey_spend_product_id FOREIGN KEY (product_id) REFERENCES client.products (id) ON DELETE CASCADE,

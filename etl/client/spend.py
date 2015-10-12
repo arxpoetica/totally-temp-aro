@@ -202,7 +202,8 @@ def add_spend(db, spend):
                 'industry_id', 
                 'employees_by_location_id', 
                 'year', 
-                'monthly_spend']
+                'monthly_spend', 
+                'currency']
     
     spend = spend.loc[:,colnames]
     
@@ -214,8 +215,9 @@ def add_spend(db, spend):
                                              industry_id, 
                                              employees_by_location_id, 
                                              year, 
-                                             monthly_spend)
-                    VALUES (%s, %s, %s, %s, %s);
+                                             monthly_spend, 
+                                             currency_abbrev)
+                    VALUES (%s, %s, %s, %s, %s, %s);
                 """
     
     cur.executemany(sql_query, values)
