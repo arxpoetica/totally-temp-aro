@@ -88,12 +88,24 @@ def delete_industry_mapping(db):
     
     db.commit()
 
+def replace_misc_phrases(emp_str):
+    print emp_str
+    terms_to_replace = [' Emp', 'Very Small ', 'Small ', 'Medium ', 
+                        'Large ', '+']
+    
+    for t in terms_to_replace:
+        emp_str = emp_str.replace(t, '')
+    print emp_str
+    return emp_str
+
 def add_employees_by_location(db, loc_sizes):
     print "Adding employee information..."
-
-    split = [x.replace(' Emp', '').replace('+', '').split('-') for x in loc_sizes.loc[:,'employees_at_location_range']]
-    min_ranges = [int(x[0]) for x in split]
-    max_ranges = [int(x[1]) for x in split if len(x) > 1]
+    
+    split = [replace_misc_phrases(x).split('-') 
+             for x in loc_sizes.loc[:,'employees_at_location_range']]
+    
+    min_ranges = [int(x[0].strip()) for x in split]
+    max_ranges = [int(x[1].strip()) for x in split if len(x) > 1]
     max_ranges.append(1000000)
     
     loc_sizes.loc[:,'min_value'] = min_ranges
