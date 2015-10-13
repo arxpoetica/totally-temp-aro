@@ -8,7 +8,7 @@ describe('Location', function() {
 
 		it('should return a GeoJSON FeatureCollection', function(done) {
 			request
-				.get('/locations')
+				.get('/locations/0')
 				.query(test_utils.test_viewport())
 				.accept('application/json')
 				.end(function(err, res) {
@@ -27,7 +27,7 @@ describe('Location', function() {
 
 		it('should return only businesses', function(done) {
 			request
-				.get('/locations')
+				.get('/locations/0')
 				.query(test_utils.test_viewport({ type: 'business' }))
 				.accept('application/json')
 				.end(function(err, res) {
@@ -46,7 +46,7 @@ describe('Location', function() {
 
 		it('should return only households', function(done) {
 			request
-				.get('/locations')
+				.get('/locations/0')
 				.query(test_utils.test_viewport({ type: 'households' }))
 				.accept('application/json')
 				.end(function(err, res) {
@@ -70,7 +70,7 @@ describe('Location', function() {
 
 		it('should return information of the given location', function(done) {
 			request
-				.get('/locations/'+location_id)
+				.get('/locations/'+location_id+'/show')
 				.query({ type: 'households' })
 				.accept('application/json')
 				.end(function(err, res) {

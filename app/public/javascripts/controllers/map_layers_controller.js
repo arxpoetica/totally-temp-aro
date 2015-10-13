@@ -25,7 +25,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     type: 'locations',
     name: 'Locations',
     short_name: 'L',
-    api_endpoint: '/locations',
+    // api_endpoint: '/locations',
     style_options: {
       normal: {
         icon: '/images/map_icons/location_business_gray.png',
@@ -183,6 +183,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     var layer = equipment_layers.network_nodes;
     var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
     layer.set_api_endpoint(api_endpoint);
+
+    var layer = feature_layers['locations'];
+    layer.set_api_endpoint('/locations/'+route.id);
 
     if (route) {
       $http.get('/network_plan/'+route.id+'/area_data')

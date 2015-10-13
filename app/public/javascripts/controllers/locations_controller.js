@@ -63,7 +63,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     } else {
       layer.show();
       var filter = $scope.locations_filter === 'both' ? '' : '?type='+$scope.locations_filter;
-      layer.set_api_endpoint('/locations'+filter);
+      layer.set_api_endpoint('/locations/'+$scope.route.id+filter);
     }
   }
 

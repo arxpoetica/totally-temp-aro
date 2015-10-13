@@ -12,11 +12,7 @@ var Location = {};
 // Find all Locations
 //
 // 1. callback: function to return a GeoJSON object
-Location.find_all = function(type, viewport, callback) {
-	if (arguments.length !== 3) {
-		throw new Error('Missing parameters')
-	}
-
+Location.find_all = function(plan_id, type, viewport, callback) {
 	txain(function(callback) {
 		if (viewport.zoom > viewport.threshold) {
 			var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
@@ -36,12 +32,18 @@ Location.find_all = function(type, viewport, callback) {
 					WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), locations.geom)
 					GROUP BY geohash
 				)
-				SELECT ST_AsGeoJSON(ST_GeomFromGeoHash(geohash))::json AS geom, density FROM geohashes
+				SELECT ST_AsGeoJSON(ST_GeomFromGeoHash(geohash))::json AS geom, density, NULL AS id FROM geohashes
+
+				UNION ALL
+
+				-- Always return selected locations
+				SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
+					FROM aro.locations
+					JOIN custom.route_targets
+					ON route_targets.route_id=$2
+					AND route_targets.location_id=locations.id
 			*/});
-			var params = [
-				viewport.linestring,
-			];
-			database.query(sql, params, callback);
+			database.query(sql, [viewport.linestring, plan_id], callback);
 		}
 	})
 	.then(function(rows, callback) {

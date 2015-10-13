@@ -22,7 +22,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     if (map_layer.type !== 'locations') return;
     options.add('See more information', function(map_layer, feature) {
       var id = feature.getProperty('id');
-      $http.get('/locations/' + id).success(function(response) {
+      $http.get('/locations/'+id+'/show').success(function(response) {
         set_selected_location(response);
         $('#selected_location_controller').modal('show');
       });
