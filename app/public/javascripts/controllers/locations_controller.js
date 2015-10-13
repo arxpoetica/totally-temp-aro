@@ -128,11 +128,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $rootScope.$on('route_selected', function(e, route) {
     if (route) {
-      var timeout = map.getBounds() ? 0 : 2000
-      setTimeout(function() {
+      var func = function() {
         $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
         $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
-      }, timeout)
+      }
+      if (map.getBounds()) {
+        func();
+      } else {
+        var listener = google.maps.event.addListener(map, 'bounds_changed', function() {
+          func();
+          google.maps.event.removeListener(listener);
+        });
+      }
     }
   });
 
