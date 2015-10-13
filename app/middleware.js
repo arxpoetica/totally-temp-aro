@@ -1,4 +1,6 @@
 var models = require('./models');
+var helpers = require('./helpers');
+var validate = helpers.validate;
 var _ = require('underscore');
 var nook = require('node-errors').nook;
 
@@ -26,28 +28,47 @@ function check_permission(rol) {
 };
 
 function viewport(request, response, next) {
-  var nelon = +request.query.nelon;
-  var nelat = +request.query.nelat;
-  var swlon = +request.query.swlon;
-  var swlat = +request.query.swlat;
-  var selon = nelon;
-  var selat = swlat;
-  var nwlon = swlon;
-  var nwlat = nelat;
-  var zoom = +request.query.zoom;
+  var query = request.query;
 
-  request.viewport = {
-    nelat: nelat,
-    nelon: nelon,
-    swlat: swlat,
-    swlon: swlon,
-    zoom: zoom,
-    threshold: +request.query.threshold,
-    simplify_factor: viewport.zoom > 14 ? 0 : 0.00015,
-    linestring: 'LINESTRING('+nelon+' '+nelat+', '+selon+' '+selat+', '+swlon+' '+swlat+', '+nwlon+' '+nwlat+', '+nelon+' '+nelat+')',
-    buffer: 10/Math.pow(2, zoom),
-  };
-  next();
+  request.query.nelon = +request.query.nelon;
+  request.query.nelat = +request.query.nelat;
+  request.query.swlon = +request.query.swlon;
+  request.query.swlat = +request.query.swlat;
+  request.query.zoom = +request.query.zoom;
+  request.query.threshold = +request.query.threshold;
+
+  validate(function(expect) {
+    expect(query, 'query_string.nelon', 'number');
+    expect(query, 'query_string.nelat', 'number');
+    expect(query, 'query_string.swlon', 'number');
+    expect(query, 'query_string.swlat', 'number');
+    expect(query, 'query_string.zoom', 'number');
+    expect(query, 'query_string.threshold', 'number');
+  }, function() {
+    var nelon = request.query.nelon;
+    var nelat = request.query.nelat;
+    var swlon = request.query.swlon;
+    var swlat = request.query.swlat;
+    var selon = nelon;
+    var selat = swlat;
+    var nwlon = swlon;
+    var nwlat = nelat;
+    var zoom = request.query.zoom;
+
+    request.viewport = {
+      nelat: nelat,
+      nelon: nelon,
+      swlat: swlat,
+      swlon: swlon,
+      zoom: zoom,
+      threshold: +request.query.threshold,
+      simplify_factor: viewport.zoom > 14 ? 0 : 0.00015,
+      linestring: 'LINESTRING('+nelon+' '+nelat+', '+selon+' '+selat+', '+swlon+' '+swlat+', '+nwlon+' '+nwlat+', '+nelon+' '+nelat+')',
+      buffer: 10/Math.pow(2, zoom),
+    };
+    next();
+
+  }, next);
 }
 
 var check_any_permission = check_permission(null);

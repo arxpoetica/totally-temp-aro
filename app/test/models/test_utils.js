@@ -1,5 +1,6 @@
 var models = require('../../models');
 var txain = require('txain');
+var _ = require('underscore');
 
 var app = require('../../app');
 var passport_stub = require('passport-stub');
@@ -43,3 +44,13 @@ exports.logout_app = function() {
 	passport_stub.logout();
 }
 
+exports.test_viewport = function(obj) {
+	return _.extend(obj || {}, {
+		nelat: '40.805607996143685',
+		nelon: '-73.91296976252443',
+		swlat: '40.69962581648302',
+		swlon: '-74.06883829279786',
+		zoom: '13',
+		threshold: '10',
+	})
+}

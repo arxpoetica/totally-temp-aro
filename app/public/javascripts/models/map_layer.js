@@ -318,8 +318,13 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				var density = feature.getProperty('density');
 				if (density) {
 					density -= mindensity;
+					var h = 60 - (density / maxdensity)*60;
+					var color = 'hsl('+h+',100%,50%)';
 					data.overrideStyle(feature, {
-						fillOpacity: (density / maxdensity)/2 + 0.25,
+						fillOpacity: 0.5,
+						fillColor: color,
+						strokeWeight: 1,
+						strokeColor: color,
 					});
 				}
 			});
