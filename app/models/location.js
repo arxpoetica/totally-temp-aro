@@ -1,4 +1,4 @@
-// Location 
+// Location
 //
 // A Location is a point in space which can contain other objects such as businesses and households
 
@@ -25,25 +25,24 @@ Location.find_all = function(plan_id, type, viewport, callback) {
 			sql += ' GROUP BY locations.id';
 			database.query(sql, [viewport.linestring], callback);
 		} else {
-			var sql = multiline(function() {;/*
-				WITH geohashes AS (
-					SELECT ST_Geohash(geom, 7) AS geohash, COUNT(*) AS density
-					FROM locations
-					WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), locations.geom)
-					GROUP BY geohash
-				)
-				SELECT ST_AsGeoJSON(ST_GeomFromGeoHash(geohash))::json AS geom, density, NULL AS id FROM geohashes
+			var sql = 'WITH '+viewport.fishnet;
+			sql += multiline(function() {;/*
+				SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
+				FROM fishnet
+				JOIN locations ON fishnet.geom && locations.geom
+				GROUP BY fishnet.geom
 
 				UNION ALL
-
+			*/});
+			sql += multiline(function() {;/*
 				-- Always return selected locations
 				SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
 					FROM aro.locations
 					JOIN custom.route_targets
-					ON route_targets.route_id=$2
+					ON route_targets.route_id=$1
 					AND route_targets.location_id=locations.id
 			*/});
-			database.query(sql, [viewport.linestring, plan_id], callback);
+			database.query(sql, [plan_id], callback);
 		}
 	})
 	.then(function(rows, callback) {

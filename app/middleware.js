@@ -3,6 +3,7 @@ var helpers = require('./helpers');
 var validate = helpers.validate;
 var _ = require('underscore');
 var nook = require('node-errors').nook;
+var multiline = require('multiline');
 
 function jsonHandler(response, next) {
   return nook(next, function(data) {
@@ -54,6 +55,7 @@ function viewport(request, response, next) {
     var nwlon = swlon;
     var nwlat = nelat;
     var zoom = request.query.zoom;
+    var linestring = 'LINESTRING('+nelon+' '+nelat+', '+selon+' '+selat+', '+swlon+' '+swlat+', '+nwlon+' '+nwlat+', '+nelon+' '+nelat+')';
 
     request.viewport = {
       nelat: nelat,
@@ -63,8 +65,14 @@ function viewport(request, response, next) {
       zoom: zoom,
       threshold: +request.query.threshold,
       simplify_factor: viewport.zoom > 14 ? 0 : 0.00015,
-      linestring: 'LINESTRING('+nelon+' '+nelat+', '+selon+' '+selat+', '+swlon+' '+swlat+', '+nwlon+' '+nwlat+', '+nelon+' '+nelat+')',
+      linestring: linestring,
       buffer: 10/Math.pow(2, zoom),
+      fishnet: multiline(function() {/*
+        extent AS ( SELECT ST_SetSRID(ST_MakePolygon(ST_GeomFromText('$1')), 4326) as bbox ),
+        bnds AS ( SELECT ST_XMin(bbox) as xmin, ST_YMin(bbox) as ymin, ST_XMax(bbox) as xmax, ST_YMax(bbox) as ymax FROM extent ),
+        raster AS ( SELECT ST_AddBand(ST_MakeEmptyRaster(ceil((xmax-xmin)/$2)::integer, ceil((ymax-ymin)/$2)::integer, xmin, ymax, $2), '8BUI'::text, 200) AS rast FROM bnds ),
+        fishnet AS ( SELECT ST_SetSRID((ST_PixelAsPolygons(rast)).geom, 4326) AS geom FROM raster )
+      */}).replace(/\$1/g, linestring).replace(/\$2/g, 20/Math.pow(2, zoom))
     };
     next();
 

@@ -318,7 +318,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				var density = feature.getProperty('density');
 				if (density) {
 					density -= mindensity;
-					var h = 60 - (density / maxdensity)*60;
+					var h = 60 - (density / maxdensity)*150;
 					var color = 'hsl('+h+',100%,50%)';
 					data.overrideStyle(feature, {
 						fillOpacity: 0.5,
