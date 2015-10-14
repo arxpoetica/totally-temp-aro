@@ -69,6 +69,21 @@ describe('Network', function() {
 		});
 	});
 
+	describe('#carrier_names()', function() {
+		it('should return all carrier names', function(done) {
+			request
+				.get('/network/carriers')
+				.accept('application/json')
+				.end(function(err, res) {
+					if (err) return done(err);
+					var output = res.body;
+					expect(output.length).to.be.above(0);
+					expect(output[0]).to.be.a('string');
+					done();
+			});
+		});
+	});
+
 	describe('#edit_network_nodes() and #clear_network_nodes()', function() {
 		var plan_id;
 		var nodes;

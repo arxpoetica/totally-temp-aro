@@ -40,6 +40,20 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, callback) {
   .end(callback)
 };
 
+Network.carrier_names = function(callback) {
+  txain(function(callback) {
+    var sql = 'SELECT distinct(carrier_name) FROM fiber_plant order by carrier_name ASC';
+    database.query(sql, callback);
+  })
+  .then(function(rows, callback) {
+    var names = rows.map(function(carrier) {
+      return carrier.carrier_name;
+    })
+    callback(null, names);
+  })
+  .end(callback);
+};
+
 // View the user client's network nodes
 // 
 // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')

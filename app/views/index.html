@@ -514,6 +514,37 @@
       </div>
     </div>
 
+    <div ng-controller="fiber_plant_controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('fiber_plant')" class="map-tool panel panel-primary" id="fiber_plant_controller">
+        <div class="panel-heading">
+          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
+            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+          </a>
+          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
+            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+          </a>
+          Competitor's fiber
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('fiber_plant')">
+            <div>
+              <h2>View</h2>
+
+              <div ng-repeat="carrier in carriers">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-change="toggle_carrier(carrier.name)" ng-model="foo">
+                      <span ng-attr-style="background-color:{{carrier.color}}; padding: 1px 10px; margin-right: 10px"> </span> {{carrier.name}}
+                  </label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="map-canvas-wrapper">
       <div id="map-canvas"></div>
     </div>
@@ -578,6 +609,7 @@
   <script src="javascripts/controllers/locations_controller.js"></script>
   <script src="javascripts/controllers/market_size_controller.js"></script>
   <script src="javascripts/controllers/equipment_nodes_controller.js"></script>
+  <script src="javascripts/controllers/fiber_plant_controller.js"></script>
   <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/controllers/selection_tools_controller.js"></script>

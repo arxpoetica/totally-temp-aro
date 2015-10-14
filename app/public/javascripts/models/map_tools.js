@@ -60,6 +60,11 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
       name: 'Network nodes',
       short_name: 'E',
     },
+    {
+      id: 'fiber_plant',
+      name: 'Competitors\'s fiber',
+      short_name: 'F',
+    },
   ];
 
   return tools;
