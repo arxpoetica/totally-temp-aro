@@ -179,6 +179,22 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
   });
 
+  equipment_layers['fiber_plant'] = new MapLayer({
+    name: 'Fiber',
+    short_name: 'F',
+    // api_endpoint: '/network/fiber_plant/VERIZON',
+    style_options: {
+      normal: {
+        strokeColor: 'red',
+        strokeWeight: 2,
+        fillColor: 'red',
+      }
+    },
+    threshold: 11,
+    reload: 'always',
+    visible: true,
+  });
+
   $rootScope.$on('route_selected', function(e, route) {
     var layer = equipment_layers.network_nodes;
     var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
@@ -186,6 +202,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
     var layer = feature_layers['locations'];
     layer.set_api_endpoint('/locations/'+route.id);
+
+    var layer = equipment_layers['fiber_plant'];
+    layer.set_api_endpoint('/network/fiber_plant/'+route.carrier_name);
 
     if (route) {
       $http.get('/network_plan/'+route.id+'/area_data')

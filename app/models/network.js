@@ -21,24 +21,25 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback
       var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.fiber_plant WHERE carrier_name = $1 AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)';
       database.query(sql, [carrier_name, viewport.linestring], callback);
     } else {
-      var sql = multiline(function() {;/*
-        WITH grouped AS (
-          SELECT ST_Union(ST_Buffer(geom, $3)) AS geom
-          FROM aro.fiber_plant
-          WHERE carrier_name = $1
-          AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)
-          GROUP BY ST_Geohash(geom)
-        )
-        SELECT ST_AsGeoJSON(ST_Envelope((ST_Dump(ST_Union(geom))).geom))::json AS geom FROM grouped
-      */})
-      database.query(sql, [carrier_name, viewport.linestring, viewport.buffer], callback);
+      var sql = 'WITH '+viewport.fishnet;
+      sql += multiline(function() {;/*
+        SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
+        FROM fishnet
+        JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
+        AND fiber_plant.carrier_name = $1
+        GROUP BY fishnet.geom
+      */});
+      database.query(sql, [carrier_name], callback);
     }
   })
   .then(function(rows, callback) {
     var features = rows.map(function(row) {
       return {
-        'type': 'Feature',
-        'geometry': row.geom,
+        type: 'Feature',
+        geometry: row.geom,
+        properties: {
+          // density: row.density,
+        }
       }
     })
 
@@ -55,13 +56,14 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback
 
 Network.carrier_names = function(callback) {
   txain(function(callback) {
-    var sql = 'SELECT distinct(carrier_name) FROM fiber_plant order by carrier_name ASC';
+    var sql = 'SELECT distinct(carrier_name) FROM fiber_plant ORDER BY carrier_name ASC';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
     var names = rows.map(function(carrier) {
       return carrier.carrier_name;
-    })
+    });
+    names = _.without(names, config.client_carrier_name);
     callback(null, names);
   })
   .end(callback);

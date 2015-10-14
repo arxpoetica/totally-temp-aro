@@ -3,6 +3,7 @@
 // The Route Optimizer finds shortest paths between sources and targets
 
 var helpers = require('../helpers');
+var config = helpers.config;
 var database = helpers.database;
 var validate = helpers.validate;
 var multiline = require('multiline');
@@ -252,6 +253,7 @@ NetworkPlan.find_all = function(user, callback) {
   }
   var sql = multiline(function() {;/*
     SELECT
+      $1::text AS carrier_name,
       route.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
       users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
       created_at, updated_at
@@ -260,9 +262,9 @@ NetworkPlan.find_all = function(user, callback) {
     LEFT JOIN custom.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
     LEFT JOIN custom.users ON users.id = permissions.user_id
   */});
-  var params = [];
+  var params = [config.client_carrier_name];
   if (user) {
-    sql += ' WHERE route.id IN (SELECT route_id FROM custom.permissions WHERE user_id=$1)';
+    sql += ' WHERE route.id IN (SELECT route_id FROM custom.permissions WHERE user_id=$2)';
     params.push(user.id);
   }
   database.query(sql, params, callback);
