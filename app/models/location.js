@@ -51,7 +51,7 @@ Location.find_all = function(plan_id, type, viewport, callback) {
 				'type':'Feature',
 				'properties': {
 					'id': row.id,
-					'density': row.density, // for clusters
+					'density': viewport.zoom > 9 ? row.density : null, // for clusters
 				},
 				'geometry': row.geom,
 			};

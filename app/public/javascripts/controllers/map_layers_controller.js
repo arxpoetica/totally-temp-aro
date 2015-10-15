@@ -30,9 +30,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       normal: {
         icon: '/images/map_icons/location_business_gray.png',
         visible: true,
-        // fillColor: 'blue',
-        // strokeColor: 'blue',
-        // strokeWeight: 1,
+        fillColor: 'blue',
+        strokeColor: 'blue',
+        strokeWeight: 1,
       },
       selected: {
         icon: '/images/map_icons/location_business_selected.png',
