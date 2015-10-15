@@ -12,9 +12,6 @@ var config = helpers.config;
 var Network = {};
 
 // View existing fiber plant for a carrier
-// This does not show the user client's fiber plant by default since we need to handle competitors' fiber plant as well.
-//
-// 1. callback: function to return the GeoJSON for a wirecenter
 Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback) {
   txain(function(callback) {
     if (viewport.zoom > viewport.threshold) {
@@ -39,6 +36,46 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback
         geometry: row.geom,
         properties: {
           // density: row.density,
+        }
+      }
+    })
+
+    var output = {
+      'feature_collection': {
+        'type':'FeatureCollection',
+        'features': features
+      },
+    };
+    callback(null, output)
+  })
+  .end(callback)
+};
+
+// View existing fiber plant for competitors
+Network.view_fiber_plant_for_competitors = function(viewport, callback) {
+  txain(function(callback) {
+    if (viewport.zoom > viewport.threshold) {
+      var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.fiber_plant WHERE carrier_name <> $1 AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)';
+      database.query(sql, [config.client_carrier_name, viewport.linestring], callback);
+    } else {
+      var sql = 'WITH '+viewport.fishnet;
+      sql += multiline(function() {;/*
+        SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(DISTINCT fiber_plant.carrier_name) AS density, NULL AS id
+        FROM fishnet
+        JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
+        AND fiber_plant.carrier_name <> $1
+        GROUP BY fishnet.geom
+      */});
+      database.query(sql, [config.client_carrier_name], callback);
+    }
+  })
+  .then(function(rows, callback) {
+    var features = rows.map(function(row) {
+      return {
+        type: 'Feature',
+        geometry: row.geom,
+        properties: {
+          density: row.density,
         }
       }
     })

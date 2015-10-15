@@ -12,6 +12,11 @@ exports.configure = function(api, middleware) {
     models.Network.view_fiber_plant_for_carrier(carrier_name, viewport, jsonHandler(response, next));
   });
 
+  api.get('/network/fiber_plant_competitors', middleware.viewport, function(request, response, next) {
+    var viewport = request.viewport;
+    models.Network.view_fiber_plant_for_competitors(viewport, jsonHandler(response, next));
+  });
+
   api.get('/network/carriers', function(request, response, next) {
     models.Network.carrier_names(jsonHandler(response, next));
   });

@@ -530,10 +530,17 @@
             <div>
               <h2>View</h2>
 
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" ng-change="toggle_competitors()" ng-model="bar"> All competitors
+                </label>
+                <hr>
+              </div>
+
               <div ng-repeat="carrier in carriers">
-                <div class="checkbox">
+                <div class="checkbox fiber_carrier_checkbox">
                   <label>
-                    <input type="checkbox" ng-change="toggle_carrier(carrier.name)" ng-model="foo">
+                    <input type="checkbox" ng-change="toggle_carrier(carrier.name)" ng-model="foo" ng-disabled="competitors_fiber.visible">
                       <span ng-attr-style="background-color:{{carrier.color}}; padding: 1px 10px; margin-right: 10px"> </span> {{carrier.name}}
                   </label>
                 </div>
