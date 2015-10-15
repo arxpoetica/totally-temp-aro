@@ -192,7 +192,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
     threshold: 11,
     reload: 'always',
-    visible: true,
   });
 
   $rootScope.$on('route_selected', function(e, route) {
@@ -205,6 +204,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
     var layer = equipment_layers['fiber_plant'];
     layer.set_api_endpoint('/network/fiber_plant/'+route.carrier_name);
+    map.ready(function() {
+      layer.show();
+    })
 
     if (route) {
       $http.get('/network_plan/'+route.id+'/area_data')

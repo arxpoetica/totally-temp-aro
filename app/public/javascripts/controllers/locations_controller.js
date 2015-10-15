@@ -128,18 +128,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $rootScope.$on('route_selected', function(e, route) {
     if (route) {
-      var func = function() {
+      map.ready(function() {
         $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
         $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
-      }
-      if (map.getBounds()) {
-        func();
-      } else {
-        var listener = google.maps.event.addListener(map, 'bounds_changed', function() {
-          func();
-          google.maps.event.removeListener(listener);
-        });
-      }
+      });
     }
   });
 

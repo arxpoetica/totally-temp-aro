@@ -596,6 +596,18 @@
         },
         styles: styles,
       });
+
+      map.ready = function(callback) {
+        if (map.getBounds()) {
+          callback();
+        } else {
+          var listener = google.maps.event.addListener(map, 'bounds_changed', function() {
+            callback();
+            google.maps.event.removeListener(listener);
+          });
+        }
+      }
+      
     }
 
     $(document).ready(initialize);
