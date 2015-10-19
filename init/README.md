@@ -238,6 +238,10 @@ $ make test
   11 passing (5s)
 
 ```
+You will need to create a user for the app. You can easily create one with email `aro@example.com` and password `password` by using:
+```console
+$ make register_user
+```
 Finally, start the webserver
 ```console
 $ make webserver

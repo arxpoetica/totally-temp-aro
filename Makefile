@@ -86,7 +86,7 @@ service_redploy: service_stop service_deploy service_start
 
 
 webapp:
-	(cd app && npm install .)
+	(cd app && npm install --no-bin-link)
 
 test:
 	(cd app && npm test)
@@ -94,3 +94,5 @@ test:
 webserver:
 	(cd app && node app.js)
 
+register_user:
+	node app/cli/register_user -f Marty -l McFly -e aro@example.com -p password
