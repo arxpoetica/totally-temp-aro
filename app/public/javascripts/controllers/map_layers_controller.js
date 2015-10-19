@@ -79,6 +79,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       },
     },
     reload: 'always',
+    threshold: 0,
   });
 
   area_layers['county_subdivisions_layer'] = new MapLayer({
@@ -99,6 +100,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       },
     },
     reload: 'always',
+    threshold: 0,
   });
 
   area_layers['census_blocks_layer'] = new MapLayer({
