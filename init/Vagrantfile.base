@@ -29,10 +29,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 # Create docker data container
   config.vm.synced_folder 'ops/docker', '/tmp/docker'
   config.vm.provision "docker" do |d|
-    d.build_image "/tmp/docker",
-      args: "-t aro-postgis"
+    d.pull_images 'mdillon/postgis:9.4'
     d.run 'postgres-data',
-      image: "aro-postgis",
+      image: "mdillon/postgis:9.4",
       args: "-v '/var/lib/postgresql/data'",
       cmd: "bash -l"
   end
@@ -44,7 +43,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Use docker container for local database
     layer.vm.provision "docker", run: "always" do |d|
       d.run 'postgres',
-        image: "aro-postgis",
+        image: "mdillon/postgis:9.4",
         args: "--volumes-from=postgres-data -e POSTGRES_PASSWORD=aro -e POSTGRES_USER=aro -d -p 5432:5432"
     end
 
