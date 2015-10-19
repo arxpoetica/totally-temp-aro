@@ -11,13 +11,14 @@ var Wirecenter = {};
 // Find all Wirecenters
 //
 // 1. callback: function to return the list of wirecenters
-Wirecenter.find_all = function(callback) {
-  var sql = 'SELECT id, ST_AsGeoJSON(ST_Simplify(geom, 0.00015))::json AS geom, wirecenter AS name FROM aro.wirecenters'; // 6.1mb, 1.3s
-  // var sql = 'SELECT id, ST_AsGeoJSON(ST_Simplify(geom, 0.0001))::json AS geom, wirecenter AS name FROM aro.wirecenters'; // 7.5mb, 1.75s
-  // var sql = 'SELECT id, ST_AsGeoJSON(geom)::json AS geom, wirecenter AS name FROM aro.wirecenters'; // 19.8mb, 4.36s
-
+Wirecenter.find_all = function(viewport, callback) {
+  var sql = multiline(function() {;/*
+    SELECT id, ST_AsGeoJSON(ST_Simplify(geom, 0.00015))::json AS geom, wirecenter AS name
+    FROM aro.wirecenters
+    WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), geom)
+  */});
   txain(function(callback) {
-    database.query(sql, callback);
+    database.query(sql, [viewport.linestring], callback);
   })
   .then(function(rows, callback) {
     var features = rows.map(function(row) {

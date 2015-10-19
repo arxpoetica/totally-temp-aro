@@ -4,6 +4,19 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
   $scope.map_tools = map_tools;
   $scope.carriers = [];
 
+  $scope.competitors_fiber = new MapLayer({
+    api_endpoint: '/network/fiber_plant_competitors',
+    style_options: {
+      normal: {
+        strokeColor: 'blue',
+        strokeWeight: 2,
+        fillColor: 'blue',
+      }
+    },
+    threshold: 12,
+    reload: 'always',
+  });
+
   var layers = [];
 
   $http.get('/network/carriers').success(function(carriers) {
@@ -28,12 +41,23 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
           normal: {
             strokeColor: carrier.color,
             strokeWeight: 2,
+            fillColor: carrier.color,
           }
         },
+        threshold: 12,
+        reload: 'always',
       });
 
     })
   });
+
+  $scope.toggle_competitors = function() {
+    $scope.competitors_fiber.toggle_visibility();
+
+    if ($scope.competitors_fiber.visible) {
+      $('.fiber_carrier_checkbox input:checked').click()
+    }
+  }
 
   $scope.toggle_carrier = function(carrier) {
     layers[layer_name(carrier)].toggle_visibility();

@@ -6,6 +6,7 @@ var helpers = require('../helpers');
 var database = helpers.database;
 var GeoJsonHelper = helpers.GeoJsonHelper;
 var txain = require('txain');
+var multiline = require('multiline');
 
 var CountySubdivision = {};
 
@@ -13,9 +14,13 @@ var CountySubdivision = {};
 //
 // 1. statefp: String. ex. '36' is New York state
 // 2. callback: function to return a GeoJSON object
-CountySubdivision.find_by_statefp = function(statefp, callback) {
-	var sql = 'SELECT gid AS id, name, ST_AsGeoJSON(geom)::json AS geom FROM aro.cousub WHERE statefp = $1';
-	var params = [statefp];
+CountySubdivision.find_by_statefp = function(statefp, viewport, callback) {
+	var sql = multiline(function() {;/*
+		SELECT gid AS id, name, ST_AsGeoJSON(ST_Simplify(geom, $3))::json AS geom FROM aro.cousub
+		WHERE statefp = $1
+		AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)
+	*/});
+	var params = [statefp, viewport.linestring, viewport.simplify_factor];
 
 	txain(function(callback) {
 	  database.query(sql, params, callback);

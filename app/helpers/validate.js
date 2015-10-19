@@ -8,7 +8,7 @@ function expect(obj, path, type) {
     comps.push(comp);
     if (comps.length === attrs.length) {
       var func = 'is' + type.substring(0, 1).toUpperCase() + type.substring(1);
-      if (!_[func](attr)) {
+      if (!_[func](attr) || (type === 'number' && _.isNaN(attr))) {
         throw new Error('Expected '+comps.join('.')+' to be of type '+type);
       }
     } else {

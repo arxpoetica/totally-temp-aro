@@ -14,10 +14,12 @@ describe('Network', function() {
 		it('should return a feature collection', function(done) {
 			request
 				.get('/network/fiber_plant/'+carrier_name)
+				.query(test_utils.test_viewport())
 				.accept('application/json')
 				.end(function(err, res) {
 					if (err) return done(err);
 					var output = res.body;
+					expect(res.statusCode).to.be.equal(200);
 					expect(output.feature_collection).to.have.property('type', 'FeatureCollection');
 					expect(output.feature_collection.features).to.have.length.above(0);
 
