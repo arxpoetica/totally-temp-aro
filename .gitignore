@@ -10,6 +10,7 @@ conf/config_app.json
 
 etl/tiger_cousub/shapefiles
 etl/client/*.pyc
+etl/source_colt/data
 
 app/coverage
 
