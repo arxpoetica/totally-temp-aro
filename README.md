@@ -1,6 +1,18 @@
 # jelly-donut
 (ARO Platform)
 
+## Important notes for Colt Setup
+
+I recommend cloning this branch into an entirely new project/subfolder, rather than switching back and forth between branches.
+The basic setup remains the same (follow instructions in the [init folder README](init/README.md) up to the point where you SSH into the Vagrant box.
+
+At that point, you must perform the following two tasks:
+
+ - Decrypt and install AWS credentials for accessing source files in S3: `init/vagrant_aws_creds.sh` and enter the secret password you've been given.
+ - when prompted for a password, enter the secret password you have been given
+ - ETL for Colt: `make etl_reload_all`
+
+ Then resume the process as described in the init README.
 
 ## Environment Setup
 Instructions for building, configuring, and managing your local development environment are found in the [init folder README](init/README.md).
