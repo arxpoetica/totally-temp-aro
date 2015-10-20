@@ -15,29 +15,28 @@ CREATE INDEX client_business_customer_types_customer_type_index ON client.busine
 INSERT INTO client.business_customer_types(business_id)
 	SELECT id from aro.businesses;
 
--- Assign a fake customer type to each business.
--- This sucks because it might break since the id range of the customer_type table might not always be 1-3
+-- Assign 'Existing Fiber' as customer type for all businesses, since that's all they've given us so far
 UPDATE client.business_customer_types
-SET customer_type_id = CAST((random() * 2) + 1 AS integer);
+SET customer_type_id = (SELECT t.id FROM client.customer_types t WHERE t.name = 'Existing Fiber')::int;
 
 
-DROP TABLE IF EXISTS client.household_customer_types;
+-- DROP TABLE IF EXISTS client.household_customer_types;
 
-CREATE TABLE client.household_customer_types
-(
-	id serial,
-	household_id bigint,
-	customer_type_id bigint,
-	CONSTRAINT client_household_customer_types_pkey PRIMARY KEY (id)
-);
+-- CREATE TABLE client.household_customer_types
+-- (
+-- 	id serial,
+-- 	household_id bigint,
+-- 	customer_type_id bigint,
+-- 	CONSTRAINT client_household_customer_types_pkey PRIMARY KEY (id)
+-- );
 
-CREATE INDEX client_household_customer_types_household_index ON client.household_customer_types(household_id);
-CREATE INDEX client_household_customer_types_customer_type_index ON client.household_customer_types(customer_type_id);
+-- CREATE INDEX client_household_customer_types_household_index ON client.household_customer_types(household_id);
+-- CREATE INDEX client_household_customer_types_customer_type_index ON client.household_customer_types(customer_type_id);
 
-INSERT INTO client.household_customer_types(household_id)
-	SELECT id from aro.households;
+-- INSERT INTO client.household_customer_types(household_id)
+-- 	SELECT id from aro.households;
 
--- Assign a fake customer type to each household.
--- This sucks because it might break since the id range of the customer_type table might not always be 1-3
-UPDATE client.household_customer_types
-SET customer_type_id = CAST((random() * 2) + 1 AS integer);
+-- -- Assign a fake customer type to each household.
+-- -- This sucks because it might break since the id range of the customer_type table might not always be 1-3
+-- UPDATE client.household_customer_types
+-- SET customer_type_id = CAST((random() * 2) + 1 AS integer);

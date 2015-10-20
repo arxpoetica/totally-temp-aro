@@ -33,7 +33,12 @@ ${SHP2PGSQL} -c -s 4326 './frankfurt_fiber/Trench_active (d).dbf' source_colt.fr
 
 
 # Create and load table for location data
-$PSQL -a -f $DIR/create_colt_locations.sql
+$PSQL -f $DIR/create_colt_locations.sql
 cat /$TMPDIR/colt_locations.csv | ${PSQL} -a -c "COPY source_colt.locations\
     (bm_access_type,bm_building_category,bm_building_id,bm_building_status,bm_building_type,bm_carrier_hotels,bm_cmnt_schema,bm_comments,bm_complex_building_id,bm_complex_building_name,bm_create_date,bm_dual_entry,bm_internal_building_id,bm_in_house_cabling,bm_name_of_carrier_hotel,bm_updated_date,ad_address_id,ad_building_id,ad_building_name,ad_cityname_english,ad_cityname_local,ad_cnmt_building_id,ad_cnmt_street_id,ad_cnmt_street_name,ad_cnmt_x_coordinates,ad_cnmt_y_coordinates,ad_country_code,ad_country_id,ad_country_name,ad_created_date,ad_cc_address,ad_house_number,ad_is_complex,ad_latitude,ad_longitude,ad_postal_code,ad_pricing_id,ad_province,ad_primary_address,ad_residue,ad_source,ad_street_name,ad_street_name_local,ad_updated_date,sd_validated,sd_access_type,sd_address_id,sd_building_id,sd_created_date,sd_customer_name,sd_floor,sd_internal_site_id,sd_ocn,sd_pm_man_city_code,sd_room,sd_sitetype,sd_site_id,sd_site_name,sd_status,sd_updated_date,sd_xng_id,ocn_building_id,s_check) \
     FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
+
+# $PSQL -f $DIR/create_colt_central_offices.sql
+# cat /$TMPDIR/colt_central_offices.csv | ${PSQL} -a -c "COPY source_colt.central_offices\
+#     \
+#     FROM STDIN DELIMETER ',' CSV HEADER;"
