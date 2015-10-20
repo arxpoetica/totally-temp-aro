@@ -29,4 +29,3 @@ ${PSQL} -a -f $DIR/create_client_customer_type_mapping.sql
 # Create the tables for products and spend for a client
 ${PSQL} -a -f $DIR/create_client_spend.sql
 python $DIR/manage.py data spend values add $DIR/reformatted_spend.csv
-python $DIR/manage.py data spend mapping add $DIR/industry_mapping.csv
