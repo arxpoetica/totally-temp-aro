@@ -529,23 +529,22 @@
           <div class="panel-body" ng-show="map_tools.is_expanded('fiber_plant')">
             <div>
               <h2>View</h2>
-
               <div class="checkbox">
                 <label>
-                  <input type="checkbox" ng-change="toggle_competitors()" ng-model="bar"> All competitors
+                  <input type="checkbox" ng-change="toggle_all_competitors()" ng-model="show_all_competitors" ng-disabled="overlay === 'density'"> All competitors
                 </label>
-                <hr>
               </div>
-
-              <div ng-repeat="carrier in carriers">
-                <div class="checkbox fiber_carrier_checkbox">
-                  <label>
-                    <input type="checkbox" ng-change="toggle_carrier(carrier.name)" ng-model="foo" ng-disabled="competitors_fiber.visible">
-                      <span ng-attr-style="background-color:{{carrier.color}}; padding: 1px 10px; margin-right: 10px"> </span> {{carrier.name}}
-                  </label>
-                </div>
+              <input class="form-control" ng-model="selected_carriers" ng-change="carriers_changed()"></input>
+            </div>
+            <hr>
+            <div>
+              <h2>Overlay</h2>
+              <div class="form-group">
+                <select class="form-control" ng-model="overlay" ng-change="overlay_changed()">
+                  <option value="none">None</option>
+                  <option value="density">Density</option>
+                </select>
               </div>
-
             </div>
           </div>
         </div>
