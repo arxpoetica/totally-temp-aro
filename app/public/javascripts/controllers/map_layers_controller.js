@@ -62,8 +62,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
   * AREA LAYERS *
   ***************/
 
-  console.log('config', config)
-
   if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
     area_layers['wirecenter'] = new MapLayer({
       short_name: 'WC',
@@ -219,7 +217,10 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       layer.show();
     })
 
-    if (route) {
+    var county_subdivisions = area_layers['county_subdivisions_layer'];
+    var census_blocks = area_layers['census_blocks_layer'];
+
+    if (route && (county_subdivisions || census_blocks)) {
       $http.get('/network_plan/'+route.id+'/area_data')
         .success(function(response) {
           // area_layers['wirecenter'].set_api_endpoint('/wirecenters/'+response.wirecenter);

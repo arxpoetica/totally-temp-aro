@@ -8,6 +8,7 @@ var multiline = require('multiline');
 var stringify = require('csv-stringify');
 var _ = require('underscore');
 var moment = require('moment');
+var config = require('../helpers').config;
 
 var MarketSize = {};
 
@@ -44,13 +45,21 @@ function empty_array(arr) {
 
 MarketSize.calculate = function(plan_id, type, options, callback) {
   txain(function(callback) {
-    var sql = 'SELECT ST_AsText(ST_Union(edge.geom)::geography) AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1';
-    database.findValue(sql, [plan_id], 'route', callback);
-  })
-  .then(function(route, callback) {
     var filters = options.filters;
     var params = [];
-    var sql = multiline(function() {;/*
+    var sql = ''
+
+    if (type === 'route' || type === 'addressable') {
+      if (config.route_planning) {
+        sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)\n';
+        params.push(plan_id);
+      } else {
+        sql += 'WITH route AS (SELECT geom AS route FROM aro.fiber_plant WHERE carrier_name = $1)\n';
+        params.push(config.client_carrier_name);
+      }
+    }
+
+    sql += multiline(function() {;/*
       SELECT
         spend.year, SUM(spend.monthly_spend * 12)::float as total
       FROM
@@ -91,16 +100,15 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       params.push(options.boundary);
       sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
     } else if (type === 'route') {
-      params.push(route);
-      sql += '\n ST_DWithin(ST_GeogFromText($'+params.length+'), b.geog, 152.4)';
+      sql += '\n ST_DWithin((SELECT ST_Union(route)::geography FROM route), b.geog, 152.4)';
     } else if (type === 'addressable') {
-      params.push(route);
-      sql += '\n ST_DWithin(ST_GeogFromText($'+params.length+'), b.geog, 152.4)';
+      sql += '\n ST_DWithin((SELECT ST_Union(route)::geography FROM route), b.geog, 152.4)';
       sql += ' AND ';
       params.push(options.boundary);
       sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
     }
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
+    console.log('sql', sql)
     database.query(sql, params, callback);
   })
   .end(callback);

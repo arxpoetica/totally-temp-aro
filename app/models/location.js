@@ -6,6 +6,7 @@ var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
 var multiline = require('multiline');
+var config = require('../helpers').config;
 
 var Location = {};
 
@@ -25,24 +26,28 @@ Location.find_all = function(plan_id, type, viewport, callback) {
 			sql += ' GROUP BY locations.id';
 			database.query(sql, [viewport.linestring], callback);
 		} else {
+			var params = [];
 			var sql = 'WITH '+viewport.fishnet;
 			sql += multiline(function() {;/*
 				SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
 				FROM fishnet
 				JOIN locations ON fishnet.geom && locations.geom
 				GROUP BY fishnet.geom
+			*/});
+			if (config.route_planning) {
+				params.push(plan_id);
+				sql += multiline(function() {;/*
+					UNION ALL
 
-				UNION ALL
-			*/});
-			sql += multiline(function() {;/*
-				-- Always return selected locations
-				SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
-					FROM aro.locations
-					JOIN custom.route_targets
-					ON route_targets.route_id=$1
-					AND route_targets.location_id=locations.id
-			*/});
-			database.query(sql, [plan_id], callback);
+					-- Always return selected locations
+					SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
+						FROM aro.locations
+						JOIN custom.route_targets
+						ON route_targets.route_id=$1
+						AND route_targets.location_id=locations.id
+				*/});
+			}
+			database.query(sql, params, callback);
 		}
 	})
 	.then(function(rows, callback) {
@@ -310,7 +315,7 @@ Location.create_location = function(values, callback) {
 };
 
 Location.find_industries = function(callback) {
-	var sql = 'SELECT * FROM industries ORDER BY description ASC'
+	var sql = 'SELECT id, industry_name as description FROM client_schema.industries ORDER BY industry_name ASC'
 	database.query(sql, [], callback);
 };
 
