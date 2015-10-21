@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
-var request = require('./test_utils').request;
+var test_utils = require('./test_utils');
+var request = test_utils.request;
 
 describe('Location', function() {
 
@@ -7,7 +8,8 @@ describe('Location', function() {
 
 		it('should return a GeoJSON FeatureCollection', function(done) {
 			request
-				.get('/locations')
+				.get('/locations/0')
+				.query(test_utils.test_viewport())
 				.accept('application/json')
 				.end(function(err, res) {
 					if (err) return done(err);
@@ -25,8 +27,8 @@ describe('Location', function() {
 
 		it('should return only businesses', function(done) {
 			request
-				.get('/locations')
-				.query({ type: 'business' })
+				.get('/locations/0')
+				.query(test_utils.test_viewport({ type: 'business' }))
 				.accept('application/json')
 				.end(function(err, res) {
 					if (err) return done(err);
@@ -44,8 +46,8 @@ describe('Location', function() {
 
 		it('should return only households', function(done) {
 			request
-				.get('/locations')
-				.query({ type: 'households' })
+				.get('/locations/0')
+				.query(test_utils.test_viewport({ type: 'households' }))
 				.accept('application/json')
 				.end(function(err, res) {
 					if (err) return done(err);
@@ -68,7 +70,7 @@ describe('Location', function() {
 
 		it('should return information of the given location', function(done) {
 			request
-				.get('/locations/'+location_id)
+				.get('/locations/'+location_id+'/show')
 				.query({ type: 'households' })
 				.accept('application/json')
 				.end(function(err, res) {

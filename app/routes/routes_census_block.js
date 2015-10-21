@@ -6,10 +6,11 @@ exports.configure = function(api, middleware) {
   var check_owner_permission = middleware.check_owner_permission;
   var jsonHandler = middleware.jsonHandler;
 
-  api.get('/census_blocks/:statefp/:countyfp', function(request, response, next) {
+  api.get('/census_blocks/:statefp/:countyfp', middleware.viewport, function(request, response, next) {
     var statefp = request.params.statefp;
-    var countyfp = request.params.countyfp
-    models.CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, jsonHandler(response, next));
+    var countyfp = request.params.countyfp;
+    var viewport = request.viewport;
+    models.CensusBlock.find_by_statefp_and_countyfp(statefp, countyfp, viewport, jsonHandler(response, next));
   });
 
 };

@@ -25,18 +25,22 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     type: 'locations',
     name: 'Locations',
     short_name: 'L',
-    api_endpoint: '/locations',
+    // api_endpoint: '/locations',
     style_options: {
       normal: {
         icon: '/images/map_icons/location_business_gray.png',
         visible: true,
+        fillColor: 'blue',
+        strokeColor: 'blue',
+        strokeWeight: 1,
       },
       selected: {
         icon: '/images/map_icons/location_business_selected.png',
         visible: true,
-      }
+      },
     },
-    heatmap: true,
+    threshold: 15,
+    reload: 'always',
   });
 
   $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
@@ -74,6 +78,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 4,
       },
     },
+    reload: 'always',
+    threshold: 0,
   });
 
   area_layers['county_subdivisions_layer'] = new MapLayer({
@@ -93,6 +99,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 2,
       },
     },
+    reload: 'always',
+    threshold: 0,
   });
 
   area_layers['census_blocks_layer'] = new MapLayer({
@@ -120,6 +128,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         strokeWeight: 4,
       }
     },
+    threshold: 13,
+    reload: 'dynamic',
   });
 
   var events = [
@@ -171,10 +181,34 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
   });
 
+  equipment_layers['fiber_plant'] = new MapLayer({
+    name: 'Fiber',
+    short_name: 'F',
+    // api_endpoint: '/network/fiber_plant/VERIZON',
+    style_options: {
+      normal: {
+        strokeColor: 'red',
+        strokeWeight: 2,
+        fillColor: 'red',
+      }
+    },
+    threshold: 11,
+    reload: 'always',
+  });
+
   $rootScope.$on('route_selected', function(e, route) {
     var layer = equipment_layers.network_nodes;
     var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
     layer.set_api_endpoint(api_endpoint);
+
+    var layer = feature_layers['locations'];
+    layer.set_api_endpoint('/locations/'+route.id);
+
+    var layer = equipment_layers['fiber_plant'];
+    layer.set_api_endpoint('/network/fiber_plant/'+route.carrier_name);
+    map.ready(function() {
+      layer.show();
+    })
 
     if (route) {
       $http.get('/network_plan/'+route.id+'/area_data')

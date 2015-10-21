@@ -21,9 +21,7 @@ app.set('views', './views');
 app.engine('html', ejs.renderFile);
 
 var middleware = require('./middleware');
-
 require('./routes/routes_authentication').configure(app, middleware);
-require('./routes/routes_errors').configure(app, middleware);
 
 var api = express.Router();
 var routes = [
@@ -43,6 +41,8 @@ var routes = [
 routes.forEach(function(route) {
 	require('./routes/routes_'+route).configure(api, middleware);
 });
+require('./routes/routes_errors').configure(api, middleware);
+require('./routes/routes_errors').configure(app, middleware);
 app.use(api);
 
 if (module.id === require.main.id) {

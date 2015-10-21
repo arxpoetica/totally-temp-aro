@@ -6,9 +6,10 @@ exports.configure = function(api, middleware) {
   var check_owner_permission = middleware.check_owner_permission;
   var jsonHandler = middleware.jsonHandler;
 
-  api.get('/county_subdivisions/:statefp', function(request, response, next) {
+  api.get('/county_subdivisions/:statefp', middleware.viewport, function(request, response, next) {
     var statefp = request.params.statefp;
-    models.CountySubdivision.find_by_statefp(statefp, jsonHandler(response, next));
+    var viewport = request.viewport;
+    models.CountySubdivision.find_by_statefp(statefp, viewport, jsonHandler(response, next));
   });
 
 };

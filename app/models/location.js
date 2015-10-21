@@ -1,4 +1,4 @@
-// Location 
+// Location
 //
 // A Location is a point in space which can contain other objects such as businesses and households
 
@@ -12,21 +12,38 @@ var Location = {};
 // Find all Locations
 //
 // 1. callback: function to return a GeoJSON object
-Location.find_all = function(type, callback) {
-	if (arguments.length === 1) {
-		callback = arguments[0];
-		type = null;
-	}
-	var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
-	if (type === 'businesses') {
-		sql += ' JOIN businesses ON businesses.location_id = locations.id';
-	} else if (type === 'households') {
-		sql += ' JOIN households ON households.location_id = locations.id';
-	}
-	sql += ' GROUP BY locations.id';
-
+Location.find_all = function(plan_id, type, viewport, callback) {
 	txain(function(callback) {
-		database.query(sql, callback);
+		if (viewport.zoom > viewport.threshold) {
+			var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
+			if (type === 'businesses') {
+				sql += ' JOIN businesses ON businesses.location_id = locations.id';
+			} else if (type === 'households') {
+				sql += ' JOIN households ON households.location_id = locations.id';
+			}
+			sql += '\n WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), locations.geom)'
+			sql += ' GROUP BY locations.id';
+			database.query(sql, [viewport.linestring], callback);
+		} else {
+			var sql = 'WITH '+viewport.fishnet;
+			sql += multiline(function() {;/*
+				SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
+				FROM fishnet
+				JOIN locations ON fishnet.geom && locations.geom
+				GROUP BY fishnet.geom
+
+				UNION ALL
+			*/});
+			sql += multiline(function() {;/*
+				-- Always return selected locations
+				SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
+					FROM aro.locations
+					JOIN custom.route_targets
+					ON route_targets.route_id=$1
+					AND route_targets.location_id=locations.id
+			*/});
+			database.query(sql, [plan_id], callback);
+		}
 	})
 	.then(function(rows, callback) {
 		var features = rows.map(function(row) {
@@ -34,6 +51,7 @@ Location.find_all = function(type, callback) {
 				'type':'Feature',
 				'properties': {
 					'id': row.id,
+					'density': viewport.zoom > 9 ? row.density : null, // for clusters
 				},
 				'geometry': row.geom,
 			};

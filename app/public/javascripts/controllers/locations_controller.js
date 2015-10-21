@@ -63,7 +63,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     } else {
       layer.show();
       var filter = $scope.locations_filter === 'both' ? '' : '?type='+$scope.locations_filter;
-      layer.set_api_endpoint('/locations'+filter);
+      layer.set_api_endpoint('/locations/'+$scope.route.id+filter);
     }
   }
 
@@ -128,8 +128,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $rootScope.$on('route_selected', function(e, route) {
     if (route) {
-      $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
-      $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
+      map.ready(function() {
+        $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
+        $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
+      });
     }
   });
 

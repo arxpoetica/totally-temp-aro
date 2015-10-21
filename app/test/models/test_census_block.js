@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
-var request = require('./test_utils').request;
+var test_utils = require('./test_utils');
+var request = test_utils.request;
 
 describe('CensusBlock', function() {
 
@@ -10,6 +11,7 @@ describe('CensusBlock', function() {
 		it('should return a feature collection', function(done) {
 			request
 				.get('/census_blocks/'+statefp+'/'+countyfp)
+				.query(test_utils.test_viewport())
 				.accept('application/json')
 				.end(function(err, res) {
 					if (err) return done(err);

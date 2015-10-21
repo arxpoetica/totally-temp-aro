@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
-var request = require('./test_utils').request;
+var test_utils = require('./test_utils');
+var request = test_utils.request;
 
 describe('Wirecenter', function() {
 
@@ -35,6 +36,7 @@ describe('Wirecenter', function() {
     it('should return the information of the wirecenter', function(done) {
       request
         .get('/wirecenters')
+        .query(test_utils.test_viewport())
         .accept('application/json')
         .end(function(err, res) {
           if (err) return done(err);
@@ -43,7 +45,7 @@ describe('Wirecenter', function() {
           expect(output.feature_collection).to.be.an('object');
           expect(output.feature_collection.type).to.be.equal('FeatureCollection');
           expect(output.feature_collection.features).to.be.an('array');
-          expect(output.feature_collection.features).to.have.length(814);
+          expect(output.feature_collection.features).to.have.length(24);
           expect(output.feature_collection.features[0].type).to.be.equal('Feature');
           expect(output.feature_collection.features[0].properties).to.be.an('object');
           expect(output.feature_collection.features[0].properties.id).to.be.a('number');

@@ -89,7 +89,7 @@ etl_test_all: etl_test_aro etl_test_custom etl_test_client
 
 
 webapp:
-	(cd app && npm install .)
+	(cd app && npm install --no-bin-link)
 
 test:
 	(cd app && npm test)
@@ -97,3 +97,5 @@ test:
 webserver:
 	(cd app && node app.js)
 
+register_user:
+	node app/cli/register_user -f Marty -l McFly -e aro@example.com -p password
