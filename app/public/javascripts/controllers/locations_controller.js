@@ -17,6 +17,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
       name: 'Combo',
     }
   ];
+  $scope.overlay = 'none';
 
   $scope.user_id = user_id;
 
@@ -58,11 +59,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $scope.change_locations_layer = function() {
     var layer = $rootScope.feature_layers.locations;
-    if (!$scope.show_locations_off) {
+    if (!$scope.show_businesses && !$scope.show_households) {
       layer.hide();
     } else {
       layer.show();
-      var filter = $scope.locations_filter === 'both' ? '' : '?type='+$scope.locations_filter;
+      var filter;
+      if ($scope.show_businesses && $scope.show_households) {
+        filter = '';
+      } else if ($scope.show_businesses) {
+        filter = '?type=businesses';
+      } else if ($scope.show_households) {
+        filter = '?type=huseholds';
+      }
       layer.set_api_endpoint('/locations/'+$scope.route.id+filter);
     }
   }
@@ -142,5 +150,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.toggle_always_show_targets = function() {
     $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
   };
+
+  $scope.overlay_changed = function() {
+    var density = $rootScope.feature_layers.locations_density;
+    var layer = $rootScope.feature_layers.locations;
+    if ($scope.overlay === 'density') {
+      density.show();
+      layer.hide();
+    } else {
+      density.hide();
+      layer.show();
+    }
+  }
 
 }]);

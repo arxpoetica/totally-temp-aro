@@ -13,6 +13,12 @@ exports.configure = function(api, middleware) {
     models.Location.find_all(plan_id, type, viewport, jsonHandler(response, next));
   });
 
+  api.get('/locations/:plan_id/density', middleware.viewport, function(request, response, next) {
+    var viewport = request.viewport;
+    var plan_id = +request.params.plan_id;
+    models.Location.density(plan_id, viewport, jsonHandler(response, next));
+  });
+
   api.get('/locations/:location_id/show', function(request, response, next) {
     var location_id = request.params.location_id;
     models.Location.show_information(location_id, jsonHandler(response, next));

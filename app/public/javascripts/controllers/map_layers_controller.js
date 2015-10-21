@@ -43,6 +43,14 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     reload: 'always',
   });
 
+  feature_layers['locations_density'] = new MapLayer({
+    type: 'locations_density',
+    name: 'Locations density',
+    style_options: { },
+    threshold: 0,
+    reload: 'always',
+  });
+
   $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
     var bounds = overlay.getBounds();
     feature_layers.locations.change_selection_for_features_matching(!deselect_mode, function(feature) {
@@ -203,6 +211,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
     var layer = feature_layers['locations'];
     layer.set_api_endpoint('/locations/'+route.id);
+
+    var layer = feature_layers['locations_density'];
+    layer.set_api_endpoint('/locations/'+route.id+'/density');
 
     var layer = equipment_layers['fiber_plant'];
     layer.set_api_endpoint('/network/fiber_plant/'+route.carrier_name);
