@@ -1,7 +1,10 @@
 var fs = require('fs');
 var path = require('path');
 
-var filename = path.join(__dirname, '..', '..', 'conf', 'config_app.json')
+var aro_client = process.env.ARO_CLIENT || '';
+var extension = (aro_client && '_'+aro_client)+'.json'
+
+var filename = path.join(__dirname, '..', '..', 'conf', 'config_app'+extension)
 var def_conf = path.join(__dirname, '..', '..', 'conf', 'config_app_default.json')
 
 try {

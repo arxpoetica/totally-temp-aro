@@ -15,6 +15,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.user_id = user_id;
 
+  $scope.show_market_profile = config.ui.top_bar_tools.indexOf('market_profile') >= 0;
+  $scope.show_customer_profile = config.ui.top_bar_tools.indexOf('customer_profile') >= 0;
+  $scope.show_financial_profile = config.ui.top_bar_tools.indexOf('financial_profile') >= 0;
+
   /************
   * FUNCTIONS *
   *************/
@@ -94,7 +98,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       });
   };
 
-  $scope.show_market_profile = function() {
+  $scope.open_market_profile = function() {
     $rootScope.$broadcast('market_profile_selected', $scope.market_profile_values);
   }
 

@@ -18,6 +18,9 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
       name: 'Polygon selection tool',
     },
   };
+  if (!config.route_planning) {
+    $scope.available_tools = [];
+  }
   $scope.user_id = user_id;
   $scope.route = null;
   $rootScope.$on('route_selected', function(e, route) {

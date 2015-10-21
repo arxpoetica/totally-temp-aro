@@ -14,6 +14,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   });
 
   $scope.selected_tool = null;
+  $scope.show_recalculate = config.ui.map_tools.equipment.actions.indexOf('recalculate') >= 0;
 
   $scope.select_tool = function(tool) {
     if ($scope.selected_tool === tool) {
@@ -24,15 +25,18 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' });
   };
 
-  var node_types = $scope.node_types = [];
+  $scope.view_node_types = [];
+  $scope.build_node_types = [];
 
   $http.get('/network/nodes').success(function(response) {
-    response = _.reject(response, function(type) {
-      return type.name === 'central_office';
-    });
-    node_types = $scope.node_types = response;
-    node_types.forEach(function(node_type) {
+    response.forEach(function(node_type) {
       node_type.visible = true;
+    });
+    $scope.view_node_types = _.reject(response, function(type) {
+      return config.ui.map_tools.equipment.view.indexOf(type.name) === -1;
+    });
+    $scope.build_node_types = _.reject(response, function(type) {
+      return config.ui.map_tools.equipment.build.indexOf(type.name) === -1;
     });
   });
 
@@ -53,7 +57,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.change_node_types_visibility = function() {
     var types = ['central_office'];
-    node_types.forEach(function(node_type) {
+    $scope.view_node_types.forEach(function(node_type) {
       if (node_type.visible) {
         types.push(node_type.name);
       }
@@ -97,7 +101,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     var gm_event = {
       latLng: new google.maps.LatLng(40.77682494132765, -73.95257949829102),
     };
-    $scope.selected_tool = node_types[0].name;
+    $scope.selected_tool = $scope.build_node_types[0].name;
     $rootScope.$broadcast('map_click', gm_event);
   };
 
@@ -134,7 +138,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     changes.insertions.push({
       lat: coordinates.lat(),
       lon: coordinates.lng(),
-      type: _.findWhere(node_types, { name: type }).id,
+      type: _.findWhere($scope.view_node_types, { name: type }).id,
     });
     var layer = $rootScope.equipment_layers.network_nodes;
     var arr = layer.data_layer.addGeoJson(feature);

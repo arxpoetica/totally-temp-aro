@@ -2,8 +2,8 @@
   "database_url": "postgres://aro:aro@localhost/aro",
   "aro_service_url": "http://localhost:8080/aro-service",
   "client_schema": "client",
-  "client_carrier_name": "VERIZON",
-  "route_planning": true,
+  "client_carrier_name": "Colt",
+  "route_planning": false,
   "ui": {
     "map_tools": {
       "locations": {
@@ -12,20 +12,20 @@
         "build": ["commercial", "residential", "combo"]
       },
       "boundaries": {
-        "view": ["census_blocks", "county_subdivisions", "wirecenters"],
+        "view": [],
         "build": ["custom"]
       },
       "equipment": {
-        "view": ["splice_point", "fiber_distribution_hub", "fiber_distribution_terminal", "existing_fiber"],
+        "view": ["splice_point", "existing_fiber"],
         "build": ["splice_point", "fiber_distribution_hub", "fiber_distribution_terminal"],
-        "actions": ["recalculate", "clear"]
+        "actions": ["clear"]
       },
       "competitors": {
-        "view": ["all", "fiber_segments"],
-        "overlay": ["density"]
+        "view": [],
+        "overlay": []
       }
     },
-    "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
+    "top_bar_tools": ["financial_profile"],
     "project_menu": ["share", "export_kml"]
   }
 }

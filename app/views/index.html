@@ -97,18 +97,18 @@
             <button ng-show="route" type="button" style="float: left; margin-right: 10px" class="btn btn-default navbar-btn" ng-click="select_route(null)"><span class="glyphicon glyphicon-chevron-left"></span></button>
             <a class="navbar-brand" href="javascript:void(0)">{{route.name}}</a>
 
-            <p ng-show="route" class="navbar-text">
-              <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer">
+            <p ng-show="route" class="navbar-text" id="top_bar_tools">
+              <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
                 <span class="glyphicon glyphicon-usd"></span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</span>
                 <span class="label label-success">{{route.metadata.revenue | currency}}</span>
               </span>
-              |
-              <span data-toggle="modal" data-target="#modal-customer-profile" style="cursor:pointer">
+
+              <span data-toggle="modal" data-target="#modal-customer-profile" style="cursor:pointer" ng-show="show_customer_profile">
                 <span class="glyphicon glyphicon-scale"></span> {{ route.metadata.total_customers }} customers covered
               </span>
-              |
-              <span data-toggle="modal" ng-click="show_market_profile()" style="cursor:pointer">
+
+              <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
                 <span class="glyphicon glyphicon-briefcase" ng-class="{'spin': market_profile_calculating}"></span> <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
               </span>
             </p>
@@ -224,36 +224,38 @@
           Boundaries
         </div>
         <div class="panel-body" ng-show="map_tools.is_expanded('boundaries')">
-          <h2>View</h2>
-          <div ng-repeat="(key, layer) in area_layers">
-            <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
-              <!--
-              <div class="pull-right">
-                <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="glyphicon glyphicon-briefcase"></span></a>
+          <div ng-show="area_layers.length > 0 || boundaries.length > 0 ">
+            <h2>View</h2>
+            <div ng-repeat="(key, layer) in area_layers">
+              <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
+                <!--
+                <div class="pull-right">
+                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="glyphicon glyphicon-briefcase"></span></a>
+                </div>
+                -->
+                <label>
+                  <input type="checkbox" ng-click="layer.toggle_visibility()"> {{layer.name}}
+                </label>
               </div>
-              -->
-              <label>
-                <input type="checkbox" ng-click="layer.toggle_visibility()"> {{layer.name}}
-              </label>
             </div>
-          </div>
-          <% if (env_is_test) { %>
-            <a href="javascript:void(0)" ng-click="area_layers.census_blocks_layer.select_random_area()" ng-attr-data-loaded="{{area_layers.census_blocks_layer.data_loaded}}">.</a>
-          <% } %>
-          <div ng-repeat="boundary in boundaries">
-            <div class="checkbox">
-              <div class="pull-right">
-                <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="glyphicon glyphicon-pencil"></span></a>
-                <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="glyphicon glyphicon-remove"></span></a>
-                <a href="javascript:void(0)" class="text-success" ng-click="select_boundary(boundary)"><span class="glyphicon glyphicon-briefcase"></span></a>
+            <% if (env_is_test) { %>
+              <a href="javascript:void(0)" ng-click="area_layers.census_blocks_layer.select_random_area()" ng-attr-data-loaded="{{area_layers.census_blocks_layer.data_loaded}}">.</a>
+            <% } %>
+            <div ng-repeat="boundary in boundaries">
+              <div class="checkbox">
+                <div class="pull-right">
+                  <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="glyphicon glyphicon-pencil"></span></a>
+                  <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="glyphicon glyphicon-remove"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="select_boundary(boundary)"><span class="glyphicon glyphicon-briefcase"></span></a>
+                </div>
+                <label>
+                  <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
+                </label>
               </div>
-              <label>
-                <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
-              </label>
             </div>
+            <hr>
           </div>
           <div ng-show="route.owner_id === user_id">
-            <hr>
             <h2>Build</h2>
             <p>
               <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggle_tool()">Custom</a>
@@ -463,7 +465,7 @@
             <div ng-show="route">
               <h2>View</h2>
 
-              <div ng-repeat="node_type in node_types">
+              <div ng-repeat="node_type in view_node_types">
                 <div class="checkbox">
                   <label>
                     <input type="checkbox" ng-model="node_type.visible" ng-change="change_node_types_visibility()"> {{node_type.description}}
@@ -494,7 +496,7 @@
                   <p></p>
                 </div>
                 <div class="row">
-                  <div class="col-sm-12" ng-repeat="node in node_types">
+                  <div class="col-sm-12" ng-repeat="node in build_node_types">
                     <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === node.name}" ng-click="select_tool(node.name)">{{node.description}}</a>
                     <br>
                   </div>
@@ -502,8 +504,10 @@
                 <hr>
                 <div class="row">
                   <div class="col-sm-12">
-                    <button class="btn btn-block btn-default btn-sm" ng-click="recalculate_network_nodes()">Recalculate network nodes</button>
-                    <br>
+                    <div ng-show="show_recalculate">
+                      <button class="btn btn-block btn-default btn-sm" ng-click="recalculate_network_nodes()">Recalculate network nodes</button>
+                      <br>
+                    </div>
                     <button class="btn btn-sm btn-danger btn-block" ng-click="clear_nodes()" type="button">Clear network nodes</button>
                   </div>
                 </div>
@@ -680,6 +684,7 @@
     });
 
     var user_id = <%= user.id %>;
+    var config = <%- JSON.stringify(config) %>;
   </script>
   <script type="text/javascript">
     (function() {
