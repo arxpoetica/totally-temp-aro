@@ -108,7 +108,6 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
     }
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
-    console.log('sql', sql)
     database.query(sql, params, callback);
   })
   .end(callback);

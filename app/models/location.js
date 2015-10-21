@@ -26,28 +26,7 @@ Location.find_all = function(plan_id, type, viewport, callback) {
 			sql += ' GROUP BY locations.id';
 			database.query(sql, [viewport.linestring], callback);
 		} else {
-			var params = [];
-			var sql = 'WITH '+viewport.fishnet;
-			sql += multiline(function() {;/*
-				SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
-				FROM fishnet
-				JOIN locations ON fishnet.geom && locations.geom
-				GROUP BY fishnet.geom
-			*/});
-			if (config.route_planning) {
-				params.push(plan_id);
-				sql += multiline(function() {;/*
-					UNION ALL
-
-					-- Always return selected locations
-					SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
-						FROM aro.locations
-						JOIN custom.route_targets
-						ON route_targets.route_id=$1
-						AND route_targets.location_id=locations.id
-				*/});
-			}
-			database.query(sql, params, callback);
+			callback(null, []);
 		}
 	})
 	.then(function(rows, callback) {
@@ -56,7 +35,57 @@ Location.find_all = function(plan_id, type, viewport, callback) {
 				'type':'Feature',
 				'properties': {
 					'id': row.id,
-					'density': viewport.zoom > 9 ? row.density : null, // for clusters
+				},
+				'geometry': row.geom,
+			};
+		});
+
+		var output = {
+			'feature_collection': {
+				'type':'FeatureCollection',
+				'features': features,
+			},
+		};
+		callback(null, output);
+	})
+	.end(callback);
+};
+
+// Density for locations
+//
+// 1. callback: function to return a GeoJSON object
+Location.density = function(plan_id, viewport, callback) {
+	txain(function(callback) {
+		var params = [];
+		var sql = 'WITH '+viewport.fishnet;
+		sql += multiline(function() {;/*
+			SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
+			FROM fishnet
+			JOIN locations ON fishnet.geom && locations.geom
+			GROUP BY fishnet.geom
+		*/});
+		if (config.route_planning) {
+			params.push(plan_id);
+			sql += multiline(function() {;/*
+				UNION ALL
+
+				-- Always return selected locations
+				SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
+					FROM aro.locations
+					JOIN custom.route_targets
+					ON route_targets.route_id=$1
+					AND route_targets.location_id=locations.id
+			*/});
+		}
+		database.query(sql, params, callback);
+	})
+	.then(function(rows, callback) {
+		var features = rows.map(function(row) {
+			return {
+				'type':'Feature',
+				'properties': {
+					'id': row.id,
+					'density': viewport.zoom > 9 ? row.density : null,
 				},
 				'geometry': row.geom,
 			};
