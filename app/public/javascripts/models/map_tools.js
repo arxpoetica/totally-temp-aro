@@ -57,12 +57,12 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
     },
     {
       id: 'network_nodes',
-      name: 'Network nodes',
+      name: 'Network Equipment',
       short_name: 'E',
     },
     {
       id: 'fiber_plant',
-      name: 'Competitors\'s fiber',
+      name: 'Competitor Networks',
       short_name: 'F',
     },
   ];
