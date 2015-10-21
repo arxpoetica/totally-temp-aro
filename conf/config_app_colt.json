@@ -9,15 +9,15 @@
       "locations": {
         "view": ["commercial", "residential"],
         "overlay": ["density"],
-        "build": ["commercial", "residential", "combo"]
+        "build": ["commercial"]
       },
       "boundaries": {
         "view": [],
         "build": ["custom"]
       },
       "equipment": {
-        "view": ["splice_point", "existing_fiber"],
-        "build": ["splice_point", "fiber_distribution_hub", "fiber_distribution_terminal"],
+        "view": ["central_office", "existing_fiber"],
+        "build": ["splice_point"],
         "actions": ["clear"]
       },
       "competitors": {
@@ -25,7 +25,7 @@
         "overlay": []
       }
     },
-    "top_bar_tools": ["financial_profile"],
+    "top_bar_tools": ["customer_profile", "market_profile"],
     "project_menu": ["share", "export_kml"]
   }
 }

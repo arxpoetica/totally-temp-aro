@@ -18,6 +18,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     }
   ];
 
+  $scope.available_tools = _.reject($scope.available_tools, function(tool) {
+    return config.ui.map_tools.locations.build.indexOf(tool.key) === -1;
+  })
+
   $scope.user_id = user_id;
 
   $scope.show_businesses = true;
