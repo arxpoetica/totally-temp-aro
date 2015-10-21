@@ -345,30 +345,30 @@
           <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
             <h2>View</h2>
             <form>
-              <div class="checkbox">
+              <div class="checkbox" ng-class="{'disabled': overlay === 'density'}">
                 <label>
-                  <input type="checkbox" ng-model="show_locations_off" ng-change="change_locations_layer()"> Show locations off the route
+                  <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay === 'density'"> Commercial
                 </label>
               </div>
-              <div class="radio" ng-class="{'disabled': !show_locations_off}">
+              <div class="checkbox" ng-class="{'disabled': overlay === 'density'}">
                 <label>
-                  <input type="radio" ng-model="locations_filter" value="both" ng-change="change_locations_layer()" ng-disabled="!show_locations_off"> Any location
-                </label>
-              </div>
-              <div class="radio" ng-class="{'disabled': !show_locations_off}">
-                <label>
-                  <input type="radio" ng-model="locations_filter" value="businesses" ng-change="change_locations_layer()" ng-disabled="!show_locations_off"> Commercial
-                </label>
-              </div>
-              <div class="radio" ng-class="{'disabled': !show_locations_off}">
-                <label>
-                  <input type="radio" ng-model="locations_filter" value="households" ng-change="change_locations_layer()" ng-disabled="!show_locations_off"> Residential
+                  <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay === 'density'"> Residential
                 </label>
               </div>
             </form>
             <% if (env_is_test) { %>
               <a href="javascript:void(0)" ng-click="feature_layers.locations.select_random_features()" ng-attr-data-loaded="{{feature_layers.locations.data_loaded}}">.</a>
             <% } %>
+            <hr>
+            <div>
+              <h2>Overlay</h2>
+              <div class="form-group">
+                <select class="form-control" ng-model="overlay" ng-change="overlay_changed()">
+                  <option value="none">None</option>
+                  <option value="density">Density</option>
+                </select>
+              </div>
+            </div>
             <div ng-show="route.owner_id === user_id">
               <hr>
               <h2>Build</h2>
@@ -529,23 +529,22 @@
           <div class="panel-body" ng-show="map_tools.is_expanded('fiber_plant')">
             <div>
               <h2>View</h2>
-
               <div class="checkbox">
                 <label>
-                  <input type="checkbox" ng-change="toggle_competitors()" ng-model="bar"> All competitors
+                  <input type="checkbox" ng-change="toggle_all_competitors()" ng-model="show_all_competitors" ng-disabled="overlay === 'density'"> All competitors
                 </label>
-                <hr>
               </div>
-
-              <div ng-repeat="carrier in carriers">
-                <div class="checkbox fiber_carrier_checkbox">
-                  <label>
-                    <input type="checkbox" ng-change="toggle_carrier(carrier.name)" ng-model="foo" ng-disabled="competitors_fiber.visible">
-                      <span ng-attr-style="background-color:{{carrier.color}}; padding: 1px 10px; margin-right: 10px"> </span> {{carrier.name}}
-                  </label>
-                </div>
+              <input class="form-control" ng-model="selected_carriers" ng-change="carriers_changed()"></input>
+            </div>
+            <hr>
+            <div>
+              <h2>Overlay</h2>
+              <div class="form-group">
+                <select class="form-control" ng-model="overlay" ng-change="overlay_changed()">
+                  <option value="none">None</option>
+                  <option value="density">Density</option>
+                </select>
               </div>
-
             </div>
           </div>
         </div>
