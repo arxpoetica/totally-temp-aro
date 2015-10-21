@@ -22,6 +22,8 @@ The application is managed through the makefile, which exposes a number of comma
 
 #### ETL
 
+First of all choose an etl directory such as `cd etl-aro` or `cd etl-colt`. Then you can run the following targets:
+
  - `make etl_tiger_cousub`: Retrieve and load selected county subdivisions from TIGER
  - `make etl_tiger_edges`: Retrieve and load selected edges from TIGER
  - `make etl_tiger`: Retrieve and load all currently supported TIGER data
