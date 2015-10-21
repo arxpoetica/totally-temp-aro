@@ -150,43 +150,17 @@ Welcome to Ubuntu 14.04.2 LTS (GNU/Linux 3.13.0-55-generic x86_64)
 vagrant@opsworks-vagrant:~$ cd /vagrant
 vagrant@opsworks-vagrant:/vagrant$ 
 ```
+** Note for Colt setup. At this point all you need to do is the following:
+
+ - Decrypt and install AWS credentials for accessing source files in S3: `init/vagrant_aws_creds.sh` and enter the secret password you've been given.
+ - ETL for Colt: `make etl_reload_all`
+
 
 The following instructions (Loading Data and Applicaiton Setup) are executed from the application root inside the virtual machine.
 
 #### Loading Data
-The initial loading of sample data can be completed with a single command:
-```console
-$ make etl_reload_all
-etl/reset_tiger_data.sh
-DROP EXTENSION
-NOTICE:  schema "tiger_data" does not exist, skipping
-DROP SCHEMA
-NOTICE:  schema "tiger_staging" does not exist, skipping
-DROP SCHEMA
-DROP SCHEMA
-CREATE EXTENSION
-etl/reset_aro_data.sh
-NOTICE:  schema "aro" does not exist, skipping
-DROP SCHEMA
-CREATE SCHEMA
-etl/tiger_cousub/cousub_etl.sh
-NOTICE:  schema "tiger_staging" does not exist, skipping
-DROP SCHEMA
-CREATE SCHEMA
---2015-06-24 15:55:06--  ftp://ftp2.census.gov/geo/tiger/TIGER2014/COUSUB/tl_2014_36_cousub.zip
-           => ‘tl_2014_36_cousub.zip’
-Resolving ftp2.census.gov (ftp2.census.gov)... 148.129.75.35, 2610:20:2010:a09:1000:0:9481:4b23
-...
-...
-psql:/vagrant/etl/aro/build_graph.sql:5: NOTICE:  -------------> TOPOLOGY CREATED FOR  23104 edges
-psql:/vagrant/etl/aro/build_graph.sql:5: NOTICE:  Rows with NULL geometry or NULL id: 0
-psql:/vagrant/etl/aro/build_graph.sql:5: NOTICE:  Vertices table for table aro.edges is: aro.edges_vertices_pgr
-psql:/vagrant/etl/aro/build_graph.sql:5: NOTICE:  ----------------------------------------------
- pgr_createtopology 
---------------------
- OK
-(1 row)
-```
+The initial loading of Colt data was accomplished in the previous step.
+
 #### Application Setup
 Install node application dependencies using the following command:
 ```console

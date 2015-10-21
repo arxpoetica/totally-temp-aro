@@ -1,0 +1,31 @@
+{
+  "database_url": "postgres://aro:aro@localhost/aro",
+  "aro_service_url": "http://localhost:8080/aro-service",
+  "client_schema": "client",
+  "client_carrier_name": "Colt",
+  "route_planning": false,
+  "ui": {
+    "map_tools": {
+      "locations": {
+        "view": ["commercial", "residential"],
+        "overlay": ["density"],
+        "build": ["commercial"]
+      },
+      "boundaries": {
+        "view": [],
+        "build": ["custom"]
+      },
+      "equipment": {
+        "view": ["central_office", "existing_fiber"],
+        "build": ["splice_point"],
+        "actions": ["clear"]
+      },
+      "competitors": {
+        "view": [],
+        "overlay": []
+      }
+    },
+    "top_bar_tools": ["customer_profile", "market_profile"],
+    "project_menu": ["share", "export_kml"]
+  }
+}

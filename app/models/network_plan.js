@@ -100,6 +100,12 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
     metadata_only = false;
   }
 
+  if (!config.route_planning) return callback(null, {
+    sources: [],
+    targets: [],
+    metadata: {},
+  });
+
   var cost_per_meter = 200;
   var output = {
     'feature_collection': {
@@ -583,18 +589,6 @@ NetworkPlan.calculate_area_data = function(plan_id, callback) {
   var data = {};
 
   txain(function(callback) {
-    var sql = multiline(function() {;/*
-      SELECT wirecenter, MIN(ST_distance(geom, (SELECT area_centroid FROM custom.route WHERE id=$1) )) AS distance
-      FROM aro.wirecenters
-      GROUP BY wirecenter
-      ORDER BY distance
-      LIMIT 1
-    */});
-    database.findOne(sql, [plan_id], callback);
-  })
-  .then(function(row, callback) {
-    data.wirecenter = row.wirecenter;
-
     var sql = multiline(function() {;/*
       SELECT statefp, countyfp, MIN(ST_distance(geom, (SELECT area_centroid FROM custom.route WHERE id=$1) )) AS distance
       FROM aro.cousub
