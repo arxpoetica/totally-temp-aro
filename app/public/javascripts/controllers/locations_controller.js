@@ -25,6 +25,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $scope.user_id = user_id;
 
+  $scope.show_commercial = config.ui.map_tools.locations.view.indexOf('commercial') >= 0;
+  $scope.show_residential = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
+
   $scope.show_businesses = true;
   $scope.show_households = true;
 
@@ -160,11 +163,28 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     var layer = $rootScope.feature_layers.locations;
     if ($scope.overlay === 'density') {
       density.show();
+      density.reload_data();
       layer.hide();
     } else {
       density.hide();
       layer.show();
+      layer.reload_data();
     }
   }
+
+  $scope.on_zoom_changed = function() {
+    var layer = $rootScope.feature_layers.locations;
+    if (layer.threshold >= map.getZoom()) {
+      $scope.overlay = 'density';
+      $scope.overlay_changed();
+
+      if (!$rootScope.$$phase) { $rootScope.$apply(); }
+    }
+  }
+
+  $rootScope.$on('map_zoom_changed', $scope.on_zoom_changed);
+  $(document).ready(function() {
+    map.ready($scope.on_zoom_changed);
+  });
 
 }]);

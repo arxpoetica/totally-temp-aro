@@ -7,7 +7,7 @@
   "ui": {
     "map_tools": {
       "locations": {
-        "view": ["commercial", "residential"],
+        "view": ["commercial"],
         "overlay": ["density"],
         "build": ["commercial"]
       },
