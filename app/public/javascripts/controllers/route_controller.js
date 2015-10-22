@@ -51,6 +51,8 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   });
 
   function redraw_route(data, only_metadata) {
+    if (!config.route_planning) return;
+    
     if (data.metadata) {
       $scope.route.metadata = data.metadata;
       $rootScope.$broadcast('route_changed_metadata', $scope.route);

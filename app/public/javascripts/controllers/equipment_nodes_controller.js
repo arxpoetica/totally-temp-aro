@@ -56,7 +56,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   });
 
   $scope.change_node_types_visibility = function() {
-    var types = ['central_office'];
+    var types = [];
     $scope.view_node_types.forEach(function(node_type) {
       if (node_type.visible) {
         types.push(node_type.name);
