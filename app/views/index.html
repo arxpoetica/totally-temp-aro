@@ -346,12 +346,12 @@
           <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
             <h2>View</h2>
             <form>
-              <div class="checkbox" ng-class="{'disabled': overlay === 'density'}">
+              <div class="checkbox" ng-class="{'disabled': overlay === 'density'}" ng-show="show_commercial">
                 <label>
                   <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay === 'density'"> Commercial
                 </label>
               </div>
-              <div class="checkbox" ng-class="{'disabled': overlay === 'density'}">
+              <div class="checkbox" ng-class="{'disabled': overlay === 'density'}" ng-show="show_residential">
                 <label>
                   <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay === 'density'"> Residential
                 </label>
