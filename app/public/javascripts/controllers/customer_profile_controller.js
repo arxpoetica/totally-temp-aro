@@ -22,7 +22,8 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', function(
         highlight: '#FFC870',
       }
     };
-    var data = $scope.route.metadata.customer_types.map(function(customer_type) {
+    var customer_types = $scope.route.metadata.customer_types || []
+    var data = customer_types.map(function(customer_type) {
       return {
         value: customer_type.businesses + customer_type.households,
         color: colors[customer_type.name].color,

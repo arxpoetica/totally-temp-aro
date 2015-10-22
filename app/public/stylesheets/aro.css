@@ -1,13 +1,58 @@
+/* Override some bootstrap styles */
+
+body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: 'Lato', sans-serif !important;
+}
+
+.navbar.navbar-default {
+  margin-bottom: 0;
+  z-index: 2;
+  background-image: none;
+  background-color: #f8f8f8;
+  border-radius: 0;
+}
+
+.btn, .btn-sm, .btn-group-sm>.btn {
+  border-radius: 2px;
+}
+
+.btn-primary, .btn-default, .btn-success, .btn-danger, .btn-primary:hover, .btn-default:hover, .btn-success:hover, .btn-danger:hover {
+  background-image: none;
+}
+
+.modal-content, .panel {
+  border-radius: 2px;
+}
+
+.panel-heading {
+  border-top-right-radius: 2px;
+  border-top-left-radius: 2px;
+}
+
+.btn-primary, .panel-primary>.panel-heading {
+  background-color: #383F66;
+}
+
+/* -- */
+
 html, body, #map-canvas, #map-canvas-wrapper {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
+.map_tools_button span {
+  pointer-events: none;
+}
+
+.boundary-options a {
+  padding: 0 4px;
+}
+
 #map-canvas-wrapper {
   padding-top: 50px;
   margin-top: -50px;
-  margin-left: 65px; /* width of left-col */
+  margin-left: 55px; /* width of left-col */
   padding-bottom: 0px; /* footer height */
 }
 
@@ -17,7 +62,8 @@ html, body, #map-canvas, #map-canvas-wrapper {
   bottom: 0px; /* footer height */
   left: 0;
   z-index: 1;
-  background-color: #fff;
+  background-color: #f8f8f8;
+  width: 55px;
 }
 
 #left-col {
@@ -187,5 +233,6 @@ footer nav {
 }
 
 #top_bar_tools span:not(.ng-hide) + span:not(.ng-hide)::before {
-  content: '| ';
+  content: ' | ';
+  padding: 0 10px;
 }
