@@ -4,11 +4,13 @@
     <title>ARO</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/sweetalert.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/select2.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/select2-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
   </head>
   <body>
 
@@ -83,7 +85,7 @@
         </div>
       </div>
 
-      <nav class="navbar navbar-default" style="margin-bottom:0;z-index:2">
+      <nav class="navbar navbar-default">
         <div class="container-fluid">
 
           <div class="navbar-header">
@@ -93,22 +95,22 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <button ng-show="route" type="button" style="float: left; margin-right: 10px" class="btn btn-default navbar-btn" ng-click="select_route(null)"><span class="glyphicon glyphicon-chevron-left"></span></button>
+            <button ng-show="route" type="button" style="float: left; margin-right: 10px" class="btn btn-default navbar-btn" ng-click="select_route(null)"><span class="fa fa-chevron-left"></span></button>
             <a class="navbar-brand" href="javascript:void(0)">{{route.name}}</a>
 
             <p ng-show="route" class="navbar-text" id="top_bar_tools">
               <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
-                <span class="glyphicon glyphicon-usd"></span>
+                <span class="fa fa-usd"></span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</span>
                 <span class="label label-success">{{route.metadata.revenue | currency}}</span>
               </span>
 
               <span data-toggle="modal" data-target="#modal-customer-profile" style="cursor:pointer" ng-show="show_customer_profile">
-                <span class="glyphicon glyphicon-scale"></span> {{ route.metadata.total_customers }} customers covered
+                <span class="fa fa-users"></span> {{ route.metadata.total_customers }} customers covered
               </span>
 
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
-                <span class="glyphicon glyphicon-briefcase" ng-class="{'spin': market_profile_calculating}"></span> <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
+                <span class="fa fa-briefcase" ng-class="{'spin': market_profile_calculating}"></span> <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
               </span>
             </p>
 
@@ -116,28 +118,28 @@
 
           <div class="collapse navbar-collapse">
             <p class="navbar-text saving" id="plan-saving">
-              <small><span class="spin glyphicon glyphicon-repeat"></span> Saving plan…</small>
+              <small><span class="spin fa fa-repeat"></span> Saving plan…</small>
             </p>
             <p class="navbar-text saving" id="plan-saved">
-              <small><span class="glyphicon glyphicon-ok"></span> Plan saved</small>
+              <small><span class="fa fa-check"></span> Plan saved</small>
             </p>
 
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                  <span class="glyphicon glyphicon-user"></span>
+                  <span class="fa fa-user"></span>
                   <%= user.email %> <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
                   <li><a href="/logout">
-                    <span class="glyphicon glyphicon-off"></span>
+                    <span class="fa fa-power-off"></span>
                     Log out
                   </a></li>
                 </ul>
               </li>
               <li class="dropdown" ng-show="route" id="network_plan_menu">
                 <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                  <span class="glyphicon glyphicon-cog"></span>
+                  <span class="fa fa-cog"></span>
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
@@ -168,10 +170,10 @@
         <div ng-controller="map_tools_controller">
           <div ng-repeat="tool in map_tools.available_tools">
             <p>
-              <a href="javascript:void(0)" class="btn btn-primary btn-block btn-sm" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
+              <a href="javascript:void(0)" class="btn btn-primary btn-block btn-sm map_tools_button" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
                 ng-attr-id="map_tools_toggle_{{tool.id}}"
                 ng-class="{'btn-success active': map_tools.is_visible(tool.id)}"
-                ng-click="map_tools.toggle(tool.id)">{{tool.short_name}}</a>
+                ng-click="map_tools.toggle(tool.id)"><span ng-attr-class="{{tool.icon}}"></span></a>
             </p>
           </div>
         </div>
@@ -215,10 +217,10 @@
       <div ng-show="map_tools.is_visible('boundaries')" class="map-tool panel panel-primary">
         <div class="panel-heading">
           <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('boundaries')" ng-click="map_tools.collapse('boundaries')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+            <span style="color:white" class="fa fa-chevron-up"></span>
           </a>
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('boundaries')" ng-click="map_tools.expand('boundaries')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+            <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
           Boundaries
         </div>
@@ -229,7 +231,7 @@
               <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
                 <!--
                 <div class="pull-right">
-                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="glyphicon glyphicon-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="fa fa-briefcase"></span></a>
                 </div>
                 -->
                 <label>
@@ -242,10 +244,10 @@
             <% } %>
             <div ng-repeat="boundary in boundaries">
               <div class="checkbox">
-                <div class="pull-right">
-                  <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="glyphicon glyphicon-pencil"></span></a>
-                  <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="glyphicon glyphicon-remove"></span></a>
-                  <a href="javascript:void(0)" class="text-success" ng-click="select_boundary(boundary)"><span class="glyphicon glyphicon-briefcase"></span></a>
+                <div class="pull-right boundary-options">
+                  <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="fa fa-pencil"></span></a>
+                  <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="fa fa-trash-o"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="select_boundary(boundary)"><span class="fa fa-briefcase"></span></a>
                 </div>
                 <label>
                   <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
@@ -336,10 +338,10 @@
         <div ng-show="map_tools.is_visible('locations')" class="map-tool panel panel-primary" id="locations_controller">
           <div class="panel-heading">
             <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
-              <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+              <span style="color:white" class="fa fa-chevron-up"></span>
             </a>
             <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
-              <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+              <span style="color:white" class="fa fa-chevron-down"></span>
             </a>
             Locations
           </div>
@@ -452,10 +454,10 @@
       <div ng-show="map_tools.is_visible('network_nodes')" class="map-tool panel panel-primary" id="equipment_nodes_controller">
         <div class="panel-heading">
           <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_nodes')" ng-click="map_tools.collapse('network_nodes')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+            <span style="color:white" class="fa fa-chevron-up"></span>
           </a>
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_nodes')" ng-click="map_tools.expand('network_nodes')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+            <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
           Network Equipment
         </div>
@@ -521,10 +523,10 @@
       <div ng-show="map_tools.is_visible('fiber_plant')" class="map-tool panel panel-primary" id="fiber_plant_controller">
         <div class="panel-heading">
           <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-up"></span>
+            <span style="color:white" class="fa fa-chevron-up"></span>
           </a>
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
-            <span style="color:white" class="glyphicon glyphicon-chevron-down"></span>
+            <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
           Competitor Networks
         </div>
