@@ -581,11 +581,12 @@
     var map;
     
     function initialize() {
-      var styles = [{
+      var styles = [];
+      styles.push({
         featureType: 'poi',
         elementType: 'labels',
         stylers: [ { visibility: 'off' } ],
-      }];
+      });
 
       map = new google.maps.Map(document.getElementById('map-canvas'), {
         zoom: 12,

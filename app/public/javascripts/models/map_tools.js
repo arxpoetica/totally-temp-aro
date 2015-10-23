@@ -49,19 +49,19 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
       id: 'locations',
       name: 'Locations',
       short_name: 'L',
-      icon: 'fa fa-map-marker',
+      icon: 'icon icon-locations',
     },
     {
       id: 'boundaries',
       name: 'Boundaries',
       short_name: 'B',
-      icon: 'fa fa-object-ungroup',
+      icon: 'icon icon-boundaries',
     },
     {
       id: 'network_nodes',
       name: 'Network Equipment',
       short_name: 'E',
-      icon: 'fa fa-wrench',
+      icon: 'icon icon-network-equipment',
     },
     {
       id: 'fiber_plant',
