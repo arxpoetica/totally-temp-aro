@@ -28,8 +28,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.show_commercial = config.ui.map_tools.locations.view.indexOf('commercial') >= 0;
   $scope.show_residential = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
 
-  $scope.show_businesses = true;
-  $scope.show_households = true;
+  $scope.show_businesses = $scope.show_commercial;
+  $scope.show_households = $scope.show_households;
 
   $scope.always_shows_sources = true;
   $scope.always_shows_targets = true;
