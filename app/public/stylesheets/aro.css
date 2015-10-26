@@ -250,7 +250,7 @@ footer nav {
   text-align: center;
 }
 
-#top_bar_tools span:not(.ng-hide) + span:not(.ng-hide)::before {
+#top_bar_tools > span:not(.ng-hide) + span:not(.ng-hide)::before {
   content: ' | ';
   padding: 0 10px;
 }
