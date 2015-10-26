@@ -1,16 +1,16 @@
-<div class="modal" id="manage-network-plans" tabindex="-1" role="dialog">
+<div class="modal" id="select-route" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Manage Network Plans</h4>
+        <h4 class="modal-title">Open Saved Plan</h4>
       </div>
       <div class="modal-body">
         <p ng-show="routes.length < 1" class="text-center">
           No routes stored in the database yet
         </p>
-        <div>
-          <form ng-show="routes.length > 0">
+        <div ng-show="routes.length > 0">
+          <form>
             <div class="input-group">
               <input type="text" class="form-control" placeholder="Search plan by name" ng-model="search_text" ng-change="load_plans()">
               <span class="input-group-addon">
@@ -19,6 +19,7 @@
             </div>
             <hr>
           </form>
+
           <table class="table table-striped">
             <thead>
               <tr>
@@ -38,27 +39,21 @@
                   <a href="javascript:void(0)" ng-click="sort_by('updated_at', false)">↑</a>
                 </th>
                 <th>Owner</th>
-                <th>
-                </th>
               </tr>
             </thead>
             <tbody>
               <tr ng-repeat="route in routes">
-                <td>{{route.name}}</th>
+                <td><a href="javascript:void(0)" ng-click="select_route(route)">{{route.name}}</a></th>
                 <td>{{route.updated_at | date:'shortDate'}}</th>
                 <td>{{route.created_at | date:'shortDate'}}</th>
                 <td>{{route.owner_first_name}} {{route.owner_last_name}}</th>
-                <td>
-                  <a class="btn btn-sm btn-primary" ng-click="show_share_route(route)"><span class="glyphicon glyphicon-share"></span></a>
-                  <a class="btn btn-sm btn-danger" ng-click="delete_route(route)" ng-show="route.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
-                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
       </div>
     </div>
   </div>

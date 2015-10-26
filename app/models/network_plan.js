@@ -252,7 +252,7 @@ NetworkPlan.recalculate_and_find_route = function(plan_id, callback) {
   .end(callback);
 };
 
-NetworkPlan.find_all = function(user, callback) {
+NetworkPlan.find_all = function(user, text, callback) {
   if (arguments.length === 1) {
     callback = user;
     user = null;
@@ -273,6 +273,12 @@ NetworkPlan.find_all = function(user, callback) {
     sql += ' WHERE route.id IN (SELECT route_id FROM custom.permissions WHERE user_id=$2)';
     params.push(user.id);
   }
+  if (text) {
+    text = '%'+text+'%'
+    sql += ' AND lower(name) LIKE lower($3)';
+    params.push(text);
+  }
+  sql += '\n LIMIT 20';
   database.query(sql, params, callback);
 };
 

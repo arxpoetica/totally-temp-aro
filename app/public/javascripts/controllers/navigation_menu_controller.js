@@ -119,13 +119,20 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $rootScope.$broadcast('route_selected', null);
       }
       $http.post('/network_plan/'+route.id+'/delete').success(function(response) {
-        $scope.load_routes();
+        $scope.load_plans();
       });
     });
   };
 
-  $scope.load_routes = function(callback) {
-    $http.get('/network_plan/find_all').success(function(response) {
+  $scope.load_plans = function(callback) {
+    var options = {
+      url: '/network_plan/find_all',
+      method: 'GET',
+      params: {
+        text: $scope.search_text,
+      }
+    };
+    $http(options).success(function(response) {
       $scope.routes = response;
       callback && callback();
     });
@@ -135,7 +142,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   var path = $location.path();
   if (path.indexOf('/plan/') === 0) {
     var plan_id = +path.substring('/plan/'.length);
-    $scope.load_routes(function() {
+    $scope.load_plans(function() {
       var route = _.findWhere($scope.routes, { id: plan_id });
       if (route) {
         $scope.select_route(route);
@@ -144,13 +151,13 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $scope.show_routes = function() {
-    $scope.load_routes(function() {
+    $scope.load_plans(function() {
       $('#select-route').modal('show');
     });
   };
 
   $scope.manage_network_plans = function() {
-    $scope.load_routes(function() {
+    $scope.load_plans(function() {
       $('#manage-network-plans').modal('show');
     });
   };
@@ -181,7 +188,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/network_plan/create', params).success(function(response) {
       $scope.select_route(response);
       $('#new-route').modal('hide');
-      $scope.load_routes();
+      $scope.load_plans();
     });
   };
 
