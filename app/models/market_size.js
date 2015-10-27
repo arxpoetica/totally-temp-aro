@@ -51,7 +51,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
   if (!config.route_planning) {
 
     sql += 'WITH biz AS (SELECT * FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4))\n';
-    params.push(config.carrier_name);
+    params.push(config.client_carrier_name);
 
     sql += multiline(function() {;/*
       SELECT
@@ -85,8 +85,6 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
         AND e.max_value >= b.number_of_employees
     */});
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
-
-    console.log('sql', sql)
 
   } else {
 
