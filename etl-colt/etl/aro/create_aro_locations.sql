@@ -5,7 +5,6 @@ DROP TABLE IF EXISTS aro.locations;
 CREATE TABLE aro.locations
 (
     id serial,
-    building_id varchar,
     address varchar,
     city varchar,
     country varchar,
@@ -20,9 +19,9 @@ CREATE TABLE aro.locations
 SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 
 -- Load unique locations from colt source locations table
-INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat, lon, geog, geom)
-    SELECT DISTINCT ON (bm_building_id)
-        bm_building_id AS building_id,
+INSERT INTO aro.locations(id, address, city, country, postal_code, lat, lon, geog, geom)
+    SELECT DISTINCT ON (ad_address_id)
+        ad_address_id AS id,
         (ad_house_number || ' ' || ad_street_name)::text AS address,
         ad_cityname_english,
         ad_country_name,
@@ -35,10 +34,6 @@ INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat,
     FROM source_colt.locations
     WHERE 
       bm_building_category = 'Retail Building';
-
-CREATE INDEX aro_locations_building_id
-  ON aro.locations USING btree (building_id);
-
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations USING gist (geog);
