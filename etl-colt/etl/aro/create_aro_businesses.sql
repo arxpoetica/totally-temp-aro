@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS aro.businesses;
 CREATE TABLE aro.businesses
 (
 	id serial,
-	location_id varchar,
+	location_id bigint,
 	industry_id int,
 	name varchar,
 	address varchar,
@@ -17,8 +17,8 @@ CREATE TABLE aro.businesses
 
 
 INSERT INTO aro.businesses(location_id, name, address, geog)
-	SELECT DISTINCT ON (sd_building_id, sd_customer_name)
-		sd_building_id as location_id,
+	SELECT
+		ad_address_id as location_id,
 		sd_customer_name as name,
 		(ad_house_number || ' ' || ad_street_name)::text AS address,
 		ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326)::geography AS geog

@@ -9,7 +9,8 @@ exports.configure = function(api, middleware) {
 
   // Find all created routes
   api.get('/network_plan/find_all', function(request, response, next) {
-    models.NetworkPlan.find_all(request.user, jsonHandler(response, next));
+    var text = request.query.text;
+    models.NetworkPlan.find_all(request.user, text, jsonHandler(response, next));
   });
 
   // Create a new empty route
