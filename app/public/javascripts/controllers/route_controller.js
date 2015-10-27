@@ -51,7 +51,11 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   });
 
   function redraw_route(data, only_metadata) {
-    if (!config.route_planning) return;
+    if (!config.route_planning) {
+      // to calculate market size
+      $rootScope.$broadcast('route_changed');
+      return;
+    }
     
     if (data.metadata) {
       $scope.route.metadata = data.metadata;
