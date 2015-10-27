@@ -30,6 +30,9 @@ etl_custom:
 etl_source_colt:
 	etl/source_colt/source_colt_etl.sh
 
+etl_source_colt_local:
+	etl/source_colt/source_colt_local.sh
+
 # reset_tiger:
 # 	etl/reset_tiger_data.sh
 
@@ -51,7 +54,7 @@ reset_client:
 reset_custom:
 	etl/reset_custom_data.sh
 
-etl_reload_general: etl_source_colt reset_aro  etl_aro
+etl_reload_general: etl_source_colt etl_source_colt_local reset_aro  etl_aro
 
 etl_reload_client: reset_client reset_custom etl_client etl_custom
 
