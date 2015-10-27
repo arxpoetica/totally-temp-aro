@@ -4,6 +4,7 @@
   "client_schema": "client",
   "client_carrier_name": "VERIZON",
   "route_planning": true,
+  "currency_symbol": "$",
   "ui": {
     "map_tools": {
       "locations": {
