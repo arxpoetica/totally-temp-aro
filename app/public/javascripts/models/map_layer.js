@@ -4,6 +4,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.name = options.name;
 		this.short_name = options.short_name;
 		this.api_endpoint = options.api_endpoint;
+		this.http_params = options.http_params;
 		this.style_options = options.style_options;
 		this.data_layer = new google.maps.Data();
 		this.metadata = {};
@@ -249,17 +250,19 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				$rootScope.$broadcast('map_layer_loaded_data', layer);
 				this.configure_feature_styles();
 			} else if (this.api_endpoint) {
+				var params = {
+					nelat: map.getBounds().getNorthEast().lat(),
+					nelon: map.getBounds().getNorthEast().lng(),
+					swlat: map.getBounds().getSouthWest().lat(),
+					swlon: map.getBounds().getSouthWest().lng(),
+					zoom: map.getZoom(),
+					threshold: layer.threshold,
+				};
+				_.extend(params, this.http_params || {});
 				$http({
 					url: this.api_endpoint,
-					method: "GET",
-					params: {
-						nelat: map.getBounds().getNorthEast().lat(),
-						nelon: map.getBounds().getNorthEast().lng(),
-						swlat: map.getBounds().getSouthWest().lat(),
-						swlon: map.getBounds().getSouthWest().lng(),
-						zoom: map.getZoom(),
-						threshold: layer.threshold,
-					},
+					method: 'GET',
+					params: params,
 				})
 				.success(function(response) {
 					var data = response;
@@ -275,9 +278,12 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		}
 	}
 
-	MapLayer.prototype.set_api_endpoint = function(api_endpoint) {
-		if (this.api_endpoint === api_endpoint) return;
+	MapLayer.prototype.set_api_endpoint = function(api_endpoint, params) {
+		if (this.api_endpoint === api_endpoint && !params) return;
 		this.api_endpoint = api_endpoint;
+		if (params) {
+			this.http_params = params;
+		}
 		this.data_loaded = false;
 		this.clear_data();
 		if (this.visible) {
