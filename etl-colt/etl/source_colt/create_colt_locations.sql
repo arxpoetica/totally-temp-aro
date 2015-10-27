@@ -21,7 +21,7 @@ CREATE TABLE source_colt.locations
   bm_in_house_cabling VARCHAR,
   bm_name_of_carrier_hotel VARCHAR,
   bm_updated_date VARCHAR,
-  ad_address_id VARCHAR,
+  ad_address_id bigint,
   ad_building_id VARCHAR,
   ad_building_name VARCHAR,
   ad_cityname_english VARCHAR,
