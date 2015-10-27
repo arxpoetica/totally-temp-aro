@@ -54,7 +54,7 @@ reset_client:
 reset_custom:
 	etl/reset_custom_data.sh
 
-etl_reload_general: etl_source_colt etl_source_colt_local reset_aro  etl_aro
+etl_reload_general: etl_source_colt reset_aro  etl_aro
 
 etl_reload_client: reset_client reset_custom etl_client etl_custom
 
