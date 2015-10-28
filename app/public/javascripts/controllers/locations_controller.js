@@ -172,19 +172,4 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     }
   }
 
-  $scope.on_zoom_changed = function() {
-    var layer = $rootScope.feature_layers.locations;
-    if (layer.threshold >= map.getZoom()) {
-      $scope.overlay = 'density';
-      $scope.overlay_changed();
-
-      if (!$rootScope.$$phase) { $rootScope.$apply(); }
-    }
-  }
-
-  $rootScope.$on('map_zoom_changed', $scope.on_zoom_changed);
-  $(document).ready(function() {
-    map.ready($scope.on_zoom_changed);
-  });
-
 }]);

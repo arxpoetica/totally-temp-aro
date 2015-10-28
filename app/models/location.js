@@ -15,19 +15,15 @@ var Location = {};
 // 1. callback: function to return a GeoJSON object
 Location.find_all = function(plan_id, type, viewport, callback) {
 	txain(function(callback) {
-		if (viewport.zoom > viewport.threshold) {
-			var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
-			if (type === 'businesses' && config.ui.map_tools.locations.view.indexOf('residential') >= 0) {
-				sql += ' JOIN businesses ON businesses.location_id = locations.id';
-			} else if (type === 'households') {
-				sql += ' JOIN households ON households.location_id = locations.id';
-			}
-			sql += '\n WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), locations.geom)'
-			sql += ' GROUP BY locations.id';
-			database.query(sql, [viewport.linestring], callback);
-		} else {
-			callback(null, []);
+		var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
+		if (type === 'businesses' && config.ui.map_tools.locations.view.indexOf('residential') >= 0) {
+			sql += ' JOIN businesses ON businesses.location_id = locations.id';
+		} else if (type === 'households') {
+			sql += ' JOIN households ON households.location_id = locations.id';
 		}
+		sql += '\n WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), locations.geom)'
+		sql += ' GROUP BY locations.id';
+		database.query(sql, [viewport.linestring], callback);
 	})
 	.then(function(rows, callback) {
 		var features = rows.map(function(row) {

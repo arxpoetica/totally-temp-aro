@@ -41,6 +41,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     },
     threshold: 15,
     reload: 'always',
+    heatmap: true,
   });
 
   feature_layers['locations_density'] = new MapLayer({
