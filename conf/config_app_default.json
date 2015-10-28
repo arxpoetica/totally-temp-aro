@@ -5,6 +5,7 @@
   "client_carrier_name": "VERIZON",
   "route_planning": true,
   "currency_symbol": "$",
+  "industry_mapping": true,
   "ui": {
     "map_tools": {
       "locations": {

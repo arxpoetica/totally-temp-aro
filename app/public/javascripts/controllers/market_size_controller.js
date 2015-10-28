@@ -149,6 +149,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
     };
     var ctx = document.getElementById('market-size-chart').getContext('2d');
+    chart && chart.destroy();
     chart = new Chart(ctx).Line(data, options);
   };
 
