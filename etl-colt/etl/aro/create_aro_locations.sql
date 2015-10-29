@@ -6,6 +6,7 @@ CREATE TABLE aro.locations
 (
     id serial,
     address varchar,
+    building_id varchar,
     city varchar,
     country varchar,
     postal_code varchar,
@@ -19,9 +20,10 @@ CREATE TABLE aro.locations
 SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 
 -- Load unique locations from colt source locations table
-INSERT INTO aro.locations(id, address, city, country, postal_code, lat, lon, geog, geom)
-    SELECT DISTINCT ON (ad_address_id)
-        ad_address_id AS id,
+-- There is some question as to which field we should be selecting distinct on to get nonduplicate locations...
+INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat, lon, geog, geom)
+    SELECT DISTINCT ON (bm_building_id)
+        bm_building_id AS building_id,
         (ad_house_number || ' ' || ad_street_name)::text AS address,
         ad_cityname_english,
         ad_country_name,
@@ -31,9 +33,7 @@ INSERT INTO aro.locations(id, address, city, country, postal_code, lat, lon, geo
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326)::geography as geog,
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326) as geom
 
-    FROM source_colt.locations
-    WHERE 
-      bm_building_category = 'Retail Building';
+    FROM source_colt.locations;
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations USING gist (geog);
