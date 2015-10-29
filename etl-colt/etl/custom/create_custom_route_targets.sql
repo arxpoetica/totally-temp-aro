@@ -7,7 +7,7 @@ CREATE TABLE custom.route_targets
   id SERIAL,
   location_id bigint REFERENCES aro.locations,
   route_id bigint REFERENCES custom.route ON DELETE CASCADE,
-  vertex_id bigint REFERENCES client.graph_vertices_pgr,
+  vertex_id bigint,
   CONSTRAINT custom_route_targets_pkey PRIMARY KEY (id)
 );
 
