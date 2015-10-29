@@ -8,6 +8,12 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-sm-6">
+            <div class="form-group" ng-show="type !== 'route'">
+              <select class="form-control" ng-model="type" ng-change="calculate_customer_profile()">
+                <option value="all">All</option>
+                <option value="addressable">Addressable</option>
+              </select>
+            </div>
             <table class="table">
               <tbody>
                 <tr ng-repeat="customer_type in data.customer_types">

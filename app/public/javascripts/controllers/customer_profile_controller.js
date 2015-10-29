@@ -1,6 +1,7 @@
 // Customer Profile Controller
 app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', '$q', function($scope, $rootScope, $http, $q) {
 
+  $scope.type = 'route';
   $scope.loading = false;
   $scope.data = {};
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
@@ -16,13 +17,14 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
     if (type !== 'customer_profile') return;
     
     geo_json = json;
+    $scope.type = 'all';
     $scope.calculate_customer_profile();
-    $scope.customer_types = [];
     open_modal(title);
   });
 
   $rootScope.$on('customer_profile_selected', function(e, json, title, type) {
     $scope.data = $scope.route.metadata;
+    $scope.type = 'route';
     open_modal(null);
     show_chart();
   });
@@ -34,9 +36,10 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
 
   var canceller = null;
   $scope.calculate_customer_profile = function() {
-    $scope.values = [];
+    $scope.data = {};
     var params = {
       boundary: geo_json && JSON.stringify(geo_json),
+      type: $scope.type,
     };
     if (canceller) canceller.resolve();
     canceller = $q.defer();

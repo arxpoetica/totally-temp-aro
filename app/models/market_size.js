@@ -50,23 +50,23 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
 
   if (type === 'route' || type === 'addressable') {
     if (config.route_planning) {
-      sql += 'WITH biz AS (SELECT * FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
       // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
       params.push(plan_id);
     } else {
-      sql += 'WITH biz AS (SELECT * FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
       params.push(config.client_carrier_name);
     }
 
     if (type === 'addressable') {
       params.push(options.boundary);
-      sql += ' AND ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog))';
+      sql += ' AND ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog) GROUP BY b.id)';
     } else {
-      sql += ')'
+      sql += 'GROUP BY b.id)'
     }
   } else {
     params.push(options.boundary);
-    sql += 'WITH biz AS (SELECT * FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
+    sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
   }
 
   sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'

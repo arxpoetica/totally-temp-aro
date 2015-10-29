@@ -81,7 +81,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
 
 CustomerProfile.customer_profile_for_existing_fiber = function(metadata, callback) {
   var sql = multiline(function(){;/*
-    WITH biz AS (SELECT b.id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4))
+    WITH biz AS (SELECT DISTINCT b.id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4))
     SELECT ct.name, COUNT(*)::integer as businesses, '0'::integer as households
     FROM biz b
     JOIN client.business_customer_types bct ON bct.business_id = b.id
@@ -98,10 +98,18 @@ CustomerProfile.customer_profile_for_existing_fiber = function(metadata, callbac
   .end(callback);
 };
 
-CustomerProfile.customer_profile_for_boundary = function(boundary, callback) {
+CustomerProfile.customer_profile_for_boundary = function(type, boundary, callback) {
   var metadata = {};
-  var sql = multiline(function(){;/*
-    WITH biz AS (SELECT * FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))
+  var sql = '';
+  var params = [boundary];
+  if (type === 'all') {
+    sql = 'WITH biz AS (SELECT * FROM businesses b'
+  } else if (type === 'addressable') {
+    sql = 'WITH biz AS (SELECT DISTINCT b.id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)'
+    params.push(config.client_carrier_name);
+  }
+  sql += ' WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))'
+  sql += multiline(function(){;/*
     SELECT ct.name, COUNT(*)::integer as businesses, '0'::integer as households
     FROM biz b
     JOIN client.business_customer_types bct ON bct.business_id = b.id
@@ -110,7 +118,7 @@ CustomerProfile.customer_profile_for_boundary = function(boundary, callback) {
     ORDER BY ct.name
   */});
   txain(function(callback) {
-    database.query(sql, [boundary], callback);
+    database.query(sql, params, callback);
   })
   .then(function(customer_types, callback) {
     process_customer_types(metadata, customer_types, callback);
