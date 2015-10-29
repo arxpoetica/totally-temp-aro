@@ -51,43 +51,46 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   });
 
   function redraw_route(data, only_metadata) {
-    if (!config.route_planning) return;
-    
     if (data.metadata) {
       $scope.route.metadata = data.metadata;
       $rootScope.$broadcast('route_changed_metadata', $scope.route);
       if (only_metadata) return;
 
-      selection.clear_selection();
+      if (config.route_planning) {
+        selection.clear_selection();
 
-      (data.metadata.targets || []).forEach(function(id) {
-        selection.targets.add(id);
-      });
-      (data.metadata.sources || []).forEach(function(id) {
-        selection.sources.add(id);
-      });
+        (data.metadata.targets || []).forEach(function(id) {
+          selection.targets.add(id);
+        });
+        (data.metadata.sources || []).forEach(function(id) {
+          selection.sources.add(id);
+        });
 
-      selection.sync_selection();
+        selection.sync_selection();
+      }
     }
 
-    var route = new MapLayer({
-      short_name: 'RT',
-      name: 'Route',
-      data: data.feature_collection,
-      style_options: {
-        normal: {
-          strokeColor: 'red'
+    if (config.route_planning) {
+      var route = new MapLayer({
+        short_name: 'RT',
+        name: 'Route',
+        data: data.feature_collection,
+        style_options: {
+          normal: {
+            strokeColor: 'red'
+          },
         },
-      },
-    });
-    route.show();
+      });
+      route.show();
+      if ($scope.route_layer) {
+        $scope.route_layer.remove();
+      }
+      $scope.route_layer = route;
 
-    if ($scope.route_layer) {
-      $scope.route_layer.remove();
+      $rootScope.equipment_layers['route'] = route;
     }
-    $scope.route_layer = route;
 
-    $rootScope.equipment_layers['route'] = route;
+    // to calculate market size
     $rootScope.$broadcast('route_changed');
   }
 

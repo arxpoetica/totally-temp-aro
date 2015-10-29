@@ -105,7 +105,7 @@
                 <span class="label label-success">{{route.metadata.revenue | currency}}</span>
               </span>
 
-              <span data-toggle="modal" data-target="#modal-customer-profile" style="cursor:pointer" ng-show="show_customer_profile">
+              <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
                 <span class="fa fa-users"></span> {{ route.metadata.total_customers }} customers covered
               </span>
 
@@ -247,7 +247,8 @@
                 <div class="pull-right boundary-options">
                   <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="fa fa-pencil"></span></a>
                   <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="fa fa-trash-o"></span></a>
-                  <a href="javascript:void(0)" class="text-success" ng-click="select_boundary(boundary)"><span class="fa fa-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="show_market_size(boundary)"><span class="fa fa-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-warning" ng-click="show_customer_profile(boundary)"><span class="fa fa-users"></span></a>
                 </div>
                 <label>
                   <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
@@ -595,7 +596,7 @@
   <script>
     var app = angular.module('aro', []);
     var map;
-    
+
     function initialize() {
       var styles = [];
       styles.push({
@@ -703,6 +704,7 @@
     var user_id = <%= user.id %>;
     var config = <%- JSON.stringify(config) %>;
   </script>
+  <script src="javascripts/interceptors/custom_locale.js"></script>
   <script type="text/javascript">
     (function() {
     var s = document.createElement("script");

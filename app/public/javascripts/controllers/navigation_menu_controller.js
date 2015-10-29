@@ -102,6 +102,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $rootScope.$broadcast('market_profile_selected', $scope.market_profile_values);
   }
 
+  $scope.open_customer_profile = function() {
+    $rootScope.$broadcast('customer_profile_selected', $scope.market_profile_values);
+  }
+
   $scope.delete_route = function(route) {
     if (!route) return;
 
