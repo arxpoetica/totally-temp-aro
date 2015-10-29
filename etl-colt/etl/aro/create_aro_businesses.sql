@@ -27,7 +27,8 @@ INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees)
 		customers.db_employee_total AS number_of_employees
 	FROM source_colt.customers customers
 	JOIN aro.locations locations ON
-	customers.building_id = locations.building_id;
+	customers.building_id = locations.building_id
+	WHERE customers.channel != 'WHOLESALE';
 
 -- Prospects have no building_id, so we need to map them geographically.
 -- Generate a view of the list of prospects which match and don't match geographically.
