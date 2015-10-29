@@ -1,64 +1,96 @@
-# etl_tiger_cousub:
-# 	etl/tiger/cousub_etl.sh
+# TIGER ETL
+#############
+etl_tiger_cousub:
+	etl/tiger/cousub_etl.sh
 
-# etl_tiger_edges:
-# 	etl/tiger/edges_etl.sh
+etl_tiger_edges:
+	etl/tiger/edges_etl.sh
 
-# etl_tiger_census_blocks:
-# 	etl/tiger/census_blocks_etl.sh
+etl_tiger_census_blocks:
+	etl/tiger/census_blocks_etl.sh
 
-# etl_tiger: etl_tiger_cousub etl_tiger_edges etl_tiger_census_blocks
+reset_tiger:
+	etl/reset_tiger_data.sh
 
-# etl_infousa:
-# 	etl/infousa/infousa_etl.sh
+etl_tiger: etl_tiger_cousub etl_tiger_edges etl_tiger_census_blocks
 
-# etl_geotel:
-# 	etl/geotel/geotel_etl.sh
+# INFOUSA ETL
+#############
 
-# etl_demographics:
-# 	etl/demographics/demographics_etl.sh
+reset_infousa:
+	etl/reset_infousa_data.sh
 
-etl_aro:
-	etl/aro/aro_etl.sh
+etl_infousa:
+	etl/infousa/infousa_etl.sh
 
-etl_client:
-	etl/client/client_etl.sh
+# GEOTEL ETL
+#############
 
-etl_custom:
-	etl/custom/custom_etl.sh
+reset_geotel:
+	etl/reset_geotel_data.sh
 
-etl_source_colt:
-	etl/source_colt/source_colt_etl.sh
+etl_geotel:
+	etl/geotel/geotel_etl.sh
 
-etl_source_colt_local:
-	etl/source_colt/source_colt_local.sh
+# DEMOGRAPHICS ETL
+#############
 
-# reset_tiger:
-# 	etl/reset_tiger_data.sh
+reset_demographics:
+	etl/reset_demographics_data.sh
+
+etl_demographics:
+	etl/demographics/demographics_etl.sh
+
+# ARO ETL
+#############
 
 reset_aro:
 	etl/reset_aro_data.sh
 
-# reset_infousa:
-# 	etl/reset_infousa_data.sh
+etl_aro:
+	etl/aro/aro_etl.sh
 
-# reset_geotel:
-# 	etl/reset_geotel_data.sh
-
-# reset_demographics:
-# 	etl/reset_demographics_data.sh
+# CLIENT ETL
+#############
 
 reset_client:
 	etl/reset_client_data.sh
 
+etl_client:
+	etl/client/client_etl.sh
+
+# CUSTOM ETL
+#############
+
 reset_custom:
 	etl/reset_custom_data.sh
 
-etl_reload_general: etl_source_colt reset_aro  etl_aro
+etl_custom:
+	etl/custom/custom_etl.sh
 
-etl_reload_client: reset_client reset_custom etl_client etl_custom
+# COLT SOURCE ETL
+#############
 
-etl_reload_all: etl_reload_general etl_reload_client
+reset_source_colt:
+	etl/reset_source_colt.sh
+
+etl_source_colt:
+	etl/source_colt/source_colt_etl.sh
+
+# MAIN ETL ACTIONS
+###################################
+
+# Include the ETLs you would like to leverage in reset, source, and app. 
+etl_reset_all: reset_demographics reset_aro reset_client reset_custom reset_source_colt
+
+etl_source_data: etl_demographics etl_source_colt
+
+etl_app_data: etl_aro etl_client etl_custom
+
+etl_reload_all: etl_reset_all etl_source_data etl_app_data
+
+# TEST ETL
+###################################
 
 etl_test_client:
 	etl/test/client.sh
@@ -71,6 +103,8 @@ etl_test_aro:
 
 etl_test_all: etl_test_aro etl_test_custom etl_test_client
 
+# SERVICES
+#############
 
 # service_deploy:
 # 	(cp aro-service/target/aro-service.war aro-service/docker)
@@ -90,15 +124,21 @@ etl_test_all: etl_test_aro etl_test_custom etl_test_client
 
 # service_redploy: service_stop service_deploy service_start	
 
+# APPLICATION SETUP
+#############
 
+# Install Node.js dependencies
 webapp:
 	(cd ../app && npm install --no-bin-link)
 
+# Run application unit tests
 test:
 	(cd ../app && npm test)
 
+# Boot the webserver at http://localhost:8000
 webserver:
 	(cd ../app && ARO_CLIENT=colt node app.js)
 
+# Make a dummy user for local development
 register_user:
 	node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password

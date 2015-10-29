@@ -24,7 +24,7 @@ INSERT INTO client.network_nodes(lat, lon, node_type_id, geog, geom)
 		ST_SetSRID(ST_Point(lon, lat),4326)::geography as geog,
 		ST_SetSRID(ST_Point(lon, lat),4326) as geom
 	FROM
-		source_colt.paris_cos;
+		source_colt.central_offices_paris;
 
 -- Load Frankfurt COs
 INSERT INTO client.network_nodes(lat, lon, node_type_id, geog, geom)
@@ -35,7 +35,7 @@ INSERT INTO client.network_nodes(lat, lon, node_type_id, geog, geom)
 		ST_SetSRID(ST_Point(lon, lat),4326)::geography as geog,
 		ST_SetSRID(ST_Point(lon, lat),4326) as geom
 	FROM
-		source_colt.frankfurt_cos;
+		source_colt.central_offices_frankfurt;
 
 CREATE INDEX client_network_nodes_geom_gist ON client.network_nodes USING gist (geom);
 CREATE INDEX client_network_nodes_geog_gist ON client.network_nodes USING gist (geog);

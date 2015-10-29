@@ -17,4 +17,4 @@ INSERT INTO client.location_entry_fees(location_id)
 
 -- Set the entry fee for every location to be between $500 and $5000. This is a very rough estimate of cost range.
 UPDATE client.location_entry_fees
-SET entry_fee = CAST(((random() * 5000) + 500) AS numeric);
+SET entry_fee = CAST(0 AS numeric);
