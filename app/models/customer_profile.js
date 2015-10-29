@@ -9,7 +9,22 @@ var _ = require('underscore');
 
 var CustomerProfile = {};
 
-CustomerProfile.customer_profile_for_route = function(plan_id, callback) {
+function process_customer_types(metadata, customer_types, callback) {
+  metadata.customer_types = customer_types;
+
+  metadata.customers_businesses_total = customer_types.reduce(function(total, customer_type) {
+    return total + customer_type.businesses;
+  }, 0);
+  metadata.customers_households_total = customer_types.reduce(function(total, customer_type) {
+    return total + customer_type.households;
+  }, 0);
+  metadata.total_customers = metadata.customer_types.reduce(function(total, type) {
+    return total + type.businesses + type.households;
+  }, 0);
+  callback(null, metadata);
+}
+
+CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callback) {
   var sql = multiline(function(){;/*
     SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
       (SELECT
@@ -55,10 +70,16 @@ CustomerProfile.customer_profile_for_route = function(plan_id, callback) {
     ORDER BY
       ct.name
   */});
-  database.query(sql, [plan_id], callback);
+  txain(function(callback) {
+    database.query(sql, [plan_id], callback);
+  })
+  .then(function(customer_types, callback) {
+    process_customer_types(metadata, customer_types, callback);
+  })
+  .end(callback);
 };
 
-CustomerProfile.customer_profile_for_existing_fiber = function(callback) {
+CustomerProfile.customer_profile_for_existing_fiber = function(metadata, callback) {
   var sql = multiline(function(){;/*
     WITH biz AS (SELECT b.id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4))
     SELECT ct.name, COUNT(*)::integer as businesses, '0'::integer as households
@@ -68,10 +89,17 @@ CustomerProfile.customer_profile_for_existing_fiber = function(callback) {
     GROUP BY ct.name
     ORDER BY ct.name
   */});
-  database.query(sql, [config.client_carrier_name], callback);
+  txain(function(callback) {
+    database.query(sql, [config.client_carrier_name], callback);
+  })
+  .then(function(customer_types, callback) {
+    process_customer_types(metadata, customer_types, callback);
+  })
+  .end(callback);
 };
 
 CustomerProfile.customer_profile_for_boundary = function(boundary, callback) {
+  var metadata = {};
   var sql = multiline(function(){;/*
     WITH biz AS (SELECT * FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))
     SELECT ct.name, COUNT(*)::integer as businesses, '0'::integer as households
@@ -81,7 +109,13 @@ CustomerProfile.customer_profile_for_boundary = function(boundary, callback) {
     GROUP BY ct.name
     ORDER BY ct.name
   */});
-  database.query(sql, [boundary], callback);
+  txain(function(callback) {
+    database.query(sql, [boundary], callback);
+  })
+  .then(function(customer_types, callback) {
+    process_customer_types(metadata, customer_types, callback);
+  })
+  .end(callback);
 };
 
 module.exports = CustomerProfile;

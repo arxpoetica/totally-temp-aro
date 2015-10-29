@@ -2,7 +2,8 @@
 app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', '$q', function($scope, $rootScope, $http, $q) {
 
   $scope.loading = false;
-  $scope.customer_types = [];
+  $scope.data = {};
+  $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
 
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
@@ -21,7 +22,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
   });
 
   $rootScope.$on('customer_profile_selected', function(e, json, title, type) {
-    $scope.customer_types = $scope.route.metadata.customer_types || [];
+    $scope.data = $scope.route.metadata;
     open_modal(null);
     show_chart();
   });
@@ -47,7 +48,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
     $scope.loading = true;
     chart && chart.destroy();
     $http.get('/customer_profile/'+$scope.route.id+'/boundary', args).success(function(response) {
-      $scope.customer_types = response;
+      $scope.data = response;
       show_chart();
     }).error(function() {
       $scope.loading = false;
@@ -71,7 +72,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
         highlight: '#FFC870',
       }
     };
-    var data = $scope.customer_types.map(function(customer_type) {
+    var data = ($scope.data.customer_types || []).map(function(customer_type) {
       return {
         value: customer_type.businesses + customer_type.households,
         color: colors[customer_type.name].color,

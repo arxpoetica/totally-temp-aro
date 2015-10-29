@@ -105,24 +105,12 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   })
   .then(function(callback) {
     if (config.route_planning) {
-      CustomerProfile.customer_profile_for_route(plan_id, callback);
+      CustomerProfile.customer_profile_for_route(plan_id, output.metadata, callback);
     } else {
-      CustomerProfile.customer_profile_for_existing_fiber(callback);
+      CustomerProfile.customer_profile_for_existing_fiber(output.metadata, callback);
     }
   })
-  .then(function(customer_types, callback) {
-    output.metadata.customer_types = customer_types;
-
-    output.metadata.customers_businesses_total = customer_types.reduce(function(total, customer_type) {
-      return total + customer_type.businesses;
-    }, 0);
-    output.metadata.customers_households_total = customer_types.reduce(function(total, customer_type) {
-      return total + customer_type.households;
-    }, 0);
-    output.metadata.total_customers = output.metadata.customer_types.reduce(function(total, type) {
-      return total + type.businesses + type.households;
-    }, 0);
-
+  .then(function(callback) {
     if (!config.route_planning) return callback(null, output);
 
     txain(function(callback) {
