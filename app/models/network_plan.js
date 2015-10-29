@@ -12,6 +12,7 @@ var Location = require('./location');
 var fs = require('fs');
 var RouteOptimizer = require('./route_optimizer');
 var Permission = require('./permission');
+var CustomerProfile = require('./customer_profile');
 var _ = require('underscore');
 
 var NetworkPlan = {};
@@ -43,68 +44,6 @@ NetworkPlan.find_target_ids = function(plan_id, callback) {
     WHERE route_id=$1
   */});
   database.findValues(sql, [plan_id], 'id', callback);
-};
-
-NetworkPlan.find_customer_types_on_route = function(plan_id, callback) {
-  var sql = multiline(function(){;/*
-    SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
-      (SELECT
-        hct.customer_type_id AS id, COUNT(*)::integer AS households, 0 as businesses
-      FROM
-        custom.route_targets t
-      JOIN
-        households h
-      ON
-        h.location_id=t.location_id
-      JOIN
-        client_schema.household_customer_types hct
-      ON
-        hct.household_id = h.id
-      WHERE
-        route_id=$1
-      GROUP BY hct.customer_type_id)
-
-      UNION
-
-      (SELECT
-        bct.customer_type_id as id, 0 as households, COUNT(*)::integer as businesses
-      FROM
-        custom.route_targets t
-      JOIN
-        businesses b
-      ON
-        b.location_id=t.location_id
-      JOIN
-        client_schema.business_customer_types bct
-      ON
-        bct.business_id = b.id
-      WHERE
-        route_id=$1
-      GROUP BY bct.customer_type_id)
-      ) t
-    JOIN
-      client_schema.customer_types ct
-    ON
-      ct.id=t.id
-    GROUP BY
-      ct.name
-    ORDER BY
-      ct.name
-  */});
-  database.query(sql, [plan_id], callback);
-};
-
-NetworkPlan.find_all_customer_types = function(callback) {
-  var sql = multiline(function(){;/*
-    WITH biz AS (SELECT b.id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4))
-    SELECT ct.name, COUNT(*)::integer as businesses, '0'::integer as households
-    FROM biz b
-    JOIN client.business_customer_types bct ON bct.business_id = b.id
-    JOIN client.customer_types ct ON ct.id=bct.customer_type_id
-    GROUP BY ct.name
-    ORDER BY ct.name
-  */});
-  database.query(sql, [config.client_carrier_name], callback);
 };
 
 NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
@@ -166,9 +105,9 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   })
   .then(function(callback) {
     if (config.route_planning) {
-      NetworkPlan.find_customer_types_on_route(plan_id, callback);
+      CustomerProfile.customer_profile_for_route(plan_id, callback);
     } else {
-      NetworkPlan.find_all_customer_types(callback);
+      CustomerProfile.customer_profile_for_existing_fiber(callback);
     }
   })
   .then(function(customer_types, callback) {

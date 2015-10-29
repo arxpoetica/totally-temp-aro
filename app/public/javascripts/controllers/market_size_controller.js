@@ -27,7 +27,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     });
   });
 
-  $rootScope.$on('boundary_selected', function(e, json, title) {
+  $rootScope.$on('boundary_selected', function(e, json, title, type) {
+    if (type !== 'market_size') return;
+    
     geo_json = json;
     $scope.market_type = 'boundary';
     $scope.calculate_market_size();

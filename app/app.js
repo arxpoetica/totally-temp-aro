@@ -37,6 +37,7 @@ var routes = [
 	'boundary',
 	'market_size',
 	'network_plan',
+	'customer_profile',
 ];
 routes.forEach(function(route) {
 	require('./routes/routes_'+route).configure(api, middleware);
