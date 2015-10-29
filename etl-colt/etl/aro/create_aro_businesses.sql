@@ -19,12 +19,13 @@ CREATE TABLE aro.businesses
 --
 --
 -- Load existing Colt customers from source_colt.customers by mapping building_id
-INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees)
+INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees, geog)
 	SELECT
 		locations.id AS location_id,
 		customers.cust_name AS name,
 		customers.db_sic_code AS industry_id,
-		customers.db_employee_total AS number_of_employees
+		customers.db_employee_total AS number_of_employees,
+		locations.geog as geog
 	FROM source_colt.customers customers
 	JOIN aro.locations locations ON
 	customers.building_id = locations.building_id
@@ -72,19 +73,21 @@ CREATE OR REPLACE VIEW source_colt.prospect_locations AS
 		prospects.employees AS number_of_employees,
 		prospects.sic_4 AS industry_id,
 		prospects.lat AS lat,
-		prospects.lon AS lon
+		prospects.lon AS lon,
+		locations.geom AS geog
 	FROM source_colt.prospects_frankfurt prospects
 	LEFT JOIN aro.locations locations
 	ON ST_Equals(locations.geom, ST_SetSRID(ST_Point(prospects.lon, prospects.lat),4326));
 
 -- Insert all prospects into businesses table, map by 
-INSERT INTO aro.businesses(location_id, name, address, industry_id, number_of_employees)
+INSERT INTO aro.businesses(location_id, name, address, industry_id, number_of_employees, geog)
 	SELECT 
 		location_id,
 		name,
 		address,
 		industry_id,
-		number_of_employees
+		number_of_employees,
+		geog
 	FROM source_colt.prospect_locations;
 
 DROP VIEW source_colt.prospect_locations;
