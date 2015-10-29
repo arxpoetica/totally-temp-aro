@@ -397,7 +397,7 @@ Location.show_businesses = function(location_id, callback) {
 			client_schema.business_install_costs costs
 		ON
 			costs.business_id = businesses.id
-		JOIN
+		LEFT JOIN
 			industries
 		ON
 			industries.id = businesses.industry_id
