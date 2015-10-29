@@ -214,19 +214,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
   };
 
-  $scope.on_zoom_changed = function() {
+  $scope.overlay_changed = function() {
+    var density = $rootScope.feature_layers.locations_density;
     var layer = $rootScope.feature_layers.locations;
-    if (layer.threshold >= map.getZoom()) {
-      $scope.overlay = 'density';
-      $scope.change_locations_layer();
-
-      if (!$rootScope.$$phase) { $rootScope.$apply(); }
+    if ($scope.overlay === 'density') {
+      density.show();
+      density.reload_data();
+      layer.hide();
+    } else {
+      density.hide();
+      layer.show();
+      layer.reload_data();
     }
   }
-
-  $rootScope.$on('map_zoom_changed', $scope.on_zoom_changed);
-  $(document).ready(function() {
-    map.ready($scope.on_zoom_changed);
-  });
 
 }]);

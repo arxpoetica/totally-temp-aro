@@ -15,33 +15,29 @@ var Location = {};
 // 1. callback: function to return a GeoJSON object
 Location.find_all = function(plan_id, type, filters, viewport, callback) {
 	txain(function(callback) {
-		if (viewport.zoom > viewport.threshold) {
-			var params = [];
-			var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
-			if (type === 'businesses') {
-				sql += ' JOIN businesses b ON b.location_id = locations.id';
-				if (filters.industries.length > 0) {
-					params.push(filters.industries)
-					sql += '\n AND b.industry_id IN ($'+params.length+')';
-				}
-				if (filters.customer_types.length > 0) {
-					params.push(filters.customer_types)
-					sql += '\n JOIN client_schema.business_customer_types ON b.id = business_customer_types.business_id AND business_customer_types.customer_type_id IN ($'+params.length+')';
-				}
-				if (filters.number_of_employees.length > 0) {
-					params.push(filters.number_of_employees)
-					sql += '\n JOIN client_schema.employees_by_location e ON e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees AND e.id IN ($'+params.length+')';
-				}
-			} else if (type === 'households') {
-				sql += ' JOIN households ON households.location_id = locations.id';
+		var params = [];
+		var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
+		if (type === 'businesses') {
+			sql += ' JOIN businesses b ON b.location_id = locations.id';
+			if (filters.industries.length > 0) {
+				params.push(filters.industries)
+				sql += '\n AND b.industry_id IN ($'+params.length+')';
 			}
-			params.push(viewport.linestring);
-			sql += '\n WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($'+params.length+')), 4326), locations.geom)'
-			sql += ' GROUP BY locations.id';
-			database.query(sql, params, callback);
-		} else {
-			callback(null, []);
+			if (filters.customer_types.length > 0) {
+				params.push(filters.customer_types)
+				sql += '\n JOIN client_schema.business_customer_types ON b.id = business_customer_types.business_id AND business_customer_types.customer_type_id IN ($'+params.length+')';
+			}
+			if (filters.number_of_employees.length > 0) {
+				params.push(filters.number_of_employees)
+				sql += '\n JOIN client_schema.employees_by_location e ON e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees AND e.id IN ($'+params.length+')';
+			}
+		} else if (type === 'households') {
+			sql += ' JOIN households ON households.location_id = locations.id';
 		}
+		params.push(viewport.linestring);
+		sql += '\n WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($'+params.length+')), 4326), locations.geom)'
+		sql += ' GROUP BY locations.id';
+		database.query(sql, params, callback);
 	})
 	.then(function(rows, callback) {
 		var features = rows.map(function(row) {
