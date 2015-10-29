@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS source_colt.frankfurt_cos;
+DROP TABLE IF EXISTS source_colt.central_offices_frankfurt;
 
-CREATE TABLE source_colt.frankfurt_cos
+CREATE TABLE source_colt.central_offices_frankfurt
 (
 	id serial,
 	country varchar,
@@ -15,5 +15,5 @@ CREATE TABLE source_colt.frankfurt_cos
 	plz varchar,
 	lat double precision,
 	lon double precision,
-	CONSTRAINT pkey_source_colt_frankfurt_cos_id PRIMARY KEY (id)
+	CONSTRAINT pkey_source_colt_central_offices_frankfurt_id PRIMARY KEY (id)
 );

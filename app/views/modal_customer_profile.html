@@ -8,27 +8,35 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-sm-6">
+            <div class="form-group" ng-show="type !== 'route'">
+              <select class="form-control" ng-model="type" ng-change="calculate_customer_profile()">
+                <option value="all">All</option>
+                <option value="addressable">Addressable</option>
+              </select>
+            </div>
             <table class="table">
               <tbody>
-                <tr ng-repeat="customer_type in route.metadata.customer_types">
+                <tr ng-repeat="customer_type in data.customer_types">
                   <th>{{customer_type.name}}</th>
                   <td class="text-right">
                     {{customer_type.businesses}}
                   </td>
                   <td class="text-right">
-                    {{customer_type.businesses*100 / route.metadata.customers_businesses_total | number : 0}}%
+                    {{customer_type.businesses*100 / data.customers_businesses_total | number : 0}}%
                   </td>
-                  <td class="text-right">
+                  <td class="text-right" ng-show="show_households">
                     {{customer_type.households}}
                   </td>
-                  <td class="text-right">
-                    {{customer_type.households*100 / route.metadata.customers_households_total | number : 0}}%
+                  <td class="text-right" ng-show="show_households">
+                    {{customer_type.households*100 / data.customers_households_total | number : 0}}%
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="col-sm-6">
+            <p class="text-center" ng-show="!loading && data.customer_types.length === 0">No data available in this area</p>
+            <p class="text-center" ng-show="loading">Loading...</p>
             <canvas id="customer-profile-chart" style="width:100%; height:200px"></canvas>
           </div>
         </div>

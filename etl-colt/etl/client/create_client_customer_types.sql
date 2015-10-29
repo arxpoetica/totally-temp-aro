@@ -10,6 +10,5 @@ CREATE TABLE client.customer_types
 -- Fake customer types for the fake client
 INSERT INTO client.customer_types(name)
 VALUES
-	('Existing Copper'),
-	('Existing Fiber'),
+	('Existing'),
 	('Prospect');

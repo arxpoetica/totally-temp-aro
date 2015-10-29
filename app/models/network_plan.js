@@ -12,6 +12,7 @@ var Location = require('./location');
 var fs = require('fs');
 var RouteOptimizer = require('./route_optimizer');
 var Permission = require('./permission');
+var CustomerProfile = require('./customer_profile');
 var _ = require('underscore');
 
 var NetworkPlan = {};
@@ -45,66 +46,11 @@ NetworkPlan.find_target_ids = function(plan_id, callback) {
   database.findValues(sql, [plan_id], 'id', callback);
 };
 
-NetworkPlan.find_customer_types = function(plan_id, callback) {
-  var sql = multiline(function(){;/*
-    SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
-      (SELECT
-        hct.customer_type_id AS id, COUNT(*)::integer AS households, 0 as businesses
-      FROM
-        custom.route_targets t
-      JOIN
-        households h
-      ON
-        h.location_id=t.location_id
-      JOIN
-        client_schema.household_customer_types hct
-      ON
-        hct.household_id = h.id
-      WHERE
-        route_id=$1
-      GROUP BY hct.customer_type_id)
-
-      UNION
-
-      (SELECT
-        bct.customer_type_id as id, 0 as households, COUNT(*)::integer as businesses
-      FROM
-        custom.route_targets t
-      JOIN
-        businesses b
-      ON
-        b.location_id=t.location_id
-      JOIN
-        client_schema.business_customer_types bct
-      ON
-        bct.business_id = b.id
-      WHERE
-        route_id=$1
-      GROUP BY bct.customer_type_id)
-      ) t
-    JOIN
-      client_schema.customer_types ct
-    ON
-      ct.id=t.id
-    GROUP BY
-      ct.name
-    ORDER BY
-      ct.name
-  */});
-  database.query(sql, [plan_id], callback);
-};
-
 NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   if (arguments.length === 2) {
     callback = metadata_only;
     metadata_only = false;
   }
-
-  if (!config.route_planning) return callback(null, {
-    sources: [],
-    targets: [],
-    metadata: {},
-  });
 
   var cost_per_meter = 200;
   var output = {
@@ -116,88 +62,91 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   var fiber_cost;
 
   txain(function(callback) {
-    NetworkPlan.find_edges(plan_id, callback);
+    if (!config.route_planning) return callback();
+
+    txain(function(callback) {
+      NetworkPlan.find_edges(plan_id, callback);
+    })
+    .then(function(edges, callback) {
+      output.feature_collection.features = edges.map(function(edge) {
+        return {
+          'type':'Feature',
+          'geometry': edge.geom,
+        }
+      });
+
+      fiber_cost = RouteOptimizer.calculate_fiber_cost(edges, cost_per_meter);
+      output.metadata.costs.push({
+        name: 'Fiber cost',
+        value: fiber_cost,
+      });
+      RouteOptimizer.calculate_locations_cost(plan_id, callback);
+    })
+    .then(function(locations_cost, callback) {
+      output.metadata.costs.push({
+        name: 'Locations cost',
+        value: locations_cost,
+      });
+
+      if (metadata_only) return callback();
+      NetworkPlan.find_target_ids(plan_id, callback);
+    })
+    .then(function(targets, callback) {
+      output.metadata.targets = targets;
+
+      if (metadata_only) return callback();
+      NetworkPlan.find_source_ids(plan_id, callback);
+    })
+    .then(function(sources, callback) {
+      output.metadata.sources = sources;
+      callback();
+    })
+    .end(callback);
   })
-  .then(function(edges, callback) {
-    output.feature_collection.features = edges.map(function(edge) {
-      return {
-        'type':'Feature',
-        'geometry': edge.geom,
-      }
-    });
-
-    fiber_cost = RouteOptimizer.calculate_fiber_cost(edges, cost_per_meter);
-    output.metadata.costs.push({
-      name: 'Fiber cost',
-      value: fiber_cost,
-    });
-    RouteOptimizer.calculate_locations_cost(plan_id, callback);
+  .then(function(callback) {
+    if (config.route_planning) {
+      CustomerProfile.customer_profile_for_route(plan_id, output.metadata, callback);
+    } else {
+      CustomerProfile.customer_profile_for_existing_fiber(output.metadata, callback);
+    }
   })
-  .then(function(locations_cost, callback) {
-    output.metadata.costs.push({
-      name: 'Locations cost',
-      value: locations_cost,
-    });
+  .then(function(callback) {
+    if (!config.route_planning) return callback(null, output);
 
-    if (metadata_only) return callback();
-    NetworkPlan.find_target_ids(plan_id, callback);
-  })
-  .then(function(targets, callback) {
-    output.metadata.targets = targets;
+    txain(function(callback) {
+      RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost, callback);
+    })
+    .then(function(calculation, callback) {
+      output.metadata.revenue = calculation.revenue;
+      output.metadata.npv = calculation.npv;
 
-    if (metadata_only) return callback();
-    NetworkPlan.find_source_ids(plan_id, callback);
-  })
-  .then(function(sources, callback) {
-    output.metadata.sources = sources;
+      RouteOptimizer.calculate_equipment_nodes_cost(plan_id, callback);
+    })
+    .then(function(equipment_nodes_cost, callback) {
+      output.metadata.costs.push({
+        name: 'Equipment nodes cost',
+        value: equipment_nodes_cost.total,
+        itemized: equipment_nodes_cost.equipment_node_types,
+      });
 
-    NetworkPlan.find_customer_types(plan_id, callback);
-  })
-  .then(function(customer_types, callback) {
-    output.metadata.customer_types = customer_types;
+      var up_front_costs = equipment_nodes_cost.total + fiber_cost;
+      RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost, callback);
+    })
+    .then(function(calculation, callback) {
+      output.metadata.revenue = calculation.revenue;
+      output.metadata.npv = calculation.npv;
 
-    output.metadata.customers_businesses_total = customer_types.reduce(function(total, customer_type) {
-      return total + customer_type.businesses;
-    }, 0);
-    output.metadata.customers_households_total = customer_types.reduce(function(total, customer_type) {
-      return total + customer_type.households;
-    }, 0);
+      output.metadata.total_cost = output.metadata.costs.reduce(function(total, cost) {
+        return total+cost.value;
+      }, 0);
 
-    RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost, callback);
-  })
-  .then(function(calculation, callback) {
-    output.metadata.revenue = calculation.revenue;
-    output.metadata.npv = calculation.npv;
+      output.metadata.profit = output.metadata.revenue - output.metadata.total_cost;
 
-    RouteOptimizer.calculate_equipment_nodes_cost(plan_id, callback);
-  })
-  .then(function(equipment_nodes_cost, callback) {
-    output.metadata.costs.push({
-      name: 'Equipment nodes cost',
-      value: equipment_nodes_cost.total,
-      itemized: equipment_nodes_cost.equipment_node_types,
-    });
+      if (metadata_only) delete output.feature_collection;
 
-    var up_front_costs = equipment_nodes_cost.total + fiber_cost;
-    RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost, callback);
-  })
-  .then(function(calculation, callback) {
-    output.metadata.revenue = calculation.revenue;
-    output.metadata.npv = calculation.npv;
-
-    output.metadata.total_cost = output.metadata.costs.reduce(function(total, cost) {
-      return total+cost.value;
-    }, 0);
-
-    output.metadata.total_customers = output.metadata.customer_types.reduce(function(total, type) {
-      return total + type.businesses + type.households;
-    }, 0);
-
-    output.metadata.profit = output.metadata.revenue - output.metadata.total_cost;
-
-    if (metadata_only) delete output.feature_collection;
-
-    callback(null, output);
+      callback(null, output);
+    })
+    .end(callback);
   })
   .end(callback);
 }

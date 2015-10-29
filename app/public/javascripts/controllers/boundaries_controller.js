@@ -120,7 +120,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     var name = event.feature.getProperty('name');
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson(function(obj) {
-        $rootScope.$broadcast('boundary_selected', obj.geometry, name);
+        $rootScope.$broadcast('boundary_selected', obj.geometry, name, 'market_size');
       });
     }
   });
@@ -149,7 +149,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
 
     overlay.marker.addListener('click', function() {
-      $scope.select_boundary(boundary);
+      $scope.show_market_size(boundary);
     });
 
     overlay.marker.addListener('mouseover', function() {
@@ -243,8 +243,12 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
   };
 
-  $scope.select_boundary = function(boundary) {
-    $rootScope.$broadcast('boundary_selected', to_geo_json(boundary.overlay, true), boundary.name);
+  $scope.show_market_size = function(boundary) {
+    $rootScope.$broadcast('boundary_selected', to_geo_json(boundary.overlay, true), boundary.name, 'market_size');
+  };
+
+  $scope.show_customer_profile = function(boundary) {
+    $rootScope.$broadcast('boundary_selected', to_geo_json(boundary.overlay, true), boundary.name, 'customer_profile');
   };
 
   $scope.select_area = function(layer) {

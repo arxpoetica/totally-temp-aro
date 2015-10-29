@@ -105,7 +105,7 @@
                 <span class="label label-success">{{route.metadata.revenue | currency}}</span>
               </span>
 
-              <span data-toggle="modal" data-target="#modal-customer-profile" style="cursor:pointer" ng-show="show_customer_profile">
+              <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
                 <span class="fa fa-users"></span> {{ route.metadata.total_customers }} customers covered
               </span>
 
@@ -247,7 +247,8 @@
                 <div class="pull-right boundary-options">
                   <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="fa fa-pencil"></span></a>
                   <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="fa fa-trash-o"></span></a>
-                  <a href="javascript:void(0)" class="text-success" ng-click="select_boundary(boundary)"><span class="fa fa-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="show_market_size(boundary)"><span class="fa fa-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-warning" ng-click="show_customer_profile(boundary)"><span class="fa fa-users"></span></a>
                 </div>
                 <label>
                   <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
@@ -347,7 +348,7 @@
           </div>
           <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
             <h2>View</h2>
-            <form>
+            <form ng-hide="show_commercial && !show_residential">
               <div class="checkbox" ng-class="{'disabled': overlay === 'density'}" ng-show="show_commercial">
                 <label>
                   <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay === 'density'"> Commercial
@@ -359,6 +360,22 @@
                 </label>
               </div>
             </form>
+            <div ng-show="show_commercial && !show_residential">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" ng-change="toggle_businesses()" ng-model="show_businesses" ng-disabled="overlay === 'density'"> Show businesses
+                </label>
+              </div>
+              <p>
+                <input class="form-control business-filter select2-industries" ng-model="selected_industries" ng-change="change_locations_layer()"></input>
+              </p>
+              <p>
+                <input class="form-control business-filter select2-customer-types" ng-model="selected_customer_types" ng-change="change_locations_layer()"></input>
+              </p>
+              <p>
+                <input class="form-control business-filter select2-number-of-employees" ng-model="selected_number_of_employees" ng-change="change_locations_layer()"></input>
+              </p>
+            </div>
             <% if (env_is_test) { %>
               <a href="javascript:void(0)" ng-click="feature_layers.locations.select_random_features()" ng-attr-data-loaded="{{feature_layers.locations.data_loaded}}">.</a>
             <% } %>
@@ -366,7 +383,7 @@
             <div>
               <h2>Overlay</h2>
               <div class="form-group">
-                <select class="form-control" ng-model="overlay" ng-change="overlay_changed()">
+                <select class="form-control" ng-model="overlay" ng-change="change_locations_layer()">
                   <option value="none">None</option>
                   <option value="density">Density</option>
                 </select>
@@ -579,7 +596,7 @@
   <script>
     var app = angular.module('aro', []);
     var map;
-    
+
     function initialize() {
       var styles = [];
       styles.push({
@@ -687,6 +704,7 @@
     var user_id = <%= user.id %>;
     var config = <%- JSON.stringify(config) %>;
   </script>
+  <script src="javascripts/interceptors/custom_locale.js"></script>
   <script type="text/javascript">
     (function() {
     var s = document.createElement("script");

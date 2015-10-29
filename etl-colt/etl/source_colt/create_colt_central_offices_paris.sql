@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS source_colt.paris_cos;
+DROP TABLE IF EXISTS source_colt.central_offices_paris;
 
-CREATE TABLE source_colt.paris_cos
+CREATE TABLE source_colt.central_offices_paris
 (
 	id serial,
 	region varchar,
@@ -17,5 +17,5 @@ CREATE TABLE source_colt.paris_cos
 	xng_site_id varchar,
 	lat double precision,
 	lon double precision,
-	CONSTRAINT pkey_source_colt_paris_cos_id PRIMARY KEY (id)
+	CONSTRAINT pkey_source_colt_central_offices_paris_id PRIMARY KEY (id)
 );

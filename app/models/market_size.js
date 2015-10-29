@@ -44,73 +44,55 @@ function empty_array(arr) {
 }
 
 MarketSize.calculate = function(plan_id, type, options, callback) {
-  txain(function(callback) {
-    var filters = options.filters;
-    var params = [];
-    var sql = ''
+  var filters = options.filters;
+  var params = [];
+  var sql = ''
 
-    if (type === 'route' || type === 'addressable') {
-      if (config.route_planning) {
-        sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)\n';
-        params.push(plan_id);
-      } else {
-        sql += 'WITH route AS (SELECT geom AS route FROM aro.fiber_plant WHERE carrier_name = $1)\n';
-        params.push(config.client_carrier_name);
-      }
+  if (type === 'route' || type === 'addressable') {
+    if (config.route_planning) {
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
+      // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
+      params.push(plan_id);
+    } else {
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
+      params.push(config.client_carrier_name);
     }
 
-    sql += multiline(function() {;/*
-      SELECT
-        spend.year, SUM(spend.monthly_spend * 12)::float as total
-      FROM
-        businesses b
-      JOIN
-        client_schema.industry_mapping m
-      ON
-        m.sic4 = b.industry_id
-      JOIN
-        client_schema.spend
-      ON
-        spend.industry_id = m.industry_id
-        AND spend.monthly_spend <> 'NaN'
-    */});
-    if (!empty_array(filters.industry)) {
-      params.push(filters.industry);
-      sql += ' AND spend.industry_id IN ($'+params.length+')';
-    }
-    if (!empty_array(filters.product)) {
-      params.push(filters.product);
-      sql += ' AND spend.product_id IN ($'+params.length+')';
-    }
-    if (!empty_array(filters.employees_range)) {
-      params.push(filters.employees_range);
-      sql += ' AND spend.employees_by_location_id IN ($'+params.length+')';
-    }
-    sql += multiline(function() {;/*
-      JOIN
-        client_schema.employees_by_location e
-      ON
-        e.id = spend.employees_by_location_id
-        AND e.min_value <= b.number_of_employees
-        AND e.max_value >= b.number_of_employees
-      WHERE
-    */});
-    // 152.4 meters = 500 feet
-    if (type === 'boundary') {
+    if (type === 'addressable') {
       params.push(options.boundary);
-      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
-    } else if (type === 'route') {
-      sql += '\n ST_DWithin((SELECT ST_Union(route)::geography FROM route), b.geog, 152.4)';
-    } else if (type === 'addressable') {
-      sql += '\n ST_DWithin((SELECT ST_Union(route)::geography FROM route), b.geog, 152.4)';
-      sql += ' AND ';
-      params.push(options.boundary);
-      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
+      sql += ' AND ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog) GROUP BY b.id)';
+    } else {
+      sql += 'GROUP BY b.id)'
     }
-    sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
-    database.query(sql, params, callback);
-  })
-  .end(callback);
+  } else {
+    params.push(options.boundary);
+    sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
+  }
+
+  sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
+
+  if (config.industry_mapping) {
+    sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
+  } else {
+    sql += '\n JOIN client_schema.spend ON spend.industry_id = b.industry_id'
+  }
+
+  if (!empty_array(filters.industry)) {
+    params.push(filters.industry);
+    sql += '\n AND spend.industry_id IN ($'+params.length+')';
+  }
+  if (!empty_array(filters.product)) {
+    params.push(filters.product);
+    sql += '\n AND spend.product_id IN ($'+params.length+')';
+  }
+  if (!empty_array(filters.employees_range)) {
+    params.push(filters.employees_range);
+    sql += '\n AND spend.employees_by_location_id IN ($'+params.length+')';
+  }
+  sql += '\n JOIN client_schema.employees_by_location e ON e.id = spend.employees_by_location_id AND e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees'
+  sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
+
+  database.query(sql, params, callback);
 };
 
 MarketSize.export_businesses = function(plan_id, type, options, user, callback) {

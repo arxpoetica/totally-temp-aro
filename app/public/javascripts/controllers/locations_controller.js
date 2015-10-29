@@ -42,18 +42,92 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $scope.feature_layers = $rootScope.feature_layers;
 
-  $http.get('/industries')
-    .success(function(response) {
-      $scope.industries = response;
-      $('#create-location select.industries').select2({ placeholder: 'Select an industry' });
+  $http.get('/locations_filters').success(function(response) {
+    $scope.industries = response.industries;
+    $scope.customer_types = response.customer_types;
+    $scope.employees_by_location = response.employees_by_location;
+
+    // industries
+    $('#create-location select.industries').select2({ placeholder: 'Select an industry' });
+
+    // customer_types
+    $('#create-location select.households_customer_types').select2({ placeholder: 'Select a customer type' });
+    $('#create-location select.businesses_customer_types').select2({ placeholder: 'Select a customer type' });
+
+    // filters
+    $scope.industries.forEach(function(industry) {
+      industry.text = industry.industry_name;
+    });
+    $scope.customer_types.forEach(function(customer_type) {
+      customer_type.text = customer_type.name;
+    });
+    $scope.employees_by_location.forEach(function(employee_by_location) {
+      employee_by_location.text = employee_by_location.value_range;
     });
 
-  $http.get('/customer_types')
-    .success(function(response) {
-      $scope.customer_types = response;
-      $('#create-location select.households_customer_types').select2({ placeholder: 'Select a customer type' });
-      $('#create-location select.businesses_customer_types').select2({ placeholder: 'Select a customer type' });
+    $('#locations_controller .select2-industries').select2({
+      placeholder: 'Any industry',
+      multiple: true,
+      data: $scope.industries,
     });
+
+    $('#locations_controller .select2-customer-types').select2({
+      placeholder: 'Any customer type',
+      multiple: true,
+      data: $scope.customer_types,
+    });
+
+    $('#locations_controller .select2-number-of-employees').select2({
+      placeholder: 'Any number of employees',
+      multiple: true,
+      data: $scope.employees_by_location,
+    });
+
+  });
+
+  $scope.change_locations_layer = function() {
+    var density = $rootScope.feature_layers.locations_density;
+    var layer = $rootScope.feature_layers.locations;
+    if ($scope.overlay === 'density') {
+      density.show();
+      density.reload_data();
+      layer.hide();
+    } else {
+      density.hide();
+
+      var industries = $('#locations_controller .select2-industries').select2('val');
+      var customer_types = $('#locations_controller .select2-customer-types').select2('val');
+      var number_of_employees = $('#locations_controller .select2-number-of-employees').select2('val');
+
+      if (!$scope.show_businesses && !$scope.show_households) {
+        layer.hide();
+      } else {
+        layer.show();
+        var type;
+        if ($scope.show_businesses && $scope.show_households) {
+          type = '';
+        } else if ($scope.show_businesses) {
+          type = 'businesses';
+        } else if ($scope.show_households) {
+          type = 'huseholds';
+        }
+      }
+      layer.set_api_endpoint('/locations/'+$scope.route.id, {
+        industries: industries.join(','),
+        customer_types: customer_types.join(','),
+        number_of_employees: number_of_employees.join(','),
+        type: type,
+      });
+      layer.show();
+    }
+
+    if ($scope.show_businesses && $scope.overlay === 'none') {
+      $('#locations_controller .business-filter').prop('disabled', false);
+    } else {
+      $('#locations_controller .business-filter').select2('val', [], true);
+      $('#locations_controller .business-filter').prop('disabled', true);
+    }
+  }
 
   $('#create-location').on('shown.bs.modal', function() {
     $('#create-location select').val('').trigger("change");
@@ -63,24 +137,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
   });
-
-  $scope.change_locations_layer = function() {
-    var layer = $rootScope.feature_layers.locations;
-    if (!$scope.show_businesses && !$scope.show_households) {
-      layer.hide();
-    } else {
-      layer.show();
-      var filter;
-      if ($scope.show_businesses && $scope.show_households) {
-        filter = '';
-      } else if ($scope.show_businesses) {
-        filter = '?type=businesses';
-      } else if ($scope.show_households) {
-        filter = '?type=huseholds';
-      }
-      layer.set_api_endpoint('/locations/'+$scope.route.id+filter);
-    }
-  }
 
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
     if (tool === 'locations') {
