@@ -107,7 +107,7 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
     if (config.route_planning) {
       CustomerProfile.customer_profile_for_route(plan_id, output.metadata, callback);
     } else {
-      CustomerProfile.customer_profile_for_existing_fiber(output.metadata, callback);
+      CustomerProfile.customer_profile_for_existing_fiber(plan_id, output.metadata, callback);
     }
   })
   .then(function(callback) {
