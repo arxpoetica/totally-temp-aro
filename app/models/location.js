@@ -50,7 +50,6 @@ Location.find_all = function(plan_id, type, filters, viewport, callback) {
 		sql += ' GROUP BY locations.id';
 		database.query(sql, params, callback);
 	})
-	.debug()
 	.then(function(rows, callback) {
 		var features = rows.map(function(row) {
 			var icon = void(0);
@@ -201,7 +200,7 @@ Location.show_information = function(location_id, callback) {
 		var sql = multiline(function() {;/*
 			SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
 			  (SELECT
-			    bct.customer_type_id as id, COUNT(*)::integer AS households, 0 as businesses
+			    bct.customer_type_id as id, COUNT(*)::integer AS businesses, 0 as households
 			  FROM
 			    businesses b
 			  JOIN
@@ -215,7 +214,7 @@ Location.show_information = function(location_id, callback) {
 			  UNION
 
 			  (SELECT
-			    hct.customer_type_id as id, 0 as households, COUNT(*)::integer AS businesses
+			    hct.customer_type_id as id, 0 as businesses, COUNT(*)::integer AS households
 			  FROM
 			    households h
 			  JOIN
@@ -250,6 +249,7 @@ Location.show_information = function(location_id, callback) {
 
 		callback(null, info);
 	})
+	.debug()
 	.end(callback);
 }
 

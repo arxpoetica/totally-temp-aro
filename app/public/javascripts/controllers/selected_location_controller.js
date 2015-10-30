@@ -1,6 +1,7 @@
 // Selected location controller
 app.controller('selected_location_controller', function($rootScope, $scope, $http) {
   $scope.location = {};
+  $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
 
   $scope.select_random_location = function() {
     var map_layer = $rootScope.feature_layers.locations;
@@ -23,6 +24,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     options.add('See more information', function(map_layer, feature) {
       var id = feature.getProperty('id');
       $http.get('/locations/'+id+'/show').success(function(response) {
+        console.log('show_households', $scope.show_households)
         set_selected_location(response);
         $('#selected_location_controller').modal('show');
       });
@@ -45,5 +47,10 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
                           + location.business_install_costs * location.number_of_businesses;
     $scope.location = location;
   };
+
+  $('#selected_location_controller .nav-tabs a').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+  })
 
 });
