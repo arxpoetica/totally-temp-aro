@@ -31,14 +31,14 @@
                   <th>Business install costs</th>
                   <td colspan="2" class="text-right">{{location.business_install_costs | currency}}</td>
                 </tr>
-                <tr>
+                <tr ng-show="show_households">
                   <th>Number of households</th>
                   <td></td>
                   <td class="text-right">
                     <input type="text" class="form-control input-sm" style="text-align:right" ng-model="location.number_of_households">
                   </td>
                 </tr>
-                <tr>
+                <tr ng-show="show_households">
                   <th>Household install costs</th>
                   <td colspan="2" class="text-right">{{location.household_install_costs | currency}}</td>
                 </tr>
@@ -55,7 +55,7 @@
                 <tr>
                   <td></td>
                   <th class="text-right" colspan="2">Businesses</th>
-                  <th class="text-right" colspan="2">Households</th>
+                  <th class="text-right" colspan="2" ng-show="show_households">Households</th>
                 </tr>
                 <tr ng-repeat="customer_type in location.customer_types">
                   <th>{{customer_type.name}}</th>
@@ -65,10 +65,10 @@
                   <td class="text-right">
                     {{customer_type.businesses*100 / location.customers_businesses_total | number : 0}}%
                   </td>
-                  <td class="text-right">
+                  <td class="text-right" ng-show="show_households">
                     {{customer_type.households}}
                   </td>
-                  <td class="text-right">
+                  <td class="text-right" ng-show="show_households">
                     {{customer_type.households*100 / location.customers_households_total | number : 0}}%
                   </td>
                 </tr>
@@ -79,7 +79,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" ng-click="update()">Update</button>
+        <button type="button" class="btn btn-primary" ng-click="update()" ng-show="show_households">Update</button>
       </div>
     </div>
   </div>

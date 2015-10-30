@@ -79,18 +79,21 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
   .end(callback);
 };
 
-CustomerProfile.customer_profile_for_existing_fiber = function(metadata, callback) {
-  var sql = multiline(function(){;/*
-    WITH biz AS (SELECT DISTINCT b.id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4))
-    SELECT ct.name, COUNT(*)::integer as businesses, '0'::integer as households
-    FROM biz b
-    JOIN client.business_customer_types bct ON bct.business_id = b.id
-    JOIN client.customer_types ct ON ct.id=bct.customer_type_id
-    GROUP BY ct.name
-    ORDER BY ct.name
-  */});
+CustomerProfile.customer_profile_for_existing_fiber = function(plan_id, metadata, callback) {
   txain(function(callback) {
-    database.query(sql, [config.client_carrier_name], callback);
+    database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM custom.route WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
+  })
+  .then(function(cbsa, callback) {
+    var sql = multiline(function(){;/*
+      WITH biz AS (SELECT DISTINCT b.id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4))
+      SELECT ct.name, COUNT(*)::integer as businesses, '0'::integer as households
+      FROM biz b
+      JOIN client.business_customer_types bct ON bct.business_id = b.id
+      JOIN client.customer_types ct ON ct.id=bct.customer_type_id
+      GROUP BY ct.name
+      ORDER BY ct.name
+    */});
+    database.query(sql, [config.client_carrier_name, cbsa], callback);
   })
   .then(function(customer_types, callback) {
     process_customer_types(metadata, customer_types, callback);
