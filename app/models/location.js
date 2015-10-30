@@ -15,13 +15,24 @@ var Location = {};
 // 1. callback: function to return a GeoJSON object
 Location.find_all = function(plan_id, type, filters, viewport, callback) {
 	txain(function(callback) {
+	  database.query('SELECT * FROM client_schema.customer_types', callback)
+	})
+	.then(function(customer_types, callback) {
 		var params = [];
-		var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom FROM aro.locations';
+		var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom';
+		customer_types.forEach(function(customer_type) {
+			params.push(customer_type.id);
+			sql += '\n\t, (SELECT COUNT(*)::integer FROM businesses b JOIN client_schema.business_customer_types bct ON b.id = bct.business_id AND bct.customer_type_id=$'+params.length;
+			sql += ' WHERE b.location_id = locations.id)'
+			sql += ' AS customer_type_'+customer_type.name.toLowerCase().replace(/\s+/g, '');
+		})
+		sql += '\n FROM aro.locations';
 		if (type === 'businesses') {
-			sql += ' JOIN businesses b ON b.location_id = locations.id';
+			sql += '\n JOIN businesses b ON b.location_id = locations.id';
+			sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.industries i ON m.industry_id = i.id';
 			if (filters.industries.length > 0) {
 				params.push(filters.industries)
-				sql += '\n AND b.industry_id IN ($'+params.length+')';
+				sql += '\n AND m.industry_id IN ($'+params.length+')';
 			}
 			if (filters.customer_types.length > 0) {
 				params.push(filters.customer_types)
@@ -39,12 +50,18 @@ Location.find_all = function(plan_id, type, filters, viewport, callback) {
 		sql += ' GROUP BY locations.id';
 		database.query(sql, params, callback);
 	})
+	.debug()
 	.then(function(rows, callback) {
 		var features = rows.map(function(row) {
+			var icon = void(0);
+			var total = (row.customer_type_existing || 0) + (row.customer_type_prospect || 0);
+			if (row.customer_type_existing > total/2) icon = '/images/map_icons/location_existing.png';
+			if (row.customer_type_prospect > total/2) icon = '/images/map_icons/location_prospect.png';
 			return {
 				'type':'Feature',
 				'properties': {
 					'id': row.id,
+					'icon': icon,
 				},
 				'geometry': row.geom,
 			};

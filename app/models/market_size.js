@@ -70,12 +70,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
   }
 
   sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
-
-  if (config.industry_mapping) {
-    sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
-  } else {
-    sql += '\n JOIN client_schema.spend ON spend.industry_id = b.industry_id'
-  }
+  sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
 
   if (!empty_array(filters.industry)) {
     params.push(filters.industry);

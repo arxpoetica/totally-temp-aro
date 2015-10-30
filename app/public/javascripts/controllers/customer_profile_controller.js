@@ -70,18 +70,26 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
         color: '#46BFBD',
         highlight: '#5AD3D1',
       },
+      'Existing': {
+        color: '#46BFBD',
+        highlight: '#5AD3D1',
+      },
       'Prospect': {
         color: '#FDB45C',
         highlight: '#FFC870',
       }
     };
     var data = ($scope.data.customer_types || []).map(function(customer_type) {
-      return {
-        value: customer_type.businesses + customer_type.households,
-        color: colors[customer_type.name].color,
-        highlight: colors[customer_type.name].highlight,
-        label: customer_type.name,
+      var info = colors[customer_type.name]
+      if (!info) {
+        info = {
+          color: 'gray',
+          highlight: 'gray',
+          name: customer_type.name,
+        }
       }
+      info.value = customer_type.businesses + customer_type.households;
+      return info;
     });
 
     chart && chart.destroy();

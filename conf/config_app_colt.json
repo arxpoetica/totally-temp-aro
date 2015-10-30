@@ -5,7 +5,6 @@
   "client_carrier_name": "Colt",
   "route_planning": false,
   "currency_symbol": "€",
-  "industry_mapping": true,
   "ui": {
     "map_tools": {
       "locations": {
