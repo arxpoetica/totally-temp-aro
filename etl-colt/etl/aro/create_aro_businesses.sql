@@ -48,11 +48,12 @@ CREATE OR REPLACE VIEW source_colt.prospects_locations_gaps AS
 	ON ST_Equals(locations.geom, ST_SetSRID(ST_Point(prospects.lon, prospects.lat),4326));
 
 -- Create locations for all prospect_location_overlaps which don't overlap 
-INSERT INTO aro.locations(address, city, postal_code, lat, lon, geog, geom)
+INSERT INTO aro.locations(address, city, postal_code, country, lat, lon, geog, geom)
 	SELECT
 		address,
 		city,
 		postcode AS postal_code,
+		'Germany' AS country,
 		lat,
 		lon,
 		ST_SetSRID(ST_Point(lon, lat),4326)::geography as geog,
