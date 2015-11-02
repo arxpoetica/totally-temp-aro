@@ -363,7 +363,7 @@
             <div ng-show="show_commercial && !show_residential">
               <div class="checkbox">
                 <label>
-                  <input type="checkbox" ng-change="toggle_businesses()" ng-model="show_businesses" ng-disabled="overlay === 'density'"> Show businesses
+                  <input type="checkbox" ng-change="change_locations_layer()" ng-model="show_businesses" ng-disabled="overlay === 'density'"> Show businesses
                 </label>
               </div>
               <p>
