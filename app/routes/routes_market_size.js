@@ -47,6 +47,11 @@ exports.configure = function(api, middleware) {
     }));
   });
 
+  api.get('/market_size/business/:business_id', function(request, response, next) {
+    var business_id = +request.params.business_id;
+    models.MarketSize.market_size_for_business(business_id, jsonHandler(response, next));
+  });
+
   function arr(value) {
     return _.compact((value || '').split(','));
   };

@@ -25,6 +25,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
       var id = feature.getProperty('id');
       $http.get('/locations/'+id+'/show').success(function(response) {
         set_selected_location(response);
+        $('#selected_location_controller a:first').tab('show');
         $('#selected_location_controller').modal('show');
       });
     });
@@ -54,16 +55,17 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
 
   $('#selected_location_controller').on('shown.bs.tab', function(e) {
     if ($(e.target).attr('href') === '#selected_location_market_profile') {
-      $('#selected_location_market_profile canvas').css({
-        width: '100%',
-        height: '200px',
-      });
       show_market_profile_chart();
     }
   })
 
   var chart;
   function show_market_profile_chart() {
+    $('#selected_location_market_profile canvas').css({
+      width: '100%',
+      height: '200px',
+    });
+
     var dataset = {
       label: "Market size",
       fillColor: "rgba(151,187,205,0.2)",
@@ -91,7 +93,6 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     };
     var ctx = document.getElementById('location-market-size-chart').getContext('2d');
     chart && chart.destroy();
-    console.log('data', data)
     chart = new Chart(ctx).Line(data, options);
 
     return chart

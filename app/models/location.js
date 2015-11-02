@@ -6,7 +6,8 @@ var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
 var multiline = require('multiline');
-var config = require('../helpers').config;
+var config = helpers.config;
+var MarketSize = require('./market_size');
 
 var Location = {};
 
@@ -247,23 +248,7 @@ Location.show_information = function(location_id, callback) {
 			return total + customer_type.households;
 		}, 0);
 
-		var sql = multiline(function() {;/*
-			SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
-			FROM aro.locations locations
-			JOIN businesses b ON locations.id = b.location_id
-			JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
-			JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
-			JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
-			JOIN client_schema.spend ON spend.industry_id = m.industry_id
-			JOIN client_schema.employees_by_location e ON
-			  e.id = spend.employees_by_location_id
-			  AND e.min_value <= b.number_of_employees
-			 AND e.max_value >= b.number_of_employees
-			WHERE locations.id = $1
-			GROUP BY spend.year
-			ORDER by spend.year
-		*/});
-		database.query(sql, [location_id], callback);
+		MarketSize.market_size_for_location(location_id, callback);
 	})
 	.then(function(market_size, callback) {
 		info.market_size = market_size;
