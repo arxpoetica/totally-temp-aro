@@ -289,7 +289,9 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
   .end(callback);
 };
 
-MarketSize.market_size_for_location = function(location_id, callback) {
+MarketSize.market_size_for_location = function(location_id, filters, callback) {
+  console.log('filters', filters)
+  var params = [location_id];
   var sql = multiline(function() {;/*
     SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
     FROM aro.locations locations
@@ -298,6 +300,20 @@ MarketSize.market_size_for_location = function(location_id, callback) {
     JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
     JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
     JOIN client_schema.spend ON spend.industry_id = m.industry_id
+  */});
+  if (!empty_array(filters.industry)) {
+    params.push(filters.industry);
+    sql += ' AND spend.industry_id IN ($'+params.length+')';
+  }
+  if (!empty_array(filters.product)) {
+    params.push(filters.product);
+    sql += ' AND spend.product_id IN ($'+params.length+')';
+  }
+  if (!empty_array(filters.employees_range)) {
+    params.push(filters.employees_range);
+    sql += ' AND spend.employees_by_location_id IN ($'+params.length+')';
+  }
+  sql += multiline(function() {;/*
     JOIN client_schema.employees_by_location e ON
       e.id = spend.employees_by_location_id
       AND e.min_value <= b.number_of_employees
@@ -306,7 +322,8 @@ MarketSize.market_size_for_location = function(location_id, callback) {
     GROUP BY spend.year
     ORDER by spend.year
   */});
-  database.query(sql, [location_id], callback);
+  console.log('sql', sql, params)
+  database.query(sql, params, callback);
 }
 
 MarketSize.market_size_for_business = function(business_id, callback) {

@@ -247,11 +247,7 @@ Location.show_information = function(location_id, callback) {
 		info.customers_households_total = customer_types.reduce(function(total, customer_type) {
 			return total + customer_type.households;
 		}, 0);
-
-		MarketSize.market_size_for_location(location_id, callback);
-	})
-	.then(function(market_size, callback) {
-		info.market_size = market_size;
+		
 		callback(null, info);
 	})
 	.end(callback);
