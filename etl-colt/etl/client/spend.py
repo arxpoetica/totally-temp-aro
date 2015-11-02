@@ -1,6 +1,7 @@
 import pandas as pd
 
 def import_spend(db, spend_data):
+    spend_data = clean_industry_names(spend_data)
     spend_data.loc[:,'spend'].fillna(value = 0, 
                                      inplace = True)
     
@@ -29,6 +30,16 @@ def import_spend(db, spend_data):
                                          'employees_by_location_id')
     
     add_spend(db, spend_data)
+
+def clean_industry_names(spend_data):
+    subset = spend_data.loc[spend_data.industry_name == 'Wholesale & retail trade',]
+    spend_data.loc[spend_data.industry_name == 'Wholesale & retail trade', 
+                   'industry_name'] = 'Retail Trade'
+    spend_data = spend_data.append(subset)
+    spend_data.loc[spend_data.industry_name == 'Wholesale & retail trade', 
+                   'industry_name'] = 'Wholesale Trade'
+    
+    return spend_data
     
 def import_industry_mapping(db, industry_mapping):
     industries = get_industries(db)
