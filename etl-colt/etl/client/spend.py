@@ -44,6 +44,10 @@ def clean_industry_names(spend_data):
 def import_industry_mapping(db, industry_mapping):
     industries = get_industries(db)
     
+    industry_mapping['industry_name'] = industry_mapping['industry_name'].str.lower()
+    industries['industry_name'] = industries['industry_name'].str.lower()
+    
+    #TODO (MD): Add logging for scenario in which there is no matching value in the industries table
     industry_mapping = industry_mapping.merge(industries, 
                                               how = 'left', 
                                               left_on = ['industry_name'], 
