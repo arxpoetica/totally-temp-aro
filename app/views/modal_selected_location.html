@@ -11,7 +11,10 @@
             <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Install costs</a>
           </li>
           <li role="presentation">
-            <a href="#selected_location_client_information" aria-controls="profile" role="tab" data-toggle="tab">Client information</a>
+            <a href="#selected_location_customer_profile" aria-controls="profile" role="tab" data-toggle="tab">Customer profile</a>
+          </li>
+          <li role="presentation">
+            <a href="#selected_location_market_profile" aria-controls="profile" role="tab" data-toggle="tab">Market profile</a>
           </li>
         </ul>
 
@@ -49,11 +52,10 @@
               </tbody>
             </table>
           </div>
-          <div role="tabpanel" class="tab-pane" id="selected_location_client_information">
+          <div role="tabpanel" class="tab-pane" id="selected_location_customer_profile">
             <table class="locations-table">
               <tbody>
                 <tr>
-                  <td></td>
                   <th class="text-right" colspan="2">Businesses</th>
                   <th class="text-right" colspan="2" ng-show="show_households">Households</th>
                 </tr>
@@ -74,6 +76,11 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="selected_location_market_profile">
+            <div style="margin-top: 40px">
+              <canvas id="location-market-size-chart" style="width:100%; height:200px"></canvas>
+            </div>
           </div>
         </div>
       </div>

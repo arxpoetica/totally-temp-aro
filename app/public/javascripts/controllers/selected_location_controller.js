@@ -24,7 +24,6 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     options.add('See more information', function(map_layer, feature) {
       var id = feature.getProperty('id');
       $http.get('/locations/'+id+'/show').success(function(response) {
-        console.log('show_households', $scope.show_households)
         set_selected_location(response);
         $('#selected_location_controller').modal('show');
       });
@@ -51,6 +50,51 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   $('#selected_location_controller .nav-tabs a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
+  });
+
+  $('#selected_location_controller').on('shown.bs.tab', function(e) {
+    if ($(e.target).attr('href') === '#selected_location_market_profile') {
+      $('#selected_location_market_profile canvas').css({
+        width: '100%',
+        height: '200px',
+      });
+      show_market_profile_chart();
+    }
   })
+
+  var chart;
+  function show_market_profile_chart() {
+    var dataset = {
+      label: "Market size",
+      fillColor: "rgba(151,187,205,0.2)",
+      strokeColor: "rgba(151,187,205,1)",
+      pointColor: "rgba(151,187,205,1)",
+      pointStrokeColor: "#fff",
+      pointHighlightFill: "#fff",
+      pointHighlightStroke: "rgba(151,187,205,1)",
+      data: [],
+    };
+
+    var data = {
+      labels: [],
+      datasets: [dataset],
+    };
+
+    $scope.location.market_size.forEach(function(row) {
+      data.labels.push(row.year);
+      dataset.data.push(row.total);
+    });
+
+    var options = {
+      scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
+      tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
+    };
+    var ctx = document.getElementById('location-market-size-chart').getContext('2d');
+    chart && chart.destroy();
+    console.log('data', data)
+    chart = new Chart(ctx).Line(data, options);
+
+    return chart
+  };
 
 });
