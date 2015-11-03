@@ -51,6 +51,6 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   $('#selected_location_controller .nav-tabs a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
-  })
+  });
 
 });
