@@ -1,11 +1,12 @@
-DROP TABLE IF EXISTS source_colt.prospects_frankfurt;
+DROP TABLE IF EXISTS source_colt.prospects;
 
-CREATE TABLE source_colt.prospects_frankfurt
+CREATE TABLE source_colt.prospects
 (
 	id serial,
 	company_name varchar,
 	company_label varchar,
 	address varchar,
+	address_2 varchar,
 	postcode varchar,
 	city varchar,
 	sic_4 int,
@@ -17,5 +18,5 @@ CREATE TABLE source_colt.prospects_frankfurt
 	employees_bracket varchar,
 	lat double precision,
 	lon double precision,
-	CONSTRAINT pkey_source_colt_prospects_frankfurt_id PRIMARY KEY (id)
+	CONSTRAINT pkey_source_colt_prospects_id PRIMARY KEY (id)
 );
