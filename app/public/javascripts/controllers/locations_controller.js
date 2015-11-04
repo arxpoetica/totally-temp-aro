@@ -102,7 +102,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
       if (!$scope.show_businesses && !$scope.show_households) {
         layer.hide();
       } else {
-        layer.show();
         var type;
         if ($scope.show_businesses && $scope.show_households) {
           type = '';
@@ -111,14 +110,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
         } else if ($scope.show_households) {
           type = 'huseholds';
         }
+        layer.set_api_endpoint('/locations/'+$scope.route.id, {
+          industries: industries.join(','),
+          customer_types: customer_types.join(','),
+          number_of_employees: number_of_employees.join(','),
+          type: type,
+        });
+        layer.show();
       }
-      layer.set_api_endpoint('/locations/'+$scope.route.id, {
-        industries: industries.join(','),
-        customer_types: customer_types.join(','),
-        number_of_employees: number_of_employees.join(','),
-        type: type,
-      });
-      layer.show();
     }
 
     if ($scope.show_businesses && $scope.overlay === 'none') {
