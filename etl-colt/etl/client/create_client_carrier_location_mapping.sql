@@ -12,6 +12,7 @@ CREATE INDEX client_locations_carriers_location_index ON client.locations_carrie
 CREATE INDEX client_locations_carriers_carrier_index ON client.locations_carriers(carrier_id);
 
 -- Mapping for ILECs
+-- Deutsche Telekom maps to all locations in Frankfurt
 INSERT INTO client.locations_carriers(location_id, carrier_id)
 	SELECT 
 		locations.id AS location_id,
@@ -20,6 +21,26 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 		aro.locations locations
 	WHERE
 		locations.country = 'Germany';
+
+-- Orange maps to all locations in Paris
+INSERT INTO client.locations_carriers(location_id, carrier_id)
+	SELECT 
+		locations.id AS location_id,
+		(SELECT carriers.id FROM aro.carriers carriers WHERE carriers.name = 'Orange' LIMIT 1)::int AS carrier_id
+	FROM
+		aro.locations locations
+	WHERE
+		locations.country = 'France';
+
+-- Mapping for carriers who display coverage areas and not fiber routes
+-- Only Bouygues has this datatype for Colt.
+INSERT INTO client.locations_carriers(location_id, carrier_id)
+	SELECT
+		locations.id AS location_id,
+		(SELECT carriers.id FROM aro.carriers carriers WHERE carriers.name = 'Bouygues' LIMIT 1)::int AS carrier_id
+	FROM aro.locations locations
+	JOIN source_colt.competitor_fiber_bouygues_paris AS coverage_area
+	ON ST_Contains(coverage_area.geom, locations.geom);
 
 -- Mapping for carriers who have fiber routes
 INSERT INTO client.locations_carriers(location_id, carrier_id)
