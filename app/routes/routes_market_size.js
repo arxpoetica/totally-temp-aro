@@ -14,7 +14,7 @@ exports.configure = function(api, middleware) {
   });
 
   // Market size calculation
-  api.get('/market_size/:plan_id/calculate', function(request, response, next) {
+  api.get('/market_size/plan/:plan_id/calculate', function(request, response, next) {
     var plan_id = +request.params.plan_id;
     var type = request.query.type;
     var options = {
@@ -29,7 +29,7 @@ exports.configure = function(api, middleware) {
   });
 
   // Export businesses involved in market size calculation
-  api.get('/market_size/:plan_id/export', function(request, response, next) {
+  api.get('/market_size/plan/:plan_id/export', function(request, response, next) {
     var plan_id = +request.params.plan_id;
     var type = request.query.type;
     var options = {
