@@ -152,6 +152,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     };
     var ctx = document.getElementById('market-size-chart').getContext('2d');
     chart && chart.destroy();
+    $('#market-size canvas').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height');
     chart = new Chart(ctx).Line(data, options);
   };
 

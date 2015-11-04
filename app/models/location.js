@@ -6,7 +6,8 @@ var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
 var multiline = require('multiline');
-var config = require('../helpers').config;
+var config = helpers.config;
+var MarketSize = require('./market_size');
 
 var Location = {};
 
@@ -246,10 +247,9 @@ Location.show_information = function(location_id, callback) {
 		info.customers_households_total = customer_types.reduce(function(total, customer_type) {
 			return total + customer_type.households;
 		}, 0);
-
+		
 		callback(null, info);
 	})
-	.debug()
 	.end(callback);
 }
 
