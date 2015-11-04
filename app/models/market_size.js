@@ -373,23 +373,46 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
 }
 
 MarketSize.market_size_for_business = function(business_id, callback) {
-  var sql = multiline(function() {;/*
-    SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
-    FROM aro.locations locations
-    JOIN businesses b ON locations.id = b.location_id
-    JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
-    JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
-    JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
-    JOIN client_schema.spend ON spend.industry_id = m.industry_id
-    JOIN client_schema.employees_by_location e ON
-      e.id = spend.employees_by_location_id
-      AND e.min_value <= b.number_of_employees
-     AND e.max_value >= b.number_of_employees
-    WHERE b.id = $1
-    GROUP BY spend.year
-    ORDER by spend.year
-  */});
-  database.query(sql, [business_id], callback);
+  var output = {};
+
+  txain(function(callback) {
+    var sql = multiline(function() {;/*
+      SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
+      FROM aro.locations locations
+      JOIN businesses b ON locations.id = b.location_id
+      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
+      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
+      JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
+      JOIN client_schema.spend ON spend.industry_id = m.industry_id
+      JOIN client_schema.employees_by_location e ON
+        e.id = spend.employees_by_location_id
+        AND e.min_value <= b.number_of_employees
+       AND e.max_value >= b.number_of_employees
+      WHERE b.id = $1
+      GROUP BY spend.year
+      ORDER by spend.year
+    */});
+    database.query(sql, [business_id], callback);
+  })
+  .then(function(market_size, callback) {
+    output.market_size = market_size;
+    
+    var params = [business_id];
+    var sql = multiline(function() {/*
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
+      JOIN locations l ON l.id = biz.location_id AND l.id = 1
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id
+      WHERE biz.id = $1
+      GROUP BY c.id
+    */})
+    database.query(sql, params, callback);
+  })
+  .then(function(fair_share, callback) {
+    output.fair_share = fair_share;
+    callback(null, output);
+  })
+  .end(callback);
 }
 
 module.exports = MarketSize;

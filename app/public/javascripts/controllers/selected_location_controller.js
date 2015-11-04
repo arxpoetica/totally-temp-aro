@@ -116,7 +116,6 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
 
   function show_current_chart() {
     var href = $('#selected_location_controller .nav-tabs > .active a').attr('href');
-    console.log('href', href)
     if (href === '#selected_location_fair_share') {
       show_fair_share_chart();
     } else if (href === '#selected_location_market_profile') {
