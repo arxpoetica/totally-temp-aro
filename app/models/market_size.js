@@ -118,7 +118,6 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
   })
   .then(function(fair_share, callback) {
     output.fair_share = fair_share;
-    console.log('output', JSON.stringify(output));
     callback(null, output);
   })
   .end(callback);

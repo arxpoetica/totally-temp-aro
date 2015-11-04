@@ -249,7 +249,6 @@ Location.show_information = function(location_id, callback) {
 
 		callback(null, info);
 	})
-	.debug()
 	.end(callback);
 }
 
