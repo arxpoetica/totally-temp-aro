@@ -58,7 +58,7 @@ INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, g
 	  	) as dumped
 	) AS simple;
 
--- Load Interroute
+-- Load Interroute Frankfurt
 INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
 	SELECT
 		'Interroute'::text,
@@ -76,6 +76,25 @@ INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, g
 	  	) as dumped
 	) AS simple;
 
+-- Load Interroute Paris
+INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
+	SELECT
+		'Interroute'::text,
+		(select carriers.id from aro.carriers carriers where carriers.name = 'Interroute' limit 1)::int,
+		'Paris'::text,
+		'fiber_route_segment'::text,
+  		Geography(ST_Force_2d(simple.simple_geom)) AS geog,
+  		ST_Force_2d(simple.simple_geom) AS geom,
+  		ST_Buffer(simple.simple_geom::geography, 152.4)::geometry AS buffer_geom
+	FROM (
+	 	SELECT
+	    	(dumped.geom_dump).geom as simple_geom
+	  	FROM (
+	    	SELECT ST_Dump(geom) AS geom_dump FROM source_colt.competitor_fiber_interroute_paris
+	  	) as dumped
+	) AS simple;
+
+-- Load Level 3 Frankfurt
 INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
 	SELECT
 		'Level 3'::text,
@@ -90,6 +109,95 @@ INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, g
 	    	(dumped.geom_dump).geom as simple_geom
 	  	FROM (
 	    	SELECT ST_Dump(geom) AS geom_dump FROM source_colt.competitor_fiber_level3_frankfurt
+	  	) as dumped
+	) AS simple;
+
+-- Load Interroute Paris
+INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
+	SELECT
+		'Level 3'::text,
+		(select carriers.id from aro.carriers carriers where carriers.name = 'Level 3' limit 1)::int,
+		'Paris'::text,
+		'fiber_route_segment'::text,
+  		Geography(ST_Force_2d(simple.simple_geom)) AS geog,
+  		ST_Force_2d(simple.simple_geom) AS geom,
+  		ST_Buffer(simple.simple_geom::geography, 152.4)::geometry AS buffer_geom
+	FROM (
+	 	SELECT
+	    	(dumped.geom_dump).geom as simple_geom
+	  	FROM (
+	    	SELECT ST_Dump(geom) AS geom_dump FROM source_colt.competitor_fiber_level3_paris
+	  	) as dumped
+	) AS simple;
+
+-- Zayo's data doesn't differentiate between Frankfurt and Paris, so no CBSA
+INSERT INTO aro.fiber_plant (carrier_name, carrier_id, plant_type, geog, geom, buffer_geom)
+	SELECT
+		'Zayo'::text,
+		(select carriers.id from aro.carriers carriers where carriers.name = 'Zayo' limit 1)::int,
+		'fiber_route_segment'::text,
+  		Geography(ST_Force_2d(simple.simple_geom)) AS geog,
+  		ST_Force_2d(simple.simple_geom) AS geom,
+  		ST_Buffer(simple.simple_geom::geography, 152.4)::geometry AS buffer_geom
+	FROM (
+	 	SELECT
+	    	(dumped.geom_dump).geom as simple_geom
+	  	FROM (
+	    	SELECT ST_Dump(geom) AS geom_dump FROM source_colt.competitor_fiber_zayo
+	  	) as dumped
+	) AS simple;
+
+-- Load Versatel Frankfurt
+INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
+	SELECT
+		'Versatel'::text,
+		(select carriers.id from aro.carriers carriers where carriers.name = 'Versatel' limit 1)::int,
+		'Frankfurt'::text,
+		'fiber_route_segment'::text,
+  		Geography(ST_Force_2d(simple.simple_geom)) AS geog,
+  		ST_Force_2d(simple.simple_geom) AS geom,
+  		ST_Buffer(simple.simple_geom::geography, 152.4)::geometry AS buffer_geom
+	FROM (
+	 	SELECT
+	    	(dumped.geom_dump).geom as simple_geom
+	  	FROM (
+	    	SELECT ST_Dump(geom) AS geom_dump FROM source_colt.competitor_fiber_versatel_frankfurt
+	  	) as dumped
+	) AS simple;
+
+-- Load EUNetworks Frankfurt
+INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
+	SELECT
+		'EUNetworks'::text,
+		(select carriers.id from aro.carriers carriers where carriers.name = 'EUNetworks' limit 1)::int,
+		'Frankfurt'::text,
+		'fiber_route_segment'::text,
+  		Geography(ST_Force_2d(simple.simple_geom)) AS geog,
+  		ST_Force_2d(simple.simple_geom) AS geom,
+  		ST_Buffer(simple.simple_geom::geography, 152.4)::geometry AS buffer_geom
+	FROM (
+	 	SELECT
+	    	(dumped.geom_dump).geom as simple_geom
+	  	FROM (
+	    	SELECT ST_Dump(geom) AS geom_dump FROM source_colt.competitor_fiber_eunetworks_frankfurt
+	  	) as dumped
+	) AS simple;
+
+-- Load EUNetworks Paris
+INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
+	SELECT
+		'EUNetworks'::text,
+		(select carriers.id from aro.carriers carriers where carriers.name = 'EUNetworks' limit 1)::int,
+		'Paris'::text,
+		'fiber_route_segment'::text,
+  		Geography(ST_Force_2d(simple.simple_geom)) AS geog,
+  		ST_Force_2d(simple.simple_geom) AS geom,
+  		ST_Buffer(simple.simple_geom::geography, 152.4)::geometry AS buffer_geom
+	FROM (
+	 	SELECT
+	    	(dumped.geom_dump).geom as simple_geom
+	  	FROM (
+	    	SELECT ST_Dump(geom) AS geom_dump FROM source_colt.competitor_fiber_eunetworks_paris
 	  	) as dumped
 	) AS simple;
 
