@@ -413,6 +413,61 @@ MarketSize.market_size_for_business = function(business_id, callback) {
     callback(null, output);
   })
   .end(callback);
+};
+
+MarketSize.fair_share_heatmap = function(viewport, callback) {
+  txain(function(callback) {
+    database.findOne('SELECT id FROM carriers WHERE name=$1', [config.client_carrier_name], callback);
+  })
+  .then(function(carrier, callback) {
+    var params = [carrier.id];
+    var sql = 'WITH '+viewport.fishnet;
+    sql += multiline(function() {;/*
+      SELECT ST_AsGeojson(fishnet.geom)::json AS geom
+      
+      , (SELECT COUNT(*)::integer FROM businesses biz
+      JOIN locations ON fishnet.geom && locations.geom
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id AND c.id = $1
+      WHERE biz.location_id = locations.id) AS carrier_current
+
+      , (SELECT COUNT(*)::integer FROM businesses biz
+      JOIN locations ON fishnet.geom && locations.geom
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id
+      WHERE biz.location_id = locations.id) AS carrier_total
+
+      FROM fishnet GROUP BY fishnet.geom
+    */});
+    database.query(sql, params, callback);
+  })
+  .then(function(rows, callback) {
+    rows = rows.filter(function(row) {
+      return row.carrier_total > 0
+    })
+
+    var features = rows.map(function(row) {
+      return {
+        'type':'Feature',
+        'properties': {
+          'id': row.id,
+          'density': row.carrier_total === 0 ? 0 : (row.carrier_current*100 / row.carrier_total),
+          'carrier_total': row.carrier_total,
+          'carrier_current': row.carrier_current,
+        },
+        'geometry': row.geom,
+      };
+    });
+
+    var output = {
+      'feature_collection': {
+        'type':'FeatureCollection',
+        'features': features,
+      },
+    };
+    callback(null, output);
+  })
+  .end(callback);
 }
 
 module.exports = MarketSize;

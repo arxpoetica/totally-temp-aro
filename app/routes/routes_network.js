@@ -22,6 +22,11 @@ exports.configure = function(api, middleware) {
     models.Network.view_fiber_plant_density(viewport, jsonHandler(response, next));
   });
 
+  api.get('/network/fairshare_density', middleware.viewport, function(request, response, next) {
+    var viewport = request.viewport;
+    models.MarketSize.fair_share_heatmap(viewport, jsonHandler(response, next));
+  });
+
   api.get('/network/carriers', function(request, response, next) {
     models.Network.carrier_names(jsonHandler(response, next));
   });

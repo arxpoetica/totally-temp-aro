@@ -388,6 +388,10 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.apply_filter();
 	}
 
+	MapLayer.prototype.set_visible = function(visible) {
+		visible ? this.show() : this.hide();
+	}
+
 	MapLayer.prototype.show = function() {
 		if (this.visible) return;
 		this.load_data();
