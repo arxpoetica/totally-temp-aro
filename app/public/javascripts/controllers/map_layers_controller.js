@@ -50,6 +50,8 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     style_options: { },
     threshold: 0,
     reload: 'always',
+    denisty_hue_from: 190,
+    denisty_hue_to: 290,
   });
 
   $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
