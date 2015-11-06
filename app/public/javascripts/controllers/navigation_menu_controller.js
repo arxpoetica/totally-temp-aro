@@ -74,7 +74,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     }
     $location.path(route ? '/plan/'+route.id : '/');
 
-    $scope.market_profile_values = [];
+    $scope.market_profile = {};
     $scope.market_profile_current_year = {};
   };
 
@@ -87,10 +87,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     var args = {
       params: { type: 'route' },
     };
-    $http.get('/market_size/'+$scope.route.id+'/calculate', args)
+    $http.get('/market_size/plan/'+$scope.route.id+'/calculate', args)
       .success(function(response) {
-        $scope.market_profile_values = response;
-        $scope.market_profile_current_year = _.findWhere($scope.market_profile_values, { year: new Date().getFullYear() });
+        $scope.market_profile = response;
+        $scope.market_profile_current_year = _.findWhere($scope.market_profile.market_size, { year: new Date().getFullYear() });
         $scope.market_profile_calculating = false;
       })
       .error(function() {
@@ -99,11 +99,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   };
 
   $scope.open_market_profile = function() {
-    $rootScope.$broadcast('market_profile_selected', $scope.market_profile_values);
+    $rootScope.$broadcast('market_profile_selected', $scope.market_profile);
   }
 
   $scope.open_customer_profile = function() {
-    $rootScope.$broadcast('customer_profile_selected', $scope.market_profile_values);
+    $rootScope.$broadcast('customer_profile_selected', $scope.market_profile);
   }
 
   $scope.delete_route = function(route) {

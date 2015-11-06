@@ -21,6 +21,8 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		this.threshold = options.threshold;
 		this.minzoom = options.minzoom || 0;
 		this.reload = options.reload;
+		this.denisty_hue_from = options.denisty_hue_from;
+		this.denisty_hue_to = options.denisty_hue_to;
 
 		var collection;
 		if (this.type === 'locations') {
@@ -353,14 +355,21 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			maxdensity = Math.max(density, maxdensity);
 			mindensity = Math.min(density, mindensity);
 		});
+		var from = this.denisty_hue_from || 120
+		var to = this.denisty_hue_to || 0
 		if (maxdensity) {
 			maxdensity -= mindensity;
 			data.forEach(function(feature) {
 				var density = feature.getProperty('density');
-				if (density) {
+				if (+density == density) {
 					density -= mindensity;
-					var h = 60 - (density / maxdensity)*150;
+					if (from < to) {
+						var h = from + Math.round((density / maxdensity)*(to - from));
+					} else {
+						var h = from - Math.round((density / maxdensity)*(from - to));
+					}
 					var color = 'hsl('+h+',100%,50%)';
+					// console.log('%c'+color, 'color: '+color, density);
 					data.overrideStyle(feature, {
 						fillOpacity: 0.5,
 						fillColor: color,
@@ -386,6 +395,10 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		}
 
 		this.apply_filter();
+	}
+
+	MapLayer.prototype.set_visible = function(visible) {
+		visible ? this.show() : this.hide();
 	}
 
 	MapLayer.prototype.show = function() {

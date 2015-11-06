@@ -43,7 +43,7 @@ CREATE OR REPLACE VIEW source_colt.prospects_locations_gaps AS
 		prospects.employees AS number_of_employees,
 		prospects.lat AS lat,
 		prospects.lon AS lon
-	FROM source_colt.prospects_frankfurt prospects
+	FROM source_colt.prospects prospects
 	LEFT JOIN aro.locations locations
 	ON ST_Equals(locations.geom, ST_SetSRID(ST_Point(prospects.lon, prospects.lat),4326));
 
@@ -76,7 +76,7 @@ CREATE OR REPLACE VIEW source_colt.prospect_locations AS
 		prospects.lat AS lat,
 		prospects.lon AS lon,
 		locations.geom AS geog
-	FROM source_colt.prospects_frankfurt prospects
+	FROM source_colt.prospects prospects
 	LEFT JOIN aro.locations locations
 	ON ST_Equals(locations.geom, ST_SetSRID(ST_Point(prospects.lon, prospects.lat),4326));
 

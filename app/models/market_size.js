@@ -45,22 +45,19 @@ function empty_array(arr) {
 
 MarketSize.calculate = function(plan_id, type, options, callback) {
   var filters = options.filters;
-  var params = [];
-  var sql = ''
+  var output = {};
 
-  txain(function(callback) {
-    database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM custom.route WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
-  })
-  .then(function(cbsa, callback) {
+  function prepareQuery(params) {
+    var sql = '';
     if (type === 'route' || type === 'addressable') {
       if (config.route_planning) {
-        sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
+        sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
         // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
         params.push(plan_id);
       } else {
-        sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
+        sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
         params.push(config.client_carrier_name);
-        params.push(cbsa);
+        params.push(output.cbsa);
       }
 
       if (type === 'addressable') {
@@ -71,8 +68,19 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       }
     } else {
       params.push(options.boundary);
-      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
     }
+    return sql;
+  }
+
+  txain(function(callback) {
+    database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM custom.route WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
+  })
+  .then(function(cbsa, callback) {
+    output.cbsa = cbsa;
+
+    var params = [];
+    var sql = prepareQuery(params);
 
     sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
     sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
@@ -93,6 +101,24 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
 
     database.query(sql, params, callback);
+  })
+  .then(function(market_size, callback) {
+    output.market_size = market_size;
+
+    var params = [];
+    var sql = prepareQuery(params);
+
+    sql += multiline(function() {/*
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM biz
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id
+      GROUP BY c.id
+    */})
+    database.query(sql, params, callback);
+  })
+  .then(function(fair_share, callback) {
+    output.fair_share = fair_share;
+    callback(null, output);
   })
   .end(callback);
 };
@@ -290,60 +316,158 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
 };
 
 MarketSize.market_size_for_location = function(location_id, filters, callback) {
-  console.log('filters', filters)
-  var params = [location_id];
-  var sql = multiline(function() {;/*
-    SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
-    FROM aro.locations locations
-    JOIN businesses b ON locations.id = b.location_id
-    JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
-    JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
-    JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
-    JOIN client_schema.spend ON spend.industry_id = m.industry_id
-  */});
-  if (!empty_array(filters.industry)) {
-    params.push(filters.industry);
-    sql += ' AND spend.industry_id IN ($'+params.length+')';
-  }
-  if (!empty_array(filters.product)) {
-    params.push(filters.product);
-    sql += ' AND spend.product_id IN ($'+params.length+')';
-  }
-  if (!empty_array(filters.employees_range)) {
-    params.push(filters.employees_range);
-    sql += ' AND spend.employees_by_location_id IN ($'+params.length+')';
-  }
-  sql += multiline(function() {;/*
-    JOIN client_schema.employees_by_location e ON
-      e.id = spend.employees_by_location_id
-      AND e.min_value <= b.number_of_employees
-     AND e.max_value >= b.number_of_employees
-    WHERE locations.id = $1
-    GROUP BY spend.year
-    ORDER by spend.year
-  */});
-  console.log('sql', sql, params)
-  database.query(sql, params, callback);
+  var output = {};
+
+  txain(function(callback) {
+    var params = [location_id];
+    var sql = multiline(function() {;/*
+      SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
+      FROM aro.locations locations
+      JOIN businesses b ON locations.id = b.location_id
+      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
+      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
+      JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
+      JOIN client_schema.spend ON spend.industry_id = m.industry_id
+    */});
+    if (!empty_array(filters.industry)) {
+      params.push(filters.industry);
+      sql += ' AND spend.industry_id IN ($'+params.length+')';
+    }
+    if (!empty_array(filters.product)) {
+      params.push(filters.product);
+      sql += ' AND spend.product_id IN ($'+params.length+')';
+    }
+    if (!empty_array(filters.employees_range)) {
+      params.push(filters.employees_range);
+      sql += ' AND spend.employees_by_location_id IN ($'+params.length+')';
+    }
+    sql += multiline(function() {;/*
+      JOIN client_schema.employees_by_location e ON
+        e.id = spend.employees_by_location_id
+        AND e.min_value <= b.number_of_employees
+       AND e.max_value >= b.number_of_employees
+      WHERE locations.id = $1
+      GROUP BY spend.year
+      ORDER by spend.year
+    */});
+    database.query(sql, params, callback);
+  })
+  .then(function(market_size, callback) {
+    output.market_size = market_size;
+    
+    var params = [location_id];
+    var sql = multiline(function() {/*
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
+      JOIN locations l ON l.id = biz.location_id AND l.id = $1
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id
+      GROUP BY c.id
+    */})
+    database.query(sql, params, callback);
+  })
+  .then(function(fair_share, callback) {
+    output.fair_share = fair_share;
+    callback(null, output);
+  })
+  .end(callback);
 }
 
 MarketSize.market_size_for_business = function(business_id, callback) {
-  var sql = multiline(function() {;/*
-    SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
-    FROM aro.locations locations
-    JOIN businesses b ON locations.id = b.location_id
-    JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
-    JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
-    JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
-    JOIN client_schema.spend ON spend.industry_id = m.industry_id
-    JOIN client_schema.employees_by_location e ON
-      e.id = spend.employees_by_location_id
-      AND e.min_value <= b.number_of_employees
-     AND e.max_value >= b.number_of_employees
-    WHERE b.id = $1
-    GROUP BY spend.year
-    ORDER by spend.year
-  */});
-  database.query(sql, [business_id], callback);
+  var output = {};
+
+  txain(function(callback) {
+    var sql = multiline(function() {;/*
+      SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
+      FROM aro.locations locations
+      JOIN businesses b ON locations.id = b.location_id
+      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
+      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
+      JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
+      JOIN client_schema.spend ON spend.industry_id = m.industry_id
+      JOIN client_schema.employees_by_location e ON
+        e.id = spend.employees_by_location_id
+        AND e.min_value <= b.number_of_employees
+       AND e.max_value >= b.number_of_employees
+      WHERE b.id = $1
+      GROUP BY spend.year
+      ORDER by spend.year
+    */});
+    database.query(sql, [business_id], callback);
+  })
+  .then(function(market_size, callback) {
+    output.market_size = market_size;
+    
+    var params = [business_id];
+    var sql = multiline(function() {/*
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
+      JOIN locations l ON l.id = biz.location_id AND l.id = 1
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id
+      WHERE biz.id = $1
+      GROUP BY c.id
+    */})
+    database.query(sql, params, callback);
+  })
+  .then(function(fair_share, callback) {
+    output.fair_share = fair_share;
+    callback(null, output);
+  })
+  .end(callback);
+};
+
+MarketSize.fair_share_heatmap = function(viewport, callback) {
+  txain(function(callback) {
+    database.findOne('SELECT id FROM carriers WHERE name=$1', [config.client_carrier_name], callback);
+  })
+  .then(function(carrier, callback) {
+    var params = [carrier.id];
+    var sql = 'WITH '+viewport.fishnet;
+    sql += multiline(function() {;/*
+      SELECT ST_AsGeojson(fishnet.geom)::json AS geom
+      
+      , (SELECT COUNT(*)::integer FROM businesses biz
+      JOIN locations ON fishnet.geom && locations.geom
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id AND c.id = $1
+      WHERE biz.location_id = locations.id) AS carrier_current
+
+      , (SELECT COUNT(*)::integer FROM businesses biz
+      JOIN locations ON fishnet.geom && locations.geom
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id
+      WHERE biz.location_id = locations.id) AS carrier_total
+
+      FROM fishnet GROUP BY fishnet.geom
+    */});
+    database.query(sql, params, callback);
+  })
+  .then(function(rows, callback) {
+    rows = rows.filter(function(row) {
+      return row.carrier_total > 0
+    })
+
+    var features = rows.map(function(row) {
+      return {
+        'type':'Feature',
+        'properties': {
+          'id': row.id,
+          'density': row.carrier_total === 0 ? 0 : (row.carrier_current*100 / row.carrier_total),
+          'carrier_total': row.carrier_total,
+          'carrier_current': row.carrier_current,
+        },
+        'geometry': row.geom,
+      };
+    });
+
+    var output = {
+      'feature_collection': {
+        'type':'FeatureCollection',
+        'features': features,
+      },
+    };
+    callback(null, output);
+  })
+  .end(callback);
 }
 
 module.exports = MarketSize;

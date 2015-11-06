@@ -77,13 +77,16 @@ reset_source_colt:
 etl_source_colt:
 	etl/source_colt/source_colt_etl.sh
 
+etl_competitor_fiber:
+	etl/source_colt/comp_fiber.sh
+
 # MAIN ETL ACTIONS
 ###################################
 
 # Include the ETLs you would like to leverage in reset, source, and app. 
 etl_reset_all: reset_demographics reset_aro reset_client reset_custom reset_source_colt
 
-etl_source_data: etl_demographics etl_source_colt
+etl_source_data: etl_demographics etl_source_colt etl_competitor_fiber
 
 etl_app_data: etl_aro etl_client etl_custom
 

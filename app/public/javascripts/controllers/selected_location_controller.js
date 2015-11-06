@@ -30,14 +30,15 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
         $('#selected_location_controller').modal('show');
         $('#selected_location_market_profile select[multiple]').select2('val', []);
         $scope.market_size = null;
+        $scope.fair_share = null;
+        $scope.calculate_market_size();
       });
     });
   });
 
   $('#selected_location_controller').on('shown.bs.tab', function(e) {
-    if ($(e.target).attr('href') === '#selected_location_market_profile' && !$scope.market_size) {
-      $scope.calculate_market_size();
-    }
+    var href = $(e.target).attr('href');
+    show_current_chart();
   });
 
   $scope.update = function() {
@@ -73,7 +74,6 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   });
 
   $scope.calculate_market_size = function() {
-    $scope.market_size = null;
     $scope.loading = true;
     var params = {
       industry: arr($scope.industry),
@@ -84,11 +84,28 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
       params: params,
     };
     $http.get('/market_size/location/'+$scope.location.id, args).success(function(response) {
-      $scope.market_size = response;
+      $scope.market_size = response.market_size;
+      $scope.fair_share = response.fair_share;
       $scope.loading = false;
-      show_market_profile_chart();
+      destroy_charts();
+      show_current_chart();
     });
   };
+
+  function destroy_market_size_chart() {
+    market_size_chart && market_size_chart.destroy();
+    $('#location_market_size_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height');
+  }
+
+  function destroy_fair_share_chart() {
+    fair_share_chart && fair_share_chart.destroy();
+    $('#location_fair_share_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height');
+  }
+
+  function destroy_charts() {
+    destroy_market_size_chart();
+    destroy_fair_share_chart();
+  }
 
   function arr(value) {
     if (!value) return value;
@@ -97,8 +114,17 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     }).join(',');
   }
 
-  var chart;
-  function show_market_profile_chart() {
+  function show_current_chart() {
+    var href = $('#selected_location_controller .nav-tabs > .active a').attr('href');
+    if (href === '#selected_location_fair_share') {
+      show_fair_share_chart();
+    } else if (href === '#selected_location_market_profile') {
+      show_market_size_chart();
+    }
+  }
+
+  var market_size_chart;
+  function show_market_size_chart() {
     var dataset = {
       label: "Market size",
       fillColor: "rgba(151,187,205,0.2)",
@@ -124,10 +150,50 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
       scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
       tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
     };
-    var ctx = document.getElementById('location-market-size-chart').getContext('2d');
-    chart && chart.destroy();
-    $('#selected_location_market_profile canvas').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height');
-    chart = new Chart(ctx).Line(data, options);
+    var ctx = document.getElementById('location_market_size_chart').getContext('2d');
+    destroy_market_size_chart();
+    market_size_chart = new Chart(ctx).Line(data, options);
+  };
+
+  var fair_share_chart = null;
+  function show_fair_share_chart() {
+    var colors = [];
+    colors.push({
+      color: '#F7464A',
+      highlight: '#FF5A5E',
+    });
+    colors.push({
+      color: '#46BFBD',
+      highlight: '#5AD3D1',
+    });
+    colors.push({
+      color: '#FDB45C',
+      highlight: '#FFC870',
+    });
+
+    var total = ($scope.fair_share || []).reduce(function(total, carrier) {
+      return total + carrier.value;
+    }, 0);
+
+    var data = ($scope.fair_share || []).map(function(carrier) {
+      var info = colors.shift();
+      if (!info) {
+        info = {
+          color: 'gray',
+          highlight: 'gray',
+        }
+      }
+      info.label = carrier.name;
+      info.value = ((carrier.value*100)/total).toFixed(2);
+      return info;
+    });
+
+    var options = {
+      tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>%",
+    };
+    var ctx = document.getElementById('location_fair_share_chart').getContext('2d');
+    destroy_fair_share_chart();
+    fair_share_chart = new Chart(ctx).Pie(data, options);
   };
 
 });

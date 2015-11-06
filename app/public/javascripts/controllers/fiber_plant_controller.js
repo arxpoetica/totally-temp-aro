@@ -31,6 +31,19 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     reload: 'always',
   });
 
+  $scope.competitors_fairshare = new MapLayer({
+    api_endpoint: '/network/fairshare_density',
+    style_options: {
+      normal: {
+        strokeColor: 'blue',
+        strokeWeight: 2,
+        fillColor: 'blue',
+      }
+    },
+    threshold: 12,
+    reload: 'always',
+  });
+
   var layers = [];
   var select = $('[ng-controller="fiber_plant_controller"] [ng-change="carriers_changed()"]');
 
@@ -104,6 +117,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     if (selected.length > 0) {
       $scope.show_all_competitors = false;
       $scope.competitors_fiber.hide();
+      $scope.competitors_fairshare.hide();
     }
 
     $scope.carriers.forEach(function(carrier) {
@@ -113,15 +127,16 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
   };
 
   $scope.overlay_changed = function() {
-    if ($scope.overlay === 'density') {
+    if ($scope.overlay === 'none') {
+      select.prop('disabled', false);
+    } else {
       $scope.show_all_competitors = false;
       select.select2('val', [], true);
       select.prop('disabled', true);
-      $scope.competitors_density.show();
-    } else {
-      select.prop('disabled', false);
-      $scope.competitors_density.hide();
     }
+
+    $scope.competitors_density.set_visible($scope.overlay === 'density');
+    $scope.competitors_fairshare.set_visible($scope.overlay === 'fairshare');
   };
 
 }]);

@@ -118,7 +118,7 @@ describe('MarketSize', function() {
         type: 'route',
       };
       request
-        .get('/market_size/'+plan_id+'/calculate')
+        .get('/market_size/plan/'+plan_id+'/calculate')
         .accept('application/json')
         .query(query)
         .end(function(err, res) {
@@ -151,7 +151,7 @@ describe('MarketSize', function() {
         boundary: boundary,
       };
       request
-        .get('/market_size/'+plan_id+'/calculate')
+        .get('/market_size/plan/'+plan_id+'/calculate')
         .accept('application/json')
         .query(query)
         .end(function(err, res) {
@@ -178,7 +178,7 @@ describe('MarketSize', function() {
         boundary: boundary,
       };
       request
-        .get('/market_size/'+plan_id+'/calculate')
+        .get('/market_size/plan/'+plan_id+'/calculate')
         .accept('application/json')
         .query(query)
         .end(function(err, res) {

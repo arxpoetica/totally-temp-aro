@@ -16,6 +16,9 @@
           <li role="presentation">
             <a href="#selected_location_market_profile" aria-controls="profile" role="tab" data-toggle="tab">Market profile</a>
           </li>
+          <li role="presentation">
+            <a href="#selected_location_fair_share" aria-controls="profile" role="tab" data-toggle="tab">Fair share</a>
+          </li>
         </ul>
 
         <div class="tab-content">
@@ -108,7 +111,11 @@
               </div>
             </form>
             
-            <canvas id="location-market-size-chart" style="width:100%; height:200px"></canvas>
+            <canvas id="location_market_size_chart" style="width:100%; height:200px"></canvas>
+          </div>
+
+          <div role="tabpanel" class="tab-pane" id="selected_location_fair_share" style="margin-top:30px">
+            <canvas id="location_fair_share_chart" style="width:100%; height:200px"></canvas>
           </div>
         </div>
       </div>

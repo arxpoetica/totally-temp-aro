@@ -279,3 +279,13 @@ footer nav {
 .icon-network-equipment {
   background: url(/images/button_icons/network_equipment.png);
 }
+
+
+#market-size .nav-tabs > li, #market-size .nav-pills > li {
+  float: none;
+  display: inline-block;
+}
+
+#market-size .nav-tabs, #market-size .nav-pills {
+    text-align:center;
+}

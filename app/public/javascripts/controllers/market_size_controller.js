@@ -9,7 +9,6 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   $scope.industry = null;
   $scope.product = null;
   $scope.employees_range = null;
-  $scope.values = [];
 
   /************
   * FUNCTIONS *
@@ -29,7 +28,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   $rootScope.$on('boundary_selected', function(e, json, title, type) {
     if (type !== 'market_size') return;
-    
+
     geo_json = json;
     $scope.market_type = 'boundary';
     $scope.calculate_market_size();
@@ -37,19 +36,25 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     $('#market-size').modal('show');
   });
 
-  $rootScope.$on('market_profile_selected', function(e, values) {
+  $rootScope.$on('market_profile_selected', function(e, market_profile) {
     geo_json = null;
     $scope.market_type = 'route';
     $('#market-size .modal-title').text('Market profile');
-    $('#market-size').modal('show');
 
-    if (values) {
+    if (market_profile) {
       $('#market-size select').val('').trigger('change');
-      chart && chart.destroy();
-      $scope.values = values;
-      show_chart();
+      $scope.market_size = market_profile.market_size;
+      $scope.fair_share = market_profile.fair_share;
+      destroy_charts();
     } else {
       $scope.calculate_market_size();
+    }
+    $('#market-size').modal('show');
+  });
+
+  $('#market-size').on('shown.bs.modal', function() {
+    if ($scope.market_size) {
+      show_chart();
     }
   });
 
@@ -60,7 +65,8 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   var canceller = null;
   $scope.calculate_market_size = function() {
-    $scope.values = [];
+    $scope.market_size = null;
+    $scope.fair_share = null;
     var params = {
       boundary: geo_json && JSON.stringify(geo_json),
       type: $scope.market_type,
@@ -76,10 +82,12 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       customErrorHandling: true,
     };
     $scope.loading = true;
-    chart && chart.destroy();
-    $http.get('/market_size/'+$scope.route.id+'/calculate', args).success(function(response) {
+    destroy_charts();
+    $http.get('/market_size/plan/'+$scope.route.id+'/calculate', args).success(function(response) {
       $scope.loading = false;
-      $scope.values = response;
+      $scope.market_size = response.market_size;
+      $scope.fair_share = response.fair_share;
+      destroy_charts();
       show_chart();
     }).error(function() {
       $scope.loading = false;
@@ -92,6 +100,20 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       return elem.id;
     }).join(',');
   }
+
+  $('#market-size .nav-tabs a').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+  });
+
+  $('#market-size .nav-tabs').on('shown.bs.tab', function (e) {
+    var href = $(e.target).attr('href')
+    if (href === '#market_profile_fair_share') { //  && !fair_share_chart
+      show_fair_share_chart();
+    } else if (href === '#market_profile_market_size') {
+      show_market_size_chart();
+    }
+  });
 
   $scope.export = function() {
     $('#market-size').modal('hide');
@@ -117,14 +139,74 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
         if (!value) return null;
         return key+'='+encodeURIComponent(value);
       });
-      var href = '/market_size/'+$scope.route.id+'/export?'+_.compact(pairs).join('&');
+      var href = '/market_size/plan/'+$scope.route.id+'/export?'+_.compact(pairs).join('&');
       location.href = href;
     });
   }
 
-  var chart = null;
+  function destroy_market_size_chart() {
+    market_size_chart && market_size_chart.destroy();
+    $('#market_profile_market_size_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height');
+  }
+
+  function destroy_fair_share_chart() {
+    fair_share_chart && fair_share_chart.destroy();
+    $('#market_profile_fair_share_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height');
+  }
+
+  function destroy_charts() {
+    destroy_market_size_chart();
+    destroy_fair_share_chart();
+  }
 
   function show_chart() {
+    $('#market-size .nav-tabs a:first').tab('show');
+    show_market_size_chart();
+  }
+
+  var fair_share_chart = null;
+  function show_fair_share_chart() {
+    var colors = [];
+    colors.push({
+      color: '#F7464A',
+      highlight: '#FF5A5E',
+    });
+    colors.push({
+      color: '#46BFBD',
+      highlight: '#5AD3D1',
+    });
+    colors.push({
+      color: '#FDB45C',
+      highlight: '#FFC870',
+    });
+
+    var total = ($scope.fair_share || []).reduce(function(total, carrier) {
+      return total + carrier.value;
+    }, 0);
+
+    var data = ($scope.fair_share || []).map(function(carrier) {
+      var info = colors.shift();
+      if (!info) {
+        info = {
+          color: 'gray',
+          highlight: 'gray',
+        }
+      }
+      info.label = carrier.name;
+      info.value = ((carrier.value*100)/total).toFixed(2);
+      return info;
+    });
+
+    var options = {
+      tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>%",
+    };
+    var ctx = document.getElementById('market_profile_fair_share_chart').getContext('2d');
+    destroy_fair_share_chart();
+    fair_share_chart = new Chart(ctx).Pie(data, options);
+  }
+
+  var market_size_chart = null;
+  function show_market_size_chart() {
     var dataset = {
       label: "Market size",
       fillColor: "rgba(151,187,205,0.2)",
@@ -141,7 +223,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       datasets: [dataset],
     };
 
-    $scope.values.forEach(function(row) {
+    $scope.market_size.forEach(function(row) {
       data.labels.push(row.year);
       dataset.data.push(row.total);
     });
@@ -150,10 +232,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
       tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
     };
-    var ctx = document.getElementById('market-size-chart').getContext('2d');
-    chart && chart.destroy();
-    $('#market-size canvas').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height');
-    chart = new Chart(ctx).Line(data, options);
+    var ctx = document.getElementById('market_profile_market_size_chart').getContext('2d');
+    destroy_market_size_chart();
+    market_size_chart = new Chart(ctx).Line(data, options);
   };
 
 }]);
