@@ -43,11 +43,11 @@ cat /$TMPDIR/colt_locations.csv | ${PSQL} -a -c "COPY source_colt.locations\
 # 1. Create and load customers table
 $PSQL -f $DIR/create_colt_customers.sql
 # Load Frankfurt customers
-cat /$DIR/local_data/colt_customers_frankfurt_v3.csv | ${PSQL} -a -c "COPY source_colt.customers\
+cat /$DIR/local_data/colt_customers_frankfurt.csv | ${PSQL} -a -c "COPY source_colt.customers\
     (building_id,s_ocn,cust_name,man_employee_total,db_country_name,db_nace_code,db_employee_here,db_employee_total,db_sic_code,db_industry,db_industry_level_1,db_industry_level_2,db_industry_level_3,gl_revenue_year_2014,db_duns,sfdc_account_name,carrier_voice,colocation,colt_total,customer_asset_sales_data,customer_asset_sales_managed_services,data_centre_services,data_centre_services_installation_adjustment,data_installation_adjustment,dedicated_hosting,ethernet_point_to_point,ethernet_vpn,high_speed_service,incoming,in_services,intercompany_voice,internet_access,ip_voice,ipvpn_corporate,link,managed_service_installation_adjustment,other_bandwidth,other_misc_data,other_voice,professional_services,reseller_voice,shared_hosting,voice_connect,voice_line,others,channel) \
     FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
 # Load Paris customers
-cat /$DIR/local_data/colt_customers_paris_v3.csv | ${PSQL} -a -c "COPY source_colt.customers\
+cat /$DIR/local_data/colt_customers_paris.csv | ${PSQL} -a -c "COPY source_colt.customers\
     (building_id,s_ocn,cust_name,man_employee_total,db_country_name,db_nace_code,db_employee_here,db_employee_total,db_sic_code,db_industry,db_industry_level_1,db_industry_level_2,db_industry_level_3,gl_revenue_year_2014,db_duns,sfdc_account_name,carrier_voice,colocation,colt_total,customer_asset_sales_data,customer_asset_sales_managed_services,data_centre_services,data_centre_services_installation_adjustment,data_installation_adjustment,dedicated_hosting,ethernet_point_to_point,ethernet_vpn,high_speed_service,incoming,in_services,intercompany_voice,internet_access,ip_voice,ipvpn_corporate,link,managed_service_installation_adjustment,other_bandwidth,other_misc_data,other_voice,professional_services,reseller_voice,shared_hosting,voice_connect,voice_line,others,channel) \
     FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
 
