@@ -293,6 +293,9 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				})
 				.success(function(response) {
 					var data = response;
+					// hide layer to change styles "in background"
+					var visible = layer.visible;
+					layer.hide();
 					layer.clear_data();
 					layer.addGeoJson(data.feature_collection);
 					layer.metadata = data.metadata;
@@ -301,6 +304,8 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 					layer.configure_feature_styles();
 					layer.sync_selection();
 					load_heatmap_layer();
+					// set the layer visible or not again
+					layer.set_visible(visible);
 				});
 			}
 		}
