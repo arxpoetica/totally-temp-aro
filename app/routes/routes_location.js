@@ -63,4 +63,9 @@ exports.configure = function(api, middleware) {
     models.Location.filters(jsonHandler(response, next));
   });
 
+  api.get('/locations_customer_profile_density', middleware.viewport, function(request, response, next) {
+    var viewport = request.viewport;
+    models.Location.customer_profile_heatmap(viewport, jsonHandler(response, next));
+  });
+
 };
