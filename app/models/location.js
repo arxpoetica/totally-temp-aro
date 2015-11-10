@@ -489,7 +489,7 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 				'type':'Feature',
 				'properties': {
 					'id': row.id,
-					'density': row.customer_type_existing*100/(row.customer_type_existing + row.customer_type_prospect),
+					'density': row.customer_type_prospect*100/(row.customer_type_existing + row.customer_type_prospect),
 				},
 				'geometry': row.geom,
 			};
