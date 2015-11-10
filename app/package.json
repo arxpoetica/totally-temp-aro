@@ -24,6 +24,7 @@
     "express-flash": "0.0.2",
     "moment": "^2.10.6",
     "multiline": "^1.0.2",
+    "node-cache": "^3.0.0",
     "node-errors": "^0.2.0",
     "passport": "^0.3.0",
     "passport-local": "^1.0.0",

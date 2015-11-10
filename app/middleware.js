@@ -4,9 +4,36 @@ var validate = helpers.validate;
 var _ = require('underscore');
 var nook = require('node-errors').nook;
 var multiline = require('multiline');
+var NodeCache = require('node-cache');
+var cache = new NodeCache();
+var crypto = require('crypto')
+
+function cacheable(request, response, next) {
+  var obj = {
+    path: request.path,
+    body: request.body,
+    query: request.query,
+  }
+  var key = crypto.createHash('sha1').update(JSON.stringify(obj)).digest('hex');
+  cache.get(key, function(err, value) {
+    if (!value) {
+      response.cache_key = key;
+      if (err) {
+        console.log('err', err);
+        return next();
+      }
+      return next();
+    }
+
+    jsonHandler(response, next)(null, value);
+  })
+}
 
 function jsonHandler(response, next) {
   return nook(next, function(data) {
+    if (response.cache_key && data) {
+      cache.set(response.cache_key, data)
+    }
     if (_.isUndefined(data) || _.isNull(data)) data = {};
     response.json(data);
   });
@@ -87,4 +114,5 @@ module.exports = {
   check_owner_permission: check_owner_permission,
   jsonHandler: jsonHandler,
   viewport: viewport,
+  cacheable: cacheable,
 };

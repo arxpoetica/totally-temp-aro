@@ -7,6 +7,7 @@ exports.configure = function(api, middleware) {
   var check_any_permission = middleware.check_any_permission;
   var check_owner_permission = middleware.check_owner_permission;
   var jsonHandler = middleware.jsonHandler;
+  var cacheable = middleware.cacheable;
 
   // Market size filters
   api.get('/market_size/filters', function(request, response, next) {
@@ -14,7 +15,7 @@ exports.configure = function(api, middleware) {
   });
 
   // Market size calculation
-  api.get('/market_size/plan/:plan_id/calculate', function(request, response, next) {
+  api.get('/market_size/plan/:plan_id/calculate', cacheable, function(request, response, next) {
     var plan_id = +request.params.plan_id;
     var type = request.query.type;
     var options = {
