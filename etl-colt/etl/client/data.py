@@ -53,7 +53,6 @@ def add_spend(options):
 
     for f in os.listdir(options.file_directory):
         if re.search("reformatted_spend", f) != None:
-            print f
             import_df = import_df.append(pd.read_csv(os.path.join(options.file_directory, f)))
             file_count += 1
     
