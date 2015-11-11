@@ -220,23 +220,47 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       data: [],
     };
 
+    var carrierDataset = {
+      label: "Fair share",
+      fillColor: "rgba(220,220,220,0.2)",
+      strokeColor: "rgba(220,220,220,1)",
+      pointColor: "rgba(220,220,220,1)",
+      pointStrokeColor: "#fff",
+      pointHighlightFill: "#fff",
+      pointHighlightStroke: "rgba(220,220,220,1)",
+      data: [],
+    }
+
+    var current_carrier;
+    var total = $scope.fair_share.reduce(function(total, item) {
+      if (item.name === config.client_carrier_name) {
+        current_carrier = item.value;
+      }
+      return item.value + total;
+    }, 0);
+    var share = current_carrier / total;
+
     var data = {
       labels: [],
-      datasets: [dataset],
+      datasets: [dataset, carrierDataset],
     };
 
     $scope.market_size.forEach(function(row) {
       data.labels.push(row.year);
       dataset.data.push(row.total);
+      carrierDataset.data.push(row.total*share);
     });
 
     var options = {
       scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
       tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
+      multiTooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
+      legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\" style=\"float:right\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
     };
     var ctx = document.getElementById('market_profile_market_size_chart').getContext('2d');
     destroy_market_size_chart();
     market_size_chart = new Chart(ctx).Line(data, options);
+    document.getElementById('market_profile_market_size_chart_legend').innerHTML = market_size_chart.generateLegend();
   };
 
 }]);

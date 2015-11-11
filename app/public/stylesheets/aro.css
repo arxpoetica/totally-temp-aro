@@ -172,7 +172,7 @@ html, body, #map-canvas, #map-canvas-wrapper {
        -o-animation: spin .7s infinite linear;
           animation: spin .7s infinite linear;
 }
- 
+
 @-webkit-keyframes spin {
   from { transform: scale( 1 ) rotate( 0deg );   }
   to   { transform: scale( 1 ) rotate( 360deg ); }
@@ -290,12 +290,12 @@ footer nav {
     text-align:center;
 }
 
-.pie-legend {
+.pie-legend, .line-legend {
   list-style-type: none;
   padding-left: 0;
 }
 
-.pie-legend li span {
+.pie-legend li span, .line-legend li span {
   display: inline-block;
   width: 12px;
   height: 12px;
