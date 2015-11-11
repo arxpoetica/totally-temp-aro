@@ -27,7 +27,7 @@ Steps to convert (for each city for which there is spend data):
 #### ETL
 
  - `make reset_client`: Drops all client-related objects.
- - `make etl_client`: One of the commands executed with this command is the reload of all data stored in the files contained within the `etl-colt/client/spend_data` directory.
+ - `make etl_client`: One of the commands executed with this command is the reload of all data stored in the files contained within the `etl-colt/etl/client/spend_data` directory.
  
 ### Script Overview
  
