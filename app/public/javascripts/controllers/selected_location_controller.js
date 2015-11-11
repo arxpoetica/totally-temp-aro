@@ -157,35 +157,20 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
 
   var fair_share_chart = null;
   function show_fair_share_chart() {
-    var colors = [];
-    colors.push({
-      color: '#F7464A',
-      highlight: '#FF5A5E',
-    });
-    colors.push({
-      color: '#46BFBD',
-      highlight: '#5AD3D1',
-    });
-    colors.push({
-      color: '#FDB45C',
-      highlight: '#FFC870',
-    });
-
-    var total = ($scope.fair_share || []).reduce(function(total, carrier) {
+    $scope.fair_share = $scope.fair_share || [];
+    var colors = randomColor({ seed: 1, count: $scope.fair_share.length });
+    var total = $scope.fair_share.reduce(function(total, carrier) {
       return total + carrier.value;
     }, 0);
 
-    var data = ($scope.fair_share || []).map(function(carrier) {
-      var info = colors.shift();
-      if (!info) {
-        info = {
-          color: 'gray',
-          highlight: 'gray',
-        }
+    var data = $scope.fair_share.map(function(carrier) {
+      var color = colors.shift();
+      return {
+        label: carrier.name,
+        value: ((carrier.value*100)/total).toFixed(2),
+        color: color,
+        highlight: tinycolor(color).lighten().toString(),
       }
-      info.label = carrier.name;
-      info.value = ((carrier.value*100)/total).toFixed(2);
-      return info;
     });
 
     var options = {
