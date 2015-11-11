@@ -199,10 +199,12 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
     var options = {
       tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>%",
+      legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>"
     };
     var ctx = document.getElementById('market_profile_fair_share_chart').getContext('2d');
     destroy_fair_share_chart();
     fair_share_chart = new Chart(ctx).Pie(data, options);
+    document.getElementById('market_profile_fair_share_chart_legend').innerHTML = fair_share_chart.generateLegend();
   }
 
   var market_size_chart = null;

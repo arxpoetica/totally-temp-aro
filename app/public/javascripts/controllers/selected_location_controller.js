@@ -194,6 +194,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     var ctx = document.getElementById('location_fair_share_chart').getContext('2d');
     destroy_fair_share_chart();
     fair_share_chart = new Chart(ctx).Pie(data, options);
+    document.getElementById('location_fair_share_chart_legend').innerHTML = fair_share_chart.generateLegend();
   };
 
 });

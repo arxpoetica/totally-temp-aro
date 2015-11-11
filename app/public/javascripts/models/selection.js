@@ -64,6 +64,10 @@ app.service('selection', function($rootScope, $http) {
     return enabled;
   };
 
+  if (!config.route_planning) {
+    selection.set_enabled(false);
+  }
+
   return selection;
 
 });
