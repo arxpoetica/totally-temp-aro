@@ -21,7 +21,7 @@ Steps to convert (for each city for which there is spend data):
 
 	1. Create a new column called “location”. Enter values in the format `<city_name>,<country_name>`.
 	2. Save the resulting file with a name that includes the phrase `reformatted_spend`. The file must be in csv format.
-	9. Place the resulting files in the `etl/client/spend_data` directory.
+	3. Place the resulting files in the `etl/client/spend_data` directory.
 
 #### ETL
 
