@@ -21,7 +21,7 @@ INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees, 
 		locations.id AS location_id,
 		customers.cust_name AS name,
 		customers.db_sic_code AS industry_id,
-		customers.db_employee_total AS number_of_employees,
+		customers.man_employee_total AS number_of_employees,
 		locations.geog as geog
 	FROM source_colt.customers customers
 	JOIN aro.locations locations ON
@@ -72,17 +72,19 @@ CREATE TABLE source_colt.prospect_location_tuple AS
 	ON ABS(locations.lat - prospect_location.lat) < .00001 AND ABS(locations.lon - prospect_location.lon) < .00001;
 
 -- Insert all the prospects into the businesses table with their assigned location_id
-INSERT INTO aro.businesses(location_id, name, address, geog)
+INSERT INTO aro.businesses(location_id, name, address, number_of_employees, geog)
 	SELECT
 		plt.aro_location_id AS location_id,
 		p.company_name AS name,
 		concat_ws(' ', p.address::text, p.address_2::text) AS address,
+		p.employees AS number_of_employees,
 		pl.geom::geography AS geog
 	FROM source_colt.prospect_location_tuple plt
 	JOIN source_colt.prospect_location pl
 	ON pl.id = plt.prospect_location_id
 	JOIN source_colt.prospects p
-	ON p.id = plt.prospect_id;
+	ON p.id = plt.prospect_id
+	WHERE p.employees >= 10;
 
 -- Drop temp tables. Could do this with a WITH statement, but...
 DROP TABLE IF EXISTS source_colt.prospect_location;
