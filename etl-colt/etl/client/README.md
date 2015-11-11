@@ -4,12 +4,13 @@
 The relevant data is in the TSM sheet within the `2015 11 05_Spend Matrix France_vSENT.xlsx` and `2015 11 05_Spend Matrix Germany_vSENT.xlsx` files. This data represents the yearly spend per business. 
 
 ### Creating a spend dataset
-Importing the spend data from this Excel workbook will very little manipulation of the data in Excel. The data required for the import process is a csv file with the following columns: 
-- location
-- product	
-- sub_product	
-- infousa_industry	
-- infousa_size	
+Importing the spend data from this Excel workbook will very little manipulation of the data in Excel. The data required for the import process is a csv file with the following columns:
+ 
+1. location
+2. product	
+3. sub_product	
+4. infousa_industry	
+5. infousa_size	
 
 and a column for each year for which there is data. 
 
@@ -19,14 +20,14 @@ Spend should be the spend per business for the entire calendar year. The ETL scr
 
 Steps to convert (for each city for which there is spend data): 
 
-	1. Create a new column called “location”. Enter values in the format `<city_name>,<country_name>`.
-	2. Save the resulting file with a name that includes the phrase `reformatted_spend`. The file must be in csv format.
-	3. Place the resulting files in the `etl/client/spend_data` directory.
+1. Create a new column called “location”. Enter values in the format `<city_name>,<country_name>`.
+2. Save the resulting file with a name that includes the phrase `reformatted_spend`. The file must be in csv format.
+3. Place the resulting files in the `etl/client/spend_data` directory.
 
 #### ETL
 
  - `make reset_client`: Drops all client-related objects.
- - `make etl_client`: One of the commands executed with this command is the reload of all data stored in the `reformatted_spend.csv` file.
+ - `make etl_client`: One of the commands executed with this command is the reload of all data stored in the files contained within the `etl-colt/client/spend_data` directory.
  
 ### Script Overview
  
