@@ -48,11 +48,19 @@ def add_common_args(parser, default_func=None):
 
 def add_spend(options):
     db = get_DBConn()
+    file_count = 0
+    import_df = pd.DataFrame()
+
     for f in os.listdir(options.file_directory):
         if re.search("reformatted_spend", f) != None:
-            df = pd.read_csv(os.path.join(options.file_directory, f))
-            print "Importing file {}".format(os.path.join(options.file_directory, f))
-            spend.import_spend(db, df)
+            print f
+            import_df = import_df.append(pd.read_csv(os.path.join(options.file_directory, f)))
+            file_count += 1
+    
+    print "Importing {} files from {}".format(file_count, 
+                                              options.file_directory)
+
+    spend.import_spend(db, import_df)
     db.close()
 
 def delete_spend(options):
