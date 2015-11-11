@@ -56,11 +56,11 @@ $PSQL -f $DIR/create_colt_prospects.sql
 
 # Load prospect data from Paris and Frankfurt
 cat /$DIR/local_data/colt_prospects_frankfurt.csv | ${PSQL} -a -c "COPY source_colt.prospects\
-    (company_name,company_label,address,address_2,postcode,city,sic_4,sic_2,sic_industry_german,sic_industry_english,solon_av_industry,employees,employees_bracket,lat,lon) \
+    (company_name,company_label,address,address_2,postcode,city,sic_4,sic_2,sic_industry_german,sic_industry_english,solon_av_industry,employees,employees_bracket,lat,lon,country) \
     FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
 
 cat /$DIR/local_data/colt_prospects_paris.csv | ${PSQL} -a -c "COPY source_colt.prospects\
-    (company_name,company_label,address,address_2,postcode,city,sic_4,sic_2,sic_industry_german,sic_industry_english,solon_av_industry,employees,employees_bracket,lat,lon) \
+    (company_name,company_label,address,address_2,postcode,city,sic_4,sic_2,sic_industry_german,sic_industry_english,solon_av_industry,employees,employees_bracket,lat,lon,country) \
     FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
 
 # 3. Create and load the CO data from Paris and Frankfurt. Paris and Frankfurt data came in two separate formats, so we made 2 tables.

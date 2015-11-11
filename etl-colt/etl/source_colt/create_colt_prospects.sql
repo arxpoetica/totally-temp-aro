@@ -18,5 +18,6 @@ CREATE TABLE source_colt.prospects
 	employees_bracket varchar,
 	lat double precision,
 	lon double precision,
+	country varchar,
 	CONSTRAINT pkey_source_colt_prospects_id PRIMARY KEY (id)
 );
