@@ -37,6 +37,7 @@ DROP TABLE IF EXISTS client.spend;
 CREATE TABLE client.spend
 (
 	id serial,
+	location varchar,
 	product_id integer, 
 	industry_id integer,
 	employees_by_location_id integer, 
