@@ -2,6 +2,7 @@ import psycopg2
 import pandas as pd
 import spend
 import os
+import re
 
 def get_DBConn():
     try:
@@ -33,8 +34,8 @@ def _init_spend_csv_load(subparser, subparser_name, add_func, delete_func):
     add_parser = base.add_parser('add')
     add_common_args(add_parser, default_func=add_func)
     add_parser.add_argument(
-        'csv_file', type = str,
-        help = 'path to CSV file to load')
+        'file_directory', type = str,
+        help = 'path to directory containing CSV files to load')
 
     delete_parser = base.add_parser('delete')
     add_common_args(delete_parser, default_func=delete_func)
@@ -47,8 +48,11 @@ def add_common_args(parser, default_func=None):
 
 def add_spend(options):
     db = get_DBConn()
-    df = pd.read_csv(options.csv_file)
-    spend.import_spend(db, df)
+    for f in os.listdir(options.file_directory):
+        if re.search("reformatted_spend", f) != None:
+            df = pd.read_csv(os.path.join(options.file_directory, f))
+            print "Importing file {}".format(os.path.join(options.file_directory, f))
+            spend.import_spend(db, df)
     db.close()
 
 def delete_spend(options):
