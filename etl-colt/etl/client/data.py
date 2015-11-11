@@ -74,7 +74,9 @@ def delete_spend(options):
     
 def add_industry_mapping(options):
     db = get_DBConn()
-    industry_mapping = pd.read_csv(options.csv_file)
+    print "Importing mapping file {}".format(os.path.join(options.file_directory, 
+                                                    'industry_mapping.csv'))
+    industry_mapping = pd.read_csv(os.path.join(options.file_directory, 'industry_mapping.csv'))
     spend.import_industry_mapping(db, industry_mapping)
     db.close()
  
