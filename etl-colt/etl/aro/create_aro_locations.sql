@@ -33,7 +33,9 @@ INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat,
         ad_longitude,
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326)::geography as geog,
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326) as geom
-    FROM source_colt.locations WHERE ad_longitude != 0 AND ad_latitude != 0;
+    FROM source_colt.locations 
+    WHERE ad_longitude != 0 AND ad_latitude != 0
+    AND ad_longitude != ad_latitude;
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations USING gist (geog);
