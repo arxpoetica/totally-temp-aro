@@ -27,13 +27,13 @@ MarketSize.filters = function(callback) {
   })
   .then(function(rows, callback) {
     output.industries = rows;
-    
+
     var sql = 'SELECT * FROM client_schema.employees_by_location';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
     output.employees_by_location = rows;
-    
+
     callback(null, output);
   })
   .end(callback);
@@ -118,6 +118,35 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
   })
   .then(function(fair_share, callback) {
     output.fair_share = fair_share;
+
+    var params = [];
+    var sql = prepareQuery(params);
+
+    sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
+    sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
+
+    if (!empty_array(filters.industry)) {
+      params.push(filters.industry);
+      sql += '\n AND spend.industry_id IN ($'+params.length+')';
+    }
+    if (!empty_array(filters.product)) {
+      params.push(filters.product);
+      sql += '\n AND spend.product_id IN ($'+params.length+')';
+    }
+    if (!empty_array(filters.employees_range)) {
+      params.push(filters.employees_range);
+      sql += '\n AND spend.employees_by_location_id IN ($'+params.length+')';
+    }
+    sql += '\n JOIN client_schema.employees_by_location e ON e.id = spend.employees_by_location_id AND e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees'
+    sql += '\n JOIN client_schema.business_customer_types bct ON bct.business_id = b.id'
+    sql += '\n JOIN client_schema.customer_types ct ON bct.customer_type_id = ct.id AND lower(ct.name) = \'existing\''
+    sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
+
+    database.query(sql, params, callback);
+  })
+  .then(function(market_size_existing, callback) {
+    output.market_size_existing = market_size_existing;
+
     callback(null, output);
   })
   .end(callback);
@@ -258,7 +287,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
   })
   .then(function(employees_by_location, callback) {
     this.set('employees_by_location', employees_by_location);
-    
+
     if (empty_array(filters.industry)) return callback(null, []);
     var sql = 'SELECT industry_name FROM client_schema.industries WHERE id IN($1)';
     database.query(sql, [filters.industry], callback);
@@ -354,7 +383,7 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
   })
   .then(function(market_size, callback) {
     output.market_size = market_size;
-    
+
     var params = [location_id];
     var sql = multiline(function() {/*
       SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
@@ -396,7 +425,7 @@ MarketSize.market_size_for_business = function(business_id, callback) {
   })
   .then(function(market_size, callback) {
     output.market_size = market_size;
-    
+
     var params = [business_id];
     var sql = multiline(function() {/*
       SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
@@ -424,7 +453,7 @@ MarketSize.fair_share_heatmap = function(viewport, callback) {
     var sql = 'WITH '+viewport.fishnet;
     sql += multiline(function() {;/*
       SELECT ST_AsGeojson(fishnet.geom)::json AS geom
-      
+
       , (SELECT COUNT(*)::integer FROM businesses biz
       JOIN locations ON fishnet.geom && locations.geom
       JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
