@@ -2,7 +2,7 @@
 app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'selection', '$location', function($scope, $rootScope, $http, map_tools, selection, $location) {
   // Controller instance variables
   $scope.selection = selection;
-  $scope.new_route_name = 'Untitled plan';
+  $scope.new_route_name = 'Untitled Analysis';
   $scope.new_route_area_name = '';
   $scope.new_route_area_centroid;
   $scope.new_route_area_bounds;
