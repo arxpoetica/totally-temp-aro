@@ -118,34 +118,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
   })
   .then(function(fair_share, callback) {
     output.fair_share = fair_share;
-
-    var params = [];
-    var sql = prepareQuery(params);
-
-    sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
-    sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
-
-    if (!empty_array(filters.industry)) {
-      params.push(filters.industry);
-      sql += '\n AND spend.industry_id IN ($'+params.length+')';
-    }
-    if (!empty_array(filters.product)) {
-      params.push(filters.product);
-      sql += '\n AND spend.product_id IN ($'+params.length+')';
-    }
-    if (!empty_array(filters.employees_range)) {
-      params.push(filters.employees_range);
-      sql += '\n AND spend.employees_by_location_id IN ($'+params.length+')';
-    }
-    sql += '\n JOIN client_schema.employees_by_location e ON e.id = spend.employees_by_location_id AND e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees'
-    sql += '\n JOIN client_schema.business_customer_types bct ON bct.business_id = b.id'
-    sql += '\n JOIN client_schema.customer_types ct ON bct.customer_type_id = ct.id AND lower(ct.name) = \'existing\''
-    sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
-
-    database.query(sql, params, callback);
-  })
-  .then(function(market_size_existing, callback) {
-    output.market_size_existing = market_size_existing;
+    output.market_size_existing = []; // TODO
 
     callback(null, output);
   })

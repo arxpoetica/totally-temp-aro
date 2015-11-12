@@ -220,12 +220,12 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
     var existingDataset = {
       label: "Existing spend",
-      fillColor: "rgba(220,220,220,0.2)",
-      strokeColor: "rgba(220,220,220,1)",
-      pointColor: "rgba(220,220,220,1)",
+      fillColor: "rgba(70,191,189,0.2)",
+      strokeColor: "rgba(70,191,189,1)",
+      pointColor: "rgba(70,191,189,1)",
       pointStrokeColor: "#fff",
       pointHighlightFill: "#fff",
-      pointHighlightStroke: "rgba(220,220,220,1)",
+      pointHighlightStroke: "rgba(70,191,189,1)",
       data: [],
     }
 
@@ -240,7 +240,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
     var data = {
       labels: [],
-      datasets: [dataset, carrierDataset, existingDataset],
+      datasets: [dataset, carrierDataset], //, existingDataset
     };
 
     $scope.market_size.forEach(function(row) {
