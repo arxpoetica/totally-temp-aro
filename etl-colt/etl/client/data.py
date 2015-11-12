@@ -2,6 +2,7 @@ import psycopg2
 import pandas as pd
 import spend
 import os
+import re
 
 def get_DBConn():
     try:
@@ -33,8 +34,8 @@ def _init_spend_csv_load(subparser, subparser_name, add_func, delete_func):
     add_parser = base.add_parser('add')
     add_common_args(add_parser, default_func=add_func)
     add_parser.add_argument(
-        'csv_file', type = str,
-        help = 'path to CSV file to load')
+        'file_directory', type = str,
+        help = 'path to directory containing CSV files to load')
 
     delete_parser = base.add_parser('delete')
     add_common_args(delete_parser, default_func=delete_func)
@@ -47,8 +48,18 @@ def add_common_args(parser, default_func=None):
 
 def add_spend(options):
     db = get_DBConn()
-    df = pd.read_csv(options.csv_file)
-    spend.import_spend(db, df)
+    file_count = 0
+    import_df = pd.DataFrame()
+
+    for f in os.listdir(options.file_directory):
+        if re.search("reformatted_spend", f) != None:
+            import_df = import_df.append(pd.read_csv(os.path.join(options.file_directory, f)))
+            file_count += 1
+    
+    print "Importing {} files from {}".format(file_count, 
+                                              options.file_directory)
+
+    spend.import_spend(db, import_df)
     db.close()
 
 def delete_spend(options):
@@ -62,7 +73,9 @@ def delete_spend(options):
     
 def add_industry_mapping(options):
     db = get_DBConn()
-    industry_mapping = pd.read_csv(options.csv_file)
+    print "Importing mapping file {}".format(os.path.join(options.file_directory, 
+                                                    'industry_mapping.csv'))
+    industry_mapping = pd.read_csv(os.path.join(options.file_directory, 'industry_mapping.csv'))
     spend.import_industry_mapping(db, industry_mapping)
     db.close()
  

@@ -1,26 +1,40 @@
 import pandas as pd
+import re
 
 def import_spend(db, spend_data):
+    fix_column_headers(spend_data)
+    spend_data = assign_product_types(spend_data)
+
+    year_cols = [c for c in spend_data.columns if re.search('20\d\d', c) != None]
+    other_cols = [c for c in spend_data.columns if c not in year_cols]
+    
+    spend_data = pd.melt(spend_data, id_vars = other_cols, 
+                         value_vars = year_cols, 
+                         value_name = 'spend', 
+                         var_name='year')
+        
+    spend_data['currency'] = 'EUR'
+    
     spend_data = clean_industry_names(spend_data)
     spend_data.loc[:,'spend'].fillna(value = 0, 
                                      inplace = True)
-    
+     
     spend_data['monthly_spend'] = spend_data.loc[:,'spend'] / 12
-    
+     
     spend_data = create_normalized_table(db, spend_data, 
                                          ['product_type', 'product'], 
                                          add_products, get_products, 
                                          ['product_type', 'product'], 
                                          ['product_type', 'product_name'], 
                                          'product_id')
-        
+         
     spend_data = create_normalized_table(db, spend_data, 
                                          ['industry_name'], 
                                          add_industries, get_industries, 
                                          ['industry_name'], 
                                          ['industry_name'], 
                                          'industry_id')
-    
+     
     spend_data = create_normalized_table(db, spend_data, 
                                          ['employees_at_location_range'], 
                                          add_employees_by_location, 
@@ -28,8 +42,15 @@ def import_spend(db, spend_data):
                                          ['employees_at_location_range'], 
                                          ['value_range'], 
                                          'employees_by_location_id')
-    
+     
     add_spend(db, spend_data)
+    
+def fix_column_headers(spend_data):
+    spend_data.rename(columns = {'product': 'product_type', 
+                                 'sub_product': 'product', 
+                                 'infousa_industry': 'industry_name', 
+                                 'infousa_size': 'employees_at_location_range'},
+                                  inplace = True)
 
 def clean_industry_names(spend_data):
     subset = spend_data.loc[spend_data.industry_name == 'Wholesale & retail trade',]
@@ -40,6 +61,31 @@ def clean_industry_names(spend_data):
                    'industry_name'] = 'Wholesale Trade'
     
     return spend_data
+
+def assign_product_types(spend_data):
+    product_types_by_product = {'Wireline Voice': ['Traditional Fixed Voice', 
+                                                   'IP Voice'], 
+                                'Wireline Data':['Internet Access', 
+                                                 'Ethernet',
+                                                 'IP-VPN',
+                                                 'Legacy Data Services'], 
+                                'Datacenter Services': ['Colocation',
+                                                        'Managed DC Services', 
+                                                        'Hosting Servers', 
+                                                        'Storage'], 
+                                'Cloud Services': ['IaaS', 
+                                                   'PaaS', 
+                                                   'SaaS']}
+    
+    for pt in product_types_by_product:
+        for p in product_types_by_product[pt]:
+            spend_data.loc[spend_data['product'] == p,
+                           'product_type'] = pt
+    
+    return spend_data
+
+def reshape_spend_data(spend_data):
+    year_cols = [c for c in df.columns if re.search('20\d\d', c) != None]
     
 def import_industry_mapping(db, industry_mapping):
     industries = get_industries(db)
@@ -224,7 +270,8 @@ def get_products(db, frame = True):
     
 def add_spend(db, spend):
     print "Adding client spend data..."
-    colnames = ['product_id', 
+    colnames = ['location',
+                'product_id', 
                 'industry_id', 
                 'employees_by_location_id', 
                 'year', 
@@ -237,13 +284,14 @@ def add_spend(db, spend):
     
     values = spend.to_dict('split')['data']
 
-    sql_query = """INSERT INTO client.spend (product_id,
+    sql_query = """INSERT INTO client.spend (location,
+                                             product_id,
                                              industry_id, 
                                              employees_by_location_id, 
                                              year, 
                                              monthly_spend, 
                                              currency_abbrev)
-                    VALUES (%s, %s, %s, %s, %s, %s);
+                    VALUES (%s, %s, %s, %s, %s, %s, %s);
                 """
     
     cur.executemany(sql_query, values)
