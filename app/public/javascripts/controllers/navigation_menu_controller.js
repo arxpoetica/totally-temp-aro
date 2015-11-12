@@ -91,6 +91,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       .success(function(response) {
         $scope.market_profile = response;
         $scope.market_profile_current_year = _.findWhere($scope.market_profile.market_size, { year: new Date().getFullYear() });
+        $scope.market_profile_fair_share_current_year_total = $scope.market_profile_current_year.total * response.share;
         $scope.market_profile_calculating = false;
       })
       .error(function() {
@@ -237,7 +238,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     else{
       $('#export-error').hide();
       $('#export-route').modal('hide');
-    
+
       location.href = '/network_plan/' + $scope.route.id + '/' + params.name + '/export';
     }
   };

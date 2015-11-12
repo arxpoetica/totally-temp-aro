@@ -46,6 +46,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       $scope.market_size = market_profile.market_size;
       $scope.market_size_existing = market_profile.market_size_existing;
       $scope.fair_share = market_profile.fair_share;
+      $scope.share = market_profile.share;
       destroy_charts();
     } else {
       $scope.calculate_market_size();
@@ -229,15 +230,6 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       data: [],
     }
 
-    var current_carrier;
-    var total = $scope.fair_share.reduce(function(total, item) {
-      if (item.name === config.client_carrier_name) {
-        current_carrier = item.value;
-      }
-      return item.value + total;
-    }, 0);
-    var share = current_carrier / total;
-
     var data = {
       labels: [],
       datasets: [dataset, carrierDataset], //, existingDataset
@@ -246,7 +238,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     $scope.market_size.forEach(function(row) {
       data.labels.push(row.year);
       dataset.data.push(row.total);
-      carrierDataset.data.push(row.total*share);
+      carrierDataset.data.push(row.total*$scope.share);
     });
 
     $scope.market_size_existing.forEach(function(row) {

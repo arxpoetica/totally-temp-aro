@@ -110,7 +110,9 @@
               </span>
 
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
-                <span class="fa fa-briefcase" ng-class="{'spin': market_profile_calculating}"></span> <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
+                <span class="fa fa-briefcase" ng-class="{'spin': market_profile_calculating}"></span>
+                  <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
+                  <span class="label label-info">{{ market_profile_fair_share_current_year_total | currency }}</span>
               </span>
             </p>
 

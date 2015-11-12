@@ -120,6 +120,15 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     output.fair_share = fair_share;
     output.market_size_existing = []; // TODO
 
+    var current_carrier;
+    var total = output.fair_share.reduce(function(total, item) {
+      if (item.name === config.client_carrier_name) {
+        current_carrier = item.value;
+      }
+      return item.value + total;
+    }, 0);
+    output.share = current_carrier / total;
+
     callback(null, output);
   })
   .end(callback);
