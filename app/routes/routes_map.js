@@ -4,7 +4,7 @@ var _ = require('underscore');
 
 exports.configure = function(api, middleware) {
 
-  var public_config = _.pick(config, 'route_planning', 'ui', 'currency_symbol');
+  var public_config = _.pick(config, 'route_planning', 'ui', 'currency_symbol', 'client_carrier_name');
 
   api.get('/', function(request, response, next) {
     response.render('index.html', {

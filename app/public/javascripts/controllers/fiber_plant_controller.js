@@ -42,6 +42,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     },
     threshold: 12,
     reload: 'always',
+    denisty_hue_from: 120,
+    denisty_hue_to: 0,
   });
 
   var layers = [];
