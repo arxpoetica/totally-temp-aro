@@ -387,6 +387,11 @@
                   <option value="none">None</option>
                   <option value="density">Density</option>
                 </select>
+                <div class="row" style="margin-top: 10px" ng-show="overlay === 'density'">
+                  <div class="col-md-2">Low</div>
+                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(190,100%,50%), hsl(290,100%,50%));">&nbsp;</div>
+                  <div class="col-md-2 text-right">High</div>
+                </div>
               </div>
             </div>
             <div ng-show="route.owner_id === user_id">
@@ -510,6 +515,16 @@
                   <option value="density">Density</option>
                   <option value="fairshare">Fair share</option>
                 </select>
+                <div class="row" style="margin-top: 10px" ng-show="overlay === 'fairshare'">
+                  <div class="col-md-2">High</div>
+                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
+                  <div class="col-md-2 text-right">Low</div>
+                </div>
+                <div class="row" style="margin-top: 10px" ng-show="overlay === 'density'">
+                  <div class="col-md-2">High</div>
+                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
+                  <div class="col-md-2 text-right">Low</div>
+                </div>
               </div>
             </div>
           </div>
@@ -530,7 +545,7 @@
     </div>
 
     <div id="loader-wrapper"><div class="loader"></div></div>
-    
+
   </body>
 
   <!-- Angular controllers and services -->
@@ -573,7 +588,7 @@
           });
         }
       }
-      
+
     }
 
     $(document).ready(initialize);
@@ -583,6 +598,8 @@
   <script src="javascripts/libs/sweetalert.min.js"></script>
   <script src="javascripts/libs/Chart.min.js"></script>
   <script src="javascripts/libs/select2.min.js"></script>
+  <script src="javascripts/libs/tinycolor.js"></script>
+  <script src="javascripts/libs/randomColor.min.js"></script>
 
   <script src="javascripts/controllers/financial_profile_controller.js"></script>
   <script src="javascripts/controllers/customer_profile_controller.js"></script>
