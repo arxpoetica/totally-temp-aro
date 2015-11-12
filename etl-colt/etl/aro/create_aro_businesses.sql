@@ -72,9 +72,10 @@ CREATE TABLE source_colt.prospect_location_tuple AS
 	ON ABS(locations.lat - prospect_location.lat) < .00001 AND ABS(locations.lon - prospect_location.lon) < .00001;
 
 -- Insert all the prospects into the businesses table with their assigned location_id
-INSERT INTO aro.businesses(location_id, name, address, number_of_employees, geog)
+INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_employees, geog)
 	SELECT
 		plt.aro_location_id AS location_id,
+		p.sic_4 AS industry_id,
 		p.company_name AS name,
 		concat_ws(' ', p.address::text, p.address_2::text) AS address,
 		p.employees AS number_of_employees,
