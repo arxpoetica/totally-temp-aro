@@ -27,13 +27,13 @@ MarketSize.filters = function(callback) {
   })
   .then(function(rows, callback) {
     output.industries = rows;
-    
+
     var sql = 'SELECT * FROM client_schema.employees_by_location';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
     output.employees_by_location = rows;
-    
+
     callback(null, output);
   })
   .end(callback);
@@ -118,6 +118,8 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
   })
   .then(function(fair_share, callback) {
     output.fair_share = fair_share;
+    output.market_size_existing = []; // TODO
+
     callback(null, output);
   })
   .end(callback);
@@ -258,7 +260,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
   })
   .then(function(employees_by_location, callback) {
     this.set('employees_by_location', employees_by_location);
-    
+
     if (empty_array(filters.industry)) return callback(null, []);
     var sql = 'SELECT industry_name FROM client_schema.industries WHERE id IN($1)';
     database.query(sql, [filters.industry], callback);
@@ -354,7 +356,7 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
   })
   .then(function(market_size, callback) {
     output.market_size = market_size;
-    
+
     var params = [location_id];
     var sql = multiline(function() {/*
       SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
@@ -396,7 +398,7 @@ MarketSize.market_size_for_business = function(business_id, callback) {
   })
   .then(function(market_size, callback) {
     output.market_size = market_size;
-    
+
     var params = [business_id];
     var sql = multiline(function() {/*
       SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
@@ -424,7 +426,7 @@ MarketSize.fair_share_heatmap = function(viewport, callback) {
     var sql = 'WITH '+viewport.fishnet;
     sql += multiline(function() {;/*
       SELECT ST_AsGeojson(fishnet.geom)::json AS geom
-      
+
       , (SELECT COUNT(*)::integer FROM businesses biz
       JOIN locations ON fishnet.geom && locations.geom
       JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
@@ -443,7 +445,7 @@ MarketSize.fair_share_heatmap = function(viewport, callback) {
   })
   .then(function(rows, callback) {
     rows = rows.filter(function(row) {
-      return row.carrier_total > 0
+      return row.carrier_total > 0;
     })
 
     var features = rows.map(function(row) {
@@ -451,7 +453,7 @@ MarketSize.fair_share_heatmap = function(viewport, callback) {
         'type':'Feature',
         'properties': {
           'id': row.id,
-          'density': row.carrier_total === 0 ? 0 : (row.carrier_current*100 / row.carrier_total),
+          'density': row.carrier_total === 0 ? 0 : ((row.carrier_total - row.carrier_current)*100 / row.carrier_total),
           'carrier_total': row.carrier_total,
           'carrier_current': row.carrier_current,
         },
