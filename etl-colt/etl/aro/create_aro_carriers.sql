@@ -15,5 +15,5 @@ INSERT INTO aro.carriers (name, route_type) values('Zayo', 'fiber');
 INSERT INTO aro.carriers (name, route_type) values('EUNetworks', 'fiber');
 INSERT INTO aro.carriers (name, route_type) values('Versatel', 'fiber');
 INSERT INTO aro.carriers (name, route_type) values('Bouygues', 'coverage_area');
-INSERT INTO aro.carriers (name, route_type) values('Desutsche Telekom', 'ilec');
+INSERT INTO aro.carriers (name, route_type) values('Deutsche Telekom', 'ilec');
 INSERT INTO aro.carriers (name, route_type) values('Orange', 'ilec');

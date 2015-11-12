@@ -16,7 +16,7 @@ CREATE INDEX client_locations_carriers_carrier_index ON client.locations_carrier
 INSERT INTO client.locations_carriers(location_id, carrier_id)
 	SELECT 
 		locations.id AS location_id,
-		(SELECT carriers.id FROM aro.carriers carriers WHERE carriers.name = 'Desutsche Telekom' LIMIT 1)::int AS carrier_id
+		(SELECT carriers.id FROM aro.carriers carriers WHERE carriers.name = 'Deutsche Telekom' LIMIT 1)::int AS carrier_id
 	FROM
 		aro.locations locations
 	WHERE
