@@ -21,6 +21,7 @@ SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 
 -- Load unique locations from colt source locations table
 -- There is some question as to which field we should be selecting distinct on to get nonduplicate locations...
+-- We will also remove some values which have 0, 0 for lat,lon
 INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat, lon, geog, geom)
     SELECT DISTINCT ON (bm_building_id)
         bm_building_id AS building_id,
@@ -32,8 +33,9 @@ INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat,
         ad_longitude,
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326)::geography as geog,
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326) as geom
-
-    FROM source_colt.locations;
+    FROM source_colt.locations 
+    WHERE ad_longitude != 0 AND ad_latitude != 0
+    AND ad_longitude != ad_latitude;
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations USING gist (geog);

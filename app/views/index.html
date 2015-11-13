@@ -31,15 +31,15 @@
               <img id="aro_logo" src="/images/logos/aro_logo_2.png" />
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="show_routes()">Open Network Plan</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="show_routes()">Open Analysis</a>
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="new_route()">Create New Network Plan</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="new_route()">Create New Analysis</a>
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manage_network_plans()">Manage Network Plans</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manage_network_plans()">Manage Analyses</a>
               <br>
             </div>
           </div>
@@ -110,7 +110,9 @@
               </span>
 
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
-                <span class="fa fa-briefcase" ng-class="{'spin': market_profile_calculating}"></span> <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
+                <span class="fa fa-briefcase" ng-class="{'spin': market_profile_calculating}"></span>
+                  <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
+                  <span class="label label-info">{{ market_profile_fair_share_current_year_total | currency }}</span>
               </span>
             </p>
 

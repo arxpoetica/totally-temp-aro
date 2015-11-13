@@ -44,7 +44,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     if (market_profile) {
       $('#market-size select').val('').trigger('change');
       $scope.market_size = market_profile.market_size;
+      $scope.market_size_existing = market_profile.market_size_existing;
       $scope.fair_share = market_profile.fair_share;
+      $scope.share = market_profile.share;
       destroy_charts();
     } else {
       $scope.calculate_market_size();
@@ -217,24 +219,30 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       data: [],
     }
 
-    var current_carrier;
-    var total = $scope.fair_share.reduce(function(total, item) {
-      if (item.name === config.client_carrier_name) {
-        current_carrier = item.value;
-      }
-      return item.value + total;
-    }, 0);
-    var share = current_carrier / total;
+    var existingDataset = {
+      label: "Existing spend",
+      fillColor: "rgba(70,191,189,0.2)",
+      strokeColor: "rgba(70,191,189,1)",
+      pointColor: "rgba(70,191,189,1)",
+      pointStrokeColor: "#fff",
+      pointHighlightFill: "#fff",
+      pointHighlightStroke: "rgba(70,191,189,1)",
+      data: [],
+    }
 
     var data = {
       labels: [],
-      datasets: [dataset, carrierDataset],
+      datasets: [dataset, carrierDataset], //, existingDataset
     };
 
     $scope.market_size.forEach(function(row) {
       data.labels.push(row.year);
       dataset.data.push(row.total);
-      carrierDataset.data.push(row.total*share);
+      carrierDataset.data.push(row.total*$scope.share);
+    });
+
+    $scope.market_size_existing.forEach(function(row) {
+      existingDataset.data.push(row.total);
     });
 
     var options = {

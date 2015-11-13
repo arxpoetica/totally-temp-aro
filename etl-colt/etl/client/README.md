@@ -1,43 +1,39 @@
 # Spend data
 
 ## Background
-The relevant data is in cells C219:W434 of the Total Spend by Size sheet within the 2014 07 09 Spend Matrix Germany.xlsx file. This data represents the yearly spend per business. 
-
-Importing the spend data from this Excel workbook will require some manipulation of the data in Excel. 
+The relevant data is in the TSM sheet within the `2015 11 05_Spend Matrix France_vSENT.xlsx` and `2015 11 05_Spend Matrix Germany_vSENT.xlsx` files. This data represents the yearly spend per business. 
 
 ### Creating a spend dataset
-Importing the spend data from this Excel workbook will require some manipulation of the data in Excel. The data required for the import process is a csv file with the following columns: 
-- industry_name	
-- employees_at_location_range	
-- product_type	
-- product	
-- year	
-- currency	
-- spend
+Importing the spend data from this Excel workbook will very little manipulation of the data in Excel. The data required for the import process is a csv file with the following columns:
+ 
+1. city
+2. country
+3. product	
+4. sub_product	
+5. infousa_industry	
+6. infousa_size	
+
+and a column for each year for which there is data. 
+
+The product column is blank in the Excel workbook - this is intentional and will be adjusted in the code.
 
 Spend should be the spend per business for the entire calendar year. The ETL script will divide this value by 12 to get a monthly spend value. You do not need to do this before importing the data.
 
-Steps to convert: 
+Steps to convert (for each city for which there is spend data): 
 
-	1. Create a new column called “year” and a column called “spend”. Duplicate the metadata for each spend year and copy/paste the spend values.
-	2. Rename the column “Spending category” to “product_type”.
-	3. Rename the column “Subcategory” to “product”.
-	4. Rename the column “Company size” to “employees_at_location_range”.
-	4. Rename the “Industry” column to “industry_name”.
-	5. Rename the “Unit” column to “currency”.
-	6. Ensure that the “currency” column has a 3-letter abbreviation for the currency depicted in the data.
-	7. Remove the “Category” column.
-	8. Save the resulting file with the name `reformatted_spend.csv`.
-	9. Place the `reformatted_spend.csv` file in the `etl/client` directory.
+1. Create a new column called `city`. Enter the appropriate value.
+2. Create a new column called `country`. Enter the appropriate value.
+3. Save the resulting file with a name that includes the phrase `reformatted_spend`. The file must be in csv format.
+4. Place the resulting files in the `etl/client/spend_data` directory.
 
 #### ETL
 
  - `make reset_client`: Drops all client-related objects.
- - `make etl_client`: One of the commands executed with this command is the reload of all data stored in the `reformatted_spend.csv` file.
+ - `make etl_client`: One of the commands executed with this command is the reload of all data stored in the files contained within the `etl-colt/etl/client/spend_data` directory.
  
 ### Script Overview
  
-First, the ETL script `spend.py` replaces missing values in the spend data with zeros and divides the values in the "spend" column by 12 to get a monthly spend value. The script creates mapping tables for products (using "product_type" and "product" columns), industries (using the "industry_name" column), and employees (using the "employees_at_location_range" column). The script merges the IDs generated for these mapping tables with the original data using the pandas merge function, and imports the reformatted DataFrame to the spend table.
+First, the ETL script `spend.py` replaces missing values in the spend data with zeros and divides the values in the `spend` column by 12 to get a monthly spend value. The script creates a product type column. It also reshapes the data so that the year to which the spend values apply is a column. The script creates mapping tables for products (using `product_type` and `product` columns), industries (using the `industry_name` column), and employees (using the `employees_at_location_range` column). The script merges the IDs generated for these mapping tables with the original data using the pandas merge function, and imports the reformatted DataFrame to the spend table.
  
   
 

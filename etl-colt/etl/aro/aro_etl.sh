@@ -16,8 +16,10 @@ ${PSQL} -a -f $DIR/create_aro_locations.sql
 # Create aro.businesses table from source_colt.locations table
 ${PSQL} -a -f $DIR/create_aro_businesses.sql
 
-# Create empty tables (empty for Colt, at least)
+# Create geographic boundaries around Frankfurt and Paris based on locations
+${PSQL} -a -f $DIR/create_aro_city_boundaries.sql
 
+# Create empty tables (empty for Colt, at least)
 ${PSQL} -a -f $DIR/create_aro_census_blocks.sql
 
 ${PSQL} -a -f $DIR/create_aro_cousub.sql
