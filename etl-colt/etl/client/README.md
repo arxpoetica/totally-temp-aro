@@ -6,11 +6,12 @@ The relevant data is in the TSM sheet within the `2015 11 05_Spend Matrix France
 ### Creating a spend dataset
 Importing the spend data from this Excel workbook will very little manipulation of the data in Excel. The data required for the import process is a csv file with the following columns:
  
-1. location
-2. product	
-3. sub_product	
-4. infousa_industry	
-5. infousa_size	
+1. city
+2. country
+3. product	
+4. sub_product	
+5. infousa_industry	
+6. infousa_size	
 
 and a column for each year for which there is data. 
 
@@ -20,9 +21,10 @@ Spend should be the spend per business for the entire calendar year. The ETL scr
 
 Steps to convert (for each city for which there is spend data): 
 
-1. Create a new column called “location”. Enter values in the format `<city_name>,<country_name>`.
-2. Save the resulting file with a name that includes the phrase `reformatted_spend`. The file must be in csv format.
-3. Place the resulting files in the `etl/client/spend_data` directory.
+1. Create a new column called `city`. Enter the appropriate value.
+2. Create a new column called `country`. Enter the appropriate value.
+3. Save the resulting file with a name that includes the phrase `reformatted_spend`. The file must be in csv format.
+4. Place the resulting files in the `etl/client/spend_data` directory.
 
 #### ETL
 
