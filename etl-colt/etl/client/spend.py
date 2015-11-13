@@ -270,7 +270,8 @@ def get_products(db, frame = True):
     
 def add_spend(db, spend):
     print "Adding client spend data..."
-    colnames = ['location',
+    colnames = ['city',
+                'country',
                 'product_id', 
                 'industry_id', 
                 'employees_by_location_id', 
@@ -284,14 +285,15 @@ def add_spend(db, spend):
     
     values = spend.to_dict('split')['data']
 
-    sql_query = """INSERT INTO client.spend (location,
+    sql_query = """INSERT INTO client.spend (city,
+                                             country,
                                              product_id,
                                              industry_id, 
                                              employees_by_location_id, 
                                              year, 
                                              monthly_spend, 
                                              currency_abbrev)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s);
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
                 """
     
     cur.executemany(sql_query, values)
