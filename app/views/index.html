@@ -351,21 +351,21 @@
           <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
             <h2>View</h2>
             <form ng-hide="show_commercial && !show_residential">
-              <div class="checkbox" ng-class="{'disabled': overlay === 'density'}" ng-show="show_commercial">
+              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
                 <label>
-                  <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay === 'density'"> Commercial
+                  <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Commercial
                 </label>
               </div>
-              <div class="checkbox" ng-class="{'disabled': overlay === 'density'}" ng-show="show_residential">
+              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
                 <label>
-                  <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay === 'density'"> Residential
+                  <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Residential
                 </label>
               </div>
             </form>
             <div ng-show="show_commercial && !show_residential">
               <div class="checkbox">
                 <label>
-                  <input type="checkbox" ng-change="change_locations_layer()" ng-model="show_businesses" ng-disabled="overlay === 'density'"> Show businesses
+                  <input type="checkbox" ng-change="change_locations_layer()" ng-model="show_businesses" ng-disabled="overlay !== 'none'"> Show businesses
                 </label>
               </div>
               <p>
@@ -388,6 +388,7 @@
                 <select class="form-control" ng-model="overlay" ng-change="change_locations_layer()">
                   <option value="none">None</option>
                   <option value="density">Density</option>
+                  <option value="customer_profile">Customer profile</option>
                 </select>
                 <div class="row" style="margin-top: 10px" ng-show="overlay === 'density'">
                   <div class="col-md-2">Low</div>

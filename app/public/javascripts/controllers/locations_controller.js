@@ -88,13 +88,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.change_locations_layer = function() {
     var density = $rootScope.feature_layers.locations_density;
     var layer = $rootScope.feature_layers.locations;
-    if ($scope.overlay === 'density') {
-      density.show();
-      density.reload_data();
-      layer.hide();
-    } else {
-      density.hide();
+    var customer_profile = $rootScope.feature_layers.locations_customer_profile_density;
 
+    density.set_visible($scope.overlay === 'density');
+    customer_profile.set_visible($scope.overlay === 'customer_profile');
+
+    if ($scope.overlay === 'none') {
       var industries = $('#locations_controller .select2-industries').select2('val');
       var customer_types = $('#locations_controller .select2-customer-types').select2('val');
       var number_of_employees = $('#locations_controller .select2-number-of-employees').select2('val');
@@ -118,6 +117,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
         });
         layer.show();
       }
+    } else {
+      layer.hide();
     }
 
     if ($scope.show_businesses && $scope.overlay === 'none') {
@@ -212,19 +213,5 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.toggle_always_show_targets = function() {
     $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
   };
-
-  $scope.overlay_changed = function() {
-    var density = $rootScope.feature_layers.locations_density;
-    var layer = $rootScope.feature_layers.locations;
-    if ($scope.overlay === 'density') {
-      density.show();
-      density.reload_data();
-      layer.hide();
-    } else {
-      density.hide();
-      layer.show();
-      layer.reload_data();
-    }
-  }
 
 }]);

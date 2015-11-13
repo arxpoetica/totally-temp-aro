@@ -54,6 +54,19 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     denisty_hue_to: 290,
   });
 
+  feature_layers['locations_customer_profile_density'] = new MapLayer({
+    api_endpoint: '/locations_customer_profile_density',
+    style_options: {
+      normal: {
+        strokeColor: 'blue',
+        strokeWeight: 2,
+        fillColor: 'blue',
+      }
+    },
+    threshold: 12,
+    reload: 'always',
+  });
+
   $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
     var bounds = overlay.getBounds();
     feature_layers.locations.change_selection_for_features_matching(!deselect_mode, function(feature) {

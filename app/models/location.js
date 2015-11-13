@@ -16,7 +16,7 @@ var Location = {};
 // 1. callback: function to return a GeoJSON object
 Location.find_all = function(plan_id, type, filters, viewport, callback) {
 	txain(function(callback) {
-	  database.query('SELECT * FROM client_schema.customer_types', callback)
+		database.query('SELECT * FROM client_schema.customer_types', callback);
 	})
 	.then(function(customer_types, callback) {
 		var params = [];
@@ -26,7 +26,7 @@ Location.find_all = function(plan_id, type, filters, viewport, callback) {
 			sql += '\n\t, (SELECT COUNT(*)::integer FROM businesses b JOIN client_schema.business_customer_types bct ON b.id = bct.business_id AND bct.customer_type_id=$'+params.length;
 			sql += ' WHERE b.location_id = locations.id)'
 			sql += ' AS customer_type_'+customer_type.name.toLowerCase().replace(/\s+/g, '');
-		})
+		});
 		sql += '\n FROM aro.locations';
 		if (type === 'businesses') {
 			sql += '\n JOIN businesses b ON b.location_id = locations.id';
@@ -138,59 +138,59 @@ Location.show_information = function(location_id, callback) {
 	txain(function(callback) {
 		var sql = multiline(function() {;/*
 			select
-			  location_id,
-			  sum(entry_fee)::integer as entry_fee,
-			  sum(install_cost)::integer as business_install_costs,
-			  sum(install_cost_per_hh)::integer as household_install_costs,
-			  sum(number_of_households)::integer as number_of_households,
-			  sum(number_of_businesses)::integer as number_of_businesses
+				location_id,
+				sum(entry_fee)::integer as entry_fee,
+				sum(install_cost)::integer as business_install_costs,
+				sum(install_cost_per_hh)::integer as household_install_costs,
+				sum(number_of_households)::integer as number_of_households,
+				sum(number_of_businesses)::integer as number_of_businesses
 			from (
-			  select
-			    location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
-			  from
-			    client_schema.location_entry_fees
-			  where
-			    location_id=$1
+				select
+					location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
+				from
+					client_schema.location_entry_fees
+				where
+					location_id=$1
 
-			  union
+				union
 
-			  select
-			    location_id, 0, install_cost, 0, 0, 0
-			  from
-			    client_schema.business_install_costs
-			  join businesses
-			    on businesses.id = business_install_costs.business_id
-			  where
-			    location_id=$1
+				select
+					location_id, 0, install_cost, 0, 0, 0
+				from
+					client_schema.business_install_costs
+				join businesses
+					on businesses.id = business_install_costs.business_id
+				where
+					location_id=$1
 
-			  union
+				union
 
-			  select
-			    location_id, 0, 0, install_cost_per_hh, 0, 0
-			  from
-			    client_schema.household_install_costs
-			  where
-			    location_id=$1
+				select
+					location_id, 0, 0, install_cost_per_hh, 0, 0
+				from
+					client_schema.household_install_costs
+				where
+					location_id=$1
 
-			  union
+				union
 
-			  select
-			    location_id, 0, 0, 0, households.number_of_households, 0
-			  from
-			    aro.households
-			  where
-			    households.location_id=$1
+				select
+					location_id, 0, 0, 0, households.number_of_households, 0
+				from
+					aro.households
+				where
+					households.location_id=$1
 
-			  union
+				union
 
-			  select
-			    location_id, 0, 0, 0, 0, count(*)
-			  from
-			    businesses
-			  where
-			    location_id=$1
-			  group by
-			    location_id
+				select
+					location_id, 0, 0, 0, 0, count(*)
+				from
+					businesses
+				where
+					location_id=$1
+				group by
+					location_id
 
 			) t group by location_id;
 		*/});
@@ -200,41 +200,41 @@ Location.show_information = function(location_id, callback) {
 		info = _info;
 		var sql = multiline(function() {;/*
 			SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
-			  (SELECT
-			    bct.customer_type_id as id, COUNT(*)::integer AS businesses, 0 as households
-			  FROM
-			    businesses b
-			  JOIN
-			    client_schema.business_customer_types bct
-			  ON
-			    bct.business_id = b.id
-			  WHERE
-			    b.location_id=$1
-			  GROUP BY bct.customer_type_id)
+				(SELECT
+					bct.customer_type_id as id, COUNT(*)::integer AS businesses, 0 as households
+				FROM
+					businesses b
+				JOIN
+					client_schema.business_customer_types bct
+				ON
+					bct.business_id = b.id
+				WHERE
+					b.location_id=$1
+				GROUP BY bct.customer_type_id)
 
-			  UNION
+				UNION
 
-			  (SELECT
-			    hct.customer_type_id as id, 0 as businesses, COUNT(*)::integer AS households
-			  FROM
-			    households h
-			  JOIN
-			    client_schema.household_customer_types hct
-			  ON
-			    hct.household_id = h.id
-			  WHERE
-			    h.location_id=$1
-			  GROUP BY hct.customer_type_id)
+				(SELECT
+					hct.customer_type_id as id, 0 as businesses, COUNT(*)::integer AS households
+				FROM
+					households h
+				JOIN
+					client_schema.household_customer_types hct
+				ON
+					hct.household_id = h.id
+				WHERE
+					h.location_id=$1
+				GROUP BY hct.customer_type_id)
 
-			  ) t
+				) t
 			JOIN
-			  client_schema.customer_types ct
+				client_schema.customer_types ct
 			ON
-			  ct.id=t.id
+				ct.id=t.id
 			GROUP BY
-			  ct.name
+				ct.name
 			ORDER BY
-			  ct.name
+				ct.name
 		*/});
 		database.query(sql, [location_id], callback);
 	})
@@ -437,29 +437,74 @@ Location.show_businesses = function(location_id, callback) {
 
 // Get available filters
 Location.filters = function(callback) {
-  var output = {};
-  txain(function(callback) {
-    var sql = 'SELECT * FROM client_schema.employees_by_location';
-    database.query(sql, callback);
-  })
-  .then(function(rows, callback) {
-    output.employees_by_location = rows;
+	var output = {};
+	txain(function(callback) {
+		var sql = 'SELECT * FROM client_schema.employees_by_location';
+		database.query(sql, callback);
+	})
+	.then(function(rows, callback) {
+		output.employees_by_location = rows;
 
-    var sql = 'SELECT * FROM client_schema.industries';
-    database.query(sql, callback);
-  })
-  .then(function(rows, callback) {
-    output.industries = rows;
+		var sql = 'SELECT * FROM client_schema.industries';
+		database.query(sql, callback);
+	})
+	.then(function(rows, callback) {
+		output.industries = rows;
 
-    var sql = 'SELECT * FROM client_schema.customer_types';
-    database.query(sql, callback);
-  })
-  .then(function(rows, callback) {
-    output.customer_types = rows;
+		var sql = 'SELECT * FROM client_schema.customer_types';
+		database.query(sql, callback);
+	})
+	.then(function(rows, callback) {
+		output.customer_types = rows;
 
-    callback(null, output);
-  })
-  .end(callback);
+		callback(null, output);
+	})
+	.end(callback);
 };
+
+Location.customer_profile_heatmap = function(viewport, callback) {
+	txain(function(callback) {
+		database.query('SELECT * FROM client_schema.customer_types', callback);
+	})
+	.then(function(customer_types, callback) {
+		var params = [];
+		var sql = 'WITH '+viewport.fishnet;
+		sql += 'SELECT ST_AsGeojson(fishnet.geom)::json AS geom';
+
+		customer_types.forEach(function(customer_type) {
+			params.push(customer_type.id);
+			sql += '\n\t, (SELECT COUNT(*)::integer FROM businesses b JOIN client_schema.business_customer_types bct ON b.id = bct.business_id AND bct.customer_type_id=$'+params.length;
+			sql += ' WHERE b.geog && fishnet.geom)'
+			sql += ' AS customer_type_'+customer_type.name.toLowerCase().replace(/\s+/g, '');
+		});
+		sql += '\n FROM fishnet GROUP BY fishnet.geom';
+		database.query(sql, params, callback);
+	})
+	.then(function(rows, callback) {
+		rows = rows.filter(function(row) {
+			return row.customer_type_existing > 0 || row.customer_type_prospect > 0;
+		});
+
+		var features = rows.map(function(row) {
+			return {
+				'type':'Feature',
+				'properties': {
+					'id': row.id,
+					'density': row.customer_type_prospect*100/(row.customer_type_existing + row.customer_type_prospect),
+				},
+				'geometry': row.geom,
+			};
+		});
+
+		var output = {
+			'feature_collection': {
+				'type':'FeatureCollection',
+				'features': features,
+			},
+		};
+		callback(null, output);
+	})
+	.end(callback);
+}
 
 module.exports = Location;
