@@ -339,7 +339,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 
 	MapLayer.prototype.configure_feature_styles = function() {
 		var data = this.data_layer;
-		var maxdensity = 0, mindensity = 0;
+		var maxdensity = Number.MIN_VALUE, mindensity = Number.MAX_VALUE;
 		data.forEach(function(feature) {
 			var styles = {};
 			var icon = feature.getProperty('icon');

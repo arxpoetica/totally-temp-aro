@@ -15,7 +15,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
 
   $rootScope.$on('boundary_selected', function(e, json, title, type) {
     if (type !== 'customer_profile') return;
-    
+
     geo_json = json;
     $scope.type = 'all';
     $scope.calculate_customer_profile();
@@ -60,36 +60,17 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
 
   function show_chart() {
     $scope.loading = false;
+    $scope.data.customer_types = $scope.data.customer_types || [];
 
-    var colors = {
-      'Existing Copper': {
-        color: '#F7464A',
-        highlight: '#FF5A5E',
-      },
-      'Existing Fiber': {
-        color: '#46BFBD',
-        highlight: '#5AD3D1',
-      },
-      'Existing': {
-        color: '#46BFBD',
-        highlight: '#5AD3D1',
-      },
-      'Prospect': {
-        color: '#FDB45C',
-        highlight: '#FFC870',
+    var colors = randomColor({ seed: 1, count: $scope.data.customer_types.length });
+    var data = $scope.data.customer_types.map(function(customer_type) {
+      var color = colors.shift();
+      return {
+        name: customer_type.name,
+        value: customer_type.businesses + customer_type.households,
+        color: color,
+        highlight: tinycolor(color).lighten().toString(),
       }
-    };
-    var data = ($scope.data.customer_types || []).map(function(customer_type) {
-      var info = colors[customer_type.name]
-      if (!info) {
-        info = {
-          color: 'gray',
-          highlight: 'gray',
-          name: customer_type.name,
-        }
-      }
-      info.value = customer_type.businesses + customer_type.households;
-      return info;
     });
 
     chart && chart.destroy();

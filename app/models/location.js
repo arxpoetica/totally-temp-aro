@@ -247,7 +247,7 @@ Location.show_information = function(location_id, callback) {
 		info.customers_households_total = customer_types.reduce(function(total, customer_type) {
 			return total + customer_type.households;
 		}, 0);
-		
+
 		callback(null, info);
 	})
 	.end(callback);
@@ -417,17 +417,18 @@ Location.show_businesses = function(location_id, callback) {
 			businesses.address,
 			costs.install_cost::float,
 			costs.annual_recurring_cost::float,
-			industries.description AS industry_description
+			industries.description AS industry_description,
+			ct.name as customer_type
 		FROM
 			aro.businesses businesses
-		JOIN
-			client_schema.business_install_costs costs
-		ON
-			costs.business_id = businesses.id
-		LEFT JOIN
-			industries
-		ON
-			industries.id = businesses.industry_id
+		JOIN client_schema.business_install_costs costs
+			ON costs.business_id = businesses.id
+		LEFT JOIN industries
+			ON industries.id = businesses.industry_id
+		JOIN client_schema.business_customer_types bct
+			ON bct.business_id = businesses.id
+		JOIN client_schema.customer_types ct
+			ON ct.id = bct.customer_type_id
 		WHERE
 			location_id = $1
 	*/});
@@ -449,13 +450,13 @@ Location.filters = function(callback) {
 	})
 	.then(function(rows, callback) {
 		output.industries = rows;
-		
+
 		var sql = 'SELECT * FROM client_schema.customer_types';
 		database.query(sql, callback);
 	})
 	.then(function(rows, callback) {
 		output.customer_types = rows;
-		
+
 		callback(null, output);
 	})
 	.end(callback);
