@@ -85,10 +85,11 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     };
     $scope.loading = true;
     destroy_charts();
-    $http.get('/market_size/plan/'+$scope.route.id+'/calculate', args).success(function(response) {
+    $http.get('/market_size/plan/'+$scope.route.id+'/calculate', args).success(function(market_profile) {
       $scope.loading = false;
-      $scope.market_size = response.market_size;
-      $scope.fair_share = response.fair_share;
+      $scope.market_size = market_profile.market_size;
+      $scope.fair_share = market_profile.fair_share;
+      $scope.share = market_profile.share;
       destroy_charts();
       show_chart();
     }).error(function() {
@@ -241,9 +242,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       carrierDataset.data.push(row.total*$scope.share);
     });
 
-    $scope.market_size_existing.forEach(function(row) {
-      existingDataset.data.push(row.total);
-    });
+    // $scope.market_size_existing.forEach(function(row) {
+    //   existingDataset.data.push(row.total);
+    // });
 
     var options = {
       scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
