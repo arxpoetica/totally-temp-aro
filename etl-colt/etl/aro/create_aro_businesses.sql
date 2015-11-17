@@ -15,7 +15,16 @@ CREATE TABLE aro.businesses
 	CONSTRAINT aro_businesses_pkey PRIMARY KEY (id)
 );
 
+-- Create a table for later assigning customer type to existing customers
+DROP TABLE IF EXISTS aro.existing_customer_business_ids;
+CREATE TABLE aro.existing_customer_business_ids 
+(
+	id int
+);
+
 -- Map existing Colt customers to existing locations
+WITH existing_customer_business_ids AS
+(
 INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees, geog)
 	SELECT
 		locations.id AS location_id,
@@ -26,10 +35,13 @@ INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees, 
 	FROM source_colt.customers customers
 	JOIN aro.locations locations ON
 	customers.building_id = locations.building_id
-	WHERE customers.man_employee_total >= 10;
-
--- Get rid of any prospects which didn't geocode
-DELETE FROM source_colt.prospects WHERE lat = 0 AND lon = 0;
+	WHERE customers.man_employee_total >= 10
+	RETURNING id
+)
+INSERT INTO aro.existing_customer_business_ids(id)
+	SELECT 
+		id
+	FROM existing_customer_business_ids;
 
 -- Create temp table for central matching of prospects
 DROP TABLE IF EXISTS source_colt.prospect_location;
@@ -40,52 +52,103 @@ CREATE TABLE source_colt.prospect_location AS
 		prospects.lon,
 		prospects.lat,
 		ST_SetSRID(ST_Point(prospects.lon, prospects.lat),4326)::geometry AS geom
-	FROM (SELECT DISTINCT country, lon, lat FROM source_colt.prospects) prospects;
+	FROM (SELECT DISTINCT country, lon, lat FROM source_colt.prospects WHERE employees >= 10) prospects
+	WHERE prospects.lat != 0 AND prospects.lon != 0;
 
--- Inesert any locations we need (for prospects who don't match existing customer locations) into locations table
-INSERT INTO aro.locations(country, lat, lon, geom, geog)
+-- Finds existing locations which match prospect locations
+DROP TABLE IF EXISTS source_colt.prospects_locations_matched;
+CREATE TABLE source_colt.prospects_locations_matched AS
+	WITH matching_locations AS
+	(
+		SELECT 
+			l.id AS location_id,
+			pl.id AS prospect_location_id,
+			ST_Distance(pl.geom::geography, l.geog) AS distance
+		FROM source_colt.prospect_location pl
+		JOIN aro.locations l
+		ON ABS(l.lat - pl.lat) < .00001 AND ABS(l.lon - pl.lon) < .00001
+	),
+	exact_locations AS
+	(
+		SELECT
+			prospect_location_id,
+			min(distance) AS min_distance
+		FROM matching_locations
+		GROUP BY prospect_location_id
+	)
 	SELECT 
-		pl.country,
-		pl.lat,
-		pl.lon,
-		pl.geom,
-		pl.geom::geography AS geog
-	FROM source_colt.prospect_location pl
-	LEFT JOIN aro.locations l
-	ON ABS(l.lat - pl.lat) < .00001 AND ABS(l.lon - pl.lon) < .00001
-	WHERE l.id IS NULL;
+		ml.location_id,
+		el.prospect_location_id
+	FROM exact_locations el
+	JOIN matching_locations ml
+	ON ml.prospect_location_id = el.prospect_location_id AND el.min_distance = ml.distance;
 
--- Mapping table (THIS TAKES A BIT OF TIME TO CREATE):
--- All prospects should now have a location since we added them for the ones that didn't have one
--- Need to map through locations and source_colt.prospects table to get other data
-DROP TABLE IF EXISTS source_colt.prospect_location_tuple;
-CREATE TABLE source_colt.prospect_location_tuple AS
-	SELECT
-		prospect_location.id AS prospect_location_id,
-		prospects.id AS prospect_id,
-		locations.id AS aro_location_id
-	FROM source_colt.prospects prospects
-	JOIN source_colt.prospect_location prospect_location
-	ON prospects.lon = prospect_location.lon 
-	AND prospects.lat = prospect_location.lat
-	JOIN aro.locations locations
-	ON ABS(locations.lat - prospect_location.lat) < .00001 AND ABS(locations.lon - prospect_location.lon) < .00001;
+-- Insert locations for all prospects which do not match existing lcoations
+WITH new_locations AS
+(
+	INSERT INTO aro.locations(country, lat, lon, geom, geog)
+		SELECT
+			pl.country,
+			pl.lat,
+			pl.lon,
+			pl.geom,
+			pl.geom::geography AS geog
+		FROM source_colt.prospect_location pl
+		LEFT JOIN source_colt.prospects_locations_matched plm
+		ON plm.prospect_location_id = pl.id
+		WHERE plm.location_id IS NULL
+		RETURNING id, lat, lon
+)
+INSERT INTO source_colt.prospects_locations_matched(location_id, prospect_location_id)
+	SELECT 
+		new_locations.id,
+		pl.id
+	FROM new_locations
+	JOIN source_colt.prospect_location pl
+	ON new_locations.lat = pl.lat AND new_locations.lon = pl.lon;
 
--- Insert all the prospects into the businesses table with their assigned location_id
+-- Create a table for later assigning customer type to prospect customers
+DROP TABLE IF EXISTS aro.prospect_customer_business_ids;
+CREATE TABLE aro.prospect_customer_business_ids
+(
+	id int
+);
+
+-- Insert all prospects into businesses table and assign a location_id
+WITH prospect_customer_business_ids AS
+(
 INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_employees, geog)
 	SELECT
-		plt.aro_location_id AS location_id,
+		plm.location_id AS location_id,
 		p.sic_4 AS industry_id,
 		p.company_name AS name,
 		concat_ws(' ', p.address::text, p.address_2::text) AS address,
 		p.employees AS number_of_employees,
-		pl.geom::geography AS geog
-	FROM source_colt.prospect_location_tuple plt
+		l.geom::geography AS geog
+	FROM source_colt.prospects p
 	JOIN source_colt.prospect_location pl
-	ON pl.id = plt.prospect_location_id
-	JOIN source_colt.prospects p
-	ON p.id = plt.prospect_id
-	WHERE p.employees >= 10;
+	ON pl.lat = p.lat AND pl.lon = p.lon
+	JOIN source_colt.prospects_locations_matched plm
+	ON plm.prospect_location_id = pl.id
+	JOIN aro.locations l
+	ON l.id = plm.location_id
+	RETURNING id
+)
+INSERT INTO aro.prospect_customer_business_ids(id)
+	SELECT 
+		id
+	FROM prospect_customer_business_ids;
+
+
+-- Calculate the distance from each location to the client's fiber network now that we have all locations
+UPDATE aro.locations SET distance_to_client_fiber = ST_distance(geog,
+    (SELECT 
+        geog 
+    FROM aro.fiber_plant 
+    WHERE carrier_name='Colt' ORDER BY aro.fiber_plant.geom <-> aro.locations.geom LIMIT 1
+    )
+);
+
 
 -- Drop temp tables. Could do this with a WITH statement, but...
 DROP TABLE IF EXISTS source_colt.prospect_location;

@@ -21,16 +21,18 @@ INSERT INTO client.business_customer_types(business_id, customer_type_id)
 	SELECT
 		id AS business_id,
 		(SELECT t.id FROM client.customer_types t WHERE t.name = 'Prospect')::int AS customer_type_id
-	FROM aro.businesses
-	WHERE address is not NULL;
+	FROM aro.prospect_customer_business_ids;
 
 -- Load current customers
 INSERT INTO client.business_customer_types(business_id, customer_type_id)
 	SELECT
 		id AS business_id,
 		(SELECT t.id FROM client.customer_types t WHERE t.name = 'Existing')::int AS customer_type_id
-	FROM aro.businesses
-	WHERE address is NULL;
+	FROM aro.existing_customer_business_ids;
+
+-- Drop the tables we created to keep track of business ids needing customer type assignment
+DROP TABLE aro.prospect_customer_business_ids;
+DROP TABLE aro.existing_customer_business_ids;
 
 -- Create household customer types, because the ARO ETL does this, too.
 DROP TABLE IF EXISTS client.household_customer_types;

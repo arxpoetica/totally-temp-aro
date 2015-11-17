@@ -14,6 +14,7 @@ CREATE TABLE aro.locations
     lon double precision,
     geog geography(POINT, 4326),
     wirecenter_id varchar,
+    distance_to_client_fiber float,
     CONSTRAINT aro_locations_pkey PRIMARY KEY (id)
 );
 
@@ -23,7 +24,7 @@ SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 -- There is some question as to which field we should be selecting distinct on to get nonduplicate locations...
 -- We will also remove some values which have 0, 0 for lat,lon
 INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat, lon, geog, geom)
-    SELECT DISTINCT ON (bm_building_id)
+    SELECT DISTINCT ON (bm_building_id, ad_latitude, ad_longitude)
         bm_building_id AS building_id,
         (ad_house_number || ' ' || ad_street_name)::text AS address,
         ad_cityname_english,
@@ -35,7 +36,7 @@ INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat,
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326) as geom
     FROM source_colt.locations 
     WHERE ad_longitude != 0 AND ad_latitude != 0
-    AND ad_longitude != ad_latitude;
+    OR ad_longitude != ad_latitude;
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations USING gist (geog);
@@ -44,4 +45,5 @@ CREATE INDEX aro_locations_geom_gist
   ON aro.locations USING gist (geom);
 
 VACUUM ANALYZE aro.locations;
+
 
