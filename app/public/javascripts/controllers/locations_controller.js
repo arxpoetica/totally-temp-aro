@@ -86,11 +86,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   });
 
   $scope.change_locations_layer = function() {
-    var density = $rootScope.feature_layers.locations_density;
     var layer = $rootScope.feature_layers.locations;
     var customer_profile = $rootScope.feature_layers.locations_customer_profile_density;
 
-    density.set_visible($scope.overlay === 'density');
     customer_profile.set_visible($scope.overlay === 'customer_profile');
 
     if ($scope.overlay === 'none') {

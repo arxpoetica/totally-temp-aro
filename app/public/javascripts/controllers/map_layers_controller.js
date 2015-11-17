@@ -44,16 +44,6 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     heatmap: true,
   });
 
-  feature_layers['locations_density'] = new MapLayer({
-    type: 'locations_density',
-    name: 'Locations density',
-    style_options: { },
-    threshold: 0,
-    reload: 'always',
-    denisty_hue_from: 190,
-    denisty_hue_to: 290,
-  });
-
   feature_layers['locations_customer_profile_density'] = new MapLayer({
     api_endpoint: '/locations_customer_profile_density',
     style_options: {
@@ -229,16 +219,13 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
   $rootScope.$on('route_selected', function(e, route) {
     if (!route) return;
-    
+
     var layer = equipment_layers.network_nodes;
     var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
     layer.set_api_endpoint(api_endpoint);
 
     var layer = feature_layers['locations'];
     layer.set_api_endpoint('/locations/'+route.id);
-
-    var layer = feature_layers['locations_density'];
-    layer.set_api_endpoint('/locations/'+route.id+'/density');
 
     var layer = equipment_layers['fiber_plant'];
     layer.set_api_endpoint('/network/fiber_plant/'+route.carrier_name);

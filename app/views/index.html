@@ -387,7 +387,6 @@
               <div class="form-group">
                 <select class="form-control" ng-model="overlay" ng-change="change_locations_layer()">
                   <option value="none">None</option>
-                  <option value="density">Density</option>
                   <option value="customer_profile">Customer profile</option>
                 </select>
                 <div class="row" style="margin-top: 10px" ng-show="overlay === 'density'">
@@ -443,12 +442,18 @@
               </div>
 
               <div ng-repeat="(key, layer) in equipment_layers">
-                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng_show="key !== 'network_nodes'">
+                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
                   <label>
                     <input type="checkbox" ng-click="layer.toggle_visibility()" ng-checked="layer.visible"> {{layer.name}}
                   </label>
                 </div>
               </div>
+
+              <hr>
+              <div ng-repeat="node_type in view_node_types">
+                <p><img ng-attr-src="/images/map_icons/{{node_type.name}}.png"> = {{node_type.description}}</p>
+              </div>
+
 
               <% if (env_is_test) { %>
                 <a href="javascript:void(0)" ng-click="equipment_layers.network_nodes.select_random_features()" ng-attr-data-loaded="{{equipment_layers.network_nodes.data_loaded}}">.</a>
