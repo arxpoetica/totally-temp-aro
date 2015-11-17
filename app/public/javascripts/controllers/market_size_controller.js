@@ -3,6 +3,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   // Controller instance variables
   $scope.filters = null;
   $scope.loading = false;
+  $scope.customer_type = null;
 
   // filters
   $scope.threshold = 152.4; // 500 feet in meters
@@ -18,6 +19,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   $http.get('/market_size/filters').success(function(response) {
     $scope.filters = response;
+    $scope.customer_type = response.customer_types[1];
     $('#market-size select[multiple]').each(function() {
       var self = $(this);
       self.select2({
@@ -75,6 +77,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       industry: arr($scope.industry),
       employees_range: arr($scope.employees_range),
       product: arr($scope.product),
+      customer_type: $scope.customer_type && $scope.customer_type.id,
     };
     if (canceller) canceller.resolve();
     canceller = $q.defer();

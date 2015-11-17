@@ -28,6 +28,12 @@ MarketSize.filters = function(callback) {
   .then(function(rows, callback) {
     output.industries = rows;
 
+    var sql = 'SELECT * FROM client_schema.customer_types';
+    database.query(sql, callback);
+  })
+  .then(function(rows, callback) {
+    output.customer_types = rows;
+
     var sql = 'SELECT * FROM client_schema.employees_by_location';
     database.query(sql, callback);
   })
@@ -98,6 +104,10 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       sql += '\n AND spend.employees_by_location_id IN ($'+params.length+')';
     }
     sql += '\n JOIN client_schema.employees_by_location e ON e.id = spend.employees_by_location_id AND e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees'
+    if (filters.customer_type) {
+      params.push(filters.customer_type);
+      sql += '\n JOIN client_schema.business_customer_types bct ON bct.business_id = b.id AND bct.customer_type_id=$'+params.length
+    }
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
 
     database.query(sql, params, callback);
@@ -172,6 +182,12 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         client_schema.customer_types ct
       ON
         ct.id=bct.customer_type_id
+    */});
+    if (filters.customer_type) {
+      params.push(filters.customer_type);
+      sql += '\n AND bct.customer_type_id=$'+params.length
+    }
+    sql += multiline(function() {;/*
       JOIN
         client_schema.industry_mapping m
       ON

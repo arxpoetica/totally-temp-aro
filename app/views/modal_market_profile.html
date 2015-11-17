@@ -50,6 +50,14 @@
                 </div>
               </div>
               <div class="form-group form-group-sm">
+                <label class="col-sm-3 control-label">Customer type</label>
+                <div class="col-sm-9">
+                  <select class="form-control" ng-options="customer_type.name for customer_type in filters.customer_types" ng-model="customer_type" ng-change="calculate_market_size()">
+                    <option value="">Any customer type</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
                 <div class="col-sm-9 col-sm-offset-3">
                   <p class="form-control-static" ng-show="loading">Loading...</p>
                 </div>
