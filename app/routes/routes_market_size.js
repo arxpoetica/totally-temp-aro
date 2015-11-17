@@ -24,6 +24,7 @@ exports.configure = function(api, middleware) {
         industry: arr(request.query.industry),
         employees_range: arr(request.query.employees_range),
         product: arr(request.query.product),
+        customer_type: request.query.customer_type,
       },
     };
     models.MarketSize.calculate(plan_id, type, options, jsonHandler(response, next));
@@ -39,6 +40,7 @@ exports.configure = function(api, middleware) {
         industry: arr(request.query.industry),
         employees_range: arr(request.query.employees_range),
         product: arr(request.query.product),
+        customer_type: request.query.customer_type,
       },
     };
     var filename = request.query.filename;

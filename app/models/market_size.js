@@ -28,6 +28,12 @@ MarketSize.filters = function(callback) {
   .then(function(rows, callback) {
     output.industries = rows;
 
+    var sql = 'SELECT * FROM client_schema.customer_types';
+    database.query(sql, callback);
+  })
+  .then(function(rows, callback) {
+    output.customer_types = rows;
+
     var sql = 'SELECT * FROM client_schema.employees_by_location';
     database.query(sql, callback);
   })
@@ -43,35 +49,35 @@ function empty_array(arr) {
   return !_.isArray(arr) || arr.length === 0;
 }
 
+function prepareMarketSizeQuery(plan_id, type, options, params, output) {
+  var sql = '';
+  if (type === 'route' || type === 'addressable') {
+    if (config.route_planning) {
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
+      // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
+      params.push(plan_id);
+    } else {
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
+      params.push(config.client_carrier_name);
+      params.push(output.cbsa);
+    }
+
+    if (type === 'addressable') {
+      params.push(options.boundary);
+      sql += ' AND ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog) GROUP BY b.id)';
+    } else {
+      sql += ' GROUP BY b.id)'
+    }
+  } else {
+    params.push(options.boundary);
+    sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
+  }
+  return sql;
+}
+
 MarketSize.calculate = function(plan_id, type, options, callback) {
   var filters = options.filters;
   var output = {};
-
-  function prepareQuery(params) {
-    var sql = '';
-    if (type === 'route' || type === 'addressable') {
-      if (config.route_planning) {
-        sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
-        // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
-        params.push(plan_id);
-      } else {
-        sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
-        params.push(config.client_carrier_name);
-        params.push(output.cbsa);
-      }
-
-      if (type === 'addressable') {
-        params.push(options.boundary);
-        sql += ' AND ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog) GROUP BY b.id)';
-      } else {
-        sql += 'GROUP BY b.id)'
-      }
-    } else {
-      params.push(options.boundary);
-      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
-    }
-    return sql;
-  }
 
   txain(function(callback) {
     database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM custom.route WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
@@ -80,7 +86,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     output.cbsa = cbsa;
 
     var params = [];
-    var sql = prepareQuery(params);
+    var sql = prepareMarketSizeQuery(plan_id, type, options, params, output);
 
     sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
     sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
@@ -98,6 +104,10 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       sql += '\n AND spend.employees_by_location_id IN ($'+params.length+')';
     }
     sql += '\n JOIN client_schema.employees_by_location e ON e.id = spend.employees_by_location_id AND e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees'
+    if (filters.customer_type) {
+      params.push(filters.customer_type);
+      sql += '\n JOIN client_schema.business_customer_types bct ON bct.business_id = b.id AND bct.customer_type_id=$'+params.length
+    }
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
 
     database.query(sql, params, callback);
@@ -106,7 +116,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     output.market_size = market_size;
 
     var params = [];
-    var sql = prepareQuery(params);
+    var sql = prepareMarketSizeQuery(plan_id, type, options, params, output);
 
     sql += multiline(function() {/*
       SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM biz
@@ -136,17 +146,22 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
 
 MarketSize.export_businesses = function(plan_id, type, options, user, callback) {
   var filters = options.filters;
+  var output = {};
+
   txain(function(callback) {
-    var sql = 'SELECT ST_AsText(ST_Union(edge.geom)::geography) AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1';
-    database.findValue(sql, [plan_id], 'route', callback);
+    database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM custom.route WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
   })
-  .then(function(route, callback) {
+  .then(function(cbsa, callback) {
+    output.cbsa = cbsa;
+
     var params = [];
-    var sql = multiline(function() {;/*
+    var sql = prepareMarketSizeQuery(plan_id, type, options, params, output);
+
+    sql += multiline(function() {;/*
       SELECT
         b.id,
-        b.name,
-        b.address,
+        MAX(b.name),
+        MAX(b.address),
         MAX(c_industries.industry_name) AS industry_name,
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
@@ -154,7 +169,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         SUM(spend.monthly_spend * 12)::float as total,
         spend.year
       FROM
-        businesses b
+        biz b
       JOIN
         industries
       ON
@@ -167,6 +182,12 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         client_schema.customer_types ct
       ON
         ct.id=bct.customer_type_id
+    */});
+    if (filters.customer_type) {
+      params.push(filters.customer_type);
+      sql += '\n AND bct.customer_type_id=$'+params.length
+    }
+    sql += multiline(function() {;/*
       JOIN
         client_schema.industry_mapping m
       ON
@@ -201,23 +222,9 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         client_schema.industries c_industries
       ON
         spend.industry_id = c_industries.id
-      WHERE
     */});
-    // 152.4 meters = 500 feet
-    if (type === 'boundary') {
-      params.push(options.boundary);
-      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
-    } else if (type === 'route') {
-      params.push(route);
-      sql += '\n ST_DWithin(ST_GeogFromText($'+params.length+'), b.geog, 152.4)';
-    } else if (type === 'addressable') {
-      params.push(route);
-      sql += '\n ST_DWithin(ST_GeogFromText($'+params.length+'), b.geog, 152.4)';
-      sql += ' AND ';
-      params.push(options.boundary);
-      sql += '\n ST_Intersects(ST_GeomFromGeoJSON($'+params.length+')::geography, b.geog)';
-    }
     sql += '\n GROUP BY b.id, year';
+    console.log('sql', sql)
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
