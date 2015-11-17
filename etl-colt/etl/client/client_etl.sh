@@ -32,3 +32,6 @@ ${PSQL} -a -f $DIR/create_client_customer_type_mapping.sql
 ${PSQL} -a -f $DIR/create_client_spend.sql
 python $DIR/manage.py data spend values add $DIR/spend_data/
 python $DIR/manage.py data spend mapping add $DIR/
+
+# Map spend data to associated cities. This needs refining...
+${PSQL} -a -f $DIR/create_city_spend_mapping.sql
