@@ -160,28 +160,21 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     sql += multiline(function() {;/*
       SELECT
         b.id,
-        MAX(b.name),
-        MAX(b.address),
+        MAX(b.name) AS name,
+        MAX(b.address) AS address,
         MAX(c_industries.industry_name) AS industry_name,
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
+        MAX(l.distance_to_client_fiber) AS distance,
         SUM(spend.monthly_spend * 12)::float as total,
         spend.year
       FROM
         biz b
-      JOIN
-        industries
-      ON
-        industries.id = b.industry_id
-      JOIN
-        client_schema.business_customer_types bct
-      ON
-        bct.business_id = b.id
-      JOIN
-        client_schema.customer_types ct
-      ON
-        ct.id=bct.customer_type_id
+      JOIN locations l ON b.location_id = l.id
+      JOIN industries ON industries.id = b.industry_id
+      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
+      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
     */});
     if (filters.customer_type) {
       params.push(filters.customer_type);
@@ -243,28 +236,21 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
     sql += multiline(function() {;/*
       SELECT
         b.id,
-        MAX(b.name),
-        MAX(b.address),
+        MAX(b.name) AS name,
+        MAX(b.address) AS address,
         MAX(c_industries.industry_name) AS industry_name,
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
+        MAX(l.distance_to_client_fiber) AS distance,
         SUM(spend.monthly_spend * 12)::float as total,
         spend.year
       FROM
         biz b
-      JOIN
-        industries
-      ON
-        industries.id = b.industry_id
-      JOIN
-        client_schema.business_customer_types bct
-      ON
-        bct.business_id = b.id
-      JOIN
-        client_schema.customer_types ct
-      ON
-        ct.id=bct.customer_type_id
+      JOIN locations l ON b.location_id = l.id
+      JOIN industries ON industries.id = b.industry_id
+      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
+      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
     */});
     if (filters.customer_type) {
       params.push(filters.customer_type);
@@ -325,7 +311,7 @@ function create_businesses_csv(plan_id, user, rows, filters, callback) {
       }
     });
     years = years.sort();
-    var columns = ['name', 'address', 'industry_name', 'industry_description', 'number_of_employees', 'type'].concat(years);
+    var columns = ['name', 'address', 'distance', 'industry_name', 'industry_description', 'number_of_employees', 'type'].concat(years);
     var businesses = {};
     rows.forEach(function(business) {
       var id = business.id;
@@ -349,7 +335,7 @@ function create_businesses_csv(plan_id, user, rows, filters, callback) {
   })
   .then(function(csv, callback) {
     var years = this.get('years');
-    var header = ['Name', 'Address', 'Industry name', 'Industry description', 'Number of employees', 'Type'].concat(years);
+    var header = ['Name', 'Address', 'Distance', 'Industry name', 'Industry description', 'Number of employees', 'Type'].concat(years);
     csv = header.join(',')+'\n'+csv;
     this.set('csv', csv);
 
