@@ -53,11 +53,11 @@ function prepareMarketSizeQuery(plan_id, type, options, params, output) {
   var sql = '';
   if (type === 'route' || type === 'addressable') {
     if (config.route_planning) {
-      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
       // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
       params.push(plan_id);
     } else {
-      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
+      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
       params.push(config.client_carrier_name);
       params.push(output.cbsa);
     }
@@ -70,7 +70,7 @@ function prepareMarketSizeQuery(plan_id, type, options, params, output) {
     }
   } else {
     params.push(options.boundary);
-    sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
+    sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog FROM businesses b WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog))';
   }
   return sql;
 }
@@ -108,6 +108,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       params.push(filters.customer_type);
       sql += '\n JOIN client_schema.business_customer_types bct ON bct.business_id = b.id AND bct.customer_type_id=$'+params.length
     }
+    sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
 
     database.query(sql, params, callback);
@@ -171,6 +172,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         spend.year
       FROM
         biz b
+      JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog
       JOIN locations l ON b.location_id = l.id
       JOIN industries ON industries.id = b.industry_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
@@ -247,6 +249,7 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
         spend.year
       FROM
         biz b
+      JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog
       JOIN locations l ON b.location_id = l.id
       JOIN industries ON industries.id = b.industry_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
@@ -446,6 +449,7 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
        AND e.max_value >= b.number_of_employees
+      JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog
       WHERE locations.id = $1
       GROUP BY spend.year
       ORDER by spend.year
@@ -488,6 +492,7 @@ MarketSize.market_size_for_business = function(business_id, callback) {
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
        AND e.max_value >= b.number_of_employees
+      JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog
       WHERE b.id = $1
       GROUP BY spend.year
       ORDER by spend.year
