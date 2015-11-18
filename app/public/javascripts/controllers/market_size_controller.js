@@ -138,6 +138,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
         industry: arr($scope.industry),
         employees_range: arr($scope.employees_range),
         product: arr($scope.product),
+        customer_type: $scope.customer_type && $scope.customer_type.id,
         filename: name,
       };
       var pairs = _.keys(params).map(function(key) {

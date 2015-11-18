@@ -224,10 +224,100 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         spend.industry_id = c_industries.id
     */});
     sql += '\n GROUP BY b.id, year';
-    console.log('sql', sql)
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
+    create_businesses_csv(plan_id, user, rows, filters, callback);
+  })
+  .end(callback);
+};
+
+MarketSize.export_businesses_at_location = function(plan_id, location_id, type, options, user, callback) {
+  var filters = options.filters;
+  var output = {};
+
+  txain(function(callback) {
+    var params = [location_id];
+    sql = 'WITH biz AS (SELECT * FROM businesses b WHERE b.location_id=$1)\n'
+
+    sql += multiline(function() {;/*
+      SELECT
+        b.id,
+        MAX(b.name),
+        MAX(b.address),
+        MAX(c_industries.industry_name) AS industry_name,
+        MAX(industries.description) AS industry_description,
+        MAX(e.value_range) AS number_of_employees,
+        MAX(ct.name) AS type,
+        SUM(spend.monthly_spend * 12)::float as total,
+        spend.year
+      FROM
+        biz b
+      JOIN
+        industries
+      ON
+        industries.id = b.industry_id
+      JOIN
+        client_schema.business_customer_types bct
+      ON
+        bct.business_id = b.id
+      JOIN
+        client_schema.customer_types ct
+      ON
+        ct.id=bct.customer_type_id
+    */});
+    if (filters.customer_type) {
+      params.push(filters.customer_type);
+      sql += '\n AND bct.customer_type_id=$'+params.length
+    }
+    sql += multiline(function() {;/*
+      JOIN
+        client_schema.industry_mapping m
+      ON
+        m.sic4 = b.industry_id
+      JOIN
+        client_schema.spend
+      ON
+        spend.industry_id = m.industry_id
+        AND spend.monthly_spend <> 'NaN'
+    */});
+
+    if (!empty_array(filters.industry)) {
+      params.push(filters.industry);
+      sql += ' AND spend.industry_id IN ($'+params.length+')';
+    }
+    if (!empty_array(filters.product)) {
+      params.push(filters.product);
+      sql += ' AND spend.product_id IN ($'+params.length+')';
+    }
+    if (!empty_array(filters.employees_range)) {
+      params.push(filters.employees_range);
+      sql += ' AND spend.employees_by_location_id IN ($'+params.length+')';
+    }
+    sql += multiline(function() {;/*
+      JOIN
+        client_schema.employees_by_location e
+      ON
+        e.id = spend.employees_by_location_id
+        AND e.min_value <= b.number_of_employees
+        AND e.max_value >= b.number_of_employees
+      JOIN
+        client_schema.industries c_industries
+      ON
+        spend.industry_id = c_industries.id
+    */});
+    sql += '\n GROUP BY b.id, year';
+    database.query(sql, params, callback);
+  })
+  .then(function(rows, callback) {
+    create_businesses_csv(plan_id, user, rows, filters, callback);
+  })
+  .end(callback);
+}
+
+function create_businesses_csv(plan_id, user, rows, filters, callback) {
+
+  txain(function(callback) {
     var years = [];
     rows.forEach(function(business) {
       if (years.indexOf(business.year) === -1) {
@@ -331,7 +421,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     callback(null, csv, this.get('total'));
   })
   .end(callback);
-};
+}
 
 MarketSize.market_size_for_location = function(location_id, filters, callback) {
   var output = {};
@@ -344,6 +434,12 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
       JOIN businesses b ON locations.id = b.location_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
       JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
+    */});
+    if (filters.customer_type) {
+      params.push(filters.customer_type);
+      sql += '\n AND bct.customer_type_id=$'+params.length
+    }
+    sql += multiline(function() {;/*
       JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
       JOIN client_schema.spend ON spend.industry_id = m.industry_id
     */});

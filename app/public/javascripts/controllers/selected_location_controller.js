@@ -79,6 +79,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
       industry: arr($scope.industry),
       employees_range: arr($scope.employees_range),
       product: arr($scope.product),
+      customer_type: $scope.customer_type && $scope.customer_type.id,
     };
     var args = {
       params: params,
@@ -91,6 +92,42 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
       show_current_chart();
     });
   };
+
+  $scope.route = null;
+  $rootScope.$on('route_selected', function(e, route) {
+    $scope.route = route;
+  });
+
+  $scope.export = function() {
+    $('#selected_location_controller').modal('hide');
+    swal({
+      title: "File name",
+      type: "input",
+      showCancelButton: true,
+      closeOnConfirm: true,
+      animation: "slide-from-top",
+      inputPlaceholder: "export",
+    }, function(name) {
+      if (name === false) return false;
+      var params = {
+        type: $scope.market_type,
+        industry: arr($scope.industry),
+        employees_range: arr($scope.employees_range),
+        product: arr($scope.product),
+        customer_type: $scope.customer_type && $scope.customer_type.id,
+        filename: name,
+      };
+      var pairs = _.keys(params).map(function(key) {
+        var value = params[key];
+        if (!value) return null;
+        return key+'='+encodeURIComponent(value);
+      });
+      console.log('route', $scope.route)
+      console.log('location', $scope.location)
+      var href = '/market_size/plan/'+$scope.route.id+'/location/'+$scope.location.id+'/export?'+_.compact(pairs).join('&');
+      location.href = href;
+    });
+  }
 
   function destroy_market_size_chart() {
     market_size_chart && market_size_chart.destroy();
