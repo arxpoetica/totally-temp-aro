@@ -27,7 +27,7 @@ INSERT INTO client.business_customer_types(business_id, customer_type_id)
 INSERT INTO client.business_customer_types(business_id, customer_type_id)
 	SELECT
 		id AS business_id,
-		(SELECT t.id FROM client.customer_types t WHERE t.name = 'Existing')::int AS customer_type_id
+		(SELECT t.id FROM client.customer_types t WHERE t.name = 'Customer')::int AS customer_type_id
 	FROM aro.existing_customer_business_ids;
 
 -- Drop the tables we created to keep track of business ids needing customer type assignment
