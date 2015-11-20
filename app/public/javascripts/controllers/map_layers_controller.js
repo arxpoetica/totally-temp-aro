@@ -208,9 +208,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     // api_endpoint: '/network/fiber_plant/VERIZON',
     style_options: {
       normal: {
-        strokeColor: 'red',
+        strokeColor: 'rgb(0, 164, 153)',
         strokeWeight: 2,
-        fillColor: 'red',
+        fillColor: 'rgb(0, 164, 153)',
       }
     },
     threshold: 11,
