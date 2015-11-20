@@ -20,21 +20,34 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     $rootScope.$broadcast('contextual_menu_feature', options, map_layer, feature);
   };
 
-  $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
-    if (map_layer.type !== 'locations') return;
-    options.add('See more information', function(map_layer, feature) {
-      var id = feature.getProperty('id');
-      $http.get('/locations/'+id+'/show').success(function(response) {
-        response.id = id;
-        set_selected_location(response);
-        $('#selected_location_controller').modal('show');
-        $('#selected_location_market_profile select[multiple]').select2('val', []);
-        $scope.market_size = null;
-        $scope.fair_share = null;
-        $scope.calculate_market_size();
+  if (config.route_planning) {
+    $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
+      if (map_layer.type !== 'locations') return;
+      options.add('See more information', function(map_layer, feature) {
+        var id = feature.getProperty('id');
+        open_location(id)
       });
     });
-  });
+  } else {
+    $rootScope.$on('map_layer_clicked_feature', function(event, options, map_layer) {
+      if (map_layer.type !== 'locations') return;
+      var feature = options.feature;
+      var id = feature.getProperty('id');
+      open_location(id)
+    });
+  }
+
+  function open_location(id) {
+    $http.get('/locations/'+id+'/show').success(function(response) {
+      response.id = id;
+      set_selected_location(response);
+      $('#selected_location_controller').modal('show');
+      $('#selected_location_market_profile select[multiple]').select2('val', []);
+      $scope.market_size = null;
+      $scope.fair_share = null;
+      $scope.calculate_market_size();
+    });
+  }
 
   $('#selected_location_controller').on('shown.bs.tab', function(e) {
     var href = $(e.target).attr('href');

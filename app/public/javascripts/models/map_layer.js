@@ -38,8 +38,8 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 		var feature_dragged;
 
 		data_layer.addListener('click', function(event) {
-			if (!selection.is_enabled()) return;
 			$rootScope.$broadcast('map_layer_clicked_feature', event, layer);
+			if (!selection.is_enabled()) return;
 			if (layer.single_selection) {
 				var changes = create_empty_changes(layer);
 				layer.data_layer.forEach(function(feature) {
@@ -111,12 +111,12 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				'rgba(63, 0, 91, 1)',
 				'rgba(127, 0, 63, 1)',
 				'rgba(191, 0, 31, 1)',
-				'rgba(255, 0, 0, 1)'    
+				'rgba(255, 0, 0, 1)'
 			];
-			layer.heatmap_layer = new google.maps.visualization.HeatmapLayer({ maxIntensity: 20, opacity: 0.8, gradient: gradient });   
-			layer.heatmap_layer.set('radius', 10);    
-			$rootScope.$on('map_zoom_changed', function() {   
-				layer.configure_visibility();   
+			layer.heatmap_layer = new google.maps.visualization.HeatmapLayer({ maxIntensity: 20, opacity: 0.8, gradient: gradient });
+			layer.heatmap_layer.set('radius', 10);
+			$rootScope.$on('map_zoom_changed', function() {
+				layer.configure_visibility();
 			});
 		}
 
@@ -309,7 +309,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				});
 			}
 		}
-		
+
 		function load_heatmap_layer() {
 			if (!layer.heatmap_layer) return;
 			var arr = [];
@@ -446,15 +446,15 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 					this.heatmap_layer.setMap(null);
 					this.data_layer.setMap(map);
 					this.set_style('normal');
-				} else {    
+				} else {
 					this.heatmap_layer.setMap(map);
 					this.set_style('hidden');
 					this.data_layer.setMap(this.always_show_selected ? map : null);
-				}   
+				}
 			} else {
 				this.set_style('normal');
 				this.data_layer.setMap(map);
-			}   
+			}
 		} else {
 			if (this.always_show_selected) {
 				this.set_style('hidden');
