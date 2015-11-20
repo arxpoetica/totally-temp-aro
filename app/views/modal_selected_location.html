@@ -104,13 +104,21 @@
                 </div>
               </div>
               <div class="form-group form-group-sm">
+                <label class="col-sm-3 control-label">Customer type</label>
+                <div class="col-sm-9">
+                  <select class="form-control" ng-options="customer_type.name for customer_type in filters.customer_types" ng-model="customer_type" ng-change="calculate_market_size()">
+                    <option value="">Any customer type</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
                 <div class="col-sm-9 col-sm-offset-3">
                   <p class="form-control-static" ng-show="!loading && market_size.length === 0">No data available for this location with the selected filters</p>
                   <p class="form-control-static" ng-show="loading">Loading...</p>
                 </div>
               </div>
             </form>
-            
+
             <canvas id="location_market_size_chart" style="width:100%; height:200px"></canvas>
           </div>
 
@@ -129,6 +137,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" ng-click="update()" ng-show="show_households">Update</button>
+        <button type="button" class="btn btn-primary" ng-click="export()">Export</button>
       </div>
     </div>
   </div>
