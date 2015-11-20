@@ -4,11 +4,11 @@ CREATE TABLE client.customer_types
 (
 	id serial,
 	name varchar,
+	is_existing_cutomer boolean,
 	CONSTRAINT client_customer_types_pkey PRIMARY KEY (id)
 );
 
--- Fake customer types for the fake client
-INSERT INTO client.customer_types(name)
+INSERT INTO client.customer_types(name, is_existing_cutomer)
 VALUES
-	('Customer'),
-	('Prospect');
+	('Customer', TRUE),
+	('Prospect', FALSE);
