@@ -66,8 +66,28 @@ exports.configure = function(api, middleware) {
       industry: arr(request.query.industry),
       employees_range: arr(request.query.employees_range),
       product: arr(request.query.product),
+      customer_type: request.query.customer_type,
     };
     models.MarketSize.market_size_for_location(location_id, filters, jsonHandler(response, next));
+  });
+
+  api.get('/market_size/plan/:plan_id/location/:location_id/export', function(request, response, next) {
+    var plan_id = +request.params.plan_id;
+    var location_id = +request.params.location_id;
+    var type = request.query.type;
+    var options = {
+      filters: {
+        industry: arr(request.query.industry),
+        employees_range: arr(request.query.employees_range),
+        product: arr(request.query.product),
+        customer_type: request.query.customer_type,
+      },
+    };
+    var filename = request.query.filename;
+    models.MarketSize.export_businesses_at_location(plan_id, location_id, type, options, request.user, nook(next, function(output) {
+      response.attachment(filename+'.csv');
+      response.send(output);
+    }));
   });
 
   function arr(value) {

@@ -5,6 +5,7 @@ CREATE TABLE client.business_customer_types
 	id serial,
 	business_id bigint,
 	customer_type_id bigint,
+	is_existing_customer boolean,
 	CONSTRAINT client_business_customer_types_pkey PRIMARY KEY (id)
 );
 
@@ -17,17 +18,19 @@ CREATE INDEX client_business_customer_types_customer_type_index ON client.busine
 -- Because of this, we'll load based on that field bein null.
 
 -- Load prospect customers
-INSERT INTO client.business_customer_types(business_id, customer_type_id)
+INSERT INTO client.business_customer_types(business_id, customer_type_id, is_existing_customer)
 	SELECT
 		id AS business_id,
-		(SELECT t.id FROM client.customer_types t WHERE t.name = 'Prospect')::int AS customer_type_id
+		(SELECT t.id FROM client.customer_types t WHERE t.name = 'Prospect')::int AS customer_type_id,
+		FALSE
 	FROM aro.prospect_customer_business_ids;
 
 -- Load current customers
-INSERT INTO client.business_customer_types(business_id, customer_type_id)
+INSERT INTO client.business_customer_types(business_id, customer_type_id, is_existing_customer)
 	SELECT
 		id AS business_id,
-		(SELECT t.id FROM client.customer_types t WHERE t.name = 'Existing')::int AS customer_type_id
+		(SELECT t.id FROM client.customer_types t WHERE t.name = 'Customer')::int AS customer_type_id,
+		TRUE
 	FROM aro.existing_customer_business_ids;
 
 -- Drop the tables we created to keep track of business ids needing customer type assignment

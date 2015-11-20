@@ -8,8 +8,9 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   margin-bottom: 0;
   z-index: 2;
   background-image: none;
-  background-color: #f8f8f8;
-  border-radius: 0;
+  background-color: rgb(20, 22, 22);
+  border: none;
+  border-radius: 0px;
 }
 
 .navbar-container {
@@ -21,16 +22,36 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   font-size: 24px;
 }
 
+.navbar-default .navbar-text {
+  color: #fff;
+}
+
+.navbar>.container .navbar-brand, .navbar>.container-fluid .navbar-brand {
+  margin-left: -10px;
+  color: #fff;
+}
+
+.span.fa.fa-users {
+  margin-right: 5px;
+}
+
 .navbar-right {
   margin-top: -3px;
 }
 
+.navbar-default .navbar-nav>li>a {
+  color: #fff;
+}
+
 .btn, .btn-sm, .btn-group-sm>.btn {
   border-radius: 2px;
+  background-color: #fff;
 }
 
 .btn-primary, .btn-default, .btn-success, .btn-danger, .btn-primary:hover, .btn-default:hover, .btn-success:hover, .btn-danger:hover {
   background-image: none;
+  background-color: rgb(0, 117, 109);
+  border: none;
 }
 
 .modal-content, .panel {
@@ -43,7 +64,8 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 .btn-primary, .panel-primary>.panel-heading {
-  background-color: #383F66;
+  background-color: rgb(0, 164, 153);
+  border: none;
 }
 
 /* -- */
@@ -75,7 +97,7 @@ html, body, #map-canvas, #map-canvas-wrapper {
   bottom: 0px; /* footer height */
   left: 0;
   z-index: 1;
-  background-color: #f8f8f8;
+  background-color: rgb(20, 22, 22);;
   width: 55px;
 }
 
@@ -97,6 +119,15 @@ html, body, #map-canvas, #map-canvas-wrapper {
   border: 2px solid #eee;
   width: 320px;
   margin: 0;
+}
+
+.btn-success:active, .btn-success.active, .open>.dropdown-toggle.btn-success {
+  background-color: rgb(0, 117, 109);
+  border: none;
+}
+
+.btn-success:active:hover, .btn-success.active:hover, .open>.dropdown-toggle.btn-success:hover, .btn-success:active:focus, .btn-success.active:focus, .open>.dropdown-toggle.btn-success:focus, .btn-success:active.focus, .btn-success.active.focus, .open>.dropdown-toggle.btn-success.focus {
+  background-color: rgb(0, 117, 109);
 }
 
 .map-tool .panel-body {
@@ -216,8 +247,11 @@ footer nav {
   top: 0;
   left: 0;
   z-index: 2;
-  background-color: white;
-  background: url(http://www.rajant.com/wp-content/uploads/2014/12/reliability-rajant-mesh-wireless-network.jpg);
+  /*background: url(/images/backgrounds/colt_home_background.jpg);*/
+  background: rgb(30,30,30); /* Old browsers */
+background: -moz-linear-gradient(top, rgb(30,30,30) 0%, rgb(106,106,106) 64%, rgb(130,130,130) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top, rgb(30,30,30) 0%,rgb(106,106,106) 64%,rgb(130,130,130) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom, rgb(30,30,30) 0%,rgb(106,106,106) 64%,rgb(130,130,130) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -228,8 +262,8 @@ footer nav {
 }
 
 #aro_logo {
-  margin-top: 40px;
-  margin-bottom: 20px;
+  margin-left: -30px;
+  margin-bottom: -10px;
 }
 
 #home_screen_logo {
