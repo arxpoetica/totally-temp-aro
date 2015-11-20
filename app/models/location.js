@@ -494,6 +494,7 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 	})
 	.then(function(rows, callback) {
 		rows = rows.filter(function(row) {
+			row.customer_type_existing = row.customer_type_customer;
 			return row.customer_type_existing > 0 || row.customer_type_prospect > 0;
 		});
 
