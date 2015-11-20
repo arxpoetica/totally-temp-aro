@@ -6,6 +6,7 @@ var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
 var multiline = require('multiline');
+var _ = require('underscore')
 var config = helpers.config;
 var MarketSize = require('./market_size');
 
@@ -248,6 +249,11 @@ Location.show_information = function(location_id, callback) {
 			return total + customer_type.households;
 		}, 0);
 
+		database.findOne('SELECT address, ST_AsGeojson(geog)::json AS geog, distance_to_client_fiber FROM locations WHERE id=$1', [location_id], callback)
+	})
+	.then(function(location, callback) {
+		_.extend(info, location);
+
 		callback(null, info);
 	})
 	.end(callback);
@@ -456,6 +462,12 @@ Location.filters = function(callback) {
 	})
 	.then(function(rows, callback) {
 		output.customer_types = rows;
+
+		var sql = 'SELECT * FROM client_schema.products ORDER BY product_type, product_name';
+		database.query(sql, callback);
+	})
+	.then(function(rows, callback) {
+		output.products = rows;
 
 		callback(null, output);
 	})

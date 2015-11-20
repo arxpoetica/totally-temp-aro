@@ -1,16 +1,35 @@
 <div class="modal" id="selected_location_controller" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Location details</h4>
       </div>
       <div class="modal-body">
+
+        <div class="row">
+          <div class="col-md-6">
+            <img ng-attr-src="{{ map_url }}">
+          </div>
+          <div class="col-md-6">
+            <address>
+              <strong>Address</strong><br>
+              {{ location.address }}<br><br>
+              <strong>Businesses</strong><br>
+              {{ businesses.length }}<br><br>
+              <strong>Distance From Network</strong><br>
+              {{ location.distance_to_client_fiber | number: 2 }} m<br>
+            </address>
+          </div>
+        </div>
+
+        <br>
+
         <ul class="nav nav-tabs" role="tablist">
-          <li role="presentation" class="active">
+          <li role="presentation" ng-show="config.route_planning">
             <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Install costs</a>
           </li>
-          <li role="presentation">
+          <li role="presentation" class="active">
             <a href="#selected_location_customer_profile" aria-controls="profile" role="tab" data-toggle="tab">Customer profile</a>
           </li>
           <li role="presentation">
@@ -19,10 +38,13 @@
           <li role="presentation">
             <a href="#selected_location_fair_share" aria-controls="profile" role="tab" data-toggle="tab">Fair share</a>
           </li>
+          <li role="presentation">
+            <a href="#selected_location_businesses" aria-controls="profile" role="tab" data-toggle="tab">Businesses</a>
+          </li>
         </ul>
 
         <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="selected_location_costs">
+          <div role="tabpanel" class="tab-pane" id="selected_location_costs" ng-show="config.route_planning">
             <table class="locations-table">
               <tbody>
                 <tr>
@@ -55,7 +77,7 @@
               </tbody>
             </table>
           </div>
-          <div role="tabpanel" class="tab-pane" id="selected_location_customer_profile">
+          <div role="tabpanel" class="tab-pane active" id="selected_location_customer_profile">
             <table class="locations-table">
               <tbody>
                 <tr>
@@ -81,45 +103,50 @@
             </table>
           </div>
           <div role="tabpanel" class="tab-pane" id="selected_location_market_profile">
-            <form class="form-horizontal" style="margin-top: 30px">
-              <div class="form-group form-group-sm">
-                <label class="col-sm-3 control-label">Industry</label>
-                <div class="col-sm-9">
-                  <select class="form-control" ng-options="industry.industry_name for industry in filters.industries" ng-model="industry" ng-change="calculate_market_size()" multiple data-placeholder="All industries">
-                  </select>
-                </div>
+            <div class="row">
+              <div class="col-md-6">
+                <canvas id="location_market_size_chart" style="width:100%; height:200px"></canvas>
               </div>
-              <div class="form-group form-group-sm">
-                <label class="col-sm-3 control-label">Product</label>
-                <div class="col-sm-9">
-                  <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculate_market_size()" multiple data-placeholder="All products">
-                  </select>
-                </div>
+              <div class="col-md-6">
+                <form class="form-horizontal" style="margin-top: 30px">
+                  <div class="form-group form-group-sm">
+                    <label class="col-sm-3 control-label">Industry</label>
+                    <div class="col-sm-9">
+                      <select class="form-control" ng-options="industry.industry_name for industry in filters.industries" ng-model="industry" ng-change="calculate_market_size()" multiple data-placeholder="All industries">
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group form-group-sm">
+                    <label class="col-sm-3 control-label">Product</label>
+                    <div class="col-sm-9">
+                      <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculate_market_size()" multiple data-placeholder="All products">
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group form-group-sm">
+                    <label class="col-sm-3 control-label">Business size</label>
+                    <div class="col-sm-9">
+                      <select class="form-control" ng-options="range.value_range for range in filters.employees_by_location" ng-model="employees_range" ng-change="calculate_market_size()" multiple data-placeholder="All business sizes">
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group form-group-sm">
+                    <label class="col-sm-3 control-label">Customer type</label>
+                    <div class="col-sm-9">
+                      <select class="form-control" ng-options="customer_type.name for customer_type in filters.customer_types" ng-model="customer_type" ng-change="calculate_market_size()">
+                        <option value="">Any customer type</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group form-group-sm">
+                    <div class="col-sm-9 col-sm-offset-3">
+                      <p class="form-control-static" ng-show="!loading && market_size.length === 0">No data available for this location with the selected filters</p>
+                      <p class="form-control-static" ng-show="loading">Loading...</p>
+                    </div>
+                  </div>
+                </form>
               </div>
-              <div class="form-group form-group-sm">
-                <label class="col-sm-3 control-label">Business size</label>
-                <div class="col-sm-9">
-                  <select class="form-control" ng-options="range.value_range for range in filters.employees_by_location" ng-model="employees_range" ng-change="calculate_market_size()" multiple data-placeholder="All business sizes">
-                  </select>
-                </div>
-              </div>
-              <div class="form-group form-group-sm">
-                <label class="col-sm-3 control-label">Customer type</label>
-                <div class="col-sm-9">
-                  <select class="form-control" ng-options="customer_type.name for customer_type in filters.customer_types" ng-model="customer_type" ng-change="calculate_market_size()">
-                    <option value="">Any customer type</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group form-group-sm">
-                <div class="col-sm-9 col-sm-offset-3">
-                  <p class="form-control-static" ng-show="!loading && market_size.length === 0">No data available for this location with the selected filters</p>
-                  <p class="form-control-static" ng-show="loading">Loading...</p>
-                </div>
-              </div>
-            </form>
-
-            <canvas id="location_market_size_chart" style="width:100%; height:200px"></canvas>
+            </div>
           </div>
 
           <div role="tabpanel" class="tab-pane" id="selected_location_fair_share" style="margin-top:30px">
@@ -132,6 +159,58 @@
               </div>
             </div>
           </div>
+
+          <div role="tabpanel" class="tab-pane" id="selected_location_businesses">
+            <table><tbody></tbody></table><!-- do not remove -->
+
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Address</th>
+                  <th>Industry</th>
+                  <th class="text-right">#employees</th>
+                  <th class="text-right">Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="business in businesses">
+                  <td ng-attr-id="location_business_row_{{ business.id }}"><a href="javascript:void(0)" ng-click="show_market_profile(business)">{{business.name}}</a></th>
+                  <td>{{business.address}}</th>
+                  <td>{{business.industry_description}}</th>
+                  <td class="text-right">{{business.number_of_employees}}</td>
+                  <td class="text-right">
+                    <span class="label label-success"
+                      ng-attr-class="label label-{{business.customer_type.toLowerCase() === 'existing' ? 'success' : 'danger'}}">
+                      {{business.customer_type}}
+                    </span></td>
+                </tr>
+                <tr id="location_business_selected_info" style="display: none">
+                  <td colspan="5">
+                    <div class="row">
+                      <div class="col-md-8">
+                        <p ng-show="business_market_size && business_market_size.length === 0" class="text-center" style="margin-top: 30px">No data available for the selected business</p>
+                        <canvas id="business_market_size_chart" style="width:100%; height:200px"></canvas>
+                      </div>
+                      <div class="col-md-4">
+                        <form class="form-horizontal" style="margin-top: 30px">
+                          <div class="form-group form-group-sm">
+                            <label class="col-sm-3 control-label">Product</label>
+                            <div class="col-sm-9">
+                              <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products"
+                                ng-model="product" ng-change="calculate_business_market_size()" multiple data-placeholder="All products">
+                              </select>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </div>
       <div class="modal-footer">
