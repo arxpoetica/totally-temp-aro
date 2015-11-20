@@ -224,7 +224,6 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         spend.industry_id = c_industries.id
     */});
     sql += '\n GROUP BY b.id, year';
-    console.log('sql', sql)
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
@@ -390,10 +389,12 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
   .end(callback);
 }
 
-MarketSize.market_size_for_business = function(business_id, callback) {
+MarketSize.market_size_for_business = function(business_id, options, callback) {
   var output = {};
+  var filters = options.filters;
 
   txain(function(callback) {
+    var params = [business_id];
     var sql = multiline(function() {;/*
       SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
       FROM aro.locations locations
@@ -402,6 +403,12 @@ MarketSize.market_size_for_business = function(business_id, callback) {
       JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
       JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
       JOIN client_schema.spend ON spend.industry_id = m.industry_id
+    */});
+    if (!empty_array(filters.product)) {
+      params.push(filters.product);
+      sql += '\n AND spend.product_id IN ($'+params.length+')'
+    }
+    sql += multiline(function() {;/*
       JOIN client_schema.employees_by_location e ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
@@ -410,7 +417,7 @@ MarketSize.market_size_for_business = function(business_id, callback) {
       GROUP BY spend.year
       ORDER by spend.year
     */});
-    database.query(sql, [business_id], callback);
+    database.query(sql, params, callback);
   })
   .then(function(market_size, callback) {
     output.market_size = market_size;

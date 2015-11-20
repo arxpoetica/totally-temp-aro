@@ -2,6 +2,7 @@
 app.controller('selected_location_controller', function($rootScope, $scope, $http) {
   $scope.location = {};
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
+  $scope.config = config;
 
   $scope.select_random_location = function() {
     var map_layer = $rootScope.feature_layers.locations;
@@ -26,7 +27,6 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
       $http.get('/locations/'+id+'/show').success(function(response) {
         response.id = id;
         set_selected_location(response);
-        $('#selected_location_controller a:first').tab('show');
         $('#selected_location_controller').modal('show');
         $('#selected_location_market_profile select[multiple]').select2('val', []);
         $scope.market_size = null;
@@ -56,7 +56,38 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
                           + location.household_install_costs * location.number_of_households
                           + location.business_install_costs * location.number_of_businesses;
     $scope.location = location;
+
+    var google_maps_key = 'AIzaSyDYjYSshVYlkt2hxjrpqTg31KdMkw-TXSM';
+    var coordinates = location.geog.coordinates[1]+','+location.geog.coordinates[0];
+    var params = {
+      center: coordinates,
+      zoom: 13,
+      size: '400x150',
+      maptype: 'roadmap',
+      markers: 'color:red|label:L|'+coordinates,
+      key: google_maps_key,
+    };
+    $scope.map_url = 'https://maps.googleapis.com/maps/api/staticmap?'
+      + _.keys(params).map(function(key) { return key+'='+encodeURIComponent(params[key]) }).join('&');
+
+    preserve_business_detail();
+    $scope.businesses = null;
+    $scope.selected_business = null;
+    $http.get('/locations/businesses/' + location.id).success(function(response) {
+      preserve_business_detail();
+      $scope.businesses = response;
+      if (!location.address) {
+        var business = $scope.businesses.filter(function(business) {
+          return business.address
+        })[0];
+        location.address = business && business.address;
+      }
+    });
   };
+
+  function preserve_business_detail() {
+    $('#selected_location_businesses tbody:first').append($('#location_business_selected_info').hide());
+  }
 
   $('#selected_location_controller .nav-tabs a').click(function (e) {
     e.preventDefault();
@@ -65,7 +96,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
 
   $http.get('/market_size/filters').success(function(response) {
     $scope.filters = response;
-    $('#selected_location_market_profile select[multiple]').each(function() {
+    $('#selected_location_controller select[multiple]').each(function() {
       var self = $(this);
       self.select2({
         placeholder: self.attr('data-placeholder'),
@@ -180,6 +211,70 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     destroy_fair_share_chart();
     fair_share_chart = new Chart(ctx).Pie(data, options);
     document.getElementById('location_fair_share_chart_legend').innerHTML = fair_share_chart.generateLegend();
+  };
+
+  $scope.show_market_profile = function(business) {
+    if ($scope.selected_business && $scope.selected_business.id === business.id) {
+      $scope.selected_business = null;
+      $('#location_business_selected_info').hide();
+    } else {
+      $scope.business_market_size = null;
+      $scope.selected_business = business;
+      $scope.calculate_business_market_size();
+
+      var row = $('#location_business_row_'+business.id);
+      $('#location_business_selected_info').insertAfter(row.parent()).show();
+    }
+  }
+
+  $scope.calculate_business_market_size = function() {
+    var params = {
+      product: arr($scope.product),
+    };
+    var args = {
+      params: params,
+    };
+    $http.get('/market_size/business/'+$scope.selected_business.id, args).success(function(response) {
+      $scope.business_market_size = response.market_size;
+      show_business_chart();
+    });
+  }
+
+  function destroy_business_market_size_chart() {
+    business_market_size_chart && business_market_size_chart.destroy();
+    $('#business_market_size_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height');
+  }
+
+  var business_market_size_chart;
+  function show_business_chart() {
+    var dataset = {
+      label: "Market size",
+      fillColor: "rgba(151,187,205,0.2)",
+      strokeColor: "rgba(151,187,205,1)",
+      pointColor: "rgba(151,187,205,1)",
+      pointStrokeColor: "#fff",
+      pointHighlightFill: "#fff",
+      pointHighlightStroke: "rgba(151,187,205,1)",
+      data: [],
+    };
+
+    var data = {
+      labels: [],
+      datasets: [dataset],
+    };
+
+    $scope.business_market_size.forEach(function(row) {
+      data.labels.push(row.year);
+      dataset.data.push(row.total);
+    });
+
+    var options = {
+      scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
+      tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
+    };
+    destroy_business_market_size_chart();
+    var ctx = document.getElementById('business_market_size_chart').getContext('2d');
+    business_market_size_chart = new Chart(ctx).Line(data, options);
   };
 
 });

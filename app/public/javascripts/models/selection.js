@@ -57,16 +57,12 @@ app.service('selection', function($rootScope, $http) {
   };
 
   selection.set_enabled = function(_enabled) {
-    enabled = _enabled;
+    enabled = _enabled && config.route_planning;
   };
 
   selection.is_enabled = function() {
     return enabled;
   };
-
-  if (!config.route_planning) {
-    selection.set_enabled(false);
-  }
 
   return selection;
 

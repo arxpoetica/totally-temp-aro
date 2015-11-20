@@ -52,7 +52,12 @@ exports.configure = function(api, middleware) {
 
   api.get('/market_size/business/:business_id', function(request, response, next) {
     var business_id = +request.params.business_id;
-    models.MarketSize.market_size_for_business(business_id, jsonHandler(response, next));
+    var options = {
+      filters: {
+        product: arr(request.query.product),
+      },
+    };
+    models.MarketSize.market_size_for_business(business_id, options, jsonHandler(response, next));
   });
 
   api.get('/market_size/location/:location_id', function(request, response, next) {
