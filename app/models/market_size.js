@@ -471,6 +471,16 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
   })
   .then(function(fair_share, callback) {
     output.fair_share = fair_share;
+
+    var current_carrier = 0;
+    var total = output.fair_share.reduce(function(total, item) {
+      if (item.name === config.client_carrier_name) {
+        current_carrier = item.value;
+      }
+      return item.value + total;
+    }, 0);
+    output.share = current_carrier / total;
+
     callback(null, output);
   })
   .end(callback);
