@@ -28,7 +28,7 @@ exports.configure = function(api, middleware) {
   });
 
   api.get('/network/carriers', function(request, response, next) {
-    models.Network.carrier_names(jsonHandler(response, next));
+    models.Network.carriers(jsonHandler(response, next));
   });
 
   // Network nodes for user client by node type
