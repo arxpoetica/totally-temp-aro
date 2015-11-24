@@ -14,7 +14,6 @@ CREATE TABLE aro.locations
     lon double precision,
     geog geography(POINT, 4326),
     wirecenter_id varchar,
-    distance_to_client_fiber float,
     CONSTRAINT aro_locations_pkey PRIMARY KEY (id)
 );
 
@@ -34,7 +33,7 @@ INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat,
         ad_longitude,
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326)::geography as geog,
         ST_SetSRID(ST_Point(ad_longitude, ad_latitude),4326) as geom
-    FROM source_colt.locations 
+    FROM source_colt.locations
     WHERE ad_longitude != 0 AND ad_latitude != 0
     OR ad_longitude != ad_latitude;
 
@@ -45,5 +44,3 @@ CREATE INDEX aro_locations_geom_gist
   ON aro.locations USING gist (geom);
 
 VACUUM ANALYZE aro.locations;
-
-

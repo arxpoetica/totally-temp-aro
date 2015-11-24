@@ -252,8 +252,9 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
 
     var data = $scope.fair_share.map(function(carrier) {
       var color = colors.shift();
+      var distance = carrier.distance !== null ? ' ('+angular.injector(['ng']).get('$filter')('number')(carrier.distance, 2)+'m)' : ''
       return {
-        label: carrier.name,
+        label: carrier.name+distance,
         value: ((carrier.value*100)/total).toFixed(2),
         color: color,
         highlight: tinycolor(color).lighten().toString(),
