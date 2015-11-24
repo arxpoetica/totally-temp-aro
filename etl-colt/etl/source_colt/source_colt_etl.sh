@@ -55,11 +55,11 @@ cat /$DIR/local_data/colt_customers_paris.csv | ${PSQL} -a -c "COPY source_colt.
 $PSQL -f $DIR/create_colt_prospects.sql
 
 # Load prospect data from Paris and Frankfurt
-cat /$DIR/local_data/colt_prospects_frankfurt.csv | ${PSQL} -a -c "COPY source_colt.prospects\
+cat /$DIR/local_data/colt_prospects_frankfurt_v3.csv | ${PSQL} -a -c "COPY source_colt.prospects\
     (company_name,company_label,address,address_2,postcode,city,sic_4,sic_2,sic_industry_german,sic_industry_english,solon_av_industry,employees,employees_bracket,lat,lon,country) \
     FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
 
-cat /$DIR/local_data/colt_prospects_paris.csv | ${PSQL} -a -c "COPY source_colt.prospects\
+cat /$DIR/local_data/colt_prospects_paris_v3.csv | ${PSQL} -a -c "COPY source_colt.prospects\
     (company_name,company_label,address,address_2,postcode,city,sic_4,sic_2,sic_industry_german,sic_industry_english,solon_av_industry,employees,employees_bracket,lat,lon,country) \
     FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
 

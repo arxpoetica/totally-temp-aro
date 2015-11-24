@@ -24,7 +24,7 @@ SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 -- There is some question as to which field we should be selecting distinct on to get nonduplicate locations...
 -- We will also remove some values which have 0, 0 for lat,lon
 INSERT INTO aro.locations(building_id, address, city, country, postal_code, lat, lon, geog, geom)
-    SELECT DISTINCT ON (bm_building_id, ad_latitude, ad_longitude)
+    SELECT DISTINCT ON (bm_building_id/*,ad_latitude, ad_longitude*/)
         bm_building_id AS building_id,
         (ad_house_number || ' ' || ad_street_name)::text AS address,
         ad_cityname_english,
