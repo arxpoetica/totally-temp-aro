@@ -388,7 +388,7 @@
                 </div>
               </div>
             </div>
-            <div ng-show="route.owner_id === user_id">
+            <div ng-show="route.owner_id === user_id && available_tools.length > 0">
               <hr>
               <h2>Build</h2>
               <div class="row">
@@ -434,7 +434,7 @@
               </div>
 
               <div ng-repeat="(key, layer) in equipment_layers">
-                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
+                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-hide="layer.hide_in_ui">
                   <label>
                     <input type="checkbox" ng-click="layer.toggle_visibility()" ng-checked="layer.visible"> {{layer.name}}
                   </label>
@@ -455,7 +455,7 @@
                 <span id="equipment_nodes_controller_number_of_features">{{number_of_features}}</span>
               <% } %>
 
-              <div ng-show="route.owner_id === user_id">
+              <div ng-show="route.owner_id === user_id && (build_node_types.length > 0 || show_clear_nodes || show_recalculate)">
                 <hr>
                 <h2>Build</h2>
                 <div class="row">
@@ -474,7 +474,9 @@
                       <button class="btn btn-block btn-default btn-sm" ng-click="recalculate_network_nodes()">Recalculate network nodes</button>
                       <br>
                     </div>
-                    <button class="btn btn-sm btn-danger btn-block" ng-click="clear_nodes()" type="button">Clear network nodes</button>
+                    <button class="btn btn-sm btn-danger btn-block"
+                      ng-show="show_clear_nodes"
+                      ng-click="clear_nodes()" type="button">Clear network nodes</button>
                   </div>
                 </div>
               </div>

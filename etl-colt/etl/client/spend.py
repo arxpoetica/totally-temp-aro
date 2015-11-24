@@ -69,13 +69,8 @@ def assign_product_types(spend_data):
                                                  'Ethernet',
                                                  'IP-VPN',
                                                  'Legacy Data Services'], 
-                                'Datacenter Services': ['Colocation',
-                                                        'Managed DC Services', 
-                                                        'Hosting Servers', 
-                                                        'Storage'], 
-                                'Cloud Services': ['IaaS', 
-                                                   'PaaS', 
-                                                   'SaaS']}
+                                'Data Center Services': ['DC / Colocation',
+                                                        'Cloud']}
     
     for pt in product_types_by_product:
         for p in product_types_by_product[pt]:

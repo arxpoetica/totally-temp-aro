@@ -131,6 +131,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     $http.get('/market_size/location/'+$scope.location.id, args).success(function(response) {
       $scope.market_size = response.market_size;
       $scope.fair_share = response.fair_share;
+      $scope.share = response.share;
       $scope.loading = false;
       destroy_charts();
       show_current_chart();
@@ -223,14 +224,26 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
       data: [],
     };
 
+    var carrierDataset = {
+      label: "Fair share",
+      fillColor: "rgba(220,220,220,0.2)",
+      strokeColor: "rgba(220,220,220,1)",
+      pointColor: "rgba(220,220,220,1)",
+      pointStrokeColor: "#fff",
+      pointHighlightFill: "#fff",
+      pointHighlightStroke: "rgba(220,220,220,1)",
+      data: [],
+    };
+
     var data = {
       labels: [],
-      datasets: [dataset],
+      datasets: [dataset, carrierDataset],
     };
 
     $scope.market_size.forEach(function(row) {
       data.labels.push(row.year);
       dataset.data.push(row.total);
+      carrierDataset.data.push(row.total*$scope.share);
     });
 
     var options = {
@@ -245,19 +258,17 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   var fair_share_chart = null;
   function show_fair_share_chart() {
     $scope.fair_share = $scope.fair_share || [];
-    var colors = randomColor({ seed: 1, count: $scope.fair_share.length });
     var total = $scope.fair_share.reduce(function(total, carrier) {
       return total + carrier.value;
     }, 0);
 
     var data = $scope.fair_share.map(function(carrier) {
-      var color = colors.shift();
       var distance = carrier.distance !== null ? ' ('+angular.injector(['ng']).get('$filter')('number')(carrier.distance, 2)+'m)' : ''
       return {
         label: carrier.name+distance,
         value: ((carrier.value*100)/total).toFixed(2),
-        color: color,
-        highlight: tinycolor(color).lighten().toString(),
+        color: carrier.color,
+        highlight: tinycolor(carrier.color).lighten().toString(),
       }
     });
 

@@ -120,7 +120,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     var sql = prepareMarketSizeQuery(plan_id, type, options, params, output);
 
     sql += multiline(function() {/*
-      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM biz
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM biz
       JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
       JOIN carriers c ON lc.carrier_id = c.id
       GROUP BY c.id
@@ -465,7 +465,7 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
 
     var params = [location_id];
     var sql = multiline(function() {/*
-      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color,
         (SELECT distance FROM client.locations_distance_to_carrier ldtc
           WHERE ldtc.carrier_id = c.id
           AND ldtc.location_id = $1
@@ -480,6 +480,16 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
   })
   .then(function(fair_share, callback) {
     output.fair_share = fair_share;
+
+    var current_carrier = 0;
+    var total = output.fair_share.reduce(function(total, item) {
+      if (item.name === config.client_carrier_name) {
+        current_carrier = item.value;
+      }
+      return item.value + total;
+    }, 0);
+    output.share = current_carrier / total;
+
     callback(null, output);
   })
   .end(callback);

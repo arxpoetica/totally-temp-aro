@@ -50,20 +50,18 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
   var select = $('[ng-controller="fiber_plant_controller"] [ng-change="carriers_changed()"]');
 
   $http.get('/network/carriers').success(function(carriers) {
-    var hue = 0;
-    var step = Math.floor(360 / carriers.length);
     $scope.carriers = carriers.map(function(carrier) {
-      var obj = {
-        id: carrier,
-        name: carrier,
-        color: 'hsl('+hue+', 100%, 30%)',
-      }
-      hue += step;
-      return obj;
+      return {
+        id: carrier.name,
+        name: carrier.name,
+        color: carrier.color,
+      };
+    }).filter(function(carrier) {
+      return carrier.name !== config.client_carrier_name;
     });
 
     $scope.carriers.forEach(function(carrier) {
-      
+
       layers[layer_name(carrier.name)] = new MapLayer({
         name: 'Fiber',
         short_name: 'F',

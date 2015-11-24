@@ -17,18 +17,25 @@ var Location = {};
 // 1. callback: function to return a GeoJSON object
 Location.find_all = function(plan_id, type, filters, viewport, callback) {
 	txain(function(callback) {
-		database.query('SELECT * FROM client_schema.customer_types', callback);
-	})
-	.then(function(customer_types, callback) {
 		var params = [];
-		var sql = 'SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom';
-		customer_types.forEach(function(customer_type) {
-			params.push(customer_type.id);
-			sql += '\n\t, (SELECT COUNT(*)::integer FROM businesses b JOIN client_schema.business_customer_types bct ON b.id = bct.business_id AND bct.customer_type_id=$'+params.length;
-			sql += ' WHERE b.location_id = locations.id)'
-			sql += ' AS customer_type_'+customer_type.name.toLowerCase().replace(/\s+/g, '');
-		});
-		sql += '\n FROM aro.locations';
+		var sql = multiline.stripIndent(function() {;/*
+			SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom,
+			-- existing customer
+			(SELECT COUNT(*)::integer FROM businesses b
+				JOIN client_schema.business_customer_types bct
+					ON b.id = bct.business_id
+				JOIN client_schema.customer_types ct
+					ON ct.id = bct.customer_type_id AND ct.is_existing_customer
+			 WHERE b.location_id = locations.id) AS customer_type_existing,
+			-- non existing customers
+			(SELECT COUNT(*)::integer FROM businesses b
+				JOIN client_schema.business_customer_types bct
+					ON b.id = bct.business_id
+				JOIN client_schema.customer_types ct
+					ON ct.id = bct.customer_type_id AND NOT ct.is_existing_customer
+			 WHERE b.location_id = locations.id) AS customer_type_prospect
+			FROM aro.locations
+		*/});
 		if (type === 'businesses') {
 			sql += '\n JOIN businesses b ON b.location_id = locations.id';
 			sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.industries i ON m.industry_id = i.id';
@@ -56,8 +63,8 @@ Location.find_all = function(plan_id, type, filters, viewport, callback) {
 		var features = rows.map(function(row) {
 			var icon = void(0);
 			var total = (row.customer_type_existing || 0) + (row.customer_type_prospect || 0);
-			if (row.customer_type_existing > total/2) icon = '/images/map_icons/location_existing.png';
-			if (row.customer_type_prospect > total/2) icon = '/images/map_icons/location_prospect.png';
+			if (row.customer_type_existing > total/2) icon = '/images/map_icons/location_business_colt.png';
+			if (row.customer_type_prospect > total/2) icon = '/images/map_icons/location_business_dark_gray.png';
 			return {
 				'type':'Feature',
 				'properties': {
@@ -485,25 +492,30 @@ Location.filters = function(callback) {
 
 Location.customer_profile_heatmap = function(viewport, callback) {
 	txain(function(callback) {
-		database.query('SELECT * FROM client_schema.customer_types', callback);
-	})
-	.then(function(customer_types, callback) {
 		var params = [];
-		var sql = 'WITH '+viewport.fishnet;
-		sql += 'SELECT ST_AsGeojson(fishnet.geom)::json AS geom';
-
-		customer_types.forEach(function(customer_type) {
-			params.push(customer_type.id);
-			sql += '\n\t, (SELECT COUNT(*)::integer FROM businesses b JOIN client_schema.business_customer_types bct ON b.id = bct.business_id AND bct.customer_type_id=$'+params.length;
-			sql += ' WHERE b.geog && fishnet.geom)'
-			sql += ' AS customer_type_'+customer_type.name.toLowerCase().replace(/\s+/g, '');
-		});
-		sql += '\n FROM fishnet GROUP BY fishnet.geom';
+		var sql = 'WITH '+viewport.fishnet+'\n';
+		sql += multiline.stripIndent(function() {;/*
+			SELECT ST_AsGeojson(fishnet.geom)::json AS geom,
+			-- existing customer
+			(SELECT COUNT(*)::integer FROM businesses b
+				JOIN client_schema.business_customer_types bct
+					ON b.id = bct.business_id
+				JOIN client_schema.customer_types ct
+					ON ct.id = bct.customer_type_id AND ct.is_existing_customer
+			 WHERE b.geog && fishnet.geom) AS customer_type_existing,
+			-- non existing customers
+			(SELECT COUNT(*)::integer FROM businesses b
+				JOIN client_schema.business_customer_types bct
+					ON b.id = bct.business_id
+				JOIN client_schema.customer_types ct
+					ON ct.id = bct.customer_type_id AND NOT ct.is_existing_customer
+			 WHERE b.geog && fishnet.geom) AS customer_type_prospect
+			FROM fishnet GROUP BY fishnet.geom
+		*/});
 		database.query(sql, params, callback);
 	})
 	.then(function(rows, callback) {
 		rows = rows.filter(function(row) {
-			row.customer_type_existing = row.customer_type_customer;
 			return row.customer_type_existing > 0 || row.customer_type_prospect > 0;
 		});
 

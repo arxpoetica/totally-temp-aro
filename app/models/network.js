@@ -118,23 +118,13 @@ Network.view_fiber_plant_density = function(viewport, callback) {
   .end(callback)
 };
 
-Network.carrier_names = function(callback) {
-  txain(function(callback) {
-    var sql = 'SELECT distinct(carrier_name) FROM fiber_plant ORDER BY carrier_name ASC';
-    database.query(sql, callback);
-  })
-  .then(function(rows, callback) {
-    var names = rows.map(function(carrier) {
-      return carrier.carrier_name;
-    });
-    names = _.without(names, config.client_carrier_name);
-    callback(null, names);
-  })
-  .end(callback);
+Network.carriers = function(callback) {
+  var sql = 'SELECT id, name, color FROM carriers ORDER BY name ASC';
+  database.query(sql, callback);
 };
 
 // View the user client's network nodes
-// 
+//
 // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
 // 2. route_id Number Pass a route_id to find additionally the network nodes associated to that route
 Network.view_network_nodes = function(node_types, plan_id, callback) {
