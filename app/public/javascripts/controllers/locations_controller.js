@@ -212,4 +212,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
   };
 
+  $scope.overlay_is_loading = function() {
+    return $rootScope.feature_layers.locations_customer_profile_density.is_loading;
+  }
+
 }]);
