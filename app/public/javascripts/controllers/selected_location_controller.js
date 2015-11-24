@@ -258,18 +258,16 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   var fair_share_chart = null;
   function show_fair_share_chart() {
     $scope.fair_share = $scope.fair_share || [];
-    var colors = randomColor({ seed: 1, count: $scope.fair_share.length });
     var total = $scope.fair_share.reduce(function(total, carrier) {
       return total + carrier.value;
     }, 0);
 
     var data = $scope.fair_share.map(function(carrier) {
-      var color = colors.shift();
       return {
         label: carrier.name,
         value: ((carrier.value*100)/total).toFixed(2),
-        color: color,
-        highlight: tinycolor(color).lighten().toString(),
+        color: carrier.color,
+        highlight: tinycolor(carrier.color).lighten().toString(),
       }
     });
 

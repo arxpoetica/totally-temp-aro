@@ -179,14 +179,12 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       return total + carrier.value;
     }, 0);
 
-    var colors = randomColor({ seed: 1, count: $scope.fair_share.length });
     var data = $scope.fair_share.map(function(carrier) {
-      color = colors.shift();
       return {
         label: carrier.name,
         value: ((carrier.value*100)/total).toFixed(2),
-        color: color,
-        highlight: tinycolor(color).lighten().toString(),
+        color: carrier.color,
+        highlight: tinycolor(carrier.color).lighten().toString(),
       }
     });
 

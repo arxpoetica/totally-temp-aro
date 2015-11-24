@@ -120,7 +120,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     var sql = prepareMarketSizeQuery(plan_id, type, options, params, output);
 
     sql += multiline(function() {/*
-      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM biz
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM biz
       JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
       JOIN carriers c ON lc.carrier_id = c.id
       GROUP BY c.id
@@ -461,7 +461,7 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
 
     var params = [location_id];
     var sql = multiline(function() {/*
-      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM businesses biz
       JOIN locations l ON l.id = biz.location_id AND l.id = $1
       JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
       JOIN carriers c ON lc.carrier_id = c.id
