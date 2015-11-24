@@ -17,7 +17,7 @@ CREATE TABLE aro.businesses
 
 -- Create a table for later assigning customer type to existing customers
 DROP TABLE IF EXISTS aro.existing_customer_business_ids;
-CREATE TABLE aro.existing_customer_business_ids 
+CREATE TABLE aro.existing_customer_business_ids
 (
 	id int
 );
@@ -39,14 +39,14 @@ INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees, 
 	RETURNING id
 )
 INSERT INTO aro.existing_customer_business_ids(id)
-	SELECT 
+	SELECT
 		id
 	FROM existing_customer_business_ids;
 
 -- Create temp table for central matching of prospects
 DROP TABLE IF EXISTS source_colt.prospect_location;
 CREATE TABLE source_colt.prospect_location AS
-	SELECT 
+	SELECT
 		row_number() OVER () AS id,
 		prospects.country,
 		prospects.lon,
@@ -60,7 +60,7 @@ DROP TABLE IF EXISTS source_colt.prospects_locations_matched;
 CREATE TABLE source_colt.prospects_locations_matched AS
 	WITH matching_locations AS
 	(
-		SELECT 
+		SELECT
 			l.id AS location_id,
 			pl.id AS prospect_location_id,
 			ST_Distance(pl.geom::geography, l.geog) AS distance
@@ -76,7 +76,7 @@ CREATE TABLE source_colt.prospects_locations_matched AS
 		FROM matching_locations
 		GROUP BY prospect_location_id
 	)
-	SELECT 
+	SELECT
 		ml.location_id,
 		el.prospect_location_id
 	FROM exact_locations el
@@ -100,7 +100,7 @@ WITH new_locations AS
 		RETURNING id, lat, lon
 )
 INSERT INTO source_colt.prospects_locations_matched(location_id, prospect_location_id)
-	SELECT 
+	SELECT
 		new_locations.id,
 		pl.id
 	FROM new_locations
@@ -135,19 +135,9 @@ INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_em
 	RETURNING id
 )
 INSERT INTO aro.prospect_customer_business_ids(id)
-	SELECT 
+	SELECT
 		id
 	FROM prospect_customer_business_ids;
-
-
--- Calculate the distance from each location to the client's fiber network now that we have all locations
-UPDATE aro.locations SET distance_to_client_fiber = ST_distance(geog,
-    (SELECT 
-        geog 
-    FROM aro.fiber_plant 
-    WHERE carrier_name='Colt' ORDER BY aro.fiber_plant.geom <-> aro.locations.geom LIMIT 1
-    )
-);
 
 
 -- Drop temp tables. Could do this with a WITH statement, but...
@@ -157,6 +147,3 @@ DROP TABLE IF EXISTS source_colt.prospect_location_tuple;
 CREATE INDEX aro_businesses_location_index ON aro.businesses(location_id);
 CREATE INDEX aro_businesses_industry_index ON aro.businesses(industry_id);
 CREATE INDEX aro_businesses_geog_index ON aro.businesses USING gist(geog);
-
-
-

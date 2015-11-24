@@ -14,7 +14,7 @@ CREATE INDEX client_locations_carriers_carrier_index ON client.locations_carrier
 -- Mapping for ILECs
 -- Deutsche Telekom maps to all locations in Frankfurt
 INSERT INTO client.locations_carriers(location_id, carrier_id)
-	SELECT 
+	SELECT
 		locations.id AS location_id,
 		(SELECT carriers.id FROM aro.carriers carriers WHERE carriers.name = 'Deutsche Telekom' LIMIT 1)::int AS carrier_id
 	FROM
@@ -24,7 +24,7 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 
 -- Orange maps to all locations in Paris
 INSERT INTO client.locations_carriers(location_id, carrier_id)
-	SELECT 
+	SELECT
 		locations.id AS location_id,
 		(SELECT carriers.id FROM aro.carriers carriers WHERE carriers.name = 'Orange' LIMIT 1)::int AS carrier_id
 	FROM
@@ -48,6 +48,26 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 		locations.id,
 		fiber.carrier_id
 	FROM aro.locations locations
-	JOIN aro.fiber_plant fiber 
+	JOIN aro.fiber_plant fiber
 	ON ST_Contains(fiber.buffer_geom, locations.geom);
 
+
+-- Calculate distnace to fiber for each location for each carrier
+
+DROP TABLE IF EXISTS client.locations_distance_to_carrier;
+
+CREATE TABLE client.locations_distance_to_carrier (
+	location_id integer,
+	carrier_id integer,
+	distance float
+);
+
+INSERT INTO client.locations_distance_to_carrier
+  SELECT locations.id AS location_id,
+    carriers.id AS carrier_id,
+    ST_Distance(locations.geog,
+        (SELECT geog FROM fiber_plant WHERE carrier_id=carriers.id ORDER BY fiber_plant.geom <-> locations.geom LIMIT 1)) AS distance
+    FROM locations
+	CROSS JOIN carriers;
+
+DELETE FROM client.locations_distance_to_carrier WHERE distance IS NULL;

@@ -256,7 +256,16 @@ Location.show_information = function(location_id, callback) {
 			return total + customer_type.households;
 		}, 0);
 
-		database.findOne('SELECT address, ST_AsGeojson(geog)::json AS geog, distance_to_client_fiber FROM locations WHERE id=$1', [location_id], callback)
+		var sql = multiline.stripIndent(function() {;/*
+			SELECT address, ST_AsGeojson(geog)::json AS geog,
+				(SELECT distance FROM client.locations_distance_to_carrier
+					JOIN carriers ON carriers.name = $2
+					WHERE location_id=locations.id
+					LIMIT 1
+				) AS distance_to_client_fiber
+			FROM locations WHERE id=$1
+		*/})
+		database.findOne(sql, [location_id, config.client_carrier_name], callback)
 	})
 	.then(function(location, callback) {
 		_.extend(info, location);

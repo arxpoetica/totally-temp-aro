@@ -167,12 +167,14 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
-        MAX(l.distance_to_client_fiber) AS distance,
+        MIN(ldtc.distance) AS distance,
         SUM(spend.monthly_spend * 12)::float as total,
         spend.year
       FROM
         biz b
       JOIN locations l ON b.location_id = l.id
+      JOIN carriers c ON c.name = $1
+      JOIN client.locations_distance_to_carrier ldtc ON ldtc.carrier_id = c.id AND ldtc.location_id = l.id
       JOIN industries ON industries.id = b.industry_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
       JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
@@ -232,7 +234,7 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
   var output = {};
 
   txain(function(callback) {
-    var params = [location_id];
+    var params = [location_id, config.client_carrier_name];
     sql = 'WITH biz AS (SELECT * FROM businesses b WHERE b.location_id=$1)\n'
 
     sql += multiline(function() {;/*
@@ -244,12 +246,14 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
-        MAX(l.distance_to_client_fiber) AS distance,
+        MAX(ldtc.distance) AS distance,
         SUM(spend.monthly_spend * 12)::float as total,
         spend.year
       FROM
         biz b
       JOIN locations l ON b.location_id = l.id
+      JOIN carriers c ON c.name = $2
+      JOIN client.locations_distance_to_carrier ldtc ON ldtc.carrier_id = c.id AND ldtc.location_id = l.id
       JOIN industries ON industries.id = b.industry_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
       JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
@@ -461,7 +465,12 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
 
     var params = [location_id];
     var sql = multiline(function() {/*
-      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM businesses biz
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color,
+        (SELECT distance FROM client.locations_distance_to_carrier ldtc
+          WHERE ldtc.carrier_id = c.id
+          AND ldtc.location_id = $1
+        )
+      FROM businesses biz
       JOIN locations l ON l.id = biz.location_id AND l.id = $1
       JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
       JOIN carriers c ON lc.carrier_id = c.id
