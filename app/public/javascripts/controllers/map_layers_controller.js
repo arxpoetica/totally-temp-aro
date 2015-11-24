@@ -201,11 +201,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
       }
     },
   });
+  equipment_layers['network_nodes'].hide_in_ui = true;
 
   equipment_layers['fiber_plant'] = new MapLayer({
     name: 'Fiber',
     short_name: 'F',
-    // api_endpoint: '/network/fiber_plant/VERIZON',
     style_options: {
       normal: {
         strokeColor: 'rgb(0, 164, 153)',

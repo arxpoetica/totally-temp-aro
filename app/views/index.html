@@ -434,7 +434,7 @@
               </div>
 
               <div ng-repeat="(key, layer) in equipment_layers">
-                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
+                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-hide="layer.hide_in_ui">
                   <label>
                     <input type="checkbox" ng-click="layer.toggle_visibility()" ng-checked="layer.visible"> {{layer.name}}
                   </label>
