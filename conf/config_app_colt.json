@@ -10,7 +10,7 @@
       "locations": {
         "view": ["commercial"],
         "overlay": ["density"],
-        "build": ["commercial"]
+        "build": []
       },
       "boundaries": {
         "view": [],
@@ -18,8 +18,8 @@
       },
       "equipment": {
         "view": ["central_office", "existing_fiber"],
-        "build": ["splice_point"],
-        "actions": ["clear"]
+        "build": [],
+        "actions": []
       },
       "competitors": {
         "view": [],

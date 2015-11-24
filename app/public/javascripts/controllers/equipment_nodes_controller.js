@@ -15,6 +15,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.selected_tool = null;
   $scope.show_recalculate = config.ui.map_tools.equipment.actions.indexOf('recalculate') >= 0;
+  $scope.show_clear_nodes = config.ui.map_tools.equipment.actions.indexOf('clear') >= 0;
 
   $scope.select_tool = function(tool) {
     if ($scope.selected_tool === tool) {
