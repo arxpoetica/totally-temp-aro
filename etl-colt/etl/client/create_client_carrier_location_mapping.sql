@@ -68,6 +68,7 @@ INSERT INTO client.locations_distance_to_carrier
     ST_Distance(locations.geog,
         (SELECT geog FROM fiber_plant WHERE carrier_id=carriers.id ORDER BY fiber_plant.geom <-> locations.geom LIMIT 1)) AS distance
     FROM locations
-	CROSS JOIN carriers;
+	CROSS JOIN carriers
+	WHERE carriers.route_type='fiber';
 
 DELETE FROM client.locations_distance_to_carrier WHERE distance IS NULL;
