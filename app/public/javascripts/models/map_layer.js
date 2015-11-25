@@ -286,12 +286,14 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 					threshold: layer.threshold,
 				};
 				_.extend(params, this.http_params || {});
+				layer.is_loading = true;
 				$http({
 					url: this.api_endpoint,
 					method: 'GET',
 					params: params,
 				})
 				.success(function(response) {
+					layer.is_loading = false;
 					var data = response;
 					// hide layer to change styles "in background"
 					var visible = layer.visible;

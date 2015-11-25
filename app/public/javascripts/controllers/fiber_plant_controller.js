@@ -139,4 +139,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     $scope.competitors_fairshare.set_visible($scope.overlay === 'fairshare');
   };
 
+  $scope.overlay_is_loading = function() {
+    return $scope.competitors_fairshare.is_loading || $scope.competitors_density.is_loading;
+  }
+
 }]);
