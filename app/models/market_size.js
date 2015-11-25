@@ -49,7 +49,7 @@ function empty_array(arr) {
   return !_.isArray(arr) || arr.length === 0;
 }
 
-function prepareMarketSizeQuery(plan_id, type, options, params, output) {
+function prepareMarketSizeQuery(plan_id, type, options, params) {
   var sql = '';
   if (type === 'route' || type === 'addressable') {
     if (config.route_planning) {
@@ -57,9 +57,16 @@ function prepareMarketSizeQuery(plan_id, type, options, params, output) {
       // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
       params.push(plan_id);
     } else {
-      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)';
+      sql += multiline(function() {;/*
+        WITH biz AS
+        (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
+          FROM businesses b
+          JOIN carriers ON carriers.name = $1
+          JOIN aro.fiber_plant
+            ON fiber_plant.carrier_id = carriers.id
+            AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)
+      */})
       params.push(config.client_carrier_name);
-      params.push(output.cbsa);
     }
 
     if (type === 'addressable') {
@@ -80,13 +87,8 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
   var output = {};
 
   txain(function(callback) {
-    database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM custom.route WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
-  })
-  .then(function(cbsa, callback) {
-    output.cbsa = cbsa;
-
     var params = [];
-    var sql = prepareMarketSizeQuery(plan_id, type, options, params, output);
+    var sql = prepareMarketSizeQuery(plan_id, type, options, params);
 
     sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
     sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
@@ -117,7 +119,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     output.market_size = market_size;
 
     var params = [];
-    var sql = prepareMarketSizeQuery(plan_id, type, options, params, output);
+    var sql = prepareMarketSizeQuery(plan_id, type, options, params);
 
     sql += multiline(function() {/*
       SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM biz
@@ -150,15 +152,15 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
   var output = {};
 
   txain(function(callback) {
-    database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM custom.route WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
+    database.query("SELECT * FROM carriers WHERE carriers.route_type='fiber'", callback);
   })
-  .then(function(cbsa, callback) {
-    output.cbsa = cbsa;
+  .then(function(carriers, callback) {
+    output.carriers = carriers;
 
     var params = [];
-    var sql = prepareMarketSizeQuery(plan_id, type, options, params, output);
+    var sql = prepareMarketSizeQuery(plan_id, type, options, params);
 
-    sql += multiline(function() {;/*
+    sql += multiline.stripIndent(function() {;/*
       SELECT
         b.id,
         MAX(b.name) AS name,
@@ -167,14 +169,22 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
-        MIN(ldtc.distance) AS distance,
+    */});
+    carriers.forEach(function(carrier) {
+      sql += '\n  MIN(ldtc_'+carrier.id+'.distance) AS distance_'+carrier.id+','
+    })
+    sql += multiline.stripIndent(function() {;/*
         SUM(spend.monthly_spend * 12)::float as total,
         spend.year
       FROM
         biz b
       JOIN locations l ON b.location_id = l.id
-      JOIN carriers c ON c.name = $1
-      JOIN client.locations_distance_to_carrier ldtc ON ldtc.carrier_id = c.id AND ldtc.location_id = l.id
+    */});
+    carriers.forEach(function(carrier) {
+      sql += '\n  LEFT JOIN client.locations_distance_to_carrier ldtc_'+carrier.id+' ON ldtc_'+carrier.id+'.carrier_id = '+carrier.id+' AND ldtc_'+carrier.id+'.location_id = l.id'
+    })
+    sql += '\n'
+    sql += multiline.stripIndent(function() {;/*
       JOIN industries ON industries.id = b.industry_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
       JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
@@ -220,11 +230,11 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
       ON
         spend.industry_id = c_industries.id
     */});
-    sql += '\n GROUP BY b.id, year';
+    sql += '\n GROUP BY b.id, year LIMIT 100';
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
-    create_businesses_csv(plan_id, user, rows, filters, callback);
+    create_businesses_csv(plan_id, user, rows, filters, output.carriers, callback);
   })
   .end(callback);
 };
@@ -234,7 +244,12 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
   var output = {};
 
   txain(function(callback) {
-    var params = [location_id, config.client_carrier_name];
+    database.query("SELECT * FROM carriers WHERE carriers.route_type='fiber'", callback);
+  })
+  .then(function(carriers, callback) {
+    output.carriers = carriers;
+
+    var params = [location_id];
     sql = 'WITH biz AS (SELECT * FROM businesses b WHERE b.location_id=$1)\n'
 
     sql += multiline(function() {;/*
@@ -246,14 +261,22 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
-        MAX(ldtc.distance) AS distance,
+      */});
+      carriers.forEach(function(carrier) {
+        sql += '\n  MIN(ldtc_'+carrier.id+'.distance) AS distance_'+carrier.id+','
+      })
+      sql += multiline.stripIndent(function() {;/*
         SUM(spend.monthly_spend * 12)::float as total,
         spend.year
       FROM
         biz b
       JOIN locations l ON b.location_id = l.id
-      JOIN carriers c ON c.name = $2
-      JOIN client.locations_distance_to_carrier ldtc ON ldtc.carrier_id = c.id AND ldtc.location_id = l.id
+    */});
+    carriers.forEach(function(carrier) {
+      sql += '\n  LEFT JOIN client.locations_distance_to_carrier ldtc_'+carrier.id+' ON ldtc_'+carrier.id+'.carrier_id = '+carrier.id+' AND ldtc_'+carrier.id+'.location_id = l.id'
+    })
+    sql += '\n'
+    sql += multiline.stripIndent(function() {;/*
       JOIN industries ON industries.id = b.industry_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
       JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
@@ -303,13 +326,12 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
-    create_businesses_csv(plan_id, user, rows, filters, callback);
+    create_businesses_csv(plan_id, user, rows, filters, output.carriers, callback);
   })
   .end(callback);
 }
 
-function create_businesses_csv(plan_id, user, rows, filters, callback) {
-
+function create_businesses_csv(plan_id, user, rows, filters, carriers, callback) {
   txain(function(callback) {
     var years = [];
     rows.forEach(function(business) {
@@ -318,7 +340,10 @@ function create_businesses_csv(plan_id, user, rows, filters, callback) {
       }
     });
     years = years.sort();
-    var columns = ['name', 'address', 'distance', 'industry_name', 'industry_description', 'number_of_employees', 'type'].concat(years);
+    var columns = ['name', 'address']
+      .concat(carriers.map(function(carrier) { return 'distance_'+carrier.id }))
+      .concat(['industry_name', 'industry_description', 'number_of_employees', 'type'])
+      .concat(years);
     var businesses = {};
     rows.forEach(function(business) {
       var id = business.id;
@@ -342,7 +367,10 @@ function create_businesses_csv(plan_id, user, rows, filters, callback) {
   })
   .then(function(csv, callback) {
     var years = this.get('years');
-    var header = ['Name', 'Address', 'Distance', 'Industry name', 'Industry description', 'Number of employees', 'Type'].concat(years);
+    var header = ['Name', 'Address']
+      .concat(carriers.map(function(carrier) { return 'Distance to '+carrier.name }))
+      .concat(['Industry name', 'Industry description', 'Number of employees', 'Type'])
+      .concat(years);
     csv = header.join(',')+'\n'+csv;
     this.set('csv', csv);
 
