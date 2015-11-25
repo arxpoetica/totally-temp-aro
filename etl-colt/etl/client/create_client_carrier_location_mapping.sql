@@ -57,12 +57,17 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 DROP TABLE IF EXISTS client.locations_distance_to_carrier;
 
 CREATE TABLE client.locations_distance_to_carrier (
-	location_id integer,
-	carrier_id integer,
 	distance float
 );
 
-INSERT INTO client.locations_distance_to_carrier
+ALTER TABLE client.locations_distance_to_carrier ADD COLUMN location_id bigint REFERENCES aro.locations ON DELETE CASCADE;
+
+ALTER TABLE client.locations_distance_to_carrier ADD COLUMN carrier_id bigint REFERENCES aro.carriers ON DELETE CASCADE;
+
+ALTER TABLE client.locations_distance_to_carrier ADD PRIMARY KEY (location_id, carrier_id);
+
+
+INSERT INTO client.locations_distance_to_carrier (location_id, carrier_id, distance)
   SELECT locations.id AS location_id,
     carriers.id AS carrier_id,
     ST_Distance(locations.geog,
