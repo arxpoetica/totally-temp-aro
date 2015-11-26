@@ -70,6 +70,7 @@ Location.find_all = function(plan_id, type, filters, viewport, callback) {
 				'properties': {
 					'id': row.id,
 					'icon': icon,
+					'density': row.customer_type_prospect*100/(row.customer_type_existing + row.customer_type_prospect),
 				},
 				'geometry': row.geom,
 			};
@@ -495,7 +496,7 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 		var params = [];
 		var sql = 'WITH '+viewport.fishnet+'\n';
 		sql += multiline.stripIndent(function() {;/*
-			SELECT ST_AsGeojson(fishnet.geom)::json AS geom,
+			SELECT ST_AsGeojson(ST_Centroid(fishnet.geom))::json AS geom,
 			-- existing customer
 			(SELECT COUNT(*)::integer FROM businesses b
 				JOIN client_schema.business_customer_types bct
