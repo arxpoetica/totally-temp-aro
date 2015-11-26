@@ -8,6 +8,7 @@ var multiline = require('multiline');
 var _ = require('underscore');
 var request = require('request');
 var config = helpers.config;
+var models = require('./');
 
 var Network = {};
 
@@ -118,9 +119,8 @@ Network.view_fiber_plant_density = function(viewport, callback) {
   .end(callback)
 };
 
-Network.carriers = function(callback) {
-  var sql = 'SELECT id, name, color FROM carriers ORDER BY name ASC';
-  database.query(sql, callback);
+Network.carriers = function(plan_id, callback) {
+  models.MarketSize.carriers_by_city_of_plan(plan_id, true, callback);
 };
 
 // View the user client's network nodes

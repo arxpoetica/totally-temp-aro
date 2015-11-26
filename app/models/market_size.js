@@ -85,7 +85,7 @@ function prepareMarketSizeQuery(plan_id, type, options, params) {
 MarketSize.carriers_by_city_of_plan = function(plan_id, only_with_fiber, callback) {
   var params = [plan_id];
   var sql = multiline.stripIndent(function() {;/*
-    SELECT carriers.id, carriers.name FROM carriers
+    SELECT carriers.id, carriers.name, carriers.color FROM carriers
       JOIN client.locations_carriers lc
         ON lc.carrier_id = carriers.id
       JOIN locations l

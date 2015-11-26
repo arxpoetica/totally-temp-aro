@@ -46,51 +46,57 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     denisty_hue_to: 0,
   });
 
-  var layers = [];
+  var layers = {};
   var select = $('[ng-controller="fiber_plant_controller"] [ng-change="carriers_changed()"]');
 
-  $http.get('/network/carriers').success(function(carriers) {
-    $scope.carriers = carriers.map(function(carrier) {
-      return {
-        id: carrier.name,
-        name: carrier.name,
-        color: carrier.color,
-      };
-    }).filter(function(carrier) {
-      return carrier.name !== config.client_carrier_name;
-    });
+  $rootScope.$on('route_selected', function(e, route) {
+    Object.keys(layers).forEach(function(key) {
+      layers[key].remove();
+    })
+    layers = {};
+    if (!route) return;
 
-    $scope.carriers.forEach(function(carrier) {
-
-      layers[layer_name(carrier.name)] = new MapLayer({
-        name: 'Fiber',
-        short_name: 'F',
-        api_endpoint: '/network/fiber_plant/'+encodeURIComponent(carrier.name),
-        style_options: {
-          normal: {
-            strokeColor: carrier.color,
-            strokeWeight: 2,
-            fillColor: carrier.color,
-          }
-        },
-        threshold: 12,
-        reload: 'always',
+    $http.get('/network/carriers/'+route.id).success(function(carriers) {
+      $scope.carriers = carriers.map(function(carrier) {
+        return {
+          id: carrier.name,
+          name: carrier.name,
+          color: carrier.color,
+        };
+      }).filter(function(carrier) {
+        return carrier.name !== config.client_carrier_name;
       });
 
-    })
+      $scope.carriers.forEach(function(carrier) {
+        layers[layer_name(carrier.name)] = new MapLayer({
+          name: 'Fiber',
+          short_name: 'F',
+          api_endpoint: '/network/fiber_plant/'+encodeURIComponent(carrier.name),
+          style_options: {
+            normal: {
+              strokeColor: carrier.color,
+              strokeWeight: 2,
+              fillColor: carrier.color,
+            }
+          },
+          threshold: 12,
+          reload: 'always',
+        });
+      });
 
-    function format(carrier) {
-      return '<span style="background-color:'+carrier.color+'; padding: 1px 10px; margin-right: 10px"> </span> '+carrier.name;
-    }
+      function format(carrier) {
+        return '<span style="background-color:'+carrier.color+'; padding: 1px 10px; margin-right: 10px"> </span> '+carrier.name;
+      }
 
-    select.select2({
-      placeholder: 'Write the name of the carriers to show',
-      formatResult: format,
-      formatSelection: format,
-      escapeMarkup: function(m) { return m; },
-      data: $scope.carriers,
-      multiple: true,
-    })
+      select.select2({
+        placeholder: 'Write the name of the carriers to show',
+        formatResult: format,
+        formatSelection: format,
+        escapeMarkup: function(m) { return m; },
+        data: $scope.carriers,
+        multiple: true,
+      })
+    });
   });
 
   $scope.toggle_all_competitors = function() {

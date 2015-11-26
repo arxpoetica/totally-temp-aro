@@ -27,8 +27,9 @@ exports.configure = function(api, middleware) {
     models.MarketSize.fair_share_heatmap(viewport, jsonHandler(response, next));
   });
 
-  api.get('/network/carriers', function(request, response, next) {
-    models.Network.carriers(jsonHandler(response, next));
+  api.get('/network/carriers/:plan_id', function(request, response, next) {
+    var plan_id = request.params.plan_id;
+    models.Network.carriers(plan_id, jsonHandler(response, next));
   });
 
   // Network nodes for user client by node type
