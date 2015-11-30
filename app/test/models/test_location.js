@@ -66,7 +66,7 @@ describe('Location', function() {
 	});
 
 	describe('#show_information()', function() {
-		var location_id = 1399894; 
+		var location_id = 1399894;
 
 		it('should return information of the given location', function(done) {
 			request
@@ -160,7 +160,7 @@ describe('Location', function() {
 		});
 
 	});
-	
+
 	describe('#show_businesses()', function(done) {
 		var location_id = 31367;
 
@@ -254,6 +254,3 @@ describe('Location', function() {
 	});
 
 });
-
-				
-				
