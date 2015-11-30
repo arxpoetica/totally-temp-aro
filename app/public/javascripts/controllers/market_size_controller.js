@@ -127,7 +127,8 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       title: "File name",
       type: "input",
       showCancelButton: true,
-      closeOnConfirm: true,
+      closeOnConfirm: false,
+      showLoaderOnConfirm: true,
       animation: "slide-from-top",
       inputPlaceholder: "export",
     }, function(name) {
@@ -141,13 +142,15 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
         customer_type: $scope.customer_type && $scope.customer_type.id,
         filename: name,
       };
-      var pairs = _.keys(params).map(function(key) {
-        var value = params[key];
-        if (!value) return null;
-        return key+'='+encodeURIComponent(value);
+      $http({
+        url: '/market_size/plan/'+$scope.route.id+'/export',
+        method: 'GET',
+        params: params,
+      })
+      .success(function(response) {
+        swal("Exported file now available");
+        location.href = '/exported_file?filename='+encodeURIComponent(name);
       });
-      var href = '/market_size/plan/'+$scope.route.id+'/export?'+_.compact(pairs).join('&');
-      location.href = href;
     });
   }
 

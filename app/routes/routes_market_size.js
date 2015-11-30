@@ -1,6 +1,9 @@
 var models = require('../models');
 var _ = require('underscore');
 var nook = require('node-errors').nook;
+var fs = require('fs')
+var path = require('path')
+var temp = require('temp')
 
 exports.configure = function(api, middleware) {
 
@@ -8,6 +11,32 @@ exports.configure = function(api, middleware) {
   var check_owner_permission = middleware.check_owner_permission;
   var jsonHandler = middleware.jsonHandler;
   var cacheable = middleware.cacheable;
+
+  var export_dir = temp.mkdirSync('aro_export');
+
+  function export_handler(request, response, next) {
+    var filename = request.query.filename;
+    var userid = request.user.id;
+    return function(err, output) {
+      if (err) return next(err);
+      var fullname = path.join(export_dir, userid+'_'+filename);
+      fs.writeFile(fullname, output, 'utf8', function(err) {
+        if (err) return next(err);
+        response.json({});
+      });
+    }
+  }
+
+  api.get('/exported_file', function(request, response, next) {
+    var filename = request.query.filename;
+    var userid = request.user.id;
+    var fullname = path.join(export_dir, userid+'_'+filename);
+    fs.readFile(fullname, 'utf8', function(err, output) {
+      if (err) return next(err);
+      response.attachment(filename+'.csv');
+      response.send(output);
+    })
+  })
 
   // Market size filters
   api.get('/market_size/filters', function(request, response, next) {
@@ -43,11 +72,7 @@ exports.configure = function(api, middleware) {
         customer_type: request.query.customer_type,
       },
     };
-    var filename = request.query.filename;
-    models.MarketSize.export_businesses(plan_id, type, options, request.user, nook(next, function(output) {
-      response.attachment(filename+'.csv');
-      response.send(output);
-    }));
+    models.MarketSize.export_businesses(plan_id, type, options, request.user, export_handler(request, response, next));
   });
 
   api.get('/market_size/business/:business_id', function(request, response, next) {
@@ -83,11 +108,7 @@ exports.configure = function(api, middleware) {
         customer_type: request.query.customer_type,
       },
     };
-    var filename = request.query.filename;
-    models.MarketSize.export_businesses_at_location(plan_id, location_id, type, options, request.user, nook(next, function(output) {
-      response.attachment(filename+'.csv');
-      response.send(output);
-    }));
+    models.MarketSize.export_businesses_at_location(plan_id, location_id, type, options, request.user, export_handler(request, response, next));
   });
 
   function arr(value) {
