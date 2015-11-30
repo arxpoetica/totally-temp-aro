@@ -71,8 +71,8 @@ describe('Network', function() {
 		});
 	});
 
-	describe('#carrier_names()', function() {
-		it('should return all carrier names', function(done) {
+	describe('#carriers()', function() {
+		it('should return all carriers', function(done) {
 			request
 				.get('/network/carriers')
 				.accept('application/json')
@@ -80,7 +80,10 @@ describe('Network', function() {
 					if (err) return done(err);
 					var output = res.body;
 					expect(output.length).to.be.above(0);
-					expect(output[0]).to.be.a('string');
+					expect(output[0]).to.be.an('object');
+					expect(output[0].id).to.be.a('number');
+					expect(output[0].name).to.be.a('string');
+					expect(output[0].color).to.be.a('string');
 					done();
 			});
 		});
