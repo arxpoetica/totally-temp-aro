@@ -82,6 +82,25 @@ function prepareMarketSizeQuery(plan_id, type, options, params) {
   return sql;
 }
 
+MarketSize.carriers_by_city_of_plan = function(plan_id, only_with_fiber, callback) {
+  var params = [plan_id];
+  var sql = multiline.stripIndent(function() {;/*
+    SELECT carriers.id, carriers.name, carriers.color FROM carriers
+      JOIN client.locations_carriers lc
+        ON lc.carrier_id = carriers.id
+      JOIN locations l
+        ON l.id = lc.location_id
+      JOIN cities c
+        ON c.buffer_geog && l.geog
+       AND c.id = (SELECT cities.id FROM cities JOIN custom.route r ON r.id = $1 ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)
+  */});
+  if (only_with_fiber) {
+    sql += " WHERE carriers.route_type='fiber'";
+  }
+  sql += ' GROUP BY carriers.id';
+  database.query(sql, params, callback);
+}
+
 MarketSize.calculate = function(plan_id, type, options, callback) {
   var filters = options.filters;
   var output = {};
@@ -152,7 +171,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
   var output = {};
 
   txain(function(callback) {
-    database.query("SELECT * FROM carriers WHERE carriers.route_type='fiber'", callback);
+    MarketSize.carriers_by_city_of_plan(plan_id, true, callback);
   })
   .then(function(carriers, callback) {
     output.carriers = carriers;
@@ -244,7 +263,7 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
   var output = {};
 
   txain(function(callback) {
-    database.query("SELECT * FROM carriers WHERE carriers.route_type='fiber'", callback);
+    MarketSize.carriers_by_city_of_plan(plan_id, true, callback);
   })
   .then(function(carriers, callback) {
     output.carriers = carriers;
