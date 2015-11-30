@@ -105,7 +105,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				'rgba(255, 85, 0, 1)',
 				'rgba(255, 0, 0, 1)',
 			];
-			layer.heatmap_layer = new google.maps.visualization.HeatmapLayer({ maxIntensity: 20, opacity: 0.8, gradient: gradient });
+			layer.heatmap_layer = new google.maps.visualization.HeatmapLayer({ opacity: 0.8, gradient: gradient });
 			layer.heatmap_layer.set('radius', 10);
 			$rootScope.$on('map_zoom_changed', function() {
 				layer.configure_visibility();
@@ -308,7 +308,16 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 			if (!layer.heatmap_layer) return;
 			var arr = [];
 			layer.features.forEach(function(feature) {
-				arr.push(feature.getGeometry().get());
+				var density = feature.getProperty('density');
+				var geom = feature.getGeometry();
+				if (geom && geom.get) {
+					if (typeof density !== 'undefined') {
+						console.log('density', density)
+						arr.push({ location: geom.get(), weight: density });
+					} else {
+						arr.push(geom.get());
+					}
+				}
 			});
 			layer.heatmap_layer.setData(new google.maps.MVCArray(arr));
 		}

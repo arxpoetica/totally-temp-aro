@@ -53,8 +53,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
         fillColor: 'blue',
       }
     },
-    threshold: 12,
+    threshold: 100,
     reload: 'always',
+    heatmap: true,
   });
 
   $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
@@ -225,6 +226,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     layer.set_api_endpoint(api_endpoint);
 
     var layer = feature_layers['locations'];
+    layer.set_api_endpoint('/locations/'+route.id);
+
+    var layer = feature_layers['locations_customer_profile_density'];
     layer.set_api_endpoint('/locations/'+route.id);
 
     var layer = equipment_layers['fiber_plant'];
