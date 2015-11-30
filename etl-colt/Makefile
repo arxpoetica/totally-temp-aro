@@ -4,7 +4,6 @@ reset_db:
 	${PGBIN}/psql -d 'aro' -c 'CREATE DATABASE colt;' # may fail but it's ok
 	${PGBIN}/psql -c 'DROP SCHEMA aro CASCADE; CREATE SCHEMA aro;'
 	${PGBIN}/psql -c 'CREATE EXTENSION postgis;'
-	${PGBIN}/psql -c 'CREATE EXTENSION postgis;'
 	${PGBIN}/psql -c 'CREATE EXTENSION postgis_topology;'
 	${PGBIN}/psql -c 'CREATE EXTENSION fuzzystrmatch;'
 	${PGBIN}/psql -c 'CREATE EXTENSION postgis_tiger_geocoder;'
