@@ -78,7 +78,7 @@ describe('Permission', function() {
   });
 
   it('should return an empty list for guest\'s plans', function(done) {
-    models.NetworkPlan.find_all(guest, function(err, plans) {
+    models.NetworkPlan.find_all(guest, null, function(err, plans) {
       expect(err).to.not.be.ok;
       expect(plans).to.be.an('array');
       expect(plans).to.have.length(0);
@@ -115,7 +115,7 @@ describe('Permission', function() {
   });
 
   it('should return one element for guest\'s plans', function(done) {
-    models.NetworkPlan.find_all(guest, function(err, plans) {
+    models.NetworkPlan.find_all(guest, null, function(err, plans) {
       expect(err).to.not.be.ok;
       expect(plans).to.be.an('array');
       expect(plans).to.have.length(1);
@@ -135,7 +135,7 @@ describe('Permission', function() {
   });
 
   it('should return an empty list for guest\'s plans', function(done) {
-    models.NetworkPlan.find_all(guest, function(err, plans) {
+    models.NetworkPlan.find_all(guest, null, function(err, plans) {
       expect(err).to.not.be.ok;
       expect(plans).to.be.an('array');
       expect(plans).to.have.length(0);
@@ -145,6 +145,3 @@ describe('Permission', function() {
 
 
 });
-
-        
-        

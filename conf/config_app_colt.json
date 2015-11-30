@@ -4,6 +4,7 @@
   "client_schema": "client",
   "client_carrier_name": "Colt",
   "route_planning": false,
+  "spend_by_city": true,
   "currency_symbol": "€",
   "ui": {
     "map_tools": {

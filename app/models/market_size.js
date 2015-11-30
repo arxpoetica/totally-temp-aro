@@ -110,7 +110,9 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       params.push(filters.customer_type);
       sql += '\n JOIN client_schema.business_customer_types bct ON bct.business_id = b.id AND bct.customer_type_id=$'+params.length
     }
-    sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
+    if (config.spend_by_city) {
+      sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
+    }
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
 
     database.query(sql, params, callback);
@@ -163,6 +165,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     sql += multiline.stripIndent(function() {;/*
       SELECT
         b.id,
+        MAX(l.id) AS location_id,
         MAX(b.name) AS name,
         MAX(b.address) AS address,
         MAX(c_industries.industry_name) AS industry_name,
@@ -171,7 +174,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         MAX(ct.name) AS type,
     */});
     carriers.forEach(function(carrier) {
-      sql += '\n  MIN(ldtc_'+carrier.id+'.distance) AS distance_'+carrier.id+','
+      sql += '\n  (SELECT MIN(distance) FROM client.locations_distance_to_carrier ldtc JOIN carriers ON ldtc.carrier_id = '+carrier.id+' AND ldtc.location_id = location_id) AS distance_'+carrier.id+','
     })
     sql += multiline.stripIndent(function() {;/*
         SUM(spend.monthly_spend * 12)::float as total,
@@ -180,9 +183,6 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         biz b
       JOIN locations l ON b.location_id = l.id
     */});
-    carriers.forEach(function(carrier) {
-      sql += '\n  LEFT JOIN client.locations_distance_to_carrier ldtc_'+carrier.id+' ON ldtc_'+carrier.id+'.carrier_id = '+carrier.id+' AND ldtc_'+carrier.id+'.location_id = l.id'
-    })
     sql += '\n'
     sql += multiline.stripIndent(function() {;/*
       JOIN industries ON industries.id = b.industry_id
@@ -224,7 +224,11 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
         AND e.max_value >= b.number_of_employees
-      JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog
+    */})
+    if (config.spend_by_city) {
+      sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
+    }
+    sql += multiline(function() {;/*
       JOIN
         client_schema.industries c_industries
       ON
@@ -261,20 +265,17 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
         MAX(industries.description) AS industry_description,
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
-      */});
-      carriers.forEach(function(carrier) {
-        sql += '\n  MIN(ldtc_'+carrier.id+'.distance) AS distance_'+carrier.id+','
-      })
-      sql += multiline.stripIndent(function() {;/*
+    */});
+    carriers.forEach(function(carrier) {
+      sql += '\n  (SELECT MIN(distance) FROM client.locations_distance_to_carrier ldtc JOIN carriers ON ldtc.carrier_id = '+carrier.id+' AND ldtc.location_id = location_id) AS distance_'+carrier.id+','
+    })
+    sql += multiline.stripIndent(function() {;/*
         SUM(spend.monthly_spend * 12)::float as total,
         spend.year
       FROM
         biz b
       JOIN locations l ON b.location_id = l.id
     */});
-    carriers.forEach(function(carrier) {
-      sql += '\n  LEFT JOIN client.locations_distance_to_carrier ldtc_'+carrier.id+' ON ldtc_'+carrier.id+'.carrier_id = '+carrier.id+' AND ldtc_'+carrier.id+'.location_id = l.id'
-    })
     sql += '\n'
     sql += multiline.stripIndent(function() {;/*
       JOIN industries ON industries.id = b.industry_id
@@ -316,7 +317,11 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
         AND e.max_value >= b.number_of_employees
-      JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog
+    */})
+    if (config.spend_by_city) {
+      sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
+    }
+    sql += multiline(function() {;/*
       JOIN
         client_schema.industries c_industries
       ON
@@ -481,7 +486,11 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
        AND e.max_value >= b.number_of_employees
-      JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog
+     */})
+     if (config.spend_by_city) {
+       sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
+     }
+     sql += multiline(function() {;/*
       WHERE locations.id = $1
       GROUP BY spend.year
       ORDER by spend.year
@@ -547,7 +556,11 @@ MarketSize.market_size_for_business = function(business_id, options, callback) {
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
        AND e.max_value >= b.number_of_employees
-      JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog
+    */})
+    if (config.spend_by_city) {
+     sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
+    }
+    sql += multiline(function() {;/*
       WHERE b.id = $1
       GROUP BY spend.year
       ORDER by spend.year
