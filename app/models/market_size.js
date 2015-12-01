@@ -249,7 +249,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
       ON
         spend.industry_id = c_industries.id
     */});
-    sql += '\n GROUP BY b.id, year LIMIT 100';
+    sql += '\n GROUP BY b.id, year';
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {

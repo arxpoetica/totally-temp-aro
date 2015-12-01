@@ -312,7 +312,6 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				var geom = feature.getGeometry();
 				if (geom && geom.get) {
 					if (typeof density !== 'undefined') {
-						console.log('density', density)
 						arr.push({ location: geom.get(), weight: density });
 					} else {
 						arr.push(geom.get());
