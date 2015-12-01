@@ -139,13 +139,19 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
 
     var params = [];
     var sql = prepareMarketSizeQuery(plan_id, type, options, params);
+    params.push(plan_id);
 
     sql += multiline(function() {/*
       SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM biz
       JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
       JOIN carriers c ON lc.carrier_id = c.id
-      GROUP BY c.id
+      JOIN locations l
+        ON l.id = lc.location_id
+      JOIN cities ct
+        ON ct.buffer_geog && l.geog
     */})
+    sql += '\n AND ct.id = (SELECT cities.id FROM cities JOIN custom.route r ON r.id = $'+params.length+' ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)';
+    sql += '\n GROUP BY c.id';
     database.query(sql, params, callback);
   })
   .then(function(fair_share, callback) {
@@ -249,7 +255,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
       ON
         spend.industry_id = c_industries.id
     */});
-    sql += '\n GROUP BY b.id, year LIMIT 100';
+    sql += '\n GROUP BY b.id, year';
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
