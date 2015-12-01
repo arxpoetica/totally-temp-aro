@@ -4,8 +4,8 @@
   "description": "Network infrastructure planning application",
   "main": "app.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha test/models/*.js test/helpers/*.js --timeout 20000 --delay",
-    "test-cov": "NODE_ENV=test istanbul --preserve-comments cover _mocha -- test/models/*.js test/helpers/*.js -R spec --timeout 20000 --delay",
+    "test": "NODE_ENV=test mocha test/models/*.js test/helpers/*.js --timeout 50000 --delay",
+    "test-cov": "NODE_ENV=test istanbul --preserve-comments cover _mocha -- test/models/*.js test/helpers/*.js -R spec --timeout 50000 --delay",
     "test-ui": "./node_modules/.bin/karma start",
     "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
     "test-all": "npm test && npm run test-ui && npm run test-integration"

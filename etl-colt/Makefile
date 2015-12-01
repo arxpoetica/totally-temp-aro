@@ -1,3 +1,14 @@
+export PGDATABASE:=colt
+
+reset_db:
+	${PGBIN}/psql -d 'aro' -c 'CREATE DATABASE colt;' # may fail but it's ok
+	${PGBIN}/psql -c 'DROP SCHEMA aro CASCADE; CREATE SCHEMA aro;'
+	${PGBIN}/psql -c 'CREATE EXTENSION postgis;'
+	${PGBIN}/psql -c 'CREATE EXTENSION postgis_topology;'
+	${PGBIN}/psql -c 'CREATE EXTENSION fuzzystrmatch;'
+	${PGBIN}/psql -c 'CREATE EXTENSION postgis_tiger_geocoder;'
+	${PGBIN}/psql -c 'CREATE EXTENSION pgrouting;'
+
 # TIGER ETL
 #############
 etl_tiger_cousub:
@@ -83,14 +94,14 @@ etl_competitor_fiber:
 # MAIN ETL ACTIONS
 ###################################
 
-# Include the ETLs you would like to leverage in reset, source, and app. 
+# Include the ETLs you would like to leverage in reset, source, and app.
 etl_reset_all: reset_demographics reset_aro reset_client reset_custom reset_source_colt
 
 etl_source_data: etl_demographics etl_source_colt etl_competitor_fiber
 
 etl_app_data: etl_aro etl_client etl_custom
 
-etl_reload_all: etl_reset_all etl_source_data etl_app_data
+etl_reload_all: reset_db etl_reset_all etl_source_data etl_app_data
 
 # TEST ETL
 ###################################
@@ -125,7 +136,7 @@ etl_test_all: etl_test_aro etl_test_custom etl_test_client
 
 # service_restart: service_stop service_start
 
-# service_redploy: service_stop service_deploy service_start	
+# service_redploy: service_stop service_deploy service_start
 
 # APPLICATION SETUP
 #############
@@ -144,4 +155,4 @@ webserver:
 
 # Make a dummy user for local development
 register_user:
-	node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password
+	ARO_CLIENT=colt node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password

@@ -67,7 +67,6 @@ describe('NetworkPlan', function() {
 				if (err) return done(err);
 				var data = res.body;
 				expect(res.statusCode).to.be.equal(200);
-				expect(data.wirecenter).to.be.a('string');
 				expect(data.statefp).to.be.a('string');
 				expect(data.countyfp).to.be.a('string');
 				done();
@@ -141,7 +140,7 @@ describe('NetworkPlan', function() {
 				expect(plan.metadata.customer_types[0].name).to.be.a('string');
 				expect(plan.metadata.customer_types[0].businesses).to.be.a('number');
 				expect(plan.metadata.customer_types[0].households).to.be.a('number');
-				
+
 				var year = new Date().getFullYear();
 				expect(plan.metadata.npv).to.be.an('array');
 				expect(plan.metadata.npv).to.have.length(5);
@@ -186,7 +185,7 @@ describe('NetworkPlan', function() {
 				expect(plan.metadata.customer_types[0].name).to.be.a('string');
 				expect(plan.metadata.customer_types[0].businesses).to.be.a('number');
 				expect(plan.metadata.customer_types[0].households).to.be.a('number');
-				
+
 				var year = new Date().getFullYear();
 				expect(plan.metadata.npv).to.be.an('array');
 				expect(plan.metadata.npv).to.have.length(5);

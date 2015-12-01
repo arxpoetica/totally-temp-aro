@@ -54,3 +54,8 @@ exports.test_viewport = function(obj) {
 		threshold: '10',
 	})
 }
+
+exports.swich_db = function(dbname) {
+	process.env.DATABASE_URL = 'postgres://aro:aro@localhost/'+dbname;
+	// TODO: config?
+}

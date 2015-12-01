@@ -4,6 +4,9 @@ PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
+# Create ARO carriers table
+${PSQL} -a -f $DIR/create_aro_carriers.sql
+
 ${PSQL} -a -f $DIR/create_aro_cousub.sql
 
 # Create aro edges from tiger edges
@@ -23,6 +26,9 @@ ${PSQL} -a -f $DIR/create_aro_industries.sql
 
 # Create aro.businesses table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_businesses.sql
+
+# Create aro.cities table
+${PSQL} -a -f $DIR/create_aro_cities.sql
 
 # Create aro.locations table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_locations.sql

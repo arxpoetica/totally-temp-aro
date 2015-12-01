@@ -1,9 +1,10 @@
 {
-  "database_url": "postgres://aro:aro@localhost/aro",
+  "database_url": "postgres://aro:aro@localhost/colt",
   "aro_service_url": "http://localhost:8080/aro-service",
   "client_schema": "client",
   "client_carrier_name": "Colt",
   "route_planning": false,
+  "spend_by_city": true,
   "currency_symbol": "€",
   "ui": {
     "map_tools": {
