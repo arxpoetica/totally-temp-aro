@@ -1,5 +1,5 @@
 {
-  "database_url": "postgres://aro:aro@localhost/colt",
+  "database_url": "postgres://aro:aro@localhost/aro",
   "aro_service_url": "http://localhost:8080/aro-service",
   "client_schema": "client",
   "client_carrier_name": "Colt",
