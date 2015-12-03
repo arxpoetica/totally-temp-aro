@@ -106,7 +106,7 @@
               </span>
 
               <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
-                <span class="fa fa-users"></span> {{ route.metadata.total_customers }} customers covered
+                <span class="fa fa-users"></span> {{ route.metadata.total_customers | number }} customers covered
               </span>
 
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
