@@ -64,7 +64,7 @@ Location.find_all = function(plan_id, type, filters, viewport, callback) {
 			var icon = void(0);
 			var total = (row.customer_type_existing || 0) + (row.customer_type_prospect || 0);
 			if (row.customer_type_existing > total/2) icon = '/images/map_icons/location_business_colt.png';
-			if (row.customer_type_prospect > total/2) icon = '/images/map_icons/location_business_dark_gray.png';
+			if (row.customer_type_prospect > total/2) icon = '/images/map_icons/location_prospect.png';
 			return {
 				'type':'Feature',
 				'properties': {

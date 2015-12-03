@@ -35,7 +35,6 @@ INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees, 
 	FROM source_colt.customers customers
 	JOIN aro.locations locations ON
 	customers.building_id = locations.building_id
-	WHERE customers.man_employee_total >= 10
 	RETURNING id
 )
 INSERT INTO aro.existing_customer_business_ids(id)
