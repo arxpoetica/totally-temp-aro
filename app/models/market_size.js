@@ -187,10 +187,16 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     var params = [];
     var sql = prepareMarketSizeQuery(plan_id, type, options, params);
 
+    sql += ', distances AS ( SELECT';
+    carriers.forEach(function(carrier) {
+      sql += '\n  (SELECT distance FROM client.locations_distance_to_carrier ldtc WHERE ldtc.carrier_id = '+carrier.id+' AND ldtc.location_id = b.location_id) AS distance_'+carrier.id+','
+    });
+    sql += '\n  b.id AS business_id FROM biz b) \n';
+
     sql += multiline.stripIndent(function() {;/*
       SELECT
         b.id,
-        MAX(l.id) AS location_id,
+        MAX(b.location_id) AS location_id,
         MAX(b.name) AS name,
         MAX(b.address) AS address,
         MAX(c_industries.industry_name) AS industry_name,
@@ -199,7 +205,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         MAX(ct.name) AS type,
     */});
     carriers.forEach(function(carrier) {
-      sql += '\n  (SELECT MIN(distance) FROM client.locations_distance_to_carrier ldtc JOIN carriers ON ldtc.carrier_id = '+carrier.id+' AND ldtc.location_id = location_id) AS distance_'+carrier.id+','
+      sql += '\n  MIN(d.distance_'+carrier.id+') AS distance_'+carrier.id+','
     })
     sql += multiline.stripIndent(function() {;/*
         SUM(spend.monthly_spend * 12)::float as total,
@@ -210,6 +216,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     */});
     sql += '\n'
     sql += multiline.stripIndent(function() {;/*
+      JOIN distances d ON d.business_id = b.id
       JOIN industries ON industries.id = b.industry_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
       JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
@@ -260,6 +267,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         spend.industry_id = c_industries.id
     */});
     sql += '\n GROUP BY b.id, year';
+    console.log('query', sql, params)
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
@@ -281,6 +289,12 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
     var params = [location_id];
     sql = 'WITH biz AS (SELECT * FROM businesses b WHERE b.location_id=$1)\n'
 
+    sql += ', distances AS ( SELECT';
+    carriers.forEach(function(carrier) {
+      sql += '\n  (SELECT distance FROM client.locations_distance_to_carrier ldtc WHERE ldtc.carrier_id = '+carrier.id+' AND ldtc.location_id = b.location_id) AS distance_'+carrier.id+','
+    });
+    sql += '\n  b.id AS business_id FROM biz b) \n';
+
     sql += multiline(function() {;/*
       SELECT
         b.id,
@@ -292,7 +306,7 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
         MAX(ct.name) AS type,
     */});
     carriers.forEach(function(carrier) {
-      sql += '\n  (SELECT MIN(distance) FROM client.locations_distance_to_carrier ldtc JOIN carriers ON ldtc.carrier_id = '+carrier.id+' AND ldtc.location_id = location_id) AS distance_'+carrier.id+','
+      sql += '\n  MIN(d.distance_'+carrier.id+') AS distance_'+carrier.id+','
     })
     sql += multiline.stripIndent(function() {;/*
         SUM(spend.monthly_spend * 12)::float as total,
@@ -303,6 +317,7 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
     */});
     sql += '\n'
     sql += multiline.stripIndent(function() {;/*
+      JOIN distances d ON d.business_id = b.id
       JOIN industries ON industries.id = b.industry_id
       JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
       JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
