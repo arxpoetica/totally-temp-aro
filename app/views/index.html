@@ -112,7 +112,7 @@
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
                 <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
                   <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
-                  <span class="label label-info">{{ market_profile_fair_share_current_year_total | currency }}</span>
+                  <span class="label label-info" style="background-color: <%- config.ui.colors.fair_share %>">{{ market_profile_fair_share_current_year_total | currency }}</span>
               </span>
             </p>
 
@@ -599,6 +599,10 @@
 
     }
 
+
+    var user_id = <%= user.id %>;
+    var config = <%- JSON.stringify(config) %>;
+
     $(document).ready(initialize);
   </script>
   <script src="javascripts/libs/bootstrap.min.js"></script>
@@ -668,9 +672,6 @@
       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
       minimumInputLength: 1,
     });
-
-    var user_id = <%= user.id %>;
-    var config = <%- JSON.stringify(config) %>;
   </script>
   <script src="javascripts/interceptors/custom_locale.js"></script>
   <script type="text/javascript">
