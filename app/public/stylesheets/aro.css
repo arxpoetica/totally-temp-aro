@@ -388,3 +388,12 @@ background: linear-gradient(to bottom, rgb(30,30,30) 0%,rgb(106,106,106) 64%,rgb
     -webkit-transform: scaleY(1.0);
   }
 }
+
+#top_bar_tools .label {
+  display: inline-block;
+  margin-top: -10px;
+}
+
+#top_bar_tools .label span {
+  display: block;
+}

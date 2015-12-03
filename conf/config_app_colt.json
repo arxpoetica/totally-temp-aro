@@ -28,6 +28,13 @@
       }
     },
     "top_bar_tools": ["customer_profile", "market_profile"],
-    "project_menu": ["share", "export_kml"]
+    "project_menu": ["share", "export_kml"],
+    "icons": {
+      "market_profile": "fa fa-eur"
+    },
+    "colors": {
+      "fiber": "rgb(0, 164, 153)",
+      "fair_share": "rgb(0, 164, 153)"
+    }
   }
 }

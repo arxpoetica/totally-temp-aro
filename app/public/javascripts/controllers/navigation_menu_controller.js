@@ -95,6 +95,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
           $scope.market_profile_fair_share_current_year_total = $scope.market_profile_current_year.total * response.share;
         }
         $scope.market_profile_calculating = false;
+        $scope.market_profile_share = response.share;
       })
       .error(function() {
         $scope.market_profile_calculating = false;

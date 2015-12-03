@@ -106,13 +106,16 @@
               </span>
 
               <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
-                <span class="fa fa-users"></span> {{ route.metadata.total_customers }} customers covered
+                <span class="fa fa-users"></span> {{ route.metadata.total_customers | number }} customers covered
               </span>
 
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
-                <span class="fa fa-briefcase" ng-class="{'spin': market_profile_calculating}"></span>
-                  <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
-                  <span class="label label-info">{{ market_profile_fair_share_current_year_total | currency }}</span>
+                <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
+                <span ng-show="market_profile_current_year.total">
+                  <span class="label label-success"><span>Market Size</span>{{ market_profile_current_year.total / 1000000000 | currency }}B</span>
+                  <span class="label label-info" style="background-color: <%- config.ui.colors.fair_share %>"><span><%- config.client_carrier_name %> revenue</span>{{ market_profile_fair_share_current_year_total / 1000000000 | currency }}B</span>
+                  <span class="label label-info"><span>Marketshare</span>{{ market_profile_share*100 | number:2 }}%</span>
+                </span>
               </span>
             </p>
 
@@ -225,7 +228,7 @@
               <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
                 <!--
                 <div class="pull-right">
-                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="fa fa-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
                 </div>
                 -->
                 <label>
@@ -241,7 +244,7 @@
                 <div class="pull-right boundary-options">
                   <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="fa fa-pencil"></span></a>
                   <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="fa fa-trash-o"></span></a>
-                  <a href="javascript:void(0)" class="text-success" ng-click="show_market_size(boundary)"><span class="fa fa-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="show_market_size(boundary)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
                   <a href="javascript:void(0)" class="text-warning" ng-click="show_customer_profile(boundary)"><span class="fa fa-users"></span></a>
                 </div>
                 <label>
@@ -599,6 +602,10 @@
 
     }
 
+
+    var user_id = <%= user.id %>;
+    var config = <%- JSON.stringify(config) %>;
+
     $(document).ready(initialize);
   </script>
   <script src="javascripts/libs/bootstrap.min.js"></script>
@@ -668,9 +675,6 @@
       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
       minimumInputLength: 1,
     });
-
-    var user_id = <%= user.id %>;
-    var config = <%- JSON.stringify(config) %>;
   </script>
   <script src="javascripts/interceptors/custom_locale.js"></script>
   <script type="text/javascript">

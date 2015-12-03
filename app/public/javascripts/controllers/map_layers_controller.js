@@ -209,9 +209,9 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     short_name: 'F',
     style_options: {
       normal: {
-        strokeColor: 'rgb(0, 164, 153)',
+        strokeColor: config.ui.colors.fiber,
         strokeWeight: 2,
-        fillColor: 'rgb(0, 164, 153)',
+        fillColor: config.ui.colors.fiber,
       }
     },
     threshold: 11,
