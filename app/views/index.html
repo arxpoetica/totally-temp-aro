@@ -110,7 +110,7 @@
               </span>
 
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
-                <span class="fa fa-briefcase" ng-class="{'spin': market_profile_calculating}"></span>
+                <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
                   <span class="label label-success">{{ market_profile_current_year.total | currency }}</span>
                   <span class="label label-info">{{ market_profile_fair_share_current_year_total | currency }}</span>
               </span>
@@ -225,7 +225,7 @@
               <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
                 <!--
                 <div class="pull-right">
-                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="fa fa-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
                 </div>
                 -->
                 <label>
@@ -241,7 +241,7 @@
                 <div class="pull-right boundary-options">
                   <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="fa fa-pencil"></span></a>
                   <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="fa fa-trash-o"></span></a>
-                  <a href="javascript:void(0)" class="text-success" ng-click="show_market_size(boundary)"><span class="fa fa-briefcase"></span></a>
+                  <a href="javascript:void(0)" class="text-success" ng-click="show_market_size(boundary)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
                   <a href="javascript:void(0)" class="text-warning" ng-click="show_customer_profile(boundary)"><span class="fa fa-users"></span></a>
                 </div>
                 <label>
