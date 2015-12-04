@@ -664,7 +664,7 @@ MarketSize.fair_share_heatmap = function(viewport, callback) {
         'type':'Feature',
         'properties': {
           'id': row.id,
-          'density': row.carrier_total === 0 ? 0 : ((row.carrier_total - row.carrier_current)*100 / row.carrier_total),
+          'density': row.carrier_total === 0 ? 0 : ((row.carrier_current)*100 / row.carrier_total),
           'carrier_total': row.carrier_total,
           'carrier_current': row.carrier_current,
         },
