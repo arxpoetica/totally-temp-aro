@@ -1,7 +1,7 @@
 # Spend data
 
 ## Background
-The relevant data is in the TSM sheet within the `2015 11 16_Spend Matrix France_vSENT.xlsx` and `2015 11 16_Spend Matrix Germany_vSENT.xlsx` files. This data represents the yearly spend per business. 
+The relevant data is in the TSM sheet within the `2015 12 01_Spend Matrix Germany_vSENT.xlsx` and `2015 12 01_Spend Matrix France_vSENT.xlsx` files. This data represents the yearly spend per business. 
 
 ### Creating a spend dataset
 Importing the spend data from this Excel workbook will very little manipulation of the data in Excel. The data required for the import process is a csv file with the following columns:
