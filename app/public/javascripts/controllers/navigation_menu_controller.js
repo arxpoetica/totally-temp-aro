@@ -184,6 +184,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     init_map();
   };
 
+  // If we use this more than once it should be more generalized...
+  $scope.clear_default_text = function() {
+    $scope.new_route_name = '';
+  };
+
   $scope.save_new_route = function() {
     var params = {
       name: $scope.new_route_name,

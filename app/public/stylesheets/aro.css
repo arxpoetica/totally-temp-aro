@@ -247,11 +247,7 @@ footer nav {
   top: 0;
   left: 0;
   z-index: 2;
-  /*background: url(/images/backgrounds/colt_home_background.jpg);*/
-  background: rgb(30,30,30); /* Old browsers */
-background: -moz-linear-gradient(top, rgb(30,30,30) 0%, rgb(106,106,106) 64%, rgb(130,130,130) 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top, rgb(30,30,30) 0%,rgb(106,106,106) 64%,rgb(130,130,130) 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom, rgb(30,30,30) 0%,rgb(106,106,106) 64%,rgb(130,130,130) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: url(/images/backgrounds/fiber_1_reverse.jpg);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
