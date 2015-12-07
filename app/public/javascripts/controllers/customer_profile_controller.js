@@ -70,7 +70,8 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
       var color = customer_type.color;
       return {
         name: customer_type.name,
-        value: customer_type.businesses + customer_type.households,
+        label: customer_type.name,
+        value: (customer_type.businesses + customer_type.households)*100 / $scope.data.customers_businesses_total,
         color: color,
         highlight: tinycolor(color).lighten().toString(),
       }
@@ -78,7 +79,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
 
     chart && chart.destroy();
     var options = {
-      // tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>%",
+      tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>%",
     };
     var ctx = document.getElementById('customer-profile-chart').getContext('2d');
     chart = new Chart(ctx).Pie(data, options);
