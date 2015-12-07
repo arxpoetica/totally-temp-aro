@@ -17,15 +17,16 @@
             <table class="table">
               <tbody>
                 <tr ng-repeat="customer_type in data.customer_types">
-                  <th>{{customer_type.name}}</th>
+                  <th><span style="background-color: {{customer_type.color}}; width: 10px; height: 10px; display: inline-block"></span>
+                    {{customer_type.name}}</th>
                   <td class="text-right">
-                    {{customer_type.businesses}}
+                    {{customer_type.businesses | number }}
                   </td>
                   <td class="text-right">
                     {{customer_type.businesses*100 / data.customers_businesses_total | number : 0}}%
                   </td>
                   <td class="text-right" ng-show="show_households">
-                    {{customer_type.households}}
+                    {{customer_type.households | number }}
                   </td>
                   <td class="text-right" ng-show="show_households">
                     {{customer_type.households*100 / data.customers_households_total | number : 0}}%
