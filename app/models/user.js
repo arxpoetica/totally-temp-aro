@@ -25,7 +25,7 @@ function checkPassword(plain, hash, callback) {
 }
 
 User.login = function(email, password, callback) {
-  var sql = 'SELECT id, first_name, last_name, email, password FROM custom.users WHERE email=$1';
+  var sql = 'SELECT id, first_name, last_name, email, password FROM auth.users WHERE email=$1';
   var user;
 
   txain(function(callback) {
@@ -49,7 +49,7 @@ User.login = function(email, password, callback) {
 };
 
 User.find_by_email = function(email, callback) {
-  var sql = 'SELECT id, first_name, last_name, email FROM custom.users WHERE email=$1';
+  var sql = 'SELECT id, first_name, last_name, email FROM auth.users WHERE email=$1';
   database.findOne(sql, [email.toLowerCase()], callback);
 };
 
@@ -73,11 +73,11 @@ User.register = function(user, callback) {
         user.email.toLowerCase(),
         hash,
       ];
-      var sql = 'INSERT INTO custom.users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id';
+      var sql = 'INSERT INTO auth.users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id';
       database.findOne(sql, params, callback);
     })
     .then(function(row, callback) {
-      var sql = 'SELECT id, first_name, last_name, email FROM custom.users WHERE id=$1';
+      var sql = 'SELECT id, first_name, last_name, email FROM auth.users WHERE id=$1';
       database.findOne(sql, [row.id], callback);
     })
     .end(function(err, usr) {
@@ -89,13 +89,13 @@ User.register = function(user, callback) {
 };
 
 User.find_by_id = function(id, callback) {
-  var sql = 'SELECT id, first_name, last_name, email FROM custom.users WHERE id=$1';
+  var sql = 'SELECT id, first_name, last_name, email FROM auth.users WHERE id=$1';
   database.findOne(sql, [id], callback);
 };
 
 User.find_by_text = function(text, callback) {
   text = '%'+text+'%';
-  var sql = 'SELECT id, first_name, last_name, email FROM custom.users WHERE first_name LIKE $1 OR last_name LIKE $1 OR email LIKE $1';
+  var sql = 'SELECT id, first_name, last_name, email FROM auth.users WHERE first_name LIKE $1 OR last_name LIKE $1 OR email LIKE $1';
   database.query(sql, [text], callback);
 }
 

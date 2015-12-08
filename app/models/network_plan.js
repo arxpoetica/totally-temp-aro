@@ -214,12 +214,12 @@ NetworkPlan.find_all = function(user, text, callback) {
       created_at, updated_at
     FROM
       custom.route
-    LEFT JOIN custom.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
-    LEFT JOIN custom.users ON users.id = permissions.user_id
+    LEFT JOIN auth.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
+    LEFT JOIN auth.users ON users.id = permissions.user_id
   */});
   var params = [config.client_carrier_name];
   if (user) {
-    sql += ' WHERE route.id IN (SELECT route_id FROM custom.permissions WHERE user_id=$2)';
+    sql += ' WHERE route.id IN (SELECT route_id FROM auth.permissions WHERE user_id=$2)';
     params.push(user.id);
   }
   if (text) {
@@ -278,8 +278,8 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
           created_at, updated_at
         FROM
           custom.route
-        LEFT JOIN custom.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
-        LEFT JOIN custom.users ON users.id = permissions.user_id
+        LEFT JOIN auth.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
+        LEFT JOIN auth.users ON users.id = permissions.user_id
         WHERE route.id=$1
       */});
       database.findOne(sql, [id], callback);
@@ -396,7 +396,7 @@ NetworkPlan.export_kml = function(plan_id, callback) {
        </IconStyle>
       </Style>
     */});
-    
+
     var sql = multiline(function() {;/*
       SELECT ST_AsKML(edge.geom) AS geom
       FROM custom.route_edges
