@@ -44,22 +44,24 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
     return !collapsed[name];
   }
 
+  tools.get_tool_name = function(id) {
+    for (var i = 0; i < tools.available_tools.length; i++ ) {
+      if (tools.available_tools[i]['id'] == id) {
+        return tools.available_tools[i]['name']
+      }
+    }
+  }
+
   tools.available_tools = [
     {
       id: 'locations',
       name: 'Locations',
       short_name: 'L',
-      icon: 'icon icon-locations',
-    },
-    {
-      id: 'boundaries',
-      name: 'Boundaries',
-      short_name: 'B',
-      icon: 'icon icon-boundaries',
+      icon: 'fa fa-building',
     },
     {
       id: 'network_nodes',
-      name: 'Network Equipment',
+      name: config.client_carrier_name + ' Network',
       short_name: 'E',
       icon: 'icon icon-network-equipment',
     },
@@ -68,6 +70,12 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
       name: 'Competitor Networks',
       short_name: 'F',
       icon: 'fa fa-plug',
+    },
+    {
+      id: 'boundaries',
+      name: 'Custom Boundaries',
+      short_name: 'B',
+      icon: 'icon icon-boundaries',
     },
   ];
 

@@ -24,6 +24,11 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
 
   $rootScope.$on('customer_profile_selected', function(e, json, title, type) {
     $scope.data = $scope.route.metadata;
+    $scope.data.customer_types = $scope.data.customer_types || [];
+    var colors = randomColor({ seed: 1, count: $scope.data.customer_types.length });
+    $scope.data.customer_types.forEach(function(customer_type) {
+      customer_type.color = colors.shift();
+    })
     $scope.type = 'route';
     open_modal(null);
     show_chart();
@@ -60,21 +65,22 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
 
   function show_chart() {
     $scope.loading = false;
-    $scope.data.customer_types = $scope.data.customer_types || [];
 
-    var colors = randomColor({ seed: 1, count: $scope.data.customer_types.length });
     var data = $scope.data.customer_types.map(function(customer_type) {
-      var color = colors.shift();
+      var color = customer_type.color;
       return {
         name: customer_type.name,
-        value: customer_type.businesses + customer_type.households,
+        label: customer_type.name,
+        value: (customer_type.businesses + customer_type.households)*100 / $scope.data.customers_businesses_total,
         color: color,
         highlight: tinycolor(color).lighten().toString(),
       }
     });
 
     chart && chart.destroy();
-    var options = {};
+    var options = {
+      tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>%",
+    };
     var ctx = document.getElementById('customer-profile-chart').getContext('2d');
     chart = new Chart(ctx).Pie(data, options);
   }
