@@ -8,6 +8,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.new_route_area_bounds;
   $scope.edit_route_name;
 
+  $('#new-route select').select2({
+    placeholder: 'Choose a city',
+  }).on('change', function() {
+    $scope.look_up_area();
+  });
+
   $scope.shared_route;
 
   $scope.route = null;
@@ -44,6 +50,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $scope.look_up_area = function() {
+    $scope.new_route_area_name = $('#new-route select').select2('val');
     var address = encodeURIComponent($scope.new_route_area_name);
     $http.get('https://maps.googleapis.com/maps/api/geocode/json?address='+address)
       .success(function(response) {
