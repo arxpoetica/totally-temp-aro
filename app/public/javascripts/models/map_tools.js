@@ -69,7 +69,7 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
       id: 'fiber_plant',
       name: 'Competitor Networks',
       short_name: 'F',
-      icon: 'fa fa-plug',
+      icon: 'fa fa-pie-chart',
     },
     {
       id: 'boundaries',
