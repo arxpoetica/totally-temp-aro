@@ -86,6 +86,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   };
 
   $rootScope.$on('route_changed', function(e) {
+    if (!$scope.route) return;
     recalculate_market_profile();
   });
 
@@ -209,6 +210,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       $scope.select_route(response);
       $('#new-route').modal('hide');
       $scope.load_plans();
+
+      $scope.new_route_name = 'Untitled Analysis';
+      $scope.new_route_area_name = '';
+      $('#new-route select').select2('val', '');
+      new_route_map.setCenter({lat: -34.397, lng: 150.644})
     });
   };
 
