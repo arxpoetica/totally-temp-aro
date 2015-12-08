@@ -14,14 +14,14 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="col-sm-4 control-label">Choose a City</label>
+            <label class="col-sm-4 control-label">Choose a City!!</label>
             <div class="col-sm-8">
-              <div class="input-group">
-                <input type="text" class="form-control" ng-model="new_route_area_name">
-                <span class="input-group-btn">
-                  <button class="btn btn-default" type="button" ng-click="look_up_area()"><span class="glyphicon glyphicon-search"></span></button>
-                </span>
-              </div>
+              <select style="width: 100%">
+                <option></option>
+                <% cities.forEach(function(city) { %>
+                  <option value="<%= city.city_name %>, <%= city.country_name %>"><%= city.city_name %>, <%= city.country_name %></option>
+                <% }) %>
+              </select>
               <div style="width:100%; height:100%; padding: 20px 0">
                 <div id="new_route_map_canvas"></div>
               </div>

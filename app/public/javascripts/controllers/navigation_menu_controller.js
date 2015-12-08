@@ -8,6 +8,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.new_route_area_bounds;
   $scope.edit_route_name;
 
+  $('#new-route select').select2({
+    placeholder: 'Choose a city',
+  }).on('change', function() {
+    $scope.look_up_area();
+  });
+
   $scope.shared_route;
 
   $scope.route = null;
@@ -44,6 +50,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $scope.look_up_area = function() {
+    $scope.new_route_area_name = $('#new-route select').select2('val');
     var address = encodeURIComponent($scope.new_route_area_name);
     $http.get('https://maps.googleapis.com/maps/api/geocode/json?address='+address)
       .success(function(response) {
@@ -79,6 +86,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   };
 
   $rootScope.$on('route_changed', function(e) {
+    if (!$scope.route) return;
     recalculate_market_profile();
   });
 
@@ -202,6 +210,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       $scope.select_route(response);
       $('#new-route').modal('hide');
       $scope.load_plans();
+
+      $scope.new_route_name = 'Untitled Analysis';
+      $scope.new_route_area_name = '';
+      $('#new-route select').select2('val', '');
+      new_route_map.setCenter({lat: -34.397, lng: 150.644})
     });
   };
 
