@@ -96,13 +96,17 @@ etl_competitor_fiber:
 ###################################
 
 # Include the ETLs you would like to leverage in reset, source, and app.
-etl_reset_all: reset_demographics reset_aro reset_client reset_custom reset_source_colt reset_auth
+etl_reset_all_really_everything: reset_demographics reset_aro reset_client reset_custom reset_source_colt reset_auth
+
+etl_reset_all: reset_demographics reset_aro reset_client reset_custom reset_source_colt
 
 etl_source_data: etl_demographics etl_source_colt etl_competitor_fiber
 
-etl_app_data: etl_aro etl_client etl_custom etl_auth
+etl_app_data: etl_aro etl_client etl_custom
 
 etl_reload_all: reset_db etl_reset_all etl_source_data etl_app_data
+
+etl_reload_all_really_everything: reset_db etl_reset_all_really_everything etl_source_data etl_app_data etl_auth
 
 # TEST ETL
 ###################################
