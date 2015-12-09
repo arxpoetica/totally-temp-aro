@@ -1,5 +1,5 @@
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', function($scope, $rootScope, $http, selection, map_tools) {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'tracker', function($scope, $rootScope, $http, selection, map_tools, tracker) {
 
   $scope.map_tools = map_tools;
   $scope.selected_tool = null;
@@ -86,6 +86,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   });
 
   $scope.change_locations_layer = function() {
+    tracker.track('Locations / '+$scope.overlay);
+
     var layer = $rootScope.feature_layers.locations;
     var customer_profile = $rootScope.feature_layers.locations_customer_profile_density;
 

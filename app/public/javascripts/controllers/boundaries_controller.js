@@ -1,5 +1,5 @@
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_utils', function($scope, $rootScope, $http, selection, map_tools, map_utils) {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_utils', 'tracker', function($scope, $rootScope, $http, selection, map_tools, map_utils, tracker) {
 
   $scope.map_tools = map_tools;
   $scope.area_layers = $rootScope.area_layers;
@@ -37,8 +37,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
           boundary.geom.coordinates[0][0].forEach(function(p) {
             paths.push(new google.maps.LatLng(p[1], p[0]))
           })
-          var overlay = new google.maps.Polygon({ 
-            paths: paths, 
+          var overlay = new google.maps.Polygon({
+            paths: paths,
             editable: route.owner_id === user_id,
             strokeWeight: 2,
           });
@@ -58,6 +58,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
       drawingManager.setMap(map);
       drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
       map.setOptions({ draggable: false });
+      tracker.track('Boundaries / Build');
     } else {
       $scope.remove_drawing_manager();
     }
@@ -120,6 +121,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     var name = event.feature.getProperty('name');
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson(function(obj) {
+        tracker.track('Boundaries / Market profile');
         $rootScope.$broadcast('boundary_selected', obj.geometry, name, 'market_size');
       });
     }
@@ -129,6 +131,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     var overlay = boundary.overlay;
 
     function edit_boundary() {
+      tracker.track('Boundaries / Edit');
       var data = {
         name: boundary.name,
         geom: JSON.stringify(to_geo_json(overlay)),
@@ -198,7 +201,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     overlay.addListener('mouseout', function() {
       update_counter(-1);
     });
-    
+
   }
 
   $scope.rename_boundary = function(boundary) {
@@ -226,6 +229,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
   };
 
   $scope.delete_boundary = function(boundary) {
+    tracker.track('Boundaries / Delete');
     swal({
       title: "Are you sure?",
       text: "You will not be able to recover the deleted data!",
@@ -244,10 +248,12 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
   };
 
   $scope.show_market_size = function(boundary) {
+    tracker.track('Boundaries / Market profile');
     $rootScope.$broadcast('boundary_selected', to_geo_json(boundary.overlay, true), boundary.name, 'market_size');
   };
 
   $scope.show_customer_profile = function(boundary) {
+    tracker.track('Boundaries / Customer profile');
     $rootScope.$broadcast('boundary_selected', to_geo_json(boundary.overlay, true), boundary.name, 'customer_profile');
   };
 

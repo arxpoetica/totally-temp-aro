@@ -1,5 +1,5 @@
 // Selected location controller
-app.controller('selected_location_controller', function($rootScope, $scope, $http) {
+app.controller('selected_location_controller', function($rootScope, $scope, $http, tracker) {
   $scope.location = {};
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
   $scope.config = config;
@@ -33,7 +33,8 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
       if (map_layer.type !== 'locations') return;
       var feature = options.feature;
       var id = feature.getProperty('id');
-      open_location(id)
+      open_location(id);
+      tracker.track('Location selected');
     });
   }
 
@@ -105,6 +106,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   $('#selected_location_controller .nav-tabs a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
+    tracker.track('Location selected / '+$(this).text());
   });
 
   $http.get('/market_size/filters').success(function(response) {
@@ -339,6 +341,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   }
 
   $scope.calculate_business_market_size = function() {
+    tracker.track('Location selected / Businesses / Business market profile');
     var params = {
       product: arr($scope.product),
     };
