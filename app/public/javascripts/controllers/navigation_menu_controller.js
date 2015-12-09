@@ -210,13 +210,15 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       $scope.select_route(response);
       $('#new-route').modal('hide');
       $scope.load_plans();
-
-      $scope.new_route_name = 'Untitled Analysis';
-      $scope.new_route_area_name = '';
-      $('#new-route select').select2('val', '');
-      new_route_map.setCenter({lat: -34.397, lng: 150.644})
     });
   };
+
+  $('#new-route').on('hidden.bs.modal', function() {
+    $scope.new_route_name = 'Untitled Analysis';
+    $scope.new_route_area_name = '';
+    $('#new-route select').select2('val', '');
+    new_route_map.setCenter({lat: -34.397, lng: 150.644})
+  })
 
   $scope.save_as = function() {
     $scope.edit_route_name = $scope.route.name;
