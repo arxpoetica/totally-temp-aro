@@ -156,7 +156,9 @@
                     <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Delete plan</a></li>
                   <li role="separator" class="divider" ng-show="route.owner_id === user_id"></li>
                   <li><a href="javascript:void(0)" ng-click="show_share_route(route)">Share…</a></li>
+                  <% if (config.route_planning) { %>
                   <li><a href="javascript:void(0)" ng-click="export_kml_name()">Export KML…</a></li>
+                  <% } %>
                 </ul>
               </li>
             </ul>
