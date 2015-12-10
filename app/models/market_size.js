@@ -153,10 +153,11 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
         ON ct.buffer_geog && l.geog
     */})
     sql += '\n AND ct.id = (SELECT cities.id FROM cities JOIN custom.route r ON r.id = $'+params.length+' ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)';
-    sql += '\n GROUP BY c.id';
+    sql += '\n GROUP BY c.id ORDER BY c.name';
     database.query(sql, params, callback);
   })
   .then(function(fair_share, callback) {
+    sort_fair_share(fair_share);
     output.fair_share = fair_share;
     output.market_size_existing = []; // TODO
 
@@ -173,6 +174,15 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
   })
   .end(callback);
 };
+
+function sort_fair_share(fair_share) {
+  var current = _.findWhere(fair_share, { name: config.client_carrier_name })
+  if (current) {
+    var i = fair_share.indexOf(current);
+    fair_share.splice(i, 1);
+    fair_share.splice(0, 0, current);
+  }
+}
 
 MarketSize.export_businesses = function(plan_id, type, options, user, callback) {
   var filters = options.filters;
@@ -551,11 +561,12 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
       JOIN locations l ON l.id = biz.location_id AND l.id = $1
       JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
       JOIN carriers c ON lc.carrier_id = c.id
-      GROUP BY c.id
+      GROUP BY c.id ORDER BY c.name
     */})
     database.query(sql, params, callback);
   })
   .then(function(fair_share, callback) {
+    sort_fair_share(fair_share);
     output.fair_share = fair_share;
 
     var current_carrier = 0;
