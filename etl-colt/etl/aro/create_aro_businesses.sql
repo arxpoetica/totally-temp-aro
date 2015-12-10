@@ -25,10 +25,11 @@ CREATE TABLE aro.existing_customer_business_ids
 -- Map existing Colt customers to existing locations
 WITH existing_customer_business_ids AS
 (
-INSERT INTO aro.businesses(location_id, name, industry_id, number_of_employees, geog)
+INSERT INTO aro.businesses(location_id, name, address, industry_id, number_of_employees, geog)
 	SELECT
 		locations.id AS location_id,
 		customers.cust_name AS name,
+		locations.address AS address,
 		customers.db_sic_code AS industry_id,
 		customers.man_employee_total AS number_of_employees,
 		locations.geog as geog
