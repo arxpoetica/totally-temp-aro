@@ -251,6 +251,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     var options = {
       scaleLabel : "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
       tooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
+      multiTooltipTemplate: "<%= angular.injector(['ng']).get('$filter')('currency')(value) %>",
     };
     var ctx = document.getElementById('location_market_size_chart').getContext('2d');
     destroy_market_size_chart();
