@@ -37,16 +37,24 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
           boundary.geom.coordinates[0][0].forEach(function(p) {
             paths.push(new google.maps.LatLng(p[1], p[0]))
           })
-          var overlay = new google.maps.Polygon({ 
-            paths: paths, 
+          var overlay = new google.maps.Polygon({
+            paths: paths,
             editable: route.owner_id === user_id,
             strokeWeight: 2,
           });
           boundary.overlay = overlay;
           make_boundary_editable(boundary);
+          update_tooltips();
         });
       });
   });
+
+  function update_tooltips() {
+    setTimeout(function() {
+      var tooltips = $('[ng-controller="boundaries_controller"] [data-toggle="tooltip"]');
+      tooltips.tooltip();
+    }, 1); // setTimeout to wait until the DOM is rendered
+  }
 
   $scope.toggle_boundary = function(boundary) {
     boundary.overlay.setMap(boundary.overlay.getMap() ? null : map);
@@ -100,6 +108,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
           $scope.boundaries.push(boundary);
           boundary.overlay = overlay;
           make_boundary_editable(boundary);
+          update_tooltips();
         });
     });
   });
@@ -198,7 +207,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     overlay.addListener('mouseout', function() {
       update_counter(-1);
     });
-    
+
   }
 
   $scope.rename_boundary = function(boundary) {

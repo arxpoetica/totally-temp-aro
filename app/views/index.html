@@ -243,10 +243,10 @@
             <div ng-repeat="boundary in boundaries">
               <div class="checkbox">
                 <div class="pull-right boundary-options">
-                  <a href="javascript:void(0)" ng-click="rename_boundary(boundary)"><span class="fa fa-pencil"></span></a>
-                  <a href="javascript:void(0)" class="text-danger" ng-click="delete_boundary(boundary)"><span class="fa fa-trash-o"></span></a>
-                  <a href="javascript:void(0)" class="text-success" ng-click="show_market_size(boundary)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
-                  <a href="javascript:void(0)" class="text-warning" ng-click="show_customer_profile(boundary)"><span class="fa fa-users"></span></a>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="Edit" ng-click="rename_boundary(boundary)"><span class="fa fa-pencil"></span></a>
+                  <a href="javascript:void(0)" class="text-danger" data-toggle="tooltip" data-placement="top" title="Delete" ng-click="delete_boundary(boundary)"><span class="fa fa-trash-o"></span></a>
+                  <a href="javascript:void(0)" class="text-success" data-toggle="tooltip" data-placement="top" title="Market profile" ng-click="show_market_size(boundary)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
+                  <a href="javascript:void(0)" class="text-warning" data-toggle="tooltip" data-placement="top" title="Customer profile" ng-click="show_customer_profile(boundary)"><span class="fa fa-users"></span></a>
                 </div>
                 <label>
                   <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
@@ -643,7 +643,7 @@
   <script>app.run(function(loader){})</script>
   <script>
     $(function () {
-      var tooltips = $('[data-toggle="tooltip"]');
+      var tooltips = $('#left-col [data-toggle="tooltip"]');
       tooltips.tooltip();
       tooltips.on('click mouseout', function() {
         $(this).tooltip('hide');
