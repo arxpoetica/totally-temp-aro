@@ -17,6 +17,7 @@ $PSQL -a -c "DROP TABLE IF EXISTS source_colt.competitor_fiber_versatel_frankfur
 $PSQL -a -c "DROP TABLE IF EXISTS source_colt.competitor_fiber_eunetworks_frankfurt;"
 $PSQL -a -c "DROP TABLE IF EXISTS source_colt.competitor_fiber_eunetworks_paris;"
 $PSQL -a -c "DROP TABLE IF EXISTS source_colt.competitor_fiber_bouygues_paris;"
+$PSQL -a -c "DROP TABLE IF EXISTS source_colt.competitor_fiber_numericable_paris;"
 
 # Interroute (Frankfurt and Paris)
 ogr2ogr -f "ESRI Shapefile" ./interroute_frankfurt Fiber_Interroute_Frankfurt.kmz
@@ -51,6 +52,10 @@ ${SHP2PGSQL} -c -s 4326 './eunetworks_paris/Fiber_EUNetworks_Paris.dbf' source_c
 ogr2ogr -f "ESRI Shapefile" ./bouygues bouygues.kml
 ${SHP2PGSQL} -c -s 4326 './bouygues/Bouygues_FixedNetwork bdys.dbf' source_colt.competitor_fiber_bouygues_paris | ${PSQL}
 
+# Numericable (Paris)
+ogr2ogr -f "ESRI Shapefile" ./numericable numericable_paris_fiber.kml
+${SHP2PGSQL} -c -s 4326 './numericable/paris fiber digitized hi-res.dbf' source_colt.competitor_fiber_numericable_paris | ${PSQL}
+
 rm -rf interroute_frankfurt
 rm -rf interroute_paris
 rm -rf level3_frankfurt
@@ -60,3 +65,4 @@ rm -rf versatel_frankfurt
 rm -rf eunetworks_frankfurt
 rm -rf eunetworks_paris
 rm -rf bouygues
+rm -rf numericable

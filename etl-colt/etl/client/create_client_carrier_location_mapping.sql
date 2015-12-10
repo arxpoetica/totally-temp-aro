@@ -33,13 +33,20 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 		locations.country = 'France';
 
 -- Mapping for carriers who display coverage areas and not fiber routes
--- Only Bouygues has this datatype for Colt.
 INSERT INTO client.locations_carriers(location_id, carrier_id)
 	SELECT
 		locations.id AS location_id,
 		(SELECT carriers.id FROM aro.carriers carriers WHERE carriers.name = 'Bouygues' LIMIT 1)::int AS carrier_id
 	FROM aro.locations locations
 	JOIN source_colt.competitor_fiber_bouygues_paris AS coverage_area
+	ON ST_Contains(coverage_area.geom, locations.geom);
+
+INSERT INTO client.locations_carriers(location_id, carrier_id)
+	SELECT
+		locations.id AS location_id,
+		(SELECT carriers.id FROM aro.carriers carriers WHERE carriers.name = 'Numericable' LIMIT 1)::int AS carrier_id
+	FROM aro.locations locations
+	JOIN source_colt.competitor_fiber_numericable_paris AS coverage_area
 	ON ST_Contains(coverage_area.geom, locations.geom);
 
 -- Mapping for carriers who have fiber routes

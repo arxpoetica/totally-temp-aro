@@ -16,5 +16,6 @@ INSERT INTO aro.carriers (name, route_type, color) values('Zayo', 'fiber', '#e89
 INSERT INTO aro.carriers (name, route_type, color) values('EUNetworks', 'fiber', '#399310');
 INSERT INTO aro.carriers (name, route_type, color) values('Versatel', 'fiber', '#e2df22');
 INSERT INTO aro.carriers (name, route_type, color) values('Bouygues', 'coverage_area', '#9eaa14');
+INSERT INTO aro.carriers (name, route_type, color) values('Numericable', 'coverage_area', '#9eaa14');
 INSERT INTO aro.carriers (name, route_type, color) values('Deutsche Telekom', 'ilec', '#c330f4');
 INSERT INTO aro.carriers (name, route_type, color) values('Orange', 'ilec', '#3b1984');
