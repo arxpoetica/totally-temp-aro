@@ -68,4 +68,9 @@ exports.configure = function(api, middleware) {
     models.Location.customer_profile_heatmap(viewport, jsonHandler(response, next));
   });
 
+  api.get('/search', function(request, response, next) {
+    var text = request.query.text;
+    models.Location.search(text, jsonHandler(response, next));
+  });
+
 };

@@ -548,6 +548,29 @@
       </div>
     </div>
 
+    <div ng-controller="search-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('search')" class="map-tool panel panel-primary" id="search_controller">
+        <div class="panel-heading" ng-bind="map_tools.get_tool_name('search')">
+          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('search')" ng-click="map_tools.collapse('search')">
+            <span style="color:white" class="fa fa-chevron-up"></span>
+          </a>
+          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('search')" ng-click="map_tools.expand('search')">
+            <span style="color:white" class="fa fa-chevron-down"></span>
+          </a>
+          <!-- Panel header text set in above binding -->
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('search')">
+            <form>
+              <div class="form-group form-group-sm">
+                <input type="text" class="form-control" placeholder="Search a business">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="map-canvas-wrapper">
       <div id="map-canvas"></div>
     </div>
@@ -635,6 +658,7 @@
   <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/controllers/selection_tools_controller.js"></script>
+  <script src="javascripts/controllers/search_controller.js"></script>
   <script src="javascripts/models/map_utils.js"></script>
   <script src="javascripts/models/map_layer.js"></script>
   <script src="javascripts/models/selection.js"></script>

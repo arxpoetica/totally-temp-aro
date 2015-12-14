@@ -77,6 +77,12 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
       short_name: 'B',
       icon: 'icon icon-boundaries',
     },
+    {
+      id: 'search',
+      name: 'Search',
+      short_name: 'S',
+      icon: 'fa fa-search',
+    },
   ];
 
   return tools;
