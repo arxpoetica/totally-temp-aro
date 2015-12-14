@@ -9,6 +9,10 @@ CREATE TABLE auth.users
   last_name varchar NOT NULL,
   email varchar NOT NULL,
   password varchar NOT NULL,
+  company_name varchar,
+  rol varchar,
+  reset_code varchar,
+  reset_code_expiration timestamp,
   CONSTRAINT auth_users_pkey PRIMARY KEY (id)
 );
 

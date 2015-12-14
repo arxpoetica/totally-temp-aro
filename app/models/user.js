@@ -6,6 +6,8 @@ var txain = require('txain');
 var multiline = require('multiline');
 var errors = require('node-errors');
 var bcrypt = require('bcryptjs');
+var crypto = require('crypto');
+var querystring = require('querystring');
 var validate = helpers.validate;
 
 var User = {};
@@ -72,8 +74,10 @@ User.register = function(user, callback) {
         user.last_name,
         user.email.toLowerCase(),
         hash,
+        user.company_name || null,
+        user.rol || null,
       ];
-      var sql = 'INSERT INTO auth.users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id';
+      var sql = 'INSERT INTO auth.users (first_name, last_name, email, password, company_name, rol) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id';
       database.findOne(sql, params, callback);
     })
     .then(function(row, callback) {
@@ -97,6 +101,55 @@ User.find_by_text = function(text, callback) {
   text = '%'+text+'%';
   var sql = 'SELECT id, first_name, last_name, email FROM auth.users WHERE first_name LIKE $1 OR last_name LIKE $1 OR email LIKE $1';
   database.query(sql, [text], callback);
+}
+
+User.forgot_password = function(email, callback) {
+  var code = crypto.randomBytes(32).toString('hex');
+
+  txain(function(callback) {
+    var sql = 'SELECT id FROM auth.users WHERE email=$1';
+    database.findOne(sql, [email], callback);
+  })
+  .then(function(user, callback) {
+    if (!user) return callback(errors.notFound('No user found with email `%s`', email));
+    var sql = 'UPDATE auth.users SET reset_code=$1, reset_code_expiration=(NOW() + interval \'1 day\') WHERE id=$2';
+    database.execute(sql, [code, user.id], callback);
+  })
+  .then(function(callback) {
+    var base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
+    var text = 'Follow the link below to reset your password\n';
+    text += base_url+'/reset_password?'+querystring.stringify({ code: code });
+
+    helpers.mail.sendMail({
+      subject: 'Reset password',
+      to: email,
+      text: text,
+    })
+    callback()
+  })
+  .end(callback);
+}
+
+User.reset_password = function(code, password, callback) {
+  var id;
+  txain(function(callback) {
+    var sql = 'SELECT id FROM auth.users WHERE reset_code=$1 AND reset_code_expiration > NOW()';
+    database.findOne(sql, [code], callback);
+  })
+  .then(function(user, callback) {
+    if (!user) return callback(errors.notFound('Reset code not found or expired'));
+    id = user.id
+    hashPassword(password, callback);
+  })
+  .then(function(hash, callback) {
+    var sql = 'UPDATE auth.users SET password=$1, reset_code=NULL WHERE id=$2';
+    database.execute(sql, [hash, id], callback);
+  })
+  .end(callback);
+}
+
+User.change_password = function(id, password, callback) {
+  // TODO
 }
 
 module.exports = User;
