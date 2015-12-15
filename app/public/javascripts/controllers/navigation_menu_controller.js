@@ -1,5 +1,5 @@
 // Navigation Menu Controller
-app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'selection', '$location', function($scope, $rootScope, $http, map_tools, selection, $location) {
+app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'selection', 'tracker', '$location', function($scope, $rootScope, $http, map_tools, selection, tracker, $location) {
   // Controller instance variables
   $scope.selection = selection;
   $scope.new_route_name = 'Untitled Analysis';
@@ -112,14 +112,17 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.open_market_profile = function() {
     $rootScope.$broadcast('market_profile_selected', $scope.market_profile);
+    tracker.track('Global market profile');
   }
 
   $scope.open_customer_profile = function() {
     $rootScope.$broadcast('customer_profile_selected', $scope.market_profile);
+    tracker.track('Global customer profile');
   }
 
   $scope.delete_route = function(route) {
     if (!route) return;
+    tracker.track('Manage Analyses / Delete Analysis');
 
     swal({
       title: "Are you sure?",
@@ -169,12 +172,14 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.show_routes = function() {
     $scope.load_plans(function() {
       $('#select-route').modal('show');
+      tracker.track('Open Analysis');
     });
   };
 
   $scope.manage_network_plans = function() {
     $scope.load_plans(function() {
       $('#manage-network-plans').modal('show');
+      tracker.track('Manage Analyses');
     });
   };
 
@@ -190,6 +195,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.new_route = function() {
     $('#new-route').modal('show');
     init_map();
+    tracker.track('Create New Analysis');
   };
 
   // If we use this more than once it should be more generalized...
@@ -270,6 +276,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.shared_route = route;
     $('#share-route').modal('show');
     $('#share-route .modal-title').text('Share "'+route.name+'"');
+    tracker.track('Manage Analyses / Share Analysis');
   };
 
   $scope.share_route = function() {

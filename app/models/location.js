@@ -542,4 +542,17 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 	.end(callback);
 }
 
+Location.search = function(text, callback) {
+	text = '%'+text.toLowerCase()+'%'
+	var sql = multiline(function() {;/*
+		SELECT
+			id, name, ST_AsGeoJSON(geog)::json AS geog
+		FROM
+			businesses
+		WHERE lower(name) LIKE $1
+		LIMIT 100
+	*/});
+	database.query(sql, [text], callback);
+}
+
 module.exports = Location;

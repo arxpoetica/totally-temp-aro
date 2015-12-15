@@ -14,6 +14,7 @@ exports.configure = function(api, middleware) {
 
       response.render('index.html', {
         env: process.env.NODE_ENV,
+        env_is_production: process.env.NODE_ENV === 'production',
         env_is_test: process.env.NODE_ENV === 'test',
         user: request.user,
         config: public_config,
