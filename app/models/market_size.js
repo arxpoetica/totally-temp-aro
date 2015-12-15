@@ -130,7 +130,9 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       sql += '\n JOIN client_schema.business_customer_types bct ON bct.business_id = b.id AND bct.customer_type_id=$'+params.length
     }
     if (config.spend_by_city) {
+      params.push(plan_id);
       sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
+      sql += '\n AND cities.id = (SELECT cities.id FROM cities JOIN custom.route r ON r.id = $'+params.length+' ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)';
     }
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
 
