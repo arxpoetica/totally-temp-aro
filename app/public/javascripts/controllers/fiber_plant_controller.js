@@ -129,7 +129,11 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     $scope.carriers.forEach(function(carrier) {
       var layer = layers[layer_name(carrier.name)];
       selected.indexOf(carrier.name) >= 0 ? layer.show() : layer.hide();
-    })
+    });
+
+    tracker.track('Competitor networks', {
+      competitors: selected,
+    });
   };
 
   $scope.overlay_changed = function() {
