@@ -1,0 +1,51 @@
+<div class="modal" id="manage-users" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Manage Users</h4>
+      </div>
+      <div class="modal-body">
+        <div>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>
+                  Name
+                  <a href="javascript:void(0)" ng-click="sort_by('first_name', true)">↓</a>
+                  <a href="javascript:void(0)" ng-click="sort_by('first_name', false)">↑</a>
+                </th>
+                <th>
+                  Email
+                  <a href="javascript:void(0)" ng-click="sort_by('email', true)">↓</a>
+                  <a href="javascript:void(0)" ng-click="sort_by('email', false)">↑</a>
+                </th>
+                <th>
+                  Rol
+                  <a href="javascript:void(0)" ng-click="sort_by('rol', true)">↓</a>
+                  <a href="javascript:void(0)" ng-click="sort_by('rol', false)">↑</a>
+                </th>
+                <th>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="user in users">
+                <td>{{user.first_name}} {{user.last_name}}</th>
+                <td>{{user.email}}</th>
+                <td>{{user.rol}}</th>
+                <td>
+                  <a class="btn btn-sm btn-danger" ng-click="delete_user(user)" ng-show="user.id !== user_id"><span class="glyphicon glyphicon-trash"></span></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn btn-default" ng-click="open_new_user()">Register a new user</a>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>

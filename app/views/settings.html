@@ -4,9 +4,9 @@
     <title>ARO</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/sweetalert.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
   </head>
   <body>
     <div id="home_screen" style="margin-top:0; padding-top: 100px">
@@ -20,23 +20,23 @@
               <% if (error && error.length > 0) { %>
                 <div class="alert alert-danger" role="alert"><%= error %></div>
               <% } %>
-              <% if (info && info.length > 0) { %>
-                <div class="alert alert-info" role="alert"><%= info %></div>
-              <% } %>
               <% if (success && success.length > 0) { %>
                 <div class="alert alert-success" role="alert"><%= success %></div>
               <% } %>
-              <form action="/login" method="post">
+              <form action="/settings/change_password" method="post">
                 <div class="form-group">
-                  <label>Email</label>
-                  <input name="email" class="form-control" placeholder="Email">
+                  <label>Current password</label>
+                  <input type="password" name="old_password" class="form-control" placeholder="Your current password">
                 </div>
                 <div class="form-group">
-                  <label>Password</label>
-                  <input type="password" name="password" class="form-control" placeholder="Password">
+                  <label>New password</label>
+                  <input type="password" name="password" class="form-control" placeholder="The new password">
                 </div>
-                <button type="submit" class="btn btn-default">Log In</button>
-                <p class="pull-right"><small><a href="/forgot_password">Forgot password?</a></small></p>
+                <div class="form-group">
+                  <label>Confirm new password</label>
+                  <input type="password" name="password_confirm" class="form-control" placeholder="Confirm the new password">
+                </div>
+                <button type="submit" class="btn btn-default">Change your password</button>
               </form>
             </div>
           </div>

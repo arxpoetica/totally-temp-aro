@@ -6,11 +6,15 @@ var argv = require('yargs')
   .describe('l', 'Last name')
   .describe('e', 'Email')
   .describe('p', 'Password')
+  .describe('r', 'Rol')
+  .describe('c', 'Company name')
   .alias('f', 'first_name')
   .alias('l', 'last_name')
   .alias('e', 'email')
   .alias('p', 'password')
-  .demand(['f', 'l', 'e', 'p'])
+  .alias('r', 'rol')
+  .alias('c', 'company_name')
+  .demand(['f', 'l', 'e'])
   .argv;
 
 var models = require('../models');

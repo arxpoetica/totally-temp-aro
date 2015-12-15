@@ -22,6 +22,13 @@
       <% include modal_customer_profile.html %>
     </div>
 
+    <% if (user.rol === 'admin') { %>
+      <div ng-controller="admin_users_controller">
+        <% include modal_manage_users.html %>
+        <% include modal_new_user.html %>
+      </div>
+    <% } %>
+
     <div ng-controller="navigation_menu_controller">
 
       <div id="home_screen" ng-show="!route">
@@ -42,6 +49,12 @@
               <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manage_network_plans()">Manage Analyses</a>
               <br>
             </div>
+            <% if (user.rol === 'admin') { %>
+              <div class="col-sm-8">
+                <a href="#manage-users" class="btn btn-primary btn-block" data-toggle="modal">Manage users</a>
+                <br>
+              </div>
+            <% } %>
           </div>
         </div>
       </div>
@@ -136,6 +149,10 @@
                   <%= user.email %> <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
+                  <li><a href="/settings/show">
+                    <span class="fa fa-cog"></span>
+                    Account settings
+                  </a></li>
                   <li><a href="/logout">
                     <span class="fa fa-power-off"></span>
                     Log out
@@ -658,6 +675,7 @@
   <script src="javascripts/controllers/selected_location_controller.js"></script>
   <script src="javascripts/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/controllers/selection_tools_controller.js"></script>
+  <script src="javascripts/controllers/admin_users_controller.js"></script>
   <script src="javascripts/controllers/search_controller.js"></script>
   <script src="javascripts/models/tracker.js"></script>
   <script src="javascripts/models/map_utils.js"></script>

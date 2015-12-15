@@ -55,6 +55,16 @@ function check_permission(rol) {
   };
 };
 
+function check_admin(request, response, next) {
+  var user = request.user;
+  if (user.rol !== 'admin') {
+    response.status(403).json({
+      error: 'Forbidden',
+    });
+  }
+  next();
+};
+
 function viewport(request, response, next) {
   var query = request.query;
 
@@ -112,6 +122,7 @@ var check_owner_permission = check_permission('owner');
 module.exports = {
   check_any_permission: check_any_permission,
   check_owner_permission: check_owner_permission,
+  check_admin: check_admin,
   jsonHandler: jsonHandler,
   viewport: viewport,
   cacheable: cacheable,
