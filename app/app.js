@@ -39,6 +39,7 @@ var routes = [
 	'network_plan',
 	'customer_profile',
 	'admin_users',
+	'settings',
 ];
 routes.forEach(function(route) {
 	require('./routes/routes_'+route).configure(api, middleware);

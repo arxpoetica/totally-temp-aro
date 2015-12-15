@@ -180,8 +180,28 @@ User.reset_password = function(code, password, callback) {
   .end(callback);
 }
 
-User.change_password = function(id, password, callback) {
-  // TODO
+User.change_password = function(id, old_password, password, callback) {
+  txain(function(callback) {
+    var sql = 'SELECT password FROM auth.users WHERE id=$1';
+    database.findOne(sql, [id], callback);
+  })
+  .then(function(user, callback) {
+    if (!user) {
+      return callback(errors.request('User not found'));
+    }
+    checkPassword(old_password, user.password, callback);
+  })
+  .then(function(res, callback) {
+    if (!res) {
+      return callback(errors.forbidden('Invalid old password'));
+    }
+    hashPassword(password, callback);
+  })
+  .then(function(hash, callback) {
+    var sql = 'UPDATE auth.users SET password=$1 WHERE id=$2';
+    database.findOne(sql, [hash, id], callback);
+  })
+  .end(callback);
 }
 
 module.exports = User;

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html ng-app="aro">
+  <head>
+    <title>ARO</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
+  </head>
+  <body>
+    <div id="home_screen" style="margin-top:0; padding-top: 100px">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-12">
+            <img id="aro_logo" src="/images/logos/aro_logo_2.png" />
+          </div>
+          <div class="col-sm-6">
+            <div class="well">
+              <% if (error && error.length > 0) { %>
+                <div class="alert alert-danger" role="alert"><%= error %></div>
+              <% } %>
+              <% if (success && success.length > 0) { %>
+                <div class="alert alert-success" role="alert"><%= success %></div>
+              <% } %>
+              <form action="/settings/change_password" method="post">
+                <div class="form-group">
+                  <label>Current password</label>
+                  <input type="password" name="old_password" class="form-control" placeholder="Your current password">
+                </div>
+                <div class="form-group">
+                  <label>New password</label>
+                  <input type="password" name="password" class="form-control" placeholder="The new password">
+                </div>
+                <div class="form-group">
+                  <label>Confirm new password</label>
+                  <input type="password" name="password_confirm" class="form-control" placeholder="Confirm the new password">
+                </div>
+                <button type="submit" class="btn btn-default">Change your password</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
