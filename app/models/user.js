@@ -27,7 +27,7 @@ function checkPassword(plain, hash, callback) {
 }
 
 User.login = function(email, password, callback) {
-  var sql = 'SELECT id, first_name, last_name, email, password FROM auth.users WHERE email=$1';
+  var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1';
   var user;
 
   txain(function(callback) {
@@ -55,17 +55,27 @@ User.find_by_email = function(email, callback) {
   database.findOne(sql, [email.toLowerCase()], callback);
 };
 
+User.find = function(callback) {
+  var sql = 'SELECT * FROM auth.users';
+  database.query(sql, callback);
+};
+
+User.delete_user = function(user_id, callback) {
+  var sql = 'DELETE FROM auth.users WHERE id=$1';
+  database.execute(sql, [user_id], callback);
+};
+
 User.register = function(user, callback) {
-  var user;
+  var code = randomCode();
 
   validate(function(expect) {
     expect(user, 'user', 'object');
     expect(user, 'user.first_name', 'string');
     expect(user, 'user.last_name', 'string');
     expect(user, 'user.email', 'string');
-    expect(user, 'user.password', 'string');
   }, function() {
     txain(function(callback) {
+      if (!user.password) return callback();
       hashPassword(user.password, callback);
     })
     .then(function(hash, callback) {
@@ -73,12 +83,17 @@ User.register = function(user, callback) {
         user.first_name,
         user.last_name,
         user.email.toLowerCase(),
-        hash,
         user.company_name || null,
         user.rol || null,
+        hash || code,
       ];
-      var sql = 'INSERT INTO auth.users (first_name, last_name, email, password, company_name, rol) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id';
-      database.findOne(sql, params, callback);
+      if (hash) {
+        var sql = 'INSERT INTO auth.users (first_name, last_name, email, company_name, rol, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id';
+        database.findOne(sql, params, callback);
+      } else {
+        var sql = 'INSERT INTO auth.users (first_name, last_name, email, company_name, rol, reset_code, reset_code_expiration) VALUES ($1, $2, $3, $4, $5, $6, (NOW() + interval \'1 day\')) RETURNING id';
+        database.findOne(sql, params, callback);
+      }
     })
     .then(function(row, callback) {
       var sql = 'SELECT id, first_name, last_name, email FROM auth.users WHERE id=$1';
@@ -87,13 +102,26 @@ User.register = function(user, callback) {
     .end(function(err, usr) {
       if (err && err.message.indexOf('duplicate key') >= 0) return callback(errors.request('There\'s already a user with that email address (%s)', user.email));
       if (err) return callback(err);
+      if (!user.password) {
+        var email = user.email;
+        var base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
+        var url = base_url+'/reset_password?'+querystring.stringify({ code: code })
+        var text = 'Follow the link below to set your password\n'+url;
+
+        helpers.mail.sendMail({
+          subject: 'Set password',
+          to: email,
+          text: text,
+        });
+        console.log('Reset link:', url);
+      }
       return callback(null, usr);
     });
   }, callback);
 };
 
 User.find_by_id = function(id, callback) {
-  var sql = 'SELECT id, first_name, last_name, email FROM auth.users WHERE id=$1';
+  var sql = 'SELECT id, first_name, last_name, email, rol, company_name FROM auth.users WHERE id=$1';
   database.findOne(sql, [id], callback);
 };
 
@@ -103,8 +131,12 @@ User.find_by_text = function(text, callback) {
   database.query(sql, [text], callback);
 }
 
+function randomCode() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
 User.forgot_password = function(email, callback) {
-  var code = crypto.randomBytes(32).toString('hex');
+  var code = randomCode();
 
   txain(function(callback) {
     var sql = 'SELECT id FROM auth.users WHERE email=$1';
@@ -125,7 +157,7 @@ User.forgot_password = function(email, callback) {
       to: email,
       text: text,
     })
-    callback()
+    callback();
   })
   .end(callback);
 }

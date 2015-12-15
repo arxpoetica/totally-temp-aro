@@ -8,7 +8,7 @@ CREATE TABLE auth.users
   first_name varchar NOT NULL,
   last_name varchar NOT NULL,
   email varchar NOT NULL,
-  password varchar NOT NULL,
+  password varchar,
   company_name varchar,
   rol varchar,
   reset_code varchar,

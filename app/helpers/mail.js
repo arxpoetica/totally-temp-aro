@@ -11,7 +11,7 @@ exports.sendMail = function(options) {
     if (error) {
       return console.log(error);
     }
-    console.log('Message sent: ' + info.response);
+    // console.log('Message sent: ' + info.response);
   });
 }
 
