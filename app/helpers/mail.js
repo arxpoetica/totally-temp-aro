@@ -1,9 +1,10 @@
-var nodemailer = require('nodemailer')
-var ses = require('nodemailer-ses-transport')
+var nodemailer = require('nodemailer');
+var ses = require('nodemailer-ses-transport');
+var AWS = require('aws-sdk');
 
 var transporter = process.env.NODE_ENV === 'production'
-  ? nodemailer.createTransport(ses({ accessKeyId: 'AWSACCESSKEY', secretAccessKey: 'AWS/Secret/key' }))
-  : nodemailer.createTransport() // direct
+  ? nodemailer.createTransport(ses({ ses: new AWS.SES() }))
+  : nodemailer.createTransport(); // direct
 
 exports.sendMail = function(options) {
   options.from = 'ARO <aro@altvil.com>';

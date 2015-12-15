@@ -13,6 +13,7 @@
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
   "dependencies": {
+    "aws-sdk": "^2.2.22",
     "bcryptjs": "^2.2.1",
     "body-parser": "^1.13.2",
     "chai": "~3.0.0",
