@@ -1,5 +1,6 @@
 // Market Size Controller
-app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http', 'selection', 'map_tools', function($q, $scope, $rootScope, $http) {
+app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http', 'selection', 'map_tools', 'tracker', function($q, $scope, $rootScope, $http, selection, map_tools, tracker) {
+
   // Controller instance variables
   $scope.filters = null;
   $scope.loading = false;
@@ -79,6 +80,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       product: arr($scope.product),
       customer_type: $scope.customer_type && $scope.customer_type.id,
     };
+    tracker.track('Market profile calculation', params);
     if (canceller) canceller.resolve();
     canceller = $q.defer();
     var args = {
@@ -110,6 +112,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   $('#market-size .nav-tabs a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
+    tracker.track('Market profile / '+$(this).text());
   });
 
   $('#market-size .nav-tabs').on('shown.bs.tab', function (e) {
@@ -123,6 +126,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   $scope.export = function() {
     $('#market-size').modal('hide');
+    tracker.track('Market profile export');
     swal({
       title: "File name",
       type: "input",

@@ -1,4 +1,4 @@
-app.service('map_tools', ['$rootScope', function($rootScope) {
+app.service('map_tools', ['$rootScope', 'tracker', function($rootScope, tracker) {
 
   var tools = {};
   var visible = [];
@@ -18,6 +18,7 @@ app.service('map_tools', ['$rootScope', function($rootScope) {
     // --
     visible.push(name);
     $rootScope.$broadcast('map_tool_changed_visibility', name);
+    tracker.track('Show Layer', { layer: name });
   }
 
   tools.hide = function(name) {
