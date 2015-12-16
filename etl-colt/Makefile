@@ -164,4 +164,4 @@ register_user:
 
 # Admin user
 register_admin:
-	ARO_CLIENT=colt node ../app/cli/register_user -f ARO -l Platform -e aro@altvil.com
+	ARO_CLIENT=colt node ../app/cli/register_user -f ARO -l Platform -e aro@altvil.com -r admin
