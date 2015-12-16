@@ -161,3 +161,7 @@ webserver:
 # Make a dummy user for local development
 register_user:
 	ARO_CLIENT=colt node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password
+
+# Admin user
+register_admin:
+	ARO_CLIENT=colt node ../app/cli/register_user -f ARO -l Platform -e aro@altvil.com
