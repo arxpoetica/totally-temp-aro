@@ -38,6 +38,7 @@ User.login = function(email, password, callback) {
     if (!user) {
       return callback(errors.request('No user found with that email (%s)', email));
     }
+    if (!user.password) return callback(null, false);
     checkPassword(password, user.password, callback);
   })
   .then(function(res, callback) {
