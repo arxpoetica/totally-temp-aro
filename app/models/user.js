@@ -2,6 +2,7 @@
 
 var helpers = require('../helpers');
 var database = helpers.database;
+var config = helpers.config;
 var txain = require('txain');
 var multiline = require('multiline');
 var errors = require('node-errors');
@@ -149,11 +150,13 @@ User.forgot_password = function(email, callback) {
   })
   .then(function(callback) {
     var base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
-    var text = 'Follow the link below to reset your password\n';
+    var text = 'You\'re receiving this email because a password reset was requested for your user account in the '+config.client_carrier_name+' ARO platform\n\n';
+    text += 'Follow the link below to reset your password\n';
     text += base_url+'/reset_password?'+querystring.stringify({ code: code });
+    text += '\n\nPlease do not reply to this email. It was automatically generated.'
 
     helpers.mail.sendMail({
-      subject: 'Reset password',
+      subject: 'Password reset: ARO Application',
       to: email,
       text: text,
     })
