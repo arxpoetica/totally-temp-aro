@@ -58,11 +58,11 @@ INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, g
 	  	) as dumped
 	) AS simple;
 
--- Load Interroute Frankfurt
+-- Load Interoute Frankfurt
 INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
 	SELECT
-		'Interroute'::text,
-		(select carriers.id from aro.carriers carriers where carriers.name = 'Interroute' limit 1)::int,
+		'Interoute'::text,
+		(select carriers.id from aro.carriers carriers where carriers.name = 'Interoute' limit 1)::int,
 		'Frankfurt'::text,
 		'fiber_route_segment'::text,
   		Geography(ST_Force_2d(simple.simple_geom)) AS geog,
@@ -76,11 +76,11 @@ INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, g
 	  	) as dumped
 	) AS simple;
 
--- Load Interroute Paris
+-- Load Interoute Paris
 INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
 	SELECT
-		'Interroute'::text,
-		(select carriers.id from aro.carriers carriers where carriers.name = 'Interroute' limit 1)::int,
+		'Interoute'::text,
+		(select carriers.id from aro.carriers carriers where carriers.name = 'Interoute' limit 1)::int,
 		'Paris'::text,
 		'fiber_route_segment'::text,
   		Geography(ST_Force_2d(simple.simple_geom)) AS geog,
@@ -112,7 +112,7 @@ INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, g
 	  	) as dumped
 	) AS simple;
 
--- Load Interroute Paris
+-- Load Interoute Paris
 INSERT INTO aro.fiber_plant (carrier_name, carrier_id, cbsa, plant_type, geog, geom, buffer_geom)
 	SELECT
 		'Level 3'::text,

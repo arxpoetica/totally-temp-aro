@@ -10,7 +10,7 @@ CREATE TABLE aro.carriers
 );
 
 INSERT INTO aro.carriers (name, route_type, color) values('Colt', 'fiber', '#00a499');
-INSERT INTO aro.carriers (name, route_type, color) values('Interroute', 'fiber', '#89dbf4');
+INSERT INTO aro.carriers (name, route_type, color) values('Interoute', 'fiber', '#89dbf4');
 INSERT INTO aro.carriers (name, route_type, color) values('Level 3', 'fiber', '#e58575');
 INSERT INTO aro.carriers (name, route_type, color) values('Zayo', 'fiber', '#e899d0');
 INSERT INTO aro.carriers (name, route_type, color) values('EUNetworks', 'fiber', '#399310');
