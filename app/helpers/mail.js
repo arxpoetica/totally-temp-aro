@@ -1,18 +1,21 @@
 var nodemailer = require('nodemailer');
 var ses = require('nodemailer-ses-transport');
 var AWS = require('aws-sdk');
+var helpers = require('../');
+var config = helpers.config;
 
 var transporter = process.env.NODE_ENV === 'production'
   ? nodemailer.createTransport(ses({ ses: new AWS.SES() }))
   : nodemailer.createTransport(); // direct
 
+var aro_client = process.env.ARO_CLIENT || '';
 exports.sendMail = function(options) {
-  options.from = 'ARO <aro@altvil.com>';
+  options.from = 'ARO <no-reply@'+aro_client+'.aro.app.altvil.com>';
   transporter.sendMail(options, function(error, info) {
     if (error) {
       return console.log(error);
     }
-    // console.log('Message sent: ' + info.response);
+    console.log('Message sent:', info.response);
   });
 }
 
