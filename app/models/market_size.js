@@ -658,9 +658,7 @@ MarketSize.fair_share_heatmap = function(viewport, callback) {
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
-    rows = rows.filter(function(row) {
-      return row.carrier_total > 0;
-    })
+    rows = rows.filter(row => row.carrier_total > 0);
 
     var features = rows.map(function(row) {
       return {

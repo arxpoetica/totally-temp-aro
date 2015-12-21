@@ -1,5 +1,5 @@
 // Fiber Plant Controller
-app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', function($scope, $rootScope, $http, map_tools, MapLayer) {
+app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', 'tracker', function($scope, $rootScope, $http, map_tools, MapLayer, tracker) {
 
   $scope.map_tools = map_tools;
   $scope.carriers = [];

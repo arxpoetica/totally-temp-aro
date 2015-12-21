@@ -14,11 +14,13 @@
   "license": "BSD-2-Clause",
   "babel": {
     "plugins": [
-      "transform-es2015-template-literals"
+      "transform-es2015-template-literals",
+      "transform-es2015-arrow-functions"
     ]
   },
   "dependencies": {
     "aws-sdk": "^2.2.22",
+    "babel-plugin-transform-es2015-arrow-functions": "^6.3.13",
     "babel-plugin-transform-es2015-template-literals": "^6.3.13",
     "babel-register": "^6.3.13",
     "bcryptjs": "^2.2.1",
