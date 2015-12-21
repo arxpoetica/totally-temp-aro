@@ -4,7 +4,6 @@ var helpers = require('../helpers');
 var database = helpers.database;
 var config = helpers.config;
 var txain = require('txain');
-var multiline = require('multiline');
 var errors = require('node-errors');
 var bcrypt = require('bcryptjs');
 var crypto = require('crypto');

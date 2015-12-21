@@ -6,7 +6,6 @@ var helpers = require('../helpers');
 var config = helpers.config;
 var database = helpers.database;
 var validate = helpers.validate;
-var multiline = require('multiline');
 var txain = require('txain');
 var Location = require('./location');
 var fs = require('fs');
@@ -18,31 +17,31 @@ var _ = require('underscore');
 var NetworkPlan = {};
 
 NetworkPlan.find_edges = function(plan_id, callback) {
-  var sql = multiline(function() {;/*
+  var sql = `
     SELECT edge.id, edge.edge_length, ST_AsGeoJSON(edge.geom)::json AS geom
     FROM custom.route_edges
     JOIN client_schema.graph edge
       ON edge.id = route_edges.edge_id
     WHERE route_edges.route_id=$1
-  */});
+  `
   database.query(sql, [plan_id], callback);
 };
 
 NetworkPlan.find_source_ids = function(plan_id, callback) {
-  var sql = multiline(function() {;/*
+  var sql = `
     SELECT network_node_id::integer AS id
     FROM custom.route_sources
     WHERE route_id=$1
-  */});
+  `
   database.findValues(sql, [plan_id], 'id', callback);
 };
 
 NetworkPlan.find_target_ids = function(plan_id, callback) {
-  var sql = multiline(function() {;/*
+  var sql = `
     SELECT location_id::integer AS id
     FROM custom.route_targets
     WHERE route_id=$1
-  */});
+  `
   database.findValues(sql, [plan_id], 'id', callback);
 };
 
@@ -161,18 +160,18 @@ NetworkPlan.recalculate_route = function(plan_id, callback) {
     database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
-    var sql = multiline(function() {;/*
+    var sql = `
       (SELECT id, 1 FROM custom.route_sources WHERE route_id=$1 limit 1)
       UNION
       (SELECT id, 2 FROM custom.route_targets WHERE route_id=$1 limit 1)
-    */});
+    `
     database.query(sql, [plan_id], callback);
   })
   .then(function(rows, callback) {
     // the route needs at least one source and at least one target
     if (rows.length < 2) return callback();
 
-    var sql = multiline(function() {;/*
+    var sql = `
       WITH edges AS (
         SELECT DISTINCT edge_id FROM
           (SELECT id as edge_id
@@ -185,7 +184,7 @@ NetworkPlan.recalculate_route = function(plan_id, callback) {
                 ON edge.id = dk.id3) as edge_id
       )
       INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
-    */});
+    `
     database.execute(sql, [plan_id], callback);
   })
   .end(callback);
@@ -206,7 +205,7 @@ NetworkPlan.find_all = function(user, text, callback) {
     callback = user;
     user = null;
   }
-  var sql = multiline(function() {;/*
+  var sql = `
     SELECT
       $1::text AS carrier_name,
       route.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
@@ -216,7 +215,7 @@ NetworkPlan.find_all = function(user, text, callback) {
       custom.route
     LEFT JOIN auth.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
     LEFT JOIN auth.users ON users.id = permissions.user_id
-  */});
+  `
   var params = [config.client_carrier_name];
   if (user) {
     sql += ' WHERE route.id IN (SELECT route_id FROM auth.permissions WHERE user_id=$2)';
@@ -253,10 +252,10 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
     expect(area, 'area.bounds.southwest.lng', 'number');
   }, function() {
     txain(function(callback) {
-      var sql = multiline(function(){;/*
+      var sql = `
         INSERT INTO custom.route (name, area_name, area_centroid, area_bounds, created_at, updated_at)
         VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_Envelope(ST_GeomFromText($4, 4326)), NOW(), NOW()) RETURNING id;
-      */});
+      `
       var params = [
         name,
         area.name,
@@ -271,7 +270,7 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
       Permission.grant_access(id, user.id, 'owner', callback);
     })
     .then(function(callback) {
-      var sql = multiline(function() {;/*
+      var sql = `
         SELECT
           $2::text AS carrier_name,
           route.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
@@ -282,7 +281,7 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
         LEFT JOIN auth.permissions ON permissions.route_id = route.id AND permissions.rol = 'owner'
         LEFT JOIN auth.users ON users.id = permissions.user_id
         WHERE route.id=$1
-      */});
+      `
       database.findOne(sql, [id, config.client_carrier_name], callback);
     })
     .end(callback);
@@ -290,35 +289,25 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
 };
 
 NetworkPlan.delete_plan = function(plan_id, callback) {
-  var sql = multiline(function() {;/*
-    DELETE FROM custom.route WHERE id=$1;
-  */});
+  var sql = 'DELETE FROM custom.route WHERE id=$1;';
   database.execute(sql, [plan_id], callback);
 };
 
 NetworkPlan.clear_route = function(plan_id, callback) {
   txain(function(callback) {
-    var sql = multiline(function() {;/*
-      DELETE FROM custom.route_targets WHERE route_id=$1;
-    */});
+    var sql = 'DELETE FROM custom.route_targets WHERE route_id=$1;';
     database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
-    var sql = multiline(function() {;/*
-      DELETE FROM custom.route_sources WHERE route_id=$1;
-    */});
+    var sql = 'DELETE FROM custom.route_sources WHERE route_id=$1;';
     database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
-    var sql = multiline(function() {;/*
-      DELETE FROM custom.route_edges WHERE route_id=$1;
-    */});
+    var sql = 'DELETE FROM custom.route_edges WHERE route_id=$1;';
     database.execute(sql, [plan_id], callback);
   })
   .then(function(callback) {
-    var sql = multiline(function() {;/*
-      DELETE FROM client_schema.network_nodes WHERE route_id=$1;
-    */});
+    var sql = 'DELETE FROM client_schema.network_nodes WHERE route_id=$1;';
     database.execute(sql, [plan_id], callback);
   })
   .end(callback);
@@ -335,7 +324,7 @@ NetworkPlan.save_plan = function(plan_id, data, callback) {
   if (fields.length === 0) return callback();
 
   params.push(plan_id);
-  var sql = 'UPDATE custom.route SET '+fields.join(', ')+', updated_at=NOW() WHERE id=$'+params.length;
+  var sql = `UPDATE custom.route SET ${fields.join(', ')}, updated_at=NOW() WHERE id=$${params.length}`;
   database.execute(sql, params, callback);
 };
 
@@ -370,8 +359,7 @@ NetworkPlan.export_kml = function(plan_id, callback) {
     database.findOne(sql, [plan_id], callback)
   })
   .then(function(route, callback) {
-    kml_output += '<name>'+escape(route.name)+'</name>'
-    kml_output += multiline(function() {;/*
+    kml_output += `<name>${escape(route.name)}</name>
       <Style id="routeColor">
        <LineStyle>
          <color>ff0000ff</color>
@@ -396,54 +384,48 @@ NetworkPlan.export_kml = function(plan_id, callback) {
          </Icon>
        </IconStyle>
       </Style>
-    */});
+    `
 
-    var sql = multiline(function() {;/*
+    var sql = `
       SELECT ST_AsKML(edge.geom) AS geom
       FROM custom.route_edges
       JOIN client_schema.graph edge
       ON edge.id = route_edges.edge_id
       WHERE route_edges.route_id = $1
-    */});
+    `
     database.query(sql, [plan_id], callback)
   })
   .then(function(edges, callback) {
     edges.forEach(function(edge) {
-      kml_output += '<Placemark><styleUrl>#routeColor</styleUrl>';
-      kml_output += edge.geom;
-      kml_output += '</Placemark>\n';
+      kml_output += `<Placemark><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`;
     });
 
-    var sql = multiline(function() {;/*
+    var sql = `
       SELECT ST_AsKML(locations.geom) AS geom
       FROM custom.route_targets
       JOIN locations
       ON route_targets.location_id = locations.id
       WHERE route_targets.route_id=$1
-    */});
+    `
     database.query(sql, [plan_id], callback)
   })
   .then(function(targets, callback) {
     targets.forEach(function(target) {
-      kml_output += '<Placemark><styleUrl>#targetColor</styleUrl>';
-      kml_output += target.geom;
-      kml_output += '</Placemark>\n';
+      kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`;
     });
 
-    var sql = multiline(function() {;/*
+    var sql = `
       SELECT ST_AsKML(network_nodes.geom) AS geom
       FROM custom.route_sources
       JOIN client_schema.network_nodes
       ON route_sources.network_node_id = network_nodes.id
       WHERE route_sources.route_id=$1
-    */});
+    `
     database.query(sql, [plan_id], callback)
   })
   .then(function(sources, callback) {
     sources.forEach(function(source) {
-      kml_output += '<Placemark><styleUrl>#sourceColor</styleUrl>';
-      kml_output += source.geom;
-      kml_output += '</Placemark>\n';
+      kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${source.geom}</Placemark>\n`;
     });
 
     kml_output += '</Document></kml>';
@@ -457,15 +439,15 @@ function add_sources(plan_id, network_node_ids, callback) {
 
   txain(function(callback) {
     // avoid duplicates
-    var sql = multiline(function() {;/*
+    var sql = `
       DELETE FROM custom.route_sources
       WHERE route_id=$1 AND network_node_id IN ($2)
-    */});
+    `
     database.execute(sql, [plan_id, network_node_ids], callback);
   })
   .then(function(callback) {
     // calculate closest vertex
-    var sql = multiline(function() {;/*
+    var sql = `
       INSERT INTO custom.route_sources (vertex_id, network_node_id, route_id)
       (SELECT
         vertex.id AS vertex_id, network_nodes.id, $2
@@ -475,7 +457,7 @@ function add_sources(plan_id, network_node_ids, callback) {
         ON network_nodes.geom && vertex.the_geom
       WHERE
         network_nodes.id IN ($1))
-    */});
+    `
     database.execute(sql, [network_node_ids, plan_id], callback);
   })
   .end(callback);
@@ -486,15 +468,15 @@ function add_targets(plan_id, location_ids, callback) {
 
   txain(function(callback) {
     // avoid duplicates
-    var sql = multiline(function() {;/*
+    var sql = `
       DELETE FROM custom.route_targets
       WHERE route_id=$1 AND location_id IN ($2)
-    */});
+    `
     database.execute(sql, [plan_id, location_ids], callback);
   })
   .then(function(callback) {
     // calculate closest vertex
-    var sql = multiline(function() {;/*
+    var sql = `
       INSERT INTO custom.route_targets (vertex_id, location_id, route_id)
       (SELECT
         vertex.id AS vertex_id, locations.id, $2 AS route_id
@@ -504,7 +486,7 @@ function add_targets(plan_id, location_ids, callback) {
         ON locations.geom && vertex.the_geom
       WHERE
        st_contains(locations.geom, vertex.the_geom) and locations.id IN ($1))
-    */});
+    `
     database.execute(sql, [location_ids, plan_id], callback);
   })
   .end(callback);
@@ -515,10 +497,10 @@ function delete_sources(plan_id, network_node_ids, callback) {
 
   txain(network_node_ids)
   .each(function(network_node_id, callback) {
-    var sql = multiline(function() {;/*
+    var sql = `
       DELETE FROM custom.route_sources
       WHERE route_id=$1 AND network_node_id=$2
-    */});
+    `
     database.execute(sql, [plan_id, network_node_id], callback);
   })
   .then(function() {
@@ -532,10 +514,10 @@ function delete_targets(plan_id, location_ids, callback) {
 
   txain(location_ids)
   .each(function(location_id, callback) {
-    var sql = multiline(function() {;/*
+    var sql = `
       DELETE FROM custom.route_targets
       WHERE route_id=$1 AND location_id=$2
-    */});
+    `
     database.execute(sql, [plan_id, location_id], callback);
   })
   .end(callback);
@@ -545,13 +527,13 @@ NetworkPlan.calculate_area_data = function(plan_id, callback) {
   var data = {};
 
   txain(function(callback) {
-    var sql = multiline(function() {;/*
+    var sql = `
       SELECT statefp, countyfp, MIN(ST_distance(geom, (SELECT area_centroid FROM custom.route WHERE id=$1) )) AS distance
       FROM aro.cousub
       GROUP BY statefp, countyfp
       ORDER BY distance
       LIMIT 1
-    */});
+    `
     database.findOne(sql, [plan_id], callback);
   })
   .then(function(row, callback) {

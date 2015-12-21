@@ -4,7 +4,6 @@
 var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
-var multiline = require('multiline');
 var _ = require('underscore');
 var request = require('request');
 var config = helpers.config;
@@ -20,13 +19,13 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback
       database.query(sql, [carrier_name, viewport.linestring], callback);
     } else {
       var sql = 'WITH '+viewport.fishnet;
-      sql += multiline(function() {;/*
+      sql += `
         SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
         FROM fishnet
         JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
         AND fiber_plant.carrier_name = $1
         GROUP BY fishnet.geom
-      */});
+      `
       database.query(sql, [carrier_name], callback);
     }
   })
@@ -88,13 +87,13 @@ Network.view_fiber_plant_for_competitors = function(viewport, callback) {
 Network.view_fiber_plant_density = function(viewport, callback) {
   txain(function(callback) {
     var sql = 'WITH '+viewport.fishnet;
-    sql += multiline(function() {;/*
+    sql += `
       SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(DISTINCT fiber_plant.carrier_name) AS density, NULL AS id
       FROM fishnet
       JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
       AND fiber_plant.carrier_name <> $1
       GROUP BY fishnet.geom
-    */});
+    `
     database.query(sql, [config.client_carrier_name], callback);
   })
   .then(function(rows, callback) {
@@ -128,13 +127,13 @@ Network.carriers = function(plan_id, callback) {
 // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
 // 2. route_id Number Pass a route_id to find additionally the network nodes associated to that route
 Network.view_network_nodes = function(node_types, plan_id, callback) {
-  var sql = multiline(function() {;/*
+  var sql = `
     SELECT
       n.id, ST_AsGeoJSON(geog)::json AS geom, t.name AS name, n.route_id
     FROM client_schema.network_nodes n
     JOIN client_schema.network_node_types t
       ON n.node_type_id = t.id
-  */});
+  `
 
   var params = [];
   var constraints = [];

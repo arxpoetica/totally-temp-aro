@@ -5,7 +5,6 @@
 var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
-var multiline = require('multiline');
 var _ = require('underscore')
 var config = helpers.config;
 var MarketSize = require('./market_size');
@@ -18,7 +17,7 @@ var Location = {};
 Location.find_all = function(plan_id, type, filters, viewport, callback) {
 	txain(function(callback) {
 		var params = [];
-		var sql = multiline.stripIndent(function() {;/*
+		var sql = `
 			SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom,
 			-- existing customer
 			(SELECT COUNT(*)::integer FROM businesses b
@@ -35,7 +34,7 @@ Location.find_all = function(plan_id, type, filters, viewport, callback) {
 					ON ct.id = bct.customer_type_id AND NOT ct.is_existing_customer
 			 WHERE b.location_id = locations.id) AS customer_type_prospect
 			FROM aro.locations
-		*/});
+		`
 		if (type === 'businesses') {
 			sql += '\n JOIN businesses b ON b.location_id = locations.id';
 			sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.industries i ON m.industry_id = i.id';
@@ -94,15 +93,15 @@ Location.density = function(plan_id, viewport, callback) {
 	txain(function(callback) {
 		var params = [];
 		var sql = 'WITH '+viewport.fishnet;
-		sql += multiline(function() {;/*
+		sql += `
 			SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
 			FROM fishnet
 			JOIN locations ON fishnet.geom && locations.geom
 			GROUP BY fishnet.geom
-		*/});
+		`
 		if (config.route_planning) {
 			params.push(plan_id);
-			sql += multiline(function() {;/*
+			sql += `
 				UNION ALL
 
 				-- Always return selected locations
@@ -111,7 +110,7 @@ Location.density = function(plan_id, viewport, callback) {
 					JOIN custom.route_targets
 					ON route_targets.route_id=$1
 					AND route_targets.location_id=locations.id
-			*/});
+			`
 		}
 		database.query(sql, params, callback);
 	})
@@ -145,7 +144,7 @@ Location.density = function(plan_id, viewport, callback) {
 Location.show_information = function(location_id, callback) {
 	var info;
 	txain(function(callback) {
-		var sql = multiline(function() {;/*
+		var sql = `
 			select
 				location_id,
 				sum(entry_fee)::integer as entry_fee,
@@ -202,12 +201,12 @@ Location.show_information = function(location_id, callback) {
 					location_id
 
 			) t group by location_id;
-		*/});
+		`
 		database.findOne(sql, [location_id], {}, callback);
 	})
 	.then(function(_info, callback) {
 		info = _info;
-		var sql = multiline(function() {;/*
+		var sql = `
 			SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
 				(SELECT
 					bct.customer_type_id as id, COUNT(*)::integer AS businesses, 0 as households
@@ -244,7 +243,7 @@ Location.show_information = function(location_id, callback) {
 				ct.name
 			ORDER BY
 				ct.name
-		*/});
+		`
 		database.query(sql, [location_id], callback);
 	})
 	.then(function(customer_types, callback) {
@@ -291,12 +290,12 @@ Location.create_location = function(values, callback) {
 			'POINT('+values.lon+' '+values.lat+')',
 			'POINT('+values.lon+' '+values.lat+')',
 		]
-		var sql = multiline(function() {;/*
+		var sql = `
 			INSERT INTO aro.locations
 				(address, lat, lon, city, state, zipcode, geog, geom)
 			VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7), ST_GeomFromText($8, 4326))
 			RETURNING id
-		*/});
+		`
 		database.findOne(sql, params, callback);
 	})
 	.then(function(row, callback) {
@@ -409,29 +408,29 @@ Location.update_households = function(location_id, values, callback) {
 		location_id,
 	];
 	txain(function(callback) {
-		var sql = multiline(function() {;/*
+		var sql = `
 			UPDATE aro.households
 			SET
 				number_of_households = $1
 			WHERE
 				location_id = $2;
-		*/});
+		`
 		database.execute(sql, params, callback);
 	})
 	.then(function(rowCount, callback) {
 		if (rowCount > 0) return callback(null, 1);
-		var sql = multiline(function() {;/*
+		var sql = `
 			INSERT INTO aro.households
 				(number_of_households, location_id)
 			VALUES ($1, $2)
-		*/});
+		`
 		database.execute(sql, params, callback);
 	})
 	.end(callback);
 }
 
 Location.show_businesses = function(location_id, callback) {
-	var sql = multiline(function() {;/*
+	var sql = `
 		SELECT
 			businesses.id,
 			businesses.industry_id,
@@ -454,7 +453,7 @@ Location.show_businesses = function(location_id, callback) {
 			ON ct.id = bct.customer_type_id
 		WHERE
 			location_id = $1
-	*/});
+	`
 	database.query(sql, [location_id], callback);
 };
 
@@ -544,14 +543,14 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 
 Location.search = function(text, callback) {
 	text = '%'+text.toLowerCase()+'%'
-	var sql = multiline(function() {;/*
+	var sql = `
 		SELECT
 			id, name, ST_AsGeoJSON(geog)::json AS geog
 		FROM
 			businesses
 		WHERE lower(name) LIKE $1
 		LIMIT 100
-	*/});
+	`
 	database.query(sql, [text], callback);
 }
 
