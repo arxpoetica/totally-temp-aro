@@ -38,6 +38,10 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     });
   }
 
+  $rootScope.$on('open_location', function(event, id) {
+    open_location(id);
+  });
+
   function open_location(id) {
     $http.get('/locations/'+id+'/show').success(function(response) {
       response.id = id;
