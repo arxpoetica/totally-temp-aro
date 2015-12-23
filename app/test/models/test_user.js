@@ -3,20 +3,7 @@ var models = require('../../models');
 var test_utils = require('./test_utils');
 var request = test_utils.agent;
 
-describe('User', function() {
-
-  var email = 'user_'
-    + require('crypto').randomBytes(16).toString('hex')
-    + '@Example.com';
-
-  var user = {
-    first_name: 'Alberto',
-    last_name: 'Gimeno',
-    email: email,
-    password: 'foobar1234',
-  };
-
-  var id;
+describe.only('User', function() {
 
   before(function() {
     test_utils.logout_app();
@@ -28,7 +15,21 @@ describe('User', function() {
 
   describe('#register() and #login()', function() {
 
+    var email = 'user_'
+      + require('crypto').randomBytes(16).toString('hex')
+      + '@Example.com';
+
+    var user = {
+      first_name: 'Alberto',
+      last_name: 'Gimeno',
+      email: email,
+      password: 'foobar1234',
+    };
+
+    var id;
+
     it('should register a user', function(done) {
+      models.User.latest_code = null;
       models.User.register(user, function(err, usr) {
         expect(err).to.not.be.ok;
         expect(usr).to.be.an('object');
@@ -37,6 +38,7 @@ describe('User', function() {
         expect(usr.last_name).to.be.equal(user.last_name);
         expect(usr.email).to.be.equal(user.email.toLowerCase());
         expect(usr.password).to.not.be.ok;
+        expect(models.User.latest_code).to.not.be.ok;
         id = usr.id;
         done();
       });
@@ -168,7 +170,7 @@ describe('User', function() {
           if (err) return done(err);
           expect(res.statusCode).to.be.equal(302);
           expect(res.headers.location).to.be.equal('/login');
-          
+
           request
             .get('/')
             .end(function(err, res) {
@@ -190,5 +192,122 @@ describe('User', function() {
     });
 
   });
+
+  describe('password resets', function() {
+
+    var email = 'user_'
+      + require('crypto').randomBytes(16).toString('hex')
+      + '@Example.com';
+
+    var user = {
+      first_name: 'Alberto',
+      last_name: 'Gimeno',
+      email: email,
+    };
+
+    var id;
+
+    it('should register a user with no password', function(done) {
+      delete user.password;
+
+      models.User.register(user, function(err, usr) {
+        expect(err).to.not.be.ok;
+        expect(usr).to.be.an('object');
+        expect(usr.id).to.be.a('number');
+        expect(usr.first_name).to.be.equal(user.first_name);
+        expect(usr.last_name).to.be.equal(user.last_name);
+        expect(usr.email).to.be.equal(user.email.toLowerCase());
+        expect(usr.password).to.not.be.ok;
+        expect(models.User.latest_code).to.be.ok;
+        id = usr.id;
+        done();
+      });
+
+    });
+
+    it('should fail to log a user with no password', function(done) {
+      request
+        .post('/login')
+        .type('form')
+        .send({ email: user.email, password: 'asdfa' })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/login');
+
+          request
+            .get('/login')
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('Invalid password');
+              done();
+            });
+        });
+    });
+
+    it('should request a password reset', function(done) {
+      models.User.latest_code = null;
+      request
+        .post('/forgot_password')
+        .type('form')
+        .send({ email: user.email })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/login');
+          expect(models.User.latest_code).to.be.ok;
+          done();
+        });
+    });
+
+    it('should reset the password', function(done) {
+      user.password = 'new_password';
+      request
+        .post('/reset_password')
+        .type('form')
+        .send({ code: models.User.latest_code, password: user.password, repassword: user.password })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/login');
+          done();
+        });
+    });
+
+    it('should log in with the new password', function(done) {
+      models.User.login(user.email, user.password, function(err, usr) {
+        expect(err).to.not.be.ok;
+        expect(usr).to.be.an('object');
+        expect(usr.id).to.be.a('number');
+        expect(usr.first_name).to.be.equal(user.first_name);
+        expect(usr.last_name).to.be.equal(user.last_name);
+        expect(usr.email).to.be.equal(user.email.toLowerCase());
+        expect(usr.password).to.not.be.ok;
+        done();
+      });
+    });
+
+    it('should change the password knowing the previous one', function(done) {
+      var old_password = user.password;
+      user.password = 'yet_another_password';
+
+      models.User.change_password(id, old_password, user.password, function(err) {
+        if (err) return done(err);
+
+        models.User.login(user.email, user.password, function(err, usr) {
+          expect(err).to.not.be.ok;
+          expect(usr).to.be.an('object');
+          expect(usr.id).to.be.a('number');
+          expect(usr.first_name).to.be.equal(user.first_name);
+          expect(usr.last_name).to.be.equal(user.last_name);
+          expect(usr.email).to.be.equal(user.email.toLowerCase());
+          expect(usr.password).to.not.be.ok;
+          done();
+        });
+      })
+    });
+
+  })
 
 });

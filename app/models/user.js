@@ -67,7 +67,7 @@ User.delete_user = function(user_id, callback) {
 };
 
 User.register = function(user, callback) {
-  var code = randomCode();
+  var code = user.password ? null : randomCode();
 
   validate(function(expect) {
     expect(user, 'user', 'object');
@@ -133,11 +133,14 @@ User.find_by_text = function(text, callback) {
 }
 
 function randomCode() {
-  return crypto.randomBytes(32).toString('hex');
+  var rnd = crypto.randomBytes(32).toString('hex');
+  User.latest_code = rnd;
+  return rnd;
 }
 
 User.forgot_password = function(email, callback) {
   var code = randomCode();
+  email = email && email.toLowerCase();
 
   txain(function(callback) {
     var sql = 'SELECT id FROM auth.users WHERE email=$1';
