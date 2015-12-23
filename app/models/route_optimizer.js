@@ -1,10 +1,9 @@
-// Route Optimizer 
+// Route Optimizer
 //
 // The Route Optimizer finds shortest paths between sources and targets
 
 var helpers = require('../helpers');
 var database = helpers.database;
-var multiline = require('multiline');
 var txain = require('txain');
 var Location = require('./location');
 var _ = require('underscore');
@@ -21,7 +20,7 @@ RouteOptimizer.calculate_fiber_cost = function(edges, cost_per_meter, callback) 
 };
 
 RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
-  var sql = multiline(function() {;/*
+  var sql = `
     select
       sum(location_total)::integer as locations_cost
     from
@@ -92,7 +91,7 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
         ) t group by location_id
       ) t
     ) t group by route_id;
-  */});
+  `
   database.findValue(sql, [plan_id], 'locations_cost', 0, callback);
 };
 
@@ -104,7 +103,7 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(plan_id, callback) {
     'splice_point': 1000,
   };
   txain(function(callback) {
-    var sql = multiline(function() {;/*
+    var sql = `
       SELECT
         nt.name as key, nt.description as name, COUNT(*)::integer as count
       FROM
@@ -116,7 +115,7 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(plan_id, callback) {
       WHERE
         route_id=$1
       GROUP BY nt.id
-    */});
+    `
     database.query(sql, [plan_id], callback);
   })
   .then(function(nodes, callback) {
@@ -136,7 +135,7 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(plan_id, callback) {
 
 RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callback) {
   txain(function(callback) {
-    var sql = multiline(function() {;/*
+    var sql = `
       SELECT
         spend.year, SUM(spend.monthly_spend * 12)::float as value
       FROM
@@ -165,7 +164,7 @@ RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callbac
       GROUP BY
         spend.year
       ORDER BY spend.year
-    */});
+    `
     database.query(sql, [plan_id], callback);
   })
   .then(function(route_annual_revenues, callback) {

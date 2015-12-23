@@ -4,7 +4,6 @@
 var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
-var multiline = require('multiline');
 
 var Wirecenter = {};
 
@@ -12,11 +11,11 @@ var Wirecenter = {};
 //
 // 1. callback: function to return the list of wirecenters
 Wirecenter.find_all = function(viewport, callback) {
-  var sql = multiline(function() {;/*
+  var sql = `
     SELECT id, ST_AsGeoJSON(ST_Simplify(geom, 0.00015))::json AS geom, wirecenter AS name
     FROM aro.wirecenters
     WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), geom)
-  */});
+  `
   txain(function(callback) {
     database.query(sql, [viewport.linestring], callback);
   })

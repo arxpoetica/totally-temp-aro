@@ -12,8 +12,17 @@
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
+  "babel": {
+    "plugins": [
+      "transform-es2015-template-literals",
+      "transform-es2015-arrow-functions"
+    ]
+  },
   "dependencies": {
     "aws-sdk": "^2.2.22",
+    "babel-plugin-transform-es2015-arrow-functions": "^6.3.13",
+    "babel-plugin-transform-es2015-template-literals": "^6.3.13",
+    "babel-register": "^6.3.13",
     "bcryptjs": "^2.2.1",
     "body-parser": "^1.13.2",
     "chai": "~3.0.0",
@@ -24,7 +33,6 @@
     "express": "^4.13.1",
     "express-flash": "0.0.2",
     "moment": "^2.10.6",
-    "multiline": "^1.0.2",
     "node-cache": "^3.0.0",
     "node-errors": "^0.2.0",
     "nodemailer": "^1.10.0",

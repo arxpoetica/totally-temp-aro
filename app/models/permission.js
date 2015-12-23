@@ -3,7 +3,6 @@
 var helpers = require('../helpers');
 var database = helpers.database;
 var txain = require('txain');
-var multiline = require('multiline');
 
 var Permission = {};
 
