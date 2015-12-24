@@ -139,7 +139,7 @@ function randomCode() {
 }
 
 User.forgot_password = function(email, callback) {
-  var code = randomCode();
+  var code;
   email = email && email.toLowerCase();
 
   txain(function(callback) {
@@ -148,6 +148,7 @@ User.forgot_password = function(email, callback) {
   })
   .then(function(user, callback) {
     if (!user) return callback(errors.notFound('No user found with email `%s`', email));
+    code = randomCode();
     var sql = 'UPDATE auth.users SET reset_code=$1, reset_code_expiration=(NOW() + interval \'1 day\') WHERE id=$2';
     database.execute(sql, [code, user.id], callback);
   })
