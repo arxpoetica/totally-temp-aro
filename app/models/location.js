@@ -256,7 +256,7 @@ Location.show_information = function(location_id, callback) {
 			return total + customer_type.households;
 		}, 0);
 
-		var sql = multiline.stripIndent(function() {;/*
+		var sql = `
 			SELECT address, ST_AsGeojson(geog)::json AS geog,
 				(SELECT distance FROM client.locations_distance_to_carrier
 					JOIN carriers ON carriers.name = $2
@@ -264,7 +264,7 @@ Location.show_information = function(location_id, callback) {
 					LIMIT 1
 				) AS distance_to_client_fiber
 			FROM locations WHERE id=$1
-		*/})
+		`
 		database.findOne(sql, [location_id, config.client_carrier_name], callback)
 	})
 	.then(function(location, callback) {

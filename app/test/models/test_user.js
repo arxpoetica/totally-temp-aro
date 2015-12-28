@@ -3,7 +3,7 @@ var models = require('../../models');
 var test_utils = require('./test_utils');
 var request = test_utils.agent;
 
-describe.only('User', function() {
+describe('User', function() {
 
   before(function() {
     test_utils.logout_app();

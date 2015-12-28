@@ -5,7 +5,7 @@ var passport = require('passport');
 var bodyParser = require('body-parser');
 var compression = require('compression');
 
-require("babel-register")
+require('babel-register')
 
 var app = module.exports = express();
 app.use(compression());
