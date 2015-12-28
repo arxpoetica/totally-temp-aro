@@ -493,8 +493,8 @@ Location.filters = function(callback) {
 Location.customer_profile_heatmap = function(viewport, callback) {
 	txain(function(callback) {
 		var params = [];
-		var sql = 'WITH '+viewport.fishnet+'\n';
-		sql += multiline.stripIndent(function() {;/*
+		var sql += `
+			WITH ${viewport.fishnet}
 			SELECT ST_AsGeojson(fishnet.geom)::json AS geom,
 			-- existing customer
 			(SELECT COUNT(*)::integer FROM businesses b
@@ -511,7 +511,7 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 					ON ct.id = bct.customer_type_id AND NOT ct.is_existing_customer
 			 WHERE b.geog && fishnet.geom) AS customer_type_prospect
 			FROM fishnet GROUP BY fishnet.geom
-		*/});
+		`
 		database.query(sql, params, callback);
 	})
 	.then(function(rows, callback) {
