@@ -8,7 +8,9 @@
     "test-cov": "NODE_ENV=test istanbul --preserve-comments cover _mocha -- test/models/*.js test/helpers/*.js -R spec --timeout 50000 --delay",
     "test-ui": "./node_modules/.bin/karma start",
     "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
-    "test-all": "npm test && npm run test-ui && npm run test-integration"
+    "test-all": "npm test && npm run test-ui && npm run test-integration",
+    "build": "babel public/javascripts/src -d public/javascripts/lib",
+    "watch": "babel public/javascripts/src -d public/javascripts/lib --watch"
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
@@ -52,6 +54,7 @@
   "devDependencies": {
     "angular": "^1.4.3",
     "angular-mocks": "^1.4.3",
+    "babel-cli": "^6.3.17",
     "istanbul": "^0.3.17",
     "karma": "^0.13.3",
     "karma-chai": "^0.1.0",

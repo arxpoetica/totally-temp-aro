@@ -241,11 +241,11 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
     var census_blocks = area_layers['census_blocks_layer'];
 
     if (route && (county_subdivisions || census_blocks)) {
-      $http.get('/network_plan/'+route.id+'/area_data')
+      $http.get(`/network_plan/${route.id}/area_data`)
         .success(function(response) {
           // area_layers['wirecenter'].set_api_endpoint('/wirecenters/'+response.wirecenter);
           area_layers['county_subdivisions_layer'].set_api_endpoint('/county_subdivisions/'+response.statefp);
-          area_layers['census_blocks_layer'].set_api_endpoint('/census_blocks/'+response.statefp+'/'+response.countyfp);
+          area_layers['census_blocks_layer'].set_api_endpoint(`/census_blocks/${response.statefp}/${response.countyfp}`);
         });
     }
   });
@@ -254,7 +254,7 @@ app.controller('map_layers_controller', function($rootScope, $http, selection, M
 
   $rootScope.$on('map_idle', function() {
     if (lastTime) {
-      console.log('It took', Date.now() - lastTime, 'ms', 'to zoom');
+      console.log(`It took ${Date.now() - lastTime} ms to zoom`);
       lastTime = null;
     }
   });

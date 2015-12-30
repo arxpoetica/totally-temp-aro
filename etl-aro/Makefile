@@ -92,7 +92,7 @@ service_redploy: service_stop service_deploy service_start
 
 
 webapp:
-	(cd ../app && npm install --no-bin-link)
+	(cd ../app && npm run build && npm install --no-bin-link)
 
 test:
 	(cd ../app && npm test)
