@@ -493,7 +493,7 @@ Location.filters = function(callback) {
 Location.customer_profile_heatmap = function(viewport, callback) {
 	txain(function(callback) {
 		var params = [];
-		var sql += `
+		var sql = `
 			WITH ${viewport.fishnet}
 			SELECT ST_AsGeojson(fishnet.geom)::json AS geom,
 			-- existing customer
