@@ -6,7 +6,7 @@ var request = test_utils.agent;
 
 chai.use(require('chai-string'));
 
-describe('User', function() {
+describe.only('User', function() {
 
   before(function() {
     test_utils.logout_app();
@@ -58,7 +58,7 @@ describe('User', function() {
           expect(res.headers.location).to.be.equal('/login');
 
           request
-            .get('/login')
+            .get(res.headers.location)
             .end(function(err, res) {
               if (err) return done(err);
               expect(res.statusCode).to.be.equal(200);
@@ -81,7 +81,7 @@ describe('User', function() {
           expect(res.headers.location).to.be.equal('/login');
 
           request
-            .get('/login')
+            .get(res.headers.location)
             .end(function(err, res) {
               if (err) return done(err);
               expect(res.statusCode).to.be.equal(200);
@@ -270,7 +270,15 @@ describe('User', function() {
           expect(res.statusCode).to.be.equal(302);
           expect(res.headers.location).to.be.equal('/forgot_password');
           expect(models.User.latest_code).not.to.be.ok;
-          done();
+
+          request
+            .get(res.headers.location)
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('No user found with email');
+              done();
+            });
         });
     });
 
@@ -309,7 +317,15 @@ describe('User', function() {
           if (err) return done(err);
           expect(res.statusCode).to.be.equal(302);
           expect(res.headers.location).to.startsWith('/reset_password');
-          done();
+
+          request
+            .get(res.headers.location)
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('Passwords do not match');
+              done();
+            });
         });
     });
 
@@ -323,7 +339,15 @@ describe('User', function() {
           if (err) return done(err);
           expect(res.statusCode).to.be.equal(302);
           expect(res.headers.location).to.startsWith('/reset_password');
-          done();
+
+          request
+            .get(res.headers.location)
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('Reset code not found or expired');
+              done();
+            });
         });
     });
 
