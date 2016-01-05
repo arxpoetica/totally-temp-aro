@@ -148,7 +148,7 @@ etl_test_all: etl_test_aro etl_test_custom etl_test_client
 
 # Install Node.js dependencies
 webapp:
-	(cd ../app && npm run build && npm install --no-bin-link)
+	(cd ../app && npm install --no-bin-link && npm run build)
 
 # Run application unit tests
 test:
