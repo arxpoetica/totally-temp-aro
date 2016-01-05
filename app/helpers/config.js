@@ -13,5 +13,5 @@ try {
 } catch (e) {
   // default configuration
   module.exports = require(def_conf);
-  console.log('File', filename, 'not found. Using default configuration file');
+  console.log('File', filename, 'not found. Using default configuration file', def_conf);
 }

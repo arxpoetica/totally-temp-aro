@@ -6,7 +6,7 @@ var request = test_utils.agent;
 
 chai.use(require('chai-string'));
 
-describe.only('User', function() {
+describe('User', function() {
 
   before(function() {
     test_utils.logout_app();

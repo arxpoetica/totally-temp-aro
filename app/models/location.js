@@ -256,7 +256,7 @@ Location.show_information = function(location_id, callback) {
 			return total + customer_type.households;
 		}, 0);
 
-		var sql = multiline.stripIndent(function() {;/*
+		var sql = `
 			SELECT address, ST_AsGeojson(geog)::json AS geog,
 				(SELECT distance FROM client.locations_distance_to_carrier
 					JOIN carriers ON carriers.name = $2
@@ -264,7 +264,7 @@ Location.show_information = function(location_id, callback) {
 					LIMIT 1
 				) AS distance_to_client_fiber
 			FROM locations WHERE id=$1
-		*/})
+		`
 		database.findOne(sql, [location_id, config.client_carrier_name], callback)
 	})
 	.then(function(location, callback) {
@@ -493,8 +493,8 @@ Location.filters = function(callback) {
 Location.customer_profile_heatmap = function(viewport, callback) {
 	txain(function(callback) {
 		var params = [];
-		var sql = 'WITH '+viewport.fishnet+'\n';
-		sql += multiline.stripIndent(function() {;/*
+		var sql = `
+			WITH ${viewport.fishnet}
 			SELECT ST_AsGeojson(fishnet.geom)::json AS geom,
 			-- existing customer
 			(SELECT COUNT(*)::integer FROM businesses b
@@ -511,7 +511,7 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 					ON ct.id = bct.customer_type_id AND NOT ct.is_existing_customer
 			 WHERE b.geog && fishnet.geom) AS customer_type_prospect
 			FROM fishnet GROUP BY fishnet.geom
-		*/});
+		`
 		database.query(sql, params, callback);
 	})
 	.then(function(rows, callback) {
