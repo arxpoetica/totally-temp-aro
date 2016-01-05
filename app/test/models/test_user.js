@@ -1,7 +1,10 @@
+var chai = require('chai');
 var expect = require('chai').expect;
 var models = require('../../models');
 var test_utils = require('./test_utils');
 var request = test_utils.agent;
+
+chai.use(require('chai-string'));
 
 describe('User', function() {
 
@@ -55,7 +58,7 @@ describe('User', function() {
           expect(res.headers.location).to.be.equal('/login');
 
           request
-            .get('/login')
+            .get(res.headers.location)
             .end(function(err, res) {
               if (err) return done(err);
               expect(res.statusCode).to.be.equal(200);
@@ -78,7 +81,7 @@ describe('User', function() {
           expect(res.headers.location).to.be.equal('/login');
 
           request
-            .get('/login')
+            .get(res.headers.location)
             .end(function(err, res) {
               if (err) return done(err);
               expect(res.statusCode).to.be.equal(200);
@@ -246,6 +249,39 @@ describe('User', function() {
         });
     });
 
+    it('should go to the password reset page', function(done) {
+      request
+        .get('/forgot_password')
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(200);
+          done();
+        });
+    });
+
+    it('should fail to request a password reset if the email does not exist', function(done) {
+      models.User.latest_code = null;
+      request
+        .post('/forgot_password')
+        .type('form')
+        .send({ email: 'x-'+user.email })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.be.equal('/forgot_password');
+          expect(models.User.latest_code).not.to.be.ok;
+
+          request
+            .get(res.headers.location)
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('No user found with email');
+              done();
+            });
+        });
+    });
+
     it('should request a password reset', function(done) {
       models.User.latest_code = null;
       request
@@ -258,6 +294,60 @@ describe('User', function() {
           expect(res.headers.location).to.be.equal('/login');
           expect(models.User.latest_code).to.be.ok;
           done();
+        });
+    });
+
+    it('should load the reset the password page', function(done) {
+      request
+        .get('/reset_password')
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(200);
+          done();
+        });
+    });
+
+    it('should fail to reset the password if the passwords do not match', function(done) {
+      user.password = 'new_password';
+      request
+        .post('/reset_password')
+        .type('form')
+        .send({ code: models.User.latest_code, password: user.password, repassword: 'x-'+user.password })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.startsWith('/reset_password');
+
+          request
+            .get(res.headers.location)
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('Passwords do not match');
+              done();
+            });
+        });
+    });
+
+    it('should fail to reset the password if the code is wrong', function(done) {
+      user.password = 'new_password';
+      request
+        .post('/reset_password')
+        .type('form')
+        .send({ code: 'x-'+models.User.latest_code, password: user.password, repassword: user.password })
+        .end(function(err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.be.equal(302);
+          expect(res.headers.location).to.startsWith('/reset_password');
+
+          request
+            .get(res.headers.location)
+            .end(function(err, res) {
+              if (err) return done(err);
+              expect(res.statusCode).to.be.equal(200);
+              expect(res.text).to.contain('Reset code not found or expired');
+              done();
+            });
         });
     });
 
