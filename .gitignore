@@ -25,3 +25,4 @@ aro-service/.classpath
 *.pyc
 
 app/models/test_permission.js
+app/public/javascripts/lib/

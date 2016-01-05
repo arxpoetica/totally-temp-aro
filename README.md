@@ -41,6 +41,11 @@ First of all choose an etl directory such as `cd etl-aro` or `cd etl-colt`. Then
  - `make test`: Runs mocha testing suite as defined in `app/package.js`
  - `make webserver`: Starts the express webserver to server the applciation in `app/app.js`
 
+#### Application development
+Frontend JavaScripts are preprocessed by `babel`. There are two npm scripts that you can use to preprocess them easily:
+ - `cd app && npm run build` builds all the frontend JavaScript files.
+ - `cd app && npm run watch` builds all the frontend JavaScript files and watches for changes to rebulid files as they are changed.
+
 #### Create users
 To start using the web application you will need to create at least a user. You can do su with a builtin command line tool. Example:
 
@@ -49,7 +54,7 @@ node app/cli/register_user.js -f John -l Smith -e john@example.com -p foobar
 ```
 
 #### Testing
- 
+
  There's a `make test` task that can be run as described before that will run the unit tests for the backend code.
 
  However there are a few other command that we can run:
