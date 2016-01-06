@@ -26,6 +26,7 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
             id: String(business.id),
             text: business.name,
             geog: business.geog,
+            location_id: business.location_id,
           }
         });
         $scope.search_results = items;
@@ -54,7 +55,7 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
     });
 
     google.maps.event.addListener(marker, 'click', function(event) {
-      $rootScope.$broadcast('open_location', value);
+      $rootScope.$broadcast('open_location', business.location_id);
     })
   })
 

@@ -545,7 +545,7 @@ Location.search = function(text, callback) {
 	text = '%'+text.toLowerCase()+'%'
 	var sql = `
 		SELECT
-			id, name, ST_AsGeoJSON(geog)::json AS geog
+			id, name, ST_AsGeoJSON(geog)::json AS geog, location_id
 		FROM
 			businesses
 		WHERE lower(name) LIKE $1
