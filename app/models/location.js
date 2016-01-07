@@ -545,10 +545,19 @@ Location.search = function(text, callback) {
 	text = '%'+text.toLowerCase()+'%'
 	var sql = `
 		SELECT
-			id, name, ST_AsGeoJSON(geog)::json AS geog, location_id
+			location_id, name, ST_AsGeoJSON(geog)::json AS geog
 		FROM
 			businesses
 		WHERE lower(name) LIKE $1
+
+		UNION ALL
+
+		SELECT
+			id AS location_id, address AS name, ST_AsGeoJSON(geog)::json AS geog
+		FROM
+			locations
+		WHERE lower(address) LIKE $1
+
 		LIMIT 100
 	`
 	database.query(sql, [text], callback);
