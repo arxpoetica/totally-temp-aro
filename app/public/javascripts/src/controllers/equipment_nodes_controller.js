@@ -1,21 +1,59 @@
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', function($scope, $rootScope, $http, selection, map_tools) {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', function($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer) {
   // Controller instance variables
   $scope.map_tools = map_tools;
   $scope.user_id = user_id;
 
+  $scope.selected_tool = null;
+  $scope.show_recalculate = config.ui.map_tools.equipment.actions.indexOf('recalculate') >= 0;
+  $scope.show_clear_nodes = config.ui.map_tools.equipment.actions.indexOf('clear') >= 0;
+
+  var network_nodes_layer = new MapLayer({
+    type: 'network_nodes',
+    name: 'Network Nodes',
+    short_name: 'NN',
+    api_endpoint: '/network/nodes/central_office',
+    style_options: {
+      normal: {
+        icon: '/images/map_icons/central_office.png',
+        visible: true,
+      },
+      selected: {
+        icon: '/images/map_icons/central_office_selected.png',
+        visible: true,
+      }
+    },
+  });
+  network_nodes_layer.hide_in_ui = true;
+
+  var fiber_plant_layer = new MapLayer({
+    name: 'Fiber',
+    type: 'fiber_plant',
+    short_name: 'F',
+    style_options: {
+      normal: {
+        strokeColor: config.ui.colors.fiber,
+        strokeWeight: 2,
+        fillColor: config.ui.colors.fiber,
+      }
+    },
+    threshold: 11,
+    reload: 'always',
+  });
+
+  map_layers.addEquipmentLayer(network_nodes_layer);
+  map_layers.addEquipmentLayer(fiber_plant_layer);
+
+  $scope.equipment_layers = map_layers.equipment_layers;
+
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
     if (map_tools.is_visible('network_nodes')) {
-      $rootScope.equipment_layers.network_nodes.show();
+      network_nodes_layer.show();
     } else if (tool === 'network_nodes') {
       $scope.selected_tool = null;
       map.setOptions({ draggableCursor: null });
     }
   });
-
-  $scope.selected_tool = null;
-  $scope.show_recalculate = config.ui.map_tools.equipment.actions.indexOf('recalculate') >= 0;
-  $scope.show_clear_nodes = config.ui.map_tools.equipment.actions.indexOf('clear') >= 0;
 
   $scope.select_tool = function(tool) {
     if ($scope.selected_tool === tool) {
@@ -54,6 +92,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.route = null;
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
+
+    var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
+    network_nodes_layer.set_api_endpoint(api_endpoint);
+
+    if (!route) return;
+    fiber_plant_layer.set_api_endpoint('/network/fiber_plant/'+route.carrier_name);
+    map.ready(function() {
+      fiber_plant_layer.show();
+    });
   });
 
   $scope.change_node_types_visibility = function() {
@@ -64,10 +111,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
     });
     if (types.length === 0) {
-      $rootScope.equipment_layers.network_nodes.hide();
+      network_nodes_layer.hide();
     } else {
-      $rootScope.equipment_layers.network_nodes.show();
-      $rootScope.equipment_layers.network_nodes.set_api_endpoint('/network/nodes/'+$scope.route.id+'/find?node_types='+types.join(','));
+      network_nodes_layer.show();
+      network_nodes_layer.set_api_endpoint('/network/nodes/'+$scope.route.id+'/find?node_types='+types.join(','));
     }
   };
 
@@ -75,7 +122,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/network/nodes/'+$scope.route.id+'/edit', changes).success(function(response) {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
-        $rootScope.equipment_layers.network_nodes.reload_data();
+        network_nodes_layer.reload_data();
       }
       changes = empty_changes();
       $rootScope.$broadcast('equipment_nodes_changed');
@@ -93,7 +140,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       closeOnConfirm: true,
     }, function() {
       $http.post('/network/nodes/'+$scope.route.id+'/clear').success(function(response) {
-        $rootScope.equipment_layers.network_nodes.reload_data();
+        network_nodes_layer.reload_data();
       });
     });
   };
@@ -107,7 +154,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   };
 
   $scope.show_number_of_features = function() {
-    $scope.number_of_features = $rootScope.equipment_layers.network_nodes.number_of_features();
+    $scope.number_of_features = network_nodes_layer.number_of_features();
   };
 
   $rootScope.$on('route_selected', function(e, route) {
@@ -141,15 +188,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       lon: coordinates.lng(),
       type: _.findWhere($scope.view_node_types, { name: type }).id,
     });
-    var layer = $rootScope.equipment_layers.network_nodes;
-    var arr = layer.data_layer.addGeoJson(feature);
+    var data_layer = network_nodes_layer.data_layer;
+    var arr = data_layer.addGeoJson(feature);
     arr.forEach(function(feature) {
-      layer.data_layer.overrideStyle(feature, {
+      data_layer.overrideStyle(feature, {
         icon: '/images/map_icons/'+type+'.png',
         draggable: true,
       });
     });
-    layer.show();
+    network_nodes_layer.show();
     $scope.save_nodes();
   });
 
@@ -181,8 +228,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.recalculate_network_nodes = function() {
     var data = {};
     $http.post('/network/nodes/'+$scope.route.id+'/recalc', data).success(function(response) {
-      var layer = $rootScope.equipment_layers['network_nodes'];
-      layer.reload_data();
+      network_nodes_layer.reload_data();
       $rootScope.$broadcast('equipment_nodes_changed');
     });
   };

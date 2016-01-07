@@ -1,4 +1,4 @@
-app.service('selection', function($rootScope, $http) {
+app.service('selection', function($rootScope, map_layers) {
 
   var selection = {};
   var collectionNames = [];
@@ -38,7 +38,7 @@ app.service('selection', function($rootScope, $http) {
       selection[name].removeAll();
     });
 
-    var feature_layers = $rootScope.feature_layers;
+    var feature_layers = map_layers.feature_layers;
     for (var key in feature_layers) {
       if (feature_layers.hasOwnProperty(key)) {
         feature_layers[key].revert_styles();
@@ -48,7 +48,7 @@ app.service('selection', function($rootScope, $http) {
   };
 
   selection.sync_selection = function() {
-    var feature_layers = $rootScope.feature_layers;
+    var feature_layers = map_layers.feature_layers;
     for (var key in feature_layers) {
       if (feature_layers.hasOwnProperty(key)) {
         feature_layers[key].sync_selection();
@@ -63,6 +63,21 @@ app.service('selection', function($rootScope, $http) {
   selection.is_enabled = function() {
     return enabled;
   };
+
+  $rootScope.$on('selection_tool_rectangle', function(e, overlay, deselect_mode) {
+    var bounds = overlay.getBounds();
+    map_layers.getFeatureLayer('locations').change_selection_for_features_matching(!deselect_mode, function(feature) {
+      var latLng = feature.getGeometry().get();
+      return bounds.contains(latLng);
+    });
+  });
+
+  $rootScope.$on('selection_tool_polygon', function(e, overlay, deselect_mode) {
+    map_layers.getFeatureLayer('locations').change_selection_for_features_matching(!deselect_mode, function(feature) {
+      var latLng = feature.getGeometry().get();
+      return google.maps.geometry.poly.containsLocation(latLng, overlay);
+    });
+  });
 
   return selection;
 

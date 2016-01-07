@@ -188,9 +188,6 @@
 
     <div id="left-col-wrapper">
       <div id="left-col">
-        <div ng-controller="map_layers_controller">
-        </div>
-
         <div ng-controller="map_tools_controller">
           <div ng-repeat="tool in map_tools.available_tools">
             <p>
@@ -395,7 +392,7 @@
               </p>
             </div>
             <% if (env_is_test) { %>
-              <a href="javascript:void(0)" ng-click="feature_layers.locations.select_random_features()" ng-attr-data-loaded="{{feature_layers.locations.data_loaded}}">.</a>
+              <a href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">.</a>
             <% } %>
             <hr>
             <div>
@@ -664,7 +661,6 @@
   <script src="javascripts/lib/controllers/financial_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
-  <script src="javascripts/lib/controllers/map_layers_controller.js"></script>
   <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
   <script src="javascripts/lib/controllers/boundaries_controller.js"></script>
@@ -683,6 +679,7 @@
   <script src="javascripts/lib/models/selection.js"></script>
   <script src="javascripts/lib/models/loader.js"></script>
   <script src="javascripts/lib/models/map_tools.js"></script>
+  <script src="javascripts/lib/models/map_layers.js"></script>
   <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
   <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>
   <script>app.run(function(loader){})</script>

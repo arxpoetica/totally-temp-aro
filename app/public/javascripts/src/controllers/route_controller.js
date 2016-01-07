@@ -1,5 +1,5 @@
 // Route Controller
-app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', function($scope, $rootScope, $http, selection, MapLayer, map_tools) {
+app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', 'map_layers', function($scope, $rootScope, $http, selection, MapLayer, map_tools, map_layers) {
   // Controller instance variables
   $scope.map_tools = map_tools;
   $scope.selection = selection;
@@ -13,11 +13,8 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
     if (!route) {
-      if ($scope.route_layer) {
-        $scope.route_layer.remove();
-      }
       $scope.route_layer = null;
-      delete $rootScope.equipment_layers['route'];
+      map_layers.removeEquipmentLayer('route');
       return;
     }
 
@@ -25,7 +22,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       redraw_route(response);
       selection.set_enabled(route.owner_id === user_id);
       if ((response.metadata.sources || []).length > 0) {
-        $rootScope.equipment_layers.network_nodes.show();
+        map_layers.getEquipmentLayer('network_nodes').show();
       }
     });
   });
@@ -74,6 +71,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       var route = new MapLayer({
         short_name: 'RT',
         name: 'Route',
+        type: 'route',
         data: data.feature_collection,
         style_options: {
           normal: {
@@ -86,8 +84,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
         $scope.route_layer.remove();
       }
       $scope.route_layer = route;
-
-      $rootScope.equipment_layers['route'] = route;
+      map_layers.addEquipmentLayer(route);
     }
 
     // to calculate market size
