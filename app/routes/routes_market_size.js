@@ -14,10 +14,32 @@ exports.configure = function(api, middleware) {
 
   var export_dir = temp.mkdirSync('aro_export');
 
+  function timer(interval, tick, end) {
+    var time = Date.now();
+    function seconds() {
+      return Math.floor((Date.now()-time)/1000);
+    }
+    var timer = setInterval(function() {
+      tick(seconds());
+    }, interval*1000);
+    return {
+      stop: function() {
+        clearInterval(timer);
+        end(seconds());
+      }
+    }
+  }
+
   function export_handler(request, response, next) {
     var filename = request.query.filename;
     var userid = request.user.id;
+    var time = Date.now()
+    var t = timer(5,
+      (seconds) => console.log('Generating CSV', filename, seconds, 'seconds'),
+      (seconds) => console.log('Finished exporting CSV', filename, seconds, 'seconds')
+    )
     return function(err, output) {
+      t.stop();
       if (err) return next(err);
       var fullname = path.join(export_dir, userid+'_'+filename);
       fs.writeFile(fullname, output, 'utf8', function(err) {
