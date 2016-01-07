@@ -21,12 +21,11 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
         };
       },
       results: function (data, params) {
-        var items = data.map(function(business) {
+        var items = data.map(function(location) {
           return {
-            id: String(business.id),
-            text: business.name,
-            geog: business.geog,
-            location_id: business.location_id,
+            id: String(location.location_id),
+            text: location.name,
+            geog: location.geog,
           }
         });
         $scope.search_results = items;
@@ -44,8 +43,8 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
 
   search.on('change', function() {
     var value = search.select2('val');
-    var business = _.findWhere($scope.search_results, { id: value });
-    var center = { lat: business.geog.coordinates[1], lng: business.geog.coordinates[0] };
+    var location = _.findWhere($scope.search_results, { id: value });
+    var center = { lat: location.geog.coordinates[1], lng: location.geog.coordinates[0] };
     map.setCenter(center);
 
     var marker = new google.maps.Marker({
@@ -55,7 +54,7 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
     });
 
     google.maps.event.addListener(marker, 'click', function(event) {
-      $rootScope.$broadcast('open_location', business.location_id);
+      $rootScope.$broadcast('open_location', location.id);
     })
   })
 
