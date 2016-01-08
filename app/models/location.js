@@ -542,13 +542,13 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 }
 
 Location.search = function(text, callback) {
-	text = '%'+text.toLowerCase()+'%'
+	text = '%'+text+'%'
 	var sql = `
 		SELECT
 			location_id, name, ST_AsGeoJSON(geog)::json AS geog
 		FROM
 			businesses
-		WHERE lower(name) LIKE $1
+		WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
 
 		UNION ALL
 
@@ -556,7 +556,7 @@ Location.search = function(text, callback) {
 			id AS location_id, address AS name, ST_AsGeoJSON(geog)::json AS geog
 		FROM
 			locations
-		WHERE lower(address) LIKE $1
+		WHERE lower(unaccent(address)) LIKE lower(unaccent($1))
 
 		LIMIT 100
 	`
