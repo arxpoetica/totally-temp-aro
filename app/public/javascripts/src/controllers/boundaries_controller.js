@@ -1,12 +1,92 @@
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_utils', 'tracker', function($scope, $rootScope, $http, selection, map_tools, map_utils, tracker) {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', function($scope, $rootScope, $http, selection, map_tools, map_utils, map_layers, MapLayer, tracker) {
 
   $scope.map_tools = map_tools;
-  $scope.area_layers = $rootScope.area_layers;
   $scope.user_id = user_id;
 
   $scope.selected_tool = false;
   $scope.boundaries = [];
+
+  var area_layers = $scope.area_layers = {};
+
+  if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
+    area_layers['wirecenter'] = new MapLayer({
+      short_name: 'WC',
+      name: 'Wirecenter',
+      type: 'wirecenter',
+      api_endpoint: '/wirecenters',
+      highlighteable: true,
+      style_options: {
+        normal: {
+          fillColor: 'green',
+          strokeColor: 'green',
+          strokeWeight: 2,
+        },
+        highlight: {
+          fillColor: 'green',
+          strokeColor: 'green',
+          strokeWeight: 4,
+        },
+      },
+      reload: 'always',
+      threshold: 0,
+    });
+  }
+
+  if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
+    area_layers['county_subdivisions_layer'] = new MapLayer({
+      short_name: 'CS',
+      name: 'County Subdivisions',
+      type: 'county_subdivisions_layer',
+      api_endpoint: '/county_subdivisions/36',
+      highlighteable: true,
+      style_options: {
+        normal: {
+          fillColor: 'green',
+          strokeColor: 'green',
+          strokeWeight: 2,
+        },
+        highlight: {
+          fillColor: 'green',
+          strokeColor: 'green',
+          strokeWeight: 2,
+        },
+      },
+      reload: 'always',
+      threshold: 0,
+    });
+  }
+
+  if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
+    area_layers['census_blocks_layer'] = new MapLayer({
+      type: 'census_blocks',
+      short_name: 'CB',
+      name: 'Census Blocks',
+      api_endpoint: '/census_blocks/36/061',
+      highlighteable: true,
+      single_selection: true,
+      reset_style_on_click: true,
+      style_options: {
+        normal: {
+          fillColor: 'blue',
+          strokeColor: 'blue',
+          strokeWeight: 2,
+        },
+        highlight: {
+          fillColor: 'blue',
+          strokeColor: 'blue',
+          strokeWeight: 4,
+        },
+        selected: {
+          fillColor: 'blue',
+          strokeColor: 'blue',
+          strokeWeight: 4,
+        }
+      },
+      threshold: 13,
+      reload: 'dynamic',
+    });
+  }
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
@@ -28,6 +108,18 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     $scope.route = route;
     $scope.boundaries = [];
     if (!route) return;
+
+    var county_subdivisions = area_layers['county_subdivisions_layer'];
+    var census_blocks = area_layers['census_blocks_layer'];
+
+    if (route && (county_subdivisions || census_blocks)) {
+      $http.get(`/network_plan/${route.id}/area_data`)
+        .success(function(response) {
+          // area_layers['wirecenter'].set_api_endpoint('/wirecenters/'+response.wirecenter);
+          area_layers['county_subdivisions_layer'].set_api_endpoint('/county_subdivisions/'+response.statefp);
+          area_layers['census_blocks_layer'].set_api_endpoint(`/census_blocks/${response.statefp}/${response.countyfp}`);
+        });
+    }
 
     $http.get('/boundary/'+route.id+'/find')
       .success(function(boundaries) {

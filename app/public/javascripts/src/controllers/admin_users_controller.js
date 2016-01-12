@@ -1,5 +1,5 @@
 // Admin users controller
-app.controller('admin_users_controller', function($rootScope, $scope, $http) {
+app.controller('admin_users_controller', function($scope, $http) {
   $scope.users = [];
   $scope.user_id = user_id;
   $scope.new_user = {};
