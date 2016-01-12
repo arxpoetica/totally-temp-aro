@@ -35,7 +35,10 @@ exports.configure = function(api, middleware) {
     var userid = request.user.id;
     var time = Date.now()
     var t = timer(5,
-      (seconds) => console.log('Generating CSV', filename, seconds, 'seconds'),
+      (seconds) => {
+        console.log('Generating CSV', filename, seconds, 'seconds')
+        response.write(seconds+'.')
+      },
       (seconds) => console.log('Finished exporting CSV', filename, seconds, 'seconds')
     )
     return function(err, output) {
@@ -44,7 +47,8 @@ exports.configure = function(api, middleware) {
       var fullname = path.join(export_dir, userid+'_'+filename);
       fs.writeFile(fullname, output, 'utf8', function(err) {
         if (err) return next(err);
-        response.json({});
+        response.write('Done');
+        response.end();
       });
     }
   }

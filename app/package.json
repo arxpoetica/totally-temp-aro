@@ -10,7 +10,7 @@
     "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
     "test-all": "npm test && npm run test-ui && npm run test-integration",
     "build": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib",
-    "watch": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib --watch"
+    "watch": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib --watch --source-maps"
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",

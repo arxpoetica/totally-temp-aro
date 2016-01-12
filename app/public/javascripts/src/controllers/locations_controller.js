@@ -1,5 +1,5 @@
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'CustomOverlay', 'tracker', function($scope, $rootScope, $http, selection, map_tools, CustomOverlay, tracker) {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', function($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer, CustomOverlay, tracker) {
 
   $scope.map_tools = map_tools;
   $scope.selected_tool = null;
@@ -40,7 +40,46 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $scope.industries = [];
 
-  $scope.feature_layers = $rootScope.feature_layers;
+  var locations_layer = $scope.locations_layer = new MapLayer({
+    type: 'locations',
+    name: 'Locations',
+    short_name: 'L',
+    // api_endpoint: '/locations',
+    style_options: {
+      normal: {
+        icon: '/images/map_icons/location_business_gray.png',
+        visible: true,
+        fillColor: 'blue',
+        strokeColor: 'blue',
+        strokeWeight: 1,
+      },
+      selected: {
+        icon: '/images/map_icons/location_business_selected.png',
+        visible: true,
+      },
+    },
+    threshold: 15,
+    reload: 'always',
+    heatmap: true,
+  });
+
+  var customer_profile_layer = new MapLayer({
+    type: 'locations_customer_profile_density',
+    api_endpoint: '/locations_customer_profile_density',
+    style_options: {
+      normal: {
+        strokeColor: 'blue',
+        strokeWeight: 2,
+        fillColor: 'blue',
+      }
+    },
+    threshold: 100,
+    reload: 'always',
+    // heatmap: true,
+  });
+
+  map_layers.addFeatureLayer(locations_layer);
+  map_layers.addFeatureLayer(customer_profile_layer);
 
   $http.get('/locations_filters').success(function(response) {
     $scope.industries = response.industries;
@@ -88,10 +127,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.change_locations_layer = function() {
     tracker.track('Locations / '+$scope.overlay);
 
-    var layer = $rootScope.feature_layers.locations;
-    var customer_profile = $rootScope.feature_layers.locations_customer_profile_density;
-
-    customer_profile.set_visible($scope.overlay === 'customer_profile');
+    customer_profile_layer.set_visible($scope.overlay === 'customer_profile');
 
     if ($scope.overlay === 'none') {
       var industries = $('#locations_controller .select2-industries').select2('val');
@@ -99,7 +135,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
       var number_of_employees = $('#locations_controller .select2-number-of-employees').select2('val');
 
       if (!$scope.show_businesses && !$scope.show_households) {
-        layer.hide();
+        locations_layer.hide();
       } else {
         var type;
         if ($scope.show_businesses && $scope.show_households) {
@@ -109,16 +145,16 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
         } else if ($scope.show_households) {
           type = 'huseholds';
         }
-        layer.set_api_endpoint('/locations/'+$scope.route.id, {
+        locations_layer.set_api_endpoint('/locations/'+$scope.route.id, {
           industries: industries.join(','),
           customer_types: customer_types.join(','),
           number_of_employees: number_of_employees.join(','),
           type: type,
         });
-        layer.show();
+        locations_layer.show();
       }
     } else {
-      layer.hide();
+      locations_layer.hide();
     }
 
     if ($scope.show_businesses && $scope.overlay === 'none') {
@@ -136,6 +172,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.route = null;
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
+    if (!route) return;
+
+    locations_layer.set_api_endpoint('/locations/'+route.id);
+    // customer_profile_layer.set_api_endpoint('/locations/'+route.id);
   });
 
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
@@ -153,7 +193,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
       .success(function(response) {
         $('#create-location').modal('hide');
         $scope.new_location_data = {};
-        $rootScope.feature_layers.locations.data_layer.addGeoJson(response);
+        locations_layer.data_layer.addGeoJson(response);
       });
   };
 
@@ -200,22 +240,22 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $rootScope.$on('route_selected', function(e, route) {
     if (route) {
       map.ready(function() {
-        $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
-        $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
+        map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources);
+        locations_layer.set_always_show_selected($scope.always_shows_targets);
       });
     }
   });
 
   $scope.toggle_always_show_sources = function() {
-    $rootScope.equipment_layers.network_nodes.set_always_show_selected($scope.always_shows_sources);
+    map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources);
   };
 
   $scope.toggle_always_show_targets = function() {
-    $rootScope.feature_layers.locations.set_always_show_selected($scope.always_shows_targets);
+    locations_layer.set_always_show_selected($scope.always_shows_targets);
   };
 
   $scope.overlay_is_loading = function() {
-    return $rootScope.feature_layers.locations_customer_profile_density.is_loading;
+    return customer_profile_layer.is_loading;
   }
 
   var overlays = [];

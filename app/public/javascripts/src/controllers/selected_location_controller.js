@@ -1,11 +1,11 @@
 // Selected location controller
-app.controller('selected_location_controller', function($rootScope, $scope, $http, tracker) {
+app.controller('selected_location_controller', function($rootScope, $scope, $http, map_layers, tracker) {
   $scope.location = {};
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
   $scope.config = config;
 
   $scope.select_random_location = function() {
-    var map_layer = $rootScope.feature_layers.locations;
+    var map_layer = map_layers.getFeatureLayer('locations');
     var feature;
     map_layer.data_layer.forEach(function(f) {
       feature = feature || f;
