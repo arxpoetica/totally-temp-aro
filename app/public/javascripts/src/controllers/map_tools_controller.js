@@ -11,7 +11,6 @@ app.controller('map_tools_controller', ['$scope', '$rootScope', 'map_tools', fun
       map_tools.enable('locations');
       map_tools.enable('fiber_plant');
     }
-    if (!$scope.$$phase) { $scope.$apply(); }
   });
 
 }]);
