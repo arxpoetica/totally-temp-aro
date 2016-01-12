@@ -3,9 +3,30 @@ app.service('map_tools', ['$rootScope', 'tracker', function($rootScope, tracker)
   var tools = {};
   var visible = [];
   var collapsed = {};
+  var disabled = [];
+
+  tools.enable = function(name) {
+    var i = disabled.indexOf(name);
+    if (i >= 0) {
+      disabled.splice(i, 1);
+      $rootScope.$broadcast('map_tool_changed_availability', name);
+    }
+  }
+
+  tools.disable = function(name) {
+    var i = disabled.indexOf(name);
+    if (i === -1) {
+      disabled.push(name);
+      $rootScope.$broadcast('map_tool_changed_availability', name);
+    }
+  }
+
+  tools.is_enabled = function(name) {
+    return disabled.indexOf(name) === -1;
+  }
 
   tools.is_visible = function(name) {
-    return visible.indexOf(name) >= 0;
+    return visible.indexOf(name) >= 0 && tools.is_enabled(name);
   }
 
   tools.show = function(name) {
