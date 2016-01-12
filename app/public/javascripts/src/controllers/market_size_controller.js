@@ -45,7 +45,8 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     $('#market-size .modal-title').text('Market profile');
 
     if (market_profile) {
-      $('#market-size select').val('').trigger('change');
+      $('#market-size select[multiple]').select2('val', '');
+      $scope.customer_type = '';
       $scope.market_size = market_profile.market_size;
       $scope.market_size_existing = market_profile.market_size_existing;
       $scope.fair_share = market_profile.fair_share;
@@ -129,6 +130,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     tracker.track('Market profile export');
     swal({
       title: "File name",
+      text: "Note: generating the CSV file may take a few minutes.",
       type: "input",
       showCancelButton: true,
       closeOnConfirm: false,
