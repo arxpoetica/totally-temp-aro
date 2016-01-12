@@ -8,8 +8,6 @@ app.controller('footer_controller', ['$scope', '$rootScope', 'selection', functi
     $scope.route = route;
   });
 
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-  });
+  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
 
 }]);

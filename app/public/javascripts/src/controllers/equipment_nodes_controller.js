@@ -30,6 +30,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     name: 'Fiber',
     type: 'fiber_plant',
     short_name: 'F',
+    api_endpoint: '/network/fiber_plant/:client_carrier_name',
     style_options: {
       normal: {
         strokeColor: config.ui.colors.fiber,
@@ -92,16 +93,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.route = null;
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
-
-    var api_endpoint = route ? '/network/nodes/'+route.id+'/find' : '/network/nodes/central_office';
-    network_nodes_layer.set_api_endpoint(api_endpoint);
-
     if (!route) return;
-    fiber_plant_layer.set_api_endpoint('/network/fiber_plant/'+route.carrier_name);
+    
     map.ready(function() {
       fiber_plant_layer.show();
     });
   });
+
 
   $scope.change_node_types_visibility = function() {
     var types = [];
@@ -156,10 +154,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.show_number_of_features = function() {
     $scope.number_of_features = network_nodes_layer.number_of_features();
   };
-
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-  });
 
   $rootScope.$on('map_layer_dragged_feature', function(e, gm_event, feature) {
     var coordinates = feature.getGeometry().get();

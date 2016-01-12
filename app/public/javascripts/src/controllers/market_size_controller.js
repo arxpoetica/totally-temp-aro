@@ -65,9 +65,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   });
 
   $scope.route = null;
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-  });
+  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
 
   var canceller = null;
   $scope.calculate_market_size = function() {
