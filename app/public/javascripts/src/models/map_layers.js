@@ -21,10 +21,11 @@ app.service('map_layers', function($rootScope) {
     equipment_layers[layer.type] = layer;
   };
 
-  map_layers.removeEquipmentLayer = function(layer) {
+  map_layers.removeEquipmentLayer = function(type) {
+    var layer = equipment_layers[type];
     if (!layer) return;
     layer.remove();
-    delete equipment_layers[layer.type];
+    delete equipment_layers[type];
   };
 
   map_layers.getEquipmentLayer = function(type) {

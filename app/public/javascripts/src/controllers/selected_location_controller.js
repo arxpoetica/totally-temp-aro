@@ -145,9 +145,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   };
 
   $scope.route = null;
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-  });
+  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
 
   $scope.export = function() {
     $('#selected_location_controller').modal('hide');

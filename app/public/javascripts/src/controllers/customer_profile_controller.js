@@ -6,9 +6,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
   $scope.data = {};
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
 
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-  });
+  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
 
   var chart = null;
   var geo_json;

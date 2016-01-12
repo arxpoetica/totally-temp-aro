@@ -44,7 +44,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     type: 'locations',
     name: 'Locations',
     short_name: 'L',
-    // api_endpoint: '/locations',
+    api_endpoint: '/locations/:plan_id',
     style_options: {
       normal: {
         icon: '/images/map_icons/location_business_gray.png',
@@ -145,7 +145,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
         } else if ($scope.show_households) {
           type = 'huseholds';
         }
-        locations_layer.set_api_endpoint('/locations/'+$scope.route.id, {
+        locations_layer.set_api_endpoint('/locations/:plan_id', {
           industries: industries.join(','),
           customer_types: customer_types.join(','),
           number_of_employees: number_of_employees.join(','),
@@ -167,15 +167,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
   $('#create-location').on('shown.bs.modal', function() {
     $('#create-location select').val('').trigger("change");
-  });
-
-  $scope.route = null;
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-    if (!route) return;
-
-    locations_layer.set_api_endpoint('/locations/'+route.id);
-    // customer_profile_layer.set_api_endpoint('/locations/'+route.id);
   });
 
   $rootScope.$on('map_tool_changed_visibility', function(e, tool) {
@@ -238,6 +229,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   });
 
   $rootScope.$on('route_selected', function(e, route) {
+    $scope.route = route;
+    
     if (route) {
       map.ready(function() {
         map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources);

@@ -2,7 +2,7 @@
 //
 // Handles display of and interaction with all layers of the map
 app.controller('selection_tools_controller', function($rootScope, $scope) {
-  
+
   $scope.selected_tool = null;
   $scope.available_tools = {
     '': {
@@ -23,9 +23,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   }
   $scope.user_id = user_id;
   $scope.route = null;
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-  });
+  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
 
   $scope.is_selected_tool = function(name) {
     return drawingManager.getDrawingMode() === (name ? name : null);
