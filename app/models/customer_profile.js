@@ -81,7 +81,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
 CustomerProfile.customer_profile_all_cities = function(callback) {
   var metadata = []
   txain(function(callback) {
-    database.query('SELECT id, city_name, ST_AsGeoJSON(ST_Centroid(cities.geom))::json AS centroid FROM cities', callback);
+    database.query('SELECT id, city_name, ST_AsGeoJSON(cities.centroid)::json AS centroid FROM cities', callback);
   })
   .each(function(city, callback) {
     txain(function(callback) {
