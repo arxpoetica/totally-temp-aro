@@ -13,4 +13,8 @@ exports.configure = function(api, middleware) {
     models.CustomerProfile.customer_profile_for_boundary(type, boundary, jsonHandler(response, next));
   });
 
+  api.get('/customer_profile/all_cities', function(request, response, next) {
+    models.CustomerProfile.customer_profile_all_cities(jsonHandler(response, next));
+  });
+
 };

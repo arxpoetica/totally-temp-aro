@@ -1,5 +1,5 @@
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', 'tracker', function($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer, tracker) {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', function($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer, CustomOverlay, tracker) {
 
   $scope.map_tools = map_tools;
   $scope.selected_tool = null;
@@ -257,5 +257,52 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.overlay_is_loading = function() {
     return customer_profile_layer.is_loading;
   }
+
+  var overlays = [];
+  $http.get('/customer_profile/all_cities')
+    .success(function(response) {
+      overlays = response.map(function(city) {
+        var id = 'customer_profile_'+city.id;
+        var chart = document.createElement('canvas');
+        chart.setAttribute('id', id);
+        chart.style.width = '100%';
+        chart.style.height = '100%';
+
+        var width = 150;
+        var height = 150;
+        var coordinates = city.centroid.coordinates;
+        var latLng = new google.maps.LatLng(coordinates[1], coordinates[0]);
+        return new CustomOverlay(map, chart, width, height, latLng, function() {
+          var colors = randomColor({ seed: 1, count: city.customer_profile.customer_types.length });
+          var data = city.customer_profile.customer_types.map(function(customer_type) {
+            var color = colors.shift();
+            return {
+              name: customer_type.name,
+              label: customer_type.name,
+              value: (customer_type.businesses + customer_type.households)*100 / city.customer_profile.customers_businesses_total,
+              color: color,
+              highlight: tinycolor(color).lighten().toString(),
+            }
+          });
+
+          // chart && chart.destroy();
+          var options = {
+            tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>%",
+          };
+          var ctx = document.getElementById(id).getContext('2d');
+          var chart = new Chart(ctx).Pie(data, options);
+        });
+      });
+      configure_overlays_visibility();
+    });
+
+  function configure_overlays_visibility() {
+    var visible = map.getZoom() < 12;
+    overlays.forEach(function(overlay) {
+      visible ? overlay.show() : overlay.hide();
+    });
+  }
+
+  $rootScope.$on('map_zoom_changed', configure_overlays_visibility);
 
 }]);
