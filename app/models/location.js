@@ -16,6 +16,9 @@ var Location = {};
 // 1. callback: function to return a GeoJSON object
 Location.find_all = function(plan_id, type, filters, viewport, callback) {
 	txain(function(callback) {
+		if (viewport.zoom < 12) {
+			return callback(null, []);
+		}
 		var params = [];
 		var sql = `
 			SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom,
