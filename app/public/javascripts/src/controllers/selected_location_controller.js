@@ -265,9 +265,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   var fair_share_chart = null;
   function show_fair_share_chart() {
     $scope.fair_share = $scope.fair_share || [];
-    var total = $scope.fair_share.reduce(function(total, carrier) {
-      return total + carrier.value;
-    }, 0);
+    var total = $scope.fair_share.reduce((total, carrier) => total + carrier.value, 0);
 
     var data = $scope.fair_share.map(function(carrier) {
       var distance = carrier.distance !== null ? ' ('+angular.injector(['ng']).get('$filter')('number')(carrier.distance, 2)+'m)' : ''

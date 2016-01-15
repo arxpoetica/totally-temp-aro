@@ -11,15 +11,12 @@ var CustomerProfile = {};
 function process_customer_types(metadata, customer_types, callback) {
   metadata.customer_types = customer_types;
 
-  metadata.customers_businesses_total = customer_types.reduce(function(total, customer_type) {
-    return total + customer_type.businesses;
-  }, 0);
-  metadata.customers_households_total = customer_types.reduce(function(total, customer_type) {
-    return total + customer_type.households;
-  }, 0);
-  metadata.total_customers = metadata.customer_types.reduce(function(total, type) {
-    return total + type.businesses + type.households;
-  }, 0);
+  metadata.customers_businesses_total = customer_types
+    .reduce((total, customer_type) => total + customer_type.businesses, 0);
+  metadata.customers_households_total = customer_types
+    .reduce((total, customer_type) => total + customer_type.households, 0);
+  metadata.total_customers = metadata.customer_types
+    .reduce((total, type) => total + type.businesses + type.households, 0);
   callback(null, metadata);
 }
 

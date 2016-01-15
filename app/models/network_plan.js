@@ -67,12 +67,10 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
       NetworkPlan.find_edges(plan_id, callback);
     })
     .then(function(edges, callback) {
-      output.feature_collection.features = edges.map(function(edge) {
-        return {
-          'type':'Feature',
-          'geometry': edge.geom,
-        }
-      });
+      output.feature_collection.features = edges.map(edge => ({
+        'type':'Feature',
+        'geometry': edge.geom,
+      }));
 
       fiber_cost = RouteOptimizer.calculate_fiber_cost(edges, cost_per_meter);
       output.metadata.costs.push({
@@ -135,9 +133,8 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
       output.metadata.revenue = calculation.revenue;
       output.metadata.npv = calculation.npv;
 
-      output.metadata.total_cost = output.metadata.costs.reduce(function(total, cost) {
-        return total+cost.value;
-      }, 0);
+      output.metadata.total_cost = output.metadata.costs
+        .reduce((total, cost) => total+cost.value, 0);
 
       output.metadata.profit = output.metadata.revenue - output.metadata.total_cost;
 
@@ -222,9 +219,8 @@ NetworkPlan.find_all = function(user, text, callback) {
     params.push(user.id);
   }
   if (text) {
-    text = '%'+text+'%'
     sql += ' AND lower(name) LIKE lower($3)';
-    params.push(text);
+    params.push(`%${text}%`);
   }
   sql += '\n LIMIT 20';
   database.query(sql, params, callback);
@@ -259,8 +255,8 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
       var params = [
         name,
         area.name,
-        'POINT('+area.centroid.lng+' '+area.centroid.lat+')',
-        'LINESTRING('+area.bounds.northeast.lng+' '+area.bounds.northeast.lat+', '+area.bounds.southwest.lng+' '+area.bounds.southwest.lat+')',
+        `POINT(${area.centroid.lng} ${area.centroid.lat})`,
+        `LINESTRING(${area.bounds.northeast.lng} ${area.bounds.northeast.lat}, ${area.bounds.southwest.lng} ${area.bounds.southwest.lat})`,
       ];
       database.findOne(sql, params, callback);
     })
@@ -317,7 +313,7 @@ NetworkPlan.save_plan = function(plan_id, data, callback) {
   var fields = [];
   var params = [];
   var allowed_fields = ['name'];
-  _.intersection(_.keys(data), allowed_fields).forEach(function(key) {
+  _.intersection(_.keys(data), allowed_fields).forEach(key => {
     params.push(data[key]);
     fields.push(key+'=$'+params.length);
   });

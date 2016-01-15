@@ -52,16 +52,14 @@ Wirecenter.find_by_wirecenter_code = function(wirecenter_code, callback) {
     database.query(sql, [wirecenter_code], callback);
   })
   .then(function(rows, callback) {
-    var features = rows.map(function(row) {
-      return {
-        'type': 'Feature',
-        'properties': {
-          'id': row.id,
-          'name': row.name,
-        },
-        'geometry': row.geom,
-      }
-    });
+    var features = rows.map(row => ({
+      'type': 'Feature',
+      'properties': {
+        'id': row.id,
+        'name': row.name,
+      },
+      'geometry': row.geom,
+    }));
 
     var output = {
       'feature_collection': {

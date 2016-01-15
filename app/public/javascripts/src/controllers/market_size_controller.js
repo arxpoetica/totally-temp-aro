@@ -182,10 +182,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   function show_fair_share_chart() {
     $scope.fair_share = $scope.fair_share || [];
 
-    var total = $scope.fair_share.reduce(function(total, carrier) {
-      return total + carrier.value;
-    }, 0);
-
+    var total = $scope.fair_share.reduce((total, carrier) => total + carrier.value, 0);
     var data = $scope.fair_share.map(function(carrier) {
       return {
         label: carrier.name,

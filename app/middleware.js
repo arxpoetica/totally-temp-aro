@@ -91,7 +91,7 @@ function viewport(request, response, next) {
     var nwlon = swlon;
     var nwlat = nelat;
     var zoom = request.query.zoom;
-    var linestring = 'LINESTRING('+nelon+' '+nelat+', '+selon+' '+selat+', '+swlon+' '+swlat+', '+nwlon+' '+nwlat+', '+nelon+' '+nelat+')';
+    var linestring = `LINESTRING(${nelon} ${nelat}, ${selon} ${selat}, ${swlon} ${swlat}, ${nwlon} ${nwlat}, ${nelon} ${nelat})`;
 
     request.viewport = {
       nelat: nelat,
