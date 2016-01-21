@@ -151,6 +151,11 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
 }
 
 NetworkPlan.recalculate_route = function(plan_id, callback) {
+  if (config.route_planning === 'fttp') return callback();
+  NetworkPlan.calculate_pg_route(plan_id, callback);
+}
+
+NetworkPlan.calculate_pg_route = function(plan_id, callback) {
   txain(function(callback) {
     var sql = 'DELETE FROM custom.route_edges WHERE route_id=$1';
     database.execute(sql, [plan_id], callback);
@@ -161,9 +166,9 @@ NetworkPlan.recalculate_route = function(plan_id, callback) {
   })
   .then(function(callback) {
     var sql = `
-      (SELECT id, 1 FROM custom.route_sources WHERE route_id=$1 limit 1)
-      UNION
-      (SELECT id, 2 FROM custom.route_targets WHERE route_id=$1 limit 1)
+      (SELECT id FROM custom.route_sources WHERE route_id=$1 limit 1)
+      UNION ALL
+      (SELECT id FROM custom.route_targets WHERE route_id=$1 limit 1)
     `
     database.query(sql, [plan_id], callback);
   })

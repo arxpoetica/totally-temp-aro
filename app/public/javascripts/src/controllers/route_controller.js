@@ -47,6 +47,12 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     });
   });
 
+  $rootScope.$on('route_planning_changed', function() {
+    $http.get('/network_plan/'+$scope.route.id).success(function(response) {
+      redraw_route(response, false);
+    });
+  });
+
   function redraw_route(data, only_metadata) {
     if ($scope.route && data.metadata) {
       $scope.route.metadata = data.metadata;

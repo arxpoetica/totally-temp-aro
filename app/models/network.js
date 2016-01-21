@@ -277,4 +277,33 @@ Network.recalculate_nodes = function(plan_id, callback) {
   .end(callback);
 };
 
+Network.run_fttp = function(plan_id, data, callback) {
+  if (data.boundary) {
+    txain(function(callback) {
+      // select all the locations inside that boundary
+      // note: this could create duplicates!
+      var sql = `
+        INSERT INTO custom.route_targets (vertex_id, location_id, route_id)
+        (SELECT
+          vertex.id AS vertex_id, locations.id, $2 AS route_id
+        FROM
+          client.graph_vertices_pgr AS vertex
+        JOIN custom.boundaries
+          ON boundaries.id = $1
+        JOIN aro.locations locations
+          ON locations.geom && boundaries.geom
+          AND locations.geom && vertex.the_geom
+          AND st_contains(locations.geom, vertex.the_geom))
+      `
+      database.execute(sql, [data.boundary, plan_id], callback);
+    })
+    .then(function(callback) {
+      models.NetworkPlan.calculate_pg_route(plan_id, callback);
+    })
+    .end(callback)
+  } else {
+    models.NetworkPlan.calculate_pg_route(plan_id, callback);
+  }
+};
+
 module.exports = Network;

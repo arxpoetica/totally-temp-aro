@@ -329,6 +329,15 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
   };
 
+  $scope.fttp_boundary = function(boundary) {
+    var data = {
+      boundary: boundary.id,
+    };
+    $http.post('/network/nodes/'+$scope.route.id+'/fttp', data).success(function(response) {
+      $rootScope.$broadcast('route_planning_changed');
+    });
+  }
+
   $scope.delete_boundary = function(boundary) {
     tracker.track('Boundaries / Delete');
     swal({

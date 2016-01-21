@@ -64,6 +64,13 @@ exports.configure = function(api, middleware) {
     models.Network.recalculate_nodes(plan_id, jsonHandler(response, next));
   });
 
+  // Recalculate network nodes
+  api.post('/network/nodes/:plan_id/fttp', check_owner_permission, function(request, response, next) {
+    var plan_id = +request.params.plan_id;
+    var data = request.body;
+    models.Network.run_fttp(plan_id, data, jsonHandler(response, next));
+  });
+
   // Network node types
   api.get('/network/nodes', function(request, response, next) {
     models.Network.view_network_node_types(jsonHandler(response, next));
