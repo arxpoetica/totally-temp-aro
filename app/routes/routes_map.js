@@ -6,7 +6,12 @@ var _ = require('underscore');
 
 exports.configure = function(api, middleware) {
 
-  var public_config = _.pick(config, 'route_planning', 'ui', 'currency_symbol', 'client_carrier_name');
+  var public_config = _.pick(config,
+    'route_planning',
+    'ui',
+    'currency_symbol',
+    'client_carrier_name',
+    'displayable_client_carrier_name');
 
   api.get('/', function(request, response, next) {
     database.query('SELECT * FROM cities ORDER BY city_name ASC', function(err, cities) {

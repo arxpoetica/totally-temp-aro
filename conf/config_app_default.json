@@ -3,6 +3,7 @@
   "aro_service_url": "http://localhost:8080/aro-service",
   "client_schema": "client",
   "client_carrier_name": "VERIZON",
+  "displayable_client_carrier_name": "Client",
   "route_planning": true,
   "spend_by_city": false,
   "currency_symbol": "$",
