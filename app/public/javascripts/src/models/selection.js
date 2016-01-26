@@ -57,7 +57,7 @@ app.service('selection', function($rootScope, map_layers) {
   };
 
   selection.set_enabled = function(_enabled) {
-    enabled = _enabled && config.route_planning;
+    enabled = _enabled && config.route_planning.length > 0;
   };
 
   selection.is_enabled = function() {

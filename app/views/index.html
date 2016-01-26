@@ -173,7 +173,7 @@
                     <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Delete plan</a></li>
                   <li role="separator" class="divider" ng-show="route.owner_id === user_id"></li>
                   <li><a href="javascript:void(0)" ng-click="show_share_route(route)">Share…</a></li>
-                  <% if (config.route_planning) { %>
+                  <% if (config.route_planning.length > 0) { %>
                   <li><a href="javascript:void(0)" ng-click="export_kml_name()">Export KML…</a></li>
                   <% } %>
                 </ul>
@@ -198,6 +198,8 @@
             </p>
           </div>
         </div>
+
+        <hr>
 
         <div ng-controller="selection_tools_controller">
           <div ng-repeat="(key, tool) in available_tools" ng-show="route.owner_id === user_id">
@@ -275,7 +277,7 @@
                     data-placement="top" title="Customer profile" ng-click="show_customer_profile(boundary)">
                       <span class="fa fa-users"></span>
                   </a>
-                  <% if (config.route_planning === 'fttp') { %>
+                  <% if (config.route_planning.indexOf('fttp') >= 0) { %>
                   <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
                     title="FTTP" ng-click="fttp_boundary(boundary)">
                       <span class="fa fa-wrench"></span>
@@ -603,6 +605,31 @@
       </div>
     </div>
 
+    <% if (config.route_planning.length > 0) { %>
+    <div ng-controller="network-planning-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('network_planning')" class="map-tool panel panel-primary" id="network_planning_controller">
+        <div class="panel-heading" ng-bind="map_tools.get_tool_name('network_planning')">
+          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_planning')" ng-click="map_tools.collapse('network_planning')">
+            <span style="color:white" class="fa fa-chevron-up"></span>
+          </a>
+          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_planning')" ng-click="map_tools.expand('network_planning')">
+            <span style="color:white" class="fa fa-chevron-down"></span>
+          </a>
+          <!-- Panel header text set in above binding -->
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('network_planning')">
+            <form>
+              <div class="form-group form-group-sm">
+                <select class="form-control" ng-model="algorithm" ng-options="algorithm as algorithm.description for algorithm in algorithms" ng-change="change_algorithm()"></select>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
     <div id="map-canvas-wrapper">
       <div id="map-canvas"></div>
     </div>
@@ -691,6 +718,7 @@
   <script src="javascripts/lib/controllers/selection_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
+  <script src="javascripts/lib/controllers/network_planning_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
@@ -699,6 +727,7 @@
   <script src="javascripts/lib/models/map_tools.js"></script>
   <script src="javascripts/lib/models/custom_overlay.js"></script>
   <script src="javascripts/lib/models/map_layers.js"></script>
+  <script src="javascripts/lib/models/network_planning.js"></script>
   <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
   <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>
   <script>app.run(function(loader){})</script>

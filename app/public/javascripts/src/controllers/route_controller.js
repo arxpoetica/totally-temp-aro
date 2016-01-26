@@ -1,5 +1,5 @@
 // Route Controller
-app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', 'map_layers', function($scope, $rootScope, $http, selection, MapLayer, map_tools, map_layers) {
+app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', 'map_layers', 'network_planning', function($scope, $rootScope, $http, selection, MapLayer, map_tools, map_layers, network_planning) {
   // Controller instance variables
   $scope.map_tools = map_tools;
   $scope.selection = selection;
@@ -59,7 +59,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       $rootScope.$broadcast('route_changed_metadata', $scope.route);
       if (only_metadata) return;
 
-      if (config.route_planning) {
+      if (config.route_planning.length > 0) {
         selection.clear_selection();
 
         (data.metadata.targets || []).forEach(function(id) {
@@ -73,7 +73,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       }
     }
 
-    if (config.route_planning) {
+    if (config.route_planning.length > 0) {
       var route = new MapLayer({
         short_name: 'RT',
         name: 'Route',
@@ -99,6 +99,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
 
   $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {
     if (!$scope.route) return;
+    changes.algorithm = network_planning.getAlgorithm().id;
 
     if (layer.type === 'locations' || layer.type === 'network_nodes') {
       var url = '/network_plan/'+$scope.route.id+'/edit'

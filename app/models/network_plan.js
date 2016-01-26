@@ -61,7 +61,7 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   var fiber_cost;
 
   txain(function(callback) {
-    if (!config.route_planning) return callback();
+    if (config.route_planning.length === 0) return callback();
 
     txain(function(callback) {
       NetworkPlan.find_edges(plan_id, callback);
@@ -103,14 +103,14 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
     .end(callback);
   })
   .then(function(callback) {
-    if (config.route_planning) {
+    if (config.route_planning.length > 0) {
       CustomerProfile.customer_profile_for_route(plan_id, output.metadata, callback);
     } else {
       CustomerProfile.customer_profile_for_existing_fiber(plan_id, output.metadata, callback);
     }
   })
   .then(function(callback) {
-    if (!config.route_planning) return callback(null, output);
+    if (config.route_planning.length === 0) return callback(null, output);
 
     txain(function(callback) {
       RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost, callback);
@@ -150,8 +150,8 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   .end(callback);
 }
 
-NetworkPlan.recalculate_route = function(plan_id, callback) {
-  if (config.route_planning === 'fttp') return callback();
+NetworkPlan.recalculate_route = function(plan_id, algorithm, callback) {
+  if (algorithm !== 'shortest_path') return callback();
   NetworkPlan.calculate_pg_route(plan_id, callback);
 }
 
@@ -195,9 +195,9 @@ NetworkPlan.calculate_pg_route = function(plan_id, callback) {
   .end(callback);
 };
 
-NetworkPlan.recalculate_and_find_route = function(plan_id, callback) {
+NetworkPlan.recalculate_and_find_route = function(plan_id, algorithm, callback) {
   txain(function(callback) {
-    NetworkPlan.recalculate_route(plan_id, callback);
+    NetworkPlan.recalculate_route(plan_id, algorithm, callback);
   })
   .then(function(callback) {
     NetworkPlan.find_plan(plan_id, callback);
@@ -347,7 +347,7 @@ NetworkPlan.edit_route = function(plan_id, changes, callback) {
     delete_targets(plan_id, changes.deletions && changes.deletions.locations, callback);
   })
   .then(function() {
-    NetworkPlan.recalculate_and_find_route(plan_id, callback);
+    NetworkPlan.recalculate_and_find_route(plan_id, changes.algorithm, callback);
   })
   .end(callback);
 };
@@ -507,9 +507,6 @@ function delete_sources(plan_id, network_node_ids, callback) {
       WHERE route_id=$1 AND network_node_id=$2
     `
     database.execute(sql, [plan_id, network_node_id], callback);
-  })
-  .then(function() {
-    NetworkPlan.recalculate_and_find_route(plan_id, callback);
   })
   .end(callback);
 };

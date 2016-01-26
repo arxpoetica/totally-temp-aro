@@ -1,5 +1,5 @@
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', function($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer) {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', 'network_planning', function($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer, network_planning) {
   // Controller instance variables
   $scope.map_tools = map_tools;
   $scope.user_id = user_id;
@@ -220,7 +220,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   });
 
   $scope.recalculate_network_nodes = function() {
-    if (config.route_planning === 'fttp') {
+    if (network_planning.getAlgorithm().id === 'fttp') {
       var data = {};
       $http.post('/network/nodes/'+$scope.route.id+'/fttp', data).success(function(response) {
         $rootScope.$broadcast('route_planning_changed');
