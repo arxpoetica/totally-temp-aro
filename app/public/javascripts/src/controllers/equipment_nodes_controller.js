@@ -5,7 +5,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.user_id = user_id;
 
   $scope.selected_tool = null;
-  $scope.show_recalculate = config.ui.map_tools.equipment.actions.indexOf('recalculate') >= 0;
   $scope.show_clear_nodes = config.ui.map_tools.equipment.actions.indexOf('clear') >= 0;
 
   var network_nodes_layer = new MapLayer({
@@ -218,21 +217,5 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       });
     });
   });
-
-  $scope.recalculate_network_nodes = function() {
-    if (network_planning.getAlgorithm().id === 'fttp') {
-      var data = {};
-      $http.post('/network/nodes/'+$scope.route.id+'/fttp', data).success(function(response) {
-        $rootScope.$broadcast('route_planning_changed');
-      });
-    } else {
-      var data = {};
-      $http.post('/network/nodes/'+$scope.route.id+'/recalc', data).success(function(response) {
-        network_nodes_layer.reload_data();
-        $rootScope.$broadcast('equipment_nodes_changed');
-      });
-    }
-  };
-
 
 }]);

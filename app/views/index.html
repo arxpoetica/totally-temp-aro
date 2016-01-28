@@ -514,10 +514,6 @@
                 <hr>
                 <div class="row">
                   <div class="col-sm-12">
-                    <div ng-show="show_recalculate">
-                      <button class="btn btn-block btn-default btn-sm" ng-click="recalculate_network_nodes()">Recalculate network nodes</button>
-                      <br>
-                    </div>
                     <button class="btn btn-sm btn-danger btn-block"
                       ng-show="show_clear_nodes"
                       ng-click="clear_nodes()" type="button">Clear network nodes</button>
@@ -619,11 +615,12 @@
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('network_planning')">
-            <form>
-              <div class="form-group form-group-sm">
-                <select class="form-control" ng-model="algorithm" ng-options="algorithm as algorithm.description for algorithm in algorithms" ng-change="change_algorithm()"></select>
-              </div>
-            </form>
+            <div class="form-group form-group-sm">
+              <select class="form-control" ng-model="algorithm" ng-options="algorithm as algorithm.description for algorithm in algorithms" ng-change="change_algorithm()"></select>
+            </div>
+            <div ng-hide="algorithm.interactive">
+              <button class="btn btn-block btn-default btn-sm" ng-click="run_algorithm()">Run algorithm</button>
+            </div>
           </div>
         </div>
       </div>
