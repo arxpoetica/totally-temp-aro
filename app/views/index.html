@@ -277,9 +277,9 @@
                     data-placement="top" title="Customer profile" ng-click="show_customer_profile(boundary)">
                       <span class="fa fa-users"></span>
                   </a>
-                  <% if (config.route_planning.indexOf('fttp') >= 0) { %>
+                  <% if (config.route_planning.length >= 0) { %>
                   <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
-                    title="FTTP" ng-click="fttp_boundary(boundary)">
+                    title="Network planning" ng-click="network_planning_boundary(boundary)">
                       <span class="fa fa-wrench"></span>
                   </a>
                   <% } %>

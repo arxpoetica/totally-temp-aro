@@ -1,5 +1,5 @@
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', function($scope, $rootScope, $http, selection, map_tools, map_utils, map_layers, MapLayer, tracker) {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'network_planning', function($scope, $rootScope, $http, selection, map_tools, map_utils, map_layers, MapLayer, tracker, network_planning) {
 
   $scope.map_tools = map_tools;
   $scope.user_id = user_id;
@@ -329,11 +329,12 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
   };
 
-  $scope.fttp_boundary = function(boundary) {
+  $scope.network_planning_boundary = function(boundary) {
     var data = {
       boundary: boundary.id,
+      algorithm: network_planning.getAlgorithm().id,
     };
-    $http.post('/network/nodes/'+$scope.route.id+'/fttp', data).success(function(response) {
+    $http.post('/network/nodes/'+$scope.route.id+'/select_boundary', data).success(function(response) {
       $rootScope.$broadcast('route_planning_changed');
     });
   }

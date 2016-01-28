@@ -20,23 +20,25 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     $rootScope.$broadcast('contextual_menu_feature', options, map_layer, feature);
   };
 
-  $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
-    if (map_layer.type !== 'locations') return;
-    if (!network_planning.getAlgorithm().interactive) return;
-    options.add('See more information', function(map_layer, feature) {
+  if (config.route_planning.length === 0) {
+    $rootScope.$on('map_layer_clicked_feature', function(event, options, map_layer) {
+      if (map_layer.type !== 'locations') return;
+      // if (network_planning.getAlgorithm().interactive) return;
+      var feature = options.feature;
       var id = feature.getProperty('id');
-      open_location(id)
+      open_location(id);
+      tracker.track('Location selected');
     });
-  });
-
-  $rootScope.$on('map_layer_clicked_feature', function(event, options, map_layer) {
-    if (map_layer.type !== 'locations') return;
-    if (network_planning.getAlgorithm().interactive) return;
-    var feature = options.feature;
-    var id = feature.getProperty('id');
-    open_location(id);
-    tracker.track('Location selected');
-  });
+  } else {
+    $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
+      if (map_layer.type !== 'locations') return;
+      // if (!network_planning.getAlgorithm().interactive) return;
+      options.add('See more information', function(map_layer, feature) {
+        var id = feature.getProperty('id');
+        open_location(id)
+      });
+    });
+  }
 
   $rootScope.$on('open_location', function(event, id) {
     open_location(id);

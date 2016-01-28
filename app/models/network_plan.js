@@ -151,7 +151,6 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
 }
 
 NetworkPlan.recalculate_route = function(plan_id, algorithm, callback) {
-  if (algorithm !== 'shortest_path') return callback();
   NetworkPlan.calculate_pg_route(plan_id, callback);
 }
 
@@ -191,16 +190,6 @@ NetworkPlan.calculate_pg_route = function(plan_id, callback) {
       INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
     `
     database.execute(sql, [plan_id], callback);
-  })
-  .end(callback);
-};
-
-NetworkPlan.recalculate_and_find_route = function(plan_id, algorithm, callback) {
-  txain(function(callback) {
-    NetworkPlan.recalculate_route(plan_id, algorithm, callback);
-  })
-  .then(function(callback) {
-    NetworkPlan.find_plan(plan_id, callback);
   })
   .end(callback);
 };
@@ -346,8 +335,12 @@ NetworkPlan.edit_route = function(plan_id, changes, callback) {
   .then(function(callback) {
     delete_targets(plan_id, changes.deletions && changes.deletions.locations, callback);
   })
-  .then(function() {
-    NetworkPlan.recalculate_and_find_route(plan_id, changes.algorithm, callback);
+  .then(function(callback) {
+    if (changes.algorithm !== 'shortest_path') return callback();
+    NetworkPlan.recalculate_route(plan_id, changes.algorithm, callback);
+  })
+  .then(function(callback) {
+    NetworkPlan.find_plan(plan_id, callback);
   })
   .end(callback);
 };
