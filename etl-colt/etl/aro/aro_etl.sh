@@ -13,6 +13,10 @@ ${PSQL} -a -f $DIR/create_aro_fiber_plant.sql
 # Create aro.locations table from source_colt.locations table
 ${PSQL} -a -f $DIR/create_aro_locations.sql
 
+# Create aro.verizon_locations table from source_colt.verizon_buildings table
+# NOTE: this table is not used in the app, but just for queries requested by the client.
+${PSQL} -a -f $DIR/create_aro_verizon_locations.sql
+
 # Create aro.businesses table from source_colt.locations table
 ${PSQL} -a -f $DIR/create_aro_businesses.sql
 

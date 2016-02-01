@@ -76,3 +76,13 @@ $PSQL -f $DIR/create_colt_central_offices_frankfurt.sql
 cat /$DIR/local_data/colt_central_offices_frankfurt.csv | ${PSQL} -a -c "COPY source_colt.central_offices_frankfurt\
     (country,city,dsl_site_id,site,model,type,status,address,city_long,plz,lat,lon) \
     FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
+
+# Load Verizon buildings in Paris 
+$PSQL -f $DIR/create_colt_verizon_buildings.sql
+
+cat /$DIR/local_data/verizon_buildings_geocoded.csv | ${PSQL} -a -c "COPY source_colt.verizon_buildings\
+    (provider,postcode,city,address,verizon_nodename,lat,lon) \
+    FROM STDIN DELIMITER ',' CSV HEADER encoding 'windows-1251';"
+
+
+

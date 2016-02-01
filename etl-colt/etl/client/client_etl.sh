@@ -28,6 +28,10 @@ ${PSQL} -a -f $DIR/create_client_customer_types.sql
 # Create and load mapping tables for businesses and households to client's customer types
 ${PSQL} -a -f $DIR/create_client_customer_type_mapping.sql
 
+# Table for calculating distance from on net (customer) buildings to Verizon buildings
+# NOTE: this table is not used in the app, just for queries the client requested.
+${PSQL} -a -f $DIR/create_client_on_net_distance.sql
+
 # Create the tables for products and spend for a client
 ${PSQL} -a -f $DIR/create_client_spend.sql
 python $DIR/manage.py data spend values add $DIR/spend_data/
