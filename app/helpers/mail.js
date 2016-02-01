@@ -4,6 +4,13 @@ var AWS = require('aws-sdk');
 var helpers = require('../');
 var config = helpers.config;
 
+var region = process.env.AWS_REGION
+if (!region) {
+  region = 'us-east-1'
+  console.warn('NO AWS_REGION found. Using', region)
+}
+AWS.config.update({ region: region })
+
 var transporter = process.env.NODE_ENV === 'production'
   ? nodemailer.createTransport(ses({ ses: new AWS.SES() }))
   : nodemailer.createTransport(); // direct
