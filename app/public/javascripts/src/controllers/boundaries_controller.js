@@ -222,8 +222,13 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     var name = event.feature.getProperty('name');
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson(function(obj) {
-        tracker.track('Boundaries / Market profile');
-        $rootScope.$broadcast('boundary_selected', obj.geometry, name, 'market_size');
+        if (map_tools.is_visible('network_planning')) {
+          tracker.track('Boundaries / Network planning');
+          $scope.network_planning_boundary(obj.geometry);
+        } else {
+          tracker.track('Boundaries / Market profile');
+          $rootScope.$broadcast('boundary_selected', obj.geometry, name, 'market_size');
+        }
       });
     }
   });
@@ -253,7 +258,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
 
     overlay.marker.addListener('click', function() {
-      $scope.show_market_size(boundary);
+      if (map_tools.is_visible('network_planning')) {
+        $scope.run_network_planning(boundary);
+      } else {
+        $scope.show_market_size(boundary);
+      }
     });
 
     overlay.marker.addListener('mouseover', function() {
@@ -329,9 +338,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
   };
 
-  $scope.network_planning_boundary = function(boundary) {
+  $scope.network_planning_boundary = function(geojson) {
     var data = {
-      boundary: boundary.id,
+      // boundary: JSON.stringify(to_geo_json(boundary.overlay)),
+      boundary: geojson,
       algorithm: network_planning.getAlgorithm().id,
     };
     $http.post('/network/nodes/'+$scope.route.id+'/select_boundary', data).success(function(response) {
@@ -356,6 +366,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
           $scope.boundaries = _.reject($scope.boundaries, function(b) { return boundary.id === b.id; });
         });
     });
+  };
+
+  $scope.run_network_planning = function(boundary) {
+    tracker.track('Boundaries / Network planning');
+    $scope.network_planning_boundary(to_geo_json(boundary.overlay, true));
   };
 
   $scope.show_market_size = function(boundary) {

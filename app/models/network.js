@@ -287,16 +287,14 @@ Network.select_boundary = function(plan_id, data, callback) {
         vertex.id AS vertex_id, locations.id, $2 AS route_id
       FROM
         client.graph_vertices_pgr AS vertex
-      JOIN custom.boundaries
-        ON boundaries.id = $1
       JOIN aro.locations locations
-        ON locations.geom && boundaries.geom
+        ON ST_Intersects(ST_GeomFromGeoJSON($1)::geography, locations.geog)
         AND locations.geom && vertex.the_geom
         AND st_contains(locations.geom, vertex.the_geom))
     `
     database.execute(sql, [data.boundary, plan_id], callback);
   })
-  .then(function(callback) {
+  .then(function(count, callback) {
     models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
   })
   .end(callback);
