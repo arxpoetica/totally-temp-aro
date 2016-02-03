@@ -61,7 +61,7 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   var fiber_cost;
 
   txain(function(callback) {
-    if (!config.route_planning) return callback();
+    if (config.route_planning.length === 0) return callback();
 
     txain(function(callback) {
       NetworkPlan.find_edges(plan_id, callback);
@@ -101,14 +101,14 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
     .end(callback);
   })
   .then(function(callback) {
-    if (config.route_planning) {
+    if (config.route_planning.length > 0) {
       CustomerProfile.customer_profile_for_route(plan_id, output.metadata, callback);
     } else {
       CustomerProfile.customer_profile_for_existing_fiber(plan_id, output.metadata, callback);
     }
   })
   .then(function(callback) {
-    if (!config.route_planning) return callback(null, output);
+    if (config.route_planning.length === 0) return callback(null, output);
 
     txain(function(callback) {
       RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost, callback);
@@ -147,7 +147,11 @@ NetworkPlan.find_plan = function(plan_id, metadata_only, callback) {
   .end(callback);
 }
 
-NetworkPlan.recalculate_route = function(plan_id, callback) {
+NetworkPlan.recalculate_route = function(plan_id, algorithm, callback) {
+  NetworkPlan.calculate_pg_route(plan_id, callback);
+}
+
+NetworkPlan.calculate_pg_route = function(plan_id, callback) {
   txain(function(callback) {
     var sql = 'DELETE FROM custom.route_edges WHERE route_id=$1';
     database.execute(sql, [plan_id], callback);
@@ -158,9 +162,9 @@ NetworkPlan.recalculate_route = function(plan_id, callback) {
   })
   .then(function(callback) {
     var sql = `
-      (SELECT id, 1 FROM custom.route_sources WHERE route_id=$1 limit 1)
-      UNION
-      (SELECT id, 2 FROM custom.route_targets WHERE route_id=$1 limit 1)
+      (SELECT id FROM custom.route_sources WHERE route_id=$1 limit 1)
+      UNION ALL
+      (SELECT id FROM custom.route_targets WHERE route_id=$1 limit 1)
     `
     database.query(sql, [plan_id], callback);
   })
@@ -183,16 +187,6 @@ NetworkPlan.recalculate_route = function(plan_id, callback) {
       INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
     `
     database.execute(sql, [plan_id], callback);
-  })
-  .end(callback);
-};
-
-NetworkPlan.recalculate_and_find_route = function(plan_id, callback) {
-  txain(function(callback) {
-    NetworkPlan.recalculate_route(plan_id, callback);
-  })
-  .then(function(callback) {
-    NetworkPlan.find_plan(plan_id, callback);
   })
   .end(callback);
 };
@@ -337,8 +331,12 @@ NetworkPlan.edit_route = function(plan_id, changes, callback) {
   .then(function(callback) {
     delete_targets(plan_id, changes.deletions && changes.deletions.locations, callback);
   })
-  .then(function() {
-    NetworkPlan.recalculate_and_find_route(plan_id, callback);
+  .then(function(callback) {
+    if (changes.algorithm !== 'shortest_path') return callback();
+    NetworkPlan.recalculate_route(plan_id, changes.algorithm, callback);
+  })
+  .then(function(callback) {
+    NetworkPlan.find_plan(plan_id, callback);
   })
   .end(callback);
 };
@@ -498,9 +496,6 @@ function delete_sources(plan_id, network_node_ids, callback) {
       WHERE route_id=$1 AND network_node_id=$2
     `
     database.execute(sql, [plan_id, network_node_id], callback);
-  })
-  .then(function() {
-    NetworkPlan.recalculate_and_find_route(plan_id, callback);
   })
   .end(callback);
 };

@@ -51,7 +51,7 @@ function empty_array(arr) {
 function prepareMarketSizeQuery(plan_id, type, options, params) {
   var sql = '';
   if (type === 'route' || type === 'addressable') {
-    if (config.route_planning) {
+    if (config.route_planning.length > 0) {
       sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
       // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
       params.push(plan_id);

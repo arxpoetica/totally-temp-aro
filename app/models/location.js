@@ -102,7 +102,7 @@ Location.density = function(plan_id, viewport, callback) {
 			JOIN locations ON fishnet.geom && locations.geom
 			GROUP BY fishnet.geom
 		`
-		if (config.route_planning) {
+		if (config.route_planning.length > 0) {
 			params.push(plan_id);
 			sql += `
 				UNION ALL

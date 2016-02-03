@@ -1,11 +1,10 @@
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', function($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer) {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', 'network_planning', function($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer, network_planning) {
   // Controller instance variables
   $scope.map_tools = map_tools;
   $scope.user_id = user_id;
 
   $scope.selected_tool = null;
-  $scope.show_recalculate = config.ui.map_tools.equipment.actions.indexOf('recalculate') >= 0;
   $scope.show_clear_nodes = config.ui.map_tools.equipment.actions.indexOf('clear') >= 0;
 
   var network_nodes_layer = new MapLayer({
@@ -94,7 +93,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('route_selected', function(e, route) {
     $scope.route = route;
     if (!route) return;
-    
+
     map.ready(function() {
       fiber_plant_layer.show();
     });
@@ -218,14 +217,5 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       });
     });
   });
-
-  $scope.recalculate_network_nodes = function() {
-    var data = {};
-    $http.post('/network/nodes/'+$scope.route.id+'/recalc', data).success(function(response) {
-      network_nodes_layer.reload_data();
-      $rootScope.$broadcast('equipment_nodes_changed');
-    });
-  };
-
 
 }]);
