@@ -11,12 +11,8 @@ var _ = require('underscore');
 var RouteOptimizer = {};
 
 RouteOptimizer.calculate_fiber_cost = function(edges, cost_per_meter, callback) {
-  return cost_per_meter * edges.map(function(edge) {
-    return edge.edge_length;
-  })
-  .reduce(function(total, current) {
-    return total + current
-  }, 0);
+  return cost_per_meter * edges.map(edge => edge.edge_length)
+  .reduce((total, current) => total + current, 0);
 };
 
 RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
@@ -119,12 +115,10 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(plan_id, callback) {
     database.query(sql, [plan_id], callback);
   })
   .then(function(nodes, callback) {
-    nodes.forEach(function(node) {
+    nodes.forEach(node => {
       node.value = (cost[node.key] || 0) * node.count;
     });
-    var total = nodes.reduce(function(total, node) {
-      return total + node.value;
-    }, 0);
+    var total = nodes.reduce((total, node) => total + node.value, 0);
     callback(null, {
       equipment_node_types: nodes,
       total: total,
@@ -172,11 +166,8 @@ RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callbac
 
     var revenue = _.findWhere(route_annual_revenues, { year: year });
     revenue = (revenue && revenue.value) || 0;
-    var past_five_years = _.filter(route_annual_revenues, function(row) {
-      return row.year >= year-5 && row.year < year;
-    });
+    var past_five_years = _.filter(route_annual_revenues, row => row.year >= year-5 && row.year < year);
     var npv = RouteOptimizer.calculate_npv(past_five_years, fiber_cost);
-
     callback(null, { revenue: revenue, npv: npv });
   })
   .end(callback);
@@ -190,7 +181,7 @@ RouteOptimizer.calculate_npv = function(revenues, up_front_costs) {
   var customer_cost_rate = 0.2; // 20% of the revenue for the year is ongoing costs
   var annual_pvs = [];
 
-  revenues.forEach(function(row) {
+  revenues.forEach(row => {
     var revenue = row.value;
     var i = annual_pvs.length;
     var value;

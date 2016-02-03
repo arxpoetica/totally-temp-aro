@@ -61,7 +61,16 @@ exports.configure = function(api, middleware) {
   // Recalculate network nodes
   api.post('/network/nodes/:plan_id/recalc', check_owner_permission, function(request, response, next) {
     var plan_id = +request.params.plan_id;
-    models.Network.recalculate_nodes(plan_id, jsonHandler(response, next));
+    var algorithm = request.body.algorithm;
+    models.NetworkPlan.recalculate_route(plan_id, algorithm, jsonHandler(response, next));
+    // models.Network.recalculate_nodes(plan_id, jsonHandler(response, next));
+  });
+
+  // Recalculate network nodes
+  api.post('/network/nodes/:plan_id/select_boundary', check_owner_permission, function(request, response, next) {
+    var plan_id = +request.params.plan_id;
+    var data = request.body;
+    models.Network.select_boundary(plan_id, data, jsonHandler(response, next));
   });
 
   // Network node types

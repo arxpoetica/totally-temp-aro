@@ -25,16 +25,14 @@ CountySubdivision.find_by_statefp = function(statefp, viewport, callback) {
 	  database.query(sql, params, callback);
 	})
 	.then(function(rows, callback) {
-		var features = rows.map(function(row) {
-			return {
-				'type': 'Feature',
-				'properties': {
-					'id': row.id,
-					'name': row.name,
-				},
-				'geometry': row.geom,
-			}
-		});
+		var features = rows.map(row => ({
+			'type': 'Feature',
+			'properties': {
+				'id': row.id,
+				'name': row.name,
+			},
+			'geometry': row.geom,
+		}));
 
 		var output = {
 			'feature_collection': {

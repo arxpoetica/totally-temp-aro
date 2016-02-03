@@ -9,16 +9,16 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
       icon: 'glyphicon glyphicon-hand-up',
       name: 'No selection',
     },
-    'rectangle': {
-      icon: 'glyphicon glyphicon-fullscreen',
-      name: 'Rectangle selection tool',
-    },
+    // 'rectangle': {
+    //   icon: 'glyphicon glyphicon-fullscreen',
+    //   name: 'Rectangle selection tool',
+    // },
     'polygon': {
       icon: 'glyphicon glyphicon-screenshot',
       name: 'Polygon selection tool',
     },
   };
-  if (!config.route_planning) {
+  if (config.route_planning.length === 0) {
     $scope.available_tools = [];
   }
   $scope.user_id = user_id;

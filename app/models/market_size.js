@@ -51,7 +51,7 @@ function empty_array(arr) {
 function prepareMarketSizeQuery(plan_id, type, options, params) {
   var sql = '';
   if (type === 'route' || type === 'addressable') {
-    if (config.route_planning) {
+    if (config.route_planning.length > 0) {
       sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
       // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
       params.push(plan_id);
@@ -161,7 +161,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     output.market_size_existing = []; // TODO
 
     var current_carrier;
-    var total = output.fair_share.reduce(function(total, item) {
+    var total = output.fair_share.reduce((total, item) => {
       if (item.name === config.client_carrier_name) {
         current_carrier = item.value;
       }
@@ -213,7 +213,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
     `
-    carriers.forEach(function(carrier) {
+    carriers.forEach(carrier => {
       sql += '\n  MIN(d.distance_'+carrier.id+') AS distance_'+carrier.id+','
     })
     sql += `
@@ -310,7 +310,7 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
         MAX(e.value_range) AS number_of_employees,
         MAX(ct.name) AS type,
     `
-    carriers.forEach(function(carrier) {
+    carriers.forEach(carrier => {
       sql += '\n  MIN(d.distance_'+carrier.id+') AS distance_'+carrier.id+','
     })
     sql += `
@@ -381,31 +381,29 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
 function create_businesses_csv(plan_id, user, rows, filters, carriers, callback) {
   txain(function(callback) {
     var years = [];
-    rows.forEach(function(business) {
+    rows.forEach(business => {
       if (years.indexOf(business.year) === -1) {
         years.push(business.year);
       }
     });
     years = years.sort();
     var columns = ['name', 'address']
-      .concat(carriers.map(function(carrier) { return 'distance_'+carrier.id }))
+      .concat(carriers.map(carrier => 'distance_'+carrier.id ))
       .concat(['industry_name', 'industry_description', 'number_of_employees', 'type'])
       .concat(years);
     var businesses = {};
-    rows.forEach(function(business) {
+    rows.forEach(business => {
       var id = business.id;
       business[business.year] = business.total;
       businesses[id] = _.extend(businesses[id] || {}, business);
     });
     businesses = _.values(businesses);
     var year = String(new Date().getFullYear());
-    var total = businesses.reduce(function(total, business) {
+    var total = businesses.reduce((total, business) => {
       return total + (business[year] || 0);
     }, 0);
-    businesses = _.values(businesses).map(function(business) {
-      return columns.map(function(col) {
-        return business[col];
-      });
+    businesses = _.values(businesses).map(business => {
+      return columns.map(col => business[col]);
     });
     this.set('years', years);
     this.set('total', total);
@@ -415,7 +413,7 @@ function create_businesses_csv(plan_id, user, rows, filters, carriers, callback)
   .then(function(csv, callback) {
     var years = this.get('years');
     var header = ['Name', 'Address']
-      .concat(carriers.map(function(carrier) { return 'Distance to '+carrier.name }))
+      .concat(carriers.map(carrier => 'Distance to '+carrier.name ))
       .concat(['Industry name', 'Industry description', 'Number of employees', 'Type'])
       .concat(years);
     csv = header.join(',')+'\n'+csv;
@@ -460,25 +458,19 @@ function create_businesses_csv(plan_id, user, rows, filters, carriers, callback)
     var industries = this.get('industries');
     if (industries.length > 0) {
       footer.push(['Industries Included In Market Sizing']);
-      industries.forEach(function(industry) {
-        footer.push(['', industry.industry_name]);
-      });
+      industries.forEach(industry => footer.push(['', industry.industry_name]));
       footer.push([]);
     }
     var products = this.get('products');
     if (products.length > 0) {
       footer.push(['Products Included In Market Sizing']);
-      products.forEach(function(product) {
-        footer.push(['', product.product_type, product.product_name]);
-      });
+      products.forEach(product => footer.push(['', product.product_type, product.product_name]));
       footer.push([]);
     }
     var employees_by_location = this.get('employees_by_location');
     if (employees_by_location.length > 0) {
       footer.push(['Employee Ranges Included In Market Sizing']);
-      employees_by_location.forEach(function(range) {
-        footer.push(['', range.value_range]);
-      });
+      employees_by_location.forEach(range => footer.push(['', range.value_range]));
       footer.push([]);
     }
     footer.push([]);
@@ -562,7 +554,7 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
     output.fair_share = fair_share;
 
     var current_carrier = 0;
-    var total = output.fair_share.reduce(function(total, item) {
+    var total = output.fair_share.reduce((total, item) => {
       if (item.name === config.client_carrier_name) {
         current_carrier = item.value;
       }
@@ -660,18 +652,16 @@ MarketSize.fair_share_heatmap = function(viewport, callback) {
   .then(function(rows, callback) {
     rows = rows.filter(row => row.carrier_total > 0);
 
-    var features = rows.map(function(row) {
-      return {
-        'type':'Feature',
-        'properties': {
-          'id': row.id,
-          'density': row.carrier_total === 0 ? 0 : ((row.carrier_current)*100 / row.carrier_total),
-          'carrier_total': row.carrier_total,
-          'carrier_current': row.carrier_current,
-        },
-        'geometry': row.geom,
-      };
-    });
+    var features = rows.map(row => ({
+      'type':'Feature',
+      'properties': {
+        'id': row.id,
+        'density': row.carrier_total === 0 ? 0 : ((row.carrier_current)*100 / row.carrier_total),
+        'carrier_total': row.carrier_total,
+        'carrier_current': row.carrier_current,
+      },
+      'geometry': row.geom,
+    }));
 
     var output = {
       'feature_collection': {
