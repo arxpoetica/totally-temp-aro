@@ -27,11 +27,14 @@ ${PSQL} -a -f $DIR/create_aro_industries.sql
 # Create aro.businesses table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_businesses.sql
 
-# Create aro.cities table
-${PSQL} -a -f $DIR/create_aro_cities.sql
-
 # Create aro.locations table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_locations.sql
 
+# Create aro.cities table
+${PSQL} -a -f $DIR/create_aro_cities.sql
+
 # Create aro.aro_household_summary table. This will reference the locations table
 ${PSQL} -a -f $DIR/create_aro_households.sql
+
+# Create aro.towers table from sita.towers table
+${PSQL} -a -f $DIR/create_aro_towers.sql
