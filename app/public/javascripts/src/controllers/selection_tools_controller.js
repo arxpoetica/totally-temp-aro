@@ -78,4 +78,30 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   document.addEventListener('keydown', update_selection_tools);
   document.addEventListener('keyup', update_selection_tools);
 
+  if (config.route_planning.length > 0) {
+    $scope.algorithm = config.route_planning[0];
+    
+    var descriptions = {
+      'fttp': 'FTTP',
+      'shortest_path': 'Shortest path',
+    };
+    $('#network_planning_selector').popover({
+      content: function() {
+        return config.route_planning.map((algorithm) => (
+          `<p>
+            <input type="radio" name="algorithm" value=${algorithm}
+              ${algorithm === $scope.algorithm ? 'checked' : ''}
+              onclick="network_planning_changed(this.value)">
+              ${descriptions[algorithm]}
+          </p>`
+        )).join('')
+      },
+      html: true,
+    });
+  }
+
+  window.network_planning_changed = function(value) {
+    $scope.algorithm = value;
+  };
+
 });

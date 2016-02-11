@@ -393,3 +393,7 @@ footer nav {
 #top_bar_tools .label span {
   display: block;
 }
+
+.popover {
+  width: 200px;
+}

@@ -211,6 +211,14 @@
                 ng-click="set_selected_tool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
             </p>
           </div>
+
+          <% if (config.route_planning.length > 0) { %>
+          <p>
+            <a class="btn btn-sm btn-default btn-block"
+              data-toggle="popover" id="network_planning_selector"><span class="fa fa-exchange"></span>
+            </a>
+          </p>
+          <% } %>
         </div>
 
       </div>
