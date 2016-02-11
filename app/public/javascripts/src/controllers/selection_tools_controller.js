@@ -6,7 +6,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   $scope.selected_tool = null;
   $scope.available_tools = {
     '': {
-      icon: 'glyphicon glyphicon-hand-up',
+      icon: 'fa fa-mouse-pointer',
       name: 'No selection',
     },
     // 'rectangle': {
