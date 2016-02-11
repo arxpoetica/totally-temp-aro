@@ -1,7 +1,7 @@
 // Selection Tools Controller
 //
 // Handles display of and interaction with all layers of the map
-app.controller('selection_tools_controller', function($rootScope, $scope) {
+app.controller('selection_tools_controller', function($rootScope, $scope, network_planning) {
 
   $scope.selected_tool = null;
   $scope.available_tools = {
@@ -79,8 +79,6 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   document.addEventListener('keyup', update_selection_tools);
 
   if (config.route_planning.length > 0) {
-    $scope.algorithm = config.route_planning[0];
-    
     var descriptions = {
       'fttp': 'FTTP',
       'shortest_path': 'Shortest path',
@@ -89,19 +87,19 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
       content: function() {
         return config.route_planning.map((algorithm) => (
           `<p>
-            <input type="radio" name="algorithm" value=${algorithm}
-              ${algorithm === $scope.algorithm ? 'checked' : ''}
+            <input type="radio" name="algorithm" value="${algorithm}"
+              ${algorithm === network_planning.getAlgorithm() ? 'checked' : ''}
               onclick="network_planning_changed(this.value)">
               ${descriptions[algorithm]}
           </p>`
-        )).join('')
+        )).join('');
       },
       html: true,
     });
   }
 
   window.network_planning_changed = function(value) {
-    $scope.algorithm = value;
+    network_planning.setAlgorithm(value);
   };
 
 });

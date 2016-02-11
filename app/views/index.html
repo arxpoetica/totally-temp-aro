@@ -610,32 +610,6 @@
       </div>
     </div>
 
-    <% if (config.route_planning.length > 0) { %>
-    <div ng-controller="network-planning-controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('network_planning')" class="map-tool panel panel-primary" id="network_planning_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('network_planning')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_planning')" ng-click="map_tools.collapse('network_planning')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_planning')" ng-click="map_tools.expand('network_planning')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-          <!-- Panel header text set in above binding -->
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('network_planning')">
-            <div class="form-group form-group-sm">
-              <select class="form-control" ng-model="algorithm" ng-options="algorithm as algorithm.description for algorithm in algorithms" ng-change="change_algorithm()"></select>
-            </div>
-            <div ng-hide="algorithm.interactive">
-              <button class="btn btn-block btn-default btn-sm" ng-click="run_algorithm()">Run algorithm</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <% } %>
-
     <div id="map-canvas-wrapper">
       <div id="map-canvas"></div>
     </div>

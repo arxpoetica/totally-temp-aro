@@ -105,12 +105,6 @@ app.service('map_tools', ['$rootScope', 'tracker', function($rootScope, tracker)
       short_name: 'S',
       icon: 'fa fa-search',
     },
-    {
-      id: 'network_planning',
-      name: 'Network Planning',
-      short_name: 'N',
-      icon: 'fa fa-exchange',
-    },
   ];
 
   return tools;
