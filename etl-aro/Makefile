@@ -98,7 +98,7 @@ test:
 	(cd ../app && npm test)
 
 webserver:
-	(cd ../app && node app.js)
+	(cd ../app && ARO_CLIENT=aro node app.js)
 
 register_user:
 	node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password

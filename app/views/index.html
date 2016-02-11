@@ -242,7 +242,7 @@
           <!-- Panel header text set in above binding -->
         </div>
         <div class="panel-body" ng-show="map_tools.is_expanded('boundaries')">
-          <div ng-show="area_layers.length > 0 || boundaries.length > 0 ">
+          <div ng-show="number_of_area_layers() > 0 || boundaries.length > 0">
             <h2>View</h2>
             <div ng-repeat="(key, layer) in area_layers">
               <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">

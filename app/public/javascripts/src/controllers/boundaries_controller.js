@@ -394,4 +394,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     });
   };
 
+  $scope.number_of_area_layers = function() {
+    return _.size(area_layers);
+  }
+
 }]);
