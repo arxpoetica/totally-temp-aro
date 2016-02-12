@@ -32,6 +32,11 @@ exports.configure = function(api, middleware) {
     models.Network.carriers(plan_id, jsonHandler(response, next));
   });
 
+  api.get('/network/towers', middleware.viewport, function(request, response, next) {
+    var viewport = request.viewport;
+    models.Network.view_towers(viewport, jsonHandler(response, next));
+  });
+
   // Network nodes for user client by node type
   api.get('/network/nodes/:node_type', function(request, response, next) {
     var node_type = request.params.node_type;

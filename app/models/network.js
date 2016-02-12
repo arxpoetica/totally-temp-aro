@@ -83,6 +83,40 @@ Network.view_fiber_plant_for_competitors = function(viewport, callback) {
   .end(callback)
 };
 
+// View existing fiber plant for competitors
+Network.view_towers = function(viewport, callback) {
+  txain(function(callback) {
+    if (viewport.zoom > viewport.threshold) {
+      var sql = `
+        SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.towers WHERE
+        ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), geom)
+      `;
+      database.query(sql, [viewport.linestring], callback);
+    } else {
+      callback(null, []);
+    }
+  })
+  .then(function(rows, callback) {
+    var features = rows.map(function(row) {
+      return {
+        type: 'Feature',
+        geometry: row.geom,
+        properties: {
+        }
+      }
+    })
+
+    var output = {
+      'feature_collection': {
+        'type':'FeatureCollection',
+        'features': features
+      },
+    };
+    callback(null, output)
+  })
+  .end(callback)
+};
+
 // View existing fiber plant for competitors with a heat map
 Network.view_fiber_plant_density = function(viewport, callback) {
   txain(function(callback) {
