@@ -215,6 +215,7 @@
           <% if (config.route_planning.length > 0) { %>
           <p>
             <a class="btn btn-sm btn-default btn-block"
+              ng-class="{'btn-success active': network_planning.getAlgorithm()}"
               data-toggle="popover" id="network_planning_selector"><span class="fa fa-exchange"></span>
             </a>
           </p>

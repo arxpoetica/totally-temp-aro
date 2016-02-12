@@ -4,6 +4,7 @@
 app.controller('selection_tools_controller', function($rootScope, $scope, network_planning) {
 
   $scope.selected_tool = null;
+  $scope.network_planning = network_planning;
   $scope.available_tools = {
     '': {
       icon: 'fa fa-mouse-pointer',
@@ -26,6 +27,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope, networ
   $rootScope.$on('route_selected', (e, route) => $scope.route = route);
 
   $scope.is_selected_tool = function(name) {
+    if (network_planning.getAlgorithm()) return false;
     return drawingManager.getDrawingMode() === (name ? name : null);
   };
 
@@ -36,6 +38,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope, networ
   $scope.set_selected_tool = function(name) {
     name = name ? name : null;
     drawingManager.old_drawing_mode = name;
+    network_planning.setAlgorithm(null);
     return drawingManager.setDrawingMode(name);
   };
 
@@ -79,18 +82,14 @@ app.controller('selection_tools_controller', function($rootScope, $scope, networ
   document.addEventListener('keyup', update_selection_tools);
 
   if (config.route_planning.length > 0) {
-    var descriptions = {
-      'fttp': 'FTTP',
-      'shortest_path': 'Shortest path',
-    };
     $('#network_planning_selector').popover({
       content: function() {
         return config.route_planning.map((algorithm) => (
           `<p>
             <input type="radio" name="algorithm" value="${algorithm}"
-              ${algorithm === network_planning.getAlgorithm() ? 'checked' : ''}
+              ${network_planning.getAlgorithm() && algorithm === network_planning.getAlgorithm().id ? 'checked' : ''}
               onclick="network_planning_changed(this.value)">
-              ${descriptions[algorithm]}
+              ${network_planning.findAlgorithm(algorithm).description}
           </p>`
         )).join('');
       },
@@ -99,7 +98,14 @@ app.controller('selection_tools_controller', function($rootScope, $scope, networ
   }
 
   window.network_planning_changed = function(value) {
-    network_planning.setAlgorithm(value);
+    network_planning.setAlgorithm(network_planning.findAlgorithm(value));
+    setTimeout(function() {
+      $('#network_planning_selector').click();
+    }, 300);
+    if (value) {
+      drawingManager.setDrawingMode(null);
+    }
+    $scope.$apply();
   };
 
 });

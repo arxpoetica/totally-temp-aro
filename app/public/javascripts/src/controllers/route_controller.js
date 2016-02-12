@@ -99,6 +99,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
 
   $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {
     if (!$scope.route) return;
+    if (!network_planning.getAlgorithm()) return;
     changes.algorithm = network_planning.getAlgorithm().id;
 
     if (layer.type === 'locations' || layer.type === 'network_nodes') {
