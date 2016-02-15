@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="web_services">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="aro-interfaces-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/aro-interfaces/aro-interfaces">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="aro-utils-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/aro-utils/aro-utils">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="aro-core-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/aro-core/aro-core">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="aro-engine-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/aro-engine/aro-engine">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="java-output-path" value="/web_services/target/classes"/>
+        <property name="component.exclusion.patterns" value="src/test/**"/>
+        <property name="context-root" value="aro-service"/>
+    </wb-module>
+</project-modules>
