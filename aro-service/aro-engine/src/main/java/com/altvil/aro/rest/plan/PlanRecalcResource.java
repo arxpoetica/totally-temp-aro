@@ -1,6 +1,5 @@
 package com.altvil.aro.rest.plan;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.Consumes;
@@ -9,10 +8,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.altvil.aro.service.MainEntry;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.recalc.RecalcException;

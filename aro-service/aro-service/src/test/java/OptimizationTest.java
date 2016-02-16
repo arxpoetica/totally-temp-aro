@@ -7,7 +7,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 
-import com.altvil.optimization.controllers.OptimizationResponse;
 import com.altvil.optimization.controllers.OptimizationRestService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
