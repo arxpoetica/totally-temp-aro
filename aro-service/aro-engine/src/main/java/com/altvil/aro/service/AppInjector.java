@@ -4,8 +4,6 @@ import com.altvil.aro.service.config.ConfigService;
 import com.altvil.aro.service.config.impl.ConfigServiceImpl;
 import com.altvil.aro.service.dao.DAOService;
 import com.altvil.aro.service.dao.impl.DAOServiceImpl;
-import com.altvil.aro.service.graph.GraphService;
-import com.altvil.aro.service.graph.impl.GraphServiceImpl;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.node.impl.GraphNodeFactoryImpl;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
@@ -26,7 +24,7 @@ public class AppInjector extends AbstractModule  {
 		bind(PersistenceService.class).to(HibernatePersistence.class) ;
 		bind(DAOService.class).to(DAOServiceImpl.class) ;
 		bind(GraphNodeFactory.class).to(GraphNodeFactoryImpl.class) ;
-		bind(GraphService.class).to(GraphServiceImpl.class) ;
+		//bind(GraphService.class).to(GraphServiceImpl.class) ;
 		bind(GraphTransformerFactory.class).to(GraphTransformerFactoryImpl.class) ;
 		bind(PlanService.class).to(PlanServiceImpl.class) ;
 		bind(RecalcService.class).to(RecalcServiceImpl.class) ;

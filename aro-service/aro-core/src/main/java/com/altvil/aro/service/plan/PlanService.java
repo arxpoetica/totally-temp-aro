@@ -1,9 +1,9 @@
 package com.altvil.aro.service.plan;
 
+import java.util.Optional;
+
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
-
-import java.util.Optional;
 
 public interface PlanService {
 

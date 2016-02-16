@@ -1,9 +1,11 @@
 package com.altvil.aro.service.recalc;
 
-import com.altvil.aro.service.plan.RecalcRequest;
+import java.util.Collection;
+import java.util.concurrent.Callable;
 
 public interface RecalcService {
 
-	public Job submit(RecalcRequest job) throws RecalcException;
+	public <T> Job<T> submit(Callable<T> task) throws RecalcException;
+	public Collection<Job<?>> getRemainingJobs() ;
 
 }

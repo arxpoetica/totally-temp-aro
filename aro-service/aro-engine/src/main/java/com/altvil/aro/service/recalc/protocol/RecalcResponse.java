@@ -2,10 +2,11 @@ package com.altvil.aro.service.recalc.protocol;
 
 import java.util.Date;
 
-public class RecalcResponse {
+public class RecalcResponse<T> {
 
 	private RecalcJob job;
 
+	public T result;
 	private Long runningTime;
 	private Date completedTime;
 	private boolean success;
@@ -49,6 +50,14 @@ public class RecalcResponse {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public T getResult() {
+		return result;
+	}
+
+	public void setResult(T result) {
+		this.result = result;
 	}
 
 }
