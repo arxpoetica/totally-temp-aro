@@ -1,12 +1,13 @@
 // Selection Tools Controller
 //
 // Handles display of and interaction with all layers of the map
-app.controller('selection_tools_controller', function($rootScope, $scope) {
+app.controller('selection_tools_controller', function($rootScope, $scope, network_planning) {
 
   $scope.selected_tool = null;
+  $scope.network_planning = network_planning;
   $scope.available_tools = {
     '': {
-      icon: 'glyphicon glyphicon-hand-up',
+      icon: 'fa fa-mouse-pointer',
       name: 'No selection',
     },
     // 'rectangle': {
@@ -26,6 +27,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   $rootScope.$on('route_selected', (e, route) => $scope.route = route);
 
   $scope.is_selected_tool = function(name) {
+    if (network_planning.getAlgorithm()) return false;
     return drawingManager.getDrawingMode() === (name ? name : null);
   };
 
@@ -36,6 +38,7 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
   $scope.set_selected_tool = function(name) {
     name = name ? name : null;
     drawingManager.old_drawing_mode = name;
+    network_planning.setAlgorithm(null);
     return drawingManager.setDrawingMode(name);
   };
 
@@ -77,5 +80,32 @@ app.controller('selection_tools_controller', function($rootScope, $scope) {
 
   document.addEventListener('keydown', update_selection_tools);
   document.addEventListener('keyup', update_selection_tools);
+
+  if (config.route_planning.length > 0) {
+    $('#network_planning_selector').popover({
+      content: function() {
+        return config.route_planning.map((algorithm) => (
+          `<p>
+            <input type="radio" name="algorithm" value="${algorithm}"
+              ${network_planning.getAlgorithm() && algorithm === network_planning.getAlgorithm().id ? 'checked' : ''}
+              onclick="network_planning_changed(this.value)">
+              ${network_planning.findAlgorithm(algorithm).description}
+          </p>`
+        )).join('');
+      },
+      html: true,
+    });
+  }
+
+  window.network_planning_changed = function(value) {
+    network_planning.setAlgorithm(network_planning.findAlgorithm(value));
+    setTimeout(function() {
+      $('#network_planning_selector').click();
+    }, 300);
+    if (value) {
+      drawingManager.setDrawingMode(null);
+    }
+    $scope.$apply();
+  };
 
 });

@@ -18,8 +18,8 @@
             <div class="col-sm-8">
               <select style="width: 100%">
                 <option></option>
-                <% cities.forEach(function(city) { %>
-                  <option value="<%= city.city_name %>, <%= city.country_name %>"><%= city.city_name %>, <%= city.country_name %></option>
+                <% areas.forEach(function(area) { %>
+                  <option value="<%= area.value %>"><%= area.name %></option>
                 <% }) %>
               </select>
               <div style="width:100%; height:100%; padding: 20px 0">

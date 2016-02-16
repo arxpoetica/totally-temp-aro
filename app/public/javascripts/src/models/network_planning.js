@@ -11,10 +11,14 @@ app.service('network_planning', ['$rootScope', function($rootScope) {
     interactive: interactive.indexOf(id) >= 0,
     description: descriptions[id],
   }));
-  var algorithm = algorithms[0] || { id: 'none', description: 'none', interactive: false };
+  var algorithm;
 
   planning.algorithms = function() {
     return algorithms;
+  }
+
+  planning.findAlgorithm = function(algorithm) {
+    return algorithms.find((obj) => algorithm === obj.id);
   }
 
   planning.getAlgorithm = function() {

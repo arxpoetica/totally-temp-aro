@@ -222,7 +222,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     var name = event.feature.getProperty('name');
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson(function(obj) {
-        if (map_tools.is_visible('network_planning')) {
+        if (network_planning.getAlgorithm()) {
           tracker.track('Boundaries / Network planning');
           $scope.network_planning_boundary(obj.geometry);
         } else {
@@ -393,5 +393,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
       $rootScope.$broadcast('boundary_selected', obj.geometry, layer.name);
     });
   };
+
+  $scope.number_of_area_layers = function() {
+    return _.size(area_layers);
+  }
 
 }]);
