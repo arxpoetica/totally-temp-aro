@@ -41,8 +41,24 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     reload: 'always',
   });
 
+  var towers_layer = new MapLayer({
+    name: 'Towers',
+    type: 'towers',
+    short_name: 'T',
+    api_endpoint: '/network/towers',
+    style_options: {
+      normal: {
+        icon: '/images/map_icons/central_office.png',
+        visible: true,
+      },
+    },
+    threshold: 8,
+    reload: 'always',
+  });
+
   map_layers.addEquipmentLayer(network_nodes_layer);
   map_layers.addEquipmentLayer(fiber_plant_layer);
+  map_layers.addEquipmentLayer(towers_layer);
 
   $scope.equipment_layers = map_layers.equipment_layers;
 

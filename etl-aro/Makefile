@@ -9,6 +9,9 @@ etl_tiger_census_blocks:
 
 etl_tiger: etl_tiger_cousub etl_tiger_edges etl_tiger_census_blocks
 
+etl_sita: 
+	etl/sita/sita_etl.sh
+
 etl_infousa:
 	etl/infousa/infousa_etl.sh
 
@@ -33,6 +36,9 @@ etl_custom:
 reset_tiger:
 	etl/reset_tiger_data.sh
 
+reset_sita:
+	etl/reset_sita_data.sh
+
 reset_aro:
 	etl/reset_aro_data.sh
 
@@ -54,7 +60,7 @@ reset_custom:
 reset_auth:
 	etl/reset_auth_data.sh
 
-etl_reload_general: reset_tiger reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_infousa etl_geotel etl_demographics etl_aro
+etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_aro
 
 etl_reload_client: reset_client reset_custom reset_auth etl_client etl_custom etl_auth
 
