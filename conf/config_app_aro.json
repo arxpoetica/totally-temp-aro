@@ -3,8 +3,7 @@
   "aro_service_url": "http://localhost:8080/aro-service",
   "client_schema": "client",
   "client_carrier_name": "VERIZON",
-  "displayable_client_carrier_name": "Client",
-  "route_planning": true,
+  "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
   "currency_symbol": "$",
   "ui": {
@@ -19,7 +18,7 @@
         "build": ["custom"]
       },
       "equipment": {
-        "view": ["splice_point", "fiber_distribution_hub", "fiber_distribution_terminal", "tower", "existing_fiber"],
+        "view": ["splice_point", "fiber_distribution_hub", "fiber_distribution_terminal", "existing_fiber"],
         "build": ["splice_point", "fiber_distribution_hub", "fiber_distribution_terminal"],
         "actions": ["recalculate", "clear"]
       },

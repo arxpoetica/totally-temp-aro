@@ -18,8 +18,8 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback
       var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.fiber_plant WHERE carrier_name = $1 AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)';
       database.query(sql, [carrier_name, viewport.linestring], callback);
     } else {
-      var sql = 'WITH '+viewport.fishnet;
-      sql += `
+      var sql = `
+        WITH ${viewport.fishnet}
         SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
         FROM fishnet
         JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
@@ -30,15 +30,13 @@ Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback
     }
   })
   .then(function(rows, callback) {
-    var features = rows.map(function(row) {
-      return {
-        type: 'Feature',
-        geometry: row.geom,
-        properties: {
-          // density: row.density,
-        }
+    var features = rows.map(row => ({
+      type: 'Feature',
+      geometry: row.geom,
+      properties: {
+        // density: row.density,
       }
-    })
+    }))
 
     var output = {
       'feature_collection': {
@@ -62,15 +60,13 @@ Network.view_fiber_plant_for_competitors = function(viewport, callback) {
     }
   })
   .then(function(rows, callback) {
-    var features = rows.map(function(row) {
-      return {
-        type: 'Feature',
-        geometry: row.geom,
-        properties: {
-          density: row.density,
-        }
+    var features = rows.map(row => ({
+      type: 'Feature',
+      geometry: row.geom,
+      properties: {
+        density: row.density,
       }
-    })
+    }))
 
     var output = {
       'feature_collection': {
@@ -120,8 +116,8 @@ Network.view_towers = function(viewport, callback) {
 // View existing fiber plant for competitors with a heat map
 Network.view_fiber_plant_density = function(viewport, callback) {
   txain(function(callback) {
-    var sql = 'WITH '+viewport.fishnet;
-    sql += `
+    var sql = `
+      WITH ${viewport.fishnet}
       SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(DISTINCT fiber_plant.carrier_name) AS density, NULL AS id
       FROM fishnet
       JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
@@ -131,15 +127,13 @@ Network.view_fiber_plant_density = function(viewport, callback) {
     database.query(sql, [config.client_carrier_name], callback);
   })
   .then(function(rows, callback) {
-    var features = rows.map(function(row) {
-      return {
-        type: 'Feature',
-        geometry: row.geom,
-        properties: {
-          density: row.density,
-        }
+    var features = rows.map(row => ({
+      type: 'Feature',
+      geometry: row.geom,
+      properties: {
+        density: row.density,
       }
-    })
+    }))
 
     var output = {
       'feature_collection': {
@@ -174,7 +168,7 @@ Network.view_network_nodes = function(node_types, plan_id, callback) {
 
   if (node_types && node_types.length > 0) {
     var arr = [];
-    node_types.forEach(function(node_type) {
+    node_types.forEach(node_type => {
       params.push(node_type);
       arr.push('t.name = $'+params.length);
     });
@@ -196,19 +190,17 @@ Network.view_network_nodes = function(node_types, plan_id, callback) {
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
-    var features = rows.map(function(row) {
-      return {
-        'type': 'Feature',
-        'properties': {
-          'id': row.id,
-          'type' : row.name,
-          'icon': '/images/map_icons/'+row.name+'.png',
-          'unselectable': row.name !== 'central_office',
-          'draggable': !!row.route_id,
-        },
-        'geometry': row.geom,
-      }
-    });
+    var features = rows.map(row => ({
+      'type': 'Feature',
+      'properties': {
+        'id': row.id,
+        'type' : row.name,
+        'icon': '/images/map_icons/'+row.name+'.png',
+        'unselectable': row.name !== 'central_office',
+        'draggable': !!row.route_id,
+      },
+      'geometry': row.geom,
+    }));
 
     var output = {
       'feature_collection': {
@@ -249,7 +241,7 @@ function add_nodes(plan_id, insertions, callback) {
   var sql = 'INSERT INTO client_schema.network_nodes (node_type_id, geog, geom, route_id) VALUES '
   var params = [];
   var arr = [];
-  insertions.forEach(function(node) {
+  insertions.forEach(node => {
     var i = params.length;
     params.push(node.type);
     params.push('POINT('+node.lon+' '+node.lat+')');
@@ -307,6 +299,29 @@ Network.recalculate_nodes = function(plan_id, callback) {
   })
   .then(function(res, body, callback) {
     callback();
+  })
+  .end(callback);
+};
+
+Network.select_boundary = function(plan_id, data, callback) {
+  txain(function(callback) {
+    // select all the locations inside that boundary
+    // note: this could create duplicates!
+    var sql = `
+      INSERT INTO custom.route_targets (vertex_id, location_id, route_id)
+      (SELECT
+        vertex.id AS vertex_id, locations.id, $2 AS route_id
+      FROM
+        client.graph_vertices_pgr AS vertex
+      JOIN aro.locations locations
+        ON ST_Intersects(ST_GeomFromGeoJSON($1)::geography, locations.geog)
+        AND locations.geom && vertex.the_geom
+        AND st_contains(locations.geom, vertex.the_geom))
+    `
+    database.execute(sql, [data.boundary, plan_id], callback);
+  })
+  .then(function(count, callback) {
+    models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
   })
   .end(callback);
 };

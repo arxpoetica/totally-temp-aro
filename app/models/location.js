@@ -102,7 +102,7 @@ Location.density = function(plan_id, viewport, callback) {
 			JOIN locations ON fishnet.geom && locations.geom
 			GROUP BY fishnet.geom
 		`
-		if (config.route_planning) {
+		if (config.route_planning.length > 0) {
 			params.push(plan_id);
 			sql += `
 				UNION ALL
@@ -118,16 +118,14 @@ Location.density = function(plan_id, viewport, callback) {
 		database.query(sql, params, callback);
 	})
 	.then(function(rows, callback) {
-		var features = rows.map(function(row) {
-			return {
-				'type':'Feature',
-				'properties': {
-					'id': row.id,
-					'density': viewport.zoom > 9 ? row.density : null,
-				},
-				'geometry': row.geom,
-			};
-		});
+		var features = rows.map(row => ({
+			'type':'Feature',
+			'properties': {
+				'id': row.id,
+				'density': viewport.zoom > 9 ? row.density : null,
+			},
+			'geometry': row.geom,
+		}));
 
 		var output = {
 			'feature_collection': {
@@ -252,12 +250,10 @@ Location.show_information = function(location_id, callback) {
 	.then(function(customer_types, callback) {
 		info.customer_types = customer_types;
 
-		info.customers_businesses_total = customer_types.reduce(function(total, customer_type) {
-			return total + customer_type.businesses;
-		}, 0);
-		info.customers_households_total = customer_types.reduce(function(total, customer_type) {
-			return total + customer_type.households;
-		}, 0);
+		info.customers_businesses_total = customer_types
+			.reduce((total, customer_type) => total + customer_type.businesses, 0);
+		info.customers_households_total = customer_types
+			.reduce((total, customer_type) => total + customer_type.households, 0);
 
 		var sql = `
 			SELECT address, ST_AsGeojson(geog)::json AS geog,
@@ -518,20 +514,16 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 		database.query(sql, params, callback);
 	})
 	.then(function(rows, callback) {
-		rows = rows.filter(function(row) {
-			return row.customer_type_existing > 0 || row.customer_type_prospect > 0;
-		});
+		rows = rows.filter((row) => row.customer_type_existing > 0 || row.customer_type_prospect > 0)
 
-		var features = rows.map(function(row) {
-			return {
-				'type':'Feature',
-				'properties': {
-					'id': row.id,
-					'density': row.customer_type_prospect*100/(row.customer_type_existing + row.customer_type_prospect),
-				},
-				'geometry': row.geom,
-			};
-		});
+		var features = rows.map(row => ({
+			'type':'Feature',
+			'properties': {
+				'id': row.id,
+				'density': row.customer_type_prospect*100/(row.customer_type_existing + row.customer_type_prospect),
+			},
+			'geometry': row.geom,
+		}));
 
 		var output = {
 			'feature_collection': {
@@ -545,7 +537,6 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 }
 
 Location.search = function(text, callback) {
-	text = '%'+text+'%'
 	var sql = `
 		SELECT
 			location_id, name, ST_AsGeoJSON(geog)::json AS geog
@@ -563,7 +554,7 @@ Location.search = function(text, callback) {
 
 		LIMIT 100
 	`
-	database.query(sql, [text], callback);
+	database.query(sql, [`%${text}%`], callback);
 }
 
 module.exports = Location;

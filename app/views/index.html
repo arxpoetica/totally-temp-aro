@@ -126,7 +126,8 @@
                 <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
                 <span ng-show="market_profile_current_year.total">
                   <span class="label label-success"><span>Market Size</span>{{ market_profile_current_year.total / 1000000000 | currency }}B</span>
-                  <span class="label label-info" style="background-color: <%- config.ui.colors.fair_share %>"><span><%- config.client_carrier_name %> revenue</span>{{ market_profile_fair_share_current_year_total / 1000000000 | currency }}B</span>
+                  <span class="label label-info" style="background-color: <%- config.ui.colors.fair_share %>"><span>
+                    <%- config.displayable_client_carrier_name || config.client_carrier_name %> revenue</span>{{ market_profile_fair_share_current_year_total / 1000000000 | currency }}B</span>
                   <span class="label label-info"><span>Market Share</span>{{ market_profile_share*100 | number:2 }}%</span>
                 </span>
               </span>
@@ -173,7 +174,7 @@
                     <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Delete plan</a></li>
                   <li role="separator" class="divider" ng-show="route.owner_id === user_id"></li>
                   <li><a href="javascript:void(0)" ng-click="show_share_route(route)">Share…</a></li>
-                  <% if (config.route_planning) { %>
+                  <% if (config.route_planning.length > 0) { %>
                   <li><a href="javascript:void(0)" ng-click="export_kml_name()">Export KML…</a></li>
                   <% } %>
                 </ul>
@@ -198,6 +199,8 @@
             </p>
           </div>
         </div>
+
+        <hr>
 
         <div ng-controller="selection_tools_controller">
           <div ng-repeat="(key, tool) in available_tools" ng-show="route.owner_id === user_id">
@@ -259,10 +262,28 @@
             <div ng-repeat="boundary in boundaries">
               <div class="checkbox">
                 <div class="pull-right boundary-options">
-                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="Edit" ng-click="rename_boundary(boundary)"><span class="fa fa-pencil"></span></a>
-                  <a href="javascript:void(0)" class="text-danger" data-toggle="tooltip" data-placement="top" title="Delete" ng-click="delete_boundary(boundary)"><span class="fa fa-trash-o"></span></a>
-                  <a href="javascript:void(0)" class="text-success" data-toggle="tooltip" data-placement="top" title="Market profile" ng-click="show_market_size(boundary)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
-                  <a href="javascript:void(0)" class="text-warning" data-toggle="tooltip" data-placement="top" title="Customer profile" ng-click="show_customer_profile(boundary)"><span class="fa fa-users"></span></a>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
+                    title="Edit" ng-click="rename_boundary(boundary)">
+                      <span class="fa fa-pencil"></span>
+                  </a>
+                  <a href="javascript:void(0)" class="text-danger" data-toggle="tooltip"
+                    data-placement="top" title="Delete" ng-click="delete_boundary(boundary)">
+                      <span class="fa fa-trash-o"></span>
+                  </a>
+                  <a href="javascript:void(0)" class="text-success" data-toggle="tooltip"
+                    data-placement="top" title="Market profile" ng-click="show_market_size(boundary)">
+                      <span class="<%= config.ui.icons.market_profile %>"></span>
+                  </a>
+                  <a href="javascript:void(0)" class="text-warning" data-toggle="tooltip"
+                    data-placement="top" title="Customer profile" ng-click="show_customer_profile(boundary)">
+                      <span class="fa fa-users"></span>
+                  </a>
+                  <% if (config.route_planning.length >= 0) { %>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
+                    title="Network planning" ng-click="run_network_planning(boundary)">
+                      <span class="fa fa-wrench"></span>
+                  </a>
+                  <% } %>
                 </div>
                 <label>
                   <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
@@ -494,10 +515,6 @@
                 <hr>
                 <div class="row">
                   <div class="col-sm-12">
-                    <div ng-show="show_recalculate">
-                      <button class="btn btn-block btn-default btn-sm" ng-click="recalculate_network_nodes()">Recalculate network nodes</button>
-                      <br>
-                    </div>
                     <button class="btn btn-sm btn-danger btn-block"
                       ng-show="show_clear_nodes"
                       ng-click="clear_nodes()" type="button">Clear network nodes</button>
@@ -584,6 +601,32 @@
         </div>
       </div>
     </div>
+
+    <% if (config.route_planning.length > 0) { %>
+    <div ng-controller="network-planning-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('network_planning')" class="map-tool panel panel-primary" id="network_planning_controller">
+        <div class="panel-heading" ng-bind="map_tools.get_tool_name('network_planning')">
+          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_planning')" ng-click="map_tools.collapse('network_planning')">
+            <span style="color:white" class="fa fa-chevron-up"></span>
+          </a>
+          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_planning')" ng-click="map_tools.expand('network_planning')">
+            <span style="color:white" class="fa fa-chevron-down"></span>
+          </a>
+          <!-- Panel header text set in above binding -->
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('network_planning')">
+            <div class="form-group form-group-sm">
+              <select class="form-control" ng-model="algorithm" ng-options="algorithm as algorithm.description for algorithm in algorithms" ng-change="change_algorithm()"></select>
+            </div>
+            <div ng-hide="algorithm.interactive">
+              <button class="btn btn-block btn-default btn-sm" ng-click="run_algorithm()">Run algorithm</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } %>
 
     <div id="map-canvas-wrapper">
       <div id="map-canvas"></div>
@@ -673,6 +716,7 @@
   <script src="javascripts/lib/controllers/selection_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
+  <script src="javascripts/lib/controllers/network_planning_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
@@ -681,6 +725,7 @@
   <script src="javascripts/lib/models/map_tools.js"></script>
   <script src="javascripts/lib/models/custom_overlay.js"></script>
   <script src="javascripts/lib/models/map_layers.js"></script>
+  <script src="javascripts/lib/models/network_planning.js"></script>
   <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
   <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>
   <script>app.run(function(loader){})</script>

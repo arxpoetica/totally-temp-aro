@@ -1,5 +1,5 @@
 // Selected location controller
-app.controller('selected_location_controller', function($rootScope, $scope, $http, map_layers, tracker) {
+app.controller('selected_location_controller', function($rootScope, $scope, $http, map_layers, tracker, network_planning) {
   $scope.location = {};
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
   $scope.config = config;
@@ -20,21 +20,23 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     $rootScope.$broadcast('contextual_menu_feature', options, map_layer, feature);
   };
 
-  if (config.route_planning) {
-    $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
-      if (map_layer.type !== 'locations') return;
-      options.add('See more information', function(map_layer, feature) {
-        var id = feature.getProperty('id');
-        open_location(id)
-      });
-    });
-  } else {
+  if (config.route_planning.length === 0) {
     $rootScope.$on('map_layer_clicked_feature', function(event, options, map_layer) {
       if (map_layer.type !== 'locations') return;
+      // if (network_planning.getAlgorithm().interactive) return;
       var feature = options.feature;
       var id = feature.getProperty('id');
       open_location(id);
       tracker.track('Location selected');
+    });
+  } else {
+    $rootScope.$on('contextual_menu_feature', function(event, options, map_layer, feature) {
+      if (map_layer.type !== 'locations') return;
+      // if (!network_planning.getAlgorithm().interactive) return;
+      options.add('See more information', function(map_layer, feature) {
+        var id = feature.getProperty('id');
+        open_location(id)
+      });
     });
   }
 
@@ -265,9 +267,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
   var fair_share_chart = null;
   function show_fair_share_chart() {
     $scope.fair_share = $scope.fair_share || [];
-    var total = $scope.fair_share.reduce(function(total, carrier) {
-      return total + carrier.value;
-    }, 0);
+    var total = $scope.fair_share.reduce((total, carrier) => total + carrier.value, 0);
 
     var data = $scope.fair_share.map(function(carrier) {
       var distance = carrier.distance !== null ? ' ('+angular.injector(['ng']).get('$filter')('number')(carrier.distance, 2)+'m)' : ''

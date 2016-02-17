@@ -38,3 +38,6 @@ ${PSQL} -a -f $DIR/create_aro_households.sql
 
 # Create aro.towers table from sita.towers table
 ${PSQL} -a -f $DIR/create_aro_towers.sql
+
+# Create aro.cities table
+${PSQL} -a -f $DIR/create_aro_cities.sql
