@@ -8,8 +8,8 @@ UNZIPTOOL=unzip
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-if [ ! -f "${GISROOT}/SITA_DATA_TOWER_13MAR10.zip"];
-    then aws s3 cp s3://public.aro/sita/SITA_DATA_TOWER_13MAR10.zip $GISROOT/SITA_DATA_TOWER_13MAR10.zip;
+if [ ! -f "${GISROOT}/SITA_DATA_TOWER_13MAR10.zip" ];
+    then aws s3 --region us-east-1 cp s3://public.aro/sita/SITA_DATA_TOWER_13MAR10.zip $GISROOT/SITA_DATA_TOWER_13MAR10.zip;
 fi
 
 cd $GISROOT;
