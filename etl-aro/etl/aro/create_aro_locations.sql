@@ -32,23 +32,23 @@ INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geo
         businesses.geog as geog,
         businesses.geog::geometry as geom
 
-    FROM infousa.businesses JOIN aro.wirecenters
+    FROM infousa.businesses;-- JOIN aro.wirecenters
       -- ON businesses.geog && wirecenters.geog
-      ON ST_Within(businesses.geog::geometry, wirecenters.geom)
-    WHERE 
-      -- NYC Upper East Side (URBAN)
-      wirecenters.wirecenter = 'NYCMNY79'
-      OR
-      -- Buffalo, New York (URBAN)
-      wirecenters.wirecenter = 'BFLONYEL'
-      OR
-      wirecenters.wirecenter = 'BFLONYFR'
-      OR
-      -- Orchard Park, NY (SUBURBAN)
-      wirecenters.wirecenter = 'ORPKNYST'
-      OR
-      -- North Collins, NY (RURAL)
-      wirecenters.wirecenter = 'NCLNNYNO';
+    --   ON ST_Within(businesses.geog::geometry, wirecenters.geom)
+    -- WHERE 
+    --   -- NYC Upper East Side (URBAN)
+    --   wirecenters.wirecenter = 'NYCMNY79'
+    --   OR
+    --   -- Buffalo, New York (URBAN)
+    --   wirecenters.wirecenter = 'BFLONYEL'
+    --   OR
+    --   wirecenters.wirecenter = 'BFLONYFR'
+    --   OR
+    --   -- Orchard Park, NY (SUBURBAN)
+    --   wirecenters.wirecenter = 'ORPKNYST'
+    --   OR
+    --   -- North Collins, NY (RURAL)
+    --   wirecenters.wirecenter = 'NCLNNYNO';
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations
