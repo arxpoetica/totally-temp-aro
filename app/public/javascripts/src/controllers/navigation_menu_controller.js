@@ -66,7 +66,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         // bounds.extend(new google.maps.LatLng(result.geometry.bounds.southwest.lat, result.geometry.bounds.southwest.lng));
         // new_route_map.fitBounds(bounds);
         $scope.new_route_area_centroid = result.geometry.location;
-        $scope.new_route_area_bounds = result.geometry.bounds;
+        $scope.new_route_area_bounds = result.geometry.viewport;
       });
   };
 
