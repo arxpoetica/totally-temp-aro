@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Open Saved Plan</h4>
+        <h4 class="modal-title">Open Saved Network Plan</h4>
       </div>
       <div class="modal-body">
         <p ng-show="routes.length < 1" class="text-center">
@@ -12,7 +12,7 @@
         <div ng-show="routes.length > 0">
           <form>
             <div class="input-group">
-              <input type="text" class="form-control" placeholder="Search analysis by name" ng-model="search_text" ng-change="load_plans()">
+              <input type="text" class="form-control" placeholder="Search Plans by Name" ng-model="search_text" ng-change="load_plans()">
               <span class="input-group-addon">
                 <span class="glyphicon glyphicon-search"></span>
               </span>
