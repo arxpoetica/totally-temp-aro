@@ -18,7 +18,7 @@
         "build": ["custom"]
       },
       "equipment": {
-        "view": ["splice_point", "fiber_distribution_hub", "fiber_distribution_terminal", "existing_fiber"],
+        "view": ["central_office", "fiber_distribution_hub", "fiber_distribution_terminal", "existing_fiber"],
         "build": ["splice_point", "fiber_distribution_hub", "fiber_distribution_terminal"],
         "actions": ["recalculate", "clear"]
       },

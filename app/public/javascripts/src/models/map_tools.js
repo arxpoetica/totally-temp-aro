@@ -95,7 +95,7 @@ app.service('map_tools', ['$rootScope', 'tracker', function($rootScope, tracker)
     },
     {
       id: 'boundaries',
-      name: 'Custom Boundaries',
+      name: 'Boundaries',
       short_name: 'B',
       icon: 'icon icon-boundaries',
     },
