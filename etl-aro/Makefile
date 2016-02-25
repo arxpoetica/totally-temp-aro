@@ -27,9 +27,6 @@ etl_client:
 etl_auth:
 	etl/auth/auth_etl.sh
 
-etl_custom:
-	etl/custom/custom_etl.sh
-
 reset_tiger:
 	etl/reset_tiger_data.sh
 
@@ -48,28 +45,22 @@ reset_demographics:
 reset_client:
 	etl/reset_client_data.sh
 
-reset_custom:
-	etl/reset_custom_data.sh
-
 reset_auth:
 	etl/reset_auth_data.sh
 
 etl_reload_general: reset_tiger reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_infousa etl_geotel etl_demographics etl_aro
 
-etl_reload_client: reset_client reset_custom reset_auth etl_client etl_custom etl_auth
+etl_reload_client: reset_client reset_auth etl_client etl_auth
 
 etl_reload_all: etl_reload_general etl_reload_client
 
 etl_test_client:
 	etl/test/client.sh
 
-etl_test_custom:
-	etl/test/custom.sh
-
 etl_test_aro:
 	etl/test/aro.sh
 
-etl_test_all: etl_test_aro etl_test_custom etl_test_client
+etl_test_all: etl_test_aro etl_test_client
 
 
 service_deploy:

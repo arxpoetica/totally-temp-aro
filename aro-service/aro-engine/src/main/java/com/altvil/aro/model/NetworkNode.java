@@ -14,6 +14,7 @@ import com.vividsolutions.jts.geom.Point;
 public class NetworkNode {
 
 	private int id;
+	private String stateCode; //Create a Logical Partition 
 	private double lattitude;
 	private double longitude;
 	private int node_type_id;
@@ -21,10 +22,11 @@ public class NetworkNode {
 	private Point geogPoint;
 	private long routeId;
 
-
 	@Id
 	@Column(name = "id")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	//@TableGenerator(schema = "vz", table = "id_table", name = "gen_id_network_node", allocationSize = 1000, initialValue = 0, pkColumnName = "name", valueColumnName = "int_value", pkColumnValue = "network_node")
+	//@GeneratedValue(strategy = GenerationType.TABLE, generator = "gen_id_network_node")
 	public int getId() {
 		return id;
 	}
@@ -65,7 +67,6 @@ public class NetworkNode {
 		return point;
 	}
 
-
 	public void setPoint(Point point) {
 		this.point = point;
 	}
@@ -79,7 +80,6 @@ public class NetworkNode {
 		this.geogPoint = geogPoint;
 	}
 
-
 	@Column(name = "route_id")
 	public long getRouteId() {
 		return routeId;
@@ -87,6 +87,15 @@ public class NetworkNode {
 
 	public void setRouteId(long routeId) {
 		this.routeId = routeId;
+	}
+
+	@Column(name = "state_fips_code")
+	public String getStateCode() {
+		return stateCode;
+	}
+
+	public void setStateCode(String stateCode) {
+		this.stateCode = stateCode;
 	}
 
 }

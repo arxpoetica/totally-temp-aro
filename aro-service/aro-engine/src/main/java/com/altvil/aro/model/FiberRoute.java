@@ -1,0 +1,94 @@
+package com.altvil.aro.model;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.altvil.aro.service.graph.segment.FiberType;
+
+
+@Entity
+@Table(name = "fiber_route")
+public class FiberRoute {
+	
+	private Long id ;
+	private FiberType fiberRouteType ;
+	private NetworkNode parentNode ;
+	private NetworkNode fromNode ;
+	private NetworkNode toNode ;
+	private String name ;
+	private String clliCode ;
+	
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+	@Column(name="fiber_route_type")
+	@Enumerated(EnumType.ORDINAL)
+	public FiberType getFiberRouteType() {
+		return fiberRouteType;
+	}
+	
+	public void setFiberRouteType(FiberType fiberRouteType) {
+		this.fiberRouteType = fiberRouteType;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "parent_network_node_id", referencedColumnName = "parent_node_id", nullable = true)
+	public NetworkNode getParentNode() {
+		return parentNode;
+	}
+	public void setParentNode(NetworkNode parentNode) {
+		this.parentNode = parentNode;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "from_network_node_id", referencedColumnName = "from_node_id", nullable = true)
+	public NetworkNode getFromNode() {
+		return fromNode;
+	}
+	public void setFromNode(NetworkNode fromNode) {
+		this.fromNode = fromNode;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "to_network_node_id", referencedColumnName = "to_node_id", nullable = true)
+	public NetworkNode getToNode() {
+		return toNode;
+	}
+	public void setToNode(NetworkNode toNode) {
+		this.toNode = toNode;
+	}
+
+	@Column(name = "name")
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	//TODO add database Mapping
+	//@Column(name = "clli_code")
+	public String getClliCode() {
+		return clliCode;
+	}
+	
+	public void setClliCode(String clliCode) {
+		this.clliCode = clliCode;
+	}
+	
+}

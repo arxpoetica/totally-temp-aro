@@ -2,7 +2,8 @@ DROP TABLE IF EXISTS client.network_nodes;
 
 CREATE TABLE client.network_nodes
 (
-	id serial,
+	id bigserial,
+	plan_id bigint REFERENCES client.plan ON DELETE CASCADE,
 	lat double precision,
 	lon double precision,
 	node_type_id int references client.network_node_types,
@@ -42,3 +43,4 @@ INSERT INTO client.network_nodes (node_type_id, geog, geom)
 
 CREATE INDEX client_network_nodes_geom_gist ON client.network_nodes USING gist (geom);
 CREATE INDEX client_network_nodes_geog_gist ON client.network_nodes USING gist (geog);
+CREATE INDEX client_network_nodes_route_index ON client.network_nodes(plan_id);

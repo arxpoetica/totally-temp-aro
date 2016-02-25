@@ -6,9 +6,11 @@ DROP TABLE IF EXISTS aro.edges;
 CREATE TABLE aro.edges AS 
 SELECT
     gid,
+    tlid,
+    tnidf,
+    tnidt,
     statefp,
     countyfp,
-    'road_segment'::text AS edge_type,
     ST_Length(Geography(ST_Transform(the_geom, 4326))) as edge_length,
     ST_Transform(the_geom, 4326) as geom,
     Geography(ST_Transform(the_geom, 4326)) as geog,
