@@ -82,11 +82,7 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 			public Point getLocationPoint() {
 				return rl.getLocationPoint();
 			}
-
-			@Override
-			public long getId() {
-				return rl.getId();
-			}
+			
 		};
 	}
 

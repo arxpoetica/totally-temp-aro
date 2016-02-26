@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import com.vividsolutions.jts.geom.Point;
 
 @Entity
-@Table(name = "network_nodes")
+@Table(name = "network_nodes", schema="client")
 public class NetworkNode {
 
 	private int id;

@@ -14,14 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.entity.CoverageAggregateStatistic;
 import com.altvil.aro.service.entity.LocationEntity;
-import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.AroRoadLocation;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.LocationEntityAssignment;
 import com.altvil.aro.service.graph.segment.impl.RoadLocationImpl;
-import com.altvil.interfaces.GraphPoint;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
@@ -31,8 +29,7 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 	private static final Logger log = LoggerFactory
 			.getLogger(RoadModelBuilder.class.getName());
 
-	private Map<? extends RoadLocation, ? extends CoverageAggregateStatistic> roadLocationsProperties;
-	private Map<Long, List<RoadLocation>> roadLocationsByTlid = new HashMap<>();
+	private Map<Long, List<NetworkAssignment>> roadLocationsByTlid = new HashMap<>();
 
 	public RoadModelBuilder(GraphModelBuilder<GeoSegment> graphModelBuilder,
 			GraphNodeFactory vertexFactory, GraphAssignmentFactory factory) {
@@ -46,30 +43,30 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 	}
 
 	public RoadModelBuilder setRoadLocations(
-			Collection<RoadLocation> roadLocations,
-			Map<RoadLocation, CoverageAggregateStatistic> roadLocationsProperties) {
+			Collection<NetworkAssignment> roadLocations) {
 		// roadLocationsByGid = groupByGid(roadLocations);
 
 		int locationsLoaded = roadLocations.size();
 		if (log.isDebugEnabled())
 			log.debug("Locations Loaded " + locationsLoaded);
-		this.roadLocationsProperties = roadLocationsProperties;
 		roadLocationsByTlid = groupByTlid(roadLocations);
 		return this;
 	}
 
-	private boolean hasFiberDemand(RoadLocation roadLocation) {
-		CoverageAggregateStatistic coverageAggregateStatistic = roadLocationsProperties
-				.get(roadLocation);
+	private boolean hasFiberDemand(NetworkAssignment roadLocation) {
+		
+		LocationEntity locationEntity = (LocationEntity) roadLocation.getSource() ;
+		CoverageAggregateStatistic coverageAggregateStatistic = locationEntity.getCoverageStatistics() ;
+		
 		return coverageAggregateStatistic != null
 				&& coverageAggregateStatistic.getFiberDemand() > 0;
 
 	}
 
-	private Map<Long, List<RoadLocation>> groupByTlid(
-			Collection<? extends RoadLocation> locations) {
+	private Map<Long, List<NetworkAssignment>> groupByTlid(
+			Collection<NetworkAssignment> locations) {
 		return locations.stream().filter(this::hasFiberDemand)
-				.collect(groupingBy(GraphPoint::getTlid));
+				.collect(groupingBy(a -> a.getDomain().getTlid()));
 	}
 
 	@Override
@@ -78,7 +75,7 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 
 		Long tlid = roadEdge.getTlid();
 
-		List<RoadLocation> result = roadLocationsByTlid.get(tlid);
+		List<NetworkAssignment> result = roadLocationsByTlid.get(tlid);
 
 		if (result == null) {
 			return Collections.emptyList();
@@ -86,16 +83,16 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 
 		Collections.sort(
 				result,
-				(l1, l2) -> Double.compare(l1.getRoadSegmentPositionRatio(),
-						l2.getRoadSegmentPositionRatio()));
+				(l1, l2) -> Double.compare(l1.getDomain().getRoadSegmentPositionRatio(),
+						l2.getDomain().getRoadSegmentPositionRatio()));
 
 		List<LocationEntityAssignment> filteredLocations = result
 				.stream()
 				.filter(l -> {
-					if (l.getRoadSegmentPositionRatio() < -0.01
-							|| l.getRoadSegmentPositionRatio() > 1.01) {
-						log.info("Detected Inavlid Location Data " + l.getId()
-								+ " ratio=" + l.getRoadSegmentPositionRatio());
+					if (l.getDomain().getRoadSegmentPositionRatio() < -0.01
+							|| l.getDomain().getRoadSegmentPositionRatio() > 1.01) {
+						log.info("Detected Inavlid Location Data " + l.getSource().getObjectId() 
+								+ " ratio=" + l.getDomain().getRoadSegmentPositionRatio());
 						return false;
 					}
 					return true;
@@ -103,24 +100,17 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 				.map(l -> {
 
 					//Snap Ratio
-					double ratio = Math.max(Math.min(1.0, l.getRoadSegmentPositionRatio() ),0.0) ;
+					double ratio = Math.max(Math.min(1.0, l.getDomain().getRoadSegmentPositionRatio() ),0.0) ;
 					
-					AroRoadLocation location = new RoadLocationImpl(l
-							.getLocationPoint(), ratio, l
-							.getRoadSegmentClosestPoint(), l
+					RoadLocation domain = l.getDomain() ;
+					
+					AroRoadLocation location = new RoadLocationImpl(domain.getLocationPoint(), ratio, domain
+							.getRoadSegmentClosestPoint(), domain
 							.getDistanceFromRoadSegmentInMeters());
-
-					CoverageAggregateStatistic fiberCoverageStatistic = roadLocationsProperties
-							.get(l);
-					if (fiberCoverageStatistic != null) {
-						LocationEntity le = EntityFactory.FACTORY
-								.createLocationEntity(l.getId(), tlid,
-										fiberCoverageStatistic);
-						return new LocationEntityAssignment(le, location);
-					}
-					return null;
-
-				}).filter(la -> la != null).collect(Collectors.toList());
+					
+					return new LocationEntityAssignment((LocationEntity)l.getSource(), location);
+					
+				}).collect(Collectors.toList());
 
 		totalNumberOfLocations += filteredLocations.size();
 		return filteredLocations;

@@ -12,7 +12,6 @@
 			persistence, it must reference classes explicitly. -->
 		<!-- OR you must have a different solution such as a configuration loader 
 			which populates the class info another way -->
-		<class>com.altvil.aro.model.GraphModel</class>
 		<class>com.altvil.aro.model.NetworkNode</class>
 
 		<properties>

@@ -11,12 +11,17 @@ import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 
 public class GeometryUtil {
 
 	private static final GeometryFactory FACTORY = new GeometryFactory(
 			new PrecisionModel(), 4326);
+	
+	private static final WKTReader WKT_READER = new WKTReader(FACTORY);
+
 
 	public static GeometryFactory factory() {
 		return FACTORY;
@@ -28,6 +33,10 @@ public class GeometryUtil {
 
 	public static Point asPoint(Coordinate coordinate) {
 		return FACTORY.createPoint(coordinate);
+	}
+	
+	public static Geometry toGeometry(String wkt) throws ParseException {
+		return WKT_READER.read(wkt);
 	}
 
 	private static Coordinate[] toCoordinates(Coordinate c1, Coordinate c2) {

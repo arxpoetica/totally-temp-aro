@@ -15,7 +15,7 @@ import com.altvil.aro.service.graph.segment.FiberType;
 
 
 @Entity
-@Table(name = "fiber_route")
+@Table(name = "fiber_route", schema="client")
 public class FiberRoute {
 	
 	private Long id ;

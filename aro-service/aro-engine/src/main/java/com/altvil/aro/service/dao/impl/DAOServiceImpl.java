@@ -18,8 +18,6 @@ import com.altvil.aro.service.dao.DAOSession;
 import com.altvil.aro.service.dao.Modification;
 import com.altvil.aro.service.dao.generic.AroDAO;
 import com.altvil.aro.service.dao.generic.impl.AroDAOImpl;
-import com.altvil.aro.service.dao.graph.GraphDAO;
-import com.altvil.aro.service.dao.graph.impl.GraphDAOImpl;
 import com.altvil.aro.service.persistence.PersistenceService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,8 +38,8 @@ public class DAOServiceImpl implements DAOService {
 	private Map<Class<?>, Object> init(PersistenceService persistence) {
 		Map<Class<?>, Object> map = new HashMap<>();
 
-		map.put(GraphDAO.class,
-				new GraphDAOImpl(persistence.getSessionFactory()));
+//		map.put(GraphDAO.class,
+//				new GraphDAOImpl(persistence.getSessionFactory()));
 
 		return Collections.unmodifiableMap(map);
 	}

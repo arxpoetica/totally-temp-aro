@@ -121,8 +121,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 				factory, GraphAssignmentFactoryImpl.FACTORY);
 
 		b.setFiberSources(locationData.getFiberSources()) 
-				.setRoadLocations(locationData.getRoadLocations(),
-						locationData.getRoadLocationsProperties())
+				.setRoadLocations(locationData.getRoadLocations())
 				.setRoadEdges(locationData.getRoadEdges());
 		return b.build();
 		

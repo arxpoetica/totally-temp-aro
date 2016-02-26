@@ -1,20 +1,16 @@
 package com.altvil.aro.service.graph.model;
 
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
-import com.altvil.interfaces.NetworkAssignment;
-import com.altvil.interfaces.RoadEdge;
-import com.altvil.interfaces.RoadLocation;
-
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
+import com.altvil.interfaces.NetworkAssignment;
+import com.altvil.interfaces.RoadEdge;
+
 
 public class NetworkData {
 
-	public Collection<RoadLocation> roadLocations;
+	public Collection<NetworkAssignment> roadLocations;
 
-
-	public Map<RoadLocation, CoverageAggregateStatistic> roadLocationsProperties;
+	//public Map<RoadLocation, CoverageAggregateStatistic> roadLocationsProperties;
 
 	private Collection<NetworkAssignment> fiberSources ;
 	private Collection<RoadEdge> roadEdges;
@@ -39,23 +35,13 @@ public class NetworkData {
 		this.fiberSources = fiberSources;
 	}
 
-	public Collection<RoadLocation> getRoadLocations() {
+	public Collection<NetworkAssignment> getRoadLocations() {
 		return roadLocations;
 	}
 
-	public void setRoadLocations(Collection<RoadLocation> roadLocations) {
+	public void setRoadLocations(Collection<NetworkAssignment> roadLocations) {
 		this.roadLocations = roadLocations;
 	}
-
-
-	public Map<RoadLocation, CoverageAggregateStatistic> getRoadLocationsProperties() {
-		return roadLocationsProperties;
-	}
-
-	public void setRoadLocationsProperties(Map<RoadLocation, CoverageAggregateStatistic> roadLocationsProperties) {
-		this.roadLocationsProperties = roadLocationsProperties;
-	}
-
 
 
 }

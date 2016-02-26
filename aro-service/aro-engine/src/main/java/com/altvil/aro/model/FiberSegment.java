@@ -42,7 +42,7 @@ public class FiberSegment {
 		this.fiberRoute = fiberRoute;
 	}
 
-	@javax.persistence.Column(name = "the_geom")
+	@Column(name = "the_geom")
 	@JsonDeserialize(using = GeometryJsonDeserializer.class)
 	public Geometry getGeometry() {
 		return geometry;

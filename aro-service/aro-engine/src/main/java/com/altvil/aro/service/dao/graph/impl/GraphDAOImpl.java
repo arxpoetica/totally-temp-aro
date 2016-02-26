@@ -8,10 +8,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.jdbc.Work;
 import org.postgresql.geometric.PGpoint;
 
-import com.altvil.aro.model.GraphModel;
-import com.altvil.aro.service.dao.DAOException;
-import com.altvil.aro.service.dao.generic.impl.DefaultAroDAO;
-import com.altvil.aro.service.dao.graph.GraphDAO;
 import com.altvil.aro.service.dao.graph.GraphData;
 import com.altvil.aro.service.dao.graph.GraphEdge;
 import com.altvil.aro.service.dao.graph.GraphVertex;
@@ -21,22 +17,7 @@ import com.altvil.aro.service.dao.impl.DefaultSQLQuery;
 import com.altvil.aro.service.dao.impl.SQLCommand;
 import com.altvil.aro.util.geometry.GeometryUtil;
 
-public class GraphDAOImpl extends DefaultAroDAO<GraphModel, Long> implements
-		GraphDAO {
-
-	private GraphDataQuery graphDataQuery ;
-	
-	public GraphDAOImpl(SessionFactory sessionFactory) {
-		super(sessionFactory, GraphModel.class);
-		this.graphDataQuery = new GraphDataQuery(sessionFactory);
-	}
-	
-	
-
-	@Override
-	public GraphData getGraphDataForPlanId(long planId) throws DAOException {
-		return graphDataQuery.query(planId) ;
-	}
+public class GraphDAOImpl {
 
 	private static class GraphDataQuery {
 
