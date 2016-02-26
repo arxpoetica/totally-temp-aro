@@ -340,11 +340,17 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
 
   $scope.network_planning_boundary = function(geojson) {
     var data = {
-      // boundary: JSON.stringify(to_geo_json(boundary.overlay)),
       boundary: geojson,
       algorithm: network_planning.getAlgorithm().id,
     };
-    $http.post('/network/nodes/'+$scope.route.id+'/select_boundary', data).success(function(response) {
+    showProgress();
+    var config = {
+      url: '/network/nodes/'+$scope.route.id+'/select_boundary',
+      method: 'post',
+      saving_plan: true,
+      data: data,
+    };
+    $http(config).success((response) => {
       $rootScope.$broadcast('route_planning_changed');
     });
   }

@@ -8,6 +8,14 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.new_route_area_bounds;
   $scope.edit_route_name;
 
+  if (config.route_planning.length > 0) {
+    $scope.market_size_scale_n = 1000000;
+    $scope.market_size_scale_s = 'M';
+  } else {
+    $scope.market_size_scale_n = 1000000000;
+    $scope.market_size_scale_s = 'B';
+  }
+
   $('#new-route select').select2({
     placeholder: 'Choose a city',
   }).on('change', function() {

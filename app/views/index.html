@@ -125,9 +125,13 @@
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
                 <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
                 <span ng-show="market_profile_current_year.total">
-                  <span class="label label-success"><span>Market Size</span>{{ market_profile_current_year.total / 1000000000 | currency }}B</span>
+                  <span class="label label-success"><span>Market Size</span>
+                    {{ market_profile_current_year.total / market_size_scale_n | currency }}{{ market_size_scale_s }}
+                  </span>
                   <span class="label label-info" style="background-color: <%- config.ui.colors.fair_share %>"><span>
-                    <%- config.displayable_client_carrier_name || config.client_carrier_name %> revenue</span>{{ market_profile_fair_share_current_year_total / 1000000000 | currency }}B</span>
+                    <%- config.displayable_client_carrier_name || config.client_carrier_name %> revenue</span>
+                    {{ market_profile_fair_share_current_year_total / market_size_scale_n | currency }}{{ market_size_scale_s }}
+                  </span>
                   <span class="label label-info"><span>Market Share</span>{{ market_profile_share*100 | number:2 }}%</span>
                 </span>
               </span>

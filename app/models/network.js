@@ -196,7 +196,7 @@ Network.edit_network_nodes = function(plan_id, changes, callback) {
     delete_nodes(plan_id, changes.deletions, callback);
   })
   .then(function(callback) {
-    var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
+    var sql = 'UPDATE client.plan SET updated_at=NOW() WHERE id=$1'
     database.execute(sql, [plan_id], callback);
   })
   .end(callback);
@@ -272,17 +272,12 @@ Network.recalculate_nodes = function(plan_id, callback) {
 Network.select_boundary = function(plan_id, data, callback) {
   txain(function(callback) {
     // select all the locations inside that boundary
-    // note: this could create duplicates!
+    // TODO: this could create duplicates!
     var sql = `
-      INSERT INTO custom.route_targets (vertex_id, location_id, route_id)
-      (SELECT
-        vertex.id AS vertex_id, locations.id, $2 AS route_id
-      FROM
-        client.graph_vertices_pgr AS vertex
-      JOIN aro.locations locations
-        ON ST_Intersects(ST_GeomFromGeoJSON($1)::geography, locations.geog)
-        AND locations.geom && vertex.the_geom
-        AND st_contains(locations.geom, vertex.the_geom))
+      INSERT INTO client.plan_targets (location_id, route_id)
+      (SELECT locations.id, $2 AS route_id
+         FROM locations
+        WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, locations.geog))
     `
     database.execute(sql, [data.boundary, plan_id], callback);
   })

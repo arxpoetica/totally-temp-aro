@@ -6,7 +6,6 @@ CREATE TABLE custom.route_edges
 (
   id SERIAL,
   route_id bigint REFERENCES custom.route ON DELETE CASCADE,
-  edge_id bigint REFERENCES client.graph,
   CONSTRAINT custom_route_edges_pkey PRIMARY KEY (id)
 );
 

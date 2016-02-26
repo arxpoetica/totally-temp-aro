@@ -51,9 +51,13 @@ function empty_array(arr) {
 function prepareMarketSizeQuery(plan_id, type, options, params) {
   var sql = '';
   if (type === 'route' || type === 'addressable') {
-    if (config.route_planning.length > 0) {
-      sql += 'WITH biz AS (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog FROM businesses b JOIN custom.route_edges ON route_edges.route_id=$1 JOIN client_schema.graph edge ON edge.id = route_edges.edge_id AND ST_DWithin(edge.geom::geography, b.geog, 152.4)';
-      // sql += 'WITH route AS (SELECT edge.geom AS route FROM custom.route_edges JOIN client_schema.graph edge ON edge.id = route_edges.edge_id WHERE route_edges.route_id=$1)';
+    if (false && config.route_planning.length > 0) {
+      sql += `WITH biz AS (
+        SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
+        FROM businesses b
+        JOIN custom.route_edges ON route_edges.route_id=$1
+        JOIN client_schema.graph edge ON edge.id = route_edges.edge_id
+        AND ST_DWithin(edge.geom::geography, b.geog, 152.4)`;
       params.push(plan_id);
     } else {
       sql += `
@@ -150,9 +154,15 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
         ON l.id = lc.location_id
       JOIN cities ct
         ON ct.buffer_geog && l.geog
+        AND ct.id = (
+          SELECT cities.id
+          FROM cities
+          JOIN custom.route r ON r.id = ${params.length}
+          ORDER BY r.area_centroid <#> cities.buffer_geog::geometry
+          LIMIT 1
+        )
+        GROUP BY c.id ORDER BY c.name
     `
-    sql += '\n AND ct.id = (SELECT cities.id FROM cities JOIN custom.route r ON r.id = $'+params.length+' ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)';
-    sql += '\n GROUP BY c.id ORDER BY c.name';
     database.query(sql, params, callback);
   })
   .then(function(fair_share, callback) {
