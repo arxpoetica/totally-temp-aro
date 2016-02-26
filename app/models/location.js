@@ -111,7 +111,7 @@ Location.density = function(plan_id, viewport, callback) {
 				SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
 					FROM aro.locations
 					JOIN custom.route_targets
-					ON route_targets.route_id=$1
+					ON route_targets.plan_id=$1
 					AND route_targets.location_id=locations.id
 			`
 		}

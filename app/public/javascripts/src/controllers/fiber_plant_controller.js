@@ -49,14 +49,14 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
   var layers = {};
   var select = $('[ng-controller="fiber_plant_controller"] [ng-change="carriers_changed()"]');
 
-  $rootScope.$on('route_selected', function(e, route) {
+  $rootScope.$on('plan_selected', function(e, plan) {
     Object.keys(layers).forEach(function(key) {
       layers[key].remove();
     })
     layers = {};
-    if (!route) return;
+    if (!plan) return;
 
-    $http.get('/network/carriers/'+route.id).success(function(carriers) {
+    $http.get('/network/carriers/'+plan.id).success(function(carriers) {
       $scope.carriers = carriers.map(function(carrier) {
         return {
           id: carrier.name,

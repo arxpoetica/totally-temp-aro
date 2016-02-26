@@ -4,33 +4,33 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   $scope.map_tools = map_tools;
   $scope.selection = selection;
 
-  $scope.route = null;
+  $scope.plan = null;
 
   /************
   * FUNCTIONS *
   *************/
 
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-    if (!route) {
+  $rootScope.$on('plan_selected', function(e, plan) {
+    $scope.plan = plan;
+    if (!plan) {
       $scope.route_layer = null;
       map_layers.removeEquipmentLayer('route');
       return;
     }
 
-    $http.get('/network_plan/'+route.id).success(function(response) {
+    $http.get('/network_plan/'+plan.id).success(function(response) {
       redraw_route(response);
-      selection.set_enabled(route.owner_id === user_id);
+      selection.set_enabled(plan.owner_id === user_id);
       if ((response.metadata.sources || []).length > 0) {
         map_layers.getEquipmentLayer('network_nodes').show();
       }
     });
   });
 
-  $rootScope.$on('route_cleared', function(e, route) {
+  $rootScope.$on('plan_cleared', function(e, plan) {
     selection.clear_selection();
     $scope.route_layer.clear_data();
-    $scope.route.metadata = {
+    $scope.plan.metadata = {
       total_cost: 0,
       costs: [
         { name: 'Fiber cost', value: 0 },
@@ -42,21 +42,21 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   });
 
   $rootScope.$on('equipment_nodes_changed', function() {
-    $http.get('/network_plan/'+$scope.route.id+'/metadata').success(function(response) {
+    $http.get('/network_plan/'+$scope.plan.id+'/metadata').success(function(response) {
       redraw_route(response, true);
     });
   });
 
   $rootScope.$on('route_planning_changed', function() {
-    $http.get('/network_plan/'+$scope.route.id).success(function(response) {
+    $http.get('/network_plan/'+$scope.plan.id).success(function(response) {
       redraw_route(response, false);
     });
   });
 
   function redraw_route(data, only_metadata) {
-    if ($scope.route && data.metadata) {
-      $scope.route.metadata = data.metadata;
-      $rootScope.$broadcast('route_changed_metadata', $scope.route);
+    if ($scope.plan && data.metadata) {
+      $scope.plan.metadata = data.metadata;
+      $rootScope.$broadcast('plan_changed_metadata', $scope.plan);
       if (only_metadata) return;
 
       if (config.route_planning.length > 0) {
@@ -99,6 +99,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
 
   $rootScope.$on('map_layer_changed_selection', function(e, layer, changes) {
     if (!$scope.route) return;
+    if (!network_planning.getAlgorithm()) return;
     changes.algorithm = network_planning.getAlgorithm().id;
 
     if (layer.type === 'locations' || layer.type === 'network_nodes') {

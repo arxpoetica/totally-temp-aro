@@ -228,10 +228,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
       });
   });
 
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-    
-    if (route) {
+  $rootScope.$on('plan_selected', function(e, plan) {
+    $scope.plan = plan;
+
+    if (plan) {
       map.ready(function() {
         map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources);
         locations_layer.set_always_show_selected($scope.always_shows_targets);

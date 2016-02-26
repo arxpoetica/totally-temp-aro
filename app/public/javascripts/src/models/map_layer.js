@@ -1,7 +1,7 @@
 app.service('MapLayer', function($http, $rootScope, selection) {
 
-	var route = null
-	$rootScope.$on('route_selected', (e, r) => route = r);
+	var plan = null
+	$rootScope.$on('plan_selected', (e, p) => plan = p);
 
 	function MapLayer(options) {
 		this.name = options.name;
@@ -284,7 +284,7 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				layer.is_loading = true;
 				var carrier = encodeURIComponent(config.client_carrier_name);
 				var api_endpoint = this.api_endpoint
-															.replace(/\:plan_id/g, (route && route.id) || 'none')
+															.replace(/\:plan_id/g, (plan && plan.id) || 'none')
 															.replace(/\:client_carrier_name/g, carrier);
 
 				$http({

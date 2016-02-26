@@ -9,6 +9,9 @@ etl_tiger_census_blocks:
 
 etl_tiger: etl_tiger_cousub etl_tiger_edges etl_tiger_census_blocks
 
+etl_sita:
+	etl/sita/sita_etl.sh
+
 etl_infousa:
 	etl/infousa/infousa_etl.sh
 
@@ -30,6 +33,9 @@ etl_auth:
 reset_tiger:
 	etl/reset_tiger_data.sh
 
+reset_sita:
+	etl/reset_sita_data.sh
+
 reset_aro:
 	etl/reset_aro_data.sh
 
@@ -48,11 +54,15 @@ reset_client:
 reset_auth:
 	etl/reset_auth_data.sh
 
-etl_reload_general: reset_tiger reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_infousa etl_geotel etl_demographics etl_aro
+etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_aro
 
-etl_reload_client: reset_client reset_auth etl_client etl_auth
+etl_reload_client: reset_client reset_custom etl_client etl_custom
+
+etl_reload_auth: reset_auth etl_auth
 
 etl_reload_all: etl_reload_general etl_reload_client
+
+etl_really_reload_all: etl_reload_general etl_reload_client etl_reload_auth
 
 etl_test_client:
 	etl/test/client.sh
@@ -89,7 +99,7 @@ test:
 	(cd ../app && npm test)
 
 webserver:
-	(cd ../app && node app.js)
+	(cd ../app && ARO_CLIENT=aro node app.js)
 
 register_user:
 	node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password

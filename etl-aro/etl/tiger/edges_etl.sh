@@ -18,11 +18,11 @@ do
 
 	# Download all edges
 	cd $GISROOT;
-	#wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATE_FIPS_ARRAY[$STATE]}* --accept=zip --reject=html -nd -nc
+	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATE_FIPS_ARRAY[$STATE]}* --accept=zip --reject=html -nd -nc
 	# New York County (i.e., Manhattan) (for upper east side wirecenter)
-	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_36061_edges.zip --accept=zip --reject=html -nd -nc
+	# wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_36061_edges.zip --accept=zip --reject=html -nd -nc
 	# Erie County (for Buffalo, North Collins, and Orchard Park)
-	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_36029_edges.zip --accept=zip --reject=html -nd -nc
+	# wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_36029_edges.zip --accept=zip --reject=html -nd -nc
 	# Uncompress all zipfiles
 	for z in tl_*_${STATE_FIPS_ARRAY[$STATE]}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
 	for z in */tl_*_${STATE_FIPS_ARRAY[$STATE]}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done  #unsure what, if anything, this does

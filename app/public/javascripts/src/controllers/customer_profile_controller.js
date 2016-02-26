@@ -6,7 +6,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
   $scope.data = {};
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0;
 
-  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
+  $rootScope.$on('plan_selected', (e, plan) => $scope.plan = plan);
 
   var chart = null;
   var geo_json;
@@ -21,7 +21,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
   });
 
   $rootScope.$on('customer_profile_selected', function(e, json, title, type) {
-    $scope.data = $scope.route.metadata;
+    $scope.data = $scope.plan.metadata;
     $scope.data.customer_types = $scope.data.customer_types || [];
     var colors = randomColor({ seed: 1, count: $scope.data.customer_types.length });
     $scope.data.customer_types.forEach(function(customer_type) {
@@ -53,7 +53,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
     };
     $scope.loading = true;
     chart && chart.destroy();
-    $http.get('/customer_profile/'+$scope.route.id+'/boundary', args).success(function(response) {
+    $http.get('/customer_profile/'+$scope.plan.id+'/boundary', args).success(function(response) {
       $scope.data = response;
       show_chart();
     }).error(function() {

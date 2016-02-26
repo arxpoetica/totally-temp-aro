@@ -31,27 +31,27 @@
 
     <div ng-controller="navigation_menu_controller">
 
-      <div id="home_screen" ng-show="!route">
+      <div id="home_screen" ng-show="!plan">
         <div class="container">
           <div class="row">
             <div class="col-sm-12">
               <img id="aro_logo" src="/images/logos/aro_logo_2.png" />
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="new_route()">Create New Analysis</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="new_plan()">Create New Network Plan</a>
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="show_routes()">Open Analysis</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="show_plans()">Open Network Plan</a>
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manage_network_plans()">Manage Analyses</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manage_network_plans()">Manage Network Plans</a>
               <br>
             </div>
             <% if (user.rol === 'admin') { %>
               <div class="col-sm-8">
-                <a href="#manage-users" class="btn btn-primary btn-block" data-toggle="modal">Manage users</a>
+                <a href="#manage-users" class="btn btn-primary btn-block" data-toggle="modal">Manage Users</a>
                 <br>
               </div>
             <% } %>
@@ -63,13 +63,13 @@
 
       <% include modal_manage_network_plans.html %>
 
-      <% include modal_new_route.html %>
+      <% include modal_new_plan.html %>
 
-      <% include modal_edit_route.html %>
+      <% include modal_edit_plan.html %>
 
-      <% include modal_share_route.html %>
+      <% include modal_share_plan.html %>
 
-      <div class="modal" id="export-route" tabindex="-1" role="dialog">
+      <div class="modal" id="export-plan" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -108,18 +108,18 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <button ng-show="route" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="select_route(null)"><span class="fa fa-chevron-left"></span></button>
-            <a class="navbar-brand" href="javascript:void(0)">{{route.name}}</a>
+            <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="select_plan(null)"><span class="fa fa-chevron-left"></span></button>
+            <a class="navbar-brand" href="javascript:void(0)">{{plan.name}}</a>
 
-            <p ng-show="route" class="navbar-text" id="top_bar_tools">
+            <p ng-show="plan" class="navbar-text" id="top_bar_tools">
               <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
                 <span class="fa fa-usd"></span>
-                <span class="label label-danger" id="shortest_path_total_cost">{{route.metadata.total_cost | currency}}</span>
-                <span class="label label-success">{{route.metadata.revenue | currency}}</span>
+                <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
+                <span class="label label-success">{{plan.metadata.revenue | currency}}</span>
               </span>
 
               <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
-                <span class="fa fa-users"></span> {{ route.metadata.total_customers | number }} customers covered
+                <span class="fa fa-users"></span> {{ plan.metadata.total_customers | number }} customers covered
               </span>
 
               <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
@@ -164,20 +164,20 @@
                   </a></li>
                 </ul>
               </li>
-              <li class="dropdown" ng-show="route" id="network_plan_menu">
+              <li class="dropdown" ng-show="plan" id="network_plan_menu">
                 <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                   <span class="fa fa-cog"></span>
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a href="javascript:void(0)" ng-click="save_as()" ng-show="route.owner_id === user_id">Save as…</a></li>
-                  <li role="separator" class="divider" ng-show="route.owner_id === user_id"></li>
-                  <li><a href="javascript:void(0)" ng-click="clear_route()"
-                    <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Clear plan</a></li>
-                  <li><a href="javascript:void(0)" ng-click="delete_route(route)"
-                    <% if (!env_is_test) { %>ng-show="route.owner_id === user_id"<% } %> >Delete plan</a></li>
-                  <li role="separator" class="divider" ng-show="route.owner_id === user_id"></li>
-                  <li><a href="javascript:void(0)" ng-click="show_share_route(route)">Share…</a></li>
+                  <li><a href="javascript:void(0)" ng-click="save_as()" ng-show="plan.owner_id === user_id">Save as…</a></li>
+                  <li role="separator" class="divider" ng-show="plan.owner_id === user_id"></li>
+                  <li><a href="javascript:void(0)" ng-click="clear_plan()"
+                    <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Clear plan</a></li>
+                  <li><a href="javascript:void(0)" ng-click="delete_plan(plan)"
+                    <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Delete plan</a></li>
+                  <li role="separator" class="divider" ng-show="plan.owner_id === user_id"></li>
+                  <li><a href="javascript:void(0)" ng-click="show_share_plan(plan)">Share…</a></li>
                   <% if (config.route_planning.length > 0) { %>
                   <li><a href="javascript:void(0)" ng-click="export_kml_name()">Export KML…</a></li>
                   <% } %>
@@ -207,7 +207,7 @@
         <hr>
 
         <div ng-controller="selection_tools_controller">
-          <div ng-repeat="(key, tool) in available_tools" ng-show="route.owner_id === user_id">
+          <div ng-repeat="(key, tool) in available_tools" ng-show="plan.owner_id === user_id">
             <p>
               <a href="javascript:void(0)" class="btn btn-default btn-block btn-sm"
                 ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
@@ -215,6 +215,15 @@
                 ng-click="set_selected_tool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
             </p>
           </div>
+
+          <% if (config.route_planning.length > 0) { %>
+          <p>
+            <a class="btn btn-sm btn-default btn-block"
+              ng-class="{'btn-success active': network_planning.getAlgorithm()}"
+              data-toggle="popover" id="network_planning_selector"><span class="fa fa-exchange"></span>
+            </a>
+          </p>
+          <% } %>
         </div>
 
       </div>
@@ -246,7 +255,7 @@
           <!-- Panel header text set in above binding -->
         </div>
         <div class="panel-body" ng-show="map_tools.is_expanded('boundaries')">
-          <div ng-show="area_layers.length > 0 || boundaries.length > 0 ">
+          <div ng-show="number_of_area_layers() > 0 || boundaries.length > 0">
             <h2>View</h2>
             <div ng-repeat="(key, layer) in area_layers">
               <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
@@ -296,7 +305,7 @@
             </div>
             <hr>
           </div>
-          <div ng-show="route.owner_id === user_id">
+          <div ng-show="plan.owner_id === user_id">
             <h2>Build</h2>
             <p>
               <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggle_tool()">Custom</a>
@@ -437,7 +446,7 @@
                 </div>
               </div>
             </div>
-            <div ng-show="route.owner_id === user_id && available_tools.length > 0">
+            <div ng-show="plan.owner_id === user_id && available_tools.length > 0">
               <hr>
               <h2>Build</h2>
               <div class="row">
@@ -471,7 +480,7 @@
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('network_nodes')">
-            <div ng-show="route">
+            <div ng-show="plan">
               <h2>View</h2>
 
               <div ng-repeat="node_type in view_node_types">
@@ -504,7 +513,7 @@
                 <span id="equipment_nodes_controller_number_of_features">{{number_of_features}}</span>
               <% } %>
 
-              <div ng-show="route.owner_id === user_id && (build_node_types.length > 0 || show_clear_nodes || show_recalculate)">
+              <div ng-show="plan.owner_id === user_id && (build_node_types.length > 0 || show_clear_nodes || show_recalculate)">
                 <hr>
                 <h2>Build</h2>
                 <div class="row">
@@ -605,32 +614,6 @@
         </div>
       </div>
     </div>
-
-    <% if (config.route_planning.length > 0) { %>
-    <div ng-controller="network-planning-controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('network_planning')" class="map-tool panel panel-primary" id="network_planning_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('network_planning')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_planning')" ng-click="map_tools.collapse('network_planning')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_planning')" ng-click="map_tools.expand('network_planning')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-          <!-- Panel header text set in above binding -->
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('network_planning')">
-            <div class="form-group form-group-sm">
-              <select class="form-control" ng-model="algorithm" ng-options="algorithm as algorithm.description for algorithm in algorithms" ng-change="change_algorithm()"></select>
-            </div>
-            <div ng-hide="algorithm.interactive">
-              <button class="btn btn-block btn-default btn-sm" ng-click="run_algorithm()">Run algorithm</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <% } %>
 
     <div id="map-canvas-wrapper">
       <div id="map-canvas"></div>
@@ -744,7 +727,7 @@
 
     swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> });
 
-    $("#share-route-search").select2({
+    $("#share-plan-search").select2({
       ajax: {
         url: "/user/find",
         dataType: 'json',

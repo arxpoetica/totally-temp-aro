@@ -64,8 +64,8 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     }
   });
 
-  $scope.route = null;
-  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
+  $scope.plan = null;
+  $rootScope.$on('plan_selected', (e, plan) => $scope.plan = plan);
 
   var canceller = null;
   $scope.calculate_market_size = function() {
@@ -89,7 +89,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     };
     $scope.loading = true;
     destroy_charts();
-    $http.get('/market_size/plan/'+$scope.route.id+'/calculate', args).success(function(market_profile) {
+    $http.get('/market_size/plan/'+$scope.plan.id+'/calculate', args).success(function(market_profile) {
       $scope.loading = false;
       $scope.market_size = market_profile.market_size;
       $scope.fair_share = market_profile.fair_share;
@@ -147,7 +147,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
         filename: name,
       };
       $http({
-        url: '/market_size/plan/'+$scope.route.id+'/export',
+        url: '/market_size/plan/'+$scope.plan.id+'/export',
         method: 'GET',
         params: params,
       })

@@ -95,7 +95,7 @@ app.service('map_tools', ['$rootScope', 'tracker', function($rootScope, tracker)
     },
     {
       id: 'boundaries',
-      name: 'Custom Boundaries',
+      name: 'Boundaries',
       short_name: 'B',
       icon: 'icon icon-boundaries',
     },
@@ -104,12 +104,6 @@ app.service('map_tools', ['$rootScope', 'tracker', function($rootScope, tracker)
       name: 'Search',
       short_name: 'S',
       icon: 'fa fa-search',
-    },
-    {
-      id: 'network_planning',
-      name: 'Network Planning',
-      short_name: 'N',
-      icon: 'fa fa-exchange',
     },
   ];
 

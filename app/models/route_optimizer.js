@@ -21,7 +21,7 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
       sum(location_total)::integer as locations_cost
     from
       (select
-        $1 as route_id,
+        $1 as plan_id,
         (entry_fee + business_install_costs * number_of_businesses + household_install_costs * number_of_households) as location_total
       from (
         select
@@ -36,9 +36,9 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
             location_entry_fees.location_id as location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
           from
             client_schema.location_entry_fees
-          join custom.route_targets on
-            location_entry_fees.location_id = route_targets.location_id
-            and route_targets.route_id=$1
+          join client.plan_targets on
+            location_entry_fees.location_id = plan_targets.location_id
+            and plan_targets.plan_id=$1
 
           union
 
@@ -48,9 +48,9 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
             client_schema.business_install_costs
           join businesses
             on businesses.id = business_install_costs.business_id
-          join custom.route_targets on
-            businesses.location_id = route_targets.location_id
-            and route_targets.route_id=$1
+          join client.plan_targets on
+            businesses.location_id = plan_targets.location_id
+            and plan_targets.plan_id=$1
 
           union
 
@@ -58,9 +58,9 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
             household_install_costs.location_id, 0, 0, install_cost_per_hh, 0, 0
           from
             client_schema.household_install_costs
-          join custom.route_targets on
-            household_install_costs.location_id = route_targets.location_id
-            and route_targets.route_id=$1
+          join client.plan_targets on
+            household_install_costs.location_id = plan_targets.location_id
+            and plan_targets.plan_id=$1
 
           union
 
@@ -68,9 +68,9 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
             households.location_id, 0, 0, 0, households.number_of_households, 0
           from
             aro.households
-          join custom.route_targets on
-            households.location_id = route_targets.location_id
-            and route_targets.route_id=$1
+          join client.plan_targets on
+            households.location_id = plan_targets.location_id
+            and plan_targets.plan_id=$1
 
           union
 
@@ -78,15 +78,15 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
             businesses.location_id, 0, 0, 0, 0, count(*)
           from
             businesses
-          join custom.route_targets on
-            businesses.location_id = route_targets.location_id
-            and route_targets.route_id=$1
+          join client.plan_targets on
+            businesses.location_id = plan_targets.location_id
+            and plan_targets.plan_id=$1
           group by
             businesses.location_id
 
         ) t group by location_id
       ) t
-    ) t group by route_id;
+    ) t group by plan_id;
   `
   database.findValue(sql, [plan_id], 'locations_cost', 0, callback);
 };
@@ -103,13 +103,13 @@ RouteOptimizer.calculate_equipment_nodes_cost = function(plan_id, callback) {
       SELECT
         nt.name as key, nt.description as name, COUNT(*)::integer as count
       FROM
-        client_schema.network_nodes n
+        client.network_nodes n
       JOIN
-        client_schema.network_node_types nt
+        client.network_node_types nt
       ON
         nt.id = n.node_type_id
       WHERE
-        route_id=$1
+        plan_id=$1
       GROUP BY nt.id
     `
     database.query(sql, [plan_id], callback);
@@ -133,11 +133,11 @@ RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callbac
       SELECT
         spend.year, SUM(spend.monthly_spend * 12)::float as value
       FROM
-        custom.route_targets
+        client.plan_targets
       JOIN
         businesses b
       ON
-        route_targets.location_id = b.location_id
+        plan_targets.location_id = b.location_id
       JOIN
         client_schema.industry_mapping m
       ON
@@ -154,7 +154,7 @@ RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callbac
         AND e.min_value <= b.number_of_employees
         AND e.max_value >= b.number_of_employees
       WHERE
-        route_targets.route_id=$1
+        plan_targets.plan_id=$1
       GROUP BY
         spend.year
       ORDER BY spend.year

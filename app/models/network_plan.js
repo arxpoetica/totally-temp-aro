@@ -148,6 +148,7 @@ NetworkPlan.recalculate_route = function(plan_id, algorithm, callback) {
 }
 
 NetworkPlan.calculate_pg_route = function(plan_id, callback) {
+  console.log('calculate_pg_route')
   txain(function(callback) {
     var sql = 'DELETE FROM client.fiber_route WHERE plan_id=$1';
     database.execute(sql, [plan_id], callback);
@@ -165,6 +166,10 @@ NetworkPlan.calculate_pg_route = function(plan_id, callback) {
     database.query(sql, [plan_id], callback);
   })
   .then(function(rows, callback) {
+    return setTimeout(() => {
+      sql = `SELECT $1::integer`;
+      database.execute(sql, [plan_id], callback);
+    }, 3000)
     // the route needs at least one source and at least one target
     if (rows.length < 2) return callback();
 
@@ -182,10 +187,6 @@ NetworkPlan.calculate_pg_route = function(plan_id, callback) {
       )
       INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
     `
-    setTimeout(() => {
-      sql = `SELECT $1::integer`;
-      database.execute(sql, [plan_id], callback);
-    }, 3000)
   })
   .end(callback);
 };
@@ -241,8 +242,8 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
   }, function() {
     txain(function(callback) {
       var sql = `
-        INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at)
-        VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_Envelope(ST_GeomFromText($4, 4326)), NOW(), NOW()) RETURNING id;
+        INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type)
+        VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_Envelope(ST_GeomFromText($4, 4326)), NOW(), NOW(), 1) RETURNING id;
       `
       var params = [
         name,
@@ -273,7 +274,7 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
       var sql = `
         SELECT
           $2::text AS carrier_name,
-          route.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
+          plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
           users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
           created_at, updated_at
         FROM

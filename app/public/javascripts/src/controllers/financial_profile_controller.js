@@ -1,8 +1,8 @@
 // Financial Profile Controller
 app.controller('financial_profile_controller', ['$scope', '$rootScope', function($scope, $rootScope) {
 
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
+  $rootScope.$on('plan_selected', function(e, plan) {
+    $scope.plan = plan;
   });
 
   var chart = null;
@@ -24,7 +24,7 @@ app.controller('financial_profile_controller', ['$scope', '$rootScope', function
       datasets: [dataset],
     };
 
-    ($scope.route.metadata.npv || []).forEach(function(revenue) {
+    ($scope.plan.metadata.npv || []).forEach(function(revenue) {
       data.labels.push(revenue.year);
       dataset.data.push(revenue.value);
     });

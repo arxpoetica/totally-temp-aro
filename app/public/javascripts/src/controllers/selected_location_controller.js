@@ -146,8 +146,8 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
     });
   };
 
-  $scope.route = null;
-  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
+  $scope.plan = null;
+  $rootScope.$on('plan_selected', (e, plan) => $scope.plan = plan);
 
   $scope.export = function() {
     $('#selected_location_controller').modal('hide');
@@ -169,7 +169,7 @@ app.controller('selected_location_controller', function($rootScope, $scope, $htt
         filename: name,
       };
       $http({
-        url: '/market_size/plan/'+$scope.route.id+'/location/'+$scope.location.id+'/export',
+        url: '/market_size/plan/'+$scope.plan.id+'/location/'+$scope.location.id+'/export',
         method: 'GET',
         params: params,
       })

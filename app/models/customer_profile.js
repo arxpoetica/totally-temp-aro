@@ -26,7 +26,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
       (SELECT
         hct.customer_type_id AS id, COUNT(*)::integer AS households, 0 as businesses
       FROM
-        custom.route_targets t
+        client.plan_targets t
       JOIN
         households h
       ON
@@ -36,7 +36,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
       ON
         hct.household_id = h.id
       WHERE
-        route_id=$1
+        plan_id=$1
       GROUP BY hct.customer_type_id)
 
       UNION
@@ -44,7 +44,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
       (SELECT
         bct.customer_type_id as id, 0 as households, COUNT(*)::integer as businesses
       FROM
-        custom.route_targets t
+        client.plan_targets t
       JOIN
         businesses b
       ON
@@ -54,7 +54,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
       ON
         bct.business_id = b.id
       WHERE
-        route_id=$1
+        plan_id=$1
       GROUP BY bct.customer_type_id)
       ) t
     JOIN
@@ -113,7 +113,7 @@ CustomerProfile.customer_profile_all_cities = function(callback) {
 
 CustomerProfile.customer_profile_for_existing_fiber = function(plan_id, metadata, callback) {
   txain(function(callback) {
-    database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM custom.route WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
+    database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM client.plan WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null, callback);
   })
   .then(function(cbsa, callback) {
     var sql = `

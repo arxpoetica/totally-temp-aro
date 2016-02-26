@@ -14,7 +14,23 @@ exports.configure = function(api, middleware) {
     'displayable_client_carrier_name');
 
   api.get('/', function(request, response, next) {
-    database.query('SELECT * FROM cities ORDER BY city_name ASC', function(err, cities) {
+    // for cities
+    var q = `
+      SELECT
+        cities.city_name || ', ' || cities.country_name AS name,
+        cities.city_name || ', ' || cities.country_name AS value
+      FROM cities
+      ORDER BY city_name ASC
+    `;
+    // for wirecenters
+    var q = `
+      SELECT
+        wirecenter || ' - ' || aocn_name as name,
+        ST_Y(st_centroid(geom)) || ', ' || ST_X(st_centroid(geom)) as value
+      FROM wirecenters
+      ORDER BY wirecenter ASC
+    `;
+    database.query(q, function(err, areas) {
       if (err) return next(err);
 
       response.render('index.html', {
@@ -23,7 +39,7 @@ exports.configure = function(api, middleware) {
         env_is_test: process.env.NODE_ENV === 'test',
         user: request.user,
         config: public_config,
-        cities: cities,
+        areas: areas,
       });
     })
   });

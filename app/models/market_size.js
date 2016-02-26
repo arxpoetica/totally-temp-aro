@@ -157,7 +157,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
         AND ct.id = (
           SELECT cities.id
           FROM cities
-          JOIN custom.route r ON r.id = ${params.length}
+          JOIN custom.route r ON r.id = $${params.length}
           ORDER BY r.area_centroid <#> cities.buffer_geog::geometry
           LIMIT 1
         )

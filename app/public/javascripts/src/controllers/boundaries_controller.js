@@ -102,18 +102,18 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     }
   });
 
-  $scope.route = null;
+  $scope.plan = null;
 
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
+  $rootScope.$on('plan_selected', function(e, plan) {
+    $scope.plan = plan;
     $scope.boundaries = [];
-    if (!route) return;
+    if (!plan) return;
 
     var county_subdivisions = area_layers['county_subdivisions_layer'];
     var census_blocks = area_layers['census_blocks_layer'];
 
-    if (route && (county_subdivisions || census_blocks)) {
-      $http.get(`/network_plan/${route.id}/area_data`)
+    if (plan && (county_subdivisions || census_blocks)) {
+      $http.get(`/network_plan/${plan.id}/area_data`)
         .success(function(response) {
           // area_layers['wirecenter'].set_api_endpoint('/wirecenters/'+response.wirecenter);
           area_layers['county_subdivisions_layer'].set_api_endpoint('/county_subdivisions/'+response.statefp);
@@ -121,7 +121,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
         });
     }
 
-    $http.get('/boundary/'+route.id+'/find')
+    $http.get('/boundary/'+plan.id+'/find')
       .success(function(boundaries) {
         $scope.boundaries = boundaries;
         boundaries.forEach(function(boundary) {
@@ -131,7 +131,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
           })
           var overlay = new google.maps.Polygon({
             paths: paths,
-            editable: route.owner_id === user_id,
+            editable: plan.owner_id === user_id,
             strokeWeight: 2,
           });
           boundary.overlay = overlay;
@@ -196,7 +196,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
         geom: JSON.stringify(to_geo_json(overlay)),
       };
 
-      $http.post('/boundary/'+$scope.route.id+'/create', data)
+      $http.post('/boundary/'+$scope.plan.id+'/create', data)
         .success(function(boundary) {
           $scope.boundaries.push(boundary);
           boundary.overlay = overlay;
@@ -222,7 +222,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     var name = event.feature.getProperty('name');
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson(function(obj) {
-        if (map_tools.is_visible('network_planning')) {
+        if (network_planning.getAlgorithm()) {
           tracker.track('Boundaries / Network planning');
           $scope.network_planning_boundary(obj.geometry);
         } else {
@@ -242,7 +242,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
         name: boundary.name,
         geom: JSON.stringify(to_geo_json(overlay)),
       };
-      $http.post('/boundary/'+$scope.route.id+'/edit/'+boundary.id, data)
+      $http.post('/boundary/'+$scope.plan.id+'/edit/'+boundary.id, data)
         .success(function(response) {
           // yay!
         });
@@ -331,7 +331,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
         geom: JSON.stringify(to_geo_json(boundary.overlay)),
       };
 
-      $http.post('/boundary/'+$scope.route.id+'/edit/'+boundary.id, data)
+      $http.post('/boundary/'+$scope.plan.id+'/edit/'+boundary.id, data)
         .success(function(response) {
           boundary.name = name;
         });
@@ -339,13 +339,13 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
   };
 
   $scope.network_planning_boundary = function(geojson) {
+    console.log('data!!', data)
     var data = {
       boundary: geojson,
       algorithm: network_planning.getAlgorithm().id,
     };
-    showProgress();
     var config = {
-      url: '/network/nodes/'+$scope.route.id+'/select_boundary',
+      url: '/network/nodes/'+$scope.plan.id+'/select_boundary',
       method: 'post',
       saving_plan: true,
       data: data,
@@ -366,7 +366,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
       showCancelButton: true,
       closeOnConfirm: true,
     }, function() {
-      $http.post('/boundary/'+$scope.route.id+'/delete/'+boundary.id)
+      $http.post('/boundary/'+$scope.plan.id+'/delete/'+boundary.id)
         .success(function(response) {
           boundary.overlay.setMap(null);
           $scope.boundaries = _.reject($scope.boundaries, function(b) { return boundary.id === b.id; });
@@ -399,5 +399,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
       $rootScope.$broadcast('boundary_selected', obj.geometry, layer.name);
     });
   };
+
+  $scope.number_of_area_layers = function() {
+    return _.size(area_layers);
+  }
 
 }]);

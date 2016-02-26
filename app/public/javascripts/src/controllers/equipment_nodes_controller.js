@@ -58,6 +58,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   map_layers.addEquipmentLayer(network_nodes_layer);
   map_layers.addEquipmentLayer(fiber_plant_layer);
+  map_layers.addEquipmentLayer(towers_layer);
 
   $scope.equipment_layers = map_layers.equipment_layers;
 
@@ -104,10 +105,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   * FUNCTIONS *
   *************/
 
-  $scope.route = null;
-  $rootScope.$on('route_selected', function(e, route) {
-    $scope.route = route;
-    if (!route) return;
+  $scope.plan = null;
+  $rootScope.$on('plan_selected', function(e, plan) {
+    $scope.plan = plan;
+    if (!plan) return;
 
     map.ready(function() {
       fiber_plant_layer.show();
@@ -126,12 +127,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       network_nodes_layer.hide();
     } else {
       network_nodes_layer.show();
-      network_nodes_layer.set_api_endpoint('/network/nodes/'+$scope.route.id+'/find?node_types='+types.join(','));
+      network_nodes_layer.set_api_endpoint('/network/nodes/'+$scope.plan.id+'/find?node_types='+types.join(','));
     }
   };
 
   $scope.save_nodes = function() {
-    $http.post('/network/nodes/'+$scope.route.id+'/edit', changes).success(function(response) {
+    $http.post('/network/nodes/'+$scope.plan.id+'/edit', changes).success(function(response) {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
         network_nodes_layer.reload_data();
@@ -151,7 +152,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       showCancelButton: true,
       closeOnConfirm: true,
     }, function() {
-      $http.post('/network/nodes/'+$scope.route.id+'/clear').success(function(response) {
+      $http.post('/network/nodes/'+$scope.plan.id+'/clear').success(function(response) {
         network_nodes_layer.reload_data();
       });
     });
@@ -180,7 +181,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   });
 
   $rootScope.$on('map_click', function(e, gm_event) {
-    if (!map_tools.is_visible('network_nodes') || !$scope.route || !$scope.selected_tool) return;
+    if (!map_tools.is_visible('network_nodes') || !$scope.plan || !$scope.selected_tool) return;
 
     var type = $scope.selected_tool;
     var coordinates = gm_event.latLng;
@@ -212,7 +213,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     if (map_layer.type !== 'network_nodes'
       || !map_tools.is_visible('network_nodes')
       || !feature.getProperty('unselectable')
-      || $scope.route.owner_id !== user_id) {
+      || $scope.plan.owner_id !== user_id) {
       return;
     }
     options.add('Delete equipment node', function(map_layer, feature) {

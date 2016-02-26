@@ -10,4 +10,4 @@ CREATE TABLE client.plan_sources
   CONSTRAINT client_plan_sources_pkey PRIMARY KEY (id)
 );
 
-CREATE INDEX client_plan_sources_route_index ON client.plan_sources(route_id);
+CREATE INDEX client_plan_sources_route_index ON client.plan_sources(plan_id);
