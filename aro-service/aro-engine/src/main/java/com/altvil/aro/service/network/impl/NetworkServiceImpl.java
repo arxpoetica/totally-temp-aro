@@ -14,14 +14,11 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.CoverageAggregateStatistic;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkService;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
-import com.altvil.utils.GeometryUtil;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
 
 @Service
 public class NetworkServiceImpl implements NetworkService {
@@ -37,11 +34,10 @@ public class NetworkServiceImpl implements NetworkService {
 
 	
 	@Override
-	public NetworkData getNetworkData(int planId) {
+	public NetworkData getNetworkData(NetworkRequest networkRequest) {
 
 		NetworkData networkData = new NetworkData();
 
-		NetworkRequest networkRequest = createRequest(planId);
 		networkData.setFiberSources(getFiberSources(networkRequest));
 		networkData.setRoadLocations(getLocations(networkRequest));
 		networkData.setRoadEdges(getRoadEdges(networkRequest));
@@ -49,27 +45,17 @@ public class NetworkServiceImpl implements NetworkService {
 		return networkData;
 	}
 
-	private NetworkRequest createRequest(int jobId) {
-		return null;
-	}
-
-	private static long toLong(Object object) {
-		return ((Number) object).longValue();
-	}
-
-	private static Point toPoint(Object value) throws ParseException {
-		return (Point) GeometryUtil.toGeometry(value.toString());
-	}
-
-	private static double toDouble(Object value) {
-		return ((Number) value).doubleValue();
-	}
+	
 
 	private Collection<NetworkAssignment> toValidAssignments(
 			Stream<NetworkAssignment> stream) {
 		return stream.filter((na) -> na != null).collect(Collectors.toList());
 	}
 
+	private enum LocationMap {
+		id, gid, tlid, point, ratio, intersect_point, distance 
+	}
+	
 	private Collection<NetworkAssignment> getLocations(
 			NetworkRequest networkRequest) {
 
@@ -79,21 +65,21 @@ public class NetworkServiceImpl implements NetworkService {
 				.map(result -> {
 					try {
 
-						long tlid = toLong(result.get(2));
+						long tlid = ConversionUtil.asLong(result.get(LocationMap.tlid.ordinal()));
 
 						AroEntity aroEntity = entityFactory
-								.createLocationEntity(toLong(result.get(0)),
-										toLong(tlid), CoverageFactory.FACTORY.getDefaultCoverage());
+								.createLocationEntity(ConversionUtil.asLong(result.get(LocationMap.id.ordinal())),
+										ConversionUtil.asLong(tlid), CoverageFactory.FACTORY.getDefaultCoverage());
 
 						RoadLocation rl = RoadLocationImpl
 								.build()
 								.setTlid(tlid)
-								.setLocationPoint(toPoint(result.get(3)))
+								.setLocationPoint(ConversionUtil.asPoint(result.get(LocationMap.point.ordinal())))
 								.setRoadSegmentPositionRatio(
-										toDouble(result.get(4)))
+										ConversionUtil.asDouble(result.get(LocationMap.ratio.ordinal())))
 								.setRoadSegmentClosestPoint(
-										toPoint(result.get(5)))
-								.setDistanceFromRoadSegmentInMeters(toDouble(6))
+										ConversionUtil.asPoint(result.get(LocationMap.intersect_point.ordinal())))
+								.setDistanceFromRoadSegmentInMeters(ConversionUtil.asDouble(LocationMap.distance.ordinal()))
 								.build();
 
 						return new DefaultNetworkAssignment(aroEntity, rl);
@@ -103,7 +89,16 @@ public class NetworkServiceImpl implements NetworkService {
 					}
 				}));
 	}
+	
+	private AroEntity createAroNetworkNode(long id, int type) {
+		return entityFactory.createCentralOfficeEquipment(id) ;
+	}
 
+	
+	private enum FiberSourceMap {
+		id, gid, tlid, point, ratio, intersect_point, distance, node_type 
+	}
+	
 	private Collection<NetworkAssignment> getFiberSources(
 			NetworkRequest networkRequest) {
 		planRepository.querySourceLocations(networkRequest.getPlanId());
@@ -113,21 +108,18 @@ public class NetworkServiceImpl implements NetworkService {
 				.map(result -> {
 					try {
 
-						long tlid = toLong(result.get(2));
+						long tlid = ConversionUtil.asLong(result.get(FiberSourceMap.tlid.ordinal()));
 
-						AroEntity aroEntity = entityFactory
-								.createLocationEntity(toLong(result.get(0)),
-										toLong(tlid), CoverageFactory.FACTORY.getDefaultCoverage());
-
+						AroEntity aroEntity = createAroNetworkNode(ConversionUtil.asLong(result.get(0)), ConversionUtil.asInteger(result.get(7))) ;
 						RoadLocation rl = RoadLocationImpl
 								.build()
 								.setTlid(tlid)
-								.setLocationPoint(toPoint(result.get(3)))
+								.setLocationPoint(ConversionUtil.asPoint(result.get(FiberSourceMap.point.ordinal())))
 								.setRoadSegmentPositionRatio(
-										toDouble(result.get(4)))
+										ConversionUtil.asDouble(result.get(FiberSourceMap.ratio.ordinal())))
 								.setRoadSegmentClosestPoint(
-										toPoint(result.get(5)))
-								.setDistanceFromRoadSegmentInMeters(toDouble(6))
+										ConversionUtil.asPoint(result.get(FiberSourceMap.intersect_point.ordinal())))
+								.setDistanceFromRoadSegmentInMeters(ConversionUtil.asDouble(FiberSourceMap.distance.ordinal()))
 								.build();
 
 						return new DefaultNetworkAssignment(aroEntity, rl);
@@ -138,13 +130,34 @@ public class NetworkServiceImpl implements NetworkService {
 				}));
 	}
 
+	
+	private enum  RoadEdgeMap {
+		gid, tlid, tnidf, tnidt, shape, edge_length
+	}
+	
 	private Collection<RoadEdge> getRoadEdges(NetworkRequest networkRequest) {
-		planRepository.queryRoadEdgesbyPlanId(networkRequest.getPlanId());
+		planRepository.queryRoadEdgesbyPlanId(networkRequest.getPlanId()).stream().map(result -> {
+			try {
+				return new RoadEdgeImpl(
+						ConversionUtil.asLong(result.get(RoadEdgeMap.tlid.ordinal())),
+						ConversionUtil.asLong(result.get(RoadEdgeMap.tlid.ordinal())), 
+						ConversionUtil.asLong(result.get(RoadEdgeMap.tlid.ordinal())), 
+						ConversionUtil.asGeometry(result.get(RoadEdgeMap.shape.ordinal())), 
+						ConversionUtil.asDouble(result.get(RoadEdgeMap.tlid.ordinal()))) ;
+			} catch (Exception err) {
+				log.error(err.getMessage(), err);
+				return null;
+			}
+		});
 		return null;
 	}
 	
 	private static class CoverageAggregateStatisticImpl implements CoverageAggregateStatistic {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private double demand ;
 		
 		public CoverageAggregateStatisticImpl(double demand) {
@@ -190,12 +203,6 @@ public class NetworkServiceImpl implements NetworkService {
 
 	}
 
-	private static class NetworkRequest {
-
-		public long getPlanId() {
-			return 0;
-		}
-
-	}
+	
 
 }

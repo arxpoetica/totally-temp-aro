@@ -17,7 +17,7 @@ import com.altvil.aro.service.recalc.RecalcService;
 import com.altvil.aro.service.recalc.protocol.RecalcResponse;
 
 @Path("recalc")
-public class PlanRecalcResource {
+public class RecalcRequest {
 
 	@Autowired
 	private RecalcService recalcService;
@@ -35,9 +35,9 @@ public class PlanRecalcResource {
 	public RecalcResponse postRecalc(FiberPlanRequest fiberPlanRequest)
 			throws RecalcException, InterruptedException, ExecutionException {
 
-		planService.computeNetworkModel(
-				networkService.getNetworkData(fiberPlanRequest.getPlanId()),
-				fiberPlanRequest.getFiberNetworkConstraints());
+//		planService.computeNetworkModel(
+//				networkService.getNetworkData(fiberPlanRequest.getPlanId()),
+//				fiberPlanRequest.getFiberNetworkConstraints());
 
 //		recalcService.submit(new Callable<T>() {
 //		});

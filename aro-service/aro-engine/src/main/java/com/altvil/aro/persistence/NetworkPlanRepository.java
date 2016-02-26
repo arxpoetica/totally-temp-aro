@@ -42,6 +42,7 @@ public interface NetworkPlanRepository  extends JpaRepository<NetworkPlan, Integ
 			"with nodes as (\n" + 
 			"		SELECT\n" + 
 			"			n.id,\n" + 
+			"			n.node_type_id" +
 			"			n.geom,\n" + 
 			"			w.location_edge_buffer as buffer_geom\n" + 
 			"			FROM\n" + 
@@ -67,13 +68,14 @@ public interface NetworkPlanRepository  extends JpaRepository<NetworkPlan, Integ
 			"			FROM nodes l\n" + 
 			"		)\n" + 
 			"		SELECT \n" + 
-			"			ll.id,\n" + 
+			"			ll.id,\n" +
 			"			ll.gid,\n" + 
 			"			e.tlid,\n" + 
 			"			ll.point::point,\n" + 
 			"			st_line_locate_point(st_linemerge(e.geom), ll.point) as intersect_position,\n" + 
 			"			st_closestpoint(st_linemerge(e.geom), ll.point)::point as intersect_point,\n" + 
 			"			st_distance(ll.point::geography, st_closestpoint(e.geom, ll.point)::geography) as distance\n" + 
+			"			ll.node_type_id" +
 			"		FROM linked_nodes ll\n" + 
 			"		JOIN  aro.edges  e on e.gid = ll.gid\n" + 
 			"		ORDER BY gid, intersect_position\n" + 
@@ -86,7 +88,7 @@ public interface NetworkPlanRepository  extends JpaRepository<NetworkPlan, Integ
 			"join aro.wirecenters w on r.wirecenter_id = w.id\n" + 
 			"join aro.edges a on st_intersects(edge_buffer, a.geom)\n" + 
 			"where r.id = :planId", nativeQuery = true)
-	List<Object> queryRoadEdgesbyPlanId(@Param("planId") long planId);
+	List<List<Object>> queryRoadEdgesbyPlanId(@Param("planId") long planId);
 
 	
 	

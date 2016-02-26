@@ -80,7 +80,7 @@ public class NetworkNode {
 		this.geogPoint = geogPoint;
 	}
 
-	@Column(name = "route_id")
+	@Column(name = "plan_id")
 	public long getRouteId() {
 		return routeId;
 	}
