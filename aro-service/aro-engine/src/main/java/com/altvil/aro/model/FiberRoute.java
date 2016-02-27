@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.altvil.aro.service.graph.segment.FiberType;
 
@@ -33,7 +34,7 @@ public class FiberRoute extends ComparableModel {
 	private String name ;
 	private Set<FiberSegment> fiberSegments = new HashSet<>() ;
 	
-	
+	@Transient
 	@Override
 	protected Serializable getIdKey() {
 		return id ;

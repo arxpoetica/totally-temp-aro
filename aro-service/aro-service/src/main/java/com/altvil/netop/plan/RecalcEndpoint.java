@@ -25,13 +25,13 @@ import com.altvil.aro.service.recalc.protocol.RecalcResponse;
 
 @RestController
 public class RecalcEndpoint {
-
-	@Autowired
-	private RecalcService recalcService;
-
+	
 	@Autowired
 	private PlanService planService;
 
+	@Autowired
+	private RecalcService recalcService;
+	
 	@Autowired
 	private NetworkService networkService;
 

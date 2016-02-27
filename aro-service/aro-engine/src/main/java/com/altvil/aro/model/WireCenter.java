@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -26,6 +27,7 @@ public class WireCenter extends ComparableModel {
 	private MultiPolygon geog;
 	private MultiPolygon geom;
 
+	@Transient
 	@Override
 	protected Serializable getIdKey() {
 		return id;

@@ -2,6 +2,8 @@ package com.altvil.aro.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Transient;
+
 public abstract class ComparableModel {
 
 	@Override
@@ -36,6 +38,7 @@ public abstract class ComparableModel {
 		return a.equals(b) ;
 	}
 
+	@Transient
 	protected abstract Serializable getIdKey();
 
 }

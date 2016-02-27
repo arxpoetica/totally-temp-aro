@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -23,6 +24,7 @@ public class FiberSegment extends ComparableModel {
 	private FiberRoute fiberRoute;
 	private Geometry geometry;
 	
+	@Transient
 	@Override
 	protected Serializable getIdKey() {
 		return id ;

@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -24,6 +25,7 @@ public class NetworkNode extends ComparableModel {
 	private Point geogPoint;
 	private long routeId;
 	
+	@Transient
 	@Override
 	protected Serializable getIdKey() {
 		return id ;

@@ -1,24 +1,28 @@
 package com.altvil.aro.service.recalc.impl;
 
-import com.altvil.aro.service.recalc.Job;
-import com.altvil.aro.service.recalc.RecalcException;
-import com.altvil.aro.service.recalc.RecalcService;
-import com.altvil.aro.service.recalc.protocol.RecalcJob;
-import com.altvil.aro.service.recalc.protocol.RecalcResponse;
-import com.google.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.altvil.aro.service.recalc.Job;
+import com.altvil.aro.service.recalc.RecalcException;
+import com.altvil.aro.service.recalc.RecalcService;
+import com.altvil.aro.service.recalc.protocol.RecalcJob;
+import com.altvil.aro.service.recalc.protocol.RecalcResponse;
+
 @Service
-@Singleton
 public class RecalcServiceImpl implements RecalcService {
 
 	private static final Logger log = LoggerFactory
