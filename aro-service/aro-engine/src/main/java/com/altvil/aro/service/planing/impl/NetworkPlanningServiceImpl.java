@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.altvil.aro.persistence.FiberRouteRepository;
-import com.altvil.aro.persistence.NetworkNodeRepository;
+import com.altvil.aro.persistence.repository.FiberRouteRepository;
+import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 

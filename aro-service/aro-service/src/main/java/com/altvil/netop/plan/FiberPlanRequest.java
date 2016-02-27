@@ -1,4 +1,4 @@
-package com.altvil.aro.rest.plan;
+package com.altvil.netop.plan;
 
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 

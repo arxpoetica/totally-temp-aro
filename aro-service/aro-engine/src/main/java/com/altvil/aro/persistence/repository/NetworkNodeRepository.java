@@ -1,4 +1,4 @@
-package com.altvil.aro.persistence;
+package com.altvil.aro.persistence.repository;
 
 import java.util.List;
 

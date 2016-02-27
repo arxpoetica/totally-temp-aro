@@ -5,17 +5,13 @@ import java.util.Collection;
 import java.util.List;
 
 import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
-import com.altvil.aro.service.graph.assigment.impl.DefaultGraphMapping;
-import com.altvil.aro.service.graph.assigment.impl.LeafGraphMapping;
 import com.altvil.aro.service.graph.segment.FiberType;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.model.FiberAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.serialize.ModelSerializer;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.utils.StreamUtil;
 
 @SuppressWarnings("unused")
 public class SerializerImpl implements ModelSerializer {
@@ -102,7 +98,6 @@ public class SerializerImpl implements ModelSerializer {
 		return null ;
 	}
 
-	@SuppressWarnings("unused")
 	private class NetworkModelSerializer {
 
 		private SerializerImpl serializer;

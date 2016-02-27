@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.persistence.NetworkPlanRepository;
+import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.CoverageAggregateStatistic;
 import com.altvil.aro.service.entity.impl.EntityFactory;
