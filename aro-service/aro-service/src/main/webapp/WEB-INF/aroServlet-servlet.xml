@@ -68,11 +68,6 @@
 		<property name="defaultContentType" value="application/json" />
 	</bean>
 
-	<context:component-scan base-package="com.altvil">
-		<context:exclude-filter type="annotation"
-			expression="com.altvil.TestService" />
-	</context:component-scan>
-
 	<context:property-placeholder location="classpath*:/aroConfig.properties" />
 
 	<bean

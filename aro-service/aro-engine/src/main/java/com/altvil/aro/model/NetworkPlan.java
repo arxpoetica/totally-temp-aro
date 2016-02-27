@@ -1,5 +1,6 @@
 package com.altvil.aro.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -19,7 +20,7 @@ import com.vividsolutions.jts.geom.Point;
 
 @Entity
 @Table(name = "plan", schema="client")
-public class NetworkPlan {
+public class NetworkPlan extends ComparableModel {
 	
 	private Long id ;
 	private String name ;
@@ -29,6 +30,11 @@ public class NetworkPlan {
 	private Point areaBounds ;
 	private Date createAt;
 	private Date updateAt ;
+	
+	@Override
+	protected Serializable getIdKey() {
+		return id ;
+	}
 	
 	@Id
 	@Column(name = "id")
@@ -41,7 +47,7 @@ public class NetworkPlan {
 	}
 	
 	
-	@Column(name="fiber_route_type")
+	@Column(name="name")
 	public String getName() {
 		return name;
 	}
@@ -67,7 +73,7 @@ public class NetworkPlan {
 		this.wireCenter = wireCenter;
 	}
 	
-	@Column(name="plan_type")
+	@Column(name="area_name")
 	public String getAreaName() {
 		return areaName;
 	}

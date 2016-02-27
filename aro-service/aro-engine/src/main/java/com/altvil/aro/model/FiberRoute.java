@@ -1,14 +1,21 @@
 package com.altvil.aro.model;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.altvil.aro.service.graph.segment.FiberType;
@@ -16,7 +23,7 @@ import com.altvil.aro.service.graph.segment.FiberType;
 
 @Entity
 @Table(name = "fiber_route", schema="client")
-public class FiberRoute {
+public class FiberRoute extends ComparableModel {
 	
 	private Long id ;
 	private FiberType fiberRouteType ;
@@ -24,7 +31,13 @@ public class FiberRoute {
 	private NetworkNode fromNode ;
 	private NetworkNode toNode ;
 	private String name ;
-	private String clliCode ;
+	private Set<FiberSegment> fiberSegments = new HashSet<>() ;
+	
+	
+	@Override
+	protected Serializable getIdKey() {
+		return id ;
+	}
 	
 	@Id
 	@Column(name = "id")
@@ -47,7 +60,7 @@ public class FiberRoute {
 	}
 	
 	@ManyToOne
-	@JoinColumn(name = "parent_network_node_id", referencedColumnName = "parent_node_id", nullable = true)
+	@JoinColumn(name = "parent_node_id", nullable = true)
 	public NetworkNode getParentNode() {
 		return parentNode;
 	}
@@ -56,7 +69,7 @@ public class FiberRoute {
 	}
 	
 	@ManyToOne
-	@JoinColumn(name = "from_network_node_id", referencedColumnName = "from_node_id", nullable = true)
+	@JoinColumn(name = "from_node_id", nullable = true)
 	public NetworkNode getFromNode() {
 		return fromNode;
 	}
@@ -65,7 +78,7 @@ public class FiberRoute {
 	}
 	
 	@ManyToOne
-	@JoinColumn(name = "to_network_node_id", referencedColumnName = "to_node_id", nullable = true)
+	@JoinColumn(name = "to_node_id", nullable = true)
 	public NetworkNode getToNode() {
 		return toNode;
 	}
@@ -80,15 +93,19 @@ public class FiberRoute {
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	
-	//TODO add database Mapping
-	//@Column(name = "clli_code")
-	public String getClliCode() {
-		return clliCode;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "fiberRoute", orphanRemoval = true, cascade = {CascadeType.ALL})
+	public Set<FiberSegment> getFiberSegments() {
+		return fiberSegments;
+	}
+
+	public void setFiberSegments(Set<FiberSegment> fiberSegments) {
+		this.fiberSegments = fiberSegments;
 	}
 	
-	public void setClliCode(String clliCode) {
-		this.clliCode = clliCode;
-	}
+	
+	
+	
 	
 }

@@ -1,5 +1,7 @@
 package com.altvil.aro.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,11 +17,16 @@ import com.vividsolutions.jts.geom.Geometry;
 
 @Entity
 @Table(name = "fiber_segment")
-public class FiberSegment {
+public class FiberSegment extends ComparableModel {
 
 	private Long id;
 	private FiberRoute fiberRoute;
 	private Geometry geometry;
+	
+	@Override
+	protected Serializable getIdKey() {
+		return id ;
+	}
 
 	@Id
 	@Column(name = "id")
