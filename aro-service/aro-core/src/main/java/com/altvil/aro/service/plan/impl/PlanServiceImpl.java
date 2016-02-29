@@ -102,6 +102,11 @@ public class PlanServiceImpl implements PlanService {
 
 	@Override
 	public FtthThreshholds createFtthThreshholds(FiberNetworkConstraints rr) {
+		
+		if( rr == null ) {
+			rr = new FiberNetworkConstraints() ;
+		}
+		
 		return FtthThreshholds
 				.build()
 				.setDropCableInFeet(rr.getDropCableLengthInFeet())

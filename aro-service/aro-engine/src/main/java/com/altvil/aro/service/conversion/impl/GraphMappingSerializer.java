@@ -22,8 +22,9 @@ public abstract class GraphMappingSerializer<T> {
 	private Map<GraphEdgeAssignment, T> resolvedMap = new HashMap<>();
 	private Map<Class<? extends AroEntity>, SerializeStrategy<T>> strategyMap = new HashMap<>();
 	
-	public GraphMappingSerializer(long PlanId) {
+	public GraphMappingSerializer(long planId) {
 		super();
+		this.planId = planId ;
 		init();
 	}
 

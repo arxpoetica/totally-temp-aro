@@ -33,12 +33,12 @@ public interface NetworkPlanRepository extends
 			+ "e.tlid,\n"
 			+ "st_astext(ll.point) as location_point,\n"
 			+ "st_line_locate_point(st_linemerge(e.geom), ll.point) as intersect_position,\n"
-			+ "st_as_text(st_closestpoint(st_linemerge(e.geom), ll.point)) as intersect_point,\n"
+			+ "st_astext(st_closestpoint(st_linemerge(e.geom), ll.point)) as intersect_point,\n"
 			+ "st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n"
 			+ "from linked_locations ll\n"
 			+ "join aro.edges e on e.gid = ll.gid\n"
 			+ "order by gid, intersect_position limit 40000", nativeQuery = true)
-	List<List<Object>> queryLinkedLocations(@Param("planId") long planId);
+	List<Object[]> queryLinkedLocations(@Param("planId") long planId);
 
 	@Query(value = "with nodes as (\n" + 
 			"		SELECT\n" + 
@@ -59,6 +59,7 @@ public interface NetworkPlanRepository extends
 			"			SELECT\n" + 
 			"			l.id,\n" + 
 			"			l.geom as point,\n" + 
+			"			l.node_type_id,\n" + 
 			"			-- First retrieve the 5 closest edges to each network_cos, using index-based bounding box search.\n" + 
 			"			-- Then measure geographic distance to each (spheroid calcualtion) and find the closest.\n" + 
 			"			-- Draw line connecting network_cos to edge.\n" + 
@@ -81,14 +82,14 @@ public interface NetworkPlanRepository extends
 			"		JOIN  aro.edges  e on e.gid = ll.gid\n" + 
 			"		ORDER BY gid, intersect_position\n" + 
 			"	limit 200", nativeQuery = true)
-	List<List<Object>> querySourceLocations(@Param("planId") long planId);
+	List<Object[]> querySourceLocations(@Param("planId") long planId);
 
 	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
 			+ "from client.plan r \n"
 			+ "join aro.wirecenters w on r.wirecenter_id = w.id\n"
 			+ "join aro.edges a on st_intersects(edge_buffer, a.geom)\n"
 			+ "where r.id = :planId", nativeQuery = true)
-	List<List<Object>> queryRoadEdgesbyPlanId(@Param("planId") long planId);
+	List<Object[]> queryRoadEdgesbyPlanId(@Param("planId") long planId);
 
     @Modifying
     @Transactional
