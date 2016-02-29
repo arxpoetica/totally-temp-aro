@@ -3,6 +3,11 @@
 	<name>web_services</name>
 	<comment></comment>
 	<projects>
+		<project>aro-core</project>
+		<project>aro-engine</project>
+		<project>aro-interfaces</project>
+		<project>aro-processing</project>
+		<project>aro-utils</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

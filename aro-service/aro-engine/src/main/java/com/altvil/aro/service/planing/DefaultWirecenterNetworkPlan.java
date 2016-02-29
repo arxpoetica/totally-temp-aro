@@ -7,11 +7,11 @@ import com.altvil.aro.model.NetworkNode;
 
 public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 
-	private int planId;
+	private long planId;
 	private Collection<NetworkNode> networkNodes;
 	private Collection<FiberRoute> fiberRoutes;
 
-	public DefaultWirecenterNetworkPlan(int planId,
+	public DefaultWirecenterNetworkPlan(long planId,
 			Collection<NetworkNode> networkNodes,
 			Collection<FiberRoute> fiberRoutes) {
 		super();
@@ -21,7 +21,7 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 	}
 
 	@Override
-	public int getPlanId() {
+	public long getPlanId() {
 		return planId;
 	}
 

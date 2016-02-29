@@ -17,7 +17,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 	private NetworkModel networkModel;
 	private Map<GraphEdgeAssignment, NetworkNode> equipmentMapping;
 
-	public FiberRouteSerializer(int planId, NetworkModel networkModel,
+	public FiberRouteSerializer(long planId, NetworkModel networkModel,
 			Map<GraphEdgeAssignment, NetworkNode> equipmentMapping) {
 		super(planId);
 		this.networkModel = networkModel;

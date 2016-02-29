@@ -11,12 +11,12 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
 public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> {
 
-	private int planId;
+	private long planId;
 
 	private List<NetworkNode> networkNodes = new ArrayList<>();
 	private List<FiberRoute> fiberRoutes = new ArrayList<FiberRoute>();
 
-	public WireCenterMods(int planId) {
+	public WireCenterMods(long planId) {
 		super();
 		this.planId = planId;
 	}

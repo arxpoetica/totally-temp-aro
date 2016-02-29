@@ -13,13 +13,13 @@
 	   </listener-class>
 	</listener> 
 	 <servlet>
-        <servlet-name>optimizationServlet</servlet-name>
+        <servlet-name>aroServlet</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>optimizationServlet</servlet-name>
+        <servlet-name>aroServlet</servlet-name>
         <url-pattern>/rest/*</url-pattern>
     </servlet-mapping>
 
@@ -47,7 +47,7 @@
 
     <filter-mapping>
         <filter-name>requestLoggingFilter</filter-name>
-        <servlet-name>optimizationServlet</servlet-name>
+        <servlet-name>aroServlet</servlet-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 </web-app>

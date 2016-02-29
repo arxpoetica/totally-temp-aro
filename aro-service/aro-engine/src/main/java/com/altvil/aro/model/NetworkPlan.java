@@ -1,34 +1,48 @@
 package com.altvil.aro.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 
 @Entity
+@Inheritance
+@DiscriminatorColumn(name="plan_type")
+@DiscriminatorOptions(force=true)
 @Table(name = "plan", schema="client")
-public class NetworkPlan {
+public class NetworkPlan extends ComparableModel {
 	
 	private Long id ;
 	private String name ;
-	private PlanType planType = PlanType.UNDEFINED;
 	private WireCenter wireCenter ;
 	private String areaName ;
-	private Point areaBounds ;
+	private Point areaCentroid ;
+	private MultiPolygon areaBounds ;
 	private Date createAt;
 	private Date updateAt ;
+	
+	@Transient
+	@Override
+	protected Serializable getIdKey() {
+		return id ;
+	}
 	
 	@Id
 	@Column(name = "id")
@@ -40,8 +54,7 @@ public class NetworkPlan {
 		this.id = id;
 	}
 	
-	
-	@Column(name="fiber_route_type")
+	@Column(name="name")
 	public String getName() {
 		return name;
 	}
@@ -49,14 +62,6 @@ public class NetworkPlan {
 		this.name = name;
 	}
 	
-	@Column(name="plan_type")
-	@Enumerated(EnumType.ORDINAL)
-	public PlanType getPlanType() {
-		return planType;
-	}
-	public void setPlanType(PlanType planType) {
-		this.planType = planType;
-	}
 	
 	@ManyToOne
 	@JoinColumn(name = "wirecenter_id")
@@ -67,7 +72,7 @@ public class NetworkPlan {
 		this.wireCenter = wireCenter;
 	}
 	
-	@Column(name="plan_type")
+	@Column(name="area_name")
 	public String getAreaName() {
 		return areaName;
 	}
@@ -77,16 +82,26 @@ public class NetworkPlan {
 	}
 	
 	
-	@Column(name = "area_centroid")
+	@Column(name = "area_bounds")
 	@JsonDeserialize(using = GeometryJsonDeserializer.class)
-	public Point getAreaBounds() {
+	public MultiPolygon getAreaBounds() {
 		return areaBounds;
 	}
 	
-	public void setAreaBounds(Point areaBounds) {
+	public void setAreaBounds(MultiPolygon areaBounds) {
 		this.areaBounds = areaBounds;
 	}
 	
+
+	@Column(name = "area_centroid")
+	@JsonDeserialize(using = GeometryJsonDeserializer.class)
+	public Point getCentroid() {
+		return areaCentroid;
+	}
+	
+	public void setCentroid(Point areaCentroid) {
+		this.areaCentroid = areaCentroid;
+	}
 	
 	@Column(name="created_at")
 	public Date getCreateAt() {

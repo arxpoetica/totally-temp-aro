@@ -19,7 +19,7 @@ import com.altvil.aro.util.geometry.GeometryUtil;
 
 public class GraphDAOImpl {
 
-	private static class GraphDataQuery {
+	public static class GraphDataQuery {
 
 		private SessionFactory sessionFactory;
 
