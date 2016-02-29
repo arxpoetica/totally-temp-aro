@@ -41,71 +41,73 @@ public class GeometryUtil {
 	public static Polygon asPolygon(Polygon polygon) {
 		return FACTORY.createPolygon(polygon.getCoordinates());
 	}
-	
+
 	public static MultiPolygon asMultiPolygon(MultiPolygon multiPolygon) {
-		
-		Polygon[] polygons = new Polygon[multiPolygon.getNumGeometries()] ;
-		for(int i=0 ; i < multiPolygon.getNumGeometries() ; i++) {
+
+		Polygon[] polygons = new Polygon[multiPolygon.getNumGeometries()];
+		for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
 			polygons[i] = asPolygon((Polygon) multiPolygon.getGeometryN(i));
 		}
-		
-		return FACTORY.createMultiPolygon(polygons) ;
+
+		return FACTORY.createMultiPolygon(polygons);
 	}
 
 	public static LineString asLineString(LineString lineString) {
 		return FACTORY.createLineString(lineString.getCoordinates());
 	}
-	
-	public static MultiLineString asMultiLinString(MultiLineString multiLineString) {
-		LineString[] strings = new LineString[multiLineString.getNumGeometries()] ;
-		for(int i=0 ; i < multiLineString.getNumGeometries() ; i++) {
-			strings[i] = asLineString((LineString) multiLineString.getGeometryN(i));
+
+	public static MultiLineString asMultiLinString(
+			MultiLineString multiLineString) {
+		LineString[] strings = new LineString[multiLineString
+				.getNumGeometries()];
+		for (int i = 0; i < multiLineString.getNumGeometries(); i++) {
+			strings[i] = asLineString((LineString) multiLineString
+					.getGeometryN(i));
 		}
-	
-		return FACTORY.createMultiLineString(strings) ;
+
+		return FACTORY.createMultiLineString(strings);
 	}
-	
-	
+
 	public static List<Point> asPoints(Geometry geometry) {
-		return StreamUtil.map(geometry.getCoordinates(), GeometryUtil::asPoint) ;
+		return StreamUtil.map(geometry.getCoordinates(), GeometryUtil::asPoint);
 	}
-	
+
 	public static List<org.postgis.Point> asPostGisPoints(Geometry geometry) {
-		return StreamUtil.map(geometry.getCoordinates(), c -> new org.postgis.Point(c.x,c.y)) ;
+		return StreamUtil.map(geometry.getCoordinates(),
+				c -> new org.postgis.Point(c.x, c.y));
 	}
-	
-	
-	
-	
+
 	public static final LineString asLineString(Geometry geometry) {
-		
-		if( geometry instanceof LineString ) {
-			return (LineString) geometry ;
+
+		if (geometry instanceof LineString) {
+			return (LineString) geometry;
 		}
-		
-		
-		if( geometry instanceof MultiLineString ) {
-			MultiLineString mls =  (MultiLineString)  geometry ;
-			if( mls.getNumGeometries() == 1 ) {
-				return asLineString(mls.getGeometryN(1)) ;
+
+		if (geometry instanceof MultiLineString) {
+			MultiLineString mls = (MultiLineString) geometry;
+			if (mls.getNumGeometries() == 1) {
+				return asLineString(mls.getGeometryN(1));
 			}
 		}
-		
-		throw new ClassCastException("Unable to cast " + geometry.toString() + " as LineString") ;
+
+		throw new ClassCastException("Unable to cast " + geometry.toString()
+				+ " as LineString");
 	}
-	
+
 	public static final MultiLineString asMultiLineString(Geometry geometry) {
-		
-		if( geometry instanceof MultiLineString ) {
-			return (MultiLineString)  geometry ;
+
+		if (geometry instanceof MultiLineString) {
+			return (MultiLineString) geometry;
 		}
-		
-		if( geometry instanceof LineString ) {
-			return FACTORY.createMultiLineString(new LineString[]{(LineString) geometry}) ;
+
+		if (geometry instanceof LineString) {
+			return FACTORY
+					.createMultiLineString(new LineString[] { (LineString) geometry });
 		}
-		
-		throw new ClassCastException("Unable to cast " + geometry.toString() + " as MultiLineString") ;
-	
+
+		throw new ClassCastException("Unable to cast " + geometry.toString()
+				+ " as MultiLineString");
+
 	}
 
 	public static boolean equalsRatio(double a, double b) {
@@ -142,6 +144,12 @@ public class GeometryUtil {
 
 	public static Geometry toGeometry(String wkt) throws ParseException {
 		return WKT_READER.read(wkt);
+	}
+
+	public static MultiLineString createMultiLineString(
+			Collection<LineString> lineStrings) {
+		return factory().createMultiLineString(
+				lineStrings.toArray(new LineString[lineStrings.size()]));
 	}
 
 	public static LineString createLineString(Coordinate c1, Coordinate c2) {
@@ -248,6 +256,5 @@ public class GeometryUtil {
 		}
 		return null;
 	}
-
 
 }

@@ -28,10 +28,6 @@ ${PSQL} -a -f $DIR/create_client_fiber_route_type.sql
 # Create and load fiber route
 ${PSQL} -a -f $DIR/create_client_fiber_route.sql
 
-# Create and load fiber segments
-${PSQL} -a -f $DIR/create_client_fiber_segment.sql
-
-
 # Populates a location entry fees table with fake data for 'client'. This should be replaced with real data later.
 ${PSQL} -a -f $DIR/load_location_entry_fees.sql
 

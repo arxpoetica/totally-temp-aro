@@ -1,25 +1,23 @@
 package com.altvil.aro.model;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.altvil.aro.service.graph.segment.FiberType;
+import com.altvil.aro.util.json.GeometryJsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.vividsolutions.jts.geom.Geometry;
 
 
 @Entity
@@ -27,12 +25,13 @@ import com.altvil.aro.service.graph.segment.FiberType;
 public class FiberRoute extends ComparableModel {
 	
 	private Long id ;
+	private long planId ;
 	private FiberType fiberRouteType ;
 	private NetworkNode parentNode ;
 	private NetworkNode fromNode ;
 	private NetworkNode toNode ;
 	private String name ;
-	private Set<FiberSegment> fiberSegments = new HashSet<>() ;
+	private Geometry geometry;
 	
 	@Transient
 	@Override
@@ -46,10 +45,22 @@ public class FiberRoute extends ComparableModel {
 	public Long getId() {
 		return id;
 	}
+	
+	
 	public void setId(Long id) {
 		this.id = id;
 	}
 	
+	
+	@Column(name = "plan_id")
+	public long getPlanId() {
+		return planId;
+	}
+
+	public void setPlanId(long planId) {
+		this.planId = planId;
+	}
+
 	@Column(name="fiber_route_type")
 	@Enumerated(EnumType.ORDINAL)
 	public FiberType getFiberRouteType() {
@@ -96,17 +107,14 @@ public class FiberRoute extends ComparableModel {
 	}
 
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "fiberRoute", orphanRemoval = true, cascade = {CascadeType.ALL})
-	public Set<FiberSegment> getFiberSegments() {
-		return fiberSegments;
+	@Column(name = "geom")
+	@JsonDeserialize(using = GeometryJsonDeserializer.class)
+	public Geometry getGeometry() {
+		return geometry;
 	}
 
-	public void setFiberSegments(Set<FiberSegment> fiberSegments) {
-		this.fiberSegments = fiberSegments;
+	public void setGeometry(Geometry geometry) {
+		this.geometry = geometry;
 	}
-	
-	
-	
-	
 	
 }

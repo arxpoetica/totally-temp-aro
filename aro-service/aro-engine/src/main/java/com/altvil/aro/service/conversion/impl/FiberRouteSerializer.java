@@ -11,6 +11,10 @@ import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.segment.FiberType;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.NetworkModel;
+import com.altvil.utils.GeometryUtil;
+import com.altvil.utils.StreamUtil;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 
 public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 
@@ -81,10 +85,25 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 
 	}
 
+	private MultiLineString createMultiLineString(
+			Collection<AroEdge<GeoSegment>> segments) {
+
+		return GeometryUtil.createMultiLineString(StreamUtil.map(segments,
+				s -> (LineString) s.getValue().getLineString()));
+	}
+
 	private FiberRoute createFiberRoute(
 			Collection<AroEdge<GeoSegment>> segments, FiberType fiberType,
 			NetworkNode equipment) {
-		return null;
+
+		FiberRoute fr = new FiberRoute();
+		
+		fr.setPlanId(planId);
+		fr.setFiberRouteType(fiberType);
+		fr.setGeometry(createMultiLineString(segments));
+		fr.setName("auto-generated") ;
+		
+		return fr;
 	}
 
 	@Override
