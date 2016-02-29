@@ -72,25 +72,17 @@ etl_test_aro:
 
 etl_test_all: etl_test_aro etl_test_client
 
+install_service:
+	(cd ../aro-service  && make install)
 
-service_deploy:
-	(cp ../aro-service/target/aro-service.war aro-service/docker)
+reinstall_service:
+	(cd ../aro-service  && make reinstall)
 
-service_build:
-	(cd ../aro-service/docker && docker build -t aro-service .)
+install_vagrant_service:
+	(cd ../aro-service  && make install_vagrant)
 
-service_run:
-	(docker run -d -p 8080:8080 --name aro-service --link postgres:arodb aro-service)
-
-service_start:  service_build service_run
-
-service_stop:
-	(docker stop aro-service && docker rm aro-service && docker rmi -f aro-service)
-
-service_restart: service_stop service_start
-
-service_redploy: service_stop service_deploy service_start
-
+reinstall_vagrant_service:
+	(cd ../aro-service  && make reinstall_vagrant)
 
 webapp:
 	(cd ../app && npm install --no-bin-link && npm run build)
