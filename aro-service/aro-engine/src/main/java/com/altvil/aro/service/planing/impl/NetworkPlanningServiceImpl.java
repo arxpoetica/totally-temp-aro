@@ -1,6 +1,5 @@
 package com.altvil.aro.service.planing.impl;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -29,6 +28,7 @@ import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.recalc.RecalcService;
+import com.altvil.utils.StreamUtil;
 
 @Service
 public class NetworkPlanningServiceImpl implements NetworkPlanningService {
@@ -74,8 +74,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	public MasterPlanCalculation planMasterFiber(long planId,
 			FiberNetworkConstraints constraints) {
 
-		List<Long> ids = networkPlanRepository
-				.computeWirecenterUpdates(planId);
+		List<Long> ids = StreamUtil.map(networkPlanRepository
+				.computeWirecenterUpdates(planId), Number::longValue);
 
 		Future<MasterPlanUpdate> f = wirePlanExecutor.submit(() -> {
 

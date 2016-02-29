@@ -10,8 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -31,7 +29,6 @@ public class NetworkPlan extends ComparableModel {
 	
 	private Long id ;
 	private String name ;
-	private WireCenter wireCenter ;
 	private String areaName ;
 	private Point areaCentroid ;
 	private MultiPolygon areaBounds ;
@@ -62,15 +59,6 @@ public class NetworkPlan extends ComparableModel {
 		this.name = name;
 	}
 	
-	
-	@ManyToOne
-	@JoinColumn(name = "wirecenter_id")
-	public WireCenter getWireCenter() {
-		return wireCenter;
-	}
-	public void setWireCenter(WireCenter wireCenter) {
-		this.wireCenter = wireCenter;
-	}
 	
 	@Column(name="area_name")
 	public String getAreaName() {

@@ -10,7 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 @Entity
-@DiscriminatorValue("1")
+@DiscriminatorValue("M")
 public class MasterPlan extends NetworkPlan {
 	
 	private Set<WirecenterPlan> wirecenterPlans = new HashSet<>() ;

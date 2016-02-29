@@ -6,7 +6,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
-@DiscriminatorValue("2")
+@DiscriminatorValue("W")
 public class WirecenterPlan extends NetworkPlan {
 
 	private MasterPlan masterPlan;
