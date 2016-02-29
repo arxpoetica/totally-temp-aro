@@ -5,9 +5,9 @@ import com.altvil.aro.service.plan.CompositeNetworkModel;
 
 public class NetworkPlanSerializer<T> {
 
-	private int planId;
+	private long planId;
 	
-	public NetworkPlanSerializer(int planId) {
+	public NetworkPlanSerializer(long planId) {
 		super();
 		this.planId = planId;
 	}

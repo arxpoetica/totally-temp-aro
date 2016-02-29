@@ -23,7 +23,7 @@ public abstract class ComparableModel {
 			return true ;
 		}
 		
-		if( !obj.getClass().equals(this.getClass()) ) {
+		if( !(obj instanceof ComparableModel) ) {
 			return false ;
 		}
 		

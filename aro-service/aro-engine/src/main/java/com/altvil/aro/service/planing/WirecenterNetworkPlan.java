@@ -7,7 +7,7 @@ import com.altvil.aro.model.NetworkNode;
 
 public interface WirecenterNetworkPlan {
 
-	int getPlanId();
+	long getPlanId();
 
 	Collection<NetworkNode> getNetworkNodes();
 

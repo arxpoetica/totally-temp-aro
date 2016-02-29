@@ -11,7 +11,7 @@ import com.vividsolutions.jts.geom.Point;
 public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 	
 	
-	public EquipmentSerializer(int planId) {
+	public EquipmentSerializer(long planId) {
 		super(planId);
 	}
 

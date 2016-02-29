@@ -2,23 +2,23 @@ package com.altvil.aro.service.network;
 
 public class NetworkRequest {
 	
-	public static NetworkRequest create(int planId) {
+	public static NetworkRequest create(long planId) {
 		NetworkRequest request = new NetworkRequest() ;
 		request.setPlanId(planId) ;
 		return request ;
 	}
 	
-	private int planId ;
+	private long planId ;
 
 	public NetworkRequest() {
 	}
 	
-	public int getPlanId() {
+	public long getPlanId() {
 		return planId;
 	}
 
 
-	public void setPlanId(int planId) {
+	public void setPlanId(long planId) {
 		this.planId = planId;
 	}
 

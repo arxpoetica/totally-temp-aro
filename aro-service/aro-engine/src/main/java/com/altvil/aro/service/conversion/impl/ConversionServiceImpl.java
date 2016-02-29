@@ -12,7 +12,7 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 public class ConversionServiceImpl implements SerializationService {
 
 	@Override
-	public WirecenterNetworkPlan convert(int planId,
+	public WirecenterNetworkPlan convert(long planId,
 			Optional<CompositeNetworkModel> model) {
 
 		WireCenterMods mods = new WireCenterMods(planId);

@@ -17,12 +17,12 @@ import com.altvil.aro.service.graph.assigment.GraphMapping;
 
 public abstract class GraphMappingSerializer<T> {
 
-	protected int planId ;
+	protected long planId ;
 	
 	private Map<GraphEdgeAssignment, T> resolvedMap = new HashMap<>();
 	private Map<Class<? extends AroEntity>, SerializeStrategy<T>> strategyMap = new HashMap<>();
 	
-	public GraphMappingSerializer(int PlanId) {
+	public GraphMappingSerializer(long PlanId) {
 		super();
 		init();
 	}

@@ -7,6 +7,6 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
 public interface SerializationService {
 	
-	WirecenterNetworkPlan convert(int planId, Optional<CompositeNetworkModel> model) ; 
+	WirecenterNetworkPlan convert(long planId, Optional<CompositeNetworkModel> model) ; 
 
 }

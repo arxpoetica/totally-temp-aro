@@ -4,14 +4,14 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 
 public class FiberPlanRequest {
 
-	private int planId;
+	private long planId;
 	private FiberNetworkConstraints fiberNetworkConstraints;
 
-	public int getPlanId() {
+	public long getPlanId() {
 		return planId;
 	}
 
-	public void setPlanId(int planId) {
+	public void setPlanId(long planId) {
 		this.planId = planId;
 	}
 
