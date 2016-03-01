@@ -15,6 +15,10 @@ aro-service/target
 aro-service/**/*.project
 aro-service/**/*.settings
 aro-service/**/*.classpath
+aro-service/aro-service/.settings
+aro-service/aro-service/.project
+aro-service/aro-engine/.settings
+
 *.project
 *.settings
 *.classpath
@@ -41,3 +45,11 @@ bin/
 
 
 *.component
+
+
+
+aro-service/aro-engine/.settings/org.eclipse.wst.common.component
+
+aro-service/aro-service/.project
+
+aro-service/aro-service/.settings/org.eclipse.wst.common.component
