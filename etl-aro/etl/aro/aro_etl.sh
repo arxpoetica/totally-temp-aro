@@ -9,9 +9,6 @@ ${PSQL} -a -f $DIR/create_aro_carriers.sql
 
 ${PSQL} -a -f $DIR/create_aro_cousub.sql
 
-# Create aro edges from tiger edges
-${PSQL} -a -f $DIR/create_aro_edges.sql
-
 # Create aro census_blocks from tiger tabblock
 ${PSQL} -a -f $DIR/create_aro_census_blocks.sql
 
