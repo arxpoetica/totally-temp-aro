@@ -21,7 +21,7 @@ uninstall:
 reinstall: uninstall install
 
 run_vagrant_docker:
-	(docker run -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGHOST=${PGHOST} -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb aro-service)
+	(docker run -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb aro-service)
 	#(docker run -d -p 8080:8080 --name aro-service --link postgres:arodb aro-service)
 install_vagrant: build_docker run_vagrant_docker
 
