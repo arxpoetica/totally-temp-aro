@@ -7,7 +7,7 @@ CREATE TABLE client.plan
   --oid varchar NOT NULL,
   name varchar NOT NULL,
   plan_type varchar NOT NULL,
-  parent_plan_id int8 NOT NULL REFERENCES client.plan ON DELETE CASCADE,
+  parent_plan_id int8 REFERENCES client.plan ON DELETE CASCADE,
 
   --parent_version_id REFERENCES client.plan ON DELETE CASCADE,
   --source_plan int8,
