@@ -27,7 +27,6 @@ import com.altvil.aro.service.planing.MasterPlanCalculation;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.recalc.RecalcService;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -44,9 +43,6 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Autowired
 	private PlanService planService;
-
-	@Autowired
-	private RecalcService recalcService;
 
 	@Autowired
 	private NetworkService networkService;
