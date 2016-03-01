@@ -25,6 +25,9 @@ ${PSQL} -a -f $DIR/create_client_plan_targets.sql
 # Create and load fiber type
 ${PSQL} -a -f $DIR/create_client_fiber_route_type.sql
 
+# Create boundaries
+${PSQL} -a -f $DIR/create_client_boundaries.sql
+
 # Create and load fiber route
 ${PSQL} -a -f $DIR/create_client_fiber_route.sql
 

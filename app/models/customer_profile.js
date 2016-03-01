@@ -32,7 +32,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
       ON
         h.location_id=t.location_id
       JOIN
-        client_schema.household_customer_types hct
+        client.household_customer_types hct
       ON
         hct.household_id = h.id
       WHERE
@@ -50,7 +50,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
       ON
         b.location_id=t.location_id
       JOIN
-        client_schema.business_customer_types bct
+        client.business_customer_types bct
       ON
         bct.business_id = b.id
       WHERE
@@ -58,7 +58,7 @@ CustomerProfile.customer_profile_for_route = function(plan_id, metadata, callbac
       GROUP BY bct.customer_type_id)
       ) t
     JOIN
-      client_schema.customer_types ct
+      client.customer_types ct
     ON
       ct.id=t.id
     GROUP BY

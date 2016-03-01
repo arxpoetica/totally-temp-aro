@@ -27,7 +27,7 @@ describe('Wirecenter', function() {
           expect(output.feature_collection.features[0].geometry.type).to.be.equal('MultiPolygon');
           done();
         });
-      
+
     });
 
   });
@@ -54,7 +54,7 @@ describe('Wirecenter', function() {
           expect(output.feature_collection.features[0].geometry.type).to.be.equal('MultiPolygon');
           done();
         });
-      
+
     });
 
   });

@@ -18,9 +18,11 @@ var NetworkPlan = {};
 
 NetworkPlan.find_edges = function(plan_id, callback) {
   var sql = `
-    SELECT ARRAY[]::integer[]
+    SELECT id, 0 AS edge_length, ST_AsGeoJSON(geom)::json AS geom
+    FROM client.fiber_route
+    WHERE plan_id=$1
   `
-  database.query(sql, [], callback);
+  database.query(sql, [plan_id], callback);
 };
 
 NetworkPlan.find_source_ids = function(plan_id, callback) {
@@ -148,7 +150,6 @@ NetworkPlan.recalculate_route = function(plan_id, algorithm, callback) {
 }
 
 NetworkPlan.calculate_pg_route = function(plan_id, callback) {
-  console.log('calculate_pg_route')
   txain(function(callback) {
     var sql = 'DELETE FROM client.fiber_route WHERE plan_id=$1';
     database.execute(sql, [plan_id], callback);
@@ -169,7 +170,7 @@ NetworkPlan.calculate_pg_route = function(plan_id, callback) {
     return setTimeout(() => {
       sql = `SELECT $1::integer`;
       database.execute(sql, [plan_id], callback);
-    }, 3000)
+    }, process.NODE_ENV === 'test' ? 1 : 3000)
     // the route needs at least one source and at least one target
     if (rows.length < 2) return callback();
 
@@ -178,11 +179,11 @@ NetworkPlan.calculate_pg_route = function(plan_id, callback) {
         SELECT DISTINCT edge_id FROM
           (SELECT id as edge_id
               FROM
-                pgr_kdijkstraPath('SELECT id, source::integer, target::integer, edge_length::double precision AS cost FROM client_schema.graph',
+                pgr_kdijkstraPath('SELECT id, source::integer, target::integer, edge_length::double precision AS cost FROM client.graph',
                   (select vertex_id from custom.route_sources where route_id=$1 limit 1)::integer,
                   array(select vertex_id from custom.route_targets where route_id=$1)::integer[],
                   false, false) AS dk
-              JOIN client_schema.graph edge
+              JOIN client.graph edge
                 ON edge.id = dk.id3) as edge_id
       )
       INSERT INTO custom.route_edges (edge_id, route_id) (SELECT edge_id, $1 as route_id FROM edges);
@@ -243,7 +244,7 @@ NetworkPlan.create_plan = function(name, area, user, callback) {
     txain(function(callback) {
       var sql = `
         INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type)
-        VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_Envelope(ST_GeomFromText($4, 4326)), NOW(), NOW(), 1) RETURNING id;
+        VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_Envelope(ST_GeomFromText($4, 4326)), NOW(), NOW(), 'M') RETURNING id;
       `
       var params = [
         name,
@@ -360,11 +361,11 @@ NetworkPlan.export_kml = function(plan_id, callback) {
   };
 
   txain(function(callback) {
-    var sql = 'SELECT name FROM custom.route WHERE id=$1'
+    var sql = 'SELECT name FROM client.plan WHERE id=$1'
     database.findOne(sql, [plan_id], callback)
   })
-  .then(function(route, callback) {
-    kml_output += `<name>${escape(route.name)}</name>
+  .then(function(plan, callback) {
+    kml_output += `<name>${escape(plan.name)}</name>
       <Style id="routeColor">
        <LineStyle>
          <color>ff0000ff</color>
@@ -392,7 +393,7 @@ NetworkPlan.export_kml = function(plan_id, callback) {
     `
 
     var sql = `
-      SELECT ST_AsKML(edge.geom) AS geom
+      SELECT ST_AsKML(geom) AS geom
       FROM client.fiber_route
       WHERE fiber_route.plan_id = $1
     `
@@ -521,7 +522,7 @@ NetworkPlan.calculate_area_data = function(plan_id, callback) {
 
   txain(function(callback) {
     var sql = `
-      SELECT statefp, countyfp, MIN(ST_distance(geom, (SELECT area_centroid FROM custom.route WHERE id=$1) )) AS distance
+      SELECT statefp, countyfp, MIN(ST_distance(geom, (SELECT area_centroid FROM client.plan WHERE id=$1) )) AS distance
       FROM aro.cousub
       GROUP BY statefp, countyfp
       ORDER BY distance

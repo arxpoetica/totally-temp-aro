@@ -35,7 +35,7 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
           select
             location_entry_fees.location_id as location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
           from
-            client_schema.location_entry_fees
+            client.location_entry_fees
           join client.plan_targets on
             location_entry_fees.location_id = plan_targets.location_id
             and plan_targets.plan_id=$1
@@ -45,7 +45,7 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
           select
             businesses.location_id, 0, install_cost, 0, 0, 0
           from
-            client_schema.business_install_costs
+            client.business_install_costs
           join businesses
             on businesses.id = business_install_costs.business_id
           join client.plan_targets on
@@ -57,7 +57,7 @@ RouteOptimizer.calculate_locations_cost = function(plan_id, callback) {
           select
             household_install_costs.location_id, 0, 0, install_cost_per_hh, 0, 0
           from
-            client_schema.household_install_costs
+            client.household_install_costs
           join client.plan_targets on
             household_install_costs.location_id = plan_targets.location_id
             and plan_targets.plan_id=$1
@@ -139,16 +139,16 @@ RouteOptimizer.calculate_revenue_and_npv = function(plan_id, fiber_cost, callbac
       ON
         plan_targets.location_id = b.location_id
       JOIN
-        client_schema.industry_mapping m
+        client.industry_mapping m
       ON
         m.sic4 = b.industry_id
       JOIN
-        client_schema.spend
+        client.spend
       ON
         spend.industry_id = m.industry_id
         -- AND spend.monthly_spend <> 'NaN'
       JOIN
-        client_schema.employees_by_location e
+        client.employees_by_location e
       ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
@@ -194,7 +194,7 @@ RouteOptimizer.calculate_npv = function(revenues, up_front_costs) {
     }
     annual_pvs.push({
       year: row.year + revenues.length,
-      value: value,
+      value: value || 0,
     });
   });
 

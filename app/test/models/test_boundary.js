@@ -49,7 +49,7 @@ describe('Boundary', function() {
         var boundary = res.body;
         expect(res.statusCode).to.be.equal(200);
 
-        expect(boundary.id).to.be.a('number');
+        expect(boundary.id).to.be.a('string');
         expect(boundary.name).to.be.a('string');
         expect(boundary.name).to.be.equal(data.name);
         expect(boundary.geom).to.be.an('object');

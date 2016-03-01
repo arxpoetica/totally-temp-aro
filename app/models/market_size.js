@@ -15,25 +15,25 @@ var MarketSize = {};
 MarketSize.filters = function(callback) {
   var output = {};
   txain(function(callback) {
-    var sql = 'SELECT * FROM client_schema.products';
+    var sql = 'SELECT * FROM client.products';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
     output.products = rows;
 
-    var sql = 'SELECT * FROM client_schema.industries';
+    var sql = 'SELECT * FROM client.industries';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
     output.industries = rows;
 
-    var sql = 'SELECT * FROM client_schema.customer_types';
+    var sql = 'SELECT * FROM client.customer_types';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
     output.customer_types = rows;
 
-    var sql = 'SELECT * FROM client_schema.employees_by_location';
+    var sql = 'SELECT * FROM client.employees_by_location';
     database.query(sql, callback);
   })
   .then(function(rows, callback) {
@@ -55,9 +55,8 @@ function prepareMarketSizeQuery(plan_id, type, options, params) {
       sql += `WITH biz AS (
         SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
         FROM businesses b
-        JOIN custom.route_edges ON route_edges.route_id=$1
-        JOIN client_schema.graph edge ON edge.id = route_edges.edge_id
-        AND ST_DWithin(edge.geom::geography, b.geog, 152.4)`;
+        JOIN client.fiber_route ON fiber_route.plan_id=$1
+        AND ST_DWithin(fiber_route.geom::geography, b.geog, 152.4)`;
       params.push(plan_id);
     } else {
       sql += `
@@ -95,7 +94,7 @@ MarketSize.carriers_by_city_of_plan = function(plan_id, only_with_fiber, callbac
         ON l.id = lc.location_id
       JOIN cities c
         ON c.buffer_geog && l.geog
-       AND c.id = (SELECT cities.id FROM cities JOIN custom.route r ON r.id = $1 ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)
+       AND c.id = (SELECT cities.id FROM cities JOIN client.plan r ON r.id = $1 ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)
        ${only_with_fiber ? " WHERE carriers.route_type='fiber'" : ''}
      GROUP BY carriers.id
   `
@@ -111,7 +110,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
     var sql = prepareMarketSizeQuery(plan_id, type, options, params);
 
     sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
-    sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.spend ON spend.industry_id = m.industry_id'
+    sql += '\n JOIN client.industry_mapping m ON m.sic4 = b.industry_id JOIN client.spend ON spend.industry_id = m.industry_id'
 
     if (!empty_array(filters.industry)) {
       params.push(filters.industry);
@@ -125,15 +124,15 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
       params.push(filters.employees_range);
       sql += '\n AND spend.employees_by_location_id IN ($'+params.length+')';
     }
-    sql += '\n JOIN client_schema.employees_by_location e ON e.id = spend.employees_by_location_id AND e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees'
+    sql += '\n JOIN client.employees_by_location e ON e.id = spend.employees_by_location_id AND e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees'
     if (filters.customer_type) {
       params.push(filters.customer_type);
-      sql += '\n JOIN client_schema.business_customer_types bct ON bct.business_id = b.id AND bct.customer_type_id=$'+params.length
+      sql += '\n JOIN client.business_customer_types bct ON bct.business_id = b.id AND bct.customer_type_id=$'+params.length
     }
     if (config.spend_by_city) {
       params.push(plan_id);
       sql += '\n JOIN cities ON spend.city_id = cities.id AND cities.buffer_geog && b.geog';
-      sql += '\n AND cities.id = (SELECT cities.id FROM cities JOIN custom.route r ON r.id = $'+params.length+' ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)';
+      sql += '\n AND cities.id = (SELECT cities.id FROM cities JOIN client.plan r ON r.id = $'+params.length+' ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)';
     }
     sql += '\n GROUP BY spend.year ORDER BY spend.year ASC';
 
@@ -157,7 +156,7 @@ MarketSize.calculate = function(plan_id, type, options, callback) {
         AND ct.id = (
           SELECT cities.id
           FROM cities
-          JOIN custom.route r ON r.id = $${params.length}
+          JOIN client.plan r ON r.id = $${params.length}
           ORDER BY r.area_centroid <#> cities.buffer_geog::geometry
           LIMIT 1
         )
@@ -234,8 +233,8 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
       JOIN locations l ON b.location_id = l.id
       JOIN distances d ON d.business_id = b.id
       JOIN industries ON industries.id = b.industry_id
-      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
-      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
+      JOIN client.business_customer_types bct ON bct.business_id = b.id
+      JOIN client.customer_types ct ON ct.id=bct.customer_type_id
     `
     if (filters.customer_type) {
       params.push(filters.customer_type);
@@ -243,11 +242,11 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     }
     sql += `
       JOIN
-        client_schema.industry_mapping m
+        client.industry_mapping m
       ON
         m.sic4 = b.industry_id
       JOIN
-        client_schema.spend
+        client.spend
       ON
         spend.industry_id = m.industry_id
         AND spend.monthly_spend <> 'NaN'
@@ -267,7 +266,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     }
     sql += `
       JOIN
-        client_schema.employees_by_location e
+        client.employees_by_location e
       ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
@@ -278,7 +277,7 @@ MarketSize.export_businesses = function(plan_id, type, options, user, callback) 
     }
     sql += `
       JOIN
-        client_schema.industries c_industries
+        client.industries c_industries
       ON
         spend.industry_id = c_industries.id
       GROUP BY b.id, year
@@ -331,8 +330,8 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
       JOIN locations l ON b.location_id = l.id
       JOIN distances d ON d.business_id = b.id
       JOIN industries ON industries.id = b.industry_id
-      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
-      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
+      JOIN client.business_customer_types bct ON bct.business_id = b.id
+      JOIN client.customer_types ct ON ct.id=bct.customer_type_id
     `
     if (filters.customer_type) {
       params.push(filters.customer_type);
@@ -340,11 +339,11 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
     }
     sql += `
       JOIN
-        client_schema.industry_mapping m
+        client.industry_mapping m
       ON
         m.sic4 = b.industry_id
       JOIN
-        client_schema.spend
+        client.spend
       ON
         spend.industry_id = m.industry_id
         AND spend.monthly_spend <> 'NaN'
@@ -364,7 +363,7 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
     }
     sql += `
       JOIN
-        client_schema.employees_by_location e
+        client.employees_by_location e
       ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
@@ -375,7 +374,7 @@ MarketSize.export_businesses_at_location = function(plan_id, location_id, type, 
     }
     sql += `
       JOIN
-        client_schema.industries c_industries
+        client.industries c_industries
       ON
         spend.industry_id = c_industries.id
     `
@@ -430,27 +429,27 @@ function create_businesses_csv(plan_id, user, rows, filters, carriers, callback)
     this.set('csv', csv);
 
     if (empty_array(filters.product)) return callback(null, []);
-    var sql = 'SELECT product_type, product_name FROM client_schema.products WHERE id IN($1)';
+    var sql = 'SELECT product_type, product_name FROM client.products WHERE id IN($1)';
     database.query(sql, [filters.product], callback);
   })
   .then(function(products, callback) {
     this.set('products', products);
 
     if (empty_array(filters.employees_range)) return callback(null, []);
-    var sql = 'SELECT value_range FROM client_schema.employees_by_location WHERE id IN($1)';
+    var sql = 'SELECT value_range FROM client.employees_by_location WHERE id IN($1)';
     database.query(sql, [filters.employees_range], callback);
   })
   .then(function(employees_by_location, callback) {
     this.set('employees_by_location', employees_by_location);
 
     if (empty_array(filters.industry)) return callback(null, []);
-    var sql = 'SELECT industry_name FROM client_schema.industries WHERE id IN($1)';
+    var sql = 'SELECT industry_name FROM client.industries WHERE id IN($1)';
     database.query(sql, [filters.industry], callback);
   })
   .then(function(industries, callback) {
     this.set('industries', industries);
 
-    var sql = 'SELECT name, area_name FROM custom.route WHERE id=$1';
+    var sql = 'SELECT name, area_name FROM client.plan WHERE id=$1';
     database.findOne(sql, [plan_id], callback);
   })
   .then(function(plan, callback) {
@@ -502,16 +501,16 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
       SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
       FROM aro.locations locations
       JOIN businesses b ON locations.id = b.location_id
-      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
-      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
+      JOIN client.business_customer_types bct ON bct.business_id = b.id
+      JOIN client.customer_types ct ON ct.id=bct.customer_type_id
     `
     if (filters.customer_type) {
       params.push(filters.customer_type);
       sql += '\n AND bct.customer_type_id=$'+params.length
     }
     sql += `
-      JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
-      JOIN client_schema.spend ON spend.industry_id = m.industry_id
+      JOIN client.industry_mapping m ON m.sic4 = b.industry_id
+      JOIN client.spend ON spend.industry_id = m.industry_id
     `
     if (!empty_array(filters.industry)) {
       params.push(filters.industry);
@@ -526,7 +525,7 @@ MarketSize.market_size_for_location = function(location_id, filters, callback) {
       sql += ' AND spend.employees_by_location_id IN ($'+params.length+')';
     }
     sql += `
-      JOIN client_schema.employees_by_location e ON
+      JOIN client.employees_by_location e ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
        AND e.max_value >= b.number_of_employees
@@ -587,17 +586,17 @@ MarketSize.market_size_for_business = function(business_id, options, callback) {
       SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
       FROM aro.locations locations
       JOIN businesses b ON locations.id = b.location_id
-      JOIN client_schema.business_customer_types bct ON bct.business_id = b.id
-      JOIN client_schema.customer_types ct ON ct.id=bct.customer_type_id
-      JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id
-      JOIN client_schema.spend ON spend.industry_id = m.industry_id
+      JOIN client.business_customer_types bct ON bct.business_id = b.id
+      JOIN client.customer_types ct ON ct.id=bct.customer_type_id
+      JOIN client.industry_mapping m ON m.sic4 = b.industry_id
+      JOIN client.spend ON spend.industry_id = m.industry_id
     `
     if (!empty_array(filters.product)) {
       params.push(filters.product);
       sql += '\n AND spend.product_id IN ($'+params.length+')'
     }
     sql += `
-      JOIN client_schema.employees_by_location e ON
+      JOIN client.employees_by_location e ON
         e.id = spend.employees_by_location_id
         AND e.min_value <= b.number_of_employees
        AND e.max_value >= b.number_of_employees

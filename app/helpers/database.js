@@ -28,7 +28,7 @@ function processQuery(sql, params) {
 	sql = sql.replace(/\$x/g, '\$');
 	var flatten = _.flatten(params);
 	Array.prototype.splice.apply(params, [0, params.length].concat(flatten));
-	sql = sql.replace(/client_schema./g, config.client_schema+'.');
+	// sql = sql.replace(/client_schema./g, config.client_schema+'.');
 	return sql;
 }
 

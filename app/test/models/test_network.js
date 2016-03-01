@@ -48,7 +48,7 @@ describe('Network', function() {
 					var first_feature = output.feature_collection.features[0];
 					expect(first_feature.geometry.type).to.equal('Point');
 					expect(first_feature.geometry.coordinates).to.have.length.above(0);
-					expect(first_feature.properties.id).to.be.a('number');
+					expect(first_feature.properties.id).to.be.a('string');
 					done();
 			});
 		});
@@ -80,12 +80,12 @@ describe('Network', function() {
 					if (err) return done(err);
 					var output = res.body;
 					expect(res.statusCode).to.be.equal(200);
-					expect(output.length).to.be.equal(0);
-					// expect(output.length).to.be.above(0);
-					// expect(output[0]).to.be.an('object');
-					// expect(output[0].id).to.be.a('number');
-					// expect(output[0].name).to.be.a('string');
-					// expect(output[0].color).to.be.a('string');
+					expect(output.length).to.be.equal(24);
+					expect(output.length).to.be.above(0);
+					expect(output[0]).to.be.an('object');
+					expect(output[0].id).to.be.a('number');
+					expect(output[0].name).to.be.a('string');
+					expect(output[0].color).to.be.a('string');
 					done();
 			});
 		});

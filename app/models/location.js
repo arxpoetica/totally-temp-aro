@@ -24,34 +24,34 @@ Location.find_all = function(plan_id, type, filters, viewport, callback) {
 			SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom,
 			-- existing customer
 			(SELECT COUNT(*)::integer FROM businesses b
-				JOIN client_schema.business_customer_types bct
+				JOIN client.business_customer_types bct
 					ON b.id = bct.business_id
-				JOIN client_schema.customer_types ct
+				JOIN client.customer_types ct
 					ON ct.id = bct.customer_type_id AND ct.is_existing_customer
 			 WHERE b.location_id = locations.id) AS customer_type_existing,
 			-- non existing customers
 			(SELECT COUNT(*)::integer FROM businesses b
-				JOIN client_schema.business_customer_types bct
+				JOIN client.business_customer_types bct
 					ON b.id = bct.business_id
-				JOIN client_schema.customer_types ct
+				JOIN client.customer_types ct
 					ON ct.id = bct.customer_type_id AND NOT ct.is_existing_customer
 			 WHERE b.location_id = locations.id) AS customer_type_prospect
 			FROM aro.locations
 		`
 		if (type === 'businesses') {
 			sql += '\n JOIN businesses b ON b.location_id = locations.id';
-			sql += '\n JOIN client_schema.industry_mapping m ON m.sic4 = b.industry_id JOIN client_schema.industries i ON m.industry_id = i.id';
+			sql += '\n JOIN client.industry_mapping m ON m.sic4 = b.industry_id JOIN client.industries i ON m.industry_id = i.id';
 			if (filters.industries.length > 0) {
 				params.push(filters.industries)
 				sql += '\n AND m.industry_id IN ($'+params.length+')';
 			}
 			if (filters.customer_types.length > 0) {
 				params.push(filters.customer_types)
-				sql += '\n JOIN client_schema.business_customer_types ON b.id = business_customer_types.business_id AND business_customer_types.customer_type_id IN ($'+params.length+')';
+				sql += '\n JOIN client.business_customer_types ON b.id = business_customer_types.business_id AND business_customer_types.customer_type_id IN ($'+params.length+')';
 			}
 			if (filters.number_of_employees.length > 0) {
 				params.push(filters.number_of_employees)
-				sql += '\n JOIN client_schema.employees_by_location e ON e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees AND e.id IN ($'+params.length+')';
+				sql += '\n JOIN client.employees_by_location e ON e.min_value <= b.number_of_employees AND e.max_value >= b.number_of_employees AND e.id IN ($'+params.length+')';
 			}
 		} else if (type === 'households') {
 			sql += ' JOIN households ON households.location_id = locations.id';
@@ -110,9 +110,9 @@ Location.density = function(plan_id, viewport, callback) {
 				-- Always return selected locations
 				SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
 					FROM aro.locations
-					JOIN custom.route_targets
-					ON route_targets.plan_id=$1
-					AND route_targets.location_id=locations.id
+					JOIN client.plan_targets
+						 ON plan_targets.plan_id=$1
+						AND plan_targets.location_id=locations.id
 			`
 		}
 		database.query(sql, params, callback);
@@ -157,7 +157,7 @@ Location.show_information = function(location_id, callback) {
 				select
 					location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
 				from
-					client_schema.location_entry_fees
+					client.location_entry_fees
 				where
 					location_id=$1
 
@@ -166,7 +166,7 @@ Location.show_information = function(location_id, callback) {
 				select
 					location_id, 0, install_cost, 0, 0, 0
 				from
-					client_schema.business_install_costs
+					client.business_install_costs
 				join businesses
 					on businesses.id = business_install_costs.business_id
 				where
@@ -177,7 +177,7 @@ Location.show_information = function(location_id, callback) {
 				select
 					location_id, 0, 0, install_cost_per_hh, 0, 0
 				from
-					client_schema.household_install_costs
+					client.household_install_costs
 				where
 					location_id=$1
 
@@ -214,7 +214,7 @@ Location.show_information = function(location_id, callback) {
 				FROM
 					businesses b
 				JOIN
-					client_schema.business_customer_types bct
+					client.business_customer_types bct
 				ON
 					bct.business_id = b.id
 				WHERE
@@ -228,7 +228,7 @@ Location.show_information = function(location_id, callback) {
 				FROM
 					households h
 				JOIN
-					client_schema.household_customer_types hct
+					client.household_customer_types hct
 				ON
 					hct.household_id = h.id
 				WHERE
@@ -237,7 +237,7 @@ Location.show_information = function(location_id, callback) {
 
 				) t
 			JOIN
-				client_schema.customer_types ct
+				client.customer_types ct
 			ON
 				ct.id=t.id
 			GROUP BY
@@ -347,7 +347,7 @@ Location.create_location = function(values, callback) {
 		.then(function(row, callback) {
 			business_id = row.id;
 
-			var sql = 'INSERT INTO client_schema.business_install_costs (business_id, install_cost, annual_recurring_cost) VALUES ($1, $2, $3)';
+			var sql = 'INSERT INTO client.business_install_costs (business_id, install_cost, annual_recurring_cost) VALUES ($1, $2, $3)';
 			var params = [
 				business_id,
 				+values.install_cost,
@@ -356,7 +356,7 @@ Location.create_location = function(values, callback) {
 			database.execute(sql, params, callback);
 		})
 		.then(function(callback) {
-			var sql = 'INSERT INTO client_schema.business_customer_types (business_id, customer_type_id) VALUES ($1, $2)';
+			var sql = 'INSERT INTO client.business_customer_types (business_id, customer_type_id) VALUES ($1, $2)';
 			var params = [
 				business_id,
 				values.business_customer_type && values.business_customer_type.id,
@@ -379,7 +379,7 @@ Location.create_location = function(values, callback) {
 		.then(function(row, callback) {
 			household_id = row.id;
 
-			var sql = 'INSERT INTO client_schema.household_customer_types (household_id, customer_type_id) VALUES ($1, $2)';
+			var sql = 'INSERT INTO client.household_customer_types (household_id, customer_type_id) VALUES ($1, $2)';
 			var params = [
 				household_id,
 				values.household_customer_type && values.household_customer_type.id,
@@ -392,12 +392,12 @@ Location.create_location = function(values, callback) {
 };
 
 Location.find_industries = function(callback) {
-	var sql = 'SELECT id, industry_name as description FROM client_schema.industries ORDER BY industry_name ASC'
+	var sql = 'SELECT id, industry_name as description FROM client.industries ORDER BY industry_name ASC'
 	database.query(sql, [], callback);
 };
 
 Location.customer_types = function(callback) {
-	var sql = 'SELECT * FROM client_schema.customer_types ORDER BY name ASC'
+	var sql = 'SELECT * FROM client.customer_types ORDER BY name ASC'
 	database.query(sql, [], callback);
 };
 
@@ -442,13 +442,13 @@ Location.show_businesses = function(location_id, callback) {
 			ct.name as customer_type
 		FROM
 			aro.businesses businesses
-		JOIN client_schema.business_install_costs costs
+		JOIN client.business_install_costs costs
 			ON costs.business_id = businesses.id
 		LEFT JOIN industries
 			ON industries.id = businesses.industry_id
-		JOIN client_schema.business_customer_types bct
+		JOIN client.business_customer_types bct
 			ON bct.business_id = businesses.id
-		JOIN client_schema.customer_types ct
+		JOIN client.customer_types ct
 			ON ct.id = bct.customer_type_id
 		WHERE
 			location_id = $1
@@ -460,25 +460,25 @@ Location.show_businesses = function(location_id, callback) {
 Location.filters = function(callback) {
 	var output = {};
 	txain(function(callback) {
-		var sql = 'SELECT * FROM client_schema.employees_by_location';
+		var sql = 'SELECT * FROM client.employees_by_location';
 		database.query(sql, callback);
 	})
 	.then(function(rows, callback) {
 		output.employees_by_location = rows;
 
-		var sql = 'SELECT * FROM client_schema.industries';
+		var sql = 'SELECT * FROM client.industries';
 		database.query(sql, callback);
 	})
 	.then(function(rows, callback) {
 		output.industries = rows;
 
-		var sql = 'SELECT * FROM client_schema.customer_types';
+		var sql = 'SELECT * FROM client.customer_types';
 		database.query(sql, callback);
 	})
 	.then(function(rows, callback) {
 		output.customer_types = rows;
 
-		var sql = 'SELECT * FROM client_schema.products ORDER BY product_type, product_name';
+		var sql = 'SELECT * FROM client.products ORDER BY product_type, product_name';
 		database.query(sql, callback);
 	})
 	.then(function(rows, callback) {
@@ -497,16 +497,16 @@ Location.customer_profile_heatmap = function(viewport, callback) {
 			SELECT ST_AsGeojson(fishnet.geom)::json AS geom,
 			-- existing customer
 			(SELECT COUNT(*)::integer FROM businesses b
-				JOIN client_schema.business_customer_types bct
+				JOIN client.business_customer_types bct
 					ON b.id = bct.business_id
-				JOIN client_schema.customer_types ct
+				JOIN client.customer_types ct
 					ON ct.id = bct.customer_type_id AND ct.is_existing_customer
 			 WHERE b.geog && fishnet.geom) AS customer_type_existing,
 			-- non existing customers
 			(SELECT COUNT(*)::integer FROM businesses b
-				JOIN client_schema.business_customer_types bct
+				JOIN client.business_customer_types bct
 					ON b.id = bct.business_id
-				JOIN client_schema.customer_types ct
+				JOIN client.customer_types ct
 					ON ct.id = bct.customer_type_id AND NOT ct.is_existing_customer
 			 WHERE b.geog && fishnet.geom) AS customer_type_prospect
 			FROM fishnet GROUP BY fishnet.geom
