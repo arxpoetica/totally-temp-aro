@@ -15,6 +15,10 @@ aro-service/target
 aro-service/**/*.project
 aro-service/**/*.settings
 aro-service/**/*.classpath
+*.project
+*.settings
+*.classpath
+aro-service/aro-service/.project
 
 
 #app ignores
@@ -34,3 +38,6 @@ etl/client/*.pyc
 etl/source_colt/data
 
 bin/
+
+
+*.component
