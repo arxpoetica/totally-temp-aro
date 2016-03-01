@@ -339,7 +339,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
   };
 
   $scope.network_planning_boundary = function(geojson) {
-    console.log('data!!', data)
     var data = {
       boundary: geojson,
       algorithm: network_planning.getAlgorithm().id,

@@ -285,11 +285,11 @@ Network.clear_network_nodes = function(plan_id, callback) {
   database.execute(sql, [plan_id], callback);
 };
 
-Network.recalculate_nodes = function(plan_id, callback) {
+Network.recalculate_nodes = function(plan_id, algorithm, callback) {
   txain(function(callback) {
     var options = {
       method: 'POST',
-      url: config.aro_service_url+'/rest/recalc/plan',
+      url: config.aro_service_url+'/rest/recalc/masterplan',
       json: true,
       body: {
         planId: plan_id,
@@ -298,6 +298,7 @@ Network.recalculate_nodes = function(plan_id, callback) {
     request(options, callback);
   })
   .then(function(res, body, callback) {
+    console.log('ARO-service responded with', body)
     callback();
   })
   .end(callback);
@@ -316,7 +317,8 @@ Network.select_boundary = function(plan_id, data, callback) {
     database.execute(sql, [data.boundary, plan_id], callback);
   })
   .then(function(count, callback) {
-    models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
+    // models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
+    models.Network.recalculate_nodes(plan_id, data.algorithm, callback);
   })
   .end(callback);
 };

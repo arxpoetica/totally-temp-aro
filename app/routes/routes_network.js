@@ -67,8 +67,8 @@ exports.configure = function(api, middleware) {
   api.post('/network/nodes/:plan_id/recalc', check_owner_permission, function(request, response, next) {
     var plan_id = +request.params.plan_id;
     var algorithm = request.body.algorithm;
-    models.NetworkPlan.recalculate_route(plan_id, algorithm, jsonHandler(response, next));
-    // models.Network.recalculate_nodes(plan_id, jsonHandler(response, next));
+    // models.NetworkPlan.recalculate_route(plan_id, algorithm, jsonHandler(response, next));
+    models.Network.recalculate_nodes(plan_id, algorithm, jsonHandler(response, next));
   });
 
   // Recalculate network nodes
