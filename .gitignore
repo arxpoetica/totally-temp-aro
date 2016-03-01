@@ -53,3 +53,5 @@ aro-service/aro-engine/.settings/org.eclipse.wst.common.component
 aro-service/aro-service/.project
 
 aro-service/aro-service/.settings/org.eclipse.wst.common.component
+
+*.war

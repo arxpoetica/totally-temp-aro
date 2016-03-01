@@ -10,17 +10,17 @@ ${PSQL} -a -f $DIR/create_client_carrier_location_mapping.sql
 # Create and load network plan table
 ${PSQL} -a -f $DIR/create_client_plan.sql
 
-# Create and load plan sources
-${PSQL} -a -f $DIR/create_client_plan_sources.sql
-
-# Create and load plan targets
-${PSQL} -a -f $DIR/create_client_plan_targets.sql
-
 # Create and load network node types table
 ${PSQL} -a -f $DIR/create_client_network_node_types.sql
 
 # Create and load network nodes table
 ${PSQL} -a -f $DIR/create_client_network_nodes.sql
+
+# Create and load plan sources
+${PSQL} -a -f $DIR/create_client_plan_sources.sql
+
+# Create and load plan targets
+${PSQL} -a -f $DIR/create_client_plan_targets.sql
 
 # Create and load fiber type
 ${PSQL} -a -f $DIR/create_client_fiber_route_type.sql
