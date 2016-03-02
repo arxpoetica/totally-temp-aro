@@ -71,6 +71,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
   });
 
+  $rootScope.$on('route_planning_changed', function() {
+    network_nodes_layer.reload_data();
+  });
+
   $scope.select_tool = function(tool) {
     if ($scope.selected_tool === tool) {
       $scope.selected_tool = null;

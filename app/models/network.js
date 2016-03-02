@@ -295,6 +295,7 @@ Network.recalculate_nodes = function(plan_id, algorithm, callback) {
         planId: plan_id,
       },
     };
+    console.log('sending request to aro-service', options)
     request(options, callback);
   })
   .then(function(res, body, callback) {
