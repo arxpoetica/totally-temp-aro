@@ -53,6 +53,9 @@ public class RecalcEndpoint {
 			return mpu;
 
 		});
+		
+		//Block Call
+		job.getResponse() ;
 
 		MasterPlanResponse mpr = new MasterPlanResponse();
 		mpr.setRecalcJob(job.getJob());
@@ -86,6 +89,7 @@ public class RecalcEndpoint {
 
 					return response;
 				});
+		
 
 		return job.getResponse();
 	}

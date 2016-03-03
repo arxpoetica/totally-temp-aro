@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,10 @@ import com.altvil.utils.StreamUtil;
 @Service
 public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(NetworkPlanningServiceImpl.class.getName());
+
+	
 	@Autowired
 	private NetworkNodeRepository networkNodeRepository;
 
@@ -70,8 +76,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	public MasterPlanCalculation planMasterFiber(long planId,
 			FiberNetworkConstraints constraints) {
 
-		List<Long> ids = StreamUtil.map(networkPlanRepository
-				.computeWirecenterUpdates(planId), Number::longValue);
+		List<Long> ids = StreamUtil.map(
+				networkPlanRepository.computeWirecenterUpdates(planId),
+				Number::longValue);
 
 		Future<MasterPlanUpdate> f = wirePlanExecutor.submit(() -> {
 
@@ -79,12 +86,14 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					.invokeAll(ids.stream()
 							.map(id -> createCallable(id, constraints))
 							.collect(Collectors.toList()));
-
-			for (Future<WirecenterNetworkPlan> wf : futures) {
-				wf.get();
-			}
-
-			return new MasterPlanUpdate();
+			return new MasterPlanUpdate(futures.stream().map(wf -> {
+				try {
+					return wf.get();
+				} catch (Exception e) {
+					log.error(e.getMessage()) ;
+					return null;
+				}
+			}).filter(p -> p != null).collect(Collectors.toList()));
 		});
 
 		return new MasterPlanCalculation() {
