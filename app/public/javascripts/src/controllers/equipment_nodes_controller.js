@@ -11,7 +11,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     type: 'network_nodes',
     name: 'Network Nodes',
     short_name: 'NN',
-    api_endpoint: '/network/nodes/central_office',
     style_options: {
       normal: {
         icon: '/images/map_icons/central_office.png',
@@ -97,6 +96,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.build_node_types = _.reject(response, function(type) {
       return config.ui.map_tools.equipment.build.indexOf(type.name) === -1;
     });
+    map.ready(function() {
+      $scope.change_node_types_visibility();
+    })
   });
 
   function empty_changes() {
@@ -116,9 +118,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     map.ready(function() {
       fiber_plant_layer.show();
+      network_nodes_layer.reload_data();
     });
   });
 
+  $rootScope.$on('plan_cleared', function() {
+    network_nodes_layer.reload_data();
+  })
 
   $scope.change_node_types_visibility = function() {
     var types = [];
@@ -131,7 +137,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       network_nodes_layer.hide();
     } else {
       network_nodes_layer.show();
-      network_nodes_layer.set_api_endpoint('/network/nodes/'+$scope.plan.id+'/find?node_types='+types.join(','));
+      network_nodes_layer.set_api_endpoint('/network/nodes/:plan_id/find', {
+        node_types: types.join(','),
+      });
     }
   };
 

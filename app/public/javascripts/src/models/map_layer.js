@@ -286,7 +286,6 @@ app.service('MapLayer', function($http, $rootScope, selection) {
 				var api_endpoint = this.api_endpoint
 															.replace(/\:plan_id/g, (plan && plan.id) || 'none')
 															.replace(/\:client_carrier_name/g, carrier);
-
 				$http({
 					url: api_endpoint,
 					method: 'GET',

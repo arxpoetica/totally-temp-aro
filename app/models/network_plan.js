@@ -18,9 +18,11 @@ var NetworkPlan = {};
 
 NetworkPlan.find_edges = function(plan_id, callback) {
   var sql = `
-    SELECT id, 0 AS edge_length, ST_AsGeoJSON(geom)::json AS geom
-    FROM client.fiber_route
-    WHERE plan_id=$1
+    SELECT fiber_route.id, 0 AS edge_length, ST_AsGeoJSON(fiber_route.geom)::json AS geom
+    FROM client.plan
+    JOIN client.plan p ON p.parent_plan_id = plan.id
+    JOIN client.fiber_route ON fiber_route.plan_id = p.id
+    WHERE plan.id=$1
   `
   database.query(sql, [plan_id], callback);
 };
@@ -312,6 +314,10 @@ NetworkPlan.clear_route = function(plan_id, callback) {
     var sql = 'DELETE FROM client.network_nodes WHERE plan_id=$1;';
     database.execute(sql, [plan_id], callback);
   })
+  .then(function(callback) {
+    var sql = 'DELETE FROM client.plan WHERE parent_plan_id=$1;';
+    database.execute(sql, [plan_id], callback);
+  })
   .end(callback);
 };
 
@@ -393,9 +399,11 @@ NetworkPlan.export_kml = function(plan_id, callback) {
     `
 
     var sql = `
-      SELECT ST_AsKML(geom) AS geom
-      FROM client.fiber_route
-      WHERE fiber_route.plan_id = $1
+      SELECT ST_AsKML(fiber_route.geom) AS geom
+      FROM client.plan
+      JOIN client.plan p ON p.parent_plan_id = plan.id
+      JOIN client.fiber_route ON fiber_route.plan_id = p.id
+      WHERE plan.id=$1
     `
     database.query(sql, [plan_id], callback)
   })
@@ -418,6 +426,7 @@ NetworkPlan.export_kml = function(plan_id, callback) {
       kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`;
     });
 
+    // TODO: network nodes in child plans
     var sql = `
       SELECT ST_AsKML(network_nodes.geom) AS geom
       FROM client.plan_sources

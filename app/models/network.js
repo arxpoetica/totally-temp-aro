@@ -177,7 +177,7 @@ Network.view_network_nodes = function(node_types, plan_id, callback) {
 
   if (plan_id) {
     params.push(plan_id);
-    constraints.push('(plan_id IS NULL OR plan_id=$'+params.length+')');
+    constraints.push(`(plan_id IS NULL OR plan_id IN (SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}))`);
   } else {
     constraints.push('plan_id IS NULL');
   }
@@ -186,10 +186,13 @@ Network.view_network_nodes = function(node_types, plan_id, callback) {
     sql += ' WHERE '+constraints.join(' AND ');
   }
 
+  console.log('sql', sql, params)
+
   txain(function(callback) {
     database.query(sql, params, callback);
   })
   .then(function(rows, callback) {
+    console.log('rows', rows.length)
     var features = rows.map(row => ({
       'type': 'Feature',
       'properties': {

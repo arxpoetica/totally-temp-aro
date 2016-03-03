@@ -254,9 +254,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       showCancelButton: true,
       closeOnConfirm: true,
     }, function() {
-      $rootScope.$broadcast('plan_cleared', $scope.plan);
       $http.post('/network_plan/'+$scope.plan.id+'/clear').success(function(response) {
-        // success
+        $rootScope.$broadcast('plan_cleared', $scope.plan);
       });
     });
   };
