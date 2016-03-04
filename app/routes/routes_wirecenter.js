@@ -1,19 +1,19 @@
-var models = require('../models');
+var models = require('../models')
 
-exports.configure = function(api, middleware) {
+exports.configure = (api, middleware) => {
+  var jsonSuccess = middleware.jsonSuccess
 
-  var check_any_permission = middleware.check_any_permission;
-  var check_owner_permission = middleware.check_owner_permission;
-  var jsonHandler = middleware.jsonHandler;
+  api.get('/wirecenters/:wirecenter_code', (request, response, next) => {
+    var wirecenter_code = request.params.wirecenter_code
+    models.Wirecenter.find_by_wirecenter_code(wirecenter_code)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 
-  api.get('/wirecenters/:wirecenter_code', function(request, response, next) {
-    var wirecenter_code = request.params.wirecenter_code;
-    models.Wirecenter.find_by_wirecenter_code(wirecenter_code, jsonHandler(response, next));
-  });
-
-  api.get('/wirecenters', middleware.viewport, function(request, response, next) {
-    var viewport = request.viewport;
-    models.Wirecenter.find_all(viewport, jsonHandler(response, next));
-  });
-
-};
+  api.get('/wirecenters', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    models.Wirecenter.find_all(viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+}

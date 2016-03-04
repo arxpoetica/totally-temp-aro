@@ -1,20 +1,19 @@
-var models = require('../models');
-var _ = require('underscore');
+var models = require('../models')
 
-exports.configure = function(api, middleware) {
+exports.configure = (api, middleware) => {
+  var jsonSuccess = middleware.jsonSuccess
 
-  var check_any_permission = middleware.check_any_permission;
-  var check_owner_permission = middleware.check_owner_permission;
-  var jsonHandler = middleware.jsonHandler;
+  api.get('/customer_profile/:plan_id/boundary', (request, response, next) => {
+    var type = request.query.type
+    var boundary = request.query.boundary
+    models.CustomerProfile.customer_profile_for_boundary(type, boundary)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 
-  api.get('/customer_profile/:plan_id/boundary', function(request, response, next) {
-    var type = request.query.type;
-    var boundary = request.query.boundary;
-    models.CustomerProfile.customer_profile_for_boundary(type, boundary, jsonHandler(response, next));
-  });
-
-  api.get('/customer_profile/all_cities', function(request, response, next) {
-    models.CustomerProfile.customer_profile_all_cities(jsonHandler(response, next));
-  });
-
-};
+  api.get('/customer_profile/all_cities', (request, response, next) => {
+    models.CustomerProfile.customer_profile_all_cities()
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+}

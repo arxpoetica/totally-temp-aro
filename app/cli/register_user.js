@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require('babel-register');
+require('babel-register')
 
 var argv = require('yargs')
   .usage('Usage: $0 [options]')
@@ -17,16 +17,16 @@ var argv = require('yargs')
   .alias('r', 'rol')
   .alias('c', 'company_name')
   .demand(['f', 'l', 'e'])
-  .argv;
+  .argv
 
-var models = require('../models');
+var models = require('../models')
 
-models.User.register(argv, function(err, user) {
-  if (err) {
-    console.log('Error', err.message);
-    process.exit(1);
-  } else {
-    console.log('User registered successfully with id =', user.id);
-    process.exit(0);
-  }
-});
+models.User.register(argv)
+  .then((user) => {
+    console.log('User registered successfully with id =', user.id)
+    process.exit(0)
+  })
+  .catch((err) => {
+    console.log('Error', err.message)
+    process.exit(1)
+  })

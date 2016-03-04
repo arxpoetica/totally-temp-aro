@@ -1,31 +1,36 @@
 // Permission
 
-var helpers = require('../helpers');
-var database = helpers.database;
-var txain = require('txain');
+'use strict'
 
-var Permission = {};
+var helpers = require('../helpers')
+var database = helpers.database
 
-Permission.grant_access = function(plan_id, user_id, rol, callback) {
-  txain(function(callback) {
-    var sql = 'DELETE FROM auth.permissions WHERE plan_id=$1 AND user_id=$2';
-    database.execute(sql, [plan_id, user_id], callback);
-  })
-  .then(function(callback) {
-    var sql = 'INSERT INTO auth.permissions (plan_id, user_id, rol) VALUES ($1, $2, $3)';
-    database.execute(sql, [plan_id, user_id, rol], callback);
-  })
-  .end(callback);
-};
+module.exports = class Permission {
 
-Permission.revoke_access = function(plan_id, user_id, callback) {
-  var sql = 'DELETE FROM auth.permissions WHERE plan_id=$1 AND user_id=$2';
-  database.execute(sql, [plan_id, user_id], callback);
-};
+  static grant_access (plan_id, user_id, rol) {
+    return Promise.resolve()
+      .then(() => (
+        database.execute('DELETE FROM auth.permissions WHERE plan_id=$1 AND user_id=$2',
+          [plan_id, user_id])
+      ))
+      .then(() => (
+        database.execute('DELETE FROM auth.permissions WHERE plan_id=$1 AND user_id=$2',
+          [plan_id, user_id])
+      ))
+      .then(() => (
+        database.execute('INSERT INTO auth.permissions (plan_id, user_id, rol) VALUES ($1, $2, $3)',
+          [plan_id, user_id, rol])
+      ))
+  }
 
-Permission.find_permission = function(plan_id, user_id, callback) {
-  var sql = 'SELECT rol FROM auth.permissions WHERE plan_id=$1 AND user_id=$2';
-  database.findOne(sql, [plan_id, user_id], callback);
-};
+  static revoke_access (plan_id, user_id) {
+    return database.execute('DELETE FROM auth.permissions WHERE plan_id=$1 AND user_id=$2',
+      [plan_id, user_id])
+  }
 
-module.exports = Permission;
+  static find_permission (plan_id, user_id) {
+    return database.findOne('SELECT rol FROM auth.permissions WHERE plan_id=$1 AND user_id=$2',
+      [plan_id, user_id])
+  }
+
+}

@@ -1,38 +1,33 @@
-var expect = require('chai').expect;
-var models = require('../../models');
-var test_utils = require('./test_utils');
-var request = test_utils.request;
+/* global describe it, before, after */
+var expect = require('chai').expect
+var test_utils = require('./test_utils')
+var request = test_utils.request
 
-describe('Authentication', function() {
+describe('Authentication', () => {
+  before(() => test_utils.logout_app())
+  after(() => test_utils.login_app())
 
-  before(function() {
-    test_utils.logout_app();
-  });
-
-  after(function() {
-    test_utils.login_app();
-  });
-
-  it('should redirect if not logged', function(done) {
+  it('should redirect if not logged', (done) => {
     request
       .get('/')
-      .end(function(err, res) {
-        expect(res.statusCode).to.be.equal(302);
-        expect(res.headers.location).to.be.equal('/login');
-        done();
-    });
-  });
+      .end((err, res) => {
+        expect(err).to.not.be.ok
+        expect(res.statusCode).to.be.equal(302)
+        expect(res.headers.location).to.be.equal('/login')
+        done()
+      })
+  })
 
-  it('should send a JSON response if not logged and using XHR', function(done) {
+  it('should send a JSON response if not logged and using XHR', (done) => {
     request
       .get('/')
       .set('X-Requested-With', 'xmlhttprequest')
       .accept('application/json')
-      .end(function(err, res) {
-        expect(res.statusCode).to.be.equal(403);
-        expect(res.body.error).to.be.equal('Forbidden');
-        done();
-    });
-  });
-
-});
+      .end((err, res) => {
+        expect(err).to.not.be.ok
+        expect(res.statusCode).to.be.equal(403)
+        expect(res.body.error).to.be.equal('Forbidden')
+        done()
+      })
+  })
+})

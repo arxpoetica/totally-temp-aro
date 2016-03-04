@@ -1,47 +1,60 @@
 // Boundary
 
-var helpers = require('../helpers');
-var database = helpers.database;
-var txain = require('txain');
+'use strict'
 
-var Boundary = {};
+var helpers = require('../helpers')
+var database = helpers.database
 
-Boundary.create_boundary = function(plan_id, data, callback) {
-  txain(function(callback) {
-    var sql = 'INSERT INTO client.boundaries (plan_id, name, geom) VALUES ($1, $2, ST_GeomFromGeoJSON($3)) RETURNING id';
+module.exports = class Boundary {
+
+  static create_boundary (plan_id, data) {
+    return Promise.resolve()
+      .then(() => {
+        var sql = `
+          INSERT INTO client.boundaries (plan_id, name, geom)
+          VALUES ($1, $2, ST_GeomFromGeoJSON($3)) RETURNING id
+        `
+        var params = [
+          plan_id,
+          data.name,
+          data.geom
+        ]
+        return database.findOne(sql, params)
+      })
+      .then((row) => {
+        var sql = `
+          SELECT id, name, ST_ASGeoJSON(geom)::json as geom
+          FROM client.boundaries WHERE id=$1
+        `
+        return database.findOne(sql, [row.id])
+      })
+  }
+
+  static delete_boundary (plan_id, boundary_id) {
+    return database.execute('DELETE FROM client.boundaries WHERE id=$1 AND plan_id=$2',
+      [boundary_id, plan_id])
+  }
+
+  static edit_boundary (data) {
+    var sql = `
+      UPDATE client.boundaries SET name=$1, geom=ST_GeomFromGeoJSON($2)
+      WHERE id=$3 AND plan_id=$4
+    `
     var params = [
-      plan_id,
       data.name,
       data.geom,
-    ];
-    database.findOne(sql, params, callback);
-  })
-  .then(function(row, callback) {
-    var sql = 'SELECT id, name, ST_ASGeoJSON(geom)::json as geom from client.boundaries WHERE id=$1';
-    database.findOne(sql, [row.id], callback);
-  })
-  .end(callback);
-};
+      data.id,
+      data.plan_id // this may look redundant but it's for checking permissions
+    ]
+    return database.execute(sql, params)
+  }
 
-Boundary.delete_boundary = function(plan_id, boundary_id, callback) {
-  var sql = 'DELETE FROM client.boundaries WHERE id=$1 AND plan_id=$2';
-  database.execute(sql, [boundary_id, plan_id], callback);
-};
+  static find_boundaries (plan_id) {
+    var sql = `
+      SELECT id, name, ST_ASGeoJSON(geom)::json as geom
+      FROM client.boundaries WHERE plan_id=$1
+    `
+    return database.query(sql, [plan_id])
+  }
 
-Boundary.edit_boundary = function(data, callback) {
-  var sql = 'UPDATE client.boundaries SET name=$1, geom=ST_GeomFromGeoJSON($2) WHERE id=$3 AND plan_id=$4';
-  var params = [
-    data.name,
-    data.geom,
-    data.id,
-    data.plan_id, // this may look redundant but it's for checking permissions
-  ];
-  database.execute(sql, params, callback);
-};
-
-Boundary.find_boundaries = function(plan_id, callback) {
-  var sql = 'SELECT id, name, ST_ASGeoJSON(geom)::json as geom from client.boundaries WHERE plan_id=$1';
-  database.query(sql, [plan_id], callback);
-};
-
-module.exports = Boundary;
+}

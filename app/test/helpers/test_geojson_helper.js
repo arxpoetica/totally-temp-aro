@@ -1,10 +1,10 @@
-var expect = require('chai').expect;
-var GeoJsonHelper = require('../../helpers/geojson_helper.js');
+/* global describe it*/
+var expect = require('chai').expect
+var GeoJsonHelper = require('../../helpers/geojson_helper.js')
 
-describe('GeoJsonHelper', function() {
-
-	// 10 features
-	var data = [ { geom: { type: 'MultiPolygon', coordinates: [Object] },
+describe('GeoJsonHelper', () => {
+  // 10 features
+  var data = [ { geom: { type: 'MultiPolygon', coordinates: [Object] },
     name: 'Harrietstown' },
   { geom: { type: 'MultiPolygon', coordinates: [Object] },
     name: 'Pharsalia' },
@@ -26,26 +26,15 @@ describe('GeoJsonHelper', function() {
     name: 'Sherburne' }
   ]
 
-  var properties = {'color':'black', 'name':'Brooklyn'};
+  var properties = {'color': 'black', 'name': 'Brooklyn'}
 
-	describe('#build_feature_collection()', function() {
-
-		it('should build a GeoJSON FeatureCollection', function() {
-			var output = GeoJsonHelper.build_feature_collection(data, properties);
-			expect(output.type).to.equal('FeatureCollection');
-		});
-
-		it('should build an array of Features', function() {
-			var output = GeoJsonHelper.build_feature_collection(data, properties);
-			expect(output.features).to.have.length(10);
-		});
-
-		it('should include specified properties in the GeoJSON', function() {
-			var output = GeoJsonHelper.build_feature_collection(data, properties);
-			expect(output.features[0].properties).to.have.a.property('color', 'black');
-			expect(output.features[0].properties).to.have.a.property('name', 'Brooklyn');
-		});
-
-	});
-
-});
+  describe('#build_feature_collection()', () => {
+    it('should build a GeoJSON FeatureCollection', () => {
+      var output = GeoJsonHelper.build_feature_collection(data, properties)
+      expect(output.type).to.equal('FeatureCollection')
+      expect(output.features).to.have.length(10)
+      expect(output.features[0].properties).to.have.a.property('color', 'black')
+      expect(output.features[0].properties).to.have.a.property('name', 'Brooklyn')
+    })
+  })
+})

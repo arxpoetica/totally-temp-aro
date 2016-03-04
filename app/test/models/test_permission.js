@@ -1,147 +1,132 @@
-var expect = require('chai').expect;
-var txain = require('txain');
-var models = require('../../models');
-var request = require('./test_utils').request;
-var test_utils = require('./test_utils');
+/* global describe it before after */
+var expect = require('chai').expect
+var models = require('../../models')
+var request = require('./test_utils').request
+var test_utils = require('./test_utils')
 
-describe('Permission', function() {
+describe('Permission', () => {
+  var plan_id
+  var owner
+  var guest
 
-  var plan_id;
-  var owner;
-  var guest;
+  before(() => {
+    return Promise.resolve()
+      .then(() => {
+        // create owner user
+        var email = 'user_' +
+          require('crypto').randomBytes(16).toString('hex') +
+          '@example.com'
 
-  before(function(done) {
-    txain(function(callback) {
-      // create owner user
-      var email = 'user_'
-        + require('crypto').randomBytes(16).toString('hex')
-        + '@example.com';
+        var user = {
+          first_name: 'Mr',
+          last_name: 'Rabbit',
+          email: email,
+          password: 'foobar1234'
+        }
+        return models.User.register(user)
+      })
+      .then((user) => {
+        owner = user
 
-      var user = {
-        first_name: 'Mr',
-        last_name: 'Rabbit',
-        email: email,
-        password: 'foobar1234',
-      };
-      models.User.register(user, callback);
-    })
-    .then(function(user, callback) {
-      owner = user;
-
-      var area = {
-        "name": "Manhattan, New York, NY, USA",
-        "centroid": {
-          "lat": 40.7830603,
-          "lng": -73.9712488
-        },
-        "bounds": {
-          "northeast": {
-            "lat": 40.882214,
-            "lng": -73.907
+        var area = {
+          'name': 'Manhattan, New York, NY, USA',
+          'centroid': {
+            'lat': 40.7830603,
+            'lng': -73.9712488
           },
-          "southwest": {
-            "lat": 40.6803955,
-            "lng": -74.047285
+          'bounds': {
+            'northeast': {
+              'lat': 40.882214,
+              'lng': -73.907
+            },
+            'southwest': {
+              'lat': 40.6803955,
+              'lng': -74.047285
+            }
           }
         }
-      };
-      models.NetworkPlan.create_plan('Untitled plan', area, owner, callback);
-    })
-    .then(function(plan, callback) {
-      plan_id = plan.id;
+        return models.NetworkPlan.create_plan('Untitled plan', area, owner)
+      })
+      .then((plan) => {
+        plan_id = plan.id
 
-      // create guest user
-      var email = 'user_'
-        + require('crypto').randomBytes(16).toString('hex')
-        + '@example.com';
+        // create guest user
+        var email = 'user_' +
+          require('crypto').randomBytes(16).toString('hex') +
+          '@example.com'
 
-      var user = {
-        first_name: 'Jessica',
-        last_name: 'Hyide',
-        email: email,
-        password: 'foobar1234',
-      };
-      models.User.register(user, callback);
-    })
-    .then(function(user, callback) {
-      guest = user;
-      callback();
-    })
-    .end(function(err) {
-      expect(err).to.not.be.ok;
-      done()
-    });
-  });
+        var user = {
+          first_name: 'Jessica',
+          last_name: 'Hyide',
+          email: email,
+          password: 'foobar1234'
+        }
+        return models.User.register(user)
+      })
+      .then((user) => {
+        guest = user
+      })
+  })
 
-  after(function() {
-    test_utils.login_app();
-  });
+  after(() => test_utils.login_app())
 
-  it('should return an empty list for guest\'s plans', function(done) {
-    models.NetworkPlan.find_all(guest, null, function(err, plans) {
-      expect(err).to.not.be.ok;
-      expect(plans).to.be.an('array');
-      expect(plans).to.have.length(0);
-      done();
-    });
-  });
+  it('should return an empty list for guest\'s plans', () => {
+    return models.NetworkPlan.find_all(guest, null)
+      .then((plans) => {
+        expect(plans).to.be.an('array')
+        expect(plans).to.have.length(0)
+      })
+  })
 
-  it('should not have permission yet', function(done) {
-    test_utils.login_app(guest);
+  it('should not have permission yet', (done) => {
+    test_utils.login_app(guest)
     request
-      .get('/network_plan/'+plan_id+'/area_data')
+      .get('/network_plan/' + plan_id + '/area_data')
       .accept('application/json')
-      .end(function(err, res) {
-        if (err) return done(err);
-        var data = res.body;
-        expect(res.statusCode).to.be.equal(403);
-        expect(data.error).to.be.equal('Forbidden');
-        done();
-    });
-  });
+      .end((err, res) => {
+        if (err) return done(err)
+        var data = res.body
+        expect(res.statusCode).to.be.equal(403)
+        expect(data.error).to.be.equal('Forbidden')
+        done()
+      })
+  })
 
-  it('should grant access to the guest user', function(done) {
-    test_utils.login_app(owner);
+  it('should grant access to the guest user', (done) => {
+    test_utils.login_app(owner)
     request
-      .post('/permissions/'+plan_id+'/grant')
+      .post('/permissions/' + plan_id + '/grant')
       .accept('application/json')
       .send({ user_id: guest.id })
-      .end(function(err, res) {
-        if (err) return done(err);
-        var plan = res.body;
-        expect(res.statusCode).to.be.equal(200);
-        done();
-    });
-  });
+      .end((err, res) => {
+        if (err) return done(err)
+        // var plan = res.body
+        expect(res.statusCode).to.be.equal(200)
+        done()
+      })
+  })
 
-  it('should return one element for guest\'s plans', function(done) {
-    models.NetworkPlan.find_all(guest, null, function(err, plans) {
-      expect(err).to.not.be.ok;
-      expect(plans).to.be.an('array');
-      expect(plans).to.have.length(1);
-      var plan = plans[0];
-      expect(plan.owner_id).to.be.equal(owner.id);
-      expect(plan.owner_first_name).to.be.equal(owner.first_name);
-      expect(plan.owner_last_name).to.be.equal(owner.last_name);
-      done();
-    });
-  });
+  it('should return one element for guest\'s plans', () => {
+    return models.NetworkPlan.find_all(guest, null)
+      .then((plans) => {
+        expect(plans).to.be.an('array')
+        expect(plans).to.have.length(1)
+        var plan = plans[0]
+        expect(plan.owner_id).to.be.equal(owner.id)
+        expect(plan.owner_first_name).to.be.equal(owner.first_name)
+        expect(plan.owner_last_name).to.be.equal(owner.last_name)
+      })
+  })
 
-  it('should revoke access to the guest user', function(done) {
-    models.Permission.revoke_access(plan_id, guest.id, function(err) {
-      expect(err).to.not.be.ok;
-      done();
-    });
-  });
+  it('should revoke access to the guest user', () => {
+    return models.Permission.revoke_access(plan_id, guest.id)
+  })
 
-  it('should return an empty list for guest\'s plans', function(done) {
-    models.NetworkPlan.find_all(guest, null, function(err, plans) {
-      expect(err).to.not.be.ok;
-      expect(plans).to.be.an('array');
-      expect(plans).to.have.length(0);
-      done();
-    });
-  });
-
-
-});
+  it('should return an empty list for guest\'s plans', () => {
+    return models.NetworkPlan.find_all(guest, null)
+      .then((plans) => {
+        expect(plans).to.be.an('array')
+        expect(plans).to.have.length(0)
+      })
+  })
+})

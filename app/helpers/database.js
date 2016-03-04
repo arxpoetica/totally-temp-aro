@@ -1,124 +1,77 @@
-var pg = require('pg');
-var txain = require('txain');
-var _ = require('underscore');
-var config = require('./config');
+'use strict'
 
-function con_string() {
-	return process.env.DATABASE_URL || config.database_url;
-}
+var pg = require('pg')
+var _ = require('underscore')
+var config = require('./config')
 
-function processQuery(sql, params) {
-	var length = params.length;
-	var replacements = [];
-	for (var i = 0, n = 0; i < params.length; i++) {
-		var value = params[i]
-		if (_.isArray(value)) {
-			var placeholders = value.map(function(val) {
-				return '$x'+(++n);
-			}).join(',');
-			replacements.push(['\\$'+(i+1), placeholders]);
-		} else {
-			replacements.push(['\\$'+(i+1), '$x'+(n+1)]);
-			n++;
-		}
-	};
-	replacements.forEach(function(arr) {
-		sql = sql.replace(new RegExp(arr[0], 'g'), arr[1]);
-	})
-	sql = sql.replace(/\$x/g, '\$');
-	var flatten = _.flatten(params);
-	Array.prototype.splice.apply(params, [0, params.length].concat(flatten));
-	// sql = sql.replace(/client_schema./g, config.client_schema+'.');
-	return sql;
-}
+module.exports = class Database {
 
-exports.query = function(sql, params, callback) {
-	if (arguments.length === 2) {
-		callback = params;
-		params = [];
-	}
-	pg.connect(con_string(), function(err, client, done) {
-		if (err) return callback(err);
-		sql = processQuery(sql, params);
-		client.query(sql, params, function(err, result) {
-			if (err) console.log('sql failed', sql, params, err.message);
-			done();
-			if (err) return callback(err);
-			callback(null, result.rows);
-		})
-	})
-}
+  static _con_string () {
+    return process.env.DATABASE_URL || config.database_url
+  }
 
-exports.execute = function(sql, params, callback) {
-	if (arguments.length === 2) {
-		callback = params;
-		params = [];
-	}
-	pg.connect(con_string(), function(err, client, done) {
-		if (err) return callback(err);
-		sql = processQuery(sql, params);
-		client.query(sql, params, function(err, result) {
-			if (err) console.log('sql failed', sql, params, err.message);
-			done();
-			if (err) return callback(err);
-			callback(null, result.rowCount);
-		})
-	})
-}
+  static _processQuery (sql, params) {
+    var replacements = []
+    for (var i = 0, n = 0; i < params.length; i++) {
+      var value = params[i]
+      if (_.isArray(value)) {
+        var placeholders = value.map((val) => {
+          return '$x' + (++n)
+        }).join(',')
+        replacements.push(['\\$' + (i + 1), placeholders])
+      } else {
+        replacements.push(['\\$' + (i + 1), '$x' + (n + 1)])
+        n++
+      }
+    };
+    replacements.forEach((arr) => {
+      sql = sql.replace(new RegExp(arr[0], 'g'), arr[1])
+    })
+    sql = sql.replace(/\$x/g, '\$')
+    var flatten = _.flatten(params)
+    Array.prototype.splice.apply(params, [0, params.length].concat(flatten))
+    return sql
+  }
 
-exports.findOne = function(sql, params, def, callback) {
-	if (arguments.length === 3) {
-		callback = def;
-		def = void 0;
-	}
-	if (arguments.length === 2) {
-		callback = params;
-		params = [];
-		def = void 0;
-	}
-	txain(function(callback) {
-		exports.query(sql, params, callback)
-	})
-	.then(function(rows, callback) {
-		callback(null, rows[0] || def)
-	})
-	.end(callback);
-}
+  static _raw (sql, params) {
+    params = params || []
+    return new Promise((resolve, reject) => {
+      pg.connect(this._con_string(), (err, client, done) => {
+        if (err) return reject(err)
+        sql = this._processQuery(sql, params)
+        client.query(sql, params, (err, result) => {
+          if (err) console.log('sql failed', sql, params, err.message)
+          done()
+          err ? reject(err) : resolve(result)
+        })
+      })
+    })
+  }
 
-exports.findValue = function(sql, params, field, def, callback) {
-	if (arguments.length === 4) {
-		callback = def;
-		def = void 0;
-	}
-	if (arguments.length === 3) {
-		callback = field;
-		def = void 0;
-		field = params;
-		params = [];
-	}
-	txain(function(callback) {
-		exports.query(sql, params, callback)
-	})
-	.then(function(rows, callback) {
-		callback(null, (rows[0] && rows[0][field]) || def);
-	})
-	.end(callback);
-}
+  static query (sql, params) {
+    return this._raw(sql, params)
+      .then((result) => result.rows)
+  }
 
-exports.findValues = function(sql, params, field, callback) {
-	if (arguments.length === 3) {
-		callback = field;
-		field = params;
-		params = [];
-	}
-	txain(function(callback) {
-		exports.query(sql, params, callback)
-	})
-	.then(function(rows, callback) {
-		rows = rows.map(function(row) {
-			return row[field];
-		});
-		callback(null, rows);
-	})
-	.end(callback);
+  static execute (sql, params) {
+    return this._raw(sql, params)
+      .then((result) => result.rowCount)
+  }
+
+  static findOne (sql, params, def) {
+    params = params || []
+    return this.query(sql, params)
+      .then((rows) => rows[0] || def)
+  }
+
+  static findValue (sql, params, field, def) {
+    return this.query(sql, params)
+      .then((rows) => (rows[0] && rows[0][field]) || def)
+  }
+
+  static findValues (sql, params, field) {
+    return this.query(sql, params)
+      .then((rows) => rows.map((row) => row[field]))
+  }
+
 }

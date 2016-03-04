@@ -1,14 +1,14 @@
+/* global app config user_id google $ map */
 // Selection Tools Controller
 //
 // Handles display of and interaction with all layers of the map
-app.controller('selection_tools_controller', function($rootScope, $scope, network_planning) {
-
-  $scope.selected_tool = null;
-  $scope.network_planning = network_planning;
+app.controller('selection_tools_controller', ($rootScope, $scope, network_planning) => {
+  $scope.selected_tool = null
+  $scope.network_planning = network_planning
   $scope.available_tools = {
     '': {
       icon: 'fa fa-mouse-pointer',
-      name: 'No selection',
+      name: 'No selection'
     },
     // 'rectangle': {
     //   icon: 'glyphicon glyphicon-fullscreen',
@@ -16,74 +16,76 @@ app.controller('selection_tools_controller', function($rootScope, $scope, networ
     // },
     'polygon': {
       icon: 'glyphicon glyphicon-screenshot',
-      name: 'Polygon selection tool',
-    },
-  };
-  if (config.route_planning.length === 0) {
-    $scope.available_tools = [];
+      name: 'Polygon selection tool'
+    }
   }
-  $scope.user_id = user_id;
-  $scope.plan = null;
-  $rootScope.$on('plan_selected', (e, plan) => $scope.plan = plan);
+  if (config.route_planning.length === 0) {
+    $scope.available_tools = []
+  }
+  $scope.user_id = user_id
+  $scope.plan = null
+  $rootScope.$on('plan_selected', (e, plan) => {
+    $scope.plan = plan
+  })
 
-  $scope.is_selected_tool = function(name) {
-    if (network_planning.getAlgorithm()) return false;
-    return drawingManager.getDrawingMode() === (name ? name : null);
-  };
+  $scope.is_selected_tool = (name) => {
+    if (network_planning.getAlgorithm()) return false
+    return drawingManager.getDrawingMode() === (name || null)
+  }
 
-  $scope.get_selected_tool = function() {
-    return drawingManager.getDrawingMode();
-  };
+  $scope.get_selected_tool = () => {
+    return drawingManager.getDrawingMode()
+  }
 
-  $scope.set_selected_tool = function(name) {
-    name = name ? name : null;
-    drawingManager.old_drawing_mode = name;
-    network_planning.setAlgorithm(null);
-    return drawingManager.setDrawingMode(name);
-  };
+  $scope.set_selected_tool = (name) => {
+    name = name || null
+    drawingManager.old_drawing_mode = name
+    network_planning.setAlgorithm(null)
+    return drawingManager.setDrawingMode(name)
+  }
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: null,
-    drawingControl: false,
-  });
+    drawingControl: false
+  })
 
-  $scope.deselect_mode = false;
+  $scope.deselect_mode = false
 
-  drawingManager.addListener('overlaycomplete', function(e) {
-    var overlay = e.overlay;
+  drawingManager.addListener('overlaycomplete', (e) => {
+    var overlay = e.overlay
     if (e.type !== drawingManager.getDrawingMode()) {
-      return overlay.setMap(null);
+      return overlay.setMap(null)
     }
-    $rootScope.$broadcast('selection_tool_'+e.type, overlay, $scope.deselect_mode);
-    setTimeout(function() {
-      overlay.setMap(null);
-    }, 100);
-  });
+    $rootScope.$broadcast('selection_tool_' + e.type, overlay, $scope.deselect_mode)
+    setTimeout(() => {
+      overlay.setMap(null)
+    }, 100)
+  })
 
-  $(document).ready(function() {
-    drawingManager.setMap(map);
-  });
+  $(document).ready(() => {
+    drawingManager.setMap(map)
+  })
 
-  function set_drawing_manager_enabled(enabled) {
+  function set_drawing_manager_enabled (enabled) {
     if (enabled) {
-      drawingManager.setDrawingMode(drawingManager.old_drawing_mode || null);
+      drawingManager.setDrawingMode(drawingManager.old_drawing_mode || null)
     } else {
-      drawingManager.setDrawingMode(null);
+      drawingManager.setDrawingMode(null)
     }
   }
 
-  function update_selection_tools(e) {
-    $scope.deselect_mode = e.shiftKey;
-    set_drawing_manager_enabled(!e.ctrlKey);
-    if (!$rootScope.$$phase) { $rootScope.$apply(); } // refresh button state
+  function update_selection_tools (e) {
+    $scope.deselect_mode = e.shiftKey
+    set_drawing_manager_enabled(!e.ctrlKey)
+    if (!$rootScope.$$phase) { $rootScope.$apply() } // refresh button state
   }
 
-  document.addEventListener('keydown', update_selection_tools);
-  document.addEventListener('keyup', update_selection_tools);
+  document.addEventListener('keydown', update_selection_tools)
+  document.addEventListener('keyup', update_selection_tools)
 
   if (config.route_planning.length > 0) {
     $('#network_planning_selector').popover({
-      content: function() {
+      content: () => {
         return config.route_planning.map((algorithm) => (
           `<p>
             <input type="radio" name="algorithm" value="${algorithm}"
@@ -91,21 +93,20 @@ app.controller('selection_tools_controller', function($rootScope, $scope, networ
               onclick="network_planning_changed(this.value)">
               ${network_planning.findAlgorithm(algorithm).description}
           </p>`
-        )).join('');
+        )).join('')
       },
-      html: true,
-    });
+      html: true
+    })
   }
 
-  window.network_planning_changed = function(value) {
-    network_planning.setAlgorithm(network_planning.findAlgorithm(value));
-    setTimeout(function() {
-      $('#network_planning_selector').click();
-    }, 300);
+  window.network_planning_changed = (value) => {
+    network_planning.setAlgorithm(network_planning.findAlgorithm(value))
+    setTimeout(() => {
+      $('#network_planning_selector').click()
+    }, 300)
     if (value) {
-      drawingManager.setDrawingMode(null);
+      drawingManager.setDrawingMode(null)
     }
-    $scope.$apply();
-  };
-
-});
+    $scope.$apply()
+  }
+})

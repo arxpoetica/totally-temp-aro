@@ -1,7 +1,6 @@
-app.service('loader', function($timeout) {
-
-  $timeout(function() {
-    $('#loader-wrapper').css('display', 'none');
-  });
-
-});
+/* global app $ */
+app.service('loader', ($timeout) => {
+  $timeout(() => {
+    $('#loader-wrapper').css('display', 'none')
+  })
+})
