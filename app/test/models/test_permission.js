@@ -71,7 +71,7 @@ describe('Permission', () => {
   after(() => test_utils.login_app())
 
   it('should return an empty list for guest\'s plans', () => {
-    return models.NetworkPlan.find_all(guest, null)
+    return models.NetworkPlan.findAll(guest, null)
       .then((plans) => {
         expect(plans).to.be.an('array')
         expect(plans).to.have.length(0)
@@ -107,7 +107,7 @@ describe('Permission', () => {
   })
 
   it('should return one element for guest\'s plans', () => {
-    return models.NetworkPlan.find_all(guest, null)
+    return models.NetworkPlan.findAll(guest, null)
       .then((plans) => {
         expect(plans).to.be.an('array')
         expect(plans).to.have.length(1)
@@ -119,11 +119,11 @@ describe('Permission', () => {
   })
 
   it('should revoke access to the guest user', () => {
-    return models.Permission.revoke_access(plan_id, guest.id)
+    return models.Permission.revokeAccess(plan_id, guest.id)
   })
 
   it('should return an empty list for guest\'s plans', () => {
-    return models.NetworkPlan.find_all(guest, null)
+    return models.NetworkPlan.findAll(guest, null)
       .then((plans) => {
         expect(plans).to.be.an('array')
         expect(plans).to.have.length(0)

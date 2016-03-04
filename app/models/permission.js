@@ -7,7 +7,7 @@ var database = helpers.database
 
 module.exports = class Permission {
 
-  static grant_access (plan_id, user_id, rol) {
+  static grantAccess (plan_id, user_id, rol) {
     return Promise.resolve()
       .then(() => (
         database.execute('DELETE FROM auth.permissions WHERE plan_id=$1 AND user_id=$2',
@@ -23,12 +23,12 @@ module.exports = class Permission {
       ))
   }
 
-  static revoke_access (plan_id, user_id) {
+  static revokeAccess (plan_id, user_id) {
     return database.execute('DELETE FROM auth.permissions WHERE plan_id=$1 AND user_id=$2',
       [plan_id, user_id])
   }
 
-  static find_permission (plan_id, user_id) {
+  static findPermission (plan_id, user_id) {
     return database.findOne('SELECT rol FROM auth.permissions WHERE plan_id=$1 AND user_id=$2',
       [plan_id, user_id])
   }

@@ -5,7 +5,7 @@ var test_utils = require('./test_utils')
 var request = test_utils.request
 
 describe('Network', () => {
-  describe('#view_fiber_plant_for_carrier()', () => {
+  describe('#viewFiberPlantForCarrier()', () => {
     var carrier_name = 'VERIZON'
 
     it('should return a feature collection', (done) => {
@@ -28,7 +28,7 @@ describe('Network', () => {
     })
   })
 
-  describe('#view_network_nodes()', () => {
+  describe('#viewNetworkNodes()', () => {
     var node_type = 'central_office'
 
     it('should return a feature collection', (done) => {
@@ -50,7 +50,7 @@ describe('Network', () => {
     })
   })
 
-  describe('#view_network_node_types()', () => {
+  describe('#viewNetworkNodeTypes()', () => {
     it('should return all available network node types', (done) => {
       request
         .get('/network/nodes')
@@ -87,7 +87,7 @@ describe('Network', () => {
     })
   })
 
-  describe('#edit_network_nodes() and #clear_network_nodes()', () => {
+  describe('#editNetworkNodes() and #clearNetworkNodes()', () => {
     var plan_id
     var nodes
     var node_id
@@ -119,7 +119,7 @@ describe('Network', () => {
     })
 
     it('should count the network nodes not associated to a plan', () => {
-      return models.Network.view_network_nodes()
+      return models.Network.viewNetworkNodes()
         .then((output) => {
           nodes = output.feature_collection.features.length
         })
@@ -157,7 +157,7 @@ describe('Network', () => {
           // var output = res.body
           expect(res.statusCode).to.be.equal(200)
 
-          models.Network.view_network_nodes(null, plan_id)
+          models.Network.viewNetworkNodes(null, plan_id)
             .then((output) => {
               var diff = output.feature_collection.features.length - nodes
               expect(diff).to.be.equal(1)
@@ -168,7 +168,7 @@ describe('Network', () => {
     })
 
     it('should calculate the cost of new network nodes', () => {
-      return models.RouteOptimizer.calculate_equipment_nodes_cost(plan_id)
+      return models.RouteOptimizer.calculateEquipmentNodesCost(plan_id)
         .then((output) => {
           expect(output.equipment_node_types).to.be.an('array')
           expect(output.total).to.be.a('number')
@@ -263,7 +263,7 @@ describe('Network', () => {
           if (err) return done(err)
           expect(res.statusCode).to.be.equal(200)
 
-          models.Network.view_network_nodes(null, plan_id)
+          models.Network.viewNetworkNodes(null, plan_id)
             .then((output) => {
               var diff = output.feature_collection.features.length - nodes
               expect(diff).to.be.equal(0)

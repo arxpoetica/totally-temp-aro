@@ -14,7 +14,7 @@ exports.configure = (api, middleware) => {
     keys.forEach((key) => {
       filters[key] = _.compact((request.query[key] || '').split(',').map((v) => +v || null))
     })
-    models.Location.find_all(plan_id, type, filters, viewport)
+    models.Location.findAll(plan_id, type, filters, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -29,33 +29,33 @@ exports.configure = (api, middleware) => {
 
   api.get('/locations/:location_id/show', (request, response, next) => {
     var location_id = request.params.location_id
-    models.Location.show_information(location_id)
+    models.Location.showInformation(location_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
   api.get('/locations/businesses/:location_id', (request, response, next) => {
     var location_id = request.params.location_id
-    models.Location.show_businesses(location_id)
+    models.Location.showBusinesses(location_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
   api.post('/locations/create', (request, response, next) => {
     var data = request.body
-    models.Location.create_location(data)
+    models.Location.createLocation(data)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
   api.get('/industries', (request, response, next) => {
-    models.Location.find_industries()
+    models.Location.findIndustries()
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
   api.get('/customer_types', (request, response, next) => {
-    models.Location.customer_types()
+    models.Location.customerTypes()
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -65,7 +65,7 @@ exports.configure = (api, middleware) => {
     var values = {
       number_of_households: request.body.number_of_households
     }
-    models.Location.update_households(location_id, values)
+    models.Location.updateHouseholds(location_id, values)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -78,7 +78,7 @@ exports.configure = (api, middleware) => {
 
   api.get('/locations_customer_profile_density', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
-    models.Location.customer_profile_heatmap(viewport)
+    models.Location.customerProfileHeatmap(viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

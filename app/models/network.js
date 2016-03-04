@@ -13,7 +13,7 @@ var pync = require('pync')
 module.exports = class Network {
 
   // View existing fiber plant for a carrier
-  static view_fiber_plant_for_carrier (carrier_name, viewport) {
+  static viewFiberPlantForCarrier (carrier_name, viewport) {
     return Promise.resolve()
       .then(() => {
         var sql
@@ -56,7 +56,7 @@ module.exports = class Network {
   };
 
   // View existing fiber plant for competitors
-  static view_fiber_plant_for_competitors (viewport) {
+  static viewFiberPlantForCompetitors (viewport) {
     return Promise.resolve()
       .then(() => {
         if (viewport.zoom <= viewport.threshold) return []
@@ -86,7 +86,7 @@ module.exports = class Network {
   }
 
   // View existing fiber plant for competitors
-  static view_towers (viewport) {
+  static viewTowers (viewport) {
     return Promise.resolve()
       .then(() => {
         if (viewport.zoom <= viewport.threshold) return []
@@ -116,7 +116,7 @@ module.exports = class Network {
   }
 
   // View existing fiber plant for competitors with a heat map
-  static view_fiber_plant_density (viewport) {
+  static viewFiberPlantDensity (viewport) {
     return Promise.resolve()
       .then(() => {
         var sql = `
@@ -158,7 +158,7 @@ module.exports = class Network {
   //
   // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
   // 2. plan_id Number Pass a plan_id to find additionally the network nodes associated to that route
-  static view_network_nodes (node_types, plan_id) {
+  static viewNetworkNodes (node_types, plan_id) {
     return Promise.resolve()
       .then(() => {
         var sql = `
@@ -220,21 +220,21 @@ module.exports = class Network {
   }
 
   // View all the available network node types
-  static view_network_node_types () {
+  static viewNetworkNodeTypes () {
     return database.query('SELECT * FROM client.network_node_types')
   }
 
-  static edit_network_nodes (plan_id, changes) {
+  static editNetworkNodes (plan_id, changes) {
     return Promise.resolve()
-      .then(() => this._add_nodes(plan_id, changes.insertions))
-      .then(() => this._update_nodes(plan_id, changes.updates))
-      .then(() => this._delete_nodes(plan_id, changes.deletions))
+      .then(() => this._addNodes(plan_id, changes.insertions))
+      .then(() => this._updateNodes(plan_id, changes.updates))
+      .then(() => this._deleteNodes(plan_id, changes.deletions))
       .then(() => (
         database.execute('UPDATE client.plan SET updated_at=NOW() WHERE id=$1', [plan_id])
       ))
   }
 
-  static _add_nodes (plan_id, insertions) {
+  static _addNodes (plan_id, insertions) {
     return Promise.resolve()
       .then(() => {
         if (!_.isArray(insertions) || insertions.length === 0) return
@@ -254,7 +254,7 @@ module.exports = class Network {
       })
   }
 
-  static _update_nodes (plan_id, updates) {
+  static _updateNodes (plan_id, updates) {
     return Promise.resolve()
       .then(() => {
         if (!_.isArray(updates)) return
@@ -275,7 +275,7 @@ module.exports = class Network {
       })
   }
 
-  static _delete_nodes (plan_id, updates) {
+  static _deleteNodes (plan_id, updates) {
     return Promise.resolve()
       .then(() => {
         if (!_.isArray(updates)) return
@@ -287,11 +287,11 @@ module.exports = class Network {
       })
   }
 
-  static clear_network_nodes (plan_id) {
+  static clearNetworkNodes (plan_id) {
     return database.execute('DELETE FROM client.network_nodes WHERE plan_id=$1;', [plan_id])
   }
 
-  static recalculate_nodes (plan_id, algorithm) {
+  static recalculateNodes (plan_id, algorithm) {
     return new Promise((resolve, reject) => {
       var options = {
         method: 'POST',
@@ -310,7 +310,7 @@ module.exports = class Network {
     })
   }
 
-  static select_boundary (plan_id, data) {
+  static selectBoundary (plan_id, data) {
     return Promise.resolve()
       .then(() => {
         // select all the locations inside that boundary
@@ -325,7 +325,7 @@ module.exports = class Network {
       })
       .then((count) => (
         // models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
-        models.Network.recalculate_nodes(plan_id, data.algorithm)
+        models.Network.recalculateNodes(plan_id, data.algorithm)
       ))
   }
 

@@ -9,12 +9,12 @@ var _ = require('underscore')
 
 module.exports = class RouteOptimizer {
 
-  static calculate_fiber_cost (edges, cost_per_meter) {
+  static calculateFiberCost (edges, cost_per_meter) {
     return cost_per_meter * edges.map((edge) => edge.edge_length)
       .reduce((total, current) => total + current, 0)
   }
 
-  static calculate_locations_cost (plan_id) {
+  static calculateLocationsCost (plan_id) {
     var sql = `
       select
         sum(location_total)::integer as locations_cost
@@ -90,7 +90,7 @@ module.exports = class RouteOptimizer {
     return database.findValue(sql, [plan_id], 'locations_cost', 0)
   }
 
-  static calculate_equipment_nodes_cost (plan_id) {
+  static calculateEquipmentNodesCost (plan_id) {
     // hard coded values by now
     var cost = {
       'fiber_distribution_hub': 5000,
@@ -167,14 +167,14 @@ module.exports = class RouteOptimizer {
         var revenue = _.findWhere(route_annual_revenues, { year: year })
         revenue = (revenue && revenue.value) || 0
         var past_five_years = _.filter(route_annual_revenues, (row) => row.year >= year - 5 && row.year < year)
-        var npv = RouteOptimizer.calculate_npv(past_five_years, fiber_cost)
+        var npv = RouteOptimizer.calculateNpv(past_five_years, fiber_cost)
         return { revenue: revenue, npv: npv }
       })
   }
 
   // Calculate NPV
   // route_annual_revenues Annual route revenues based on revenues generated from 5 years total spends from customers connected to route
-  static calculate_npv (revenues, up_front_costs) {
+  static calculateNpv (revenues, up_front_costs) {
     var discount_rate = 0.09
     var commission_rate = 0.15 // This is negative cash flow
     var customer_cost_rate = 0.2 // 20% of the revenue for the year is ongoing costs

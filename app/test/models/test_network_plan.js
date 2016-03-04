@@ -282,7 +282,7 @@ describe('NetworkPlan', () => {
       return { value: value, year: year++ }
     })
     var up_front_costs = 50
-    var output = models.RouteOptimizer.calculate_npv(revenues, up_front_costs)
+    var output = models.RouteOptimizer.calculateNpv(revenues, up_front_costs)
     output = output.map((obj) => obj.value)
     var expected = [-50.0, 7.155963302752293, 7.659287938725695, 8.030708192635068, 8.288574969462799]
     expect(_.isEqual(output, expected)).to.be.true

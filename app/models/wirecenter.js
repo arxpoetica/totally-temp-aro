@@ -7,7 +7,7 @@ var database = helpers.database
 
 module.exports = class Wirecenter {
 
-  static find_all (viewport) {
+  static findAll (viewport) {
     var sql = `
       SELECT id, ST_AsGeoJSON(ST_Simplify(geom, 0.00015))::json AS geom, wirecenter AS name
       FROM aro.wirecenters
@@ -35,7 +35,7 @@ module.exports = class Wirecenter {
       })
   }
 
-  static find_by_wirecenter_code (wirecenter_code) {
+  static findByWirecenterCode (wirecenter_code) {
     var sql = `
       SELECT id, ST_AsGeoJSON(geom)::json AS geom, wirecenter AS name
       FROM aro.wirecenters

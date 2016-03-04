@@ -6,7 +6,7 @@ var request = test_utils.request
 describe('CensusBlock', () => {
   before(() => test_utils.login_app())
 
-  describe('#find_by_statefp_and_county_fp', () => {
+  describe('#findByStatefpAndCountyfp', () => {
     var statefp = '36'
     var countyfp = '061'
 

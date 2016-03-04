@@ -55,7 +55,7 @@ exports.configure = (app, middleware) => {
 
   app.post('/forgot_password', (request, response, next) => {
     var email = request.body.email
-    models.User.forgot_password(email)
+    models.User.forgotPassword(email)
       .then(() => {
         request.flash('info', 'We just sent reset instructions to your email address')
         response.redirect('/login')
@@ -84,7 +84,7 @@ exports.configure = (app, middleware) => {
       return response.redirect('/reset_password?' + querystring.stringify({ code: code }))
     }
 
-    models.User.reset_password(code, password)
+    models.User.resetPassword(code, password)
       .then(() => {
         request.flash('success', 'Password changed successfully. Now you can log in')
         response.redirect('/login')

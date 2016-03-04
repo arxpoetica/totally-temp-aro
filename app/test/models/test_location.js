@@ -4,7 +4,7 @@ var test_utils = require('./test_utils')
 var request = test_utils.request
 
 describe('Location', () => {
-  describe('#find_all()', () => {
+  describe('#findAll()', () => {
     it('should return a GeoJSON FeatureCollection', (done) => {
       request
         .get('/locations/0')

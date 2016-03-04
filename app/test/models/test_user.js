@@ -367,7 +367,7 @@ describe('User', () => {
       var old_password = user.password
       user.password = 'yet_another_password'
 
-      return models.User.change_password(id, old_password, user.password)
+      return models.User.changePassword(id, old_password, user.password)
         .then(() => models.User.login(user.email, user.password))
         .then((usr) => {
           expect(usr).to.be.an('object')

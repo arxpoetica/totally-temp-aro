@@ -139,12 +139,12 @@ module.exports = class NetworkPlan {
               'geometry': edge.geom
             }))
 
-            fiber_cost = RouteOptimizer.calculate_fiber_cost(edges, cost_per_meter)
+            fiber_cost = RouteOptimizer.calculateFiberCost(edges, cost_per_meter)
             output.metadata.costs.push({
               name: 'Fiber cost',
               value: fiber_cost
             })
-            return RouteOptimizer.calculate_locations_cost(plan_id)
+            return RouteOptimizer.calculateLocationsCost(plan_id)
           })
           .then((locations_cost) => {
             output.metadata.costs.push({
@@ -163,8 +163,8 @@ module.exports = class NetworkPlan {
       })
       .then(() => (
         config.route_planning.length > 0
-          ? models.CustomerProfile.customer_profile_for_route(plan_id, output.metadata)
-          : models.CustomerProfile.customer_profile_for_existing_fiber(plan_id, output.metadata)
+          ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
+          : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
       ))
       .then(() => {
         if (config.route_planning.length === 0) return output
@@ -173,7 +173,7 @@ module.exports = class NetworkPlan {
           .then((calculation) => {
             output.metadata.revenue = calculation.revenue
             output.metadata.npv = calculation.npv
-            return RouteOptimizer.calculate_equipment_nodes_cost(plan_id)
+            return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
           })
           .then((equipment_nodes_cost) => {
             output.metadata.costs.push({
@@ -199,7 +199,7 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static find_all (user, text) {
+  static findAll (user, text) {
     var sql = `
       SELECT
         $1::text AS carrier_name,
@@ -254,7 +254,7 @@ module.exports = class NetworkPlan {
     })
     .then((row) => {
       id = row.id
-      if (user) return models.Permission.grant_access(id, user.id, 'owner')
+      if (user) return models.Permission.grantAccess(id, user.id, 'owner')
     })
     .then(() => {
       var sql = `

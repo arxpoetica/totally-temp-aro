@@ -9,7 +9,7 @@ var config = helpers.config
 
 module.exports = class Location {
 
-  static find_all (plan_id, type, filters, viewport) {
+  static findAll (plan_id, type, filters, viewport) {
     return Promise.resolve()
       .then(() => {
         if (viewport.zoom < 16) return []
@@ -144,7 +144,7 @@ module.exports = class Location {
   // Get summary information for a given location
   //
   // 1. location_id: integer. ex. 1738
-  static show_information (location_id) {
+  static showInformation (location_id) {
     var info
     return Promise.resolve()
       .then(() => {
@@ -272,7 +272,7 @@ module.exports = class Location {
       .then((location) => Object.assign(info, location))
   }
 
-  static create_location (values) {
+  static createLocation (values) {
     var location_id
     var type = values.type
 
@@ -300,12 +300,11 @@ module.exports = class Location {
         location_id = row.id
 
         if (type === 'commercial') {
-          return insert_business()
+          return insertBusiness()
         } else if (type === 'residential') {
-          return insert_household()
+          return insertHousehold()
         } else if (type === 'combo') {
-          insert_business()
-            .then(() => insert_household())
+          return insertBusiness().then(() => insertHousehold())
         }
       })
       .then(() => database.findOne('SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations WHERE id=$1', [location_id]))
@@ -319,7 +318,7 @@ module.exports = class Location {
         }
       })
 
-    function insert_business () {
+    function insertBusiness () {
       var business_id
       return Promise.resolve()
         .then(() => {
@@ -362,7 +361,7 @@ module.exports = class Location {
         })
     }
 
-    function insert_household (callback) {
+    function insertHousehold (callback) {
       var household_id
       return Promise.resolve()
         .then(() => {
@@ -391,7 +390,7 @@ module.exports = class Location {
     }
   }
 
-  static find_industries () {
+  static findIndustries () {
     return database.query(`
       SELECT id, industry_name as description
       FROM client.industries
@@ -399,14 +398,14 @@ module.exports = class Location {
     `)
   }
 
-  static customer_types () {
+  static customerTypes () {
     return database.query(`
       SELECT * FROM client.customer_types
       ORDER BY name ASC
     `)
   }
 
-  static update_households (location_id, values) {
+  static updateHouseholds (location_id, values) {
     var params = [
       values.number_of_households,
       location_id
@@ -433,7 +432,7 @@ module.exports = class Location {
       })
   }
 
-  static show_businesses (location_id) {
+  static showBusinesses (location_id) {
     var sql = `
       SELECT
         businesses.id,
@@ -484,7 +483,7 @@ module.exports = class Location {
       })
   }
 
-  static customer_profile_heatmap (viewport) {
+  static customerProfileHeatmap (viewport) {
     return Promise.resolve()
       .then(() => {
         var params = []

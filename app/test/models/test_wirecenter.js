@@ -4,7 +4,7 @@ var test_utils = require('./test_utils')
 var request = test_utils.request
 
 describe('Wirecenter', () => {
-  describe('#find_by_wirecenter_code()', () => {
+  describe('#findByWirecenterCode()', () => {
     var wirecenter_code = 'NYCMNY79'
 
     it('should return the information of the wirecenter', (done) => {
@@ -30,7 +30,7 @@ describe('Wirecenter', () => {
     })
   })
 
-  describe('#find_all()', () => {
+  describe('#findAll()', () => {
     it('should return the information of the wirecenter', (done) => {
       request
         .get('/wirecenters')

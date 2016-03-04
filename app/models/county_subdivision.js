@@ -11,7 +11,7 @@ module.exports = class CountySubdivision {
   // Find all County Subdivisions in a US state by querying the `statefp` field
   //
   // 1. statefp: String. ex. '36' is New York state
-  static find_by_statefp (statefp, viewport) {
+  static findByStatefp (statefp, viewport) {
     var sql = `
       SELECT gid AS id, name, ST_AsGeoJSON(ST_Simplify(geom, $3))::json AS geom FROM aro.cousub
       WHERE statefp = $1

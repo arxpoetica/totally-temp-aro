@@ -20,7 +20,7 @@ exports.configure = (app, middleware) => {
       return response.redirect('/settings/show')
     }
 
-    models.User.change_password(user.id, old_password, password)
+    models.User.changePassword(user.id, old_password, password)
       .then(() => {
         request.flash('success', 'Password changed successfully')
         response.redirect('/settings/show')

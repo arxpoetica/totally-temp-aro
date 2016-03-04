@@ -54,7 +54,7 @@ module.exports = class User {
       })
   }
 
-  static find_by_email (email) {
+  static findByEmail (email) {
     return database.findOne('SELECT id, first_name, last_name, email FROM auth.users WHERE email=$1', [email.toLowerCase()])
   }
 
@@ -62,7 +62,7 @@ module.exports = class User {
     return database.query('SELECT * FROM auth.users')
   }
 
-  static delete_user (user_id) {
+  static deleteUser (user_id) {
     return database.execute('DELETE FROM auth.users WHERE id=$1', [user_id])
   }
 
@@ -153,7 +153,7 @@ module.exports = class User {
     return rnd
   }
 
-  static forgot_password (email) {
+  static forgotPassword (email) {
     var code
     email = email && email.toLowerCase()
 
@@ -189,7 +189,7 @@ module.exports = class User {
       })
   }
 
-  static reset_password (code, password) {
+  static resetPassword (code, password) {
     var id
     return Promise.resolve()
       .then(() => (
@@ -209,7 +209,7 @@ module.exports = class User {
         `, [hash, id]))
   }
 
-  static change_password (id, old_password, password) {
+  static changePassword (id, old_password, password) {
     return Promise.resolve()
       .then(() => (
         database.findOne('SELECT password FROM auth.users WHERE id=$1', [id])

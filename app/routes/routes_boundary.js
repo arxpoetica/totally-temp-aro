@@ -9,7 +9,7 @@ exports.configure = (api, middleware) => {
   api.post('/boundary/:plan_id/create', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
     var data = request.body
-    models.Boundary.create_boundary(plan_id, data)
+    models.Boundary.createBoundary(plan_id, data)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -19,7 +19,7 @@ exports.configure = (api, middleware) => {
     var data = request.body
     data.id = request.params.boundary_id
     data.plan_id = request.params.plan_id
-    models.Boundary.edit_boundary(data)
+    models.Boundary.editBoundary(data)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -28,7 +28,7 @@ exports.configure = (api, middleware) => {
   api.post('/boundary/:plan_id/delete/:boundary_id', check_owner_permission, (request, response, next) => {
     var plan_id = +request.params.plan_id
     var boundary_id = +request.params.boundary_id
-    models.Boundary.delete_boundary(plan_id, boundary_id)
+    models.Boundary.deleteBoundary(plan_id, boundary_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -36,7 +36,7 @@ exports.configure = (api, middleware) => {
   // Find boundaries of a network plan
   api.get('/boundary/:plan_id/find', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
-    models.Boundary.find_boundaries(plan_id)
+    models.Boundary.findBoundary(plan_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

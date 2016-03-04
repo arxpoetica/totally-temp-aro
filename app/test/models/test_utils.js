@@ -15,7 +15,7 @@ exports.create_test_user = () => {
 
   var email = 'test@example.com'
   var password = '#test$'
-  return models.User.find_by_email(email)
+  return models.User.findByEmail(email)
     .then((user) => {
       return user || models.User.register({
         first_name: 'test',

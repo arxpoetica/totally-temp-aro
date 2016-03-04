@@ -8,7 +8,7 @@ var pync = require('pync')
 
 module.exports = class CustomerProfile {
 
-  static _process_customer_types (metadata, customer_types) {
+  static _processCustomerTypes (metadata, customer_types) {
     metadata.customer_types = customer_types
 
     metadata.customers_businesses_total = customer_types
@@ -19,7 +19,7 @@ module.exports = class CustomerProfile {
       .reduce((total, type) => total + type.businesses + type.households, 0)
   }
 
-  static customer_profile_for_route (plan_id, metadata) {
+  static customerProfileForRoute (plan_id, metadata) {
     var sql = `
       SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
         (SELECT
@@ -66,10 +66,10 @@ module.exports = class CustomerProfile {
         ct.name
     `
     return database.query(sql, [plan_id])
-      .then((customer_types) => this._process_customer_types(metadata, customer_types))
+      .then((customer_types) => this._processCustomerTypes(metadata, customer_types))
   };
 
-  static customer_profile_all_cities () {
+  static customerProfileAllCities () {
     var metadata = []
     return database.query('SELECT id, city_name, ST_AsGeoJSON(cities.centroid)::json AS centroid FROM cities')
       .then((cities) => (
@@ -92,14 +92,14 @@ module.exports = class CustomerProfile {
             .then((customer_types) => {
               city.customer_profile = {}
               metadata.push(city)
-              this._process_customer_types(city.customer_profile, customer_types)
+              this._processCustomerTypes(city.customer_profile, customer_types)
             })
         })
       ))
       .then(() => metadata)
   }
 
-  static customer_profile_for_existing_fiber (plan_id, metadata) {
+  static customerProfileForExistingFiber (plan_id, metadata) {
     return database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM client.plan WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null)
       .then((cbsa) => {
         var sql = `
@@ -113,10 +113,10 @@ module.exports = class CustomerProfile {
         `
         return database.query(sql, [config.client_carrier_name, cbsa])
       })
-      .then((customer_types) => this._process_customer_types(metadata, customer_types))
+      .then((customer_types) => this._processCustomerTypes(metadata, customer_types))
   }
 
-  static customer_profile_for_boundary (type, boundary) {
+  static customerProfileForBoundary (type, boundary) {
     var metadata = {}
     var sql = ''
     var params = [boundary]
@@ -137,7 +137,7 @@ module.exports = class CustomerProfile {
       ORDER BY ct.name
     `
     database.query(sql, params)
-      .then((customer_types) => this._process_customer_types(metadata, customer_types))
+      .then((customer_types) => this._processCustomerTypes(metadata, customer_types))
   }
 
 }

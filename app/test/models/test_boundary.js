@@ -130,7 +130,7 @@ describe('Boundary', () => {
         expect(res.statusCode).to.be.equal(200)
         expect(output).to.be.equal(1)
 
-        models.Boundary.find_boundaries(plan_id)
+        models.Boundary.findBoundary(plan_id)
           .then((list) => {
             expect(list).to.have.length(0)
             done()

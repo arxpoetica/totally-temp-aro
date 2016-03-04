@@ -52,7 +52,7 @@ function check_permission (rol) {
   return (request, response, next) => {
     var user = request.user
     var plan_id = request.params.plan_id
-    models.Permission.find_permission(plan_id, user.id)
+    models.Permission.findPermission(plan_id, user.id)
       .then((permission) => {
         // !rol means any permission is ok
         if (permission && (!rol || rol === permission.rol || permission.rol === 'owner')) {

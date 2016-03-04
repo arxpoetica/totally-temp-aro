@@ -7,7 +7,7 @@ exports.configure = (api, middleware) => {
   api.post('/permissions/:plan_id/grant', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
     var user_id = request.body.user_id
-    models.Permission.grant_access(plan_id, user_id, 'guest')
+    models.Permission.grantAccess(plan_id, user_id, 'guest')
       .then(jsonSuccess(response, next))
       .catch(next)
   })

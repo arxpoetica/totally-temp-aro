@@ -19,7 +19,7 @@ exports.configure = (app, middleware) => {
 
   app.post('/admin/users/delete', check_admin, (request, response, next) => {
     var user_id = request.body.user
-    models.User.delete_user(user_id)
+    models.User.deleteUser(user_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

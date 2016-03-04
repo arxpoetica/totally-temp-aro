@@ -8,7 +8,7 @@ var database = helpers.database
 
 module.exports = class CensusBlock {
 
-  static find_by_statefp_and_countyfp (statefp, countyfp, viewport) {
+  static findByStatefpAndCountyfp (statefp, countyfp, viewport) {
     return Promise.resolve()
       .then(() => {
         var sql, params

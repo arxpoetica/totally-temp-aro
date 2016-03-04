@@ -12,7 +12,8 @@ const empty_array = (arr) => !Array.isArray(arr) || arr.length === 0
 
 module.exports = class MarketSize {
 
-  static _sort_fair_share (fair_share) {
+  // Current carrier always first
+  static _sortFairShare (fair_share) {
     var current = fair_share.find((carrier) => carrier.name === config.client_carrier_name)
     if (current) {
       var i = fair_share.indexOf(current)
@@ -296,7 +297,7 @@ module.exports = class MarketSize {
         return database.query(sql, params)
       })
       .then((fair_share) => {
-        this._sort_fair_share(fair_share)
+        this._sortFairShare(fair_share)
         output.fair_share = fair_share
         output.market_size_existing = [] // TODO
 
@@ -592,7 +593,7 @@ module.exports = class MarketSize {
         return database.query(sql, params)
       })
       .then((fair_share) => {
-        this._sort_fair_share(fair_share)
+        this._sortFairShare(fair_share)
         output.fair_share = fair_share
 
         var current_carrier = 0
@@ -667,7 +668,7 @@ module.exports = class MarketSize {
       })
   }
 
-  static fair_share_heatmap (viewport) {
+  static fairShareHeatmap (viewport) {
     database.findOne('SELECT id FROM carriers WHERE name=$1', [config.client_carrier_name])
       .then((carrier) => {
         var params = [carrier.id]

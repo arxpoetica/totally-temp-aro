@@ -6,7 +6,7 @@ exports.configure = (api, middleware) => {
   api.get('/county_subdivisions/:statefp', middleware.viewport, (request, response, next) => {
     var statefp = request.params.statefp
     var viewport = request.viewport
-    models.CountySubdivision.find_by_statefp(statefp, viewport)
+    models.CountySubdivision.findByStatefp(statefp, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

@@ -4,7 +4,7 @@ var test_utils = require('./test_utils')
 var request = test_utils.request
 
 describe('CountySubdivision', () => {
-  describe('#find_by_statefp()', () => {
+  describe('#findByStatefp()', () => {
     var statefp = '36'
 
     it('should return a feature collection', (done) => {

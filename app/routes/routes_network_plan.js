@@ -8,7 +8,7 @@ exports.configure = (api, middleware) => {
   // Find all created routes
   api.get('/network_plan/find_all', (request, response, next) => {
     var text = request.query.text
-    models.NetworkPlan.find_all(request.user, text)
+    models.NetworkPlan.findAll(request.user, text)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

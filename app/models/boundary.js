@@ -7,7 +7,7 @@ var database = helpers.database
 
 module.exports = class Boundary {
 
-  static create_boundary (plan_id, data) {
+  static createBoundary (plan_id, data) {
     return Promise.resolve()
       .then(() => {
         var sql = `
@@ -30,12 +30,12 @@ module.exports = class Boundary {
       })
   }
 
-  static delete_boundary (plan_id, boundary_id) {
+  static deleteBoundary (plan_id, boundary_id) {
     return database.execute('DELETE FROM client.boundaries WHERE id=$1 AND plan_id=$2',
       [boundary_id, plan_id])
   }
 
-  static edit_boundary (data) {
+  static editBoundary (data) {
     var sql = `
       UPDATE client.boundaries SET name=$1, geom=ST_GeomFromGeoJSON($2)
       WHERE id=$3 AND plan_id=$4
@@ -49,7 +49,7 @@ module.exports = class Boundary {
     return database.execute(sql, params)
   }
 
-  static find_boundaries (plan_id) {
+  static findBoundary (plan_id) {
     var sql = `
       SELECT id, name, ST_ASGeoJSON(geom)::json as geom
       FROM client.boundaries WHERE plan_id=$1
