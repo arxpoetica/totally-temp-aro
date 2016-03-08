@@ -41,3 +41,6 @@ ${PSQL} -a -f $DIR/create_aro_towers.sql
 
 # Create aro.cities table
 ${PSQL} -a -f $DIR/create_aro_cities.sql
+
+# Create aro.algorithms table
+${PSQL} -a -f $DIR/create_aro_algorithms.sql

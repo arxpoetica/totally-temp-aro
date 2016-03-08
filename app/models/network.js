@@ -180,7 +180,8 @@ module.exports = class Network {
         url: config.aro_service_url + '/rest/recalc/masterplan',
         json: true,
         body: {
-          planId: plan_id
+          planId: plan_id,
+          algorithm: algorithm
         }
       }
       console.log('sending request to aro-service', options)

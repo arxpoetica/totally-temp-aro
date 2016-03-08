@@ -86,7 +86,7 @@ app.controller('selection_tools_controller', ($rootScope, $scope, network_planni
   if (config.route_planning.length > 0) {
     $('#network_planning_selector').popover({
       content: () => {
-        return config.route_planning.map((algorithm) => (
+        return config.route_planning.map((algorithm) => algorithm.id).map((algorithm) => (
           `<p>
             <input type="radio" name="algorithm" value="${algorithm}"
               ${network_planning.getAlgorithm() && algorithm === network_planning.getAlgorithm().id ? 'checked' : ''}

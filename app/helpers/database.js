@@ -174,3 +174,10 @@ module.exports = class Database {
     return this.query(finalSql, params, asFeatureCollection)
   }
 }
+
+module.exports.query('SELECT * from aro.algorithms')
+  .then((result) => {
+    Array.prototype.splice.apply(config.route_planning,
+      [0, config.route_planning.length].concat(result))
+  })
+  .catch((err) => console.error(err.stack))

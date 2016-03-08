@@ -1,15 +1,11 @@
 /* global app config */
 app.service('network_planning', ['$rootScope', ($rootScope) => {
   var planning = {}
-  var descriptions = {
-    'fttp': 'FTTP',
-    'shortest_path': 'Shortest path'
-  }
-  var interactive = ['shortest_path']
-  var algorithms = config.route_planning.map((id) => ({
-    id: id,
-    interactive: interactive.indexOf(id) >= 0,
-    description: descriptions[id]
+  var interactive = []
+  var algorithms = config.route_planning.map((algorithm) => ({
+    id: algorithm.id,
+    interactive: interactive.indexOf(algorithm.id) >= 0,
+    description: `${algorithm.name}: ${algorithm.description}`
   }))
   var algorithm
 
