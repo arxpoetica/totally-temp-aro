@@ -3,6 +3,7 @@
 var pg = require('pg')
 var _ = require('underscore')
 var config = require('./config')
+var geojson = require('./geojson')
 
 module.exports = class Database {
 
@@ -48,9 +49,10 @@ module.exports = class Database {
     })
   }
 
-  static query (sql, params) {
+  static query (sql, params, asFeatureCollection) {
     return this._raw(sql, params)
-      .then((result) => result.rows)
+      .then((result) => asFeatureCollection
+        ? geojson.featureCollection(result.rows) : result.rows)
   }
 
   static execute (sql, params) {
@@ -74,4 +76,101 @@ module.exports = class Database {
       .then((rows) => rows.map((row) => row[field]))
   }
 
+  static points (sql, params, asFeatureCollection, viewport) {
+    var finalSql
+    if (viewport.zoom > viewport.threshold) {
+      finalSql = `
+        WITH features AS (${sql})
+        SELECT
+          features.*,
+          ST_AsGeoJSON(geom)::json AS geom
+        FROM features
+        WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
+      `
+      params.push(viewport.linestring)
+    } else {
+      finalSql = `
+        WITH features AS (${sql})
+        SELECT
+          -- COUNT(*) AS density,
+          ST_AsGeoJSON(ST_ConvexHull(ST_Collect( geom )))::json AS geom
+          -- ST_AsText( ST_Centroid(ST_Collect( geom )) ) AS centroid
+        FROM features
+        WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
+        GROUP BY ST_SnapToGrid(geom, $${params.length + 2})
+      `
+      params.push(viewport.linestring)
+      params.push(viewport.buffer * 3)
+    }
+    return this.query(finalSql, params, asFeatureCollection)
+  }
+
+  static polygons (sql, params, asFeatureCollection, viewport) {
+    var finalSql
+    if (viewport.zoom > viewport.threshold) {
+      finalSql = `
+        WITH features AS (${sql})
+        SELECT
+          features.*,
+          ST_AsGeoJSON(geom)::json AS geom
+        FROM features
+        WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
+      `
+      params.push(viewport.linestring)
+    } else {
+      finalSql = `
+        WITH features AS (${sql})
+        SELECT
+          ST_AsGeoJSON(ST_Simplify(ST_Union(geom), $${params.length + 1}, true))::json AS geom
+        FROM features
+        WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 2})), 4326), features.geom)
+      `
+      params.push(viewport.simplify_factor)
+      params.push(viewport.linestring)
+    }
+    return this.query(finalSql, params, asFeatureCollection)
+  }
+
+  static lines (sql, params, asFeatureCollection, viewport) {
+    var finalSql
+    if (viewport.zoom > viewport.threshold) {
+      finalSql = `
+        WITH features AS (${sql})
+        SELECT
+          features.*,
+          ST_AsGeoJSON(geom)::json AS geom
+        FROM features
+        WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
+      `
+      params.push(viewport.linestring)
+    } else {
+      finalSql = `
+        WITH features AS (${sql})
+        SELECT
+          COUNT(*) AS _density,
+          ST_AsGeoJSON(ST_Envelope( ST_SnapToGrid(geom, $${params.length + 2}) ))::json AS geom
+        FROM features
+        WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
+        GROUP BY ST_SnapToGrid(geom, $${params.length + 2})
+      `
+      params.push(viewport.linestring)
+      params.push(viewport.buffer * 3)
+    }
+    return this.query(finalSql, params, asFeatureCollection)
+  }
+
+  static density (sql, params, asFeatureCollection, viewport, density) {
+    var finalSql = `
+      WITH features AS (${sql})
+      SELECT
+        ${density || 'COUNT(*)'} AS _density,
+        ST_AsGeoJSON(ST_Envelope( ST_SnapToGrid(geom, $${params.length + 2}) ))::json AS geom
+      FROM features
+      WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
+      GROUP BY ST_SnapToGrid(geom, $${params.length + 2})
+    `
+    params.push(viewport.linestring)
+    params.push(viewport.buffer * 3)
+    return this.query(finalSql, params, asFeatureCollection)
+  }
 }

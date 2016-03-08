@@ -42,32 +42,31 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       this.collection = collection
 
       var data_layer = this.data_layer
-      var layer = this
 
       var feature_dragged
 
       data_layer.addListener('click', (event) => {
-        $rootScope.$broadcast('map_layer_clicked_feature', event, layer)
+        $rootScope.$broadcast('map_layer_clicked_feature', event, this)
         if (!selection.is_enabled()) return
         var changes
-        if (layer.single_selection) {
-          changes = create_empty_changes(layer)
-          layer.data_layer.forEach((feature) => {
+        if (this.single_selection) {
+          changes = create_empty_changes(this)
+          this.data_layer.forEach((feature) => {
             if (feature.selected) {
-              layer.set_feature_selected(feature, false, changes)
+              this.set_feature_selected(feature, false, changes)
             }
           })
-          if (layer.reset_style_on_click) {
-            layer.data_layer.overrideStyle(event.feature, layer.style_options.normal)
+          if (this.reset_style_on_click) {
+            this.data_this.overrideStyle(event.feature, this.style_options.normal)
           } else {
-            layer.set_feature_selected(event.feature, true, changes)
+            this.set_feature_selected(event.feature, true, changes)
           }
-          broadcast_changes(layer, changes)
+          broadcast_changes(this, changes)
         } else {
           if (!event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return
-          changes = create_empty_changes(layer)
-          layer.toggle_feature(event.feature, changes)
-          broadcast_changes(layer, changes)
+          changes = create_empty_changes(this)
+          this.toggle_feature(event.feature, changes)
+          broadcast_changes(this, changes)
         }
       })
 
@@ -86,24 +85,24 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       })
 
       data_layer.addListener('mouseup', (event) => {
-        $rootScope.$broadcast('map_layer_mouseup_feature', event, layer)
+        $rootScope.$broadcast('map_layer_mouseup_feature', event, this)
       })
 
       data_layer.addListener('mouseover', (event) => {
-        if (layer.highlighteable && event.feature) {
-          layer.data_layer.overrideStyle(event.feature, layer.style_options.highlight)
+        if (this.highlighteable && event.feature) {
+          this.data_layer.overrideStyle(event.feature, this.style_options.highlight)
         }
-        $rootScope.$broadcast('map_layer_mouseover_feature', event, layer)
+        $rootScope.$broadcast('map_layer_mouseover_feature', event, this)
       })
 
       data_layer.addListener('mouseout', (event) => {
-        if (layer.highlighteable && event.feature && !event.feature.selected) {
-          layer.data_layer.overrideStyle(event.feature, layer.style_options.normal)
+        if (this.highlighteable && event.feature && !event.feature.selected) {
+          this.data_layer.overrideStyle(event.feature, this.style_options.normal)
         }
       })
 
       data_layer.addListener('rightclick', (event) => {
-        $rootScope.$broadcast('map_layer_rightclicked_feature', event, layer)
+        $rootScope.$broadcast('map_layer_rightclicked_feature', event, this)
       })
 
       if (options.heatmap) {
@@ -115,27 +114,27 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
           'rgba(255, 85, 0, 1)',
           'rgba(255, 0, 0, 1)'
         ]
-        layer.heatmap_layer = new google.maps.visualization.HeatmapLayer({ opacity: 0.8, gradient: gradient })
-        layer.heatmap_layer.set('radius', 10)
+        this.heatmap_layer = new google.maps.visualization.HeatmapLayer({ opacity: 0.8, gradient: gradient })
+        this.heatmap_layer.set('radius', 10)
         $rootScope.$on('map_zoom_changed', () => {
-          layer.configure_visibility()
+          this.configure_visibility()
         })
       }
 
       $rootScope.$on('map_idle', () => {
-        layer.reload_if_dirty()
+        this.reload_if_dirty()
       })
 
       ;['dragend', 'zoom_changed'].forEach((event_name) => {
         $rootScope.$on('map_' + event_name, () => {
-          if (layer.reload === 'dynamic') {
-            var reload_on = map.getZoom() > layer.threshold ? 'dragend' : 'zoom_changed'
-            if (reload_on === event_name || (layer.reload_on && layer.reload_on !== reload_on)) {
-              layer.mark_as_dirty()
+          if (this.reload === 'dynamic') {
+            var reload_on = map.getZoom() > this.threshold ? 'dragend' : 'zoom_changed'
+            if (reload_on === event_name || (this.reload_on && this.reload_on !== reload_on)) {
+              this.mark_as_dirty()
             }
-            layer.reload_on = reload_on
-          } else if (layer.reload === 'always') {
-            layer.mark_as_dirty()
+            this.reload_on = reload_on
+          } else if (this.reload === 'always') {
+            this.mark_as_dirty()
           }
         })
       })

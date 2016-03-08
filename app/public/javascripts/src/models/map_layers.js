@@ -72,7 +72,7 @@ app.service('map_layers', ($rootScope) => {
 
   $rootScope.$on('map_idle', () => {
     if (lastTime) {
-      console.log(`It took ${Date.now() - lastTime} ms to zoom`)
+      console.log(`It took ${Date.now() - lastTime} ms to zoom (${map.getZoom()})`)
       lastTime = null
     }
   })

@@ -195,7 +195,7 @@ module.exports = class MarketSize {
       })
   }
 
-  static carriers_by_city_of_plan (plan_id, only_with_fiber) {
+  static carriersByCityOfPlan (plan_id, only_with_fiber) {
     var params = [plan_id]
     var sql = `
       SELECT carriers.id, carriers.name, carriers.color FROM carriers
@@ -317,7 +317,7 @@ module.exports = class MarketSize {
     var filters = options.filters
     var output = {}
 
-    return MarketSize.carriers_by_city_of_plan(plan_id, true)
+    return MarketSize.carriersByCityOfPlan(plan_id, true)
       .then((carriers) => {
         output.carriers = carriers
 
@@ -419,7 +419,7 @@ module.exports = class MarketSize {
     var filters = options.filters
     var output = {}
 
-    return MarketSize.carriers_by_city_of_plan(plan_id, true)
+    return MarketSize.carriersByCityOfPlan(plan_id, true)
       .then((carriers) => {
         output.carriers = carriers
 
@@ -669,7 +669,7 @@ module.exports = class MarketSize {
   }
 
   static fairShareHeatmap (viewport) {
-    database.findOne('SELECT id FROM carriers WHERE name=$1', [config.client_carrier_name])
+    return database.findOne('SELECT id FROM carriers WHERE name=$1', [config.client_carrier_name])
       .then((carrier) => {
         var params = [carrier.id]
         var sql = `

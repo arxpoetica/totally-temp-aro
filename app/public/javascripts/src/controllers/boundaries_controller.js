@@ -115,7 +115,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     if (plan && (county_subdivisions || census_blocks)) {
       $http.get(`/network_plan/${plan.id}/area_data`)
         .success((response) => {
-          // area_layers['wirecenter'].set_api_endpoint('/wirecenters/'+response.wirecenter);
           area_layers['county_subdivisions_layer'].set_api_endpoint('/county_subdivisions/' + response.statefp)
           area_layers['census_blocks_layer'].set_api_endpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
         })

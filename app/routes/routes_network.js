@@ -49,18 +49,20 @@ exports.configure = (api, middleware) => {
   })
 
   // Network nodes for user client by node type
-  api.get('/network/nodes/:node_type', (request, response, next) => {
+  api.get('/network/nodes/:node_type', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
     var node_type = request.params.node_type
-    models.Network.viewNetworkNodes([node_type], null)
+    models.Network.viewNetworkNodes([node_type], null, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
   // Network nodes of an existing route
-  api.get('/network/nodes/:plan_id/find', check_any_permission, (request, response, next) => {
+  api.get('/network/nodes/:plan_id/find', check_any_permission, middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
     var plan_id = request.params.plan_id
-    var node_types = request.query.node_types ? request.query.node_types.split(',') : null
-    models.Network.viewNetworkNodes(node_types, plan_id)
+    var node_types = request.query.node_types && request.query.node_types.split(',')
+    models.Network.viewNetworkNodes(node_types, plan_id, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

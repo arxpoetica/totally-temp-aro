@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-require('babel-register')
-
 var argv = require('yargs')
   .usage('Usage: $0 [options]')
   .describe('f', 'First name')

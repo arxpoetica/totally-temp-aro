@@ -84,7 +84,7 @@ function viewport (request, response, next) {
   request.query.swlon = +request.query.swlon
   request.query.swlat = +request.query.swlat
   request.query.zoom = +request.query.zoom
-  request.query.threshold = +request.query.threshold
+  request.query.threshold = +request.query.threshold || -1
 
   validate((expect) => {
     expect(query, 'query_string.nelon', 'number')
@@ -125,7 +125,7 @@ function viewport (request, response, next) {
     }
     next()
   })
-  .catch(next)
+  .catch((err) => next(new Error(`Cannot parse viewport for ${request.method} ${request.path}: ${JSON.stringify(request.query)}`)))
 }
 
 var check_any_permission = check_permission(null)

@@ -14,156 +14,58 @@ module.exports = class Network {
 
   // View existing fiber plant for a carrier
   static viewFiberPlantForCarrier (carrier_name, viewport) {
-    return Promise.resolve()
-      .then(() => {
-        var sql
-        if (viewport.zoom > viewport.threshold) {
-          sql = `
-            SELECT ST_AsGeoJSON(geom)::json AS geom
-            FROM aro.fiber_plant
-            WHERE carrier_name = $1
-            AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)
-          `
-          return database.query(sql, [carrier_name, viewport.linestring])
-        } else {
-          sql = `
-            WITH ${viewport.fishnet}
-            SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
-            FROM fishnet
-            JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
-            AND fiber_plant.carrier_name = $1
-            GROUP BY fishnet.geom
-          `
-          return database.query(sql, [carrier_name])
-        }
-      })
-      .then((rows) => {
-        var features = rows.map((row) => ({
-          type: 'Feature',
-          geometry: row.geom,
-          properties: {
-            // density: row.density,
-          }
-        }))
-
-        return {
-          'feature_collection': {
-            'type': 'FeatureCollection',
-            'features': features
-          }
-        }
-      })
-  };
+    var sql = `
+      SELECT geom
+      FROM aro.fiber_plant
+      WHERE carrier_name = $1
+    `
+    return database.lines(sql, [carrier_name], true, viewport)
+  }
 
   // View existing fiber plant for competitors
   static viewFiberPlantForCompetitors (viewport) {
-    return Promise.resolve()
-      .then(() => {
-        if (viewport.zoom <= viewport.threshold) return []
-        var sql = `
-          SELECT ST_AsGeoJSON(geom)::json AS geom
-          FROM aro.fiber_plant
-          WHERE carrier_name <> $1 AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)
-        `
-        return database.query(sql, [config.client_carrier_name, viewport.linestring])
-      })
-      .then((rows) => {
-        var features = rows.map((row) => ({
-          type: 'Feature',
-          geometry: row.geom,
-          properties: {
-            density: row.density
-          }
-        }))
-
-        return {
-          'feature_collection': {
-            'type': 'FeatureCollection',
-            'features': features
-          }
-        }
-      })
+    var sql = `
+      SELECT geom
+      FROM aro.fiber_plant
+      WHERE carrier_id <> (SELECT id FROM carriers WHERE name=$1)
+    `
+    return database.lines(sql, [config.client_carrier_name], true, viewport)
   }
 
   // View existing fiber plant for competitors
   static viewTowers (viewport) {
-    return Promise.resolve()
-      .then(() => {
-        if (viewport.zoom <= viewport.threshold) return []
-        var sql = `
-          SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.towers WHERE
-          ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), geom)
-        `
-        return database.query(sql, [viewport.linestring])
-      })
-      .then((rows) => {
-        var features = rows.map((row) => {
-          return {
-            type: 'Feature',
-            geometry: row.geom,
-            properties: {
-            }
-          }
-        })
-
-        return {
-          'feature_collection': {
-            'type': 'FeatureCollection',
-            'features': features
-          }
-        }
-      })
+    var sql = `SELECT geom FROM aro.towers`
+    return database.points(sql, [], true, viewport)
   }
 
   // View existing fiber plant for competitors with a heat map
   static viewFiberPlantDensity (viewport) {
-    return Promise.resolve()
-      .then(() => {
-        var sql = `
-          WITH ${viewport.fishnet}
-          SELECT
-            ST_AsGeojson(fishnet.geom)::json AS geom,
-            COUNT(DISTINCT fiber_plant.carrier_name) AS density,
-            NULL AS id
-          FROM fishnet
-          JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
-          AND fiber_plant.carrier_name <> $1
-          GROUP BY fishnet.geom
-        `
-        return database.query(sql, [config.client_carrier_name])
-      })
-      .then((rows) => {
-        var features = rows.map((row) => ({
-          type: 'Feature',
-          geometry: row.geom,
-          properties: {
-            density: row.density
-          }
-        }))
-
-        return {
-          'feature_collection': {
-            'type': 'FeatureCollection',
-            'features': features
-          }
-        }
-      })
+    var sql = `
+      SELECT geom
+      FROM fiber_plant
+      WHERE carrier_name <> $1
+    `
+    var density = 'COUNT(DISTINCT features.carrier_name)'
+    return database.density(sql, [config.client_carrier_name], true, viewport, density)
   }
 
   static carriers (plan_id) {
-    return models.MarketSize.carriers_by_city_of_plan(plan_id, true)
+    return models.MarketSize.carriersByCityOfPlan(plan_id, true)
   }
 
   // View the user client's network nodes
   //
   // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
   // 2. plan_id Number Pass a plan_id to find additionally the network nodes associated to that route
-  static viewNetworkNodes (node_types, plan_id) {
+  static viewNetworkNodes (node_types, plan_id, viewport) {
     return Promise.resolve()
       .then(() => {
         var sql = `
           SELECT
-            n.id, ST_AsGeoJSON(geog)::json AS geom, t.name AS name, n.plan_id
+            n.id, ST_AsGeoJSON(geom)::json AS geom, t.name AS name,
+            '/images/map_icons/' || t.name || '.png' AS icon,
+            plan_id IS NOT NULL AS draggable,
+            name <> 'central_office' AS unselectable
           FROM client.network_nodes n
           JOIN client.network_node_types t
             ON n.node_type_id = t.id
@@ -195,27 +97,7 @@ module.exports = class Network {
         if (constraints.length > 0) {
           sql += ' WHERE ' + constraints.join(' AND ')
         }
-        return database.query(sql, params)
-      })
-      .then((rows) => {
-        var features = rows.map((row) => ({
-          'type': 'Feature',
-          'properties': {
-            'id': row.id,
-            'type': row.name,
-            'icon': `/images/map_icons/${row.name}.png`,
-            'unselectable': row.name !== 'central_office',
-            'draggable': !!row.plan_id
-          },
-          'geometry': row.geom
-        }))
-
-        return {
-          'feature_collection': {
-            'type': 'FeatureCollection',
-            'features': features
-          }
-        }
+        return database.query(sql, params, true)
       })
   }
 
