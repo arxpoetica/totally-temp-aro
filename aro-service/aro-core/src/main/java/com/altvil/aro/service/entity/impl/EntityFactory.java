@@ -104,7 +104,7 @@ public class EntityFactory {
 			EntityDoubleSum<DropCable> summer = new EntityDoubleSum<DropCable>() ;
 			
 			dropAssignments.forEach(da -> {
-				summer.add(da.getDropCable(), da.getAggregateStatistic().getDemandCoverage()) ;
+				summer.add(da.getDropCable(), da.getAggregateStatistic().getFiberDemand()) ;
 			});
 			
 			return new DropCableSummary(summer.getTotals().entrySet()

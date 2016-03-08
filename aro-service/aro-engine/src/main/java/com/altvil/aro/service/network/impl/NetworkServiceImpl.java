@@ -184,22 +184,9 @@ public class NetworkServiceImpl implements NetworkService {
 		}
 
 		@Override
-		public double getScore(double capex) {
-			return capex;
-		}
-
-		@Override
-		public void add(CoverageAggregateStatistic other) {
-		}
-
-		@Override
-		public double getMonthlyCashFlowImpact() {
-			return 0;
-		}
-
-		@Override
-		public double getDemandCoverage() {
-			return demand;
+		public CoverageAggregateStatistic add(
+				CoverageAggregateStatistic coverageStatic) {
+			return new CoverageAggregateStatisticImpl(getFiberDemand() + coverageStatic.getFiberDemand()) ;
 		}
 
 	}

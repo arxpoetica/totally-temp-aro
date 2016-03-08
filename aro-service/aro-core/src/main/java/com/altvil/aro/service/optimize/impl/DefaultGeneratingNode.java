@@ -198,7 +198,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public double getScore() {
-		return coverage.getCoverage().getScore(capex);
+		//TODO Compute Score as a function of Demand
+		return coverage.getCoverage().getFiberDemand() ;
 	}
 
 	@Override
