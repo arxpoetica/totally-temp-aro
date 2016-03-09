@@ -18,8 +18,6 @@ public class SerializerImpl implements ModelSerializer {
 
 	//private CompositeNetworkModel originalModel;
 
-	//private GraphEdgeAssignment centralOffice;
-	private List<FullFdhAssigmnent> fdhs = new ArrayList<>();
 	//private FiberAssignment fiberAssignment;
 
 	public SerializerImpl(CompositeNetworkModel originalModel) {
@@ -27,11 +25,7 @@ public class SerializerImpl implements ModelSerializer {
 		//this.originalModel = originalModel;
 	}
 
-	@Override
-	public GraphMapping serialize(GeneratingNode node, FullFdhAssigmnent fdh) {
-		fdhs.add(fdh);
-		return null ;
-	}
+	
 
 	@Override
 	public GraphMapping serialize(GeneratingNode node, RootAssignment root) {

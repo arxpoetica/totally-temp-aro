@@ -4,7 +4,6 @@ import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.optimize.impl.CentralOfficeAssignment;
 import com.altvil.aro.service.optimize.impl.FdhAssignment;
 import com.altvil.aro.service.optimize.impl.FdtAssignment;
-import com.altvil.aro.service.optimize.impl.FullFdhAssigmnent;
 import com.altvil.aro.service.optimize.impl.RootAssignment;
 import com.altvil.aro.service.optimize.impl.SplitterNodeAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
@@ -18,7 +17,6 @@ public interface ModelSerializer {
 	public GraphMapping serialize(GeneratingNode node,
 			SplitterNodeAssignment fiberAssignment);
 
-	public GraphMapping serialize(GeneratingNode node, FullFdhAssigmnent fdh);
 	
 	public GraphMapping serialize(GeneratingNode node, FdhAssignment fdh);
 
