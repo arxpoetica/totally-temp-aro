@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.entity.AroEntity;
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.network.impl.demand.LocationDemandFactory;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
@@ -68,9 +68,9 @@ public class NetworkServiceImpl implements NetworkService {
 
 						AroEntity aroEntity = entityFactory
 								.createLocationEntity(result
-										.getLong(LocationMap.id), tlid,
-										CoverageFactory.FACTORY
-												.getDefaultCoverage());
+										.getLong(LocationMap.id),
+										LocationDemandFactory.FACTORY
+												.getDefaultDemand());
 
 						RoadLocation rl = RoadLocationImpl
 								.build()
@@ -164,44 +164,8 @@ public class NetworkServiceImpl implements NetworkService {
 
 	}
 
-	private static class CoverageAggregateStatisticImpl implements
-			CoverageAggregateStatistic {
+	
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private double demand;
-
-		public CoverageAggregateStatisticImpl(double demand) {
-			super();
-			this.demand = demand;
-		}
-
-		@Override
-		public double getFiberDemand() {
-			return demand;
-		}
-
-		@Override
-		public CoverageAggregateStatistic add(
-				CoverageAggregateStatistic coverageStatic) {
-			return new CoverageAggregateStatisticImpl(getFiberDemand() + coverageStatic.getFiberDemand()) ;
-		}
-
-	}
-
-	private static class CoverageFactory {
-
-		private static CoverageFactory FACTORY = new CoverageFactory();
-
-		private CoverageAggregateStatistic defaultCoverage = new CoverageAggregateStatisticImpl(
-				1.0);
-
-		public CoverageAggregateStatistic getDefaultCoverage() {
-			return defaultCoverage;
-		}
-
-	}
+	
 
 }

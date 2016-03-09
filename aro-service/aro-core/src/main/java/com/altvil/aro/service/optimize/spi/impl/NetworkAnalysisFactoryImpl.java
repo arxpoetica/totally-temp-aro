@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.DefaultAroVisitor;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
@@ -444,7 +444,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		@Override
-		public Supplier<CoverageAggregateStatistic> getCoverageScoreSupplier() {
+		public Supplier<LocationDemand> getCoverageScoreSupplier() {
 			return context.getCoverageScoreSupplier();
 		}
 

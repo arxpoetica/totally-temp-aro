@@ -4,7 +4,7 @@ public interface LocationDropAssignment extends AroEntity {
 
 	LocationEntity getLocationEntity();
 
-	CoverageAggregateStatistic getAggregateStatistic() ;
+	LocationDemand getAggregateStatistic() ;
 	
 	double getDropLength();
 	DropCable getDropCable() ;

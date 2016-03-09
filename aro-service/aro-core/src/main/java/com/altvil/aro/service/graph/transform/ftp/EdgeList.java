@@ -1,12 +1,17 @@
 package com.altvil.aro.service.graph.transform.ftp;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.LocationEntityDemand;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
-
-import java.util.*;
 
 public class EdgeList {
 
@@ -16,7 +21,8 @@ public class EdgeList {
 
 	private AroEdge<GeoSegment> edge;
 	private List<GraphEdgeAssignment> pinnedLocations;
-	private List<LocationDemand> locationDemand ;
+	
+	private List<LocationEntityDemand> householdDemand ;
 	private double totalDemand ;
 	private double[] cumlativeDemand ;
 	private double length;
@@ -38,36 +44,27 @@ public class EdgeList {
 
 	}
 
-	// private EdgeList subEdgeFromStart(int endIndex) {
-	//
-	// PinnedLocation pl = pinnedLocations.get(endIndex - 1)
-	// .getPinnedLocation();
-	// pl.getOffsetFromStartVertex();
-	// List<GraphEdgeAssignment> subList = pinnedLocations
-	// .subList(0, endIndex);
-	// return new EdgeList(edge, subList, pl.getOffsetFromStartVertex());
-	// }
-
 	private void init(List<GraphEdgeAssignment> assignments) {
 		double  totalDemand = 0 ;
-		List<LocationDemand> locationDemand = new ArrayList<>(assignments.size()) ;
+		List<LocationEntityDemand> locationDemand = new ArrayList<>(assignments.size()) ;
 		cumlativeDemand = new double[assignments.size()] ;
 		
 		int index = 0 ;
 		for(GraphEdgeAssignment a : assignments) {
-			LocationDemand ld = new LocationDemandImpl(a) ;
+			LocationEntity locationEntity = (LocationEntity) a.getAroEntity() ;
+			LocationEntityDemand ld = locationEntity.getLocationDemand().getHouseholdFiberDemand() ;
 			locationDemand.add(ld) ;
 			totalDemand += ld.getDemand() ;
 			cumlativeDemand[index++] = totalDemand ;
 		}
 		
 		this.totalDemand = totalDemand ;
-		this.locationDemand = locationDemand ;
+		this.householdDemand = locationDemand ;
 		
 	}
 
-	public Collection<LocationDemand> getLocationDemands() {
-		return locationDemand ;
+	public Collection<LocationEntityDemand> getLocationDemands() {
+		return householdDemand ;
 	}
 	
 	public double getTotalLocationDemand() {
@@ -132,29 +129,5 @@ public class EdgeList {
 		return pinnedLocations;
 	}
 
-	private static class LocationDemandImpl implements LocationDemand {
-
-		private GraphEdgeAssignment graphEdgeAssignment;
-
-		public LocationDemandImpl(GraphEdgeAssignment graphEdgeAssignment) {
-			super();
-			this.graphEdgeAssignment = graphEdgeAssignment;
-		}
-
-		@Override
-		public PinnedLocation getPinnedLocation() {
-			return graphEdgeAssignment.getPinnedLocation();
-		}
-
-		@Override
-		public LocationEntity getLocationEntity() {
-			return (LocationEntity) graphEdgeAssignment.getAroEntity();
-		}
-
-		@Override
-		public double getDemand() {
-			return getLocationEntity().getCoverageStatistics().getFiberDemand();
-		}
-
-	}
+	
 }

@@ -73,7 +73,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	@Override
 	public boolean canAdd(GraphEdgeAssignment li) {
 		LocationEntity entity = (LocationEntity) li.getAroEntity();
-		double testedDemand = entity.getCoverageStatistics().getFiberDemand();
+		double testedDemand = entity.getLocationDemand().getHouseholdFiberDemandValue();
 		return (getLocationCount() + testedDemand) <= thresholds
 				.getMaxlocationPerFDT();
 
@@ -106,7 +106,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 			return false;
 		}
 		coverage += (((LocationEntity) li.getAroEntity())
-				.getCoverageStatistics().getFiberDemand());
+				.getLocationDemand().getHouseholdFiberDemandValue());
 		locationIntersections.add(li);
 		return true;
 

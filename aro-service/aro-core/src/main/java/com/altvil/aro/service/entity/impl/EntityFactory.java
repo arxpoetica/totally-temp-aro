@@ -9,7 +9,7 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.AroEntityVisitor;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.CompositeAroEntity;
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.DropCableCount;
 import com.altvil.aro.service.entity.DropCableSummary;
@@ -33,9 +33,9 @@ public class EntityFactory {
 		return id == null ? idGen.getAndDecrement() : id;
 	}
 
-	public LocationEntity createLocationEntity(long locationId, Long gid,
-			CoverageAggregateStatistic coverageAggregateStatistic) {
-		return new LocationEntityImpl(locationId, gid,
+	public LocationEntity createLocationEntity(long locationId,
+			LocationDemand coverageAggregateStatistic) {
+		return new LocationEntityImpl(locationId,
 				coverageAggregateStatistic);
 	}
 
@@ -104,7 +104,7 @@ public class EntityFactory {
 			EntityDoubleSum<DropCable> summer = new EntityDoubleSum<DropCable>() ;
 			
 			dropAssignments.forEach(da -> {
-				summer.add(da.getDropCable(), da.getAggregateStatistic().getFiberDemand()) ;
+				summer.add(da.getDropCable(), da.getAggregateStatistic().getHouseholdFiberDemandValue()) ;
 			});
 			
 			return new DropCableSummary(summer.getTotals().entrySet()
@@ -347,8 +347,8 @@ public class EntityFactory {
 
 
 		@Override
-		public CoverageAggregateStatistic getAggregateStatistic() {
-			return entity.getCoverageStatistics() ;
+		public LocationDemand getAggregateStatistic() {
+			return entity.getLocationDemand() ;
 		}
 
 		@Override
@@ -381,13 +381,11 @@ public class EntityFactory {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private Long gid;
-		private CoverageAggregateStatistic coverageAggregateStatistic;
+		private LocationDemand coverageAggregateStatistic;
 
-		public LocationEntityImpl(Long id, Long gid,
-				CoverageAggregateStatistic coverageAggregateStatistic) {
+		public LocationEntityImpl(Long id,
+				LocationDemand coverageAggregateStatistic) {
 			super(id);
-			this.gid = gid;
 			this.coverageAggregateStatistic = coverageAggregateStatistic;
 		}
 
@@ -401,13 +399,10 @@ public class EntityFactory {
 			visitor.visit(this);
 		}
 
-		@Override
-		public Long getGid() {
-			return gid;
-		}
+		
 
 		@Override
-		public CoverageAggregateStatistic getCoverageStatistics() {
+		public LocationDemand getLocationDemand() {
 			return coverageAggregateStatistic;
 		}
 
