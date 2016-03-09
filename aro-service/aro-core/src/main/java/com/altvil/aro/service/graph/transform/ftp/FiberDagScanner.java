@@ -35,9 +35,6 @@ import com.altvil.utils.StreamUtil;
 
 public class FiberDagScanner  {
 
-	// private EntityFactory entityFactory = EntityFactory.FACTORY;
-	// private GraphAssignmentFactory graphAssignmentFactory =
-	// GraphAssignmentFactoryImpl.FACTORY;
 
 	
 	private FtthThreshholds thresholds;
@@ -320,18 +317,6 @@ public class FiberDagScanner  {
 		public TerminatedVertex terminate() {
 			return new VertexTerminator(graphNode).assignStreams(streams);
 		}
-
-		// public Collection<EdgeStream> getStreams() {
-		// return streams;
-		// }
-		//
-		// public int getCount() {
-		// return count;
-		// }
-		//
-		// public double getMaxDistanceToEnd() {
-		// return maxDistanceToEnd;
-		// }
 
 	}
 

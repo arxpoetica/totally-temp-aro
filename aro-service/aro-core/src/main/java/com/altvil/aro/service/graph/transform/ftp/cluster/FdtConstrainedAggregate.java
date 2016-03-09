@@ -1,23 +1,22 @@
 package com.altvil.aro.service.graph.transform.ftp.cluster;
 
-import com.altvil.aro.service.entity.LocationEntity;
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.graph.segment.PinnedLocation;
-import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
-import com.altvil.utils.GeometryUtil;
-import com.vividsolutions.jts.algorithm.CentroidPoint;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.segment.PinnedLocation;
+import com.altvil.aro.service.graph.transform.ftp.AssignedEntityDemand;
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.utils.GeometryUtil;
+import com.vividsolutions.jts.algorithm.CentroidPoint;
+
 public class FdtConstrainedAggregate implements LocationCluster {
 
 	double coverage;
 	private FtthThreshholds thresholds;
-	private List<GraphEdgeAssignment> locationIntersections;
+	private List<AssignedEntityDemand> locationIntersections;
 	private GeoSegment geoSegment;
 	private ClusterLocation clusterLocation;
 
@@ -71,9 +70,8 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	 * @see com.altvil.aro.service.graph.transform.fd.LocationAggregate#canAdd()
 	 */
 	@Override
-	public boolean canAdd(GraphEdgeAssignment li) {
-		LocationEntity entity = (LocationEntity) li.getAroEntity();
-		double testedDemand = entity.getLocationDemand().getHouseholdFiberDemandValue();
+	public boolean canAdd(AssignedEntityDemand li) {
+		double testedDemand = li.getTotalFiberDemand() ;
 		return (getLocationCount() + testedDemand) <= thresholds
 				.getMaxlocationPerFDT();
 
@@ -99,14 +97,13 @@ public class FdtConstrainedAggregate implements LocationCluster {
 
 	}
 
-	public boolean add(GraphEdgeAssignment li) {
+	public boolean add(AssignedEntityDemand li) {
 
 		// Basis Constraint (TODO expanded Spatial Constraint)
 		if (!canAdd(li) || !ensureConstraint(li.getPinnedLocation())) {
 			return false;
 		}
-		coverage += (((LocationEntity) li.getAroEntity())
-				.getLocationDemand().getHouseholdFiberDemandValue());
+		coverage += li.getTotalFiberDemand() ;
 		locationIntersections.add(li);
 		return true;
 
@@ -146,7 +143,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	}
 
 	@Override
-	public Collection<GraphEdgeAssignment> getLocations() {
+	public Collection<AssignedEntityDemand> getLocations() {
 		return locationIntersections;
 	}
 

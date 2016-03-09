@@ -49,7 +49,7 @@ public class EntityFactory {
 	}
 
 	public LocationDropAssignment createDropAssignment(LocationEntity entity,
-			double dropLengthMeters, DropCable dropCable) {
+			double dropLengthMeters, DropCable dropCable, double fiberDemand) {
 		return new LocationDropAssignmentImpl(entity, dropLengthMeters, dropCable);
 	}
 

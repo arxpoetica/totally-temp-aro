@@ -2,7 +2,6 @@ package com.altvil.aro.service.graph.transform.ftp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,7 +21,8 @@ public class EdgeList {
 	private AroEdge<GeoSegment> edge;
 	private List<GraphEdgeAssignment> pinnedLocations;
 	
-	private List<LocationEntityDemand> householdDemand ;
+	private List<AssignedEntityDemand> assignedEntityDemands ;
+	//private List<LocationEntityDemand> householdDemand ;
 	private double totalDemand ;
 	private double[] cumlativeDemand ;
 	private double length;
@@ -37,15 +37,11 @@ public class EdgeList {
 		this.length = length;
 		
 		init(pinnedLocations) ;
-
-		// if( this.length == 0 && pinnedLocations.size() > 0 ) {
-		// throw new IllegalArgumentException("Lnegth not defined") ;
-		// }
-
 	}
 
 	private void init(List<GraphEdgeAssignment> assignments) {
 		double  totalDemand = 0 ;
+		
 		List<LocationEntityDemand> locationDemand = new ArrayList<>(assignments.size()) ;
 		cumlativeDemand = new double[assignments.size()] ;
 		
@@ -59,13 +55,10 @@ public class EdgeList {
 		}
 		
 		this.totalDemand = totalDemand ;
-		this.householdDemand = locationDemand ;
+		//this.householdDemand = locationDemand ;
 		
 	}
 
-	public Collection<LocationEntityDemand> getLocationDemands() {
-		return householdDemand ;
-	}
 	
 	public double getTotalLocationDemand() {
 		return totalDemand ;
@@ -125,9 +118,23 @@ public class EdgeList {
 		return edge == null ? null : edge.getValue();
 	}
 
-	public List<GraphEdgeAssignment> getGraphEdgeAssignments() {
-		return pinnedLocations;
+	public EdgeDemand getEdgeDemand() {
+		return null ;
 	}
+	
+	public List<GraphEdgeAssignment> getLocationAssignments() {
+		return pinnedLocations ;
+	}
+
+	public List<AssignedEntityDemand> getAssignedEntityDemands() {
+		return assignedEntityDemands;
+	}
+	
+	
+	
+//	public List<GraphEdgeAssignment> getGraphEdgeAssignments() {
+//		return pinnedLocations;
+//	}
 
 	
 }
