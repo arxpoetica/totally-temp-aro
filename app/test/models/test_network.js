@@ -34,6 +34,7 @@ describe('Network', () => {
     it('should return a feature collection', (done) => {
       request
         .get('/network/nodes/' + node_type)
+        .query(test_utils.test_viewport())
         .accept('application/json')
         .end((err, res) => {
           if (err) return done(err)
@@ -178,6 +179,7 @@ describe('Network', () => {
     it('should return network nodes of a type', (done) => {
       request
         .get('/network/nodes/' + plan_id + '/find')
+        .query(test_utils.test_viewport())
         .accept('application/json')
         .query({ node_types: 'splice_point' })
         .end((err, res) => {

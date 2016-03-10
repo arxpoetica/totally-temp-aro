@@ -1,6 +1,6 @@
 /* global describe it*/
 var expect = require('chai').expect
-var GeoJsonHelper = require('../../helpers/geojson_helper.js')
+var GeoJsonHelper = require('../../helpers/geojson.js')
 
 describe('GeoJsonHelper', () => {
   // 10 features
@@ -30,11 +30,12 @@ describe('GeoJsonHelper', () => {
 
   describe('#build_feature_collection()', () => {
     it('should build a GeoJSON FeatureCollection', () => {
-      var output = GeoJsonHelper.build_feature_collection(data, properties)
-      expect(output.type).to.equal('FeatureCollection')
-      expect(output.features).to.have.length(10)
-      expect(output.features[0].properties).to.have.a.property('color', 'black')
-      expect(output.features[0].properties).to.have.a.property('name', 'Brooklyn')
+      var output = GeoJsonHelper.featureCollection(data, properties)
+      expect(output.feature_collection).to.be.an('object')
+      expect(output.feature_collection.type).to.equal('FeatureCollection')
+      expect(output.feature_collection.features).to.have.length(10)
+      expect(output.feature_collection.features[0].properties).to.have.a.property('color', 'black')
+      expect(output.feature_collection.features[0].properties).to.have.a.property('name', 'Brooklyn')
     })
   })
 })

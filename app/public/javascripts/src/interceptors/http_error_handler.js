@@ -3,7 +3,9 @@ app.config(($httpProvider) => {
   function handleRejection (rejection) {
     swal({
       title: 'Error!',
-      text: rejection.status + ' ' + rejection.statusText,
+      text: rejection.status
+        ? rejection.status + ' ' + rejection.statusText
+        : 'The connection with the server failed',
       type: 'error'
     })
   }

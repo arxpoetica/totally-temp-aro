@@ -34,7 +34,7 @@ module.exports = class Network {
 
   // View existing fiber plant for competitors
   static viewTowers (viewport) {
-    var sql = `SELECT geom FROM aro.towers`
+    var sql = 'SELECT geom FROM aro.towers'
     return database.points(sql, [], true, viewport)
   }
 

@@ -30,8 +30,9 @@ module.exports = class MarketSize {
           WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
-          JOIN client.fiber_route ON fiber_route.plan_id=$1
-          AND ST_DWithin(fiber_route.geom::geography, b.geog, 152.4)
+          JOIN client.fiber_route
+            ON fiber_route.plan_id=$1
+           AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
         `
         params.push(plan_id)
       } else {
@@ -42,14 +43,14 @@ module.exports = class MarketSize {
             JOIN carriers ON carriers.name = $1
             JOIN aro.fiber_plant
               ON fiber_plant.carrier_id = carriers.id
-              AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4)
+             AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
         `
         params.push(config.client_carrier_name)
       }
 
       if (type === 'addressable') {
         params.push(options.boundary)
-        sql += ` AND ST_Intersects(ST_GeomFromGeoJSON($${params.length})::geography, b.geog) GROUP BY b.id)`
+        sql += ` AND ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom) GROUP BY b.id)`
       } else {
         sql += ' GROUP BY b.id)'
       }
@@ -59,7 +60,7 @@ module.exports = class MarketSize {
         WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
-          WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, b.geog)
+          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($1)::geometry, 4326), b.geom)
         )
       `
     }
