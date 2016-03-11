@@ -2,8 +2,8 @@ package com.altvil.aro.service.graph.transform.ftp.impl;
 
 import java.util.List;
 
+import com.altvil.aro.service.demand.AssignedEntityDemand;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.graph.transform.ftp.AssignedEntityDemand;
 import com.altvil.aro.service.graph.transform.ftp.EdgeList;
 import com.altvil.aro.service.graph.transform.ftp.LocationStreamVisitor;
 import com.altvil.aro.service.graph.transform.ftp.tree.AbstractLocationStream;

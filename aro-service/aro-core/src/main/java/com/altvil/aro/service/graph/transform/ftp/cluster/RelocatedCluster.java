@@ -2,9 +2,9 @@ package com.altvil.aro.service.graph.transform.ftp.cluster;
 
 import java.util.Collection;
 
+import com.altvil.aro.service.demand.AssignedEntityDemand;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
-import com.altvil.aro.service.graph.transform.ftp.AssignedEntityDemand;
 
 public class RelocatedCluster implements LocationCluster {
 

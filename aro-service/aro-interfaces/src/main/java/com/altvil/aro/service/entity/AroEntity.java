@@ -12,6 +12,7 @@ public interface AroEntity extends Serializable {
 	public boolean isTransient() ;
 	public void updateId(Long id) ;
 	
+	
 	public void accept(AroEntityVisitor visitor) ;
 	
 }

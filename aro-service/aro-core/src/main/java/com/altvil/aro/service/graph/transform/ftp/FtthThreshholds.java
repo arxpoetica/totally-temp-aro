@@ -1,20 +1,22 @@
 package com.altvil.aro.service.graph.transform.ftp;
 
 import com.altvil.utils.UnitUtils;
+
 public class FtthThreshholds {
 
 	private boolean reduceIncomingStreams = false;
 	private int maxlocationPerFDT = 12;
 	private int threshHoldClusteringFDT = 10;
 	private HubModel hubModel;
-	private DropCableModel dropCableModel = DropCableModel.DEFAULT_MODEL ;
+	private DropCableModel dropCableModel = DropCableModel.DEFAULT_MODEL;
+	private double locationBulkThreshhold = 150;
 	private double maxOffsetInMeters = UnitUtils.toMeters(60000);
 	private double maxDropCableLengthInMeters = UnitUtils.toMeters(1500);
 	private double preferredDropCableLengthInMeters = UnitUtils.toMeters(500);
 	private double sparseThreshholdInMeters = 1 / UnitUtils.toMeters(500); // Sparse
-	private boolean clusterMergingSupported = false ; 
-	private boolean dropCableConstraintsSupported = true ;
-	
+	private boolean clusterMergingSupported = false;
+	private boolean dropCableConstraintsSupported = true;
+
 	private FtthThreshholds() {
 
 	}
@@ -27,7 +29,10 @@ public class FtthThreshholds {
 	public static Builder build() {
 		return new Builder();
 	}
-	
+
+	public double getLocationBulkThreshhold() {
+		return locationBulkThreshhold;
+	}
 
 	public DropCableModel getDropCableModel() {
 		return dropCableModel;
@@ -76,11 +81,11 @@ public class FtthThreshholds {
 	public double getPreferredDropCableLengthInMeters() {
 		return preferredDropCableLengthInMeters;
 	}
-	
+
 	public boolean isClusterMergingSupported() {
 		return clusterMergingSupported;
 	}
-	
+
 	public boolean isDropCableConstraintsSupported() {
 		return dropCableConstraintsSupported;
 	}
@@ -130,15 +135,14 @@ public class FtthThreshholds {
 			}
 			return this;
 		}
-		
-		
+
 		public Builder setPrefferedOffsetInFeet(Double feet) {
 			if (feet != null) {
-				thresholds.preferredDropCableLengthInMeters = UnitUtils.toMeters(feet);
+				thresholds.preferredDropCableLengthInMeters = UnitUtils
+						.toMeters(feet);
 			}
 			return this;
 		}
-		
 
 		public Builder setMaxOffsetInFeet(Double feet) {
 			if (feet != null) {
@@ -154,20 +158,21 @@ public class FtthThreshholds {
 			}
 			return this;
 		}
-		
-		
-		public Builder setClusterMergingSupported(Boolean clusterMergingSupported) {
-			if( clusterMergingSupported != null ) {
-				thresholds.clusterMergingSupported = clusterMergingSupported ;
+
+		public Builder setClusterMergingSupported(
+				Boolean clusterMergingSupported) {
+			if (clusterMergingSupported != null) {
+				thresholds.clusterMergingSupported = clusterMergingSupported;
 			}
-			return this ;
+			return this;
 		}
-		
-		public Builder setDropCableConstraintsSupported(Boolean dropCableConstraintsSupported) {
-			if( dropCableConstraintsSupported != null ) {
-				thresholds.dropCableConstraintsSupported = dropCableConstraintsSupported ;
+
+		public Builder setDropCableConstraintsSupported(
+				Boolean dropCableConstraintsSupported) {
+			if (dropCableConstraintsSupported != null) {
+				thresholds.dropCableConstraintsSupported = dropCableConstraintsSupported;
 			}
-			return this ;
+			return this;
 		}
 
 		// TODO validate inputs
@@ -178,8 +183,6 @@ public class FtthThreshholds {
 
 			return thresholds;
 		}
-		
-		
 
 	}
 

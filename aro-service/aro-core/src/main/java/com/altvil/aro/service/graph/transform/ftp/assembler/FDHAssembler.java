@@ -121,7 +121,7 @@ public class FDHAssembler {
 									locationEntity,
 									dropLength,
 									threshHolds.getDropCableModel().getDropCable(dropLength),
-									a.getTotalFiberDemand()
+									a.getTotalDemand()
 							));
 
 				});

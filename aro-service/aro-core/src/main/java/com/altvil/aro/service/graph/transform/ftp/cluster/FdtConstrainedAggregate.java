@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.altvil.aro.service.demand.AssignedEntityDemand;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
-import com.altvil.aro.service.graph.transform.ftp.AssignedEntityDemand;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.utils.GeometryUtil;
 import com.vividsolutions.jts.algorithm.CentroidPoint;
@@ -71,7 +71,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	 */
 	@Override
 	public boolean canAdd(AssignedEntityDemand li) {
-		double testedDemand = li.getTotalFiberDemand() ;
+		double testedDemand = li.getTotalDemand() ;
 		return (getLocationCount() + testedDemand) <= thresholds
 				.getMaxlocationPerFDT();
 
@@ -103,7 +103,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 		if (!canAdd(li) || !ensureConstraint(li.getPinnedLocation())) {
 			return false;
 		}
-		coverage += li.getTotalFiberDemand() ;
+		coverage += li.getTotalDemand() ;
 		locationIntersections.add(li);
 		return true;
 

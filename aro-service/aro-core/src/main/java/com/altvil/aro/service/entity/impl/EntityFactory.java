@@ -7,16 +7,19 @@ import java.util.stream.Collectors;
 
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.AroEntityVisitor;
+import com.altvil.aro.service.entity.BulkFiberConsumer;
+import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.CompositeAroEntity;
-import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.DropCableCount;
 import com.altvil.aro.service.entity.DropCableSummary;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.LocationEntityDemand;
 import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.RoadVertex;
 import com.altvil.aro.service.entity.RootEntity;
@@ -39,6 +42,14 @@ public class EntityFactory {
 				coverageAggregateStatistic);
 	}
 
+	
+	public BulkFiberTerminal createBulkFiberTerminal() {
+		return null ;
+	}
+	
+	public BulkFiberConsumer createBulkFiberConsumer(LocationEntityDemand locationEntityDemand) {
+		return null ;
+	}
 	
 	public FDTEquipment createFdt(Long id, Collection<LocationDropAssignment> dropAssignments) {
 		return new DefaultFDT(ensureId(id), dropAssignments);

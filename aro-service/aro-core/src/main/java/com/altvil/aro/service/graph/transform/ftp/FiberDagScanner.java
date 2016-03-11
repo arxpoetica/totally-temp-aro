@@ -12,11 +12,16 @@ import java.util.stream.Collectors;
 
 import org.jgrapht.DirectedGraph;
 
+import com.altvil.aro.service.demand.AssignedEntityDemand;
+import com.altvil.aro.service.demand.DemandAnalyizer;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
+import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
+import com.altvil.aro.service.graph.assigment.impl.DefaultGraphMapping;
 import com.altvil.aro.service.graph.assigment.impl.FiberSourceMapping;
+import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.assigment.impl.RootGraphMapping;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -31,29 +36,32 @@ import com.altvil.aro.util.algo.DefaultValueItem;
 import com.altvil.aro.util.algo.Knapsack;
 import com.altvil.aro.util.algo.Knapsack.ValuedItem;
 import com.altvil.interfaces.Assignment;
-import com.altvil.utils.StreamUtil;
 
-public class FiberDagScanner  {
+public class FiberDagScanner {
 
-
-	
+	private DemandAnalyizer demandAnalyizer;
 	private FtthThreshholds thresholds;
+
+	private GraphAssignmentFactory graphAssignmentFactory = GraphAssignmentFactoryImpl.FACTORY;
 
 	private DAGModel<GeoSegment> graphModel;
 	private DirectedGraph<GraphNode, AroEdge<GeoSegment>> graph;
 
 	private Set<GraphNode> visited = new HashSet<GraphNode>();
-	private List<GraphMapping> fiberSourceAssignments = new ArrayList<>() ;
+	private List<GraphMapping> fiberSourceAssignments = new ArrayList<>();
 
-	private List<GraphMapping> fdhAssignments = new ArrayList<>();
-
-	public FiberDagScanner(
+	private List<GraphMapping> feederSinkAssignments = new ArrayList<>();
+	
+	public FiberDagScanner(DemandAnalyizer demandAnalyizer,
 			FtthThreshholds threshholds) {
 		super();
+		this.demandAnalyizer = demandAnalyizer;
 		this.thresholds = threshholds;
 	}
 
-	public RootGraphMapping apply(DAGModel<GeoSegment> model, Collection<? extends Assignment<GraphEdgeAssignment, GraphNode>> targets) {
+	public RootGraphMapping apply(
+			DAGModel<GeoSegment> model,
+			Collection<? extends Assignment<GraphEdgeAssignment, GraphNode>> targets) {
 		this.graphModel = model;
 		this.graph = model.getAsDirectedGraph();
 
@@ -63,27 +71,28 @@ public class FiberDagScanner  {
 	public RootGraphMapping calculate(
 			Collection<? extends Assignment<GraphEdgeAssignment, GraphNode>> targets) {
 		targets.forEach(t -> {
-			if( this.graph.containsVertex(t.getDomain()) ) {
-				fiberSourceAssignments.add(writeFiberSource(t)) ;
+			if (this.graph.containsVertex(t.getDomain())) {
+				fiberSourceAssignments.add(writeFiberSource(t));
 			}
 		});
-		
+
 		return new RootGraphMapping(fiberSourceAssignments);
 	}
-	
-	
-	private FiberSourceMapping writeFiberSource(Assignment<GraphEdgeAssignment, GraphNode> target) {
-		fdhAssignments = new ArrayList<>() ;
-		writeFDH(scanVertex(EdgeList.EMPTY_EDGE, target.getDomain())) ;
-		return new FiberSourceMapping(target.getSource(), fdhAssignments);
-		
+
+	private FiberSourceMapping writeFiberSource(
+			Assignment<GraphEdgeAssignment, GraphNode> target) {
+		feederSinkAssignments = new ArrayList<>();
+		writeFDH(scanVertex(EdgeList.EMPTY_EDGE, target.getDomain()));
+		return new FiberSourceMapping(target.getSource(), feederSinkAssignments);
+
 	}
 
-	private Iterator<AroEdge<GeoSegment>> createItr(Collection<AroEdge<GeoSegment>> edges, GeoSegment incommingSeg) {
-		return incommingSeg == null ? edges.iterator() : new OrderedEdgeIterator(
-				edges, incommingSeg);
+	private Iterator<AroEdge<GeoSegment>> createItr(
+			Collection<AroEdge<GeoSegment>> edges, GeoSegment incommingSeg) {
+		return incommingSeg == null ? edges.iterator()
+				: new OrderedEdgeIterator(edges, incommingSeg);
 	}
-	
+
 	/**
 	 * Scan
 	 * 
@@ -99,8 +108,9 @@ public class FiberDagScanner  {
 			return emptyVertex(vertex);
 		}
 
-		Iterator<AroEdge<GeoSegment>> itr = createItr(incomingEdges, outgoingEdge.getGeoSegment()) ;
-			
+		Iterator<AroEdge<GeoSegment>> itr = createItr(incomingEdges,
+				outgoingEdge.getGeoSegment());
+
 		List<EdgeStream> edgeStreams = new ArrayList<>(incomingEdges.size());
 		while (itr.hasNext()) {
 			AroEdge<GeoSegment> e = itr.next();
@@ -130,13 +140,29 @@ public class FiberDagScanner  {
 	private EdgeStream process(GraphNode src, GraphNode target,
 			AroEdge<GeoSegment> e) {
 
-		// TODO emit Business as FDH_Business (filter edges for business)
-
-		// Handle Partial Assignments
-		EdgeList el = new EdgeList(e, StreamUtil.asImmutableList(e.getValue()
-				.getGeoSegmentAssignments()), e.getWeight());
+		com.altvil.aro.service.demand.EdgeDemand edgeDemand = demandAnalyizer
+				.createDemandAnalyis(e.getValue());
+		
+		writeBulkFiber(e.getValue(), edgeDemand.getBulkFiberAssigments()) ;
+		
+		EdgeList el = new EdgeList(e, edgeDemand.getFdtAssigments(),
+				e.getWeight());
 
 		return toEdgeStream(el, scanVertex(el, src));
+	}
+
+	private void writeBulkFiber(GeoSegment geoSegment,
+			Collection<AssignedEntityDemand> assigments) {
+
+		if (assigments.size() > 0) {
+			this.feederSinkAssignments.addAll(assigments
+					.stream()
+					.map(aed -> new DefaultGraphMapping(graphAssignmentFactory
+							.createEdgeAssignment(aed.getPinnedLocation(),
+									aed.getLocationEntity())
+
+					)).collect(Collectors.toList()));
+		}
 	}
 
 	private VertexStream emptyVertex(GraphNode gn) {
@@ -152,7 +178,7 @@ public class FiberDagScanner  {
 		if (stream.getLocationCount() > 0) {
 			FDHAssembler assembler = new FDHAssembler(graphModel,
 					this.thresholds);
-			fdhAssignments.add(assembler.createMapping(stream));
+			feederSinkAssignments.add(assembler.createMapping(stream));
 		}
 	}
 

@@ -3,6 +3,7 @@
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.altvil.aro.service.demand.DefaultLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -27,7 +28,7 @@ public class LocationDemandFactory {
 		demands.put(LocationEntityType.Business, LocationEntityDemandFactory.FACTORY.create(LocationEntityType.Business, business)) ;
 		demands.put(LocationEntityType.CellTower, LocationEntityDemandFactory.FACTORY.create(LocationEntityType.CellTower, cellTower)) ;
 		
-		return new DefaultLocationDemand(demands) ;
+		return DefaultLocationDemand.create(demands) ;
 		
 	}
 

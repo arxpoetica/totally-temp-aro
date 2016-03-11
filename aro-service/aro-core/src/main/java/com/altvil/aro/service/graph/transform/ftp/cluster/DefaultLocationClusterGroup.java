@@ -8,8 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.altvil.aro.service.demand.AssignedEntityDemand;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.graph.transform.ftp.AssignedEntityDemand;
 import com.altvil.aro.service.graph.transform.ftp.EdgeList;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 
@@ -93,7 +93,8 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 		for (LocationCluster cluster : incomingClusters) {
 			for (AssignedEntityDemand a : cluster.getLocations()) {
-				AssignedEntityDemand ald = new AssignedEntityDemand(a.getLocationEntity(), gs.proxyPin(0.0, a.getPinnedLocation()), a.getLocationDemand()) ;
+				AssignedEntityDemand ald = 
+						new AssignedEntityDemand(a.getLocationEntity(), gs.proxyPin(0.0, a.getPinnedLocation())) ;
 				locations.add(ald);
 			}
 		}

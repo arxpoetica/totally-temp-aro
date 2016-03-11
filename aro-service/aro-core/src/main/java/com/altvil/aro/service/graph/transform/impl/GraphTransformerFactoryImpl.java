@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.demand.EntityDemandService;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
@@ -43,12 +44,15 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 			.getLogger(GraphTransformerFactoryImpl.class.getName());
+	
 	private GraphNodeFactory factory;
-
+	private EntityDemandService entityDemandService ;
+	
 	@Autowired
 	@Inject
-	public GraphTransformerFactoryImpl(GraphNodeFactory factory) {
+	public GraphTransformerFactoryImpl(GraphNodeFactory factory, EntityDemandService entityDemandService) {
 		this.factory = factory;
+		this.entityDemandService = entityDemandService ;
 	}
 	
 	@Override
@@ -60,7 +64,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 
 	@Override
 	public FiberDagScanner createWirecenterTransformer(FtthThreshholds threshholds) {
-		return new FiberDagScanner(threshholds);
+		return new FiberDagScanner(entityDemandService.createDemandAnalyizer(threshholds), threshholds);
 	}
 
 	@Override
