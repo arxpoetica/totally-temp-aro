@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
-import com.altvil.aro.service.graph.segment.FiberType;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.model.FiberAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;

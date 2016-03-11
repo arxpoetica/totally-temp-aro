@@ -7,11 +7,10 @@ public interface AroEntity extends Serializable {
 
 	public Class<? extends AroEntity> getType();
 
+	
+	//public FiberType getFiberSourceType() ;
+	
 	public Long getObjectId();
-	
-	public boolean isTransient() ;
-	public void updateId(Long id) ;
-	
 	
 	public void accept(AroEntityVisitor visitor) ;
 	

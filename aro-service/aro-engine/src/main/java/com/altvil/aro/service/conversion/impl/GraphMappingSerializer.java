@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.altvil.aro.service.conversion.ModelSerialization;
 import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
@@ -37,6 +38,7 @@ public abstract class GraphMappingSerializer<T> {
 		register(CentralOfficeEquipment.class, this::serializeCentralOffice);
 		register(SplicePoint.class, this::serializeSplicePoint);
 		register(LocationDropAssignment.class, this::serializeLocationDropAssignment);
+		register(BulkFiberTerminal.class, this::serializeBulkFiberTerminals);
 	}
 
 	@FunctionalInterface
@@ -96,6 +98,11 @@ public abstract class GraphMappingSerializer<T> {
 			GraphMapping graphMapping) ;
 
 	protected void serializeFdt(T parent,
+			GraphMapping graphMapping) {
+	}
+	
+	
+	protected void serializeBulkFiberTerminals(T parent,
 			GraphMapping graphMapping) {
 	}
 	

@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
@@ -282,6 +284,10 @@ public class PlanServiceImpl implements PlanService {
 			return planRoute(mapping.getGraphAssignment(),
 					mapping.getChildAssignments());
 		}
+		
+		private boolean isDistributionSource(AroEntity entity) {
+			return entity.getType().equals(FDHEquipment.class) ;
+		}
 
 		private Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> planDistributionRoutes(
 				Collection<GraphMapping> children) {
@@ -289,7 +295,9 @@ public class PlanServiceImpl implements PlanService {
 			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> map = new HashMap<>();
 
 			children.forEach(a -> {
-				map.put(a.getGraphAssignment(), planRoute(a));
+				if( isDistributionSource(a.getAroEntity()) ) {
+					map.put(a.getGraphAssignment(), planRoute(a));
+				}
 			});
 
 			return map;

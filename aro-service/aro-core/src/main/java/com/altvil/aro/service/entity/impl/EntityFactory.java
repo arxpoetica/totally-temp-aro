@@ -10,7 +10,6 @@ import com.altvil.aro.service.entity.AroEntityVisitor;
 import com.altvil.aro.service.entity.BulkFiberConsumer;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
-import com.altvil.aro.service.entity.CompositeAroEntity;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.DropCableCount;
 import com.altvil.aro.service.entity.DropCableSummary;
@@ -21,7 +20,6 @@ import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityDemand;
 import com.altvil.aro.service.entity.RemoteTerminal;
-import com.altvil.aro.service.entity.RoadVertex;
 import com.altvil.aro.service.entity.RootEntity;
 import com.altvil.aro.service.entity.SplicePoint;
 import com.altvil.utils.EntityDoubleSum;
@@ -276,59 +274,7 @@ public class EntityFactory {
 
 	}
 
-	public static class RoadNode extends AbstractEntity implements RoadVertex {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public RoadNode(Long id) {
-			super(id);
-		}
-
-		@Override
-		public Class<? extends AroEntity> getType() {
-			return RoadVertex.class;
-		}
-
-		@Override
-		public void accept(AroEntityVisitor visitor) {
-			visitor.visit(this);
-		}
-
-	}
-
-	public static class CompositeEntity extends AbstractEntity implements
-			CompositeAroEntity {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private Collection<AroEntity> entities;
-
-		public CompositeEntity(Long id, Collection<AroEntity> entities) {
-			super(id);
-			this.entities = entities;
-		}
-
-		@Override
-		public Class<? extends AroEntity> getType() {
-			return CompositeAroEntity.class;
-		}
-
-		@Override
-		public void accept(AroEntityVisitor visitor) {
-			visitor.visit(this);
-		}
-
-		@Override
-		public Collection<AroEntity> getEntities() {
-			return entities;
-		}
-
-	}
+	
 
 	public static class LocationDropAssignmentImpl extends AbstractEntity
 			implements LocationDropAssignment {

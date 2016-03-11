@@ -47,6 +47,19 @@ public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 						), graphMapping.getChildren());
 
 	}
+	
+
+	@Override
+	protected void serializeBulkFiberTerminals(NetworkNode parent,
+			GraphMapping graphMapping) {
+		
+		serialize(
+				register(
+						graphMapping.getGraphAssignment(),
+						createNetworkNode(graphMapping.getGraphAssignment().getPoint(), NetworkNodeType.bulk_distrubution_terminal)
+						), graphMapping.getChildren());
+		
+	}
 
 	protected void serializeFdt(NetworkNode parent, GraphMapping graphMapping) {
 
@@ -58,6 +71,8 @@ public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 				graphMapping.getChildAssignments());
 
 	}
+	
+	
 	
 	
 	protected NetworkNode createNetworkNode(Point point, NetworkNodeType type) {

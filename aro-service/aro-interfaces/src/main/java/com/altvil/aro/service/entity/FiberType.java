@@ -1,4 +1,4 @@
-package com.altvil.aro.service.graph.segment;
+package com.altvil.aro.service.entity;
 
 public enum FiberType {
 

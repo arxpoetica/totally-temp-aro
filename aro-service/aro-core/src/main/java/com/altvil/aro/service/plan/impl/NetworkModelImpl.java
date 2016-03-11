@@ -1,5 +1,9 @@
 package com.altvil.aro.service.plan.impl;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphModel;
@@ -12,15 +16,13 @@ import com.altvil.aro.service.plan.LocationModel;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
 
-import java.util.*;
-
 public class NetworkModelImpl implements NetworkModel {
 
-	private LocationModel locationModel;
+	//private LocationModel locationModel;
 
 	private NetworkAssignment fiberSourceAssignment;
-	private GraphModel<GeoSegment> dagModel;
-	private GraphModel<GeoSegment> graphModel;
+	//private GraphModel<GeoSegment> dagModel;
+	//private GraphModel<GeoSegment> graphModel;
 	private Map<GraphAssignment, GraphNode> resolvedModel;
 
 	private Collection<AroEdge<GeoSegment>> feederFiber;
@@ -43,10 +45,10 @@ public class NetworkModelImpl implements NetworkModel {
 			Map<GraphAssignment, GraphNode> resolvedModel) {
 		super();
 		this.fiberSourceAssignment = fiberSourceAssignment;
-		this.locationModel = locationModel;
-		this.dagModel = dagModel;
+		//this.locationModel = locationModel;
+		//this.dagModel = dagModel;
 
-		this.graphModel = graphModel;
+		//this.graphModel = graphModel;
 		this.feederFiber = feederFiber;
 		this.distributionFiber = distributionFiber;
 		this.networkPlan = networkPlan;
@@ -55,15 +57,15 @@ public class NetworkModelImpl implements NetworkModel {
 		init(networkPlan);
 	}
 
-	@Override
-	public NetworkModel createNetworkModel(
-			Collection<AroEdge<GeoSegment>> feederFiber,
-			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> distributionFiber,
-			FiberSourceMapping co) {
-
-		return new NetworkModelImpl(fiberSourceAssignment, locationModel, dagModel, graphModel,
-				feederFiber, distributionFiber, co, resolvedModel);
-	}
+//	@Override
+//	public NetworkModel createNetworkModel(
+//			Collection<AroEdge<GeoSegment>> feederFiber,
+//			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> distributionFiber,
+//			FiberSourceMapping co) {
+//
+//		return new NetworkModelImpl(fiberSourceAssignment, locationModel, dagModel, graphModel,
+//				feederFiber, distributionFiber, co, resolvedModel);
+//	}
 
 	private void register(GraphMapping gm) {
 		entityToAssignment.put(gm.getAroEntity(), gm.getGraphAssignment());

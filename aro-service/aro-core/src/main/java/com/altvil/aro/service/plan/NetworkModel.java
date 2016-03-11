@@ -1,7 +1,6 @@
 package com.altvil.aro.service.plan;
 
 import java.util.Collection;
-import java.util.Map;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
@@ -23,6 +22,6 @@ public interface NetworkModel {
 	public Collection<AroEdge<GeoSegment>> getCentralOfficeFeederFiber() ;
 	public Collection<AroEdge<GeoSegment>> getFiberRouteForFdh(GraphAssignment ga) ;
 			
-	public NetworkModel createNetworkModel(Collection<AroEdge<GeoSegment>> feederFiber, Map<GraphAssignment, 
-			Collection<AroEdge<GeoSegment>>> distributionFiber, FiberSourceMapping co) ;
+//	public NetworkModel createNetworkModel(Collection<AroEdge<GeoSegment>> feederFiber, Map<GraphAssignment, 
+//			Collection<AroEdge<GeoSegment>>> distributionFiber, FiberSourceMapping co) ;
 }
