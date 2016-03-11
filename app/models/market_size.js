@@ -23,29 +23,43 @@ module.exports = class MarketSize {
   }
 
   static _prepareMarketSizeQuery (plan_id, type, options, params) {
+    var filters = options.filters
     var sql = ''
+
+    var customerTypeFilter = () => {
+      if (!filters || !filters.customer_type) return ''
+      params.push(filters.customer_type)
+      return `
+         JOIN client.business_customer_types bct
+          ON bct.business_id = b.id
+         AND bct.customer_type_id=$${params.length}
+       `
+    }
+
     if (type === 'route' || type === 'addressable') {
       if (false && config.route_planning.length > 0) {
+        params.push(plan_id)
         sql += `
           WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
           JOIN client.fiber_route
-            ON fiber_route.plan_id=$1
+            ON fiber_route.plan_id=$${params.length}
            AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
+           ${customerTypeFilter()}
         `
-        params.push(plan_id)
       } else {
+        params.push(config.client_carrier_name)
         sql += `
           WITH biz AS
           (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
             FROM businesses b
-            JOIN carriers ON carriers.name = $1
+            JOIN carriers ON carriers.name = $${params.length}
             JOIN aro.fiber_plant
               ON fiber_plant.carrier_id = carriers.id
              AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
+               ${customerTypeFilter()}
         `
-        params.push(config.client_carrier_name)
       }
 
       if (type === 'addressable') {
@@ -60,7 +74,8 @@ module.exports = class MarketSize {
         WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
-          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($1)::geometry, 4326), b.geom)
+          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)
+          ${customerTypeFilter()}
         )
       `
     }
@@ -222,48 +237,58 @@ module.exports = class MarketSize {
         var params = []
         var sql = this._prepareMarketSizeQuery(plan_id, type, options, params)
 
-        sql += '\n SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total FROM biz b'
-        sql += '\n JOIN client.industry_mapping m ON m.sic4 = b.industry_id JOIN client.spend ON spend.industry_id = m.industry_id'
+        sql += `
+          , counts AS (
+              SELECT m.industry_id, e.id AS employees_by_location_id, COUNT(*) as total
+                FROM biz b
+                JOIN client.industry_mapping m
+                  ON m.sic4 = b.industry_id
+        `
 
         if (!empty_array(filters.industry)) {
           params.push(filters.industry)
-          sql += `\n AND spend.industry_id IN ($${params.length})`
+          sql += `\n AND m.industry_id IN ($${params.length})`
         }
+
+        sql += `
+                JOIN client.employees_by_location e
+                  ON e.min_value <= b.number_of_employees
+                 AND e.max_value >= b.number_of_employees
+         `
+
+        if (!empty_array(filters.employees_range)) {
+          params.push(filters.employees_range)
+          sql += `\n AND e.id IN ($${params.length})`
+        }
+
+        sql += `
+            GROUP BY m.industry_id, e.id
+          )
+
+            SELECT spend.year, SUM(spend.monthly_spend * c.total * 12)::float as total
+              FROM counts c
+              JOIN client.spend
+                ON c.industry_id = spend.industry_id
+               AND c.employees_by_location_id = spend.employees_by_location_id
+         `
         if (!empty_array(filters.product)) {
           params.push(filters.product)
           sql += `\n AND spend.product_id IN ($${params.length})`
         }
-        if (!empty_array(filters.employees_range)) {
-          params.push(filters.employees_range)
-          sql += `\n AND spend.employees_by_location_id IN ($${params.length})`
-        }
-        sql += `
-          JOIN client.employees_by_location e
-           ON e.id = spend.employees_by_location_id
-          AND e.min_value <= b.number_of_employees
-          AND e.max_value >= b.number_of_employees
-        `
-        if (filters.customer_type) {
-          params.push(filters.customer_type)
-          sql += `
-            JOIN client.business_customer_types bct
-             ON bct.business_id = b.id
-            AND bct.customer_type_id=$${params.length}
-          `
-        }
+
         if (config.spend_by_city) {
           params.push(plan_id)
           sql += `
-            JOIN cities
-              ON spend.city_id = cities.id
-             AND cities.buffer_geog && b.geog
-             AND cities.id = (
-               SELECT cities.id FROM cities
-               JOIN client.plan r ON r.id = $${params.length}
-               ORDER BY r.area_centroid <#> cities.buffer_geog::geometry
-               LIMIT 1
-             )
-          `
+             JOIN cities
+               ON spend.city_id = cities.id
+              AND cities.buffer_geog && b.geog
+              AND cities.id = (
+                SELECT cities.id FROM cities
+                JOIN client.plan r ON r.id = $${params.length}
+                ORDER BY r.area_centroid <#> cities.buffer_geog::geometry
+                LIMIT 1
+              )
+           `
         }
         sql += `
           GROUP BY spend.year
