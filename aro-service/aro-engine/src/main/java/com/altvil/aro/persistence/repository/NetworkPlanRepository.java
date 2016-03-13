@@ -21,7 +21,7 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, ceil(sum(monthly_spend) /65) as fiber_count\n" + 
+			"	select s.industry_id, s.employees_by_location_id, ceil(sum(monthly_spend) / 65) as fiber_count\n" + 
 			"	from client.spend s\n" + 
 			"	where city_id = 1 and year = :year\n" + 
 			"	group by industry_id, employees_by_location_id\n" + 
