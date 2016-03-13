@@ -24,6 +24,7 @@ import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.aro.service.plan.InputRequests;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanCalculation;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
@@ -74,6 +75,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Override
 	public MasterPlanCalculation planMasterFiber(long planId,
+			InputRequests inputRequests,
 			FiberNetworkConstraints constraints) {
 
 		List<Long> ids = StreamUtil.map(
