@@ -1,6 +1,6 @@
 package com.altvil.aro.service.optimize;
 
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 
@@ -12,12 +12,12 @@ public class OptimizerContext {
 	private PricingModel pricingModel;
 	private FiberNetworkConstraints fiberConstraints;
 	private FtthThreshholds ftpThreshholds ;
-	private Supplier<CoverageAggregateStatistic> coverageScoreSupplier;
+	private Supplier<LocationDemand> coverageScoreSupplier;
 
 	public OptimizerContext(boolean fullAnalysisNode,
 							PricingModel pricingModel, 
 							FtthThreshholds ftpThreshholds,
-							FiberNetworkConstraints fiberConstraints, Supplier<CoverageAggregateStatistic> scoreSupplier) {
+							FiberNetworkConstraints fiberConstraints, Supplier<LocationDemand> scoreSupplier) {
 		super();
 		this.fullAnalysisNode = fullAnalysisNode;
 		this.pricingModel = pricingModel;
@@ -38,7 +38,7 @@ public class OptimizerContext {
 		return fiberConstraints;
 	}
 
-	public Supplier<CoverageAggregateStatistic> getCoverageScoreSupplier() {
+	public Supplier<LocationDemand> getCoverageScoreSupplier() {
 		return coverageScoreSupplier;
 	}
 

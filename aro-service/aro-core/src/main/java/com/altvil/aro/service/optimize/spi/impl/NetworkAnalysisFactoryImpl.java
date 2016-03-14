@@ -14,10 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
 import com.altvil.aro.service.entity.DefaultAroVisitor;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
+import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.SplicePoint;
@@ -26,7 +27,6 @@ import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.FiberType;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
@@ -39,7 +39,6 @@ import com.altvil.aro.service.optimize.impl.DefaultFiberAssignment;
 import com.altvil.aro.service.optimize.impl.DefaultGeneratingNode;
 import com.altvil.aro.service.optimize.impl.FdhAssignment;
 import com.altvil.aro.service.optimize.impl.FdtAssignment;
-import com.altvil.aro.service.optimize.impl.FullFdhAssigmnent;
 import com.altvil.aro.service.optimize.impl.GeneratingNodeAssembler;
 import com.altvil.aro.service.optimize.impl.GeneratingNodeComparator;
 import com.altvil.aro.service.optimize.impl.NoEquipment;
@@ -162,26 +161,12 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public void visit(FDHEquipment node) {
-
-			if (ctx.isFullAnalysisMode()) {
-				createAnalyis(
-						parent.addChild(new FdhAssignment(graphAssignment, node)),
-						graphMapping,
-						FiberType.DISTRIBUTION,
-						ctx.getNetworkModel().getFiberRouteForFdh(
-								graphMapping.getGraphAssignment()));
-
-			} else {
-
-				FiberAssignment fa = new DefaultFiberAssignment(
-						FiberType.DISTRIBUTION, ctx.getNetworkModel()
-						.getFiberRouteForFdh(
-								graphMapping.getGraphAssignment()));
-
-				nodeBuilder = parent.addChild(FullFdhAssigmnent.create(
-						graphMapping, fa));
-
-			}
+			createAnalyis(
+					parent.addChild(new FdhAssignment(graphAssignment, node)),
+					graphMapping,
+					FiberType.DISTRIBUTION,
+					ctx.getNetworkModel().getFiberRouteForFdh(
+							graphMapping.getGraphAssignment()));
 
 		}
 	}
@@ -444,7 +429,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		@Override
-		public Supplier<CoverageAggregateStatistic> getCoverageScoreSupplier() {
+		public Supplier<LocationDemand> getCoverageScoreSupplier() {
 			return context.getCoverageScoreSupplier();
 		}
 

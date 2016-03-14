@@ -7,18 +7,19 @@ import java.util.stream.Collectors;
 
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.AroEntityVisitor;
+import com.altvil.aro.service.entity.BulkFiberConsumer;
+import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
-import com.altvil.aro.service.entity.CompositeAroEntity;
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.DropCableCount;
 import com.altvil.aro.service.entity.DropCableSummary;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.LocationEntityDemand;
 import com.altvil.aro.service.entity.RemoteTerminal;
-import com.altvil.aro.service.entity.RoadVertex;
 import com.altvil.aro.service.entity.RootEntity;
 import com.altvil.aro.service.entity.SplicePoint;
 import com.altvil.utils.EntityDoubleSum;
@@ -33,12 +34,20 @@ public class EntityFactory {
 		return id == null ? idGen.getAndDecrement() : id;
 	}
 
-	public LocationEntity createLocationEntity(long locationId, Long gid,
-			CoverageAggregateStatistic coverageAggregateStatistic) {
-		return new LocationEntityImpl(locationId, gid,
+	public LocationEntity createLocationEntity(long locationId,
+			LocationDemand coverageAggregateStatistic) {
+		return new LocationEntityImpl(locationId,
 				coverageAggregateStatistic);
 	}
 
+	
+	public BulkFiberTerminal createBulkFiberTerminal(LocationEntity locationEntity) {
+		return new BulkFiberTerminalImpl(ensureId(null), locationEntity) ;
+	}
+	
+	public BulkFiberConsumer createBulkFiberConsumer(LocationEntityDemand locationEntityDemand) {
+		return null ;
+	}
 	
 	public FDTEquipment createFdt(Long id, Collection<LocationDropAssignment> dropAssignments) {
 		return new DefaultFDT(ensureId(id), dropAssignments);
@@ -49,7 +58,7 @@ public class EntityFactory {
 	}
 
 	public LocationDropAssignment createDropAssignment(LocationEntity entity,
-			double dropLengthMeters, DropCable dropCable) {
+			double dropLengthMeters, DropCable dropCable, double fiberDemand) {
 		return new LocationDropAssignmentImpl(entity, dropLengthMeters, dropCable);
 	}
 
@@ -104,7 +113,7 @@ public class EntityFactory {
 			EntityDoubleSum<DropCable> summer = new EntityDoubleSum<DropCable>() ;
 			
 			dropAssignments.forEach(da -> {
-				summer.add(da.getDropCable(), da.getAggregateStatistic().getDemandCoverage()) ;
+				summer.add(da.getDropCable(), da.getAggregateStatistic().getTotalDemand()) ;
 			});
 			
 			return new DropCableSummary(summer.getTotals().entrySet()
@@ -265,59 +274,7 @@ public class EntityFactory {
 
 	}
 
-	public static class RoadNode extends AbstractEntity implements RoadVertex {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public RoadNode(Long id) {
-			super(id);
-		}
-
-		@Override
-		public Class<? extends AroEntity> getType() {
-			return RoadVertex.class;
-		}
-
-		@Override
-		public void accept(AroEntityVisitor visitor) {
-			visitor.visit(this);
-		}
-
-	}
-
-	public static class CompositeEntity extends AbstractEntity implements
-			CompositeAroEntity {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private Collection<AroEntity> entities;
-
-		public CompositeEntity(Long id, Collection<AroEntity> entities) {
-			super(id);
-			this.entities = entities;
-		}
-
-		@Override
-		public Class<? extends AroEntity> getType() {
-			return CompositeAroEntity.class;
-		}
-
-		@Override
-		public void accept(AroEntityVisitor visitor) {
-			visitor.visit(this);
-		}
-
-		@Override
-		public Collection<AroEntity> getEntities() {
-			return entities;
-		}
-
-	}
+	
 
 	public static class LocationDropAssignmentImpl extends AbstractEntity
 			implements LocationDropAssignment {
@@ -347,8 +304,8 @@ public class EntityFactory {
 
 
 		@Override
-		public CoverageAggregateStatistic getAggregateStatistic() {
-			return entity.getCoverageStatistics() ;
+		public LocationDemand getAggregateStatistic() {
+			return entity.getLocationDemand() ;
 		}
 
 		@Override
@@ -373,6 +330,53 @@ public class EntityFactory {
 		}
 
 	}
+	
+	private static class BulkFiberTerminalImpl extends AbstractEntity implements BulkFiberTerminal {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private LocationEntity locationEntity ;
+		
+		public BulkFiberTerminalImpl(Long objectId,
+				LocationEntity locationEntity) {
+			super(objectId);
+			this.locationEntity = locationEntity;
+		}
+		
+		
+
+		@Override
+		public Class<? extends AroEntity> getType() {
+			return BulkFiberTerminal.class ;
+		}
+
+
+
+		@Override
+		public void accept(AroEntityVisitor visitor) {
+			visitor.visit(this);
+		}
+
+		@Override
+		public LocationEntity getLocationEntity() {
+			return locationEntity ;
+		}
+
+		
+
+		@Override
+		public LocationDemand getLocationDemand() {
+			return locationEntity.getLocationDemand() ;
+		}
+
+		@Override
+		public double getTotalFiberDemand() {
+			return locationEntity.getLocationDemand().getTotalDemand() ;
+		}
+		
+	}
 
 	public static class LocationEntityImpl extends AbstractEntity implements
 			LocationEntity {
@@ -381,13 +385,11 @@ public class EntityFactory {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private Long gid;
-		private CoverageAggregateStatistic coverageAggregateStatistic;
+		private LocationDemand coverageAggregateStatistic;
 
-		public LocationEntityImpl(Long id, Long gid,
-				CoverageAggregateStatistic coverageAggregateStatistic) {
+		public LocationEntityImpl(Long id,
+				LocationDemand coverageAggregateStatistic) {
 			super(id);
-			this.gid = gid;
 			this.coverageAggregateStatistic = coverageAggregateStatistic;
 		}
 
@@ -401,13 +403,10 @@ public class EntityFactory {
 			visitor.visit(this);
 		}
 
-		@Override
-		public Long getGid() {
-			return gid;
-		}
+		
 
 		@Override
-		public CoverageAggregateStatistic getCoverageStatistics() {
+		public LocationDemand getLocationDemand() {
 			return coverageAggregateStatistic;
 		}
 

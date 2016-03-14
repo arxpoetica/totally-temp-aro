@@ -3,7 +3,7 @@ package com.altvil.aro.service.conversion.impl;
 import java.util.Collection;
 
 import com.altvil.aro.model.NetworkNode;
-import com.altvil.aro.model.NetworkNodeType;
+import com.altvil.aro.model.NetworkNodeTypeEnum;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.vividsolutions.jts.geom.Point;
@@ -43,9 +43,28 @@ public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 		serialize(
 				register(
 						graphMapping.getGraphAssignment(),
-						createNetworkNode(graphMapping.getGraphAssignment().getPoint(), NetworkNodeType.fiber_distribution_hub)
+						createNetworkNode(graphMapping.getGraphAssignment().getPoint(), NetworkNodeTypeEnum.fiber_distribution_hub)
 						), graphMapping.getChildren());
 
+	}
+	
+
+	@Override
+	protected void serializeBulkFiberTerminals(NetworkNode parent,
+			GraphMapping graphMapping) {
+		
+		try {
+			createNetworkNode(graphMapping.getGraphAssignment().getPoint(), NetworkNodeTypeEnum.bulk_distrubution_terminal) ;
+		} catch( Throwable err ) {
+			err.printStackTrace(); 
+		}
+		
+		serialize(
+				register(
+						graphMapping.getGraphAssignment(),
+						createNetworkNode(graphMapping.getGraphAssignment().getPoint(), NetworkNodeTypeEnum.bulk_distrubution_terminal)
+						), graphMapping.getChildren());
+		
 	}
 
 	protected void serializeFdt(NetworkNode parent, GraphMapping graphMapping) {
@@ -54,13 +73,15 @@ public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 				register(
 						graphMapping.getGraphAssignment(),
 						createNetworkNode(graphMapping.getGraphAssignment().getPoint(), 
-								NetworkNodeType.fiber_distribution_terminal)),
+								NetworkNodeTypeEnum.fiber_distribution_terminal)),
 				graphMapping.getChildAssignments());
 
 	}
 	
 	
-	protected NetworkNode createNetworkNode(Point point, NetworkNodeType type) {
+	
+	
+	protected NetworkNode createNetworkNode(Point point, NetworkNodeTypeEnum type) {
 		NetworkNode node = new NetworkNode();
 
 		node.setGeogPoint(point);

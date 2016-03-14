@@ -1,10 +1,7 @@
 package com.altvil.aro.service.entity;
 
 public class DefaultAroVisitor implements AroEntityVisitor {
-
-	@Override
-	public void visit(RoadVertex node) {
-	}
+	
 
 	@Override
 	public void visit(CentralOfficeEquipment node) {
@@ -17,15 +14,8 @@ public class DefaultAroVisitor implements AroEntityVisitor {
 	@Override
 	public void visit(FDHEquipment node) {
 	}
-
-	@Override
-	public void visit(ConsumerAggregate node) {
-	}
-
-	@Override
-	public void visit(CompositeAroEntity node) {
-	}
-
+	
+	
 	@Override
 	public void visit(LocationEntity node) {
 	}
@@ -36,6 +26,12 @@ public class DefaultAroVisitor implements AroEntityVisitor {
 
 	@Override
 	public void visit(RemoteTerminal node) {
+	}
+	
+
+	@Override
+	public void visit(BulkFiberTerminal fiberTerminal) {
+		
 	}
 
 	@Override

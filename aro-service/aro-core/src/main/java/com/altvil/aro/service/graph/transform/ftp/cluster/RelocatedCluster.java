@@ -1,10 +1,10 @@
 package com.altvil.aro.service.graph.transform.ftp.cluster;
 
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
+import java.util.Collection;
+
+import com.altvil.aro.service.demand.AssignedEntityDemand;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
-
-import java.util.Collection;
 
 public class RelocatedCluster implements LocationCluster {
 
@@ -31,7 +31,7 @@ public class RelocatedCluster implements LocationCluster {
 	}
 
 	@Override
-	public boolean canAdd(GraphEdgeAssignment li) {
+	public boolean canAdd(AssignedEntityDemand li) {
 		return locationCluster.canAdd(li);
 	}
 
@@ -46,7 +46,7 @@ public class RelocatedCluster implements LocationCluster {
 	}
 
 	@Override
-	public Collection<GraphEdgeAssignment> getLocations() {
+	public Collection<AssignedEntityDemand> getLocations() {
 		return locationCluster.getLocations();
 	}
 

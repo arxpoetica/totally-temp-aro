@@ -14,7 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.altvil.aro.service.graph.segment.FiberType;
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.Geometry;

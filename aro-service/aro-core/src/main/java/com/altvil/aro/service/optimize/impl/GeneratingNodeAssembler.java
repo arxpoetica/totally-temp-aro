@@ -3,6 +3,7 @@ package com.altvil.aro.service.optimize.impl;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
@@ -10,7 +11,6 @@ import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.FiberType;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
@@ -18,7 +18,6 @@ import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-
 
 import org.jgrapht.DirectedGraph;
 

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
@@ -56,10 +56,10 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 	private boolean hasFiberDemand(NetworkAssignment roadLocation) {
 		
 		LocationEntity locationEntity = (LocationEntity) roadLocation.getSource() ;
-		CoverageAggregateStatistic coverageAggregateStatistic = locationEntity.getCoverageStatistics() ;
+		LocationDemand coverageAggregateStatistic = locationEntity.getLocationDemand() ;
 		
 		return coverageAggregateStatistic != null
-				&& coverageAggregateStatistic.getFiberDemand() > 0;
+				&& coverageAggregateStatistic. getTotalDemand() > 0;
 
 	}
 

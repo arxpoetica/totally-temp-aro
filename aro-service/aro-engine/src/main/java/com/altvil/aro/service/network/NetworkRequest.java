@@ -9,6 +9,7 @@ public class NetworkRequest {
 	}
 	
 	private long planId ;
+	private int year = 2015 ;
 
 	public NetworkRequest() {
 	}
@@ -21,5 +22,15 @@ public class NetworkRequest {
 	public void setPlanId(long planId) {
 		this.planId = planId;
 	}
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+	
+	
 
 }

@@ -1,7 +1,7 @@
 package com.altvil.aro.service.optimize.impl;
 
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.segment.FiberType;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage.Accumulator;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
@@ -103,7 +103,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 				then change getCapex methods so they take required fiber strands instead of demand coverage
 */
 		int childrenFiberStrandsRequirements = getChildren().stream().mapToInt(GeneratingNode::getRequiredFiberStrands).sum();
-		int directFiberDemand = (int) Math.ceil(directCoverage.getCoverage().getFiberDemand());
+		int directFiberDemand = (int) Math.ceil(directCoverage.getCoverage(). getTotalDemand());
 		this.requiredFiberStrands = equipmentAssigment.getRequiredIncomingFiberStrands(ctx, childrenFiberStrandsRequirements + directFiberDemand);
 
 		this.coverage = calcFiberCoverage(children);
@@ -198,7 +198,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public double getScore() {
-		return coverage.getCoverage().getScore(capex);
+		//TODO Compute Score as a function of Demand
+		return coverage.getCoverage().getTotalDemand() ;
 	}
 
 	@Override

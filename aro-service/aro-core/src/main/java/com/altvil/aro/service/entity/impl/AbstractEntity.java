@@ -26,15 +26,6 @@ public abstract class AbstractEntity implements AroEntity {
 	}
 
 	
-	@Override
-	public boolean isTransient() {
-		return objectId == null || objectId < 0;
-	}
-
-	@Override
-	public void updateId(Long objectId) {
-		this.objectId = objectId;
-	}
 	
 	
 	

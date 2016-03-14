@@ -12,6 +12,8 @@ public class DefaultGraphMapping implements GraphMapping {
 
 	private GraphEdgeAssignment graphAssignment;
 	private Collection<GraphMapping> graphMapping;
+	
+	
 
 	public DefaultGraphMapping(GraphEdgeAssignment graphAssignment,
 			Collection<GraphMapping> graphMapping) {
@@ -19,7 +21,8 @@ public class DefaultGraphMapping implements GraphMapping {
 		this.graphAssignment = graphAssignment;
 		this.graphMapping = graphMapping;
 	}
-
+	
+	
 	public DefaultGraphMapping(GraphEdgeAssignment graphAssignment) {
 		this(graphAssignment, StreamUtil
 				.asList((GraphMapping) new DefaultGraphMapping(graphAssignment,

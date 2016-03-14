@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
-import com.altvil.aro.service.graph.segment.FiberType;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.model.FiberAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
@@ -18,8 +18,6 @@ public class SerializerImpl implements ModelSerializer {
 
 	//private CompositeNetworkModel originalModel;
 
-	//private GraphEdgeAssignment centralOffice;
-	private List<FullFdhAssigmnent> fdhs = new ArrayList<>();
 	//private FiberAssignment fiberAssignment;
 
 	public SerializerImpl(CompositeNetworkModel originalModel) {
@@ -27,11 +25,7 @@ public class SerializerImpl implements ModelSerializer {
 		//this.originalModel = originalModel;
 	}
 
-	@Override
-	public GraphMapping serialize(GeneratingNode node, FullFdhAssigmnent fdh) {
-		fdhs.add(fdh);
-		return null ;
-	}
+	
 
 	@Override
 	public GraphMapping serialize(GeneratingNode node, RootAssignment root) {

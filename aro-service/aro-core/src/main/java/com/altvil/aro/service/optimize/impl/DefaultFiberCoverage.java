@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.ZeroCoverageStatistics;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
@@ -15,24 +15,24 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	
 	public static  DemandCoverage EMPTY_COVERAGE = new DefaultFiberCoverage(ZeroCoverageStatistics.STATISTIC, new HashSet<LocationEntity>()) ;
 	
-	private CoverageAggregateStatistic coverage;
+	private LocationDemand coverage;
 	private Set<LocationEntity> locationEntities;
 
-	private DefaultFiberCoverage(CoverageAggregateStatistic coverage, Set<LocationEntity> locationEntities) {
+	private DefaultFiberCoverage(LocationDemand coverage, Set<LocationEntity> locationEntities) {
 		super();
 		this.coverage = coverage;
 		this.locationEntities = locationEntities;
 	}
 
-	public static Accumulator accumulate(Supplier<CoverageAggregateStatistic> supplier) {
+	public static Accumulator accumulate(Supplier<LocationDemand> supplier) {
 		return new Accumulator(supplier);
 	}
 
 	public static DemandCoverage create(Set<LocationEntity> locationEntities,
-										Supplier<CoverageAggregateStatistic> supplier) {
+										Supplier<LocationDemand> supplier) {
 
-		CoverageAggregateStatistic coverage = supplier.get();
-		locationEntities.forEach(le -> coverage.add(le.getCoverageStatistics()));
+		LocationDemand coverage = supplier.get();
+		locationEntities.forEach(le -> coverage.add(le.getLocationDemand()));
 		return new DefaultFiberCoverage(coverage,
 				locationEntities);
 
@@ -44,17 +44,17 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	}
 
 	@Override
-	public CoverageAggregateStatistic getCoverage() {
+	public LocationDemand getCoverage() {
 		return coverage;
 	}
 
 
 	public static class Accumulator {
 
-		CoverageAggregateStatistic coverage;
+		LocationDemand coverage;
 		Set<LocationEntity> locationEntities = new HashSet<>();
 
-		public Accumulator(Supplier<CoverageAggregateStatistic> supplier) {
+		public Accumulator(Supplier<LocationDemand> supplier) {
 			coverage = supplier.get();
 		}
 

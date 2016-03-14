@@ -114,14 +114,14 @@ public class FDHAssembler {
 					double dropLength = Math.abs(fdt.offsetFrom(pl))
 							+ pl.getDistanceFromIntersectionPoint();
 
-					LocationEntity locationEntity = (LocationEntity) a.getAroEntity();
+					LocationEntity locationEntity = a.getLocationEntity() ;
 					return GraphAssignmentFactoryImpl.FACTORY.createEdgeAssignment(
 							a.getPinnedLocation(),
 							EntityFactory.FACTORY.createDropAssignment(
 									locationEntity,
 									dropLength,
-									threshHolds.getDropCableModel().getDropCable(dropLength) 
-									
+									threshHolds.getDropCableModel().getDropCable(dropLength),
+									a.getTotalDemand()
 							));
 
 				});

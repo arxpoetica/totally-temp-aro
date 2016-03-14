@@ -3,10 +3,10 @@ package com.altvil.aro.service.optimize.spi;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-import com.altvil.aro.service.entity.CoverageAggregateStatistic;
+import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.FiberType;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.HubModel;
 import com.altvil.aro.service.optimize.OptimizerContext;
@@ -47,6 +47,6 @@ public interface AnalysisContext {
 
 	public Builder addSplitterNode(GeneratingNode.Builder parent);
 
-	Supplier<CoverageAggregateStatistic> getCoverageScoreSupplier();
+	Supplier<LocationDemand> getCoverageScoreSupplier();
 
 }

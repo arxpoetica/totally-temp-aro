@@ -3,6 +3,7 @@ package com.altvil.aro.service.planing;
 import java.util.concurrent.Future;
 
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.aro.service.plan.InputRequests;
 
 public interface NetworkPlanningService {
 
@@ -12,6 +13,6 @@ public interface NetworkPlanningService {
 			FiberNetworkConstraints constraints);
 
 	MasterPlanCalculation planMasterFiber(long planId,
-			FiberNetworkConstraints constraints);
+			InputRequests inputRequests, FiberNetworkConstraints constraints);
 
 }

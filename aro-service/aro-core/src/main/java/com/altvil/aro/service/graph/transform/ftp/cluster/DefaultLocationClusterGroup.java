@@ -8,9 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
+import com.altvil.aro.service.demand.AssignedEntityDemand;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.ftp.EdgeList;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
@@ -25,9 +23,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			FtthThreshholds thresholds) {
 		return new DefaultLocationClusterGroup(edgeList, thresholds, thresholds.isClusterMergingSupported());
 	}
-
-	private GraphAssignmentFactory assignmentFactory = GraphAssignmentFactoryImpl.FACTORY;
-
+	
 	private EdgeList edgeList;
 	private boolean supportsIncomingCluster;
 	
@@ -86,29 +82,29 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 		return edgeList.getGeoSegment();
 	}
 
-	private Collection<GraphEdgeAssignment> getLocationAssignments() {
+	private Collection<AssignedEntityDemand> getLocationAssignments() {
 		if (incomingClusters == null || incomingClusters.size() == 0) {
-			return edgeList.getGraphEdgeAssignments();
+			return edgeList.getAssignedEntityDemands() ;
 		}
 
 		GeoSegment gs = getGeoSegment();
 
-		List<GraphEdgeAssignment> locations = new ArrayList<>();
+		List<AssignedEntityDemand> locations = new ArrayList<>();
 
 		for (LocationCluster cluster : incomingClusters) {
-			for (GraphEdgeAssignment a : cluster.getLocations()) {
-				locations.add(assignmentFactory.createEdgeAssignment(
-						gs.proxyPin(0.0, a.getPinnedLocation()),
-						a.getAroEntity()));
+			for (AssignedEntityDemand a : cluster.getLocations()) {
+				AssignedEntityDemand ald = 
+						new AssignedEntityDemand(a.getLocationEntity(), gs.proxyPin(0.0, a.getPinnedLocation())) ;
+				locations.add(ald);
 			}
 		}
 		
 		
 		//Sort Assignments By Distance from End Vertex
 		//This will force Pins from connecting segments to be placed first 
-		locations.sort(new Comparator<GraphEdgeAssignment>() {
+		locations.sort(new Comparator<AssignedEntityDemand>() {
 			@Override
-			public int compare(GraphEdgeAssignment o1, GraphEdgeAssignment o2) {
+			public int compare(AssignedEntityDemand o1, AssignedEntityDemand o2) {
 
 				double d1 = o1.getPinnedLocation()
 						.getEffectiveOffsetFromEndVertex();
@@ -120,39 +116,17 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 		});
 
-		locations.addAll(edgeList.getGraphEdgeAssignments());
+		locations.addAll(edgeList.getAssignedEntityDemands());
 
 		return locations;
 
 	}
 	
 	private List<LocationCluster> recluster() {
-		return thresholds.isDropCableConstraintsSupported() ? _reclusterConstrained() : _recluster() ;
+		return  _reclusterConstrained() ;
 	}
 
-	@Deprecated
-	private List<LocationCluster> _recluster() {
-
-		List<LocationCluster> clusters = new ArrayList<LocationCluster>();
-
-		FDTLocationAggregate la =
-				new FDTLocationAggregate(edgeList.getGeoSegment(), thresholds);
-
-		for (GraphEdgeAssignment li : getLocationAssignments()) {
-			
-			if (!la.add(li)) {
-				clusters.add(la);
-				la = new FDTLocationAggregate(edgeList.getGeoSegment(), thresholds);
-				la.add(li) ;
-			}
-		}
-
-		if (!la.isEmpty()) {
-			clusters.add(la);
-		}
-
-		return clusters;
-	}
+	
 	
 	private List<LocationCluster> _reclusterConstrained() {
 
@@ -161,7 +135,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 		FdtConstrainedAggregate la =
 				new FdtConstrainedAggregate(edgeList.getGeoSegment(), thresholds);
 
-		for (GraphEdgeAssignment li : getLocationAssignments()) {
+		for (AssignedEntityDemand li : getLocationAssignments()) {
 			if (!la.add(li)) {
 				clusters.add(la);
 				la = new FdtConstrainedAggregate(edgeList.getGeoSegment(), thresholds);
