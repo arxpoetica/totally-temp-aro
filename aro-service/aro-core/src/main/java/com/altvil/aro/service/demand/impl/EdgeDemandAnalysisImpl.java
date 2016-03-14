@@ -60,8 +60,6 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 			double totalDemand = locationDemand.getTotalDemand();
 
 			if (totalDemand != 0) {
-
-				System.out.println("checking .... " + totalDemand) ;
 				
 				AssignedEntityDemand ad = new AssignedEntityDemand(entity, pl);
 
