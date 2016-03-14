@@ -1,6 +1,6 @@
 package com.altvil.aro.model;
 
-public enum NetworkNodeType {
+public enum NetworkNodeTypeEnum {
 	
 	central_office(1),
 	splice_point(2),
@@ -13,7 +13,7 @@ public enum NetworkNodeType {
 	
 	int id ;
 	
-	private NetworkNodeType(int id) {
+	private NetworkNodeTypeEnum(int id) {
 		this.id = id ;
 	}
 	

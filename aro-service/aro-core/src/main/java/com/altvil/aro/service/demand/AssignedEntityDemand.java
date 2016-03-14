@@ -20,7 +20,7 @@ public class AssignedEntityDemand  {
 	}
 
 	public double getHouseholdFiberDemandValue() {
-		return locationDemand.getHouseholdFiberDemandValue() ;
+		return locationDemand.getTotalDemand() ;
 	}
 
 

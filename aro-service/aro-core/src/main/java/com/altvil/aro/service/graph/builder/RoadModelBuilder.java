@@ -59,7 +59,7 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 		LocationDemand coverageAggregateStatistic = locationEntity.getLocationDemand() ;
 		
 		return coverageAggregateStatistic != null
-				&& coverageAggregateStatistic. getHouseholdFiberDemandValue() > 0;
+				&& coverageAggregateStatistic. getTotalDemand() > 0;
 
 	}
 

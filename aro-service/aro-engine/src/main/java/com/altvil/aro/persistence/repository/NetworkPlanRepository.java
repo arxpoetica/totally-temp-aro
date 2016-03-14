@@ -58,7 +58,7 @@ public interface NetworkPlanRepository extends
 			"from location_ids l\n" + 
 			"left join business_fiber b on b.id = l.id\n" + 
 			"left join celltower_fiber t on t.id = l.id\n" + 
-			"left join household_fiber h on h.id = l.id ")
+			"left join household_fiber h on h.id = l.id", nativeQuery = true)
 	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year);
 
 	

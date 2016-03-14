@@ -23,7 +23,7 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 
 	@Override
 	public DemandAnalyizer createDemandAnalyizer(FtthThreshholds constraints) {
-		return new DemandAnalysisImpl(0) ;
+		return new DemandAnalysisImpl(constraints.getLocationBulkThreshhold()) ;
 	}
 
 	private class DemandAnalysisImpl implements DemandAnalyizer {
@@ -61,6 +61,8 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 
 			if (totalDemand != 0) {
 
+				System.out.println("checking .... " + totalDemand) ;
+				
 				AssignedEntityDemand ad = new AssignedEntityDemand(entity, pl);
 
 				if (totalDemand >= bulkFiberThreshold) {

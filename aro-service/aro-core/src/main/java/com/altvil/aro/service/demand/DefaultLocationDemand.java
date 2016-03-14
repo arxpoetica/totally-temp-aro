@@ -46,6 +46,8 @@ public class DefaultLocationDemand implements LocationDemand {
 		super();
 		this.demands = demands;
 		this.totalFiberDemand = totalFiberDemand;
+		
+		System.out.println("total demand " + totalFiberDemand) ;
 	}
 
 	@Override
@@ -77,15 +79,6 @@ public class DefaultLocationDemand implements LocationDemand {
 	public double getTotalFiberDemand() {
 		return totalFiberDemand;
 	}
-
-	@Override
-	public double getHouseholdFiberDemandValue() {
-		return demands.get(LocationEntityType.Household).getDemand();
-	}
-
-	@Override
-	public LocationEntityDemand getHouseholdFiberDemand() {
-		return demands.get(LocationEntityType.Household);
-	}
+	
 
 }

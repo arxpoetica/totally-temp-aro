@@ -67,8 +67,7 @@ public class NetworkServiceImpl implements NetworkService {
 		Map<Long, LocationDemand> map = new HashMap<>();
 
 		planRepository
-				.queryFiberDemand(networkRequest.getPlanId(),
-						networkRequest.getYear())
+				.queryFiberDemand(networkRequest.getPlanId(), networkRequest.getYear())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
@@ -102,7 +101,7 @@ public class NetworkServiceImpl implements NetworkService {
 
 						Long locationId = result.getLong(LocationMap.id) ;
 						LocationDemand  ldm = demandMap.get(locationId) ;
-						if( ldm == null ) {
+						if( ldm == null || ldm.getTotalDemand() == 0) {
 							//No Demand no location mapped in for fiber Linking
 							return null ;
 						}

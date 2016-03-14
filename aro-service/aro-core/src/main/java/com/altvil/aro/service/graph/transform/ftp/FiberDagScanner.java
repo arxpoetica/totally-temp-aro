@@ -2,6 +2,7 @@ package com.altvil.aro.service.graph.transform.ftp;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,6 +15,7 @@ import org.jgrapht.DirectedGraph;
 
 import com.altvil.aro.service.demand.AssignedEntityDemand;
 import com.altvil.aro.service.demand.DemandAnalyizer;
+import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
@@ -39,10 +41,12 @@ import com.altvil.interfaces.Assignment;
 
 public class FiberDagScanner {
 
+	
 	private DemandAnalyizer demandAnalyizer;
 	private FtthThreshholds thresholds;
 
 	private GraphAssignmentFactory graphAssignmentFactory = GraphAssignmentFactoryImpl.FACTORY;
+	private EntityFactory entityFactory = EntityFactory.FACTORY ; 
 
 	private DAGModel<GeoSegment> graphModel;
 	private DirectedGraph<GraphNode, AroEdge<GeoSegment>> graph;
@@ -157,11 +161,12 @@ public class FiberDagScanner {
 		if (assigments.size() > 0) {
 			this.feederSinkAssignments.addAll(assigments
 					.stream()
-					.map(aed -> new DefaultGraphMapping(graphAssignmentFactory
+					.map(aed -> new DefaultGraphMapping(
+							graphAssignmentFactory
 							.createEdgeAssignment(aed.getPinnedLocation(),
-									aed.getLocationEntity())
+									entityFactory.createBulkFiberTerminal(aed.getLocationEntity()))
 
-					)).collect(Collectors.toList()));
+					,Collections.emptyList())).collect(Collectors.toList()));
 		}
 	}
 

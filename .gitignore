@@ -57,3 +57,7 @@ aro-service/aro-service/.settings/org.eclipse.wst.common.component
 *.war
 
 aro-service/docker/aro-service.war
+
+aro-service/aro-interfaces/.project
+
+aro-service/aro-interfaces/.project

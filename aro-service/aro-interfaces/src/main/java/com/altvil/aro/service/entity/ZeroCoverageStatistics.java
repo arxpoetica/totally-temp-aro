@@ -20,26 +20,13 @@ public class ZeroCoverageStatistics implements LocationDemand {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@Override
-	public double getHouseholdFiberDemandValue() {
-		return 0;
-	}
 	
-
-
 
 	@Override
 	public double getTotalDemand() {
 		return 0;
 	}
-
-
-
-
-	@Override
-	public LocationEntityDemand getHouseholdFiberDemand() {
-		return map.get(LocationEntityType.Household) ;
-	}
+	
 
 	@Override
 	public LocationEntityDemand getLocationDemand(LocationEntityType type) {

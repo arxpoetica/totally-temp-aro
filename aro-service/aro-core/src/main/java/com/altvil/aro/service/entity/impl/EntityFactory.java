@@ -41,8 +41,8 @@ public class EntityFactory {
 	}
 
 	
-	public BulkFiberTerminal createBulkFiberTerminal() {
-		return null ;
+	public BulkFiberTerminal createBulkFiberTerminal(LocationEntity locationEntity) {
+		return new BulkFiberTerminalImpl(ensureId(null), locationEntity) ;
 	}
 	
 	public BulkFiberConsumer createBulkFiberConsumer(LocationEntityDemand locationEntityDemand) {
@@ -113,7 +113,7 @@ public class EntityFactory {
 			EntityDoubleSum<DropCable> summer = new EntityDoubleSum<DropCable>() ;
 			
 			dropAssignments.forEach(da -> {
-				summer.add(da.getDropCable(), da.getAggregateStatistic().getHouseholdFiberDemandValue()) ;
+				summer.add(da.getDropCable(), da.getAggregateStatistic().getTotalDemand()) ;
 			});
 			
 			return new DropCableSummary(summer.getTotals().entrySet()
@@ -329,6 +329,53 @@ public class EntityFactory {
 
 		}
 
+	}
+	
+	private static class BulkFiberTerminalImpl extends AbstractEntity implements BulkFiberTerminal {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private LocationEntity locationEntity ;
+		
+		public BulkFiberTerminalImpl(Long objectId,
+				LocationEntity locationEntity) {
+			super(objectId);
+			this.locationEntity = locationEntity;
+		}
+		
+		
+
+		@Override
+		public Class<? extends AroEntity> getType() {
+			return BulkFiberTerminal.class ;
+		}
+
+
+
+		@Override
+		public void accept(AroEntityVisitor visitor) {
+			visitor.visit(this);
+		}
+
+		@Override
+		public LocationEntity getLocationEntity() {
+			return locationEntity ;
+		}
+
+		
+
+		@Override
+		public LocationDemand getLocationDemand() {
+			return locationEntity.getLocationDemand() ;
+		}
+
+		@Override
+		public double getTotalFiberDemand() {
+			return locationEntity.getLocationDemand().getTotalDemand() ;
+		}
+		
 	}
 
 	public static class LocationEntityImpl extends AbstractEntity implements
