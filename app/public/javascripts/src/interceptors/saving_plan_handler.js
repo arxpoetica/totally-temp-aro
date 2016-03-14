@@ -1,50 +1,50 @@
-app.config(function($httpProvider) {
+/* global app $ */
+app.config(($httpProvider) => {
+  var operations = 0
 
-  var operations = 0;
-
-  function update_operations(n) {
-    operations += n;
+  function update_operations (n) {
+    operations += n
     if (operations > 0) {
-      $('#plan-saved').stop().hide();
-      $('#plan-saving').stop().show();
+      $('#plan-saved').stop().hide()
+      $('#plan-saving').stop().show()
     } else {
-      $('#plan-saving').stop().hide();
-      $('#plan-saved').stop().show();
-      setTimeout(function() {
-        $('#plan-saved').fadeOut();
+      $('#plan-saving').stop().hide()
+      $('#plan-saved').stop().show()
+      setTimeout(() => {
+        $('#plan-saved').fadeOut()
       }, 500)
     }
   }
 
-  $httpProvider.interceptors.push(function($q) {
+  $httpProvider.interceptors.push(($q) => {
     return {
-      request: function(config) {
+      request: (config) => {
         if (config.saving_plan) {
-          update_operations(1);
+          update_operations(1)
         }
-        var deferred = $q.defer();
-        deferred.resolve(config);
-        return deferred.promise;
+        var deferred = $q.defer()
+        deferred.resolve(config)
+        return deferred.promise
       },
-      response: function(response) {
+      response: (response) => {
         if (response.config.saving_plan) {
-          update_operations(-1);
+          update_operations(-1)
         }
-        return response;
+        return response
       },
-     'requestError': function(rejection) {
+      'requestError': (rejection) => {
         if (rejection.config.saving_plan) {
-          update_operations(-1);
+          update_operations(-1)
         }
-        return $q.reject(rejection);
+        return $q.reject(rejection)
       },
 
-      'responseError': function(rejection) {
+      'responseError': (rejection) => {
         if (rejection.config.saving_plan) {
-          update_operations(-1);
+          update_operations(-1)
         }
-        return $q.reject(rejection);
+        return $q.reject(rejection)
       }
-    };
-  });
-});
+    }
+  })
+})

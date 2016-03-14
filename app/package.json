@@ -10,7 +10,8 @@
     "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
     "test-all": "npm test && npm run test-ui && npm run test-integration",
     "build": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib",
-    "watch": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib --watch --source-maps"
+    "watch": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib --watch --source-maps",
+    "lint": "standard"
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
@@ -18,6 +19,15 @@
     "plugins": [
       "transform-es2015-template-literals",
       "transform-es2015-arrow-functions"
+    ]
+  },
+  "standard": {
+    "ignore": [
+      "public/javascripts/lib",
+      "public/javascripts/vendors",
+      "test/integration",
+      "test/ui/mocha.js",
+      "test/ui/chai.js"
     ]
   },
   "dependencies": {
@@ -32,6 +42,7 @@
     "compression": "~1.5.0",
     "cookie-session": "^1.2.0",
     "csv-stringify": "0.0.8",
+    "dedent": "^0.6.0",
     "ejs": "^2.3.3",
     "express": "^4.13.1",
     "express-flash": "0.0.2",
@@ -44,11 +55,11 @@
     "passport-local": "^1.0.0",
     "passport-stub": "^1.0.1",
     "pg": "~4.4.0",
+    "pync": "^1.0.0",
     "q": "^1.4.1",
     "request": "^2.61.0",
     "supertest": "^1.1.0",
     "temp": "^0.8.3",
-    "txain": "^0.4.0",
     "underscore": "^1.8.3",
     "yargs": "^3.24.0"
   },
@@ -66,6 +77,7 @@
     "mocha": "^2.2.5",
     "phantomjs": "^1.9.17",
     "protractor": "^2.1.0",
+    "standard": "^6.0.7",
     "xml2js": "^0.4.10"
   }
 }

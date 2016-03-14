@@ -1,12 +1,13 @@
-var app = angular.module('aro', []);
-var map;
+/* global angular google */
+var app = angular.module('aro', []) // eslint-disable-line
+var map // eslint-disable-line
 
-function initialize() {
+function initialize () {
   var styles = [{
     featureType: 'poi',
     elementType: 'labels',
-    stylers: [ { visibility: 'off' } ],
-  }];
+    stylers: [ { visibility: 'off' } ]
+  }]
 
   map = new google.maps.Map(document.getElementById('map-canvas'), {
     zoom: 12,
@@ -20,10 +21,10 @@ function initialize() {
     mapTypeControlOptions: {
       position: google.maps.ControlPosition.TOP_RIGHT
     },
-    styles: styles,
-  });
+    styles: styles
+  })
 }
 
-google.maps.event.addDomListener(window, 'load', initialize);
+google.maps.event.addDomListener(window, 'load', initialize)
 
-var expect = chai.expect;
+var expect = chai.expect // eslint-disable-line

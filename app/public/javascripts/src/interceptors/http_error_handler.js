@@ -1,29 +1,30 @@
-app.config(function($httpProvider) {
-
-  function handleRejection(rejection) {
+/* global app swal */
+app.config(($httpProvider) => {
+  function handleRejection (rejection) {
     swal({
-      title: "Error!",
-      text: rejection.status+' '+rejection.statusText,
-      type: "error"
-    });
+      title: 'Error!',
+      text: rejection.status
+        ? rejection.status + ' ' + rejection.statusText
+        : 'The connection with the server failed',
+      type: 'error'
+    })
   }
 
-  $httpProvider.interceptors.push(function($q) {
+  $httpProvider.interceptors.push(($q) => {
     return {
-     'requestError': function(rejection) {
+      'requestError': (rejection) => {
         if (!rejection.config.customErrorHandling) {
-          handleRejection(rejection);
+          handleRejection(rejection)
         }
-        return $q.reject(rejection);
+        return $q.reject(rejection)
       },
 
-      'responseError': function(rejection) {
+      'responseError': (rejection) => {
         if (!rejection.config.customErrorHandling) {
-          handleRejection(rejection);
+          handleRejection(rejection)
         }
-        return $q.reject(rejection);
+        return $q.reject(rejection)
       }
-    };
-  });
-
-});
+    }
+  })
+})

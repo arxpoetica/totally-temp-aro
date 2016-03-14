@@ -1,23 +1,26 @@
-var models = require('../models');
-var nook = require('node-errors').nook;
+var models = require('../models')
 
-exports.configure = function(app, middleware) {
+exports.configure = (app, middleware) => {
+  var check_admin = middleware.check_admin
+  var jsonSuccess = middleware.jsonSuccess
 
-  var check_admin = middleware.check_admin;
-  var jsonHandler = middleware.jsonHandler;
+  app.get('/admin/users', check_admin, (request, response, next) => {
+    models.User.find()
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 
-  app.get('/admin/users', check_admin, function(request, response, next) {
-    models.User.find(jsonHandler(response, next));
-  });
+  app.post('/admin/users/register', check_admin, (request, response, next) => {
+    var options = request.body
+    models.User.register(options)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 
-  app.post('/admin/users/register', check_admin, function(request, response, next) {
-    var options = request.body;
-    models.User.register(options, jsonHandler(response, next));
-  });
-
-  app.post('/admin/users/delete', check_admin, function(request, response, next) {
-    var user_id = request.body.user;
-    models.User.delete_user(user_id, jsonHandler(response, next));
-  });
-
-};
+  app.post('/admin/users/delete', check_admin, (request, response, next) => {
+    var user_id = request.body.user
+    models.User.deleteUser(user_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+}

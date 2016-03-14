@@ -4563,7 +4563,7 @@ Runnable.prototype.run = function(fn){
     if (result && typeof result.then === 'function') {
       self.resetTimeout();
       result
-        .then(function() {
+        .then(() => {
           done()
         },
         function(reason) {

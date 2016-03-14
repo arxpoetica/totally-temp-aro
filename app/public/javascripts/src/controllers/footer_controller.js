@@ -1,13 +1,14 @@
+/* global app */
 // Footer Controller
-app.controller('footer_controller', ['$scope', '$rootScope', 'selection', function($scope, $rootScope, selection) {
+app.controller('footer_controller', ['$scope', '$rootScope', 'selection', ($scope, $rootScope, selection) => {
+  $scope.plan = null
+  $scope.selection = selection
 
-  $scope.route = null;
-  $scope.selection = selection;
+  $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    $scope.plan = plan
+  })
 
-  $rootScope.$on('route_changed_metadata', function(e, route) {
-    $scope.route = route;
-  });
-
-  $rootScope.$on('route_selected', (e, route) => $scope.route = route);
-
-}]);
+  $rootScope.$on('plan_selected', (e, plan) => {
+    $scope.plan = plan
+  })
+}])

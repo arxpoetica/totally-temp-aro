@@ -1,11 +1,11 @@
--- Table: custom.boundaries
+-- Table: client.plan_boundaries
 
-DROP TABLE IF EXISTS custom.boundaries;
+DROP TABLE IF EXISTS client.plan_boundaries;
 
-CREATE TABLE custom.boundaries
+CREATE TABLE client.plan_boundaries
 (
   id serial,
-  route_id bigint NOT NULL REFERENCES custom.route ON DELETE CASCADE,
+  plan_id bigint NOT NULL REFERENCES client.plan ON DELETE CASCADE,
   name varchar not null,
   geom geometry
 );

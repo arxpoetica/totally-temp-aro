@@ -7,13 +7,29 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 # Map carriers to locations to determine service coverage
 ${PSQL} -a -f $DIR/create_client_carrier_location_mapping.sql
 
+# Create and load network plan table
+${PSQL} -a -f $DIR/create_client_plan.sql
+
 # Create and load network node types table
 ${PSQL} -a -f $DIR/create_client_network_node_types.sql
 
 # Create and load network nodes table
 ${PSQL} -a -f $DIR/create_client_network_nodes.sql
 
-${PSQL} -a -f $DIR/create_client_graph.sql
+# Create and load plan sources
+${PSQL} -a -f $DIR/create_client_plan_sources.sql
+
+# Create and load plan targets
+${PSQL} -a -f $DIR/create_client_plan_targets.sql
+
+# Create and load fiber type
+${PSQL} -a -f $DIR/create_client_fiber_route_type.sql
+
+# Create boundaries
+${PSQL} -a -f $DIR/create_client_boundaries.sql
+
+# Create and load fiber route
+${PSQL} -a -f $DIR/create_client_fiber_route.sql
 
 # Populates a location entry fees table with fake data for 'client'. This should be replaced with real data later.
 ${PSQL} -a -f $DIR/load_location_entry_fees.sql

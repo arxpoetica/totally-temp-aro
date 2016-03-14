@@ -1,329 +1,215 @@
 // Network
 //
+'use strict'
 
-var helpers = require('../helpers');
-var database = helpers.database;
-var txain = require('txain');
-var _ = require('underscore');
-var request = require('request');
-var config = helpers.config;
-var models = require('./');
+var helpers = require('../helpers')
+var database = helpers.database
+var _ = require('underscore')
+var request = require('request')
+var config = helpers.config
+var models = require('./')
+var pync = require('pync')
 
-var Network = {};
+module.exports = class Network {
 
-// View existing fiber plant for a carrier
-Network.view_fiber_plant_for_carrier = function(carrier_name, viewport, callback) {
-  txain(function(callback) {
-    if (viewport.zoom > viewport.threshold) {
-      var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.fiber_plant WHERE carrier_name = $1 AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)';
-      database.query(sql, [carrier_name, viewport.linestring], callback);
-    } else {
-      var sql = `
-        WITH ${viewport.fishnet}
-        SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
-        FROM fishnet
-        JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
-        AND fiber_plant.carrier_name = $1
-        GROUP BY fishnet.geom
-      `
-      database.query(sql, [carrier_name], callback);
-    }
-  })
-  .then(function(rows, callback) {
-    var features = rows.map(row => ({
-      type: 'Feature',
-      geometry: row.geom,
-      properties: {
-        // density: row.density,
-      }
-    }))
+  // View existing fiber plant for a carrier
+  static viewFiberPlantForCarrier (carrier_name, viewport) {
+    var sql = `
+      SELECT geom
+      FROM aro.fiber_plant
+      WHERE carrier_name = $1
+    `
+    return database.lines(sql, [carrier_name], true, viewport)
+  }
 
-    var output = {
-      'feature_collection': {
-        'type':'FeatureCollection',
-        'features': features
-      },
-    };
-    callback(null, output)
-  })
-  .end(callback)
-};
+  // View existing fiber plant for competitors
+  static viewFiberPlantForCompetitors (viewport) {
+    var sql = `
+      SELECT geom
+      FROM aro.fiber_plant
+      WHERE carrier_id <> (SELECT id FROM carriers WHERE name=$1)
+    `
+    return database.lines(sql, [config.client_carrier_name], true, viewport)
+  }
 
-// View existing fiber plant for competitors
-Network.view_fiber_plant_for_competitors = function(viewport, callback) {
-  txain(function(callback) {
-    if (viewport.zoom > viewport.threshold) {
-      var sql = 'SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.fiber_plant WHERE carrier_name <> $1 AND ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($2)), 4326), geom)';
-      database.query(sql, [config.client_carrier_name, viewport.linestring], callback);
-    } else {
-      callback(null, []);
-    }
-  })
-  .then(function(rows, callback) {
-    var features = rows.map(row => ({
-      type: 'Feature',
-      geometry: row.geom,
-      properties: {
-        density: row.density,
-      }
-    }))
+  // View existing fiber plant for competitors
+  static viewTowers (viewport) {
+    var sql = 'SELECT geom FROM aro.towers'
+    return database.points(sql, [], true, viewport)
+  }
 
-    var output = {
-      'feature_collection': {
-        'type':'FeatureCollection',
-        'features': features
-      },
-    };
-    callback(null, output)
-  })
-  .end(callback)
-};
+  // View existing fiber plant for competitors with a heat map
+  static viewFiberPlantDensity (viewport) {
+    var sql = `
+      SELECT geom
+      FROM fiber_plant
+      WHERE carrier_name <> $1
+    `
+    var density = 'COUNT(DISTINCT features.carrier_name)'
+    return database.density(sql, [config.client_carrier_name], true, viewport, density)
+  }
 
-// View existing fiber plant for competitors
-Network.view_towers = function(viewport, callback) {
-  txain(function(callback) {
-    if (viewport.zoom > viewport.threshold) {
-      var sql = `
-        SELECT ST_AsGeoJSON(geom)::json AS geom FROM aro.towers WHERE
-        ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($1)), 4326), geom)
-      `;
-      database.query(sql, [viewport.linestring], callback);
-    } else {
-      callback(null, []);
-    }
-  })
-  .then(function(rows, callback) {
-    var features = rows.map(function(row) {
-      return {
-        type: 'Feature',
-        geometry: row.geom,
-        properties: {
+  static carriers (plan_id) {
+    return models.MarketSize.carriersByCityOfPlan(plan_id, true)
+  }
+
+  // View the user client's network nodes
+  //
+  // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
+  // 2. plan_id Number Pass a plan_id to find additionally the network nodes associated to that route
+  static viewNetworkNodes (node_types, plan_id, viewport) {
+    return Promise.resolve()
+      .then(() => {
+        var sql = `
+          SELECT
+            n.id, ST_AsGeoJSON(geom)::json AS geom, t.name AS name,
+            '/images/map_icons/' || t.name || '.png' AS icon,
+            plan_id IS NOT NULL AS draggable,
+            name <> 'central_office' AS unselectable
+          FROM client.network_nodes n
+          JOIN client.network_node_types t
+            ON n.node_type_id = t.id
+        `
+        var params = []
+        var constraints = []
+
+        if (node_types && node_types.length > 0) {
+          var arr = []
+          node_types.forEach((node_type) => {
+            params.push(node_type)
+            arr.push('t.name = $' + params.length)
+          })
+          constraints.push('(' + arr.join(' OR ') + ')')
+        }
+
+        if (plan_id) {
+          params.push(plan_id)
+          constraints.push(`
+            (plan_id IS NULL OR plan_id IN (
+              SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
+              UNION ALL
+              SELECT $${params.length}
+            ))`)
+        } else {
+          constraints.push('plan_id IS NULL')
+        }
+
+        if (constraints.length > 0) {
+          sql += ' WHERE ' + constraints.join(' AND ')
+        }
+        return database.query(sql, params, true)
+      })
+  }
+
+  // View all the available network node types
+  static viewNetworkNodeTypes () {
+    return database.query('SELECT * FROM client.network_node_types')
+  }
+
+  static editNetworkNodes (plan_id, changes) {
+    return Promise.resolve()
+      .then(() => this._addNodes(plan_id, changes.insertions))
+      .then(() => this._updateNodes(plan_id, changes.updates))
+      .then(() => this._deleteNodes(plan_id, changes.deletions))
+      .then(() => (
+        database.execute('UPDATE client.plan SET updated_at=NOW() WHERE id=$1', [plan_id])
+      ))
+  }
+
+  static _addNodes (plan_id, insertions) {
+    return Promise.resolve()
+      .then(() => {
+        if (!_.isArray(insertions) || insertions.length === 0) return
+        var sql = 'INSERT INTO client.network_nodes (node_type_id, geog, geom, plan_id) VALUES '
+        var params = []
+        var arr = []
+        insertions.forEach((node) => {
+          var i = params.length
+          params.push(node.type)
+          params.push(`POINT(${node.lon} ${node.lat})`)
+          params.push(`POINT(${node.lon} ${node.lat})`)
+          params.push(plan_id)
+          arr.push('($' + (i + 1) + ', ST_GeogFromText($' + (i + 2) + '), ST_GeomFromText($' + (i + 3) + ', 4326), $' + (i + 4) + ')')
+        })
+        sql += arr.join(', ')
+        return database.execute(sql, params)
+      })
+  }
+
+  static _updateNodes (plan_id, updates) {
+    return Promise.resolve()
+      .then(() => {
+        if (!_.isArray(updates)) return
+        return pync.series(updates, (node) => {
+          var sql = `
+            UPDATE client.network_nodes
+            SET geog=ST_GeogFromText($1), geom=ST_GeomFromText($2, 4326)
+            WHERE id=$3 AND plan_id=$4
+          `
+          var params = [
+            `POINT(${node.lon} ${node.lat})`,
+            `POINT(${node.lon} ${node.lat})`,
+            node.id,
+            plan_id
+          ]
+          return database.execute(sql, params)
+        })
+      })
+  }
+
+  static _deleteNodes (plan_id, updates) {
+    return Promise.resolve()
+      .then(() => {
+        if (!_.isArray(updates)) return
+        return pync.series(updates, (node) => {
+          var sql = 'DELETE FROM client.network_nodes WHERE id=$1 AND plan_id=$2'
+          var params = [node.id, plan_id]
+          return database.execute(sql, params)
+        })
+      })
+  }
+
+  static clearNetworkNodes (plan_id) {
+    return database.execute('DELETE FROM client.network_nodes WHERE plan_id=$1;', [plan_id])
+  }
+
+  static recalculateNodes (plan_id, algorithm) {
+    return new Promise((resolve, reject) => {
+      var options = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/recalc/masterplan',
+        json: true,
+        body: {
+          planId: plan_id,
+          algorithm: algorithm
         }
       }
+      console.log('sending request to aro-service', options)
+      request(options, (err, res, body) => {
+        if (err) return reject(err)
+        console.log('ARO-service responded with', res.statusCode, body)
+        resolve()
+      })
     })
-
-    var output = {
-      'feature_collection': {
-        'type':'FeatureCollection',
-        'features': features
-      },
-    };
-    callback(null, output)
-  })
-  .end(callback)
-};
-
-// View existing fiber plant for competitors with a heat map
-Network.view_fiber_plant_density = function(viewport, callback) {
-  txain(function(callback) {
-    var sql = `
-      WITH ${viewport.fishnet}
-      SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(DISTINCT fiber_plant.carrier_name) AS density, NULL AS id
-      FROM fishnet
-      JOIN aro.fiber_plant ON fishnet.geom && fiber_plant.geom
-      AND fiber_plant.carrier_name <> $1
-      GROUP BY fishnet.geom
-    `
-    database.query(sql, [config.client_carrier_name], callback);
-  })
-  .then(function(rows, callback) {
-    var features = rows.map(row => ({
-      type: 'Feature',
-      geometry: row.geom,
-      properties: {
-        density: row.density,
-      }
-    }))
-
-    var output = {
-      'feature_collection': {
-        'type':'FeatureCollection',
-        'features': features
-      },
-    };
-    callback(null, output)
-  })
-  .end(callback)
-};
-
-Network.carriers = function(plan_id, callback) {
-  models.MarketSize.carriers_by_city_of_plan(plan_id, true, callback);
-};
-
-// View the user client's network nodes
-//
-// 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
-// 2. route_id Number Pass a route_id to find additionally the network nodes associated to that route
-Network.view_network_nodes = function(node_types, plan_id, callback) {
-  var sql = `
-    SELECT
-      n.id, ST_AsGeoJSON(geog)::json AS geom, t.name AS name, n.route_id
-    FROM client_schema.network_nodes n
-    JOIN client_schema.network_node_types t
-      ON n.node_type_id = t.id
-  `
-
-  var params = [];
-  var constraints = [];
-
-  if (node_types && node_types.length > 0) {
-    var arr = [];
-    node_types.forEach(node_type => {
-      params.push(node_type);
-      arr.push('t.name = $'+params.length);
-    });
-    constraints.push('('+arr.join(' OR ')+')');
   }
 
-  if (plan_id) {
-    params.push(plan_id);
-    constraints.push('(route_id IS NULL OR route_id=$'+params.length+')');
-  } else {
-    constraints.push('route_id IS NULL');
+  static selectBoundary (plan_id, data) {
+    return Promise.resolve()
+      .then(() => {
+        // select all the locations inside that boundary
+        // TODO: this could create duplicates!
+        var sql = `
+          INSERT INTO client.plan_targets (location_id, plan_id)
+          (SELECT locations.id, $2 AS plan_id
+             FROM locations
+            WHERE ST_Intersects(ST_GeomFromGeoJSON($1)::geography, locations.geog))
+        `
+        return database.execute(sql, [data.boundary, plan_id])
+      })
+      .then((count) => (
+        // models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
+        models.Network.recalculateNodes(plan_id, data.algorithm)
+      ))
   }
 
-  if (constraints.length > 0) {
-    sql += ' WHERE '+constraints.join(' AND ');
-  }
-
-  txain(function(callback) {
-    database.query(sql, params, callback);
-  })
-  .then(function(rows, callback) {
-    var features = rows.map(row => ({
-      'type': 'Feature',
-      'properties': {
-        'id': row.id,
-        'type' : row.name,
-        'icon': '/images/map_icons/'+row.name+'.png',
-        'unselectable': row.name !== 'central_office',
-        'draggable': !!row.route_id,
-      },
-      'geometry': row.geom,
-    }));
-
-    var output = {
-      'feature_collection': {
-        'type':'FeatureCollection',
-        'features': features
-      },
-    };
-    callback(null, output);
-  })
-  .end(callback)
-};
-
-// View all the available network node types
-Network.view_network_node_types = function(callback) {
-  var sql = 'SELECT * FROM client_schema.network_node_types';
-  database.query(sql, callback);
-};
-
-Network.edit_network_nodes = function(plan_id, changes, callback) {
-  txain(function(callback) {
-    add_nodes(plan_id, changes.insertions, callback);
-  })
-  .then(function(callback) {
-    update_nodes(plan_id, changes.updates, callback);
-  })
-  .then(function(callback) {
-    delete_nodes(plan_id, changes.deletions, callback);
-  })
-  .then(function(callback) {
-    var sql = 'UPDATE custom.route SET updated_at=NOW() WHERE id=$1'
-    database.execute(sql, [plan_id], callback);
-  })
-  .end(callback);
-};
-
-function add_nodes(plan_id, insertions, callback) {
-  if (!_.isArray(insertions) || insertions.length === 0) return callback();
-  var sql = 'INSERT INTO client_schema.network_nodes (node_type_id, geog, geom, route_id) VALUES '
-  var params = [];
-  var arr = [];
-  insertions.forEach(node => {
-    var i = params.length;
-    params.push(node.type);
-    params.push('POINT('+node.lon+' '+node.lat+')');
-    params.push('POINT('+node.lon+' '+node.lat+')');
-    params.push(plan_id);
-    arr.push('($'+(i+1)+', ST_GeogFromText($'+(i+2)+'), ST_GeomFromText($'+(i+3)+', 4326), $'+(i+4)+')');
-  });
-  sql += arr.join(', ');
-  database.execute(sql, params, callback);
-};
-
-function update_nodes(plan_id, updates, callback) {
-  if (!_.isArray(updates) || updates.length === 0) return callback();
-  txain(updates)
-  .each(function(node, callback) {
-    var sql = 'UPDATE client_schema.network_nodes SET geog=ST_GeogFromText($1), geom=ST_GeomFromText($2, 4326) WHERE id=$3 AND route_id=$4'
-    var params = [
-      'POINT('+node.lon+' '+node.lat+')',
-      'POINT('+node.lon+' '+node.lat+')',
-      node.id,
-      plan_id,
-    ];
-    database.execute(sql, params, callback);
-  })
-  .end(callback);
-};
-
-function delete_nodes(plan_id, updates, callback) {
-  if (!_.isArray(updates) || updates.length === 0) return callback();
-  txain(updates)
-  .each(function(node, callback) {
-    var sql = 'DELETE FROM client_schema.network_nodes WHERE id=$1 AND route_id=$2';
-    var params = [node.id, plan_id];
-    database.execute(sql, params, callback);
-  })
-  .end(callback);
-};
-
-Network.clear_network_nodes = function(plan_id, callback) {
-  var sql = 'DELETE FROM client_schema.network_nodes WHERE route_id=$1;';
-  database.execute(sql, [plan_id], callback);
-};
-
-Network.recalculate_nodes = function(plan_id, callback) {
-  txain(function(callback) {
-    var options = {
-      method: 'POST',
-      url: config.aro_service_url+'/rest/recalc/plan',
-      json: true,
-      body: {
-        planId: plan_id,
-      },
-    };
-    request(options, callback);
-  })
-  .then(function(res, body, callback) {
-    callback();
-  })
-  .end(callback);
-};
-
-Network.select_boundary = function(plan_id, data, callback) {
-  txain(function(callback) {
-    // select all the locations inside that boundary
-    // note: this could create duplicates!
-    var sql = `
-      INSERT INTO custom.route_targets (vertex_id, location_id, route_id)
-      (SELECT
-        vertex.id AS vertex_id, locations.id, $2 AS route_id
-      FROM
-        client.graph_vertices_pgr AS vertex
-      JOIN aro.locations locations
-        ON ST_Intersects(ST_GeomFromGeoJSON($1)::geography, locations.geog)
-        AND locations.geom && vertex.the_geom
-        AND st_contains(locations.geom, vertex.the_geom))
-    `
-    database.execute(sql, [data.boundary, plan_id], callback);
-  })
-  .then(function(count, callback) {
-    models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
-  })
-  .end(callback);
-};
-
-module.exports = Network;
+}
