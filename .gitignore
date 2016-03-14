@@ -71,3 +71,5 @@ aro-service/aro-interfaces/.project
 aro-service/aro-engine/.project
 
 aro-service/aro-interfaces/.project
+
+aro-service/aro-service/.settings/org.eclipse.wst.common.project.facet.core.xml
