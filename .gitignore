@@ -15,14 +15,28 @@ aro-service/target
 aro-service/**/*.project
 aro-service/**/*.settings
 aro-service/**/*.classpath
+
 aro-service/aro-service/.settings
 aro-service/aro-service/.project
+
 aro-service/aro-engine/.settings
+aro-service/aro-engine/.project
+
+aro-service/aro-service/.settings
+aro-service/aro-service/.project
+
+aro-service/aro-interfaces/.settings
+aro-service/aro-interfaces/.project
+
+aro-service/aro-utils/.settings
+aro-service/aro-utils/.project
+
+aro-service/docker/aro-service.war
 
 *.project
 *.settings
 *.classpath
-aro-service/aro-service/.project
+*.component
 
 
 #app ignores
@@ -35,6 +49,7 @@ app/public/javascripts/lib/
 conf/config_app.json
 
 
+
 #etl ignores
 
 etl/tiger_cousub/shapefiles
@@ -44,20 +59,7 @@ etl/source_colt/data
 bin/
 
 
-*.component
 
 
 
-aro-service/aro-engine/.settings/org.eclipse.wst.common.component
 
-aro-service/aro-service/.project
-
-aro-service/aro-service/.settings/org.eclipse.wst.common.component
-
-*.war
-
-aro-service/docker/aro-service.war
-
-aro-service/aro-interfaces/.project
-
-aro-service/aro-interfaces/.project
