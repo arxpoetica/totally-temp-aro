@@ -35,7 +35,7 @@ INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geo
     FROM infousa.businesses;-- JOIN aro.wirecenters
       -- ON businesses.geog && wirecenters.geog
     --   ON ST_Within(businesses.geog::geometry, wirecenters.geom)
-    -- WHERE 
+    -- WHERE
     --   -- NYC Upper East Side (URBAN)
     --   wirecenters.wirecenter = 'NYCMNY79'
     --   OR
@@ -62,3 +62,4 @@ CREATE INDEX aro_locations_geom_gist
 
 VACUUM ANALYZE aro.locations;
 
+create index aro_locations on aro.locations using gist (geog);
