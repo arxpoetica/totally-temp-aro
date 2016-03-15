@@ -82,7 +82,7 @@ module.exports = class MarketSize {
     return sql
   }
 
-  static _create_businesses_csv (plan_id, user, rows, filters, carriers) {
+  static _createBusinessesCsv (plan_id, user, rows, filters, carriers) {
     var years = []
     var total
     var csv, products, employees_by_location, industries
@@ -339,7 +339,7 @@ module.exports = class MarketSize {
       })
   }
 
-  static export_businesses (plan_id, type, options, user) {
+  static exportBusinesses (plan_id, type, options, user) {
     var filters = options.filters
     var output = {}
 
@@ -437,11 +437,11 @@ module.exports = class MarketSize {
         return database.query(sql, params)
       })
       .then((rows) => (
-        this._create_businesses_csv(plan_id, user, rows, filters, output.carriers)
+        this._createBusinessesCsv(plan_id, user, rows, filters, output.carriers)
       ))
   }
 
-  static export_businesses_at_location (plan_id, location_id, type, options, user) {
+  static exportBusinessesAtLocation (plan_id, location_id, type, options, user) {
     var filters = options.filters
     var output = {}
 
@@ -543,7 +543,7 @@ module.exports = class MarketSize {
         return database.query(sql, params)
       })
       .then((rows) => (
-        this._create_businesses_csv(plan_id, user, rows, filters, output.carriers)
+        this._createBusinessesCsv(plan_id, user, rows, filters, output.carriers)
       ))
   }
 

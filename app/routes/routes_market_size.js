@@ -97,7 +97,7 @@ exports.configure = (api, middleware) => {
         customer_type: request.query.customer_type
       }
     }
-    models.MarketSize.export_businesses(plan_id, type, options, request.user, export_handler(request, response, next))
+    models.MarketSize.exportBusinesses(plan_id, type, options, request.user, export_handler(request, response, next))
   })
 
   api.get('/market_size/business/:business_id', (request, response, next) => {
@@ -137,7 +137,7 @@ exports.configure = (api, middleware) => {
         customer_type: request.query.customer_type
       }
     }
-    models.MarketSize.export_businesses_at_location(plan_id, location_id, type, options, request.user, export_handler(request, response, next))
+    models.MarketSize.exportBusinessesAtLocation(plan_id, location_id, type, options, request.user, export_handler(request, response, next))
   })
 
   var arr = (value) => _.compact((value || '').split(','))

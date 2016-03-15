@@ -216,7 +216,7 @@ describe('MarketSize', () => {
         filters: {},
         boundary: boundary
       }
-      return models.MarketSize.export_businesses(plan_id, 'boundary', options, null)
+      return models.MarketSize.exportBusinesses(plan_id, 'boundary', options, null)
         .then((output) => {
           expect(output).to.be.an('object')
           expect(output.csv).to.be.a('string')
@@ -235,7 +235,7 @@ describe('MarketSize', () => {
         },
         boundary: boundary
       }
-      return models.MarketSize.export_businesses(plan_id, 'boundary', options, null)
+      return models.MarketSize.exportBusinesses(plan_id, 'boundary', options, null)
         .then((output) => {
           expect(output).to.be.an('object')
           expect(output.csv).to.be.a('string')
