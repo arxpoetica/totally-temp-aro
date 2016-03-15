@@ -32,12 +32,6 @@ module.exports = class Network {
     return database.lines(sql, [config.client_carrier_name], true, viewport)
   }
 
-  // View existing fiber plant for competitors
-  static viewTowers (viewport) {
-    var sql = 'SELECT geom FROM aro.towers'
-    return database.points(sql, [], true, viewport)
-  }
-
   // View existing fiber plant for competitors with a heat map
   static viewFiberPlantDensity (viewport) {
     var sql = `
@@ -187,6 +181,7 @@ module.exports = class Network {
       console.log('sending request to aro-service', options)
       request(options, (err, res, body) => {
         if (err) return reject(err)
+        // if (err) return resolve()
         console.log('ARO-service responded with', res.statusCode, body)
         resolve()
       })

@@ -28,18 +28,14 @@ app.controller('selection_tools_controller', ($rootScope, $scope, network_planni
     $scope.plan = plan
   })
 
-  $scope.is_selected_tool = (name) => {
+  $scope.isToolSelected = (name) => {
     if (network_planning.getAlgorithm()) return false
     return drawingManager.getDrawingMode() === (name || null)
   }
 
-  $scope.get_selected_tool = () => {
-    return drawingManager.getDrawingMode()
-  }
-
-  $scope.set_selected_tool = (name) => {
+  $scope.setSelectedTool = (name) => {
     name = name || null
-    drawingManager.old_drawing_mode = name
+    drawingManager.oldDrawingMode = name
     network_planning.setAlgorithm(null)
     return drawingManager.setDrawingMode(name)
   }
@@ -66,22 +62,22 @@ app.controller('selection_tools_controller', ($rootScope, $scope, network_planni
     drawingManager.setMap(map)
   })
 
-  function set_drawing_manager_enabled (enabled) {
+  function setDrawingManagerEnabled (enabled) {
     if (enabled) {
-      drawingManager.setDrawingMode(drawingManager.old_drawing_mode || null)
+      drawingManager.setDrawingMode(drawingManager.oldDrawingMode || null)
     } else {
       drawingManager.setDrawingMode(null)
     }
   }
 
-  function update_selection_tools (e) {
+  function updateSelectionTools (e) {
     $scope.deselect_mode = e.shiftKey
-    set_drawing_manager_enabled(!e.ctrlKey)
+    setDrawingManagerEnabled(!e.ctrlKey)
     if (!$rootScope.$$phase) { $rootScope.$apply() } // refresh button state
   }
 
-  document.addEventListener('keydown', update_selection_tools)
-  document.addEventListener('keyup', update_selection_tools)
+  document.addEventListener('keydown', updateSelectionTools)
+  document.addEventListener('keyup', updateSelectionTools)
 
   if (config.route_planning.length > 0) {
     $('#network_planning_selector').popover({
@@ -90,7 +86,7 @@ app.controller('selection_tools_controller', ($rootScope, $scope, network_planni
           `<p>
             <input type="radio" name="algorithm" value="${algorithm}"
               ${network_planning.getAlgorithm() && algorithm === network_planning.getAlgorithm().id ? 'checked' : ''}
-              onclick="network_planning_changed(this.value)">
+              onclick="networkPlanningChanged(this.value)">
               ${network_planning.findAlgorithm(algorithm).description}
           </p>`
         )).join('')
@@ -99,7 +95,7 @@ app.controller('selection_tools_controller', ($rootScope, $scope, network_planni
     })
   }
 
-  window.network_planning_changed = (value) => {
+  window.networkPlanningChanged = (value) => {
     network_planning.setAlgorithm(network_planning.findAlgorithm(value))
     setTimeout(() => {
       $('#network_planning_selector').click()

@@ -89,18 +89,18 @@ describe('Map layer', () => {
   })
 
   it('should toggle the visibility', () => {
-    layer.toggle_visibility()
+    layer.toggleVisibility()
     expect(layer.visible).to.be.true
     expect(events.length).to.be.equal(1)
     expect(events[0]).to.be.equal('map_layer_changed_visibility')
   })
 
   it('should revert the styles', () => {
-    layer.revert_styles()
+    layer.revertStyles()
   })
 
   it('should clear the data', () => {
-    layer.clear_data()
+    layer.clearData()
     expect(layer.number_of_features()).to.be.equal(0)
   })
 
@@ -108,7 +108,7 @@ describe('Map layer', () => {
     layer.show()
     $httpBackend.flush()
 
-    layer.set_api_endpoint('/foo')
+    layer.setApiEndpoint('/foo')
     expect(layer.number_of_features()).to.be.equal(0) // first clears the data
     $httpBackend.flush()
     expect(layer.number_of_features()).to.be.equal(1) // data should be loaded

@@ -145,8 +145,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
       select.prop('disabled', true)
     }
 
-    $scope.competitors_density.set_visible($scope.overlay === 'density')
-    $scope.competitors_fairshare.set_visible($scope.overlay === 'fairshare')
+    $scope.competitors_density.setVisible($scope.overlay === 'density')
+    $scope.competitors_fairshare.setVisible($scope.overlay === 'fairshare')
   }
 
   $scope.overlay_is_loading = () => {

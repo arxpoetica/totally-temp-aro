@@ -17,7 +17,7 @@ exports.configure = (api, middleware) => {
   api.post('/network_plan/create', (request, response, next) => {
     var name = request.body.name
     var area = request.body.area
-    models.NetworkPlan.create_plan(name, area, request.user)
+    models.NetworkPlan.createPlan(name, area, request.user)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -25,7 +25,7 @@ exports.configure = (api, middleware) => {
   // Return data of an existing plan
   api.get('/network_plan/:plan_id', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
-    models.NetworkPlan.find_plan(plan_id)
+    models.NetworkPlan.findPlan(plan_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -33,7 +33,7 @@ exports.configure = (api, middleware) => {
   // Return the metadata of an existing plan
   api.get('/network_plan/:plan_id/metadata', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
-    models.NetworkPlan.find_plan(plan_id, true)
+    models.NetworkPlan.findPlan(plan_id, true)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -42,7 +42,7 @@ exports.configure = (api, middleware) => {
   api.post('/network_plan/:plan_id/edit', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
     var changes = request.body
-    models.NetworkPlan.edit_route(plan_id, changes)
+    models.NetworkPlan.editRoute(plan_id, changes)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -51,7 +51,7 @@ exports.configure = (api, middleware) => {
   api.post('/network_plan/:plan_id/save', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
     var changes = request.body
-    models.NetworkPlan.save_plan(plan_id, changes)
+    models.NetworkPlan.savePlan(plan_id, changes)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -59,7 +59,7 @@ exports.configure = (api, middleware) => {
   // Delete an existing plan
   api.post('/network_plan/:plan_id/delete', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
-    models.NetworkPlan.delete_plan(plan_id)
+    models.NetworkPlan.deletePlan(plan_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -67,7 +67,7 @@ exports.configure = (api, middleware) => {
   // Clear the route of an existing plan
   api.post('/network_plan/:plan_id/clear', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
-    models.NetworkPlan.clear_route(plan_id)
+    models.NetworkPlan.clearRoute(plan_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -75,7 +75,7 @@ exports.configure = (api, middleware) => {
   // Get some area information of a given plan
   api.get('/network_plan/:plan_id/area_data', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
-    models.NetworkPlan.calculate_area_data(plan_id)
+    models.NetworkPlan.calculateAreaData(plan_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -85,7 +85,7 @@ exports.configure = (api, middleware) => {
     var plan_id = request.params.plan_id
     var file_name = request.params.file_name
 
-    models.NetworkPlan.export_kml(plan_id)
+    models.NetworkPlan.exportKml(plan_id)
       .then((kml_output) => {
         response.attachment(file_name + '.kml')
         response.send(kml_output)

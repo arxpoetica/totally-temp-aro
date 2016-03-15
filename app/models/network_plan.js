@@ -15,7 +15,7 @@ var pync = require('pync')
 
 module.exports = class NetworkPlan {
 
-  static _add_sources (plan_id, network_node_ids) {
+  static _addSources (plan_id, network_node_ids) {
     if (!_.isArray(network_node_ids) || network_node_ids.length === 0) return Promise.resolve()
 
     return Promise.resolve()
@@ -40,7 +40,7 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static _add_targets (plan_id, location_ids) {
+  static _addTargets (plan_id, location_ids) {
     if (!_.isArray(location_ids) || location_ids.length === 0) return Promise.resolve()
 
     return Promise.resolve()
@@ -65,7 +65,7 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static _delete_sources (plan_id, network_node_ids) {
+  static _deleteSources (plan_id, network_node_ids) {
     if (!_.isArray(network_node_ids) || network_node_ids.length === 0) return Promise.resolve()
 
     return pync.series(network_node_ids, (network_node_id) => {
@@ -77,7 +77,7 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static _delete_targets (plan_id, location_ids) {
+  static _deleteTargets (plan_id, location_ids) {
     if (!_.isArray(location_ids) || location_ids.length === 0) return Promise.resolve()
 
     return pync.series(location_ids, (location_id) => {
@@ -89,7 +89,7 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static find_edges (plan_id) {
+  static findEdges (plan_id) {
     var sql = `
       SELECT fiber_route.id, 0 AS edge_length, ST_AsGeoJSON(fiber_route.geom)::json AS geom
       FROM client.plan
@@ -100,25 +100,7 @@ module.exports = class NetworkPlan {
     return database.query(sql, [plan_id])
   }
 
-  static find_source_ids (plan_id) {
-    var sql = `
-      SELECT network_node_id::integer AS id
-      FROM client.plan_sources
-      WHERE plan_id=$1
-    `
-    return database.findValues(sql, [plan_id], 'id')
-  }
-
-  static find_target_ids (plan_id) {
-    var sql = `
-      SELECT location_id::integer AS id
-      FROM client.plan_targets
-      WHERE plan_id=$1
-    `
-    return database.findValues(sql, [plan_id], 'id')
-  }
-
-  static find_plan (plan_id, metadata_only) {
+  static findPlan (plan_id, metadata_only) {
     var cost_per_meter = 200
     var output = {
       'feature_collection': {
@@ -132,7 +114,7 @@ module.exports = class NetworkPlan {
       .then(() => {
         if (config.route_planning.length === 0) return
         return Promise.resolve()
-          .then(() => NetworkPlan.find_edges(plan_id))
+          .then(() => NetworkPlan.findEdges(plan_id))
           .then((edges) => {
             output.feature_collection.features = edges.map((edge) => ({
               'type': 'Feature',
@@ -151,14 +133,6 @@ module.exports = class NetworkPlan {
               name: 'Locations cost',
               value: locations_cost
             })
-            if (!metadata_only) return NetworkPlan.find_target_ids(plan_id)
-          })
-          .then((targets) => {
-            output.metadata.targets = targets
-            if (!metadata_only) NetworkPlan.find_source_ids(plan_id)
-          })
-          .then((sources) => {
-            output.metadata.sources = sources
           })
       })
       .then(() => (
@@ -223,7 +197,7 @@ module.exports = class NetworkPlan {
     return database.query(sql, params)
   }
 
-  static create_plan (name, area, user) {
+  static createPlan (name, area, user) {
     var id
 
     return validate((expect) => {
@@ -285,30 +259,30 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static delete_plan (plan_id) {
-    return database.execute('DELETE FROM client.plan WHERE id=$1;', [plan_id])
+  static deletePlan (plan_id) {
+    return database.execute('DELETE FROM client.plan WHERE id=$1', [plan_id])
   }
 
-  static clear_route (plan_id) {
+  static clearRoute (plan_id) {
     return Promise.resolve()
       .then(() => (
-        database.execute('DELETE FROM client.plan_targets WHERE plan_id=$1;', [plan_id])
+        database.execute('DELETE FROM client.plan_targets WHERE plan_id=$1', [plan_id])
       ))
       .then(() => (
-        database.execute('DELETE FROM client.plan_sources WHERE plan_id=$1;', [plan_id])
+        database.execute('DELETE FROM client.plan_sources WHERE plan_id=$1', [plan_id])
       ))
       .then(() => (
-        database.execute('DELETE FROM client.fiber_route WHERE plan_id=$1;', [plan_id])
+        database.execute('DELETE FROM client.fiber_route WHERE plan_id=$1', [plan_id])
       ))
       .then(() => (
-        database.execute('DELETE FROM client.network_nodes WHERE plan_id=$1;', [plan_id])
+        database.execute('DELETE FROM client.network_nodes WHERE plan_id=$1', [plan_id])
       ))
       .then(() => (
-        database.execute('DELETE FROM client.plan WHERE parent_plan_id=$1;', [plan_id])
+        database.execute('DELETE FROM client.plan WHERE parent_plan_id=$1', [plan_id])
       ))
   }
 
-  static save_plan (plan_id, data) {
+  static savePlan (plan_id, data) {
     var fields = []
     var params = []
     var allowed_fields = ['name']
@@ -323,29 +297,27 @@ module.exports = class NetworkPlan {
       params)
   }
 
-  static edit_route (plan_id, changes) {
+  static editRoute (plan_id, changes) {
     return Promise.resolve()
       .then(() => (
-        this._add_sources(plan_id, changes.insertions && changes.insertions.network_nodes)
+        this._addSources(plan_id, changes.insertions && changes.insertions.network_nodes)
       ))
       .then(() => (
-        this._add_targets(plan_id, changes.insertions && changes.insertions.locations)
+        this._addTargets(plan_id, changes.insertions && changes.insertions.locations)
       ))
       .then(() => (
-        this._delete_sources(plan_id, changes.deletions && changes.deletions.network_nodes)
+        this._deleteSources(plan_id, changes.deletions && changes.deletions.network_nodes)
       ))
       .then(() => (
-        this._delete_targets(plan_id, changes.deletions && changes.deletions.locations)
+        this._deleteTargets(plan_id, changes.deletions && changes.deletions.locations)
       ))
       .then(() => (
-        changes.algorithm === 'shortest_path'
-          ? NetworkPlan.recalculate_route(plan_id, changes.algorithm)
-          : null
+        models.Network.recalculateNodes(plan_id, changes.algorithm)
       ))
-      .then(() => NetworkPlan.find_plan(plan_id))
+      .then(() => NetworkPlan.findPlan(plan_id))
   }
 
-  static export_kml (plan_id) {
+  static exportKml (plan_id) {
     var kml_output = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
 
     var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -429,7 +401,7 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static calculate_area_data (plan_id) {
+  static calculateAreaData (plan_id) {
     return Promise.resolve()
       .then(() => {
         var sql = `

@@ -47,10 +47,4 @@ describe('Selection model', () => {
     expect(selection.sources.length()).to.be.equal(0)
     expect(selection.targets.length()).to.be.equal(0)
   })
-
-  it('should sync the selection of all layers', () => {
-    selection.sources.add('123')
-    selection.targets.add('321')
-    selection.sync_selection()
-  })
 })

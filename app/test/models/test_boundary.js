@@ -27,7 +27,7 @@ describe('Boundary', () => {
         }
       }
     }
-    return models.NetworkPlan.create_plan('Untitled route', area, test_utils.test_user)
+    return models.NetworkPlan.createPlan('Untitled route', area, test_utils.test_user)
       .then((plan) => {
         expect(plan).to.have.property('id')
         expect(plan).to.have.property('name')

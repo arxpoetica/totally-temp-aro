@@ -63,7 +63,7 @@ describe('MarketSize', () => {
           }
         }
       }
-      return models.NetworkPlan.create_plan('Untitled plan', area)
+      return models.NetworkPlan.createPlan('Untitled plan', area)
         .then((route) => {
           plan_id = route.id
 
@@ -75,7 +75,7 @@ describe('MarketSize', () => {
               network_nodes: [source]
             }
           }
-          return models.NetworkPlan.edit_route(plan_id, changes)
+          return models.NetworkPlan.editRoute(plan_id, changes)
         })
     })
 

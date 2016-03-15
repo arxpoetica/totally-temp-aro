@@ -1,8 +1,7 @@
 /* global app map config $ user_id google _ swal location */
 // Navigation Menu Controller
-app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'selection', 'tracker', '$location', ($scope, $rootScope, $http, map_tools, selection, tracker, $location) => {
+app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state', ($scope, $rootScope, $http, map_tools, tracker, $location, state) => {
   // Controller instance variables
-  $scope.selection = selection
   $scope.new_plan_name = 'Untitled Plan'
   $scope.new_plan_area_name = ''
   $scope.new_plan_area_centroid
@@ -77,12 +76,18 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.select_plan = function (plan) {
     $scope.plan = plan
+    state.loadPlan(plan)
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
     var centroid = plan && plan.area_centroid
     if (centroid) {
-      map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
-      map.setZoom(14)
+      try {
+        map.setZoom(+state.get('mapZoom') || 14)
+        map.setCenter(JSON.parse(state.get('mapCenter')))
+      } catch (err) {
+        map.setZoom(14)
+        map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
+      }
     }
     $location.path(plan ? '/plan/' + plan.id : '/')
 
@@ -140,6 +145,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     }, () => {
       if ($scope.plan && plan.id === $scope.plan.id) {
         $scope.plan = null
+        state.loadPlan(null)
         $rootScope.$broadcast('plan_selected', null)
       }
       $http.post('/network_plan/' + plan.id + '/delete').success((response) => {

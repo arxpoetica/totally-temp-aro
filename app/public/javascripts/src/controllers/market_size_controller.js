@@ -1,6 +1,6 @@
 /* global app $ swal encodeURIComponent location Chart tinycolor */
 // Market Size Controller
-app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http', 'selection', 'map_tools', 'tracker', ($q, $scope, $rootScope, $http, selection, map_tools, tracker) => {
+app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http', 'map_tools', 'tracker', ($q, $scope, $rootScope, $http, map_tools, tracker) => {
   // Controller instance variables
   $scope.filters = null
   $scope.loading = false
