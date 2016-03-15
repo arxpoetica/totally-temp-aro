@@ -27,7 +27,7 @@ describe('Location', () => {
     it('should return only businesses', (done) => {
       request
         .get('/locations/0')
-        .query(test_utils.test_viewport({ type: 'business' }))
+        .query(test_utils.test_viewport({ type: 'businesses' }))
         .accept('application/json')
         .end((err, res) => {
           if (err) return done(err)

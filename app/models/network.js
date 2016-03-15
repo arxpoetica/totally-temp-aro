@@ -183,6 +183,9 @@ module.exports = class Network {
         if (err) return reject(err)
         // if (err) return resolve()
         console.log('ARO-service responded with', res.statusCode, body)
+        if (res.statusCode && res.statusCode >= 400) {
+          return reject(new Error(`ARO-service returned status code ${res.statusCode}`))
+        }
         resolve()
       })
     })

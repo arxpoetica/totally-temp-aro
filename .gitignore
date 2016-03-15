@@ -31,7 +31,7 @@ aro-service/aro-interfaces/.project
 aro-service/aro-utils/.settings
 aro-service/aro-utils/.project
 
-aro-service/docker/aro-service.war
+
 
 *.project
 *.settings

@@ -1,13 +1,13 @@
 /* global app swal */
 app.config(($httpProvider) => {
   function handleRejection (rejection) {
-    swal({
-      title: 'Error!',
-      text: rejection.status
+    var text = rejection.data && rejection.data.error
+    if (!text) {
+      text = rejection.status
         ? rejection.status + ' ' + rejection.statusText
-        : 'The connection with the server failed',
-      type: 'error'
-    })
+        : 'The connection with the server failed'
+    }
+    swal({ title: 'Error!', text: text, type: 'error' })
   }
 
   $httpProvider.interceptors.push(($q) => {
