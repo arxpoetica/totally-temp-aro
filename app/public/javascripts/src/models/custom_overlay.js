@@ -1,7 +1,7 @@
 /* global app google */
 'use strict'
 
-app.service('CustomOverlay', ($http, $rootScope, selection) => {
+app.service('CustomOverlay', ($http, $rootScope) => {
   // Based on https://developers.google.com/maps/documentation/javascript/customoverlays
 
   return class CustomOverlay extends google.maps.OverlayView {

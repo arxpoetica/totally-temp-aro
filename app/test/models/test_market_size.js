@@ -63,7 +63,7 @@ describe('MarketSize', () => {
           }
         }
       }
-      return models.NetworkPlan.create_plan('Untitled plan', area)
+      return models.NetworkPlan.createPlan('Untitled plan', area)
         .then((route) => {
           plan_id = route.id
 
@@ -75,7 +75,7 @@ describe('MarketSize', () => {
               network_nodes: [source]
             }
           }
-          return models.NetworkPlan.edit_route(plan_id, changes)
+          return models.NetworkPlan.editRoute(plan_id, changes)
         })
     })
 
@@ -216,7 +216,7 @@ describe('MarketSize', () => {
         filters: {},
         boundary: boundary
       }
-      return models.MarketSize.export_businesses(plan_id, 'boundary', options, null)
+      return models.MarketSize.exportBusinesses(plan_id, 'boundary', options, null)
         .then((output) => {
           expect(output).to.be.an('object')
           expect(output.csv).to.be.a('string')
@@ -235,7 +235,7 @@ describe('MarketSize', () => {
         },
         boundary: boundary
       }
-      return models.MarketSize.export_businesses(plan_id, 'boundary', options, null)
+      return models.MarketSize.exportBusinesses(plan_id, 'boundary', options, null)
         .then((output) => {
           expect(output).to.be.an('object')
           expect(output.csv).to.be.a('string')

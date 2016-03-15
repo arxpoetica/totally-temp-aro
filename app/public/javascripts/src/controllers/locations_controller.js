@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [
@@ -29,18 +29,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.show_residential = config.ui.map_tools.locations.view.indexOf('residential') >= 0
 
   $scope.show_businesses = $scope.show_commercial
-  $scope.show_households = $scope.show_households
-
-  $scope.always_shows_sources = true
-  $scope.always_shows_targets = true
-  $scope.show_locations_off = true
-  $scope.locations_filter = 'both'
+  $scope.show_households = $scope.show_residential
 
   $scope.new_location_data = null
 
   $scope.industries = []
 
-  var locations_layer = $scope.locations_layer = new MapLayer({
+  var locationsLayer = $scope.locations_layer = new MapLayer({
     type: 'locations',
     name: 'Locations',
     short_name: 'L',
@@ -59,11 +54,29 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
       }
     },
     threshold: 15,
-    reload: 'always',
-    heatmap: true
+    reload: 'always'
   })
 
-  var customer_profile_layer = new MapLayer({
+  var selectedLocationsLayer = $scope.selected_locations_layer = new MapLayer({
+    type: 'selected_locations',
+    name: 'Selected locations',
+    short_name: 'SL',
+    api_endpoint: '/locations/:plan_id/selected',
+    style_options: {
+      normal: {
+        icon: '/images/map_icons/location_business_selected.png',
+        visible: true,
+        fillColor: '#78D8C3',
+        strokeColor: '#78D8C3',
+        strokeWeight: 1,
+        fillOpacity: 0.9
+      }
+    },
+    threshold: 15,
+    reload: 'always'
+  })
+
+  var customerProfileLayer = new MapLayer({
     type: 'locations_customer_profile_density',
     api_endpoint: '/locations_customer_profile_density',
     style_options: {
@@ -75,11 +88,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     },
     threshold: 100,
     reload: 'always'
-    // heatmap: true,
   })
 
-  map_layers.addFeatureLayer(locations_layer)
-  map_layers.addFeatureLayer(customer_profile_layer)
+  map_layers.addFeatureLayer(locationsLayer)
+  map_layers.addFeatureLayer(selectedLocationsLayer)
+  map_layers.addFeatureLayer(customerProfileLayer)
 
   $http.get('/locations_filters').success((response) => {
     $scope.industries = response.industries
@@ -126,7 +139,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
   $scope.change_locations_layer = () => {
     tracker.track('Locations / ' + $scope.overlay)
 
-    customer_profile_layer.set_visible($scope.overlay === 'customer_profile')
+    customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
     if ($scope.overlay === 'none') {
       var industries = $('#locations_controller .select2-industries').select2('val')
@@ -134,7 +147,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
       var number_of_employees = $('#locations_controller .select2-number-of-employees').select2('val')
 
       if (!$scope.show_businesses && !$scope.show_households) {
-        locations_layer.hide()
+        locationsLayer.hide()
       } else {
         var type
         if ($scope.show_businesses && $scope.show_households) {
@@ -142,18 +155,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
         } else if ($scope.show_businesses) {
           type = 'businesses'
         } else if ($scope.show_households) {
-          type = 'huseholds'
+          type = 'households'
         }
-        locations_layer.set_api_endpoint('/locations/:plan_id', {
+        locationsLayer.setApiEndpoint('/locations/:plan_id', {
           industries: industries.join(','),
           customer_types: customer_types.join(','),
           number_of_employees: number_of_employees.join(','),
           type: type
         })
-        locations_layer.show()
+        locationsLayer.show()
       }
     } else {
-      locations_layer.hide()
+      locationsLayer.hide()
     }
 
     if ($scope.show_businesses && $scope.overlay === 'none') {
@@ -178,12 +191,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
     }
   })
 
+  $rootScope.$on('route_planning_changed', () => {
+    locationsLayer.reloadData(true)
+    selectedLocationsLayer.reloadData(true)
+  })
+
   $scope.create_location = () => {
     $http.post('/locations/create', $scope.new_location_data)
       .success((response) => {
         $('#create-location').modal('hide')
         $scope.new_location_data = {}
-        locations_layer.data_layer.addGeoJson(response)
+        locationsLayer.data_layer.addGeoJson(response)
       })
   }
 
@@ -232,22 +250,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'select
 
     if (plan) {
       map.ready(() => {
-        map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources)
-        locations_layer.set_always_show_selected($scope.always_shows_targets)
+        // map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources)
+        // locationsLayer.set_always_show_selected($scope.always_shows_targets)
+        selectedLocationsLayer.show()
       })
     }
   })
 
-  $scope.toggle_always_show_sources = () => {
-    map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources)
-  }
-
-  $scope.toggle_always_show_targets = () => {
-    locations_layer.set_always_show_selected($scope.always_shows_targets)
-  }
-
   $scope.overlay_is_loading = () => {
-    return customer_profile_layer.is_loading
+    return customerProfileLayer.is_loading
   }
 
   var overlays = []

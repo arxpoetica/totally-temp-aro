@@ -46,8 +46,6 @@ public class DefaultLocationDemand implements LocationDemand {
 		super();
 		this.demands = demands;
 		this.totalFiberDemand = totalFiberDemand;
-		
-		System.out.println("total demand " + totalFiberDemand) ;
 	}
 
 	@Override

@@ -19,6 +19,15 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/locations/:plan_id/selected', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var plan_id = +request.params.plan_id
+
+    models.Location.findSelected(plan_id, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/locations/:plan_id/density', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = +request.params.plan_id

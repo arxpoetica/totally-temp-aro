@@ -10,89 +10,35 @@ var config = helpers.config
 module.exports = class Location {
 
   static findAll (plan_id, type, filters, viewport) {
-    return Promise.resolve()
-      .then(() => {
-        if (viewport.zoom < 16) return []
+    var joins = {
+      businesses: 'JOIN businesses b ON b.location_id = locations.id',
+      households: 'JOIN households ON households.location_id = locations.id',
+      towers: 'JOIN towers ON towers.location_id = locations.id'
+    }
+    joins[''] = `${joins['businesses']} ${joins['households']}`
+    var sql = `
+        SELECT locations.id, locations.geom
+          FROM locations ${joins[type || '']}
+        EXCEPT
+          SELECT locations.id, locations.geom
+          FROM locations ${joins[type || '']}
+          JOIN client.plan_targets
+            ON plan_targets.plan_id = $1
+           AND plan_targets.location_id = locations.id
+      GROUP BY locations.id
+    `
+    return database.points(sql, [plan_id], true, viewport)
+  }
 
-        var params = []
-        var sql = `
-          SELECT locations.id, ST_AsGeoJSON(locations.geog)::json AS geom,
-          -- existing customer
-          (SELECT COUNT(*)::integer FROM businesses b
-            JOIN client.business_customer_types bct
-              ON b.id = bct.business_id
-            JOIN client.customer_types ct
-              ON ct.id = bct.customer_type_id AND ct.is_existing_customer
-           WHERE b.location_id = locations.id) AS customer_type_existing,
-          -- non existing customers
-          (SELECT COUNT(*)::integer FROM businesses b
-            JOIN client.business_customer_types bct
-              ON b.id = bct.business_id
-            JOIN client.customer_types ct
-              ON ct.id = bct.customer_type_id AND NOT ct.is_existing_customer
-           WHERE b.location_id = locations.id) AS customer_type_prospect
-          FROM aro.locations
-        `
-        if (type === 'businesses') {
-          sql += `
-            JOIN businesses b ON b.location_id = locations.id
-            JOIN client.industry_mapping m ON m.sic4 = b.industry_id
-            JOIN client.industries i ON m.industry_id = i.id
-          `
-          if (filters.industries.length > 0) {
-            params.push(filters.industries)
-            sql += `\n AND m.industry_id IN ($${params.length})`
-          }
-          if (filters.customer_types.length > 0) {
-            params.push(filters.customer_types)
-            sql += `
-              JOIN client.business_customer_types
-                ON b.id = business_customer_types.business_id
-               AND business_customer_types.customer_type_id IN ($${params.length})`
-          }
-          if (filters.number_of_employees.length > 0) {
-            params.push(filters.number_of_employees)
-            sql += `
-              JOIN client.employees_by_location e
-                ON e.min_value <= b.number_of_employees
-               AND e.max_value >= b.number_of_employees
-               AND e.id IN ($${params.length})
-            `
-          }
-        } else if (type === 'households') {
-          sql += ' JOIN households ON households.location_id = locations.id'
-        }
-        params.push(viewport.linestring)
-        sql += `
-          WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length})), 4326), locations.geom)
-          GROUP BY locations.id
-        `
-        return database.query(sql, params)
-      })
-      .then((rows) => {
-        var features = rows.map((row) => {
-          var icon = void 0
-          var total = (row.customer_type_existing || 0) + (row.customer_type_prospect || 0)
-          if (row.customer_type_existing > total / 2) icon = '/images/map_icons/location_business_colt.png'
-          if (row.customer_type_prospect > total / 2) icon = '/images/map_icons/location_prospect.png'
-          return {
-            'type': 'Feature',
-            'properties': {
-              'id': row.id,
-              'icon': icon,
-              'density': row.customer_type_prospect * 100 / (row.customer_type_existing + row.customer_type_prospect)
-            },
-            'geometry': row.geom
-          }
-        })
-
-        return {
-          'feature_collection': {
-            'type': 'FeatureCollection',
-            'features': features
-          }
-        }
-      })
+  static findSelected (plan_id, viewport) {
+    var sql = `
+      SELECT locations.id, locations.geom AS geom
+        FROM aro.locations
+        JOIN client.plan_targets
+          ON plan_targets.plan_id = $1
+         AND plan_targets.location_id = locations.id
+    `
+    return database.points(sql, [plan_id], true, viewport)
   }
 
   // Density for locations

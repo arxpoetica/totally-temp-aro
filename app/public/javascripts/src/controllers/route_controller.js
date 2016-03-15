@@ -26,7 +26,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
 
   $rootScope.$on('plan_cleared', (e, plan) => {
     selection.clear_selection()
-    $scope.route_layer.clear_data()
+    $scope.route_layer.clearData()
     $scope.plan.metadata = {
       total_cost: 0,
       costs: [
@@ -54,20 +54,6 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     if ($scope.plan && data.metadata) {
       $scope.plan.metadata = data.metadata
       $rootScope.$broadcast('plan_changed_metadata', $scope.plan)
-      if (only_metadata) return
-
-      if (config.route_planning.length > 0) {
-        selection.clear_selection()
-
-        ;(data.metadata.targets || []).forEach((id) => {
-          selection.targets.add(id)
-        })
-        ;(data.metadata.sources || []).forEach((id) => {
-          selection.sources.add(id)
-        })
-
-        selection.sync_selection()
-      }
     }
 
     if (config.route_planning.length > 0) {
@@ -95,21 +81,23 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   }
 
   $rootScope.$on('map_layer_changed_selection', (e, layer, changes) => {
-    if (!$scope.route) return
-    if (!network_planning.getAlgorithm()) return
-    changes.algorithm = network_planning.getAlgorithm().id
-
-    if (layer.type === 'locations' || layer.type === 'network_nodes') {
-      var url = '/network_plan/' + $scope.route.id + '/edit'
-      var config = {
-        url: url,
-        method: 'post',
-        saving_plan: true,
-        data: changes
-      }
-      $http(config).success((response) => {
-        redraw_route(response)
-      })
+    if (!$scope.plan) return
+    if (network_planning.getAlgorithm()) {
+      changes.algorithm = network_planning.getAlgorithm().id
     }
+
+    if (layer.type !== 'locations' &&
+      layer.type !== 'network_nodes') return
+
+    var url = '/network_plan/' + $scope.plan.id + '/edit'
+    var config = {
+      url: url,
+      method: 'post',
+      saving_plan: true,
+      data: changes
+    }
+    $http(config).success((response) => {
+      redraw_route(response)
+    })
   })
 }])

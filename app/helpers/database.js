@@ -7,7 +7,7 @@ var geojson = require('./geojson')
 
 module.exports = class Database {
 
-  static _con_string () {
+  static _conString () {
     return process.env.DATABASE_URL || config.database_url
   }
 
@@ -37,7 +37,7 @@ module.exports = class Database {
   static _raw (sql, params) {
     params = params || []
     return new Promise((resolve, reject) => {
-      pg.connect(this._con_string(), (err, client, done) => {
+      pg.connect(this._conString(), (err, client, done) => {
         if (err) return reject(err)
         sql = this._processQuery(sql, params)
         client.query(sql, params, (err, result) => {

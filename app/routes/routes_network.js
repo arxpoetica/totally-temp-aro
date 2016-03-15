@@ -41,13 +41,6 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/network/towers', middleware.viewport, (request, response, next) => {
-    var viewport = request.viewport
-    models.Network.viewTowers(viewport)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
   // Network nodes for user client by node type
   api.get('/network/nodes/:node_type', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport

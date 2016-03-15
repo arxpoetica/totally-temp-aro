@@ -73,7 +73,7 @@ public class FDHAssembler {
 				LocationClusterGroup lcg = cluster(edgeStream);
 				clusterGroups.add(lcg);
 
-				rootAssignment = (lcg.getLastCluster() == null) ? assignmentFactory
+				rootAssignment = (lcg.getLastCluster() == null || lcg.getLastCluster().getPinnedLocation() == null) ? assignmentFactory
 						.createEdgeAssignment(edgeStream.getGeoSegment()
 								.pinLocation(0.0), fdh) : assignmentFactory
 						.createEdgeAssignment(lcg.getLastCluster()

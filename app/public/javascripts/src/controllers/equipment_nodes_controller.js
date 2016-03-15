@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_layers', 'MapLayer', 'network_planning', ($scope, $rootScope, $http, selection, map_tools, map_layers, MapLayer, network_planning) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'network_planning', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, network_planning) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -43,9 +43,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   var towers_layer = new MapLayer({
     name: 'Towers',
-    type: 'towers',
+    type: 'locations', // important for selecting towers
     short_name: 'T',
-    api_endpoint: '/network/towers',
+    api_endpoint: '/locations/:plan_id',
+    http_params: {
+      type: 'towers'
+    },
     style_options: {
       normal: {
         icon: '/images/map_icons/tower.png',
@@ -72,7 +75,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    network_nodes_layer.reload_data()
+    network_nodes_layer.reloadData()
   })
 
   $scope.select_tool = (tool) => {
@@ -115,12 +118,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     map.ready(() => {
       fiber_plant_layer.show()
-      network_nodes_layer.reload_data()
+      network_nodes_layer.reloadData()
     })
   })
 
   $rootScope.$on('plan_cleared', () => {
-    network_nodes_layer.reload_data()
+    network_nodes_layer.reloadData()
   })
 
   $scope.change_node_types_visibility = () => {
@@ -134,7 +137,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       network_nodes_layer.hide()
     } else {
       network_nodes_layer.show()
-      network_nodes_layer.set_api_endpoint('/network/nodes/:plan_id/find', {
+      network_nodes_layer.setApiEndpoint('/network/nodes/:plan_id/find', {
         node_types: types.join(',')
       })
     }
@@ -144,7 +147,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/network/nodes/' + $scope.plan.id + '/edit', changes).success((response) => {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
-        network_nodes_layer.reload_data()
+        network_nodes_layer.reloadData()
       }
       changes = empty_changes()
       $rootScope.$broadcast('equipment_nodes_changed')
@@ -162,7 +165,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       closeOnConfirm: true
     }, () => {
       $http.post('/network/nodes/' + $scope.plan.id + '/clear').success((response) => {
-        network_nodes_layer.reload_data()
+        network_nodes_layer.reloadData()
       })
     })
   }

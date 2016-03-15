@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selection', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'network_planning', ($scope, $rootScope, $http, selection, map_tools, map_utils, map_layers, MapLayer, tracker, network_planning) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'network_planning', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, network_planning) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -115,8 +115,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'selec
     if (plan && (county_subdivisions || census_blocks)) {
       $http.get(`/network_plan/${plan.id}/area_data`)
         .success((response) => {
-          area_layers['county_subdivisions_layer'].set_api_endpoint('/county_subdivisions/' + response.statefp)
-          area_layers['census_blocks_layer'].set_api_endpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
+          area_layers['county_subdivisions_layer'].setApiEndpoint('/county_subdivisions/' + response.statefp)
+          area_layers['census_blocks_layer'].setApiEndpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
         })
     }
 

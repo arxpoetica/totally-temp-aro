@@ -74,15 +74,15 @@ module.exports = class MarketSize {
         WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
-          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)
           ${customerTypeFilter()}
+          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)
         )
       `
     }
     return sql
   }
 
-  static _create_businesses_csv (plan_id, user, rows, filters, carriers) {
+  static _createBusinessesCsv (plan_id, user, rows, filters, carriers) {
     var years = []
     var total
     var csv, products, employees_by_location, industries
@@ -339,7 +339,7 @@ module.exports = class MarketSize {
       })
   }
 
-  static export_businesses (plan_id, type, options, user) {
+  static exportBusinesses (plan_id, type, options, user) {
     var filters = options.filters
     var output = {}
 
@@ -437,11 +437,11 @@ module.exports = class MarketSize {
         return database.query(sql, params)
       })
       .then((rows) => (
-        this._create_businesses_csv(plan_id, user, rows, filters, output.carriers)
+        this._createBusinessesCsv(plan_id, user, rows, filters, output.carriers)
       ))
   }
 
-  static export_businesses_at_location (plan_id, location_id, type, options, user) {
+  static exportBusinessesAtLocation (plan_id, location_id, type, options, user) {
     var filters = options.filters
     var output = {}
 
@@ -543,7 +543,7 @@ module.exports = class MarketSize {
         return database.query(sql, params)
       })
       .then((rows) => (
-        this._create_businesses_csv(plan_id, user, rows, filters, output.carriers)
+        this._createBusinessesCsv(plan_id, user, rows, filters, output.carriers)
       ))
   }
 

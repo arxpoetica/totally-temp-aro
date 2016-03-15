@@ -45,7 +45,7 @@ describe('Permission', () => {
             }
           }
         }
-        return models.NetworkPlan.create_plan('Untitled plan', area, owner)
+        return models.NetworkPlan.createPlan('Untitled plan', area, owner)
       })
       .then((plan) => {
         plan_id = plan.id
