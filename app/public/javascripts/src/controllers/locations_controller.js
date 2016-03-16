@@ -190,8 +190,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    locationsLayer.reloadData(true)
-    selectedLocationsLayer.reloadData(true)
+    // locationsLayer.reloadData(true)
+    // selectedLocationsLayer.reloadData(true)
   })
 
   $scope.create_location = () => {
