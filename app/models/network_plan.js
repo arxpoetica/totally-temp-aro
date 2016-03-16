@@ -233,7 +233,7 @@ module.exports = class NetworkPlan {
     .then(() => {
       var sql = `
         INSERT INTO client.plan_sources (network_node_id, plan_id)
-        (SELECT network_nodes.id, $1
+        (SELECT network_nodes.id, $1 AS plan_id
           FROM client.network_nodes
           JOIN client.network_node_types nnt
             ON nnt.name = 'central_office'
