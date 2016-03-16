@@ -9,89 +9,60 @@ var config = helpers.config
 
 module.exports = class Location {
 
-  static findAll (plan_id, type, filters, viewport) {
+  /*
+  * Returns the businesses and households locations except the selected ones
+  */
+  static findLocations (plan_id, type, filters, viewport) {
     var joins = {
       businesses: 'JOIN businesses b ON b.location_id = locations.id',
-      households: 'JOIN households h ON h.location_id = locations.id',
-      towers: 'JOIN towers ON towers.location_id = locations.id'
+      households: 'JOIN households h ON h.location_id = locations.id'
     }
     joins[''] = `${joins['businesses']} ${joins['households']}`
-    var except = type === 'towers' ? '' : `
-      EXCEPT
-        SELECT locations.id, locations.geom
-        FROM locations ${joins[type || '']}
-        JOIN client.plan_targets
-          ON plan_targets.plan_id = $1
-         AND plan_targets.location_id = locations.id
-    `
-    var params = type === 'towers' ? [] : [plan_id]
     var sql = `
         SELECT locations.id, locations.geom
           FROM locations ${joins[type || '']}
-          ${except}
+        EXCEPT
+        SELECT locations.id, locations.geom
+          FROM locations ${joins[type || '']}
+          JOIN client.plan_targets
+            ON plan_targets.plan_id = $1
+           AND plan_targets.location_id = locations.id
       GROUP BY locations.id
     `
-    return database.points(sql, params, true, viewport)
+    return database.points(sql, [plan_id], true, viewport)
   }
 
+  /*
+  * Returns all the towers with a flag indicating if they are selected or not
+  */
+  static findTowers (plan_id, viewport) {
+    let sql = `
+        SELECT locations.id, locations.geom, MAX(plan_targets.id) IS NOT NULL AS selected
+          FROM locations
+          JOIN towers ON towers.location_id = locations.id
+     LEFT JOIN client.plan_targets
+            ON plan_targets.location_id=locations.id AND plan_targets.plan_id=$1
+      GROUP BY locations.id
+    `
+    return database.points(sql, [plan_id], true, viewport)
+  }
+
+  /*
+  * Returns the selected locations with businesses and households on them
+  */
   static findSelected (plan_id, viewport) {
     var sql = `
-      SELECT locations.id, locations.geom AS geom
+      SELECT locations.id, locations.geom AS geom, true AS selected
         FROM aro.locations
-        -- show only businesses and households. Do not show towers
+        -- show only businesses and households. Do not show towers for example
         JOIN businesses b ON b.location_id = locations.id
         JOIN households h ON h.location_id = locations.id
         JOIN client.plan_targets
           ON plan_targets.plan_id = $1
          AND plan_targets.location_id = locations.id
+    GROUP BY locations.id
     `
     return database.points(sql, [plan_id], true, viewport)
-  }
-
-  // Density for locations
-  static density (plan_id, viewport) {
-    return Promise.resolve()
-      .then(() => {
-        var params = []
-        var sql = 'WITH ' + viewport.fishnet
-        sql += `
-          SELECT ST_AsGeojson(fishnet.geom)::json AS geom, COUNT(*) AS density, NULL AS id
-          FROM fishnet
-          JOIN locations ON fishnet.geom && locations.geom
-          GROUP BY fishnet.geom
-        `
-        if (config.route_planning.length > 0) {
-          params.push(plan_id)
-          sql += `
-            UNION ALL
-
-            -- Always return selected locations
-            SELECT ST_AsGeoJSON(geog)::json AS geom, NULL AS density, locations.id
-              FROM aro.locations
-              JOIN client.plan_targets
-                 ON plan_targets.plan_id=$1
-                AND plan_targets.location_id=locations.id
-          `
-        }
-        return database.query(sql, params)
-      })
-      .then((rows) => {
-        var features = rows.map((row) => ({
-          'type': 'Feature',
-          'properties': {
-            'id': row.id,
-            'density': viewport.zoom > 9 ? row.density : null
-          },
-          'geometry': row.geom
-        }))
-
-        return {
-          'feature_collection': {
-            'type': 'FeatureCollection',
-            'features': features
-          }
-        }
-      })
   }
 
   // Get summary information for a given location
