@@ -195,7 +195,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
     }
 
     // Load GeoJSON data into the layer if it's not already loaded
-    load_data () {
+    loadData () {
       var layer = this
       if (!layer.data_loaded) {
         if (layer.data) {
@@ -252,7 +252,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       this.data_loaded = false
       this.clearData()
       if (this.visible) {
-        this.load_data()
+        this.loadData()
       }
     }
 
@@ -262,7 +262,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       } else {
         this.data_loaded = false
       }
-      this.load_data()
+      this.loadData()
     }
 
     configure_feature_styles () {
@@ -320,7 +320,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
 
     show () {
       if (this.visible) return
-      this.load_data()
+      this.loadData()
       this.visible = true
       this.configureVisibility()
       $rootScope.$broadcast('map_layer_changed_visibility', this)

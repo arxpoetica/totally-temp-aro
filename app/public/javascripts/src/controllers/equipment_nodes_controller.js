@@ -73,7 +73,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    network_nodes_layer.reloadData()
+    network_nodes_layer.reloadData(true)
   })
 
   $scope.select_tool = (tool) => {

@@ -97,6 +97,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       data: changes
     }
     $http(config).success((response) => {
+      $rootScope.$broadcast('route_planning_changed')
       redraw_route(response)
     })
   })
