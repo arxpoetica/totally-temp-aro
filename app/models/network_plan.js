@@ -237,10 +237,12 @@ module.exports = class NetworkPlan {
           FROM client.network_nodes
           JOIN client.network_node_types nnt
             ON nnt.name = 'central_office'
+           AND network_nodes.node_type_id = nnt.id
           JOIN client.plan
-            ON plan.id = $1 AND plan.area_bounds && network_nodes.geom)
+            ON plan.id = $1
+      ORDER BY plan.area_bounds <#> network_nodes.geom LIMIT 1)
       `
-      return database.findOne(sql, [id])
+      return database.execute(sql, [id])
     })
     .then(() => {
       var sql = `

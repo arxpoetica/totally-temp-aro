@@ -35,7 +35,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   var new_plan_map
 
-  function init_map () {
+  function initMap () {
     if (new_plan_map) return
 
     var styles = [{
@@ -130,7 +130,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     tracker.track('Global customer profile')
   }
 
-  $scope.delete_plan = (plan) => {
+  $scope.deletePlan = (plan) => {
     if (!plan) return
     tracker.track('Manage Analyses / Delete Analysis')
 
@@ -203,7 +203,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.new_plan = () => {
     $('#new-plan').modal('show')
-    init_map()
+    initMap()
     tracker.track('Create New Analysis')
   }
 
@@ -279,14 +279,14 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     }
   }
 
-  $scope.show_share_plan = (plan) => {
+  $scope.showSharePlan = (plan) => {
     $scope.shared_plan = plan
     $('#share-plan').modal('show')
     $('#share-plan .modal-title').text(`Share "${plan.name}"`)
     tracker.track('Manage Analyses / Share Analysis')
   }
 
-  $scope.share_plan = () => {
+  $scope.sharePlan = () => {
     $('#share-plan').modal('hide')
     var params = {
       user_id: +$('#share-plan-search').select2('val'), // will be removed in select2 4.1

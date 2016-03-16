@@ -34,6 +34,9 @@ module.exports = class Location {
     var sql = `
       SELECT locations.id, locations.geom AS geom
         FROM aro.locations
+        -- show only businesses and households. Do not show towers
+        JOIN businesses b ON b.location_id = locations.id
+        JOIN households ON households.location_id = locations.id
         JOIN client.plan_targets
           ON plan_targets.plan_id = $1
          AND plan_targets.location_id = locations.id
