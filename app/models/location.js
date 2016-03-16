@@ -12,22 +12,26 @@ module.exports = class Location {
   static findAll (plan_id, type, filters, viewport) {
     var joins = {
       businesses: 'JOIN businesses b ON b.location_id = locations.id',
-      households: 'JOIN households ON households.location_id = locations.id',
+      households: 'JOIN households h ON h.location_id = locations.id',
       towers: 'JOIN towers ON towers.location_id = locations.id'
     }
     joins[''] = `${joins['businesses']} ${joins['households']}`
+    var except = type === 'towers' ? '' : `
+      EXCEPT
+        SELECT locations.id, locations.geom
+        FROM locations ${joins[type || '']}
+        JOIN client.plan_targets
+          ON plan_targets.plan_id = $1
+         AND plan_targets.location_id = locations.id
+    `
+    var params = type === 'towers' ? [] : [plan_id]
     var sql = `
         SELECT locations.id, locations.geom
           FROM locations ${joins[type || '']}
-        EXCEPT
-          SELECT locations.id, locations.geom
-          FROM locations ${joins[type || '']}
-          JOIN client.plan_targets
-            ON plan_targets.plan_id = $1
-           AND plan_targets.location_id = locations.id
+          ${except}
       GROUP BY locations.id
     `
-    return database.points(sql, [plan_id], true, viewport)
+    return database.points(sql, params, true, viewport)
   }
 
   static findSelected (plan_id, viewport) {
@@ -36,7 +40,7 @@ module.exports = class Location {
         FROM aro.locations
         -- show only businesses and households. Do not show towers
         JOIN businesses b ON b.location_id = locations.id
-        JOIN households ON households.location_id = locations.id
+        JOIN households h ON h.location_id = locations.id
         JOIN client.plan_targets
           ON plan_targets.plan_id = $1
          AND plan_targets.location_id = locations.id
