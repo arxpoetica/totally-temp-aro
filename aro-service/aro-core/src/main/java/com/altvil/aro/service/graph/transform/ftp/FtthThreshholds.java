@@ -9,7 +9,7 @@ public class FtthThreshholds {
 	private int threshHoldClusteringFDT = 10;
 	private HubModel hubModel;
 	private DropCableModel dropCableModel = DropCableModel.DEFAULT_MODEL;
-	private double locationBulkThreshhold = 150;
+	private double locationBulkThreshhold = 12;
 	private double maxOffsetInMeters = UnitUtils.toMeters(60000);
 	private double maxDropCableLengthInMeters = UnitUtils.toMeters(1500);
 	private double preferredDropCableLengthInMeters = UnitUtils.toMeters(500);

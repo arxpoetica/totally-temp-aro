@@ -29,12 +29,13 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"business_fiber as (\n" + 
-			"	select l.id, f.fiber_count\n" + 
+			"	select l.id, sum(f.fiber_count) as fiber_count\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
 			"	join client.employees_by_location e on (b.number_of_employees >= e.min_value) and  (b.number_of_employees <= e.max_value) \n" + 
 			"	join client.industry_mapping m on m.sic4 = b.industry_id\n" + 
 			"	join fiber_model f on f.industry_id = m.industry_id and f.employees_by_location_id = e.id \n" + 
+			"	group by l.id\n" +
 			")\n" + 
 			",\n" + 
 			"celltower_fiber as (\n" + 
