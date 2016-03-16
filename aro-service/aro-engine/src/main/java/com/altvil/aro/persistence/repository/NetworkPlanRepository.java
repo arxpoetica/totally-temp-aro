@@ -141,6 +141,14 @@ public interface NetworkPlanRepository extends
 			+ "where r.id = :planId", nativeQuery = true)
 	List<Object[]> queryRoadEdgesbyPlanId(@Param("planId") long planId);
 
+	
+	
+	@Modifying
+    @Transactional
+	@Query(value = "delete from client.plan where parent_plan_id = :planId", nativeQuery = true)
+	void deleteWireCenterPlans(@Param("planId") long planId) ;
+			
+	
     @Modifying
     @Transactional
 	@Query(value = "with inputs as (\n" + 
@@ -148,11 +156,11 @@ public interface NetworkPlanRepository extends
 			" from client.plan p where p.id = :planId\n" + 
 			")\n" + 
 			",\n" +
-			"debug_plans as (\n" +
-				"delete from client.plan where parent_plan_id in (select master_plan_id from inputs)\n" +
-				"returning id\n" +
-			")\n" + 
-			",\n" +
+//			"debug_plans as (\n" +
+//				"delete from client.plan where parent_plan_id in (select master_plan_id from inputs)\n" +
+//				"returning id\n" +
+//			")\n" + 
+//			",\n" +
 			"original_targets as (\n" + 
 			" select pt.id, pt.location_id, pt.plan_id, mp.master_plan_id, wp.wirecenter_id\n" + 
 			" from inputs mp\n" + 
