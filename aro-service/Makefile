@@ -7,16 +7,17 @@ deploy_war:
 
 rebuild_war: compile_war deploy_war
 
+tag:
+	(docker tag aro-service docker-registry.cloud.altvil.com/aro-service)
+
 build_docker:
 	(cd docker && docker build -t aro-service .)
+
+build_docker_image: build_docker tag
 
 run_docker:
 	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e ARO_THREAD_COUNT=5 -d -p 8080:8080 --name aro-service docker-registry.cloud.altvil.com/aro-service)
 
-install: build_docker tag
-
-tag:
-	(docker tag aro-service docker-registry.cloud.altvil.com/aro-service)
 
 build_tag_push: build_docker tag push
 

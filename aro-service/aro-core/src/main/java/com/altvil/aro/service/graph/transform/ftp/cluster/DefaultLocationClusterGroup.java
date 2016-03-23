@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.demand.AssignedEntityDemand;
+import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.transform.ftp.EdgeList;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 
@@ -86,10 +88,9 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 	
 	private Collection<AssignedEntityDemand> getLocationAssignments() {
 		
-		LocationDemandBuilder b = new LocationDemandBuilder() ;
 		
 		if (incomingClusters == null || incomingClusters.size() == 0) {
-			b.addAll(edgeList.getAssignedEntityDemands()) ;
+			return edgeList.getAssignedEntityDemands()  ;
 		} else {
 
 			GeoSegment gs = getGeoSegment();
@@ -122,10 +123,8 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			});
 	
 			locations.addAll(edgeList.getAssignedEntityDemands());
-			b.addAll(locations);
+			return locations ;
 		}
-
-		return b.build() ;
 
 	}
 	
@@ -137,25 +136,14 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 	
 	private List<LocationCluster> _reclusterConstrained() {
 
-		List<LocationCluster> clusters = new ArrayList<LocationCluster>();
-
-		FdtConstrainedAggregate la =
-				new FdtConstrainedAggregate(edgeList.getGeoSegment(), thresholds);
-
-		for (AssignedEntityDemand li : getLocationAssignments()) {
-			
-			if (!la.add(li)) {
-				clusters.add(la);
-				la = new FdtConstrainedAggregate(edgeList.getGeoSegment(), thresholds);
-				la.add(li) ;
-			}
-		}
-
-		if (!la.isEmpty()) {
-			clusters.add(la);
-		}
-
-		return clusters;
+		ClusterAssembler assembler = new ClusterAssembler() ;
+		
+		getLocationAssignments().forEach(d -> {
+			assembler.assign(d) ;
+		});
+		
+		return assembler.flush() ;
+		
 	}
 
 	@Override
@@ -169,29 +157,63 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 	}
 	
-	private  class LocationDemandBuilder {
+	private class ClusterAssembler {
 		
-		private List<AssignedEntityDemand> result = new ArrayList<>() ;
+		private List<LocationCluster> clusters = new ArrayList<LocationCluster>();
 		
-		public void addAll(Collection<AssignedEntityDemand> demands) {
-			for(AssignedEntityDemand d : demands) {
-				add(d) ;
-			}
-		}
+		private FdtConstrainedAggregate currentCluster =
+				new FdtConstrainedAggregate(edgeList.getGeoSegment(), thresholds);
 		
-		public void add(AssignedEntityDemand demand) {
-			if( demand.getTotalDemand() > thresholds.getMaxlocationPerFDT() ) {
-				result.addAll(demand.split( thresholds.getMaxlocationPerFDT())) ;
-			} else {
-				result.add(demand) ;
+		
+		private void flushCluster() {
+			if( !currentCluster.isEmpty() ) {
+				if( currentCluster.getPinnedLocation() == null ) {
+					System.out.println("Failed ") ;
+				} else {
+					clusters.add(currentCluster) ;
+					currentCluster =
+							new FdtConstrainedAggregate(edgeList.getGeoSegment(), thresholds);
+				}
 			}
 			
 		}
 		
-		public List<AssignedEntityDemand> build() {
-			return result ;
+		public List<LocationCluster> flush() {
+			flushCluster() ;
+			return clusters ;
 		}
 		
+		private void flushAndAssignLocation(PinnedLocation pl) {
+			flushCluster(); 
+			currentCluster.assignConstraint(pl) ;
+		}
+		
+		public void assign(AssignedEntityDemand d) {
+			
+			if( currentCluster.isFull() ) {
+				flushCluster() ;
+			}
+			
+			if( !currentCluster.assignConstraint(d.getPinnedLocation()) ) {
+				flushAndAssignLocation(d.getPinnedLocation()) ;
+			}
+			
+			while(d.getTotalDemand() > currentCluster.getRemainingDemand() ) {
+				Pair<AssignedEntityDemand> pair =  d.split(currentCluster.getRemainingDemand()) ;
+				currentCluster.assign(pair.getHead()) ;
+				flushAndAssignLocation(d.getPinnedLocation()) ;
+				d = pair.getTail() ;
+			}
+			
+			if( d.getTotalDemand() > 0 ) {
+				currentCluster.assign(d) ;
+			}
+			
+		}
+		
+		
 	}
+	
+	
 
 }

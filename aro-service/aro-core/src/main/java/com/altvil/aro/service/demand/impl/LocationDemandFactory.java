@@ -1,11 +1,10 @@
- package com.altvil.aro.service.network.impl.demand;
+ package com.altvil.aro.service.demand.impl;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.altvil.aro.service.demand.DefaultLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.entity.LocationEntityDemand;
+import com.altvil.aro.service.entity.LocationEntityDemandByType;
 import com.altvil.aro.service.entity.LocationEntityType;
 
 public class LocationDemandFactory {
@@ -29,7 +28,7 @@ public class LocationDemandFactory {
 	}
 	
 	public LocationDemand create(double houseHold, double business, double cellTower) {
-		Map<LocationEntityType, LocationEntityDemand> demands = new EnumMap<>(LocationEntityType.class) ;
+		Map<LocationEntityType, LocationEntityDemandByType> demands = new EnumMap<>(LocationEntityType.class) ;
 		demands.put(LocationEntityType.Household, LocationEntityDemandFactory.FACTORY.create(LocationEntityType.Household, houseHold)) ;
 		demands.put(LocationEntityType.Business, LocationEntityDemandFactory.FACTORY.create(LocationEntityType.Business, business)) ;
 		demands.put(LocationEntityType.CellTower, LocationEntityDemandFactory.FACTORY.create(LocationEntityType.CellTower, cellTower)) ;

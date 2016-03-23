@@ -1,10 +1,8 @@
 package com.altvil.aro.service.demand;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 
 public class AssignedEntityDemand {
@@ -43,12 +41,14 @@ public class AssignedEntityDemand {
 		return locationEntity;
 	}
 
-	public Collection<AssignedEntityDemand> split(int max) {
-		return locationDemand
-				.splitDemand(max)
-				.stream()
-				.map(led -> new AssignedEntityDemand(locationEntity,
-						pinnedLocation, led)).collect(Collectors.toList());
+	public Pair<AssignedEntityDemand> split(double demand) {
+
+		Pair<LocationDemand> pair = locationDemand.splitDemand(demand);
+		return new Pair<AssignedEntityDemand>(new AssignedEntityDemand(
+				locationEntity, pinnedLocation, pair.getHead()),
+				new AssignedEntityDemand(locationEntity, pinnedLocation, pair
+						.getTail()));
+
 	}
 
 }

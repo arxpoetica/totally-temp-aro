@@ -18,7 +18,7 @@ import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
-import com.altvil.aro.service.entity.LocationEntityDemand;
+import com.altvil.aro.service.entity.LocationEntityDemandByType;
 import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.RootEntity;
 import com.altvil.aro.service.entity.SplicePoint;
@@ -45,7 +45,7 @@ public class EntityFactory {
 		return new BulkFiberTerminalImpl(ensureId(null), locationEntity) ;
 	}
 	
-	public BulkFiberConsumer createBulkFiberConsumer(LocationEntityDemand locationEntityDemand) {
+	public BulkFiberConsumer createBulkFiberConsumer(LocationEntityDemandByType locationEntityDemand) {
 		return null ;
 	}
 	

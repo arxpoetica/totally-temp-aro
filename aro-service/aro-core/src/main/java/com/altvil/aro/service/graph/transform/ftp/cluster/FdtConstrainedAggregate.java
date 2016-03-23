@@ -87,20 +87,34 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	public boolean isEmpty() {
 		return locationIntersections.size() == 0 || coverage == 0 ;
 	}
+	
+	public boolean isFull() {
+		return (thresholds.getMaxlocationPerFDT() - coverage) > 0.001 ;
+	}
 
 	//
 	// TODO add constraint
 	//
-	private boolean ensureConstraint(PinnedLocation pin) {
-
+	public boolean assignConstraint(PinnedLocation pin) {
 		return clusterLocation.add(pin);
+	}
+	
+	public double getRemainingDemand() {
+		return thresholds.getMaxlocationPerFDT() - coverage ;
+	}
+	
+	
+	public double assign(AssignedEntityDemand li) {
+		coverage += li.getTotalDemand() ;
+		locationIntersections.add(li);
+		return thresholds.getMaxlocationPerFDT() - coverage  ;
 
 	}
 
 	public boolean add(AssignedEntityDemand li) {
 
 		// Basis Constraint (TODO expanded Spatial Constraint)
-		if (!canAdd(li) || !ensureConstraint(li.getPinnedLocation())) {
+		if (!canAdd(li) || !assignConstraint(li.getPinnedLocation())) {
 			return false;
 		}
 		coverage += li.getTotalDemand() ;
