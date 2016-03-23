@@ -3,18 +3,18 @@ package com.altvil.aro.service.network.impl.demand;
 import com.altvil.aro.service.entity.LocationEntityDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 
-public class DefaultLoctionEntityDemand implements LocationEntityDemand {
+public class DefaultLocationEntityDemand implements LocationEntityDemand {
 
 	
 	
 	public static LocationEntityDemand create(LocationEntityType type, double demand) {
-		return new DefaultLoctionEntityDemand(type, demand) ;
+		return new DefaultLocationEntityDemand(type, demand) ;
 	}
 	
 	private LocationEntityType type ;
 	private double demand ;
 	
-	public DefaultLoctionEntityDemand(LocationEntityType type, double demand) {
+	public DefaultLocationEntityDemand(LocationEntityType type, double demand) {
 		super();
 		this.type = type;
 		this.demand = demand;
@@ -32,7 +32,14 @@ public class DefaultLoctionEntityDemand implements LocationEntityDemand {
 
 	@Override
 	public LocationEntityDemand add(LocationEntityDemand other) {
-		return null;
+		return add(other.getDemand()) ;
 	}
+
+	@Override
+	public LocationEntityDemand add(double other) {
+		return new DefaultLocationEntityDemand(type, other + demand) ;
+	}
+	
+	
 
 }

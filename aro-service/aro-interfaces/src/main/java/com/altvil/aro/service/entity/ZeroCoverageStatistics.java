@@ -11,7 +11,7 @@ public class ZeroCoverageStatistics implements LocationDemand {
 	private static Map<LocationEntityType, LocationEntityDemand> map = new EnumMap<>(LocationEntityType.class) ;
 	static {
 		for(LocationEntityType t : LocationEntityType.values()) {
-			map.put(t, new ZeroEntityDemand(t)) ;
+			map.put(t, new DefaultEntityDemand(t, 0)) ;
 		}
 	}
 	
@@ -38,13 +38,15 @@ public class ZeroCoverageStatistics implements LocationDemand {
 		return coverageStatic ;
 	}
 	
-	private static class ZeroEntityDemand implements LocationEntityDemand {
+	private static class DefaultEntityDemand implements LocationEntityDemand {
 
 		private LocationEntityType type ;
+		private double demand ;
 		
-		public ZeroEntityDemand(LocationEntityType type) {
+		public DefaultEntityDemand(LocationEntityType type, double demand) {
 			super();
 			this.type = type;
+			this.demand = demand ;
 		}
 
 		@Override
@@ -54,12 +56,20 @@ public class ZeroCoverageStatistics implements LocationDemand {
 
 		@Override
 		public double getDemand() {
-			return 0;
+			return demand;
 		}
 
 		@Override
 		public LocationEntityDemand add(LocationEntityDemand other) {
+			if( other == null ) {
+				return other ;
+			}
 			return other ;
+		}
+
+		@Override
+		public LocationEntityDemand add(double other) {
+			return new DefaultEntityDemand(type, demand + other) ;
 		}
 		
 	}

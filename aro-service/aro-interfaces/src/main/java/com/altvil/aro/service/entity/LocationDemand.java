@@ -3,6 +3,7 @@ package com.altvil.aro.service.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -25,6 +26,10 @@ public interface LocationDemand extends Serializable {
 		}
 		
 		return result ;
+	}
+	
+	default public Collection<LocationDemand> splitDemand(int maxDemand) {
+		return Collections.singleton(this) ;
 	}
 	
     LocationDemand add(LocationDemand coverageStatic) ;

@@ -1,11 +1,15 @@
 package com.altvil.aro.service.demand;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.entity.ZeroCoverageStatistics;
 
 public class DefaultLocationDemand implements LocationDemand {
 
@@ -14,6 +18,22 @@ public class DefaultLocationDemand implements LocationDemand {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	
+	public static LocationDemand createHouseholdDemand(
+			double houseHoldDemand) {
+
+		Map<LocationEntityType, LocationEntityDemand> demands = new EnumMap<>(LocationEntityType.class) ;
+		for(LocationEntityType t : LocationEntityType.values()) {
+			LocationEntityDemand led = ZeroCoverageStatistics.STATISTIC.getLocationDemand(t) ;
+			if( led.getEntityType() == LocationEntityType.Household) {
+				led = led.add(houseHoldDemand) ;
+			}
+			demands.put(t, led) ;
+		}
+		
+		return new DefaultLocationDemand(demands, houseHoldDemand);
+	}
+	
 	public static LocationDemand create(
 			Map<LocationEntityType, LocationEntityDemand> demands,
 			double totalFiberDemand) {
@@ -73,10 +93,29 @@ public class DefaultLocationDemand implements LocationDemand {
 
 		return create(result, total);
 	}
+	
+	@Override
+	public Collection<LocationDemand> splitDemand(int maxDemand) {
+		double totalDemand = getTotalDemand() ;
+		
+		List<LocationDemand> result = new ArrayList<>() ;
+		
+		while(totalDemand > maxDemand ) {
+			result.add(createHouseholdDemand(maxDemand)) ;
+			totalDemand -= maxDemand ;
+		}
+		
+		if( totalDemand > 0 ) {
+			result.add(createHouseholdDemand(maxDemand)) ;
+		}
+		
+		return result ;
+	}
 
 	public double getTotalFiberDemand() {
 		return totalFiberDemand;
 	}
+	
 	
 
 }

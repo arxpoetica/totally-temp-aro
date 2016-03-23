@@ -21,7 +21,7 @@ public class LocationEntityDemandFactory {
 
 	public LocationEntityDemand create(LocationEntityType type, double demand) {
 		return demand == 0.0 ? zeroDemand.get(type)
-				: new DefaultLoctionEntityDemand(type, demand);
+				: new DefaultLocationEntityDemand(type, demand);
 	}
 
 }

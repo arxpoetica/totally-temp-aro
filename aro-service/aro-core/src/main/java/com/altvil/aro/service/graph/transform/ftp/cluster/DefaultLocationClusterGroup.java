@@ -81,44 +81,51 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 	private GeoSegment getGeoSegment() {
 		return edgeList.getGeoSegment();
 	}
-
+	
+	
+	
 	private Collection<AssignedEntityDemand> getLocationAssignments() {
+		
+		LocationDemandBuilder b = new LocationDemandBuilder() ;
+		
 		if (incomingClusters == null || incomingClusters.size() == 0) {
-			return edgeList.getAssignedEntityDemands() ;
+			b.addAll(edgeList.getAssignedEntityDemands()) ;
+		} else {
+
+			GeoSegment gs = getGeoSegment();
+	
+			List<AssignedEntityDemand> locations = new ArrayList<>();
+	
+			for (LocationCluster cluster : incomingClusters) {
+				for (AssignedEntityDemand a : cluster.getLocations()) {
+					AssignedEntityDemand ald = 
+							new AssignedEntityDemand(a.getLocationEntity(), gs.proxyPin(0.0, a.getPinnedLocation())) ;
+					locations.add(ald);
+				}
+			}
+			
+			
+			//Sort Assignments By Distance from End Vertex
+			//This will force Pins from connecting segments to be placed first 
+			locations.sort(new Comparator<AssignedEntityDemand>() {
+				@Override
+				public int compare(AssignedEntityDemand o1, AssignedEntityDemand o2) {
+	
+					double d1 = o1.getPinnedLocation()
+							.getEffectiveOffsetFromEndVertex();
+					double d2 = o2.getPinnedLocation()
+							.getEffectiveOffsetFromEndVertex();
+	
+					return d1 > d2 ? -1 : (d1 == d2) ? 0 : 1;
+				}
+	
+			});
+	
+			locations.addAll(edgeList.getAssignedEntityDemands());
+			b.addAll(locations);
 		}
 
-		GeoSegment gs = getGeoSegment();
-
-		List<AssignedEntityDemand> locations = new ArrayList<>();
-
-		for (LocationCluster cluster : incomingClusters) {
-			for (AssignedEntityDemand a : cluster.getLocations()) {
-				AssignedEntityDemand ald = 
-						new AssignedEntityDemand(a.getLocationEntity(), gs.proxyPin(0.0, a.getPinnedLocation())) ;
-				locations.add(ald);
-			}
-		}
-		
-		
-		//Sort Assignments By Distance from End Vertex
-		//This will force Pins from connecting segments to be placed first 
-		locations.sort(new Comparator<AssignedEntityDemand>() {
-			@Override
-			public int compare(AssignedEntityDemand o1, AssignedEntityDemand o2) {
-
-				double d1 = o1.getPinnedLocation()
-						.getEffectiveOffsetFromEndVertex();
-				double d2 = o2.getPinnedLocation()
-						.getEffectiveOffsetFromEndVertex();
-
-				return d1 > d2 ? -1 : (d1 == d2) ? 0 : 1;
-			}
-
-		});
-
-		locations.addAll(edgeList.getAssignedEntityDemands());
-
-		return locations;
+		return b.build() ;
 
 	}
 	
@@ -136,6 +143,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				new FdtConstrainedAggregate(edgeList.getGeoSegment(), thresholds);
 
 		for (AssignedEntityDemand li : getLocationAssignments()) {
+			
 			if (!la.add(li)) {
 				clusters.add(la);
 				la = new FdtConstrainedAggregate(edgeList.getGeoSegment(), thresholds);
@@ -159,6 +167,31 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				.getOffsetFromEndVertex(), cluster, edgeList.getGeoSegment()
 				.pinLocation(0)));
 
+	}
+	
+	private  class LocationDemandBuilder {
+		
+		private List<AssignedEntityDemand> result = new ArrayList<>() ;
+		
+		public void addAll(Collection<AssignedEntityDemand> demands) {
+			for(AssignedEntityDemand d : demands) {
+				add(d) ;
+			}
+		}
+		
+		public void add(AssignedEntityDemand demand) {
+			if( demand.getTotalDemand() > thresholds.getMaxlocationPerFDT() ) {
+				result.addAll(demand.split( thresholds.getMaxlocationPerFDT())) ;
+			} else {
+				result.add(demand) ;
+			}
+			
+		}
+		
+		public List<AssignedEntityDemand> build() {
+			return result ;
+		}
+		
 	}
 
 }
