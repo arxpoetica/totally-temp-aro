@@ -22,6 +22,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       this.visible = false
       this.data = options.data
       this.type = options.type
+      this.changes = options.changes
       this.single_selection = options.single_selection
       this.reset_style_on_click = !!options.reset_style_on_click
       this.highlighteable = !!options.highlighteable
@@ -145,13 +146,14 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       if (feature.selected === select) return
 
       var id = feature.getProperty('id')
+      var type = this.changes || this.type
 
       if (!select) {
         this.deselectFeature(feature)
-        changes.deletions[this.type].push(id)
+        changes.deletions[type].push(id)
       } else {
         this.selectFeature(feature)
-        changes.insertions[this.type].push(id)
+        changes.insertions[type].push(id)
       }
       // This is needed because if the event is triggered from a google maps event
       // then we need angular to do its stuff. Otherwise couters for sources and targets
@@ -193,7 +195,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
     }
 
     // Load GeoJSON data into the layer if it's not already loaded
-    load_data () {
+    loadData () {
       var layer = this
       if (!layer.data_loaded) {
         if (layer.data) {
@@ -250,7 +252,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       this.data_loaded = false
       this.clearData()
       if (this.visible) {
-        this.load_data()
+        this.loadData()
       }
     }
 
@@ -260,7 +262,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       } else {
         this.data_loaded = false
       }
-      this.load_data()
+      this.loadData()
     }
 
     configure_feature_styles () {
@@ -281,6 +283,9 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
         var density = feature.getProperty('density')
         maxdensity = Math.max(density, maxdensity)
         mindensity = Math.min(density, mindensity)
+        if (feature.getProperty('selected') === true) {
+          this.selectFeature(feature)
+        }
       })
       var from = this.denisty_hue_from || 120
       var to = this.denisty_hue_to || 0
@@ -315,7 +320,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
 
     show () {
       if (this.visible) return
-      this.load_data()
+      this.loadData()
       this.visible = true
       this.configureVisibility()
       $rootScope.$broadcast('map_layer_changed_visibility', this)
@@ -362,17 +367,15 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
     }
 
     changeSelectionForFeaturesMatching (select, func) {
-      var layer = this
-      if (!layer.visible) return
-      var data = this.data_layer
-      var changes = createEmptyChanges(layer)
+      if (!this.visible) return
+      var changes = createEmptyChanges(this)
 
-      data.forEach((feature) => {
+      this.data_layer.forEach((feature) => {
         if (func(feature)) {
-          layer.setFeatureSelected(feature, select, changes)
+          this.setFeatureSelected(feature, select, changes)
         }
       })
-      broadcastChanges(layer, changes)
+      broadcastChanges(this, changes)
     }
 
     remove () {
@@ -388,7 +391,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
   }
 
   function createEmptyChanges (layer) {
-    var type = layer.type
+    var type = layer.changes || layer.type
     var changes = { insertions: {}, deletions: {} }
     changes.insertions[type] = []
     changes.deletions[type] = []

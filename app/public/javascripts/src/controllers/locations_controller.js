@@ -35,43 +35,41 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $scope.industries = []
 
+  var locationStyles = {
+    normal: {
+      icon: '/images/map_icons/location_business_gray.png',
+      visible: true,
+      fillColor: 'blue',
+      strokeColor: 'blue',
+      strokeWeight: 1
+    },
+    selected: {
+      icon: '/images/map_icons/location_business_selected.png',
+      visible: true,
+      fillColor: '#78D8C3',
+      strokeColor: '#78D8C3',
+      strokeWeight: 1,
+      fillOpacity: 0.9
+    }
+  }
+
   var locationsLayer = $scope.locations_layer = new MapLayer({
     type: 'locations',
     name: 'Locations',
     short_name: 'L',
     api_endpoint: '/locations/:plan_id',
-    style_options: {
-      normal: {
-        icon: '/images/map_icons/location_business_gray.png',
-        visible: true,
-        fillColor: 'blue',
-        strokeColor: 'blue',
-        strokeWeight: 1
-      },
-      selected: {
-        icon: '/images/map_icons/location_business_selected.png',
-        visible: true
-      }
-    },
+    style_options: locationStyles,
     threshold: 15,
     reload: 'always'
   })
 
   var selectedLocationsLayer = $scope.selected_locations_layer = new MapLayer({
     type: 'selected_locations',
+    changes: 'locations',
     name: 'Selected locations',
     short_name: 'SL',
     api_endpoint: '/locations/:plan_id/selected',
-    style_options: {
-      normal: {
-        icon: '/images/map_icons/location_business_selected.png',
-        visible: true,
-        fillColor: '#78D8C3',
-        strokeColor: '#78D8C3',
-        strokeWeight: 1,
-        fillOpacity: 0.9
-      }
-    },
+    style_options: locationStyles,
     threshold: 15,
     reload: 'always'
   })
@@ -192,8 +190,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    locationsLayer.reloadData(true)
-    selectedLocationsLayer.reloadData(true)
+    // locationsLayer.reloadData(true)
+    // selectedLocationsLayer.reloadData(true)
   })
 
   $scope.create_location = () => {

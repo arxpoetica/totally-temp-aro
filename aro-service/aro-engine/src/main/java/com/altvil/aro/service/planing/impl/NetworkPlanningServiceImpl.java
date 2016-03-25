@@ -77,6 +77,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	public MasterPlanCalculation planMasterFiber(long planId,
 			InputRequests inputRequests,
 			FiberNetworkConstraints constraints) {
+		
+
+		networkPlanRepository.deleteWireCenterPlans(planId);
 
 		List<Long> ids = StreamUtil.map(
 				networkPlanRepository.computeWirecenterUpdates(planId),

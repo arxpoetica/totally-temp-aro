@@ -2,39 +2,53 @@ package com.altvil.aro.service.demand;
 
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 
-public class AssignedEntityDemand  {
+public class AssignedEntityDemand {
 
 	private PinnedLocation pinnedLocation;
-	
+
 	private LocationEntity locationEntity;
-	private LocationDemand locationDemand ;
-	
+	private LocationDemand locationDemand;
+
 	public AssignedEntityDemand(LocationEntity locationEntity,
-			PinnedLocation pinnedLocation) {
+			PinnedLocation pinnedLocation, LocationDemand locationDemand) {
 		super();
 		this.locationEntity = locationEntity;
 		this.pinnedLocation = pinnedLocation;
-		this.locationDemand = locationEntity.getLocationDemand() ;
+		this.locationDemand = locationDemand;
+	}
+
+	public AssignedEntityDemand(LocationEntity locationEntity,
+			PinnedLocation pinnedLocation) {
+		this(locationEntity, pinnedLocation, locationEntity.getLocationDemand());
 	}
 
 	public double getHouseholdFiberDemandValue() {
-		return locationDemand.getTotalDemand() ;
+		return locationDemand.getTotalDemand();
 	}
 
-
 	public double getTotalDemand() {
-		return locationDemand.getTotalDemand() ;
+		return locationDemand.getTotalDemand();
 	}
 
 	public PinnedLocation getPinnedLocation() {
 		return pinnedLocation;
 	}
 
-
 	public LocationEntity getLocationEntity() {
 		return locationEntity;
+	}
+
+	public Pair<AssignedEntityDemand> split(double demand) {
+
+		Pair<LocationDemand> pair = locationDemand.splitDemand(demand);
+		return new Pair<AssignedEntityDemand>(new AssignedEntityDemand(
+				locationEntity, pinnedLocation, pair.getHead()),
+				new AssignedEntityDemand(locationEntity, pinnedLocation, pair
+						.getTail()));
+
 	}
 
 }

@@ -70,12 +70,13 @@ module.exports = class MarketSize {
       }
     } else {
       params.push(options.boundary)
+      var length = params.length
       sql += `
         WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
           ${customerTypeFilter()}
-          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)
+          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${length})::geometry, 4326), b.geom)
         )
       `
     }

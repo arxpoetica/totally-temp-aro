@@ -43,12 +43,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   var towers_layer = new MapLayer({
     name: 'Towers',
-    type: 'locations', // important for selecting towers
+    type: 'locations',
+    changes: 'locations',
     short_name: 'T',
-    api_endpoint: '/locations/:plan_id',
-    http_params: {
-      type: 'towers'
-    },
+    api_endpoint: '/towers/:plan_id',
     style_options: {
       normal: {
         icon: '/images/map_icons/tower.png',
@@ -75,7 +73,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    network_nodes_layer.reloadData()
+    network_nodes_layer.reloadData(true)
   })
 
   $scope.select_tool = (tool) => {

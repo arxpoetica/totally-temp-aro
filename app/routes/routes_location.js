@@ -14,7 +14,16 @@ exports.configure = (api, middleware) => {
     keys.forEach((key) => {
       filters[key] = _.compact((request.query[key] || '').split(',').map((v) => +v || null))
     })
-    models.Location.findAll(plan_id, type, filters, viewport)
+    models.Location.findLocations(plan_id, type, filters, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/towers/:plan_id', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var plan_id = +request.params.plan_id
+
+    models.Location.findTowers(plan_id, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -24,14 +33,6 @@ exports.configure = (api, middleware) => {
     var plan_id = +request.params.plan_id
 
     models.Location.findSelected(plan_id, viewport)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.get('/locations/:plan_id/density', middleware.viewport, (request, response, next) => {
-    var viewport = request.viewport
-    var plan_id = +request.params.plan_id
-    models.Location.density(plan_id, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
