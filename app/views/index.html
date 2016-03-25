@@ -639,9 +639,7 @@
   <% if (env_is_production) { %>
     <!-- If we're in production, use our Google Maps Enterprise client ID -->
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;client=gme-altmanvilandrieand&amp;libraries=visualization,drawing"></script>
-  <% } %>
-
-  <% if (!env_is_production) { %>
+  <% } else { %>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=visualization,drawing"></script>
   <% } %>
 
