@@ -193,6 +193,7 @@ public class NetworkServiceImpl implements NetworkService {
 								.getGeometry(RoadEdgeMap.shape), result
 								.getDouble(RoadEdgeMap.edge_length));
 					} catch (Exception err) {
+						log.error(result.toString());
 						log.error(err.getMessage(), err);
 						return null;
 					}

@@ -453,7 +453,7 @@ public class FiberDagScanner {
 				TerminatedVertex.Builder builder) {
 
 			// Tricky remainder Basis
-			if (remainingCount < thresholds.getMinLocationPerFDH()) {
+			if (remainingDemand < thresholds.getMinLocationPerFDH()) {
 				builder.setRemainder(write(map, map.keySet()));
 				return builder;
 			}
@@ -461,7 +461,7 @@ public class FiberDagScanner {
 			//
 			// Closed case Basis
 			//
-			if (remainingCount <= thresholds.getMaxLocationPerFDH()) {
+			if (remainingDemand <= thresholds.getMaxLocationPerFDH()) {
 				builder.close(write(map, map.keySet()));
 				builder.setRemainder(emptyVertex(vertex));
 				return builder;
