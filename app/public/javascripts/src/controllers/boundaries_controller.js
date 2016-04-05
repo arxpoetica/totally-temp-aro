@@ -352,7 +352,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  $scope.delete_boundary = (boundary) => {
+  $scope.deleteBoundary = (boundary) => {
     tracker.track('Boundaries / Delete')
     swal({
       title: 'Are you sure?',
@@ -366,7 +366,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       $http.post('/boundary/' + $scope.plan.id + '/delete/' + boundary.id)
         .success((response) => {
           boundary.overlay.setMap(null)
-          $scope.boundaries = _.reject($scope.boundaries, (b) => boundary.id === b.i)
+          $scope.boundaries = _.reject($scope.boundaries, (b) => boundary.id === b.id)
         })
     })
   }
