@@ -5,17 +5,16 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 
 public class OptimizerContext {
 
-	private boolean fullAnalysisNode;
+	//TODO KG Remove this
+	private boolean fullAnalysisNode = true ;
 	private PricingModel pricingModel;
 	private FiberNetworkConstraints fiberConstraints;
 	private FtthThreshholds ftpThreshholds ;
 	
-	public OptimizerContext(boolean fullAnalysisNode,
-							PricingModel pricingModel, 
+	public OptimizerContext(PricingModel pricingModel, 
 							FtthThreshholds ftpThreshholds,
 							FiberNetworkConstraints fiberConstraints) {
 		super();
-		this.fullAnalysisNode = fullAnalysisNode;
 		this.pricingModel = pricingModel;
 		this.fiberConstraints = fiberConstraints;
 		this.ftpThreshholds = ftpThreshholds ;
