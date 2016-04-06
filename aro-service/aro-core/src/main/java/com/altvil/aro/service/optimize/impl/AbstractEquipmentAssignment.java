@@ -46,7 +46,7 @@ public abstract class AbstractEquipmentAssignment implements
 
 	@Override
 	public DemandCoverage getDirectCoverage(AnalysisContext ctx) {
-		return DefaultFiberCoverage.create(Collections.emptySet(), ctx.getCoverageScoreSupplier());
+		return DefaultFiberCoverage.create(Collections.emptySet());
 	}
 
 	@Override

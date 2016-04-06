@@ -1,5 +1,8 @@
 package com.altvil.aro.service.optimize.impl;
 
+import java.util.Collection;
+import java.util.Set;
+
 import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
@@ -11,9 +14,6 @@ import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.serialize.ModelSerializer;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.utils.StreamUtil;
-
-import java.util.Collection;
-import java.util.Set;
 
 public class FdtAssignment extends AbstractEquipmentAssignment {
 
@@ -63,6 +63,6 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 		Set<LocationEntity> locationEntities = StreamUtil.mapSet(locations,
 				l -> ((LocationDropAssignment) l.getAroEntity()).getLocationEntity());
 
-		return DefaultFiberCoverage.create(locationEntities, ctx.getCoverageScoreSupplier());
+		return DefaultFiberCoverage.create(locationEntities);
 	}
 }

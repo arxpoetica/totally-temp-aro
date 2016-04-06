@@ -18,7 +18,6 @@ import com.altvil.aro.service.entity.DefaultAroVisitor;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.SplicePoint;
@@ -428,10 +427,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			return parent.addChild(new SplitterNodeAssignment()).setJunctionNode(true);
 		}
 
-		@Override
-		public Supplier<LocationDemand> getCoverageScoreSupplier() {
-			return context.getCoverageScoreSupplier();
-		}
+		
 
 	}
 
