@@ -100,7 +100,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
 					.invokeAll(ids.stream()
-							.map(id -> createCallable(id, constraints))
+							.map(id -> createOptimzedCallable(id, constraints))
 							.collect(Collectors.toList()));
 			return new MasterPlanUpdate(futures.stream().map(wf -> {
 				try {
@@ -140,7 +140,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
 					.invokeAll(ids.stream()
-							.map(id -> createCallable(id, constraints))
+							.map(id -> createPlanningCallable(id, constraints))
 							.collect(Collectors.toList()));
 			return new MasterPlanUpdate(futures.stream().map(wf -> {
 				try {
@@ -168,10 +168,33 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	@Override
 	public Future<WirecenterNetworkPlan> planFiber(long planId,
 			FiberNetworkConstraints constraints) {
-		return executorService.submit(createCallable(planId, constraints));
+		return executorService.submit(createPlanningCallable(planId, constraints));
 	}
+	
+	
+	private Callable<WirecenterNetworkPlan> createPlanningCallable(long planId,
+			FiberNetworkConstraints constraints) {
 
-	private Callable<WirecenterNetworkPlan> createCallable(long planId,
+		return () -> {
+
+			NetworkData networkData = networkService
+					.getNetworkData(NetworkRequest.create(planId));
+
+			Optional<CompositeNetworkModel> model= planService.computeNetworkModel(networkData, constraints) ;
+			if( model.isPresent() ) {
+				WirecenterNetworkPlan plan = conversionService.convert(planId,
+						model);
+				save(plan);
+				return plan ;
+			}
+			
+			//TODO KG 
+			return null ;
+		};
+	}
+	
+
+	private Callable<WirecenterNetworkPlan> createOptimzedCallable(long planId,
 			FiberNetworkConstraints constraints) {
 
 		return () -> {
