@@ -20,8 +20,17 @@ import com.altvil.aro.persistence.repository.FiberRouteRepository;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.entity.DropCable;
+import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.MaterialType;
+import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.optimize.FTTHOptimizerService;
+import com.altvil.aro.service.optimize.NetworkPlanner;
+import com.altvil.aro.service.optimize.OptimizedNetwork;
+import com.altvil.aro.service.optimize.OptimizerContext;
+import com.altvil.aro.service.optimize.PricingModel;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.InputRequests;
@@ -29,6 +38,7 @@ import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanCalculation;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
+import com.altvil.aro.service.planing.OptimizationInputs;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.utils.StreamUtil;
 
@@ -38,7 +48,6 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkPlanningServiceImpl.class.getName());
 
-	
 	@Autowired
 	private NetworkNodeRepository networkNodeRepository;
 
@@ -57,6 +66,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	@Autowired
 	private SerializationService conversionService;
 
+	@Autowired
+	private FTTHOptimizerService optimizerService;
+
 	private ExecutorService executorService;
 	private ExecutorService wirePlanExecutor;
 
@@ -73,11 +85,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		fiberRouteRepository.save(plan.getFiberRoutes());
 	}
 
-	@Override
-	public MasterPlanCalculation planMasterFiber(long planId,
+	public MasterPlanCalculation optimizeMasterFiber(long planId,
 			InputRequests inputRequests,
+			OptimizationInputs optimizationInputs,
 			FiberNetworkConstraints constraints) {
-		
 
 		networkPlanRepository.deleteWireCenterPlans(planId);
 
@@ -95,7 +106,47 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				try {
 					return wf.get();
 				} catch (Exception e) {
-					log.error(e.getMessage()) ;
+					log.error(e.getMessage());
+					return null;
+				}
+			}).filter(p -> p != null).collect(Collectors.toList()));
+		});
+
+		return new MasterPlanCalculation() {
+			@Override
+			public List<Long> getWireCenterPlans() {
+				return ids;
+			}
+
+			@Override
+			public Future<MasterPlanUpdate> getFuture() {
+				return f;
+			}
+		};
+
+	}
+
+	@Override
+	public MasterPlanCalculation planMasterFiber(long planId,
+			InputRequests inputRequests, FiberNetworkConstraints constraints) {
+
+		networkPlanRepository.deleteWireCenterPlans(planId);
+
+		List<Long> ids = StreamUtil.map(
+				networkPlanRepository.computeWirecenterUpdates(planId),
+				Number::longValue);
+
+		Future<MasterPlanUpdate> f = wirePlanExecutor.submit(() -> {
+
+			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
+					.invokeAll(ids.stream()
+							.map(id -> createCallable(id, constraints))
+							.collect(Collectors.toList()));
+			return new MasterPlanUpdate(futures.stream().map(wf -> {
+				try {
+					return wf.get();
+				} catch (Exception e) {
+					log.error(e.getMessage());
 					return null;
 				}
 			}).filter(p -> p != null).collect(Collectors.toList()));
@@ -124,17 +175,63 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			FiberNetworkConstraints constraints) {
 
 		return () -> {
-			Optional<CompositeNetworkModel> model = planService
-					.computeNetworkModel(networkService
-							.getNetworkData(NetworkRequest.create(planId)),
-							constraints);
 
-			WirecenterNetworkPlan plan = conversionService.convert(planId,
-					model);
+			NetworkData networkData = networkService
+					.getNetworkData(NetworkRequest.create(planId));
 
-			save(plan);
+			OptimizerContext ctx = new OptimizerContext(new DefaultPriceModel(), planService.createFtthThreshholds(constraints), constraints) ;
+			
+			NetworkPlanner planner = optimizerService.createNetworkPlanner((networkAnalysis) -> true, networkData, ctx,
+					(GeneratingNode) -> false);
+			
+			Optional<OptimizedNetwork> optimized = planner.getNetworkPlan() ;
+			if( optimized.isPresent() ) {
+				Optional<CompositeNetworkModel> model = optimized.get().getNetworkPlan() ;
+				if( model.isPresent() ) {
+					WirecenterNetworkPlan plan = conversionService.convert(planId,
+							model);
+					save(plan);
+					return plan ;
+				}
+			}
 
-			return plan;
+			//TODO KG 
+			return null ;
 		};
+	}
+	
+	
+	private static class DefaultPriceModel implements PricingModel {
+
+		@Override
+		public double getPrice(DropCable dropCable) {
+			return 50 ;
+		}
+
+		@Override
+		public double getMaterialCost(MaterialType type) {
+			switch( type ) {
+			case FDT :
+				return 20 ;
+			case FDH :
+				return 2000 ;
+			case SPLITTER_16 :
+				return 1500 ;
+			case SPLITTER_32 :
+				return 2000 ;
+			case SPLITTER_64 :
+				return 2500 ;
+			
+			default :
+				return 0 ;
+			}
+		}
+
+		@Override
+		public double getFiberCostPerMeter(FiberType fiberType,
+				int requiredFiberStrands) {
+			return 10 ;
+		}
+		
 	}
 }

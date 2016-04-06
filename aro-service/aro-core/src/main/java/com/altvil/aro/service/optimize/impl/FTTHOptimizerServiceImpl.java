@@ -31,19 +31,18 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 	}
 
 	@Override
-	public NetworkPlanner createNetworkPlanner(NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstrain) {
-		return DefaultNetworkPlannerImpl.create(createConstrainer(constraint, networkData, ctx, generatingNodeConstrain));
-
+	public NetworkPlanner createNetworkPlanner(NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint) {
+		return DefaultNetworkPlannerImpl.create(createConstrainer(constraint, networkData, ctx, generatingNodeConstraint));
 	}
 
-	private NetworkConstrainer createConstrainer(NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstrain) {
+	private NetworkConstrainer createConstrainer(NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint) {
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
 				.create(networkData, ctx.getFiberNetworkConstraints());
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder,
 						ctx);
 
-		return NetworkConstrainer.create(networkModelBuilder, generatingNodeConstrain, constraint::isConstraintMet, networkAnalysis);
+		return NetworkConstrainer.create(networkModelBuilder, generatingNodeConstraint, constraint::isConstraintMet, networkAnalysis);
 	}
 
 

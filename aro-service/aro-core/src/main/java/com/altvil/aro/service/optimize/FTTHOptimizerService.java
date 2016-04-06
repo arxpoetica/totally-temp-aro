@@ -7,6 +7,6 @@ import java.util.function.Predicate;
 
 public interface FTTHOptimizerService {
 
-	NetworkPlanner createNetworkPlanner(NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstrain);
+	NetworkPlanner createNetworkPlanner(NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint);
 	
 }
