@@ -103,7 +103,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 				then change getCapex methods so they take required fiber strands instead of demand coverage
 */
 		int childrenFiberStrandsRequirements = getChildren().stream().mapToInt(GeneratingNode::getRequiredFiberStrands).sum();
-		int directFiberDemand = (int) Math.ceil(directCoverage.getCoverage(). getTotalDemand());
+		int directFiberDemand = (int) Math.ceil(directCoverage.getCoverage().getTotalDemand());
 		this.requiredFiberStrands = equipmentAssigment.getRequiredIncomingFiberStrands(ctx, childrenFiberStrandsRequirements + directFiberDemand);
 
 		this.coverage = calcFiberCoverage(children);
@@ -116,7 +116,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	private DemandCoverage calcFiberCoverage(Collection<GeneratingNode> children) {
 
-		Accumulator acc = DefaultFiberCoverage.accumulate(ctx.getCoverageScoreSupplier());
+		Accumulator acc = DefaultFiberCoverage.accumulate();
 
 		if (directCoverage != null) {
 			acc.add(directCoverage);

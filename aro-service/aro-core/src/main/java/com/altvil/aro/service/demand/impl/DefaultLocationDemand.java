@@ -36,6 +36,17 @@ public class DefaultLocationDemand implements LocationDemand {
 
 		return new DefaultLocationDemand(demands, houseHoldDemand);
 	}
+	
+	public static LocationDemand create(double houseHoldDemand, double businessDemand, double towerDemand) {
+		Map<LocationEntityType, LocationEntityDemandByType> map = new EnumMap<>(LocationEntityType.class) ;
+		double totalCount = houseHoldDemand + businessDemand + towerDemand ;
+	
+		map.put(LocationEntityType.Household, new DefaultLocationEntityDemand(LocationEntityType.Household, houseHoldDemand)) ;
+		map.put(LocationEntityType.Business, new DefaultLocationEntityDemand(LocationEntityType.Business, businessDemand)) ;
+		map.put(LocationEntityType.CellTower, new DefaultLocationEntityDemand(LocationEntityType.CellTower, towerDemand)) ;
+		
+		return create(map, totalCount) ;
+	}
 
 	public static LocationDemand create(
 			Map<LocationEntityType, LocationEntityDemandByType> demands,
