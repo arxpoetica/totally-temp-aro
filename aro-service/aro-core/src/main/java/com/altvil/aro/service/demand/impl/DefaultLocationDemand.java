@@ -3,87 +3,88 @@ package com.altvil.aro.service.demand.impl;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.entity.LocationEntityDemandByType;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.Pair;
 
-public class DefaultLocationDemand implements LocationDemand {
+public class DefaultLocationDemand extends DefaultDemandStatistic implements
+		LocationDemand {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	
-	public static LocationDemand ZERO_DEMAND = createHouseholdDemand(0) ;
+
+	public static LocationDemand ZERO_DEMAND = createHouseholdDemand(0);
 
 	public static LocationDemand createHouseholdDemand(double houseHoldDemand) {
 
-		Map<LocationEntityType, LocationEntityDemandByType> demands = new EnumMap<>(
+		Map<LocationEntityType, DemandStatistic> demands = new EnumMap<>(
 				LocationEntityType.class);
-
-		for (Map.Entry<LocationEntityType, LocationEntityDemandByType> e : ZeroDemands.ZERO_DEMANDS
-				.getZeroDemands().entrySet()) {
-			if (e.getKey() == LocationEntityType.Household) {
-				demands.put(LocationEntityType.Household,
-						new DefaultLocationEntityDemand(
-								LocationEntityType.Household, houseHoldDemand));
-			} else {
-				demands.put(e.getKey(), e.getValue());
-			}
-		}
-
-		return new DefaultLocationDemand(demands, houseHoldDemand);
-	}
-	
-	public static LocationDemand create(double houseHoldDemand, double businessDemand, double towerDemand) {
-		Map<LocationEntityType, LocationEntityDemandByType> map = new EnumMap<>(LocationEntityType.class) ;
-		double totalCount = houseHoldDemand + businessDemand + towerDemand ;
-	
-		map.put(LocationEntityType.Household, new DefaultLocationEntityDemand(LocationEntityType.Household, houseHoldDemand)) ;
-		map.put(LocationEntityType.Business, new DefaultLocationEntityDemand(LocationEntityType.Business, businessDemand)) ;
-		map.put(LocationEntityType.CellTower, new DefaultLocationEntityDemand(LocationEntityType.CellTower, towerDemand)) ;
 		
-		return create(map, totalCount) ;
+		DemandStatistic houseHoldStat = new DefaultDemandStatistic(houseHoldDemand) ;
+		
+		demands.put(LocationEntityType.Household, houseHoldStat) ;
+		demands.put(LocationEntityType.Business, DefaultDemandStatistic.ZERO_DEMAND) ;
+		demands.put(LocationEntityType.CellTower, DefaultDemandStatistic.ZERO_DEMAND) ;
+		
+		return new DefaultLocationDemand(demands, houseHoldStat);
+	}
+
+	public static LocationDemand create(DemandStatistic houseHoldDemand,
+			DemandStatistic businessDemand, DemandStatistic towerDemand) {
+		Map<LocationEntityType, DemandStatistic> map = new EnumMap<>(
+				LocationEntityType.class);
+		
+		map.put(LocationEntityType.Household, houseHoldDemand);
+		map.put(LocationEntityType.Business, businessDemand);
+		map.put(LocationEntityType.CellTower, towerDemand);
+
+		return create(map, sum(map.values()));
+	}
+
+	public static LocationDemand create(double houseHoldDemand,
+			double businessDemand, double towerDemand) {
+		return create(new DefaultDemandStatistic(houseHoldDemand), new DefaultDemandStatistic(businessDemand), new DefaultDemandStatistic(towerDemand)) ;
 	}
 
 	public static LocationDemand create(
-			Map<LocationEntityType, LocationEntityDemandByType> demands,
-			double totalFiberDemand) {
-
+			Map<LocationEntityType, DemandStatistic> demands,
+			DemandStatistic totalFiberDemand) {
 		return new DefaultLocationDemand(demands, totalFiberDemand);
 	}
 
-	private static double sum(
-			Map<LocationEntityType, LocationEntityDemandByType> demands) {
-		double total = 0;
-
-		for (LocationEntityType t : LocationEntityType.values()) {
-			total += demands.get(t).getDemand();
-		}
-
-		return total;
+	private static DemandStatistic sum(
+			Map<LocationEntityType, DemandStatistic> demands) {
+		return DefaultDemandStatistic.sum(demands.values());
 	}
 
 	public static LocationDemand create(
-			Map<LocationEntityType, LocationEntityDemandByType> demands) {
+			Map<LocationEntityType, DemandStatistic> demands) {
 		return new DefaultLocationDemand(demands, sum(demands));
 	}
 
-	private Map<LocationEntityType, LocationEntityDemandByType> demands;
+	private Map<LocationEntityType, DemandStatistic> demands;
 	private double totalFiberDemand;
 
 	private DefaultLocationDemand(
-			Map<LocationEntityType, LocationEntityDemandByType> demands,
-			double totalFiberDemand) {
-		super();
+			Map<LocationEntityType, DemandStatistic> demands,
+			DemandStatistic stat) {
+		super(stat.getRawCoverage(), stat.getDemand(), stat
+				.getMonthlyRevenueImpact());
 		this.demands = demands;
-		this.totalFiberDemand = totalFiberDemand;
+	}
+
+	private DefaultLocationDemand(
+			Map<LocationEntityType, DemandStatistic> demands, double raw,
+			double demand, double revenue) {
+		super(raw, demand, revenue);
+		this.demands = demands;
 	}
 
 	@Override
-	public LocationEntityDemandByType getLocationDemand(LocationEntityType type) {
+	public DemandStatistic getLocationDemand(LocationEntityType type) {
 		return demands.get(type);
 	}
 
@@ -94,18 +95,19 @@ public class DefaultLocationDemand implements LocationDemand {
 
 	@Override
 	public LocationDemand add(LocationDemand other) {
-		EnumMap<LocationEntityType, LocationEntityDemandByType> result = new EnumMap<>(
+
+		EnumMap<LocationEntityType, DemandStatistic> result = new EnumMap<>(
 				LocationEntityType.class);
 
-		double total = 0;
 		for (LocationEntityType t : LocationEntityType.values()) {
-			LocationEntityDemandByType led = getLocationDemand(t).add(
-					other.getLocationDemand(t));
-			total += led.getDemand();
-			result.put(t, led);
+
+			result.put(
+					t,
+					DefaultDemandStatistic.sum(getLocationDemand(t),
+							other.getLocationDemand(t)));
 		}
 
-		return create(result, total);
+		return create(result, sum(result.values()));
 	}
 
 	@Override
@@ -117,25 +119,6 @@ public class DefaultLocationDemand implements LocationDemand {
 
 	public double getTotalFiberDemand() {
 		return totalFiberDemand;
-	}
-
-	private static class ZeroDemands {
-
-		public static ZeroDemands ZERO_DEMANDS = new ZeroDemands();
-
-		private Map<LocationEntityType, LocationEntityDemandByType> emptyDemands = new EnumMap<LocationEntityType, LocationEntityDemandByType>(
-				LocationEntityType.class);
-
-		private ZeroDemands() {
-			for (LocationEntityType t : LocationEntityType.values()) {
-				emptyDemands.put(t, new DefaultLocationEntityDemand(t, 0));
-			}
-		}
-
-		public Map<LocationEntityType, LocationEntityDemandByType> getZeroDemands() {
-			return emptyDemands;
-		}
-
-	}
+	}	
 
 }

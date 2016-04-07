@@ -5,6 +5,6 @@ import com.altvil.aro.service.optimize.OptimizerContext;
 public interface NetworkAnalysisFactory {
 
 	public abstract NetworkAnalysis createNetworkAnalysis(
-			NetworkModelBuilder networkModelBuilder, OptimizerContext ctx);
+			NetworkModelBuilder networkModelBuilder, OptimizerContext ctx, ScoringStrategy scoringStragey);
 
 }

@@ -15,35 +15,36 @@ import com.altvil.aro.service.plan.NetworkModel;
 
 public interface AnalysisContext {
 
-	public HubModel getHubModel();
+	HubModel getHubModel();
 
-	public PricingModel getPricingModel();
+	PricingModel getPricingModel();
 
-	public OptimizerContext getOptimizerContext();
+	OptimizerContext getOptimizerContext();
 
-	public GraphTransformerFactory getGraphTransformerFactory();
+	GraphTransformerFactory getGraphTransformerFactory();
 
-	public NetworkModel getNetworkModel();
+	NetworkModel getNetworkModel();
 
-	public NetworkAnalysis getNetworkAnalysis();
+	NetworkAnalysis getNetworkAnalysis();
 
-	public boolean isFullAnalysisMode();
+	boolean isFullAnalysisMode();
 
-	public void rebuildRequired(GeneratingNode node);
+	void rebuildRequired(GeneratingNode node);
 
-	public void changing_start(GeneratingNode node);
+	void changing_start(GeneratingNode node);
 
-	public void changing_end(GeneratingNode node);
+	void changing_end(GeneratingNode node);
 
-	public void addToAnalysis(GeneratingNode node);
+	ScoringStrategy getScoringStrategy();
 
-	public void removeFromAnalysis(GeneratingNode node);
+	void addToAnalysis(GeneratingNode node);
 
-	public Builder addNode(FiberType fiberType,
+	void removeFromAnalysis(GeneratingNode node);
+
+	Builder addNode(FiberType fiberType,
 			Collection<GraphAssignment> assignments,
 			GeneratingNode.Builder parent, GraphNode vertex);
 
-	public Builder addSplitterNode(GeneratingNode.Builder parent);
-
+	Builder addSplitterNode(GeneratingNode.Builder parent);
 
 }

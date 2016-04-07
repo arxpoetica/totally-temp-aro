@@ -39,6 +39,8 @@ import com.altvil.aro.service.planing.MasterPlanCalculation;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.OptimizationInputs;
+import com.altvil.aro.service.planing.OptimizationType;
+import com.altvil.aro.service.planing.ScoringStrategyFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.utils.StreamUtil;
 
@@ -68,6 +70,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Autowired
 	private FTTHOptimizerService optimizerService;
+	
+	@Autowired
+	private ScoringStrategyFactory scoringStrategyFactory ;
 
 	private ExecutorService executorService;
 	private ExecutorService wirePlanExecutor;
@@ -205,7 +210,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			OptimizerContext ctx = new OptimizerContext(new DefaultPriceModel(), planService.createFtthThreshholds(constraints), constraints) ;
 			
 			NetworkPlanner planner = optimizerService.createNetworkPlanner((networkAnalysis) -> true, networkData, ctx,
-					(GeneratingNode) -> false);
+					(GeneratingNode) -> false, scoringStrategyFactory.getScoringStrategy(OptimizationType.CAPEX));
 			
 			Optional<OptimizedNetwork> optimized = planner.getNetworkPlan() ;
 			if( optimized.isPresent() ) {
