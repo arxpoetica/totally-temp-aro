@@ -2,6 +2,7 @@ package com.altvil.aro.service.network.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,13 +62,40 @@ public class NetworkServiceImpl implements NetworkService {
 		location_id, buesiness_fiber, tower_fiber, household_fiber
 	}
 
+	private List<Object[]> queryLocations(
+			NetworkRequest networkRequest) {
+		switch (networkRequest.getLocationLoadingRequest()) {
+			case SELECTED:
+				return planRepository
+				.queryLinkedLocations(networkRequest.getPlanId()) ;
+			case ALL:
+				return planRepository
+				.queryAllLocationsByPlanId(networkRequest.getPlanId()) ;
+			default :
+				return planRepository
+						.queryLinkedLocations(networkRequest.getPlanId()) ;
+		}
+	}
+	
+	private List<Object[]> queryLocationDemand(NetworkRequest networkRequest) {
+		switch (networkRequest.getLocationLoadingRequest()) {
+		case SELECTED:
+			return planRepository
+			.queryAllFiberDemand(networkRequest.getPlanId(), networkRequest.getYear()) ;
+		case ALL:
+			return planRepository
+					.queryAllFiberDemand(networkRequest.getPlanId(), networkRequest.getYear()) ;
+		default :
+			return planRepository
+					.queryAllFiberDemand(networkRequest.getPlanId(), networkRequest.getYear()) ;
+	}
+	}
+
 	private Map<Long, LocationDemand> getLocationDemand(
 			NetworkRequest networkRequest) {
 
 		Map<Long, LocationDemand> map = new HashMap<>();
-
-		planRepository
-				.queryFiberDemand(networkRequest.getPlanId(), networkRequest.getYear())
+		queryLocationDemand(networkRequest)
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
@@ -87,11 +115,9 @@ public class NetworkServiceImpl implements NetworkService {
 	private Collection<NetworkAssignment> getLocations(
 			NetworkRequest networkRequest) {
 
-		Map<Long, LocationDemand> demandMap = getLocationDemand(networkRequest) ;
-		
-		
-		return toValidAssignments(planRepository
-				.queryLinkedLocations(networkRequest.getPlanId())
+		Map<Long, LocationDemand> demandMap = getLocationDemand(networkRequest);
+
+		return toValidAssignments(queryLocations(networkRequest)
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {
@@ -99,15 +125,15 @@ public class NetworkServiceImpl implements NetworkService {
 
 						long tlid = result.getLong(LocationMap.tlid);
 
-						Long locationId = result.getLong(LocationMap.id) ;
-						LocationDemand  ldm = demandMap.get(locationId) ;
-						if( ldm == null || ldm.getDemand() == 0) {
-							//No Demand no location mapped in for fiber Linking
-							return null ;
+						Long locationId = result.getLong(LocationMap.id);
+						LocationDemand ldm = demandMap.get(locationId);
+						if (ldm == null || ldm.getDemand() == 0) {
+							// No Demand no location mapped in for fiber Linking
+							return null;
 						}
 						AroEntity aroEntity = entityFactory
-								.createLocationEntity(locationId, ldm) ;
- 
+								.createLocationEntity(locationId, ldm);
+
 						RoadLocation rl = RoadLocationImpl
 								.build()
 								.setTlid(tlid)

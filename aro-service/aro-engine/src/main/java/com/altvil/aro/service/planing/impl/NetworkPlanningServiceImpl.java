@@ -1,5 +1,6 @@
 package com.altvil.aro.service.planing.impl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -22,6 +23,7 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkRequest;
@@ -70,9 +72,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Autowired
 	private FTTHOptimizerService optimizerService;
-	
+
 	@Autowired
-	private ScoringStrategyFactory scoringStrategyFactory ;
+	private ScoringStrategyFactory scoringStrategyFactory;
 
 	private ExecutorService executorService;
 	private ExecutorService wirePlanExecutor;
@@ -84,6 +86,15 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
+	public Future<WirecenterNetworkPlan> optimizeWirecenter(long planId,
+			InputRequests inputRequests, OptimizationInputs optimizationInputs,
+			FiberNetworkConstraints constraints) {
+		return this.wirePlanExecutor
+				.submit(createOptimzedCallable(NetworkRequest.create(planId,
+						NetworkRequest.LocationLoadingRequest.ALL), optimizationInputs, constraints));
+	}
+
+	@Override
 	@Transactional
 	public void save(WirecenterNetworkPlan plan) {
 		networkNodeRepository.save(plan.getNetworkNodes());
@@ -91,8 +102,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	public MasterPlanCalculation optimizeMasterFiber(long planId,
-			InputRequests inputRequests,
-			OptimizationInputs optimizationInputs,
+			InputRequests inputRequests, OptimizationInputs optimizationInputs,
 			FiberNetworkConstraints constraints) {
 
 		networkPlanRepository.deleteWireCenterPlans(planId);
@@ -104,8 +114,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		Future<MasterPlanUpdate> f = wirePlanExecutor.submit(() -> {
 
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
-					.invokeAll(ids.stream()
-							.map(id -> createOptimzedCallable(id, constraints))
+					.invokeAll(ids
+							.stream()
+							.map(id -> createOptimzedCallable(
+									NetworkRequest.create(id), optimizationInputs, constraints))
 							.collect(Collectors.toList()));
 			return new MasterPlanUpdate(futures.stream().map(wf -> {
 				try {
@@ -173,10 +185,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	@Override
 	public Future<WirecenterNetworkPlan> planFiber(long planId,
 			FiberNetworkConstraints constraints) {
-		return executorService.submit(createPlanningCallable(planId, constraints));
+		return executorService.submit(createPlanningCallable(planId,
+				constraints));
 	}
-	
-	
+
 	private Callable<WirecenterNetworkPlan> createPlanningCallable(long planId,
 			FiberNetworkConstraints constraints) {
 
@@ -185,83 +197,102 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			NetworkData networkData = networkService
 					.getNetworkData(NetworkRequest.create(planId));
 
-			Optional<CompositeNetworkModel> model= planService.computeNetworkModel(networkData, constraints) ;
-			if( model.isPresent() ) {
+			Optional<CompositeNetworkModel> model = planService
+					.computeNetworkModel(networkData, constraints);
+			if (model.isPresent()) {
 				WirecenterNetworkPlan plan = conversionService.convert(planId,
 						model);
 				save(plan);
-				return plan ;
+				return plan;
 			}
-			
-			//TODO KG 
-			return null ;
+
+			// TODO KG
+			return null;
 		};
 	}
-	
 
-	private Callable<WirecenterNetworkPlan> createOptimzedCallable(long planId,
+	private Callable<WirecenterNetworkPlan> createOptimzedCallable(
+			NetworkRequest networkRequest,
+			OptimizationInputs optimizationInputs,
 			FiberNetworkConstraints constraints) {
 
 		return () -> {
 
 			NetworkData networkData = networkService
-					.getNetworkData(NetworkRequest.create(planId));
+					.getNetworkData(networkRequest);
 
-			OptimizerContext ctx = new OptimizerContext(new DefaultPriceModel(), planService.createFtthThreshholds(constraints), constraints) ;
-			
-			NetworkPlanner planner = optimizerService.createNetworkPlanner((networkAnalysis) -> true, networkData, ctx,
-					(GeneratingNode) -> false, scoringStrategyFactory.getScoringStrategy(OptimizationType.CAPEX));
-			
-			Optional<OptimizedNetwork> optimized = planner.getNetworkPlan() ;
-			if( optimized.isPresent() ) {
-				Optional<CompositeNetworkModel> model = optimized.get().getNetworkPlan() ;
-				if( model.isPresent() ) {
-					WirecenterNetworkPlan plan = conversionService.convert(planId,
-							model);
-					save(plan);
-					return plan ;
-				}
+			OptimizerContext ctx = new OptimizerContext(
+					new DefaultPriceModel(),
+					planService.createFtthThreshholds(constraints), constraints);
+
+			double totalDemand = networkData
+					.getRoadLocations()
+					.stream()
+					.mapToDouble(
+							a -> ((LocationEntity) a.getSource())
+									.getLocationDemand().getDemand()).sum();
+
+			NetworkPlanner planner = optimizerService.createNetworkPlanner((
+					networkAnalysis) -> false, networkData, ctx, (
+					GeneratingNode) -> false, scoringStrategyFactory
+					.getScoringStrategy(OptimizationType.CAPEX));
+
+			Collection<OptimizedNetwork> optimizedPlans = planner
+					.getOptimizedPlans();
+
+			Optional<OptimizedNetwork> model = optimizedPlans
+					.stream()
+					.filter(p -> !p.isEmpty()
+							&& (p.getAnalysisNode().getFiberCoverage()
+									.getDemand() / totalDemand) > optimizationInputs
+									.getCoverage()).findFirst();
+
+			if (model.isPresent()) {
+				WirecenterNetworkPlan plan = conversionService.convert(
+						networkRequest.getPlanId(), model.get()
+								.getNetworkPlan());
+				save(plan);
+				return plan;
 			}
 
-			//TODO KG 
-			return null ;
+			// TODO KG
+			return null;
 		};
 	}
-	
-	
+
 	private static class DefaultPriceModel implements PricingModel {
 
 		@Override
 		public double getPrice(DropCable dropCable) {
-			return 50 ;
+			return 50;
 		}
 
 		@Override
 		public double getMaterialCost(MaterialType type) {
-			switch( type ) {
-			case FDT :
-				return 20 ;
-			case FDH :
-				return 2000 ;
-			case BFT :
-				return 400 ;
-			case SPLITTER_16 :
-				return 1500 ;
-			case SPLITTER_32 :
-				return 2000 ;
-			case SPLITTER_64 :
-				return 2500 ;
-			
-			default :
-				return 0 ;
+			switch (type) {
+			case FDT:
+				return 20;
+			case FDH:
+				return 2000;
+			case BFT:
+				return 400;
+			case SPLITTER_16:
+				return 1500;
+			case SPLITTER_32:
+				return 2000;
+			case SPLITTER_64:
+				return 2500;
+
+			default:
+				return 0;
 			}
 		}
 
 		@Override
 		public double getFiberCostPerMeter(FiberType fiberType,
 				int requiredFiberStrands) {
-			return 10 ;
+			return 10;
 		}
-		
+
 	}
 }

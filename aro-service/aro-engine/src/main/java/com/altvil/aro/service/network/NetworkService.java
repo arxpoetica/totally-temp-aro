@@ -5,5 +5,7 @@ import com.altvil.aro.service.graph.model.NetworkData;
 public interface NetworkService {
 	
 	 NetworkData getNetworkData(NetworkRequest networkRequest) ;
+	
+	 
 
 }

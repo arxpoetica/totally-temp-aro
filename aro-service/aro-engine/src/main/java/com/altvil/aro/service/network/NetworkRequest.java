@@ -2,12 +2,21 @@ package com.altvil.aro.service.network;
 
 public class NetworkRequest {
 	
-	public static NetworkRequest create(long planId) {
+	public enum LocationLoadingRequest { ALL, SELECTED } 
+	
+	public static NetworkRequest create(long planId, LocationLoadingRequest loadingRequest) {
 		NetworkRequest request = new NetworkRequest() ;
 		request.setPlanId(planId) ;
+		request.setLocationLoadingRequest(loadingRequest);
+	
 		return request ;
 	}
 	
+	public static NetworkRequest create(long planId) {
+		return create(planId, LocationLoadingRequest.SELECTED) ;
+	}	
+	
+	private LocationLoadingRequest locationLoadingRequest ;
 	private long planId ;
 	private int year = 2015 ;
 
@@ -17,7 +26,15 @@ public class NetworkRequest {
 	public long getPlanId() {
 		return planId;
 	}
+	
+	public LocationLoadingRequest getLocationLoadingRequest() {
+		return locationLoadingRequest;
+	}
 
+	public void setLocationLoadingRequest(
+			LocationLoadingRequest locationLoadingRequest) {
+		this.locationLoadingRequest = locationLoadingRequest;
+	}
 
 	public void setPlanId(long planId) {
 		this.planId = planId;
@@ -30,7 +47,6 @@ public class NetworkRequest {
 	public void setYear(int year) {
 		this.year = year;
 	}
-	
 	
 
 }
