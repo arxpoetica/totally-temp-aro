@@ -57,7 +57,7 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 			PinnedLocation pl = locationAssignment.getPinnedLocation();
 			LocationDemand locationDemand = entity.getLocationDemand();
 
-			double totalDemand = locationDemand.getTotalDemand();
+			double totalDemand = locationDemand.getDemand();
 
 			if (totalDemand != 0) {
 				

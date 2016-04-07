@@ -66,8 +66,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	}
 
 	private Map<LocationEntityType, DemandStatistic> demands;
-	private double totalFiberDemand;
-
+	
 	private DefaultLocationDemand(
 			Map<LocationEntityType, DemandStatistic> demands,
 			DemandStatistic stat) {
@@ -87,11 +86,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	public DemandStatistic getLocationDemand(LocationEntityType type) {
 		return demands.get(type);
 	}
-
-	@Override
-	public double getTotalDemand() {
-		return totalFiberDemand;
-	}
+	
 
 	@Override
 	public LocationDemand add(LocationDemand other) {
@@ -112,13 +107,10 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 
 	@Override
 	public Pair<LocationDemand> splitDemand(double demand) {
-		double splitDemand = Math.min(this.totalFiberDemand, demand);
+		double splitDemand = Math.min(getDemand(), demand);
 		return new Pair<LocationDemand>(createHouseholdDemand(splitDemand),
-				createHouseholdDemand(totalFiberDemand - splitDemand));
+				createHouseholdDemand(getDemand() - splitDemand));
 	}
-
-	public double getTotalFiberDemand() {
-		return totalFiberDemand;
-	}	
+	
 
 }
