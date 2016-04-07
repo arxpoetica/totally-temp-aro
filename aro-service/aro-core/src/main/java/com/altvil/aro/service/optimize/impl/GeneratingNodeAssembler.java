@@ -1,5 +1,6 @@
 package com.altvil.aro.service.optimize.impl;
 
+import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
@@ -25,13 +26,15 @@ import java.util.*;
 
 public class GeneratingNodeAssembler {
 
-	private static Map<FiberType, Class<?>> matchingEquipmentMap = new HashMap<>();
+	private static Map<FiberType, Set<Class<?>>> matchingEquipmentMap = new HashMap<>();
 
+	
+	
 	static {
-		matchingEquipmentMap.put(FiberType.BACKBONE, CentralOfficeEquipment.class);
-		matchingEquipmentMap.put(FiberType.FEEDER, FDHEquipment.class);
-		matchingEquipmentMap.put(FiberType.DISTRIBUTION, FDTEquipment.class);
-		matchingEquipmentMap.put(FiberType.DROP, LocationEntity.class);
+		matchingEquipmentMap.put(FiberType.BACKBONE, StreamUtil.asSet(CentralOfficeEquipment.class));
+		matchingEquipmentMap.put(FiberType.FEEDER,  StreamUtil.asSet(FDHEquipment.class, BulkFiberTerminal.class)) ;
+		matchingEquipmentMap.put(FiberType.DISTRIBUTION, StreamUtil.asSet(FDTEquipment.class));
+		matchingEquipmentMap.put(FiberType.DROP, StreamUtil.asSet(LocationEntity.class));
 	}
 
 	private AnalysisContext ctx;
@@ -39,7 +42,7 @@ public class GeneratingNodeAssembler {
 	private DirectedGraph<GraphNode, AroEdge<GeoSegment>> graph;
 	private Multimap<GraphNode, GraphAssignment> equipmentMap;
 	private FiberType fiberType ;
-	private Class<?> matchingEquipmentType;
+	private Set<Class<?>> matchingEquipmentType;
 	private List<AroEdge<GeoSegment>> fiberPath = new ArrayList<>();
 
 	public GeneratingNodeAssembler(AnalysisContext ctx, FiberType fiberType) {
@@ -113,7 +116,7 @@ public class GeneratingNodeAssembler {
 			return Collections.emptyList();
 		}
 
-		return StreamUtil.filter(gas, a -> a.getAroEntity().getType().equals(matchingEquipmentType));
+		return StreamUtil.filter(gas, a -> matchingEquipmentType.contains(a.getAroEntity().getType()));
 
 	}
 	

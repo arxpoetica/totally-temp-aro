@@ -238,6 +238,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				return 20 ;
 			case FDH :
 				return 2000 ;
+			case BFT :
+				return 400 ;
 			case SPLITTER_16 :
 				return 1500 ;
 			case SPLITTER_32 :
