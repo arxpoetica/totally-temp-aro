@@ -1,7 +1,5 @@
 package com.altvil.netop.optimize;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
