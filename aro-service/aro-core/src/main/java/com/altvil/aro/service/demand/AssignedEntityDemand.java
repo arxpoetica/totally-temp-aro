@@ -26,11 +26,11 @@ public class AssignedEntityDemand {
 	}
 
 	public double getHouseholdFiberDemandValue() {
-		return locationDemand.getTotalDemand();
+		return locationDemand.getDemand();
 	}
 
 	public double getTotalDemand() {
-		return locationDemand.getTotalDemand();
+		return locationDemand.getDemand();
 	}
 
 	public PinnedLocation getPinnedLocation() {

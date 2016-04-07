@@ -101,7 +101,7 @@ public class NetworkServiceImpl implements NetworkService {
 
 						Long locationId = result.getLong(LocationMap.id) ;
 						LocationDemand  ldm = demandMap.get(locationId) ;
-						if( ldm == null || ldm.getTotalDemand() == 0) {
+						if( ldm == null || ldm.getDemand() == 0) {
 							//No Demand no location mapped in for fiber Linking
 							return null ;
 						}
