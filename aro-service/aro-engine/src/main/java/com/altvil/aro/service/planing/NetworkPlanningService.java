@@ -11,6 +11,11 @@ public interface NetworkPlanningService {
 
 	Future<WirecenterNetworkPlan> planFiber(long planId,
 			FiberNetworkConstraints constraints);
+	
+	
+	Future<WirecenterNetworkPlan> optimizeWirecenter(long planId,
+			InputRequests inputRequests, OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) ;
+
 
 	MasterPlanCalculation optimizeMasterFiber(long planId,
 			InputRequests inputRequests, OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) ;

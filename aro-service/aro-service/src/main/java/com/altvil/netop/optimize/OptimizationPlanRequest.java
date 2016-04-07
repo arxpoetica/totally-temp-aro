@@ -1,11 +1,13 @@
 package com.altvil.netop.optimize;
 
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.aro.service.planing.OptimizationInputs;
 
 public class OptimizationPlanRequest {
 	
 	private long planId;
 	private FiberNetworkConstraints fiberNetworkConstraints;
+	private OptimizationInputs optimizationInputs = OptimizationInputs.DEFAULT ;
 	private String algorithm ;
 
 	public long getPlanId() {
@@ -32,6 +34,15 @@ public class OptimizationPlanRequest {
 	public void setAlgorithm(String algorithm) {
 		this.algorithm = algorithm;
 	}
+
+	public OptimizationInputs getOptimizationInputs() {
+		return optimizationInputs;
+	}
+
+	public void setOptimizationInputs(OptimizationInputs optimizationInputs) {
+		this.optimizationInputs = optimizationInputs;
+	}
+	
 	
 	
 	
