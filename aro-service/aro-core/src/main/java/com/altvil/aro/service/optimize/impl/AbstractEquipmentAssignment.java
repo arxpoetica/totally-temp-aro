@@ -1,7 +1,5 @@
 package com.altvil.aro.service.optimize.impl;
 
-import java.util.Collections;
-
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.optimize.model.EquipmentAssignment;
@@ -18,13 +16,11 @@ public abstract class AbstractEquipmentAssignment implements
 		this.graphAssignment = graphAssignment;
 	}
 	
-	
 
 	@Override
 	public boolean isRoot() {
 		return false ;
 	}
-
 
 
 	@Override
@@ -46,7 +42,7 @@ public abstract class AbstractEquipmentAssignment implements
 
 	@Override
 	public DemandCoverage getDirectCoverage(AnalysisContext ctx) {
-		return DefaultFiberCoverage.create(Collections.emptySet());
+		return DefaultFiberCoverage.EMPTY_COVERAGE ;
 	}
 
 	@Override

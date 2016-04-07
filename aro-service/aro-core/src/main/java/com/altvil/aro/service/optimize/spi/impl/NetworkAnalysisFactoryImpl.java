@@ -56,6 +56,7 @@ import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysisFactory;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
+import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanService;
@@ -87,8 +88,8 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 	@Override
 	public NetworkAnalysis createNetworkAnalysis(
-			NetworkModelBuilder networkModelBuilder, OptimizerContext ctx) {
-		return new NetworkAnalysisImpl(networkModelBuilder, ctx);
+			NetworkModelBuilder networkModelBuilder, OptimizerContext ctx, ScoringStrategy scoringStrategy) {
+		return new NetworkAnalysisImpl(networkModelBuilder, ctx, scoringStrategy);
 	}
 
 	private static class BuilderFactory extends DefaultAroVisitor {
@@ -146,7 +147,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		@Override
 		public void visit(BulkFiberTerminal node) {
 			nodeBuilder = parent.addChild(new BulkFiberTerminalAssignment(
-					graphAssignment, node, graphMapping.getChildAssignments())).setFiber(EMPTY_FEEDER);
+					graphAssignment, node)).setFiber(EMPTY_FEEDER);
 		}
 
 		@Override
@@ -190,6 +191,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		private BuilderFactory builderFactory;
 		private GeneratingNode rootNode;
 		private FtthThreshholds ftpThreshholds;
+		private ScoringStrategy scoringStrategy ;
 
 		private Set<LocationEntity> rejectedLocations = new HashSet<>();
 
@@ -197,17 +199,25 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 				.create(Double::compare, GeneratingNodeComparator.COMPARATROR);
 
 		public NetworkAnalysisImpl(NetworkModelBuilder networkModelBuilder,
-				OptimizerContext context) {
+				OptimizerContext context, ScoringStrategy scoringStrategy) {
 			super();
 			this.networkModelBuilder = networkModelBuilder;
 			this.context = context;
 			this.ftpThreshholds = context.getFtpThreshholds();
+			this.scoringStrategy = scoringStrategy ;
+			
 			planService.createFtthThreshholds(this.context
 					.getFiberNetworkConstraints());
 
 			builderFactory = new BuilderFactory(this);
 
 			init();
+		}
+		
+
+		@Override
+		public ScoringStrategy getScoringStrategy() {
+			return scoringStrategy ;
 		}
 
 		@Override

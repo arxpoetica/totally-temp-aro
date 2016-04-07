@@ -103,7 +103,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 				then change getCapex methods so they take required fiber strands instead of demand coverage
 */
 		int childrenFiberStrandsRequirements = getChildren().stream().mapToInt(GeneratingNode::getRequiredFiberStrands).sum();
-		int directFiberDemand = (int) Math.ceil(directCoverage.getCoverage().getTotalDemand());
+		int directFiberDemand = (int) Math.ceil(directCoverage.getDemand());
 		this.requiredFiberStrands = equipmentAssigment.getRequiredIncomingFiberStrands(ctx, childrenFiberStrandsRequirements + directFiberDemand);
 
 		this.coverage = calcFiberCoverage(children);
@@ -198,8 +198,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public double getScore() {
-		//TODO Compute Score as a function of Demand
-		return coverage.getCoverage().getTotalDemand() ;
+		return ctx.getScoringStrategy().score(this) ;
 	}
 
 	@Override

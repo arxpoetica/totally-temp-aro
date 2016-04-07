@@ -1,11 +1,9 @@
 package com.altvil.aro.service.optimize.impl;
 
 import java.util.Collection;
-import java.util.Set;
 
 import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.LocationDropAssignment;
-import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
@@ -60,9 +58,11 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 
 	@Override
 	public DemandCoverage getDirectCoverage(AnalysisContext ctx) {
-		Set<LocationEntity> locationEntities = StreamUtil.mapSet(locations,
-				l -> ((LocationDropAssignment) l.getAroEntity()).getLocationEntity());
-
-		return DefaultFiberCoverage.create(locationEntities);
+		DefaultFiberCoverage.Accumulator accumlator = DefaultFiberCoverage.accumulate() ;
+		locations.forEach(l -> {
+			LocationDropAssignment lda = (LocationDropAssignment) l.getAroEntity() ;
+			accumlator.add(lda.getLocationEntity(), lda.getAggregateStatistic()) ;
+		});
+		return accumlator.getResult() ;
 	}
 }
