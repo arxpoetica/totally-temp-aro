@@ -235,7 +235,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			NetworkPlanner planner = optimizerService.createNetworkPlanner((
 					networkAnalysis) -> false, networkData, ctx, (
 					GeneratingNode) -> false, scoringStrategyFactory
-					.getScoringStrategy(OptimizationType.CAPEX));
+					.getScoringStrategy(optimizationInputs.getOptimizationType()));
 
 			Collection<OptimizedNetwork> optimizedPlans = planner
 					.getOptimizedPlans();
@@ -244,7 +244,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					.stream()
 					.filter(p -> !p.isEmpty()
 							&& (p.getAnalysisNode().getFiberCoverage()
-									.getDemand() / totalDemand) > optimizationInputs
+									.getDemand() / totalDemand) >= optimizationInputs
 									.getCoverage()).findFirst();
 
 			if (model.isPresent()) {
