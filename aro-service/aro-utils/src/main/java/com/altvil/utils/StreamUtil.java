@@ -1,6 +1,15 @@
 package com.altvil.utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -15,6 +24,15 @@ public class StreamUtil {
 				false);
 	}
 
+	@SafeVarargs
+	public static <T> Set<T> asSet(T ... values) {
+		Set<T> result = new HashSet<>(values.length) ;
+		for(T v : values) {
+			result.add(v) ;
+		}
+		return result ;
+	}
+	
 	public static <T> List<T> asList(T[] source) {
 		List<T> result = new ArrayList<T>(source.length);
 

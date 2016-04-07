@@ -2,7 +2,7 @@ package com.altvil.aro.service.entity;
 
 public enum MaterialType {
 
-	FDT, FDH, SPLITTER_16, SPLITTER_32, SPLITTER_64,
+	FDT, FDH, BFT, SPLITTER_16, SPLITTER_32, SPLITTER_64,
 
 	;
 

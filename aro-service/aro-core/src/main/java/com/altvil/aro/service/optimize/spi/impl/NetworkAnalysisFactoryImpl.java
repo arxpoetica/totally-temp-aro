@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.DefaultAroVisitor;
 import com.altvil.aro.service.entity.FDHEquipment;
@@ -32,6 +33,7 @@ import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.ftp.HubModel;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.PricingModel;
+import com.altvil.aro.service.optimize.impl.BulkFiberTerminalAssignment;
 import com.altvil.aro.service.optimize.impl.CentralOfficeAssignment;
 import com.altvil.aro.service.optimize.impl.CompositeNodeBuilder;
 import com.altvil.aro.service.optimize.impl.DefaultFiberAssignment;
@@ -64,8 +66,12 @@ import com.google.inject.Inject;
 @Service
 public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
-	private static FiberAssignment EMPTY_DIST = new DefaultFiberAssignment(FiberType.DISTRIBUTION, Collections.emptyList()) ;
+	private static FiberAssignment EMPTY_DIST = new DefaultFiberAssignment(
+			FiberType.DISTRIBUTION, Collections.emptyList());
 	
+	private static FiberAssignment EMPTY_FEEDER = new DefaultFiberAssignment(
+			FiberType.FEEDER, Collections.emptyList());
+
 	private GraphTransformerFactory graphTransformerFactory;
 	private PlanService planService;
 
@@ -90,9 +96,8 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		private AnalysisContext ctx;
 
 		private Builder parent;
-		
-		
-		private GraphNode vertex ;
+
+		private GraphNode vertex;
 		private GraphMapping graphMapping;
 		private GraphEdgeAssignment graphAssignment;
 
@@ -103,10 +108,11 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			this.ctx = ctx;
 		}
 
-		public Builder addChild(Builder parent, GraphNode vertex, GraphMapping graphMapping) {
+		public Builder addChild(Builder parent, GraphNode vertex,
+				GraphMapping graphMapping) {
 
 			this.parent = parent;
-			this.vertex = vertex ;
+			this.vertex = vertex;
 			this.graphMapping = graphMapping;
 			this.graphAssignment = graphMapping.getGraphAssignment();
 
@@ -116,46 +122,48 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		private void createAnalyis(Builder builder, GraphMapping gm,
-								   FiberType ft, Collection<AroEdge<GeoSegment>> pathEdges) {
-			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder, vertex, gm,
-					pathEdges);
+				FiberType ft, Collection<AroEdge<GeoSegment>> pathEdges) {
+			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder,
+					vertex, gm, pathEdges);
 
 			nodeBuilder = builder;
 		}
 
 		@Override
 		public void visit(CentralOfficeEquipment node) {
-			createAnalyis(parent.addChild(new CentralOfficeAssignment(graphAssignment, node)),
-					graphMapping,
-					FiberType.FEEDER,
+			createAnalyis(parent.addChild(new CentralOfficeAssignment(
+					graphAssignment, node)), graphMapping, FiberType.FEEDER,
 					ctx.getNetworkModel().getCentralOfficeFeederFiber());
 		}
-		
-		
-		
 
 		@Override
 		public void visit(RemoteTerminal node) {
-			createAnalyis(parent.addChild(new RemoteTerminalAssignment(graphAssignment, node)),
-					graphMapping,
-					FiberType.FEEDER,
+			createAnalyis(parent.addChild(new RemoteTerminalAssignment(
+					graphAssignment, node)), graphMapping, FiberType.FEEDER,
 					ctx.getNetworkModel().getCentralOfficeFeederFiber());
+		}
+
+		@Override
+		public void visit(BulkFiberTerminal node) {
+			nodeBuilder = parent.addChild(new BulkFiberTerminalAssignment(
+					graphAssignment, node, graphMapping.getChildAssignments())).setFiber(EMPTY_FEEDER);
 		}
 
 		@Override
 		public void visit(SplicePoint node) {
-			createAnalyis(parent.addChild(new SplicePointAssignment(graphAssignment, node)),
-					graphMapping,
-					FiberType.FEEDER,
+			createAnalyis(parent.addChild(new SplicePointAssignment(
+					graphAssignment, node)), graphMapping, FiberType.FEEDER,
 					ctx.getNetworkModel().getCentralOfficeFeederFiber());
 		}
 
 		@Override
 		public void visit(FDTEquipment node) {
-			
-			nodeBuilder = parent.addChild(new FdtAssignment(graphAssignment,
-					node, StreamUtil.map(graphMapping.getChildAssignments(),
-					a -> (GraphEdgeAssignment) a))).setFiber(EMPTY_DIST);
+
+			nodeBuilder = parent.addChild(
+					new FdtAssignment(graphAssignment, node, StreamUtil.map(
+							graphMapping.getChildAssignments(),
+							a -> (GraphEdgeAssignment) a)))
+					.setFiber(EMPTY_DIST);
 		}
 
 		@Override
@@ -177,12 +185,11 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		private NetworkModelBuilder networkModelBuilder;
 
 		private Optional<CompositeNetworkModel> model = Optional.empty();
-		private NetworkModel networkModel ;
+		private NetworkModel networkModel;
 
 		private BuilderFactory builderFactory;
 		private GeneratingNode rootNode;
 		private FtthThreshholds ftpThreshholds;
-		
 
 		private Set<LocationEntity> rejectedLocations = new HashSet<>();
 
@@ -194,7 +201,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			super();
 			this.networkModelBuilder = networkModelBuilder;
 			this.context = context;
-			this.ftpThreshholds = context.getFtpThreshholds() ;
+			this.ftpThreshholds = context.getFtpThreshholds();
 			planService.createFtthThreshholds(this.context
 					.getFiberNetworkConstraints());
 
@@ -202,19 +209,16 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 			init();
 		}
-		
+
 		@Override
 		public NetworkModelBuilder getNetworkModelBuilder() {
-			return networkModelBuilder ;
+			return networkModelBuilder;
 		}
-
 
 		@Override
 		public NetworkModel getNetworkModel() {
-			return networkModel ;
+			return networkModel;
 		}
-
-
 
 		@Override
 		public HubModel getHubModel() {
@@ -241,8 +245,6 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		public OptimizerContext getOptimizerContext() {
 			return context;
 		}
-		
-
 
 		@Override
 		public Optional<CompositeNetworkModel> serialize() {
@@ -251,33 +253,30 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			rootNode.getEquipmentAssignment().serialize(rootNode, serializer);
 			return Optional.of(serializer.getNetworkModel());
 		}
-		
-		
 
 		@Override
 		public Supplier<Optional<CompositeNetworkModel>> lazySerialize() {
-			Set<LocationEntity> _rejectedLocations  = new HashSet<LocationEntity>(this.rejectedLocations) ;
+			Set<LocationEntity> _rejectedLocations = new HashSet<LocationEntity>(
+					this.rejectedLocations);
 			return new Supplier<Optional<CompositeNetworkModel>>() {
 				@Override
 				public Optional<CompositeNetworkModel> get() {
 					return networkModelBuilder.createModel(StreamUtil.map(
-							_rejectedLocations, AroEntity::getObjectId)) ;
+							_rejectedLocations, AroEntity::getObjectId));
 				}
 			};
 		}
-		
 
 		@Override
 		public Optional<CompositeNetworkModel> createNetworkModel() {
 			return networkModelBuilder.createModel(StreamUtil.map(
-					rejectedLocations, AroEntity::getObjectId)) ;
+					rejectedLocations, AroEntity::getObjectId));
 		}
-		
-		
+
 		private void regenerate() {
 
-			model = createNetworkModel() ;
-			
+			model = createNetworkModel();
+
 			treeMap.clear();
 			rootNode = null;
 			if (model.isPresent()) {
@@ -288,38 +287,35 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 				//
 				// Builds Sources
 				//
-				
+
 				model.get().getNetworkModels().forEach(n -> {
-					if( n.getFiberSourceMapping().getChildren().size() > 0 ) {
-						assmbleNetwork(n, builder) ;
+					if (n.getFiberSourceMapping().getChildren().size() > 0) {
+						assmbleNetwork(n, builder);
 					}
 				});
-				
-				
+
 				//
 				// Assign Root node
 				//
-				rootNode = builder
-						.setFiber(FiberType.BACKBONE, Collections.emptyList())
-						.build();
+				rootNode = builder.setFiber(FiberType.BACKBONE,
+						Collections.emptyList()).build();
 			}
 		}
-		
-		
+
 		private void assmbleNetwork(NetworkModel model, Builder builder) {
 			//
 			// Builds From the Fiber Source
 			//
-			
+
 			networkModel = model;
-			
-			GraphEdgeAssignment coEdgeAssignment = model.getFiberSourceMapping().getGraphAssignment() ;
-			GraphNode coVertex = model.getVertex(coEdgeAssignment) ;
-			
-			addNode(coVertex, coEdgeAssignment, builder)
-					.setFiber(FiberType.BACKBONE, Collections.emptyList())
-					.build();
-			
+
+			GraphEdgeAssignment coEdgeAssignment = model
+					.getFiberSourceMapping().getGraphAssignment();
+			GraphNode coVertex = model.getVertex(coEdgeAssignment);
+
+			addNode(coVertex, coEdgeAssignment, builder).setFiber(
+					FiberType.BACKBONE, Collections.emptyList()).build();
+
 		}
 
 		@Override
@@ -382,7 +378,6 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			return NetworkAnalysisFactoryImpl.this.graphTransformerFactory;
 		}
 
-
 		@Override
 		public NetworkAnalysis getNetworkAnalysis() {
 			return this;
@@ -393,14 +388,16 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			return context.isFullAnalysisModel();
 		}
 
-		private Builder addNode(GraphNode vertex, GraphAssignment graphAssignment, Builder parent) {
+		private Builder addNode(GraphNode vertex,
+				GraphAssignment graphAssignment, Builder parent) {
 			return builderFactory.addChild(parent, vertex,
 					networkModel.getGraphMapping(graphAssignment));
 		}
 
 		@Override
 		public Builder addNode(FiberType fiberType,
-				Collection<GraphAssignment> assignments, Builder parent,  GraphNode vertex) {
+				Collection<GraphAssignment> assignments, Builder parent,
+				GraphNode vertex) {
 
 			if (assignments.size() == 0) {
 				return addSplitterNode(parent);
@@ -424,10 +421,9 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public Builder addSplitterNode(Builder parent) {
-			return parent.addChild(new SplitterNodeAssignment()).setJunctionNode(true);
+			return parent.addChild(new SplitterNodeAssignment())
+					.setJunctionNode(true);
 		}
-
-		
 
 	}
 

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.network.NetworkService;
@@ -17,6 +18,7 @@ import com.altvil.aro.service.recalc.Job;
 import com.altvil.aro.service.recalc.RecalcService;
 import com.altvil.netop.plan.MasterPlanResponse;
 
+@RestController
 public class OptimizeEndPoint {
 	
 	@Autowired
