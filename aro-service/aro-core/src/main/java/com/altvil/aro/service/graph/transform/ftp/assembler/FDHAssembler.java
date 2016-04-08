@@ -1,8 +1,17 @@
 package com.altvil.aro.service.graph.transform.ftp.assembler;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.LocationDropAssignment;
-import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
@@ -25,12 +34,6 @@ import com.altvil.aro.service.graph.transform.ftp.tree.VertexStream;
 import com.altvil.aro.util.algo.DefaultValueItem;
 import com.altvil.aro.util.algo.Knapsack.ValuedItem;
 import com.altvil.utils.StreamUtil;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class FDHAssembler {
 
@@ -113,15 +116,14 @@ public class FDHAssembler {
 					PinnedLocation pl = a.getPinnedLocation();
 					double dropLength = Math.abs(fdt.offsetFrom(pl))
 							+ pl.getDistanceFromIntersectionPoint();
-
-					LocationEntity locationEntity = a.getLocationEntity() ;
+					
 					return GraphAssignmentFactoryImpl.FACTORY.createEdgeAssignment(
 							a.getPinnedLocation(),
 							EntityFactory.FACTORY.createDropAssignment(
-									locationEntity,
+									a,
 									dropLength,
 									threshHolds.getDropCableModel().getDropCable(dropLength),
-									a.getTotalDemand()
+									a.getDemand()
 							));
 
 				});

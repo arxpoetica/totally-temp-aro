@@ -3,7 +3,7 @@ package com.altvil.aro.service.demand;
 import java.util.List;
 
 public interface EdgeDemand {
-	List<AssignedEntityDemand> getFdtAssigments();
+	List<DefaultAssignedEntityDemand> getFdtAssigments();
 
-	List<AssignedEntityDemand> getBulkFiberAssigments();
+	List<DefaultAssignedEntityDemand> getBulkFiberAssigments();
 }

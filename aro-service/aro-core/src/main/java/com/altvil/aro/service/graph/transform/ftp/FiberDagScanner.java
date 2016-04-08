@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.jgrapht.DirectedGraph;
 
-import com.altvil.aro.service.demand.AssignedEntityDemand;
+import com.altvil.aro.service.demand.DefaultAssignedEntityDemand;
 import com.altvil.aro.service.demand.DemandAnalyizer;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.AroEdge;
@@ -156,15 +156,15 @@ public class FiberDagScanner {
 	}
 
 	private void writeBulkFiber(GeoSegment geoSegment,
-			Collection<AssignedEntityDemand> assigments) {
+			Collection<DefaultAssignedEntityDemand> assigments) {
 
-		if (assigments.size() > 0) {
+		if (assigments.size() > 0 && false) {
 			this.feederSinkAssignments.addAll(assigments
 					.stream()
 					.map(aed -> new DefaultGraphMapping(
 							graphAssignmentFactory
 							.createEdgeAssignment(aed.getPinnedLocation(),
-									entityFactory.createBulkFiberTerminal(aed.getLocationEntity()))
+									entityFactory.createBulkFiberTerminal(aed))
 
 					,Collections.emptyList())).collect(Collectors.toList()));
 		}

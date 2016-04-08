@@ -5,7 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.altvil.aro.service.demand.AssignedEntityDemand;
+import com.altvil.aro.service.demand.DefaultAssignedEntityDemand;
+import com.altvil.aro.service.demand.PinnedAssignedEntityDemand;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
@@ -16,7 +17,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 
 	double coverage;
 	private FtthThreshholds thresholds;
-	private List<AssignedEntityDemand> locationIntersections;
+	private List<PinnedAssignedEntityDemand> locationIntersections;
 	private GeoSegment geoSegment;
 	private ClusterLocation clusterLocation;
 
@@ -70,7 +71,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	 * @see com.altvil.aro.service.graph.transform.fd.LocationAggregate#canAdd()
 	 */
 	@Override
-	public boolean canAdd(AssignedEntityDemand li) {
+	public boolean canAdd(DefaultAssignedEntityDemand li) {
 		double testedDemand = li.getTotalDemand() ;
 		return (getLocationCount() + testedDemand) <= thresholds
 				.getMaxlocationPerFDT();
@@ -89,7 +90,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	}
 	
 	public boolean isFull() {
-		return (thresholds.getMaxlocationPerFDT() - coverage) > 0.001 ;
+		return (thresholds.getMaxlocationPerFDT() - coverage) < 0.001 ;
 	}
 
 	//
@@ -104,14 +105,19 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	}
 	
 	
-	public double assign(AssignedEntityDemand li) {
-		coverage += li.getTotalDemand() ;
+	public double assign(PinnedAssignedEntityDemand li) {
+		
+		if( li.getDemand() == 0 ) {
+			throw new RuntimeException("Grrrr") ;
+		}
+		
+		coverage += li.getDemand() ;
 		locationIntersections.add(li);
 		return thresholds.getMaxlocationPerFDT() - coverage  ;
 
 	}
 
-	public boolean add(AssignedEntityDemand li) {
+	public boolean add(DefaultAssignedEntityDemand li) {
 
 		// Basis Constraint (TODO expanded Spatial Constraint)
 		if (!canAdd(li) || !assignConstraint(li.getPinnedLocation())) {
@@ -157,7 +163,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	}
 
 	@Override
-	public Collection<AssignedEntityDemand> getLocations() {
+	public Collection<PinnedAssignedEntityDemand> getLocations() {
 		return locationIntersections;
 	}
 

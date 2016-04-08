@@ -104,7 +104,8 @@ public class NetworkServiceImpl implements NetworkService {
 									.getLong(LoctationDemandMap.location_id),
 									LocationDemandFactory.FACTORY.create(
 											result.getDouble(LoctationDemandMap.household_fiber),
-											result.getDouble(LoctationDemandMap.buesiness_fiber),
+											//result.getDouble(LoctationDemandMap.buesiness_fiber),
+											0,
 											result.getDouble(LoctationDemandMap.tower_fiber)));
 						});
 

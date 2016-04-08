@@ -5,20 +5,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.altvil.aro.service.demand.AssignedEntityDemand;
+import com.altvil.aro.service.demand.DefaultAssignedEntityDemand;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 
 public class EdgeList {
 
-	private static List<AssignedEntityDemand> EMPTY_LIST = Collections
+	private static List<DefaultAssignedEntityDemand> EMPTY_LIST = Collections
 			.emptyList();
 	public static EdgeList EMPTY_EDGE = new EdgeList(null, EMPTY_LIST, 0);
 
 	private AroEdge<GeoSegment> edge;
 	
-	private List<AssignedEntityDemand> pinnedLocations ;
+	private List<DefaultAssignedEntityDemand> pinnedLocations ;
 	private double totalDemand ;
 	private double[] cumlativeDemand ;
 	private double length;
@@ -26,7 +26,7 @@ public class EdgeList {
 	
 
 	public EdgeList(AroEdge<GeoSegment> edge,
-			List<AssignedEntityDemand> pinnedLocations, double length) {
+			List<DefaultAssignedEntityDemand> pinnedLocations, double length) {
 		super();
 		this.edge = edge;
 		this.pinnedLocations = pinnedLocations;
@@ -35,13 +35,13 @@ public class EdgeList {
 		init(pinnedLocations) ;
 	}
 
-	private void init(List<AssignedEntityDemand> assignments) {
+	private void init(List<DefaultAssignedEntityDemand> assignments) {
 		double  totalDemand = 0 ;
 		
 		cumlativeDemand = new double[assignments.size()] ;
 		
 		int index = 0 ;
-		for(AssignedEntityDemand a : assignments) {
+		for(DefaultAssignedEntityDemand a : assignments) {
 			totalDemand += a.getHouseholdFiberDemandValue() ;
 			cumlativeDemand[index++] = totalDemand ;
 		}
@@ -67,7 +67,7 @@ public class EdgeList {
 
 		PinnedLocation pl = pinnedLocations.get(startIndex).getPinnedLocation();
 		double length = edge.getWeight() - pl.getOffsetFromStartVertex();
-		List<AssignedEntityDemand> subList = pinnedLocations.subList(startIndex,
+		List<DefaultAssignedEntityDemand> subList = pinnedLocations.subList(startIndex,
 				pinnedLocations.size());
 		return new EdgeList(edge, subList, length);
 	}
@@ -88,7 +88,7 @@ public class EdgeList {
 		PinnedLocation p1 = pinnedLocations.get(startIndex).getPinnedLocation();
 		PinnedLocation p2 = pinnedLocations.get(endIndex - 1)
 				.getPinnedLocation();
-		List<AssignedEntityDemand> subList = pinnedLocations.subList(startIndex,
+		List<DefaultAssignedEntityDemand> subList = pinnedLocations.subList(startIndex,
 				endIndex);
 		return new EdgeList(edge, subList, p2.getOffsetFromStartVertex()
 				- p1.getOffsetFromStartVertex());
@@ -112,7 +112,7 @@ public class EdgeList {
 		return null ;
 	}
 
-	public List<AssignedEntityDemand> getAssignedEntityDemands() {
+	public List<DefaultAssignedEntityDemand> getAssignedEntityDemands() {
 		return pinnedLocations;
 	}
 

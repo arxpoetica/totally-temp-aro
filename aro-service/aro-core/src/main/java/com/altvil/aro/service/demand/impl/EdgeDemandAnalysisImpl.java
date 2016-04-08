@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.demand.AssignedEntityDemand;
+import com.altvil.aro.service.demand.DefaultAssignedEntityDemand;
 import com.altvil.aro.service.demand.DemandAnalyizer;
 import com.altvil.aro.service.demand.EdgeDemand;
 import com.altvil.aro.service.demand.EntityDemandService;
@@ -61,7 +61,7 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 
 			if (totalDemand != 0) {
 				
-				AssignedEntityDemand ad = new AssignedEntityDemand(entity, pl);
+				DefaultAssignedEntityDemand ad = new DefaultAssignedEntityDemand(entity, pl);
 
 				if (totalDemand >= bulkFiberThreshold) {
 					builder.addBulkDemand(ad);
@@ -83,11 +83,11 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 			
 			private EdgeDemandAnalyisImpl demandAnalysis = new EdgeDemandAnalyisImpl() ;
 			
-			public void addFdtDemand(AssignedEntityDemand demand) {
+			public void addFdtDemand(DefaultAssignedEntityDemand demand) {
 				demandAnalysis.fdtAssigments.add(demand) ;
 			}
 
-			public void addBulkDemand(AssignedEntityDemand demand) {
+			public void addBulkDemand(DefaultAssignedEntityDemand demand) {
 				demandAnalysis.bulkFiberAssigments.add(demand);
 			}
 			
@@ -96,18 +96,18 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 			}
 		}
 
-		private List<AssignedEntityDemand> fdtAssigments = new ArrayList<>();
-		private List<AssignedEntityDemand> bulkFiberAssigments = new ArrayList<>();
+		private List<DefaultAssignedEntityDemand> fdtAssigments = new ArrayList<>();
+		private List<DefaultAssignedEntityDemand> bulkFiberAssigments = new ArrayList<>();
 
 		private EdgeDemandAnalyisImpl() {
 			super();
 		}
 
-		public List<AssignedEntityDemand> getFdtAssigments() {
+		public List<DefaultAssignedEntityDemand> getFdtAssigments() {
 			return fdtAssigments;
 		}
 
-		public List<AssignedEntityDemand> getBulkFiberAssigments() {
+		public List<DefaultAssignedEntityDemand> getBulkFiberAssigments() {
 			return bulkFiberAssigments;
 		}
 

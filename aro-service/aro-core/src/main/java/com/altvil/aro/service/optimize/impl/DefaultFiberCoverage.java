@@ -7,23 +7,25 @@ import java.util.Map;
 import java.util.Set;
 
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
+import com.altvil.aro.service.entity.AssignedEntityDemand;
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
+import com.altvil.utils.StreamUtil;
 
 public class DefaultFiberCoverage implements DemandCoverage {
 
 	public static DemandCoverage EMPTY_COVERAGE = new DefaultFiberCoverage(
-			DefaultLocationDemand.ZERO_DEMAND, new HashSet<LocationEntity>());
+			DefaultLocationDemand.ZERO_DEMAND, new HashSet<AssignedEntityDemand>());
 
 	
 	private LocationDemand coverage;
-	private Set<LocationEntity> locationEntities;
+	private Set<AssignedEntityDemand> locationEntities;
 
 	private DefaultFiberCoverage(LocationDemand coverage,
-			Set<LocationEntity> locationEntities) {
+			Set<AssignedEntityDemand> locationEntities) {
 		super();
 		this.coverage = coverage;
 		this.locationEntities = locationEntities;
@@ -51,15 +53,18 @@ public class DefaultFiberCoverage implements DemandCoverage {
 
 	public static Accumulator accumulate() {
 		return new Accumulator();
+	}	
+
+	@Override
+	public Collection<AssignedEntityDemand> getAssignedEntityDemands() {
+		return locationEntities ;
 	}
-	
 
 	@Override
 	public Collection<LocationEntity> getLocations() {
-		return locationEntities;
+		return StreamUtil.map(locationEntities, AssignedEntityDemand::getLocationEntity) ;
 	}
 
-	
 
 	private static class DemandSummer implements DemandStatistic {
 		private double rawCoverage = 0;
@@ -87,7 +92,6 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			return revenue ;
 		}
 		
-		
 	}
 	
 	
@@ -98,7 +102,7 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		Map<LocationEntityType, DemandSummer> demands = new EnumMap<>(
 				LocationEntityType.class);
 
-		Set<LocationEntity> locationEntities = new HashSet<>();
+		Set<AssignedEntityDemand> locationEntities = new HashSet<>();
 
 		public Accumulator() {
 			for (LocationEntityType t : LocationEntityType.values()) {
@@ -106,14 +110,14 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			}
 		}
 		
-		public void add(LocationEntity location, LocationDemand locationDemand) {
+		public void add(AssignedEntityDemand assignedEntityDemand) {
 
 			for (LocationEntityType t : LocationEntityType.values()) {
 				demands.get(t).add(
-						locationDemand.getLocationDemand(t));
+						assignedEntityDemand.getLocationDemand().getLocationDemand(t));
 			}
 
-			locationEntities.add(location);
+			locationEntities.add(assignedEntityDemand);
 		}
 
 		private void add(LocationDemand locationDemand) {
@@ -127,17 +131,17 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			stats.forEach(this::add) ;
 		}
 
-		public void addLocations(LocationEntity le, LocationDemand demand) {
+		public void addLocations(AssignedEntityDemand assignedEntityDemand) {
 			for (LocationEntityType t : LocationEntityType.values()) {
 				demands.get(t).add(
-						demand.getLocationDemand(t));
+						assignedEntityDemand.getLocationDemand().getLocationDemand(t));
 			}
-			locationEntities.add(le);
+			locationEntities.add(assignedEntityDemand);
 		}
 
 		public void add(DemandCoverage dc) {
 			add(dc.getLocationDemand()) ;
-			locationEntities.addAll(dc.getLocations()) ;
+			locationEntities.addAll(dc.getAssignedEntityDemands()) ;
 		}
 
 		public DemandCoverage getResult() {

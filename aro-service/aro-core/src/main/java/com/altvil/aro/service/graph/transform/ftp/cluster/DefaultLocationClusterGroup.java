@@ -8,7 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.demand.AssignedEntityDemand;
+import com.altvil.aro.service.demand.DefaultAssignedEntityDemand;
+import com.altvil.aro.service.demand.PinnedAssignedEntityDemand;
 import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
@@ -86,7 +87,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 	
 	
 	
-	private Collection<AssignedEntityDemand> getLocationAssignments() {
+	private Collection<DefaultAssignedEntityDemand> getLocationAssignments() {
 		
 		
 		if (incomingClusters == null || incomingClusters.size() == 0) {
@@ -95,12 +96,12 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 			GeoSegment gs = getGeoSegment();
 	
-			List<AssignedEntityDemand> locations = new ArrayList<>();
+			List<DefaultAssignedEntityDemand> locations = new ArrayList<>();
 	
 			for (LocationCluster cluster : incomingClusters) {
-				for (AssignedEntityDemand a : cluster.getLocations()) {
-					AssignedEntityDemand ald = 
-							new AssignedEntityDemand(a.getLocationEntity(), gs.proxyPin(0.0, a.getPinnedLocation())) ;
+				for (PinnedAssignedEntityDemand a : cluster.getLocations()) {
+					DefaultAssignedEntityDemand ald = 
+							new DefaultAssignedEntityDemand(a.getLocationEntity(), gs.proxyPin(0.0, a.getPinnedLocation())) ;
 					locations.add(ald);
 				}
 			}
@@ -108,9 +109,9 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			
 			//Sort Assignments By Distance from End Vertex
 			//This will force Pins from connecting segments to be placed first 
-			locations.sort(new Comparator<AssignedEntityDemand>() {
+			locations.sort(new Comparator<DefaultAssignedEntityDemand>() {
 				@Override
-				public int compare(AssignedEntityDemand o1, AssignedEntityDemand o2) {
+				public int compare(DefaultAssignedEntityDemand o1, DefaultAssignedEntityDemand o2) {
 	
 					double d1 = o1.getPinnedLocation()
 							.getEffectiveOffsetFromEndVertex();
@@ -188,7 +189,9 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			currentCluster.assignConstraint(pl) ;
 		}
 		
-		public void assign(AssignedEntityDemand d) {
+		public void assign(PinnedAssignedEntityDemand d) {
+			
+			int x = 11 ;
 			
 			if( currentCluster.isFull() ) {
 				flushCluster() ;
@@ -198,14 +201,14 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				flushAndAssignLocation(d.getPinnedLocation()) ;
 			}
 			
-			while(d.getTotalDemand() > currentCluster.getRemainingDemand() ) {
-				Pair<AssignedEntityDemand> pair =  d.split(currentCluster.getRemainingDemand()) ;
+			while(d.getDemand() > currentCluster.getRemainingDemand() ) {
+				Pair<PinnedAssignedEntityDemand> pair =  d.split(currentCluster.getRemainingDemand()) ;
 				currentCluster.assign(pair.getHead()) ;
 				flushAndAssignLocation(d.getPinnedLocation()) ;
 				d = pair.getTail() ;
 			}
 			
-			if( d.getTotalDemand() > 0 ) {
+			if( d.getDemand() > 0 ) {
 				currentCluster.assign(d) ;
 			}
 			

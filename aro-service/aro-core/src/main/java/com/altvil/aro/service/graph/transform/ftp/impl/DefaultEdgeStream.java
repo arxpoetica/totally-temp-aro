@@ -2,7 +2,7 @@ package com.altvil.aro.service.graph.transform.ftp.impl;
 
 import java.util.List;
 
-import com.altvil.aro.service.demand.AssignedEntityDemand;
+import com.altvil.aro.service.demand.DefaultAssignedEntityDemand;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.ftp.EdgeList;
 import com.altvil.aro.service.graph.transform.ftp.LocationStreamVisitor;
@@ -71,7 +71,7 @@ public class DefaultEdgeStream extends AbstractLocationStream implements
 	}
 
 	@Override
-	public List<AssignedEntityDemand> getPinnedLocations() {
+	public List<DefaultAssignedEntityDemand> getPinnedLocations() {
 		return edgeList.getAssignedEntityDemands() ;
 	}
 
