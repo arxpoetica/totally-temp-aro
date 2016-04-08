@@ -191,8 +191,6 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 		
 		public void assign(PinnedAssignedEntityDemand d) {
 			
-			int x = 11 ;
-			
 			if( currentCluster.isFull() ) {
 				flushCluster() ;
 			}
