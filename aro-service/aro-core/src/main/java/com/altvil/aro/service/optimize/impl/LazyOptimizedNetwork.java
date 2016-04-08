@@ -32,7 +32,7 @@ public class LazyOptimizedNetwork implements OptimizedNetwork {
 
 	@Override
 	public boolean isEmpty() {
-		 return getAnalysisNode().getFiberCoverage().getLocations().isEmpty() ;
+		 return getAnalysisNode().getFiberCoverage().getAssignedEntityDemands().isEmpty() ;
 	}
 
 

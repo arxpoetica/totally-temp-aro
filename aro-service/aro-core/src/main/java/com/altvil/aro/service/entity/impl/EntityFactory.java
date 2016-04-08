@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.AroEntityVisitor;
+import com.altvil.aro.service.entity.AssignedEntityDemand;
 import com.altvil.aro.service.entity.BulkFiberConsumer;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
@@ -36,30 +37,33 @@ public class EntityFactory {
 
 	public LocationEntity createLocationEntity(long locationId,
 			LocationDemand coverageAggregateStatistic) {
-		return new LocationEntityImpl(locationId,
-				coverageAggregateStatistic);
+		return new LocationEntityImpl(locationId, coverageAggregateStatistic);
 	}
 
-	
-	public BulkFiberTerminal createBulkFiberTerminal(LocationEntity locationEntity) {
-		return new BulkFiberTerminalImpl(ensureId(null), locationEntity) ;
+	public BulkFiberTerminal createBulkFiberTerminal(
+			AssignedEntityDemand assignedEntityDemand) {
+		return new BulkFiberTerminalImpl(ensureId(null), assignedEntityDemand);
 	}
-	
-	public BulkFiberConsumer createBulkFiberConsumer(DemandStatistic locationEntityDemand) {
-		return null ;
+
+	public BulkFiberConsumer createBulkFiberConsumer(
+			DemandStatistic locationEntityDemand) {
+		return null;
 	}
-	
-	public FDTEquipment createFdt(Long id, Collection<LocationDropAssignment> dropAssignments) {
+
+	public FDTEquipment createFdt(Long id,
+			Collection<LocationDropAssignment> dropAssignments) {
 		return new DefaultFDT(ensureId(id), dropAssignments);
 	}
-	
+
 	public FDTEquipment createFdt(Long id) {
-		return createFdt(null, Collections.emptyList()) ;
+		return createFdt(null, Collections.emptyList());
 	}
 
-	public LocationDropAssignment createDropAssignment(LocationEntity entity,
-			double dropLengthMeters, DropCable dropCable, double fiberDemand) {
-		return new LocationDropAssignmentImpl(entity, dropLengthMeters, dropCable);
+	public LocationDropAssignment createDropAssignment(
+			AssignedEntityDemand entity, double dropLengthMeters,
+			DropCable dropCable, double fiberDemand) {
+		return new LocationDropAssignmentImpl(ensureId(null), entity,
+				dropLengthMeters, dropCable);
 	}
 
 	public FDHEquipment createFdh(Long id, int splitterCount) {
@@ -69,7 +73,7 @@ public class EntityFactory {
 	public RemoteTerminal createRemoteTerminal(Long id) {
 		return new RemoteTerminalImpl(ensureId(id));
 	}
-	
+
 	public RootEntity createRemoteTerminal() {
 		return new RootEntityImpl(ensureId(null));
 	}
@@ -89,48 +93,44 @@ public class EntityFactory {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		
-		private DropCableSummary dropCableSummary = null ; //lazyLoaded
-		
-		private Collection<LocationDropAssignment> dropAssignments ;
 
-		public DefaultFDT(Long id, Collection<LocationDropAssignment> dropAssignments) {
+		private DropCableSummary dropCableSummary = null; // lazyLoaded
+
+		private Collection<LocationDropAssignment> dropAssignments;
+
+		public DefaultFDT(Long id,
+				Collection<LocationDropAssignment> dropAssignments) {
 			super(id);
-			this.dropAssignments = dropAssignments ;
+			this.dropAssignments = dropAssignments;
 		}
-		
 
 		@Override
 		public DropCableSummary getDropCableSummary() {
-			if( dropCableSummary == null ) {
-				dropCableSummary = calcDropCableSummary() ;
+			if (dropCableSummary == null) {
+				dropCableSummary = calcDropCableSummary();
 			}
-			
-			return dropCableSummary ;
+
+			return dropCableSummary;
 		}
-		
+
 		private DropCableSummary calcDropCableSummary() {
-			EntityDoubleSum<DropCable> summer = new EntityDoubleSum<DropCable>() ;
-			
+			EntityDoubleSum<DropCable> summer = new EntityDoubleSum<DropCable>();
+
 			dropAssignments.forEach(da -> {
-				summer.add(da.getDropCable(), da.getAggregateStatistic().getDemand()) ;
+				summer.add(da.getDropCable(), da.getAssignedEntityDemand()
+						.getDemand());
 			});
-			
-			return new DropCableSummary(summer.getTotals().entrySet()
-					.stream()
+
+			return new DropCableSummary(summer.getTotals().entrySet().stream()
 					.map(e -> new DropCableCount(e.getKey(), e.getValue()))
-					.collect(Collectors.toList())) ;
-			
+					.collect(Collectors.toList()));
+
 		}
-
-
 
 		@Override
 		public Collection<LocationDropAssignment> getDropAssignments() {
-			return dropAssignments ;
+			return dropAssignments;
 		}
-
-
 
 		@Override
 		public Class<? extends AroEntity> getType() {
@@ -151,12 +151,12 @@ public class EntityFactory {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		
-		private int splitterCount ;
+
+		private int splitterCount;
 
 		public DefaultFDH(Long id, int splitterCount) {
 			super(id);
-			this.splitterCount = splitterCount ;
+			this.splitterCount = splitterCount;
 		}
 
 		@Override
@@ -171,10 +171,8 @@ public class EntityFactory {
 
 		@Override
 		public int getSplitterCount() {
-			return splitterCount ;
+			return splitterCount;
 		}
-		
-		
 
 	}
 
@@ -274,8 +272,6 @@ public class EntityFactory {
 
 	}
 
-	
-
 	public static class LocationDropAssignmentImpl extends AbstractEntity
 			implements LocationDropAssignment {
 
@@ -283,34 +279,32 @@ public class EntityFactory {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private LocationEntity entity;
+		private AssignedEntityDemand assignedEntityDemand;
 		private double dropLengthInMeters;
-		private DropCable dropCable ;
+		private DropCable dropCable;
 
-		public LocationDropAssignmentImpl(LocationEntity entity,
+		public LocationDropAssignmentImpl(Long id,
+				AssignedEntityDemand assignedEntityDemand,
 				double dropLengthInMeters, DropCable dropCable) {
-			super(entity.getObjectId());
-			this.entity = entity;
+			super(id);
+			this.assignedEntityDemand = assignedEntityDemand;
 			this.dropLengthInMeters = dropLengthInMeters;
-			this.dropCable = dropCable ;
+			this.dropCable = dropCable;
 		}
-		
+
 		@Override
 		public DropCable getDropCable() {
-			return dropCable ;
+			return dropCable;
 		}
-		
-		
-
 
 		@Override
-		public LocationDemand getAggregateStatistic() {
-			return entity.getLocationDemand() ;
+		public AssignedEntityDemand getAssignedEntityDemand() {
+			return assignedEntityDemand;
 		}
 
 		@Override
 		public LocationEntity getLocationEntity() {
-			return entity;
+			return assignedEntityDemand.getLocationEntity();
 		}
 
 		@Override
@@ -330,29 +324,26 @@ public class EntityFactory {
 		}
 
 	}
-	
-	private static class BulkFiberTerminalImpl extends AbstractEntity implements BulkFiberTerminal {
+
+	private static class BulkFiberTerminalImpl extends AbstractEntity implements
+			BulkFiberTerminal {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private LocationEntity locationEntity ;
-		
+		private AssignedEntityDemand assignedEntityDemand;
+
 		public BulkFiberTerminalImpl(Long objectId,
-				LocationEntity locationEntity) {
+				AssignedEntityDemand assignedEntityDemand) {
 			super(objectId);
-			this.locationEntity = locationEntity;
+			this.assignedEntityDemand = assignedEntityDemand;
 		}
-		
-		
 
 		@Override
 		public Class<? extends AroEntity> getType() {
-			return BulkFiberTerminal.class ;
+			return BulkFiberTerminal.class;
 		}
-
-
 
 		@Override
 		public void accept(AroEntityVisitor visitor) {
@@ -361,21 +352,19 @@ public class EntityFactory {
 
 		@Override
 		public LocationEntity getLocationEntity() {
-			return locationEntity ;
+			return assignedEntityDemand.getLocationEntity();
 		}
 
-		
-
 		@Override
-		public LocationDemand getLocationDemand() {
-			return locationEntity.getLocationDemand() ;
+		public AssignedEntityDemand getAssignedEntityDemand() {
+			return assignedEntityDemand;
 		}
 
 		@Override
 		public double getTotalFiberDemand() {
-			return locationEntity.getLocationDemand().getDemand() ;
+			return assignedEntityDemand.getLocationDemand().getDemand();
 		}
-		
+
 	}
 
 	public static class LocationEntityImpl extends AbstractEntity implements
@@ -402,8 +391,6 @@ public class EntityFactory {
 		public void accept(AroEntityVisitor visitor) {
 			visitor.visit(this);
 		}
-
-		
 
 		@Override
 		public LocationDemand getLocationDemand() {

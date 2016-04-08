@@ -1,18 +1,19 @@
 package com.altvil.aro.service.demand;
 
+import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 
-public class AssignedEntityDemand {
+public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssignedEntityDemand {
 
 	private PinnedLocation pinnedLocation;
 
 	private LocationEntity locationEntity;
 	private LocationDemand locationDemand;
 
-	public AssignedEntityDemand(LocationEntity locationEntity,
+	public DefaultAssignedEntityDemand(LocationEntity locationEntity,
 			PinnedLocation pinnedLocation, LocationDemand locationDemand) {
 		super();
 		this.locationEntity = locationEntity;
@@ -20,9 +21,30 @@ public class AssignedEntityDemand {
 		this.locationDemand = locationDemand;
 	}
 
-	public AssignedEntityDemand(LocationEntity locationEntity,
+	public DefaultAssignedEntityDemand(LocationEntity locationEntity,
 			PinnedLocation pinnedLocation) {
 		this(locationEntity, pinnedLocation, locationEntity.getLocationDemand());
+	}
+	
+	
+	@Override
+	public double getRawCoverage() {
+		return locationDemand.getRawCoverage() ;
+	}
+
+	@Override
+	public double getDemand() {
+		return locationDemand.getDemand() ;
+	}
+
+	@Override
+	public double getMonthlyRevenueImpact() {
+		return locationDemand.getMonthlyRevenueImpact() ;
+	}
+
+	@Override
+	public LocationDemand getLocationDemand(){
+		return locationDemand ;
 	}
 
 	public double getHouseholdFiberDemandValue() {
@@ -32,21 +54,29 @@ public class AssignedEntityDemand {
 	public double getTotalDemand() {
 		return locationDemand.getDemand();
 	}
-
+	
 	public PinnedLocation getPinnedLocation() {
 		return pinnedLocation;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.altvil.aro.service.demand.AssignedAssignedEntityDemand#getLocationEntity()
+	 */
+	@Override
 	public LocationEntity getLocationEntity() {
 		return locationEntity;
 	}
 
-	public Pair<AssignedEntityDemand> split(double demand) {
+	/* (non-Javadoc)
+	 * @see com.altvil.aro.service.demand.AssignedAssignedEntityDemand#split(double)
+	 */
+	@Override
+	public Pair<PinnedAssignedEntityDemand> split(double demand) {
 
 		Pair<LocationDemand> pair = locationDemand.splitDemand(demand);
-		return new Pair<AssignedEntityDemand>(new AssignedEntityDemand(
+		return new Pair<PinnedAssignedEntityDemand>(new DefaultAssignedEntityDemand(
 				locationEntity, pinnedLocation, pair.getHead()),
-				new AssignedEntityDemand(locationEntity, pinnedLocation, pair
+				new DefaultAssignedEntityDemand(locationEntity, pinnedLocation, pair
 						.getTail()));
 
 	}

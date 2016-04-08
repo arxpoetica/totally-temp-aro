@@ -61,7 +61,7 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 		DefaultFiberCoverage.Accumulator accumlator = DefaultFiberCoverage.accumulate() ;
 		locations.forEach(l -> {
 			LocationDropAssignment lda = (LocationDropAssignment) l.getAroEntity() ;
-			accumlator.add(lda.getLocationEntity(), lda.getAggregateStatistic()) ;
+			accumlator.add(lda.getAssignedEntityDemand()) ;
 		});
 		return accumlator.getResult() ;
 	}

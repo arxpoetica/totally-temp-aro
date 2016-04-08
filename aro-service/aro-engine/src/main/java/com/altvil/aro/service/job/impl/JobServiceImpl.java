@@ -32,6 +32,7 @@ public class JobServiceImpl implements JobService {
 	public JobServiceImpl() {
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Job<?> get(Id id) {
 		return map.get(id);

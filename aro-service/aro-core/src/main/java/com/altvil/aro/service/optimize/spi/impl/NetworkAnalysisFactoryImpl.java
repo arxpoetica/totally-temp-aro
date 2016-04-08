@@ -19,6 +19,7 @@ import com.altvil.aro.service.entity.DefaultAroVisitor;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.SplicePoint;
@@ -156,9 +157,23 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 					graphAssignment, node)), graphMapping, FiberType.FEEDER,
 					ctx.getNetworkModel().getCentralOfficeFeederFiber());
 		}
+		
+		private void dump(FDTEquipment node) {
+			System.out.print("FDT ") ;
+			for(LocationDropAssignment lds : node.getDropAssignments()) {
+				System.out.print(lds.getLocationEntity().getObjectId()) ;
+				System.out.print(" ") ;
+				System.out.print(lds.getAssignedEntityDemand().getDemand()) ;
+				System.out.print(" | ") ;
+			}
+			System.out.println();
+			
+		}
 
 		@Override
 		public void visit(FDTEquipment node) {
+			
+			dump(node) ;
 
 			nodeBuilder = parent.addChild(
 					new FdtAssignment(graphAssignment, node, StreamUtil.map(

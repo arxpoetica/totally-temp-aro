@@ -41,7 +41,6 @@ import com.altvil.aro.service.planing.MasterPlanCalculation;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.OptimizationInputs;
-import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planing.ScoringStrategyFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.utils.StreamUtil;

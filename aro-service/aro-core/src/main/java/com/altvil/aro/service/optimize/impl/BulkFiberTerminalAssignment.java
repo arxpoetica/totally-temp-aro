@@ -45,7 +45,7 @@ public class BulkFiberTerminalAssignment extends AbstractEquipmentAssignment {
 	public DemandCoverage getDirectCoverage(AnalysisContext ctx) {
 		
 		DefaultFiberCoverage.Accumulator accumulator = DefaultFiberCoverage.accumulate() ;
-		accumulator.add(bftEquipment.getLocationEntity(), bftEquipment.getLocationDemand()) ;
+		accumulator.add(bftEquipment.getAssignedEntityDemand()) ;
 		return accumulator.getResult() ;
 		
 	}
