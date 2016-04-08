@@ -33,3 +33,5 @@ INSERT INTO aro.businesses(id, location_id, industry_id, name, address, number_o
 		geog::geography as geography,
 		geog::geometry as geometry
 	FROM infousa.businesses;
+
+CREATE EXTENSION unaccent;

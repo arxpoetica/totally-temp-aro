@@ -20,7 +20,7 @@ public class GeometryUtil {
 	public static final double PRECISION = 10E-6;
 	private static final GeometryFactory FACTORY = new GeometryFactory(
 			new PrecisionModel(), 4326);
-	private static final WKTReader WKT_READER = new WKTReader(FACTORY);
+	//private static final WKTReader WKT_READER = new WKTReader(FACTORY);
 
 	public static GeometryFactory factory() {
 		return FACTORY;
@@ -143,7 +143,7 @@ public class GeometryUtil {
 	}
 
 	public static Geometry toGeometry(String wkt) throws ParseException {
-		return WKT_READER.read(wkt);
+		return new WKTReader(FACTORY).read(wkt);
 	}
 
 	public static MultiLineString createMultiLineString(

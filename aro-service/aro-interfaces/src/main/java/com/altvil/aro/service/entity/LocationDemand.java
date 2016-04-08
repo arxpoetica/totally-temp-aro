@@ -9,16 +9,16 @@ import java.util.function.Predicate;
 public interface LocationDemand extends Serializable {
     
 	
-	LocationEntityDemand getLocationDemand(LocationEntityType type) ;
+	LocationEntityDemandByType getLocationDemand(LocationEntityType type) ;
 	
 	public double getTotalDemand() ;
 
-	default public Collection<LocationEntityDemand> filterDemands(Predicate<LocationEntityDemand> predicate) {
+	default public Collection<LocationEntityDemandByType> filterDemands(Predicate<LocationEntityDemandByType> predicate) {
 		LocationEntityType[] types = LocationEntityType.values() ;
-		List<LocationEntityDemand> result = new ArrayList<>(types.length) ;
+		List<LocationEntityDemandByType> result = new ArrayList<>(types.length) ;
 		
 		for(LocationEntityType lt : types) {
-			LocationEntityDemand  ld = getLocationDemand(lt) ;
+			LocationEntityDemandByType  ld = getLocationDemand(lt) ;
 			if(predicate.test(ld)) {
 				result.add(ld) ;
 			}
@@ -26,6 +26,8 @@ public interface LocationDemand extends Serializable {
 		
 		return result ;
 	}
+	
+	 Pair<LocationDemand> splitDemand(double demand) ;
 	
     LocationDemand add(LocationDemand coverageStatic) ;
     

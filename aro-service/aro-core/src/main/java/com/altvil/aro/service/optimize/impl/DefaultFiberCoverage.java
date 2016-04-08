@@ -5,15 +5,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
-import com.altvil.aro.service.entity.ZeroCoverageStatistics;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 
 public class DefaultFiberCoverage implements DemandCoverage {
 
 	
-	public static  DemandCoverage EMPTY_COVERAGE = new DefaultFiberCoverage(ZeroCoverageStatistics.STATISTIC, new HashSet<LocationEntity>()) ;
+	public static  DemandCoverage EMPTY_COVERAGE = new DefaultFiberCoverage(DefaultLocationDemand.ZERO_DEMAND, new HashSet<LocationEntity>()) ;
 	
 	private LocationDemand coverage;
 	private Set<LocationEntity> locationEntities;

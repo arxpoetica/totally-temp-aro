@@ -35,7 +35,7 @@ module.exports = class Network {
   // View existing fiber plant for competitors with a heat map
   static viewFiberPlantDensity (viewport) {
     var sql = `
-      SELECT geom
+      SELECT geom, carrier_name
       FROM fiber_plant
       WHERE carrier_name <> $1
     `

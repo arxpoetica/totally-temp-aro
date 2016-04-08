@@ -9,6 +9,109 @@
 Vagrantfile
 npm-debug.log
 
+
+#app ignores
+
+app/coverage
+app/npm-debug*.*
+app/node_modules
+app/models/test_permission.js
+app/public/javascripts/lib/
+conf/config_app.json
+
+
+*.project
+*.settings
+*.classpath
+*.component
+
+
+###############################
+
+
+# Directories #
+/build/
+/bin/
+target/
+ 
+# OS Files #
+.DS_Store
+ 
+*.class
+ 
+# Package Files #
+*.jar
+*.war
+*.ear
+*.db
+ 
+######################
+# Windows
+######################
+ 
+# Windows image file caches
+Thumbs.db 
+ 
+# Folder config file
+Desktop.ini
+ 
+######################
+# OSX
+######################
+ 
+.DS_Store
+.svn
+ 
+# Thumbnails
+._*
+ 
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+ 
+ 
+######################
+# Eclipse
+######################
+ 
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+*.classpath
+*.settings/
+*.loadpath
+/src/main/resources/rebel.xml
+# External tool builders
+.externalToolBuilders/
+ 
+# Locally stored "Eclipse launch configurations"
+*.launch
+ 
+# CDT-specific
+.cproject
+ 
+# PDT-specific
+.buildpath
+
+
+#etl ignores
+
+etl/tiger_cousub/shapefiles
+etl/client/*.pyc
+etl/source_colt/data
+
+bin/
+
+
+
 #aro-service git ignores
 
 aro-service/target
@@ -32,44 +135,3 @@ aro-service/aro-utils/.settings
 aro-service/aro-utils/.project
 
 aro-service/docker/aro-service.war
-
-*.project
-*.settings
-*.classpath
-*.component
-
-
-#app ignores
-
-app/coverage
-app/npm-debug*.*
-app/node_modules
-app/models/test_permission.js
-app/public/javascripts/lib/
-conf/config_app.json
-
-
-
-#etl ignores
-
-etl/tiger_cousub/shapefiles
-etl/client/*.pyc
-etl/source_colt/data
-
-bin/
-
-
-
-
-
-
-
-aro-service/aro-interfaces/.project
-
-aro-service/aro-interfaces/.project
-
-aro-service/aro-engine/.project
-
-aro-service/aro-interfaces/.project
-
-aro-service/aro-service/.settings/org.eclipse.wst.common.project.facet.core.xml

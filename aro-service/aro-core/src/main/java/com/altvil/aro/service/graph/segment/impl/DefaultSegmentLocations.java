@@ -41,8 +41,8 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 		this.parent = parent;
 
-		if (geometry.getLength() == 0) {
-			// throw new RuntimeException("BANG BANG") ;
+		if (geometry == null || geometry.getLength() == 0) {
+			 throw new RuntimeException("BANG BANG") ;
 		}
 
 		this.length = length;

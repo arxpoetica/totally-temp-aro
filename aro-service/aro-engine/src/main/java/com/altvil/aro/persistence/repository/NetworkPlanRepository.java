@@ -29,12 +29,13 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"business_fiber as (\n" + 
-			"	select l.id, f.fiber_count\n" + 
+			"	select l.id, sum(f.fiber_count) as fiber_count\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
 			"	join client.employees_by_location e on (b.number_of_employees >= e.min_value) and  (b.number_of_employees <= e.max_value) \n" + 
 			"	join client.industry_mapping m on m.sic4 = b.industry_id\n" + 
 			"	join fiber_model f on f.industry_id = m.industry_id and f.employees_by_location_id = e.id \n" + 
+			"	group by l.id\n" +
 			")\n" + 
 			",\n" + 
 			"celltower_fiber as (\n" + 
@@ -140,13 +141,26 @@ public interface NetworkPlanRepository extends
 			+ "where r.id = :planId", nativeQuery = true)
 	List<Object[]> queryRoadEdgesbyPlanId(@Param("planId") long planId);
 
+	
+	
+	@Modifying
+    @Transactional
+	@Query(value = "delete from client.plan where parent_plan_id = :planId", nativeQuery = true)
+	void deleteWireCenterPlans(@Param("planId") long planId) ;
+			
+	
     @Modifying
     @Transactional
 	@Query(value = "with inputs as (\n" + 
 			" select p.id as master_plan_id, p.* \n" + 
 			" from client.plan p where p.id = :planId\n" + 
 			")\n" + 
-			",\n" + 
+			",\n" +
+//			"debug_plans as (\n" +
+//				"delete from client.plan where parent_plan_id in (select master_plan_id from inputs)\n" +
+//				"returning id\n" +
+//			")\n" + 
+//			",\n" +
 			"original_targets as (\n" + 
 			" select pt.id, pt.location_id, pt.plan_id, mp.master_plan_id, wp.wirecenter_id\n" + 
 			" from inputs mp\n" + 

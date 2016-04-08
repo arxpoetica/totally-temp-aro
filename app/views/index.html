@@ -634,7 +634,15 @@
   <!-- Angular controllers and services -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=visualization,drawing"></script>
+
+  <!-- Put the Google Maps URL in a config... -->
+  <% if (env_is_production) { %>
+    <!-- If we're in production, use our Google Maps Enterprise client ID -->
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;client=gme-altmanvilandrieand&amp;libraries=visualization,drawing"></script>
+  <% } else { %>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=visualization,drawing"></script>
+  <% } %>
+
   <script>
     var app = angular.module('aro', []);
     var map;

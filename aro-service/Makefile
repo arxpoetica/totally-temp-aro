@@ -7,21 +7,37 @@ deploy_war:
 
 rebuild_war: compile_war deploy_war
 
+tag:
+	(docker tag aro-service docker-registry.cloud.altvil.com/aro-service)
+
 build_docker:
 	(cd docker && docker build -t aro-service .)
 
-run_docker:
-	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e ARO_THREAD_COUNT=5 -d -p 8080:8080 --name aro-service aro-service)
+build_docker_image: build_docker tag
 
-install: build_docker run_docker
+run_docker:
+	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e ARO_THREAD_COUNT=5 -d -p 8080:8080 --name aro-service docker-registry.cloud.altvil.com/aro-service)
+
+
+build_tag_push: build_docker tag push
+
+push:
+	(docker push docker-registry.cloud.altvil.com/aro-service)
+
+pull:
+	(docker pull docker-registry.cloud.altvil.com/aro-service)
+
+pull_run: pull run_docker
+
+pull_run_vagrant: pull run_vagrant_docker
 
 uninstall:
-	(docker stop aro-service && docker rm aro-service && docker rmi -f aro-service)
+	(docker stop aro-service && docker rm aro-service && docker rmi -f docker-registry.cloud.altvil.com/aro-service)
 
 reinstall: uninstall install
 
 run_vagrant_docker:
-	(docker run -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb aro-service)
+	(docker run -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb docker-registry.cloud.altvil.com/aro-service)
 	#(docker run -d -p 8080:8080 --name aro-service --link postgres:arodb aro-service)
 install_vagrant: build_docker run_vagrant_docker
 

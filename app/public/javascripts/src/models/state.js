@@ -9,6 +9,7 @@ app.service('state', ($rootScope, map_layers) => {
       if (!key) return
 
       var center = map.getCenter()
+      if (!center) return
       var literal = { lat: center.lat(), lng: center.lng() }
       service.set('mapCenter', JSON.stringify(literal))
       service.set('mapZoom', map.getZoom())

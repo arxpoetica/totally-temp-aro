@@ -6,11 +6,11 @@
         <h4 class="modal-title">Manage Network Plans</h4>
       </div>
       <div class="modal-body">
-        <p ng-show="routes.length < 1" class="text-center">
+        <p ng-show="plans.length < 1" class="text-center">
           No plans stored in the database yet
         </p>
         <div>
-          <form ng-show="routes.length > 0">
+          <form ng-show="plans.length > 0">
             <div class="input-group">
               <input type="text" class="form-control" placeholder="Search Plans by Name" ng-model="search_text" ng-change="load_plans()">
               <span class="input-group-addon">
@@ -43,14 +43,14 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="route in routes">
-                <td>{{route.name}}</th>
-                <td>{{route.updated_at | date:'shortDate'}}</th>
-                <td>{{route.created_at | date:'shortDate'}}</th>
-                <td>{{route.owner_first_name}} {{route.owner_last_name}}</th>
+              <tr ng-repeat="plan in plans">
+                <td>{{plan.name}}</th>
+                <td>{{plan.updated_at | date:'shortDate'}}</th>
+                <td>{{plan.created_at | date:'shortDate'}}</th>
+                <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</th>
                 <td>
-                  <a class="btn btn-sm btn-primary" ng-click="show_share_route(route)"><span class="glyphicon glyphicon-share"></span></a>
-                  <a class="btn btn-sm btn-danger" ng-click="delete_route(route)" ng-show="route.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
+                  <a class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>
+                  <a class="btn btn-sm btn-danger" ng-click="deletePlan(plan)" ng-show="plan.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
                 </td>
               </tr>
             </tbody>

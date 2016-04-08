@@ -216,11 +216,19 @@ You will need to create a user for the app. You can easily create one with email
 ```console
 $ make register_user
 ```
-Finally, start the webserver
+start the webserver
 ```console
 $ make webserver
 
 ```
+Finally install aro-service
+
+# Running Locally
+$ make install_vagrant_service 
+
+#If configuring AMZ Server 
+$ make install_service 
+
 
 Now you can access the application by browsing to `http://localhost:8000` from your host machine.
 
