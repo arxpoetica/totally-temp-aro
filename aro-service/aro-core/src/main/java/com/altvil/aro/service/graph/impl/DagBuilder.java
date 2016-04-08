@@ -60,6 +60,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 			if( log.isDebugEnabled() ) log.debug("vertices count " + vertices.size());
 	
 	
+			// Find shortest (minimizes sum of path weights) path to each vertex.
 			Collection<GraphNode> foundPaths = shortestPaths
 					.findPathVertices(vertices);
 	
@@ -67,6 +68,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 			if( log.isDebugEnabled() ) log.debug("found Paths " + foundPaths.size());
 	
 			
+			// Remove duplicate edges
 			Set<AroEdge<T>> minEdges = new HashSet<>();
 			for (GraphNode v : vertices) {
 	

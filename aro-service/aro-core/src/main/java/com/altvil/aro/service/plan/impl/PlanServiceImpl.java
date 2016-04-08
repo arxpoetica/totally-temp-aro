@@ -184,7 +184,7 @@ public class PlanServiceImpl implements PlanService {
 				return null;
 			}
 
-			// Causes Graph to be Re-nodded
+			// Build simple weighted graph
 			RouteModel routeModel = routePlaningService.planRoute(networkModel);
 
 			Collection<FiberSourceBinding> possibleFiberSources = StreamUtil
@@ -198,8 +198,8 @@ public class PlanServiceImpl implements PlanService {
 							}) ;
 			
 			//Ensure that Only Source per vertex (this ensure constraint one vertex one source) 
-			Map<GraphNode, FiberSourceBinding> bindingMap = StreamUtil.hash(possibleFiberSources, FiberSourceBinding::getDomain) ;
-			Collection<FiberSourceBinding> assignedFiberSources = bindingMap.values() ;
+			Collection<FiberSourceBinding> assignedFiberSources = StreamUtil.hash(possibleFiberSources, FiberSourceBinding::getDomain).values() ;
+			
 			
 			Map<GraphEdgeAssignment, FiberSourceBinding> edgeMap = 
 					StreamUtil.hash(assignedFiberSources, fsb -> fsb.getSource()) ;
@@ -208,8 +208,10 @@ public class PlanServiceImpl implements PlanService {
 			GraphModelBuilder<GeoSegment> modifier = transformFactory
 					.modifyModel(routeModel.getModel());
 			
+			// Create a virtual root whose edges connect to all of the assigned fiber sources.
 			GraphNode rootNode = modifier.addVirtualRoot(StreamUtil.map(assignedFiberSources, Assignment::getDomain));
 			
+			// Create a tree leading to each AroEdge with a value.
 			DAGModel<GeoSegment> dag = transformFactory.createDAG(modifier.build(), rootNode, e -> e.getValue() != null && !e.getValue().isEmpty());
 
 			if (dag.getEdges().isEmpty()) {
