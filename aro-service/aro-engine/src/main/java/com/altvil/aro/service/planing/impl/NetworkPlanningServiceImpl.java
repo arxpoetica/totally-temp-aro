@@ -111,7 +111,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				networkPlanRepository.computeWirecenterUpdates(planId),
 				Number::longValue);
 
-		Future<MasterPlanUpdate> f = wirePlanExecutor.submit(() -> {
+		Future<MasterPlanUpdate> f = executorService.submit(() -> {
 
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
 					.invokeAll(ids
@@ -153,7 +153,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				networkPlanRepository.computeWirecenterUpdates(planId),
 				Number::longValue);
 
-		Future<MasterPlanUpdate> f = wirePlanExecutor.submit(() -> {
+		Future<MasterPlanUpdate> f = executorService.submit(() -> {
 
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
 					.invokeAll(ids.stream()
