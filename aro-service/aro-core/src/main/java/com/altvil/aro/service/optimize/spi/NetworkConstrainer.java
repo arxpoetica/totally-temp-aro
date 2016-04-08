@@ -112,7 +112,6 @@ public class NetworkConstrainer {
 		private NetworkModelBuilder networkModelBuilder;
 
 		private List<OptimizedNetwork> result = new ArrayList<OptimizedNetwork>();
-		private int emptyResult = 0;
 
 		public ResultAssembler(NetworkModelBuilder networkModelBuilder) {
 			super();
@@ -121,10 +120,6 @@ public class NetworkConstrainer {
 
 
 		public void add(OptimizedNetwork network) {
-
-			if (network.isEmpty()) {
-				emptyResult++;
-			}
 			result.add(network);
 		}
 
@@ -140,7 +135,7 @@ public class NetworkConstrainer {
 
 
 		public List<OptimizedNetwork> assemble() {
-			if (emptyResult == 0) {
+			if (result.isEmpty()) {
 				result.add(createEmptyNetwork()) ;
 			}
 			return result;
