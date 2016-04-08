@@ -39,37 +39,42 @@ public class DropCableModel {
 					UnitUtils.toMeters(1000),
 					UnitUtils.toMeters(1500)) ;
 	
-	private List<DropCable> dropCables ;
-	private Double[] dropLengths;
+	private final List<DropCable> dropCables ;
+	private final double[] dropLengths;
 	
 	private DropCableModel(Collection<DropCable> dropCables) {
-		init(dropCables) ;
-	}
-	
-	private void init(Collection<DropCable> undorderedCables) {
-		dropCables = new ArrayList<>(undorderedCables) ;
-		Collections.sort(dropCables) ;
-		
-		dropLengths = new Double[dropCables.size()] ;
-		int i = 0 ;
-		for(DropCable dc : dropCables) {
-			dropLengths[i++] = dc.getLength() ;
- 		}
-		
-	}
-	
-	public Collection<DropCable> getDropCableTypes() {
-		return dropCables  ;
-	}
-	
-	public DropCable getDropCable(double length) {
-		int index = Arrays.binarySearch(dropLengths, length) ;
-		
-		if( index < 0 ) {
-			index = Math.min((index * -1) + 1,dropLengths.length)  ;
+		this.dropCables = new ArrayList<>(dropCables);
+		Collections.sort(this.dropCables);
+
+		dropLengths = new double[dropCables.size()];
+		int i = 0;
+		for (DropCable dc : dropCables) {
+			assert i == 0 || dropLengths[i] < dc.getLength() : "Cable lengths in model must be unique.";
+			dropLengths[i++] = dc.getLength();
 		}
-		
-		return dropCables.get(index) ;
+
 	}
 
+	public Collection<DropCable> getDropCableTypes() {
+		return dropCables;
+	}
+
+	// TODO HARRY Should we have a getMaxLength method in DropCableModel to use
+	// in the algorithm that is laying out the splitters. That way it should be
+	// impossible for the layout to ever request a drop cable longer than what
+	// the model supports.
+
+	public DropCable getDropCable(double length) {
+		assert length > 0 : "Drop cables must have a positive length.";
+
+		int index = Arrays.binarySearch(dropLengths, length);
+
+		if (index < 0) {
+			index = -index - 1;
+
+			assert index < dropLengths.length : "Drop cable exceeded max length of model.";
+		}
+
+		return dropCables.get(index);
+	}
 }
