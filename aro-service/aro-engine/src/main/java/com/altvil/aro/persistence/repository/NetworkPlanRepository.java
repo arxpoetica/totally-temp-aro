@@ -38,7 +38,7 @@ public interface NetworkPlanRepository extends
 			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" + 
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
-			"order by gid, intersect_position limit 40000", nativeQuery = true)
+			"order by gid, intersect_position limit 1", nativeQuery = true)
 	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
 
 	

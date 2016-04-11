@@ -88,9 +88,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	public Future<WirecenterNetworkPlan> optimizeWirecenter(long planId,
 			InputRequests inputRequests, OptimizationInputs optimizationInputs,
 			FiberNetworkConstraints constraints) {
-		return this.wirePlanExecutor
-				.submit(createOptimzedCallable(NetworkRequest.create(planId,
-						NetworkRequest.LocationLoadingRequest.ALL), optimizationInputs, constraints));
+		return this.wirePlanExecutor.submit(createOptimzedCallable(
+				NetworkRequest.create(planId,
+						NetworkRequest.LocationLoadingRequest.ALL),
+				optimizationInputs, constraints));
 	}
 
 	@Override
@@ -116,7 +117,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					.invokeAll(ids
 							.stream()
 							.map(id -> createOptimzedCallable(
-									NetworkRequest.create(id), optimizationInputs, constraints))
+									NetworkRequest.create(id),
+									optimizationInputs, constraints))
 							.collect(Collectors.toList()));
 			return new MasterPlanUpdate(futures.stream().map(wf -> {
 				try {
@@ -209,6 +211,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			return null;
 		};
 	}
+	
 
 	private Callable<WirecenterNetworkPlan> createOptimzedCallable(
 			NetworkRequest networkRequest,
@@ -230,21 +233,34 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					.mapToDouble(
 							a -> ((LocationEntity) a.getSource())
 									.getLocationDemand().getDemand()).sum();
+			
+			log.info("Target total = " + totalDemand) ;
+			
 
 			NetworkPlanner planner = optimizerService.createNetworkPlanner((
 					networkAnalysis) -> false, networkData, ctx, (
-					GeneratingNode) -> false, scoringStrategyFactory
-					.getScoringStrategy(optimizationInputs.getOptimizationType()));
+					GeneratingNode) -> true, scoringStrategyFactory
+					.getScoringStrategy(optimizationInputs
+							.getOptimizationType()));
 
 			Collection<OptimizedNetwork> optimizedPlans = planner
 					.getOptimizedPlans();
 
 			Optional<OptimizedNetwork> model = optimizedPlans
 					.stream()
-					.filter(p -> !p.isEmpty()
-							&& (p.getAnalysisNode().getFiberCoverage()
-									.getDemand() / totalDemand) >= optimizationInputs
-									.getCoverage()).findFirst();
+					.filter(p -> {
+
+						double ratio = p.getAnalysisNode().getFiberCoverage()
+								.getDemand()
+								/ totalDemand;
+
+						System.out.println(ratio);
+
+						boolean predicate = !p.isEmpty()
+								&& (ratio >= optimizationInputs
+										.getCoverage());
+						return predicate;
+					}).findFirst();
 
 			if (model.isPresent()) {
 				WirecenterNetworkPlan plan = conversionService.convert(

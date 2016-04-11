@@ -112,12 +112,15 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		
 		public void add(AssignedEntityDemand assignedEntityDemand) {
 
-			for (LocationEntityType t : LocationEntityType.values()) {
-				demands.get(t).add(
-						assignedEntityDemand.getLocationDemand().getLocationDemand(t));
+			if( !locationEntities.contains(assignedEntityDemand) ) {
+			
+				for (LocationEntityType t : LocationEntityType.values()) {
+					demands.get(t).add(
+							assignedEntityDemand.getLocationDemand().getLocationDemand(t));
+				}
+	
+				locationEntities.add(assignedEntityDemand);
 			}
-
-			locationEntities.add(assignedEntityDemand);
 		}
 
 		private void add(LocationDemand locationDemand) {
@@ -131,13 +134,7 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			stats.forEach(this::add) ;
 		}
 
-		public void addLocations(AssignedEntityDemand assignedEntityDemand) {
-			for (LocationEntityType t : LocationEntityType.values()) {
-				demands.get(t).add(
-						assignedEntityDemand.getLocationDemand().getLocationDemand(t));
-			}
-			locationEntities.add(assignedEntityDemand);
-		}
+		
 
 		public void add(DemandCoverage dc) {
 			add(dc.getLocationDemand()) ;
