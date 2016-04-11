@@ -1,6 +1,7 @@
 package com.altvil.aro.service.planing.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -246,7 +247,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			Collection<OptimizedNetwork> optimizedPlans = planner
 					.getOptimizedPlans();
 
-			Optional<OptimizedNetwork> model = optimizedPlans
+			
+			
+			List<OptimizedNetwork> plans = optimizedPlans
 					.stream()
 					.filter(p -> {
 
@@ -260,7 +263,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 								&& (ratio >= optimizationInputs
 										.getCoverage());
 						return predicate;
-					}).findFirst();
+					}).collect(Collectors.toList());
+			
+			Collections.reverse(plans) ;
+			Optional<OptimizedNetwork> model = plans.stream().findFirst() ;
 
 			if (model.isPresent()) {
 				WirecenterNetworkPlan plan = conversionService.convert(
@@ -279,7 +285,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@Override
 		public double getPrice(DropCable dropCable) {
-			return 50;
+			return 0.5 * dropCable.getLength() ;
 		}
 
 		@Override
@@ -306,7 +312,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		@Override
 		public double getFiberCostPerMeter(FiberType fiberType,
 				int requiredFiberStrands) {
-			return 10;
+			return 4;
 		}
 
 	}

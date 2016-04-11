@@ -104,8 +104,7 @@ public class NetworkServiceImpl implements NetworkService {
 									.getLong(LoctationDemandMap.location_id),
 									LocationDemandFactory.FACTORY.create(
 											result.getDouble(LoctationDemandMap.household_fiber),
-											//result.getDouble(LoctationDemandMap.buesiness_fiber),
-											0,
+											result.getDouble(LoctationDemandMap.buesiness_fiber),
 											//result.getDouble(LoctationDemandMap.tower_fiber)));
 											0));
 						});
@@ -129,19 +128,13 @@ public class NetworkServiceImpl implements NetworkService {
 
 						Long locationId = result.getLong(LocationMap.id);
 						
-						LocationDemand ldm = LocationDemandFactory.FACTORY.create(
-								1,
-								//result.getDouble(LoctationDemandMap.buesiness_fiber),
-								0,
-								//result.getDouble(LoctationDemandMap.tower_fiber)));
-								0) ;
 						
-						
-//						LocationDemand ldm = demandMap.get(locationId);
-//						if (ldm == null || ldm.getDemand() == 0) {
-//							// No Demand no location mapped in for fiber Linking
-//							return null;
-//						}
+						LocationDemand ldm = demandMap.get(locationId);
+						if (ldm == null || ldm.getDemand() == 0) {
+							// No Demand no location mapped in for fiber Linking
+							return null;
+						}
+
 						AroEntity aroEntity = entityFactory
 								.createLocationEntity(locationId, ldm);
 
