@@ -158,7 +158,7 @@ public class FiberDagScanner {
 	private void writeBulkFiber(GeoSegment geoSegment,
 			Collection<DefaultAssignedEntityDemand> assigments) {
 
-		if (assigments.size() > 0 && false) {
+		if (assigments.size() > 0 ) {
 			this.feederSinkAssignments.addAll(assigments
 					.stream()
 					.map(aed -> new DefaultGraphMapping(
