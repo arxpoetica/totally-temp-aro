@@ -33,6 +33,7 @@ public class DefaultFiberAssignment implements FiberAssignment {
 
 	@Override
 	public double getCost(AnalysisContext ctx, int requiredFiberStrands) {
+		requiredFiberStrands = 5; // HARRY
 		return ctx.getPricingModel().getFiberCostPerMeter(fiberType, requiredFiberStrands)
 				* fiberLengthMeters;
 	}

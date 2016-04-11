@@ -109,7 +109,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		this.coverage = calcFiberCoverage(children);
 		double nodeCapex = calculateNodeCapex(requiredFiberStrands);
 		double childrenCapex = getChildren().stream().mapToDouble(GeneratingNode::getCapex).sum();
-		System.out.println("Capex " + nodeCapex + " => "+ (nodeCapex + childrenCapex) + " coverage = " + coverage.getDemand()) ;
+		System.out.println("Capex " + nodeCapex + " => "+ (nodeCapex + childrenCapex) + " coverage = " + coverage.getDemand() + " rfs = " + requiredFiberStrands) ;
 		
 		this.capex = nodeCapex + childrenCapex;
 
@@ -188,9 +188,9 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		}
 	}
 
-	protected double calculateNodeCapex(int requiredFiberStrands) {
-		return equipmentAssigment.getCost(ctx, requiredFiberStrands)
-				+ fiberAssignment.getCost(ctx, requiredFiberStrands);
+	protected double calculateNodeCapex(int fiberDemand) {
+		return equipmentAssigment.getCost(ctx, fiberDemand)
+				+ fiberAssignment.getCost(ctx, fiberDemand);
 	}
 
 

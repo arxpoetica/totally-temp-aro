@@ -19,9 +19,9 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 	}
 
 	@Override
-	public double getCost(AnalysisContext ctx, int requiredFiberStrands) {
+	public double getCost(AnalysisContext ctx, int fiberDemand) {
 
-		int roundedUpSplitters = ctx.getHubModel().computeNumberOfSplitters(requiredFiberStrands) ;
+		int roundedUpSplitters = ctx.getHubModel().computeNumberOfSplitters(fiberDemand) ;
 		
 		return ctx.getPricingModel().getMaterialCost(
 				MaterialType.FDH)
@@ -48,6 +48,9 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 	public int getRequiredIncomingFiberStrands(AnalysisContext ctx, int requiredOutgoingFiberStrands) {
 		int splitterRatio = ctx.getHubModel().getSplitterRatio();
 		int roundedUpSplitters = (int) Math.ceil(((double) requiredOutgoingFiberStrands) / splitterRatio);
+		roundedUpSplitters = 1; // HARRY
 		return roundedUpSplitters;
 	}
+	
+	
 }
