@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +63,7 @@ import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanService;
+import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.TreeMultimap;
 import com.google.inject.Inject;
@@ -68,6 +71,10 @@ import com.google.inject.Inject;
 @Service
 public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(NetworkAnalysisFactoryImpl.class.getName());
+
+	
 	private static FiberAssignment EMPTY_DIST = new DefaultFiberAssignment(
 			FiberType.DISTRIBUTION, Collections.emptyList());
 	
@@ -173,7 +180,9 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		@Override
 		public void visit(FDTEquipment node) {
 			
-			dump(node) ;
+			if( log.isTraceEnabled() ) {
+				dump(node) ;
+			}
 
 			nodeBuilder = parent.addChild(
 					new FdtAssignment(graphAssignment, node, StreamUtil.map(
