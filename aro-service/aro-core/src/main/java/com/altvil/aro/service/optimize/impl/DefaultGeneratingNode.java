@@ -122,10 +122,6 @@ public class DefaultGeneratingNode implements GeneratingNode {
 			acc.add(directCoverage);
 		}
 		
-		if( children.size() > 0 ) {
-			int x = 10 ;
-		}
-
         children.forEach(n -> acc.add(n.getFiberCoverage()));
 
 		return acc.getResult();
