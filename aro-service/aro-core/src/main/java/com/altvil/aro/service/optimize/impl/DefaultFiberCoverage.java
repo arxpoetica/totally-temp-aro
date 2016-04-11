@@ -134,11 +134,8 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			stats.forEach(this::add) ;
 		}
 
-		
-
 		public void add(DemandCoverage dc) {
-			add(dc.getLocationDemand()) ;
-			locationEntities.addAll(dc.getAssignedEntityDemands()) ;
+			dc.getAssignedEntityDemands().forEach(this::add);
 		}
 
 		public DemandCoverage getResult() {
