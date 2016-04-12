@@ -243,7 +243,6 @@
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('boundaries')" ng-click="map_tools.expand('boundaries')">
             <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
-          <!-- Panel header text set in above binding -->
         </div>
         <div class="panel-body" ng-show="map_tools.is_expanded('boundaries')">
           <div ng-show="number_of_area_layers() > 0 || boundaries.length > 0">
@@ -384,7 +383,6 @@
             <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
               <span style="color:white" class="fa fa-chevron-down"></span>
             </a>
-            <!-- Panel header text set in above binding -->
           </div>
           <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
             <h2>View</h2>
@@ -467,7 +465,6 @@
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_nodes')" ng-click="map_tools.expand('network_nodes')">
             <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
-          <!-- Panel header text set in above binding -->
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('network_nodes')">
@@ -541,7 +538,6 @@
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
             <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
-          <!-- Panel header text set in above binding -->
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('fiber_plant')">
@@ -592,7 +588,6 @@
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('search')" ng-click="map_tools.expand('search')">
             <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
-          <!-- Panel header text set in above binding -->
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('search')">
@@ -601,6 +596,39 @@
                 <input type="text" class="form-control" placeholder="Search a business">
               </div>
             </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div ng-controller="area-network-planning-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('area_network_planning')" class="map-tool panel panel-primary" id="area_network_planning_controller">
+        <div class="panel-heading" ng-bind="map_tools.get_tool_name('area_network_planning')">
+          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('area_network_planning')" ng-click="map_tools.collapse('area_network_planning')">
+            <span style="color:white" class="fa fa-chevron-up"></span>
+          </a>
+          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('area_network_planning')" ng-click="map_tools.expand('area_network_planning')">
+            <span style="color:white" class="fa fa-chevron-down"></span>
+          </a>
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('area_network_planning')">
+            <p><strong>Search or Click Geographies</strong></p>
+            <form>
+              <div class="form-group form-group-sm">
+                <input type="text" class="form-control" placeholder="Search a business">
+              </div>
+            </form>
+            <p><strong>Selected Geographies</strong></p>
+            <p><em>No geographies selected</em></p>
+            <nav>
+              <ul class="pager">
+                <li><a href="javascript:void(0)">1</a></li>
+                <li class="disabled"><a href="#">2</a></li>
+                <li class="disabled"><a href="#">3</a></li>
+                <li class="next"><a href="#">Next</a></li>
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
@@ -702,6 +730,7 @@
   <script src="javascripts/lib/controllers/selection_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
+  <script src="javascripts/lib/controllers/area_network_planning_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
