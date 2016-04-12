@@ -4,6 +4,6 @@ import com.altvil.aro.service.entity.FiberType;
 
 public interface FiberStrandConverter {
 	
-	int getFiberStrandCount(FiberType type, double fiberDemand) ;
+	double convertFiberCount(FiberType sourece, FiberType target, double fiberDemand) ;
 
 }

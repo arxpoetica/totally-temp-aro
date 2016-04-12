@@ -120,9 +120,10 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 		double childrenCapex = getChildren().stream()
 				.mapToDouble(GeneratingNode::getCapex).sum();
+		
 		System.out.println("Capex " + nodeCapex + " => "
 				+ (nodeCapex + childrenCapex) + " coverage = "
-				+ coverage.getDemand());
+				+ coverage.getDemand() + " fc=" + fiberProducer.getFiberCount());
 
 		this.capex = nodeCapex + childrenCapex;
 

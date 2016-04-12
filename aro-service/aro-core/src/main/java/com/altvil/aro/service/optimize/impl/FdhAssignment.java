@@ -40,7 +40,7 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 			FiberType fiberType, FiberConsumer fiberConsumer) {
 		int splitterCount = calculateSplitterCount(ctx, fiberConsumer) ;
 		int feederCount =  (int) Math.ceil(fiberConsumer.getCount(FiberType.FEEDER)) ;
-		return ctx.getFiberProdcuerConsumerFactory().createProducer(fiberType, splitterCount + feederCount);
+		return ctx.getFiberProducerConsumerFactory().createProducer(fiberType, splitterCount + feederCount);
 	}
 
 	public FDHEquipment getFdhEquipment() {
