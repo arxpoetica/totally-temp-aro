@@ -1,5 +1,10 @@
 package com.altvil.aro.service.optimize.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -7,14 +12,11 @@ import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage.Accumulator;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.optimize.model.EquipmentAssignment;
 import com.altvil.aro.service.optimize.model.FiberAssignment;
+import com.altvil.aro.service.optimize.model.FiberConsumer;
+import com.altvil.aro.service.optimize.model.FiberProducer;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class DefaultGeneratingNode implements GeneratingNode {
 
@@ -26,12 +28,10 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	private EquipmentAssignment equipmentAssigment;
 	private FiberAssignment fiberAssignment = null;
 	private double capex;
+	private FiberConsumer fiberConsumer;
+	private FiberProducer fiberProducer;
 	private List<GeneratingNode> children;
-	private int recalcMode = 0 ;
-	
-
-	private int requiredFiberStrands;
-
+	private int recalcMode = 0;
 
 	private DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment,
@@ -47,13 +47,19 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	}
 
+	@Override
+	public FiberProducer getFiberProducer() {
+		return fiberProducer;
+	}
+
+	@Override
+	public FiberConsumer getFiberConsumer() {
+		return fiberConsumer;
+	}
+
 	private DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment, DefaultGeneratingNode parent) {
-		this(ctx,
-				equipmentAssigment,
-				null,
-				parent,
-				new ArrayList<>());
+		this(ctx, equipmentAssigment, null, parent, new ArrayList<>());
 	}
 
 	public static Builder build(AnalysisContext ctx,
@@ -79,40 +85,46 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public void remove() {
-		/*if (getEquipmentAssignment().rebuildNetwork(this, ctx)) {
-			ctx.rebuildRequired(this);
-		} else {*/
+		/*
+		 * if (getEquipmentAssignment().rebuildNetwork(this, ctx)) {
+		 * ctx.rebuildRequired(this); } else {
+		 */
 		try {
-			recalcMode++ ;
-			 new ArrayList<>(children).forEach(GeneratingNode::remove);
+			recalcMode++;
+			new ArrayList<>(children).forEach(GeneratingNode::remove);
 			ctx.removeFromAnalysis(this);
 			if (parent != null) {
 				parent.removeChild(this);
 			}
 		} finally {
-			recalcMode-- ;
+			recalcMode--;
 		}
-		
+
 	}
 
 	private void _recalc() {
 		/*
-		add required fiber strands to this class
-				required fiber strands=
-		equipmentAssigment.getRequiredIncomingFiberStrands(sum(children required strands) + Math.ceil(direct coverage.getCoverage().getFiberDemand())
-				then change getCapex methods so they take required fiber strands instead of demand coverage
-*/
-		int childrenFiberStrandsRequirements = getChildren().stream().mapToInt(GeneratingNode::getRequiredFiberStrands).sum();
-		int directFiberDemand = (int) Math.ceil(directCoverage.getDemand());
-		this.requiredFiberStrands = equipmentAssigment.getRequiredIncomingFiberStrands(ctx, childrenFiberStrandsRequirements + directFiberDemand);
+		 * add required fiber strands to this class required fiber strands=
+		 * equipmentAssigment.getRequiredIncomingFiberStrands(sum(children
+		 * required strands) + Math.ceil(direct
+		 * coverage.getCoverage().getFiberDemand()) then change getCapex methods
+		 * so they take required fiber strands instead of demand coverage
+		 */
+		this.fiberConsumer = this.aggregateIncomingFiberStrands(directCoverage);
+		this.fiberProducer = this.equipmentAssigment.createFiberProducer(ctx,
+				this.getFiberAssignment().getFiberType(), fiberConsumer);
 
 		this.coverage = calcFiberCoverage(children);
-		double nodeCapex = calculateNodeCapex(requiredFiberStrands);
-		double childrenCapex = getChildren().stream().mapToDouble(GeneratingNode::getCapex).sum();
-		System.out.println("Capex " + nodeCapex + " => "+ (nodeCapex + childrenCapex) + " coverage = " + coverage.getDemand()) ;
-		
-		this.capex = nodeCapex + childrenCapex;
+		double nodeCapex = calculateNodeCapex(fiberConsumer, fiberProducer,
+				this.coverage);
 
+		double childrenCapex = getChildren().stream()
+				.mapToDouble(GeneratingNode::getCapex).sum();
+		System.out.println("Capex " + nodeCapex + " => "
+				+ (nodeCapex + childrenCapex) + " coverage = "
+				+ coverage.getDemand());
+
+		this.capex = nodeCapex + childrenCapex;
 
 	}
 
@@ -123,8 +135,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		if (directCoverage != null) {
 			acc.add(directCoverage);
 		}
-		
-        children.forEach(n -> acc.add(n.getFiberCoverage()));
+
+		children.forEach(n -> acc.add(n.getFiberCoverage()));
 
 		return acc.getResult();
 
@@ -135,18 +147,17 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		children.add(newNode);
 		recalc();
 	}
-	
-	
+
 	private boolean isRecalcMode() {
-		return recalcMode == 0 ;
+		return recalcMode == 0;
 	}
 
 	public void recalc() {
 
-		if( !isRecalcMode() ) {
-			return ;
+		if (!isRecalcMode()) {
+			return;
 		}
-		
+
 		boolean removed = false;
 
 		ctx.changing_start(this);
@@ -157,16 +168,15 @@ public class DefaultGeneratingNode implements GeneratingNode {
 				removed = true;
 			} else if (this.getChildren().size() == 1) {
 				/*
-				GeneratingNode childNode = children.get(0);
-
-				ctx.changing_start(childNode);
-				GeneratingNode newNode = childNode.relink(parent,
-						fiberAssignment);
-				this.parent.replace(this, newNode);
-				ctx.changing_end(newNode);
-
-				removed = true;
-				*/
+				 * GeneratingNode childNode = children.get(0);
+				 * 
+				 * ctx.changing_start(childNode); GeneratingNode newNode =
+				 * childNode.relink(parent, fiberAssignment);
+				 * this.parent.replace(this, newNode);
+				 * ctx.changing_end(newNode);
+				 * 
+				 * removed = true;
+				 */
 			}
 		}
 
@@ -188,11 +198,29 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		}
 	}
 
-	protected double calculateNodeCapex(int requiredFiberStrands) {
-		return equipmentAssigment.getCost(ctx, requiredFiberStrands)
-				+ fiberAssignment.getCost(ctx, requiredFiberStrands);
+	protected FiberConsumer aggregateIncomingFiberStrands(
+			DemandCoverage directCoverage) {
+
+		DefaultFiberConsumer.Builder b = DefaultFiberConsumer.build();
+
+		children.forEach(c -> {
+			b.add(c.getFiberProducer());
+		});
+
+		b.add(fiberAssignment.getFiberType(), directCoverage
+				.getRequiredFiberStrands(fiberAssignment.getFiberType()));
+
+		return b.build();
+
 	}
 
+	protected double calculateNodeCapex(FiberConsumer consumer,
+			FiberProducer producer, DemandCoverage coverage) {
+		return equipmentAssigment.getCost(ctx, this.fiberConsumer,
+				this.fiberProducer, coverage)
+				+ fiberAssignment.getCost(ctx, this.fiberConsumer,
+						this.fiberProducer, coverage);
+	}
 
 	private void _addChild(GeneratingNode child) {
 		this.children.add(child);
@@ -200,7 +228,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public double getScore() {
-		return ctx.getScoringStrategy().score(this) ;
+		return ctx.getScoringStrategy().score(this);
 	}
 
 	@Override
@@ -228,10 +256,10 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		return 0;
 	}
 
-    @Override
-    public int compareTo(GeneratingNode o) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public int compareTo(GeneratingNode o) {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public NetworkAnalysis getNetworkAnalysis() {
@@ -261,11 +289,6 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		return junctionNode;
 	}
 
-	@Override
-	public int getRequiredFiberStrands() {
-		return requiredFiberStrands;
-	}
-
 	public static class BuilderImpl implements Builder {
 
 		private DefaultGeneratingNode node;
@@ -275,14 +298,11 @@ public class DefaultGeneratingNode implements GeneratingNode {
 			this.node = node;
 		}
 
-
-        @Override
-        public Builder setJunctionNode(boolean junctionNode) {
-            node.junctionNode = junctionNode;
-            return this;
-        }
-
-
+		@Override
+		public Builder setJunctionNode(boolean junctionNode) {
+			node.junctionNode = junctionNode;
+			return this;
+		}
 
 		@Override
 		public Builder setFiber(FiberAssignment fiber) {
