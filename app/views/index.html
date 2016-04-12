@@ -215,15 +215,6 @@
                 ng-click="setSelectedTool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
             </p>
           </div>
-
-          <% if (config.route_planning.length > 0) { %>
-          <p>
-            <a class="btn btn-sm btn-default btn-block"
-              ng-class="{'btn-success active': network_planning.getAlgorithm()}"
-              data-toggle="popover" id="network_planning_selector"><span class="fa fa-exchange"></span>
-            </a>
-          </p>
-          <% } %>
         </div>
 
       </div>
@@ -711,7 +702,6 @@
   <script src="javascripts/lib/controllers/selection_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
-  <script src="javascripts/lib/controllers/network_planning_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
