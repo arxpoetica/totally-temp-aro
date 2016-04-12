@@ -397,3 +397,7 @@ footer nav {
 .popover {
   width: 250px;
 }
+
+.nopadding {
+  padding: 0;
+}
