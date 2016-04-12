@@ -8,6 +8,8 @@ import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
+import com.altvil.aro.service.optimize.model.FiberConsumer;
+import com.altvil.aro.service.optimize.model.FiberProducer;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.serialize.ModelSerializer;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
@@ -33,13 +35,19 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 	}
 
 	@Override
-	public double getCost(AnalysisContext ctx, int fiberRequiredStrands) {
-		
-		double dropCableCosts = fdtEquipment.getDropCableSummary().getCounts()
-		.stream()
-		.mapToDouble(s -> ctx.getPricingModel().getPrice(s.getDropCable()) * s.getCount()).sum() ;
-		
-		return dropCableCosts + ctx.getPricingModel().getMaterialCost(MaterialType.FDT);
+	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer,
+			FiberProducer fiberProducer, DemandCoverage coverage) {
+		double dropCableCosts = fdtEquipment
+				.getDropCableSummary()
+				.getCounts()
+				.stream()
+				.mapToDouble(
+						s -> ctx.getPricingModel().getPrice(s.getDropCable())
+								* s.getCount()).sum();
+
+		return dropCableCosts
+				+ ctx.getPricingModel().getMaterialCost(MaterialType.FDT);
+
 	}
 
 	public FDTEquipment getFdtEquipment() {
@@ -49,20 +57,23 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 	public Collection<GraphEdgeAssignment> getAssignedLocations() {
 		return locations;
 	}
-	
 
 	@Override
-	public GraphMapping serialize(GeneratingNode node, ModelSerializer serializer) {
-		return serializer.serialize(node, this) ;
+	public GraphMapping serialize(GeneratingNode node,
+			ModelSerializer serializer) {
+		return serializer.serialize(node, this);
 	}
 
 	@Override
 	public DemandCoverage getDirectCoverage(AnalysisContext ctx) {
-		DefaultFiberCoverage.Accumulator accumlator = DefaultFiberCoverage.accumulate() ;
+		DefaultFiberCoverage.Accumulator accumlator = DefaultFiberCoverage
+				.accumulate();
 		locations.forEach(l -> {
-			LocationDropAssignment lda = (LocationDropAssignment) l.getAroEntity() ;
-			accumlator.add(lda.getAssignedEntityDemand()) ;
+			LocationDropAssignment lda = (LocationDropAssignment) l
+					.getAroEntity();
+			accumlator.add(lda.getAssignedEntityDemand());
 		});
-		return accumlator.getResult() ;
-	}
+		return accumlator.getResult();
+	}	
+
 }

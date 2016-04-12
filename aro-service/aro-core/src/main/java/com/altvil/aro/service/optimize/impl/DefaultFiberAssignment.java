@@ -3,7 +3,10 @@ package com.altvil.aro.service.optimize.impl;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.optimize.model.FiberAssignment;
+import com.altvil.aro.service.optimize.model.FiberConsumer;
+import com.altvil.aro.service.optimize.model.FiberProducer;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
 
 import java.util.Collection;
@@ -32,8 +35,9 @@ public class DefaultFiberAssignment implements FiberAssignment {
 	}
 
 	@Override
-	public double getCost(AnalysisContext ctx, int requiredFiberStrands) {
-		return ctx.getPricingModel().getFiberCostPerMeter(fiberType, requiredFiberStrands)
+	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer,
+			FiberProducer fiberProducer, DemandCoverage coverage) {
+		return ctx.getPricingModel().getFiberCostPerMeter(fiberType, fiberProducer.getFiberCount())
 				* fiberLengthMeters;
 	}
 
