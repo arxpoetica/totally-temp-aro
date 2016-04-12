@@ -18,7 +18,7 @@ do
 
 	# Download all edges
 	cd $GISROOT;
-	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/TABBLOCK/tl_2014_${STATE_FIPS_ARRAY[$STATE]}* --accept=zip --reject=html -nd -nc
+	wget ftp://mirror1.shellbot.com/census/geo/tiger/TIGER2014/TABBLOCK/tl_2014_${STATE_FIPS_ARRAY[$STATE]}* --accept=zip --reject=html -nd -nc
 	# Uncompress all zipfiles
 	for z in tl_*_${STATE_FIPS_ARRAY[$STATE]}*_tabblock10.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
 	for z in */tl_*_${STATE_FIPS_ARRAY[$STATE]}*_tabblock10.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done  #unsure what, if anything, this does
