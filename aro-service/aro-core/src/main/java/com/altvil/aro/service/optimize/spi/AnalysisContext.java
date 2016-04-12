@@ -9,6 +9,7 @@ import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.HubModel;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.PricingModel;
+import com.altvil.aro.service.optimize.impl.FiberProducerConsumerFactory;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode.Builder;
 import com.altvil.aro.service.plan.NetworkModel;
@@ -16,6 +17,10 @@ import com.altvil.aro.service.plan.NetworkModel;
 public interface AnalysisContext {
 
 	HubModel getHubModel();
+	
+	FiberProducerConsumerFactory getFiberProducerConsumerFactory() ;
+	
+	FiberStrandConverter getFiberStrandConverter() ;
 
 	PricingModel getPricingModel();
 

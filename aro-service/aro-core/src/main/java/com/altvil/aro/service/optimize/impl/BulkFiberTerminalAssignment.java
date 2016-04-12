@@ -5,6 +5,8 @@ import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
+import com.altvil.aro.service.optimize.model.FiberConsumer;
+import com.altvil.aro.service.optimize.model.FiberProducer;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.serialize.ModelSerializer;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
@@ -22,14 +24,18 @@ public class BulkFiberTerminalAssignment extends AbstractEquipmentAssignment {
 	public BulkFiberTerminalAssignment(GraphMapping m) {
 		this(m.getGraphAssignment(), (BulkFiberTerminal) m.getAroEntity());
 	}
+	
+	
 
 	@Override
-	public double getCost(AnalysisContext ctx, int fiberRequiredStrands) {
-		
+	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer,
+			FiberProducer fiberProducer, DemandCoverage coverage) {
 		ctx.getPricingModel().getMaterialCost(MaterialType.BFT) ;
 		return ctx.getPricingModel().getMaterialCost(MaterialType.BFT) ;
+
 	}
 
+	
 	public BulkFiberTerminal getBftEquipment() {
 		return bftEquipment;
 	}
@@ -40,6 +46,8 @@ public class BulkFiberTerminalAssignment extends AbstractEquipmentAssignment {
 		//return serializer.serialize(node, this) ;
 		return null ;
 	}
+	
+
 
 	@Override
 	public DemandCoverage getDirectCoverage(AnalysisContext ctx) {

@@ -4,6 +4,6 @@ import com.altvil.aro.service.optimize.spi.AnalysisContext;
 
 public interface MaterialAssigment {
 
-	public double getCost(AnalysisContext ctx, int requiredFiberStrands);
+	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer, FiberProducer fiberProducer,  DemandCoverage coverage);
 
 }

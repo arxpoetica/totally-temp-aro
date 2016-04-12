@@ -43,6 +43,7 @@ import com.altvil.aro.service.optimize.impl.DefaultFiberAssignment;
 import com.altvil.aro.service.optimize.impl.DefaultGeneratingNode;
 import com.altvil.aro.service.optimize.impl.FdhAssignment;
 import com.altvil.aro.service.optimize.impl.FdtAssignment;
+import com.altvil.aro.service.optimize.impl.FiberProducerConsumerFactory;
 import com.altvil.aro.service.optimize.impl.GeneratingNodeAssembler;
 import com.altvil.aro.service.optimize.impl.GeneratingNodeComparator;
 import com.altvil.aro.service.optimize.impl.NoEquipment;
@@ -56,6 +57,7 @@ import com.altvil.aro.service.optimize.model.FiberAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode.Builder;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
+import com.altvil.aro.service.optimize.spi.FiberStrandConverter;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysisFactory;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
@@ -63,7 +65,6 @@ import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanService;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.TreeMultimap;
 import com.google.inject.Inject;
@@ -238,6 +239,20 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			init();
 		}
 		
+
+		
+		
+		@Override
+		public FiberProducerConsumerFactory getFiberProducerConsumerFactory() {
+			return FiberProducerConsumerFactory.FACTORY ;
+		}
+
+
+		@Override
+		public FiberStrandConverter getFiberStrandConverter() {
+			return FiberStrandConverterImpl.CONVERTER ;
+		}
+
 
 		@Override
 		public ScoringStrategy getScoringStrategy() {
