@@ -1,4 +1,4 @@
-/* global app */
+/* global app swal */
 // Search Controller
 app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
   // Controller instance variables
@@ -24,5 +24,21 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.toggleAdvancedSettings = () => {
     $scope.advancedSettings = !$scope.advancedSettings
+  }
+
+  $scope.cancel = () => {
+    swal({
+      title: 'Are you sure?',
+      text: 'Are you sure you want to cancel?',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, cancel it',
+      cancelButtonText: 'Keep Going',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, () => {
+      $scope.back()
+      $scope.$apply()
+    })
   }
 }])
