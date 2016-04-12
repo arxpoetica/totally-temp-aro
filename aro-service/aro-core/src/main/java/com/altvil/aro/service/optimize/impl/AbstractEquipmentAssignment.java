@@ -50,10 +50,16 @@ public abstract class AbstractEquipmentAssignment implements
 	public FiberProducer createFiberProducer(AnalysisContext ctx,
 			FiberType fiberType, FiberConsumer fiberConsumer) {
 
-		if (fiberConsumer.getFiberTypes().contains(fiberType)
-				&& fiberConsumer.getFiberTypes().size() == 1) {
-			ctx.getFiberProdcuerConsumerFactory().createProducer(fiberType, (int) Math.ceil(fiberConsumer.getCount(fiberType))) ;
+		if( fiberConsumer.getFiberTypes().size() == 0 ) {
+			return ctx.getFiberProducerConsumerFactory().createProducer(fiberType, 0) ;
 		}
+		
+		if( fiberConsumer.getFiberTypes().size() == 1 ) {
+			FiberType sourceType = fiberConsumer.getFiberTypes().iterator().next() ;
+			int fiberCount = (int) Math.ceil(ctx.getFiberStrandConverter().convertFiberCount(sourceType, fiberType, fiberConsumer.getCount(sourceType))) ;
+			return ctx.getFiberProducerConsumerFactory().createProducer(fiberType, fiberCount) ;
+		}
+		
 
 		throw new AroException("Unable to unify incoming Fiber " + fiberConsumer.getFiberTypes());
 

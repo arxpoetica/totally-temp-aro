@@ -57,6 +57,7 @@ import com.altvil.aro.service.optimize.model.FiberAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode.Builder;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
+import com.altvil.aro.service.optimize.spi.FiberStrandConverter;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysisFactory;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
@@ -242,11 +243,15 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		
 		
 		@Override
-		public FiberProducerConsumerFactory getFiberProdcuerConsumerFactory() {
+		public FiberProducerConsumerFactory getFiberProducerConsumerFactory() {
 			return FiberProducerConsumerFactory.FACTORY ;
 		}
 
 
+		@Override
+		public FiberStrandConverter getFiberStrandConverter() {
+			return FiberStrandConverterImpl.CONVERTER ;
+		}
 
 
 		@Override

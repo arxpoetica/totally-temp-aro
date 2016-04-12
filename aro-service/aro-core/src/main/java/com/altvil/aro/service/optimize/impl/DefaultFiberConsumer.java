@@ -20,6 +20,12 @@ public class DefaultFiberConsumer implements FiberConsumer {
 	public static class Builder {
 		private EnumMap<FiberType, DoubleSummer> map = new EnumMap<>(FiberType.class) ;
 		
+		private Builder() {
+			for(FiberType ft : FiberType.values()) {
+				map.put(ft, new DoubleSummer()) ;
+			}
+		}
+		
 		public Builder add(FiberType fiberType, double count) {
 			map.get(fiberType).add(count) ;
 			return this ;
@@ -35,7 +41,7 @@ public class DefaultFiberConsumer implements FiberConsumer {
 		}
 		
 		private Set<FiberType> computeFiberTypes() {
-			EnumSet<FiberType> set =  EnumSet.copyOf(Collections.emptySet()) ;
+			EnumSet<FiberType> set =  EnumSet.noneOf(FiberType.class) ;
 			for(FiberType ft : FiberType.values()) {
 				if( map.get(ft).get() > 0 ) {
 					set.add(ft) ;

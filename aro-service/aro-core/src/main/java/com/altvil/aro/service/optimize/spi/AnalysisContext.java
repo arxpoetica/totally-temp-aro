@@ -18,7 +18,9 @@ public interface AnalysisContext {
 
 	HubModel getHubModel();
 	
-	FiberProducerConsumerFactory getFiberProdcuerConsumerFactory() ;
+	FiberProducerConsumerFactory getFiberProducerConsumerFactory() ;
+	
+	FiberStrandConverter getFiberStrandConverter() ;
 
 	PricingModel getPricingModel();
 
