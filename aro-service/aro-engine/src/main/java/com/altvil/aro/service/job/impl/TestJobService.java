@@ -2,6 +2,7 @@ package com.altvil.aro.service.job.impl;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -20,14 +21,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/EngineTest-context.xml"})
 public class TestJobService {
 	static ExecutorService executorService;
 	
-	@Autowired
-	JobService js;
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		executorService = Executors.newFixedThreadPool(2);
@@ -38,49 +37,16 @@ public class TestJobService {
 		executorService.shutdownNow();
 	}
 
-	@Test
-	public void testGetRemainingJobs() {
-		assertTrue(js.getRemainingJobs().isEmpty());
-
-		js.submit(new TestRunnable(1000));
-
-		assertEquals(1, js.getRemainingJobs().size());
-
-		js.submit(new TestRunnable(2000));
-
-		assertEquals(2, js.getRemainingJobs().size());
-
-		wait(js);
-	}
-
-	private void wait(JobService js) {
-		js.getRemainingJobs().stream().forEach((j) -> {
-			try {
-				j.get();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		});
-	}
-
-	@Test
-	public void testSubmitCallableOfTExecutorService() throws InterruptedException, ExecutionException {
-		final int result = 5;
-		final int duration = 1000;
-		Job<Integer> job = js.submit(new TestCallable<Integer>(duration, result), executorService);
-
-		assertEquals(result, job.get().intValue());
-
-		successfulJobChecks(duration, null, job);
-		
-		wait(js);
-	}
+	@Autowired
+	JobService js;
 
 	private void successfulJobChecks(final int duration, Map<String, Object> meta, Job<?> job) {
-		assertNotNull(job.getScheduledTime());
-		assertNotNull(job.getStartedTime());
+		final Date scheduledTime = job.getScheduledTime();
+		final Date startedTime = job.getStartedTime();
+		assertNotNull(scheduledTime);
+		assertNotNull(startedTime);
 		assertNotNull(job.getCompletedTime());
-		assertTrue(job.getScheduledTime().before(job.getStartedTime()));
+		assertTrue(scheduledTime.compareTo(startedTime) <= 0);
 		long executionTime = job.getCompletedTime().getTime() - job.getStartedTime().getTime();
 		assertTrue(duration - 20 < executionTime && executionTime < duration + 20);
 
@@ -96,18 +62,17 @@ public class TestJobService {
 	}
 
 	@Test
-	public void testSubmitMapOfStringObjectRunnableTExecutorService() throws InterruptedException, ExecutionException {
-		final int result = 5;
-		final int duration = 1000;
-		final Map<String, Object> meta = new HashMap<>();
-		meta.put("key1", 15);
+	public void testGetRemainingJobs() {
+		assertTrue(js.getRemainingJobs().isEmpty());
 
-		Job<Integer> job = js.submit(meta, new TestCallable<Integer>(duration, result), executorService);
+		js.submit(new JobService.Builder<Void>().setCallable(new TestCallable<>(1000)));
 
-		assertEquals(result, job.get().intValue());
+		assertEquals(1, js.getRemainingJobs().size());
 
-		successfulJobChecks(duration, meta, job);
-		
+		js.submit(new JobService.Builder<Void>().setCallable(new TestCallable<>(2000)));
+
+		assertEquals(2, js.getRemainingJobs().size());
+
 		wait(js);
 	}
 
@@ -115,7 +80,7 @@ public class TestJobService {
 	public void testSubmitCallableOfT() throws InterruptedException, ExecutionException {
 		final int result = 5;
 		final int duration = 1000;
-		Job<Integer> job = js.submit(new TestCallable<Integer>(duration, result));
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>().setCallable(new TestCallable<>(duration, result)));
 
 		assertEquals(result, job.get().intValue());
 
@@ -125,71 +90,64 @@ public class TestJobService {
 	}
 
 	@Test
-	public void testSubmitMapOfStringObjectRunnable() throws InterruptedException, ExecutionException {
+	public void testSubmitCallableOfTExecutorService() throws InterruptedException, ExecutionException {
+		final int result = 5;
+		final int duration = 1000;
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>().setCallable(new TestCallable<>(duration, result)).setExecutorService(executorService));
+
+		assertEquals(result, job.get().intValue());
+
+		successfulJobChecks(duration, null, job);
+		
+		wait(js);
+	}
+
+	@Test
+	public void testSubmitMapOfStringObjectCallableOfTExecutorService() throws InterruptedException, ExecutionException {
+		final int result = 5;
 		final int duration = 1000;
 		final Map<String, Object> meta = new HashMap<>();
-		meta.put("key2", 30);
+		meta.put("key1", 15);
 
-		Job<?> job = js.submit(meta, new TestRunnable(duration), executorService);
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>().setCallable(new TestCallable<>(duration, result)).setMetaIdentifiers(meta).setExecutorService(executorService));
 
-		assertNull(job.get());
+		assertEquals(result, job.get().intValue());
 
 		successfulJobChecks(duration, meta, job);
 		
 		wait(js);
 	}
 
+	private void wait(JobService js) {
+		js.getRemainingJobs().stream().forEach((j) -> {
+			try {
+				j.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
 }
 
-class TestTask<T> {
+class TestCallable<T> implements Callable<T> {
 	long	delay;
 	boolean	fail;
 	T		result;
 
-	public TestTask(long delay, T result) {
+	public TestCallable(long delay) {
+		this.delay = delay;
+		this.fail = true;
+	}
+
+	public TestCallable(long delay, T result) {
 		this.delay = delay;
 		this.fail = false;
 		this.result = result;
 	}
 
-	public TestTask(long delay) {
-		this.delay = delay;
-		this.fail = true;
-	}
-
-	T doit() throws InterruptedException {
-		Thread.sleep(delay);
-		return null;
-	}
-}
-
-class TestCallable<T> extends TestTask<T> implements Callable<T> {
-	public TestCallable(long delay) {
-		super(delay);
-	}
-
-	public TestCallable(long delay, T result) {
-		super(delay, result);
-	}
-
 	@Override
 	public T call() throws Exception {
-		return doit();
-	}
-}
-
-class TestRunnable extends TestTask<Void> implements Runnable {
-	public TestRunnable(long delay) {
-		super(delay);
-	}
-
-	@Override
-	public void run() {
-		try {
-			doit();
-		} catch (InterruptedException e) {
-		}
-
-		return;
+		Thread.sleep(delay);
+		return result;
 	}
 }

@@ -18,7 +18,7 @@ import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.InputRequests;
-import com.altvil.aro.service.planing.MasterPlanCalculation$;
+import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
@@ -43,10 +43,9 @@ public class RecalcEndpoint {
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(
 			@RequestBody FiberPlanRequest request) {
 
-		MasterPlanCalculation$ mpc = networkPlanningService.planMasterFiber$(jobService,
-				request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
 
-		Job<MasterPlanUpdate> job = mpc.getJob();
+		Job<MasterPlanUpdate> job = jobService.submit(mpc);
 		
 		//Block until complete (Temporary until the UI can handle async responses)
 		try {
@@ -68,7 +67,7 @@ public class RecalcEndpoint {
 			throws InterruptedException, ExecutionException {
 
 		Job<FiberPlanResponse> job = jobService
-				.submit(() -> {
+				.submit(new JobService.Builder<FiberPlanResponse>().setCallable(() -> {
 
 					FiberNetworkConstraints constraints = fiberPlanRequest
 							.getFiberNetworkConstraints() == null ? new FiberNetworkConstraints()
@@ -86,7 +85,7 @@ public class RecalcEndpoint {
 					response.setNewEquipmentCount(plan.getNetworkNodes().size());
 
 					return response;
-				}, executorService);
+				}).setExecutorService(executorService));
 		
 		return job;
 	}

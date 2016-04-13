@@ -1,18 +1,14 @@
 package com.altvil.aro.service.job.impl;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -93,6 +89,20 @@ public class JobServiceImpl implements JobService {
 		private  Date startedTime;
 		private Date	   completedTime;
 
+		JobAdapter(Builder<T> builder) {
+			id = new JobIdImpl(builder.getMetaIdentifiers());
+			this.task = builder.getCallable();
+			scheduledTime = new Date();
+			startedTime = null;
+			completedTime = null;
+			
+			if (builder.getExecutorService() == null) {
+				future = defaultService.submit(this);
+			} else {
+			future = builder.getExecutorService().submit(this);
+			}
+		}
+
 		JobAdapter(Map<String, Object> meta, Callable<T> task, ExecutorService executorService) {
 			id = new JobIdImpl(meta);
 			this.task = task;
@@ -162,8 +172,8 @@ public class JobServiceImpl implements JobService {
 	
 
 	@Override
-	public <T> Job<T> submit(Map<String, Object> metaId, Callable<T> task, ExecutorService executorService) {
-		JobAdapter<T> newJob = new JobAdapter<T>(metaId, task, executorService);
+	public <T> Job<T> submit(Builder<T> builder) {
+		JobAdapter<T> newJob = new JobAdapter<T>(builder);
 		
 		map.put(newJob.getId(), newJob);
 
@@ -172,99 +182,76 @@ public class JobServiceImpl implements JobService {
 		return newJob;
 	}
 
-	@Override
-	public <T> Job<T> submit(Map<String, Object> metaId, Callable<T> task) {
-		JobAdapter<T> newJob = new JobAdapter<T>(metaId, task);
-		
-		map.put(newJob.getId(), newJob);
+//	@Override
+//	public <T> Job<T> submit(Map<String, Object> metaId, Callable<T> task, ExecutorService executorService) {
+//		JobAdapter<T> newJob = new JobAdapter<T>(metaId, task, executorService);
+//		
+//		map.put(newJob.getId(), newJob);
+//
+//		LOG.trace("{} added to service", newJob);
+//		
+//		return newJob;
+//	}
+//
+//	@Override
+//	public <T> Job<T> submit(Map<String, Object> metaId, Callable<T> task) {
+//		JobAdapter<T> newJob = new JobAdapter<T>(metaId, task);
+//		
+//		map.put(newJob.getId(), newJob);
+//
+//		LOG.trace("{} added to service", newJob);
+//		
+//		return newJob;
+//	}
 
-		LOG.trace("{} added to service", newJob);
-		
-		return newJob;
-	}
+//	@Override
+//	public <T> Job<T> submit(Callable<T> task, ExecutorService executorService) {
+//		return submit((Map<String, Object>) null, task, executorService);
+//	}
+//
+//	@Override
+//	public <T> Job<T> submit(Map<String, Object> metaId, Runnable task, T result, ExecutorService executorService) {
+//		return submit((Map<String, Object>) metaId, () -> {task.run(); return result;}, executorService);
+//	}
+//
+//	@Override
+//	public Job<?> submit(Map<String, Object> metaId, Runnable task, ExecutorService executorService) {
+//		return submit(metaId, task, (Void) null, executorService);
+//	}
+//
+//	@Override
+//	public <T> Job<T> submit(Runnable task, T result, ExecutorService executorService) {
+//		return submit((Map<String, Object>)null, task, result, executorService);
+//	}
+//
+//	@Override
+//	public Job<?> submit(Runnable task, ExecutorService executorService) {
+//		return submit((Map<String, Object>)null, task, (Void) null, executorService);
+//	}
+//
+//	@Override
+//	public <T> Job<T> submit(Callable<T> task) {
+//		return submit((Map<String, Object>) null, task);
+//	}
 
-	@Override
-	public <T> Job<T> submit(Callable<T> task, ExecutorService executorService) {
-		return submit((Map<String, Object>) null, task, executorService);
-	}
+//	@Override
+//	public <T> Job<T> submit(Map<String, Object> metaId, Runnable task, T result) {
+//		return submit((Map<String, Object>) null, () -> {task.run(); return result;});
+//	}
+//
+//	@Override
+//	public Job<?> submit(Map<String, Object> metaId, Runnable task) {
+//		return submit(metaId, task, (Void) null);
+//	}
+//
+//	@Override
+//	public <T> Job<T> submit(Runnable task, T result) {
+//		return submit((Map<String, Object>)null, task, result);
+//	}
+//
+//	@Override
+//	public Job<?> submit(Runnable task) {
+//		return submit((Map<String, Object>)null, task, (Void) null);
+//	}
 
-	@Override
-	public <T> Job<T> submit(Map<String, Object> metaId, Runnable task, T result, ExecutorService executorService) {
-		return submit((Map<String, Object>) null, () -> {task.run(); return result;}, executorService);
-	}
-
-	@Override
-	public Job<?> submit(Map<String, Object> metaId, Runnable task, ExecutorService executorService) {
-		return submit(metaId, task, (Void) null, executorService);
-	}
-
-	@Override
-	public <T> Job<T> submit(Runnable task, T result, ExecutorService executorService) {
-		return submit((Map<String, Object>)null, task, result, executorService);
-	}
-
-	@Override
-	public Job<?> submit(Runnable task, ExecutorService executorService) {
-		return submit((Map<String, Object>)null, task, (Void) null, executorService);
-	}
-
-	@Override
-	public <T> Job<T> submit(Callable<T> task) {
-		return submit((Map<String, Object>) null, task);
-	}
-
-	@Override
-	public <T> Job<T> submit(Map<String, Object> metaId, Runnable task, T result) {
-		return submit((Map<String, Object>) null, () -> {task.run(); return result;});
-	}
-
-	@Override
-	public Job<?> submit(Map<String, Object> metaId, Runnable task) {
-		return submit(metaId, task, (Void) null);
-	}
-
-	@Override
-	public <T> Job<T> submit(Runnable task, T result) {
-		return submit((Map<String, Object>)null, task, result);
-	}
-
-	@Override
-	public Job<?> submit(Runnable task) {
-		return submit((Map<String, Object>)null, task, (Void) null);
-	}
-
-	public static void main(String[] argv) {
-		ExecutorService executorService = Executors.newFixedThreadPool(2);
-		JobService js = new JobServiceImpl();
-		List<Job<?>> jobs = new ArrayList<>();
-		
-		for(int i = 0; i < 10; i++)  {
-			final long delay = 1500 + 100 * (i % 3);
-			jobs.add((Job<?>) js.submit(() -> {
-				try {
-					Thread.sleep(delay);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}, executorService));
-		}
-		
-		System.out.println("Active thread count should be 3 (main thread + 2 in the executor service).  Actual count is " + Thread.activeCount());
-		
-		DateFormat df = new SimpleDateFormat("kkmmss");		
-		// Display job stats in reverse order.  Ensures that stats are independent of the code calling Future.get().
-		for(int i = jobs.size(); i > 0;) {
-			final Job<?> job = jobs.get(--i);
-			
-			try {
-				job.get();
-			} catch (InterruptedException | ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			long duration = job.getCompletedTime().getTime() - job.getStartedTime().getTime();
-			System.out.println("Job#" + job.getId() + "; started = " + df.format(job.getStartedTime()) + " ; duration = " + duration);
-		}
-	}
 }

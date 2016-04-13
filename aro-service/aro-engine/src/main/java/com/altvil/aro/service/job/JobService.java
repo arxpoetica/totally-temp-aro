@@ -16,17 +16,36 @@ public interface JobService {
 	<T> Job<T> get(Id id);
 	Collection<Job<?>> getRemainingJobs();
 	
-    <T> Job<T> submit(Callable<T> task);
-    <T> Job<T> submit(Callable<T> task, ExecutorService executorService);
-    <T> Job<T> submit(Map<String, Object>metaId, Callable<T> task);
-    <T> Job<T> submit(Map<String, Object>metaId, Callable<T> task, ExecutorService executorService);
-    Job<?> submit(Map<String, Object>metaId, Runnable task);
-    Job<?> submit(Map<String, Object>metaId, Runnable task, ExecutorService executorService);
-	
-    <T> Job<T> submit(Map<String, Object>metaId, Runnable task, T result);
-    <T> Job<T> submit(Map<String, Object>metaId, Runnable task, T result, ExecutorService executorService);
-    Job<?> submit(Runnable task);
-    Job<?> submit(Runnable task, ExecutorService executorService);
-    <T> Job<T> submit(Runnable task, T result);
-    <T> Job<T> submit(Runnable task, T result, ExecutorService executorService);
+    <T> Job<T> submit(Builder<T> builder);
+    
+    class Builder<T> {
+    	private ExecutorService executorService;
+    	private Callable<T> callable;
+    	private Map<String, Object> metaIdentifiers;
+    	
+		public ExecutorService getExecutorService() {
+			return executorService;
+		}
+		public Builder<T> setExecutorService(ExecutorService executorService) {
+			this.executorService = executorService;
+			
+			return this;
+		}
+		public Callable<T> getCallable() {
+			return callable;
+		}
+		public Builder<T> setCallable(Callable<T> callable) {
+			this.callable = callable;
+			
+			return this;
+		}
+		public Map<String, Object> getMetaIdentifiers() {
+			return metaIdentifiers;
+		}
+		public Builder<T> setMetaIdentifiers(Map<String, Object> metaIdentifiers) {
+			this.metaIdentifiers = metaIdentifiers;
+			
+			return this;
+		}
+    }
 }
