@@ -27,6 +27,8 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.job.Job;
+import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
@@ -39,6 +41,7 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.InputRequests;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanCalculation;
+import com.altvil.aro.service.planing.MasterPlanCalculation$;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.OptimizationInputs;
@@ -93,6 +96,16 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				NetworkRequest.create(planId,
 						NetworkRequest.LocationLoadingRequest.ALL),
 				optimizationInputs, constraints));
+	}
+
+	@Override
+	public Job<WirecenterNetworkPlan> optimizeWirecenter$(JobService jobService, long planId,
+			InputRequests inputRequests, OptimizationInputs optimizationInputs,
+			FiberNetworkConstraints constraints) {
+		return jobService.submit(createOptimzedCallable(
+				NetworkRequest.create(planId,
+						NetworkRequest.LocationLoadingRequest.ALL),
+				optimizationInputs, constraints), this.wirePlanExecutor);
 	}
 
 	@Override
@@ -179,6 +192,45 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 			@Override
 			public Future<MasterPlanUpdate> getFuture() {
+				return f;
+			}
+		};
+	}
+
+	@Override
+	public MasterPlanCalculation$ planMasterFiber$(JobService jobService, long planId,
+			InputRequests inputRequests, FiberNetworkConstraints constraints) {
+
+		networkPlanRepository.deleteWireCenterPlans(planId);
+
+		List<Long> ids = StreamUtil.map(
+				networkPlanRepository.computeWirecenterUpdates(planId),
+				Number::longValue);
+
+		Job<MasterPlanUpdate> f = jobService.submit(() -> {
+
+			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
+					.invokeAll(ids.stream()
+							.map(id -> createPlanningCallable(id, constraints))
+							.collect(Collectors.toList()));
+			return new MasterPlanUpdate(futures.stream().map(wf -> {
+				try {
+					return wf.get();
+				} catch (Exception e) {
+					log.error(e.getMessage());
+					return null;
+				}
+			}).filter(p -> p != null).collect(Collectors.toList()));
+		}, executorService);
+
+		return new MasterPlanCalculation$() {
+			@Override
+			public List<Long> getWireCenterPlans() {
+				return ids;
+			}
+
+			@Override
+			public Job<MasterPlanUpdate> getJob() {
 				return f;
 			}
 		};

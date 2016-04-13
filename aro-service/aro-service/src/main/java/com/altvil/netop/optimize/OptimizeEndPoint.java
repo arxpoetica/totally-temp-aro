@@ -1,8 +1,6 @@
 package com.altvil.netop.optimize;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -20,6 +18,7 @@ import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.plan.InputRequests;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanCalculation;
+import com.altvil.aro.service.planing.MasterPlanCalculation$;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.OptimizationInputs;
@@ -100,13 +99,15 @@ public class OptimizeEndPoint {
 
 		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null ? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs()) ;
 		
-		Future<WirecenterNetworkPlan> f = networkPlanningService.optimizeWirecenter(
+		com.altvil.aro.service.job.Job<WirecenterNetworkPlan> f = networkPlanningService.optimizeWirecenter$(jobService,
 				request.getPlanId(), new InputRequests(),  optimizationInputs, request.getFiberNetworkConstraints());
 		
-		Map<String, Object> metaIds = new HashMap<String, Object>();
-		metaIds.put("planId", request.getPlanId());
-
-		return jobService.add(metaIds, f);
+//		Map<String, Object> metaIds = new HashMap<String, Object>();
+//		metaIds.put("planId", request.getPlanId());
+//
+//		return jobService.add(metaIds, f);
+		
+		return f;
 	}
 
 	@RequestMapping(value = "/optimize/wirecenter/complete", method = RequestMethod.POST)
@@ -122,10 +123,10 @@ public class OptimizeEndPoint {
 
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(@RequestBody OptimizationPlanRequest request) {
-		MasterPlanCalculation mpc = networkPlanningService.planMasterFiber(request.getPlanId(), new InputRequests(),
+		MasterPlanCalculation$ mpc = networkPlanningService.planMasterFiber$(jobService, request.getPlanId(), new InputRequests(),
 				request.getFiberNetworkConstraints());
 
-		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.add(mpc.getFuture());
+		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = mpc.getJob();
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);

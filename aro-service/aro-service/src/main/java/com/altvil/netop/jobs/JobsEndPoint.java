@@ -2,7 +2,6 @@ package com.altvil.netop.jobs;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,14 +36,12 @@ public class JobsEndPoint {
 
 	@RequestMapping(value = "/jobs/test", method = RequestMethod.GET)
 	public @ResponseBody Object test() {
-		Future<Object> future = executorService.submit(() -> {
+		return jobService.submit(() -> {
 			System.out.println("Callable started");
 			Thread.sleep(30000L);
 			System.out.println("Callable finished");
 			
 			return null;
-		});
-		
-		return jobService.add(future);
+		}, executorService);
 	}
 }

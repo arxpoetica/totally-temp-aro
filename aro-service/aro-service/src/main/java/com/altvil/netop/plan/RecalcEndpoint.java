@@ -1,7 +1,11 @@
 package com.altvil.netop.plan;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,67 +14,60 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.altvil.aro.service.conversion.SerializationService;
-import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.job.Job;
+import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.InputRequests;
-import com.altvil.aro.service.plan.PlanService;
-import com.altvil.aro.service.planing.MasterPlanCalculation;
+import com.altvil.aro.service.planing.MasterPlanCalculation$;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.recalc.Job;
-import com.altvil.aro.service.recalc.RecalcException;
-import com.altvil.aro.service.recalc.RecalcService;
-import com.altvil.aro.service.recalc.protocol.RecalcResponse;
 
 @RestController
 public class RecalcEndpoint {
+	private ExecutorService executorService;
 
 	@Autowired
-	private PlanService planService;
-
-	@Autowired
-	private RecalcService recalcService;
-
-	@Autowired
-	private NetworkService networkService;
-
-	@Autowired
-	private SerializationService conversionService;
-
+	private JobService jobService;
+	
 	@Autowired
 	private NetworkPlanningService networkPlanningService;
 
+	// Temporary - replace with injected service.
+	@PostConstruct
+	public void init() {
+		executorService = Executors.newFixedThreadPool(2);
+	}
+
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanResponse postRecalcMasterPlan(
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(
 			@RequestBody FiberPlanRequest request) {
 
-		MasterPlanCalculation mpc = networkPlanningService.planMasterFiber(
+		MasterPlanCalculation$ mpc = networkPlanningService.planMasterFiber$(jobService,
 				request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
 
-		Job<MasterPlanUpdate> job = recalcService.submit(() -> {
-			MasterPlanUpdate mpu = mpc.getFuture().get();
-			return mpu;
-
-		});
+		Job<MasterPlanUpdate> job = mpc.getJob();
 		
-		//Block Call
-		job.getResponse() ;
+		//Block until complete (Temporary until the UI can handle async responses)
+		try {
+			job.get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
 
-		MasterPlanResponse mpr = new MasterPlanResponse();
-		mpr.setRecalcJob(job.getJob());
+		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
+		mpr.setJob(job);
 		mpr.setWireCenterids(mpc.getWireCenterPlans());
 
 		return mpr;
 	}
 
 	@RequestMapping(value = "/recalc/wirecenter", method = RequestMethod.POST)
-	public @ResponseBody RecalcResponse<FiberPlanResponse> postRecalc(
+	public @ResponseBody Job<FiberPlanResponse> postRecalc(
 			@RequestBody FiberPlanRequest fiberPlanRequest)
-			throws RecalcException, InterruptedException, ExecutionException {
+			throws InterruptedException, ExecutionException {
 
-		Job<FiberPlanResponse> job = recalcService
+		Job<FiberPlanResponse> job = jobService
 				.submit(() -> {
 
 					FiberNetworkConstraints constraints = fiberPlanRequest
@@ -89,9 +86,8 @@ public class RecalcEndpoint {
 					response.setNewEquipmentCount(plan.getNetworkNodes().size());
 
 					return response;
-				});
+				}, executorService);
 		
-
-		return job.getResponse();
+		return job;
 	}
 }
