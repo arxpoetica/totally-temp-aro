@@ -27,6 +27,7 @@ public interface GeneratingNode extends AnalysisNode,
 
 	Collection<GeneratingNode> getChildren();
 
+	
 	boolean isValueNode();
 
 	boolean isJunctionNode();

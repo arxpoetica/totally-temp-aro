@@ -59,9 +59,9 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 	}
 
 	@Override
-	public GraphMapping serialize(GeneratingNode node,
+	public void serialize(GeneratingNode node,
 			ModelSerializer serializer) {
-		return serializer.serialize(node, this);
+		 serializer.serialize(node, this);
 	}
 
 	@Override

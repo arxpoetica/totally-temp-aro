@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimize.impl;
 
-import com.altvil.aro.service.graph.assigment.GraphMapping;
+import com.altvil.aro.service.entity.JunctionNode;
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.optimize.model.FiberConsumer;
 import com.altvil.aro.service.optimize.model.FiberProducer;
@@ -10,25 +11,39 @@ import com.altvil.aro.service.optimize.spi.AnalysisContext;
 
 public class SplitterNodeAssignment extends AbstractEquipmentAssignment {
 
-	public SplitterNodeAssignment() {
-		super(null);
+	private JunctionNode junctionNode ;
+	
+	public SplitterNodeAssignment(GraphEdgeAssignment assignment, JunctionNode junctionNode) {
+		super(assignment);
+		this.junctionNode = junctionNode ;
 	}
-
 	
 	
 	@Override
 	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer,
 			FiberProducer fiberProducer, DemandCoverage coverage) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	
+
+
+	public JunctionNode getJunctionNode() {
+		return junctionNode;
+	}
 
 
 	@Override
-	public GraphMapping serialize(GeneratingNode node, ModelSerializer serializer) {
-		return serializer.serialize(node, this) ;
-		
+	public void serialize(GeneratingNode node, ModelSerializer serializer) {
+		 serializer.serialize(node, this) ;
 	}
+
+
+
+	public JunctionNode getSplicePoint() {
+		return junctionNode ;
+	}
+	
+	
 
 }

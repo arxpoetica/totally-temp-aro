@@ -5,10 +5,12 @@ import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -100,6 +102,38 @@ public class GeneratingNodeAssembler {
 				ArrayList::new);
 
 		mapping.getChildAssignments().forEach(a -> map.put(model.getVertex(a), a));
+		
+		for(GraphNode gn : map.keySet()) {
+			Collection<GraphAssignment> m = map.get(gn) ;
+			if( m.size() > 6 ) {
+				System.out.println("Looking Large " + m.size())  ;
+				for(GraphAssignment a : m) {
+					GraphEdgeAssignment ge = (GraphEdgeAssignment) a ;
+					System.out.println(a.getAroEntity().getObjectId() + " " + ge.getPinnedLocation().getGeoSegment().getGid() + " " + ge.getPinnedLocation().getOffsetRatio()) ; ;
+				}
+				
+				StringBuffer sb = new StringBuffer() ;
+				int index = 0 ;
+				for(GraphAssignment a : m) {
+					if( a.getAroEntity() instanceof FDTEquipment ) {
+						FDTEquipment fdt = (FDTEquipment) a.getAroEntity() ;
+						for(LocationDropAssignment lda : fdt.getDropAssignments()) {
+							if( index++ > 0 ) {
+								sb.append(",") ;
+							}
+							sb.append(lda.getLocationEntity().getObjectId()) ;
+						}
+						System.out.println(a.getAroEntity().getType().getSimpleName()) ;
+					}
+				}
+				System.out.println(sb.toString()) ;
+				
+			}
+			
+			
+			
+			
+		}
 
 		return map;
 	}
