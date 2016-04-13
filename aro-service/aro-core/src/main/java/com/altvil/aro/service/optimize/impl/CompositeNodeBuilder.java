@@ -2,6 +2,7 @@ package com.altvil.aro.service.optimize.impl;
 
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.model.EquipmentAssignment;
 import com.altvil.aro.service.optimize.model.FiberAssignment;
@@ -22,6 +23,24 @@ public class CompositeNodeBuilder implements Builder {
 		super();
 		this.nodeBuilder = nodeBuilder;
 	}
+	
+	
+
+	@Override
+	public GraphEdgeAssignment getParentAssignment() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public GraphEdgeAssignment getAssignment() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 
 	@Override
 	public Builder setFiber(FiberAssignment fiber) {

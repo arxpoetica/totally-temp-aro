@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+
+import javax.management.RuntimeErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +63,7 @@ import com.altvil.aro.service.optimize.spi.FiberStrandConverter;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysisFactory;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
+import com.altvil.aro.service.optimize.spi.ParentResolver;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
@@ -215,11 +215,14 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		private Optional<CompositeNetworkModel> model = Optional.empty();
 		private NetworkModel networkModel;
+		private ParentResolver parentResolver ;
 
 		private BuilderFactory builderFactory;
 		private GeneratingNode rootNode;
 		private FtthThreshholds ftpThreshholds;
 		private ScoringStrategy scoringStrategy ;
+		
+		private Set<AroEntity> verifySet = new HashSet<>() ;
 
 		private Set<LocationEntity> rejectedLocations = new HashSet<>();
 
@@ -246,6 +249,18 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		
 		
 		@Override
+		public void debugVerify(AroEntity entity) {
+			if( verifySet.contains(entity) ) {
+				throw new RuntimeException("Failed") ;
+			}
+			verifySet.add(entity) ;
+			
+		}
+
+
+
+
+		@Override
 		public FiberProducerConsumerFactory getFiberProducerConsumerFactory() {
 			return FiberProducerConsumerFactory.FACTORY ;
 		}
@@ -271,6 +286,14 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		public NetworkModel getNetworkModel() {
 			return networkModel;
 		}
+		
+		
+
+		@Override
+		public ParentResolver getParentResolver() {
+			return parentResolver ;
+		}
+
 
 		@Override
 		public HubModel getHubModel() {
@@ -361,6 +384,8 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			//
 
 			networkModel = model;
+			parentResolver = new ParentResolverImpl(model) ;
+			
 
 			GraphEdgeAssignment coEdgeAssignment = model
 					.getFiberSourceMapping().getGraphAssignment();
@@ -449,7 +474,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		
 		@Override
 		public Builder addNode(FiberType fiberType,
-				Collection<GraphAssignment> assignments, Builder parent,
+				Collection<GraphEdgeAssignment> assignments, Builder parent,
 				GraphNode vertex) {
 
 			if (assignments.size() == 0) {
@@ -459,7 +484,6 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			if (assignments.size() == 1) {
 				return addNode(vertex, assignments.iterator().next(), parent);
 			}
-			
 			
 			System.out.print("cluster types ");
 			for(GraphAssignment ga : assignments) {

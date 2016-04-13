@@ -1,15 +1,24 @@
 package com.altvil.aro.service.optimize.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
+import org.jgrapht.DirectedGraph;
+
 import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
-import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
@@ -17,14 +26,11 @@ import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
+import com.altvil.aro.service.optimize.spi.ParentResolver;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-
-import org.jgrapht.DirectedGraph;
-
-import java.util.*;
 
 public class GeneratingNodeAssembler {
 
@@ -42,14 +48,16 @@ public class GeneratingNodeAssembler {
 	private AnalysisContext ctx;
 	private DAGModel<GeoSegment> dagModel;
 	private DirectedGraph<GraphNode, AroEdge<GeoSegment>> graph;
-	private Multimap<GraphNode, GraphAssignment> equipmentMap;
+	private Multimap<GraphNode, GraphEdgeAssignment> equipmentMap;
 	private FiberType fiberType ;
 	private Set<Class<?>> matchingEquipmentType;
 	private List<AroEdge<GeoSegment>> fiberPath = new ArrayList<>();
+	private ParentResolver parentResolver ;
 
 	public GeneratingNodeAssembler(AnalysisContext ctx, FiberType fiberType) {
 		this.ctx = ctx;
 		this.fiberType = fiberType ;
+		this.parentResolver = ctx.getParentResolver() ;
 		matchingEquipmentType = matchingEquipmentMap.get(fiberType);
 	}
 
@@ -66,7 +74,7 @@ public class GeneratingNodeAssembler {
 					graph.incomingEdgesOf(vertex));
 		} 
 		
-		if( getGraphAssignments(vertex).size() > 0 )  {
+		if( getGraphAssignments(builder.getParentAssignment(), vertex).size() > 0 )  {
 			depthFirstTraversal(builder, vertex);
 		}
 		
@@ -95,46 +103,14 @@ public class GeneratingNodeAssembler {
 
 	}
 
-	private Multimap<GraphNode, GraphAssignment> createEquipmentMap(
+	private Multimap<GraphNode, GraphEdgeAssignment> createEquipmentMap(
 			NetworkModel model, GraphMapping mapping) {
-		Multimap<GraphNode, GraphAssignment> map = Multimaps.newListMultimap(
+		Multimap<GraphNode, GraphEdgeAssignment> map = Multimaps.newListMultimap(
 				new HashMap<>(),
 				ArrayList::new);
 
 		mapping.getChildAssignments().forEach(a -> map.put(model.getVertex(a), a));
 		
-		for(GraphNode gn : map.keySet()) {
-			Collection<GraphAssignment> m = map.get(gn) ;
-			if( m.size() > 6 ) {
-				System.out.println("Looking Large " + m.size())  ;
-				for(GraphAssignment a : m) {
-					GraphEdgeAssignment ge = (GraphEdgeAssignment) a ;
-					System.out.println(a.getAroEntity().getObjectId() + " " + ge.getPinnedLocation().getGeoSegment().getGid() + " " + ge.getPinnedLocation().getOffsetRatio()) ; ;
-				}
-				
-				StringBuffer sb = new StringBuffer() ;
-				int index = 0 ;
-				for(GraphAssignment a : m) {
-					if( a.getAroEntity() instanceof FDTEquipment ) {
-						FDTEquipment fdt = (FDTEquipment) a.getAroEntity() ;
-						for(LocationDropAssignment lda : fdt.getDropAssignments()) {
-							if( index++ > 0 ) {
-								sb.append(",") ;
-							}
-							sb.append(lda.getLocationEntity().getObjectId()) ;
-						}
-						System.out.println(a.getAroEntity().getType().getSimpleName()) ;
-					}
-				}
-				System.out.println(sb.toString()) ;
-				
-			}
-			
-			
-			
-			
-		}
-
 		return map;
 	}
 
@@ -143,14 +119,32 @@ public class GeneratingNodeAssembler {
 		fiberPath.clear();
 		return result;
 	}
-
-	private Collection<GraphAssignment> getGraphAssignments(GraphNode vertex) {
-		Collection<GraphAssignment> gas = equipmentMap.get(vertex);
+	
+	
+	private Collection<GraphEdgeAssignment> getGraphAssignments(GraphEdgeAssignment parentAssignment, GraphNode vertex) {
+		
+		Predicate<GraphEdgeAssignment> parentPredicate = 
+				parentAssignment == null ? ((ga) -> true) : (ga) -> {
+					
+					GraphEdgeAssignment pa = parentResolver.getParentAssignment(ga) ;
+					
+					if( pa == null ) {
+						System.out.println("Failed ") ;
+					}
+					else {
+						System.out.println( pa.getAroEntity().getObjectId() + " <-> " + parentAssignment.getAroEntity().getObjectId()) ;
+					}
+					
+					
+					return pa == null ? false : pa.equals(parentAssignment) ;
+				} ;
+		
+		Collection<GraphEdgeAssignment> gas = equipmentMap.get(vertex);
 		if (gas == null) {
 			return Collections.emptyList();
 		}
 
-		return StreamUtil.filter(gas, a -> matchingEquipmentType.contains(a.getAroEntity().getType()));
+		return StreamUtil.filter(gas, a -> matchingEquipmentType.contains(a.getAroEntity().getType()) && parentPredicate.test(a));
 
 	}
 	
@@ -160,8 +154,9 @@ public class GeneratingNodeAssembler {
 
 		GeneratingNode.Builder childBuilder = null;
 		
+		
 		// Basis Equipment Node
-		Collection<GraphAssignment> gas = getGraphAssignments(vertex);
+		Collection<GraphEdgeAssignment> gas = getGraphAssignments(builder.getParentAssignment(), vertex);
 		if (gas.size() > 0) {
 
 			//Partition edges

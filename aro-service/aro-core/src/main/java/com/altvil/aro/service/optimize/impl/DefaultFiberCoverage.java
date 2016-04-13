@@ -136,6 +136,8 @@ public class DefaultFiberCoverage implements DemandCoverage {
 				}
 
 				locationEntities.add(assignedEntityDemand);
+			} else {
+				System.out.println("WTF") ;
 			}
 		}
 
