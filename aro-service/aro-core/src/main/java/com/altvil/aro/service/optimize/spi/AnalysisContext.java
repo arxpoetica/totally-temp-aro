@@ -2,8 +2,9 @@ package com.altvil.aro.service.optimize.spi;
 
 import java.util.Collection;
 
+import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.graph.assigment.GraphAssignment;
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.HubModel;
@@ -18,6 +19,8 @@ public interface AnalysisContext {
 
 	HubModel getHubModel();
 	
+	void debugVerify(AroEntity entity) ;
+	
 	FiberProducerConsumerFactory getFiberProducerConsumerFactory() ;
 	
 	FiberStrandConverter getFiberStrandConverter() ;
@@ -29,6 +32,8 @@ public interface AnalysisContext {
 	GraphTransformerFactory getGraphTransformerFactory();
 
 	NetworkModel getNetworkModel();
+	
+	ParentResolver getParentResolver() ;
 
 	NetworkAnalysis getNetworkAnalysis();
 
@@ -47,7 +52,7 @@ public interface AnalysisContext {
 	void removeFromAnalysis(GeneratingNode node);
 
 	Builder addNode(FiberType fiberType,
-			Collection<GraphAssignment> assignments,
+			Collection<GraphEdgeAssignment> assignments,
 			GeneratingNode.Builder parent, GraphNode vertex);
 
 	Builder addSplitterNode(GeneratingNode.Builder parent);

@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 
@@ -33,7 +34,7 @@ public interface GeneratingNode extends AnalysisNode,
 	boolean isJunctionNode();
 	
 	interface Builder {
-
+		
 		Builder setJunctionNode(boolean juntionNode);
 
 		Builder setFiber(FiberAssignment fiber);
@@ -42,6 +43,10 @@ public interface GeneratingNode extends AnalysisNode,
 						 Collection<AroEdge<GeoSegment>> fiber);
 
 		Builder addChild(EquipmentAssignment equipment);
+		
+		GraphEdgeAssignment getParentAssignment() ;
+		
+		GraphEdgeAssignment getAssignment() ;
 
 		GeneratingNode build();
 	}
