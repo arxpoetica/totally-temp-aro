@@ -17,6 +17,7 @@ import com.altvil.aro.service.entity.DropCableCount;
 import com.altvil.aro.service.entity.DropCableSummary;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
+import com.altvil.aro.service.entity.JunctionNode;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
@@ -48,6 +49,10 @@ public class EntityFactory {
 	public BulkFiberConsumer createBulkFiberConsumer(
 			DemandStatistic locationEntityDemand) {
 		return null;
+	}
+	
+	public JunctionNode createJunctionNode() {
+		return new JunctionImpl(ensureId(null)) ;
 	}
 
 	public FDTEquipment createFdt(Long id,
@@ -174,6 +179,32 @@ public class EntityFactory {
 			return splitterCount;
 		}
 
+	}
+	
+	
+	public static class JunctionImpl extends AbstractEntity implements JunctionNode {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public JunctionImpl(Long objectId) {
+			super(objectId);
+		}
+
+		@Override
+		public Class<? extends AroEntity> getType() {
+			return JunctionNode.class ;
+		}
+
+		@Override
+		public void accept(AroEntityVisitor visitor) {
+			visitor.visit(this) ;
+		}
+		
+		
+		
 	}
 
 	public static class SplicePointImpl extends AbstractEntity implements

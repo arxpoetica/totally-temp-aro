@@ -1,6 +1,5 @@
 package com.altvil.aro.service.optimize.impl;
 
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;

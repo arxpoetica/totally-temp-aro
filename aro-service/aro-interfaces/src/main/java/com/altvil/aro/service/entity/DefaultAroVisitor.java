@@ -41,7 +41,12 @@ public class DefaultAroVisitor implements AroEntityVisitor {
 	@Override
 	public void visit(RootEntity node) {
 	}
-	
+
+	@Override
+	public void visit(JunctionNode node) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 
 }
