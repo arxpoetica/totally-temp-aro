@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage.Accumulator;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
@@ -299,6 +300,32 @@ public class DefaultGeneratingNode implements GeneratingNode {
 			super();
 			this.node = node;
 		}
+		
+
+		@Override
+		public GraphEdgeAssignment getParentAssignment() {
+			GeneratingNode parentNode = node.getParent() ;
+			if( parentNode != null ) {
+				EquipmentAssignment assignment = parentNode.getEquipmentAssignment() ;
+				if( assignment != null ) {
+					return assignment.getGraphAssignment() ;
+				}
+			}
+			return null ;
+		}
+
+		@Override
+		public GraphEdgeAssignment getAssignment() {
+			EquipmentAssignment assignment = node.getEquipmentAssignment() ;
+			if( assignment != null ) {
+				return assignment.getGraphAssignment() ;
+			}
+			return null ;
+		}
+
+		
+
+
 
 		@Override
 		public Builder setJunctionNode(boolean junctionNode) {
