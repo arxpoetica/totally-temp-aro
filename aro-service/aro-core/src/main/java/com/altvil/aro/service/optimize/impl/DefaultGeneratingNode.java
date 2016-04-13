@@ -299,6 +299,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	public static class BuilderImpl implements Builder {
 
 		private DefaultGeneratingNode node;
+		//private List<DefaultGeneratingNode> unresolvedNodes ;
 
 		public BuilderImpl(DefaultGeneratingNode node) {
 			super();

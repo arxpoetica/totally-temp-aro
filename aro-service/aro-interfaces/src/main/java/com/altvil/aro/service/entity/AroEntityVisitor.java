@@ -20,6 +20,8 @@ public interface AroEntityVisitor {
 	public void visit(BulkFiberTerminal fiberTerminal) ;
 	
 	public void visit(LocationDropAssignment node) ;
+	
+	public void visit(JunctionNode node) ;
 
 
 }

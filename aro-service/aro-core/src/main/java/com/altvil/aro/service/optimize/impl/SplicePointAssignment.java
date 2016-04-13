@@ -2,7 +2,6 @@ package com.altvil.aro.service.optimize.impl;
 
 import com.altvil.aro.service.entity.SplicePoint;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.optimize.model.FiberConsumer;
 import com.altvil.aro.service.optimize.model.FiberProducer;
@@ -34,9 +33,8 @@ public class SplicePointAssignment   extends AbstractEquipmentAssignment {
 	}
 
 	@Override
-	public GraphMapping serialize(GeneratingNode node, ModelSerializer serializer) {
-		//return serializer.serialize(node, this);
-		return null ;
+	public void serialize(GeneratingNode node, ModelSerializer serializer) {
+		serializer.serialize(node, this);
 	}
 	
 	@Override

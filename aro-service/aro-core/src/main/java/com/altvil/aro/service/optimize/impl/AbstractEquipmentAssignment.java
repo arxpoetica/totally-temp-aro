@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimize.impl;
 
 import com.altvil.aro.service.AroException;
+import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
@@ -45,6 +46,11 @@ public abstract class AbstractEquipmentAssignment implements
 		return DefaultFiberCoverage.EMPTY_COVERAGE;
 	}
 	
+	
+	@Override
+	public AroEntity getParentEntity() {
+		return null ;
+	}
 
 	@Override
 	public FiberProducer createFiberProducer(AnalysisContext ctx,

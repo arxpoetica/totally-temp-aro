@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,7 @@ import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.SplicePoint;
+import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
@@ -49,7 +53,6 @@ import com.altvil.aro.service.optimize.impl.GeneratingNodeComparator;
 import com.altvil.aro.service.optimize.impl.NoEquipment;
 import com.altvil.aro.service.optimize.impl.RemoteTerminalAssignment;
 import com.altvil.aro.service.optimize.impl.RootAssignment;
-import com.altvil.aro.service.optimize.impl.SerializerImpl;
 import com.altvil.aro.service.optimize.impl.SplicePointAssignment;
 import com.altvil.aro.service.optimize.impl.SplitterNodeAssignment;
 import com.altvil.aro.service.optimize.model.AnalysisNode;
@@ -298,9 +301,10 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		@Override
 		public Optional<CompositeNetworkModel> serialize() {
 
-			SerializerImpl serializer = new SerializerImpl(model.get());
-			rootNode.getEquipmentAssignment().serialize(rootNode, serializer);
-			return Optional.of(serializer.getNetworkModel());
+//			SerializerImpl serializer = new SerializerImpl(model.get());
+//			rootNode.getEquipmentAssignment().serialize(rootNode, serializer);
+//			return Optional.of(serializer.getNetworkModel());
+			return null ;
 		}
 
 		@Override
@@ -442,7 +446,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			return builderFactory.addChild(parent, vertex,
 					networkModel.getGraphMapping(graphAssignment));
 		}
-
+		
 		@Override
 		public Builder addNode(FiberType fiberType,
 				Collection<GraphAssignment> assignments, Builder parent,
@@ -455,9 +459,20 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			if (assignments.size() == 1) {
 				return addNode(vertex, assignments.iterator().next(), parent);
 			}
-
+			
+			
+			System.out.print("cluster types ");
+			for(GraphAssignment ga : assignments) {
+				System.out.print(" | ");
+				System.out.print(ga.getAroEntity().getType().getSimpleName()) ;
+			}
+			System.out.println("") ;
+			
+			//Map<Class<?>, List<GraphAssignment>> map = assignments.stream().collect(Collectors.groupingBy(a -> a.getAroEntity().getType())) ;
+			
 			Builder builder = new CompositeNodeBuilder(
 					parent.addChild(NoEquipment.ASSIGNMENT));
+			
 			builder.setFiber(new DefaultFiberAssignment(fiberType,
 					new ArrayList<>()));
 
@@ -468,9 +483,10 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			return builder;
 		}
 
+		//TODO HT + KG create upgrade Fiber Route Planning
 		@Override
 		public Builder addSplitterNode(Builder parent) {
-			return parent.addChild(new SplitterNodeAssignment())
+			return parent.addChild(new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode()))
 					.setJunctionNode(true);
 		}
 

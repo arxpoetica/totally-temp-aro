@@ -172,6 +172,8 @@ public class GeoSegmentSplitter {
 			}
 
 		}
+		
+		System.out.println("Merged " + merged.vertexAssignments.size()) ;
 
 		return null;
 	}

@@ -42,9 +42,8 @@ public class BulkFiberTerminalAssignment extends AbstractEquipmentAssignment {
 	
 
 	@Override
-	public GraphMapping serialize(GeneratingNode node, ModelSerializer serializer) {
-		//return serializer.serialize(node, this) ;
-		return null ;
+	public void serialize(GeneratingNode node, ModelSerializer serializer) {
+		serializer.serialize(node, this);
 	}
 	
 

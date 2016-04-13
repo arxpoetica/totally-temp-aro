@@ -4,7 +4,6 @@ import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.optimize.model.FiberConsumer;
 import com.altvil.aro.service.optimize.model.FiberProducer;
@@ -53,9 +52,9 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 	}
 	
 	@Override
-	public GraphMapping serialize(GeneratingNode node,
+	public void serialize(GeneratingNode node,
 			ModelSerializer serializer) {
-		return serializer.serialize(node, this);
+		 serializer.serialize(node, this);
 	}
 
 	
