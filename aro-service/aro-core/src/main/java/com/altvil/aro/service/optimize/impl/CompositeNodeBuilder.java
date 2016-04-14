@@ -1,34 +1,44 @@
 package com.altvil.aro.service.optimize.impl;
 
-import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.graph.AroEdge;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.optimize.impl.DefaultGeneratingNode.BuilderImpl;
 import com.altvil.aro.service.optimize.model.EquipmentAssignment;
 import com.altvil.aro.service.optimize.model.FiberAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode.Builder;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.altvil.utils.StreamUtil;
 
 public class CompositeNodeBuilder implements Builder {
 
-	private Builder nodeBuilder;
-	private FiberType fiberType ;
-	private List<Builder> children = new ArrayList<>();
 	
-	public CompositeNodeBuilder(Builder nodeBuilder) {
+	private CompositeGeneratingNode node ;
+	private List<Builder> children = new ArrayList<>();
+	private boolean initMode = true ;
+	
+	public CompositeNodeBuilder(CompositeGeneratingNode node) {
 		super();
-		this.nodeBuilder = nodeBuilder;
+		this.node = node;
 	}
 	
-	
+
+	public boolean isInitMode() {
+		return initMode;
+	}
+
+
+
+	public void setInitMode(boolean initMode) {
+		this.initMode = initMode;
+	}
+
+
+
 
 	@Override
 	public GraphEdgeAssignment getParentAssignment() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -36,48 +46,44 @@ public class CompositeNodeBuilder implements Builder {
 
 	@Override
 	public GraphEdgeAssignment getAssignment() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-
 	@Override
-	public Builder setFiber(FiberAssignment fiber) {
-		nodeBuilder.setFiber(fiber);
-		this.fiberType = fiber.getFiberType() ;
-		return this;
+	public Builder addCompositeChild(FiberAssignment fiberAssignment) {
+		return new CompositeNodeBuilder(new CompositeGeneratingNode(
+				node.getAnalysisContext(), new NoEquipment(), fiberAssignment, node));
 	}
 
-	@Override
-	public Builder setFiber(FiberType fiberType, Collection<AroEdge<GeoSegment>> fiber) {
-		nodeBuilder.setFiber(fiberType, fiber);
-		this.fiberType = fiberType ;
-		return this;
-	}
+
+	
 
 	@Override
-	public Builder addChild(EquipmentAssignment equipment) {
-		Builder builder = nodeBuilder.addChild(equipment);
-		builder.setFiber(fiberType, new ArrayList<AroEdge<GeoSegment>>()) ;
-		children.add(builder);
+	public Builder addChild(FiberAssignment fiberAssignment, EquipmentAssignment equipment) {
+		
+		
+		Builder builder =  new BuilderImpl(new DefaultGeneratingNode(node.getAnalysisContext(),
+				equipment, fiberAssignment, node));
+		
+		//TODO HT + KV
+		if( initMode ) {
+			children.add(builder);
+		}
+		
 		return builder;
 	}
 
 	@Override
 	public GeneratingNode build() {
-		children.forEach(Builder::build);
-		return nodeBuilder.build();
-	}
+		if( children.size() > 20 ) {
+			StreamUtil.forEach(children, Builder::build);	
+		} else {
+			StreamUtil.forEach(children, Builder::build);
 
-	@Override
-	public Builder setJunctionNode(boolean juntionNode) {
-		nodeBuilder.setJunctionNode(juntionNode);
-		return this;
+		}
+		return node.initReclc() ;
 	}
-	
-	
-	
 	
 
 }

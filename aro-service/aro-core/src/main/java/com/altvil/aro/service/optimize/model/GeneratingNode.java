@@ -2,15 +2,15 @@ package com.altvil.aro.service.optimize.model;
 
 import java.util.Collection;
 
-import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 
 public interface GeneratingNode extends AnalysisNode,
 		Comparable<GeneratingNode> {
 
+	AnalysisContext getAnalysisContext() ;
+	
 	FiberAssignment getFiberAssignment();
 
 	EquipmentAssignment getEquipmentAssignment();
@@ -35,18 +35,16 @@ public interface GeneratingNode extends AnalysisNode,
 	
 	interface Builder {
 		
-		Builder setJunctionNode(boolean juntionNode);
-
-		Builder setFiber(FiberAssignment fiber);
-
-		Builder setFiber(FiberType fiberType,
-						 Collection<AroEdge<GeoSegment>> fiber);
-
-		Builder addChild(EquipmentAssignment equipment);
+		Builder addCompositeChild(FiberAssignment fiberAssignment)  ;
+		
+		Builder addChild(FiberAssignment fiberAssignment, EquipmentAssignment equipment);
 		
 		GraphEdgeAssignment getParentAssignment() ;
 		
 		GraphEdgeAssignment getAssignment() ;
+		
+		boolean isInitMode() ;
+		void setInitMode(boolean mode) ;
 
 		GeneratingNode build();
 	}
