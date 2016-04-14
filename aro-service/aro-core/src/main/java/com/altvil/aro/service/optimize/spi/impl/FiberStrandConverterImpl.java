@@ -46,7 +46,7 @@ public class FiberStrandConverterImpl implements FiberStrandConverter {
 	private void fill() {
 		
 		Converter identity = (val) -> val ;
-		Converter error = (val) -> {throw new AroException("Fiber Conversion Exception") ; };
+ 		Converter error = (val) -> {throw new AroException("Fiber Conversion Exception") ; };
 		
 		for (FiberType source : FiberType.values()) {
 			for(FiberType target : FiberType.values()) {

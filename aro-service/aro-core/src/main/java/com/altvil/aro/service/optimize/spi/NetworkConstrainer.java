@@ -78,6 +78,9 @@ public class NetworkConstrainer {
 					optimized = true;
 				} else {
 					resultAssembler.add(optimizedNetwork);
+					
+					System.out.println("prune ..." + networkAnalysis.getAnalyisNode().getScore()) ;
+					
 					// TODO after adding support of multiple fiber soudes. maybe
 					// USE GeneratingNode::isValueNode or get rid of it
 					GeneratingNode node = networkAnalysis

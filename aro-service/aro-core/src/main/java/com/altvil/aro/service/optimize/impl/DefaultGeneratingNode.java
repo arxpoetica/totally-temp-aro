@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.graph.AroEdge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage.Accumulator;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.optimize.model.EquipmentAssignment;
@@ -21,10 +21,13 @@ import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 
 public class DefaultGeneratingNode implements GeneratingNode {
 
+	
+	private static final Logger log = LoggerFactory
+			.getLogger(DefaultGeneratingNode.class.getName());
+
 	private DemandCoverage directCoverage;
 	private AnalysisContext ctx;
 	private DefaultGeneratingNode parent;
-	private boolean junctionNode;
 	private DemandCoverage coverage = null;
 	private EquipmentAssignment equipmentAssigment;
 	private FiberAssignment fiberAssignment = null;
@@ -34,9 +37,10 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	private List<GeneratingNode> children;
 	private int recalcMode = 0 ;
 	
-	private DefaultGeneratingNode(AnalysisContext ctx,
+	protected DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment,
-			FiberAssignment fiberAssignment, DefaultGeneratingNode parent,
+			FiberAssignment fiberAssignment,
+			DefaultGeneratingNode parent,
 			List<GeneratingNode> children) {
 
 		this.ctx = ctx;
@@ -46,6 +50,13 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		this.children = children;
 		this.directCoverage = equipmentAssigment.getDirectCoverage(ctx);
 
+	}
+
+	
+
+	@Override
+	public AnalysisContext getAnalysisContext() {
+		return ctx ;
 	}
 
 	@Override
@@ -58,18 +69,14 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		return fiberConsumption;
 	}
 
-	private DefaultGeneratingNode(AnalysisContext ctx,
-			EquipmentAssignment equipmentAssigment, DefaultGeneratingNode parent) {
-		this(ctx,
-				equipmentAssigment,
-				null,
-				parent,
-				new ArrayList<>());
+	public DefaultGeneratingNode(AnalysisContext ctx,
+			EquipmentAssignment equipmentAssigment, FiberAssignment fiberAssignment, DefaultGeneratingNode parent) {
+		this(ctx, equipmentAssigment, fiberAssignment, parent, new ArrayList<>());
 	}
 
 	public static Builder build(AnalysisContext ctx,
-			EquipmentAssignment assignment) {
-		return new BuilderImpl(new DefaultGeneratingNode(ctx, assignment, null));
+			EquipmentAssignment assignment, FiberAssignment fiberAssignment) {
+		return new BuilderImpl(new DefaultGeneratingNode(ctx, assignment,fiberAssignment,   null));
 	}
 
 	@Override
@@ -128,9 +135,13 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		double childrenCapex = getChildren().stream()
 				.mapToDouble(GeneratingNode::getCapex).sum();
 		
-		System.out.println("Capex " + nodeCapex + " => "
+		
+		if( log.isTraceEnabled() ) {
+			log.trace("Capex " + nodeCapex + " => "
 				+ (nodeCapex + childrenCapex) + " coverage = "
-				+ coverage.getDemand() + " fc=" + fiberProduction.getFiberCount());
+							+ coverage.getDemand() + " fc="
+							+ fiberProducer.getFiberCount());
+		}
 
 		this.capex = nodeCapex + childrenCapex;
 
@@ -206,6 +217,18 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		}
 	}
 
+	public GeneratingNode initReclc() {
+		_recalc();
+
+		ctx.addToAnalysis(this);
+
+		if (parent != null) {
+			parent._addChild(this);
+		}
+
+		return this;
+	}
+
 	protected FiberConsumer aggregateIncomingFiberStrands(
 			DemandCoverage directCoverage) {
 
@@ -230,7 +253,11 @@ public class DefaultGeneratingNode implements GeneratingNode {
 						this.fiberProduction, coverage);
 	}
 
-	private void _addChild(GeneratingNode child) {
+	protected void _addChild(GeneratingNode child) {
+		if (children.contains(child)) {
+			children.remove(child);
+			System.out.println("Cloned Children");
+		}
 		this.children.add(child);
 	}
 
@@ -294,12 +321,13 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public boolean isJunctionNode() {
-		return junctionNode;
+		return equipmentAssigment == null ? false : equipmentAssigment.isJunctionNode();
 	}
 
 	public static class BuilderImpl implements Builder {
 
 		private DefaultGeneratingNode node;
+
 		//private List<DefaultGeneratingNode> unresolvedNodes ;
 
 		public BuilderImpl(DefaultGeneratingNode node) {
@@ -308,11 +336,32 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		}
 		
 
+
+		@Override
+		public boolean isInitMode() {
+			return false;
+		}
+
+
+
+		@Override
+		public void setInitMode(boolean mode) {
+		}
+
+
+
+		@Override
+		public Builder addCompositeChild(FiberAssignment fiberAssignment) {
+			return new CompositeNodeBuilder(new CompositeGeneratingNode(
+					node.getAnalysisContext(), new NoEquipment(), fiberAssignment, node));
+		}
+
 		@Override
 		public GraphEdgeAssignment getParentAssignment() {
 			GeneratingNode parentNode = node.getParent() ;
 			if( parentNode != null ) {
-				EquipmentAssignment assignment = parentNode.getEquipmentAssignment() ;
+				EquipmentAssignment assignment = parentNode
+						.getEquipmentAssignment();
 				if( assignment != null ) {
 					return assignment.getGraphAssignment() ;
 				}
@@ -330,45 +379,18 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		}
 
 		
-
-
-
         @Override
-        public Builder setJunctionNode(boolean junctionNode) {
-            node.junctionNode = junctionNode;
-            return this;
+		public GeneratingNode build() {
+			return node.initReclc();
         }
 
-		@Override
-		public Builder setFiber(FiberAssignment fiber) {
-			node.fiberAssignment = fiber;
-			return this;
-		}
+
 
 		@Override
-		public Builder setFiber(FiberType fiberType,
-				Collection<AroEdge<GeoSegment>> fiber) {
-			return setFiber(new DefaultFiberAssignment(fiberType, fiber));
-		}
-
-		@Override
-		public GeneratingNode build() {
-
-			node._recalc();
-
-			node.ctx.addToAnalysis(node);
-
-			if (node.parent != null) {
-				node.parent._addChild(node);
-			}
-
-			return node;
-		}
-
-		@Override
-		public Builder addChild(EquipmentAssignment equipment) {
+		public Builder addChild(FiberAssignment fiberAssignment,
+				EquipmentAssignment equipment) {
 			return new BuilderImpl(new DefaultGeneratingNode(node.ctx,
-					equipment, node));
+					equipment, fiberAssignment, node));
 		}
 
 	}

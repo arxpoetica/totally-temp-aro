@@ -20,6 +20,15 @@ public abstract class AbstractEquipmentAssignment implements
 		super();
 		this.graphAssignment = graphAssignment;
 	}
+	
+	
+
+	@Override
+	public boolean isJunctionNode() {
+		return false;
+	}
+
+
 
 	@Override
 	public boolean isRoot() {

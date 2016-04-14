@@ -10,6 +10,7 @@ public interface EquipmentAssignment extends MaterialAssigment {
 
 	boolean isRoot() ;
 	boolean isSourceEquipment() ;
+	boolean isJunctionNode() ;
 	
 	AroEntity getParentEntity() ;
 	GraphEdgeAssignment getGraphAssignment() ;

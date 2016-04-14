@@ -9,7 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.eclipse.jetty.util.log.Log;
 import org.jgrapht.DirectedGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
@@ -17,6 +20,7 @@ import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
@@ -28,12 +32,17 @@ import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.ParentResolver;
 import com.altvil.aro.service.plan.NetworkModel;
+import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 public class GeneratingNodeAssembler {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(GeneratingNodeAssembler.class.getName());
+
+	
 	private static Map<FiberType, Set<Class<?>>> matchingEquipmentMap = new HashMap<>();
 
 	
@@ -71,11 +80,11 @@ public class GeneratingNodeAssembler {
 		
 		if( graph.edgeSet().size() > 0 ) {
 			depthFirstTraversal(builder,
-					graph.incomingEdgesOf(vertex));
+					graph.incomingEdgesOf(vertex), 1);
 		} 
 		
-		if( getGraphAssignments(builder.getParentAssignment(), vertex).size() > 0 )  {
-			depthFirstTraversal(builder, vertex);
+		if( getGraphAssignments(builder.getParentAssignment(), vertex, 1).size() > 0 )  {
+			depthFirstTraversal(builder, vertex, 1);
 		}
 		
 
@@ -121,10 +130,17 @@ public class GeneratingNodeAssembler {
 	}
 	
 	
-	private Collection<GraphEdgeAssignment> getGraphAssignments(GraphEdgeAssignment parentAssignment, GraphNode vertex) {
+	private Collection<GraphEdgeAssignment> getGraphAssignments(GraphEdgeAssignment parentAssignment, GraphNode vertex, int level) {
 		
 		Predicate<GraphEdgeAssignment> parentPredicate = 
-				parentAssignment == null ? ((ga) -> true) : (ga) -> {
+				parentAssignment == null || level > 1 ? ((ga) -> {
+					if( !ctx.debugVerify(ga.getAroEntity()) ) {
+						log.warn("Duplicate No Parent Node detected " + ga.getAroEntity());
+						return false ;
+					}
+					return true ;
+					
+				}) : (ga) -> {
 					
 					GraphEdgeAssignment pa = parentResolver.getParentAssignment(ga) ;
 					
@@ -132,7 +148,11 @@ public class GeneratingNodeAssembler {
 						System.out.println("Failed ") ;
 					}
 					else {
-						System.out.println( pa.getAroEntity().getObjectId() + " <-> " + parentAssignment.getAroEntity().getObjectId()) ;
+						if( !ctx.debugVerify(ga.getAroEntity()) ) {
+							log.warn("Duplicate Node detected " + ga.getAroEntity());
+							return false ;
+						}
+						System.out.println( pa.getAroEntity() + " <-> " + parentAssignment.getAroEntity()) ;
 					}
 					
 					
@@ -150,17 +170,17 @@ public class GeneratingNodeAssembler {
 	
 	
 	
-	private void depthFirstTraversal(GeneratingNode.Builder builder, GraphNode vertex) {
+	private void depthFirstTraversal(GeneratingNode.Builder builder, GraphNode vertex, int level) {
 
 		GeneratingNode.Builder childBuilder = null;
 		
 		
 		// Basis Equipment Node
-		Collection<GraphEdgeAssignment> gas = getGraphAssignments(builder.getParentAssignment(), vertex);
+		Collection<GraphEdgeAssignment> gas = getGraphAssignments(builder.getParentAssignment(), vertex, level);
 		if (gas.size() > 0) {
 
 			//Partition edges
-			childBuilder = ctx.addNode(fiberType, gas, builder, vertex);
+			childBuilder = ctx.addNode(new DefaultFiberAssignment(fiberType, extractFiberPath()), gas, builder, vertex);
 		
 		}
 
@@ -174,26 +194,21 @@ public class GeneratingNodeAssembler {
 				//
 				AroEdge<GeoSegment> e = edges.iterator().next();
 				fiberPath.add(e);
-				depthFirstTraversal(builder, e.getSourceNode());
+				depthFirstTraversal(builder, e.getSourceNode(), level);
 				return ;
 			} else {
 	
 				if (childBuilder == null) {
 					// TODO create Synthetic
-					childBuilder = ctx.addSplitterNode(builder);
+					
+					childBuilder =  builder.addChild(new DefaultFiberAssignment(fiberType, extractFiberPath()), new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode())) ;
 				}
-	
-				childBuilder.setFiber(fiberType, extractFiberPath());
-	
+				
 				// Induction
-				depthFirstTraversal(childBuilder, edges);
+				depthFirstTraversal(childBuilder, edges, level +1);
 				
 			} 
-		} else {
-			if( childBuilder != null ) {
-				childBuilder.setFiber(fiberType, extractFiberPath());
-			}
-		}
+		} 
 		
 		if( childBuilder != null ) {
 			childBuilder.build() ;
@@ -204,13 +219,13 @@ public class GeneratingNodeAssembler {
 	}
 
 	private void depthFirstTraversal(GeneratingNode.Builder nodeBuilder,
-									 Collection<AroEdge<GeoSegment>> edges) {
+									 Collection<AroEdge<GeoSegment>> edges, int level) {
 
 		//Partition Edges
 		
 		edges.forEach(e -> {
 			fiberPath.add(e);
-			depthFirstTraversal(nodeBuilder, e.getSourceNode());
+			depthFirstTraversal(nodeBuilder, e.getSourceNode(), level);
 		});
 
 	}

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,6 +23,12 @@ public class StreamUtil {
 		return StreamSupport.stream(
 				Spliterators.spliteratorUnknownSize(itr, Spliterator.ORDERED),
 				false);
+	}
+	
+	public static <T> void forEach(Iterable<T> iterable, Consumer<? super T> action) {
+		for(T v : iterable) {
+			action.accept(v) ;
+		}
 	}
 
 	@SafeVarargs
