@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.job.JobService;
+import com.altvil.aro.service.job.JobService.Builder;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.plan.InputRequests;
 import com.altvil.aro.service.plan.PlanService;
-import com.altvil.aro.service.planing.MasterPlanCalculation;
+import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.OptimizationInputs;
@@ -58,11 +59,11 @@ public class OptimizeEndPoint {
 
 		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null ? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs()) ;
 		
-		Future<WirecenterNetworkPlan> f = networkPlanningService.optimizeWirecenter(
-				request.getPlanId(), new InputRequests(),  optimizationInputs, request.getFiberNetworkConstraints());
+		Builder<WirecenterNetworkPlan> f = networkPlanningService.optimizeWirecenter(request.getPlanId(),
+				new InputRequests(), optimizationInputs, request.getFiberNetworkConstraints());
 
 		Job<WirecenterUpdate> job = recalcService.submit(() -> {
-			f.get() ;
+			jobService.submit(f).get();
 			WirecenterUpdate wu = new WirecenterUpdate() ;
 			wu.setWirecenterId(request.getPlanId());
 			return wu ;
@@ -76,11 +77,12 @@ public class OptimizeEndPoint {
 	public @ResponseBody MasterPlanResponse postRecalcMasterPlan(
 			@RequestBody OptimizationPlanRequest request) {
 
-		MasterPlanCalculation mpc = networkPlanningService.planMasterFiber(
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(
 				request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
 
 		Job<MasterPlanUpdate> job = recalcService.submit(() -> {
-			MasterPlanUpdate mpu = mpc.getFuture().get();
+			Future<MasterPlanUpdate> f = mpc.getExecutorService().submit(mpc.getCallable());
+			MasterPlanUpdate mpu = f.get();
 			return mpu;
 		});
 		
@@ -100,13 +102,14 @@ public class OptimizeEndPoint {
 
 		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null ? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs()) ;
 		
-		Future<WirecenterNetworkPlan> f = networkPlanningService.optimizeWirecenter(
+		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(
 				request.getPlanId(), new InputRequests(),  optimizationInputs, request.getFiberNetworkConstraints());
 		
 		Map<String, Object> metaIds = new HashMap<String, Object>();
 		metaIds.put("planId", request.getPlanId());
+		builder.setMetaIdentifiers(metaIds);
 
-		return jobService.add(metaIds, f);
+		return jobService.submit(builder);
 	}
 
 	@RequestMapping(value = "/optimize/wirecenter/complete", method = RequestMethod.POST)
@@ -122,10 +125,10 @@ public class OptimizeEndPoint {
 
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(@RequestBody OptimizationPlanRequest request) {
-		MasterPlanCalculation mpc = networkPlanningService.planMasterFiber(request.getPlanId(), new InputRequests(),
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(request.getPlanId(), new InputRequests(),
 				request.getFiberNetworkConstraints());
 
-		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.add(mpc.getFuture());
+		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.submit(mpc);
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);

@@ -4,8 +4,7 @@ import java.util.Date;
 import java.util.concurrent.Future;
 
 /**
- * A job is an asynchronous computation that has an unique identifier. The
- * JobService will, when provided an id, return a pending or active computation.
+ * A job is an asynchronous computation that has a light-weight identifier that can easily be passed between the front-end and the service layer.
  * 
  * @author Kevin
  *
@@ -13,10 +12,14 @@ import java.util.concurrent.Future;
  */
 public interface Job<T> extends Future<T> {
 	interface Id {
+		long getUid();
+		Object get(String key);
 	}
 
 	Id getId();
 
+	Date getStartedTime();
+	
 	Date getScheduledTime();
 
 	Date getCompletedTime();

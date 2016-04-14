@@ -27,6 +27,7 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
@@ -38,6 +39,7 @@ import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.InputRequests;
 import com.altvil.aro.service.plan.PlanService;
+import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanCalculation;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
@@ -86,13 +88,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
-	public Future<WirecenterNetworkPlan> optimizeWirecenter(long planId,
-			InputRequests inputRequests, OptimizationInputs optimizationInputs,
-			FiberNetworkConstraints constraints) {
-		return this.wirePlanExecutor.submit(createOptimzedCallable(
-				NetworkRequest.create(planId,
-						NetworkRequest.LocationLoadingRequest.ALL),
-				optimizationInputs, constraints));
+	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(long planId, InputRequests inputRequests,
+			OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) {
+		return new JobService.Builder<WirecenterNetworkPlan>().setCallable(createOptimzedCallable(NetworkRequest.create(planId, NetworkRequest.LocationLoadingRequest.ALL),
+						optimizationInputs, constraints)).setExecutorService(executorService);
 	}
 
 	@Override
@@ -146,7 +145,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
-	public MasterPlanCalculation planMasterFiber(long planId,
+	public MasterPlanBuilder planMasterFiber(long planId,
 			InputRequests inputRequests, FiberNetworkConstraints constraints) {
 
 		networkPlanRepository.deleteWireCenterPlans(planId);
@@ -154,9 +153,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		List<Long> ids = StreamUtil.map(
 				networkPlanRepository.computeWirecenterUpdates(planId),
 				Number::longValue);
-
-		Future<MasterPlanUpdate> f = executorService.submit(() -> {
-
+		
+		MasterPlanBuilder builder = new MasterPlanBuilder();
+		builder.setWireCenterPlans(ids);
+		builder.setCallable(() -> {
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
 					.invokeAll(ids.stream()
 							.map(id -> createPlanningCallable(id, constraints))
@@ -170,18 +170,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				}
 			}).filter(p -> p != null).collect(Collectors.toList()));
 		});
+		builder.setExecutorService(executorService);
 
-		return new MasterPlanCalculation() {
-			@Override
-			public List<Long> getWireCenterPlans() {
-				return ids;
-			}
-
-			@Override
-			public Future<MasterPlanUpdate> getFuture() {
-				return f;
-			}
-		};
+		return builder;
 	}
 
 	@Override
