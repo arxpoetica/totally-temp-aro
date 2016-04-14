@@ -32,8 +32,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	private EquipmentAssignment equipmentAssigment;
 	private FiberAssignment fiberAssignment = null;
 	private double capex;
-	private FiberConsumer fiberConsumption;
-	private FiberProducer fiberProduction;
+	private FiberConsumer fiberConsumer;
+	private FiberProducer fiberProducer;
 	private List<GeneratingNode> children;
 	private int recalcMode = 0 ;
 	
@@ -61,12 +61,12 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public FiberProducer getFiberProducer() {
-		return fiberProduction;
+		return fiberProducer;
 	}
 
 	@Override
 	public FiberConsumer getFiberConsumer() {
-		return fiberConsumption;
+		return fiberConsumer;
 	}
 
 	public DefaultGeneratingNode(AnalysisContext ctx,
@@ -123,13 +123,13 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		 * so they take required fiber strands instead of demand coverage
 */
 		
-		this.fiberConsumption = aggregateIncomingFiberStrands(directCoverage);
-		this.fiberProduction = this.equipmentAssigment.createFiberProducer(ctx,
-				this.getFiberAssignment().getFiberType(), fiberConsumption);
+		this.fiberConsumer = aggregateIncomingFiberStrands(directCoverage);
+		this.fiberProducer = this.equipmentAssigment.createFiberProducer(ctx,
+				this.getFiberAssignment().getFiberType(), fiberConsumer);
 
 		this.coverage = calcFiberCoverage(children);
 		
-		double nodeCapex = calculateNodeCapex(fiberConsumption, fiberProduction,
+		double nodeCapex = calculateNodeCapex(fiberConsumer, fiberProducer,
 				this.coverage);
 		
 		double childrenCapex = getChildren().stream()
@@ -247,10 +247,10 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	protected double calculateNodeCapex(FiberConsumer consumer,
 			FiberProducer producer, DemandCoverage coverage) {
-		return equipmentAssigment.getCost(ctx, this.fiberConsumption,
-				this.fiberProduction, coverage)
-				+ fiberAssignment.getCost(ctx, this.fiberConsumption,
-						this.fiberProduction, coverage);
+		return equipmentAssigment.getCost(ctx, this.fiberConsumer,
+				this.fiberProducer, coverage)
+				+ fiberAssignment.getCost(ctx, this.fiberConsumer,
+						this.fiberProducer, coverage);
 	}
 
 	protected void _addChild(GeneratingNode child) {

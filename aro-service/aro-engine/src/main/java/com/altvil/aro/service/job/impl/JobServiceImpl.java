@@ -123,13 +123,11 @@ public class JobServiceImpl implements JobService {
 			future = defaultService.submit(this);
 		}
 
-		@JsonDeserialize(using = JobIdDeserializer.class)
 		void setId(Job.Id id) {
 			this.id = id;
 		}
 
 		@Override
-		@JsonSerialize(using = JobIdSerializer.class)
 		public Id getId() {
 			return id;
 		}

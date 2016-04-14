@@ -33,78 +33,41 @@ import com.altvil.netop.plan.MasterPlanResponse;
 
 @RestController
 public class OptimizeEndPoint {
-	
-	@Autowired
-	private PlanService planService;
 
 	@Autowired
-	private JobService jobService;
-	
-	@Autowired
-	private RecalcService recalcService;
+	private PlanService			   planService;
 
 	@Autowired
-	private NetworkService networkService;
+	private JobService			   jobService;
 
 	@Autowired
-	private SerializationService conversionService;
+	private NetworkService		   networkService;
+
+	@Autowired
+	private SerializationService   conversionService;
 
 	@Autowired
 	private NetworkPlanningService networkPlanningService;
 
-	
 	@RequestMapping(value = "/optimize/wirecenter", method = RequestMethod.POST)
 	public @ResponseBody WirecenterUpdate postRecalcWirecenterPlan(
-			@RequestBody OptimizationPlanRequest request) {
-
-		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null ? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs()) ;
-		
-		Builder<WirecenterNetworkPlan> f = networkPlanningService.optimizeWirecenter(request.getPlanId(),
-				new InputRequests(), optimizationInputs, request.getFiberNetworkConstraints());
-
-		Job<WirecenterUpdate> job = recalcService.submit(() -> {
-			jobService.submit(f).get();
-			WirecenterUpdate wu = new WirecenterUpdate() ;
-			wu.setWirecenterId(request.getPlanId());
-			return wu ;
-		});
-		
-		//Block Call
-		return job.getResponse().getResult() ;
-	}
-
-	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanResponse postRecalcMasterPlan(
-			@RequestBody OptimizationPlanRequest request) {
-
-		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(
-				request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
-
-		Job<MasterPlanUpdate> job = recalcService.submit(() -> {
-			Future<MasterPlanUpdate> f = mpc.getExecutorService().submit(mpc.getCallable());
-			MasterPlanUpdate mpu = f.get();
-			return mpu;
-		});
-		
-		//Block Call
-		job.getResponse() ;
-
-		MasterPlanResponse mpr = new MasterPlanResponse();
-		mpr.setRecalcJob(job.getJob());
-		mpr.setWireCenterids(mpc.getWireCenterPlans());
-
-		return mpr;
+			@RequestBody OptimizationPlanRequest request) throws InterruptedException, ExecutionException {
+		// Start async task
+		com.altvil.aro.service.job.Job<WirecenterNetworkPlan> job = beginRecalcWirecenterPlan(request);
+		// Get task result
+		return completeRecalcWirecenterPlan(job.getId());
 	}
 
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
 	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(
 			@RequestBody OptimizationPlanRequest request) {
 
-		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null ? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs()) ;
-		
-		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(
-				request.getPlanId(), new InputRequests(),  optimizationInputs, request.getFiberNetworkConstraints());
-		
+		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null
+				? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs());
+
+		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(request.getPlanId(),
+				new InputRequests(), optimizationInputs, request.getFiberNetworkConstraints());
+
 		Map<String, Object> metaIds = new HashMap<String, Object>();
 		metaIds.put("planId", request.getPlanId());
 		builder.setMetaIdentifiers(metaIds);
@@ -112,15 +75,23 @@ public class OptimizeEndPoint {
 		return jobService.submit(builder);
 	}
 
-	@RequestMapping(value = "/optimize/wirecenter/complete", method = RequestMethod.POST)
+	@RequestMapping(value = "/optimize/wirecenter/results", method = RequestMethod.POST)
 	public @ResponseBody WirecenterUpdate completeRecalcWirecenterPlan(
 			@RequestBody com.altvil.aro.service.job.Job.Id request) throws InterruptedException, ExecutionException {
 		Future<WirecenterNetworkPlan> f = jobService.get(request);
 		WirecenterNetworkPlan wnp = f.get();
-		
-		WirecenterUpdate wu = new WirecenterUpdate() ;
+
+		WirecenterUpdate wu = new WirecenterUpdate();
 		wu.setWirecenterId(wnp.getPlanId());
-		return wu ;
+		return wu;
+	}
+
+	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(@RequestBody OptimizationPlanRequest request) throws InterruptedException, ExecutionException {
+		// Start the async job
+		MasterPlanJobResponse masterPlanResponse = beginRecalcMasterPlan(request);
+		// Get job results
+		return completeRecalcMasterPlan(masterPlanResponse.getJob().getId());
 	}
 
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
@@ -137,7 +108,7 @@ public class OptimizeEndPoint {
 		return mpr;
 	}
 
-	@RequestMapping(value = "/optimize/masterplan/complete", method = RequestMethod.POST)
+	@RequestMapping(value = "/optimize/masterplan/results", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse completeRecalcMasterPlan(
 			@RequestBody com.altvil.aro.service.job.Job.Id request) throws InterruptedException, ExecutionException {
 		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.get(request);
@@ -151,5 +122,4 @@ public class OptimizeEndPoint {
 
 		return mpr;
 	}
-
 }
