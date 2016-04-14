@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.impl.AnalysisNodeImpl;
 import com.altvil.aro.service.optimize.impl.LazyOptimizedNetwork;
@@ -18,6 +21,9 @@ import com.altvil.interfaces.NetworkAssignment;
 
 public class NetworkConstrainer {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(NetworkConstrainer.class.getName());
+	
 	private NetworkModelBuilder networkModelBuilder;
 	private Predicate<GeneratingNode> generatingNodeConstraint;
 	private Predicate<NetworkAnalysis> constraintMatcher;
@@ -79,7 +85,9 @@ public class NetworkConstrainer {
 				} else {
 					resultAssembler.add(optimizedNetwork);
 					
-					System.out.println("prune ..." + networkAnalysis.getAnalyisNode().getScore()) ;
+					if( log.isTraceEnabled() ) {
+						log.trace("prune ..." + networkAnalysis.getAnalyisNode().getScore()) ;
+					}
 					
 					// TODO after adding support of multiple fiber soudes. maybe
 					// USE GeneratingNode::isValueNode or get rid of it
