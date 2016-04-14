@@ -37,6 +37,12 @@ import com.altvil.utils.StreamUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
+import org.hibernate.internal.util.collections.IdentitySet;
+import org.jgrapht.DirectedGraph;
+
+import java.util.*;
+import java.util.function.Function;
+
 public class GeneratingNodeAssembler {
 
 	private static final Logger log = LoggerFactory
@@ -76,6 +82,8 @@ public class GeneratingNodeAssembler {
 		this.dagModel = createDagModel(vertex, pathEdges);
 		this.graph = this.dagModel.getAsDirectedGraph();
 
+		assert isTree(vertex, graph);
+
 		equipmentMap = createEquipmentMap(ctx.getNetworkModel(), gm);
 		
 		if( graph.edgeSet().size() > 0 ) {
@@ -90,6 +98,26 @@ public class GeneratingNodeAssembler {
 
 	}
 	
+	private boolean isTree(GraphNode vertex, DirectedGraph<GraphNode, AroEdge<GeoSegment>> directedGraph) {
+		Set<Long> knownGraphNodeIds = new HashSet<Long>();
+		Stack<GraphNode> candidates = new Stack<>();
+		
+		candidates.add(vertex);
+		
+		while (!candidates.isEmpty()) {
+			GraphNode candidate = candidates.pop();
+			
+			if (!knownGraphNodeIds.add(candidate.getId())) {
+				System.err.println(candidate.getId() + "; " + candidate);
+				return false;
+			}
+			
+			directedGraph.incomingEdgesOf(candidate).stream().map(AroEdge::getSourceNode).forEach((n) -> {candidates.push(n);});			
+		}
+		
+		return true;
+	}
+
 	private DAGModel<GeoSegment> createDagModel(GraphNode vertex,
 			Collection<AroEdge<GeoSegment>> pathEdges) {
 		
