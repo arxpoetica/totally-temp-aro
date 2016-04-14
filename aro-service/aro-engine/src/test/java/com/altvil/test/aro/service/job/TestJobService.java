@@ -1,4 +1,4 @@
-package com.altvil.aro.service.job.impl;
+package com.altvil.test.aro.service.job;
 
 import static org.junit.Assert.*;
 
