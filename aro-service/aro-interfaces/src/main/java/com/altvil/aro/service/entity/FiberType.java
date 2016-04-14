@@ -2,7 +2,7 @@ package com.altvil.aro.service.entity;
 
 public enum FiberType {
 
-	ROOT("root"), BACKBONE("backbone"), FEEDER("feed"), DAG("dag"), DISTRIBUTION("dist"), GRAPH("graph"), DROP("drop"), UNKNOWN("unknown")
+	ROOT("root"), BACKBONE("backbone"), FEEDER("feed"),  DISTRIBUTION("dist"), DROP("drop"), UNKNOWN("unknown")
 
 	;
 

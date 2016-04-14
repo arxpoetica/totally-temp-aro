@@ -133,12 +133,14 @@ public class GeneratingNodeAssembler {
 	private Collection<GraphEdgeAssignment> getGraphAssignments(GraphEdgeAssignment parentAssignment, GraphNode vertex, int level) {
 		
 		Predicate<GraphEdgeAssignment> parentPredicate = 
-				parentAssignment == null || level > 1 ? ((ga) -> true) : (ga) -> {
-					
+				parentAssignment == null || level > 1 ? ((ga) -> {
 					if( !ctx.debugVerify(ga.getAroEntity()) ) {
-						log.warn("Duplicate Node detected " + ga.getAroEntity());
+						log.warn("Duplicate No Parent Node detected " + ga.getAroEntity());
 						return false ;
 					}
+					return true ;
+					
+				}) : (ga) -> {
 					
 					GraphEdgeAssignment pa = parentResolver.getParentAssignment(ga) ;
 					
@@ -146,6 +148,10 @@ public class GeneratingNodeAssembler {
 						System.out.println("Failed ") ;
 					}
 					else {
+						if( !ctx.debugVerify(ga.getAroEntity()) ) {
+							log.warn("Duplicate Node detected " + ga.getAroEntity());
+							return false ;
+						}
 						System.out.println( pa.getAroEntity() + " <-> " + parentAssignment.getAroEntity()) ;
 					}
 					

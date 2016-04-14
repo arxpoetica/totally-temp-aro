@@ -343,7 +343,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			if (model.isPresent()) {
 
 				Builder builder = DefaultGeneratingNode.build(this,
-						new RootAssignment(null), new DefaultFiberAssignment(FiberType.GRAPH,Collections.emptyList()));
+						new RootAssignment(null), new DefaultFiberAssignment(FiberType.ROOT,Collections.emptyList()));
 
 				//
 				// Builds Sources
