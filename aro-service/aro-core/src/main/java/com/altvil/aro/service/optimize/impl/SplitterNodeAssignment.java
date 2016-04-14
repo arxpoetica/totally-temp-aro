@@ -18,14 +18,17 @@ public class SplitterNodeAssignment extends AbstractEquipmentAssignment {
 		this.junctionNode = junctionNode ;
 	}
 	
+	@Override
+	public boolean isJunctionNode() {
+		return true;
+	}
+	
 	
 	@Override
 	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer,
 			FiberProducer fiberProducer, DemandCoverage coverage) {
 		return 0;
 	}
-
-	
 
 
 	public JunctionNode getJunctionNode() {

@@ -3,7 +3,6 @@ package com.altvil.aro.service.optimize.spi;
 import java.util.Collection;
 
 import com.altvil.aro.service.entity.AroEntity;
-import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
@@ -11,6 +10,8 @@ import com.altvil.aro.service.graph.transform.ftp.HubModel;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.PricingModel;
 import com.altvil.aro.service.optimize.impl.FiberProducerConsumerFactory;
+import com.altvil.aro.service.optimize.impl.SplitterNodeAssignment;
+import com.altvil.aro.service.optimize.model.FiberAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode.Builder;
 import com.altvil.aro.service.plan.NetworkModel;
@@ -19,7 +20,7 @@ public interface AnalysisContext {
 
 	HubModel getHubModel();
 	
-	void debugVerify(AroEntity entity) ;
+	boolean debugVerify(AroEntity entity) ;
 	
 	FiberProducerConsumerFactory getFiberProducerConsumerFactory() ;
 	
@@ -51,10 +52,14 @@ public interface AnalysisContext {
 
 	void removeFromAnalysis(GeneratingNode node);
 
-	Builder addNode(FiberType fiberType,
+	Builder addNode(FiberAssignment fiberAssignment,
 			Collection<GraphEdgeAssignment> assignments,
 			GeneratingNode.Builder parent, GraphNode vertex);
 
-	Builder addSplitterNode(GeneratingNode.Builder parent);
+	SplitterNodeAssignment createSplitterNodeAssignment() ;
+	
+	//Builder addSplitterNode(FiberAssignment fiberAssignment, GeneratingNode.Builder parent);
+	
+	//Builder addCompositeNode(FiberAssignment fiberAssignment, GeneratingNode.Builder parent) ;
 
 }
