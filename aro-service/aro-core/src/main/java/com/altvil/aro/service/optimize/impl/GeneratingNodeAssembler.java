@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Predicate;
 
-import org.eclipse.jetty.util.log.Log;
 import org.jgrapht.DirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,16 +33,9 @@ import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.ParentResolver;
 import com.altvil.aro.service.plan.NetworkModel;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-
-import org.hibernate.internal.util.collections.IdentitySet;
-import org.jgrapht.DirectedGraph;
-
-import java.util.*;
-import java.util.function.Function;
 
 public class GeneratingNodeAssembler {
 
