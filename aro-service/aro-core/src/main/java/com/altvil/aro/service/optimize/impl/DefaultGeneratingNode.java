@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage.Accumulator;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
@@ -17,6 +20,10 @@ import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 
 public class DefaultGeneratingNode implements GeneratingNode {
+	
+	
+	private static final Logger log = LoggerFactory
+			.getLogger(DefaultGeneratingNode.class.getName());
 
 	private DemandCoverage directCoverage;
 	private AnalysisContext ctx;
@@ -126,11 +133,13 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		double childrenCapex = getChildren().stream()
 				.mapToDouble(GeneratingNode::getCapex).sum();
 
-		System.out
-				.println("Capex " + nodeCapex + " => "
-						+ (nodeCapex + childrenCapex) + " coverage = "
-						+ coverage.getDemand() + " fc="
-						+ fiberProducer.getFiberCount());
+		
+		if( log.isTraceEnabled() ) {
+			log.trace("Capex " + nodeCapex + " => "
+							+ (nodeCapex + childrenCapex) + " coverage = "
+							+ coverage.getDemand() + " fc="
+							+ fiberProducer.getFiberCount());
+		}
 
 		this.capex = nodeCapex + childrenCapex;
 

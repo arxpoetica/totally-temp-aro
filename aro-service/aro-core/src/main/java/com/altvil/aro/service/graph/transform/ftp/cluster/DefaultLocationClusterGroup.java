@@ -199,19 +199,23 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				flushAndAssignLocation(d.getPinnedLocation()) ;
 			}
 			
-			if( d.getDemand() > currentCluster.getRemainingDemand() ) {
-				System.out.print("Multi Assignment ") ;
-				while(d.getDemand() > currentCluster.getRemainingDemand() ) {
-					System.out.print(" | ") ;
-					System.out.print(d.getDemand()) ;
-					
-					Pair<PinnedAssignedEntityDemand> pair =  d.split(currentCluster.getRemainingDemand()) ;
-					currentCluster.assign(pair.getHead()) ;
-					flushAndAssignLocation(d.getPinnedLocation()) ;
-					d = pair.getTail() ;
-					
+			if( log.isTraceEnabled() ) {
+				if( d.getDemand() > currentCluster.getRemainingDemand() ) {
+					StringBuffer sb = new StringBuffer() ;
+					sb.append("Multi Assignment ") ;
+					while(d.getDemand() > currentCluster.getRemainingDemand() ) {
+						sb.append(" | ") ;
+						sb.append(d.getDemand()) ;
+						
+						Pair<PinnedAssignedEntityDemand> pair =  d.split(currentCluster.getRemainingDemand()) ;
+						currentCluster.assign(pair.getHead()) ;
+						flushAndAssignLocation(d.getPinnedLocation()) ;
+						d = pair.getTail() ;
+						
+					}
+					sb.append("\n") ;
+					log.trace(sb.toString()) ;
 				}
-				System.out.println("") ;
 			}
 			
 			if( d.getDemand() > 0 ) {
