@@ -286,9 +286,9 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"updated_network_nodes as (\n" + 
 			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
-			"	select np.id, 1, coalesce(ST_Centroid(w.geom), cast(np.area_centroid as geography)), coalesce(st_centroid(w.geom), np.area_centroid) \n" + 
+			"	select np.id, 1, coalesce(cast(st_centroid(w.geom) as geography), cast(np.area_centroid as geography)), coalesce(st_centroid(w.geom), np.area_centroid) \n" + 
 			"	from new_plans np\n" + 
-			"	join aro.wirecenters w on st_contains(w.geom, np.area_centroid)\n" + 
+			"	left join aro.wirecenters w on st_contains(w.geom, np.area_centroid)\n" + 
 			"	returning id, plan_id\n" + 
 			")\n" + 
 			",\n" + 
