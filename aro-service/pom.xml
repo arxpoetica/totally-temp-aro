@@ -335,6 +335,7 @@
         <module>aro-utils</module>
         <module>aro-core</module>
         <module>aro-engine</module>
-        <module>aro-service</module> 
+        <module>aro-service</module>
+        <module>aro-ignite</module>
     </modules>
 </project>
