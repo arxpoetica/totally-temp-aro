@@ -82,11 +82,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     var centroid = plan && plan.area_centroid
     if (centroid) {
       try {
-        map.setZoom(+state.get('mapZoom') || 14)
         map.setCenter(JSON.parse(state.get('mapCenter')))
+        map.setZoom(+state.get('mapZoom') || 14)
       } catch (err) {
-        map.setZoom(14)
         map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
+        map.setZoom(14)
       }
     }
     $location.path(plan ? '/plan/' + plan.id : '/')

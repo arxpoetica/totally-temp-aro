@@ -29,7 +29,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         }
       },
       reload: 'always',
-      threshold: 0
+      threshold: 0,
+      minZoom: 12
     })
   }
 
@@ -53,7 +54,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         }
       },
       reload: 'always',
-      threshold: 0
+      threshold: 0,
+      minZoom: 9
     })
   }
 
@@ -84,7 +86,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         }
       },
       threshold: 13,
-      reload: 'dynamic'
+      reload: 'dynamic',
+      minZoom: 14
     })
   }
 
@@ -100,6 +103,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     if (tool === 'boundaries' && !map_tools.is_visible('boundaries')) {
       $scope.remove_drawing_manager()
     }
+  })
+
+  $rootScope.$on('map_layer_changed_visibility', () => {
+    if (!$scope.$$phase) { $scope.$apply() } // refresh button state
   })
 
   $scope.plan = null
@@ -218,6 +225,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (map_tools.is_visible('area_network_planning')) return
+    if (true) return
+
     var name = event.feature.getProperty('name')
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson((obj) => {

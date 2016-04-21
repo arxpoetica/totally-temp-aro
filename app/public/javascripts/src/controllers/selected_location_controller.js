@@ -158,6 +158,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       type: 'input',
       showCancelButton: true,
       closeOnConfirm: false,
+      showLoaderOnConfirm: true,
       animation: 'slide-from-top',
       inputPlaceholder: 'export'
     }, (name) => {

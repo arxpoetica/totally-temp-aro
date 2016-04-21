@@ -110,6 +110,12 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       name: 'Area netowrk planning',
       short_name: 'A',
       icon: 'fa fa-square-o'
+    },
+    {
+      id: 'financial_profile',
+      name: 'Financial profile',
+      short_name: 'F',
+      icon: 'fa fa-usd'
     }
   ]
 

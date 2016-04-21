@@ -18,6 +18,8 @@ CREATE TABLE aro.locations
 
 SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 
+-- SELECT setval('aro.locations_id_seq', COALESCE((SELECT MAX(id)+1 FROM locations), 1));
+
 -- Load locations from infousa_businesses
 -- ONLY using UES wirecenter for Verizon
 INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geom)

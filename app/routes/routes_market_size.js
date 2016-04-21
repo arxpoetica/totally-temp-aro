@@ -36,14 +36,16 @@ exports.configure = (api, middleware) => {
       },
       (seconds) => console.log('Finished exporting CSV', filename, seconds, 'seconds')
     )
-    return (err, output) => {
+    return (output) => {
       t.stop()
-      if (err) return next(err)
       var fullname = path.join(export_dir, userid + '_' + filename)
-      fs.writeFile(fullname, output.csv, 'utf8', (err) => {
-        if (err) return next(err)
-        response.write('Done')
-        response.end()
+      return new Promise((resolve, reject) => {
+        fs.writeFile(fullname, output.csv, 'utf8', (err) => {
+          if (err) return reject(err)
+          response.write('Done')
+          response.end()
+          resolve()
+        })
       })
     }
   }
@@ -97,7 +99,9 @@ exports.configure = (api, middleware) => {
         customer_type: request.query.customer_type
       }
     }
-    models.MarketSize.exportBusinesses(plan_id, type, options, request.user, export_handler(request, response, next))
+    models.MarketSize.exportBusinesses(plan_id, type, options, request.user)
+      .then(export_handler(request, response, next))
+      .catch(next)
   })
 
   api.get('/market_size/business/:business_id', (request, response, next) => {
@@ -137,7 +141,9 @@ exports.configure = (api, middleware) => {
         customer_type: request.query.customer_type
       }
     }
-    models.MarketSize.exportBusinessesAtLocation(plan_id, location_id, type, options, request.user, export_handler(request, response, next))
+    models.MarketSize.exportBusinessesAtLocation(plan_id, location_id, type, options, request.user)
+      .then(export_handler(request, response, next))
+      .catch(next)
   })
 
   var arr = (value) => _.compact((value || '').split(','))

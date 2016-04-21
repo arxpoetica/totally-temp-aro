@@ -1,4 +1,4 @@
-/* global app google map _ encodeURIComponent config */
+/* global app google map _ encodeURIComponent config document $ */
 'use strict'
 
 app.service('MapLayer', ($http, $rootScope, selection) => {
@@ -32,6 +32,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       this.reload = options.reload
       this.denisty_hue_from = options.denisty_hue_from
       this.denisty_hue_to = options.denisty_hue_to
+      this.minZoom = options.minZoom
 
       var data_layer = this.data_layer
 
@@ -114,6 +115,25 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
           }
         })
       })
+
+      $rootScope.$on('map_zoom_changed', () => this._calculateDisabled())
+      if (map) {
+        map.ready(() => this._calculateDisabled())
+      } else {
+        $(document).ready(() => {
+          map.ready(() => this._calculateDisabled())
+        })
+      }
+    }
+
+    _calculateDisabled () {
+      if (this.minZoom) {
+        if (map.getZoom() < this.minZoom) {
+          this.disable()
+        } else {
+          this.enable()
+        }
+      }
     }
 
     markAsDirty () {
@@ -196,12 +216,11 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
 
     // Load GeoJSON data into the layer if it's not already loaded
     loadData () {
-      var layer = this
-      if (!layer.data_loaded) {
-        if (layer.data) {
-          this.addGeoJson(layer.data)
-          layer.data_loaded = true
-          $rootScope.$broadcast('map_layer_loaded_data', layer)
+      if (!this.data_loaded) {
+        if (this.data) {
+          this.addGeoJson(this.data)
+          this.data_loaded = true
+          $rootScope.$broadcast('map_layer_loaded_data', this)
           this.configure_feature_styles()
         } else if (this.api_endpoint) {
           var bounds = map.getBounds()
@@ -211,10 +230,10 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
             swlat: bounds.getSouthWest().lat(),
             swlon: bounds.getSouthWest().lng(),
             zoom: map.getZoom(),
-            threshold: layer.threshold
+            threshold: this.threshold
           }
           _.extend(params, this.http_params || {})
-          layer.is_loading = true
+          this.is_loading = true
           var carrier = encodeURIComponent(config.client_carrier_name)
           var api_endpoint = this.api_endpoint
                                 .replace(/\:plan_id/g, (plan && plan.id) || 'none')
@@ -225,19 +244,19 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
             params: params
           })
           .success((response) => {
-            layer.is_loading = false
+            this.is_loading = false
             var data = response
             // hide layer to change styles "in background"
-            var visible = layer.visible
-            layer.hide()
-            layer.clearData()
-            layer.addGeoJson(data.feature_collection)
-            layer.metadata = data.metadata
-            layer.data_loaded = true
-            $rootScope.$broadcast('map_layer_loaded_data', layer)
-            layer.configure_feature_styles()
+            var visible = this.visible
+            this.hide()
+            this.clearData()
+            this.addGeoJson(data.feature_collection)
+            this.metadata = data.metadata
+            this.data_loaded = true
+            $rootScope.$broadcast('map_layer_loaded_data', this)
+            this.configure_feature_styles()
             // set the layer visible or not again
-            layer.setVisible(visible)
+            this.setVisible(visible)
           })
         }
       }
@@ -280,9 +299,11 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
         if (_.size(styles) > 0) {
           data.overrideStyle(feature, styles)
         }
-        var density = feature.getProperty('density')
-        maxdensity = Math.max(density, maxdensity)
-        mindensity = Math.min(density, mindensity)
+        if (feature.getGeometry()) {
+          var density = feature.getProperty('density')
+          maxdensity = Math.max(density, maxdensity)
+          mindensity = Math.min(density, mindensity)
+        }
         if (feature.getProperty('selected') === true) {
           this.selectFeature(feature)
         }
@@ -302,7 +323,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
               h = from - Math.round((density / maxdensity) * (from - to))
             }
             var color = 'hsl(' + h + ',100%,50%)'
-            // console.log('%c'+color, 'color: '+color, density);
+            // console.log('%c' + color, 'color: ' + color, density)
             data.overrideStyle(feature, {
               fillOpacity: 0.5,
               fillColor: color,
@@ -320,24 +341,37 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
 
     show () {
       if (this.visible) return
-      this.loadData()
       this.visible = true
       this.configureVisibility()
-      $rootScope.$broadcast('map_layer_changed_visibility', this)
     }
 
     hide () {
       if (!this.visible) return
       this.visible = false
       this.configureVisibility()
-      $rootScope.$broadcast('map_layer_changed_visibility', this)
+    }
+
+    enable () {
+      if (!this.disabled) return
+      this.disabled = false
+      this.configureVisibility()
+    }
+
+    disable () {
+      if (this.disabled) return
+      this.disabled = true
+      this.configureVisibility()
     }
 
     configureVisibility () {
-      if (this.visible) {
-        this.data_layer.setMap(map)
-      } else {
-        this.data_layer.setMap(null)
+      var oldValue = this.data_layer.getMap()
+      var _map = this.visible && !this.disabled ? map : null
+      if (_map) {
+        this.loadData()
+      }
+      this.data_layer.setMap(_map)
+      if (_map !== oldValue) {
+        $rootScope.$broadcast('map_layer_changed_visibility', this)
       }
     }
 
