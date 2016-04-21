@@ -163,7 +163,7 @@ module.exports = class Database {
     var finalSql = `
       WITH features AS (${sql})
       SELECT
-        ${density || 'COUNT(*)'} AS _density,
+        ${density || 'COUNT(*)'}::integer AS density,
         ST_AsGeoJSON(ST_Envelope( ST_SnapToGrid(geom, $${params.length + 2}) ))::json AS geom
       FROM features
       WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)

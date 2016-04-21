@@ -1,4 +1,4 @@
-/* global app google map _ encodeURIComponent config document */
+/* global app google map _ encodeURIComponent config document $ */
 'use strict'
 
 app.service('MapLayer', ($http, $rootScope, selection) => {
@@ -299,9 +299,11 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
         if (_.size(styles) > 0) {
           data.overrideStyle(feature, styles)
         }
-        var density = feature.getProperty('density')
-        maxdensity = Math.max(density, maxdensity)
-        mindensity = Math.min(density, mindensity)
+        if (feature.getGeometry()) {
+          var density = feature.getProperty('density')
+          maxdensity = Math.max(density, maxdensity)
+          mindensity = Math.min(density, mindensity)
+        }
         if (feature.getProperty('selected') === true) {
           this.selectFeature(feature)
         }
@@ -321,7 +323,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
               h = from - Math.round((density / maxdensity) * (from - to))
             }
             var color = 'hsl(' + h + ',100%,50%)'
-            // console.log('%c'+color, 'color: '+color, density);
+            // console.log('%c' + color, 'color: ' + color, density)
             data.overrideStyle(feature, {
               fillOpacity: 0.5,
               fillColor: color,
