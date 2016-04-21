@@ -92,7 +92,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   var search = $('#area-network-planning-search')
   search.select2({
     ajax: {
-      url: '/boundaries/search',
+      url: '/search/boundaries',
       dataType: 'json',
       delay: 250,
       data: (term) => ({ text: term }),
