@@ -40,7 +40,7 @@ install: build_docker_image run_vagrant_docker
 
 run_vagrant_docker:
 	(docker run -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb docker-registry.cloud.altvil.com/aro-service)
-	#(docker run -d -p 8080:8080 --name aro-service --link postgres:arodb aro-service)
+
 install_vagrant: build_docker_image run_vagrant_docker
 
 reinstall_vagrant: uninstall install_vagrant
