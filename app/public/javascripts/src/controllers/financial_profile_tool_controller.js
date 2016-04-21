@@ -6,6 +6,21 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   var charts = {}
 
+  $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (!map_tools.is_visible('financial_profile')) return
+
+    var feature = event.feature
+    if (feature.getGeometry().getType() === 'MultiPolygon') {
+      feature.toGeoJson((obj) => {
+        $scope.selectedArea = {
+          name: feature.getProperty('name'),
+          geog: obj.geometry
+        }
+        $scope.$apply()
+      })
+    }
+  })
+
   showCashFlowChart()
 
   $('#financial_profile_controller .nav-tabs').on('shown.bs.tab', (e) => {

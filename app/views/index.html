@@ -1096,17 +1096,14 @@
 
     <div ng-controller="financial-profile-tool-controller" class="map-tool-wrapper">
       <div ng-show="map_tools.is_visible('financial_profile')" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 800px">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('financial_profile')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('financial_profile')" ng-click="map_tools.collapse('financial_profile')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('financial_profile')" ng-click="map_tools.expand('financial_profile')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
+        <div class="panel-heading">
+          {{ map_tools.get_tool_name('financial_profile') }}
+          {{ selectedArea ? ' · '+selectedArea.name : '' }}
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
-            <ul class="nav nav-tabs" role="tablist">
+            <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
+            <ul class="nav nav-tabs" role="tablist" ng-show="selectedArea">
               <li role="presentation" class="active"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
               <li role="presentation"><a href="#financialProfileBudget" aria-controls="profile" role="tab" data-toggle="tab">Budget</a></li>
               <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
@@ -1115,7 +1112,7 @@
               <li role="presentation"><a href="#financialProfileSubscribers" aria-controls="messages" role="tab" data-toggle="tab">Subscribers</a></li>
               <li role="presentation"><a href="#financialProfileEquipment" aria-controls="messages" role="tab" data-toggle="tab">Equipment</a></li>
             </ul>
-            <div class="tab-content">
+            <div class="tab-content" ng-show="selectedArea">
               <div role="tabpanel" class="tab-pane active" id="financialProfileCashFlow">
                 <br>
                 <p class="text-center"><strong>Cash Flow Summary</strong></p>

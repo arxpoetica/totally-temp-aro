@@ -226,6 +226,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (map_tools.is_visible('area_network_planning')) return
+    if (true) return
 
     var name = event.feature.getProperty('name')
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
