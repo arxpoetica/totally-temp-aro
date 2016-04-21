@@ -128,6 +128,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
           highlightFill: 'rgba(151,187,205,0.75)',
           highlightStroke: 'rgba(151,187,205,1)',
           data: [28, 48, 40, 19, 86, 27, 90]
+        },
+        {
+          label: 'Maintenance/Capacity',
+          fillColor: 'rgba(121,127,121,0.5)',
+          strokeColor: 'rgba(121,127,121,0.8)',
+          highlightFill: 'rgba(121,127,121,0.75)',
+          highlightStroke: 'rgba(121,127,121,1)',
+          data: [28, 48, 40, 19, 86, 27, 90]
         }
       ]
     }
@@ -135,7 +143,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }
-    showChart('financial-profile-chart-capex', 'Bar', data, options)
+    showChart('financial-profile-chart-capex', 'StackedBar', data, options)
   }
 
   function showRevenueChart () {
@@ -157,6 +165,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
           highlightFill: 'rgba(151,187,205,0.75)',
           highlightStroke: 'rgba(151,187,205,1)',
           data: [28, 48, 40, 19, 86, 27, 90]
+        },
+        {
+          label: 'Towers',
+          fillColor: 'rgba(121,127,121,0.5)',
+          strokeColor: 'rgba(121,127,121,0.8)',
+          highlightFill: 'rgba(121,127,121,0.75)',
+          highlightStroke: 'rgba(121,127,121,1)',
+          data: [28, 48, 40, 19, 86, 27, 90]
         }
       ]
     }
@@ -164,7 +180,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }
-    showChart('financial-profile-chart-revenue', 'Bar', data, options)
+    showChart('financial-profile-chart-revenue', 'StackedBar', data, options)
   }
 
   function showPremisesChart () {
@@ -193,7 +209,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }
-    showChart('financial-profile-chart-premises', 'Bar', data, options)
+    showChart('financial-profile-chart-premises', 'StackedBar', data, options)
   }
 
   function showSubscribersChart () {
@@ -215,6 +231,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
           highlightFill: 'rgba(151,187,205,0.75)',
           highlightStroke: 'rgba(151,187,205,1)',
           data: [28, 48, 40, 19, 86, 27, 90]
+        },
+        {
+          label: 'Incremental',
+          fillColor: 'rgba(121,127,121,0.5)',
+          strokeColor: 'rgba(121,127,121,0.8)',
+          highlightFill: 'rgba(121,127,121,0.75)',
+          highlightStroke: 'rgba(121,127,121,1)',
+          data: [28, 48, 40, 19, 86, 27, 90]
         }
       ]
     }
@@ -222,7 +246,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }
-    showChart('financial-profile-chart-subscribers', 'Bar', data, options)
+    showChart('financial-profile-chart-subscribers', 'StackedBar', data, options)
   }
 
   function showPenetrationChart () {
@@ -243,6 +267,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
           strokeColor: 'rgba(151,187,205,0.8)',
           highlightFill: 'rgba(151,187,205,0.75)',
           highlightStroke: 'rgba(151,187,205,1)',
+          data: [28, 48, 40, 19, 86, 27, 90]
+        },
+        {
+          label: 'Towers',
+          fillColor: 'rgba(121,127,121,0.5)',
+          strokeColor: 'rgba(121,127,121,0.8)',
+          highlightFill: 'rgba(121,127,121,0.75)',
+          highlightStroke: 'rgba(121,127,121,1)',
           data: [28, 48, 40, 19, 86, 27, 90]
         }
       ]
