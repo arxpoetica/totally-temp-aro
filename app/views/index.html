@@ -248,14 +248,14 @@
           <div ng-show="number_of_area_layers() > 0 || boundaries.length > 0">
             <h2>View</h2>
             <div ng-repeat="(key, layer) in area_layers">
-              <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
+              <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-class="{ 'disabled': layer.disabled }">
                 <!--
                 <div class="pull-right">
                   <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
                 </div>
                 -->
                 <label>
-                  <input type="checkbox" ng-click="layer.toggleVisibility()"> {{layer.name}}
+                  <input type="checkbox" ng-click="layer.toggleVisibility()" ng-disabled="layer.disabled"> {{layer.name}}
                 </label>
               </div>
             </div>
@@ -617,11 +617,19 @@
               <p><strong>Search or Click Geographies</strong></p>
               <form>
                 <div class="form-group form-group-sm">
-                  <input type="text" class="form-control" placeholder="Search a business">
+                  <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
                 </div>
               </form>
               <p><strong>Selected Geographies</strong></p>
-              <p><em>No geographies selected</em></p>
+              <p ng-hide="selectedGeographies.length > 0"><em>No geographies selected</em></p>
+              <ul ng-show="selectedGeographies.length > 0" style="list-style-type:none; padding:0">
+                <li ng-repeat="geography in selectedGeographies">
+                  <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
+                    <span class="fa fa-trash-o"></span>
+                  </a>
+                  {{ geography.name }}
+                </li>
+              </ul>
             </div>
             <div ng-show="wizardStatus === 'cover'">
               <p><strong>Cover</strong></p>
@@ -1086,6 +1094,178 @@
       </div>
     </div>
 
+    <div ng-controller="financial-profile-tool-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('financial_profile')" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 800px">
+        <div class="panel-heading" ng-bind="map_tools.get_tool_name('financial_profile')">
+          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('financial_profile')" ng-click="map_tools.collapse('financial_profile')">
+            <span style="color:white" class="fa fa-chevron-up"></span>
+          </a>
+          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('financial_profile')" ng-click="map_tools.expand('financial_profile')">
+            <span style="color:white" class="fa fa-chevron-down"></span>
+          </a>
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
+            <ul class="nav nav-tabs" role="tablist">
+              <li role="presentation" class="active"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
+              <li role="presentation"><a href="#financialProfileBudget" aria-controls="profile" role="tab" data-toggle="tab">Budget</a></li>
+              <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
+              <li role="presentation"><a href="#financialProfileRevenue" aria-controls="messages" role="tab" data-toggle="tab">Revenue</a></li>
+              <li role="presentation"><a href="#financialProfilePremises" aria-controls="messages" role="tab" data-toggle="tab">Premises</a></li>
+              <li role="presentation"><a href="#financialProfileSubscribers" aria-controls="messages" role="tab" data-toggle="tab">Subscribers</a></li>
+              <li role="presentation"><a href="#financialProfileEquipment" aria-controls="messages" role="tab" data-toggle="tab">Equipment</a></li>
+            </ul>
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane active" id="financialProfileCashFlow">
+                <br>
+                <p class="text-center"><strong>Cash Flow Summary</strong></p>
+                <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-cash-flow-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileBudget">
+                <br>
+                <p class="text-center"><strong>Budget Allocation</strong></p>
+                <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-budget-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileCapex">
+                <br>
+                <form class="form-inline">
+                  <div class="form-group">
+                    <select class="form-control">
+                      <option>BAU</option>
+                      <option>A long, long, value</option>
+                    </select>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Businesses
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Households
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Towers
+                    </label>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>BAU Capex</strong></p>
+                <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-capex-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileRevenue">
+                <br>
+                <form class="form-inline">
+                  <div class="form-group">
+                    <select class="form-control">
+                      <option>BAU</option>
+                      <option>A long, long, value</option>
+                    </select>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>BAU Revenue</strong></p>
+                <canvas id="financial-profile-chart-revenue" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-revenue-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfilePremises">
+                <br>
+                <form class="form-inline">
+                  <div class="form-group">
+                    <select class="form-control">
+                      <option>BAU</option>
+                      <option>A long, long, value</option>
+                    </select>
+                  </div>
+                </form>
+                <br>
+                <div class="alert alert-info text-center">
+                  <strong>Total</strong>: 12,345
+                  <strong>% Passed</strong>: 12.3
+                  <strong>Cost / Premise</strong>: $123.45
+                  |
+                  <strong>Businesses</strong>: 12,345
+                  <strong>Households</strong>: 12,345
+                  <strong>Towers</strong>: 12,345
+                </div>
+                <form class="form-inline">
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Businesses
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Households
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Towers
+                    </label>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>All Premises Passed</strong></p>
+                <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-premises-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers">
+                <br>
+                <form class="form-inline">
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio"> Businesses
+                    </label>
+                  </div>
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio"> Households
+                    </label>
+                  </div>
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio"> Towers
+                    </label>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>Subscribers</strong></p>
+                <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-subscribers-legend"></div>
+                <br>
+                <p class="text-center"><strong>Penetration</strong></p>
+                <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-penetration-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileEquipment">
+                <br>
+                <form class="form-inline">
+                  <div class="form-group form-group-sm">
+                    <label>Start</label>
+                    <input class="form-control" type="text">
+                  </div>
+                  <div class="form-group form-group-sm" style="margin-left:10px">
+                    <label>End</label>
+                    <input class="form-control" type="text">
+                  </div>
+                </form>
+                <br>
+                <div class="alert alert-info">
+                  <strong>Total cost of Plan</strong>: $123.45
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="map-canvas-wrapper">
       <div id="map-canvas"></div>
     </div>
@@ -1183,6 +1363,7 @@
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
   <script src="javascripts/lib/controllers/area_network_planning_controller.js"></script>
+  <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
@@ -1201,11 +1382,25 @@
       var tooltips = $('#left-col [data-toggle="tooltip"]');
       tooltips.tooltip();
       tooltips.on('click mouseout', function() {
-        $(this).tooltip('hide');
+        $(this).tooltip('hide')
       })
-    });
+    })
 
-    swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> });
+    swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> })
+
+    // prevent tabs from changing the URL
+    $('.nav-tabs a').click((e) => {
+      e.preventDefault()
+      $(this).tab('show')
+    })
+
+    function calculatePanelHeight () {
+      var maxHeight = $(document).height() - 154
+      $('.panel-body').css('max-height', maxHeight)
+    }
+
+    calculatePanelHeight()
+    $(window).resize(calculatePanelHeight)
 
     $("#share-plan-search").select2({
       ajax: {
