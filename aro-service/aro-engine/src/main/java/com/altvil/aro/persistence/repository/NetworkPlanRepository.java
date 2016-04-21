@@ -13,7 +13,10 @@ import com.altvil.aro.model.NetworkPlan;
 public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
-	
+	@Query(value = "SELECT r.wirecenter_id \n" +
+			"FROM client.plan r \n" +
+			"WHERE r.id = :planId", nativeQuery = true)
+	Long queryWirecenterIdForPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n" + 
 			"SELECT\n" + 

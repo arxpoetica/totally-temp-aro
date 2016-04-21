@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteCache;
+import org.apache.ignite.Ignition;
+import org.apache.ignite.configuration.CacheConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,7 @@ import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkRequest;
+import com.altvil.aro.service.network.NetworkRequest.LocationLoadingRequest;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
@@ -36,6 +41,12 @@ public class NetworkServiceImpl implements NetworkService {
 	private NetworkPlanRepository planRepository;
 
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
+	
+	public static final String CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandByWCID";
+	public static final String IGNITE_GRID_NAME = NetworkServiceImpl.class.getSimpleName();
+	private Ignite ignite = Ignition.ignite(IGNITE_GRID_NAME);
+	//TODO configure this grid and its caches via Spring rather than method calls
+	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID = cacheConfigLocationDemandByWCID();
 
 	@Override
 	public NetworkData getNetworkData(NetworkRequest networkRequest) {
@@ -47,6 +58,13 @@ public class NetworkServiceImpl implements NetworkService {
 		networkData.setRoadEdges(getRoadEdges(networkRequest));
 
 		return networkData;
+	}
+
+	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID() {
+		CacheConfiguration<Long, Map<Long, LocationDemand>> cfg = new CacheConfiguration<>(CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID);
+		//TODO configure cache
+		log.warn("Ingite cache using default config for CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID + ")");
+		return cfg;
 	}
 
 	private Collection<NetworkAssignment> toValidAssignments(
@@ -77,25 +95,40 @@ public class NetworkServiceImpl implements NetworkService {
 		}
 	}
 	
-	private List<Object[]> queryLocationDemand(NetworkRequest networkRequest) {
-		switch (networkRequest.getLocationLoadingRequest()) {
-		case SELECTED:
-			return planRepository
-			.queryAllFiberDemand(networkRequest.getPlanId(), networkRequest.getYear()) ;
-		case ALL:
-			return planRepository
-					.queryAllFiberDemand(networkRequest.getPlanId(), networkRequest.getYear()) ;
-		default :
-			return planRepository
-					.queryAllFiberDemand(networkRequest.getPlanId(), networkRequest.getYear()) ;
-	}
+	private Map<Long, LocationDemand> getLocationDemand(NetworkRequest networkRequest) {
+		Map<Long, LocationDemand> locDemands;
+		
+		//determine wirecenter ID
+		Long wcid = getWirecenterIdByPlanId(networkRequest.getPlanId());
+		
+		//retrieve all locations from cache by wirecenter ID
+		//if cache miss, populate the cache by wirecenterID with results of ALL request
+		IgniteCache<Long, Map<Long, LocationDemand>> locDemandCache = ignite.getOrCreateCache(cacheConfigLocationDemandByWCID);
+		if (null != locDemandCache && locDemandCache.containsKey(wcid)) 
+		{
+			locDemands = locDemandCache.get(wcid);
+		}
+		else
+		{
+			locDemands = queryLocationDemand(networkRequest);
+			locDemandCache.put(wcid, locDemands);
+		}
+		
+		//if SELECTED request, filter them
+		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
+		{
+			//TODO filter locations
+			log.warn("LocationDemand not yet being filtered for SELECTED requests");
+		}
+		//return results
+		return locDemands;
 	}
 
-	private Map<Long, LocationDemand> getLocationDemand(
+	private Map<Long, LocationDemand> queryLocationDemand(
 			NetworkRequest networkRequest) {
 
 		Map<Long, LocationDemand> map = new HashMap<>();
-		queryLocationDemand(networkRequest)
+		planRepository.queryAllFiberDemand(networkRequest.getPlanId(), networkRequest.getYear())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
@@ -112,10 +145,14 @@ public class NetworkServiceImpl implements NetworkService {
 		return map;
 
 	}
+	
+	private Long getWirecenterIdByPlanId(long planId) 
+	{
+		return planRepository.queryWirecenterIdForPlanId(planId);
+	}
 
-	private Collection<NetworkAssignment> getLocations(
-			NetworkRequest networkRequest) {
-
+	private Collection<NetworkAssignment> getLocations(NetworkRequest networkRequest) 
+	{
 		Map<Long, LocationDemand> demandMap = getLocationDemand(networkRequest);
 
 		return toValidAssignments(queryLocations(networkRequest)
