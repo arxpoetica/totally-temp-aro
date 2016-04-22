@@ -69,8 +69,10 @@ public class NetworkServiceImpl implements NetworkService {
 		//determine wirecenter ID
 		Long wcid = getWirecenterIdByPlanId(networkRequest.getPlanId());
 		
+		//TODO MEDIUM Compare performance
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(networkRequest, wcid));
 		networkData.setRoadLocations(getRoadLocationNetworkAssignments(networkRequest, wcid));
+		//TODO HIGH cache RoadEdges
 		networkData.setRoadEdges(getRoadEdges(networkRequest));
 
 		return networkData;
@@ -125,7 +127,7 @@ public class NetworkServiceImpl implements NetworkService {
 		{
 			locDemands = queryLocationDemand(networkRequest);
 			locDemandCache.put(wirecenterId, locDemands);
-			//TODO implement an eviction policy
+			//TODO HIGH implement an eviction policy
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(locDemandCache);
@@ -224,7 +226,7 @@ public class NetworkServiceImpl implements NetworkService {
 		{
 			roadLocations = queryRoadLocations(networkRequest);
 			roadLocCache.put(wirecenterId, roadLocations);
-			//TODO implement an eviction policy
+			//TODO HIGH implement an eviction policy
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(roadLocCache);
@@ -232,7 +234,7 @@ public class NetworkServiceImpl implements NetworkService {
 		//if SELECTED request, filter them
 		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
 		{
-			//TODO filter roadlocations, which used to be differentiated by these queries:
+			//TODO HIGH filter roadlocations, which used to be differentiated by these queries:
 			/*
 			case SELECTED:
 				return planRepository.queryLinkedLocations(networkRequest.getPlanId()) ;
@@ -330,7 +332,7 @@ public class NetworkServiceImpl implements NetworkService {
 		{
 			fiberSourceLocations = queryFiberSources(networkRequest);
 			fiberSourceLocCache.put(wirecenterId, fiberSourceLocations);
-			//TODO implement an eviction policy
+			//TODO HIGH implement an eviction policy
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(fiberSourceLocCache);
