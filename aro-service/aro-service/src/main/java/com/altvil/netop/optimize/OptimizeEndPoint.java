@@ -1,5 +1,6 @@
 package com.altvil.netop.optimize;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.JobService.Builder;
 import com.altvil.aro.service.network.NetworkService;
@@ -26,7 +28,6 @@ import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.OptimizationInputs;
 import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.recalc.Job;
 import com.altvil.aro.service.recalc.RecalcService;
 import com.altvil.netop.plan.MasterPlanJobResponse;
 import com.altvil.netop.plan.MasterPlanResponse;
@@ -50,22 +51,20 @@ public class OptimizeEndPoint {
 	private NetworkPlanningService networkPlanningService;
 
 	@RequestMapping(value = "/optimize/wirecenter", method = RequestMethod.POST)
-	public @ResponseBody WirecenterUpdate postRecalcWirecenterPlan(
-			@RequestBody OptimizationPlanRequest request) throws InterruptedException, ExecutionException {
+	public @ResponseBody WirecenterUpdate postRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlanRequest request) throws InterruptedException, ExecutionException {
 		// Start async task
-		com.altvil.aro.service.job.Job<WirecenterNetworkPlan> job = beginRecalcWirecenterPlan(request);
+		com.altvil.aro.service.job.Job<WirecenterNetworkPlan> job = beginRecalcWirecenterPlan(requestor, request);
 		// Get task result
 		return completeRecalcWirecenterPlan(job.getId());
 	}
 
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
-	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(
-			@RequestBody OptimizationPlanRequest request) {
+	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlanRequest request) {
 
 		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null
 				? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs());
 
-		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(request.getPlanId(),
+		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(requestor, request.getPlanId(),
 				new InputRequests(), optimizationInputs, request.getFiberNetworkConstraints());
 
 		Map<String, Object> metaIds = new HashMap<String, Object>();
@@ -78,7 +77,7 @@ public class OptimizeEndPoint {
 	@RequestMapping(value = "/optimize/wirecenter/results", method = RequestMethod.POST)
 	public @ResponseBody WirecenterUpdate completeRecalcWirecenterPlan(
 			@RequestBody com.altvil.aro.service.job.Job.Id request) throws InterruptedException, ExecutionException {
-		Future<WirecenterNetworkPlan> f = jobService.get(request);
+		Job<WirecenterNetworkPlan> f = jobService.get(request);
 		WirecenterNetworkPlan wnp = f.get();
 
 		WirecenterUpdate wu = new WirecenterUpdate();
@@ -87,16 +86,16 @@ public class OptimizeEndPoint {
 	}
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(@RequestBody OptimizationPlanRequest request) throws InterruptedException, ExecutionException {
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody OptimizationPlanRequest request) throws InterruptedException, ExecutionException {
 		// Start the async job
-		MasterPlanJobResponse masterPlanResponse = beginRecalcMasterPlan(request);
+		MasterPlanJobResponse masterPlanResponse = beginRecalcMasterPlan(requestor, request);
 		// Get job results
 		return completeRecalcMasterPlan(masterPlanResponse.getJob().getId());
 	}
 
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(@RequestBody OptimizationPlanRequest request) {
-		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(request.getPlanId(), new InputRequests(),
+	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(Principal requestor, @RequestBody OptimizationPlanRequest request) {
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), new InputRequests(),
 				request.getFiberNetworkConstraints());
 
 		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.submit(mpc);

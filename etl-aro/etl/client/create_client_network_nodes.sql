@@ -39,7 +39,9 @@ INSERT INTO client.network_nodes (node_type_id, geog, geom)
     -- North Collins, NY (RURAL)
     wirecenters.wirecenter = 'NCLNNYNO';
 
-
+-- Round the CO coordinates so that they are near, but not on, the centroid
+--update client.network_nodes set geog = st_setsrid(st_makepoint(round(st_x(geog::geometry)::numeric, 2), round(st_y(geog::geometry)::numeric, 2)), st_srid(geog)) where plan_id is null and node_type_id = 1;
+--update client.network_nodes set geom = st_setsrid(st_makepoint(round(st_x(geom::geometry)::numeric, 2), round(st_y(geom::geometry)::numeric, 2)), st_srid(geom)) where plan_id is null and node_type_id = 1;
 
 CREATE INDEX client_network_nodes_geom_gist ON client.network_nodes USING gist (geom);
 CREATE INDEX client_network_nodes_geog_gist ON client.network_nodes USING gist (geog);

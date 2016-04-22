@@ -2,6 +2,7 @@ package com.altvil.test.aro.service.job;
 
 import static org.junit.Assert.*;
 
+import java.security.Principal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,8 @@ import com.altvil.aro.service.job.JobService;
 @ContextConfiguration(locations = { "/EngineTest-context.xml"})
 public class TestJobService {
 	static ExecutorService executorService;
+	static Principal user1 = new TestPrincipal("Kevin");
+	static Principal user2 = new TestPrincipal("Greiner");
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -65,11 +68,11 @@ public class TestJobService {
 	public void testGetRemainingJobs() {
 		assertTrue(js.getRemainingJobs().isEmpty());
 
-		js.submit(new JobService.Builder<Void>().setCallable(new TestCallable<>(1000)));
+		js.submit(new JobService.Builder<Void>(user1).setCallable(new TestCallable<>(1000)));
 
 		assertEquals(1, js.getRemainingJobs().size());
 
-		js.submit(new JobService.Builder<Void>().setCallable(new TestCallable<>(2000)));
+		js.submit(new JobService.Builder<Void>(user1).setCallable(new TestCallable<>(2000)));
 
 		assertEquals(2, js.getRemainingJobs().size());
 
@@ -80,7 +83,7 @@ public class TestJobService {
 	public void testSubmitCallableOfT() throws InterruptedException, ExecutionException {
 		final int result = 5;
 		final int duration = 1000;
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>().setCallable(new TestCallable<>(duration, result)));
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user1).setCallable(new TestCallable<>(duration, result)));
 
 		assertEquals(result, job.get().intValue());
 
@@ -93,7 +96,7 @@ public class TestJobService {
 	public void testSubmitCallableOfTExecutorService() throws InterruptedException, ExecutionException {
 		final int result = 5;
 		final int duration = 1000;
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>().setCallable(new TestCallable<>(duration, result)).setExecutorService(executorService));
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user2).setCallable(new TestCallable<>(duration, result)).setExecutorService(executorService));
 
 		assertEquals(result, job.get().intValue());
 
@@ -109,7 +112,7 @@ public class TestJobService {
 		final Map<String, Object> meta = new HashMap<>();
 		meta.put("key1", 15);
 
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>().setCallable(new TestCallable<>(duration, result)).setMetaIdentifiers(meta).setExecutorService(executorService));
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user2).setCallable(new TestCallable<>(duration, result)).setMetaIdentifiers(meta).setExecutorService(executorService));
 
 		assertEquals(result, job.get().intValue());
 
@@ -151,3 +154,17 @@ class TestCallable<T> implements Callable<T> {
 		return result;
 	}
 }
+
+class TestPrincipal implements Principal {
+	private final String name;
+	
+	public TestPrincipal(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+}
+

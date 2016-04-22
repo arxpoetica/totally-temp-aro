@@ -1,5 +1,6 @@
 package com.altvil.aro.service.planing.impl;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -88,9 +89,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
-	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(long planId, InputRequests inputRequests,
+	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal username, long planId, InputRequests inputRequests,
 			OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) {
-		return new JobService.Builder<WirecenterNetworkPlan>().setCallable(createOptimzedCallable(NetworkRequest.create(planId, NetworkRequest.LocationLoadingRequest.ALL),
+		return new JobService.Builder<WirecenterNetworkPlan>(username).setCallable(createOptimzedCallable(NetworkRequest.create(planId, NetworkRequest.LocationLoadingRequest.ALL),
 						optimizationInputs, constraints)).setExecutorService(executorService);
 	}
 
@@ -145,7 +146,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
-	public MasterPlanBuilder planMasterFiber(long planId,
+	public MasterPlanBuilder planMasterFiber(Principal username, long planId,
 			InputRequests inputRequests, FiberNetworkConstraints constraints) {
 
 		networkPlanRepository.deleteWireCenterPlans(planId);
@@ -154,7 +155,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				networkPlanRepository.computeWirecenterUpdates(planId),
 				Number::longValue);
 		
-		MasterPlanBuilder builder = new MasterPlanBuilder();
+		MasterPlanBuilder builder = new MasterPlanBuilder(username);
 		builder.setWireCenterPlans(ids);
 		builder.setCallable(() -> {
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor

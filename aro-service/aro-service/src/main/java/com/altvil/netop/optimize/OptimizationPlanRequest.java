@@ -4,7 +4,6 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planing.OptimizationInputs;
 
 public class OptimizationPlanRequest {
-	
 	private long planId;
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private OptimizationInputs optimizationInputs = OptimizationInputs.DEFAULT ;

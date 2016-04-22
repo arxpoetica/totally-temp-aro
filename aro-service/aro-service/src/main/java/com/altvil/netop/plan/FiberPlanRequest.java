@@ -3,10 +3,9 @@ package com.altvil.netop.plan;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 
 public class FiberPlanRequest {
-
-	private long planId;
-	private FiberNetworkConstraints fiberNetworkConstraints;
-	private String algorithm ;
+	private long					planId;
+	private FiberNetworkConstraints	fiberNetworkConstraints;
+	private String					algorithm;
 
 	public long getPlanId() {
 		return planId;
@@ -20,8 +19,7 @@ public class FiberPlanRequest {
 		return fiberNetworkConstraints;
 	}
 
-	public void setFiberNetworkConstraints(
-			FiberNetworkConstraints fiberNetworkConstraints) {
+	public void setFiberNetworkConstraints(FiberNetworkConstraints fiberNetworkConstraints) {
 		this.fiberNetworkConstraints = fiberNetworkConstraints;
 	}
 
@@ -32,11 +30,5 @@ public class FiberPlanRequest {
 	public void setAlgorithm(String algorithm) {
 		this.algorithm = algorithm;
 	}
-	
-	
-	
-	
-	
-	
 
 }

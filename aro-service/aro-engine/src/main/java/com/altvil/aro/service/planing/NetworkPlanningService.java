@@ -1,5 +1,6 @@
 package com.altvil.aro.service.planing;
 
+import java.security.Principal;
 import java.util.concurrent.Future;
 
 import com.altvil.aro.service.job.JobService;
@@ -14,13 +15,13 @@ public interface NetworkPlanningService {
 			FiberNetworkConstraints constraints);
 	
 	
-	JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(long planId,
+	JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal requestor, long planId,
 			InputRequests inputRequests, OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) ;
 
 
 	MasterPlanCalculation optimizeMasterFiber(long planId,
 			InputRequests inputRequests, OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) ;
 	
-	MasterPlanBuilder planMasterFiber(long planId,
+	MasterPlanBuilder planMasterFiber(Principal requestor, long planId,
 			InputRequests inputRequests, FiberNetworkConstraints constraints);
 }
