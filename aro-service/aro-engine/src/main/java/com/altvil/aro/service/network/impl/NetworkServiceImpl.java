@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
@@ -50,15 +51,29 @@ public class NetworkServiceImpl implements NetworkService {
 	public static final String CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandsByWCID";
 	public static final String CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadLocationsByWCID";
 	public static final String CACHE_FIBER_SOURCES_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_FiberSourcesByWCID";
+	public static final String CACHE_ROAD_EDGES_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadEdgesByWCID";
 	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID = cacheConfigLocationDemandByWCID();
 	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID = cacheConfigRoadLocationsByWCID();
 	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID = cacheConfigFiberSourcesByWCID();
+	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID = cacheConfigRoadEdgesByWCID();
 
 	@PostConstruct
 	private void postConstruct()
 	{
-		//TODO configure via main Spring file
+		//TODO configure and instantiate via main Spring file.  Get handle here via something like Ignition.ignite($instanceName).
+		//TODO use client-mode Ignite instance here once a node cluster infrastructure is in place 
 		ignite = Ignition.start("/aroServlet-IgniteConfig.xml");
+	}
+	
+	@PreDestroy
+	private void preDestroy()
+	{
+		//NOTE: it does NOT make sense here to explicitly stop the Ignite grid, as it may be shared with other processes
+		//TODO MEDIUM move cache destruction to shutdown of entire grid, as a single NetworkServiceImpl destroy should/need not destroy caches
+		ignite.destroyCache(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
+		ignite.destroyCache(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
+		ignite.destroyCache(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
+		ignite.destroyCache(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
 	}
 	
 	@Override
@@ -72,8 +87,7 @@ public class NetworkServiceImpl implements NetworkService {
 		//TODO MEDIUM Compare performance
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(networkRequest, wcid));
 		networkData.setRoadLocations(getRoadLocationNetworkAssignments(networkRequest, wcid));
-		//TODO HIGH cache RoadEdges
-		networkData.setRoadEdges(getRoadEdges(networkRequest));
+		networkData.setRoadEdges(getRoadEdges(networkRequest, wcid));
 
 		return networkData;
 	}
@@ -96,6 +110,13 @@ public class NetworkServiceImpl implements NetworkService {
 		CacheConfiguration<Long, Collection<NetworkAssignment>> cfg = new CacheConfiguration<>(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
 		//TODO configure cache
 		log.warn("Ingite cache using default config for CACHE_FIBER_SOURCES_BY_WIRECENTER_ID (" + CACHE_FIBER_SOURCES_BY_WIRECENTER_ID + ")");
+		return cfg;
+	}
+
+	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID() {
+		CacheConfiguration<Long, Collection<RoadEdge>> cfg = new CacheConfiguration<>(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
+		//TODO configure cache
+		log.warn("Ingite cache using default config for CACHE_ROAD_EDGES_BY_WIRECENTER_ID (" + CACHE_ROAD_EDGES_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
@@ -345,7 +366,7 @@ public class NetworkServiceImpl implements NetworkService {
 		gid, tlid, tnidf, tnidt, shape, edge_length
 	}
 
-	private Collection<RoadEdge> getRoadEdges(NetworkRequest networkRequest) {
+	private Collection<RoadEdge> queryRoadEdges(NetworkRequest networkRequest) {
 		return planRepository
 				.queryRoadEdgesbyPlanId(networkRequest.getPlanId())
 				.stream()
@@ -364,15 +385,31 @@ public class NetworkServiceImpl implements NetworkService {
 						return null;
 					}
 				}).filter(e -> e != null).collect(Collectors.toList());
-
+		
 	}
+	
+	private Collection<RoadEdge> getRoadEdges(NetworkRequest networkRequest, Long wirecenterId) {
+		Collection<RoadEdge> roadEdges;
+		
+		//retrieve all locations from cache by wirecenter ID
+		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-	@Override
-	protected void finalize() throws Throwable 
-	{
-		ignite.destroyCache(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
-		ignite.destroyCache(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
-		ignite.destroyCache(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
-		super.finalize();
+		IgniteCache<Long, Collection<RoadEdge>> roadEdgesCache = ignite.getOrCreateCache(cacheConfigRoadEdgesByWCID);
+		//TODO adjust the cache population strategy to one which supports hit/miss metrics
+		if (null != roadEdgesCache && roadEdgesCache.containsKey(wirecenterId)) 
+		{
+			roadEdges = roadEdgesCache.get(wirecenterId);
+		}
+		else
+		{
+			roadEdges = queryRoadEdges(networkRequest);
+			roadEdgesCache.put(wirecenterId, roadEdges);
+			//TODO HIGH implement an eviction policy
+		}
+		
+		if (log.isDebugEnabled()) logCacheStats(roadEdgesCache);
+				
+		//return results
+		return roadEdges;
 	}
 }
