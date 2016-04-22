@@ -93,8 +93,9 @@ module.exports = class Database {
         WITH features AS (${sql})
         SELECT
           -- COUNT(*) AS density,
-          ST_AsGeoJSON(ST_ConvexHull(ST_Collect( geom )))::json AS geom
+          ST_AsGeoJSON(ST_ConvexHull(ST_Collect( geom )))::json AS geom,
           -- ST_AsText( ST_Centroid(ST_Collect( geom )) ) AS centroid
+          '{ "path": 0, "scale": 3, "strokeColor": "blue" }'::json AS icon
         FROM features
         WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
         GROUP BY ST_SnapToGrid(geom, $${params.length + 2})

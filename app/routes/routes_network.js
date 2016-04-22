@@ -103,7 +103,7 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/boundaries/search', (request, response, next) => {
+  api.get('/search/boundaries', (request, response, next) => {
     var text = request.query.text
     models.Network.searchBoundaries(text)
       .then(jsonSuccess(response, next))

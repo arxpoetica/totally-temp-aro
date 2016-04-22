@@ -9,7 +9,7 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
   var search = $('#search_controller input')
   search.select2({
     ajax: {
-      url: '/locations/search',
+      url: '/search/locations',
       dataType: 'json',
       delay: 250,
       data: (term) => ({ text: term }),

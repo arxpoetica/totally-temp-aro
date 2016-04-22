@@ -93,7 +93,7 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/locations/search', (request, response, next) => {
+  api.get('/search/locations', (request, response, next) => {
     var text = request.query.text
     models.Location.search(text)
       .then(jsonSuccess(response, next))
