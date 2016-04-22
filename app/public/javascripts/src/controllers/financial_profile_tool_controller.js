@@ -70,6 +70,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
           highlightFill: 'rgba(151,187,205,0.75)',
           highlightStroke: 'rgba(151,187,205,1)',
           data: [28, 48, 40, 19, 86, 27, 90]
+        },
+        {
+          label: 'Incremental',
+          fillColor: 'rgba(121,127,121,0.5)',
+          strokeColor: 'rgba(121,127,121,0.8)',
+          highlightFill: 'rgba(121,127,121,0.75)',
+          highlightStroke: 'rgba(121,127,121,1)',
+          data: [28, 48, 40, 19, 86, 27, 90]
         }
       ]
     }
