@@ -7,9 +7,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
+import org.apache.ignite.cache.CacheMetrics;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +45,19 @@ public class NetworkServiceImpl implements NetworkService {
 
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
 	
+	
+	private Ignite ignite;
+	//TODO configure grid caches via Spring rather than method calls
 	public static final String CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandByWCID";
-	public static final String IGNITE_GRID_NAME = NetworkServiceImpl.class.getSimpleName();
-	private Ignite ignite = Ignition.ignite(IGNITE_GRID_NAME);
-	//TODO configure this grid and its caches via Spring rather than method calls
 	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID = cacheConfigLocationDemandByWCID();
 
+	@PostConstruct
+	private void postConstruct()
+	{
+		//TODO configure via main Spring file
+		ignite = Ignition.start("/aroServlet-IgniteConfig.xml");
+	}
+	
 	@Override
 	public NetworkData getNetworkData(NetworkRequest networkRequest) {
 
@@ -103,6 +113,7 @@ public class NetworkServiceImpl implements NetworkService {
 		
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
+
 		IgniteCache<Long, Map<Long, LocationDemand>> locDemandCache = ignite.getOrCreateCache(cacheConfigLocationDemandByWCID);
 		if (null != locDemandCache && locDemandCache.containsKey(wcid)) 
 		{
@@ -114,6 +125,8 @@ public class NetworkServiceImpl implements NetworkService {
 			locDemandCache.put(wcid, locDemands);
 		}
 		
+		if (log.isDebugEnabled()) logCacheStats(locDemandCache);
+				
 		//if SELECTED request, filter them
 		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
 		{
@@ -122,6 +135,15 @@ public class NetworkServiceImpl implements NetworkService {
 		}
 		//return results
 		return locDemands;
+	}
+	
+	private void logCacheStats(IgniteCache<?, ?> cache)
+	{
+		CacheMetrics cm = cache.metrics();
+		log.debug("*************** Cache: " + cache.getName());
+		log.debug("Hits: " + cm.getCacheHits());
+		log.debug("Miss: " + cm.getCacheMisses());
+		log.debug("Size: " + cm.getSize());
 	}
 
 	private Map<Long, LocationDemand> queryLocationDemand(
@@ -268,4 +290,10 @@ public class NetworkServiceImpl implements NetworkService {
 
 	}
 
+	@Override
+	protected void finalize() throws Throwable 
+	{
+		ignite.destroyCache(CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID);
+		super.finalize();
+	}
 }
