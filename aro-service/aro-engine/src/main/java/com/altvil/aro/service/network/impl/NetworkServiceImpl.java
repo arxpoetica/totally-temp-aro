@@ -49,7 +49,9 @@ public class NetworkServiceImpl implements NetworkService {
 	private Ignite ignite;
 	//TODO configure grid caches via Spring rather than method calls
 	public static final String CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandByWCID";
+	public static final String CACHE_ROAD_LOCATION_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadLocationByWCID";
 	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID = cacheConfigLocationDemandByWCID();
+	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID = cacheConfigRoadLocationsByWCID();
 
 	@PostConstruct
 	private void postConstruct()
@@ -64,7 +66,7 @@ public class NetworkServiceImpl implements NetworkService {
 		NetworkData networkData = new NetworkData();
 
 		networkData.setFiberSources(getFiberSources(networkRequest));
-		networkData.setRoadLocations(getLocations(networkRequest));
+		networkData.setRoadLocations(getNetworkAssignments(networkRequest));
 		networkData.setRoadEdges(getRoadEdges(networkRequest));
 
 		return networkData;
@@ -74,6 +76,13 @@ public class NetworkServiceImpl implements NetworkService {
 		CacheConfiguration<Long, Map<Long, LocationDemand>> cfg = new CacheConfiguration<>(CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID);
 		//TODO configure cache
 		log.warn("Ingite cache using default config for CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID + ")");
+		return cfg;
+	}
+
+	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID() {
+		CacheConfiguration<Long, Map<Long, RoadLocation>> cfg = new CacheConfiguration<>(CACHE_ROAD_LOCATION_BY_WIRECENTER_ID);
+		//TODO configure cache
+		log.warn("Ingite cache using default config for CACHE_ROAD_LOCATION_BY_WIRECENTER_ID (" + CACHE_ROAD_LOCATION_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
@@ -88,21 +97,6 @@ public class NetworkServiceImpl implements NetworkService {
 
 	private enum LoctationDemandMap implements OrdinalAccessor {
 		location_id, buesiness_fiber, tower_fiber, household_fiber
-	}
-
-	private List<Object[]> queryLocations(
-			NetworkRequest networkRequest) {
-		switch (networkRequest.getLocationLoadingRequest()) {
-			case SELECTED:
-				return planRepository
-				.queryLinkedLocations(networkRequest.getPlanId()) ;
-			case ALL:
-				return planRepository
-				.queryAllLocationsByPlanId(networkRequest.getPlanId()) ;
-			default :
-				return planRepository
-						.queryLinkedLocations(networkRequest.getPlanId()) ;
-		}
 	}
 	
 	private Map<Long, LocationDemand> getLocationDemand(NetworkRequest networkRequest) {
@@ -123,6 +117,7 @@ public class NetworkServiceImpl implements NetworkService {
 		{
 			locDemands = queryLocationDemand(networkRequest);
 			locDemandCache.put(wcid, locDemands);
+			//TODO implement an eviction policy
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(locDemandCache);
@@ -140,10 +135,10 @@ public class NetworkServiceImpl implements NetworkService {
 	private void logCacheStats(IgniteCache<?, ?> cache)
 	{
 		CacheMetrics cm = cache.metrics();
-		log.debug("*************** Cache: " + cache.getName());
-		log.debug("Hits: " + cm.getCacheHits());
-		log.debug("Miss: " + cm.getCacheMisses());
-		log.debug("Size: " + cm.getSize());
+		log.debug("**Cache: " + cache.getName() + " Hit:" + cm.getCacheHits() + " Miss:" + cm.getCacheMisses() + " Size:" + cm.getSize());
+//		String logString = "**Cache: " + cache.getName() + " Hit:" + cm.getCacheHits() + " Miss:" + cm.getCacheMisses() + " Size:" + cm.getSize();
+//		log.debug(logString);
+//		System.out.println(logString);
 	}
 
 	private Map<Long, LocationDemand> queryLocationDemand(
@@ -173,49 +168,100 @@ public class NetworkServiceImpl implements NetworkService {
 		return planRepository.queryWirecenterIdForPlanId(planId);
 	}
 
-	private Collection<NetworkAssignment> getLocations(NetworkRequest networkRequest) 
+	private Map<Long, RoadLocation> queryRoadLocations(NetworkRequest networkRequest)
 	{
-		Map<Long, LocationDemand> demandMap = getLocationDemand(networkRequest);
+		Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
+		planRepository
+		.queryAllLocationsByPlanId(networkRequest.getPlanId())
+		.stream()
+		.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+		.forEach(result -> {
+			long tlid = result.getLong(LocationMap.tlid);
+			Long locationId = result.getLong(LocationMap.id);				
+			try {
+				RoadLocation rl = RoadLocationImpl
+					.build()
+					.setTlid(tlid)
+					.setLocationPoint(
+							result.getPoint(LocationMap.point))
+					.setRoadSegmentPositionRatio(
+							result.getDouble(LocationMap.ratio))
+					.setRoadSegmentClosestPoint(
+							result.getPoint(LocationMap.intersect_point))
+					.setDistanceFromRoadSegmentInMeters(
+							result.getDouble(LocationMap.distance))
+					.build(); //TODO why build() twice? does second produce a deep clone?
 
-		return toValidAssignments(queryLocations(networkRequest)
-				.stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-				.map(result -> {
-					try {
+				roadLocationsMap.put(locationId, rl);
+			} catch (Throwable err) {
+				log.error("Failed creating RoadLocation for locationId " + locationId + " due to: " + err.getMessage(), err);
+			}
+		});
+		return roadLocationsMap;
+	}
+	
+	private Map<Long, RoadLocation> getNetworkLocations(NetworkRequest networkRequest) {
+		Map<Long, RoadLocation> roadLocations;
+		
+		//determine wirecenter ID
+		Long wcid = getWirecenterIdByPlanId(networkRequest.getPlanId());
+		
+		//retrieve all locations from cache by wirecenter ID
+		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-						long tlid = result.getLong(LocationMap.tlid);
+		IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByWCID);
+		//TODO adjust the cache population strategy to one which supports hit/miss metrics
+		if (null != roadLocCache && roadLocCache.containsKey(wcid)) 
+		{
+			roadLocations = roadLocCache.get(wcid);
+		}
+		else
+		{
+			roadLocations = queryRoadLocations(networkRequest);
+			roadLocCache.put(wcid, roadLocations);
+			//TODO implement an eviction policy
+		}
+		
+		if (log.isDebugEnabled()) logCacheStats(roadLocCache);
+				
+		//if SELECTED request, filter them
+		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
+		{
+			//TODO filter roadlocations, which used to be differentiated by these queries:
+			/*
+			case SELECTED:
+				return planRepository.queryLinkedLocations(networkRequest.getPlanId()) ;
+			case ALL:
+				return planRepository.queryAllLocationsByPlanId(networkRequest.getPlanId()) ;
+			default :
+				return planRepository.queryLinkedLocations(networkRequest.getPlanId()) ;
+			 */
+			log.error("RoadLocations not yet being filtered for SELECTED requests");
+		}
+		//return results
+		return roadLocations;
+	}
 
-						Long locationId = result.getLong(LocationMap.id);
-						
-						
-						LocationDemand ldm = demandMap.get(locationId);
-						if (ldm == null || ldm.getDemand() == 0) {
-							// No Demand no location mapped in for fiber Linking
-							return null;
-						}
+	private Collection<NetworkAssignment> getNetworkAssignments(NetworkRequest networkRequest) 
+	{
+		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkRequest);
+		Map<Long, RoadLocation> roadLocationByLocationIdMap = getNetworkLocations(networkRequest);
+		
+		return toValidAssignments(roadLocationByLocationIdMap.keySet().stream()
+			.map(result -> {
+				Long locationId = result;
+				
+				LocationDemand ldm = demandByLocationIdMap.get(locationId);
+				if (ldm == null || ldm.getDemand() == 0) {
+					// No Demand no location mapped in for fiber Linking
+					return null;
+				}
 
-						AroEntity aroEntity = entityFactory
-								.createLocationEntity(locationId, ldm);
-
-						RoadLocation rl = RoadLocationImpl
-								.build()
-								.setTlid(tlid)
-								.setLocationPoint(
-										result.getPoint(LocationMap.point))
-								.setRoadSegmentPositionRatio(
-										result.getDouble(LocationMap.ratio))
-								.setRoadSegmentClosestPoint(
-										result.getPoint(LocationMap.intersect_point))
-								.setDistanceFromRoadSegmentInMeters(
-										result.getDouble(LocationMap.distance))
-								.build();
-
-						return new DefaultNetworkAssignment(aroEntity, rl);
-					} catch (Throwable err) {
-						log.error(err.getMessage(), err);
-						return null;
-					}
-				}));
+				AroEntity aroEntity = entityFactory
+						.createLocationEntity(locationId, ldm);
+				
+				return new DefaultNetworkAssignment(aroEntity, roadLocationByLocationIdMap.get(locationId));
+			}));
 	}
 
 	private AroEntity createAroNetworkNode(long id, int type) {

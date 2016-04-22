@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkRequest.LocationLoadingRequest;
 import com.altvil.aro.service.network.NetworkService;
@@ -38,10 +39,13 @@ public class NetworkServiceTest {
 		nr.setPlanId(3);
 		nr.setYear(2016);
 		nr.setLocationLoadingRequest(LocationLoadingRequest.SELECTED);
-		nsi.getNetworkData(nr);
-		nsi.getNetworkData(nr);
-		nsi.getNetworkData(nr);		
-		assert(true);
+		NetworkData nd = nsi.getNetworkData(nr);
+		assertNotNull(nd);
+		NetworkData nd2 = nsi.getNetworkData(nr);
+		assertNotNull(nd2);
+		nd = nsi.getNetworkData(nr);
+		assertNotNull(nd);
+
 		//fail("Not yet implemented");
 	}
 
