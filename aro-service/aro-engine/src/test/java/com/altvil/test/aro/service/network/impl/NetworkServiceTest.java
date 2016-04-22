@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.altvil.aro.service.network.impl;
+package com.altvil.test.aro.service.network.impl;
 
 import static org.junit.Assert.*;
 import org.junit.AfterClass;
