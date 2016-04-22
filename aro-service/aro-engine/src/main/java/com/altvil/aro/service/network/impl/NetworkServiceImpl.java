@@ -158,7 +158,7 @@ public class NetworkServiceImpl implements NetworkService {
 		{
 			locDemands = queryLocationDemand(networkRequest);
 			locDemandCache.put(wirecenterId, locDemands);
-			//TODO HIGH implement an eviction policy
+			//NOTE: currently no eviction policy used as LocationDemand is temporarily assumed immutable
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(locDemandCache);
@@ -276,7 +276,7 @@ public class NetworkServiceImpl implements NetworkService {
 			{
 				roadLocations = queryRoadLocations(networkRequest);
 				roadLocCache.put(wirecenterId, roadLocations);
-				//TODO HIGH implement an eviction policy
+				//NOTE: currently no eviction policy used as RoadLocation is temporarily assumed immutable
 			}
 		}
 		
@@ -369,7 +369,7 @@ public class NetworkServiceImpl implements NetworkService {
 		{
 			fiberSourceLocations = queryFiberSources(networkRequest);
 			fiberSourceLocCache.put(wirecenterId, fiberSourceLocations);
-			//TODO HIGH implement an eviction policy
+			//NOTE: currently no eviction policy used as FiberSource is temporarily assumed immutable
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(fiberSourceLocCache);
@@ -420,7 +420,7 @@ public class NetworkServiceImpl implements NetworkService {
 		{
 			roadEdges = queryRoadEdges(networkRequest);
 			roadEdgesCache.put(wirecenterId, roadEdges);
-			//TODO HIGH implement an eviction policy
+			//NOTE: currently no eviction policy used as RoadEdge is temporarily assumed immutable
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(roadEdgesCache);
