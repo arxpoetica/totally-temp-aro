@@ -369,6 +369,8 @@ public class NetworkServiceImpl implements NetworkService {
 	protected void finalize() throws Throwable 
 	{
 		ignite.destroyCache(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
+		ignite.destroyCache(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
+		ignite.destroyCache(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
 		super.finalize();
 	}
 }
