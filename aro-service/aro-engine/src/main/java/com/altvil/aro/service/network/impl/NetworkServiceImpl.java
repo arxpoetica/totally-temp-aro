@@ -47,10 +47,12 @@ public class NetworkServiceImpl implements NetworkService {
 	
 	private Ignite ignite;
 	//TODO configure grid caches via Spring rather than method calls
-	public static final String CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandByWCID";
-	public static final String CACHE_ROAD_LOCATION_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadLocationByWCID";
+	public static final String CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandsByWCID";
+	public static final String CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadLocationsByWCID";
+	public static final String CACHE_FIBER_SOURCES_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_FiberSourcesByWCID";
 	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID = cacheConfigLocationDemandByWCID();
 	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID = cacheConfigRoadLocationsByWCID();
+	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID = cacheConfigFiberSourcesByWCID();
 
 	@PostConstruct
 	private void postConstruct()
@@ -64,24 +66,34 @@ public class NetworkServiceImpl implements NetworkService {
 
 		NetworkData networkData = new NetworkData();
 
-		networkData.setFiberSources(getFiberSources(networkRequest));
-		networkData.setRoadLocations(getNetworkAssignments(networkRequest));
+		//determine wirecenter ID
+		Long wcid = getWirecenterIdByPlanId(networkRequest.getPlanId());
+		
+		networkData.setFiberSources(getFiberSourceNetworkAssignments(networkRequest, wcid));
+		networkData.setRoadLocations(getRoadLocationNetworkAssignments(networkRequest, wcid));
 		networkData.setRoadEdges(getRoadEdges(networkRequest));
 
 		return networkData;
 	}
 
 	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID() {
-		CacheConfiguration<Long, Map<Long, LocationDemand>> cfg = new CacheConfiguration<>(CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID);
+		CacheConfiguration<Long, Map<Long, LocationDemand>> cfg = new CacheConfiguration<>(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
 		//TODO configure cache
-		log.warn("Ingite cache using default config for CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID + ")");
+		log.warn("Ingite cache using default config for CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
 	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID() {
-		CacheConfiguration<Long, Map<Long, RoadLocation>> cfg = new CacheConfiguration<>(CACHE_ROAD_LOCATION_BY_WIRECENTER_ID);
+		CacheConfiguration<Long, Map<Long, RoadLocation>> cfg = new CacheConfiguration<>(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
 		//TODO configure cache
-		log.warn("Ingite cache using default config for CACHE_ROAD_LOCATION_BY_WIRECENTER_ID (" + CACHE_ROAD_LOCATION_BY_WIRECENTER_ID + ")");
+		log.warn("Ingite cache using default config for CACHE_ROAD_LOCATION_BY_WIRECENTER_ID (" + CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID + ")");
+		return cfg;
+	}
+
+	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID() {
+		CacheConfiguration<Long, Collection<NetworkAssignment>> cfg = new CacheConfiguration<>(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
+		//TODO configure cache
+		log.warn("Ingite cache using default config for CACHE_FIBER_SOURCES_BY_WIRECENTER_ID (" + CACHE_FIBER_SOURCES_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
@@ -98,24 +110,21 @@ public class NetworkServiceImpl implements NetworkService {
 		location_id, buesiness_fiber, tower_fiber, household_fiber
 	}
 	
-	private Map<Long, LocationDemand> getLocationDemand(NetworkRequest networkRequest) {
+	private Map<Long, LocationDemand> getLocationDemand(NetworkRequest networkRequest, Long wirecenterId) {
 		Map<Long, LocationDemand> locDemands;
-		
-		//determine wirecenter ID
-		Long wcid = getWirecenterIdByPlanId(networkRequest.getPlanId());
 		
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
 		IgniteCache<Long, Map<Long, LocationDemand>> locDemandCache = ignite.getOrCreateCache(cacheConfigLocationDemandByWCID);
-		if (null != locDemandCache && locDemandCache.containsKey(wcid)) 
+		if (null != locDemandCache && locDemandCache.containsKey(wirecenterId)) 
 		{
-			locDemands = locDemandCache.get(wcid);
+			locDemands = locDemandCache.get(wirecenterId);
 		}
 		else
 		{
 			locDemands = queryLocationDemand(networkRequest);
-			locDemandCache.put(wcid, locDemands);
+			locDemandCache.put(wirecenterId, locDemands);
 			//TODO implement an eviction policy
 		}
 		
@@ -199,25 +208,22 @@ public class NetworkServiceImpl implements NetworkService {
 		return roadLocationsMap;
 	}
 	
-	private Map<Long, RoadLocation> getNetworkLocations(NetworkRequest networkRequest) {
+	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(NetworkRequest networkRequest, Long wirecenterId) {
 		Map<Long, RoadLocation> roadLocations;
-		
-		//determine wirecenter ID
-		Long wcid = getWirecenterIdByPlanId(networkRequest.getPlanId());
 		
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
 		IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByWCID);
 		//TODO adjust the cache population strategy to one which supports hit/miss metrics
-		if (null != roadLocCache && roadLocCache.containsKey(wcid)) 
+		if (null != roadLocCache && roadLocCache.containsKey(wirecenterId)) 
 		{
-			roadLocations = roadLocCache.get(wcid);
+			roadLocations = roadLocCache.get(wirecenterId);
 		}
 		else
 		{
 			roadLocations = queryRoadLocations(networkRequest);
-			roadLocCache.put(wcid, roadLocations);
+			roadLocCache.put(wirecenterId, roadLocations);
 			//TODO implement an eviction policy
 		}
 		
@@ -241,10 +247,10 @@ public class NetworkServiceImpl implements NetworkService {
 		return roadLocations;
 	}
 
-	private Collection<NetworkAssignment> getNetworkAssignments(NetworkRequest networkRequest) 
+	private Collection<NetworkAssignment> getRoadLocationNetworkAssignments(NetworkRequest networkRequest, Long wirecenterId) 
 	{
-		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkRequest);
-		Map<Long, RoadLocation> roadLocationByLocationIdMap = getNetworkLocations(networkRequest);
+		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkRequest, wirecenterId);
+		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkRequest, wirecenterId);
 		
 		return toValidAssignments(roadLocationByLocationIdMap.keySet().stream()
 			.map(result -> {
@@ -271,7 +277,7 @@ public class NetworkServiceImpl implements NetworkService {
 		id, gid, tlid, point, ratio, intersect_point, distance, node_type
 	}
 
-	private Collection<NetworkAssignment> getFiberSources(
+	private Collection<NetworkAssignment> queryFiberSources(
 			NetworkRequest networkRequest) {
 
 		return toValidAssignments(planRepository
@@ -279,10 +285,9 @@ public class NetworkServiceImpl implements NetworkService {
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {
+					long tlid = result.getLong(FiberSourceMap.tlid);
+
 					try {
-
-						long tlid = result.getLong(FiberSourceMap.tlid);
-
 						AroEntity aroEntity = createAroNetworkNode(
 								result.getLong(FiberSourceMap.id),
 								result.getInteger(FiberSourceMap.node_type));
@@ -303,10 +308,35 @@ public class NetworkServiceImpl implements NetworkService {
 
 						return new DefaultNetworkAssignment(aroEntity, rl);
 					} catch (Throwable err) {
-						log.error(err.getMessage(), err);
+						log.error("Failed creating FiberSource for tlid " + tlid + " due to: " + err.getMessage(), err);
 						return null;
 					}
 				}));
+	}
+
+	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(NetworkRequest networkRequest, Long wirecenterId) {
+		Collection<NetworkAssignment> fiberSourceLocations;
+		
+		//retrieve all locations from cache by wirecenter ID
+		//if cache miss, populate the cache by wirecenterID with results of ALL request
+
+		IgniteCache<Long, Collection<NetworkAssignment>> fiberSourceLocCache = ignite.getOrCreateCache(cacheConfigFiberSourcesByWCID);
+		//TODO adjust the cache population strategy to one which supports hit/miss metrics
+		if (null != fiberSourceLocCache && fiberSourceLocCache.containsKey(wirecenterId)) 
+		{
+			fiberSourceLocations = fiberSourceLocCache.get(wirecenterId);
+		}
+		else
+		{
+			fiberSourceLocations = queryFiberSources(networkRequest);
+			fiberSourceLocCache.put(wirecenterId, fiberSourceLocations);
+			//TODO implement an eviction policy
+		}
+		
+		if (log.isDebugEnabled()) logCacheStats(fiberSourceLocCache);
+				
+		//return results
+		return fiberSourceLocations;
 	}
 
 	private enum RoadEdgeMap implements OrdinalAccessor {
@@ -338,7 +368,7 @@ public class NetworkServiceImpl implements NetworkService {
 	@Override
 	protected void finalize() throws Throwable 
 	{
-		ignite.destroyCache(CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID);
+		ignite.destroyCache(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
 		super.finalize();
 	}
 }
