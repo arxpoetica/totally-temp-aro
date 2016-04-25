@@ -48,5 +48,25 @@ public class NetworkServiceTest {
 
 		//fail("Not yet implemented");
 	}
+	
+	@Test
+	public void testSelectedVersusAllAssignments() {
+		NetworkRequest nrSelected = new NetworkRequest();
+		nrSelected.setPlanId(3);
+		nrSelected.setYear(2016);
+		nrSelected.setLocationLoadingRequest(LocationLoadingRequest.SELECTED);
+		
+		NetworkRequest nrAll = new NetworkRequest();
+		nrAll.setPlanId(3);
+		nrAll.setYear(2016);
+		nrAll.setLocationLoadingRequest(LocationLoadingRequest.ALL);
+		
+		NetworkData ndSelected = nsi.getNetworkData(nrSelected);
+		NetworkData ndAll = nsi.getNetworkData(nrAll);
+		int selectedCount = ndSelected.getRoadLocations().size();
+		int allCount = ndAll.getRoadLocations().size();
+		System.out.println("testSelectedVersusAllAssignments()  selected:" + selectedCount + " all:" + allCount);
+		assertNotEquals(selectedCount, allCount);
+	}
 
 }

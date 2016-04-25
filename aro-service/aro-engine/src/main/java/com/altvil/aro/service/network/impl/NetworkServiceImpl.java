@@ -1,5 +1,6 @@
 package com.altvil.aro.service.network.impl;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -255,8 +256,12 @@ public class NetworkServiceImpl implements NetworkService {
 		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
 		{
 			Long lookupKey = networkRequest.getPlanId();
-			List<Long> selectedLocIds = planRepository.querySelectedLocationsByPlanId(lookupKey);
-			roadLocations.keySet().retainAll(selectedLocIds);
+			List<BigInteger> selectedLocIds = planRepository.querySelectedLocationsByPlanId(lookupKey);
+			List<Long> safeList = selectedLocIds.stream().mapToLong(bi -> bi.longValue()).boxed().collect(Collectors.toList());
+			//System.out.println("Selected IDs: " + safeList);
+			//System.out.println("All: " + roadLocations.keySet());
+			roadLocations.keySet().retainAll(safeList);
+			//System.out.println("After filter: " + roadLocations.keySet());
 		}
 
 		if (log.isDebugEnabled()) logCacheStats(roadLocCache);
