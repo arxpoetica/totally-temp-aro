@@ -2,6 +2,7 @@ package com.altvil.aro.service.network.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,12 +51,10 @@ public class NetworkServiceImpl implements NetworkService {
 	//TODO configure grid caches via Spring rather than method calls
 	public static final String CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandsByWCID";
 	public static final String CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadLocationsByWCID";
-	public static final String CACHE_ROAD_LOCATIONS_BY_PLAN_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadLocationsByPlanID";
 	public static final String CACHE_FIBER_SOURCES_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_FiberSourcesByWCID";
 	public static final String CACHE_ROAD_EDGES_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadEdgesByWCID";
 	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID = cacheConfigLocationDemandByWCID();
 	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID = cacheConfigRoadLocationsByWCID();
-	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByPlanID = cacheConfigRoadLocationsByPlanID();
 	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID = cacheConfigFiberSourcesByWCID();
 	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID = cacheConfigRoadEdgesByWCID();
 
@@ -74,7 +73,6 @@ public class NetworkServiceImpl implements NetworkService {
 		//TODO MEDIUM move cache destruction to shutdown of entire grid, as a single NetworkServiceImpl destroy should/need not destroy caches
 		ignite.destroyCache(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
 		ignite.destroyCache(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
-		ignite.destroyCache(CACHE_ROAD_LOCATIONS_BY_PLAN_ID);
 		ignite.destroyCache(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
 		ignite.destroyCache(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
 	}
@@ -99,13 +97,6 @@ public class NetworkServiceImpl implements NetworkService {
 		CacheConfiguration<Long, Map<Long, LocationDemand>> cfg = new CacheConfiguration<>(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
 		//TODO configure cache
 		log.warn("Ingite cache using default config for CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID + ")");
-		return cfg;
-	}
-
-	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByPlanID() {
-		CacheConfiguration<Long, Map<Long, RoadLocation>> cfg = new CacheConfiguration<>(CACHE_ROAD_LOCATIONS_BY_PLAN_ID);
-		//TODO configure cache
-		log.warn("Ingite cache using default config for CACHE_ROAD_LOCATIONS_BY_PLAN_ID (" + CACHE_ROAD_LOCATIONS_BY_PLAN_ID + ")");
 		return cfg;
 	}
 
@@ -245,41 +236,29 @@ public class NetworkServiceImpl implements NetworkService {
 		Map<Long, RoadLocation> roadLocations;
 		IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache;
 		
-		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
+		//retrieve all locations from cache by wirecenter ID
+		//if cache miss, populate the cache by wirecenterID with results of ALL request
+
+		roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByWCID);
+		//TODO adjust the cache population strategy to one which supports hit/miss metrics
+		if (null != roadLocCache && roadLocCache.containsKey(wirecenterId)) 
 		{
-			roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByPlanID);
-			//TODO adjust the cache population strategy to one which supports hit/miss metrics
-			Long lookupKey = networkRequest.getPlanId();
-			if (null != roadLocCache && roadLocCache.containsKey(lookupKey)) 
-			{
-				roadLocations = roadLocCache.get(lookupKey);
-			}
-			else
-			{
-				roadLocations = queryRoadLocations(networkRequest);
-				roadLocCache.put(lookupKey, roadLocations);
-				//TODO HIGH implement an eviction policy
-			}
+			roadLocations = roadLocCache.get(wirecenterId);
 		}
 		else
 		{
-			//retrieve all locations from cache by wirecenter ID
-			//if cache miss, populate the cache by wirecenterID with results of ALL request
-	
-			roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByWCID);
-			//TODO adjust the cache population strategy to one which supports hit/miss metrics
-			if (null != roadLocCache && roadLocCache.containsKey(wirecenterId)) 
-			{
-				roadLocations = roadLocCache.get(wirecenterId);
-			}
-			else
-			{
-				roadLocations = queryRoadLocations(networkRequest);
-				roadLocCache.put(wirecenterId, roadLocations);
-				//NOTE: currently no eviction policy used as RoadLocation is temporarily assumed immutable
-			}
+			roadLocations = queryRoadLocations(networkRequest);
+			roadLocCache.put(wirecenterId, roadLocations);
+			//NOTE: currently no eviction policy used as RoadLocation is temporarily assumed immutable
 		}
-		
+	
+		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
+		{
+			Long lookupKey = networkRequest.getPlanId();
+			List<Long> selectedLocIds = planRepository.querySelectedLocationsByPlanId(lookupKey);
+			roadLocations.keySet().retainAll(selectedLocIds);
+		}
+
 		if (log.isDebugEnabled()) logCacheStats(roadLocCache);
 
 		//return results

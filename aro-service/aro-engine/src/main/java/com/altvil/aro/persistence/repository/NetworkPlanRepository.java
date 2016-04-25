@@ -145,7 +145,9 @@ public interface NetworkPlanRepository extends
 			"", nativeQuery = true)
 	List<Object[]> queryAllFiberDemand(@Param("planId") long planId, @Param("year") int year);
 
-
+	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
+			"WHERE pt.plan_id = :planId", nativeQuery = true)
+	List<Long> querySelectedLocationsByPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n"
 			+ "SELECT\n"
