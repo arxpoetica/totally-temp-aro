@@ -1,5 +1,7 @@
 package com.altvil.aro.service.job.impl;
 
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.Principal;
@@ -11,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,6 @@ import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Resource;
 
-import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -33,8 +33,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.job.Job;
-import com.altvil.aro.service.job.Job.Id;
 import com.altvil.aro.service.job.JobService;
+import com.altvil.aro.service.job.impl.JobIdImpl;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -189,7 +189,7 @@ public class JobServiceImpl implements JobService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Job<?> get(Id id) {
+	public Job<?> get(Job.Id id) {
 		return map.get(id);
 	}
 
