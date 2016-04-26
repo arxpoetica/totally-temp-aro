@@ -1,5 +1,6 @@
 package com.altvil.netop.plan;
 
+import java.security.Principal;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,10 +41,8 @@ public class RecalcEndpoint {
 	}
 
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(
-			@RequestBody FiberPlanRequest request) {
-
-		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlanRequest request) {
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
 
 		Job<MasterPlanUpdate> job = jobService.submit(mpc);
 		
@@ -62,12 +61,12 @@ public class RecalcEndpoint {
 	}
 
 	@RequestMapping(value = "/recalc/wirecenter", method = RequestMethod.POST)
-	public @ResponseBody Job<FiberPlanResponse> postRecalc(
+	public @ResponseBody Job<FiberPlanResponse> postRecalc(Principal username,
 			@RequestBody FiberPlanRequest fiberPlanRequest)
 			throws InterruptedException, ExecutionException {
 
 		Job<FiberPlanResponse> job = jobService
-				.submit(new JobService.Builder<FiberPlanResponse>().setCallable(() -> {
+				.submit(new JobService.Builder<FiberPlanResponse>(username).setCallable(() -> {
 
 					FiberNetworkConstraints constraints = fiberPlanRequest
 							.getFiberNetworkConstraints() == null ? new FiberNetworkConstraints()

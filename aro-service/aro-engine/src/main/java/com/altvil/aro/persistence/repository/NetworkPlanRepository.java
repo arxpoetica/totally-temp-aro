@@ -292,8 +292,19 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"updated_network_nodes as (\n" + 
 			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
-			"	select np.id, 1, cast(np.area_centroid as geography), np.area_centroid \n" + 
+			"	select np.id, 1,\n" + 
+			"		case\n" + 
+			"		when CO.geog is not null then CO.geog\n" + 
+			"		else cast(np.area_centroid as geography)\n" + 
+			"		end,\n" + 
+			"		case\n" + 
+			"		when CO.geom is not null then CO.geom\n" + 
+			"		else np.area_centroid\n" + 
+			"		end\n" + 
 			"	from new_plans np\n" + 
+			"	join aro.wirecenters w on w.id = np.wirecenter_id\n" +
+			"	left join client.network_nodes CO on st_contains(w.geom, CO.geom)\n" + 
+			"	where CO.plan_id is null\n" +
 			"	returning id, plan_id\n" + 
 			")\n" + 
 			",\n" + 
