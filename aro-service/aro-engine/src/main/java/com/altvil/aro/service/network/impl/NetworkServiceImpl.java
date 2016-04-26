@@ -71,7 +71,7 @@ public class NetworkServiceImpl implements NetworkService {
 	private void preDestroy()
 	{
 		//NOTE: it does NOT make sense here to explicitly stop the Ignite grid, as it may be shared with other processes
-		//TODO MEDIUM move cache destruction to shutdown of entire grid, as a single NetworkServiceImpl destroy should/need not destroy caches
+		//TODO HIGH move cache destruction to shutdown of entire grid, as a single NetworkServiceImpl destroy should/need not destroy caches
 		ignite.destroyCache(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
 		ignite.destroyCache(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
 		ignite.destroyCache(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
