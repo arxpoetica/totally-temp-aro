@@ -1,0 +1,22 @@
+This container allows bringing up a 1+ node Ignite server cluster.
+
+See the Makefile for commands which will build/install/run this docker container.
+
+
+TO DO
+
+Review the "Production Readiness" portion of https://apacheignite.readme.io/docs/faq and take appropriate actions.
+
+Review the resource utilization in the Vagrant setup relative to node counts. Configure LRU config and such for dev, different for prod.
+
+Provide make commands to instantiate/tear down a simple cluster in vagrant
+
+Attach to an ignite container and run $IGNITE_HOME/bin/ignitevisorcmd.sh to examine grid contents and other managment/monitoring.
+
+Consider a shell process/make which performs 'docker log -f' aggregation across the cluster to one common log tail. Alternatively, use logback to write logs to TCP aggregation point (Splunk?)
+
+Map host ports on VirtualBox if we want to share node with IDE testing.
+
+Use Ignite Lifecycle Events and custom Ignite LifecycleBean to notify cluster of startup/spindown of nodes, if Ignite not doing this already
+
+Install necessary jars in ignite node container when possible, otherwise they load remotely.

@@ -44,3 +44,21 @@ run_vagrant_docker:
 install_vagrant: build_docker_image run_vagrant_docker
 
 reinstall_vagrant: uninstall install_vagrant
+
+###############################
+#IGNITE NODES IN VAGRANT DOCKER
+
+#vagrant_docker_pull_ignite:
+#	(docker pull apacheignite/ignite:1.5.0.final)
+
+refresh_docker_ignite_config:
+	(cp aro-engine/src/main/resources/META-INF/aroServlet-igniteConfig.xml docker-ignite-node/.)
+
+vagrant_docker_build_ignite:
+	(cd docker-ignite-node && docker build -t aro-ignite-node .)
+
+vagrant_docker_run_ignite:
+	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e CONFIG_URI=aroServlet-igniteConfig.xml -e OPTION_LIBS=ignite-spring,ingite-indexing,ignite-slf4j,ignite-jta -it --net=default --name $(DOCKER_NAME) aro-ignite-node)
+
+###############################
+

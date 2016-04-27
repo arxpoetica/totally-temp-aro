@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
@@ -63,19 +62,9 @@ public class NetworkServiceImpl implements NetworkService {
 	private void postConstruct()
 	{
 		//TODO configure and instantiate via main Spring file.  Get handle here via something like Ignition.ignite($instanceName).
-		//TODO use client-mode Ignite instance here once a node cluster infrastructure is in place 
+		//Using client-mode Ignite instance here so we connect to existing cluster infrastructure but using same config file
+		Ignition.setClientMode(true);
 		ignite = Ignition.start("/aroServlet-IgniteConfig.xml");
-	}
-	
-	@PreDestroy
-	private void preDestroy()
-	{
-		//NOTE: it does NOT make sense here to explicitly stop the Ignite grid, as it may be shared with other processes
-		//TODO HIGH move cache destruction to shutdown of entire grid, as a single NetworkServiceImpl destroy should/need not destroy caches
-		ignite.destroyCache(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
-		ignite.destroyCache(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
-		ignite.destroyCache(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
-		ignite.destroyCache(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
 	}
 	
 	@Override
