@@ -1,4 +1,6 @@
-This container allows bringing up a 1+ node Ignite server cluster.
+This container allows bringing up a 1+ node Ignite server cluster.  The intention is for this to be used in Vagrant virtualbox during development, and likely on production.  To bring up a cluster for use in your IDE, consider creating a launch profile for AroIgniteNodeIDEStartup.class instead.
+
+If the amount of cached data and desire to have long lived persistent cache in the nodes is desirable, then accessing the Vagrant docker instances may be desirable even from the IDE.  That would require host-to-vm port mappings to allow client nodes in the IDE to discover server nodes inside the VM.
 
 See the Makefile for commands which will build/install/run this docker container.
 

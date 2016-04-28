@@ -6,7 +6,7 @@ import org.apache.ignite.Ignition;
 /**
  * Starts up an empty node with example compute configuration.
  */
-public class ExampleNodeStartup {
+public class AroIgniteNodeIDEStartup {
     /**
      * Start up an empty node with example compute configuration.
      *
@@ -14,6 +14,6 @@ public class ExampleNodeStartup {
      * @throws IgniteException If failed.
      */
     public static void main(String[] args) throws IgniteException {
-        Ignition.start("com/altvil/aro/processing/ignite/config/example-ignite.xml");
+        Ignition.start("aroServlet-IgniteConfig.xml");
     }
 }

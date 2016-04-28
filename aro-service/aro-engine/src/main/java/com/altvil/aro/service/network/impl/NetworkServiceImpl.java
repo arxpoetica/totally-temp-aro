@@ -14,6 +14,7 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMetrics;
+import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,28 +86,29 @@ public class NetworkServiceImpl implements NetworkService {
 
 	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID() {
 		CacheConfiguration<Long, Map<Long, LocationDemand>> cfg = new CacheConfiguration<>(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
-		//TODO configure cache
+		//TODO MEDIUM investigate whether the multiple caches partition by wirecenter ID and naturally co-locate due to this
+        cfg.setCacheMode(CacheMode.PARTITIONED);
 		log.warn("Ingite cache using default config for CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
 	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID() {
 		CacheConfiguration<Long, Map<Long, RoadLocation>> cfg = new CacheConfiguration<>(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
-		//TODO configure cache
+        cfg.setCacheMode(CacheMode.PARTITIONED);
 		log.warn("Ingite cache using default config for CACHE_ROAD_LOCATION_BY_WIRECENTER_ID (" + CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
 	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID() {
 		CacheConfiguration<Long, Collection<NetworkAssignment>> cfg = new CacheConfiguration<>(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
-		//TODO configure cache
+        cfg.setCacheMode(CacheMode.PARTITIONED);
 		log.warn("Ingite cache using default config for CACHE_FIBER_SOURCES_BY_WIRECENTER_ID (" + CACHE_FIBER_SOURCES_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
 	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID() {
 		CacheConfiguration<Long, Collection<RoadEdge>> cfg = new CacheConfiguration<>(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
-		//TODO configure cache
+        cfg.setCacheMode(CacheMode.PARTITIONED);
 		log.warn("Ingite cache using default config for CACHE_ROAD_EDGES_BY_WIRECENTER_ID (" + CACHE_ROAD_EDGES_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
