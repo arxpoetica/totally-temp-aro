@@ -65,7 +65,7 @@ public class NetworkServiceImpl implements NetworkService {
 		//TODO configure and instantiate via main Spring file.  Get handle here via something like Ignition.ignite($instanceName).
 		//Using client-mode Ignite instance here so we connect to existing cluster infrastructure but using same config file
 		Ignition.setClientMode(true);
-		ignite = Ignition.start("/aroServlet-IgniteConfig.xml");
+		ignite = Ignition.start("/aroServlet-igniteConfig.xml");
 	}
 	
 	@Override
