@@ -20,8 +20,24 @@
        http://www.springframework.org/schema/util/spring-util.xsd">
 
     
-	<!-- Import normal config then override with development virtualbox settings -->
-    <import resource="aroServlet-igniteConfig-abstract.xml"/>
-    <bean parent="ignite.cfg"/>
+    <bean abstract="true" id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
+
+		<!-- Nodes which share gridName will cluster, so long as they can discover each other -->
+        <property name="gridName" value="aroIgniteGrid"/>
+
+        <!-- Set to true to enable distributed class loading for examples, default is false. -->
+        <property name="peerClassLoadingEnabled" value="true"/>
+
+        <!-- Explicitly configure TCP discovery SPI to provide list of initial nodes. -->
+        <property name="discoverySpi">
+            <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+                <property name="ipFinder">
+                    <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder">
+						<!-- For security in production environment, consider populate 'addresses' property with list of actual host IP address. -->
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
 
 </beans>

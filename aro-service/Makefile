@@ -53,6 +53,7 @@ reinstall_vagrant: uninstall install_vagrant
 
 refresh_docker_ignite_config:
 	(cp aro-engine/src/main/resources/META-INF/aroServlet-igniteConfig.xml docker-ignite-node/.)
+	(cp aro-engine/src/main/resources/META-INF/aroServlet-igniteConfig-abstract.xml docker-ignite-node/.)
 
 vagrant_docker_build_ignite:
 	(cd docker-ignite-node && docker build -t aro-ignite-node .)
