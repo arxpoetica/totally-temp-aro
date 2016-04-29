@@ -61,5 +61,8 @@ vagrant_docker_build_ignite:
 vagrant_docker_run_ignite:
 	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e CONFIG_URI=aroServlet-igniteConfig.xml -e OPTION_LIBS=ignite-spring,ingite-indexing,ignite-slf4j,ignite-jta -it --net=default --name $(DOCKER_NAME) aro-ignite-node)
 
+vagrant_ignite_visor:
+	(docker run -it --rm aro-ignite-node apache-ignite-fabric-1.5.0.final-bin/bin/ignitevisorcmd.sh)
+
 ###############################
 
