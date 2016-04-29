@@ -1,4 +1,4 @@
-FROM apacheignite/ignite:1.5.0.final
+FROM aro-ignite-jdk8
 MAINTAINER Altvil
 ENV PGUSER=${PGUSER}
 ENV PGPASSWORD=${PGPASSWORD}

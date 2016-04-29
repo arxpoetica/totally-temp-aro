@@ -55,7 +55,10 @@ refresh_docker_ignite_config:
 	(cp aro-engine/src/main/resources/META-INF/aroServlet-igniteConfig.xml docker-ignite-node/.)
 	(cp aro-engine/src/main/resources/META-INF/aroServlet-igniteConfig-abstract.xml docker-ignite-node/.)
 
-vagrant_docker_build_ignite:
+vagrant_docker_build_ignite_base:
+	(cd docker-ignite-jdk8 && docker build -t aro-ignite-jdk8 .)
+
+vagrant_docker_build_ignite_node:
 	(cd docker-ignite-node && docker build -t aro-ignite-node .)
 
 vagrant_docker_run_ignite:
