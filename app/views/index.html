@@ -32,6 +32,8 @@
 
     <div ng-controller="navigation_menu_controller">
 
+      <% include modal_build_sequence.html %>
+
       <div id="home_screen" ng-show="!plan">
         <div class="container">
           <div class="row">
@@ -148,11 +150,14 @@
               <small><span class="fa fa-check"></span> Plan saved</small>
             </p>
 
-            <div class="navbar-text" style="width: 200px">
+            <div class="navbar-text" style="width: 200px" ng-show="plan">
               <div id="year-slider"></div>
             </div>
 
             <ul class="nav navbar-nav navbar-right">
+              <li ng-show="plan">
+                <a style="cursor:pointer" data-target="#build-sequence" data-toggle="modal"><small>Build Sequence</small></a>
+              </li>
               <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                   <span class="fa fa-user"></span>
@@ -1290,6 +1295,7 @@
   <!-- Angular controllers and services -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
 
   <!-- Put the Google Maps URL in a config... -->
   <% if (env_is_production) { %>
@@ -1335,9 +1341,7 @@
           });
         }
       }
-
     }
-
 
     var user_id = <%= user.id %>;
     var config = <%- JSON.stringify(config) %>;

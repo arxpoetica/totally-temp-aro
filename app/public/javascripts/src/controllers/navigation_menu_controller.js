@@ -65,10 +65,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         // use centroid...
         new_plan_map.setCenter(result.geometry.location)
         // ...or use bounds
-        // var bounds = new google.maps.LatLngBounds();
-        // bounds.extend(new google.maps.LatLng(result.geometry.bounds.northeast.lat, result.geometry.bounds.northeast.lng));
-        // bounds.extend(new google.maps.LatLng(result.geometry.bounds.southwest.lat, result.geometry.bounds.southwest.lng));
-        // new_plan_map.fitBounds(bounds);
+        // var bounds = new google.maps.LatLngBounds()
+        // bounds.extend(new google.maps.LatLng(result.geometry.bounds.northeast.lat, result.geometry.bounds.northeast.lng))
+        // bounds.extend(new google.maps.LatLng(result.geometry.bounds.southwest.lat, result.geometry.bounds.southwest.lng))
+        // new_plan_map.fitBounds(bounds)
         $scope.new_plan_area_centroid = result.geometry.location
         $scope.new_plan_area_bounds = result.geometry.viewport
       })
@@ -317,4 +317,37 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       density: 0
     }
   })
+
+  google.charts.load('current', {'packages': ['gantt']})
+
+  function daysToMilliseconds (days) {
+    return days * 24 * 60 * 60 * 1000
+  }
+
+  function drawChart () {
+    var data = new google.visualization.DataTable()
+    data.addColumn('string', 'Task ID')
+    data.addColumn('string', 'Task Name')
+    data.addColumn('date', 'Start Date')
+    data.addColumn('date', 'End Date')
+    data.addColumn('number', 'Duration')
+    data.addColumn('number', 'Percent Complete')
+    data.addColumn('string', 'Dependencies')
+
+    data.addRows([
+      ['ABC123', 'ABC123', new Date(2016, 0, 1), new Date(2016, 0, 5), null, 100, null],
+      ['ABC124', 'ABC124', new Date(2016, 0, 2), new Date(2016, 0, 9), daysToMilliseconds(3), 25, null],
+      ['ABC125', 'ABC125', new Date(2016, 0, 3), new Date(2016, 0, 7), daysToMilliseconds(1), 20, null],
+      ['ABC126', 'ABC126', new Date(2016, 0, 4), new Date(2016, 0, 10), daysToMilliseconds(1), 0, null],
+      ['ABC127', 'ABC127', new Date(2016, 0, 5), new Date(2016, 0, 6), daysToMilliseconds(1), 100, null]
+    ])
+
+    var options = {
+      height: 275
+    }
+    var chart = new google.visualization.Gantt(document.getElementById('build-sequence-chart'))
+    chart.draw(data, options)
+  }
+
+  $('#build-sequence').on('shown.bs.modal', drawChart)
 }])
