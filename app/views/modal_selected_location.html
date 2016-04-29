@@ -12,14 +12,26 @@
             <img ng-attr-src="{{ map_url }}">
           </div>
           <div class="col-md-6">
-            <address>
-              <strong>Address</strong><br>
-              {{ location.address }}<br><br>
-              <strong>Businesses</strong><br>
-              {{ businesses.length }}<br><br>
-              <strong>Distance From Network</strong><br>
-              {{ location.distance_to_client_fiber | number: 2 }} m<br>
-            </address>
+            <div class="row">
+              <div class="col-md-6"><strong>Address</strong></div>
+              <div class="col-md-6">{{ location.address }}</div>
+            </div>
+            <div class="row">
+              <div class="col-md-6"><strong>Businesses</strong></div>
+              <div class="col-md-6">{{ location.number_of_businesses }}</div>
+            </div>
+            <div class="row">
+              <div class="col-md-6"><strong>Households</strong></div>
+              <div class="col-md-6">{{ location.number_of_households }}</div>
+            </div>
+            <div class="row">
+              <div class="col-md-6"><strong>Towers</strong></div>
+              <div class="col-md-6">{{ location.number_of_towers }}</div>
+            </div>
+            <div class="row">
+              <div class="col-md-6"><strong>Distance From Network</strong></div>
+              <div class="col-md-6">{{ location.distance_to_client_fiber | number: 2 }} m</div>
+            </div>
           </div>
         </div>
 
