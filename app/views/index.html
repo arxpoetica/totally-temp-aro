@@ -9,8 +9,9 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/sweetalert.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/select2.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/select2-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
   </head>
   <body>
 
@@ -146,6 +147,10 @@
             <p class="navbar-text saving" id="plan-saved">
               <small><span class="fa fa-check"></span> Plan saved</small>
             </p>
+
+            <div class="navbar-text" style="width: 200px">
+              <div id="year-slider"></div>
+            </div>
 
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
@@ -1347,6 +1352,7 @@
   <script src="javascripts/vendors/tinycolor.js"></script>
   <script src="javascripts/vendors/randomColor.min.js"></script>
   <script src="javascripts/vendors/Chart.StackedBar.js"></script>
+  <script src="javascripts/vendors/nouislider.min.js"></script>
 
   <script src="javascripts/lib/controllers/financial_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
@@ -1428,7 +1434,7 @@
       },
       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
       minimumInputLength: 1,
-    });
+    })
   </script>
   <script src="javascripts/lib/interceptors/custom_locale.js"></script>
   <% if (env_is_production) { %>
