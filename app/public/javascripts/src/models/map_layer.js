@@ -33,6 +33,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       this.denisty_hue_from = options.denisty_hue_from
       this.denisty_hue_to = options.denisty_hue_to
       this.minZoom = options.minZoom
+      this.heatmap = options.heatmap
 
       var data_layer = this.data_layer
 
@@ -118,10 +119,20 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
 
       $rootScope.$on('map_zoom_changed', () => this._calculateDisabled())
       if (map) {
-        map.ready(() => this._calculateDisabled())
+        map.ready(() => this._mapReady())
       } else {
         $(document).ready(() => {
-          map.ready(() => this._calculateDisabled())
+          map.ready(() => this._mapReady())
+        })
+      }
+    }
+
+    _mapReady () {
+      this._calculateDisabled()
+      if (this.heatmap) {
+        this.heatmapLayer = new google.maps.visualization.HeatmapLayer({
+          map: map,
+          radius: 40
         })
       }
     }
@@ -230,7 +241,8 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
             swlat: bounds.getSouthWest().lat(),
             swlon: bounds.getSouthWest().lng(),
             zoom: map.getZoom(),
-            threshold: this.threshold
+            threshold: this.threshold,
+            heatmap: this.heatmap
           }
           _.extend(params, this.http_params || {})
           this.is_loading = true
@@ -250,7 +262,20 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
             var visible = this.visible
             this.hide()
             this.clearData()
-            this.addGeoJson(data.feature_collection)
+            if (this.heatmapLayer && params.zoom <= params.threshold) {
+              this.heatmapLayer.setData(
+                data.feature_collection.features.map((feature) => {
+                  var coordinates = feature.geometry.coordinates
+                  var density = feature.properties.density
+                  return {
+                    location: new google.maps.LatLng(coordinates[1], coordinates[0]),
+                    weight: density
+                  }
+                })
+              )
+            } else {
+              this.addGeoJson(data.feature_collection)
+            }
             this.metadata = data.metadata
             this.data_loaded = true
             $rootScope.$broadcast('map_layer_loaded_data', this)
@@ -370,6 +395,9 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
         this.loadData()
       }
       this.data_layer.setMap(_map)
+      if (this.heatmapLayer) {
+        this.heatmapLayer.setMap(_map)
+      }
       if (_map !== oldValue) {
         $rootScope.$broadcast('map_layer_changed_visibility', this)
       }
@@ -386,6 +414,9 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       this.metadata = {}
       this.features.splice(0)
       delete this.data
+      if (this.heatmapLayer) {
+        this.heatmapLayer.setData([])
+      }
     }
 
     revertStyles () {

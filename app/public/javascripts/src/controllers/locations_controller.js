@@ -60,7 +60,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     api_endpoint: '/locations/:plan_id',
     style_options: locationStyles,
     threshold: 15,
-    reload: 'always'
+    reload: 'always',
+    heatmap: true
   })
 
   var selectedLocationsLayer = $scope.selected_locations_layer = new MapLayer({
