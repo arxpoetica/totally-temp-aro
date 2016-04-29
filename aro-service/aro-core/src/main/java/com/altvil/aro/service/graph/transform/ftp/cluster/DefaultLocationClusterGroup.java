@@ -18,7 +18,6 @@ import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 
 public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 			.getLogger(DefaultLocationClusterGroup.class.getName());
 	

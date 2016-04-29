@@ -3,8 +3,8 @@ package com.altvil.aro.service.job.impl;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+
 import com.altvil.aro.service.job.Job;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize(using = JobIdSerializer.class)
