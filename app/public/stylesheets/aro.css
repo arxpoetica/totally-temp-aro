@@ -310,6 +310,10 @@ footer nav {
   background: url(/images/button_icons/network_equipment.png);
 }
 
+.icon-network-planning {
+  background: url(/images/button_icons/network_planning.png);
+}
+
 
 #market-size .nav-tabs > li, #market-size .nav-pills > li {
   float: none;
@@ -403,5 +407,41 @@ footer nav {
 }
 
 .checkbox.disabled label {
-    color: #ccc;
+  color: #ccc;
+}
+
+
+.noUi-handle:before, .noUi-handle:after {
+  height: 8px;
+  top: 5px;
+}
+
+.noUi-handle:before {
+  left: 10px;
+}
+
+.noUi-handle:after {
+  left: 14px;
+}
+
+.noUi-horizontal .noUi-handle {
+  width: 25px;
+  height: 20px;
+  top: -7px;
+}
+
+.noUi-horizontal {
+  height: 6px;
+}
+
+.noUi-marker-horizontal.noUi-marker {
+  display: none;
+}
+
+.noUi-pips-horizontal {
+  padding-top: 3px;
+}
+
+.noUi-value {
+  font-size: 10px;
 }
