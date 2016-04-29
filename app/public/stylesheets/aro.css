@@ -310,6 +310,10 @@ footer nav {
   background: url(/images/button_icons/network_equipment.png);
 }
 
+.icon-network-planning {
+  background: url(/images/button_icons/network_planning.png);
+}
+
 
 #market-size .nav-tabs > li, #market-size .nav-pills > li {
   float: none;
