@@ -127,9 +127,6 @@ public class SimpleFairShareModelFactory implements FairShareModelFactory {
 		public int getStrength(NetworkStrength providerStrength,
 				NetworkStrength cometitorStrength) {
 			
-			Object o = strengthMap.get(providerStrength) ;
-			Object cs = getCanaonicalStrength(cometitorStrength) ;
-			
 			return strengthMap.get(providerStrength).get(
 					getCanaonicalStrength(cometitorStrength));
 		}
