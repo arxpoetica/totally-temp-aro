@@ -1,5 +1,9 @@
 package com.altvil.aro.service.roic.model;
 
-public interface NetworkType {
+public enum NetworkType {
+	
+	Copper,
+	Fiber,
+	FiveG,
 	
 }

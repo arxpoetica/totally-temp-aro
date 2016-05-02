@@ -29,7 +29,7 @@ public class FairShareServiceImpl implements FairShareService {
 			modelTypeMap.put(t.getName(), t) ;
 		}
 		
-		modelFactoryMap.put(FairShareModelTypeEnum.StandardModel, new DefaultFairShareModelFactory()) ;
+		modelFactoryMap.put(FairShareModelTypeEnum.StandardModel, new StandardFairShareModelFactory()) ;
 		
 	}
 	

@@ -1,5 +1,6 @@
 package com.altvil.aro.service.roic.fairshare;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -7,9 +8,14 @@ import com.altvil.aro.service.roic.model.NetworkType;
 
 public class NetworkTypeShare {
 
+	
+	public static Builder build() {
+		return new Builder() ;
+	}
+	
 	public static class Builder {
 
-		private Map<NetworkType, Double> assignments;
+		private Map<NetworkType, Double> assignments = new HashMap<>() ;
 		// private double total = 0;
 
 		public Builder add(NetworkType type, double percent) {

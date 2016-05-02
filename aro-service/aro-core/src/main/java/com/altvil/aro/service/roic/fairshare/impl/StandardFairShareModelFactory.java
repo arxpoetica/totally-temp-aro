@@ -8,7 +8,7 @@ import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.utils.calc.CalcRow;
 import com.altvil.utils.calc.CalcSheet;
 
-public class DefaultFairShareModelFactory implements FairShareModelFactory {
+public class StandardFairShareModelFactory implements FairShareModelFactory {
 
 	@Override
 	public FairShareModel createModel(FairShareInputs inputs) {
@@ -16,13 +16,13 @@ public class DefaultFairShareModelFactory implements FairShareModelFactory {
 		CalcSheet<NetworkType> calcSheet = new CalcSheet<>(inputs
 				.getNetworkTypeShare().getNetworkTypes());
 
+		
 		final CalcRow<NetworkType, Double> networkSupply = calcSheet
 				.calcDouble(t -> {
 					return inputs.getCompetitorNetworkCapabilities().stream()
-							.mapToDouble(c -> c.getEffectiveNetworkStrength(t)).sum()
+							.mapToDouble(c -> c.getEffectiveNetworkStrength(t)).sum() * inputs.getCompetitorWeighting()
 							+ inputs.getProviderCapability()
 									.getEffectiveNetworkStrength(t);
-
 				});
 
 		final CalcRow<NetworkType, Double> networkUtilization = calcSheet
@@ -39,6 +39,10 @@ public class DefaultFairShareModelFactory implements FairShareModelFactory {
 					if (networkSupply.getValue(t) == 0 || totalUtilization == 0) {
 						return 0.0;
 					}
+					
+					// 1 / (1 + 0.5*(competitors))
+					
+					
 
 					// effectiveUtilization --Normalize Network based on
 					// "active networks"

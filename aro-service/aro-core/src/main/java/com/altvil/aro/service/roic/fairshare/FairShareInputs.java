@@ -11,6 +11,10 @@ import com.altvil.aro.service.roic.provider.impl.DefaultNetworkCapability;
 
 public class FairShareInputs {
 	
+	public static Builder build() {
+		return new Builder() ;
+	}
+	
 	public static class Builder {
 		
 		private FairShareInputs inputs = new FairShareInputs() ;
@@ -20,14 +24,33 @@ public class FairShareInputs {
 			return this ;
 		}
 		
+		public Builder setProvider(NetworkCapability capability) {
+			inputs.providerCapability = capability;
+			return this ;
+		}
+		
+		public Builder addCompetitor(NetworkCapability capability) {
+			inputs.competitorNetworkCapabilities.add(capability) ;
+			return this ;
+		}
+		
 		public Builder setNetworkTypes(NetworkTypeShare share) {
 			inputs.networkTypeShare = share ;
 			return this ;
 		}
 		
 		public Builder add(NetworkProvider provider, Double strength, Set<NetworkType> supportedTypes) {
-			inputs.competitorNetworkCapabilities.add(new DefaultNetworkCapability(provider, strength, supportedTypes)) ;
+			addCompetitor(new DefaultNetworkCapability(provider, strength, supportedTypes)) ;
 			return this ;
+		}
+		
+		public Builder setCompetitorWeighting(double weighting) {
+			inputs.competitorWeighting = weighting ;
+			return this ;
+		}
+		
+		public FairShareInputs build() {
+			return inputs ;
 		}
 		
 	}
@@ -36,6 +59,7 @@ public class FairShareInputs {
 	//Variables
 	private NetworkTypeShare networkTypeShare;
 	private NetworkCapability providerCapability;
+	private double competitorWeighting = 1.0 ;
 	private Collection<NetworkCapability> competitorNetworkCapabilities = new ArrayList<>();
 
 	//Network Types
@@ -50,5 +74,11 @@ public class FairShareInputs {
 	public Collection<NetworkCapability> getCompetitorNetworkCapabilities() {
 		return competitorNetworkCapabilities;
 	}
+
+	public double getCompetitorWeighting() {
+		return competitorWeighting;
+	}
+	
+	
 
 }
