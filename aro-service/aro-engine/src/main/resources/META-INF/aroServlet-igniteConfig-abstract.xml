@@ -38,6 +38,30 @@
                 </property>
             </bean>
         </property>
+        
+        <property name="cacheConfiguration">
+	        <bean class="org.apache.ignite.configuration.CacheConfiguration">
+	            <!-- Set cache mode. -->
+	            <property name="cacheMode" value="PARTITIONED"/>
+	            <!-- Set number of backups to 0  WARNING: REEVALUATE FOR PRODUCTION!-->
+	            <property name="backups" value="0"/>
+	            <!-- Set initial cache capacity to ~ 10M. -->
+	            <property name="startSize" value="#{10 * 1024 * 1024}"/> 
+	            <!-- Enable off-heap storage with unlimited size. -->
+	            <property name="offHeapMaxMemory" value="0"/> 
+	            <!-- Disable swap. -->
+	            <property name="swapEnabled" value="false"/> 
+	            <!-- Eviction for constrained memory -->
+			    <property name="evictionPolicy">
+			        <!-- LRU eviction policy. -->
+			        <bean class="org.apache.ignite.cache.eviction.lru.LruEvictionPolicy">
+			            <!-- Set the maximum cache size to 1 million (default is 100,000). -->
+			            <property name="maxSize" value="1000000"/>
+			        </bean>
+			    </property>
+	        </bean>
+    	</property>
+        
     </bean>
 
 </beans>
