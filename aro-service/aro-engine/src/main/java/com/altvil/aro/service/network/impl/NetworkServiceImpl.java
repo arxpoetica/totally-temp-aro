@@ -15,6 +15,7 @@ import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMetrics;
 import org.apache.ignite.cache.CacheMode;
+import org.apache.ignite.cluster.ClusterGroup;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,6 @@ public class NetworkServiceImpl implements NetworkService {
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
 	
 	
-	private Ignite ignite;
 	//TODO configure grid caches via Spring rather than method calls
 	public static final String CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandsByWCID";
 	public static final String CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadLocationsByWCID";
@@ -59,6 +59,12 @@ public class NetworkServiceImpl implements NetworkService {
 	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID = cacheConfigFiberSourcesByWCID();
 	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID = cacheConfigRoadEdgesByWCID();
 
+	private static Ignite ignite;	
+	private static IgniteCache<Long, Map<Long, LocationDemand>> locDemandCache;
+	private static IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache;
+	private static IgniteCache<Long, Collection<NetworkAssignment>> fiberSourceLocCache;
+	private static IgniteCache<Long, Collection<RoadEdge>> roadEdgesCache;
+
 	@PostConstruct
 	private void postConstruct()
 	{
@@ -66,6 +72,11 @@ public class NetworkServiceImpl implements NetworkService {
 		//Using client-mode Ignite instance here so we connect to existing cluster infrastructure but using same config file
 		Ignition.setClientMode(true);
 		ignite = Ignition.start("/aroServlet-igniteConfig.xml");
+		
+		locDemandCache = ignite.getOrCreateCache(cacheConfigLocationDemandByWCID);
+		roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByWCID);
+		fiberSourceLocCache = ignite.getOrCreateCache(cacheConfigFiberSourcesByWCID);
+		roadEdgesCache = ignite.getOrCreateCache(cacheConfigRoadEdgesByWCID);
 	}
 	
 	@Override
@@ -88,28 +99,33 @@ public class NetworkServiceImpl implements NetworkService {
 		CacheConfiguration<Long, Map<Long, LocationDemand>> cfg = new CacheConfiguration<>(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
 		//TODO MEDIUM investigate whether the multiple caches partition by wirecenter ID and naturally co-locate due to this
         cfg.setCacheMode(CacheMode.PARTITIONED);
-		log.warn("Ingite cache using default config for CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID + ")");
+        //TODO stat collection likely expensive...default to false when config is via spring
+        cfg.setStatisticsEnabled(log.isDebugEnabled());
+		if (cfg.isStatisticsEnabled()) log.warn("Ingite cache is collecting metrics, which could be expensive: CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
 	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID() {
 		CacheConfiguration<Long, Map<Long, RoadLocation>> cfg = new CacheConfiguration<>(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
         cfg.setCacheMode(CacheMode.PARTITIONED);
-		log.warn("Ingite cache using default config for CACHE_ROAD_LOCATION_BY_WIRECENTER_ID (" + CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID + ")");
+        cfg.setStatisticsEnabled(log.isDebugEnabled());
+		if (cfg.isStatisticsEnabled()) log.warn("Ingite cache is collecting metrics, which could be expensive: CACHE_ROAD_LOCATION_BY_WIRECENTER_ID (" + CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
 	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID() {
 		CacheConfiguration<Long, Collection<NetworkAssignment>> cfg = new CacheConfiguration<>(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
         cfg.setCacheMode(CacheMode.PARTITIONED);
-		log.warn("Ingite cache using default config for CACHE_FIBER_SOURCES_BY_WIRECENTER_ID (" + CACHE_FIBER_SOURCES_BY_WIRECENTER_ID + ")");
+        cfg.setStatisticsEnabled(log.isDebugEnabled());
+		if (cfg.isStatisticsEnabled()) log.warn("Ingite cache is collecting metrics, which could be expensive: CACHE_FIBER_SOURCES_BY_WIRECENTER_ID (" + CACHE_FIBER_SOURCES_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
 	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID() {
 		CacheConfiguration<Long, Collection<RoadEdge>> cfg = new CacheConfiguration<>(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
         cfg.setCacheMode(CacheMode.PARTITIONED);
-		log.warn("Ingite cache using default config for CACHE_ROAD_EDGES_BY_WIRECENTER_ID (" + CACHE_ROAD_EDGES_BY_WIRECENTER_ID + ")");
+        cfg.setStatisticsEnabled(log.isDebugEnabled());
+		if (cfg.isStatisticsEnabled()) log.warn("Ingite cache is collecting metrics, which could be expensive: CACHE_ROAD_EDGES_BY_WIRECENTER_ID (" + CACHE_ROAD_EDGES_BY_WIRECENTER_ID + ")");
 		return cfg;
 	}
 
@@ -132,16 +148,12 @@ public class NetworkServiceImpl implements NetworkService {
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-		IgniteCache<Long, Map<Long, LocationDemand>> locDemandCache = ignite.getOrCreateCache(cacheConfigLocationDemandByWCID);
-		if (null != locDemandCache && locDemandCache.containsKey(wirecenterId)) 
-		{
-			locDemands = locDemandCache.get(wirecenterId);
-		}
-		else
+		locDemands = locDemandCache.get(wirecenterId);
+		if (null == locDemands) 
 		{
 			locDemands = queryLocationDemand(networkRequest);
 			locDemandCache.put(wirecenterId, locDemands);
-			//NOTE: currently no eviction policy used as LocationDemand is temporarily assumed immutable
+			//NOTE: currently no update policy used as LocationDemand is temporarily assumed immutable
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(locDemandCache);
@@ -152,17 +164,27 @@ public class NetworkServiceImpl implements NetworkService {
 			//TODO filter locations (were not being filtered in non-cached implementation!)
 			log.warn("LocationDemand not yet being filtered for SELECTED requests");
 		}
-		//return results
 		return locDemands;
 	}
 	
 	private void logCacheStats(IgniteCache<?, ?> cache)
 	{
-		CacheMetrics cm = cache.metrics();
-		log.debug("**Cache: " + cache.getName() + " Hit:" + cm.getCacheHits() + " Miss:" + cm.getCacheMisses() + " Size:" + cm.getSize());
-//		String logString = "**Cache: " + cache.getName() + " Hit:" + cm.getCacheHits() + " Miss:" + cm.getCacheMisses() + " Size:" + cm.getSize();
-//		log.debug(logString);
-//		System.out.println(logString);
+		//TODO MEDIUM sleep 2s+ first for accurate metrics, as metrics are collected at intervals so they'll never be accurate if logged instantly.  Consider forking logging thread (has downsides). 
+		ClusterGroup cgrp = ignite.cluster().forDataNodes(cache.getName());
+		CacheMetrics cm = cache.metrics(cgrp);
+		log.debug("DataNodes: " + cm.name() + " CollectStats:" + cm.isStatisticsEnabled() + " Hit:" + cm.getCacheHits() + " Miss:" + cm.getCacheMisses() + " Size:" + cm.getSize());
+
+			// optional local node reporting
+//			ClusterGroup lgrp = ignite.cluster().forLocal();
+//			CacheMetrics lcm = cache.metrics(lgrp);
+//			log.debug("**    Local: " + lcm.name() + " CollectStats:" + lcm.isStatisticsEnabled() + " Hit:" + lcm.getCacheHits() + " Miss:" + lcm.getCacheMisses() + " Size:" + lcm.getSize());
+
+			// optional cache memory mode peek
+//			log.debug("** Peek All:" + cache.size(CachePeekMode.ALL) + " Near:" + cache.size(CachePeekMode.NEAR) + " Local:" + cache.localSize(CachePeekMode.ALL) + " Primary:" + cache.size(CachePeekMode.PRIMARY) + " OnHeap:" + cache.size(CachePeekMode.ONHEAP) + " OffHeap:" + cache.size(CachePeekMode.OFFHEAP) + " Swap:" + cache.size(CachePeekMode.SWAP));
+
+//			String logString = "**Cache: " + cache.getName() + " Hit:" + cm.getCacheHits() + " Miss:" + cm.getCacheMisses() + " Size:" + cm.getSize();
+//			log.debug(logString);
+//			System.out.println(logString);
 	}
 
 	private Map<Long, LocationDemand> queryLocationDemand(
@@ -226,22 +248,16 @@ public class NetworkServiceImpl implements NetworkService {
 	
 	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(NetworkRequest networkRequest, Long wirecenterId) {
 		Map<Long, RoadLocation> roadLocations;
-		IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache;
 		
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-		roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByWCID);
-		//TODO adjust the cache population strategy to one which supports hit/miss metrics
-		if (null != roadLocCache && roadLocCache.containsKey(wirecenterId)) 
-		{
-			roadLocations = roadLocCache.get(wirecenterId);
-		}
-		else
+		roadLocations = roadLocCache.get(wirecenterId);
+		if (null == roadLocations) 
 		{
 			roadLocations = queryRoadLocations(networkRequest);
 			roadLocCache.put(wirecenterId, roadLocations);
-			//NOTE: currently no eviction policy used as RoadLocation is temporarily assumed immutable
+			//NOTE: currently no update policy used as RoadLocation is temporarily assumed immutable
 		}
 	
 		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
@@ -257,7 +273,6 @@ public class NetworkServiceImpl implements NetworkService {
 
 		if (log.isDebugEnabled()) logCacheStats(roadLocCache);
 
-		//return results
 		return roadLocations;
 	}
 
@@ -334,18 +349,13 @@ public class NetworkServiceImpl implements NetworkService {
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-		IgniteCache<Long, Collection<NetworkAssignment>> fiberSourceLocCache = ignite.getOrCreateCache(cacheConfigFiberSourcesByWCID);
-		//TODO adjust the cache population strategy to one which supports hit/miss metrics
-		if (null != fiberSourceLocCache && fiberSourceLocCache.containsKey(wirecenterId)) 
-		{
-			fiberSourceLocations = fiberSourceLocCache.get(wirecenterId);
-		}
-		else
+		fiberSourceLocations = fiberSourceLocCache.get(wirecenterId);
+		if (null == fiberSourceLocations) 
 		{
 			fiberSourceLocations = queryFiberSources(networkRequest);
 			fiberSourceLocCache.put(wirecenterId, fiberSourceLocations);
-			//NOTE: currently no eviction policy used as FiberSource is temporarily assumed immutable
 		}
+		//NOTE: currently never updating FiberSource as it is temporarily assumed immutable
 		
 		if (log.isDebugEnabled()) logCacheStats(fiberSourceLocCache);
 				
@@ -385,17 +395,12 @@ public class NetworkServiceImpl implements NetworkService {
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-		IgniteCache<Long, Collection<RoadEdge>> roadEdgesCache = ignite.getOrCreateCache(cacheConfigRoadEdgesByWCID);
-		//TODO adjust the cache population strategy to one which supports hit/miss metrics
-		if (null != roadEdgesCache && roadEdgesCache.containsKey(wirecenterId)) 
-		{
-			roadEdges = roadEdgesCache.get(wirecenterId);
-		}
-		else
+		roadEdges = roadEdgesCache.get(wirecenterId);
+		if (null == roadEdges) 
 		{
 			roadEdges = queryRoadEdges(networkRequest);
 			roadEdgesCache.put(wirecenterId, roadEdges);
-			//NOTE: currently no eviction policy used as RoadEdge is temporarily assumed immutable
+			//NOTE: currently no update policy used as RoadEdge is temporarily assumed immutable
 		}
 		
 		if (log.isDebugEnabled()) logCacheStats(roadEdgesCache);
