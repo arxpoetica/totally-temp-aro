@@ -34,13 +34,13 @@ public class AbstractFairShareTest {
 	}
 
 	protected FairShareInputs createInputs(double copper, double fiber,
-			int[][] inputs, double[] prodStrength, double competitorWeithing) {
+			int[][] inputs, double[] prodStrength, double demographicModifier) {
 
 		FairShareInputs.Builder b = FairShareInputs.build().setNetworkTypes(
 				NetworkTypeShare.build().add(NetworkType.Copper, copper)
 						.add(NetworkType.Fiber, fiber).build());
 		
-		b.setCompetitorWeighting(competitorWeithing) ;
+		b.setDemographicModifier(demographicModifier) ;
 
 		b.setProvider(createCapability(prodStrength[0], inputs[0]));
 		for (int i = 1; i < inputs.length; i++) {

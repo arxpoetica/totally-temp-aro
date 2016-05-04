@@ -8,6 +8,8 @@ import java.util.Set;
 
 import com.altvil.aro.service.roic.fairshare.FairShareInputs;
 import com.altvil.aro.service.roic.fairshare.FairShareModel;
+import com.altvil.aro.service.roic.fairshare.FairShareModel.ModelType;
+import com.altvil.aro.service.roic.fairshare.FairShareModelTypeEnum;
 import com.altvil.aro.service.roic.fairshare.spi.FairShareModelFactory;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.utils.calc.CalcRow;
@@ -31,7 +33,7 @@ public class SimpleFairShareModelFactory implements FairShareModelFactory {
 								CodeMapping.MAPPING.getNetworkStrength(c
 										.getNetworkTypes()))).sum();
 
-		double totalFairShare = providerStrength == NetworkStrength.none ? 0 : 1 / (1 + competitorSupply*inputs.getCompetitorWeighting());
+		double totalFairShare = providerStrength == NetworkStrength.none ? 0 : 1 / (1 + competitorSupply);
 
 		CalcSheet<NetworkType> calcSheet = new CalcSheet<>(inputs
 				.getNetworkTypeShare().getNetworkTypes());
@@ -63,6 +65,13 @@ public class SimpleFairShareModelFactory implements FairShareModelFactory {
 			return networkTypes;
 		}
 
+	}
+
+	
+	
+	@Override
+	public ModelType getModelType() {
+		return FairShareModelTypeEnum.SimpleModel ;
 	}
 
 	private static class CompetitorEncoding {

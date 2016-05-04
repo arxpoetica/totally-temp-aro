@@ -7,6 +7,8 @@ import com.altvil.aro.service.roic.fairshare.FairShareModel.ModelType;
 public enum FairShareModelTypeEnum implements ModelType {
 	
 	StandardModel("StandardModel"),
+	SimpleModel("SimpleModel"),
+	AltvilModel("AltVilModel")
 	
 	;
 

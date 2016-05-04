@@ -7,7 +7,7 @@ import com.altvil.aro.service.roic.model.NetworkType;
 
 public interface NetworkCapability {
 	
-	double getProviderStrength() ;
+	double getProviderStrength(NetworkType type) ;
 	NetworkProvider getNetworkProvider() ;
 	double getNetworkStrength(NetworkType type) ;
 	double getEffectiveNetworkStrength(NetworkType type) ;
