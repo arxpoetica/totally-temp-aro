@@ -22,6 +22,11 @@
 	<!-- Import normal config then override with IDE-specific settings -->
     <import resource="aroServlet-igniteConfig-abstract.xml"/>
     <bean parent="ignite.cfg">
+
+		<!-- Override the default grid name so we have a test-only grid, 
+			 and so the grid consoles are clear as to which grid 
+			 a node is participating in -->
+        <property name="gridName" value="aroIgniteGrid-IDE"/>
  
         <!-- Set to true to enable distributed class loading for examples, default is false. -->
 		<!-- <property name="peerClassLoadingEnabled" value="true"/> -->

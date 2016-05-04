@@ -1,24 +1,16 @@
 This container allows bringing up a 1+ node Ignite server cluster.  The intention is for this to be used in Vagrant virtualbox during development, and likely on production.  To bring up a cluster for use in your IDE, consider creating a launch profile for AroIgniteNodeIDEStartup.class instead.
 
-If the amount of cached data and desire to have long lived persistent cache in the nodes is desirable, then accessing the Vagrant docker instances may be desirable even from the IDE.  That would require host-to-vm port mappings to allow client nodes in the IDE to discover server nodes inside the VM.
-
 See the Makefile for commands which will build/install/run this docker container.
 
+Install necessary jars in ignite node docker container image when possible, otherwise they load remotely.  Configure the docker image to at least contain the third-party jar files.
 
-TO DO
+Use Ignite Visor to connect to cluster and examine cache and task queue contents, as well as tons of other management/monitoring data for the cluster.  See $IGNITE_HOME/bin/ignitevisorcmd.sh, and the Makefile provides a command for running this in the Virtualbox machine as a docker instance.
 
-Review the "Production Readiness" portion of https://apacheignite.readme.io/docs/faq and take appropriate actions.
+If the expense of populating cached data makes long-lived persistent cache in the nodes desirable, then accessing the Vagrant docker instances may be desirable even from the IDE.  That would require host-to-vm port mappings to allow client nodes in the IDE to discover server nodes inside the VM.
 
-Review the resource utilization in the Vagrant setup relative to node counts. Configure LRU config and such for dev, different for prod.
 
-Provide make commands to instantiate/tear down a simple cluster in vagrant
+CONSIDER
+Consider using Ignite Lifecycle Events and custom Ignite LifecycleBean to notify cluster of startup/spindown of nodes, or to perform other lifecycle tasks. 
 
-Attach to an ignite container and run $IGNITE_HOME/bin/ignitevisorcmd.sh to examine grid contents and other managment/monitoring.
+Consider providing make commands to instantiate/tear down a simple cluster in vagrant. (make command exists to start individual nodes; probably sufficient for now)
 
-Consider a shell process/make which performs 'docker log -f' aggregation across the cluster to one common log tail. Alternatively, use logback to write logs to TCP aggregation point (Splunk?)
-
-Map host ports on VirtualBox if we want to share node with IDE testing.
-
-Use Ignite Lifecycle Events and custom Ignite LifecycleBean to notify cluster of startup/spindown of nodes, if Ignite not doing this already
-
-Install necessary jars in ignite node container when possible, otherwise they load remotely.
