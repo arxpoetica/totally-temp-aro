@@ -151,7 +151,7 @@
 		 
 	<bean id="singleIgniteGrid" autowire="byName" class="org.apache.ignite.IgniteSpringBean">
 		<property name="configuration">
-	        <bean parent="ignite-abstract.cfg">  <!-- Use bean parent "ignite-abstract-IDE.cfg" when running in IDE -->
+	        <bean parent="ignite-abstract-IDE.cfg">  <!-- Remove "-IDE" from parent name if not running in IDE -->
 	        	<property name="clientMode" value="true"/>
 	        	        
 		        <property name="cacheConfiguration">
