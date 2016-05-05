@@ -12,11 +12,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
-import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMetrics;
-import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cluster.ClusterGroup;
-import org.apache.ignite.configuration.CacheConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,15 +46,10 @@ public class NetworkServiceImpl implements NetworkService {
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
 	
 	
-	//TODO configure grid caches via Spring rather than method calls
-	public static final String CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_LocationDemandsByWCID";
-	public static final String CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadLocationsByWCID";
-	public static final String CACHE_FIBER_SOURCES_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_FiberSourcesByWCID";
-	public static final String CACHE_ROAD_EDGES_BY_WIRECENTER_ID = NetworkServiceImpl.class.getSimpleName() + "_RoadEdgesByWCID";
-	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID = cacheConfigLocationDemandByWCID();
-	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID = cacheConfigRoadLocationsByWCID();
-	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID = cacheConfigFiberSourcesByWCID();
-	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID = cacheConfigRoadEdgesByWCID();
+	public static final String CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID = "NetworkService_LocationDemandsByWCID";
+	public static final String CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID = "NetworkService_RoadLocationsByWCID";
+	public static final String CACHE_FIBER_SOURCES_BY_WIRECENTER_ID = "NetworkService_FiberSourcesByWCID";
+	public static final String CACHE_ROAD_EDGES_BY_WIRECENTER_ID = "NetworkService_RoadEdgesByWCID";
 
 	private Ignite ignite;
 	private static IgniteCache<Long, Map<Long, LocationDemand>> locDemandCache;
@@ -68,10 +60,11 @@ public class NetworkServiceImpl implements NetworkService {
 	@PostConstruct
 	private void postConstruct()
 	{
-		locDemandCache = ignite.getOrCreateCache(cacheConfigLocationDemandByWCID);
-		roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByWCID);
-		fiberSourceLocCache = ignite.getOrCreateCache(cacheConfigFiberSourcesByWCID);
-		roadEdgesCache = ignite.getOrCreateCache(cacheConfigRoadEdgesByWCID);
+		//TODO MEDIUM investigate whether the multiple caches partition by wirecenter ID and naturally co-locate due to this
+		locDemandCache = ignite.getOrCreateCache(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
+		roadLocCache = ignite.getOrCreateCache(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
+		fiberSourceLocCache = ignite.getOrCreateCache(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
+		roadEdgesCache = ignite.getOrCreateCache(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
 	}
 	
 	@Autowired
@@ -94,40 +87,6 @@ public class NetworkServiceImpl implements NetworkService {
 		networkData.setRoadEdges(getRoadEdges(networkRequest, wcid));
 
 		return networkData;
-	}
-
-	private static CacheConfiguration<Long, Map<Long, LocationDemand>> cacheConfigLocationDemandByWCID() {
-		CacheConfiguration<Long, Map<Long, LocationDemand>> cfg = new CacheConfiguration<>(CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID);
-		//TODO MEDIUM investigate whether the multiple caches partition by wirecenter ID and naturally co-locate due to this
-        cfg.setCacheMode(CacheMode.PARTITIONED);
-        //TODO stat collection likely expensive...default to false when config is via spring
-        cfg.setStatisticsEnabled(log.isDebugEnabled());
-		if (cfg.isStatisticsEnabled()) log.warn("Ingite cache is collecting metrics, which could be expensive: CACHE_LOCATION_DEMAND_BY_WIRECENTER_ID (" + CACHE_LOCATION_DEMANDS_BY_WIRECENTER_ID + ")");
-		return cfg;
-	}
-
-	private static CacheConfiguration<Long, Map<Long, RoadLocation>> cacheConfigRoadLocationsByWCID() {
-		CacheConfiguration<Long, Map<Long, RoadLocation>> cfg = new CacheConfiguration<>(CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID);
-        cfg.setCacheMode(CacheMode.PARTITIONED);
-        cfg.setStatisticsEnabled(log.isDebugEnabled());
-		if (cfg.isStatisticsEnabled()) log.warn("Ingite cache is collecting metrics, which could be expensive: CACHE_ROAD_LOCATION_BY_WIRECENTER_ID (" + CACHE_ROAD_LOCATIONS_BY_WIRECENTER_ID + ")");
-		return cfg;
-	}
-
-	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID() {
-		CacheConfiguration<Long, Collection<NetworkAssignment>> cfg = new CacheConfiguration<>(CACHE_FIBER_SOURCES_BY_WIRECENTER_ID);
-        cfg.setCacheMode(CacheMode.PARTITIONED);
-        cfg.setStatisticsEnabled(log.isDebugEnabled());
-		if (cfg.isStatisticsEnabled()) log.warn("Ingite cache is collecting metrics, which could be expensive: CACHE_FIBER_SOURCES_BY_WIRECENTER_ID (" + CACHE_FIBER_SOURCES_BY_WIRECENTER_ID + ")");
-		return cfg;
-	}
-
-	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID() {
-		CacheConfiguration<Long, Collection<RoadEdge>> cfg = new CacheConfiguration<>(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
-        cfg.setCacheMode(CacheMode.PARTITIONED);
-        cfg.setStatisticsEnabled(log.isDebugEnabled());
-		if (cfg.isStatisticsEnabled()) log.warn("Ingite cache is collecting metrics, which could be expensive: CACHE_ROAD_EDGES_BY_WIRECENTER_ID (" + CACHE_ROAD_EDGES_BY_WIRECENTER_ID + ")");
-		return cfg;
 	}
 
 	private Collection<NetworkAssignment> toValidAssignments(

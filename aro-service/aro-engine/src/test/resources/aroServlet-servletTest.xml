@@ -141,7 +141,7 @@
 	<!-- NOTE the bean id is used for Autowiring, while the configuration's gridName is the actual Ignite grid being used.  This abstraction provides easy reconfiguration when using multiple grids. -->
 	<bean id="networkServiceIgniteGrid" class="org.apache.ignite.IgniteSpringBean">
 		<property name="configuration">
-	        <bean parent="ignite-abstract.cfg">
+	        <bean parent="ignite-abstract.cfg">  <!-- Use bean parent "ignite-abstract-IDE.cfg" when running in IDE -->
 	        	<property name="clientMode" value="true"/>
 	        </bean>
 	    </property>
