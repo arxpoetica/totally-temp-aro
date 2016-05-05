@@ -20,13 +20,13 @@ public class StandardFairShareTest extends AbstractFairShareTest {
 	
 	@Test
 	public void testAlgorithm() {
-		FairShareModel model = factory.createModel(createInputs(.1, .9, new int[][]{{1,2}, {0,0}, {0,0}, {0,0}}, new double[]{1.0, 1.0, 1.0, 1.0}));
+		FairShareModel model = factory.createModel(createInputs(.1, .9, new int[][]{{1,1}, {0,0}, {0,0}, {0,0}}, new double[]{1.0, 1.0, 1.0, 1.0}));
 		assertEquals(1.0, model.getTotalShare(), 0);
 	}
 	
 	@Test
 	public void testAlgorithm1() {
-		FairShareModel model = factory.createModel(createInputs(.1, .9, new int[][]{{1,1}, {0,0}, {0,0}, {0,0}}, new double[]{1.0, 1.0, 1.0, 1.0}));
+		FairShareModel model = factory.createModel(createInputs(.1, .9, new int[][]{{1,1}, {0,0}, {0,0}, {0,0}}, new double[][]{{1.0}, {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}}));
 		assertEquals(1.0, model.getTotalShare(), 0);
 	}
 	
@@ -102,7 +102,7 @@ public class StandardFairShareTest extends AbstractFairShareTest {
 	
 	@Test
 	public void testAlgorithm14() {
-		FairShareModel model = factory.createModel(createInputs(.1, .9, new int[][]{{1,1}, {1,1}, {1,1}, {1,1}}, new double[]{1.0, 1.0, 1.0, 1.0}, 0.5));
+		FairShareModel model = factory.createModel(createInputs(.1, .9, new int[][]{{1,1}, {1,1}, {1,1}, {1,1}}, new double[]{1.0, 1.0, 1.0, 1.0}));
 		assertEquals(.4, model.getTotalShare(), 0);
 	}
 

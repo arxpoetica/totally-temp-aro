@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.service.roic.fairshare.FairShareInputs;
 import com.altvil.aro.service.roic.fairshare.FairShareModel;
 import com.altvil.aro.service.roic.fairshare.FairShareModel.ModelType;
-import com.altvil.aro.service.roic.fairshare.FairShareModelTypeEnum;
 import com.altvil.aro.service.roic.fairshare.FairShareService;
 import com.altvil.aro.service.roic.fairshare.spi.FairShareModelFactory;
 
