@@ -42,27 +42,6 @@
                 </property>
             </bean>
         </property>
-        
-        <property name="cacheConfiguration">
-        	<list>
-				<bean parent="basicCache.cfg">
-					<property name="name" value="NetworkService_LocationDemandsByWCID"/>
-					<property name="statisticsEnabled" value="false"/>
-				</bean>
-				<bean parent="basicCache.cfg">
-					<property name="name" value="NetworkService_RoadLocationsByWCID"/>
-					<property name="statisticsEnabled" value="false"/>
-				</bean>
-				<bean parent="basicCache.cfg">
-					<property name="name" value="NetworkService_FiberSourcesByWCID"/>
-					<property name="statisticsEnabled" value="false"/>
-				</bean>
-				<bean parent="basicCache.cfg">
-					<property name="name" value="NetworkService_RoadEdgesByWCID"/>
-					<property name="statisticsEnabled" value="false"/>
-				</bean>
-			</list>
-    	</property>
     </bean>
 
 <!-- ******************** -->

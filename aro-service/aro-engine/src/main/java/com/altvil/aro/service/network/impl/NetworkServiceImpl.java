@@ -67,10 +67,11 @@ public class NetworkServiceImpl implements NetworkService {
 		roadEdgesCache = ignite.getOrCreateCache(CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
 	}
 	
+	//Note: cannot autowire as Map<String,Ignite> and lookup by key, because the map keys ignore bean aliases!
 	@Autowired
-	private void igniteBeans(Map<String, Ignite> igniteBeans)
+	private void setNetworkServiceIgniteGrid(Ignite igniteBean)
 	{
-		ignite = igniteBeans.get("networkServiceIgniteGrid");
+		this.ignite = igniteBean;
 	}
 	
 	@Override
