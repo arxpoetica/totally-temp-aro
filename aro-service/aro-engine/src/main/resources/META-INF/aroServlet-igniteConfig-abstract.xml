@@ -20,7 +20,7 @@
        http://www.springframework.org/schema/util/spring-util.xsd">
 
     
-    <bean abstract="true" id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
+    <bean abstract="true" id="ignite-abstract.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
 
 		<!-- Nodes which share gridName will cluster, so long as they can discover each other -->
         <property name="gridName" value="aroIgniteGrid"/>
@@ -73,7 +73,33 @@
 			    </property>
 	        </bean>
     	</property>
+    </bean>
+
+
+
+    <bean abstract="true" id="ignite-abstract-IDE.cfg" parent="ignite-abstract.cfg">
+
+		<!-- Override the default grid name so we have a test-only grid, 
+			 and so the grid consoles are clear as to which grid 
+			 a node is participating in -->
+        <property name="gridName" value="aroIgniteGrid-IDE"/>
         
+        <property name="localHost" value="127.0.0.1"/>
+
+        <!-- Explicitly configure TCP discovery SPI to provide list of initial nodes. -->
+        <property name="discoverySpi">
+            <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+                <property name="ipFinder">
+                    <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder">
+                        <property name="addresses">
+                            <list>
+                                <value>127.0.0.1:47500..47509</value>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
     </bean>
 
 </beans>

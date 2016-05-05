@@ -136,4 +136,15 @@
 	
 	<mvc:resources mapping="/webjars/**"
 		location="classpath:/META-INF/resources/webjars/" />
+		
+    <import resource="classpath:/META-INF/aroServlet-igniteConfig-abstract.xml"/>
+	<!-- NOTE the bean id is used for Autowiring, while the configuration's gridName is the actual Ignite grid being used.  This abstraction provides easy reconfiguration when using multiple grids. -->
+	<bean id="networkServiceIgniteGrid" class="org.apache.ignite.IgniteSpringBean">
+		<property name="configuration">
+	        <bean parent="ignite-abstract.cfg">
+	        	<property name="clientMode" value="true"/>
+	        </bean>
+	    </property>
+ 	</bean>
+ 	
 </beans>

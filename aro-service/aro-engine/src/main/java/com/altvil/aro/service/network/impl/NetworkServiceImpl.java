@@ -59,7 +59,7 @@ public class NetworkServiceImpl implements NetworkService {
 	private static CacheConfiguration<Long, Collection<NetworkAssignment>> cacheConfigFiberSourcesByWCID = cacheConfigFiberSourcesByWCID();
 	private static CacheConfiguration<Long, Collection<RoadEdge>> cacheConfigRoadEdgesByWCID = cacheConfigRoadEdgesByWCID();
 
-	private static Ignite ignite;	
+	private Ignite ignite;
 	private static IgniteCache<Long, Map<Long, LocationDemand>> locDemandCache;
 	private static IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache;
 	private static IgniteCache<Long, Collection<NetworkAssignment>> fiberSourceLocCache;
@@ -68,15 +68,16 @@ public class NetworkServiceImpl implements NetworkService {
 	@PostConstruct
 	private void postConstruct()
 	{
-		//TODO configure and instantiate via main Spring file.  Get handle here via something like Ignition.ignite($instanceName).
-		//Using client-mode Ignite instance here so we connect to existing cluster infrastructure but using same config file
-		Ignition.setClientMode(true);
-		ignite = Ignition.start("/aroServlet-igniteConfig.xml");
-		
 		locDemandCache = ignite.getOrCreateCache(cacheConfigLocationDemandByWCID);
 		roadLocCache = ignite.getOrCreateCache(cacheConfigRoadLocationsByWCID);
 		fiberSourceLocCache = ignite.getOrCreateCache(cacheConfigFiberSourcesByWCID);
 		roadEdgesCache = ignite.getOrCreateCache(cacheConfigRoadEdgesByWCID);
+	}
+	
+	@Autowired
+	private void igniteBeans(Map<String, Ignite> igniteBeans)
+	{
+		ignite = igniteBeans.get("networkServiceIgniteGrid");
 	}
 	
 	@Override

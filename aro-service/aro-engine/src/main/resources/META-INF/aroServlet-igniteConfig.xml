@@ -22,6 +22,6 @@
     
 	<!-- Import normal config then override with development virtualbox settings -->
     <import resource="aroServlet-igniteConfig-abstract.xml"/>
-    <bean parent="ignite.cfg"/>
+    <bean id="ignite.cfg" parent="ignite-abstract.cfg"/>
 
 </beans>

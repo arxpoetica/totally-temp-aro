@@ -14,6 +14,6 @@ public class AroIgniteNodeIDEStartup {
      * @throws IgniteException If failed.
      */
     public static void main(String[] args) throws IgniteException {
-        Ignition.start("aroServlet-IgniteConfig-IDE.xml");
+        Ignition.start("aroServlet-igniteConfig-IDE.xml");
     }
 }
