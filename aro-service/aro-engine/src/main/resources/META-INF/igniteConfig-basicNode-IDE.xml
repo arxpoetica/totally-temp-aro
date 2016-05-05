@@ -19,9 +19,9 @@
        http://www.springframework.org/schema/util
        http://www.springframework.org/schema/util/spring-util.xsd">
 
-    
-	<!-- Import normal config then override with development virtualbox settings -->
-    <import resource="aroServlet-igniteConfig-abstract.xml"/>
-    <bean id="ignite.cfg" parent="ignite-abstract.cfg"/>
+
+	<!-- Import normal config then override with IDE-specific settings -->
+    <import resource="igniteConfig-abstract.xml"/>
+    <bean id="ignite.cfg" parent="ignite-abstract-IDE.cfg"/>
 
 </beans>

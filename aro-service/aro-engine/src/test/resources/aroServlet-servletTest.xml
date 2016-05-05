@@ -142,7 +142,7 @@
 <!-- IGNITE GRID CONFIGURATIONS    -->
 <!-- ***************************** -->
 		
-    <import resource="classpath:/META-INF/aroServlet-igniteConfig-abstract.xml"/>
+    <import resource="classpath:/META-INF/igniteConfig-abstract.xml"/>
     
 	<!-- NOTE the IgniteSpringBean bean id is used for Autowiring, while 
 		 the configuration's gridName is the actual Ignite grid being used.  

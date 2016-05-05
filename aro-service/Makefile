@@ -52,20 +52,20 @@ reinstall_vagrant: uninstall install_vagrant
 #	(docker pull apacheignite/ignite:1.5.0.final)
 
 refresh_docker_ignite_config:
-	(cp aro-engine/src/main/resources/META-INF/aroServlet-igniteConfig.xml docker-ignite-node/.)
-	(cp aro-engine/src/main/resources/META-INF/aroServlet-igniteConfig-abstract.xml docker-ignite-node/.)
+	(cp aro-engine/src/main/resources/META-INF/igniteConfig-basicNode-docker.xml docker-ignite-node/.)
+	(cp aro-engine/src/main/resources/META-INF/igniteConfig-abstract.xml docker-ignite-node/.)
 
 vagrant_docker_build_ignite_base:
 	(cd docker-ignite-jdk8 && docker build -t aro-ignite-jdk8 .)
 
 vagrant_docker_build_ignite_node:
-	(cd docker-ignite-node && docker build -t aro-ignite-node .)
+	(cd docker-ignite-node && docker build -t aro-ignite-basicnode .)
 
 vagrant_docker_run_ignite:
-	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e CONFIG_URI=aroServlet-igniteConfig.xml -e OPTION_LIBS=ignite-spring,ingite-indexing,ignite-slf4j,ignite-jta -it --net=default --name $(DOCKER_NAME) aro-ignite-node)
+	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e CONFIG_URI=igniteConfig-basicNode-docker.xml -e OPTION_LIBS=ignite-spring,ingite-indexing,ignite-slf4j,ignite-jta -it --net=default --name $(DOCKER_NAME) aro-ignite-basicnode)
 
 vagrant_ignite_visor:
-	(docker run -it --rm aro-ignite-node apache-ignite-fabric-1.5.0.final-bin/bin/ignitevisorcmd.sh)
+	(docker run -it --rm aro-ignite-basicnode apache-ignite-fabric-1.5.0.final-bin/bin/ignitevisorcmd.sh)
 
 ###############################
 

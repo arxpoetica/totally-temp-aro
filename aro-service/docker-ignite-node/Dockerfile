@@ -4,6 +4,6 @@ ENV PGUSER=${PGUSER}
 ENV PGPASSWORD=${PGPASSWORD}
 ENV PGHOST=${PGHOST}
 ENV PGDATABASE=${PGDATABASE}
-ADD aroServlet-igniteConfig-abstract.xml aroServlet-igniteConfig-abstract.xml
-ADD aroServlet-igniteConfig.xml aroServlet-igniteConfig.xml
+ADD igniteConfig-abstract.xml igniteConfig-abstract.xml
+ADD igniteConfig-basicNode-docker.xml igniteConfig-basicNode-docker.xml
 
