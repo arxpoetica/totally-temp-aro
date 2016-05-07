@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +27,7 @@ import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.OptimizationInputs;
 import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.recalc.RecalcService;
 import com.altvil.netop.plan.MasterPlanJobResponse;
-import com.altvil.netop.plan.MasterPlanResponse;
 
 @RestController
 public class OptimizeEndPoint {

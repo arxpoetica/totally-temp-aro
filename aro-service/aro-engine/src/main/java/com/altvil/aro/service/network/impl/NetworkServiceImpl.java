@@ -68,7 +68,7 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 	
 	//Note: cannot autowire as Map<String,Ignite> and lookup by key, because the map keys ignore bean aliases!
-	@Autowired
+	@Autowired  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
 	private void setNetworkServiceIgniteGrid(Ignite igniteBean)
 	{
 		this.ignite = igniteBean;

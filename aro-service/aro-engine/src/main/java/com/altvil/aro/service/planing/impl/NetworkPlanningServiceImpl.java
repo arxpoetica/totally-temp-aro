@@ -7,12 +7,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteCompute;
+import org.apache.ignite.cluster.ClusterGroup;
+import org.apache.ignite.cluster.ClusterNode;
+import org.apache.ignite.lang.IgniteCallable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,20 +83,49 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	@Autowired
 	private ScoringStrategyFactory scoringStrategyFactory;
 
-	private ExecutorService executorService;
+	private Ignite igniteGrid;
+	private ExecutorService executorService ;
 	private ExecutorService wirePlanExecutor;
+	private IgniteCompute wirePlanComputeGrid;
 
 	@PostConstruct
 	public void init() {
-		executorService = Executors.newFixedThreadPool(2);
-		wirePlanExecutor = Executors.newFixedThreadPool(5);
+		/* NOTE: we could be more sophisticated with service cluster definition. Here are examples:
+				ClusterGroup networkPlanCluster = ignite.cluster().forAttribute("ROLE", "networkPlanning");
+				ClusterGroup wirePlanCluster = ignite.cluster().forAttribute("ROLE", "wirePlanning");
+			or:
+				ClusterGroup wirePlanCluster = ignite.cluster().forCacheNodes(NetworkServiceImpl.CACHE_ROAD_EDGES_BY_WIRECENTER_ID);
+			together with:
+				executorService = ignite.executorService(networkPlanCluster);
+				wirePlanExecutor = ignite.executorService(wirePlanCluster);
+		*/
+		//we use the server cluster if available, otherwise compute takes place locally
+		ClusterGroup executorGroup = igniteGrid.cluster().forServers();
+		if (0 == executorGroup.nodes().size()) 
+		{
+			executorGroup = igniteGrid.cluster().forLocal();
+			ClusterNode thisNode = executorGroup.node();
+			log.warn("Ignite server cluster was empty, so we are falling back to local computation!" +
+						" Consistent ID:" + thisNode.consistentId() + 
+						" UUID:" + thisNode.id() +
+						" HostNames:" + thisNode.hostNames());
+		}
+		executorService = igniteGrid.executorService();
+		wirePlanExecutor = igniteGrid.executorService();
+		wirePlanComputeGrid = igniteGrid.compute(executorGroup);
 	}
+	
+	@Autowired  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	private void setNetworkPlanningServiceIgniteGrid(Ignite igniteBean)
+	{
+		this.igniteGrid = igniteBean;
+	}	
 
 	@Override
 	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal username, long planId, InputRequests inputRequests,
 			OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) {
 		return new JobService.Builder<WirecenterNetworkPlan>(username).setCallable(createOptimzedCallable(NetworkRequest.create(planId, NetworkRequest.LocationLoadingRequest.ALL),
-						optimizationInputs, constraints)).setExecutorService(executorService);
+						optimizationInputs, constraints)).setComputeGrid(wirePlanComputeGrid);
 	}
 
 	@Override
@@ -171,7 +204,6 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				}
 			}).filter(p -> p != null).collect(Collectors.toList()));
 		});
-		builder.setExecutorService(executorService);
 
 		return builder;
 	}
@@ -206,7 +238,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 	
 
-	private Callable<WirecenterNetworkPlan> createOptimzedCallable(
+	private IgniteCallable<WirecenterNetworkPlan> createOptimzedCallable(
 			NetworkRequest networkRequest,
 			OptimizationInputs optimizationInputs,
 			FiberNetworkConstraints constraints) {

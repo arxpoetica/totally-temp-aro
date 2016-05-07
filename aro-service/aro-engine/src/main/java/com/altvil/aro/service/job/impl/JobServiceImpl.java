@@ -4,24 +4,31 @@ package com.altvil.aro.service.job.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
+//import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Resource;
 
+import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteCompute;
+import org.apache.ignite.lang.IgniteCallable;
+import org.apache.ignite.lang.IgniteFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -29,7 +36,6 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.job.Job;
@@ -39,81 +45,86 @@ import com.altvil.aro.service.job.impl.JobIdImpl;
 @Service
 public class JobServiceImpl implements JobService {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(JobServiceImpl.class.getName());
+
 	// NOTE: JobAdapter<T> can NOT implement Callable<T> as that triggers Servlet 3 Async response logic,
-	public class JobAdapter<T> implements Job<T> {
-		private final Callable<T> callable;
+	public class JobAdapter<T> implements Serializable, Job<T> {
+		private static final long serialVersionUID = 1L;
+
 		private Date	   completedTime;
-		private final Principal creator;
-		private final Future<T> future;
+		private Principal creator;
+		private IgniteFuture<T> future;
 		private final Job.Id	   id;
 		private final Date scheduledTime;
 		private  Date startedTime;
-		private final Callable<T> task;
 		
-		JobAdapter(Builder<T> builder) {
-			id = new JobIdImpl(builder.getMetaIdentifiers());
-			creator = builder.getCreator();
-			callable = builder.getCallable();
-			task = new Callable<T>() {
-				public T call() throws Exception {
-					try {
-						startedTime = new Date();
-						
-						return callable.call();
-					} finally {
-						completedTime = new Date();
-						
-						// Done async so that any futures associated with this task will be marked as done before serializing the task over JMS.
-						ForkJoinPool.commonPool().execute((Runnable) (() -> {announceCompletion();}));
-					}
-				}
-
-				private void announceCompletion() {
-					try {
-						String msg;
-						if (messageConverter.canWrite(getClass(), MediaType.APPLICATION_JSON)) {
-							HttpOutputMessage outputMessage = new HttpOutputMessage() {
-								ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-								@Override
-								public OutputStream getBody() throws IOException {
-									return baos;
-								}
-
-								@Override
-								public HttpHeaders getHeaders() {
-									return new HttpHeaders();
-								}
-							
-								public String toString() {
-									return baos.toString();
-								}
-							};
-							messageConverter.write(JobAdapter.this, MediaType.APPLICATION_JSON, outputMessage);
-							msg = outputMessage.toString();
-						} else {
-							msg = JobAdapter.this.toString();
-						}
-						
-						messagingTemplate.convertAndSendToUser(creator.getName(), "/topic/jobs", msg);
-					} catch (HttpMessageNotWritableException | MessagingException | IOException e) {
-						
-					}
-				}};
+		JobAdapter(final Builder<T> builder) {
 			scheduledTime = new Date();
 			startedTime = null;
 			completedTime = null;
+
+			id = new JobIdImpl(builder.getMetaIdentifiers());
+			creator = builder.getCreator();
+			final IgniteCallable<T> callable = builder.getCallable();
+			IgniteCompute innerComputeGrid = builder.getComputeGrid();
+			if (null == innerComputeGrid) {
+				innerComputeGrid = defaultServiceGrid.compute();
+			}
+			innerComputeGrid = innerComputeGrid.withAsync();
 			
-			 	if (builder.getExecutorService() == null) {
-					future = defaultService.submit(task);
+			innerComputeGrid.call(callable);
+			future = innerComputeGrid.future();
+			future.listen(f -> {
+					Calendar computeCalendar = GregorianCalendar.getInstance();
+					computeCalendar.setTimeInMillis(f.startTime());
+					startedTime = computeCalendar.getTime();
+					computeCalendar.setTimeInMillis(f.startTime() + f.duration());
+					completedTime = computeCalendar.getTime();
+
+					// Done async so that any futures associated with this task will be marked as done before serializing the task over JMS.
+					ForkJoinPool.commonPool().execute((Runnable) (() -> {announceCompletion();}));
+				});
+		}
+		
+		private void announceCompletion() {
+			try {
+				String msg;
+				if (messageConverter.canWrite(getClass(), MediaType.APPLICATION_JSON)) {
+					HttpOutputMessage outputMessage = new HttpOutputMessage() {
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	
+						@Override
+						public OutputStream getBody() throws IOException {
+							return baos;
+						}
+	
+						@Override
+						public HttpHeaders getHeaders() {
+							return new HttpHeaders();
+						}
+					
+						public String toString() {
+							return baos.toString();
+						}
+					};
+					messageConverter.write(JobAdapter.this, MediaType.APPLICATION_JSON, outputMessage);
+					msg = outputMessage.toString();
 				} else {
-					future = builder.getExecutorService().submit(task);
+					msg = JobAdapter.this.toString();
 				}
+				messagingTemplate.convertAndSendToUser(creator.getName(), "/topic/jobs", msg);
+				log.trace(msg);
+			} catch (HttpMessageNotWritableException | MessagingException | IOException e) {
+				log.error("Error attempting to announce job completion. ", e);
+			}
 		}
 
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
-			return future.cancel(mayInterruptIfRunning);
+			if (future.isDone()) return false;
+			
+			return mayInterruptIfRunning ? future.cancel() : false;
 		}
 
 		@Override
@@ -173,8 +184,13 @@ public class JobServiceImpl implements JobService {
 
 	private static final Logger	LOG	= LoggerFactory.getLogger(JobServiceImpl.class.getName());
 	
-	@Resource(name="myExecutor")
-	private	ThreadPoolTaskExecutor defaultService;
+	private Ignite defaultServiceGrid;
+	
+	@Autowired  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	private void setJobServiceIgniteGrid(Ignite igniteBean)
+	{
+		defaultServiceGrid = igniteBean;
+	}	
 	
 	private Map<Job.Id, Job<?>>	map	= Collections.synchronizedMap(new HashMap<>());
 	

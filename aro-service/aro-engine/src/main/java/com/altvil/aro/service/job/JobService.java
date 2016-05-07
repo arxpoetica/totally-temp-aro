@@ -3,8 +3,9 @@ package com.altvil.aro.service.job;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+
+import org.apache.ignite.IgniteCompute;
+import org.apache.ignite.lang.IgniteCallable;
 
 import com.altvil.aro.service.job.Job.Id;
 
@@ -25,8 +26,8 @@ public interface JobService {
 
 	class Builder<T> {
 		private final Principal		creator;
-		private ExecutorService		executorService;
-		private Callable<T>			callable;
+		private IgniteCompute		computeGrid;
+		private IgniteCallable<T>	callable;
 		private Map<String, Object>	metaIdentifiers;
 
 		public Builder(Principal creator) {
@@ -37,21 +38,21 @@ public interface JobService {
 			return creator;
 		}
 
-		public ExecutorService getExecutorService() {
-			return executorService;
+		public IgniteCompute getComputeGrid() {
+			return computeGrid;
 		}
 
-		public Builder<T> setExecutorService(ExecutorService executorService) {
-			this.executorService = executorService;
+		public Builder<T> setComputeGrid(IgniteCompute grid) {
+			this.computeGrid = grid;
 
 			return this;
 		}
 
-		public Callable<T> getCallable() {
+		public IgniteCallable<T> getCallable() {
 			return callable;
 		}
 
-		public Builder<T> setCallable(Callable<T> callable) {
+		public Builder<T> setCallable(IgniteCallable<T> callable) {
 			this.callable = callable;
 
 			return this;

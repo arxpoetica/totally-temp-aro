@@ -2,12 +2,12 @@ package com.altvil.netop.plan;
 
 import java.security.Principal;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,20 +26,21 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
 @RestController
 public class RecalcEndpoint {
-	private ExecutorService executorService;
+
+	private static final Logger log = LoggerFactory
+			.getLogger(RecalcEndpoint.class.getName());
 
 	@Autowired
 	private JobService jobService;
 	
 	@Autowired
 	private NetworkPlanningService networkPlanningService;
-
+	
 	// Temporary - replace with injected service.
 	@PostConstruct
 	public void init() {
-		executorService = Executors.newFixedThreadPool(2);
 	}
-
+	
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlanRequest request) {
 		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
@@ -50,7 +51,7 @@ public class RecalcEndpoint {
 		try {
 			job.get();
 		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+			log.error("Error retrieving job value. ", e);;
 		}
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
@@ -84,7 +85,7 @@ public class RecalcEndpoint {
 					response.setNewEquipmentCount(plan.getNetworkNodes().size());
 
 					return response;
-				}).setExecutorService(executorService));
+				}));
 		
 		return job;
 	}

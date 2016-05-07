@@ -2,17 +2,20 @@ package com.altvil.test.aro.service.job;
 
 import static org.junit.Assert.*;
 
+import java.io.Serializable;
 import java.security.Principal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.ignite.Ignite;
+import org.apache.ignite.cluster.ClusterGroup;
+import org.apache.ignite.lang.IgniteCallable;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +27,24 @@ import com.altvil.aro.service.job.JobService;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/EngineTest-context.xml"})
+@ContextConfiguration(locations = { "/aroServlet-servletTest.xml"})
 public class TestJobService {
+	static Ignite igniteGrid;
 	static ExecutorService executorService;
 	static Principal user1 = new TestPrincipal("Kevin");
 	static Principal user2 = new TestPrincipal("Greiner");
 	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		executorService = Executors.newFixedThreadPool(2);
+	@PostConstruct
+	public static void postConstruct() throws Exception {
+		ClusterGroup executorGroup = igniteGrid.cluster().withAsync().forServers();
+		executorService = igniteGrid.executorService(executorGroup);
 	}
+	
+	@Autowired  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	private void setJobServiceIgniteGrid(Ignite igniteBean)
+	{
+		TestJobService.igniteGrid = igniteBean;
+	}	
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
@@ -83,26 +94,24 @@ public class TestJobService {
 	public void testSubmitCallableOfT() throws InterruptedException, ExecutionException {
 		final int result = 5;
 		final int duration = 1000;
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user1).setCallable(new TestCallable<>(duration, result)));
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user1).setCallable(new TestCallable<>(duration, result)).setComputeGrid(igniteGrid.compute()));
 
 		assertEquals(result, job.get().intValue());
 
-		successfulJobChecks(duration, null, job);
-		
 		wait(js);
+
+		successfulJobChecks(duration, null, job);
 	}
 
 	@Test
 	public void testSubmitCallableOfTExecutorService() throws InterruptedException, ExecutionException {
 		final int result = 5;
 		final int duration = 1000;
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user2).setCallable(new TestCallable<>(duration, result)).setExecutorService(executorService));
-
-		assertEquals(result, job.get().intValue());
-
-		successfulJobChecks(duration, null, job);
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user2).setCallable(new TestCallable<>(duration, result)).setComputeGrid(TestJobService.igniteGrid.compute()));
 		
+		assertEquals(result, job.get().intValue());
 		wait(js);
+		successfulJobChecks(duration, null, job);
 	}
 
 	@Test
@@ -112,13 +121,13 @@ public class TestJobService {
 		final Map<String, Object> meta = new HashMap<>();
 		meta.put("key1", 15);
 
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user2).setCallable(new TestCallable<>(duration, result)).setMetaIdentifiers(meta).setExecutorService(executorService));
-
+		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user2).setCallable(new TestCallable<>(duration, result)).setMetaIdentifiers(meta).setComputeGrid(TestJobService.igniteGrid.compute()));
+		
 		assertEquals(result, job.get().intValue());
 
-		successfulJobChecks(duration, meta, job);
-		
 		wait(js);
+
+		successfulJobChecks(duration, meta, job);
 	}
 
 	private void wait(JobService js) {
@@ -132,7 +141,9 @@ public class TestJobService {
 	}
 }
 
-class TestCallable<T> implements Callable<T> {
+class TestCallable<T> implements IgniteCallable<T> {
+	private static final long serialVersionUID = 1L;
+	
 	long	delay;
 	boolean	fail;
 	T		result;
@@ -155,7 +166,9 @@ class TestCallable<T> implements Callable<T> {
 	}
 }
 
-class TestPrincipal implements Principal {
+class TestPrincipal implements Serializable, Principal {
+	private static final long serialVersionUID = 1L;
+
 	private final String name;
 	
 	public TestPrincipal(String name) {

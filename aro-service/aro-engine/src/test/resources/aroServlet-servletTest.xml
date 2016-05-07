@@ -153,7 +153,7 @@
 		<property name="configuration">
 	        <bean parent="ignite-abstract-IDE.cfg">  <!-- Remove "-IDE" from parent name if not running in IDE -->
 	        	<property name="clientMode" value="true"/>
-	        	        
+
 		        <property name="cacheConfiguration">
 		        	<list>
 						<bean parent="basicCache.cfg">
@@ -183,5 +183,7 @@
  		 moved to different clusters without code changes.  When autowiring,
  		 use method injection based on these aliases only. -->
 	<alias name="singleIgniteGrid" alias="networkServiceIgniteGrid"/>
+	<alias name="singleIgniteGrid" alias="jobServiceIgniteGrid"/>
+	<alias name="singleIgniteGrid" alias="networkPlanningServiceIgniteGrid"/>
  	
 </beans>
