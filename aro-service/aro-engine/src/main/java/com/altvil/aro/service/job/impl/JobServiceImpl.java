@@ -29,6 +29,7 @@ import org.apache.ignite.lang.IgniteFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -113,8 +114,10 @@ public class JobServiceImpl implements JobService {
 				} else {
 					msg = JobAdapter.this.toString();
 				}
-				messagingTemplate.convertAndSendToUser(creator.getName(), "/topic/jobs", msg);
-				log.trace(msg);
+				if (null == messagingTemplate)
+					log.warn("messagingTemplate was null, so no completion announcement will be sent to user");
+				else
+					messagingTemplate.convertAndSendToUser(creator.getName(), "/topic/jobs", msg);
 			} catch (HttpMessageNotWritableException | MessagingException | IOException e) {
 				log.error("Error attempting to announce job completion. ", e);
 			}
@@ -197,7 +200,8 @@ public class JobServiceImpl implements JobService {
 	@Resource(name="jsonMessageConverter")
 	private GenericHttpMessageConverter<Job<?>> messageConverter;
 
-	@Resource(name="brokerMessagingTemplate")
+	@Autowired(required=false)
+	@Qualifier("brokerMessagingTemplate")
 	private SimpMessagingTemplate messagingTemplate;
 
 	public JobServiceImpl() {
