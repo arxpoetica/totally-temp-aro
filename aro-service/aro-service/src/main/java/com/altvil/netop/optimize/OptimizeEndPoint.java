@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
-import com.altvil.aro.service.job.JobService.Builder;
+import com.altvil.aro.service.job.JobService.JobRequest;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.plan.InputRequests;
 import com.altvil.aro.service.plan.PlanService;
@@ -56,19 +56,19 @@ public class OptimizeEndPoint {
 	}
 
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
-	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlanRequest request) {
+	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlanRequest optimizationPlanRequest) {
 
-		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null
-				? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs());
+		OptimizationInputs optimizationInputs = (optimizationPlanRequest.getOptimizationInputs() == null
+				? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : optimizationPlanRequest.getOptimizationInputs());
 
-		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(requestor, request.getPlanId(),
-				new InputRequests(), optimizationInputs, request.getFiberNetworkConstraints());
+		JobRequest<WirecenterNetworkPlan> networkPlanRequest = networkPlanningService.optimizeWirecenter(requestor, optimizationPlanRequest.getPlanId(),
+				new InputRequests(), optimizationInputs, optimizationPlanRequest.getFiberNetworkConstraints());
 
 		Map<String, Object> metaIds = new HashMap<String, Object>();
-		metaIds.put("planId", request.getPlanId());
-		builder.setMetaIdentifiers(metaIds);
+		metaIds.put("planId", optimizationPlanRequest.getPlanId());
+		networkPlanRequest.setMetaIdentifiers(metaIds);
 
-		return jobService.submit(builder);
+		return jobService.submit(networkPlanRequest);
 	}
 
 	@RequestMapping(value = "/optimize/wirecenter/results", method = RequestMethod.POST)

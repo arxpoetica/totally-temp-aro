@@ -15,7 +15,7 @@ public interface NetworkPlanningService {
 			FiberNetworkConstraints constraints);
 	
 	
-	JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal requestor, long planId,
+	JobService.JobRequest<WirecenterNetworkPlan> optimizeWirecenter(Principal requestor, long planId,
 			InputRequests inputRequests, OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) ;
 
 

@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import com.altvil.aro.service.job.Job;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize(using = JobIdSerializer.class)
@@ -16,7 +15,7 @@ class JobIdImpl implements Job.Id {
 
 	JobIdImpl(long uid, Map<String, Object> meta) {
 		this.uid = uid;
-		this.meta = (meta == null || meta.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(meta));
+		this.meta = ((meta == null || meta.isEmpty()) ? Collections.emptyMap() : Collections.unmodifiableMap(meta));
 	}
 
 	JobIdImpl(Map<String, Object> meta) {

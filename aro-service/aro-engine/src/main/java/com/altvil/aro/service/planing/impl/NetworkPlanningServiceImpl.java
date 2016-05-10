@@ -33,6 +33,7 @@ import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.job.JobService;
+import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
 import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
@@ -122,10 +123,11 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}	
 
 	@Override
-	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal username, long planId, InputRequests inputRequests,
+	public JobService.JobRequest<WirecenterNetworkPlan> optimizeWirecenter(Principal username, long planId, InputRequests inputRequests,
 			OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) {
-		return new JobService.Builder<WirecenterNetworkPlan>(username).setCallable(createOptimzedCallable(NetworkRequest.create(planId, NetworkRequest.LocationLoadingRequest.ALL),
-						optimizationInputs, constraints)).setComputeGrid(wirePlanComputeGrid);
+		IgniteCallable<WirecenterNetworkPlan> callable = createOptimzedCallable(NetworkRequest.create(planId, NetworkRequest.LocationLoadingRequest.ALL),
+				optimizationInputs, constraints);
+		return new JobRequestIgniteCallable<WirecenterNetworkPlan>(username, wirePlanComputeGrid, callable);
 	}
 
 	@Override
@@ -188,9 +190,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				networkPlanRepository.computeWirecenterUpdates(planId),
 				Number::longValue);
 		
-		MasterPlanBuilder builder = new MasterPlanBuilder(username);
-		builder.setWireCenterPlans(ids);
-		builder.setCallable(() -> {
+		IgniteCallable<MasterPlanUpdate> callable = (() -> {
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
 					.invokeAll(ids.stream()
 							.map(id -> createPlanningCallable(id, constraints))
@@ -204,6 +204,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				}
 			}).filter(p -> p != null).collect(Collectors.toList()));
 		});
+		MasterPlanBuilder builder = new MasterPlanBuilder(username, wirePlanComputeGrid, callable);
+		builder.setWireCenterPlans(ids);
 
 		return builder;
 	}

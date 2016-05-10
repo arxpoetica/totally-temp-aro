@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
+import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -79,11 +80,11 @@ public class TestJobService {
 	public void testGetRemainingJobs() {
 		assertTrue(js.getRemainingJobs().isEmpty());
 
-		js.submit(new JobService.Builder<Void>(user1).setCallable(new TestCallable<>(1000)));
+		js.submit(new JobRequestIgniteCallable<Void>(user1, igniteGrid.compute(), new TestCallable<>(2000)));
 
 		assertEquals(1, js.getRemainingJobs().size());
 
-		js.submit(new JobService.Builder<Void>(user1).setCallable(new TestCallable<>(2000)));
+		js.submit(new JobRequestIgniteCallable<Void>(user1, igniteGrid.compute(), new TestCallable<>(2000)));
 
 		assertEquals(2, js.getRemainingJobs().size());
 
@@ -94,7 +95,7 @@ public class TestJobService {
 	public void testSubmitCallableOfT() throws InterruptedException, ExecutionException {
 		final int result = 5;
 		final int duration = 1000;
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user1).setCallable(new TestCallable<>(duration, result)).setComputeGrid(igniteGrid.compute()));
+		Job<Integer> job = js.submit(new JobRequestIgniteCallable<Integer>(user1, igniteGrid.compute(), new TestCallable<>(duration, result)));
 
 		assertEquals(result, job.get().intValue());
 
@@ -107,7 +108,7 @@ public class TestJobService {
 	public void testSubmitCallableOfTExecutorService() throws InterruptedException, ExecutionException {
 		final int result = 5;
 		final int duration = 1000;
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user2).setCallable(new TestCallable<>(duration, result)).setComputeGrid(TestJobService.igniteGrid.compute()));
+		Job<Integer> job = js.submit(new JobRequestIgniteCallable<Integer>(user2, TestJobService.igniteGrid.compute(), new TestCallable<>(duration, result)));
 		
 		assertEquals(result, job.get().intValue());
 		wait(js);
@@ -121,7 +122,7 @@ public class TestJobService {
 		final Map<String, Object> meta = new HashMap<>();
 		meta.put("key1", 15);
 
-		Job<Integer> job = js.submit(new JobService.Builder<Integer>(user2).setCallable(new TestCallable<>(duration, result)).setMetaIdentifiers(meta).setComputeGrid(TestJobService.igniteGrid.compute()));
+		Job<Integer> job = js.submit(new JobRequestIgniteCallable<Integer>(user2, TestJobService.igniteGrid.compute(), new TestCallable<>(duration, result)).setMetaIdentifiers(meta));
 		
 		assertEquals(result, job.get().intValue());
 
@@ -146,7 +147,7 @@ class TestCallable<T> implements IgniteCallable<T> {
 	
 	long	delay;
 	boolean	fail;
-	T		result;
+	T		result = null;
 
 	public TestCallable(long delay) {
 		this.delay = delay;
@@ -162,6 +163,7 @@ class TestCallable<T> implements IgniteCallable<T> {
 	@Override
 	public T call() throws Exception {
 		Thread.sleep(delay);
+		System.out.println("Executing " + TestCallable.this);
 		return result;
 	}
 }

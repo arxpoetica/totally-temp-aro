@@ -183,7 +183,7 @@
  		 moved to different clusters without code changes.  When autowiring,
  		 use method injection based on these aliases only. -->
 	<alias name="singleIgniteGrid" alias="networkServiceIgniteGrid"/>
-	<alias name="singleIgniteGrid" alias="jobServiceIgniteGrid"/>
 	<alias name="singleIgniteGrid" alias="networkPlanningServiceIgniteGrid"/>
+	<alias name="singleIgniteGrid" alias="recalcEndpointIgniteGrid"/>
  	
 </beans>
