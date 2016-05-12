@@ -681,7 +681,7 @@
                     </div>
                   </div>
                 </form>
-                <br>
+                <hr>
                 <p><strong>IRR Threshold</strong></p>
                 <p>
                   <input type="range" min="100" max="500" step="10">
@@ -711,15 +711,15 @@
                           Lease
                         </label>
                       </div>
-                      <br>
+                      <hr>
 
                       <p><strong>Maintenance % of Revenue</strong></p>
                       <p>
                         <input type="range" min="100" max="500" step="10">
                       </p>
-                      <br>
+                      <hr>
 
-                      <p><strong>Workforce</strong></p>
+                      <p><strong>Build Timeline</strong></p>
                       <div class="row text-center">
                         <div class="col-md-8 col-md-offset-4">
                           <div class="row" style="margin-right: 10px">
@@ -732,46 +732,57 @@
                       </div>
                       <div class="row">
                         <div class="col-md-4">
-                          ABC123
+                          Complete
                         </div>
                         <div class="col-md-8">
                           <div class="row" style="margin-right: 10px">
                             <div class="col-md-3 nopadding">
-                              <input type="text" value="10,000" class="text-center" style="width:100%">
+                              <input type="text" value="70%" class="text-center" style="width:100%">
                             </div>
                             <div class="col-md-3 nopadding">
-                              <input type="text" value="10,000" class="text-center" style="width:100%">
+                              <input type="text" value="15%" class="text-center" style="width:100%">
                             </div>
                             <div class="col-md-3 nopadding">
-                              <input type="text" value="10,000" class="text-center" style="width:100%">
+                              <input type="text" value="15%" class="text-center" style="width:100%">
                             </div>
                             <div class="col-md-3 nopadding">
-                              <input type="text" value="10,000" class="text-center" style="width:100%">
+                              <input type="text" value="" class="text-center" style="width:100%">
                             </div>
                           </div>
                         </div>
                       </div>
+                      <hr>
+
+                      <p><strong>MTU/MDU Constraint</strong></p>
                       <div class="row">
                         <div class="col-md-4">
-                          DEF456
+                          Entities
                         </div>
                         <div class="col-md-8">
                           <div class="row" style="margin-right: 10px">
                             <div class="col-md-3 nopadding">
-                              <input type="text" value="10,000" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="10,000" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="10,000" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="10,000" class="text-center" style="width:100%">
+                              <input type="text" value="10" class="text-center" style="width:100%">
                             </div>
                           </div>
                         </div>
                       </div>
+                      <hr>
+
+                      <p><strong>CO Upgrade Cost</strong></p>
+                      <div class="row">
+                        <div class="col-md-4">
+                          $
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="1000" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <br>
+
                     </div>
                     <div role="tabpanel" class="tab-pane" id="advancedSettingsProducts">
                       <br>
@@ -780,7 +791,7 @@
                         <option>Businesses</option>
                         <option>Towers</option>
                       </select>
-                      <br>
+                      <hr>
 
                       <p><strong>Product ARPU</strong></p>
                       <div class="row text-center">
@@ -835,7 +846,7 @@
                           </div>
                         </div>
                       </div>
-                      <br><br>
+                      <hr>
 
                       <p><strong>Product Cost Margin</strong></p>
                       <div class="row text-center">
@@ -890,7 +901,7 @@
                           </div>
                         </div>
                       </div>
-                      <br><br>
+                      <hr>
 
                       <p><strong>Penetration End State</strong></p>
                       <div class="row">
@@ -920,129 +931,197 @@
 
                     </div>
                     <div role="tabpanel" class="tab-pane" id="advancedSettingsEquipment">
-                      <br>
+                      <p><strong>Terminal Cost Settings</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>Ports</small></div>
+                            <div class="col-md-3 nopadding"><small>Cost</small></div>
+                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
+                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
+                          </div>
+                        </div>
+                      </div>
                       <div class="row">
-                        <div class="col-md-6">
-                          <p><strong>Terminal Settings</strong></p>
-                          <div class="row text-center">
-                            <div class="col-md-8 col-md-offset-4">
-                              <div class="row" style="margin-right: 10px">
-                                <div class="col-md-6 nopadding"><small>Ports</small></div>
-                                <div class="col-md-6 nopadding"><small>Cost</small></div>
-                              </div>
+                        <div class="col-md-4">
+                          FDH
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="32" class="text-center" style="width:100%">
                             </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-4">
-                              FDH
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$150" class="text-center" style="width:100%">
                             </div>
-                            <div class="col-md-8">
-                              <div class="row" style="margin-right: 10px">
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="256" class="text-center" style="width:100%">
-                                </div>
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="100" class="text-center" style="width:100%">
-                                </div>
-                              </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
                             </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-4">
-                              FDT
-                            </div>
-                            <div class="col-md-8">
-                              <div class="row" style="margin-right: 10px">
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="256" class="text-center" style="width:100%">
-                                </div>
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="100" class="text-center" style="width:100%">
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <br>
-
-                          <p><strong>CPE Settings</strong></p>
-                          <div class="row text-center">
-                            <div class="col-md-8 col-md-offset-4">
-                              <div class="row" style="margin-right: 10px">
-                                <div class="col-md-6 nopadding"><small>Cost/ft</small></div>
-                                <div class="col-md-6 nopadding"><small>Strands</small></div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-4">
-                              F1
-                            </div>
-                            <div class="col-md-8">
-                              <div class="row" style="margin-right: 10px">
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="100" class="text-center" style="width:100%">
-                                </div>
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="100" class="text-center" style="width:100%">
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-4">
-                              F2
-                            </div>
-                            <div class="col-md-8">
-                              <div class="row" style="margin-right: 10px">
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="100" class="text-center" style="width:100%">
-                                </div>
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="100" class="text-center" style="width:100%">
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-4">
-                              F3
-                            </div>
-                            <div class="col-md-8">
-                              <div class="row" style="margin-right: 10px">
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="100" class="text-center" style="width:100%">
-                                </div>
-                                <div class="col-md-6 nopadding">
-                                  <input type="text" value="100" class="text-center" style="width:100%">
-                                </div>
-                              </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
                             </div>
                           </div>
                         </div>
-                        <div class="col-md-6">
-                          <p><strong>Fiber Settings</strong></p>
-                          <div class="row">
-                            <div class="col-md-7">
-                              ONT Cost
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          FDT
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="12" class="text-center" style="width:100%">
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$75" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
                               <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
                             </div>
                           </div>
-                          <div class="row">
-                            <div class="col-md-7">
-                              STB Cost
+                        </div>
+                      </div>
+                      <hr>
+
+                      <p><strong>Fiber Settings</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>Cost/Ft.</small></div>
+                            <div class="col-md-3 nopadding"><small>Strands</small></div>
+                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
+                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Feeder
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$3.50" class="text-center" style="width:100%">
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="256" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
                               <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
                             </div>
                           </div>
-                          <div class="row">
-                            <div class="col-md-7">
-                              Router Cost
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Distribution
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$2.50" class="text-center" style="width:100%">
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="128" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
                               <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Drop
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$1.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="64" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+
+                      <p><strong>CPE Settings</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>Cost</small></div>
+                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
+                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          ONT
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$55.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          STB
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$25.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Router
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$12.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
                             </div>
                           </div>
                         </div>
@@ -1050,6 +1129,7 @@
                     </div>
                   </div>
 
+                  
                 </div>
                 <br>
                 <p class="text-right"><small><a href="javascript:void(0)" ng-click="toggleAdvancedSettings()">basic inputs</a></small><p>
