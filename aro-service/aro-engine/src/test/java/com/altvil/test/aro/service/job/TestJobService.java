@@ -4,8 +4,11 @@ import static org.junit.Assert.*;
 
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -13,7 +16,11 @@ import java.util.concurrent.ExecutorService;
 import javax.annotation.PostConstruct;
 
 import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteException;
 import org.apache.ignite.cluster.ClusterGroup;
+import org.apache.ignite.compute.ComputeJobAdapter;
+import org.apache.ignite.compute.ComputeJobResult;
+import org.apache.ignite.compute.ComputeTaskSplitAdapter;
 import org.apache.ignite.lang.IgniteCallable;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -25,6 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
+import com.altvil.aro.service.job.impl.JobRequestIgniteComputeTask;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -91,6 +99,59 @@ public class TestJobService {
 		wait(js);
 	}
 
+//TODO HIGH demonstrate near-cache for a compute group
+//TODO HIGH demonstrate using shared compute session to bound an optimization (e.g., to cancel options which grow beyond known best)
+//TODO HIGH test failover (stop a node during calculation, show that it completes regardless)
+//TODO MEDIUM test IngiteCompute with and without .withAsync() preparation
+//TODO MEDIUM demonstrate Affinity computation, explore creative data distribution to facilitate natural compute efficiencies (e.g., avoid storing adjacent wirecenters on same node)
+//TODO verify how backup data nodes participate in affinity compute distribution
+//TODO explore balancing compute resources by a priority marker
+//TODO explore dynamically provisioning a compute cluster with necessary data, then compute on it
+//TODO demonstrate wrapping the JobRequestIgniteComputeTask in a JobRequestIgniteCallable so even the task->job map/split and/or node provisioning happens remotely
+	
+	@Test
+	public void testSubmitComputeTaskOnString() throws InterruptedException, ExecutionException {
+		ComputeTaskSplitAdapter<String, Integer> testCompute = new ComputeTaskSplitAdapter<String, Integer>() {
+
+			private static final long serialVersionUID = 1L;
+			
+		    //@LoadBalancerResource
+		    //private ComputeLoadBalancer balancer; //can inject or construct a load balancer..interesting with custom affinity situations
+
+			//NOTE: if we will not use the arg, can declare ComputeTaskSplitAdapter<Void,R> and split(int gridSize, Void arg)
+			@Override
+			protected Collection<TestComputeJob> split(int gridSize, String arg) throws IgniteException {
+				//gridSize reasonable initial size, or look at args and determine how many jobs to put onto grid where jobCount!=gridSize
+				System.out.println("ComputeTaskSplitAdapter creating compute tasks for: " + arg);
+				List<TestComputeJob> jobs = new ArrayList<TestComputeJob>(gridSize);
+				String[] tokens = arg.trim().split("\\s"); //split on whitespace
+				for (String token : tokens) {
+					jobs.add(new TestComputeJob(token));
+				}
+				System.out.println("Created " + jobs.size() + " tasks.");
+				return jobs; //load balancer is applied automatically with ComputeTaskSplitAdapter, see ComputeTaskAdapter for manual balancing
+			}
+
+			@Override
+			public Integer reduce(List<ComputeJobResult> results) throws IgniteException {
+				System.out.println("Reducing results: " + results);
+				int aggregateLength = 0;
+				for (ComputeJobResult computeJobResult : results) {
+					Integer aResult = computeJobResult.getData();
+					if (null != aResult) aggregateLength += aResult;
+				}
+				return aggregateLength;
+			}
+			
+		};
+		String computeString = "Now is the time for all good persons to come to the aid of their cluster.";
+		Job<Integer> computeJob = js.submit(new JobRequestIgniteComputeTask<String,Integer>(user1, igniteGrid.compute().withAsync(), testCompute, computeString));
+
+		Integer result = computeJob.get();
+		
+		assertEquals(result.intValue(), 58);
+	}
+	
 	@Test
 	public void testSubmitCallableOfT() throws InterruptedException, ExecutionException {
 		final int result = 5;
@@ -140,6 +201,28 @@ public class TestJobService {
 			}
 		});
 	}
+}
+
+class TestComputeJob extends ComputeJobAdapter {
+	private static final long serialVersionUID = 1L;
+	
+	TestComputeJob(String stringArg) {
+		super(stringArg);
+	}
+
+	@Override
+	public Integer execute() throws IgniteException {
+		Integer result = null;
+		if (this.isCancelled()) {
+			System.out.println("TestComputeJob cancelled.");
+			return null;
+		}
+		String arg = this.argument(0);
+		System.out.println("TestComputeJob Computing length of " + arg);
+		result = arg.length();
+		return result;
+	}
+	
 }
 
 class TestCallable<T> implements IgniteCallable<T> {
