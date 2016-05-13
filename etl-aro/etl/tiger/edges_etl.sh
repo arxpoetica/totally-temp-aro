@@ -18,8 +18,8 @@ do
 
 	# Download all edges
 	cd $GISROOT;
-	wget ftp://mirror1.shellbot.com/census/geo/tiger/TIGER2014/EDGES/tl_2014_${STATE_FIPS_ARRAY[$STATE]}* --accept=zip --reject=html -nd -nc
-	# New York County (i.e., Manhattan) (for upper east side wirecenter)
+	# wget ftp://mirror1.shellbot.com/census/geo/tiger/TIGER2014/EDGES/tl_2014_${STATE_FIPS_ARRAY[$STATE]}* --accept=zip --reject=html -nd -nc
+	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATE_FIPS_ARRAY[$STATE]}* --accept=zip --reject=html -nd -nc# New York County (i.e., Manhattan) (for upper east side wirecenter)
 	# wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_36061_edges.zip --accept=zip --reject=html -nd -nc
 	# Erie County (for Buffalo, North Collins, and Orchard Park)
 	# wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_36029_edges.zip --accept=zip --reject=html -nd -nc
