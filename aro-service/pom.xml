@@ -52,22 +52,13 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.5.8</version>
+            <version>1.7.21</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.5.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.5.8</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
+            <version>1.7.21</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -236,6 +227,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
             <version>2.0</version>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>commons-logging</artifactId>
+            		<groupId>commons-logging</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Hibernate Spatial -->
@@ -315,6 +312,24 @@
         </dependency>
 
 
+        <dependency>
+        	<groupId>org.slf4j</groupId>
+        	<artifactId>log4j-over-slf4j</artifactId>
+        	<version>1.7.21</version>
+        	<scope>runtime</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.slf4j</groupId>
+        	<artifactId>jul-to-slf4j</artifactId>
+        	<version>1.7.21</version>
+        	<scope>runtime</scope>
+        </dependency>
+        <dependency>
+        	<groupId>ch.qos.logback</groupId>
+        	<artifactId>logback-classic</artifactId>
+        	<version>1.1.7</version>
+        	<scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>

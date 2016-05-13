@@ -42,6 +42,10 @@
                 </property>
             </bean>
         </property>
+        
+        <property name="gridLogger">
+        	<bean class="org.apache.ignite.logger.slf4j.Slf4jLogger"/>
+        </property>
     </bean>
 
 <!-- ******************** -->

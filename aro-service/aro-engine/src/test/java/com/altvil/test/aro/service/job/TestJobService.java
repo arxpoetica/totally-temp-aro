@@ -99,11 +99,18 @@ public class TestJobService {
 		wait(js);
 	}
 
-//TODO HIGH demonstrate near-cache for a compute group
-//TODO HIGH demonstrate using shared compute session to bound an optimization (e.g., to cancel options which grow beyond known best)
+//TODO demonstrate MDC for logging parameters such as host, client IP, etc. http://logback.qos.ch/manual/mdc.html
+//TODO enable XLogger extended SLF4J logger for entry() exit() throwing() within remote jobs. consider Java Agent for bytecode injection
+//TODO demonstrate use of SLF4J Profiler class for logging performance statistics
+//TODO implement SLF4J servlet filter to populate web client info into MDC.  Propagate through to Ignite
+//TODO HIGH demonstrate near-cache for a compute group.  Maybe also demonstrate this on top of OFFHEAP_TIERED or OFFHEAP_VALUES memory modes.
+//TODO HIGH demonstrate using shared ComputeTaskSession to bound an optimization (e.g., to cancel options which grow beyond known best)
 //TODO HIGH test failover (stop a node during calculation, show that it completes regardless)
 //TODO MEDIUM test IngiteCompute with and without .withAsync() preparation
-//TODO MEDIUM demonstrate Affinity computation, explore creative data distribution to facilitate natural compute efficiencies (e.g., avoid storing adjacent wirecenters on same node)
+//TODO MEDIUM demonstrate Affinity computation: 
+		//explore creative data distribution to facilitate natural compute efficiencies (e.g., avoid storing adjacent wirecenters on same node)
+		//IgniteCompute.affinityRun() or @CacheAffinityMapped annotation.  Affinity.mapKeysToNodes().
+		//See Ignite Performance tips docs and the Affinity Colocation docs
 //TODO verify how backup data nodes participate in affinity compute distribution
 //TODO explore balancing compute resources by a priority marker
 //TODO explore dynamically provisioning a compute cluster with necessary data, then compute on it

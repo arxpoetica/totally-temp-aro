@@ -97,6 +97,12 @@
 			<groupId>org.apache.ignite</groupId>
 			<artifactId>ignite-spring</artifactId>
 			<version>1.5.0.final</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	    <dependency>
 	    	<groupId>org.apache.ignite</groupId>
@@ -150,6 +156,17 @@
 	    		<exclusion>
 	    			<artifactId>hibernate-core</artifactId>
 	    			<groupId>org.hibernate</groupId>
+	    		</exclusion>
+	    	</exclusions>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.springframework</groupId>
+	    	<artifactId>spring-remoting</artifactId>
+	    	<version>2.0.8</version>
+	    	<exclusions>
+	    		<exclusion>
+	    			<artifactId>log4j</artifactId>
+	    			<groupId>log4j</groupId>
 	    		</exclusion>
 	    	</exclusions>
 	    </dependency>
