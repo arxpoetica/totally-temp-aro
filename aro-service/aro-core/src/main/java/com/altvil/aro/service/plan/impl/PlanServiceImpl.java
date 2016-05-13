@@ -38,6 +38,7 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
+import com.altvil.aro.service.network.NetworkStrategyRequest;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.NetworkModel;
@@ -75,7 +76,7 @@ public class PlanServiceImpl implements PlanService {
 
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
-			NetworkData networkData, NetworkConfiguration networkConfiguration, FiberNetworkConstraints request)
+			NetworkData networkData, NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration, FiberNetworkConstraints request)
 			throws PlanException {
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();

@@ -31,6 +31,7 @@ import com.altvil.aro.service.network.NetworkRequest.LocationLoadingRequest;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.network.NetworkStrategyFactory;
 import com.altvil.aro.service.network.NetworkStrategyRequest;
+import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
 import com.altvil.interfaces.NetworkAssignment;
@@ -83,19 +84,19 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 	
 	@Override
-	public NetworkData getNetworkData(NetworkRequest networkRequest) {
+	public NetworkData getNetworkData(PlanId planId, NetworkRequest networkRequest) {
 
 		NetworkData networkData = new NetworkData();
 
 		//determine wirecenter ID
-		Long wcid = getWirecenterIdByPlanId(networkRequest.getPlanId());
-		List<Long> safeList = selectedRoadLocationIds(networkRequest);
+		Long wcid = getWirecenterIdByPlanId(planId);
+		List<Long> safeList = selectedRoadLocationIds(networkRequest, planId);
 		networkData.setSelectedRoadLocationIds(safeList);
 		
 		//TODO MEDIUM Compare performance
-		networkData.setFiberSources(getFiberSourceNetworkAssignments(networkRequest, wcid));
-		networkData.setRoadLocations(getRoadLocationNetworkAssignments(networkRequest, wcid, safeList));
-		networkData.setRoadEdges(getRoadEdges(networkRequest, wcid));
+		networkData.setFiberSources(getFiberSourceNetworkAssignments(planId, networkRequest, wcid));
+		networkData.setRoadLocations(getRoadLocationNetworkAssignments(planId, networkRequest, wcid, safeList));
+		networkData.setRoadEdges(getRoadEdges(planId, networkRequest, wcid));
 
 		return networkData;
 	}
@@ -113,7 +114,7 @@ public class NetworkServiceImpl implements NetworkService {
 		location_id, buesiness_fiber, tower_fiber, household_fiber
 	}
 	
-	private Map<Long, LocationDemand> getLocationDemand(NetworkRequest networkRequest, Long wirecenterId) {
+	private Map<Long, LocationDemand> getLocationDemand(PlanId planId, NetworkRequest networkRequest, Long wirecenterId) {
 		Map<Long, LocationDemand> locDemands;
 		
 		//retrieve all locations from cache by wirecenter ID
@@ -122,7 +123,7 @@ public class NetworkServiceImpl implements NetworkService {
 		locDemands = null;//locDemandCache.get(wirecenterId);
 		if (null == locDemands) 
 		{
-			locDemands = queryLocationDemand(networkRequest);
+			locDemands = queryLocationDemand(planId, networkRequest);
 			locDemandCache.put(wirecenterId, locDemands);
 			//NOTE: currently no update policy used as LocationDemand is temporarily assumed immutable
 		}
@@ -158,11 +159,11 @@ public class NetworkServiceImpl implements NetworkService {
 //			System.out.println(logString);
 	}
 
-	private Map<Long, LocationDemand> queryLocationDemand(
+	private Map<Long, LocationDemand> queryLocationDemand(PlanId planId, 
 			NetworkRequest networkRequest) {
 
 		Map<Long, LocationDemand> map = new HashMap<>();
-		planRepository.queryAllFiberDemand(networkRequest.getPlanId(), networkRequest.getYear())
+		planRepository.queryAllFiberDemand(planId.longValue(), networkRequest.getYear())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
@@ -180,16 +181,16 @@ public class NetworkServiceImpl implements NetworkService {
 
 	}
 	
-	private Long getWirecenterIdByPlanId(long planId) 
+	private Long getWirecenterIdByPlanId(PlanId planId) 
 	{
-		return planRepository.queryWirecenterIdForPlanId(planId);
+		return planRepository.queryWirecenterIdForPlanId(planId.longValue());
 	}
 
-	private Map<Long, RoadLocation> queryRoadLocations(NetworkRequest networkRequest)
+	private Map<Long, RoadLocation> queryRoadLocations(NetworkRequest networkRequest, PlanId planId)
 	{
 		Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
 		planRepository
-		.queryAllLocationsByPlanId(networkRequest.getPlanId())
+		.queryAllLocationsByPlanId(planId.longValue())
 		.stream()
 		.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 		.forEach(result -> {
@@ -217,7 +218,7 @@ public class NetworkServiceImpl implements NetworkService {
 		return roadLocationsMap;
 	}
 	
-	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(NetworkRequest networkRequest, Long wirecenterId) {
+	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(PlanId planId, NetworkRequest networkRequest, Long wirecenterId) {
 		Map<Long, RoadLocation> roadLocations;
 		
 		//retrieve all locations from cache by wirecenter ID
@@ -226,7 +227,7 @@ public class NetworkServiceImpl implements NetworkService {
 		roadLocations = null;//roadLocCache.get(wirecenterId);
 		if (null == roadLocations) 
 		{
-			roadLocations = queryRoadLocations(networkRequest);
+			roadLocations = queryRoadLocations(networkRequest, planId);
 			roadLocCache.put(wirecenterId, roadLocations);
 			//NOTE: currently no update policy used as RoadLocation is temporarily assumed immutable
 		}
@@ -236,18 +237,18 @@ public class NetworkServiceImpl implements NetworkService {
 		return roadLocations;
 	}
 
-	private List<Long> selectedRoadLocationIds(NetworkRequest networkRequest) {
-		Long lookupKey = networkRequest.getPlanId();
-		List<BigInteger> selectedLocIds = planRepository.querySelectedLocationsByPlanId(lookupKey);
+	private List<Long> selectedRoadLocationIds(NetworkRequest networkRequest, PlanId planId) {
+		PlanId lookupKey = planId;
+		List<BigInteger> selectedLocIds = planRepository.querySelectedLocationsByPlanId(lookupKey.longValue());
 		List<Long> safeList = selectedLocIds.stream().mapToLong(bi -> bi.longValue()).boxed().collect(Collectors.toList());
 		return safeList;
 	}
 
 	// TODO Convert safeList into a predicate
-	private Collection<NetworkAssignment> getRoadLocationNetworkAssignments(NetworkRequest networkRequest, Long wirecenterId, List<Long> safeList) 
+	private Collection<NetworkAssignment> getRoadLocationNetworkAssignments(PlanId planId, NetworkRequest networkRequest, Long wirecenterId, List<Long> safeList) 
 	{
-		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkRequest, wirecenterId);
-		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkRequest, wirecenterId);
+		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(planId, networkRequest, wirecenterId);
+		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(planId, networkRequest, wirecenterId);
 	
 		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
 		{
@@ -281,10 +282,10 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 
 	private Collection<NetworkAssignment> queryFiberSources(
-			NetworkRequest networkRequest) {
+			NetworkRequest networkRequest, PlanId planId) {
 
 		return toValidAssignments(planRepository
-				.querySourceLocations(networkRequest.getPlanId())
+				.querySourceLocations(planId.longValue())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {
@@ -317,7 +318,7 @@ public class NetworkServiceImpl implements NetworkService {
 				}));
 	}
 
-	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(NetworkRequest networkRequest, Long wirecenterId) {
+	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(PlanId planId, NetworkRequest networkRequest, Long wirecenterId) {
 		Collection<NetworkAssignment> fiberSourceLocations;
 		
 		//retrieve all locations from cache by wirecenter ID
@@ -326,7 +327,7 @@ public class NetworkServiceImpl implements NetworkService {
 		fiberSourceLocations = null;//fiberSourceLocCache.get(wirecenterId);
 		if (null == fiberSourceLocations) 
 		{
-			fiberSourceLocations = queryFiberSources(networkRequest);
+			fiberSourceLocations = queryFiberSources(networkRequest, planId);
 			fiberSourceLocCache.put(wirecenterId, fiberSourceLocations);
 		}
 		//NOTE: currently never updating FiberSource as it is temporarily assumed immutable
@@ -341,9 +342,9 @@ public class NetworkServiceImpl implements NetworkService {
 		gid, tlid, tnidf, tnidt, shape, edge_length
 	}
 
-	private Collection<RoadEdge> queryRoadEdges(NetworkRequest networkRequest) {
+	private Collection<RoadEdge> queryRoadEdges(NetworkRequest networkRequest, PlanId planId) {
 		return planRepository
-				.queryRoadEdgesbyPlanId(networkRequest.getPlanId())
+				.queryRoadEdgesbyPlanId(planId.longValue())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {
@@ -363,7 +364,7 @@ public class NetworkServiceImpl implements NetworkService {
 		
 	}
 	
-	private Collection<RoadEdge> getRoadEdges(NetworkRequest networkRequest, Long wirecenterId) {
+	private Collection<RoadEdge> getRoadEdges(PlanId planId, NetworkRequest networkRequest, Long wirecenterId) {
 		Collection<RoadEdge> roadEdges;
 		
 		//retrieve all locations from cache by wirecenter ID
@@ -372,7 +373,7 @@ public class NetworkServiceImpl implements NetworkService {
 		roadEdges = roadEdgesCache.get(wirecenterId);
 		if (null == roadEdges) 
 		{
-			roadEdges = queryRoadEdges(networkRequest);
+			roadEdges = queryRoadEdges(networkRequest, planId);
 			roadEdgesCache.put(wirecenterId, roadEdges);
 			//NOTE: currently no update policy used as RoadEdge is temporarily assumed immutable
 		}

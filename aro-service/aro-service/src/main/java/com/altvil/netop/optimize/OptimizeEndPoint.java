@@ -19,6 +19,7 @@ import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.JobService.Builder;
 import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.network.NetworkStrategyRequest;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
@@ -26,6 +27,8 @@ import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.OptimizationInputs;
 import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.netop.network.algorithms.NpvSetupRequest;
+import com.altvil.netop.network.algorithms.ScalarSetupRequest;
 import com.altvil.netop.plan.MasterPlanJobResponse;
 
 @RestController
@@ -56,12 +59,26 @@ public class OptimizeEndPoint {
 
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
 	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlanRequest request) {
+		// KJG Convert OptimizationPlanRequest to contain a NetworkStrategyRequest
+		
+		NetworkStrategyRequest networkStrategyRequest = null;
+		switch(request.getAlgorithm()) {
+		case NPV:
+			final NpvSetupRequest npvSetupRequest = new NpvSetupRequest();
+			npvSetupRequest.setDiscountRate(request.getDiscountRate());
+			npvSetupRequest.setYears(request.getPeriods());
+			networkStrategyRequest = npvSetupRequest;
+			break;
+		case WEIGHT_MINIMIZATION:
+			final ScalarSetupRequest ssr = new ScalarSetupRequest();
+			networkStrategyRequest = ssr;
+		}
 
 		OptimizationInputs optimizationInputs = (request.getOptimizationInputs() == null
 				? new OptimizationInputs(OptimizationType.COVERAGE, 0.5) : request.getOptimizationInputs());
 
 		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(requestor, request.getPlanId(),
-				request.getNetworkConfiguration(), optimizationInputs, request.getFiberNetworkConstraints());
+				networkStrategyRequest, request.getNetworkConfiguration(), optimizationInputs, request.getFiberNetworkConstraints());
 
 		Map<String, Object> metaIds = new HashMap<String, Object>();
 		metaIds.put("planId", request.getPlanId());
@@ -77,7 +94,7 @@ public class OptimizeEndPoint {
 		WirecenterNetworkPlan wnp = f.get();
 
 		WirecenterUpdate wu = new WirecenterUpdate();
-		wu.setWirecenterId(wnp.getPlanId());
+		wu.setWirecenterId(wnp.getPlanId().longValue());
 		return wu;
 	}
 
@@ -91,14 +108,29 @@ public class OptimizeEndPoint {
 
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(Principal requestor, @RequestBody OptimizationPlanRequest request) {
-		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), request.getNetworkConfiguration(),
+		// KJG Convert OptimizationPlanRequest to contain a NetworkStrategyRequest
+		
+		NetworkStrategyRequest networkStrategyRequest = null;
+		switch(request.getAlgorithm()) {
+		case NPV:
+			final NpvSetupRequest npvSetupRequest = new NpvSetupRequest();
+			npvSetupRequest.setDiscountRate(request.getDiscountRate());
+			npvSetupRequest.setYears(request.getPeriods());
+			networkStrategyRequest = npvSetupRequest;
+			break;
+		case WEIGHT_MINIMIZATION:
+			final ScalarSetupRequest ssr = new ScalarSetupRequest();
+			networkStrategyRequest = ssr;
+		}
+		
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), networkStrategyRequest, request.getNetworkConfiguration(),
 				request.getFiberNetworkConstraints());
 
 		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.submit(mpc);
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);
-		mpr.setWireCenterids(mpc.getWireCenterPlans());
+		mpr.setWireCenterids(mpc.getWireCenterPlans().stream().mapToLong(Number::longValue).boxed().collect(Collectors.toList()));
 
 		return mpr;
 	}
@@ -109,7 +141,7 @@ public class OptimizeEndPoint {
 		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.get(request);
 		MasterPlanUpdate wnp = job.get();
 
-		List<Long> planIds = wnp.getUpdates().stream().map((update) -> update.getPlanId()).collect(Collectors.toList());
+		List<Long> planIds = wnp.getUpdates().stream().map((update) -> update.getPlanId().longValue()).collect(Collectors.toList());
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);

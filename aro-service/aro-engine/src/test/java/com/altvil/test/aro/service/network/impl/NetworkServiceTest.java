@@ -16,6 +16,7 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkRequest.LocationLoadingRequest;
 import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.network.PlanId;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -36,14 +37,15 @@ public class NetworkServiceTest {
 	@Test
 	public void testGetNetworkData() {
 		NetworkRequest nr = new NetworkRequest();
-		nr.setPlanId(3);
+		final PlanId planId = new PlanId(3);
+		nr.setPlanId(planId);
 		nr.setYear(2016);
 		nr.setLocationLoadingRequest(LocationLoadingRequest.SELECTED);
-		NetworkData nd = nsi.getNetworkData(nr);
+		NetworkData nd = nsi.getNetworkData(planId, nr);
 		assertNotNull(nd);
-		NetworkData nd2 = nsi.getNetworkData(nr);
+		NetworkData nd2 = nsi.getNetworkData(planId, nr);
 		assertNotNull(nd2);
-		nd = nsi.getNetworkData(nr);
+		nd = nsi.getNetworkData(planId, nr);
 		assertNotNull(nd);
 
 		//fail("Not yet implemented");
@@ -52,17 +54,18 @@ public class NetworkServiceTest {
 	@Test
 	public void testSelectedVersusAllAssignments() {
 		NetworkRequest nrSelected = new NetworkRequest();
-		nrSelected.setPlanId(3);
+		final PlanId planId = new PlanId(3);
+		nrSelected.setPlanId(planId);
 		nrSelected.setYear(2016);
 		nrSelected.setLocationLoadingRequest(LocationLoadingRequest.SELECTED);
 		
 		NetworkRequest nrAll = new NetworkRequest();
-		nrAll.setPlanId(3);
+		nrAll.setPlanId(planId);
 		nrAll.setYear(2016);
 		nrAll.setLocationLoadingRequest(LocationLoadingRequest.ALL);
 		
-		NetworkData ndSelected = nsi.getNetworkData(nrSelected);
-		NetworkData ndAll = nsi.getNetworkData(nrAll);
+		NetworkData ndSelected = nsi.getNetworkData(planId, nrSelected);
+		NetworkData ndAll = nsi.getNetworkData(planId, nrAll);
 		int selectedCount = ndSelected.getRoadLocations().size();
 		int allCount = ndAll.getRoadLocations().size();
 		System.out.println("testSelectedVersusAllAssignments()  selected:" + selectedCount + " all:" + allCount);

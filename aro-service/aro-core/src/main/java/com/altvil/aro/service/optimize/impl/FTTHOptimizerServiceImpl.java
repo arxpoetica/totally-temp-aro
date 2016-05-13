@@ -2,6 +2,7 @@ package com.altvil.aro.service.optimize.impl;
 
 import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.network.NetworkStrategyRequest;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkConstraint;
 import com.altvil.aro.service.optimize.NetworkPlanner;
@@ -30,13 +31,13 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 	}
 
 	@Override
-	public NetworkPlanner createNetworkPlanner(NetworkConfiguration networkConfiguration, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
-		return DefaultNetworkPlannerImpl.create(createConstrainer(networkConfiguration, constraint, networkData, ctx, generatingNodeConstraint, scoringStrategy));
+	public NetworkPlanner createNetworkPlanner(NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
+		return DefaultNetworkPlannerImpl.create(createConstrainer(networkStrategyRequest, networkConfiguration, constraint, networkData, ctx, generatingNodeConstraint, scoringStrategy));
 	}
 
-	private NetworkConstrainer createConstrainer(NetworkConfiguration networkConfiguration, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
+	private NetworkConstrainer createConstrainer(NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
-				.create(networkData, networkConfiguration, ctx.getFiberNetworkConstraints());
+				.create(networkData, networkStrategyRequest, networkConfiguration, ctx.getFiberNetworkConstraints());
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder,
 						ctx, scoringStrategy);

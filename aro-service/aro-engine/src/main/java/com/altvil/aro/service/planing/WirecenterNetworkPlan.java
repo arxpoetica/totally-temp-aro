@@ -4,10 +4,11 @@ import java.util.Collection;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.service.network.PlanId;
 
 public interface WirecenterNetworkPlan {
 
-	long getPlanId();
+	PlanId getPlanId();
 
 	Collection<NetworkNode> getNetworkNodes();
 

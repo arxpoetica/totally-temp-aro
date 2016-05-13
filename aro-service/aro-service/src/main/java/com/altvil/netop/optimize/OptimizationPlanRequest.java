@@ -1,13 +1,14 @@
 package com.altvil.netop.optimize;
 
 import com.altvil.aro.service.graph.model.NetworkConfiguration;
+import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planing.OptimizationInputs;
 import com.altvil.netop.json.NetworkAlgorithmDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class OptimizationPlanRequest {
-	private long planId;
+	private PlanId planId;
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private OptimizationInputs optimizationInputs = OptimizationInputs.DEFAULT ;
 	private NetworkConfiguration.Algorithm algorithm ;
@@ -30,11 +31,11 @@ public class OptimizationPlanRequest {
 		this.periods = periods;
 	}
 
-	public long getPlanId() {
+	public PlanId getPlanId() {
 		return planId;
 	}
 
-	public void setPlanId(long planId) {
+	public void setPlanId(PlanId planId) {
 		this.planId = planId;
 	}
 

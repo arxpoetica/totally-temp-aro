@@ -10,6 +10,7 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
@@ -21,7 +22,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 	private NetworkModel networkModel;
 	private Map<GraphEdgeAssignment, NetworkNode> equipmentMapping;
 
-	public FiberRouteSerializer(long planId, NetworkModel networkModel,
+	public FiberRouteSerializer(PlanId planId, NetworkModel networkModel,
 			Map<GraphEdgeAssignment, NetworkNode> equipmentMapping) {
 		super(planId);
 		this.networkModel = networkModel;

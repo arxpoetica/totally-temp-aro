@@ -1,13 +1,14 @@
 package com.altvil.aro.service.conversion.impl;
 
 import com.altvil.aro.service.conversion.PlanModifications;
+import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 
 public class NetworkPlanSerializer<T> {
 
-	private long planId;
+	private PlanId planId;
 	
-	public NetworkPlanSerializer(long planId) {
+	public NetworkPlanSerializer(PlanId planId) {
 		super();
 		this.planId = planId;
 	}

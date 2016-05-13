@@ -1,6 +1,7 @@
 package com.altvil.netop.plan;
 
 import com.altvil.aro.service.graph.model.NetworkConfiguration;
+import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.netop.json.NetworkAlgorithmDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -10,7 +11,7 @@ public class FiberPlanRequest {
 	private double						   discountRate	= Double.NaN;
 	private FiberNetworkConstraints		   fiberNetworkConstraints;
 	private int							   periods		= -1;
-	private long						   planId;
+	private PlanId						   planId;
 
 	public NetworkConfiguration.Algorithm getAlgorithm() {
 		return algorithm;
@@ -32,7 +33,7 @@ public class FiberPlanRequest {
 		return periods;
 	}
 
-	public long getPlanId() {
+	public PlanId getPlanId() {
 		return planId;
 	}
 
@@ -53,7 +54,7 @@ public class FiberPlanRequest {
 		this.periods = periods;
 	}
 
-	public void setPlanId(long planId) {
+	public void setPlanId(PlanId planId) {
 		this.planId = planId;
 	}
 }

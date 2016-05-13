@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -46,20 +47,20 @@ public class RecalcEndpoint {
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlanRequest request) {
 		// KJG Convert FiberPlanRequest to contain a NetworkStrategyRequest
 		
-		NetworkStrategyRequest nsr = null;
+		NetworkStrategyRequest networkStrategyRequest = null;
 		switch(request.getAlgorithm()) {
 		case NPV:
 			final NpvSetupRequest npvSetupRequest = new NpvSetupRequest();
 			npvSetupRequest.setDiscountRate(request.getDiscountRate());
 			npvSetupRequest.setYears(request.getPeriods());
-			nsr = npvSetupRequest;
+			networkStrategyRequest = npvSetupRequest;
 			break;
 		case WEIGHT_MINIMIZATION:
 			final ScalarSetupRequest ssr = new ScalarSetupRequest();
-			nsr = ssr;
+			networkStrategyRequest = ssr;
 		}
 		
-		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), request.getNetworkConfiguration(), request.getFiberNetworkConstraints());
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), networkStrategyRequest, request.getNetworkConfiguration(), request.getFiberNetworkConstraints());
 
 		Job<MasterPlanUpdate> job = jobService.submit(mpc);
 		
@@ -72,7 +73,7 @@ public class RecalcEndpoint {
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);
-		mpr.setWireCenterids(mpc.getWireCenterPlans());
+		mpr.setWireCenterids(mpc.getWireCenterPlans().stream().mapToLong(Number::longValue).boxed().collect(Collectors.toList()));
 
 		return mpr;
 	}
@@ -81,7 +82,20 @@ public class RecalcEndpoint {
 	public @ResponseBody Job<FiberPlanResponse> postRecalc(Principal username,
 			@RequestBody FiberPlanRequest fiberPlanRequest)
 			throws InterruptedException, ExecutionException {
-
+		final NetworkStrategyRequest networkStrategyRequest;
+		switch(fiberPlanRequest.getAlgorithm()) {
+		case NPV:
+			final NpvSetupRequest npvSetupRequest = new NpvSetupRequest();
+			npvSetupRequest.setDiscountRate(fiberPlanRequest.getDiscountRate());
+			npvSetupRequest.setYears(fiberPlanRequest.getPeriods());
+			networkStrategyRequest = npvSetupRequest;
+			break;
+		default:
+			final ScalarSetupRequest ssr = new ScalarSetupRequest();
+			networkStrategyRequest = ssr;
+		}
+		
+		
 		Job<FiberPlanResponse> job = jobService
 				.submit(new JobService.Builder<FiberPlanResponse>(username).setCallable(() -> {
 
@@ -90,7 +104,7 @@ public class RecalcEndpoint {
 							: fiberPlanRequest.getFiberNetworkConstraints();
 
 					Future<WirecenterNetworkPlan> future = networkPlanningService
-							.planFiber(fiberPlanRequest.getPlanId(), fiberPlanRequest.getNetworkConfiguration(),
+							.planFiber(fiberPlanRequest.getPlanId(), networkStrategyRequest, fiberPlanRequest.getNetworkConfiguration(),
 									constraints);
 
 					WirecenterNetworkPlan plan = future.get();

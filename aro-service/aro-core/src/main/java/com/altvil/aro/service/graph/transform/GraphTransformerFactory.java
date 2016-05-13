@@ -108,5 +108,6 @@ public interface GraphTransformerFactory {
 	public NetworkBuilder createNetworkBuilder(
 			GraphModelBuilder<GeoSegment> builder);
 
+	@Deprecated
 	public <T> ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> createClosestFirstSurfaceBuilder(NetworkData data, NetworkConfiguration networkConfiguration);
 }

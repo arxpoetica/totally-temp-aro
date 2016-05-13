@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.network.NetworkStrategyRequest;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
@@ -33,23 +34,25 @@ public class NetworkModelBuilderFactoryImpl implements
 	}
 
 	@Override
-	public NetworkModelBuilder create(NetworkData networkData, NetworkConfiguration networkConfiguration,
+	public NetworkModelBuilder create(NetworkData networkData, NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration,
 			FiberNetworkConstraints fiberConstraints) {
-		return new NetworkModelBuilderImpl(networkData, networkConfiguration, fiberConstraints);
+		return new NetworkModelBuilderImpl(networkData, networkStrategyRequest, networkConfiguration, fiberConstraints);
 	}
 
 	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
 
 		private NetworkData networkData;
 		private NetworkConfiguration networkConfiguration;
+		private NetworkStrategyRequest networkStrategyRequest;
 		private FiberNetworkConstraints constraints;
 
 		private Map<Long, NetworkAssignment> map;
 
-		private NetworkModelBuilderImpl(NetworkData networkData, NetworkConfiguration networkConfiguration,
+		private NetworkModelBuilderImpl(NetworkData networkData, NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration,
 										FiberNetworkConstraints constraints) {
 			super();
 			this.networkData = networkData;
+			this.networkStrategyRequest = networkStrategyRequest;
 			this.networkConfiguration = networkConfiguration;
 			this.constraints = constraints;
 
@@ -96,7 +99,7 @@ public class NetworkModelBuilderFactoryImpl implements
 		@Override
 		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
 			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), networkConfiguration, constraints);
+					createNetworkData(rejectedLocations), networkStrategyRequest, networkConfiguration, constraints);
 		}
 	}
 }

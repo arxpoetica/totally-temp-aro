@@ -5,7 +5,7 @@ import com.altvil.aro.service.graph.model.NetworkStrategy;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 
 public interface NetworkService {
-		 NetworkData getNetworkData(NetworkRequest networkRequest) ;
+		 NetworkData getNetworkData(PlanId planId, NetworkRequest networkRequest) ;
 	
 		 NetworkStrategy getNetworkStrategy(NetworkStrategyRequest request) throws NoSuchStrategy;
 }

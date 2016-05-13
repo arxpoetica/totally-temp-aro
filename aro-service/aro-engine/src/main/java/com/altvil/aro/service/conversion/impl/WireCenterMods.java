@@ -6,17 +6,18 @@ import java.util.List;
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.service.conversion.PlanModifications;
+import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.planing.DefaultWirecenterNetworkPlan;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
 public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> {
 
-	private long planId;
+	private PlanId planId;
 
 	private List<NetworkNode> networkNodes = new ArrayList<>();
 	private List<FiberRoute> fiberRoutes = new ArrayList<FiberRoute>();
 
-	public WireCenterMods(long planId) {
+	public WireCenterMods(PlanId planId) {
 		super();
 		this.planId = planId;
 	}

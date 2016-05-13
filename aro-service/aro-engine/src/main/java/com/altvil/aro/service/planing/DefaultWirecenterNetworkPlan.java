@@ -4,14 +4,15 @@ import java.util.Collection;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.service.network.PlanId;
 
 public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 
-	private long planId;
+	private PlanId planId;
 	private Collection<NetworkNode> networkNodes;
 	private Collection<FiberRoute> fiberRoutes;
 
-	public DefaultWirecenterNetworkPlan(long planId,
+	public DefaultWirecenterNetworkPlan(PlanId planId,
 			Collection<NetworkNode> networkNodes,
 			Collection<FiberRoute> fiberRoutes) {
 		super();
@@ -21,7 +22,7 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 	}
 
 	@Override
-	public long getPlanId() {
+	public PlanId getPlanId() {
 		return planId;
 	}
 

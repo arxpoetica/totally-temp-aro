@@ -5,7 +5,7 @@ public class NetworkRequest {
 	@Deprecated
 	public enum LocationLoadingRequest { ALL, SELECTED } 
 	
-	public static NetworkRequest create(long planId, LocationLoadingRequest loadingRequest) {
+	public static NetworkRequest create(PlanId planId, LocationLoadingRequest loadingRequest) {
 		NetworkRequest request = new NetworkRequest() ;
 		request.setPlanId(planId) ;
 		request.setLocationLoadingRequest(loadingRequest);
@@ -13,18 +13,18 @@ public class NetworkRequest {
 		return request ;
 	}
 	
-	public static NetworkRequest create(long planId) {
+	public static NetworkRequest create(PlanId planId) {
 		return create(planId, LocationLoadingRequest.SELECTED) ;
 	}	
 	
 	private LocationLoadingRequest locationLoadingRequest ;
-	private long planId ;
+	private PlanId planId ;
 	private int year = 2015 ;
 
 	public NetworkRequest() {
 	}
 	
-	public long getPlanId() {
+	public PlanId getPlanId$() {
 		return planId;
 	}
 	
@@ -37,7 +37,7 @@ public class NetworkRequest {
 		this.locationLoadingRequest = locationLoadingRequest;
 	}
 
-	public void setPlanId(long planId) {
+	public void setPlanId(PlanId planId) {
 		this.planId = planId;
 	}
 

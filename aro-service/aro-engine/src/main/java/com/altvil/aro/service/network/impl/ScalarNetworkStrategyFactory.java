@@ -1,6 +1,6 @@
 package com.altvil.aro.service.network.impl;
 
-import com.altvil.aro.service.Strategy;
+import com.altvil.annotation.Strategy;
 import com.altvil.aro.service.graph.model.NetworkStrategy;
 import com.altvil.aro.service.network.NetworkStrategyFactory;
 import com.altvil.aro.service.network.NetworkStrategyRequest;

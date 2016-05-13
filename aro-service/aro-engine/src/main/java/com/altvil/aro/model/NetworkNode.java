@@ -3,6 +3,7 @@ package com.altvil.aro.model;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.altvil.aro.service.network.PlanId;
+import com.altvil.aro.service.network.impl.PlanIdConverter;
 import com.vividsolutions.jts.geom.Point;
 
 @Entity
@@ -23,7 +26,7 @@ public class NetworkNode extends ComparableModel {
 	private int node_type_id;
 	private Point point;
 	private Point geogPoint;
-	private long routeId;
+	private PlanId routeId;
 	
 	@Transient
 	@Override
@@ -90,11 +93,12 @@ public class NetworkNode extends ComparableModel {
 	}
 
 	@Column(name = "plan_id")
-	public long getRouteId() {
+	@Convert(converter = PlanIdConverter.class)
+	public PlanId getRouteId() {
 		return routeId;
 	}
 
-	public void setRouteId(long routeId) {
+	public void setRouteId(PlanId routeId) {
 		this.routeId = routeId;
 	}
 

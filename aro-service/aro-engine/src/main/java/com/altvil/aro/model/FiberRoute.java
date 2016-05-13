@@ -3,6 +3,7 @@ package com.altvil.aro.model;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -15,6 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.network.PlanId;
+import com.altvil.aro.service.network.impl.PlanIdConverter;
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.Geometry;
@@ -25,7 +28,7 @@ import com.vividsolutions.jts.geom.Geometry;
 public class FiberRoute extends ComparableModel {
 	
 	private Long id ;
-	private long planId ;
+	private PlanId planId ;
 	private FiberType fiberRouteType ;
 	private NetworkNode parentNode ;
 	private NetworkNode fromNode ;
@@ -53,11 +56,12 @@ public class FiberRoute extends ComparableModel {
 	
 	
 	@Column(name = "plan_id")
-	public long getPlanId() {
+	@Convert(converter = PlanIdConverter.class)
+	public PlanId getPlanId() {
 		return planId;
 	}
 
-	public void setPlanId(long planId) {
+	public void setPlanId(PlanId planId) {
 		this.planId = planId;
 	}
 

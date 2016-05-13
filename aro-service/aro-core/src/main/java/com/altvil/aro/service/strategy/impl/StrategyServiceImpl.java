@@ -11,7 +11,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.Strategy;
+import com.altvil.annotation.Strategy;
 import com.altvil.aro.service.graph.model.NetworkStrategy;
 import com.altvil.aro.service.network.NetworkStrategyRequest;
 import com.altvil.aro.service.strategy.NoSuchStrategy;

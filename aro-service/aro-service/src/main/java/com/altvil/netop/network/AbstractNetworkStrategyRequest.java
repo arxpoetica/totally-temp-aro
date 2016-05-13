@@ -14,5 +14,4 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 	@JsonSubTypes.Type(value = ScalarSetupRequest.class, name="scalar")
 })
 public abstract class AbstractNetworkStrategyRequest implements NetworkStrategyRequest {
-
 }
