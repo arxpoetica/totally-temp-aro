@@ -136,21 +136,19 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 			return StreamUtil.map(networkAssignments, this::getVertex);
 		}
 
-		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		public Collection<AroEdge<GeoSegment>> planRoute(GraphNode src,
 				Collection<GraphNode> targets) {
 			return new RouteBuilder<GraphNode, AroEdge<GeoSegment>>().build(
-					(WeightedGraph) getModel().getGraph(), src, targets);
+					getModel().getGraph(), null, src, targets);
 		}
 		
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Collection<SourceRoute<GraphNode,AroEdge<GeoSegment>>> planRoute(
 				Collection<GraphNode> sources, Collection<GraphNode> targets) {
 			return new RouteBuilder<GraphNode, AroEdge<GeoSegment>>().build(
-					(WeightedGraph) getModel().getGraph(), sources, targets);
+					getModel().getGraph(), null, sources, targets);
 		}
 
 		/*

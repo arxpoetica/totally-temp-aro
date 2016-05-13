@@ -127,7 +127,7 @@ public class GeneratingNodeAssembler {
 			}
 		}
 		
-		return ctx.getGraphTransformerFactory().createDAG(b.build(), vertex, e -> true) ;
+		return ctx.getGraphTransformerFactory().createDAG(null, b.build(), vertex, e -> true) ;
 		
 //		b.setRoot(vertex);
 //		return b.buildDAG();

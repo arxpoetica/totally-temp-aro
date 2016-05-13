@@ -16,7 +16,10 @@ import com.altvil.aro.service.demand.EntityDemandService;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
+import com.altvil.aro.service.graph.alg.NpvClosestFirstIterator;
+import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
@@ -24,6 +27,7 @@ import com.altvil.aro.service.graph.builder.RoadModelBuilder;
 import com.altvil.aro.service.graph.builder.impl.DefaultGraphBuilder;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
 import com.altvil.aro.service.graph.impl.DagBuilder;
+import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
@@ -105,11 +109,27 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return createDAGBuilder(new AroEdgeFactory<T>());
 	}
 
-	@Override
-	public <T> DAGModel<T> createDAG(GraphModel<T> graph, GraphNode srcNode,
-			Predicate<AroEdge<T>> predicate) {
-		return new DagBuilder<>(createDAGBuilder(), graph).createDAG(predicate,
+	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder, GraphModel<T> graph, GraphNode srcNode,
+			Predicate<AroEdge<T>> marked) {
+		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(marked,
 				srcNode);
+	}
+
+	@Override
+	public <T> ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> createClosestFirstSurfaceBuilder(NetworkData data,
+			NetworkConfiguration configuration) {
+		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder;
+		switch (configuration.getRoutePlanningAlgorithm()) {
+		case WEIGHT_MINIMIZATION :
+			builder = (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<T>>(g, s);
+			break;
+		case NPV:
+			builder = (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<T>>(data, configuration.getDiscountRate(), configuration.getPeriods(), g, s);
+			break;
+		default:
+			throw new UnsupportedOperationException("" + configuration.getRoutePlanningAlgorithm() + " algorithm not yet supported.");
+		}
+		return builder;
 	}
 
 	@Override

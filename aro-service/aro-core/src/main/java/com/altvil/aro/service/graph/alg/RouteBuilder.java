@@ -1,6 +1,7 @@
 package com.altvil.aro.service.graph.alg;
 
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.google.common.collect.TreeMultimap;
 
@@ -17,7 +18,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 	private Map<V, AllShortestPaths<V, E>> targetMap;
 
-	public Collection<SourceRoute<V,E>> build(WeightedGraph<V, E> source, Collection<V> all_roots,
+	public Collection<SourceRoute<V,E>> build(WeightedGraph<V, E> source, ClosestFirstSurfaceBuilder<V, E> builder, Collection<V> all_roots,
 			Collection<V> targets) {
 		
 		
@@ -40,7 +41,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 				sourceRootMap.get(target).add(target, target, new HashSet<E>());
 			} else {
 				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, target));
+						new AllShortestPaths<V, E>(source, builder, target));
 			}
 		}
 
@@ -100,7 +101,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 	}
 
 	// Return a composite Result
-	public Set<E> build(WeightedGraph<V, E> source, V root,
+	public Set<E> build(WeightedGraph<V, E> source, ClosestFirstSurfaceBuilder<V, E> closestFirstBuilder, V root,
 			Collection<V> targets) {
 
 		targetMap = new HashMap<>(targets.size());
@@ -108,7 +109,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			// Exclude any source target match
 			if (!target.equals(root)) {
 				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, target));
+						new AllShortestPaths<V, E>(source, closestFirstBuilder.build(source, target), target));
 			}
 		}
 

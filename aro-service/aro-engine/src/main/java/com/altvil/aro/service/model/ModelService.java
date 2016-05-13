@@ -6,4 +6,6 @@ public interface ModelService {
 	Collection<AdministrativeOperatingCompany> allAdministrativeOperatingCompanies();
 
 	Collection<WireCenter> wireCenters(String aoc);
+
+	Collection<Edge> edgesInWireCenter(String wireCenter);
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.ModelRepository;
 import com.altvil.aro.service.model.AdministrativeOperatingCompany;
+import com.altvil.aro.service.model.Edge;
 import com.altvil.aro.service.model.ModelService;
 import com.altvil.aro.service.model.WireCenter;
 
@@ -17,9 +18,16 @@ private ModelRepository repository;
 	public Collection<AdministrativeOperatingCompany> allAdministrativeOperatingCompanies() {
 		return repository.allAdministrativeOperatingCompanies();
 	}
+	
 	@Override
 	public Collection<WireCenter> wireCenters(String aoc) {
 		return repository.wireCenters(aoc);
+	}
+	
+	@Override
+	public Collection<Edge> edgesInWireCenter(String wireCenter) {
+		return repository.edgesInWireCenter(wireCenter);
+		
 	}
 
 }

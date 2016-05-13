@@ -1,34 +1,59 @@
 package com.altvil.netop.plan;
 
+import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.netop.json.NetworkAlgorithmDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class FiberPlanRequest {
-	private long					planId;
-	private FiberNetworkConstraints	fiberNetworkConstraints;
-	private String					algorithm;
+	private NetworkConfiguration.Algorithm algorithm;
+	private double						   discountRate	= Double.NaN;
+	private FiberNetworkConstraints		   fiberNetworkConstraints;
+	private int							   periods		= -1;
+	private long						   planId;
 
-	public long getPlanId() {
-		return planId;
+	public NetworkConfiguration.Algorithm getAlgorithm() {
+		return algorithm;
 	}
 
-	public void setPlanId(long planId) {
-		this.planId = planId;
+	public double getDiscountRate() {
+		return discountRate;
 	}
 
 	public FiberNetworkConstraints getFiberNetworkConstraints() {
 		return fiberNetworkConstraints;
 	}
 
+	public NetworkConfiguration getNetworkConfiguration() {
+		return new NetworkConfiguration(getAlgorithm(), getDiscountRate(), getPeriods());
+	}
+
+	public int getPeriods() {
+		return periods;
+	}
+
+	public long getPlanId() {
+		return planId;
+	}
+
+	@JsonDeserialize(using = NetworkAlgorithmDeserializer.class)
+	public void setAlgorithm(NetworkConfiguration.Algorithm algorithm) {
+		this.algorithm = algorithm;
+	}
+
+	public void setDiscountRate(double discountRate) {
+		this.discountRate = discountRate;
+	}
+
 	public void setFiberNetworkConstraints(FiberNetworkConstraints fiberNetworkConstraints) {
 		this.fiberNetworkConstraints = fiberNetworkConstraints;
 	}
 
-	public String getAlgorithm() {
-		return algorithm;
+	public void setPeriods(int periods) {
+		this.periods = periods;
 	}
 
-	public void setAlgorithm(String algorithm) {
-		this.algorithm = algorithm;
+	public void setPlanId(long planId) {
+		this.planId = planId;
 	}
-
 }

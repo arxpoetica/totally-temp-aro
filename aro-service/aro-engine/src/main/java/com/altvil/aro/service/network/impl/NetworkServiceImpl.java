@@ -81,10 +81,12 @@ public class NetworkServiceImpl implements NetworkService {
 
 		//determine wirecenter ID
 		Long wcid = getWirecenterIdByPlanId(networkRequest.getPlanId());
+		List<Long> safeList = selectedRoadLocationIds(networkRequest);
+		networkData.setSelectedRoadLocationIds(safeList);
 		
 		//TODO MEDIUM Compare performance
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(networkRequest, wcid));
-		networkData.setRoadLocations(getRoadLocationNetworkAssignments(networkRequest, wcid));
+		networkData.setRoadLocations(getRoadLocationNetworkAssignments(networkRequest, wcid, safeList));
 		networkData.setRoadEdges(getRoadEdges(networkRequest, wcid));
 
 		return networkData;
@@ -109,7 +111,7 @@ public class NetworkServiceImpl implements NetworkService {
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-		locDemands = locDemandCache.get(wirecenterId);
+		locDemands = null;//locDemandCache.get(wirecenterId);
 		if (null == locDemands) 
 		{
 			locDemands = queryLocationDemand(networkRequest);
@@ -213,7 +215,7 @@ public class NetworkServiceImpl implements NetworkService {
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-		roadLocations = roadLocCache.get(wirecenterId);
+		roadLocations = null;//roadLocCache.get(wirecenterId);
 		if (null == roadLocations) 
 		{
 			roadLocations = queryRoadLocations(networkRequest);
@@ -221,26 +223,29 @@ public class NetworkServiceImpl implements NetworkService {
 			//NOTE: currently no update policy used as RoadLocation is temporarily assumed immutable
 		}
 	
-		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
-		{
-			Long lookupKey = networkRequest.getPlanId();
-			List<BigInteger> selectedLocIds = planRepository.querySelectedLocationsByPlanId(lookupKey);
-			List<Long> safeList = selectedLocIds.stream().mapToLong(bi -> bi.longValue()).boxed().collect(Collectors.toList());
-			//System.out.println("Selected IDs: " + safeList);
-			//System.out.println("All: " + roadLocations.keySet());
-			roadLocations.keySet().retainAll(safeList);
-			//System.out.println("After filter: " + roadLocations.keySet());
-		}
-
 		if (log.isDebugEnabled()) logCacheStats(roadLocCache);
 
 		return roadLocations;
 	}
 
-	private Collection<NetworkAssignment> getRoadLocationNetworkAssignments(NetworkRequest networkRequest, Long wirecenterId) 
+	private List<Long> selectedRoadLocationIds(NetworkRequest networkRequest) {
+		Long lookupKey = networkRequest.getPlanId();
+		List<BigInteger> selectedLocIds = planRepository.querySelectedLocationsByPlanId(lookupKey);
+		List<Long> safeList = selectedLocIds.stream().mapToLong(bi -> bi.longValue()).boxed().collect(Collectors.toList());
+		return safeList;
+	}
+
+	// TODO Convert safeList into a predicate
+	private Collection<NetworkAssignment> getRoadLocationNetworkAssignments(NetworkRequest networkRequest, Long wirecenterId, List<Long> safeList) 
 	{
 		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkRequest, wirecenterId);
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkRequest, wirecenterId);
+	
+		if (LocationLoadingRequest.SELECTED == networkRequest.getLocationLoadingRequest())
+		{
+			roadLocationByLocationIdMap.keySet().retainAll(safeList);
+		}
+
 		
 		return toValidAssignments(roadLocationByLocationIdMap.keySet().stream()
 			.map(result -> {
@@ -310,7 +315,7 @@ public class NetworkServiceImpl implements NetworkService {
 		//retrieve all locations from cache by wirecenter ID
 		//if cache miss, populate the cache by wirecenterID with results of ALL request
 
-		fiberSourceLocations = fiberSourceLocCache.get(wirecenterId);
+		fiberSourceLocations = null;//fiberSourceLocCache.get(wirecenterId);
 		if (null == fiberSourceLocations) 
 		{
 			fiberSourceLocations = queryFiberSources(networkRequest);

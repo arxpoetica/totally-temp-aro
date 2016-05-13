@@ -1,5 +1,6 @@
 package com.altvil.aro.service.optimize.impl;
 
+import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkConstraint;
@@ -29,13 +30,13 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 	}
 
 	@Override
-	public NetworkPlanner createNetworkPlanner(NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
-		return DefaultNetworkPlannerImpl.create(createConstrainer(constraint, networkData, ctx, generatingNodeConstraint, scoringStrategy));
+	public NetworkPlanner createNetworkPlanner(NetworkConfiguration networkConfiguration, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
+		return DefaultNetworkPlannerImpl.create(createConstrainer(networkConfiguration, constraint, networkData, ctx, generatingNodeConstraint, scoringStrategy));
 	}
 
-	private NetworkConstrainer createConstrainer(NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
+	private NetworkConstrainer createConstrainer(NetworkConfiguration networkConfiguration, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
-				.create(networkData, ctx.getFiberNetworkConstraints());
+				.create(networkData, networkConfiguration, ctx.getFiberNetworkConstraints());
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder,
 						ctx, scoringStrategy);

@@ -1,13 +1,34 @@
 package com.altvil.netop.optimize;
 
+import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planing.OptimizationInputs;
+import com.altvil.netop.json.NetworkAlgorithmDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class OptimizationPlanRequest {
 	private long planId;
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private OptimizationInputs optimizationInputs = OptimizationInputs.DEFAULT ;
-	private String algorithm ;
+	private NetworkConfiguration.Algorithm algorithm ;
+	private double discountRate = Double.NaN;
+	private int periods = -1;
+
+	public double getDiscountRate() {
+		return discountRate;
+	}
+
+	public void setDiscountRate(double discountRate) {
+		this.discountRate = discountRate;
+	}
+
+	public int getPeriods() {
+		return periods;
+	}
+
+	public void setPeriods(int periods) {
+		this.periods = periods;
+	}
 
 	public long getPlanId() {
 		return planId;
@@ -26,11 +47,13 @@ public class OptimizationPlanRequest {
 		this.fiberNetworkConstraints = fiberNetworkConstraints;
 	}
 
-	public String getAlgorithm() {
+
+	public NetworkConfiguration.Algorithm getAlgorithm() {
 		return algorithm;
 	}
 
-	public void setAlgorithm(String algorithm) {
+	@JsonDeserialize(using=NetworkAlgorithmDeserializer.class)
+	public void setAlgorithm(NetworkConfiguration.Algorithm algorithm) {
 		this.algorithm = algorithm;
 	}
 
@@ -41,9 +64,8 @@ public class OptimizationPlanRequest {
 	public void setOptimizationInputs(OptimizationInputs optimizationInputs) {
 		this.optimizationInputs = optimizationInputs;
 	}
-	
-	
-	
-	
 
+	public NetworkConfiguration getNetworkConfiguration() {
+		return new NetworkConfiguration(getAlgorithm(), getDiscountRate(), getPeriods());
+	}
 }

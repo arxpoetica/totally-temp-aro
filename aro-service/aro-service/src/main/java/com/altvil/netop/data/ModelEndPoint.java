@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.model.AdministrativeOperatingCompany;
+import com.altvil.aro.service.model.Edge;
 import com.altvil.aro.service.model.ModelService;
 import com.altvil.aro.service.model.WireCenter;
 
@@ -26,5 +27,10 @@ public class ModelEndPoint {
 	@RequestMapping(value = "/model/wirecenters/{aocn}", method = RequestMethod.GET)
 	public @ResponseBody Collection<WireCenter> wireCenters(@PathVariable("aocn") String aocn) {
 		return modelService.wireCenters(aocn);
+	}
+
+	@RequestMapping(value = "/model/edges/{wireCenter}", method = RequestMethod.GET)
+	public @ResponseBody Collection<Edge> edgesInWireCenter(@PathVariable("wireCenter") String wireCenter) {
+		return modelService.edgesInWireCenter(wireCenter);
 	}
 }

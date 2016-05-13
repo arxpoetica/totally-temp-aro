@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
-import com.altvil.aro.service.plan.InputRequests;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
@@ -42,7 +41,7 @@ public class RecalcEndpoint {
 
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlanRequest request) {
-		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), request.getNetworkConfiguration(), request.getFiberNetworkConstraints());
 
 		Job<MasterPlanUpdate> job = jobService.submit(mpc);
 		
@@ -73,7 +72,7 @@ public class RecalcEndpoint {
 							: fiberPlanRequest.getFiberNetworkConstraints();
 
 					Future<WirecenterNetworkPlan> future = networkPlanningService
-							.planFiber(fiberPlanRequest.getPlanId(),
+							.planFiber(fiberPlanRequest.getPlanId(), fiberPlanRequest.getNetworkConfiguration(),
 									constraints);
 
 					WirecenterNetworkPlan plan = future.get();

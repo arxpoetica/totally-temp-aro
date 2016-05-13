@@ -1,12 +1,12 @@
 package com.altvil.aro.service.graph.alg;
 
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.google.common.collect.TreeMultimap;
+
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.GraphPathImpl;
-import org.jgrapht.traverse.ClosestFirstIterator;
-
 import java.util.*;
 
 public class AllShortestPaths<V, E> {
@@ -16,16 +16,20 @@ public class AllShortestPaths<V, E> {
 	private boolean reversed = false;
 
 	private Set<V> seenVertices = new HashSet<>();
-	private ClosestFirstIterator<V, E> itr;
+	private ClosestFirstSurfaceIterator<V, E> itr;
 
 	private Set<V> currentTargets;
 
-	public AllShortestPaths(WeightedGraph<V, E> graph, V source) {
-		super();
+	public AllShortestPaths(WeightedGraph<V, E> graph, ClosestFirstSurfaceIterator<V, E> bestFirstIterator, V source) {
 		this.graph = graph;
 		this.source = source;
 		this.seenVertices = new HashSet<>();
-		itr = new ClosestFirstIterator<V, E>(graph, source);
+		this.itr = bestFirstIterator;
+	}
+
+	public AllShortestPaths(WeightedGraph<V, E> graph,
+			ClosestFirstSurfaceBuilder<V, E> closestFirstSurfaceBuilder, V src) {
+		this(graph, closestFirstSurfaceBuilder.build(graph, src), src);
 	}
 
 	public TreeMultimap<Double, V> findPaths(Collection<V> targets) {

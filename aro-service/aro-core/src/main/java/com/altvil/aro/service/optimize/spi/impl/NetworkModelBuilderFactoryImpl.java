@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
@@ -32,22 +33,24 @@ public class NetworkModelBuilderFactoryImpl implements
 	}
 
 	@Override
-	public NetworkModelBuilder create(NetworkData networkData,
+	public NetworkModelBuilder create(NetworkData networkData, NetworkConfiguration networkConfiguration,
 			FiberNetworkConstraints fiberConstraints) {
-		return new NetworkModelBuilderImpl(networkData, fiberConstraints);
+		return new NetworkModelBuilderImpl(networkData, networkConfiguration, fiberConstraints);
 	}
 
 	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
 
 		private NetworkData networkData;
+		private NetworkConfiguration networkConfiguration;
 		private FiberNetworkConstraints constraints;
 
 		private Map<Long, NetworkAssignment> map;
 
-		private NetworkModelBuilderImpl(NetworkData networkData,
+		private NetworkModelBuilderImpl(NetworkData networkData, NetworkConfiguration networkConfiguration,
 										FiberNetworkConstraints constraints) {
 			super();
 			this.networkData = networkData;
+			this.networkConfiguration = networkConfiguration;
 			this.constraints = constraints;
 
 			map = StreamUtil.hash(networkData.getRoadLocations(),
@@ -93,9 +96,7 @@ public class NetworkModelBuilderFactoryImpl implements
 		@Override
 		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
 			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), constraints);
+					createNetworkData(rejectedLocations), networkConfiguration, constraints);
 		}
-
 	}
-
 }

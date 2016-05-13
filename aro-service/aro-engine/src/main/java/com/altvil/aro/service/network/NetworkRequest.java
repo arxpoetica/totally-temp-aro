@@ -47,6 +47,4 @@ public class NetworkRequest {
 	public void setYear(int year) {
 		this.year = year;
 	}
-	
-
 }
