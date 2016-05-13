@@ -17,11 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
+import com.altvil.aro.service.network.NetworkStrategyRequest;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.netop.network.algorithms.NpvSetupRequest;
+import com.altvil.netop.network.algorithms.ScalarSetupRequest;
 
 @RestController
 public class RecalcEndpoint {
@@ -41,6 +44,21 @@ public class RecalcEndpoint {
 
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlanRequest request) {
+		// KJG Convert FiberPlanRequest to contain a NetworkStrategyRequest
+		
+		NetworkStrategyRequest nsr = null;
+		switch(request.getAlgorithm()) {
+		case NPV:
+			final NpvSetupRequest npvSetupRequest = new NpvSetupRequest();
+			npvSetupRequest.setDiscountRate(request.getDiscountRate());
+			npvSetupRequest.setYears(request.getPeriods());
+			nsr = npvSetupRequest;
+			break;
+		case WEIGHT_MINIMIZATION:
+			final ScalarSetupRequest ssr = new ScalarSetupRequest();
+			nsr = ssr;
+		}
+		
 		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), request.getNetworkConfiguration(), request.getFiberNetworkConstraints());
 
 		Job<MasterPlanUpdate> job = jobService.submit(mpc);

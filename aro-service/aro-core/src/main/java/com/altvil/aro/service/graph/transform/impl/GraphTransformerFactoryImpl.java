@@ -124,7 +124,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 			builder = (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<T>>(g, s);
 			break;
 		case NPV:
-			builder = (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<T>>(data, configuration.getDiscountRate(), configuration.getPeriods(), g, s);
+			builder = (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<T>>(configuration.getDiscountRate(), configuration.getPeriods(), g, s);
 			break;
 		default:
 			throw new UnsupportedOperationException("" + configuration.getRoutePlanningAlgorithm() + " algorithm not yet supported.");

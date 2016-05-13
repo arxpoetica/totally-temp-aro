@@ -25,9 +25,14 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.graph.model.NetworkStrategy;
 import com.altvil.aro.service.network.NetworkRequest;
 import com.altvil.aro.service.network.NetworkRequest.LocationLoadingRequest;
 import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.network.NetworkStrategyFactory;
+import com.altvil.aro.service.network.NetworkStrategyRequest;
+import com.altvil.aro.service.strategy.NoSuchStrategy;
+import com.altvil.aro.service.strategy.StrategyService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
@@ -42,6 +47,9 @@ public class NetworkServiceImpl implements NetworkService {
 
 	@Autowired
 	private NetworkPlanRepository planRepository;
+	
+	@Autowired
+	private StrategyService strategyService;
 
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
 	
@@ -373,5 +381,10 @@ public class NetworkServiceImpl implements NetworkService {
 				
 		//return results
 		return roadEdges;
+	}
+
+	@Override
+	public NetworkStrategy getNetworkStrategy(NetworkStrategyRequest request) throws NoSuchStrategy {
+		return strategyService.getStrategy(NetworkStrategyFactory.class, request.getAlgorithm()).getNetworkStrategy(request);
 	}
 }

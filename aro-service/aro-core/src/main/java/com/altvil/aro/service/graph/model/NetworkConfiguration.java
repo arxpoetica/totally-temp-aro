@@ -2,9 +2,11 @@ package com.altvil.aro.service.graph.model;
 
 import java.io.Serializable;
 
+@Deprecated
 public class NetworkConfiguration implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	@Deprecated
 	public enum Algorithm {
 		WEIGHT_MINIMIZATION, NPV;
 	};

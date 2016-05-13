@@ -1,7 +1,8 @@
 package com.altvil.aro.service.network;
 
+@Deprecated
 public class NetworkRequest {
-	
+	@Deprecated
 	public enum LocationLoadingRequest { ALL, SELECTED } 
 	
 	public static NetworkRequest create(long planId, LocationLoadingRequest loadingRequest) {

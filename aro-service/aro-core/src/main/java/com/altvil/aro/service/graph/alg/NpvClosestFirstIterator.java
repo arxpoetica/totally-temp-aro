@@ -1,25 +1,18 @@
 package com.altvil.aro.service.graph.alg;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.jgrapht.*;
+import org.jgrapht.Graph;
+import org.jgrapht.Graphs;
 import org.jgrapht.traverse.CrossComponentIterator;
-import org.jgrapht.util.*;
+import org.jgrapht.util.FibonacciHeap;
+import org.jgrapht.util.FibonacciHeapNode;
 
-import com.altvil.aro.service.entity.AroEntity;
-import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.interfaces.NetworkAssignment;
 
 /**
  * A closest-first iterator for a directed or undirected graph. For this
@@ -79,7 +72,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * Maximum distance to search.
 	 */
 	private double							radius		= Double.POSITIVE_INFINITY;
-	private Map<Long, LocationDemand> demandByRoadLocationId;
 
 	/**
 	 * Creates a new closest-first iterator for the specified graph.
@@ -87,8 +79,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param g
 	 *            the graph to be iterated.
 	 */
-	public NpvClosestFirstIterator(NetworkData networkData, double discountRate, int periods, Graph<V, E> g) {
-		this(networkData, discountRate, periods, g, null);
+	public NpvClosestFirstIterator(double discountRate, int periods, Graph<V, E> g) {
+		this(discountRate, periods, g, null);
 	}
 
 	/**
@@ -103,9 +95,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param startVertex
 	 *            the vertex iteration to be started.
 	 */
-	public NpvClosestFirstIterator(NetworkData networkData, double discountRate, int periods, Graph<V, E> g,
-			V startVertex) {
-		this(networkData, discountRate, periods, g, startVertex, Double.POSITIVE_INFINITY);
+	public NpvClosestFirstIterator(double discountRate, int periods, Graph<V, E> g, V startVertex) {
+		this(discountRate, periods, g, startVertex, Double.POSITIVE_INFINITY);
 	}
 
 	/**
@@ -124,57 +115,13 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 *            limit on weighted path length, or Double.POSITIVE_INFINITY for
 	 *            unbounded search.
 	 */
-	public NpvClosestFirstIterator(NetworkData networkData, double discountRate, int periods, Graph<V, E> g,
-			V startVertex, double radius) {
+	public NpvClosestFirstIterator(double discountRate, int periods, Graph<V, E> g, V startVertex, double radius) {
 		super(g, startVertex);
 		this.discountRate = discountRate;
 		this.periods = periods;
 		this.radius = radius;
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
-
-		 this.demandByRoadLocationId = extractDemandStatistics(networkData);
-	}
-
-	private Map<Long, LocationDemand> extractDemandStatistics(NetworkData networkData) {
-		Map<Long, List<NetworkAssignment>> assignmentsById = new HashMap<Long, List<NetworkAssignment>>(){
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public List<NetworkAssignment> get(Object key) {
-				List<NetworkAssignment> list = super.get(key);
-				
-				if (list == null) {
-					list = new ArrayList<>();
-					super.put((Long) key,  list);
-				}
-				
-				return list;
-			}};
-		Map<Long, LocationDemand> results = new HashMap<>();
-
-		networkData.getRoadLocations().forEach((na) -> {
-			AroEntity ae = na.getSource();
-			if (ae instanceof LocationEntity) {
-				assignmentsById.get(na.getRoadSegmentId()).add(na);
-			}
-		});
-		
-		
-		
-		
-
-		final Collection<NetworkAssignment> roadLocations = networkData.getRoadLocations();
-		roadLocations.forEach((na) -> {
-			AroEntity ae = na.getSource();
-			if (ae instanceof LocationEntity) {
-				LocationEntity le = (LocationEntity) ae;
-
-				results.put(na.getRoadSegmentId(), le.getLocationDemand());
-			}
-		});
-
-		return results;
 	}
 
 	/**
@@ -199,18 +146,19 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		}
 
 		final double f = f(npv);
-		
+
 		System.err.println(base2terminal.getValue() + ": npv = " + npv + ": f = " + f);
-		
+
 		return f;
 	}
 
 	private static class NpvData {
-		double cost		   = 0;
-		double revenue	   = 0;
-		double totalLength = 0;
-		public int locations = 0;
-		public int fdt = 0;
+		double	   cost		   = 0;
+		double	   revenue	   = 0;
+		double	   totalLength = 0;
+		public int locations   = 0;
+		public int fdt		   = 0;
+
 		@Override
 		public String toString() {
 			return "NpvData [cost=" + cost + ", revenue=" + revenue + ", totalLength=" + totalLength + ", locations="
@@ -286,7 +234,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				// NOTE: Presently assumes that the FDT is located on the
 				// edge rather than at the location.
 			});
-			
+
 			System.err.println(segment + ": " + terminalData);
 		}
 
@@ -388,41 +336,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	}
 
 	/**
-	 * Sums all members of two cost flow lists. The last member of the shorter
-	 * list is automatically repeated
-	 * 
-	 * @param costs1
-	 * @param costs2
-	 * @return
-	 */
-	private List<Double> sumPathCosts(List<Double> costs1, List<Double> costs2) {
-		int s1 = costs1.size();
-		int s2 = costs2.size();
-		int min, max;
-
-		if (s1 < s2) {
-			min = s1;
-			max = s2;
-		} else {
-			min = s2;
-			max = s1;
-		}
-
-		List<Double> combined = new ArrayList<Double>(max);
-		for (int i = 0; i < min; i++) {
-			combined.add(i, costs1.get(i) + costs2.get(i));
-		}
-		for (int i = min; i < s1; i++) {
-			combined.add(i, costs1.get(i));
-		}
-		for (int i = min; i < s2; i++) {
-			combined.add(i, costs2.get(i));
-		}
-
-		return combined;
-	}
-
-	/**
 	 * @see CrossComponentIterator#isConnectedComponentExhausted()
 	 */
 	@Override
@@ -438,23 +351,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		}
 
 		return false;
-	}
-
-	/**
-	 * Net Present Value. Based on the algorithm for numpy.npv as described in
-	 * docs.scipy.org.
-	 * 
-	 * @param cashFlow
-	 * @return
-	 */
-	private double npv(List<Double> cashFlow) {
-		double npv = 0;
-
-		for (int i = 0; i < cashFlow.size(); i++) {
-			npv += cashFlow.get(i) / Math.pow((1 + discountRate), i);
-		}
-
-		return npv;
 	}
 
 	/**
