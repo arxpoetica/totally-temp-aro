@@ -129,13 +129,13 @@ public class TestJobService {
 			@Override
 			protected Collection<TestComputeJob> split(int gridSize, String arg) throws IgniteException {
 				//gridSize reasonable initial size, or look at args and determine how many jobs to put onto grid where jobCount!=gridSize
-				System.out.println("ComputeTaskSplitAdapter creating compute tasks for: " + arg);
+				System.out.println("ComputeTaskSplitAdapter creating compute jobs for: " + arg);
 				List<TestComputeJob> jobs = new ArrayList<TestComputeJob>(gridSize);
 				String[] tokens = arg.trim().split("\\s"); //split on whitespace
 				for (String token : tokens) {
 					jobs.add(new TestComputeJob(token));
 				}
-				System.out.println("Created " + jobs.size() + " tasks.");
+				System.out.println("Created " + jobs.size() + " jobs.");
 				return jobs; //load balancer is applied automatically with ComputeTaskSplitAdapter, see ComputeTaskAdapter for manual balancing
 			}
 
