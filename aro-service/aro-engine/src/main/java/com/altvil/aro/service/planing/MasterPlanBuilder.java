@@ -4,21 +4,20 @@ import java.security.Principal;
 import java.util.List;
 
 import com.altvil.aro.service.job.JobService;
-import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
-import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
+import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 
 public class MasterPlanBuilder extends JobService.Builder<MasterPlanUpdate> {
 	public MasterPlanBuilder(Principal creator) {
 		super(creator);
 	}
 
-	private List<FiberPlanConfiguration<? extends AbstractFiberPlan>> wireCenterPlans;
+	private List<FiberPlanConfiguration> wireCenterPlans;
 
-	public List<FiberPlanConfiguration<? extends AbstractFiberPlan>> getWireCenterPlans() {
+	public List<FiberPlanConfiguration> getWireCenterPlans() {
 		return wireCenterPlans;
 	}
 
-	public void setWireCenterPlans(List<FiberPlanConfiguration<? extends AbstractFiberPlan>> wireCenterPlans) {
+	public void setWireCenterPlans(List<FiberPlanConfiguration> wireCenterPlans) {
 		this.wireCenterPlans = wireCenterPlans;
 	}
 }

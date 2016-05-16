@@ -1,4 +1,4 @@
-package com.altvil.aro.service.planning.fiber.strategies;
+package com.altvil.aro.service.planning.optimization.strategies;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -11,49 +11,64 @@ import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.planning.NpvFiberPlan;
+import com.altvil.aro.service.planing.OptimizationType;
+import com.altvil.aro.service.planning.NpvOptimizationPlan;
 
-public class FiberPlanConfigurationNpv extends FiberPlanConfiguration implements NpvFiberPlan {
-	final double discountRate;
-	final int years;
+public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfiguration implements NpvOptimizationPlan {
+	private final double		   coverage;
+	private double				   discountRate;
 
-	public FiberPlanConfigurationNpv(NpvFiberPlan fiberPlan) {
+	private final OptimizationType optimizationType;
+
+	private int					   years;
+
+	public OptimizationPlanConfigurationNpv(NpvOptimizationPlan fiberPlan) {
 		super(fiberPlan);
-		this.discountRate = fiberPlan.getDiscountRate();
-		this.years = fiberPlan.getYears();
+
+		this.optimizationType = fiberPlan.getOptimizationType();
+		this.coverage = fiberPlan.getCoverage();
 	}
 
 	@Override
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), g, s);
+		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), g,
+				s);
 	}
-	
+
+	public double getCoverage() {
+		return coverage;
+	}
+
 	public double getDiscountRate() {
 		return discountRate;
 	}
+
+	public OptimizationType getOptimizationType() {
+		return optimizationType;
+	}
+
 	@Override
 	public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
-		return (e) ->
-		{
+		return (e) -> {
 			GeoSegment value = e.getValue();
-			
+
 			if (value == null) {
 				return false;
 			}
 			Collection<Long> selectedRoadLocationIds = networkData.getSelectedRoadLocationIds();
-			
-			for(GraphEdgeAssignment geoSegmentAssignments: value.getGeoSegmentAssignments()) {
+
+			for (GraphEdgeAssignment geoSegmentAssignments : value.getGeoSegmentAssignments()) {
 				Object ae = geoSegmentAssignments.getAroEntity();
 				if (ae instanceof LocationEntity) {
 					LocationEntity le = (LocationEntity) ae;
-					
+
 					if (selectedRoadLocationIds.contains(le.getObjectId())) {
 						return true;
 					}
 				}
-				
+
 			}
-			
+
 			return false;
 		};
 	}
@@ -72,4 +87,11 @@ public class FiberPlanConfigurationNpv extends FiberPlanConfiguration implements
 		return false;
 	}
 
+	public void setDiscountRate(double discountRate) {
+		this.discountRate = discountRate;
+	}
+
+	public void setYears(int years) {
+		this.years = years;
+	}
 }

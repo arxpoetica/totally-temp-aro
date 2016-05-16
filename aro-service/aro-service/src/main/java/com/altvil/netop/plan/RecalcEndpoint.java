@@ -24,9 +24,9 @@ import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
 import com.altvil.aro.service.planning.FiberPlan;
-import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.fiber.FiberPlanConfigurationBuilder;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
@@ -53,7 +53,7 @@ public class RecalcEndpoint {
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlan request) throws NoSuchStrategy {
 		final FiberPlanConfigurationBuilder strategy = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm());
-		FiberPlanConfiguration<? extends FiberPlan> fiberPlan = strategy.build(request);
+		FiberPlanConfiguration fiberPlan = strategy.build(request);
 		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
 		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, fiberPlan, fiberNetworkConstraints);
 
@@ -69,7 +69,7 @@ public class RecalcEndpoint {
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);
 		// TODO Why are we storing WireCenter PLAN Ids in a property that expects WireCenter Ids????
-		mpr.setWireCenterids(mpc.getWireCenterPlans().stream().map((p) ->{return p.getFiberPlan().getPlanId();}).collect(Collectors.toList()));
+		mpr.setWireCenterids(mpc.getWireCenterPlans().stream().map((p) ->{return p.getPlanId();}).collect(Collectors.toList()));
 
 		return mpr;
 	}

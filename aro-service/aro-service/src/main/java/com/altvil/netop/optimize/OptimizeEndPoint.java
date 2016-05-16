@@ -26,11 +26,9 @@ import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
-import com.altvil.aro.service.planning.NpvOptimizationPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
-import com.altvil.aro.service.planning.optimization.impl.AbstractOptimizationPlan;
-import com.altvil.aro.service.planning.optimization.OptimizationPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfigurationBuilder;
+import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
 import com.altvil.netop.plan.MasterPlanJobResponse;
@@ -63,7 +61,7 @@ public class OptimizeEndPoint {
 
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
 	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlan request) throws NoSuchStrategy {
-		OptimizationPlanConfiguration<OptimizationPlan> fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
+		OptimizationPlanConfiguration fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
 		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
 
 		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(requestor, fiberPlan, fiberNetworkConstraints);
@@ -99,7 +97,7 @@ public class OptimizeEndPoint {
 
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(Principal requestor, @RequestBody OptimizationPlan request) throws NoSuchStrategy {
-		OptimizationPlanConfiguration<OptimizationPlan> fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
+		OptimizationPlanConfiguration fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
 		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
 		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, fiberPlan, fiberNetworkConstraints);
 
@@ -108,7 +106,7 @@ public class OptimizeEndPoint {
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);
 		// TODO Check this.  Why are plan Ids being assigned to something that appears to expect wirecenter Ids?
-		mpr.setWireCenterids(mpc.getWireCenterPlans().stream().mapToLong(p -> {return p.getFiberPlan().getPlanId();}).boxed().collect(Collectors.toList()));
+		mpr.setWireCenterids(mpc.getWireCenterPlans().stream().mapToLong(p -> {return p.getPlanId();}).boxed().collect(Collectors.toList()));
 
 		return mpr;
 	}

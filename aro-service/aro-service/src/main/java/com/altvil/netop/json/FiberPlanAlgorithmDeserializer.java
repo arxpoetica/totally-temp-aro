@@ -1,7 +1,7 @@
 package com.altvil.netop.json;
 
 import java.io.IOException;
-import com.altvil.aro.service.graph.model.NetworkConfiguration;
+
 import com.altvil.enumerations.FiberPlanAlgorithm;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;

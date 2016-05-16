@@ -3,11 +3,7 @@ package com.altvil.netop.json;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.altvil.aro.service.planning.NpvFiberPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
-import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
-import com.altvil.aro.service.planning.fiber.impl.CapexFiberPlanImpl;
-import com.altvil.aro.service.planning.fiber.impl.NpvFiberPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.CapexOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.NpvOptimizationPlanImpl;
 import com.altvil.enumerations.FiberPlanAlgorithm;

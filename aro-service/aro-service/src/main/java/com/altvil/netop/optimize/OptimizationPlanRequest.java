@@ -4,7 +4,7 @@ import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planing.OptimizationInputs;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.altvil.aro.service.planning.optimization.impl.AbstractOptimizationPlan;
 
 /**
  * 

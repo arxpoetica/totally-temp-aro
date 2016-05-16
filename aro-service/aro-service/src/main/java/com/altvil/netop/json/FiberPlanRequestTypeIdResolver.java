@@ -3,7 +3,6 @@ package com.altvil.netop.json;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.altvil.aro.service.planning.NpvFiberPlan;
 import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
 import com.altvil.aro.service.planning.fiber.impl.CapexFiberPlanImpl;
 import com.altvil.aro.service.planning.fiber.impl.NpvFiberPlanImpl;
@@ -15,7 +14,9 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-// TODO Evaluate whether a DeserializationContext can be created that ties into Spring's context such that the strategy service can be used to look up enum-specific factories that return the appropriate request type for the context.
+// TODO Evaluate whether a DeserializationContext can be created that ties into Spring's context 
+// such that the strategy service can be used to look up enum-specific factories that return the 
+// appropriate request type for the context.
 public class FiberPlanRequestTypeIdResolver implements TypeIdResolver {
 	private JavaType baseType;
 	private JavaType defaultType;

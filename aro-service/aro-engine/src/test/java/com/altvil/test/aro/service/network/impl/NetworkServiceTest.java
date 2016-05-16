@@ -23,7 +23,7 @@ import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
-import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
+import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.enumerations.FiberPlanAlgorithm;
 
 
@@ -61,21 +61,16 @@ public class NetworkServiceTest {
 		}
 	}
 	
+	public AbstractFiberPlan mockFiberPlan(FiberPlanAlgorithm algorithm, int year) {
+		final MockFiberPlan mockFiberPlan = new MockFiberPlan(algorithm);
+		mockFiberPlan.setPlanId(3);
+		mockFiberPlan.setYear(year);
+		return mockFiberPlan;
+	}
+	
+	
 	private FiberPlanConfiguration mockFiberPlanStrategy(final long planId, final FiberPlanAlgorithm algorithm, final int year, final boolean filteringRoadLocationsBySelection) {
-		return new FiberPlanConfiguration() {
-			@Override
-			public AbstractFiberPlan getFiberPlan() {
-				final MockFiberPlan mockFiberPlan = new MockFiberPlan(algorithm);
-				mockFiberPlan.setPlanId(3);
-				mockFiberPlan.setYear(year);
-				return mockFiberPlan;
-			}
-
-//			@Override
-//			public List<Long> getSelectedRoadLocationIds$() {
-//				// TODO Auto-generated method stub
-//				return null;
-//			}
+		return new FiberPlanConfiguration(mockFiberPlan(algorithm, year)) {
 
 			@Override
 			public boolean isFilteringRoadLocationDemandsBySelection() {
@@ -87,6 +82,7 @@ public class NetworkServiceTest {
 				return filteringRoadLocationsBySelection;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public FiberPlanConfiguration dependentPlan(long dependentId) {
 				// TODO Auto-generated method stub

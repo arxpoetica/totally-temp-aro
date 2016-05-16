@@ -24,12 +24,8 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.model.NetworkStrategy;
 import com.altvil.aro.service.network.NetworkService;
-import com.altvil.aro.service.network.NetworkStrategyFactory;
-import com.altvil.aro.service.network.NetworkStrategyRequest;
-import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
-import com.altvil.aro.service.strategy.NoSuchStrategy;
+import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.strategy.StrategyService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
@@ -83,7 +79,7 @@ public class NetworkServiceImpl implements NetworkService {
 	@Override
 	public NetworkData getNetworkData(FiberPlanConfiguration fiberPlanStrategy) {
 
-		final long planId = fiberPlanStrategy.getFiberPlan().getPlanId();
+		final long planId = fiberPlanStrategy.getPlanId();
 		NetworkData networkData = new NetworkData();
 
 		//determine wirecenter ID
@@ -160,7 +156,7 @@ public class NetworkServiceImpl implements NetworkService {
 	private Map<Long, LocationDemand> queryLocationDemand(FiberPlanConfiguration fiberPlanStrategy) {
 
 		Map<Long, LocationDemand> map = new HashMap<>();
-		planRepository.queryAllFiberDemand(fiberPlanStrategy.getFiberPlan().getPlanId(), fiberPlanStrategy.getFiberPlan().getYear())
+		planRepository.queryAllFiberDemand(fiberPlanStrategy.getPlanId(), fiberPlanStrategy.getYear())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
@@ -187,7 +183,7 @@ public class NetworkServiceImpl implements NetworkService {
 	{
 		Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
 		planRepository
-		.queryAllLocationsByPlanId(fiberPlanStrategy.getFiberPlan().getPlanId())
+		.queryAllLocationsByPlanId(fiberPlanStrategy.getPlanId())
 		.stream()
 		.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 		.forEach(result -> {
@@ -279,7 +275,7 @@ public class NetworkServiceImpl implements NetworkService {
 			FiberPlanConfiguration fiberPlanStrategy) {
 
 		return toValidAssignments(planRepository
-				.querySourceLocations(fiberPlanStrategy.getFiberPlan().getPlanId())
+				.querySourceLocations(fiberPlanStrategy.getPlanId())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {
@@ -338,7 +334,7 @@ public class NetworkServiceImpl implements NetworkService {
 
 	private Collection<RoadEdge> queryRoadEdges(FiberPlanConfiguration fiberPlanStrategy) {
 		return planRepository
-				.queryRoadEdgesbyPlanId(fiberPlanStrategy.getFiberPlan().getPlanId())
+				.queryRoadEdgesbyPlanId(fiberPlanStrategy.getPlanId())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {
