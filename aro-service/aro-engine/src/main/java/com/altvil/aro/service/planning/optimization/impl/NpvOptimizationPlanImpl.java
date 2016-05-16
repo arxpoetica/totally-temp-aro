@@ -1,12 +1,13 @@
-package com.altvil.aro.service.planning.fiber;
+package com.altvil.aro.service.planning.optimization.impl;
 
+import com.altvil.aro.service.planning.NpvOptimizationPlan;
 import com.altvil.enumerations.FiberPlanAlgorithm;
 
-public class NpvFiberPlan extends AbstractFiberPlan {
+public class NpvOptimizationPlanImpl extends AbstractOptimizationPlan implements NpvOptimizationPlan{
 	private double discountRate = Double.NaN;
 	private int periods = -1;
 
-	protected NpvFiberPlan() {
+	protected NpvOptimizationPlanImpl() {
 		super(FiberPlanAlgorithm.NPV);
 	}
 
@@ -14,7 +15,7 @@ public class NpvFiberPlan extends AbstractFiberPlan {
 		return discountRate;
 	}
 
-	public int getPeriods() {
+	public int getYears() {
 		return periods;
 	}
 

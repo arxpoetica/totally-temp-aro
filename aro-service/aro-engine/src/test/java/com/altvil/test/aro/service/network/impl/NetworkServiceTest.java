@@ -22,7 +22,7 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.network.NetworkService;
-import com.altvil.aro.service.planning.fiber.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
 import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
 import com.altvil.enumerations.FiberPlanAlgorithm;
 
@@ -44,7 +44,7 @@ public class NetworkServiceTest {
 
 	@Test
 	public void testGetNetworkData() {
-		FiberPlanConfiguration fps = mockFiberPlanStrategy(3, FiberPlanAlgorithm.SCALAR, 2016, true);
+		FiberPlanConfiguration fps = mockFiberPlanStrategy(3, FiberPlanAlgorithm.CAPEX, 2016, true);
 		NetworkData nd = nsi.getNetworkData(fps);
 		assertNotNull(nd);
 		NetworkData nd2 = nsi.getNetworkData(fps);
@@ -108,8 +108,8 @@ public class NetworkServiceTest {
 
 	@Test
 	public void testSelectedVersusAllAssignments() {
-		FiberPlanConfiguration fpsSelected = mockFiberPlanStrategy(3, FiberPlanAlgorithm.SCALAR, 2016, true);
-		FiberPlanConfiguration fpsAll = mockFiberPlanStrategy(3, FiberPlanAlgorithm.SCALAR, 2016, false);
+		FiberPlanConfiguration fpsSelected = mockFiberPlanStrategy(3, FiberPlanAlgorithm.CAPEX, 2016, true);
+		FiberPlanConfiguration fpsAll = mockFiberPlanStrategy(3, FiberPlanAlgorithm.CAPEX, 2016, false);
 		
 		NetworkData ndSelected = nsi.getNetworkData(fpsSelected);
 		NetworkData ndAll = nsi.getNetworkData(fpsAll);

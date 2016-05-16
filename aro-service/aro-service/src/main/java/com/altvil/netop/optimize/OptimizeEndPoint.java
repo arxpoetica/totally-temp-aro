@@ -26,7 +26,9 @@ import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
-import com.altvil.aro.service.planning.optimization.AbstractOptimizationPlan;
+import com.altvil.aro.service.planning.NpvOptimizationPlan;
+import com.altvil.aro.service.planning.OptimizationPlan;
+import com.altvil.aro.service.planning.optimization.impl.AbstractOptimizationPlan;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfigurationBuilder;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
@@ -52,7 +54,7 @@ public class OptimizeEndPoint {
 	private NetworkPlanningService networkPlanningService;
 
 	@RequestMapping(value = "/optimize/wirecenter", method = RequestMethod.POST)
-	public @ResponseBody WirecenterUpdate postRecalcWirecenterPlan(Principal requestor, @RequestBody AbstractOptimizationPlan request) throws InterruptedException, ExecutionException, NoSuchStrategy {
+	public @ResponseBody WirecenterUpdate postRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlan request) throws InterruptedException, ExecutionException, NoSuchStrategy {
 		// Start async task
 		com.altvil.aro.service.job.Job<WirecenterNetworkPlan> job = beginRecalcWirecenterPlan(requestor, request);
 		// Get task result
@@ -60,8 +62,8 @@ public class OptimizeEndPoint {
 	}
 
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
-	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(Principal requestor, @RequestBody AbstractOptimizationPlan request) throws NoSuchStrategy {
-		OptimizationPlanConfiguration fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
+	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlan request) throws NoSuchStrategy {
+		OptimizationPlanConfiguration<OptimizationPlan> fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
 		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
 
 		Builder<WirecenterNetworkPlan> builder = networkPlanningService.optimizeWirecenter(requestor, fiberPlan, fiberNetworkConstraints);
@@ -85,7 +87,7 @@ public class OptimizeEndPoint {
 	}
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody AbstractOptimizationPlan request) throws InterruptedException, ExecutionException, NoSuchStrategy {
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody OptimizationPlan request) throws InterruptedException, ExecutionException, NoSuchStrategy {
 		// Start the async job
 		MasterPlanJobResponse masterPlanResponse = beginRecalcMasterPlan(requestor, request);
 		// Get job results
@@ -96,8 +98,8 @@ public class OptimizeEndPoint {
 	private StrategyService strategyService;
 
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(Principal requestor, @RequestBody AbstractOptimizationPlan request) throws NoSuchStrategy {
-		OptimizationPlanConfiguration fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
+	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(Principal requestor, @RequestBody OptimizationPlan request) throws NoSuchStrategy {
+		OptimizationPlanConfiguration<OptimizationPlan> fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
 		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
 		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, fiberPlan, fiberNetworkConstraints);
 

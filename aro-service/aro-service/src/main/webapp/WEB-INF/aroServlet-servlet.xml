@@ -74,7 +74,7 @@
 	<bean id="jsonMessageConverter"
 		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
 		<property name="objectMapper">
-			<bean class="com.altvil.aro.persistence.HibernateAwareObjectMapper" />
+			<bean class="com.altvil.netop.json.AroServiceObjectMapper" />
 		</property>
 	</bean>
 

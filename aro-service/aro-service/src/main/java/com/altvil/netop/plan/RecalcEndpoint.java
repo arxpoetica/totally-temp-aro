@@ -23,8 +23,9 @@ import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.planning.fiber.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
+import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.fiber.FiberPlanConfigurationBuilder;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
@@ -50,8 +51,9 @@ public class RecalcEndpoint {
 	private StrategyService strategyService;
 
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody AbstractFiberPlan request) throws NoSuchStrategy {
-		FiberPlanConfiguration fiberPlan = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlan request) throws NoSuchStrategy {
+		final FiberPlanConfigurationBuilder strategy = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm());
+		FiberPlanConfiguration<? extends FiberPlan> fiberPlan = strategy.build(request);
 		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
 		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, fiberPlan, fiberNetworkConstraints);
 

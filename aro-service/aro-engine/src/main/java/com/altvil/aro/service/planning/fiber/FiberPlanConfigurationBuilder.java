@@ -1,5 +1,7 @@
 package com.altvil.aro.service.planning.fiber;
 
-public interface FiberPlanConfigurationBuilder {
-	FiberPlanConfiguration build(AbstractFiberPlan fiberPlan);
+import com.altvil.aro.service.planning.FiberPlan;
+
+public interface FiberPlanConfigurationBuilder<FP extends FiberPlan> {
+	  FiberPlanConfiguration<FP> build(FP fiberPlan );
 }

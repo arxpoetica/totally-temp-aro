@@ -3,9 +3,10 @@ package com.altvil.aro.service.planning.optimization.strategies;
 import com.altvil.annotation.FiberPlanDefaultStrategy;
 import com.altvil.aro.service.planing.OptimizationInputs;
 import com.altvil.aro.service.planing.OptimizationType;
-import com.altvil.aro.service.planning.optimization.AbstractOptimizationPlan;
+import com.altvil.aro.service.planning.optimization.impl.AbstractOptimizationPlan;
 import com.altvil.aro.service.planning.optimization.OptimizationNetworkConstraintsBuilder;
 
+@Deprecated
 @FiberPlanDefaultStrategy(type=OptimizationNetworkConstraintsBuilder.class)
 public class OptimizationInputsDefaultBuilder implements OptimizationNetworkConstraintsBuilder {
 

@@ -11,11 +11,12 @@ import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.planning.fiber.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
+import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
 
-public class FiberPlanDefaultConfiguration extends AbstractFiberPlanConfiguration implements FiberPlanConfiguration {
-		public FiberPlanDefaultConfiguration(AbstractFiberPlan fiberPlan) {
+public class FiberPlanDefaultConfiguration<FP extends FiberPlan> extends AbstractFiberPlanConfiguration<FP> implements FiberPlanConfiguration<FP> {
+		public FiberPlanDefaultConfiguration(FP fiberPlan) {
 			super(fiberPlan);
 		}
 

@@ -50,13 +50,15 @@ import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.ScoringStrategyFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
+import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
+import com.altvil.aro.service.planning.optimization.impl.AbstractOptimizationPlan;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfiguration;
 import com.altvil.utils.StreamUtil;
 
 @Service
 public class NetworkPlanningServiceImpl implements NetworkPlanningService {
-
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkPlanningServiceImpl.class.getName());
 
@@ -94,7 +96,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
-	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal username, OptimizationPlanConfiguration optimizationPlanStrategy, FiberNetworkConstraints constraints) {
+	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal username, OptimizationPlanConfiguration<OptimizationPlan> optimizationPlanStrategy, FiberNetworkConstraints constraints) {
 		return new JobService.Builder<WirecenterNetworkPlan>(username).setCallable(createOptimzedCallable(optimizationPlanStrategy, constraints)).setExecutorService(executorService);
 	}
 
@@ -105,20 +107,21 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		fiberRouteRepository.save(plan.getFiberRoutes());
 	}
 
-	public MasterPlanCalculation optimizeMasterFiber(OptimizationPlanConfiguration optimizationPlanStrategy, FiberNetworkConstraints constraints) {
+	@Override
+	public MasterPlanCalculation optimizeMasterFiber(OptimizationPlanConfiguration<OptimizationPlan> optimizationPlanStrategy, FiberNetworkConstraints constraints) {
 
 		networkPlanRepository.deleteWireCenterPlans(optimizationPlanStrategy.getFiberPlan().getPlanId());
 
 		List<Long> ids = StreamUtil
 				.map(networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getFiberPlan().getPlanId()), Number::longValue);
-		Function<Number, OptimizationPlanConfiguration> transform = new Function<Number, OptimizationPlanConfiguration>() {
+		Function<Number, OptimizationPlanConfiguration<OptimizationPlan>> transform = new Function<Number, OptimizationPlanConfiguration<OptimizationPlan>>() {
 			@Override
-			public OptimizationPlanConfiguration apply(Number dependentId) {
+			public OptimizationPlanConfiguration<OptimizationPlan> apply(Number dependentId) {
 				return optimizationPlanStrategy.dependentPlan(dependentId.longValue());
 			}
 		};
 
-		List<OptimizationPlanConfiguration> plans = StreamUtil
+		List<OptimizationPlanConfiguration<OptimizationPlan>> plans = StreamUtil
 				.map(networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getFiberPlan().getPlanId()),transform
 				);
 
@@ -154,18 +157,18 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
-	public MasterPlanBuilder planMasterFiber(Principal username, final FiberPlanConfiguration fiberPlanStrategy, FiberNetworkConstraints constraints) {
+	public MasterPlanBuilder planMasterFiber(Principal username, final FiberPlanConfiguration<? extends AbstractFiberPlan> fiberPlanStrategy, FiberNetworkConstraints constraints) {
 
 		networkPlanRepository.deleteWireCenterPlans(fiberPlanStrategy.getFiberPlan().getPlanId());
 		
-		Function<Number, FiberPlanConfiguration> transform = new Function<Number, FiberPlanConfiguration>(){
+		Function<Number, FiberPlanConfiguration<? extends AbstractFiberPlan>> transform = new Function<Number, FiberPlanConfiguration<? extends AbstractFiberPlan>>(){
 			@Override
-			public FiberPlanConfiguration apply(Number dependentId) {
+			public FiberPlanConfiguration<? extends AbstractFiberPlan> apply(Number dependentId) {
 				return fiberPlanStrategy.dependentPlan(dependentId.longValue());
 			}
 			};
 
-		List<FiberPlanConfiguration> plans = StreamUtil.map(
+		List<FiberPlanConfiguration<? extends AbstractFiberPlan>> plans = StreamUtil.map(
 				networkPlanRepository.computeWirecenterUpdates(fiberPlanStrategy.getFiberPlan().getPlanId()),transform
 				);
 		

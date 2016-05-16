@@ -1,7 +1,12 @@
 package com.altvil.aro.service.planning;
 
-@Deprecated
+import com.altvil.enumerations.FiberPlanAlgorithm;
+
 public interface FiberPlan {
 	long getPlanId();
+
+	int getYear();
+
+	FiberPlanAlgorithm getAlgorithm();
 
 }

@@ -4,7 +4,6 @@ import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planing.OptimizationInputs;
-import com.altvil.netop.json.NetworkAlgorithmDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
@@ -59,7 +58,6 @@ public class OptimizationPlanRequest {
 		return algorithm;
 	}
 
-	@JsonDeserialize(using=NetworkAlgorithmDeserializer.class)
 	public void setAlgorithm(NetworkConfiguration.Algorithm algorithm) {
 		this.algorithm = algorithm;
 	}

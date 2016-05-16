@@ -1,8 +1,8 @@
 package com.altvil.aro.service.planning;
 
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
-import com.altvil.aro.service.planning.fiber.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
 
 public interface FiberNetworkConstraintsBuilder {
-		FiberNetworkConstraints build(AbstractFiberPlan fiberPlan);
+		FiberNetworkConstraints build(FiberPlan fiberPlan);
 }

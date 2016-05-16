@@ -1,16 +1,9 @@
-package com.altvil.aro.service.planning.fiber;
+package com.altvil.aro.service.planning.fiber.impl;
 
+import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.enumerations.FiberPlanAlgorithm;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({
-	@JsonSubTypes.Type(value = NpvFiberPlan.class, name="NPV"),
-	@JsonSubTypes.Type(value = ScalarFiberPlan.class, name="CAPEX"),
-	@JsonSubTypes.Type(value = ScalarFiberPlan.class, name="undefined")
-})
-public abstract class AbstractFiberPlan implements Cloneable {
+public abstract class AbstractFiberPlan implements Cloneable, FiberPlan {
 	private final FiberPlanAlgorithm algorithm;
 	private long						   planId;
 	private int year;
@@ -19,10 +12,12 @@ public abstract class AbstractFiberPlan implements Cloneable {
 		this.algorithm = algorithm;
 	}
 
+	@Override
 	public FiberPlanAlgorithm getAlgorithm() {
 		return algorithm;
 	}
 
+	@Override
 	public long getPlanId() {
 		return planId;
 	}
@@ -31,6 +26,7 @@ public abstract class AbstractFiberPlan implements Cloneable {
 		this.planId = planId;
 	}
 
+	@Override
 	public int getYear() {
 		return year;
 	}

@@ -1,6 +1,6 @@
 package com.altvil.netop.plan;
 
-import com.altvil.aro.service.planning.fiber.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
 
 public class FiberPlanResponse {
 
