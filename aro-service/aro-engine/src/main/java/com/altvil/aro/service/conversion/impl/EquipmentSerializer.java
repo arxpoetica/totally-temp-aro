@@ -6,13 +6,12 @@ import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.model.NetworkNodeTypeEnum;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
-import com.altvil.aro.service.network.PlanId;
 import com.vividsolutions.jts.geom.Point;
 
 public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 	
 	
-	public EquipmentSerializer(PlanId planId) {
+	public EquipmentSerializer(long planId) {
 		super(planId);
 	}
 

@@ -1,13 +1,18 @@
 package com.altvil.aro.service.optimize.spi;
 
-import com.altvil.aro.service.graph.model.NetworkConfiguration;
+import java.util.function.Predicate;
+
+import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.network.NetworkStrategyRequest;
+import com.altvil.aro.service.graph.node.GraphNode;
+import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 
 public interface NetworkModelBuilderFactory {
 
-	public NetworkModelBuilder create(NetworkData networkData, NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration,
+	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+			Predicate<AroEdge<GeoSegment>> selectedEdges, 
 			FiberNetworkConstraints fiberConstraints);
 
 }

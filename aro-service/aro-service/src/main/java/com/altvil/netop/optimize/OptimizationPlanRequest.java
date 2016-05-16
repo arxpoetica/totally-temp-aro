@@ -7,6 +7,12 @@ import com.altvil.aro.service.planing.OptimizationInputs;
 import com.altvil.netop.json.NetworkAlgorithmDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+/**
+ * 
+ * @author Kevin
+ * @see AbstractOptimizationPlan
+ */
+@Deprecated
 public class OptimizationPlanRequest {
 	private PlanId planId;
 	private FiberNetworkConstraints fiberNetworkConstraints;

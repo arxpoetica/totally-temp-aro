@@ -1,11 +1,14 @@
 package com.altvil.aro.service.plan;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
-import com.altvil.aro.service.graph.model.NetworkConfiguration;
+import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.graph.node.GraphNode;
+import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
-import com.altvil.aro.service.network.NetworkStrategyRequest;
 
 public interface PlanService {
 
@@ -19,7 +22,8 @@ public interface PlanService {
 	 * @throws PlanException
 	 */
 	public Optional<CompositeNetworkModel> computeNetworkModel(NetworkData networkData,
-			NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration configuration, FiberNetworkConstraints request) throws PlanException;
+			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+			Predicate<AroEdge<GeoSegment>> selectedEdges, FiberNetworkConstraints request) throws PlanException;
 
 	/**
 	 * @param request

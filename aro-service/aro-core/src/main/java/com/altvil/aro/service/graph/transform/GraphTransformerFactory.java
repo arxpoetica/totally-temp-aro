@@ -9,12 +9,9 @@ import org.jgrapht.WeightedGraph;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
-import com.altvil.aro.service.graph.alg.NpvClosestFirstIterator;
-import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
-import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -107,7 +104,4 @@ public interface GraphTransformerFactory {
 	
 	public NetworkBuilder createNetworkBuilder(
 			GraphModelBuilder<GeoSegment> builder);
-
-	@Deprecated
-	public <T> ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> createClosestFirstSurfaceBuilder(NetworkData data, NetworkConfiguration networkConfiguration);
 }

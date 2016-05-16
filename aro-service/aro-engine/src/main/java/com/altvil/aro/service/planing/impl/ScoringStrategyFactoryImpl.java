@@ -12,7 +12,7 @@ import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planing.ScoringStrategyFactory;
 
 @Service
-public class ScoringStrageyFactoryImpl implements ScoringStrategyFactory {
+public class ScoringStrategyFactoryImpl implements ScoringStrategyFactory {
 
 	private Map<OptimizationType, ScoringStrategy> map = new EnumMap<>(OptimizationType.class) ;
 	

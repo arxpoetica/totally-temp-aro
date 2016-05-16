@@ -1,5 +1,6 @@
 package com.altvil.aro.service.planing;
 
+@Deprecated
 public class OptimizationInputs {
 	
 	public static OptimizationInputs DEFAULT = new OptimizationInputs(OptimizationType.COVERAGE, 0.5) ;

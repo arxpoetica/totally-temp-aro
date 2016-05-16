@@ -27,7 +27,6 @@ import com.altvil.aro.service.graph.builder.RoadModelBuilder;
 import com.altvil.aro.service.graph.builder.impl.DefaultGraphBuilder;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
 import com.altvil.aro.service.graph.impl.DagBuilder;
-import com.altvil.aro.service.graph.model.NetworkConfiguration;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
@@ -113,23 +112,6 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 			Predicate<AroEdge<T>> marked) {
 		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(marked,
 				srcNode);
-	}
-
-	@Override
-	public <T> ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> createClosestFirstSurfaceBuilder(NetworkData data,
-			NetworkConfiguration configuration) {
-		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder;
-		switch (configuration.getRoutePlanningAlgorithm()) {
-		case WEIGHT_MINIMIZATION :
-			builder = (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<T>>(g, s);
-			break;
-		case NPV:
-			builder = (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<T>>(configuration.getDiscountRate(), configuration.getPeriods(), g, s);
-			break;
-		default:
-			throw new UnsupportedOperationException("" + configuration.getRoutePlanningAlgorithm() + " algorithm not yet supported.");
-		}
-		return builder;
 	}
 
 	@Override

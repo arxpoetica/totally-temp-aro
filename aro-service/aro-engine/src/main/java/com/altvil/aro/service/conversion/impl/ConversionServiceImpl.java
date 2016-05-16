@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.conversion.SerializationService;
-import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
@@ -13,7 +12,7 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 public class ConversionServiceImpl implements SerializationService {
 
 	@Override
-	public WirecenterNetworkPlan convert(PlanId planId,
+	public WirecenterNetworkPlan convert(long planId,
 			Optional<CompositeNetworkModel> model) {
 
 		WireCenterMods mods = new WireCenterMods(planId);

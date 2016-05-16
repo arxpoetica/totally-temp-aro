@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.altvil.netop.network.AbstractNetworkStrategyRequest;
 
+@Deprecated
 public class ScalarSetupRequest extends AbstractNetworkStrategyRequest {
 	@Override
 	public String getAlgorithm() {

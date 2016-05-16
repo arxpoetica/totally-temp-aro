@@ -4,15 +4,12 @@ import java.security.Principal;
 import java.util.Date;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.altvil.aro.service.job.impl.JobIdDeserializer;
-import com.altvil.aro.service.job.impl.JobIdSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * A job is an asynchronous computation that has a light-weight identifier that can easily be passed between the front-end and the service layer.

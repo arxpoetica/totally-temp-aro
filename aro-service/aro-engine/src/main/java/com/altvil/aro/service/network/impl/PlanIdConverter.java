@@ -6,6 +6,7 @@ import javax.persistence.Converter;
 import com.altvil.aro.service.network.PlanId;
 
 @Converter
+@Deprecated
 public class PlanIdConverter implements AttributeConverter<PlanId, Long> {
 	@Override
 	public Long convertToDatabaseColumn(PlanId attribute) {

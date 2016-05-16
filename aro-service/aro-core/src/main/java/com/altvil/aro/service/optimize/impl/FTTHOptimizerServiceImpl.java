@@ -1,19 +1,27 @@
 package com.altvil.aro.service.optimize.impl;
 
-import com.altvil.aro.service.graph.model.NetworkConfiguration;
+import java.util.function.Predicate;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.network.NetworkStrategyRequest;
+import com.altvil.aro.service.graph.node.GraphNode;
+import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkConstraint;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
-import com.altvil.aro.service.optimize.spi.*;
+import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
+import com.altvil.aro.service.optimize.spi.NetworkAnalysisFactory;
+import com.altvil.aro.service.optimize.spi.NetworkConstrainer;
+import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
+import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
+import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.google.inject.Inject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.function.Predicate;
 
 @Service
 public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
@@ -31,13 +39,15 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 	}
 
 	@Override
-	public NetworkPlanner createNetworkPlanner(NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
-		return DefaultNetworkPlannerImpl.create(createConstrainer(networkStrategyRequest, networkConfiguration, constraint, networkData, ctx, generatingNodeConstraint, scoringStrategy));
+	public NetworkPlanner createNetworkPlanner(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+			Predicate<AroEdge<GeoSegment>> selectedEdges, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
+		return DefaultNetworkPlannerImpl.create(createConstrainer(closestFirstSurfaceBuilder, selectedEdges, constraint, networkData, ctx, generatingNodeConstraint, scoringStrategy));
 	}
 
-	private NetworkConstrainer createConstrainer(NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
+	private NetworkConstrainer createConstrainer(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+			Predicate<AroEdge<GeoSegment>> selectedEdges, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
-				.create(networkData, networkStrategyRequest, networkConfiguration, ctx.getFiberNetworkConstraints());
+				.create(networkData, closestFirstSurfaceBuilder, selectedEdges, ctx.getFiberNetworkConstraints());
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder,
 						ctx, scoringStrategy);

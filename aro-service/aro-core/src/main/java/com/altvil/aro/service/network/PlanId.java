@@ -7,6 +7,7 @@ package com.altvil.aro.service.network;
  *
  */
 
+@Deprecated
 public class PlanId extends Number {
 	private static final long serialVersionUID = 1L;
 	private final long		  planId;

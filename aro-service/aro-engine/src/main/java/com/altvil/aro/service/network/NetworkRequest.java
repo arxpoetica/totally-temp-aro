@@ -1,11 +1,11 @@
 package com.altvil.aro.service.network;
 
-@Deprecated
 public class NetworkRequest {
 	@Deprecated
 	public enum LocationLoadingRequest { ALL, SELECTED } 
 	
-	public static NetworkRequest create(PlanId planId, LocationLoadingRequest loadingRequest) {
+	@Deprecated
+	public static NetworkRequest create(long planId, LocationLoadingRequest loadingRequest) {
 		NetworkRequest request = new NetworkRequest() ;
 		request.setPlanId(planId) ;
 		request.setLocationLoadingRequest(loadingRequest);
@@ -13,18 +13,19 @@ public class NetworkRequest {
 		return request ;
 	}
 	
-	public static NetworkRequest create(PlanId planId) {
+	@Deprecated
+	public static NetworkRequest create(long planId) {
 		return create(planId, LocationLoadingRequest.SELECTED) ;
 	}	
 	
 	private LocationLoadingRequest locationLoadingRequest ;
-	private PlanId planId ;
+	private long planId ;
 	private int year = 2015 ;
 
 	public NetworkRequest() {
 	}
 	
-	public PlanId getPlanId$() {
+	public long getPlanId() {
 		return planId;
 	}
 	
@@ -37,7 +38,7 @@ public class NetworkRequest {
 		this.locationLoadingRequest = locationLoadingRequest;
 	}
 
-	public void setPlanId(PlanId planId) {
+	public void setPlanId(long planId) {
 		this.planId = planId;
 	}
 

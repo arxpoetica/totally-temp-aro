@@ -13,5 +13,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 	@JsonSubTypes.Type(value = NpvSetupRequest.class, name="NPV"),
 	@JsonSubTypes.Type(value = ScalarSetupRequest.class, name="scalar")
 })
+@Deprecated
 public abstract class AbstractNetworkStrategyRequest implements NetworkStrategyRequest {
 }

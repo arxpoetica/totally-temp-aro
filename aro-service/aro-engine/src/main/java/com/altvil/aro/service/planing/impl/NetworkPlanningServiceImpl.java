@@ -9,6 +9,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -27,14 +29,13 @@ import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.MaterialType;
-import com.altvil.aro.service.graph.model.NetworkConfiguration;
+import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.graph.node.GraphNode;
+import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.job.JobService;
-import com.altvil.aro.service.network.NetworkRequest;
-import com.altvil.aro.service.network.NetworkRequest.LocationLoadingRequest;
 import com.altvil.aro.service.network.NetworkService;
-import com.altvil.aro.service.network.NetworkStrategyRequest;
-import com.altvil.aro.service.network.PlanId;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
@@ -47,9 +48,10 @@ import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanCalculation;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
-import com.altvil.aro.service.planing.OptimizationInputs;
 import com.altvil.aro.service.planing.ScoringStrategyFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.planning.fiber.FiberPlanConfiguration;
+import com.altvil.aro.service.planning.optimization.OptimizationPlanConfiguration;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -92,10 +94,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
-	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal username, PlanId planId, NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration,
-			OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) {
-		return new JobService.Builder<WirecenterNetworkPlan>(username).setCallable(createOptimzedCallable(planId, NetworkRequest.create(planId, NetworkRequest.LocationLoadingRequest.ALL),
-				networkStrategyRequest, networkConfiguration, optimizationInputs, constraints)).setExecutorService(executorService);
+	public JobService.Builder<WirecenterNetworkPlan> optimizeWirecenter(Principal username, OptimizationPlanConfiguration optimizationPlanStrategy, FiberNetworkConstraints constraints) {
+		return new JobService.Builder<WirecenterNetworkPlan>(username).setCallable(createOptimzedCallable(optimizationPlanStrategy, constraints)).setExecutorService(executorService);
 	}
 
 	@Override
@@ -105,24 +105,29 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		fiberRouteRepository.save(plan.getFiberRoutes());
 	}
 
-	public MasterPlanCalculation optimizeMasterFiber(PlanId planId,
-			NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration, OptimizationInputs optimizationInputs,
-			FiberNetworkConstraints constraints) {
+	public MasterPlanCalculation optimizeMasterFiber(OptimizationPlanConfiguration optimizationPlanStrategy, FiberNetworkConstraints constraints) {
 
-		networkPlanRepository.deleteWireCenterPlans(planId.longValue());
+		networkPlanRepository.deleteWireCenterPlans(optimizationPlanStrategy.getFiberPlan().getPlanId());
 
-		List<PlanId> ids = StreamUtil.map(
-				networkPlanRepository.computeWirecenterUpdates(planId.longValue()),
-				PlanId::of);
+		List<Long> ids = StreamUtil
+				.map(networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getFiberPlan().getPlanId()), Number::longValue);
+		Function<Number, OptimizationPlanConfiguration> transform = new Function<Number, OptimizationPlanConfiguration>() {
+			@Override
+			public OptimizationPlanConfiguration apply(Number dependentId) {
+				return optimizationPlanStrategy.dependentPlan(dependentId.longValue());
+			}
+		};
+
+		List<OptimizationPlanConfiguration> plans = StreamUtil
+				.map(networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getFiberPlan().getPlanId()),transform
+				);
 
 		Future<MasterPlanUpdate> f = executorService.submit(() -> {
 
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
-					.invokeAll(ids
+					.invokeAll(plans
 							.stream()
-							.map(id -> createOptimzedCallable(id, 
-									NetworkRequest.create(id), networkStrategyRequest, networkConfiguration,
-									optimizationInputs, constraints))
+							.map(plan -> createOptimzedCallable(plan, constraints))
 							.collect(Collectors.toList()));
 			return new MasterPlanUpdate(futures.stream().map(wf -> {
 				try {
@@ -136,7 +141,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		return new MasterPlanCalculation() {
 			@Override
-			public List<PlanId> getWireCenterPlans() {
+			public List<Long> getWireCenterPlans() {
 				return ids;
 			}
 
@@ -149,21 +154,27 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	@Override
-	public MasterPlanBuilder planMasterFiber(Principal username, PlanId planId, NetworkStrategyRequest networkStrategyRequest,
-			NetworkConfiguration networkConfiguration, FiberNetworkConstraints constraints) {
+	public MasterPlanBuilder planMasterFiber(Principal username, final FiberPlanConfiguration fiberPlanStrategy, FiberNetworkConstraints constraints) {
 
-		networkPlanRepository.deleteWireCenterPlans(planId.longValue());
+		networkPlanRepository.deleteWireCenterPlans(fiberPlanStrategy.getFiberPlan().getPlanId());
+		
+		Function<Number, FiberPlanConfiguration> transform = new Function<Number, FiberPlanConfiguration>(){
+			@Override
+			public FiberPlanConfiguration apply(Number dependentId) {
+				return fiberPlanStrategy.dependentPlan(dependentId.longValue());
+			}
+			};
 
-		List<PlanId> ids = StreamUtil.map(
-				networkPlanRepository.computeWirecenterUpdates(planId.longValue()),
-				PlanId::of);
+		List<FiberPlanConfiguration> plans = StreamUtil.map(
+				networkPlanRepository.computeWirecenterUpdates(fiberPlanStrategy.getFiberPlan().getPlanId()),transform
+				);
 		
 		MasterPlanBuilder builder = new MasterPlanBuilder(username);
-		builder.setWireCenterPlans(ids);
+		builder.setWireCenterPlans(plans);
 		builder.setCallable(() -> {
 			List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor
-					.invokeAll(ids.stream()
-							.map(id -> createPlanningCallable(id, networkStrategyRequest, networkConfiguration, constraints))
+					.invokeAll(plans.stream()
+							.map(plan -> createPlanningCallable(plan, constraints))
 							.collect(Collectors.toList()));
 			return new MasterPlanUpdate(futures.stream().map(wf -> {
 				try {
@@ -178,35 +189,28 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		return builder;
 	}
-
+	
 	@Override
-	public Future<WirecenterNetworkPlan> planFiber(PlanId planId, NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration networkConfiguration,
+	public Future<WirecenterNetworkPlan> planFiber(FiberPlanConfiguration fiberPlanStrategy,
 			FiberNetworkConstraints constraints) {
-		return executorService.submit(createPlanningCallable(planId, networkStrategyRequest, networkConfiguration,
+		return executorService.submit(createPlanningCallable(fiberPlanStrategy, 
 				constraints));
 	}
 
-	private Callable<WirecenterNetworkPlan> createPlanningCallable(PlanId planId, NetworkStrategyRequest networkStrategyRequest, NetworkConfiguration configuration,
-			FiberNetworkConstraints constraints) {
+	private Callable<WirecenterNetworkPlan> createPlanningCallable(FiberPlanConfiguration fiberPlanStrategy, FiberNetworkConstraints constraints) {
 
 		return () -> {
-			final NetworkRequest.LocationLoadingRequest locationLoading;
-			switch (configuration.getRoutePlanningAlgorithm()) {
-			case NPV:
-				locationLoading = LocationLoadingRequest.ALL;
-				break;
-			default:
-				locationLoading = LocationLoadingRequest.SELECTED;
-			}
-
-			final NetworkRequest networkRequest = NetworkRequest.create(planId, locationLoading);
 			NetworkData networkData = networkService
-					.getNetworkData(planId, networkRequest);
+					.getNetworkData(fiberPlanStrategy);
+			
+			
+			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = fiberPlanStrategy.getClosestFirstSurfaceBuilder();
+			Predicate<AroEdge<GeoSegment>> selectedEdges = fiberPlanStrategy.getSelectedEdges(networkData);
 
 			Optional<CompositeNetworkModel> model = planService
-					.computeNetworkModel(networkData, networkStrategyRequest, configuration, constraints);
+					.computeNetworkModel(networkData, closestFirstSurfaceBuilder, selectedEdges, constraints);
 			if (model.isPresent()) {
-				WirecenterNetworkPlan plan = conversionService.convert(planId,
+				WirecenterNetworkPlan plan = conversionService.convert(fiberPlanStrategy.getFiberPlan().getPlanId(),
 						model);
 				save(plan);
 				return plan;
@@ -218,18 +222,13 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 	
 
-	private Callable<WirecenterNetworkPlan> createOptimzedCallable(PlanId planId, 
-			NetworkRequest networkRequest,
-		
-			NetworkStrategyRequest networkStrategyRequest,
-			NetworkConfiguration networkConfiguration,
-			OptimizationInputs optimizationInputs,
+	private Callable<WirecenterNetworkPlan> createOptimzedCallable(OptimizationPlanConfiguration optimizationPlanStrategy,
 			FiberNetworkConstraints constraints) {
 
 		return () -> {
 
 			NetworkData networkData = networkService
-					.getNetworkData(planId, networkRequest);
+					.getNetworkData(optimizationPlanStrategy);
 
 			OptimizerContext ctx = new OptimizerContext(
 					new DefaultPriceModel(),
@@ -244,11 +243,13 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			
 			log.info("Target total = " + totalDemand) ;
 			
+			
 
-			NetworkPlanner planner = optimizerService.createNetworkPlanner(networkStrategyRequest,networkConfiguration, (
+			NetworkPlanner planner = optimizerService.createNetworkPlanner(optimizationPlanStrategy.getClosestFirstSurfaceBuilder(),
+					optimizationPlanStrategy.getSelectedEdges(networkData), (
 					networkAnalysis) -> false, networkData, ctx, (
 					GeneratingNode) -> true, scoringStrategyFactory
-					.getScoringStrategy(optimizationInputs
+					.getScoringStrategy(optimizationPlanStrategy
 							.getOptimizationType()));
 
 			Collection<OptimizedNetwork> optimizedPlans = planner
@@ -267,7 +268,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 						System.out.println(ratio);
 
 						boolean predicate = !p.isEmpty()
-								&& (ratio >= optimizationInputs
+								&& (ratio >= optimizationPlanStrategy
 										.getCoverage());
 						return predicate;
 					}).collect(Collectors.toList());
@@ -277,7 +278,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 			if (model.isPresent()) {
 				WirecenterNetworkPlan plan = conversionService.convert(
-						planId,  model.get()
+						optimizationPlanStrategy.getFiberPlan().getPlanId(),  model.get()
 								.getNetworkPlan());
 				save(plan);
 				return plan;

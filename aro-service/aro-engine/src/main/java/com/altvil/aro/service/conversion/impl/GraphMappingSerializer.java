@@ -15,16 +15,15 @@ import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.SplicePoint;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
-import com.altvil.aro.service.network.PlanId;
 
 public abstract class GraphMappingSerializer<T> {
 
-	protected PlanId planId ;
+	protected long planId ;
 	
 	private Map<GraphEdgeAssignment, T> resolvedMap = new HashMap<>();
 	private Map<Class<? extends AroEntity>, SerializeStrategy<T>> strategyMap = new HashMap<>();
 	
-	public GraphMappingSerializer(PlanId planId) {
+	public GraphMappingSerializer(long planId) {
 		super();
 		this.planId = planId ;
 		init();

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.altvil.netop.network.AbstractNetworkStrategyRequest;
 
+@Deprecated
 public class NpvSetupRequest extends AbstractNetworkStrategyRequest {
 	private final Map<String, Object> properties = new HashMap<>(2);
 	
