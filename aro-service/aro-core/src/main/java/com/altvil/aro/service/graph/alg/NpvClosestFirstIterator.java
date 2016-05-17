@@ -122,6 +122,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		this.radius = radius;
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
+		ONCE = true;
 	}
 
 	/**
@@ -146,11 +147,18 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		}
 
 		final double f = f(npv);
+		if (ONCE) {
+			System.err.println("|Source Vertex, Target Vertex, Edge Length, Path Cost, Path Revenue, Path Length, Path Locations, Path FDT, NPV, F");
+			ONCE = false;
+		}
 
-		System.err.println(base2terminal.getValue() + ": npv = " + npv + ": f = " + f);
+		System.err.println("|" + base2terminal.getTargetNode().getId() + "," + base2terminal.getSourceNode().getId() + "," + base2terminal.getWeight() + "," + terminalData.cost +
+				"," + terminalData.revenue + "," + terminalData.totalLength + "," + terminalData.locations + 
+				"," + terminalData.fdt + "," + npv + "," + f);
 
 		return f;
 	}
+	private static boolean ONCE = false;
 
 	private static class NpvData {
 		double	   cost		   = 0;
@@ -235,7 +243,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				// edge rather than at the location.
 			});
 
-			System.err.println(segment + ": " + terminalData);
+//			System.err.println(segment + ": " + terminalData);
 		}
 
 		return terminalData;

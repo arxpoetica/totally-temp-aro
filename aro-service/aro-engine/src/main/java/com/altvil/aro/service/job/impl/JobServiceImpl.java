@@ -69,37 +69,40 @@ public class JobServiceImpl implements JobService {
 				}
 
 				private void announceCompletion() {
-					try {
-						String msg;
-						if (messageConverter.canWrite(getClass(), MediaType.APPLICATION_JSON)) {
-							HttpOutputMessage outputMessage = new HttpOutputMessage() {
-								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					if (creator != null) {
+						try {
+							String msg;
+							if (messageConverter.canWrite(getClass(), MediaType.APPLICATION_JSON)) {
+								HttpOutputMessage outputMessage = new HttpOutputMessage() {
+									ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-								@Override
-								public OutputStream getBody() throws IOException {
-									return baos;
-								}
+									@Override
+									public OutputStream getBody() throws IOException {
+										return baos;
+									}
 
-								@Override
-								public HttpHeaders getHeaders() {
-									return new HttpHeaders();
-								}
-							
-								public String toString() {
-									return baos.toString();
-								}
-							};
-							messageConverter.write(JobAdapter.this, MediaType.APPLICATION_JSON, outputMessage);
-							msg = outputMessage.toString();
-						} else {
-							msg = JobAdapter.this.toString();
+									@Override
+									public HttpHeaders getHeaders() {
+										return new HttpHeaders();
+									}
+
+									public String toString() {
+										return baos.toString();
+									}
+								};
+								messageConverter.write(JobAdapter.this, MediaType.APPLICATION_JSON, outputMessage);
+								msg = outputMessage.toString();
+							} else {
+								msg = JobAdapter.this.toString();
+							}
+
+							messagingTemplate.convertAndSendToUser(creator.getName(), "/topic/jobs", msg);
+						} catch (HttpMessageNotWritableException | MessagingException | IOException e) {
+
 						}
-						
-						messagingTemplate.convertAndSendToUser(creator.getName(), "/topic/jobs", msg);
-					} catch (HttpMessageNotWritableException | MessagingException | IOException e) {
-						
 					}
-				}};
+				}
+			};
 			scheduledTime = new Date();
 			startedTime = null;
 			completedTime = null;

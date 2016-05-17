@@ -11,22 +11,17 @@ import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planning.NpvOptimizationPlan;
 
 public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfiguration implements NpvOptimizationPlan {
-	private final double		   coverage;
 	private double				   discountRate;
-
-	private final OptimizationType optimizationType;
 
 	private int					   years;
 
 	public OptimizationPlanConfigurationNpv(NpvOptimizationPlan fiberPlan) {
 		super(fiberPlan);
-
-		this.optimizationType = fiberPlan.getOptimizationType();
-		this.coverage = fiberPlan.getCoverage();
+		this.years = fiberPlan.getYears();
+		this.discountRate = fiberPlan.getDiscountRate();
 	}
 
 	@Override
@@ -35,16 +30,8 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 				s);
 	}
 
-	public double getCoverage() {
-		return coverage;
-	}
-
 	public double getDiscountRate() {
 		return discountRate;
-	}
-
-	public OptimizationType getOptimizationType() {
-		return optimizationType;
 	}
 
 	@Override

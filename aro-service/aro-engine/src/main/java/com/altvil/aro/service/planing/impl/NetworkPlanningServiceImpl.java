@@ -249,7 +249,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					optimizationPlanStrategy.getSelectedEdges(networkData), (
 					networkAnalysis) -> false, networkData, ctx, (
 					GeneratingNode) -> true, scoringStrategyFactory
-					.getScoringStrategy(optimizationPlanStrategy
+					.getScoringStrategy(optimizationPlanStrategy.getOptimizationInputs()
 							.getOptimizationType()));
 
 			Collection<OptimizedNetwork> optimizedPlans = planner
@@ -268,7 +268,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 						System.out.println(ratio);
 
 						boolean predicate = !p.isEmpty()
-								&& (ratio >= optimizationPlanStrategy
+								&& (ratio >= optimizationPlanStrategy.getOptimizationInputs()
 										.getCoverage());
 						return predicate;
 					}).collect(Collectors.toList());

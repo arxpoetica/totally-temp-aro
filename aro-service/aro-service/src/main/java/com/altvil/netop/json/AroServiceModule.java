@@ -1,11 +1,13 @@
 package com.altvil.netop.json;
 
+import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.enumerations.FiberPlanAlgorithm;
 import com.altvil.netop.json.mixin.FiberPlanAlgorithmMixin;
 import com.altvil.netop.json.mixin.FiberPlanMixin;
 import com.altvil.netop.json.mixin.OptimizationPlanMixin;
+import com.altvil.netop.json.mixin.OptimizationTypeMixin;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class AroServiceModule extends SimpleModule {
@@ -20,5 +22,6 @@ public class AroServiceModule extends SimpleModule {
 		context.setMixInAnnotations(FiberPlan.class, FiberPlanMixin.class);
 		context.setMixInAnnotations(OptimizationPlan.class, OptimizationPlanMixin.class);
 		context.setMixInAnnotations(FiberPlanAlgorithm.class, FiberPlanAlgorithmMixin.class);
+		context.setMixInAnnotations(OptimizationType.class, OptimizationTypeMixin.class);
 	}
 }
