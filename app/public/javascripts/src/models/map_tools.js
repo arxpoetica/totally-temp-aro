@@ -107,7 +107,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     },
     {
       id: 'area_network_planning',
-      name: 'Area netowrk planning',
+      name: 'Area network planning',
       short_name: 'A',
       icon: 'icon icon-network-planning'
     },
