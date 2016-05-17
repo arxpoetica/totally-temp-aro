@@ -30,6 +30,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $scope.show_businesses = $scope.show_commercial
   $scope.show_households = $scope.show_residential
+  $scope.show_towers = false
 
   $scope.new_location_data = null
 
@@ -89,9 +90,26 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     reload: 'always'
   })
 
+  var towersLayer = new MapLayer({
+    name: 'Towers',
+    type: 'locations',
+    changes: 'locations',
+    short_name: 'T',
+    api_endpoint: '/towers/:plan_id',
+    style_options: {
+      normal: {
+        icon: '/images/map_icons/tower.png',
+        visible: true
+      }
+    },
+    threshold: 8,
+    reload: 'always'
+  })
+
   map_layers.addFeatureLayer(locationsLayer)
   map_layers.addFeatureLayer(selectedLocationsLayer)
   map_layers.addFeatureLayer(customerProfileLayer)
+  map_layers.addFeatureLayer(towersLayer)
 
   $http.get('/locations_filters').success((response) => {
     $scope.industries = response.industries
@@ -134,6 +152,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       data: $scope.employees_by_location
     })
   })
+
+  $scope.change_towers_layer = () => {
+    towersLayer.toggleVisibility()
+  }
 
   $scope.change_locations_layer = () => {
     tracker.track('Locations / ' + $scope.overlay)
