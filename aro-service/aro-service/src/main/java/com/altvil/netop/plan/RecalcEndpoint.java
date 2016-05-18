@@ -3,6 +3,7 @@ package com.altvil.netop.plan;
 import java.security.Principal;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -20,11 +21,17 @@ import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
-import com.altvil.aro.service.plan.InputRequests;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
+import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
+import com.altvil.aro.service.planning.FiberPlan;
+import com.altvil.aro.service.planning.fiber.FiberPlanConfigurationBuilder;
+import com.altvil.aro.service.strategy.NoSuchStrategy;
+import com.altvil.aro.service.strategy.StrategyService;
 
 @RestController
 public class RecalcEndpoint {
@@ -51,9 +58,15 @@ public class RecalcEndpoint {
 	public void init() {
 	}
 	
+	@Autowired
+	private StrategyService strategyService;
+
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlanRequest request) {
-		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlan request) throws NoSuchStrategy, InterruptedException {
+		final FiberPlanConfigurationBuilder strategy = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm());
+		FiberPlanConfiguration fiberPlan = strategy.build(request);
+		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, fiberPlan, fiberNetworkConstraints);
 
 		Job<MasterPlanUpdate> job = jobService.submit(mpc);
 		
@@ -66,32 +79,30 @@ public class RecalcEndpoint {
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);
-		mpr.setWireCenterids(mpc.getWireCenterPlans());
+		// TODO Why are we storing WireCenter PLAN Ids in a property that expects WireCenter Ids????
+		mpr.setWireCenterids(mpc.getWireCenterPlans().stream().map((p) ->{return p.getPlanId();}).collect(Collectors.toList()));
 
 		return mpr;
 	}
 
 	@RequestMapping(value = "/recalc/wirecenter", method = RequestMethod.POST)
 	public @ResponseBody Job<FiberPlanResponse> postRecalc(Principal username,
-			@RequestBody FiberPlanRequest fiberPlanRequest)
-			throws InterruptedException, ExecutionException {
+			@RequestBody AbstractFiberPlan request)
+			throws InterruptedException, ExecutionException, NoSuchStrategy {		
+		final FiberPlanConfiguration fiberPlan = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
+		final FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
 
 		Job<FiberPlanResponse> job = jobService
 				.submit(new JobRequestIgniteCallable<FiberPlanResponse>(username, igniteGrid.compute(), () -> {
 
-					FiberNetworkConstraints constraints = fiberPlanRequest
-							.getFiberNetworkConstraints() == null ? new FiberNetworkConstraints()
-							: fiberPlanRequest.getFiberNetworkConstraints();
-
 					Future<WirecenterNetworkPlan> future = networkPlanningService
-							.planFiber(fiberPlanRequest.getPlanId(),
-									constraints);
+							.planFiber(fiberPlan, fiberNetworkConstraints);
 
 					WirecenterNetworkPlan plan = future.get();
 
 					FiberPlanResponse response = new FiberPlanResponse();
 
-					response.setFiberPlanRequest(fiberPlanRequest);
+					response.setFiberPlanRequest(request);
 					response.setNewEquipmentCount(plan.getNetworkNodes().size());
 
 					return response;

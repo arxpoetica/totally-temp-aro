@@ -1,7 +1,9 @@
 package com.altvil.aro.service.planing;
 
-public class OptimizationInputs {
-	
+import java.io.Serializable;
+
+public class OptimizationInputs implements Serializable {
+	private static final long serialVersionUID = 1L;
 	public static OptimizationInputs DEFAULT = new OptimizationInputs(OptimizationType.COVERAGE, 0.5) ;
 	
 	public OptimizationInputs(OptimizationType optimizationType, double coverage) {

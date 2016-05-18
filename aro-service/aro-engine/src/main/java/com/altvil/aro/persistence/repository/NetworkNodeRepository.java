@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import com.altvil.aro.model.NetworkNode;
 
-@Repository
+@Repository("networkNodeRepository")
 public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Integer>  {
 	
 	@Query(value = "with linked_locations as (\n"

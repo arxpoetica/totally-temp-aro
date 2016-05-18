@@ -53,6 +53,7 @@ public class FiberRoute extends ComparableModel {
 	
 	
 	@Column(name = "plan_id")
+//	@Convert(converter = PlanIdConverter.class)
 	public long getPlanId() {
 		return planId;
 	}

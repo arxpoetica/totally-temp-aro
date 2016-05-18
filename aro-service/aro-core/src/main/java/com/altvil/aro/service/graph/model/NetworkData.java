@@ -14,6 +14,7 @@ public class NetworkData {
 
 	private Collection<NetworkAssignment> fiberSources ;
 	private Collection<RoadEdge> roadEdges;
+	private Collection<Long> selectedRoadLocationIds;
 
 	public void setCentralOffice(NetworkAssignment fiberSource) {
 		setFiberSources(Collections.singleton(fiberSource));
@@ -43,5 +44,11 @@ public class NetworkData {
 		this.roadLocations = roadLocations;
 	}
 
+	public Collection<Long> getSelectedRoadLocationIds() {
+		return selectedRoadLocationIds;
+	}
 
+	public void setSelectedRoadLocationIds(Collection<Long> selectedRoadLocationIds) {
+		this.selectedRoadLocationIds = selectedRoadLocationIds;
+	}
 }

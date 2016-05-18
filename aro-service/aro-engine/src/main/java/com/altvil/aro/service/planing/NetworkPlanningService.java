@@ -5,23 +5,21 @@ import java.util.concurrent.Future;
 
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
-import com.altvil.aro.service.plan.InputRequests;
+import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
+import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 
 public interface NetworkPlanningService {
 
-	void save(WirecenterNetworkPlan plan);
+//	void save(WirecenterNetworkPlan plan);
 
-	Future<WirecenterNetworkPlan> planFiber(long planId,
+	Future<WirecenterNetworkPlan> planFiber(FiberPlanConfiguration fiberPlan,
 			FiberNetworkConstraints constraints);
 	
 	
-	JobService.JobRequest<WirecenterNetworkPlan> optimizeWirecenter(Principal requestor, long planId,
-			InputRequests inputRequests, OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) ;
+	JobService.JobRequest<WirecenterNetworkPlan> optimizeWirecenter(Principal requestor, OptimizationPlanConfiguration fiberPlan, FiberNetworkConstraints constraints) ;
 
 
-	MasterPlanCalculation optimizeMasterFiber(long planId,
-			InputRequests inputRequests, OptimizationInputs optimizationInputs, FiberNetworkConstraints constraints) ;
+	MasterPlanCalculation optimizeMasterFiber(OptimizationPlanConfiguration fiberPlan, FiberNetworkConstraints constraints) ;
 	
-	MasterPlanBuilder planMasterFiber(Principal requestor, long planId,
-			InputRequests inputRequests, FiberNetworkConstraints constraints);
+	MasterPlanBuilder planMasterFiber(Principal requestor, FiberPlanConfiguration fiberPlan, FiberNetworkConstraints constraints) throws InterruptedException;
 }

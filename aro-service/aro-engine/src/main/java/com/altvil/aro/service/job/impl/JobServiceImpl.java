@@ -1,9 +1,9 @@
 package com.altvil.aro.service.job.impl;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,16 +34,17 @@ import com.altvil.aro.service.job.impl.JobIdImpl;
 @Service
 public class JobServiceImpl implements JobService {
 
-	private static final Logger	LOG	= LoggerFactory.getLogger(JobServiceImpl.class.getName());
-	
-	private Map<Job.Id, Job<?>>	map	= Collections.synchronizedMap(new HashMap<>());
-	
-	@Resource(name="jsonMessageConverter")
-	private GenericHttpMessageConverter<Job<?>> messageConverter;
+	private static final Logger					LOG	= LoggerFactory.getLogger(JobServiceImpl.class.getName());
+
+	private Map<Job.Id, Job<?>>					map	= Collections.synchronizedMap(new HashMap<>());
 
 	@Autowired(required=false)
+	@Qualifier("jsonMessageConverter")
+	private GenericHttpMessageConverter<Job<?>>	messageConverter;
+
+	@Autowired(required = false)
 	@Qualifier("brokerMessagingTemplate")
-	private SimpMessagingTemplate messagingTemplate;
+	private SimpMessagingTemplate				messagingTemplate;
 
 	public JobServiceImpl() {
 	}
@@ -57,18 +58,18 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public Collection<Job<?>> getRemainingJobs() {
 		return new ArrayList<>(map.values());
-	}	
+	}
 
 	@Override
 	public <T> Job<T> submit(JobRequest<T> jobRequest) {
-		
+
 		jobRequest.scheduleAsJob(new JobIdImpl(jobRequest.getMetaIdentifiers()));
 
 		map.put(jobRequest.getId(), jobRequest);
 
 		System.out.println("Added " + jobRequest);
 		LOG.trace("{} added to service", jobRequest);
-		
+
 		ForkJoinPool.commonPool().execute((Runnable) (() -> {
 			try {
 				jobRequest.run();
@@ -77,7 +78,7 @@ public class JobServiceImpl implements JobService {
 				LOG.debug("Submitted job was interrupted.", e);
 			} catch (ExecutionException e) {
 				LOG.error("Error while executing job.", e);
-			} finally {				
+			} finally {
 				announceCompletion(jobRequest);
 				map.remove(jobRequest.getId());
 			}
@@ -85,8 +86,19 @@ public class JobServiceImpl implements JobService {
 
 		return jobRequest;
 	}
-	
+
 	private void announceCompletion(Job<?> adapter) {
+		final Principal creator = adapter.getCreator();
+		if (null == messagingTemplate) {
+			LOG.warn("messagingTemplate was null, so no completion announcement will be sent to user");
+			return;
+		}
+
+		if (creator == null) {
+			LOG.warn("No creator specified in the Job so no completion announcement will be sent to user.");
+			return;
+		}
+
 		try {
 			String msg;
 			if (messageConverter.canWrite(getClass(), MediaType.APPLICATION_JSON)) {
@@ -102,7 +114,7 @@ public class JobServiceImpl implements JobService {
 					public HttpHeaders getHeaders() {
 						return new HttpHeaders();
 					}
-				
+
 					public String toString() {
 						return baos.toString();
 					}
@@ -112,10 +124,8 @@ public class JobServiceImpl implements JobService {
 			} else {
 				msg = adapter.toString();
 			}
-			if (null == messagingTemplate)
-				LOG.warn("messagingTemplate was null, so no completion announcement will be sent to user");
-			else
-				messagingTemplate.convertAndSendToUser(adapter.getCreator().getName(), "/topic/jobs", msg);
+
+			messagingTemplate.convertAndSendToUser(creator.getName(), "/topic/jobs", msg);
 		} catch (HttpMessageNotWritableException | MessagingException | IOException e) {
 			LOG.error("Error attempting to announce job completion. ", e);
 		}

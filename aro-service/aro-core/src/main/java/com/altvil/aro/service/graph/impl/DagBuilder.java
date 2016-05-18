@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.WeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ import com.altvil.aro.service.graph.alg.AllShortestPaths;
 import com.altvil.aro.service.graph.alg.DAGPath;
 import com.altvil.aro.service.graph.alg.GraphPathListener;
 import com.altvil.aro.service.graph.alg.PathEdge;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.model.Reversable;
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -29,21 +31,23 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 	private static final Logger log = LoggerFactory
 			.getLogger(DagBuilder.class.getName());
 	
-	private GraphModelBuilder<T> dagBuilder;
-	private GraphModel<T> graphModel;
+	private final GraphModelBuilder<T> dagBuilder;
+	private final GraphModel<T> graphModel;
 
 	private Set<AroEdge<T>> foundEdges = new HashSet<>();
 	private Set<AroEdge<T>> markedEdges;
 
-	public DagBuilder(GraphModelBuilder<T> dagBuilder, GraphModel<T> graphModel) {
-		super();
+	private final ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder;
+
+	public DagBuilder(GraphModelBuilder<T> dagBuilder, GraphModel<T> graphModel, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder) {
 		this.dagBuilder = dagBuilder;
 		this.graphModel = graphModel;
+		this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
 	}
 
-	public DAGModel<T> createDAG(Predicate<AroEdge<T>> predicate, GraphNode src) {
+	public DAGModel<T> createDAG(Predicate<AroEdge<T>> marked, GraphNode src) {
 
-		markedEdges = graphModel.getEdges().stream().filter(predicate)
+		markedEdges = graphModel.getEdges().stream().filter(marked)
 				.collect(Collectors.toSet());
 		
 		if( log.isDebugEnabled() ) log.debug("marked edges " + markedEdges.size());
@@ -51,22 +55,19 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		dagBuilder.addVertex(src) ;
 		
 		if( markedEdges.size() > 0 ) {
+			final WeightedGraph<GraphNode, AroEdge<T>> graph = graphModel.getGraph();
 			AllShortestPaths<GraphNode, AroEdge<T>> shortestPaths = new AllShortestPaths<GraphNode, AroEdge<T>>(
-					graphModel.getGraph(), src);
-			
+					graph, closestFirstSurfaceBuilder, src);
 			
 			Set<GraphNode> vertices = toVertices(markedEdges) ;
 			
 			if( log.isDebugEnabled() ) log.debug("vertices count " + vertices.size());
 	
-	
 			// Find shortest (minimizes sum of path weights) path to each vertex.
 			Collection<GraphNode> foundPaths = shortestPaths
 					.findPathVertices(vertices);
-	
 			
 			if( log.isDebugEnabled() ) log.debug("found Paths " + foundPaths.size());
-	
 			
 			// Remove duplicate edges
 			Set<AroEdge<T>> minEdges = new HashSet<>();
@@ -84,7 +85,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 				GraphNode previous = itr.next();
 				while(itr.hasNext() ) {
 					GraphNode next = itr.next() ;
-					AroEdge<T> edge = graphModel.getGraph().getEdge(previous, next) ;
+					AroEdge<T> edge = graph.getEdge(previous, next) ;
 					markedEdges.remove(edge) ;
 					if( !minEdges.contains(edge) ) {
 						minEdges.add(edge) ;
@@ -101,6 +102,10 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		dagBuilder.setRoot(src);
 		return dagBuilder.buildDAG();
 
+	}
+
+	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> getClosestFirstSurfaceBuilder() {
+		return closestFirstSurfaceBuilder;
 	}
 
 	public Set<GraphNode> toVertices(Set<AroEdge<T>> nodes) {

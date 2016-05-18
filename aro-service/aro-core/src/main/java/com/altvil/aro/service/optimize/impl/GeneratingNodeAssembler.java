@@ -26,6 +26,7 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -70,10 +71,10 @@ public class GeneratingNodeAssembler {
 		matchingEquipmentType = matchingEquipmentMap.get(fiberType);
 	}
 
-	public void createAnalysis(GeneratingNode.Builder builder, GraphNode vertex, GraphMapping gm,
+	public void createAnalysis(GeneratingNode.Builder builder, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder, GraphNode vertex, GraphMapping gm,
 			Collection<AroEdge<GeoSegment>> pathEdges) {
 
-		this.dagModel = createDagModel(vertex, pathEdges);
+		this.dagModel = createDagModel(closestFirstSurfaceBuilder, vertex, pathEdges);
 		this.graph = this.dagModel.getAsDirectedGraph();
 
 		assert isTree(vertex, graph);
@@ -112,7 +113,7 @@ public class GeneratingNodeAssembler {
 		return true;
 	}
 
-	private DAGModel<GeoSegment> createDagModel(GraphNode vertex,
+	private DAGModel<GeoSegment> createDagModel(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder, GraphNode vertex,
 			Collection<AroEdge<GeoSegment>> pathEdges) {
 		
 		
@@ -127,7 +128,7 @@ public class GeneratingNodeAssembler {
 			}
 		}
 		
-		return ctx.getGraphTransformerFactory().createDAG(b.build(), vertex, e -> true) ;
+		return ctx.getGraphTransformerFactory().createDAG(closestFirstSurfaceBuilder, b.build(), vertex, e -> true) ;
 		
 //		b.setRoot(vertex);
 //		return b.buildDAG();

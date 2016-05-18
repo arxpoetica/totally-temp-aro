@@ -26,9 +26,11 @@ import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.SplicePoint;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
@@ -128,7 +130,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		private void createAnalyis(Builder builder, GraphMapping gm,
 				FiberType ft, Collection<AroEdge<GeoSegment>> pathEdges) {
-			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder,
+			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder, (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s),
 					vertex, gm, pathEdges);
 
 			nodeBuilder = builder;
