@@ -92,7 +92,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   var towersLayer = new MapLayer({
     name: 'Towers',
-    type: 'locations',
+    type: 'towers',
     changes: 'locations',
     short_name: 'T',
     api_endpoint: '/towers/:plan_id',
