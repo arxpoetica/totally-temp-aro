@@ -14,6 +14,7 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.cache.CacheMetrics;
 import org.apache.ignite.cluster.ClusterGroup;
+import org.apache.ignite.resources.IgniteInstanceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,22 +86,27 @@ public class NetworkServiceImpl implements NetworkService {
 	private static IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache;
 	private static IgniteCache<Long, Collection<NetworkAssignment>> fiberSourceLocCache;
 	private static IgniteCache<Long, Collection<RoadEdge>> roadEdgesCache;
-
+	
 	@PostConstruct
 	private void postConstruct() {
+		if (locDemandCache == null && ignite != null) {
 		// TODO MEDIUM investigate whether the multiple caches partition by
 		// wirecenter ID and naturally co-locate due to this
 		locDemandCache = ignite.getOrCreateCache(cacheLocationDemandsbyPlanIdAndYear);
 		roadLocCache = ignite.getOrCreateCache(cacheRoadLocationsByPlanId);
 		fiberSourceLocCache = ignite.getOrCreateCache(cacheFiberSourcesByPlanId);
 		roadEdgesCache = ignite.getOrCreateCache(cacheRoadEdgesByPlanId);
+		}
 	}
 	
 	// Note: cannot autowire as Map<String,Ignite> and lookup by key, because
 	// the map keys ignore bean aliases!
-	@Autowired  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
-	private void setNetworkServiceIgniteGrid(Ignite igniteBean) {
+	@Autowired(required=false)  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	public void setNetworkServiceIgniteGrid(Ignite igniteBean) {
 		this.ignite = igniteBean;
+		
+		// NOTE: 
+		postConstruct();
 	}
 	
 	@Override

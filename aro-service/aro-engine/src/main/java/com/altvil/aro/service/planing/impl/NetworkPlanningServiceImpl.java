@@ -61,7 +61,7 @@ import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.utils.StreamUtil;
 
-@Service
+@Service("networkPlanningService")
 public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkPlanningServiceImpl.class.getName());
@@ -74,11 +74,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	private ExecutorService wirePlanExecutor;
 	private IgniteCompute wirePlanComputeGrid;
 	
-	@Value("#{systemProperties.forceLocalComputation}")
-	private boolean forceLocalComputation = false;
-
 	@PostConstruct
 	public void init() {
+		if (executorService == null && igniteGrid != null) {
 		/* NOTE: we could be more sophisticated with service cluster definition. Here are examples:
 				ClusterGroup networkPlanCluster = ignite.cluster().forAttribute("ROLE", "networkPlanning");
 				ClusterGroup wirePlanCluster = ignite.cluster().forAttribute("ROLE", "wirePlanning");
@@ -90,6 +88,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		*/
 		//we use the server cluster if available, otherwise compute takes place locally
 		ClusterGroup executorGroup = null;
+		boolean forceLocalComputation = Boolean.parseBoolean(System.getProperty("forceLocalComputation", "false"));
 		if (forceLocalComputation || 0 == (executorGroup = igniteGrid.cluster().forServers()).nodes().size()) 
 		{
 			executorGroup = igniteGrid.cluster().forLocal();
@@ -102,12 +101,15 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		executorService = igniteGrid.executorService(executorGroup);
 		wirePlanExecutor = igniteGrid.executorService(executorGroup);
 		wirePlanComputeGrid = igniteGrid.compute(executorGroup);
+		}
 	}
 	
-	@Autowired  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
-	private void setNetworkPlanningServiceIgniteGrid(Ignite igniteBean)
+	@Autowired(required=false)  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	public void setNetworkPlanningServiceIgniteGrid(Ignite igniteBean)
 	{
 		this.igniteGrid = igniteBean;
+		
+		init();
 	}	
 
 	@Override
