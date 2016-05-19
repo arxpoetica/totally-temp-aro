@@ -139,12 +139,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	private double calculatePathLength(V terminal, E base2terminal) {
 		NpvData terminalData = createNpvData(terminal, base2terminal);
 
-		double npv = -terminalData.cost;
-
-		// NOTE: Assumes fixed revenue for every year INCLUDING THE FIRST YEAR.
-		for (int t = 1; t <= periods; t++) {
-			npv += terminalData.revenue / Math.pow(1 + discountRate, t);
-		}
+		double npv = netPresentValue(terminalData);
 
 		final double f = f(npv);
 		if (ONCE) {
@@ -157,6 +152,16 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				"," + terminalData.fdt + "," + npv + "," + f);
 
 		return f;
+	}
+
+	private double netPresentValue(NpvData data) {
+		double npv = -data.cost;
+
+		// NOTE: Assumes fixed revenue for every year INCLUDING THE FIRST YEAR.
+		for (int t = 1; t <= periods; t++) {
+			npv += data.revenue / Math.pow(1 + discountRate, t);
+		}
+		return npv;
 	}
 	private static boolean ONCE = false;
 
@@ -300,13 +305,18 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 */
 
 	private double f(double npv) {
-		if (npv > 1) {
-			return 1 / npv;
-		} else if (npv < -1) {
-			return -npv;
-		}
-
-		return 1;
+		double normalized = 1.0E7 - npv;
+		
+		assert (normalized >= 0.0);
+		
+		return normalized;
+//		if (npv > 1) {
+//			return 1 / npv;
+//		} else if (npv < -1) {
+//			return -npv;
+//		}
+//
+//		return 1;
 	}
 
 	/*
@@ -341,6 +351,14 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		}
 
 		return node.getData().spanningTreeEdge;
+	}
+
+	@Override
+	public void logWeight(V vertex) {
+		FibonacciHeapNode<QueueEntry<V, E>> node = getSeenData(vertex);
+		NpvData d = node.getData().npvData;
+		
+		System.err.println("|" + vertex + "," + netPresentValue(d));		
 	}
 
 	/**

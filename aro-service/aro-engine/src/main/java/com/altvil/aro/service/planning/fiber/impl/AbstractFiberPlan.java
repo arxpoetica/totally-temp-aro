@@ -6,7 +6,7 @@ import com.altvil.enumerations.FiberPlanAlgorithm;
 public abstract class AbstractFiberPlan implements Cloneable, FiberPlan {
 	private final FiberPlanAlgorithm algorithm;
 	private long						   planId;
-	private int year;
+	private int year = 2015;
 
 	protected AbstractFiberPlan(FiberPlanAlgorithm algorithm) {
 		this.algorithm = algorithm;

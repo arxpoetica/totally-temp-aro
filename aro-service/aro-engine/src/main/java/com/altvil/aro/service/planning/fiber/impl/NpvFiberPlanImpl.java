@@ -6,7 +6,7 @@ import com.altvil.enumerations.FiberPlanAlgorithm;
 
 public class NpvFiberPlanImpl extends AbstractFiberPlan implements NpvFiberPlan {
 	private double discountRate = Double.NaN;
-	private int periods = -1;
+	private int years = -1;
 
 	protected NpvFiberPlanImpl() {
 		super(FiberPlanAlgorithm.NPV);
@@ -25,14 +25,14 @@ public class NpvFiberPlanImpl extends AbstractFiberPlan implements NpvFiberPlan 
 	 */
 	@Override
 	public int getYears() {
-		return periods;
+		return years;
 	}
 
 	public void setDiscountRate(double discountRate) {
 		this.discountRate = discountRate;
 	}
 
-	public void setPeriods(int periods) {
-		this.periods = periods;
+	public void setYears(int years) {
+		this.years = years;
 	}
 }

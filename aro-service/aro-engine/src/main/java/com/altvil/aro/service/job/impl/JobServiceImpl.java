@@ -101,7 +101,7 @@ public class JobServiceImpl implements JobService {
 
 		try {
 			String msg;
-			if (messageConverter.canWrite(getClass(), MediaType.APPLICATION_JSON)) {
+			if (messageConverter != null && messageConverter.canWrite(getClass(), MediaType.APPLICATION_JSON)) {
 				HttpOutputMessage outputMessage = new HttpOutputMessage() {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
