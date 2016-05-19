@@ -74,9 +74,6 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	private ExecutorService wirePlanExecutor;
 	private IgniteCompute wirePlanComputeGrid;
 	
-	@Value("#{systemProperties.forceLocalComputation}")
-	private boolean forceLocalComputation = false;
-
 	@PostConstruct
 	public void init() {
 		/* NOTE: we could be more sophisticated with service cluster definition. Here are examples:
@@ -90,6 +87,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		*/
 		//we use the server cluster if available, otherwise compute takes place locally
 		ClusterGroup executorGroup = null;
+		boolean forceLocalComputation = Boolean.parseBoolean(System.getProperty("forceLocalComputation", "false"));
 		if (forceLocalComputation || 0 == (executorGroup = igniteGrid.cluster().forServers()).nodes().size()) 
 		{
 			executorGroup = igniteGrid.cluster().forLocal();

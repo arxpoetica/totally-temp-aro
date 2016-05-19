@@ -55,7 +55,7 @@ public class FiberPlanConfiguration implements Cloneable, Serializable {
 	}
 
 	public boolean isFilteringRoadLocationsBySelection() {
-		return false;
+		return true;
 	}
 
 	public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
