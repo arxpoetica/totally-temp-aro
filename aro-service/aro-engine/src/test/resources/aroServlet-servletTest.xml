@@ -75,16 +75,7 @@
 		<property name="defaultContentType" value="application/json" />
 	</bean>
 
-	<context:property-placeholder location="classpath*:/aroConfig.properties" />
-
-	<bean
-		class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>classpath*:aroConfig.properties</value>
-			</list>
-		</property>
-	</bean>
+	<context:property-placeholder location="classpath*:/WEB-INF/aroConfig.properties" />
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 	

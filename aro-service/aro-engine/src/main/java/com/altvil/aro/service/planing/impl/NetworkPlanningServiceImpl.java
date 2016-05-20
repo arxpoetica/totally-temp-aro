@@ -19,6 +19,7 @@ import org.apache.ignite.IgniteCompute;
 import org.apache.ignite.cluster.ClusterGroup;
 import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.lang.IgniteCallable;
+import org.apache.ignite.resources.IgniteInstanceResource;
 import org.apache.ignite.resources.SpringResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +106,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 	
 	@Autowired(required=false)  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	@IgniteInstanceResource
 	public void setNetworkPlanningServiceIgniteGrid(Ignite igniteBean)
 	{
 		this.igniteGrid = igniteBean;

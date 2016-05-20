@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.ignite.Ignite;
+import org.apache.ignite.resources.IgniteInstanceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,8 @@ public class RecalcEndpoint {
 	@Autowired
 	private NetworkPlanningService networkPlanningService;
 	
-	@Autowired  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	@Autowired(required=false)  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	@IgniteInstanceResource
 	private void setRecalcEndpointIgniteGrid(Ignite igniteBean)
 	{
 		this.igniteGrid = igniteBean;

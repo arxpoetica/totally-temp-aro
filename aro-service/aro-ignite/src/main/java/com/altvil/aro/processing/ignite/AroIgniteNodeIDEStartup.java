@@ -3,7 +3,6 @@ package com.altvil.aro.processing.ignite;
 import org.apache.ignite.IgniteCheckedException;
 import org.apache.ignite.IgniteException;
 import org.apache.ignite.IgniteSpring;
-import org.apache.ignite.Ignition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
@@ -19,8 +18,7 @@ public class AroIgniteNodeIDEStartup {
      * @throws IgniteCheckedException 
      */
     public static void main(String[] args) throws IgniteException, IgniteCheckedException {
-    	ApplicationContext context = new GenericXmlApplicationContext("aroServices.xml");
+    	ApplicationContext context = new GenericXmlApplicationContext("/WEB-INF/aroServices.xml");
         IgniteSpring.start("igniteConfig-serviceNode-IDE.xml", context);
-    	//Ignition.start("igniteConfig-basicNode-IDE.xml");
     }
 }
