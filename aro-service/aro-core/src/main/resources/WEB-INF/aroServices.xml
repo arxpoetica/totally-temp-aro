@@ -1,14 +1,12 @@
 <beans xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xmlns:task="http://www.springframework.org/schema/task" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns="http://www.springframework.org/schema/beans"
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context
 		http://www.springframework.org/schema/context/spring-context.xsd
-		http://www.springframework.org/schema/mvc
-		http://www.springframework.org/schema/mvc/spring-mvc.xsd
 		http://www.springframework.org/schema/task
 		http://www.springframework.org/schema/task/spring-task.xsd
 		http://www.springframework.org/schema/tx
@@ -16,23 +14,32 @@
 		http://www.springframework.org/schema/data/jpa
 		http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
-	<context:component-scan base-package="com.altvil"/>
- 
+	<context:component-scan base-package="com.altvil">
+		<!-- NOTE: aroServices is included as part of the application context so 
+			that they are part of a separate context that can be passed to the IgniteSpringBean 
+			by the aroServlet's context. The component scan must NOT include any of the 
+			servlet's packages as their beans cannot be initialized without the MVC components 
+			defined in aroServlet-*.xml -->
+		<context:exclude-filter type="regex"
+			expression="com\.altvil\.(?:authentication|mvcconfig|netop)\..*" />
+	</context:component-scan>
+
 	<task:executor id="myExecutor" pool-size="1" />
-	
+
 	<task:annotation-driven executor="myExecutor"
 		scheduler="myScheduler" />
 
 	<task:scheduler id="myScheduler" pool-size="1" />
-	
-	<context:property-placeholder location="classpath*:/WEB-INF/aroConfig.properties"/>
+
+	<context:property-placeholder
+		location="classpath*:/WEB-INF/aroConfig.properties" />
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
-	
+
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
-	
+
 	<bean id="aroDataSource" class="org.apache.commons.dbcp2.BasicDataSource"
 		destroy-method="close">
 		<property name="driverClassName" value="org.postgis.DriverWrapper" />
@@ -61,16 +68,16 @@
 			</props>
 		</property>
 	</bean>
-	
+
 	<bean id="entityManager"
 		class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
-	
+
 	<jpa:repositories base-package="com.altvil"
 		repository-impl-postfix="Impl" entity-manager-factory-ref="entityManagerFactory"
 		transaction-manager-ref="transactionManager" />
 
- 
- 	
+
+
 </beans>
