@@ -14,19 +14,25 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.planning.NpvOptimizationPlan;
 
 public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfiguration implements NpvOptimizationPlan {
+	private static final long serialVersionUID = 1L;
+	private double budget;
 	private double				   discountRate;
-
 	private int					   years;
 
 	public OptimizationPlanConfigurationNpv(NpvOptimizationPlan fiberPlan) {
 		super(fiberPlan);
-		this.years = fiberPlan.getYears();
+		this.budget = fiberPlan.getBudget();
 		this.discountRate = fiberPlan.getDiscountRate();
+		this.years = fiberPlan.getYears();
+	}
+
+	public double getBudget() {
+		return budget;
 	}
 
 	@Override
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), g,
+		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), getBudget(), g,
 				s);
 	}
 
@@ -72,6 +78,10 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 	@Override
 	public boolean isFilteringRoadLocationsBySelection() {
 		return false;
+	}
+
+	public void setBudget(double budget) {
+		this.budget = budget;
 	}
 
 	public void setDiscountRate(double discountRate) {

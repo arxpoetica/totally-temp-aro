@@ -6,10 +6,19 @@ import com.altvil.enumerations.FiberPlanAlgorithm;
 
 public class NpvFiberPlanImpl extends AbstractFiberPlan implements NpvFiberPlan {
 	private double discountRate = Double.NaN;
+	private double budget = Double.POSITIVE_INFINITY;
 	private int years = -1;
 
 	protected NpvFiberPlanImpl() {
 		super(FiberPlanAlgorithm.NPV);
+	}
+
+	public double getBudget() {
+		return budget;
+	}
+
+	public void setBudget(double budget) {
+		this.budget = budget;
 	}
 
 	/* (non-Javadoc)

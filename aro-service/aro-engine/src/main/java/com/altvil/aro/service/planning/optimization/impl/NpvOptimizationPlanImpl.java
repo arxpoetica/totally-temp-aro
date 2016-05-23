@@ -4,11 +4,16 @@ import com.altvil.aro.service.planning.NpvOptimizationPlan;
 import com.altvil.enumerations.FiberPlanAlgorithm;
 
 public class NpvOptimizationPlanImpl extends AbstractOptimizationPlan implements NpvOptimizationPlan{
+	private double budget = Double.POSITIVE_INFINITY;
 	private double discountRate = Double.NaN;
 	private int years = -1;
 
 	protected NpvOptimizationPlanImpl() {
 		super(FiberPlanAlgorithm.NPV);
+	}
+
+	public double getBudget() {
+		return budget;
 	}
 
 	public double getDiscountRate() {
@@ -17,6 +22,10 @@ public class NpvOptimizationPlanImpl extends AbstractOptimizationPlan implements
 
 	public int getYears() {
 		return years;
+	}
+
+	public void setBudget(double budget) {
+		this.budget = budget;
 	}
 
 	public void setDiscountRate(double discountRate) {

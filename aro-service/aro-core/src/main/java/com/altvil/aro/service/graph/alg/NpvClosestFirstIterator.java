@@ -7,6 +7,8 @@ import org.jgrapht.Graphs;
 import org.jgrapht.traverse.CrossComponentIterator;
 import org.jgrapht.util.FibonacciHeap;
 import org.jgrapht.util.FibonacciHeapNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
@@ -29,8 +31,11 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		extends CrossComponentIterator<V, E, FibonacciHeapNode<NpvClosestFirstIterator.QueueEntry<V, E>>>
 		implements ClosestFirstSurfaceIterator<V, E> {
+	private static final double	MAX_NPV		 = 1.0E7;
 
-	private static final int FDT_PER_UNIT = 200;
+	private final Logger		log			 = LoggerFactory.getLogger(NpvClosestFirstIterator.class);
+
+	private static final int	FDT_PER_UNIT = 200;
 
 	/**
 	 * Private data to associate with each entry in the priority queue.
@@ -59,7 +64,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	}
 
 	private final double					discountRate;
-	private final int						periods;
+	private final int						years;
 
 	/**
 	 * Priority queue of fringe vertices.
@@ -72,6 +77,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * Maximum distance to search.
 	 */
 	private double							radius		= Double.POSITIVE_INFINITY;
+	private double							budget		= Double.POSITIVE_INFINITY;
 
 	/**
 	 * Creates a new closest-first iterator for the specified graph.
@@ -79,8 +85,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param g
 	 *            the graph to be iterated.
 	 */
-	public NpvClosestFirstIterator(double discountRate, int periods, Graph<V, E> g) {
-		this(discountRate, periods, g, null);
+	public NpvClosestFirstIterator(double discountRate, int years, double budget, Graph<V, E> g) {
+		this(discountRate, years, budget, g, null);
 	}
 
 	/**
@@ -95,8 +101,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param startVertex
 	 *            the vertex iteration to be started.
 	 */
-	public NpvClosestFirstIterator(double discountRate, int periods, Graph<V, E> g, V startVertex) {
-		this(discountRate, periods, g, startVertex, Double.POSITIVE_INFINITY);
+	public NpvClosestFirstIterator(double discountRate, int years, double budget, Graph<V, E> g, V startVertex) {
+		this(discountRate, years, budget, g, startVertex, Double.POSITIVE_INFINITY);
 	}
 
 	/**
@@ -115,10 +121,12 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 *            limit on weighted path length, or Double.POSITIVE_INFINITY for
 	 *            unbounded search.
 	 */
-	public NpvClosestFirstIterator(double discountRate, int periods, Graph<V, E> g, V startVertex, double radius) {
+	public NpvClosestFirstIterator(double discountRate, int years, double budget, Graph<V, E> g, V startVertex,
+			double radius) {
 		super(g, startVertex);
+		this.budget = budget;
 		this.discountRate = discountRate;
-		this.periods = periods;
+		this.years = years;
 		this.radius = radius;
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
@@ -143,13 +151,17 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 
 		final double f = f(npv);
 		if (ONCE) {
-			System.err.println("|Source Vertex, Target Vertex, Edge Length, Path Cost, Path Revenue, Path Length, Path Locations, Path FDT, NPV, F");
+			log.trace(
+					"|Source Vertex, Target Vertex, Edge Length, Path Cost, Path Revenue, Path Length, Path Locations, Path FDT, NPV, F");
 			ONCE = false;
 		}
 
-		System.err.println("|" + base2terminal.getTargetNode().getId() + "," + base2terminal.getSourceNode().getId() + "," + base2terminal.getWeight() + "," + terminalData.cost +
-				"," + terminalData.revenue + "," + terminalData.totalLength + "," + terminalData.locations + 
-				"," + terminalData.fdt + "," + npv + "," + f);
+		if (log.isTraceEnabled()) {
+			log.trace("|" + base2terminal.getTargetNode().getId() + "," + base2terminal.getSourceNode().getId() + ","
+					+ base2terminal.getWeight() + "," + terminalData.cost + "," + terminalData.revenue + ","
+					+ terminalData.totalLength + "," + terminalData.locations + "," + terminalData.fdt + "," + npv + ","
+					+ f);
+		}
 
 		return f;
 	}
@@ -157,12 +169,22 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	private double netPresentValue(NpvData data) {
 		double npv = -data.cost;
 
-		// NOTE: Assumes fixed revenue for every year INCLUDING THE FIRST YEAR.
-		for (int t = 1; t <= periods; t++) {
-			npv += data.revenue / Math.pow(1 + discountRate, t);
+		// if the cost of this plan does NOT exceed the budget then include the
+		// revenue in the NPV calculation otherwise return NPV with no revenue
+		// to make this plan highly undesirable.
+		// NOTE: Do NOT return a constant value when the budget is exceeded as
+		// the plan's npv must get worse each time it is extended.
+		if (data.cost < budget) {
+			// NOTE: Assumes fixed revenue for every year INCLUDING THE FIRST
+			// YEAR.
+			for (int t = 1; t <= years; t++) {
+				npv += data.revenue / Math.pow(1 + discountRate, t);
+			}
 		}
+
 		return npv;
 	}
+
 	private static boolean ONCE = false;
 
 	private static class NpvData {
@@ -247,8 +269,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				// NOTE: Presently assumes that the FDT is located on the
 				// edge rather than at the location.
 			});
-
-//			System.err.println(segment + ": " + terminalData);
 		}
 
 		return terminalData;
@@ -305,18 +325,11 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 */
 
 	private double f(double npv) {
-		double normalized = 1.0E7 - npv;
-		
+		double normalized = MAX_NPV - npv;
+
 		assert (normalized >= 0.0);
-		
+
 		return normalized;
-//		if (npv > 1) {
-//			return 1 / npv;
-//		} else if (npv < -1) {
-//			return -npv;
-//		}
-//
-//		return 1;
 	}
 
 	/*
@@ -357,8 +370,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	public void logWeight(V vertex) {
 		FibonacciHeapNode<QueueEntry<V, E>> node = getSeenData(vertex);
 		NpvData d = node.getData().npvData;
-		
-		System.err.println("|" + vertex + "," + netPresentValue(d));		
+
+		System.err.println("|" + vertex + "," + netPresentValue(d));
 	}
 
 	/**

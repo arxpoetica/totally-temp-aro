@@ -14,20 +14,27 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.planning.NpvFiberPlan;
 
 public class FiberPlanConfigurationNpv extends FiberPlanConfiguration implements NpvFiberPlan {
+	private static final long serialVersionUID = 1L;
 	final double discountRate;
 	final int years;
+	final double budget;
 
 	public FiberPlanConfigurationNpv(NpvFiberPlan fiberPlan) {
 		super(fiberPlan);
+		this.budget = fiberPlan.getBudget();
 		this.discountRate = fiberPlan.getDiscountRate();
 		this.years = fiberPlan.getYears();
 	}
 
 	@Override
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), g, s);
+		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), getBudget(), g, s);
 	}
 	
+	public double getBudget() {
+		return budget;
+	}
+
 	public double getDiscountRate() {
 		return discountRate;
 	}
