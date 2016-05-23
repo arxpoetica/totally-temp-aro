@@ -68,7 +68,7 @@
 		<property name="defaultContentType" value="application/json" />
 	</bean>
 
-	<context:property-placeholder location="classpath*:/WEB-INF/aroConfig.properties" />
+	<context:property-placeholder location="classpath*:/aroConfig.properties" />
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 	

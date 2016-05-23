@@ -25,7 +25,7 @@
 	</context:component-scan>
 
 	<context:property-placeholder
-		location="classpath*:/WEB-INF/aroConfig.properties" />
+		location="classpath*:/aroConfig.properties" />
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 

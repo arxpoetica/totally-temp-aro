@@ -18,7 +18,7 @@ public class AroIgniteNodeIDEStartup {
      * @throws IgniteCheckedException 
      */
     public static void main(String[] args) throws IgniteException, IgniteCheckedException {
-    	ApplicationContext context = new GenericXmlApplicationContext("/WEB-INF/aroServices.xml");
+    	ApplicationContext context = new GenericXmlApplicationContext("/aroServices.xml");
         IgniteSpring.start("igniteConfig-serviceNode-IDE.xml", context);
     }
 }

@@ -21,7 +21,7 @@
 
 	<!-- The property placeholder in aroServices cannot be inherited so repeat it here. -->
 	<context:property-placeholder
-		location="classpath*:/WEB-INF/aroConfig.properties" />
+		location="classpath*:/aroConfig.properties" />
 
 	<bean id="contentManager"
 		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
