@@ -21,6 +21,16 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     }
   })
 
+  $rootScope.$on('custom_boundary_clicked', (e, boundary) => {
+    if (!map_tools.is_visible('financial_profile')) return
+
+    $scope.selectedArea = {
+      name: boundary.name,
+      geog: boundary.geom
+    }
+    $scope.$apply()
+  })
+
   showCashFlowChart()
 
   $('#financial_profile_controller .nav-tabs').on('shown.bs.tab', (e) => {

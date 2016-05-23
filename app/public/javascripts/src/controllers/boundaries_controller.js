@@ -127,7 +127,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         })
     }
 
-    $http.get('/boundary/' + plan.id + '/find')
+    $http.get(`/boundary/${plan.id}/find`)
       .success((boundaries) => {
         $scope.boundaries = boundaries
         boundaries.forEach((boundary) => {
@@ -269,6 +269,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     overlay.marker.addListener('click', () => {
       if (map_tools.is_visible('network_planning')) {
         $scope.run_network_planning(boundary)
+      } else if (map_tools.is_visible('financial_profile')) {
+        $rootScope.$broadcast('custom_boundary_clicked', boundary)
       } else {
         $scope.show_market_size(boundary)
       }
