@@ -19,6 +19,7 @@
 		http://www.springframework.org/schema/websocket
 		http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
+	<!-- The property placeholder in aroServices cannot be inherited so repeat it here. -->
 	<context:property-placeholder
 		location="classpath*:/WEB-INF/aroConfig.properties" />
 

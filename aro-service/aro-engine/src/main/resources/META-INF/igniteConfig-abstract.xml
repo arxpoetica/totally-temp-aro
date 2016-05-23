@@ -96,7 +96,7 @@
 		<!-- Override the default grid name so we have a test-only grid, 
 			 and so the grid consoles are clear as to which grid 
 			 a node is participating in -->
-        <property name="gridName" value="aroIgniteGrid-IDE"/>
+        <property name="gridName" value="aroIgniteGrid"/>
         
         <property name="localHost" value="127.0.0.1"/>
 

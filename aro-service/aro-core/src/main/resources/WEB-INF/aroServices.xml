@@ -24,13 +24,6 @@
 			expression="com\.altvil\.(?:authentication|mvcconfig|netop)\..*" />
 	</context:component-scan>
 
-	<task:executor id="myExecutor" pool-size="1" />
-
-	<task:annotation-driven executor="myExecutor"
-		scheduler="myScheduler" />
-
-	<task:scheduler id="myScheduler" pool-size="1" />
-
 	<context:property-placeholder
 		location="classpath*:/WEB-INF/aroConfig.properties" />
 
