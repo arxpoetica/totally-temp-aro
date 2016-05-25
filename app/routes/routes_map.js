@@ -10,6 +10,7 @@ exports.configure = (api, middleware) => {
     'currency_symbol',
     'client_carrier_name',
     'displayable_client_carrier_name')
+  public_config.ARO_CLIENT = process.env.ARO_CLIENT
 
   api.get('/', (request, response, next) => {
     var q

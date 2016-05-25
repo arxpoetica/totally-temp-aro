@@ -1,9 +1,10 @@
-/* global app user_id config map _ google swal */
+/* global app user_id config map _ google swal config */
 // Equipment Nodes Controller
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
+  $scope.ARO_CLIENT = config.ARO_CLIENT
 
   $scope.selected_tool = null
   $scope.show_clear_nodes = config.ui.map_tools.equipment.actions.indexOf('clear') >= 0
@@ -14,11 +15,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     short_name: 'NN',
     style_options: {
       normal: {
-        icon: '/images/map_icons/central_office.png',
+        icon: `/images/map_icons/${config.ARO_CLIENT}/central_office.png`,
         visible: true
       },
       selected: {
-        icon: '/images/map_icons/central_office_selected.png',
+        icon: `/images/map_icons/${config.ARO_CLIENT}/central_office_selected.png`,
         visible: true
       }
     }
@@ -194,7 +195,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     var arr = data_layer.addGeoJson(feature)
     arr.forEach((feature) => {
       data_layer.overrideStyle(feature, {
-        icon: '/images/map_icons/' + type + '.png',
+        icon: `/images/map_icons/${config.ARO_CLIENT}/${type}.png`,
         draggable: true
       })
     })
