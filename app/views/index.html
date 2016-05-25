@@ -215,20 +215,6 @@
             </p>
           </div>
         </div>
-
-        <hr>
-
-        <div ng-controller="selection_tools_controller">
-          <div ng-repeat="(key, tool) in available_tools" ng-show="plan.owner_id === user_id">
-            <p>
-              <a href="javascript:void(0)" class="btn btn-default btn-block btn-sm"
-                ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
-                ng-class="{'btn-success active': isToolSelected(key) && (!key || !deselect_mode), 'btn-danger active': isToolSelected(key) && key && deselect_mode}"
-                ng-click="setSelectedTool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
-            </p>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -1283,6 +1269,67 @@
       </div>
     </div>
 
+    <div ng-controller="target-builder-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('target_builder')" class="map-tool panel panel-primary" id="target_builder_controller">
+        <div class="panel-heading">
+          {{ map_tools.get_tool_name('target_builder') }}
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('target_builder')">
+            <form>
+              <p><strong>Optimization type</strong></p>
+              <select class="form-control" ng-model="optimizationType">
+                <option value="capex">Capex</option>
+                <option value="npv">NPV</option>
+              </select>
+              <div ng-show="optimizationType === 'npv'" style="margin-top:5px">
+                <p>
+                  <label style="font-weight: 100; margin-right: 20px">
+                    <input type="radio" name="npvType" value="targeted" checked>
+                    Targeted
+                  </label>
+                  <label style="font-weight: 100">
+                    <input type="radio" name="npvType" value="untargeted" checked>
+                    Untargeted
+                  </label>
+                </p>
+                <p><strong>Total budget</strong></p>
+                <div class="form-group form-group-sm">
+                  <div class="input-group input-group-sm">
+                    <div class="input-group-addon">$</div>
+                    <input type="text" class="form-control" placeholder="Amount">
+                    <div class="input-group-btn">
+                      <button class="btn btn-default">Update</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br>
+              <p><strong>Search, Click or Upload Locations</strong></p>
+              <input class="form-control" placeholder="Address, Business Name">
+              <br>
+              <p>
+                Select:
+                <button class="btn btn-default btn-sm"
+                  ng-class="{'btn-success active': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
+                  ng-click="setSelectedTool('single')">Single</button>
+                <button class="btn btn-default btn-sm"
+                  ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
+                  ng-click="setSelectedTool('polygon')">Many</button>
+                <i class="fa fa-file-o"></i>
+              </p>
+              <p><strong>Selected Locations</strong></p>
+              <ul style="padding: 0 20px">
+                <li>Businesses: 0</li>
+                <li>Households: 0</li>
+                <li>Towers: 0</li>
+              </ul>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="map-canvas-wrapper">
       <div id="map-canvas"></div>
     </div>
@@ -1377,11 +1424,11 @@
   <script src="javascripts/lib/controllers/fiber_plant_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_location_controller.js"></script>
   <script src="javascripts/lib/controllers/contextual_menu_controller.js"></script>
-  <script src="javascripts/lib/controllers/selection_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
   <script src="javascripts/lib/controllers/area_network_planning_controller.js"></script>
   <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
+  <script src="javascripts/lib/controllers/target_builder_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
@@ -1390,7 +1437,6 @@
   <script src="javascripts/lib/models/map_tools.js"></script>
   <script src="javascripts/lib/models/custom_overlay.js"></script>
   <script src="javascripts/lib/models/map_layers.js"></script>
-  <script src="javascripts/lib/models/network_planning.js"></script>
   <script src="javascripts/lib/models/state.js"></script>
   <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
   <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>

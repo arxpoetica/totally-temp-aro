@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'network_planning', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, network_planning) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id

@@ -43,7 +43,7 @@ describe('Selection model', () => {
   it('should be able to clear all selections', () => {
     selection.sources.add('123')
     selection.targets.add('321')
-    selection.clear_selection()
+    selection.clearSelection()
     expect(selection.sources.length()).to.be.equal(0)
     expect(selection.targets.length()).to.be.equal(0)
   })

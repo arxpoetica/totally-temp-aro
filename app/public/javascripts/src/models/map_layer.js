@@ -1,7 +1,7 @@
 /* global app google map _ encodeURIComponent config document $ */
 'use strict'
 
-app.service('MapLayer', ($http, $rootScope, selection) => {
+app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
   var plan = null
   $rootScope.$on('plan_selected', (e, p) => {
     plan = p
@@ -44,7 +44,7 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
         if (!selection.is_enabled()) return
         var changes
         if (this.single_selection) {
-          changes = createEmptyChanges(this)
+          changes = this.createEmptyChanges()
           this.data_layer.forEach((feature) => {
             if (feature.selected) {
               this.setFeatureSelected(feature, false, changes)
@@ -55,12 +55,12 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
           } else {
             this.setFeatureSelected(event.feature, true, changes)
           }
-          broadcastChanges(this, changes)
+          this.broadcastChanges(changes)
         } else {
-          if (!event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return
-          changes = createEmptyChanges(this)
+          if (!map_tools.is_visible('target_builder') || !event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return
+          changes = this.createEmptyChanges()
           this.toggleFeature(event.feature, changes)
-          broadcastChanges(this, changes)
+          this.broadcastChanges(changes)
         }
       })
 
@@ -198,16 +198,15 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
     }
 
     select_random_features () {
-      var self = this
       var i = 0
-      var changes = createEmptyChanges(self)
-      self.data_layer.forEach((feature) => {
+      var changes = this.createEmptyChanges()
+      this.data_layer.forEach((feature) => {
         if (i < 3 && !feature.selected) {
-          self.toggleFeature(feature, changes)
+          this.toggleFeature(feature, changes)
           i++
         }
       })
-      broadcastChanges(self, changes)
+      this.broadcastChanges(changes)
     }
 
     select_random_area () {
@@ -433,14 +432,14 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
 
     changeSelectionForFeaturesMatching (select, func) {
       if (!this.visible) return
-      var changes = createEmptyChanges(this)
+      var changes = this.createEmptyChanges()
 
       this.data_layer.forEach((feature) => {
         if (func(feature)) {
           this.setFeatureSelected(feature, select, changes)
         }
       })
-      broadcastChanges(this, changes)
+      this.broadcastChanges(changes)
     }
 
     remove () {
@@ -453,17 +452,17 @@ app.service('MapLayer', ($http, $rootScope, selection) => {
       return i
     }
 
-  }
+    broadcastChanges (changes) {
+      $rootScope.$broadcast('map_layer_changed_selection', this, changes)
+    }
 
-  function createEmptyChanges (layer) {
-    var type = layer.changes || layer.type
-    var changes = { insertions: {}, deletions: {} }
-    changes.insertions[type] = []
-    changes.deletions[type] = []
-    return changes
-  }
+    createEmptyChanges () {
+      var type = this.changes || this.type
+      var changes = { insertions: {}, deletions: {} }
+      changes.insertions[type] = []
+      changes.deletions[type] = []
+      return changes
+    }
 
-  function broadcastChanges (layer, changes) {
-    $rootScope.$broadcast('map_layer_changed_selection', layer, changes)
   }
 })

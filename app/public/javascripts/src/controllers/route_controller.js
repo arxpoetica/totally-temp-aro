@@ -1,6 +1,6 @@
 /* global app user_id config */
 // Route Controller
-app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', 'map_layers', 'network_planning', ($scope, $rootScope, $http, selection, MapLayer, map_tools, map_layers, network_planning) => {
+app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', 'map_layers', ($scope, $rootScope, $http, selection, MapLayer, map_tools, map_layers) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.selection = selection
@@ -25,7 +25,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   })
 
   $rootScope.$on('plan_cleared', (e, plan) => {
-    selection.clear_selection()
+    selection.clearSelection()
     $scope.route_layer.clearData()
     $scope.plan.metadata = {
       total_cost: 0,
@@ -82,9 +82,6 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
 
   $rootScope.$on('map_layer_changed_selection', (e, layer, changes) => {
     if (!$scope.plan) return
-    if (network_planning.getAlgorithm()) {
-      changes.algorithm = network_planning.getAlgorithm().id
-    }
 
     if (layer.type !== 'locations' &&
       layer.type !== 'network_nodes' &&
