@@ -15,6 +15,10 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     $scope.plan = plan
   })
 
+  $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    $scope.plan = plan
+  })
+
   $scope.isToolSelected = (name) => {
     return $scope.selectedTool === name
   }

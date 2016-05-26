@@ -15,16 +15,23 @@ module.exports = class CustomerProfile {
       .reduce((total, customer_type) => total + customer_type.businesses, 0)
     metadata.customers_households_total = customer_types
       .reduce((total, customer_type) => total + customer_type.households, 0)
+    metadata.customers_towers_total = customer_types
+      .reduce((total, customer_type) => total + customer_type.towers, 0)
     metadata.total_customers = metadata.customer_types
-      .reduce((total, type) => total + type.businesses + type.households, 0)
+      .reduce((total, type) => total + type.businesses + type.households + type.towers, 0)
     return metadata
   }
 
   static customerProfileForRoute (plan_id, metadata) {
     var sql = `
-      SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
+      SELECT
+        ct.name,
+        SUM(households)::integer as households,
+        SUM(businesses)::integer as businesses,
+        SUM(towers)::integer as towers
+      FROM (
         (SELECT
-          hct.customer_type_id AS id, COUNT(*)::integer AS households, 0 as businesses
+          hct.customer_type_id AS id, COUNT(*)::integer AS households, 0 as businesses, 0 as towers
           FROM client.plan_targets t
           JOIN households h ON h.location_id=t.location_id
           JOIN client.household_customer_types hct ON hct.household_id = h.id
@@ -34,14 +41,24 @@ module.exports = class CustomerProfile {
         UNION ALL
 
         (SELECT
-          bct.customer_type_id as id, 0 as households, COUNT(*)::integer as businesses
+          bct.customer_type_id as id, 0 as households, COUNT(*)::integer as businesses, 0 as towers
           FROM client.plan_targets t
           JOIN businesses b ON b.location_id=t.location_id
           JOIN client.business_customer_types bct ON bct.business_id = b.id
           WHERE plan_id=$1
           GROUP BY bct.customer_type_id)
 
-        ) t
+        UNION ALL
+
+        (SELECT
+          bct.customer_type_id as id, 0 as households, 0 as businesses, COUNT(*)::integer as towers
+          FROM client.plan_targets t
+          JOIN towers b ON b.location_id=t.location_id
+          JOIN client.tower_customer_types bct ON bct.tower_id = b.id
+          WHERE plan_id=$1
+          GROUP BY bct.customer_type_id)
+
+      ) t
       JOIN client.customer_types ct ON ct.id=t.id
       GROUP BY ct.name
       ORDER BY ct.name
