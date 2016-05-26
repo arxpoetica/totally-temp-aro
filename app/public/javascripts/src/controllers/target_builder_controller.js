@@ -62,5 +62,25 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   document.addEventListener('keydown', updateSelectionTools)
   document.addEventListener('keyup', updateSelectionTools)
 
+  var budgetInput = $('#target-builder-budget input')
+  var budgetButton = $('#target-builder-budget button')
+
+  budgetInput.on('focus', () => {
+    budgetInput.val(budgetInput.val().match(/\d+/g).join(''))
+  })
+
+  budgetInput.on('blur', () => {
+    var num = +budgetInput.val().match(/\d+/g).join('')
+    budgetInput.val(num.toLocaleString())
+  })
+
+  budgetInput.on('input', () => {
+    budgetButton.removeAttr('disabled')
+  })
+
+  budgetButton.on('click', () => {
+    budgetButton.attr('disabled', 'disabled')
+  })
+
   // TODO: hide this tool if not config.route_planning
 }])
