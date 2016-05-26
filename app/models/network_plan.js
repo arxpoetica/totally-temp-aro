@@ -143,7 +143,7 @@ module.exports = class NetworkPlan {
       .then(() => {
         if (config.route_planning.length === 0) return output
 
-        return RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost)
+        return RouteOptimizer.calculateRevenueAndNPV(plan_id, fiber_cost)
           .then((calculation) => {
             output.metadata.revenue = calculation.revenue
             output.metadata.npv = calculation.npv
@@ -157,7 +157,7 @@ module.exports = class NetworkPlan {
             })
 
             // var up_front_costs = equipment_nodes_cost.total + fiber_cost
-            return RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost)
+            return RouteOptimizer.calculateRevenueAndNPV(plan_id, fiber_cost)
           })
           .then((calculation) => {
             output.metadata.revenue = calculation.revenue

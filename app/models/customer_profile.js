@@ -25,46 +25,26 @@ module.exports = class CustomerProfile {
       SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
         (SELECT
           hct.customer_type_id AS id, COUNT(*)::integer AS households, 0 as businesses
-        FROM
-          client.plan_targets t
-        JOIN
-          households h
-        ON
-          h.location_id=t.location_id
-        JOIN
-          client.household_customer_types hct
-        ON
-          hct.household_id = h.id
-        WHERE
-          plan_id=$1
-        GROUP BY hct.customer_type_id)
+          FROM client.plan_targets t
+          JOIN households h ON h.location_id=t.location_id
+          JOIN client.household_customer_types hct ON hct.household_id = h.id
+          WHERE plan_id=$1
+          GROUP BY hct.customer_type_id)
 
-        UNION
+        UNION ALL
 
         (SELECT
           bct.customer_type_id as id, 0 as households, COUNT(*)::integer as businesses
-        FROM
-          client.plan_targets t
-        JOIN
-          businesses b
-        ON
-          b.location_id=t.location_id
-        JOIN
-          client.business_customer_types bct
-        ON
-          bct.business_id = b.id
-        WHERE
-          plan_id=$1
-        GROUP BY bct.customer_type_id)
+          FROM client.plan_targets t
+          JOIN businesses b ON b.location_id=t.location_id
+          JOIN client.business_customer_types bct ON bct.business_id = b.id
+          WHERE plan_id=$1
+          GROUP BY bct.customer_type_id)
+
         ) t
-      JOIN
-        client.customer_types ct
-      ON
-        ct.id=t.id
-      GROUP BY
-        ct.name
-      ORDER BY
-        ct.name
+      JOIN client.customer_types ct ON ct.id=t.id
+      GROUP BY ct.name
+      ORDER BY ct.name
     `
     return database.query(sql, [plan_id])
       .then((customer_types) => this._processCustomerTypes(metadata, customer_types))

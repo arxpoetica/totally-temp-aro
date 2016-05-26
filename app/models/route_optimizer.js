@@ -126,7 +126,7 @@ module.exports = class RouteOptimizer {
       })
   }
 
-  static calculate_revenue_and_npv (plan_id, fiber_cost) {
+  static calculateRevenueAndNPV (plan_id, fiber_cost) {
     return Promise.resolve()
       .then(() => {
         var sql = `
