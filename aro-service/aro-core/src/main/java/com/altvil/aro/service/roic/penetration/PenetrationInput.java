@@ -4,35 +4,28 @@ import com.altvil.aro.service.roic.model.NetworkType;
 
 public class PenetrationInput {
 
-	private NetworkType networkType;
-	private int analysisMonths;
-	private double pentrationAdjustmentFactor;
+	private double penetrationAdjustmentFactor;
 
 	private double startShare;
 	private double endShare;
+	private double rate;
 
-	public NetworkType getNetworkType() {
-		return networkType;
+	
+	public double getRate() {
+		return rate;
 	}
 
-	public void setNetworkType(NetworkType networkType) {
-		this.networkType = networkType;
+	public void setRate(double rate) {
+		this.rate = rate;
+	}
+	
+
+	public double getPenetrationAdjustmentFactor() {
+		return penetrationAdjustmentFactor;
 	}
 
-	public int getAnalysisMonths() {
-		return analysisMonths;
-	}
-
-	public void setAnalysisMonths(int analysisMonths) {
-		this.analysisMonths = analysisMonths;
-	}
-
-	public double getPentrationAdjustmentFactor() {
-		return pentrationAdjustmentFactor;
-	}
-
-	public void setPentrationAdjustmentFactor(double pentrationAdjustmentFactor) {
-		this.pentrationAdjustmentFactor = pentrationAdjustmentFactor;
+	public void setPenetrationAdjustmentFactor(double penetrationAdjustmentFactor) {
+		this.penetrationAdjustmentFactor = penetrationAdjustmentFactor;
 	}
 
 	public double getStartShare() {
