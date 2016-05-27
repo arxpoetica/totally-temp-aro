@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include=JsonTypeInfo.As.PROPERTY, property="algorithm")
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(value={"closestFirstSurfaceBuilder", "filteringRoadLocationDemandsBySelection", "filteringRoadLocationsBySelection"}, ignoreUnknown = true)
 @JsonTypeIdResolver(FiberPlanRequestTypeIdResolver.class)
 public class FiberPlanMixin {
 

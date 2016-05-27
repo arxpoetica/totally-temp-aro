@@ -28,6 +28,7 @@ import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.planning.NetworkConfiguration;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
@@ -110,9 +111,9 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 	
 	@Override
-	public NetworkData getNetworkData(FiberPlanConfiguration fiberPlanStrategy) {
+	public NetworkData getNetworkData(NetworkConfiguration networkConfiguration) {
 
-		final long planId = fiberPlanStrategy.getPlanId();
+		final long planId = networkConfiguration.getPlanId();
 		NetworkData networkData = new NetworkData();
 
 		//determine wirecenter ID
@@ -124,10 +125,10 @@ public class NetworkServiceImpl implements NetworkService {
 			networkData.setSelectedRoadLocationIds(selectedRoadLocations);
 		
 		//TODO MEDIUM Compare performance
-			networkData.setFiberSources(getFiberSourceNetworkAssignments(fiberPlanStrategy));
+			networkData.setFiberSources(getFiberSourceNetworkAssignments(networkConfiguration));
 			networkData.setRoadLocations(
-					getRoadLocationNetworkAssignments(fiberPlanStrategy, selectedRoadLocations));
-			networkData.setRoadEdges(getRoadEdges(fiberPlanStrategy));
+					getRoadLocationNetworkAssignments(networkConfiguration, selectedRoadLocations));
+			networkData.setRoadEdges(getRoadEdges(networkConfiguration));
 		}
 
 		return networkData;
@@ -145,16 +146,16 @@ public class NetworkServiceImpl implements NetworkService {
 		location_id, buesiness_fiber, tower_fiber, household_fiber
 	}
 	
-	private Map<Long, LocationDemand> getLocationDemand(FiberPlanConfiguration fiberPlanStrategy) {
+	private Map<Long, LocationDemand> getLocationDemand(NetworkConfiguration networkConfiguration) {
 		Map<Long, LocationDemand> locDemands;
 		
 		//retrieve all locations from cache by the plan's ID and the year of the location demand data
 		// if cache miss, populate the cache by same key with results of the request
 
-		final PlanYearKey key = new PlanYearKey(fiberPlanStrategy.getPlanId(), fiberPlanStrategy.getYear());
+		final PlanYearKey key = new PlanYearKey(networkConfiguration.getPlanId(), networkConfiguration.getYear());
 		locDemands = locDemandCache.get(key);
 		if (null == locDemands) {
-			locDemands = queryLocationDemand(fiberPlanStrategy.getPlanId(), fiberPlanStrategy.getYear());
+			locDemands = queryLocationDemand(networkConfiguration.getPlanId(), networkConfiguration.getYear());
 			locDemandCache.put(key, locDemands);
 			// NOTE: currently no update policy used as LocationDemand is
 			// temporarily assumed immutable
@@ -164,7 +165,7 @@ public class NetworkServiceImpl implements NetworkService {
 			logCacheStats(locDemandCache);
 				
 		//if SELECTED request, filter them
-		if (fiberPlanStrategy.isFilteringRoadLocationDemandsBySelection()) {
+		if (networkConfiguration.isFilteringRoadLocationDemandsBySelection()) {
 			// TODO filter locations (were not being filtered in non-cached
 			// implementation!)
 			LOG.warn("LocationDemand not yet being filtered for SELECTED requests");
@@ -255,13 +256,13 @@ public class NetworkServiceImpl implements NetworkService {
 		return roadLocationsMap;
 	}
 	
-	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(FiberPlanConfiguration fiberPlanStrategy) {
+	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(NetworkConfiguration networkConfiguration) {
 		Map<Long, RoadLocation> roadLocations;
 		
-		roadLocations = roadLocCache.get(fiberPlanStrategy.getPlanId());
+		roadLocations = roadLocCache.get(networkConfiguration.getPlanId());
 		if (null == roadLocations) {
-			roadLocations = queryRoadLocations(fiberPlanStrategy.getPlanId());
-			roadLocCache.put(fiberPlanStrategy.getPlanId(), roadLocations);
+			roadLocations = queryRoadLocations(networkConfiguration.getPlanId());
+			roadLocCache.put(networkConfiguration.getPlanId(), roadLocations);
 			// NOTE: currently no update policy used as RoadLocation is
 			// temporarily assumed immutable
 		}
@@ -278,12 +279,12 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 
 	// TODO Convert safeList into a predicate
-	private Collection<NetworkAssignment> getRoadLocationNetworkAssignments(FiberPlanConfiguration fiberPlanStrategy,
+	private Collection<NetworkAssignment> getRoadLocationNetworkAssignments(NetworkConfiguration networkConfiguration,
 			List<Long> safeList) {
-		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(fiberPlanStrategy);
-		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(fiberPlanStrategy);
+		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkConfiguration);
+		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkConfiguration);
 
-		if (fiberPlanStrategy.isFilteringRoadLocationsBySelection()) {
+		if (networkConfiguration.isFilteringRoadLocationsBySelection()) {
 			roadLocationByLocationIdMap.keySet().retainAll(safeList);
 	}
 
@@ -335,13 +336,13 @@ public class NetworkServiceImpl implements NetworkService {
 				}));
 	}
 
-	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(FiberPlanConfiguration fiberPlanStrategy) {
+	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(NetworkConfiguration networkConfiguration) {
 		Collection<NetworkAssignment> fiberSourceLocations;
 		
-		fiberSourceLocations = fiberSourceLocCache.get(fiberPlanStrategy.getPlanId());
+		fiberSourceLocations = fiberSourceLocCache.get(networkConfiguration.getPlanId());
 		if (null == fiberSourceLocations) {
-			fiberSourceLocations = queryFiberSources(fiberPlanStrategy.getPlanId());
-			fiberSourceLocCache.put(fiberPlanStrategy.getPlanId(), fiberSourceLocations);
+			fiberSourceLocations = queryFiberSources(networkConfiguration.getPlanId());
+			fiberSourceLocCache.put(networkConfiguration.getPlanId(), fiberSourceLocations);
 		}
 		// NOTE: currently never updating FiberSource as it is temporarily
 		// assumed immutable
@@ -373,13 +374,13 @@ public class NetworkServiceImpl implements NetworkService {
 		
 	}
 	
-	private Collection<RoadEdge> getRoadEdges(FiberPlanConfiguration fiberPlanStrategy) {
+	private Collection<RoadEdge> getRoadEdges(NetworkConfiguration networkConfiguration) {
 		Collection<RoadEdge> roadEdges;
 		
-		roadEdges = roadEdgesCache.get(fiberPlanStrategy.getPlanId());
+		roadEdges = roadEdgesCache.get(networkConfiguration.getPlanId());
 		if (null == roadEdges) {
-			roadEdges = queryRoadEdges(fiberPlanStrategy.getPlanId());
-			roadEdgesCache.put(fiberPlanStrategy.getPlanId(), roadEdges);
+			roadEdges = queryRoadEdges(networkConfiguration.getPlanId());
+			roadEdgesCache.put(networkConfiguration.getPlanId(), roadEdges);
 			// NOTE: currently no update policy used as RoadEdge is temporarily
 			// assumed immutable
 		}

@@ -1,7 +1,7 @@
 package com.altvil.aro.service.planning.optimization.impl;
 
 import com.altvil.aro.service.planning.NpvOptimizationPlan;
-import com.altvil.enumerations.FiberPlanAlgorithm;
+import com.altvil.enumerations.OptimizationType;
 
 public class NpvOptimizationPlanImpl extends AbstractOptimizationPlan implements NpvOptimizationPlan{
 	private double budget = Double.POSITIVE_INFINITY;
@@ -9,7 +9,7 @@ public class NpvOptimizationPlanImpl extends AbstractOptimizationPlan implements
 	private int years = -1;
 
 	protected NpvOptimizationPlanImpl() {
-		super(FiberPlanAlgorithm.NPV);
+		super(OptimizationType.NPV);
 	}
 
 	public double getBudget() {

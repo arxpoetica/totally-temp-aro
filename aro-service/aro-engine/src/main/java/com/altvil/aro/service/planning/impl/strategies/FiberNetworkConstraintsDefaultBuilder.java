@@ -9,7 +9,7 @@ import com.altvil.aro.service.planning.FiberPlan;
 public class FiberNetworkConstraintsDefaultBuilder implements FiberNetworkConstraintsBuilder {
 
 	@Override
-	public FiberNetworkConstraints build(FiberPlan fiberPlan) {
+	public FiberNetworkConstraints build(Object request) {
 		return new FiberNetworkConstraints();
 	}
 	

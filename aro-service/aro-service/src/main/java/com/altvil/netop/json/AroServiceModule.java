@@ -1,9 +1,9 @@
 package com.altvil.netop.json;
 
-import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.enumerations.FiberPlanAlgorithm;
+import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.json.mixin.FiberPlanAlgorithmMixin;
 import com.altvil.netop.json.mixin.FiberPlanMixin;
 import com.altvil.netop.json.mixin.OptimizationPlanMixin;

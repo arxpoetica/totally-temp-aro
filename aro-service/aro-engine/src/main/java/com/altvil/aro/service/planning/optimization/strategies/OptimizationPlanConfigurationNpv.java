@@ -11,14 +11,19 @@ import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.optimize.OptimizedNetwork;
+import com.altvil.aro.service.optimize.model.GeneratingNode;
+import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
+import com.altvil.aro.service.planning.NpvFiberPlan;
 import com.altvil.aro.service.planning.NpvOptimizationPlan;
 
 public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfiguration implements NpvOptimizationPlan {
 	private static final long serialVersionUID = 1L;
-	private double budget;
-	private double				   discountRate;
-	private int					   years;
 
+	private final double budget;
+	private final double discountRate;
+	private final int years;
+	
 	public OptimizationPlanConfigurationNpv(NpvOptimizationPlan fiberPlan) {
 		super(fiberPlan);
 		this.budget = fiberPlan.getBudget();
@@ -29,39 +34,59 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 	public double getBudget() {
 		return budget;
 	}
+	
+	@Override
+	public double score(GeneratingNode node) {
+		double npv = -node.getCapex();
+
+		// if the cost of this plan does NOT exceed the budget then include the
+		// revenue in the NPV calculation otherwise return NPV with no revenue
+		// to make this plan highly undesirable.
+		// NOTE: Do NOT return a constant value when the budget is exceeded as
+		// the plan's npv must get worse each time it is extended.
+		if (node.getCapex() < budget) {
+			// NOTE: Assumes fixed revenue for every year INCLUDING THE FIRST
+			// YEAR.
+			double revenue = 12 * node.getFiberCoverage().getMonthlyRevenueImpact();
+			for (int t = 1; t <= years; t++) {
+				npv += revenue / Math.pow(1 + discountRate, t);
+			}
+		}
+		
+		return npv;
+	}
 
 	@Override
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), getBudget(), g,
-				s);
+		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), getBudget(), g, s);
 	}
 
 	public double getDiscountRate() {
 		return discountRate;
 	}
-
 	@Override
 	public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
-		return (e) -> {
+		return (e) ->
+		{
 			GeoSegment value = e.getValue();
-
+			
 			if (value == null) {
 				return false;
 			}
 			Collection<Long> selectedRoadLocationIds = networkData.getSelectedRoadLocationIds();
-
-			for (GraphEdgeAssignment geoSegmentAssignments : value.getGeoSegmentAssignments()) {
+			
+			for(GraphEdgeAssignment geoSegmentAssignments: value.getGeoSegmentAssignments()) {
 				Object ae = geoSegmentAssignments.getAroEntity();
 				if (ae instanceof LocationEntity) {
 					LocationEntity le = (LocationEntity) ae;
-
+					
 					if (selectedRoadLocationIds.contains(le.getObjectId())) {
 						return true;
 					}
 				}
-
+				
 			}
-
+			
 			return false;
 		};
 	}
@@ -80,15 +105,14 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 		return false;
 	}
 
-	public void setBudget(double budget) {
-		this.budget = budget;
+	@Override
+	public boolean isConstraintMet(NetworkAnalysis analysis) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
-	public void setDiscountRate(double discountRate) {
-		this.discountRate = discountRate;
-	}
-
-	public void setYears(int years) {
-		this.years = years;
+	@Override
+	public boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork) {
+		return true;
 	}
 }

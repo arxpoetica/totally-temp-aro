@@ -2,6 +2,9 @@ package com.altvil.aro.service.planing;
 
 import java.io.Serializable;
 
+import com.altvil.enumerations.OptimizationType;
+
+@Deprecated
 public class OptimizationInputs implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public static OptimizationInputs DEFAULT = new OptimizationInputs(OptimizationType.COVERAGE, 0.5) ;

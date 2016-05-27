@@ -8,10 +8,11 @@ import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
-import com.altvil.aro.service.planing.OptimizationType;
 import com.altvil.aro.service.planing.ScoringStrategyFactory;
+import com.altvil.enumerations.OptimizationType;
 
 @Service("scoringStrategyFactory")
+@Deprecated
 public class ScoringStrategyFactoryImpl implements ScoringStrategyFactory {
 
 	private Map<OptimizationType, ScoringStrategy> map = new EnumMap<>(OptimizationType.class) ;

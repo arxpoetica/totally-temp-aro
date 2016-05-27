@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import com.altvil.annotation.FiberPlanDefaultStrategy;
 import com.altvil.annotation.FiberPlanStrategy;
+import com.altvil.annotation.OptimizationPlanStrategy;
 import com.altvil.annotation.StrategyStereotype;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
@@ -110,6 +111,10 @@ public class StrategyServiceImpl implements StrategyService {
 					FiberPlanDefaultStrategy fpds = (FiberPlanDefaultStrategy) annotation;
 
 					register(bean, fpds.type(), (Enum<?>) null);
+				} else if (annotation.annotationType() == OptimizationPlanStrategy.class) {
+					OptimizationPlanStrategy fps = (OptimizationPlanStrategy) annotation;
+
+					register(bean, fps.type(), fps.types());
 				} else {
 					LOG.error("Update StrategyService to support the strategy annotation: "
 							+ annotation.annotationType().getName());

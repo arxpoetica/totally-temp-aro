@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.ignite.IgniteCompute;
 import org.apache.ignite.lang.IgniteCallable;
+
+import com.altvil.aro.service.planning.NetworkConfiguration;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 
 import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
@@ -14,13 +16,13 @@ public class MasterPlanBuilder extends JobRequestIgniteCallable<MasterPlanUpdate
 		super(creator, compute, callable);
 	}
 
-	private List<FiberPlanConfiguration> wireCenterPlans;
+	private List<? extends NetworkConfiguration> wireCenterPlans;
 
-	public List<FiberPlanConfiguration> getWireCenterPlans() {
+	public List<? extends NetworkConfiguration> getWireCenterPlans() {
 		return wireCenterPlans;
 	}
 
-	public void setWireCenterPlans(List<FiberPlanConfiguration> wireCenterPlans) {
+	public void setWireCenterPlans(List<? extends NetworkConfiguration> wireCenterPlans) {
 		this.wireCenterPlans = wireCenterPlans;
 	}
 

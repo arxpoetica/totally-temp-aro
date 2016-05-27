@@ -14,8 +14,9 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.planning.FiberPlan;
+import com.altvil.aro.service.planning.NetworkConfiguration;
 
-public class FiberPlanConfiguration implements Cloneable, Serializable {
+public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPlan, NetworkConfiguration {
 	private static final long serialVersionUID = 1L;
 	private final FiberPlanAlgorithm algorithm;
 	private long planId;
@@ -39,12 +40,13 @@ public class FiberPlanConfiguration implements Cloneable, Serializable {
 		return year;
 	}
 
-	public <FPC extends FiberPlanConfiguration> FPC dependentPlan(long dependentId) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T dependentPlan(long dependentId) {
 		try {
-			@SuppressWarnings("unchecked")
-			FPC copy= (FPC) clone();
-			((FiberPlanConfiguration) copy).planId = dependentId;
-			return copy;
+			FiberPlanConfiguration copy= (FiberPlanConfiguration) clone();
+			copy.planId = dependentId;
+			return (T) copy;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}

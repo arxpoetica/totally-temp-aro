@@ -2,8 +2,7 @@ package com.altvil.netop.json;
 
 import java.io.IOException;
 
-import com.altvil.aro.service.planing.OptimizationType;
-import com.altvil.enumerations.FiberPlanAlgorithm;
+import com.altvil.enumerations.OptimizationType;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;

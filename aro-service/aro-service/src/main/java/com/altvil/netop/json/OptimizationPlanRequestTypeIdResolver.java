@@ -5,8 +5,10 @@ import java.util.Map;
 
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.aro.service.planning.optimization.impl.CapexOptimizationPlanImpl;
+import com.altvil.aro.service.planning.optimization.impl.CoverageOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.NpvOptimizationPlanImpl;
 import com.altvil.enumerations.FiberPlanAlgorithm;
+import com.altvil.enumerations.OptimizationType;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.databind.DatabindContext;
@@ -18,18 +20,19 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 public class OptimizationPlanRequestTypeIdResolver implements TypeIdResolver {
 	private JavaType baseType;
 	private JavaType defaultType;
-	private final Map<FiberPlanAlgorithm, JavaType> javaTypeByAlgorithm= new EnumMap<FiberPlanAlgorithm, JavaType>(FiberPlanAlgorithm.class);
+	private final Map<OptimizationType, JavaType> javaTypeByAlgorithm= new EnumMap<OptimizationType, JavaType>(OptimizationType.class);
 	
 	@Override
 	public void init(JavaType baseType) {
 		this.baseType = baseType;
 		
-		javaTypeByAlgorithm.put(FiberPlanAlgorithm.NPV, javaType(NpvOptimizationPlanImpl.class));
-		javaTypeByAlgorithm.put(FiberPlanAlgorithm.CAPEX, javaType(CapexOptimizationPlanImpl.class));
+		javaTypeByAlgorithm.put(OptimizationType.NPV, javaType(NpvOptimizationPlanImpl.class));
+		javaTypeByAlgorithm.put(OptimizationType.CAPEX, javaType(CapexOptimizationPlanImpl.class));
+		javaTypeByAlgorithm.put(OptimizationType.COVERAGE, javaType(CoverageOptimizationPlanImpl.class));
 		
-		assert allEnumerationsResolved(FiberPlanAlgorithm.class);
+		assert allEnumerationsResolved(OptimizationType.class);
 		
-		defaultType = javaTypeByAlgorithm.get(FiberPlanAlgorithm.CAPEX);
+		defaultType = javaTypeByAlgorithm.get(OptimizationType.CAPEX);
 	}
 
 	private boolean allEnumerationsResolved(Class<?> enumClass) {
@@ -50,7 +53,7 @@ public class OptimizationPlanRequestTypeIdResolver implements TypeIdResolver {
 	public String idFromValue(Object value) {
 		OptimizationPlan request = (OptimizationPlan) value;
 		
-		return request.getAlgorithm() == null ? "undefined" : request.getAlgorithm().toString();
+		return request.getOptimizationType() == null ? "undefined" : request.getOptimizationType().toString();
 	}
 
 	@Override
@@ -67,7 +70,7 @@ public class OptimizationPlanRequestTypeIdResolver implements TypeIdResolver {
 	@Override
 	public JavaType typeFromId(String id) {
 		try {
-			FiberPlanAlgorithm algorithm = Enum.valueOf(FiberPlanAlgorithm.class, id);
+			OptimizationType algorithm = Enum.valueOf(OptimizationType.class, id);
 			return javaTypeByAlgorithm.get(algorithm);
 		} catch (NullPointerException e) {
 			return defaultType;

@@ -1,10 +1,11 @@
-package com.altvil.aro.service.planing;
+package com.altvil.enumerations;
 
 public enum OptimizationType {
 	
 	CAPEX,
  	PENETRATION,
  	IRR,
+ 	NPV,
     COVERAGE
 
 }
