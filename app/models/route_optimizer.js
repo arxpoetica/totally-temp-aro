@@ -109,7 +109,11 @@ module.exports = class RouteOptimizer {
           ON
             nt.id = n.node_type_id
           WHERE
-            plan_id=$1
+            plan_id IN (
+              SELECT id FROM client.plan WHERE parent_plan_id=$1
+              UNION ALL
+              SELECT $1
+            )
           GROUP BY nt.id
         `
         return database.query(sql, [plan_id])
