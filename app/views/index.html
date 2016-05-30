@@ -115,13 +115,11 @@
             <a class="navbar-brand" href="javascript:void(0)">{{plan.name}}</a>
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
-              <!--
               <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
                 <span class="fa fa-usd"></span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
                 <span class="label label-success">{{plan.metadata.revenue | currency}}</span>
               </span>
-              -->
               <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
                 <span class="fa fa-users"></span> {{ plan.metadata.total_customers | number }} customers covered
               </span>
@@ -1285,11 +1283,11 @@
               <div ng-show="optimizationType === 'npv'" style="margin-top:5px">
                 <p>
                   <label style="font-weight: 100; margin-right: 20px">
-                    <input type="radio" name="npvType" value="targeted" checked>
+                    <input type="radio" name="npvType" value="targeted" ng-model="npvType">
                     Targeted
                   </label>
                   <label style="font-weight: 100">
-                    <input type="radio" name="npvType" value="untargeted" checked>
+                    <input type="radio" name="npvType" value="untargeted" ng-model="npvType">
                     Untargeted
                   </label>
                 </p>
@@ -1303,6 +1301,7 @@
                     </div>
                   </div>
                 </div>
+                <p class="text-danger text-right" ng-show="overbugdet && npvType === 'targeted'">You are over budget. Current cost is {{plan.metadata.total_cost | currency}}</p>
               </div>
               <br>
               <p><strong>Search, Click or Upload Locations</strong></p>

@@ -9,15 +9,16 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     'single': null,
     'polygon': 'polygon'
   }
+  $scope.budget = 10000000
+  $scope.npvType = 'targeted'
   $scope.user_id = user_id
   $scope.plan = null
-  $rootScope.$on('plan_selected', (e, plan) => {
+  const planChanged = (e, plan) => {
     $scope.plan = plan
-  })
-
-  $rootScope.$on('plan_changed_metadata', (e, plan) => {
-    $scope.plan = plan
-  })
+    checkBudget()
+  }
+  $rootScope.$on('plan_selected', planChanged)
+  $rootScope.$on('plan_changed_metadata', planChanged)
 
   $scope.isToolSelected = (name) => {
     return $scope.selectedTool === name
@@ -69,13 +70,16 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   var budgetInput = $('#target-builder-budget input')
   var budgetButton = $('#target-builder-budget button')
 
+  budgetInput.val($scope.budget.toLocaleString())
+
+  const parseBudget = () => +budgetInput.val().match(/\d+/g).join('') || 0
+
   budgetInput.on('focus', () => {
-    budgetInput.val(budgetInput.val().match(/\d+/g).join(''))
+    budgetInput.val(String(parseBudget()))
   })
 
   budgetInput.on('blur', () => {
-    var num = +budgetInput.val().match(/\d+/g).join('')
-    budgetInput.val(num.toLocaleString())
+    budgetInput.val(parseBudget().toLocaleString())
   })
 
   budgetInput.on('input', () => {
@@ -83,8 +87,17 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   })
 
   budgetButton.on('click', () => {
+    $scope.budget = parseBudget()
     budgetButton.attr('disabled', 'disabled')
+    checkBudget()
   })
+
+  const checkBudget = () => {
+    if ($scope.plan && $scope.plan.metadata) {
+      $scope.overbugdet = $scope.plan.metadata.total_cost > $scope.budget
+      if (!$rootScope.$$phase) { $rootScope.$apply() } // if triggered by a jquery event
+    }
+  }
 
   // TODO: hide this tool if not config.route_planning
 }])
