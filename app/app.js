@@ -38,7 +38,8 @@ var routes = [
   'network_plan',
   'customer_profile',
   'admin_users',
-  'settings'
+  'settings',
+  'financial_profile'
 ]
 routes.forEach((route) => {
   require('./routes/routes_' + route).configure(api, middleware)
