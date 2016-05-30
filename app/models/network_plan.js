@@ -91,7 +91,7 @@ module.exports = class NetworkPlan {
 
   static findEdges (plan_id) {
     var sql = `
-      SELECT fiber_route.id, 0 AS edge_length, ST_AsGeoJSON(fiber_route.geom)::json AS geom
+      SELECT fiber_route.id, ST_Length(geom::geography) AS edge_length, ST_AsGeoJSON(fiber_route.geom)::json AS geom
       FROM client.plan
       JOIN client.plan p ON p.parent_plan_id = plan.id
       JOIN client.fiber_route ON fiber_route.plan_id = p.id

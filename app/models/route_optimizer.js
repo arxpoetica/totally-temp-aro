@@ -134,29 +134,20 @@ module.exports = class RouteOptimizer {
             spend.year, SUM(spend.monthly_spend * 12)::float as value
           FROM
             client.plan_targets
-          JOIN
-            businesses b
-          ON
-            plan_targets.location_id = b.location_id
-          JOIN
-            client.industry_mapping m
-          ON
-            m.sic4 = b.industry_id
-          JOIN
-            client.spend
-          ON
-            spend.industry_id = m.industry_id
+          JOIN businesses b
+            ON plan_targets.location_id = b.location_id
+          JOIN client.industry_mapping m
+            ON m.sic4 = b.industry_id
+          JOIN client.spend
+            ON spend.industry_id = m.industry_id
             -- AND spend.monthly_spend <> 'NaN'
-          JOIN
-            client.employees_by_location e
-          ON
-            e.id = spend.employees_by_location_id
-            AND e.min_value <= b.number_of_employees
-            AND e.max_value >= b.number_of_employees
+          JOIN client.employees_by_location e
+            ON e.id = spend.employees_by_location_id
+           AND e.min_value <= b.number_of_employees
+           AND e.max_value >= b.number_of_employees
           WHERE
             plan_targets.plan_id=$1
-          GROUP BY
-            spend.year
+          GROUP BY spend.year
           ORDER BY spend.year
         `
         return database.query(sql, [plan_id])
