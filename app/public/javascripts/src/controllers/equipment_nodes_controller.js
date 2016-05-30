@@ -27,7 +27,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   network_nodes_layer.hide_in_ui = true
 
   var fiber_plant_layer = new MapLayer({
-    name: 'Fiber',
+    name: config.ui.labels.fiber,
     type: 'fiber_plant',
     short_name: 'F',
     api_endpoint: '/network/fiber_plant/:client_carrier_name',

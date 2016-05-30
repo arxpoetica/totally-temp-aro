@@ -35,6 +35,9 @@
     "colors": {
       "fiber": "red",
       "fair_share": "blue"
+    },
+    "labels": {
+      "fiber": "Cable"
     }
   }
 }
