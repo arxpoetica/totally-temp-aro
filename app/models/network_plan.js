@@ -123,16 +123,17 @@ module.exports = class NetworkPlan {
 
             fiber_cost = RouteOptimizer.calculateFiberCost(edges, cost_per_meter)
             output.metadata.costs.push({
-              name: 'Fiber cost',
+              name: 'Fiber Capex',
               value: fiber_cost
             })
             return RouteOptimizer.calculateLocationsCost(plan_id)
           })
           .then((locations_cost) => {
-            output.metadata.costs.push({
-              name: 'Locations cost',
-              value: locations_cost
-            })
+            // Ignore by now
+            // output.metadata.costs.push({
+            //   name: 'Locations cost',
+            //   value: locations_cost
+            // })
           })
       })
       .then(() => (
@@ -151,7 +152,7 @@ module.exports = class NetworkPlan {
           })
           .then((equipment_nodes_cost) => {
             output.metadata.costs.push({
-              name: 'Equipment nodes cost',
+              name: 'Equipment Capex',
               value: equipment_nodes_cost.total,
               itemized: equipment_nodes_cost.equipment_node_types
             })
@@ -162,6 +163,7 @@ module.exports = class NetworkPlan {
           .then((calculation) => {
             output.metadata.revenue = calculation.revenue
             output.metadata.npv = calculation.npv
+            output.metadata.total_npv = calculation.npv.reduce((total, item) => total + item.value, 0)
 
             output.metadata.total_cost = output.metadata.costs
               .reduce((total, cost) => total + cost.value, 0)
