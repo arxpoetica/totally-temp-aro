@@ -91,12 +91,12 @@ public class NetworkServiceImpl implements NetworkService {
 	@PostConstruct
 	private void postConstruct() {
 		if (locDemandCache == null && ignite != null) {
-		// TODO MEDIUM investigate whether the multiple caches partition by
-		// wirecenter ID and naturally co-locate due to this
-		locDemandCache = ignite.getOrCreateCache(cacheLocationDemandsbyPlanIdAndYear);
-		roadLocCache = ignite.getOrCreateCache(cacheRoadLocationsByPlanId);
-		fiberSourceLocCache = ignite.getOrCreateCache(cacheFiberSourcesByPlanId);
-		roadEdgesCache = ignite.getOrCreateCache(cacheRoadEdgesByPlanId);
+			// TODO MEDIUM investigate whether the multiple caches partition by
+			// wirecenter ID and naturally co-locate due to this
+			locDemandCache = ignite.getOrCreateCache(cacheLocationDemandsbyPlanIdAndYear);
+			roadLocCache = ignite.getOrCreateCache(cacheRoadLocationsByPlanId);
+			fiberSourceLocCache = ignite.getOrCreateCache(cacheFiberSourcesByPlanId);
+			roadEdgesCache = ignite.getOrCreateCache(cacheRoadEdgesByPlanId);
 		}
 	}
 	
