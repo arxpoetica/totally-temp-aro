@@ -13,23 +13,22 @@ import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.NetworkConfiguration;
 
 public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPlan, NetworkConfiguration {
 	private static final long serialVersionUID = 1L;
-	private final FiberPlanAlgorithm algorithm;
+	private final FiberPlan fiberPlan;
 	private long planId;
-	private final int year;
 
 	public FiberPlanConfiguration(FiberPlan fiberPlan) {
-		this.algorithm = fiberPlan.getAlgorithm();
+		this.fiberPlan= fiberPlan;
 		this.planId = fiberPlan.getPlanId();
-		this.year = fiberPlan.getYear();
 	}
 
 	public FiberPlanAlgorithm getAlgorithm() {
-		return algorithm;
+		return fiberPlan.getAlgorithm();
 	}
 
 	public long getPlanId() {
@@ -37,14 +36,18 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 	}
 
 	public int getYear() {
-		return year;
+		return fiberPlan.getYear();
+	}
+	
+	public FiberNetworkConstraints getFiberNetworkConstraints() {
+		return fiberPlan.getFiberNetworkConstraints();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T dependentPlan(long dependentId) {
 		try {
-			FiberPlanConfiguration copy= (FiberPlanConfiguration) clone();
+			FiberPlanConfiguration copy = (FiberPlanConfiguration) clone();
 			copy.planId = dependentId;
 			return (T) copy;
 		} catch (CloneNotSupportedException e) {

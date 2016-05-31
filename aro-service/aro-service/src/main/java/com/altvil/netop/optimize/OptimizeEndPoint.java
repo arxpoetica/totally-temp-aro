@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.JobService.JobRequest;
 import com.altvil.aro.service.network.NetworkService;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
@@ -62,7 +62,7 @@ public class OptimizeEndPoint {
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
 	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(Principal requestor, @RequestBody OptimizationPlan request) throws NoSuchStrategy {
 		OptimizationPlanConfiguration fiberPlan = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getOptimizationType()).build(request);
-		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getOptimizationType()).build(request);
+		FtthThreshholds fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getOptimizationType()).build(request.getFiberNetworkConstraints());
 
 		JobRequest<WirecenterNetworkPlan> networkPlanRequest = networkPlanningService.optimizeWirecenter(requestor, fiberPlan, fiberNetworkConstraints);
 
@@ -98,7 +98,7 @@ public class OptimizeEndPoint {
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(Principal requestor, @RequestBody OptimizationPlan request) throws NoSuchStrategy, InterruptedException {
 		OptimizationPlanConfiguration optimizationPlanConfiguration = strategyService.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getOptimizationType()).build(request);
-		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getOptimizationType()).build(request);
+		FtthThreshholds fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getOptimizationType()).build(request.getFiberNetworkConstraints());
 		MasterPlanBuilder mpc = networkPlanningService.optimizeMasterFiber(requestor, optimizationPlanConfiguration, fiberNetworkConstraints);
 
 		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.submit(mpc);

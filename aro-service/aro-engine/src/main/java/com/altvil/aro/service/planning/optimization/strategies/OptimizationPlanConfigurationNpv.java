@@ -14,7 +14,6 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
-import com.altvil.aro.service.planning.NpvFiberPlan;
 import com.altvil.aro.service.planning.NpvOptimizationPlan;
 
 public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfiguration implements NpvOptimizationPlan {
