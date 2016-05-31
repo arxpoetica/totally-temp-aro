@@ -8,7 +8,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	@Override
 	public PeriodFunction createCurve(NetworkPenetration networkPenetration) {
-		return null;
+		return new AnalysisCurve(networkPenetration) ;
 	}
 
 }

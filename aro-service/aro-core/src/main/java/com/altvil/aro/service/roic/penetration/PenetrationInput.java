@@ -1,6 +1,5 @@
 package com.altvil.aro.service.roic.penetration;
 
-import com.altvil.aro.service.roic.model.NetworkType;
 
 public class PenetrationInput {
 

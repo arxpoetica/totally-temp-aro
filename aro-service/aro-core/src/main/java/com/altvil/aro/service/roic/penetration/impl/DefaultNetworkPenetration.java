@@ -1,6 +1,5 @@
 package com.altvil.aro.service.roic.penetration.impl;
 
-import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 
 public class DefaultNetworkPenetration implements NetworkPenetration {

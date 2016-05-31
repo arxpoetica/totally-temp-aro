@@ -14,7 +14,6 @@ public class AnalysisCurve implements PeriodFunction {
 	public AnalysisCurve(NetworkPenetration networkPenetration) {
 		this.endPercent = networkPenetration.getEndPenetration();
 		this.rate = networkPenetration.getRate();
-		;
 
 		difference = networkPenetration.getStartPenetration() - endPercent;
 	}
