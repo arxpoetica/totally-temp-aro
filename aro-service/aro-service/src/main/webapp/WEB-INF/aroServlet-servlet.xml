@@ -20,8 +20,7 @@
 		http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 	<!-- The property placeholder in aroServices cannot be inherited so repeat it here. -->
-	<context:property-placeholder
-		location="classpath*:/aroConfig.properties" />
+	<context:property-placeholder location="classpath*:/aroConfig.properties,classpath*:/aroServlet.properties" />
 
 	<bean id="contentManager"
 		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
@@ -97,7 +96,7 @@
 	<bean id="singleIgniteGrid" autowire="byName" class="org.apache.ignite.IgniteSpringBean">
 		<property name="configuration">
 	        <bean parent="ignite-abstract.cfg">  <!-- Use bean parent "ignite-abstract-IDE.cfg" when running in IDE -->
-	        	<property name="clientMode" value="true"/>
+	        	<property name="clientMode" value="${igniteClientMode}"/>
 	        	        
 		        <property name="cacheConfiguration">
 		        	<list>

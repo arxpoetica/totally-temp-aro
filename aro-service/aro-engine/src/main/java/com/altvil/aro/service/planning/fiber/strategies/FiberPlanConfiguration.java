@@ -71,7 +71,7 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 			
 			Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
 			
-			return geoSegmentAssignments.isEmpty();
+			return !geoSegmentAssignments.isEmpty();
 		};
 	}
 
