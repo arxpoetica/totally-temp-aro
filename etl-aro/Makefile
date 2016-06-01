@@ -30,6 +30,9 @@ etl_client:
 etl_auth:
 	etl/auth/auth_etl.sh
 
+etl_temp_hh:
+	etl/temp_hh/temp_hh_etl.sh
+
 reset_tiger:
 	etl/reset_tiger_data.sh
 
@@ -53,6 +56,9 @@ reset_client:
 
 reset_auth:
 	etl/reset_auth_data.sh
+
+reset_temp_hh:
+	etl/reset_temp_hh.sh
 
 etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_aro
 
