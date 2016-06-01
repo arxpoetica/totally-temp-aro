@@ -57,7 +57,7 @@ module.exports = class Network {
         var sql = `
           SELECT
             n.id, ST_AsGeoJSON(geom)::json AS geom, t.name AS name,
-            '/images/map_icons/' || t.name || '.png' AS icon,
+            '/images/map_icons/${process.env.ARO_CLIENT}/' || t.name || '.png' AS icon,
             plan_id IS NOT NULL AS draggable,
             name <> 'central_office' AS unselectable
           FROM client.network_nodes n
@@ -175,7 +175,7 @@ module.exports = class Network {
         json: true,
         body: {
           planId: plan_id,
-          algorithm: algorithm
+          algorithm: 'CAPEX'
         }
       }
       console.log('sending request to aro-service', options)

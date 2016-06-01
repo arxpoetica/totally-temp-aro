@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'network_planning', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, network_planning) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -231,7 +231,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     var name = event.feature.getProperty('name')
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson((obj) => {
-        if (network_planning.getAlgorithm()) {
+        if (false) { // TODO
           tracker.track('Boundaries / Network planning')
           $scope.network_planning_boundary(obj.geometry)
         } else {
@@ -349,10 +349,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $scope.network_planning_boundary = (geojson) => {
-    var data = {
-      boundary: geojson,
-      algorithm: network_planning.getAlgorithm().id
-    }
+    var data = { boundary: geojson }
     var config = {
       url: '/network/nodes/' + $scope.plan.id + '/select_boundary',
       method: 'post',

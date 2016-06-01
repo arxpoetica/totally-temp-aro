@@ -38,14 +38,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   var locationStyles = {
     normal: {
-      icon: '/images/map_icons/location_business_gray.png',
+      icon: `/images/map_icons/${config.ARO_CLIENT}/location_business_gray.png`,
       visible: true,
       fillColor: 'blue',
       strokeColor: 'blue',
       strokeWeight: 1
     },
     selected: {
-      icon: '/images/map_icons/location_business_selected.png',
+      icon: `/images/map_icons/${config.ARO_CLIENT}/location_business_selected.png`,
       visible: true,
       fillColor: '#78D8C3',
       strokeColor: '#78D8C3',
@@ -98,7 +98,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     api_endpoint: '/towers/:plan_id',
     style_options: {
       normal: {
-        icon: '/images/map_icons/tower.png',
+        icon: `/images/map_icons/${config.ARO_CLIENT}/tower.png`,
         visible: true
       }
     },

@@ -69,7 +69,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
 
       $scope.carriers.forEach((carrier) => {
         layers[layer_name(carrier.name)] = new MapLayer({
-          name: 'Fiber',
+          name: config.ui.labels.fiber,
           short_name: 'F',
           api_endpoint: '/network/fiber_plant/' + encodeURIComponent(carrier.name),
           style_options: {

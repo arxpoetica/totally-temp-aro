@@ -91,7 +91,7 @@ module.exports = class NetworkPlan {
 
   static findEdges (plan_id) {
     var sql = `
-      SELECT fiber_route.id, 0 AS edge_length, ST_AsGeoJSON(fiber_route.geom)::json AS geom
+      SELECT fiber_route.id, ST_Length(geom::geography) AS edge_length, ST_AsGeoJSON(fiber_route.geom)::json AS geom
       FROM client.plan
       JOIN client.plan p ON p.parent_plan_id = plan.id
       JOIN client.fiber_route ON fiber_route.plan_id = p.id
@@ -123,17 +123,18 @@ module.exports = class NetworkPlan {
 
             fiber_cost = RouteOptimizer.calculateFiberCost(edges, cost_per_meter)
             output.metadata.costs.push({
-              name: 'Fiber cost',
+              name: 'Fiber Capex',
               value: fiber_cost
             })
-            return RouteOptimizer.calculateLocationsCost(plan_id)
+            // return RouteOptimizer.calculateLocationsCost(plan_id)
           })
-          .then((locations_cost) => {
-            output.metadata.costs.push({
-              name: 'Locations cost',
-              value: locations_cost
-            })
-          })
+          // .then((locations_cost) => {
+          //   Ignore by now
+          //   output.metadata.costs.push({
+          //     name: 'Locations cost',
+          //     value: locations_cost
+          //   })
+          // })
       })
       .then(() => (
         config.route_planning.length > 0
@@ -143,26 +144,19 @@ module.exports = class NetworkPlan {
       .then(() => {
         if (config.route_planning.length === 0) return output
 
-        return RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost)
+        return RouteOptimizer.calculateRevenueAndNPV(plan_id, fiber_cost)
           .then((calculation) => {
             output.metadata.revenue = calculation.revenue
             output.metadata.npv = calculation.npv
+            output.metadata.total_npv = calculation.npv.reduce((total, item) => total + item.value, 0)
             return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
           })
           .then((equipment_nodes_cost) => {
             output.metadata.costs.push({
-              name: 'Equipment nodes cost',
+              name: 'Equipment Capex',
               value: equipment_nodes_cost.total,
               itemized: equipment_nodes_cost.equipment_node_types
             })
-
-            // var up_front_costs = equipment_nodes_cost.total + fiber_cost
-            return RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost)
-          })
-          .then((calculation) => {
-            output.metadata.revenue = calculation.revenue
-            output.metadata.npv = calculation.npv
-
             output.metadata.total_cost = output.metadata.costs
               .reduce((total, cost) => total + cost.value, 0)
 
@@ -421,4 +415,31 @@ module.exports = class NetworkPlan {
       }))
   }
 
+}
+
+if (module.id === require.main.id) {
+  var pify = require('pify')
+  var request = pify(require('request'), { multiArgs: true })
+  var options = {
+    url: config.aro_service_url + '/rest/optimize/masterplan',
+    method: 'POST',
+    json: true,
+    body: {
+      optimizationType: 'NPV',
+      planId: String(352),
+      financialConstraints: {
+        // budget: 10000000,
+        discountRate: String(0.03),
+        years: String(5)
+      }
+    }
+  }
+  console.log('options', options)
+  request(options).then((result) => {
+    let [, body] = result
+    console.log('body', body)
+  })
+  .catch((err) => {
+    console.error(err)
+  })
 }

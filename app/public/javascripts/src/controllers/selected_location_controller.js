@@ -1,6 +1,6 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular randomColor */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, map_layers, tracker, network_planning) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, map_layers, tracker, map_tools) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
@@ -21,25 +21,13 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     $rootScope.$broadcast('contextual_menu_feature', options, map_layer, feature)
   }
 
-  if (config.route_planning.length === 0) {
-    $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
-      if (map_layer.type !== 'locations') return
-      // if (network_planning.getAlgorithm().interactive) return;
-      var feature = options.feature
-      var id = feature.getProperty('id')
-      open_location(id)
-      tracker.track('Location selected')
-    })
-  } else {
-    $rootScope.$on('contextual_menu_feature', (event, options, map_layer, feature) => {
-      if (map_layer.type !== 'locations' && map_layer.type !== 'selected_locations') return
-      // if (!network_planning.getAlgorithm().interactive) return
-      options.add('See more information', (map_layer, feature) => {
-        var id = feature.getProperty('id')
-        open_location(id)
-      })
-    })
-  }
+  $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+    if (map_layer.type !== 'locations' || map_tools.is_visible('target_builder')) return
+    var feature = options.feature
+    var id = feature.getProperty('id')
+    open_location(id)
+    tracker.track('Location selected')
+  })
 
   $rootScope.$on('open_location', (event, id) => {
     open_location(id)

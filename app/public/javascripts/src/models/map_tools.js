@@ -116,8 +116,19 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       name: 'Financial Profile',
       short_name: 'F',
       icon: 'fa fa-usd'
+    },
+    {
+      id: 'target_builder',
+      name: 'Target builder',
+      short_name: 'TB',
+      icon: 'icon icon-network-planning'
     }
   ]
+
+  if (config.ARO_CLIENT === 'demo') {
+    var tool = tools.available_tools.find((item) => item.id === 'area_network_planning')
+    tools.available_tools.splice(tools.available_tools.indexOf(tool), 1)
+  }
 
   return tools
 }])

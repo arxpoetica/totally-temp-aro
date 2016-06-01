@@ -97,13 +97,29 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('route_changed', (e) => {
     if (!$scope.plan) return
-    recalculate_market_profile()
+    recalculateMarketProfile()
   })
 
-  function recalculate_market_profile () {
+  ;['dragend', 'zoom_changed'].forEach((event_name) => {
+    $rootScope.$on('map_' + event_name, () => {
+      recalculateMarketProfile()
+    })
+  })
+
+  // --
+  function recalculateMarketProfile () {
     $scope.market_profile_calculating = true
+    var bounds = map.getBounds()
     var args = {
-      params: { type: 'route' }
+      params: {
+        type: 'route',
+        nelat: bounds.getNorthEast().lat(),
+        nelon: bounds.getNorthEast().lng(),
+        swlat: bounds.getSouthWest().lat(),
+        swlon: bounds.getSouthWest().lng(),
+        zoom: map.getZoom(),
+        threshold: 0
+      }
     }
     $http.get('/market_size/plan/' + $scope.plan.id + '/calculate', args)
       .success((response) => {

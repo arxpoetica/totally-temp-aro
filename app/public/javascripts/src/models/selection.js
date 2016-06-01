@@ -3,7 +3,7 @@ app.service('selection', ($rootScope, map_layers) => {
   var selection = {}
   var enabled = false
 
-  selection.clear_selection = () => {
+  selection.clearSelection = () => {
     var feature_layers = map_layers.feature_layers
     for (var key in feature_layers) {
       if (feature_layers.hasOwnProperty(key)) {

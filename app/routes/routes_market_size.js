@@ -69,7 +69,7 @@ exports.configure = (api, middleware) => {
   })
 
   // Market size calculation
-  api.get('/market_size/plan/:plan_id/calculate', cacheable, (request, response, next) => {
+  api.get('/market_size/plan/:plan_id/calculate', cacheable, middleware.viewport, (request, response, next) => {
     var plan_id = +request.params.plan_id
     var type = request.query.type
     var options = {
@@ -79,7 +79,8 @@ exports.configure = (api, middleware) => {
         employees_range: arr(request.query.employees_range),
         product: arr(request.query.product),
         customer_type: request.query.customer_type
-      }
+      },
+      viewport: request.viewport
     }
     models.MarketSize.calculate(plan_id, type, options)
       .then(jsonSuccess(response, next))
