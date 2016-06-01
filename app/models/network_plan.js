@@ -126,15 +126,15 @@ module.exports = class NetworkPlan {
               name: 'Fiber Capex',
               value: fiber_cost
             })
-            return RouteOptimizer.calculateLocationsCost(plan_id)
+            // return RouteOptimizer.calculateLocationsCost(plan_id)
           })
-          .then((locations_cost) => {
-            // Ignore by now
-            // output.metadata.costs.push({
-            //   name: 'Locations cost',
-            //   value: locations_cost
-            // })
-          })
+          // .then((locations_cost) => {
+          //   Ignore by now
+          //   output.metadata.costs.push({
+          //     name: 'Locations cost',
+          //     value: locations_cost
+          //   })
+          // })
       })
       .then(() => (
         config.route_planning.length > 0
@@ -148,6 +148,7 @@ module.exports = class NetworkPlan {
           .then((calculation) => {
             output.metadata.revenue = calculation.revenue
             output.metadata.npv = calculation.npv
+            output.metadata.total_npv = calculation.npv.reduce((total, item) => total + item.value, 0)
             return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
           })
           .then((equipment_nodes_cost) => {
@@ -156,15 +157,6 @@ module.exports = class NetworkPlan {
               value: equipment_nodes_cost.total,
               itemized: equipment_nodes_cost.equipment_node_types
             })
-
-            // var up_front_costs = equipment_nodes_cost.total + fiber_cost
-            return RouteOptimizer.calculateRevenueAndNPV(plan_id, fiber_cost)
-          })
-          .then((calculation) => {
-            output.metadata.revenue = calculation.revenue
-            output.metadata.npv = calculation.npv
-            output.metadata.total_npv = calculation.npv.reduce((total, item) => total + item.value, 0)
-
             output.metadata.total_cost = output.metadata.costs
               .reduce((total, cost) => total + cost.value, 0)
 
