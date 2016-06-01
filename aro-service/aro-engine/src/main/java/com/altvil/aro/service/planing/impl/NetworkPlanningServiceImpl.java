@@ -119,7 +119,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	
 	private void initLocal() {
 		
-		if( executorService != null ) {
+		if( executorService == null ) {
 			executorService = Executors.newFixedThreadPool(10) ;
 			wirePlanExecutor = Executors.newFixedThreadPool(20);
 		}
