@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.JobService.JobRequest;
@@ -76,9 +77,9 @@ public class OptimizeEndPoint {
 				OptimizationPlanConfigurationBuilder.class,
 				request.getOptimizationType()).build(request);
 		
-		FiberNetworkConstraints fiberNetworkConstraints = strategyService
+		FtthThreshholds fiberNetworkConstraints = strategyService
 				.getStrategy(FiberNetworkConstraintsBuilder.class,
-						request.getOptimizationType()).build(request);
+						request.getOptimizationType()).build(aroRequest.getFiberNetworkConstraints());
 
 		JobRequest<WirecenterNetworkPlan> networkPlanRequest = networkPlanningService
 				.optimizeWirecenter(DummyRequester.PRINCIPAL, fiberPlan,
@@ -129,9 +130,9 @@ public class OptimizeEndPoint {
 		OptimizationPlanConfiguration optimizationPlanConfiguration = strategyService
 				.getStrategy(OptimizationPlanConfigurationBuilder.class,
 						request.getOptimizationType()).build(request);
-		FiberNetworkConstraints fiberNetworkConstraints = strategyService
+		FtthThreshholds fiberNetworkConstraints = strategyService
 				.getStrategy(FiberNetworkConstraintsBuilder.class,
-						request.getOptimizationType()).build(request);
+						request.getOptimizationType()).build(aroRequest.getFiberNetworkConstraints());
 		MasterPlanBuilder mpc = networkPlanningService.optimizeMasterFiber(
 				DummyRequester.PRINCIPAL, optimizationPlanConfiguration,
 				fiberNetworkConstraints);
