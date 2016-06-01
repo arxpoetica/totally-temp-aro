@@ -5,8 +5,8 @@ import com.altvil.utils.UnitUtils;
 public class FtthThreshholds {
 
 	private boolean reduceIncomingStreams = false;
-	private int maxlocationPerFDT = 12;
-	private int threshHoldClusteringFDT = 10;
+	private int maxlocationPerFDT = 50;
+	private int threshHoldClusteringFDT = 40;
 	private HubModel hubModel;
 	private DropCableModel dropCableModel = DropCableModel.DEFAULT_MODEL;
 	private double locationBulkThreshhold = 32;

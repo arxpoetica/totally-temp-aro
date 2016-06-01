@@ -10,10 +10,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
-import org.apache.ignite.cache.CacheMetrics;
-import org.apache.ignite.cluster.ClusterGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,33 +77,33 @@ public class NetworkServiceImpl implements NetworkService {
 	@Value("${CACHE_ROAD_EDGES_BY_PLAN_ID}") 
 	private  String cacheRoadEdgesByPlanId;
 
-	private Ignite ignite;
-	private static IgniteCache<PlanYearKey, Map<Long, LocationDemand>> locDemandCache;
-	private static IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache;
-	private static IgniteCache<Long, Collection<NetworkAssignment>> fiberSourceLocCache;
-	private static IgniteCache<Long, Collection<RoadEdge>> roadEdgesCache;
+	//private Ignite ignite;
+//	private static IgniteCache<PlanYearKey, Map<Long, LocationDemand>> locDemandCache;
+//	private static IgniteCache<Long, Map<Long, RoadLocation>> roadLocCache;
+//	private static IgniteCache<Long, Collection<NetworkAssignment>> fiberSourceLocCache;
+//	private static IgniteCache<Long, Collection<RoadEdge>> roadEdgesCache;
 	
 	@PostConstruct
 	private void postConstruct() {
-		if (locDemandCache == null && ignite != null) {
-			// TODO MEDIUM investigate whether the multiple caches partition by
-			// wirecenter ID and naturally co-locate due to this
-			locDemandCache = ignite.getOrCreateCache(cacheLocationDemandsbyPlanIdAndYear);
-			roadLocCache = ignite.getOrCreateCache(cacheRoadLocationsByPlanId);
-			fiberSourceLocCache = ignite.getOrCreateCache(cacheFiberSourcesByPlanId);
-			roadEdgesCache = ignite.getOrCreateCache(cacheRoadEdgesByPlanId);
-		}
+//		if (locDemandCache == null && ignite != null) {
+//			// TODO MEDIUM investigate whether the multiple caches partition by
+//			// wirecenter ID and naturally co-locate due to this
+//			locDemandCache = ignite.getOrCreateCache(cacheLocationDemandsbyPlanIdAndYear);
+//			roadLocCache = ignite.getOrCreateCache(cacheRoadLocationsByPlanId);
+//			fiberSourceLocCache = ignite.getOrCreateCache(cacheFiberSourcesByPlanId);
+//			roadEdgesCache = ignite.getOrCreateCache(cacheRoadEdgesByPlanId);
+//		}
 	}
 	
 	// Note: cannot autowire as Map<String,Ignite> and lookup by key, because
 	// the map keys ignore bean aliases!
-	@Autowired(required=false)  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
-	public void setNetworkServiceIgniteGrid(Ignite igniteBean) {
-		this.ignite = igniteBean;
-		
-		// NOTE: 
-		postConstruct();
-	}
+//	@Autowired(required=false)  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+//	public void setNetworkServiceIgniteGrid(Ignite igniteBean) {
+//		this.ignite = igniteBean;
+//		
+//		// NOTE: 
+//		postConstruct();
+//	}
 	
 	@Override
 	public NetworkData getNetworkData(NetworkConfiguration networkConfiguration) {
@@ -150,17 +147,18 @@ public class NetworkServiceImpl implements NetworkService {
 		//retrieve all locations from cache by the plan's ID and the year of the location demand data
 		// if cache miss, populate the cache by same key with results of the request
 
-		final PlanYearKey key = new PlanYearKey(networkConfiguration.getPlanId(), networkConfiguration.getYear());
-		locDemands = locDemandCache.get(key);
+		//final PlanYearKey key = new PlanYearKey(networkConfiguration.getPlanId(), networkConfiguration.getYear());
+		//locDemands = locDemandCache.get(key);
+		locDemands = null ;
 		if (null == locDemands) {
 			locDemands = queryLocationDemand(networkConfiguration.getPlanId(), networkConfiguration.getYear());
-			locDemandCache.put(key, locDemands);
+			//locDemandCache.put(key, locDemands);
 			// NOTE: currently no update policy used as LocationDemand is
 			// temporarily assumed immutable
 		}
 		
-		if (LOG.isDebugEnabled())
-			logCacheStats(locDemandCache);
+//		if (LOG.isDebugEnabled())
+//			logCacheStats(locDemandCache);
 				
 		//if SELECTED request, filter them
 		if (networkConfiguration.isFilteringRoadLocationDemandsBySelection()) {
@@ -171,14 +169,15 @@ public class NetworkServiceImpl implements NetworkService {
 		return locDemands;
 	}
 	
+	@SuppressWarnings("unused")
 	private void logCacheStats(IgniteCache<?, ?> cache) {
 		// TODO MEDIUM sleep 2s+ first for accurate metrics, as metrics are
 		// collected at intervals so they'll never be accurate if logged
 		// instantly. Consider forking logging thread (has downsides).
-		ClusterGroup cgrp = ignite.cluster().forDataNodes(cache.getName());
-		CacheMetrics cm = cache.metrics(cgrp);
-		LOG.debug("DataNodes: " + cm.name() + " CollectStats:" + cm.isStatisticsEnabled() + " Hit:" + cm.getCacheHits()
-				+ " Miss:" + cm.getCacheMisses() + " Size:" + cm.getSize());
+//		ClusterGroup cgrp = ignite.cluster().forDataNodes(cache.getName());
+//		CacheMetrics cm = cache.metrics(cgrp);
+//		LOG.debug("DataNodes: " + cm.name() + " CollectStats:" + cm.isStatisticsEnabled() + " Hit:" + cm.getCacheHits()
+//				+ " Miss:" + cm.getCacheMisses() + " Size:" + cm.getSize());
 
 			// optional local node reporting
 //			ClusterGroup lgrp = ignite.cluster().forLocal();
@@ -255,18 +254,18 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 	
 	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(NetworkConfiguration networkConfiguration) {
-		Map<Long, RoadLocation> roadLocations;
+		Map<Long, RoadLocation> roadLocations = null ;
 		
-		roadLocations = roadLocCache.get(networkConfiguration.getPlanId());
+		//roadLocations = roadLocCache.get(networkConfiguration.getPlanId());
 		if (null == roadLocations) {
 			roadLocations = queryRoadLocations(networkConfiguration.getPlanId());
-			roadLocCache.put(networkConfiguration.getPlanId(), roadLocations);
+			//roadLocCache.put(networkConfiguration.getPlanId(), roadLocations);
 			// NOTE: currently no update policy used as RoadLocation is
 			// temporarily assumed immutable
 		}
 	
-		if (LOG.isDebugEnabled())
-			logCacheStats(roadLocCache);
+//		if (LOG.isDebugEnabled())
+//			logCacheStats(roadLocCache);
 
 		return roadLocations;
 		}
@@ -337,16 +336,16 @@ public class NetworkServiceImpl implements NetworkService {
 	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(NetworkConfiguration networkConfiguration) {
 		Collection<NetworkAssignment> fiberSourceLocations;
 		
-		fiberSourceLocations = fiberSourceLocCache.get(networkConfiguration.getPlanId());
+		fiberSourceLocations = null ; //fiberSourceLocCache.get(networkConfiguration.getPlanId());
 		if (null == fiberSourceLocations) {
 			fiberSourceLocations = queryFiberSources(networkConfiguration.getPlanId());
-			fiberSourceLocCache.put(networkConfiguration.getPlanId(), fiberSourceLocations);
+			//fiberSourceLocCache.put(networkConfiguration.getPlanId(), fiberSourceLocations);
 		}
 		// NOTE: currently never updating FiberSource as it is temporarily
 		// assumed immutable
 		
-		if (LOG.isDebugEnabled())
-			logCacheStats(fiberSourceLocCache);
+//		if (LOG.isDebugEnabled())
+//			logCacheStats(fiberSourceLocCache);
 				
 		//return results
 		return fiberSourceLocations;
@@ -375,16 +374,16 @@ public class NetworkServiceImpl implements NetworkService {
 	private Collection<RoadEdge> getRoadEdges(NetworkConfiguration networkConfiguration) {
 		Collection<RoadEdge> roadEdges;
 		
-		roadEdges = roadEdgesCache.get(networkConfiguration.getPlanId());
+		roadEdges = null ; //roadEdgesCache.get(networkConfiguration.getPlanId());
 		if (null == roadEdges) {
 			roadEdges = queryRoadEdges(networkConfiguration.getPlanId());
-			roadEdgesCache.put(networkConfiguration.getPlanId(), roadEdges);
+			//roadEdgesCache.put(networkConfiguration.getPlanId(), roadEdges);
 			// NOTE: currently no update policy used as RoadEdge is temporarily
 			// assumed immutable
 		}
 		
-		if (LOG.isDebugEnabled())
-			logCacheStats(roadEdgesCache);
+//		if (LOG.isDebugEnabled())
+//			logCacheStats(roadEdgesCache);
 				
 		//return results
 		return roadEdges;
