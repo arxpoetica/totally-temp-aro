@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import org.apache.ignite.resources.SpringResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.FiberRouteRepository;
@@ -57,13 +59,19 @@ import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.utils.StreamUtil;
 
+
 @Service("networkPlanningService")
 public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	private static final Logger	  log = LoggerFactory.getLogger(NetworkPlanningServiceImpl.class.getName());
 
+	private boolean useIgnite = false ;
+	
 	@Autowired
 	private NetworkPlanRepository networkPlanRepository;
 
+	@Autowired
+	private ApplicationContext appCtx ;
+	
 	private Ignite				  igniteGrid;
 	private ExecutorService		  executorService;
 	private ExecutorService		  wirePlanExecutor;
@@ -71,6 +79,14 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@PostConstruct
 	public void init() {
+		if( useIgnite )  {
+			initIgnite();
+		} else {
+			initLocal() ;
+		}
+	}
+	
+	private void initIgnite() {
 		if (executorService == null && igniteGrid != null) {
 			/*
 			 * NOTE: we could be more sophisticated with service cluster
@@ -100,21 +116,55 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			wirePlanComputeGrid = igniteGrid.compute(executorGroup);
 		}
 	}
+	
+	private void initLocal() {
+		
+		if( executorService != null ) {
+			executorService = Executors.newFixedThreadPool(10) ;
+			wirePlanExecutor = Executors.newFixedThreadPool(20);
+		}
+	}
+	
+	
+	private interface LocalBinding {
+		void init(ApplicationContext ctx) ;
+	}
+	
+	private <T extends LocalBinding> T bind(T val) {
+		if( !useIgnite )  {
+			val.init(appCtx);
+		}
+		
+		return val ;
+	}
+	
+	public MasterPlanBuilder createMasterPlanBuilder(Principal creator,  IgniteCallable<MasterPlanUpdate> callable) {
+		if( useIgnite ) {
+			return new MasterPlanBuilder(creator, wirePlanComputeGrid, callable) ;
+		} else {
+			return new MasterPlanBuilder(creator, wirePlanExecutor, callable) ;
+		}
+	}
+	
 
 	@Autowired(required = false) // NOTE the method name determines the
 								 // name/alias of Ignite grid which gets bound!
-	@IgniteInstanceResource
+	//@IgniteInstanceResource
 	public void setNetworkPlanningServiceIgniteGrid(Ignite igniteBean) {
 		this.igniteGrid = igniteBean;
-
 		init();
 	}
+	
 
 	@Override
 	public JobService.JobRequest<WirecenterNetworkPlan> optimizeWirecenter(Principal username,
 			OptimizationPlanConfiguration optimizationPlanStrategy, FtthThreshholds constraints) {
 		IgniteCallable<WirecenterNetworkPlan> callable = createOptimzedCallable(optimizationPlanStrategy, constraints);
-		return new JobRequestIgniteCallable<WirecenterNetworkPlan>(username, wirePlanComputeGrid, callable);
+		if( useIgnite ) {
+			return new JobRequestIgniteCallable<WirecenterNetworkPlan>(username, wirePlanComputeGrid, callable);
+		} else {
+			return new JobRequestIgniteCallable<WirecenterNetworkPlan>(username, this.wirePlanExecutor, callable);
+		}
 	}
 
 	@Override
@@ -139,7 +189,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				}
 			}).filter(p -> p != null).collect(Collectors.toList()));
 		});
-		MasterPlanBuilder builder = new MasterPlanBuilder(requestor, wirePlanComputeGrid, callable);
+		MasterPlanBuilder builder =  createMasterPlanBuilder(requestor, callable);
 		builder.setWireCenterPlans(plans);
 
 		return builder;
@@ -166,7 +216,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				}
 			}).filter(p -> p != null).collect(Collectors.toList()));
 		});
-		MasterPlanBuilder builder = new MasterPlanBuilder(requestor, wirePlanComputeGrid, callable);
+		MasterPlanBuilder builder = createMasterPlanBuilder(requestor, callable);
 		builder.setWireCenterPlans(plans);
 
 		return builder;
@@ -206,7 +256,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		return executorService.submit(createPlanningCallable(fiberPlanStrategy, constraints));
 	}
 
-	public static class FiberPlanningCallable implements IgniteCallable<WirecenterNetworkPlan> {
+	public static class FiberPlanningCallable implements IgniteCallable<WirecenterNetworkPlan>, LocalBinding {
 		private static final long				 serialVersionUID = 1L;
 		private final FiberPlanConfiguration	 fiberPlanStrategy;
 		private final FtthThreshholds	 constraints;
@@ -236,6 +286,21 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			this.fiberPlanStrategy = fiberPlanStrategy;
 			this.constraints = constraints;
 		}
+		
+		
+
+		@Override
+		public void init(ApplicationContext ctx) {
+			networkService = ctx.getBean(NetworkService.class) ;
+			planService = ctx.getBean(PlanService.class) ;
+			optimizerService = ctx.getBean(FTTHOptimizerService.class) ;
+			scoringStrategyFactory = ctx.getBean(ScoringStrategyFactory.class) ;
+			conversionService = ctx.getBean(SerializationService.class) ;
+			networkNodeRepository = ctx.getBean(NetworkNodeRepository.class) ;
+			fiberRouteRepository = ctx.getBean(FiberRouteRepository.class) ;
+		}
+
+
 
 		@Override
 		public WirecenterNetworkPlan call() throws Exception {
@@ -258,7 +323,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		}
 	}
 
-	public static class OptimizationPlanningCallable implements IgniteCallable<WirecenterNetworkPlan> {
+	public static class OptimizationPlanningCallable implements IgniteCallable<WirecenterNetworkPlan>, LocalBinding {
 		private static final long					serialVersionUID = 1L;
 		private final OptimizationPlanConfiguration	fiberPlanStrategy;
 		private final FtthThreshholds		constraints;
@@ -289,6 +354,18 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			this.fiberPlanStrategy = fiberPlanStrategy;
 			this.constraints = constraints;
 		}
+		
+		@Override
+		public void init(ApplicationContext ctx) {
+			networkService = ctx.getBean(NetworkService.class) ;
+			planService = ctx.getBean(PlanService.class) ;
+			optimizerService = ctx.getBean(FTTHOptimizerService.class) ;
+			scoringStrategyFactory = ctx.getBean(ScoringStrategyFactory.class) ;
+			conversionService = ctx.getBean(SerializationService.class) ;
+			networkNodeRepository = ctx.getBean(NetworkNodeRepository.class) ;
+			fiberRouteRepository = ctx.getBean(FiberRouteRepository.class) ;
+		}
+
 
 		@Override
 		public WirecenterNetworkPlan call() throws Exception {
@@ -313,10 +390,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	private IgniteCallable<WirecenterNetworkPlan> createPlanningCallable(FiberPlanConfiguration fiberPlanStrategy,
 			FtthThreshholds constraints) {
-		return new FiberPlanningCallable(fiberPlanStrategy, constraints);
+		return bind(new FiberPlanningCallable(fiberPlanStrategy, constraints));
 	}
 
-	public static class OptimizeCallable implements IgniteCallable<WirecenterNetworkPlan> {
+	public static class OptimizeCallable implements IgniteCallable<WirecenterNetworkPlan>, LocalBinding {
 		private static final long					serialVersionUID = 1L;
 		private final OptimizationPlanConfiguration	optimizationPlanConfiguration;
 		private final FtthThreshholds		constraints;
@@ -345,6 +422,18 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			this.constraints = constraints;
 		}
 
+
+		@Override
+		public void init(ApplicationContext ctx) {
+			networkService = ctx.getBean(NetworkService.class) ;
+			planService = ctx.getBean(PlanService.class) ;
+			optimizerService = ctx.getBean(FTTHOptimizerService.class) ;
+			conversionService = ctx.getBean(SerializationService.class) ;
+			networkNodeRepository = ctx.getBean(NetworkNodeRepository.class) ;
+			fiberRouteRepository = ctx.getBean(FiberRouteRepository.class) ;
+		}
+
+		
 		@Override
 		public WirecenterNetworkPlan call() throws Exception {
 			NetworkData networkData = networkService.getNetworkData(optimizationPlanConfiguration);
@@ -389,7 +478,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	private IgniteCallable<WirecenterNetworkPlan> createOptimzedCallable(
 			OptimizationPlanConfiguration optimizationPlanStrategy, FtthThreshholds constraints) {
-		return new OptimizeCallable(optimizationPlanStrategy, constraints);
+		return bind(new OptimizeCallable(optimizationPlanStrategy, constraints));
 	}
 
 	private static class DefaultPriceModel implements PricingModel {

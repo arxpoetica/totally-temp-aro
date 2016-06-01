@@ -3,6 +3,7 @@ package com.altvil.aro.service.job.impl;
 import java.security.Principal;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.ignite.IgniteCompute;
 import org.apache.ignite.lang.IgniteCallable;
@@ -16,6 +17,15 @@ public class JobRequestIgniteCallable<T> extends JobRequest<T> {
 			@Override
 			public T call() throws Exception {
 				return computeGrid.call(igniteCallable);
+			}
+		});
+	}
+	
+	public JobRequestIgniteCallable(Principal creator, ExecutorService computeGrid, Callable<T> igniteCallable) {
+		super(creator, new Callable<T>() {
+			@Override
+			public T call() throws Exception {
+				return computeGrid.submit(igniteCallable).get() ;
 			}
 		});
 	}
