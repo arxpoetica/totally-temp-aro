@@ -73,7 +73,6 @@
             <param-value>2000</param-value>
         </init-param>
     </filter>
-    <!-- Switch of Authentication for demo
     <filter>
 		<filter-name>aroServletAuthenticationFilter</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -82,16 +81,13 @@
 			<param-value>jwtAuthenticationFilterBean</param-value>
 		</init-param>
     </filter>
-    -->
 
     <filter-mapping>
         <filter-name>requestLoggingFilter</filter-name>
         <servlet-name>aroServlet</servlet-name>
     </filter-mapping>
-	<!-- Switch of Authentication for demo
     <filter-mapping>
         <filter-name>aroServletAuthenticationFilter</filter-name>
         <servlet-name>aroServlet</servlet-name>
     </filter-mapping>
-    -->
 </web-app>

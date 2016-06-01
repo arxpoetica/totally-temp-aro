@@ -49,7 +49,13 @@ public class JobServiceImpl implements JobService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Job<?> get(Job.Id id) {
-		return map.get(id);
+		final Job<?> job = map.get(id);
+		
+		if (job.isDone()) {
+			map.remove(id);
+		}
+		
+		return job;
 	}
 
 	@Override
@@ -64,7 +70,6 @@ public class JobServiceImpl implements JobService {
 
 		map.put(jobRequest.getId(), jobRequest);
 
-		System.out.println("Added " + jobRequest);
 		LOG.trace("{} added to service", jobRequest);
 
 		ForkJoinPool.commonPool().execute((Runnable) (() -> {
@@ -77,7 +82,6 @@ public class JobServiceImpl implements JobService {
 				LOG.error("Error while executing job.", e);
 			} finally {
 				announceCompletion(jobRequest);
-				map.remove(jobRequest.getId());
 			}
 		}));
 

@@ -34,7 +34,6 @@ import com.altvil.aro.service.planning.optimization.impl.NpvOptimizationPlanImpl
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
-import com.altvil.netop.DummyRequester;
 import com.altvil.netop.plan.MasterPlanJobResponse;
 
 @RestController
@@ -56,31 +55,29 @@ public class OptimizeEndPoint {
 	private NetworkPlanningService networkPlanningService;
 
 	@RequestMapping(value = "/optimize/wirecenter", method = RequestMethod.POST)
-	public @ResponseBody WirecenterUpdate postRecalcWirecenterPlan(
-			Principal requestor, @RequestBody AroOptimizationPlan aroRequest)
+	public @ResponseBody WirecenterUpdate postRecalcWirecenterPlan(Principal requestor,
+			@RequestBody AroOptimizationPlan aroRequest)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
 		// Start async task
-		com.altvil.aro.service.job.Job<WirecenterNetworkPlan> job = beginRecalcWirecenterPlan(aroRequest);
+		com.altvil.aro.service.job.Job<WirecenterNetworkPlan> job = beginRecalcWirecenterPlan(requestor, aroRequest);
 		// Get task result
 		return completeRecalcWirecenterPlan(job.getId());
 	}
 
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
 	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(
-			@RequestBody AroOptimizationPlan aroRequest) throws NoSuchStrategy {
+			Principal requestor, @RequestBody AroOptimizationPlan aroRequest) throws NoSuchStrategy {
 
-		OptimizationPlan request = toOptimizationPlan(aroRequest) ;
+		OptimizationPlan request = toOptimizationPlan(aroRequest);
 
-		OptimizationPlanConfiguration fiberPlan = strategyService.getStrategy(
-				OptimizationPlanConfigurationBuilder.class,
-				request.getOptimizationType()).build(request);
+		OptimizationPlanConfiguration fiberPlan = strategyService
+				.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getOptimizationType()).build(request);
 		FtthThreshholds fiberNetworkConstraints = strategyService
-				.getStrategy(FiberNetworkConstraintsBuilder.class,
-						request.getOptimizationType()).build(request.getFiberNetworkConstraints());
+				.getStrategy(FiberNetworkConstraintsBuilder.class, request.getOptimizationType())
+				.build(request.getFiberNetworkConstraints());
 
-		JobRequest<WirecenterNetworkPlan> networkPlanRequest = networkPlanningService
-				.optimizeWirecenter(DummyRequester.PRINCIPAL, fiberPlan,
-						fiberNetworkConstraints);
+		JobRequest<WirecenterNetworkPlan> networkPlanRequest = networkPlanningService.optimizeWirecenter(requestor,
+				fiberPlan, fiberNetworkConstraints);
 
 		Map<String, Object> metaIds = new HashMap<String, Object>();
 		metaIds.put("planId", fiberPlan.getPlanId());
@@ -91,8 +88,7 @@ public class OptimizeEndPoint {
 
 	@RequestMapping(value = "/optimize/wirecenter/results", method = RequestMethod.POST)
 	public @ResponseBody WirecenterUpdate completeRecalcWirecenterPlan(
-			@RequestBody com.altvil.aro.service.job.Job.Id request)
-			throws InterruptedException, ExecutionException {
+			@RequestBody com.altvil.aro.service.job.Job.Id request) throws InterruptedException, ExecutionException {
 		Job<WirecenterNetworkPlan> f = jobService.get(request);
 		WirecenterNetworkPlan wnp = f.get();
 
@@ -102,14 +98,11 @@ public class OptimizeEndPoint {
 	}
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(
-			@RequestBody AroOptimizationPlan request)
-			throws InterruptedException, ExecutionException, NoSuchStrategy {
-		
-	
-		
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor,
+			@RequestBody AroOptimizationPlan request) throws InterruptedException, ExecutionException, NoSuchStrategy {
+
 		// Start the async job
-		MasterPlanJobResponse masterPlanResponse = beginRecalcMasterPlan(request);
+		MasterPlanJobResponse masterPlanResponse = beginRecalcMasterPlan(requestor, request);
 		// Get job results
 		return completeRecalcMasterPlan(masterPlanResponse.getJob().getId());
 	}
@@ -118,24 +111,20 @@ public class OptimizeEndPoint {
 	private StrategyService strategyService;
 
 	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(
-			 @RequestBody AroOptimizationPlan aroRequest)
-						throws NoSuchStrategy, InterruptedException {
-		OptimizationPlan request = toOptimizationPlan(aroRequest) ;
+	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(Principal requestor,
+			@RequestBody AroOptimizationPlan aroRequest) throws NoSuchStrategy, InterruptedException {
+		OptimizationPlan request = toOptimizationPlan(aroRequest);
 
 		OptimizationPlanConfiguration optimizationPlanConfiguration = strategyService
-				.getStrategy(OptimizationPlanConfigurationBuilder.class,
-						request.getOptimizationType()).build(request);
+				.getStrategy(OptimizationPlanConfigurationBuilder.class, request.getOptimizationType()).build(request);
 		FtthThreshholds fiberNetworkConstraints = strategyService
-				.getStrategy(FiberNetworkConstraintsBuilder.class,
-						request.getOptimizationType()).build(aroRequest.getFiberNetworkConstraints());
-		
-		MasterPlanBuilder mpc = networkPlanningService.optimizeMasterFiber(
-				DummyRequester.PRINCIPAL, optimizationPlanConfiguration,
+				.getStrategy(FiberNetworkConstraintsBuilder.class, request.getOptimizationType())
+				.build(aroRequest.getFiberNetworkConstraints());
+
+		MasterPlanBuilder mpc = networkPlanningService.optimizeMasterFiber(requestor, optimizationPlanConfiguration,
 				fiberNetworkConstraints);
 
-		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService
-				.submit(mpc);
+		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.submit(mpc);
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);
@@ -150,15 +139,11 @@ public class OptimizeEndPoint {
 
 	@RequestMapping(value = "/optimize/masterplan/results", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse completeRecalcMasterPlan(
-			@RequestBody com.altvil.aro.service.job.Job.Id request)
-			throws InterruptedException, ExecutionException {
-		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService
-				.get(request);
+			@RequestBody com.altvil.aro.service.job.Job.Id request) throws InterruptedException, ExecutionException {
+		com.altvil.aro.service.job.Job<MasterPlanUpdate> job = jobService.get(request);
 		MasterPlanUpdate wnp = job.get();
 
-		List<Long> planIds = wnp.getUpdates().stream()
-				.map((update) -> update.getPlanId())
-				.collect(Collectors.toList());
+		List<Long> planIds = wnp.getUpdates().stream().map((update) -> update.getPlanId()).collect(Collectors.toList());
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setJob(job);
@@ -172,17 +157,22 @@ public class OptimizeEndPoint {
 		switch (plan.getOptimizationType()) {
 		case NPV:
 			FinancialConstraints financials = plan.getFinancialConstraints();
-			return new NpvOptimizationPlanImpl(financials.getBudget(),
+			final NpvOptimizationPlanImpl npvOptimizationPlanImpl = new NpvOptimizationPlanImpl(financials.getBudget(),
 					financials.getDiscountRate(), financials.getYears());
+			npvOptimizationPlanImpl.setPlanId(plan.getPlanId());
+			return npvOptimizationPlanImpl;
 		case COVERAGE:
-			return new CoverageOptimizationPlanImpl(plan.getCoverage());
+			final CoverageOptimizationPlanImpl coverageOptimizationPlanImpl = new CoverageOptimizationPlanImpl(
+					plan.getCoverage());
+			coverageOptimizationPlanImpl.setPlanId(plan.getPlanId());
+			return coverageOptimizationPlanImpl;
 
 		case CAPEX:
 		case PENETRATION:
 		case IRR:
 		default:
-			return new CapexOptimizationPlanImpl() ;
-}
+			return new CapexOptimizationPlanImpl();
+		}
 
 	}
 }
