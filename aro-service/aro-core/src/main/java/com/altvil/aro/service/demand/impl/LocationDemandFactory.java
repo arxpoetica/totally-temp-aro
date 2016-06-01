@@ -23,7 +23,7 @@ public class LocationDemandFactory {
 	}
 	
 	public LocationDemand create(double houseHold, double business, double cellTower) {
-		return DefaultLocationDemand.create(houseHold, business, cellTower) ;
+		return DefaultLocationDemand.create(houseHold>0 ? 1: 0, business>0 ? 1 :0, cellTower > 0 ? 8 : 1) ;
 	}
 
 }
