@@ -8,8 +8,12 @@ public class NpvOptimizationPlanImpl extends AbstractOptimizationPlan implements
 	private double discountRate = Double.NaN;
 	private int years = -1;
 
-	protected NpvOptimizationPlanImpl() {
+	public NpvOptimizationPlanImpl(
+			double budget, double discountRate, int years) {
 		super(OptimizationType.NPV);
+		this.budget = budget;
+		this.discountRate = discountRate;
+		this.years = years;
 	}
 
 	public double getBudget() {
