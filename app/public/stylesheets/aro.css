@@ -310,6 +310,10 @@ footer nav {
   background: url(/images/button_icons/network_equipment.png);
 }
 
+.icon-network-planning {
+  background: url(/images/button_icons/network_planning.png);
+}
+
 
 #market-size .nav-tabs > li, #market-size .nav-pills > li {
   float: none;
@@ -320,12 +324,12 @@ footer nav {
     text-align:center;
 }
 
-.pie-legend, .line-legend {
+.pie-legend, .line-legend, .bar-legend, .stackedbar-legend {
   list-style-type: none;
   padding-left: 0;
 }
 
-.pie-legend li span, .line-legend li span {
+.pie-legend li span, .line-legend li span, .stackedbar-legend li span, .bar-legend li span {
   display: inline-block;
   width: 12px;
   height: 12px;
@@ -396,4 +400,48 @@ footer nav {
 
 .popover {
   width: 250px;
+}
+
+.nopadding {
+  padding: 0;
+}
+
+.checkbox.disabled label {
+  color: #ccc;
+}
+
+
+.noUi-handle:before, .noUi-handle:after {
+  height: 8px;
+  top: 5px;
+}
+
+.noUi-handle:before {
+  left: 10px;
+}
+
+.noUi-handle:after {
+  left: 14px;
+}
+
+.noUi-horizontal .noUi-handle {
+  width: 25px;
+  height: 20px;
+  top: -7px;
+}
+
+.noUi-horizontal {
+  height: 6px;
+}
+
+.noUi-marker-horizontal.noUi-marker {
+  display: none;
+}
+
+.noUi-pips-horizontal {
+  padding-top: 3px;
+}
+
+.noUi-value {
+  font-size: 10px;
 }

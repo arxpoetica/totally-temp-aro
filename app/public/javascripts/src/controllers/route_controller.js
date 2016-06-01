@@ -87,7 +87,8 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     }
 
     if (layer.type !== 'locations' &&
-      layer.type !== 'network_nodes') return
+      layer.type !== 'network_nodes' &&
+      layer.type !== 'towers') return
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'
     var config = {

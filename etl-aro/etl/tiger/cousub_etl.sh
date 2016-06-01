@@ -18,6 +18,7 @@ do
 	${PSQL} -c "CREATE SCHEMA tiger_staging;"
 
 	cd $GISROOT;
+	# wget ftp://mirror1.shellbot.com/census/geo/tiger/TIGER2014/COUSUB/tl_2014_${STATE_FIPS_ARRAY[$STATE]}_cousub.zip --accept=zip --reject=html -nd -nc
 	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/COUSUB/tl_2014_${STATE_FIPS_ARRAY[$STATE]}_cousub.zip --accept=zip --reject=html -nd -nc
 	unzip tl_2014_${STATE_FIPS_ARRAY[$STATE]}_cousub.zip -d ${TMPDIR}
 	cd $TMPDIR;

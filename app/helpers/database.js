@@ -92,9 +92,13 @@ module.exports = class Database {
       finalSql = `
         WITH features AS (${sql})
         SELECT
-          -- COUNT(*) AS density,
-          ST_AsGeoJSON(ST_ConvexHull(ST_Collect( geom )))::json AS geom
-          -- ST_AsText( ST_Centroid(ST_Collect( geom )) ) AS centroid
+          COUNT(*) AS density,
+          ${
+            viewport.heatmap
+            ? 'ST_AsGeoJSON(ST_Centroid(ST_Collect( geom )))::json AS geom,'
+            : 'ST_AsGeoJSON(ST_ConvexHull(ST_Collect( geom )))::json AS geom,'
+          }
+          '{ "path": 0, "scale": 3, "strokeColor": "blue" }'::json AS icon
         FROM features
         WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
         GROUP BY ST_SnapToGrid(geom, $${params.length + 2})
@@ -163,7 +167,7 @@ module.exports = class Database {
     var finalSql = `
       WITH features AS (${sql})
       SELECT
-        ${density || 'COUNT(*)'} AS _density,
+        ${density || 'COUNT(*)'}::integer AS density,
         ST_AsGeoJSON(ST_Envelope( ST_SnapToGrid(geom, $${params.length + 2}) ))::json AS geom
       FROM features
       WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)

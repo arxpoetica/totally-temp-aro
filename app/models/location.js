@@ -79,19 +79,20 @@ module.exports = class Location {
             sum(install_cost)::integer as business_install_costs,
             sum(install_cost_per_hh)::integer as household_install_costs,
             sum(number_of_households)::integer as number_of_households,
-            sum(number_of_businesses)::integer as number_of_businesses
+            sum(number_of_businesses)::integer as number_of_businesses,
+            sum(number_of_towers)::integer as number_of_towers
           from (
             select
-              location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses
+              location_id, entry_fee, 0 as install_cost, 0 as install_cost_per_hh, 0 as number_of_households, 0 as number_of_businesses, 0 as number_of_towers
             from
               client.location_entry_fees
             where
               location_id=$1
 
-            union
+            UNION ALL
 
             select
-              location_id, 0, install_cost, 0, 0, 0
+              location_id, 0, install_cost, 0, 0, 0, 0
             from
               client.business_install_costs
             join businesses
@@ -99,10 +100,10 @@ module.exports = class Location {
             where
               location_id=$1
 
-            union
+            UNION ALL
 
             select
-              location_id, 0, 0, install_cost_per_hh, 0, 0
+              location_id, 0, 0, install_cost_per_hh, 0, 0, 0
             from
               client.household_install_costs
             where
@@ -111,18 +112,29 @@ module.exports = class Location {
             union
 
             select
-              location_id, 0, 0, 0, households.number_of_households, 0
+              location_id, 0, 0, 0, households.number_of_households, 0, 0
             from
               aro.households
             where
               households.location_id=$1
 
-            union
+            UNION ALL
 
             select
-              location_id, 0, 0, 0, 0, count(*)
+              location_id, 0, 0, 0, 0, count(*), 0
             from
               businesses
+            where
+              location_id=$1
+            group by
+              location_id
+
+            UNION ALL
+
+            select
+              location_id, 0, 0, 0, 0, 0, count(*)
+            from
+              towers
             where
               location_id=$1
             group by

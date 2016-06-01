@@ -29,7 +29,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         }
       },
       reload: 'always',
-      threshold: 0
+      threshold: 0,
+      minZoom: 12
     })
   }
 
@@ -53,7 +54,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         }
       },
       reload: 'always',
-      threshold: 0
+      threshold: 0,
+      minZoom: 9
     })
   }
 
@@ -84,7 +86,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         }
       },
       threshold: 13,
-      reload: 'dynamic'
+      reload: 'dynamic',
+      minZoom: 14
     })
   }
 
@@ -100,6 +103,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     if (tool === 'boundaries' && !map_tools.is_visible('boundaries')) {
       $scope.remove_drawing_manager()
     }
+  })
+
+  $rootScope.$on('map_layer_changed_visibility', () => {
+    if (!$scope.$$phase) { $scope.$apply() } // refresh button state
   })
 
   $scope.plan = null
@@ -120,7 +127,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         })
     }
 
-    $http.get('/boundary/' + plan.id + '/find')
+    $http.get(`/boundary/${plan.id}/find`)
       .success((boundaries) => {
         $scope.boundaries = boundaries
         boundaries.forEach((boundary) => {
@@ -218,6 +225,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (map_tools.is_visible('area_network_planning')) return
+    if (true) return
+
     var name = event.feature.getProperty('name')
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson((obj) => {
@@ -259,6 +269,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     overlay.marker.addListener('click', () => {
       if (map_tools.is_visible('network_planning')) {
         $scope.run_network_planning(boundary)
+      } else if (map_tools.is_visible('financial_profile')) {
+        $rootScope.$broadcast('custom_boundary_clicked', boundary)
       } else {
         $scope.show_market_size(boundary)
       }
@@ -352,7 +364,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  $scope.delete_boundary = (boundary) => {
+  $scope.deleteBoundary = (boundary) => {
     tracker.track('Boundaries / Delete')
     swal({
       title: 'Are you sure?',
@@ -366,7 +378,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       $http.post('/boundary/' + $scope.plan.id + '/delete/' + boundary.id)
         .success((response) => {
           boundary.overlay.setMap(null)
-          $scope.boundaries = _.reject($scope.boundaries, (b) => boundary.id === b.i)
+          $scope.boundaries = _.reject($scope.boundaries, (b) => boundary.id === b.id)
         })
     })
   }

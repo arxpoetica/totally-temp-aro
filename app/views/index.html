@@ -9,8 +9,9 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/sweetalert.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/select2.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/select2-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
   </head>
   <body>
 
@@ -30,6 +31,8 @@
     <% } %>
 
     <div ng-controller="navigation_menu_controller">
+
+      <% include modal_build_sequence.html %>
 
       <div id="home_screen" ng-show="!plan">
         <div class="container">
@@ -112,12 +115,13 @@
             <a class="navbar-brand" href="javascript:void(0)">{{plan.name}}</a>
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
+              <!--
               <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
                 <span class="fa fa-usd"></span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
                 <span class="label label-success">{{plan.metadata.revenue | currency}}</span>
               </span>
-
+              -->
               <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
                 <span class="fa fa-users"></span> {{ plan.metadata.total_customers | number }} customers covered
               </span>
@@ -147,11 +151,19 @@
               <small><span class="fa fa-check"></span> Plan saved</small>
             </p>
 
+            <p class="navbar-text" ng-show="plan">
+              <a style="cursor:pointer; color:white" data-target="#build-sequence" data-toggle="modal"><small>Build Sequence</small></a>
+            </p>
+
+            <div class="navbar-text" style="width: 200px" ng-show="plan">
+              <div id="year-slider"></div>
+            </div>
+
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                   <span class="fa fa-user"></span>
-                  <%= user.email %> <span class="caret"></span>
+                  <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
                   <li><a href="/settings/show">
@@ -215,15 +227,6 @@
                 ng-click="setSelectedTool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
             </p>
           </div>
-
-          <% if (config.route_planning.length > 0) { %>
-          <p>
-            <a class="btn btn-sm btn-default btn-block"
-              ng-class="{'btn-success active': network_planning.getAlgorithm()}"
-              data-toggle="popover" id="network_planning_selector"><span class="fa fa-exchange"></span>
-            </a>
-          </p>
-          <% } %>
         </div>
 
       </div>
@@ -252,20 +255,19 @@
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('boundaries')" ng-click="map_tools.expand('boundaries')">
             <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
-          <!-- Panel header text set in above binding -->
         </div>
         <div class="panel-body" ng-show="map_tools.is_expanded('boundaries')">
           <div ng-show="number_of_area_layers() > 0 || boundaries.length > 0">
             <h2>View</h2>
             <div ng-repeat="(key, layer) in area_layers">
-              <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}">
+              <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-class="{ 'disabled': layer.disabled }">
                 <!--
                 <div class="pull-right">
                   <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
                 </div>
                 -->
                 <label>
-                  <input type="checkbox" ng-click="layer.toggleVisibility()"> {{layer.name}}
+                  <input type="checkbox" ng-click="layer.toggleVisibility()" ng-disabled="layer.disabled"> {{layer.name}}
                 </label>
               </div>
             </div>
@@ -393,7 +395,6 @@
             <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
               <span style="color:white" class="fa fa-chevron-down"></span>
             </a>
-            <!-- Panel header text set in above binding -->
           </div>
           <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
             <h2>View</h2>
@@ -406,6 +407,11 @@
               <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
                 <label>
                   <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Residential
+                </label>
+              </div>
+              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}">
+                <label>
+                  <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
                 </label>
               </div>
             </form>
@@ -476,7 +482,6 @@
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_nodes')" ng-click="map_tools.expand('network_nodes')">
             <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
-          <!-- Panel header text set in above binding -->
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('network_nodes')">
@@ -550,7 +555,6 @@
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
             <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
-          <!-- Panel header text set in above binding -->
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('fiber_plant')">
@@ -601,7 +605,6 @@
           <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('search')" ng-click="map_tools.expand('search')">
             <span style="color:white" class="fa fa-chevron-down"></span>
           </a>
-          <!-- Panel header text set in above binding -->
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('search')">
@@ -610,6 +613,751 @@
                 <input type="text" class="form-control" placeholder="Search a business">
               </div>
             </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div ng-controller="area-network-planning-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('area_network_planning')" class="map-tool panel panel-primary" id="area_network_planning_controller">
+        <div class="panel-heading" ng-bind="map_tools.get_tool_name('area_network_planning')">
+          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('area_network_planning')" ng-click="map_tools.collapse('area_network_planning')">
+            <span style="color:white" class="fa fa-chevron-up"></span>
+          </a>
+          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('area_network_planning')" ng-click="map_tools.expand('area_network_planning')">
+            <span style="color:white" class="fa fa-chevron-down"></span>
+          </a>
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('area_network_planning')">
+            <div ng-show="wizardStatus === 'geographies'">
+              <p><strong>Search or Click Geographies</strong></p>
+              <form>
+                <div class="form-group form-group-sm">
+                  <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
+                </div>
+              </form>
+              <p><strong>Selected Geographies</strong></p>
+              <p ng-hide="selectedGeographies.length > 0"><em>No geographies selected</em></p>
+              <ul ng-show="selectedGeographies.length > 0" style="list-style-type:none; padding:0">
+                <li ng-repeat="geography in selectedGeographies">
+                  <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
+                    <span class="fa fa-trash-o"></span>
+                  </a>
+                  {{ geography.name }}
+                </li>
+              </ul>
+            </div>
+            <div ng-show="wizardStatus === 'cover'">
+              <p><strong>Cover</strong></p>
+              <form>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-click=""> Households
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-click=""> Businesses
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-click=""> Towers
+                  </label>
+                </div>
+              </form>
+            </div>
+            <div ng-show="wizardStatus === 'budget'">
+              <div ng-hide="advancedSettings">
+                <p><strong>Budget</strong></p>
+                <form class="text-center">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <small>2016</small> <br> <input type="text" value="5.0" class="text-center" style="width:100%">
+                    </div>
+                    <div class="col-md-3">
+                      <small>2017</small> <br> <input type="text" value="5.0" class="text-center" style="width:100%">
+                    </div>
+                    <div class="col-md-3">
+                      <small>2018</small> <br> <input type="text" value="5.0" class="text-center" style="width:100%">
+                    </div>
+                    <div class="col-md-3">
+                      <small>2019</small> <br> <input type="text" value="5.0" class="text-center" style="width:100%">
+                    </div>
+                  </div>
+                </form>
+                <hr>
+                <p><strong>IRR Threshold</strong></p>
+                <p>
+                  <input type="range" min="100" max="500" step="10">
+                </p>
+                <p class="text-right"><small><a href="javascript:void(0)" ng-click="toggleAdvancedSettings()">advanced inputs</a></small><p>
+              </div>
+              <div ng-show="advancedSettings">
+                <div>
+                  <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#advancedSettingsBuild" aria-controls="home" role="tab" data-toggle="tab">Build</a></li>
+                    <li role="presentation"><a href="#advancedSettingsProducts" aria-controls="profile" role="tab" data-toggle="tab">Products</a></li>
+                    <li role="presentation"><a href="#advancedSettingsEquipment" aria-controls="messages" role="tab" data-toggle="tab">Equipment</a></li>
+                  </ul>
+                  <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="advancedSettingsBuild">
+                      <br>
+                      <p><strong>Build Type</strong></p>
+                      <div class="radio">
+                        <label>
+                          <input type="radio" name="buildType" value="build" checked>
+                          Build
+                        </label>
+                      </div>
+                      <div class="radio">
+                        <label>
+                          <input type="radio" name="buildType" value="lease">
+                          Lease
+                        </label>
+                      </div>
+                      <hr>
+
+                      <p><strong>Maintenance % of Revenue</strong></p>
+                      <p>
+                        <input type="range" min="100" max="500" step="10">
+                      </p>
+                      <hr>
+
+                      <p><strong>Build Timeline</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>2016</small></div>
+                            <div class="col-md-3 nopadding"><small>2017</small></div>
+                            <div class="col-md-3 nopadding"><small>2018</small></div>
+                            <div class="col-md-3 nopadding"><small>2019</small></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Complete
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="70%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="15%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="15%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+
+                      <p><strong>MTU/MDU Constraint</strong></p>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Entities
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="10" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+
+                      <p><strong>CO Upgrade Cost</strong></p>
+                      <div class="row">
+                        <div class="col-md-4">
+                          $
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="1000" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <br>
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="advancedSettingsProducts">
+                      <br>
+                      <select class="form-control">
+                        <option>Households</option>
+                        <option>Businesses</option>
+                        <option>Towers</option>
+                      </select>
+                      <hr>
+
+                      <p><strong>Product ARPU</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>2016</small></div>
+                            <div class="col-md-3 nopadding"><small>2017</small></div>
+                            <div class="col-md-3 nopadding"><small>2018</small></div>
+                            <div class="col-md-3 nopadding"><small>2019</small></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Product 1
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Product 2
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+
+                      <p><strong>Product Cost Margin</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>2016</small></div>
+                            <div class="col-md-3 nopadding"><small>2017</small></div>
+                            <div class="col-md-3 nopadding"><small>2018</small></div>
+                            <div class="col-md-3 nopadding"><small>2019</small></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Product 1
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Product 2
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+
+                      <p><strong>Penetration End State</strong></p>
+                      <div class="row">
+                        <div class="col-md-7">
+                          Business
+                        </div>
+                        <div class="col-md-5">
+                          <input type="text" value="5%" class="text-center" style="width:100%">
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-7">
+                          Household
+                        </div>
+                        <div class="col-md-5">
+                          <input type="text" value="5%" class="text-center" style="width:100%">
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-7">
+                          Tower
+                        </div>
+                        <div class="col-md-5">
+                          <input type="text" value="5%" class="text-center" style="width:100%">
+                        </div>
+                      </div>
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="advancedSettingsEquipment">
+                      <p><strong>Terminal Cost Settings</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>Ports</small></div>
+                            <div class="col-md-3 nopadding"><small>Cost</small></div>
+                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
+                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          FDH
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="32" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$150" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          FDT
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="12" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$75" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+
+                      <p><strong>Fiber Settings</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>Cost/Ft.</small></div>
+                            <div class="col-md-3 nopadding"><small>Strands</small></div>
+                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
+                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Feeder
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$3.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="256" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Distribution
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$2.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="128" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Drop
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$1.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="64" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+
+                      <p><strong>CPE Settings</strong></p>
+                      <div class="row text-center">
+                        <div class="col-md-8 col-md-offset-4">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding"><small>Cost</small></div>
+                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
+                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          ONT
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$55.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          STB
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$25.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          Router
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row" style="margin-right: 10px">
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="$12.50" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="100" class="text-center" style="width:100%">
+                            </div>
+                            <div class="col-md-3 nopadding">
+                              <input type="text" value="5%" class="text-center" style="width:100%">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  
+                </div>
+                <br>
+                <p class="text-right"><small><a href="javascript:void(0)" ng-click="toggleAdvancedSettings()">basic inputs</a></small><p>
+              </div>
+            </div>
+            <div ng-show="wizardStatus === 'progress'">
+              <p><strong>Running Optimization...</strong></p>
+              <div class="row">
+                <div class="col-md-4">
+                  ABC123
+                </div>
+                <div class="col-md-8">
+                  <div class="progress">
+                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  DEF456
+                </div>
+                <div class="col-md-8">
+                  <div class="progress">
+                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 20%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <nav ng-hide="wizardStatus === 'progress'">
+              <ul class="pager">
+                <li ng-class="{ 'disabled': wizardStatus === allStatus[0] }" class="previous">
+                  <a href="javascript:void(0)" ng-click="back()">Back</a>
+                </li>
+
+                <li ng-class="{ 'disabled': wizardStatus !== allStatus[0] }"><a href="javascript:void(0)" style="cursor:default">1</a></li>
+                <li ng-class="{ 'disabled': wizardStatus !== allStatus[1] }"><a href="javascript:void(0)" style="cursor:default">2</a></li>
+                <li ng-class="{ 'disabled': wizardStatus !== allStatus[2] }"><a href="javascript:void(0)" style="cursor:default">3</a></li>
+
+                <li ng-class="{ 'disabled': wizardStatus === allStatus[allStatus.length - 1] }" class="next">
+                  <a href="javascript:void(0)" ng-click="forward()">Next</a>
+                </li>
+              </ul>
+            </nav>
+            <nav ng-show="wizardStatus === 'progress'">
+              <ul class="pager">
+                <li class="next">
+                  <a href="javascript:void(0)" ng-click="cancel()">Cancel</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div ng-controller="financial-profile-tool-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('financial_profile')" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 800px">
+        <div class="panel-heading">
+          {{ map_tools.get_tool_name('financial_profile') }}
+          {{ selectedArea ? ' · '+selectedArea.name : '' }}
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
+            <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
+            <ul class="nav nav-tabs" role="tablist" ng-show="selectedArea">
+              <li role="presentation" class="active"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
+              <li role="presentation"><a href="#financialProfileBudget" aria-controls="profile" role="tab" data-toggle="tab">Budget</a></li>
+              <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
+              <li role="presentation"><a href="#financialProfileRevenue" aria-controls="messages" role="tab" data-toggle="tab">Revenue</a></li>
+              <li role="presentation"><a href="#financialProfilePremises" aria-controls="messages" role="tab" data-toggle="tab">Premises</a></li>
+              <li role="presentation"><a href="#financialProfileSubscribers" aria-controls="messages" role="tab" data-toggle="tab">Subscribers</a></li>
+              <li role="presentation"><a href="#financialProfileEquipment" aria-controls="messages" role="tab" data-toggle="tab">Equipment</a></li>
+            </ul>
+            <div class="tab-content" ng-show="selectedArea">
+              <div role="tabpanel" class="tab-pane active" id="financialProfileCashFlow">
+                <br>
+                <p class="text-center"><strong>Cash Flow Summary</strong></p>
+                <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-cash-flow-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileBudget">
+                <br>
+                <p class="text-center"><strong>Budget Allocation</strong></p>
+                <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-budget-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileCapex">
+                <br>
+                <form class="form-inline">
+                  <div class="form-group">
+                    <select class="form-control">
+                      <option>BAU</option>
+                      <option>Fiber</option>
+                      <option>Incremental capex</option>
+                    </select>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Businesses
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Households
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Towers
+                    </label>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>BAU Capex</strong></p>
+                <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-capex-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileRevenue">
+                <br>
+                <form class="form-inline">
+                  <div class="form-group">
+                    <select class="form-control">
+                      <option>BAU</option>
+                      <option>Fiber</option>
+                      <option>Incremental</option>
+                    </select>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>BAU Revenue</strong></p>
+                <canvas id="financial-profile-chart-revenue" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-revenue-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfilePremises">
+                <br>
+                <form class="form-inline">
+                  <div class="form-group">
+                    <select class="form-control">
+                      <option>BAU</option>
+                      <option>Fiber</option>
+                      <option>Incremental</option>
+                    </select>
+                  </div>
+                </form>
+                <br>
+                <div class="alert alert-info text-center">
+                  <strong>Total</strong>: 12,345
+                  <strong>% Passed</strong>: 12.3
+                  <strong>Cost / Premise</strong>: $123.45
+                  |
+                  <strong>Businesses</strong>: 12,345
+                  <strong>Households</strong>: 12,345
+                  <strong>Towers</strong>: 12,345
+                </div>
+                <form class="form-inline">
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Businesses
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Households
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox"> Towers
+                    </label>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>All Premises Passed</strong></p>
+                <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-premises-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers">
+                <br>
+                <form class="form-inline">
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio"> Businesses
+                    </label>
+                  </div>
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio"> Households
+                    </label>
+                  </div>
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio"> Towers
+                    </label>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>Subscribers</strong></p>
+                <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-subscribers-legend"></div>
+                <br>
+                <p class="text-center"><strong>Penetration</strong></p>
+                <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-penetration-legend"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileEquipment">
+                <br>
+                <form class="form-inline">
+                  <div class="form-group form-group-sm">
+                    <label>Start</label>
+                    <input class="form-control" type="text">
+                  </div>
+                  <div class="form-group form-group-sm" style="margin-left:10px">
+                    <label>End</label>
+                    <input class="form-control" type="text">
+                  </div>
+                </form>
+                <br>
+                <div class="alert alert-info">
+                  <strong>Total cost of Plan</strong>: $123.45
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -634,6 +1382,7 @@
   <!-- Angular controllers and services -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
 
   <!-- Put the Google Maps URL in a config... -->
   <% if (env_is_production) { %>
@@ -679,9 +1428,7 @@
           });
         }
       }
-
     }
-
 
     var user_id = <%= user.id %>;
     var config = <%- JSON.stringify(config) %>;
@@ -695,6 +1442,8 @@
   <script src="javascripts/vendors/select2.min.js"></script>
   <script src="javascripts/vendors/tinycolor.js"></script>
   <script src="javascripts/vendors/randomColor.min.js"></script>
+  <script src="javascripts/vendors/Chart.StackedBar.js"></script>
+  <script src="javascripts/vendors/nouislider.min.js"></script>
 
   <script src="javascripts/lib/controllers/financial_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
@@ -711,7 +1460,8 @@
   <script src="javascripts/lib/controllers/selection_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
-  <script src="javascripts/lib/controllers/network_planning_controller.js"></script>
+  <script src="javascripts/lib/controllers/area_network_planning_controller.js"></script>
+  <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
@@ -730,11 +1480,25 @@
       var tooltips = $('#left-col [data-toggle="tooltip"]');
       tooltips.tooltip();
       tooltips.on('click mouseout', function() {
-        $(this).tooltip('hide');
+        $(this).tooltip('hide')
       })
-    });
+    })
 
-    swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> });
+    swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> })
+
+    // prevent tabs from changing the URL
+    $('.nav-tabs a').click((e) => {
+      e.preventDefault()
+      $(this).tab('show')
+    })
+
+    function calculatePanelHeight () {
+      var maxHeight = $(document).height() - 154
+      $('.panel-body').css('max-height', maxHeight)
+    }
+
+    calculatePanelHeight()
+    $(window).resize(calculatePanelHeight)
 
     $("#share-plan-search").select2({
       ajax: {
@@ -761,7 +1525,7 @@
       },
       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
       minimumInputLength: 1,
-    });
+    })
   </script>
   <script src="javascripts/lib/interceptors/custom_locale.js"></script>
   <% if (env_is_production) { %>

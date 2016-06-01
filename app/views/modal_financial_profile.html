@@ -10,7 +10,7 @@
           <div class="col-sm-6">
             <table class="table">
               <tbody>
-                <tr ng-repeat-start="cost in route.metadata.costs">
+                <tr ng-repeat-start="cost in plan.metadata.costs">
                   <th colspan="3">{{cost.name}}</th>
                   <td colspan="2" class="text-right">{{cost.value | currency}}</td>
                 </tr>
@@ -20,21 +20,21 @@
                 </tr>
                 <tr>
                   <th>Total cost</th>
-                  <td colspan="4" class="text-right">{{route.metadata.total_cost | currency}}</td>
+                  <td colspan="4" class="text-right">{{plan.metadata.total_cost | currency}}</td>
                 </tr>
                 <tr>
                   <th>Revenue</th>
-                  <td colspan="4" class="text-right">{{route.metadata.revenue | currency}}</td>
+                  <td colspan="4" class="text-right">{{plan.metadata.revenue | currency}}</td>
                 </tr>
                 <tr>
                   <th>Profit</th>
-                  <td colspan="4" class="text-right" ng-class="{'text-success': route.metadata.profit > 0, 'text-danger': route.metadata.profit < 0}">{{route.metadata.profit | currency}}</td>
+                  <td colspan="4" class="text-right" ng-class="{'text-success': plan.metadata.profit > 0, 'text-danger': plan.metadata.profit < 0}">{{plan.metadata.profit | currency}}</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="col-sm-6">
-            <p><strong>NPV</strong></p>
+            <p><strong>Discounted Cash Flow</strong></p>
             <canvas id="financial-profile-chart" style="width:100%; height:200px"></canvas>
           </div>
         </div>
