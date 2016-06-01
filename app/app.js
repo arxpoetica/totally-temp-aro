@@ -24,6 +24,7 @@ require('./routes/routes_authentication').configure(app, middleware)
 
 var api = express.Router()
 var routes = [
+  'status',
   'api',
   'user',
   'map',
