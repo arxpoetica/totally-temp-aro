@@ -55,6 +55,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
       $scope.plan.metadata = data.metadata
       $rootScope.$broadcast('plan_changed_metadata', $scope.plan)
     }
+    if (only_metadata) return
 
     if (config.route_planning.length > 0) {
       var route = new MapLayer({

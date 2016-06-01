@@ -58,6 +58,7 @@ module.exports = class MarketSize {
             JOIN aro.fiber_plant
               ON fiber_plant.carrier_id = carriers.id
              AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
+                 ${database.intersects(options.viewport, 'b.geom', 'AND')}
                ${customerTypeFilter()}
         `
       }
