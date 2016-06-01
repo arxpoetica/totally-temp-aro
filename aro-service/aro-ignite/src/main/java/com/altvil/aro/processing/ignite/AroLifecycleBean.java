@@ -9,7 +9,6 @@ import org.apache.ignite.resources.SpringApplicationContextResource;
 import org.springframework.context.ApplicationContext;
 
 import com.altvil.aro.service.network.impl.NetworkServiceImpl;
-import com.altvil.aro.service.planing.impl.NetworkPlanningServiceImpl;
 
 public class AroLifecycleBean implements LifecycleBean {
 	@IgniteInstanceResource
@@ -23,10 +22,10 @@ public class AroLifecycleBean implements LifecycleBean {
 		if (evt == LifecycleEventType.AFTER_NODE_START) {     
 			NetworkServiceImpl nsi = (NetworkServiceImpl) applicationContext.getBean("networkService");
 			
-			nsi.setNetworkServiceIgniteGrid(ignite);
-			NetworkPlanningServiceImpl npsi = (NetworkPlanningServiceImpl) applicationContext.getBean("networkPlanningService");
+			//nsi.setNetworkServiceIgniteGrid(ignite);
+			//NetworkPlanningServiceImpl npsi = (NetworkPlanningServiceImpl) applicationContext.getBean("networkPlanningService");
 			
-			npsi.setNetworkPlanningServiceIgniteGrid(ignite);
+			//npsi.setNetworkPlanningServiceIgniteGrid(ignite);
         }
 	}
 
