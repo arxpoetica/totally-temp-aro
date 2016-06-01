@@ -15,37 +15,23 @@ import com.altvil.aro.service.optimize.NetworkConstraint;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
+import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planning.NetworkConfiguration;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.enumerations.OptimizationType;
 
 public abstract class OptimizationPlanConfiguration implements Cloneable, Serializable, OptimizationPlan, NetworkConfiguration, ScoringStrategy, NetworkConstraint {
 	private static final long serialVersionUID = 1L;
-	private long planId;
-	private int year;
-	private OptimizationType optimizationType;
 	private NetworkData networkData;
+	private final OptimizationPlan optimizationPlan;
+	private OptimizationType optimizationType;
+	private long planId;
 
 	public OptimizationPlanConfiguration(OptimizationPlan optimizationPlan) {
-		this.optimizationType = optimizationPlan.getOptimizationType();
+		this.optimizationPlan = optimizationPlan;
 		this.planId = optimizationPlan.getPlanId();
-		this.year = optimizationPlan.getYear();
 	}
 	
-	public abstract double score(GeneratingNode node) ;
-
-	public long getPlanId() {
-		return planId;
-	}
-
-	public int getYear() {
-		return year;
-	}
-
-	public OptimizationType getOptimizationType() {
-		return optimizationType;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T dependentPlan(long dependentId) {
@@ -57,28 +43,29 @@ public abstract class OptimizationPlanConfiguration implements Cloneable, Serial
 			throw new RuntimeException(e);
 		}
 	}
-	
+
+	public boolean generatingNodeConstraint (GeneratingNode generatingNode) {
+		return true;
+	}
+
+	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
+		return (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
+	}
+
+	public FiberNetworkConstraints getFiberNetworkConstraints() {
+		return optimizationPlan.getFiberNetworkConstraints();
+	}
+
 	public NetworkData getNetworkData() {
 		return networkData;
 	}
 
-	public void setNetworkData(NetworkData networkData) {
-		this.networkData = networkData;
-	}
-
-	public abstract boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork);
-
-
-	public boolean isFilteringRoadLocationDemandsBySelection() {
-		return false;
-	}
-
-	public boolean isFilteringRoadLocationsBySelection() {
-		return true;
+	public OptimizationType getOptimizationType() {
+		return optimizationType;
 	}
 	
-	public boolean generatingNodeConstraint (GeneratingNode generatingNode) {
-		return true;
+	public long getPlanId() {
+		return planId;
 	}
 
 	public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
@@ -96,7 +83,24 @@ public abstract class OptimizationPlanConfiguration implements Cloneable, Serial
 		};
 	}
 
-	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
+	public int getYear() {
+		return optimizationPlan.getYear();
+	}
+
+
+	public boolean isFilteringRoadLocationDemandsBySelection() {
+		return false;
+	}
+
+	public boolean isFilteringRoadLocationsBySelection() {
+		return true;
+	}
+	
+	public abstract boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork);
+
+	public abstract double score(GeneratingNode node) ;
+
+	public void setNetworkData(NetworkData networkData) {
+		this.networkData = networkData;
 	}
 }

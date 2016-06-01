@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize(using = JobIdSerializer.class)
 class JobIdImpl implements Job.Id {
-	private static final AtomicLong	  NEXT_GUID	= new AtomicLong(0);
+	private static final AtomicLong	  NEXT_GUID	= new AtomicLong(1);
 
 	private final long				  uid;
 	private final Map<String, Object> meta;

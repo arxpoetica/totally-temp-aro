@@ -14,10 +14,10 @@ import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
@@ -39,7 +39,7 @@ public class NetworkModelBuilderFactoryImpl implements
 	@Override
 	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
 			Predicate<AroEdge<GeoSegment>> selectedEdges,
-			FiberNetworkConstraints fiberConstraints) {
+			FtthThreshholds fiberConstraints) {
 		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, selectedEdges, fiberConstraints);
 	}
 
@@ -50,13 +50,13 @@ public class NetworkModelBuilderFactoryImpl implements
 		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder;
 		Predicate<AroEdge<GeoSegment>> selectedEdges;
 		
-		private FiberNetworkConstraints constraints;
+		private FtthThreshholds constraints;
 
 		private Map<Long, NetworkAssignment> map;
 
 		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
 				Predicate<AroEdge<GeoSegment>> selectedEdges, 
-										FiberNetworkConstraints constraints) {
+				FtthThreshholds constraints) {
 			super();
 			this.networkData = networkData;
 			this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
@@ -67,9 +67,8 @@ public class NetworkModelBuilderFactoryImpl implements
 					a -> a.getSource().getObjectId());
 		}
 
-
 		@Override
-		public FiberNetworkConstraints getFiberNetworkConstraints() {
+		public FtthThreshholds getFtthThreshholds() {
 			return constraints;
 		}
 

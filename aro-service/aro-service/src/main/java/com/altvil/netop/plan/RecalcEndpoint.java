@@ -1,5 +1,6 @@
 package com.altvil.netop.plan;
 
+import java.security.Principal;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -17,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
@@ -32,7 +33,6 @@ import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
-import com.altvil.netop.DummyRequester;
 
 @RestController
 public class RecalcEndpoint {
@@ -64,11 +64,11 @@ public class RecalcEndpoint {
 	private StrategyService strategyService;
 
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(@RequestBody FiberPlan request) throws NoSuchStrategy, InterruptedException {
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlan request) throws NoSuchStrategy, InterruptedException {
 		final FiberPlanConfigurationBuilder strategy = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm());
 		FiberPlanConfiguration fiberPlan = strategy.build(request);
-		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
-		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(DummyRequester.PRINCIPAL, fiberPlan, fiberNetworkConstraints);
+		FtthThreshholds fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request.getFiberNetworkConstraints());
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(requestor, fiberPlan, fiberNetworkConstraints);
 
 		Job<MasterPlanUpdate> job = jobService.submit(mpc);
 		
@@ -88,14 +88,14 @@ public class RecalcEndpoint {
 	}
 
 	@RequestMapping(value = "/recalc/wirecenter", method = RequestMethod.POST)
-	public @ResponseBody Job<FiberPlanResponse> postRecalc(
+	public @ResponseBody Job<FiberPlanResponse> postRecalc(Principal username,
 			@RequestBody AbstractFiberPlan request)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {		
 		final FiberPlanConfiguration fiberPlan = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
-		final FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
+		final FtthThreshholds fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request.getFiberNetworkConstraints());
 
 		Job<FiberPlanResponse> job = jobService
-				.submit(new JobRequestIgniteCallable<FiberPlanResponse>(DummyRequester.PRINCIPAL, igniteGrid.compute(), () -> {
+				.submit(new JobRequestIgniteCallable<FiberPlanResponse>(username, igniteGrid.compute(), () -> {
 
 					Future<WirecenterNetworkPlan> future = networkPlanningService
 							.planFiber(fiberPlan, fiberNetworkConstraints);

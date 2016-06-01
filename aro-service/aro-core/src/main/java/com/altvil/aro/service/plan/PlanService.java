@@ -11,7 +11,6 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 
 public interface PlanService {
-
 	/**
 	 * 
 	 * @param networkData
@@ -23,12 +22,6 @@ public interface PlanService {
 	 */
 	public Optional<CompositeNetworkModel> computeNetworkModel(NetworkData networkData,
 			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Predicate<AroEdge<GeoSegment>> selectedEdges, FiberNetworkConstraints request) throws PlanException;
-
-	/**
-	 * @param request
-	 * @return
-	 */
-	public FtthThreshholds createFtthThreshholds(FiberNetworkConstraints request);
+			Predicate<AroEdge<GeoSegment>> selectedEdges, FtthThreshholds request) throws PlanException;
 
 }

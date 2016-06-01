@@ -37,7 +37,6 @@ import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanException;
 import com.altvil.aro.service.plan.PlanService;
@@ -74,7 +73,7 @@ public class PlanServiceImpl implements PlanService {
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
 			NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Predicate<AroEdge<GeoSegment>> selectedEdges, FiberNetworkConstraints request)
+			Predicate<AroEdge<GeoSegment>> selectedEdges, FtthThreshholds request)
 			throws PlanException {
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
@@ -94,7 +93,7 @@ public class PlanServiceImpl implements PlanService {
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
 			NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Predicate<AroEdge<GeoSegment>> selectedEdges, FiberNetworkConstraints constraints)
+			Predicate<AroEdge<GeoSegment>> selectedEdges, FtthThreshholds constraints)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
@@ -105,28 +104,7 @@ public class PlanServiceImpl implements PlanService {
 				.empty();
 	}
 
-	@Override
-	public FtthThreshholds createFtthThreshholds(FiberNetworkConstraints rr) {
-		
-		if( rr == null ) {
-			rr = new FiberNetworkConstraints() ;
-		}
-		
-		return FtthThreshholds
-				.build()
-				.setDropCableInFeet(rr.getDropCableLengthInFeet())
-				.setPrefferedOffsetInFeet(rr.getPreferredCableLengthInFeet())
-				.setMaxOffsetInFeet(rr.getMaxDistrubitionLengthInFeet())
-				.setMaxSplitters(rr.getMaxSplitters())
-				.setMinSplitters(rr.getMinSplitters())
-				.setIdealSplitters(rr.getIdealSplitters())
-				.setFdtCount(rr.getFdtCount())
-				.setClusterMergingSupported(rr.getClusterMergingSupported())
-				.setDropCableConstraintsSupported(
-						rr.getDropCableConstraintsSupported())
-				.setSplitterRatio(rr.getSplitterRatio()).build();
-	}
-	
+
 	private static class FiberSourceBinding implements Assignment<GraphEdgeAssignment, GraphNode> {
 		
 		private GraphNode graphNode ;
@@ -177,7 +155,7 @@ public class PlanServiceImpl implements PlanService {
 		}
 
 		public CompositeNetworkModel build(final NetworkData data, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				Predicate<AroEdge<GeoSegment>> selectedEdges, FiberNetworkConstraints request) {
+				Predicate<AroEdge<GeoSegment>> selectedEdges, FtthThreshholds request) {
 			
 			GraphNetworkModel networkModel = transformFactory
 					.createGraphNetworkModel(data);
@@ -225,7 +203,7 @@ public class PlanServiceImpl implements PlanService {
 			}
 						
 			RootGraphMapping rootGraphMapping = transformFactory
-					.createWirecenterTransformer(createFtthThreshholds(request))
+					.createWirecenterTransformer(request)
 					.apply(dag, assignedFiberSources);
 			
 			

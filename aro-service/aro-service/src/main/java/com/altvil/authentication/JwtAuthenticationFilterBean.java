@@ -20,18 +20,18 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
 
 /**
- * Authenticates web service requests then provides the user's identity to the web service endpoints.
+ * Authenticates web service requests then provides the user's identity to the
+ * web service endpoints.
  * 
  * @author Kevin
  *
  */
 public class JwtAuthenticationFilterBean extends OncePerRequestFilter {
-	private static final String HEADER = "Authorization";
-	private static final String SCHEMA = "Bearer ";
-	private final byte[] jwtSecret;
-	
-	private static final Logger LOG = LoggerFactory
-			.getLogger(JwtAuthenticationFilterBean.class.getName());
+	private static final String	HEADER = "Authorization";
+	private static final String	SCHEMA = "Bearer ";
+	private final byte[]		jwtSecret;
+
+	private static final Logger	LOG	   = LoggerFactory.getLogger(JwtAuthenticationFilterBean.class.getName());
 
 	public JwtAuthenticationFilterBean(String jwtSecret) {
 		this.jwtSecret = jwtSecret.getBytes(StandardCharsets.UTF_8);
@@ -44,30 +44,33 @@ public class JwtAuthenticationFilterBean extends OncePerRequestFilter {
 	@Override
 	public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain next)
 			throws IOException, ServletException {
-			try {
-				next.doFilter(wrap(request), response);
-			} catch (InvalidKeyException | NoSuchAlgorithmException | IllegalStateException | SignatureException
-					| JWTVerifyException e) {
-				LOG.warn("JWT authorization failed", e);
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-			}
+		try {
+			next.doFilter(wrap(request), response);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | IllegalStateException | SignatureException
+				| JWTVerifyException e) {
+			LOG.warn("JWT authorization failed", e);
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+		}
 	}
 
 	private HttpServletRequest wrap(HttpServletRequest httpServletRequest) throws InvalidKeyException,
 			NoSuchAlgorithmException, IllegalStateException, SignatureException, IOException, JWTVerifyException {
 		String jwtToken = httpServletRequest.getHeader(HEADER);
 
-		if (jwtToken == null || !jwtToken.startsWith(SCHEMA)) {
+		final Principal principal;
+		if (jwtToken == null) {
+			principal = new SimplePrincipal("demo");
+		} else if (!jwtToken.startsWith(SCHEMA)) {
 			// TODO KG Throw exception to reject every rest and ws (websocket)
 			// HTTP request that does not provide a valid JWT token.
 
 			return httpServletRequest;
+		} else {
+			Map<String, Object> payload = new JWTVerifier(jwtSecret, "audience")
+					.verify(jwtToken.substring(SCHEMA.length()));
+
+			principal = new SimplePrincipal(payload.getOrDefault("sub", "").toString());
 		}
-
-		Map<String, Object> payload = new JWTVerifier(jwtSecret, "audience")
-				.verify(jwtToken.substring(SCHEMA.length()));
-
-		final Principal principal = new SimplePrincipal(payload.getOrDefault("sub", "").toString());
 
 		return new HttpServletRequestWrapper(httpServletRequest) {
 			@Override
@@ -86,24 +89,4 @@ public class JwtAuthenticationFilterBean extends OncePerRequestFilter {
 			}
 		};
 	}
-
-//	@Override
-//	public void init(FilterConfig config) throws ServletException {
-//		PropertySourcesPlaceholderConfigurer configurer = WebApplicationContextUtils
-//				.getRequiredWebApplicationContext(config.getServletContext())
-//				.getBean(PropertySourcesPlaceholderConfigurer.class);
-//		configurer.getAppliedPropertySources().forEach(propertySourceConsumer());
-//	}
-//
-//	Consumer<? super PropertySource<?>> propertySourceConsumer() {
-//		return new Consumer<PropertySource<?>>() {
-//
-//			@Override
-//			public void accept(PropertySource<?> propertySource) {
-//				if (propertySource.containsProperty("JWT_SECRET")) {
-//					jwtSecret = propertySource.getProperty("JWT_SECRET").toString().getBytes(StandardCharsets.UTF_8);
-//				}
-//			}
-//		};
-//	}
 }

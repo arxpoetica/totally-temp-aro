@@ -5,10 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -24,9 +22,7 @@ import org.apache.ignite.resources.SpringResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.persistence.repository.FiberRouteRepository;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
@@ -41,6 +37,7 @@ import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
 import com.altvil.aro.service.network.NetworkService;
@@ -50,15 +47,12 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.PricingModel;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
-import com.altvil.aro.service.planing.MasterPlanCalculation;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.ScoringStrategyFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.planning.NetworkConfiguration;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.utils.StreamUtil;
@@ -118,14 +112,14 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Override
 	public JobService.JobRequest<WirecenterNetworkPlan> optimizeWirecenter(Principal username,
-			OptimizationPlanConfiguration optimizationPlanStrategy, FiberNetworkConstraints constraints) {
+			OptimizationPlanConfiguration optimizationPlanStrategy, FtthThreshholds constraints) {
 		IgniteCallable<WirecenterNetworkPlan> callable = createOptimzedCallable(optimizationPlanStrategy, constraints);
 		return new JobRequestIgniteCallable<WirecenterNetworkPlan>(username, wirePlanComputeGrid, callable);
 	}
 
 	@Override
 	public MasterPlanBuilder optimizeMasterFiber(Principal requestor, OptimizationPlanConfiguration optimizationPlanStrategy,
-			FiberNetworkConstraints constraints) throws InterruptedException {
+			FtthThreshholds constraints) throws InterruptedException {
 
 		networkPlanRepository.deleteWireCenterPlans(optimizationPlanStrategy.getPlanId());
 
@@ -153,7 +147,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Override
 	public MasterPlanBuilder planMasterFiber(Principal requestor, FiberPlanConfiguration fiberPlanConfiguration,
-			FiberNetworkConstraints constraints) throws InterruptedException {
+			FtthThreshholds constraints) throws InterruptedException {
 		networkPlanRepository.deleteWireCenterPlans(fiberPlanConfiguration.getPlanId());
 
 		List<FiberPlanConfiguration> plans = StreamUtil
@@ -180,7 +174,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 //	@Override
 //	public MasterPlanBuilder planMasterFiber(Principal requestor, OptimizationPlanConfiguration fiberPlanConfiguration,
-//			FiberNetworkConstraints constraints) throws InterruptedException {
+//			FtthThreshholds constraints) throws InterruptedException {
 //		networkPlanRepository.deleteWireCenterPlans(fiberPlanConfiguration.getPlanId());
 //
 //		List<OptimizationPlanConfiguration> plans = StreamUtil.map(
@@ -208,14 +202,14 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Override
 	public Future<WirecenterNetworkPlan> planFiber(FiberPlanConfiguration fiberPlanStrategy,
-			FiberNetworkConstraints constraints) {
+			FtthThreshholds constraints) {
 		return executorService.submit(createPlanningCallable(fiberPlanStrategy, constraints));
 	}
 
 	public static class FiberPlanningCallable implements IgniteCallable<WirecenterNetworkPlan> {
 		private static final long				 serialVersionUID = 1L;
 		private final FiberPlanConfiguration	 fiberPlanStrategy;
-		private final FiberNetworkConstraints	 constraints;
+		private final FtthThreshholds	 constraints;
 
 		@SpringResource(resourceName = "networkService")
 		private transient NetworkService		 networkService;
@@ -238,7 +232,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		@SpringResource(resourceName = "fiberRouteRepository")
 		private transient FiberRouteRepository	 fiberRouteRepository;
 
-		FiberPlanningCallable(FiberPlanConfiguration fiberPlanStrategy, FiberNetworkConstraints constraints) {
+		FiberPlanningCallable(FiberPlanConfiguration fiberPlanStrategy, FtthThreshholds constraints) {
 			this.fiberPlanStrategy = fiberPlanStrategy;
 			this.constraints = constraints;
 		}
@@ -267,7 +261,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	public static class OptimizationPlanningCallable implements IgniteCallable<WirecenterNetworkPlan> {
 		private static final long					serialVersionUID = 1L;
 		private final OptimizationPlanConfiguration	fiberPlanStrategy;
-		private final FiberNetworkConstraints		constraints;
+		private final FtthThreshholds		constraints;
 
 		@SpringResource(resourceName = "networkService")
 		private transient NetworkService			networkService;
@@ -291,7 +285,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		private transient FiberRouteRepository		fiberRouteRepository;
 
 		OptimizationPlanningCallable(OptimizationPlanConfiguration fiberPlanStrategy,
-				FiberNetworkConstraints constraints) {
+				FtthThreshholds constraints) {
 			this.fiberPlanStrategy = fiberPlanStrategy;
 			this.constraints = constraints;
 		}
@@ -318,14 +312,14 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	private IgniteCallable<WirecenterNetworkPlan> createPlanningCallable(FiberPlanConfiguration fiberPlanStrategy,
-			FiberNetworkConstraints constraints) {
+			FtthThreshholds constraints) {
 		return new FiberPlanningCallable(fiberPlanStrategy, constraints);
 	}
 
 	public static class OptimizeCallable implements IgniteCallable<WirecenterNetworkPlan> {
 		private static final long					serialVersionUID = 1L;
 		private final OptimizationPlanConfiguration	optimizationPlanConfiguration;
-		private final FiberNetworkConstraints		constraints;
+		private final FtthThreshholds		constraints;
 
 		@SpringResource(resourceName = "networkService")
 		private transient NetworkService			networkService;
@@ -346,7 +340,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		private transient FiberRouteRepository		fiberRouteRepository;
 
 		public OptimizeCallable(OptimizationPlanConfiguration optimizationPlanStrategy,
-				FiberNetworkConstraints constraints) {
+				FtthThreshholds constraints) {
 			this.optimizationPlanConfiguration = optimizationPlanStrategy;
 			this.constraints = constraints;
 		}
@@ -358,7 +352,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			optimizationPlanConfiguration.setNetworkData(networkData);
 
 			OptimizerContext ctx = new OptimizerContext(new DefaultPriceModel(),
-					planService.createFtthThreshholds(constraints), constraints);
+					constraints);
 
 			double totalDemand = networkData.getRoadLocations().stream()
 					.mapToDouble(a -> ((LocationEntity) a.getSource()).getLocationDemand().getDemand()).sum();
@@ -394,7 +388,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	private IgniteCallable<WirecenterNetworkPlan> createOptimzedCallable(
-			OptimizationPlanConfiguration optimizationPlanStrategy, FiberNetworkConstraints constraints) {
+			OptimizationPlanConfiguration optimizationPlanStrategy, FtthThreshholds constraints) {
 		return new OptimizeCallable(optimizationPlanStrategy, constraints);
 	}
 

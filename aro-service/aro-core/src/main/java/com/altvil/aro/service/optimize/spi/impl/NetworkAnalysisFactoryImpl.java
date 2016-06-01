@@ -30,7 +30,6 @@ import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
-import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
@@ -228,12 +227,9 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			super();
 			this.networkModelBuilder = networkModelBuilder;
 			this.context = context;
-			this.ftpThreshholds = context.getFtpThreshholds();
+			this.ftpThreshholds = context.getFtthThreshholds();
 			this.scoringStrategy = scoringStrategy ;
 			
-			planService.createFtthThreshholds(this.context
-					.getFiberNetworkConstraints());
-
 			builderFactory = new BuilderFactory(this);
 
 			init();

@@ -5,7 +5,6 @@ import java.util.function.Predicate;
 
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.alg.NpvClosestFirstIterator;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
@@ -16,8 +15,6 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.planning.CoverageOptimizationPlan;
-import com.altvil.aro.service.planning.NpvFiberPlan;
-import com.altvil.aro.service.planning.NpvOptimizationPlan;
 
 public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfiguration implements CoverageOptimizationPlan {
 	private static final long serialVersionUID = 1L;

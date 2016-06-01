@@ -7,7 +7,6 @@ import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.aro.service.planning.optimization.impl.CapexOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.CoverageOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.NpvOptimizationPlanImpl;
-import com.altvil.enumerations.FiberPlanAlgorithm;
 import com.altvil.enumerations.OptimizationType;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
