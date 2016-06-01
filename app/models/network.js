@@ -175,7 +175,7 @@ module.exports = class Network {
         json: true,
         body: {
           planId: plan_id,
-          algorithm: algorithm
+          algorithm: 'CAPEX'
         }
       }
       console.log('sending request to aro-service', options)
