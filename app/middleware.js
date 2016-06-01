@@ -116,6 +116,7 @@ function viewport (request, response, next) {
       simplify_factor: viewport.zoom > 14 ? 0 : 0.00015,
       linestring: linestring,
       buffer: 10 / Math.pow(2, zoom),
+      heatmap: !!request.query.heatmap,
       fishnet: `
         extent AS ( SELECT ST_SetSRID(ST_MakePolygon(ST_GeomFromText('$1')), 4326) as bbox ),
         bnds AS ( SELECT ST_XMin(bbox) as xmin, ST_YMin(bbox) as ymin, ST_XMax(bbox) as xmax, ST_YMax(bbox) as ymax FROM extent ),

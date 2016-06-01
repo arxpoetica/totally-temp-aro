@@ -24,11 +24,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
 
   $rootScope.$on('customer_profile_selected', (e, json, title, type) => {
     $scope.data = $scope.plan.metadata
-    $scope.data.customer_types = $scope.data.customer_types || []
-    var colors = randomColor({ seed: 1, count: $scope.data.customer_types.length })
-    $scope.data.customer_types.forEach((customer_type) => {
-      customer_type.color = colors.shift()
-    })
+    calculateColors()
     $scope.type = 'route'
     open_modal(null)
     show_chart()
@@ -57,9 +53,18 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
     chart && chart.destroy()
     $http.get('/customer_profile/' + $scope.plan.id + '/boundary', args).success((response) => {
       $scope.data = response
+      calculateColors()
       show_chart()
     }).error(() => {
       $scope.loading = false
+    })
+  }
+
+  function calculateColors () {
+    $scope.data.customer_types = $scope.data.customer_types || []
+    var colors = randomColor({ seed: 1, count: $scope.data.customer_types.length })
+    $scope.data.customer_types.forEach((customer_type) => {
+      customer_type.color = colors.shift()
     })
   }
 

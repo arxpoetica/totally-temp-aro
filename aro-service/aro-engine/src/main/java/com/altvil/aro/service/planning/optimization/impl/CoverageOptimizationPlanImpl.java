@@ -6,8 +6,13 @@ import com.altvil.enumerations.OptimizationType;
 public class CoverageOptimizationPlanImpl extends AbstractOptimizationPlan implements CoverageOptimizationPlan {
 	private double coverage;
 	
-	protected CoverageOptimizationPlanImpl() {
+	public CoverageOptimizationPlanImpl() {
 		super(OptimizationType.COVERAGE);
+	}
+	
+	public CoverageOptimizationPlanImpl(double coverage) {
+		super(OptimizationType.COVERAGE);
+		this.coverage = coverage ;
 	}
 
 	public double getCoverage() {

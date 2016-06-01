@@ -32,7 +32,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     })
   } else {
     $rootScope.$on('contextual_menu_feature', (event, options, map_layer, feature) => {
-      if (map_layer.type !== 'locations') return
+      if (map_layer.type !== 'locations' && map_layer.type !== 'selected_locations') return
       // if (!network_planning.getAlgorithm().interactive) return
       options.add('See more information', (map_layer, feature) => {
         var id = feature.getProperty('id')
@@ -158,6 +158,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       type: 'input',
       showCancelButton: true,
       closeOnConfirm: false,
+      showLoaderOnConfirm: true,
       animation: 'slide-from-top',
       inputPlaceholder: 'export'
     }, (name) => {

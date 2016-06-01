@@ -35,7 +35,7 @@ module.exports = class Network {
   // View existing fiber plant for competitors with a heat map
   static viewFiberPlantDensity (viewport) {
     var sql = `
-      SELECT geom
+      SELECT geom, carrier_name
       FROM fiber_plant
       WHERE carrier_name <> $1
     `
@@ -208,6 +208,35 @@ module.exports = class Network {
         // models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
         models.Network.recalculateNodes(plan_id, data.algorithm)
       ))
+  }
+
+  static searchBoundaries (text) {
+    var sql = `
+      SELECT 'wirecenter:' || id AS id, wirecenter AS name, ST_AsGeoJSON(geom)::json AS geog
+        FROM wirecenters
+       WHERE lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
+
+      UNION ALL
+
+      SELECT 'census_block:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+        FROM census_blocks
+       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+
+      UNION ALL
+
+      SELECT 'custom_boundary:' || id AS id, name, ST_AsGeoJSON(geom)::json AS geog
+        FROM client.boundaries
+       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+
+       UNION ALL
+
+      SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+        FROM aro.cousub
+       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+
+      LIMIT 100
+    `
+    return database.query(sql, [`%${text}%`])
   }
 
 }

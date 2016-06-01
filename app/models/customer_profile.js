@@ -17,6 +17,7 @@ module.exports = class CustomerProfile {
       .reduce((total, customer_type) => total + customer_type.households, 0)
     metadata.total_customers = metadata.customer_types
       .reduce((total, type) => total + type.businesses + type.households, 0)
+    return metadata
   }
 
   static customerProfileForRoute (plan_id, metadata) {
@@ -136,7 +137,7 @@ module.exports = class CustomerProfile {
       GROUP BY ct.name
       ORDER BY ct.name
     `
-    database.query(sql, params)
+    return database.query(sql, params)
       .then((customer_types) => this._processCustomerTypes(metadata, customer_types))
   }
 

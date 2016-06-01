@@ -135,3 +135,7 @@ aro-service/aro-utils/.settings
 aro-service/aro-utils/.project
 
 aro-service/docker/aro-service.war
+
+aro-service/aro-core/src/main/java/com/altvil/aro/service/optimize/spi/impl/NetworkAnalysisFactoryImpl.java
+
+aro-service/aro-engine/src/main/java/com/altvil/aro/service/network/NetworkRequest.java
