@@ -22,6 +22,7 @@ import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
+import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
@@ -34,10 +35,17 @@ import com.altvil.aro.service.planning.fiber.impl.NpvFiberPlanImpl;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
+import com.altvil.enumerations.FiberPlanAlgorithm;
 import com.altvil.netop.optimize.FinancialConstraints;
 
 @RestController
 public class RecalcEndpoint {
+
+	public static class CapexFP extends CapexFiberPlanImpl {
+	}
+
+	public static class NpvFP extends NpvFiberPlanImpl {
+	}
 
 	private static final Logger log = LoggerFactory
 			.getLogger(RecalcEndpoint.class.getName());
@@ -130,20 +138,37 @@ public class RecalcEndpoint {
 	}
 	
 	private FiberPlan toFiberPlan(AroFiberPlan plan) {
-
-		switch (plan.getAlgorithm()) {
+		FiberPlanAlgorithm algorithm = plan.getAlgorithm();
+		if (algorithm == null) {
+			algorithm = FiberPlanAlgorithm.CAPEX;
+		}
+		
+		algorithm = FiberPlanAlgorithm.NPV; // For demo
+		
+		switch (algorithm) {
 		case NPV:
 			{FinancialConstraints financials = plan.getFinancialConstraints();
-			final NpvFiberPlanImpl npvFiberPlanImpl = new NpvFiberPlanImpl(){};
+			final NpvFiberPlanImpl npvFiberPlanImpl = new NpvFP();
 			npvFiberPlanImpl.setPlanId(plan.getPlanId());
-			npvFiberPlanImpl.setBudget(financials.getBudget());
-			npvFiberPlanImpl.setDiscountRate(financials.getDiscountRate());
-			npvFiberPlanImpl.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
-			npvFiberPlanImpl.setYears(financials.getYears());
+			npvFiberPlanImpl.setFiberNetworkConstraints(
+					new FiberNetworkConstraints() /*
+												   * plan.
+												   * getFiberNetworkConstraints(
+												   * )
+												   */);
+			if (financials == null) {
+				npvFiberPlanImpl.setDiscountRate(0.2);
+				npvFiberPlanImpl.setYear(2015);
+				npvFiberPlanImpl.setYears(5);
+			} else {
+				npvFiberPlanImpl.setBudget(financials.getBudget());
+				npvFiberPlanImpl.setDiscountRate(financials.getDiscountRate());
+				npvFiberPlanImpl.setYears(financials.getYears());
+			}
 			return npvFiberPlanImpl;}
 		case CAPEX:
 		default:
-			final CapexFiberPlanImpl capexFiberPlanImpl = new CapexFiberPlanImpl(){};
+			final CapexFiberPlanImpl capexFiberPlanImpl = new CapexFP();
 			capexFiberPlanImpl.setPlanId(plan.getPlanId());
 			capexFiberPlanImpl.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
 			return capexFiberPlanImpl;

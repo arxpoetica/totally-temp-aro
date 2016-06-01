@@ -254,7 +254,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				terminalData.locations++;
 				terminalData.revenue += d.getMonthlyRevenueImpact() * 12;
 				// # FDT to support this location
-				int fdt = (int) ((d.getDemand() + 12) / 12);
+				int fdt = (int) ((d.getDemand() + 50) / 50);
 				terminalData.fdt += fdt;
 				// Cost of distribution fiber (1 per FDT) from start of path
 				// to this location
