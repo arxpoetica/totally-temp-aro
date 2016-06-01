@@ -125,7 +125,8 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		}
 
 		public void add(AssignedEntityDemand assignedEntityDemand) {
-
+			assert !locationEntities.contains(assignedEntityDemand);
+			
 			if (!locationEntities.contains(assignedEntityDemand)) {
 
 				for (LocationEntityType t : LocationEntityType.values()) {

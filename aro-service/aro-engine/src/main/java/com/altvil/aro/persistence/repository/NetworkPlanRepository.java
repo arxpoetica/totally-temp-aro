@@ -1,5 +1,6 @@
 package com.altvil.aro.persistence.repository;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +14,10 @@ import com.altvil.aro.model.NetworkPlan;
 public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
-	
+	@Query(value = "SELECT r.wirecenter_id \n" +
+			"FROM client.plan r \n" +
+			"WHERE r.id = :planId", nativeQuery = true)
+	Long queryWirecenterIdForPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n" + 
 			"SELECT\n" + 
@@ -38,7 +42,7 @@ public interface NetworkPlanRepository extends
 			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" + 
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
-			"order by gid, intersect_position limit 40000", nativeQuery = true)
+			"order by gid, intersect_position limit 40000", nativeQuery = true) // KG debugging
 	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
 
 	
@@ -142,7 +146,9 @@ public interface NetworkPlanRepository extends
 			"", nativeQuery = true)
 	List<Object[]> queryAllFiberDemand(@Param("planId") long planId, @Param("year") int year);
 
-
+	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
+			"WHERE pt.plan_id = :planId", nativeQuery = true)
+	List<BigInteger> querySelectedLocationsByPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n"
 			+ "SELECT\n"
@@ -286,8 +292,19 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"updated_network_nodes as (\n" + 
 			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
-			"	select np.id, 1, cast(np.area_centroid as geography), np.area_centroid \n" + 
+			"	select np.id, 1,\n" + 
+			"		case\n" + 
+			"		when CO.geog is not null then CO.geog\n" + 
+			"		else cast(np.area_centroid as geography)\n" + 
+			"		end,\n" + 
+			"		case\n" + 
+			"		when CO.geom is not null then CO.geom\n" + 
+			"		else np.area_centroid\n" + 
+			"		end\n" + 
 			"	from new_plans np\n" + 
+			"	join aro.wirecenters w on w.id = np.wirecenter_id\n" +
+			"	left join client.network_nodes CO on st_contains(w.geom, CO.geom)\n" + 
+			"	where CO.plan_id is null\n" +
 			"	returning id, plan_id\n" + 
 			")\n" + 
 			",\n" + 

@@ -78,12 +78,109 @@
 			<groupId>com.googlecode.genericdao</groupId>
 			<artifactId>dao-hibernate</artifactId>
 			<version>1.2.0</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>hibernate-core</artifactId>
+					<groupId>org.hibernate</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 
 
+		<dependency>
+			<groupId>org.apache.ignite</groupId>
+			<artifactId>ignite-core</artifactId>
+			<version>1.5.0.final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ignite</groupId>
+			<artifactId>ignite-spring</artifactId>
+			<version>1.5.0.final</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	    <dependency>
+	    	<groupId>org.apache.ignite</groupId>
+	    	<artifactId>ignite-indexing</artifactId>
+	    	<version>1.5.0.final</version>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.apache.ignite</groupId>
+	    	<artifactId>ignite-geospatial</artifactId>
+	    	<version>1.0.0</version>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.apache.ignite</groupId>
+	    	<artifactId>ignite-hibernate</artifactId>
+	    	<version>1.0.0</version>
+	    	<exclusions>
+	    		<exclusion>
+	    			<artifactId>hibernate-core</artifactId>
+	    			<groupId>org.hibernate</groupId>
+	    		</exclusion>
+	    	</exclusions>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.apache.ignite</groupId>
+	    	<artifactId>ignite-slf4j</artifactId>
+	    	<version>1.5.0.final</version>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.apache.ignite</groupId>
+	    	<artifactId>ignite-jta</artifactId>
+	    	<version>1.5.0.final</version>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.hibernate</groupId>
+	    	<artifactId>hibernate-entitymanager</artifactId>
+	    	<version>5.0.0.CR4</version>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.hibernate</groupId>
+	    	<artifactId>hibernate-spatial</artifactId>
+	    	<version>5.0.0.CR4</version>
+	    	<exclusions>
+	    		<exclusion>
+	    			<artifactId>org.jboss.logging</artifactId>
+	    			<groupId>jboss-logging</groupId>
+	    		</exclusion>
+	    		<exclusion>
+	    			<artifactId>postgresql</artifactId>
+	    			<groupId>postgresql</groupId>
+	    		</exclusion>
+	    		<exclusion>
+	    			<artifactId>hibernate-core</artifactId>
+	    			<groupId>org.hibernate</groupId>
+	    		</exclusion>
+	    	</exclusions>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.springframework</groupId>
+	    	<artifactId>spring-remoting</artifactId>
+	    	<version>2.0.8</version>
+	    	<exclusions>
+	    		<exclusion>
+	    			<artifactId>log4j</artifactId>
+	    			<groupId>log4j</groupId>
+	    		</exclusion>
+	    	</exclusions>
+	    </dependency>
 	</dependencies>
 	<build>
 		<finalName>aro-engine</finalName>
 	</build>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+				<version>4.2.5.RELEASE</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

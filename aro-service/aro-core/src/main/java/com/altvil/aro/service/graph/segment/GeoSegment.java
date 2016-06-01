@@ -19,8 +19,6 @@ public interface GeoSegment extends Reversable {
 
 	public double getLength();
 
-	public boolean isEmpty();
-
 	public List<GeoSegment> split(GraphNodeFactory vertexFactory,
 			double offsetRatio);
 

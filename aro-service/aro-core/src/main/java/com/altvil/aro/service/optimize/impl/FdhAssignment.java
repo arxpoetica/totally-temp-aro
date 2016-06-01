@@ -26,13 +26,13 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 			FiberProducer fiberProducer, DemandCoverage coverage) {
 
 		int roundedUpSplitters = calculateSplitterCount(ctx, fiberConsumer) ;
-
+		
 		return ctx.getPricingModel().getMaterialCost(MaterialType.FDH)
 				+ (ctx.getPricingModel().getMaterialCost(
-						ctx.getHubModel().getMaterialType()) * roundedUpSplitters);
+				ctx.getHubModel().getMaterialType()) * roundedUpSplitters);
 
 	}
-	
+
 	
 	@Override
 	public FiberProducer createFiberProducer(AnalysisContext ctx,
@@ -50,7 +50,7 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 	public boolean rebuildNetwork(GeneratingNode node, AnalysisContext ctx) {
 		return true;
 	}
-
+	
 	@Override
 	public void serialize(GeneratingNode node,
 			ModelSerializer serializer) {
@@ -63,6 +63,7 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 				.getCount(FiberType.DISTRIBUTION);
 		int roundedUpSplitters = (int) Math.ceil(((double) distributionDemand)
 				/ ctx.getHubModel().getSplitterRatio());
+		//roundedUpSplitters = 1; // HARRY
 		return roundedUpSplitters;
 	}
 	

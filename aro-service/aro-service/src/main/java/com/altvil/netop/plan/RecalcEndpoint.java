@@ -2,7 +2,14 @@ package com.altvil.netop.plan;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.ignite.Ignite;
+import org.apache.ignite.resources.IgniteInstanceResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,88 +17,99 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.altvil.aro.service.conversion.SerializationService;
-import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.job.Job;
+import com.altvil.aro.service.job.JobService;
+import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
-import com.altvil.aro.service.plan.InputRequests;
-import com.altvil.aro.service.plan.PlanService;
-import com.altvil.aro.service.planing.MasterPlanCalculation;
+import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.recalc.Job;
-import com.altvil.aro.service.recalc.RecalcException;
-import com.altvil.aro.service.recalc.RecalcService;
-import com.altvil.aro.service.recalc.protocol.RecalcResponse;
+import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
+import com.altvil.aro.service.planning.FiberPlan;
+import com.altvil.aro.service.planning.fiber.FiberPlanConfigurationBuilder;
+import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
+import com.altvil.aro.service.strategy.NoSuchStrategy;
+import com.altvil.aro.service.strategy.StrategyService;
+import com.altvil.netop.DummyRequester;
 
 @RestController
 public class RecalcEndpoint {
 
-	@Autowired
-	private PlanService planService;
+	private static final Logger log = LoggerFactory
+			.getLogger(RecalcEndpoint.class.getName());
+	
+	private Ignite igniteGrid;
 
 	@Autowired
-	private RecalcService recalcService;
-
-	@Autowired
-	private NetworkService networkService;
-
-	@Autowired
-	private SerializationService conversionService;
-
+	private JobService jobService;
+	
 	@Autowired
 	private NetworkPlanningService networkPlanningService;
+	
+	@Autowired(required=false)  //NOTE the method name determines the name/alias of Ignite grid which gets bound!
+	@IgniteInstanceResource
+	private void setRecalcEndpointIgniteGrid(Ignite igniteBean)
+	{
+		this.igniteGrid = igniteBean;
+	}	
+	
+	// Temporary - replace with injected service.
+	@PostConstruct
+	public void init() {
+	}
+	
+	@Autowired
+	private StrategyService strategyService;
 
 	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanResponse postRecalcMasterPlan(
-			@RequestBody FiberPlanRequest request) {
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(@RequestBody FiberPlan request) throws NoSuchStrategy, InterruptedException {
+		final FiberPlanConfigurationBuilder strategy = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm());
+		FiberPlanConfiguration fiberPlan = strategy.build(request);
+		FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
+		MasterPlanBuilder mpc = networkPlanningService.planMasterFiber(DummyRequester.PRINCIPAL, fiberPlan, fiberNetworkConstraints);
 
-		MasterPlanCalculation mpc = networkPlanningService.planMasterFiber(
-				request.getPlanId(), new InputRequests(), request.getFiberNetworkConstraints());
-
-		Job<MasterPlanUpdate> job = recalcService.submit(() -> {
-			MasterPlanUpdate mpu = mpc.getFuture().get();
-			return mpu;
-
-		});
+		Job<MasterPlanUpdate> job = jobService.submit(mpc);
 		
-		//Block Call
-		job.getResponse() ;
+		//Block until complete (Temporary until the UI can handle async responses)
+		try {
+			job.get();
+		} catch (InterruptedException | ExecutionException e) {
+			log.error("Error retrieving job value. ", e);;
+		}
 
-		MasterPlanResponse mpr = new MasterPlanResponse();
-		mpr.setRecalcJob(job.getJob());
-		mpr.setWireCenterids(mpc.getWireCenterPlans());
+		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
+		mpr.setJob(job);
+		// TODO Why are we storing WireCenter PLAN Ids in a property that expects WireCenter Ids????
+		mpr.setWireCenterids(mpc.getWireCenterPlans().stream().map((p) ->{return p.getPlanId();}).collect(Collectors.toList()));
 
 		return mpr;
 	}
 
 	@RequestMapping(value = "/recalc/wirecenter", method = RequestMethod.POST)
-	public @ResponseBody RecalcResponse<FiberPlanResponse> postRecalc(
-			@RequestBody FiberPlanRequest fiberPlanRequest)
-			throws RecalcException, InterruptedException, ExecutionException {
+	public @ResponseBody Job<FiberPlanResponse> postRecalc(
+			@RequestBody AbstractFiberPlan request)
+			throws InterruptedException, ExecutionException, NoSuchStrategy {		
+		final FiberPlanConfiguration fiberPlan = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
+		final FiberNetworkConstraints fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request);
 
-		Job<FiberPlanResponse> job = recalcService
-				.submit(() -> {
-
-					FiberNetworkConstraints constraints = fiberPlanRequest
-							.getFiberNetworkConstraints() == null ? new FiberNetworkConstraints()
-							: fiberPlanRequest.getFiberNetworkConstraints();
+		Job<FiberPlanResponse> job = jobService
+				.submit(new JobRequestIgniteCallable<FiberPlanResponse>(DummyRequester.PRINCIPAL, igniteGrid.compute(), () -> {
 
 					Future<WirecenterNetworkPlan> future = networkPlanningService
-							.planFiber(fiberPlanRequest.getPlanId(),
-									constraints);
+							.planFiber(fiberPlan, fiberNetworkConstraints);
 
 					WirecenterNetworkPlan plan = future.get();
 
 					FiberPlanResponse response = new FiberPlanResponse();
 
-					response.setFiberPlanRequest(fiberPlanRequest);
+					response.setFiberPlanRequest(request);
 					response.setNewEquipmentCount(plan.getNetworkNodes().size());
 
 					return response;
-				});
+				}));
 		
-
-		return job.getResponse();
+		return job;
 	}
 }

@@ -112,7 +112,6 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 					
 				}).collect(Collectors.toList());
 
-		totalNumberOfLocations += filteredLocations.size();
 		return filteredLocations;
 	}
 

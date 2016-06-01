@@ -1,0 +1,76 @@
+<beans xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/data/jpa
+		http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+	<context:component-scan base-package="com.altvil">
+		<!-- NOTE: aroServices is included as part of the application context so 
+			that they are part of a separate context that can be passed to the IgniteSpringBean 
+			by the aroServlet's context. The component scan must NOT include any of the 
+			servlet's packages as their beans cannot be initialized without the MVC components 
+			defined in aroServlet-*.xml -->
+		<context:exclude-filter type="regex"
+			expression="com\.altvil\.(?:authentication|mvcconfig|netop)\..*" />
+	</context:component-scan>
+
+	<context:property-placeholder
+		location="classpath*:/aroConfig.properties" />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<bean id="aroDataSource" class="org.apache.commons.dbcp2.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="org.postgis.DriverWrapper" />
+		<property name="url"
+			value="jdbc:postgresql_postGIS://${PGHOST}:${PGPORT}/${PGDATABASE}" />
+		<property name="username" value="${PGUSER}" />
+		<property name="password" value="${PGPASSWORD}" />
+		<property name="accessToUnderlyingConnectionAllowed" value="true" />
+	</bean>
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="aroDataSource" />
+		<property name="packagesToScan" value="com.altvil" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="showSql" value="false" />
+				<property name="databasePlatform"
+					value="com.altvil.aro.persistence.JsonPostgisHibernateDialect" />
+			</bean>
+		</property>
+
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">validate</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="entityManager"
+		class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<jpa:repositories base-package="com.altvil"
+		repository-impl-postfix="Impl" entity-manager-factory-ref="entityManagerFactory"
+		transaction-manager-ref="transactionManager" />
+
+
+
+</beans>

@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Predicate;
 
 import org.jgrapht.DirectedGraph;
@@ -24,6 +26,7 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -68,11 +71,13 @@ public class GeneratingNodeAssembler {
 		matchingEquipmentType = matchingEquipmentMap.get(fiberType);
 	}
 
-	public void createAnalysis(GeneratingNode.Builder builder, GraphNode vertex, GraphMapping gm,
+	public void createAnalysis(GeneratingNode.Builder builder, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder, GraphNode vertex, GraphMapping gm,
 			Collection<AroEdge<GeoSegment>> pathEdges) {
 
-		this.dagModel = createDagModel(vertex, pathEdges);
+		this.dagModel = createDagModel(closestFirstSurfaceBuilder, vertex, pathEdges);
 		this.graph = this.dagModel.getAsDirectedGraph();
+
+		assert isTree(vertex, graph);
 
 		equipmentMap = createEquipmentMap(ctx.getNetworkModel(), gm);
 		
@@ -88,7 +93,27 @@ public class GeneratingNodeAssembler {
 
 	}
 	
-	private DAGModel<GeoSegment> createDagModel(GraphNode vertex,
+	private boolean isTree(GraphNode vertex, DirectedGraph<GraphNode, AroEdge<GeoSegment>> directedGraph) {
+		Set<Long> knownGraphNodeIds = new HashSet<Long>();
+		Stack<GraphNode> candidates = new Stack<>();
+		
+		candidates.add(vertex);
+		
+		while (!candidates.isEmpty()) {
+			GraphNode candidate = candidates.pop();
+			
+			if (!knownGraphNodeIds.add(candidate.getId())) {
+				System.err.println(candidate.getId() + "; " + candidate);
+				return false;
+			}
+			
+			directedGraph.incomingEdgesOf(candidate).stream().map(AroEdge::getSourceNode).forEach((n) -> {candidates.push(n);});			
+		}
+		
+		return true;
+	}
+
+	private DAGModel<GeoSegment> createDagModel(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder, GraphNode vertex,
 			Collection<AroEdge<GeoSegment>> pathEdges) {
 		
 		
@@ -103,7 +128,7 @@ public class GeneratingNodeAssembler {
 			}
 		}
 		
-		return ctx.getGraphTransformerFactory().createDAG(b.build(), vertex, e -> true) ;
+		return ctx.getGraphTransformerFactory().createDAG(closestFirstSurfaceBuilder, b.build(), vertex, e -> true) ;
 		
 //		b.setRoot(vertex);
 //		return b.buildDAG();

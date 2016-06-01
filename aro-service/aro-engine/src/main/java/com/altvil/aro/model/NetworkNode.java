@@ -90,6 +90,7 @@ public class NetworkNode extends ComparableModel {
 	}
 
 	@Column(name = "plan_id")
+//	@Convert(converter = PlanIdConverter.class)
 	public long getRouteId() {
 		return routeId;
 	}

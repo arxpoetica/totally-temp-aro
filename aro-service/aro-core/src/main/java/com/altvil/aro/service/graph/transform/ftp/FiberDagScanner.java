@@ -199,7 +199,7 @@ public class FiberDagScanner {
 
 			this.writeFDH(thisEdge.subEdge(0, offset), vs);
 
-			while (thisEdge.getTotalLocationDemand() - offset >= thresholds
+			while (thisEdge.getTotalLocationDemand() - offsetDemand >= thresholds
 					.getMaxLocationPerFDH()) {
 
 				double nextDemand = offsetDemand

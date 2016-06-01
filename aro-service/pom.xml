@@ -52,22 +52,13 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.5.8</version>
+            <version>1.7.21</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.5.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.5.8</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
+            <version>1.7.21</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -151,24 +142,24 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>4.0.5.RELEASE</version>
+            <version>4.2.5.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>4.0.5.RELEASE</version>
+            <version>4.2.5.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.0.5.RELEASE</version>
+            <version>4.2.5.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>4.0.5.RELEASE</version>
+            <version>4.2.5.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -176,18 +167,22 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>4.0.4.RELEASE</version>
+		</dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>4.0.5.RELEASE</version>
+            <version>4.2.5.RELEASE</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>4.0.5.RELEASE</version>
+            <version>4.2.5.RELEASE</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -207,15 +202,37 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>4.0.5.RELEASE</version>
+            <version>4.2.5.RELEASE</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
 
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-messaging</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-websocket</artifactId>
+		    <version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
+		    <groupId>javax.websocket</groupId>
+		    <artifactId>javax.websocket-api</artifactId>
+		    <version>1.0</version>
+		    <scope>provided</scope>
+		</dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
             <version>2.0</version>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>commons-logging</artifactId>
+            		<groupId>commons-logging</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Hibernate Spatial -->
@@ -274,6 +291,11 @@
             <version>3.10.1</version>
         </dependency>
         <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.bedatadriven</groupId>
             <artifactId>jackson-datatype-jts</artifactId>
             <version>jackson-datatype-jts-1.0</version>
@@ -290,6 +312,24 @@
         </dependency>
 
 
+        <dependency>
+        	<groupId>org.slf4j</groupId>
+        	<artifactId>log4j-over-slf4j</artifactId>
+        	<version>1.7.21</version>
+        	<scope>runtime</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.slf4j</groupId>
+        	<artifactId>jul-to-slf4j</artifactId>
+        	<version>1.7.21</version>
+        	<scope>runtime</scope>
+        </dependency>
+        <dependency>
+        	<groupId>ch.qos.logback</groupId>
+        	<artifactId>logback-classic</artifactId>
+        	<version>1.1.7</version>
+        	<scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -335,6 +375,7 @@
         <module>aro-utils</module>
         <module>aro-core</module>
         <module>aro-engine</module>
-        <module>aro-service</module> 
+        <module>aro-service</module>
+        <module>aro-ignite</module>
     </modules>
 </project>
