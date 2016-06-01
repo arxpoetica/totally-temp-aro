@@ -1,17 +1,17 @@
 package com.altvil.netop.plan;
 
-import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
+import com.altvil.aro.service.planning.FiberPlan;
 
 public class FiberPlanResponse {
 
-	private AbstractFiberPlan fiberPlanRequest;
+	private FiberPlan fiberPlanRequest;
 	private int newEquipmentCount;
 
-	public AbstractFiberPlan getFiberPlanRequest() {
+	public FiberPlan getFiberPlanRequest() {
 		return fiberPlanRequest;
 	}
 
-	public void setFiberPlanRequest(AbstractFiberPlan fiberPlanRequest) {
+	public void setFiberPlanRequest(FiberPlan fiberPlanRequest) {
 		this.fiberPlanRequest = fiberPlanRequest;
 	}
 
