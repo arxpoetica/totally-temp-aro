@@ -20,7 +20,8 @@ module.exports = class Location {
     joins[''] = `${joins['businesses']} ${joins['households']}`
     var icon = `
       CASE
-        WHEN (SELECT COUNT(*) FROM businesses b WHERE b.location_id = locations.id) > (SELECT COUNT(*) FROM households h WHERE h.location_id = locations.id)
+        WHEN (SELECT COUNT(*) FROM businesses b WHERE b.location_id = locations.id) >
+             (SELECT COUNT(*) FROM households h WHERE h.location_id = locations.id)
         THEN '/images/map_icons/${process.env.ARO_CLIENT}/location_business_gray.png'
         ELSE '/images/map_icons/${process.env.ARO_CLIENT}/location_household.png'
       END
