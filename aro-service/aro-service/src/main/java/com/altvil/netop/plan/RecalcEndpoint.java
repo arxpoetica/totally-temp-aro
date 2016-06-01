@@ -29,10 +29,12 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.fiber.FiberPlanConfigurationBuilder;
-import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
+import com.altvil.aro.service.planning.fiber.impl.CapexFiberPlanImpl;
+import com.altvil.aro.service.planning.fiber.impl.NpvFiberPlanImpl;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
+import com.altvil.netop.optimize.FinancialConstraints;
 
 @RestController
 public class RecalcEndpoint {
@@ -63,7 +65,7 @@ public class RecalcEndpoint {
 	@Autowired
 	private StrategyService strategyService;
 
-	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
+	@RequestMapping(value = "/recalc/masterplan/p", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody FiberPlan request) throws NoSuchStrategy, InterruptedException {
 		final FiberPlanConfigurationBuilder strategy = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm());
 		FiberPlanConfiguration fiberPlan = strategy.build(request);
@@ -87,9 +89,9 @@ public class RecalcEndpoint {
 		return mpr;
 	}
 
-	@RequestMapping(value = "/recalc/wirecenter", method = RequestMethod.POST)
+	@RequestMapping(value = "/recalc/wirecenter/p", method = RequestMethod.POST)
 	public @ResponseBody Job<FiberPlanResponse> postRecalc(Principal username,
-			@RequestBody AbstractFiberPlan request)
+			@RequestBody FiberPlan request)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {		
 		final FiberPlanConfiguration fiberPlan = strategyService.getStrategy(FiberPlanConfigurationBuilder.class, request.getAlgorithm()).build(request);
 		final FtthThreshholds fiberNetworkConstraints = strategyService.getStrategy(FiberNetworkConstraintsBuilder.class, request.getAlgorithm()).build(request.getFiberNetworkConstraints());
@@ -111,5 +113,40 @@ public class RecalcEndpoint {
 				}));
 		
 		return job;
+	}
+
+	@RequestMapping(value = "/recalc/masterplan", method = RequestMethod.POST)
+	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(Principal requestor, @RequestBody AroFiberPlan aroRequest) throws NoSuchStrategy, InterruptedException {
+		FiberPlan request = toFiberPlan(aroRequest);
+		return postRecalcMasterPlan(requestor, request);
+	}
+
+	@RequestMapping(value = "/recalc/wirecenter", method = RequestMethod.POST)
+	public @ResponseBody Job<FiberPlanResponse> postRecalc(Principal username,
+			@RequestBody AroFiberPlan aroRequest)
+			throws InterruptedException, ExecutionException, NoSuchStrategy {	
+		FiberPlan request = toFiberPlan(aroRequest);
+		return postRecalc(username, request);
+	}
+	
+	private FiberPlan toFiberPlan(AroFiberPlan plan) {
+
+		switch (plan.getAlgorithm()) {
+		case NPV:
+			{FinancialConstraints financials = plan.getFinancialConstraints();
+			final NpvFiberPlanImpl npvFiberPlanImpl = new NpvFiberPlanImpl(){};
+			npvFiberPlanImpl.setPlanId(plan.getPlanId());
+			npvFiberPlanImpl.setBudget(financials.getBudget());
+			npvFiberPlanImpl.setDiscountRate(financials.getDiscountRate());
+			npvFiberPlanImpl.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
+			npvFiberPlanImpl.setYears(financials.getYears());
+			return npvFiberPlanImpl;}
+		case CAPEX:
+		default:
+			final CapexFiberPlanImpl capexFiberPlanImpl = new CapexFiberPlanImpl(){};
+			capexFiberPlanImpl.setPlanId(plan.getPlanId());
+			capexFiberPlanImpl.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
+			return capexFiberPlanImpl;
+		}
 	}
 }
