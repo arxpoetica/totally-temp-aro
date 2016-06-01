@@ -1,9 +1,6 @@
 package com.altvil.aro.service.planning.optimization.impl;
 
-import com.altvil.aro.service.planing.OptimizationInputs;
-import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
-import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
 import com.altvil.enumerations.OptimizationType;
 
 public abstract class AbstractOptimizationPlan implements OptimizationPlan {
