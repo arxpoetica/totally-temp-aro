@@ -62,7 +62,7 @@ vagrant_uninstall uninstall:
 	(docker stop aro-service && docker rm aro-service && docker rmi -f $(SERVICE_IMAGE))
 
 vagrant_run_service vagrant_run vagrant_run_docker run_vagrant_docker:
-	(docker run -e CATALINA_OPTS='-Xmx4g -Xms2g' -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb $(SERVICE_IMAGE))
+	(docker run -e CATALINA_OPTS='' -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb $(SERVICE_IMAGE))
 
 vagrant_install install_vagrant install: build_docker_image run_vagrant_docker
 
