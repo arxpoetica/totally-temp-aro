@@ -14,7 +14,10 @@ import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
+import com.altvil.aro.service.graph.node.impl.DefaultVertex;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * A closest-first iterator for a directed or undirected graph. For this
@@ -131,7 +134,19 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
 		ONCE = true;
+
+		// NOTE: Calculate a scale factor that can be used to reduce the npv
+		// function to a linear equation. Assumes that the net revenue is
+		double npv = 0;
+
+		for (int t = 1; t <= years; t++) {
+			npv += 1 / Math.pow(1 + discountRate, t);
+		}
+
+		npvFactor = npv;
 	}
+
+	private final double npvFactor;
 
 	/**
 	 * Determine weighted path length to a vertex via an edge, using the path
@@ -167,13 +182,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	}
 
 	private double netPresentValue(NpvData data) {
-		double npv = -data.cost;
-
-		// NOTE: Assumes fixed revenue for every year INCLUDING THE FIRST
-		// YEAR.
-		for (int t = 1; t <= years; t++) {
-			npv += data.revenue / Math.pow(1 + discountRate, t);
-		}
+		double npv = (data.revenue * npvFactor) - data.cost;
 
 		return npv;
 	}
@@ -223,62 +232,67 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		return new FibonacciHeapNode<QueueEntry<V, E>>(terminalEntry);
 	}
 
-	private NpvData createNpvData(V terminal, E base2terminal) {
-		final NpvData baseData;
-		final NpvData terminalData = new NpvData();
+	private NpvData createNpvData(V destination, E source2Destination) {
+		final NpvData sourceData;
+		final NpvData destinationData = new NpvData();
 
-		if (base2terminal == null) {
-			return terminalData;
+		if (source2Destination == null) {
+			return destinationData;
 		}
 
-		V base = Graphs.getOppositeVertex(getGraph(), base2terminal, terminal);
-		FibonacciHeapNode<QueueEntry<V, E>> baseNode = getSeenData(base);
-		baseData = baseNode.getData().npvData;
+		V source = Graphs.getOppositeVertex(getGraph(), source2Destination, destination);
+		FibonacciHeapNode<QueueEntry<V, E>> sourceNode = getSeenData(source);
+		sourceData = sourceNode.getData().npvData;
 
-		terminalData.cost = baseData.cost;
-		terminalData.revenue = baseData.revenue;
+		// The destination's financials will be the source's financials plus the
+		// costs and revenues associated with the current edge.
+		destinationData.cost = sourceData.cost;
+		destinationData.revenue = sourceData.revenue;
 
-		terminalData.totalLength = baseData.totalLength + base2terminal.getWeight();
+		destinationData.totalLength = sourceData.totalLength + source2Destination.getWeight();
 
-		GeoSegment segment = (GeoSegment) base2terminal.getValue();
-		if (segment != null) {
-			// if the cost of this plan does NOT exceed the budget then include the
-			// cost, and revenue, of its assignments in the NPV calculation.
-			if (baseData.cost < budget) {
+		// include a nominal cost of building this edge
+
+		// NOTE: Using 5x was determined by trial and error.
+		destinationData.cost += 5 * source2Destination.getWeight() * (FIBER_PER_M + LABOR_PER_M);
+
+		// if the cost of this plan does NOT exceed the budget then include the
+		// cost, and revenue, of its assignments in the NPV calculation.
+		if (sourceData.cost < budget) {
+			GeoSegment segment = (GeoSegment) source2Destination.getValue();
+
+			if (segment != null) {
 				Collection<GraphEdgeAssignment> assignments = segment.getGeoSegmentAssignments();
 
 				assignments.forEach((assignment) -> {
 					LocationEntity le = (LocationEntity) assignment.getAroEntity();
 					LocationDemand d = le.getLocationDemand();
-					terminalData.locations++;
-					terminalData.revenue += d.getMonthlyRevenueImpact() * 12;
+					// Count the locations on this page for later analysis
+					destinationData.locations++;
+					destinationData.revenue += d.getMonthlyRevenueImpact() * 12;
 					// # FDT to support this location
 					int fdt = (int) ((d.getDemand() + 50) / 50);
-					terminalData.fdt += fdt;
+					destinationData.fdt += fdt;
 
 					// Cost of distribution fiber (1 per FDT) from start of path
 					// to this location
-					terminalData.cost += (baseData.totalLength
+					destinationData.cost += (sourceData.totalLength
 							+ assignment.getPinnedLocation().getEffectiveOffsetFromStartVertex()) * fdt * FIBER_PER_M;
 					// Cost of FDTs at this location
-					terminalData.cost += fdt * FDT_PER_UNIT;
+					destinationData.cost += fdt * FDT_PER_UNIT;
 					// Labor cost for this edge (Assumes that the edge is not
 					// the terminal edge of the entire path)
-					terminalData.cost += base2terminal.getWeight() * LABOR_PER_M;
+					destinationData.cost += source2Destination.getWeight() * LABOR_PER_M;
 					// NOTE: Cost of terminal fiber not included.
 					// NOTE: Presently assumes that the FDT is located on the
 					// edge rather than at the location.
 				});
-			} else { // otherwise include the minimal cost of building this edge without any offsetting revenue
-
-				// NOTE: Do NOT return a constant value when the budget is exceeded as
-				// the plan's npv must get worse each time it is extended.
-				terminalData.cost += base2terminal.getWeight() * FIBER_PER_M;
-				terminalData.cost += base2terminal.getWeight() * LABOR_PER_M;
 			}
+		} else {
+			destinationData.cost += 5 * source2Destination.getWeight() * (FIBER_PER_M + LABOR_PER_M);			
 		}
 
-		return terminalData;
+		return destinationData;
 	}
 
 	/**
@@ -370,7 +384,28 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			return null;
 		}
 
-		return node.getData().spanningTreeEdge;
+		DefaultVertex v = (DefaultVertex) vertex;
+
+		final QueueEntry<V, E> data = node.getData();
+
+		final E spanningTreeEdge = data.spanningTreeEdge;
+
+		if (v != null) {
+			final Point point = v.getPoint();
+			if (point != null) {
+				Coordinate coord = point.getCoordinate();
+
+				log.debug(v + " " + coord.y + " " + coord.x + " " + data.npvData.totalLength + " " + data.npvData.cost
+						+ " " + data.npvData.revenue + " " + netPresentValue(data.npvData));
+
+				if (spanningTreeEdge != null) {
+					log.debug(
+							spanningTreeEdge.getSourceNode().getId() + " " + spanningTreeEdge.getTargetNode().getId());
+				}
+			}
+		}
+
+		return spanningTreeEdge;
 	}
 
 	@Override
@@ -378,7 +413,9 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		FibonacciHeapNode<QueueEntry<V, E>> node = getSeenData(vertex);
 		NpvData d = node.getData().npvData;
 
-		System.err.println("|" + vertex + "," + netPresentValue(d));
+		if (log.isTraceEnabled()) {
+			log.trace("|" + vertex + "," + netPresentValue(d));
+		}
 	}
 
 	/**
