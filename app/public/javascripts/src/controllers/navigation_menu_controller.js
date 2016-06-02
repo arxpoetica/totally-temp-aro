@@ -18,7 +18,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $('#new-plan select').select2({
-    placeholder: 'Enter a CLLI Code'
+    placeholder: config.ui.default_form_values.create_plan.select_area_text
   }).on('change', () => {
     $scope.look_up_area()
   })

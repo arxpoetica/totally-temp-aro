@@ -39,6 +39,11 @@
     "labels": {
       "fiber": "Cable",
       "wirecenter": "Service Area"
+    },
+    "default_form_values": {
+      "create_plan": {
+        "select_area_text": "Search For a Service Area"
+      }
     }
   }
 }
