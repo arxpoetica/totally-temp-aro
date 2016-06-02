@@ -1,7 +1,8 @@
 package com.altvil.aro.service.graph.transform.impl;
 
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.WeightedGraph;
@@ -46,8 +47,8 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	private static final Logger log = LoggerFactory
 			.getLogger(GraphTransformerFactoryImpl.class.getName());
 	
-	private GraphNodeFactory factory;
 	private EntityDemandService entityDemandService ;
+	private GraphNodeFactory factory;
 	
 	@Autowired
 	@Inject
@@ -57,36 +58,28 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	}
 	
 	@Override
-	public <T> GraphModelBuilder<T> modifyModel(GraphModel<T> model) {
-		AroEdgeFactory<T> f = new AroEdgeFactory<T>() ;
-		return new DefaultGraphBuilder<T>(factory,
-				model.getGraph(), f);
+	public <T> GraphModelBuilder<T> createBuilder(
+			WeightedGraph<GraphNode, AroEdge<T>> graph) {
+		return new DefaultGraphBuilder<T>(factory, graph, new AroEdgeFactory<T>());
+	}
+
+	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder, GraphModel<T> graph, GraphNode srcNode,
+			Function<AroEdge<T>, Set<GraphNode>> marked) {
+		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(marked,
+				srcNode);
 	}
 
 	@Override
-	public FiberDagScanner createWirecenterTransformer(FtthThreshholds threshholds) {
-		return new FiberDagScanner(entityDemandService.createDemandAnalyizer(threshholds), threshholds);
+	public <T> GraphModelBuilder<T> createDagBuilder() {
+		return createDAGBuilder(new AroEdgeFactory<T>());
 	}
 
 	@Override
 	public <T> GraphModelBuilder<T> createDAGBuilder() {
 		return createDAGBuilder(new AroEdgeFactory<T>());
 	}
-
-	@Override
-	public <T> GraphModelBuilder<T> createBuilder(
-			WeightedGraph<GraphNode, AroEdge<T>> graph) {
-		return new DefaultGraphBuilder<T>(factory, graph, new AroEdgeFactory<T>());
-	}
 	
 	
-	@Override
-	public GraphModelBuilder<GeoSegment> createGraphBuilder() {
-		AroEdgeFactory<GeoSegment> f = new AroEdgeFactory<GeoSegment>() ;
-		return new DefaultGraphBuilder<GeoSegment>(factory,
-				new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(f), f);
-	}
-
 	@Override
 	public <T> GraphModelBuilder<T> createDAGBuilder(
 			EdgeFactory<GraphNode, AroEdge<T>> edgeFactory) {
@@ -95,27 +88,25 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 						edgeFactory), edgeFactory);
 	}
 
+	@Override
+	public GraphModelBuilder<GeoSegment> createGraphBuilder() {
+		AroEdgeFactory<GeoSegment> f = new AroEdgeFactory<GeoSegment>() ;
+		return new DefaultGraphBuilder<GeoSegment>(factory,
+				new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(f), f);
+	}
+
 	
-	private GraphModelBuilder<GeoSegment> createSimpleBuilder() {
-		return createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
-				new AroEdgeFactory<GeoSegment>()));
-	}
-
 	@Override
-	public <T> GraphModelBuilder<T> createDagBuilder() {
-		return createDAGBuilder(new AroEdgeFactory<T>());
-	}
+	public GraphNetworkModel createGraphNetworkModel(
+			Collection<RoadEdge> edges,
+			Collection<NetworkAssignment> networkAssignments) {
 
-	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder, GraphModel<T> graph, GraphNode srcNode,
-			Predicate<AroEdge<T>> marked) {
-		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(marked,
-				srcNode);
-	}
+		GraphNetworkBuilder b = new GraphNetworkBuilder(createSimpleBuilder(),
+				factory, GraphAssignmentFactoryImpl.FACTORY);
 
-	@Override
-	public NetworkBuilder createNetworkBuilder(
-			GraphModelBuilder<GeoSegment> builder) {
-		return new NetworkBuilder(builder, factory);
+		b.setNetworkAssignments(networkAssignments).setRoadEdges(edges);
+		return b.build();
+
 	}
 
 	@Override
@@ -132,16 +123,26 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	}
 
 	@Override
-	public GraphNetworkModel createGraphNetworkModel(
-			Collection<RoadEdge> edges,
-			Collection<NetworkAssignment> networkAssignments) {
+	public NetworkBuilder createNetworkBuilder(
+			GraphModelBuilder<GeoSegment> builder) {
+		return new NetworkBuilder(builder, factory);
+	}
 
-		GraphNetworkBuilder b = new GraphNetworkBuilder(createSimpleBuilder(),
-				factory, GraphAssignmentFactoryImpl.FACTORY);
+	private GraphModelBuilder<GeoSegment> createSimpleBuilder() {
+		return createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
+				new AroEdgeFactory<GeoSegment>()));
+	}
 
-		b.setNetworkAssignments(networkAssignments).setRoadEdges(edges);
-		return b.build();
+	@Override
+	public FiberDagScanner createWirecenterTransformer(FtthThreshholds threshholds) {
+		return new FiberDagScanner(entityDemandService.createDemandAnalyizer(threshholds), threshholds);
+	}
 
+	@Override
+	public <T> GraphModelBuilder<T> modifyModel(GraphModel<T> model) {
+		AroEdgeFactory<T> f = new AroEdgeFactory<T>() ;
+		return new DefaultGraphBuilder<T>(factory,
+				model.getGraph(), f);
 	}
 
 }

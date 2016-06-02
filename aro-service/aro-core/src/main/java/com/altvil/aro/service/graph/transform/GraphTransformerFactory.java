@@ -1,7 +1,8 @@
 package com.altvil.aro.service.graph.transform;
 
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.WeightedGraph;
@@ -77,11 +78,11 @@ public interface GraphTransformerFactory {
 	/**
 	 * 
 	 * @param srcNode
-	 * @param predicate
+	 * @param selectedEdges
 	 * @return
 	 */
 	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder, GraphModel<T> graphModel,
-			GraphNode srcNode, Predicate<AroEdge<T>> predicate);
+			GraphNode srcNode, Function<AroEdge<T>, Set<GraphNode>> selectedEdges);
 
 	/**
 	 * 

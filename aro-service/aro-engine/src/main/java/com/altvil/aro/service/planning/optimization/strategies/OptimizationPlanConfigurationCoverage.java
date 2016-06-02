@@ -1,7 +1,10 @@
 package com.altvil.aro.service.planning.optimization.strategies;
 
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
 
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
@@ -49,18 +52,33 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 		return true;
 	}
 
-	public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
+	public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
 		return (e) ->
 		{
 			GeoSegment value = e.getValue();
 			
 			if (value == null) {
-				return false;
+				return null;
 			}
 			
 			Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
-			
-			return geoSegmentAssignments.isEmpty();
+
+			if (geoSegmentAssignments.isEmpty()) {
+				return Collections.emptySet();
+			}
+
+			// There may be multiple marked locations on this edge so it may be
+			// necessary to return both vertices of this edge.
+			Set<GraphNode> selectedNodes = new HashSet<>();
+			for (GraphEdgeAssignment assignment : geoSegmentAssignments) {
+				if (assignment.getPinnedLocation().isAtStartVertex()) {
+					selectedNodes.add(e.getSourceNode());
+				} else {
+					selectedNodes.add(e.getTargetNode());
+				}
+			}
+
+			return selectedNodes;
 		};
 	}
 	

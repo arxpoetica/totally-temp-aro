@@ -127,12 +127,13 @@ public class GeneratingNodeAssembler {
 						e.getWeight());
 			}
 		}
-		
-		return ctx.getGraphTransformerFactory().createDAG(closestFirstSurfaceBuilder, b.build(), vertex, e -> true) ;
-		
-//		b.setRoot(vertex);
-//		return b.buildDAG();
 
+		return ctx.getGraphTransformerFactory().createDAG(closestFirstSurfaceBuilder, b.build(), vertex, e -> {
+			Set<GraphNode> vertices = new HashSet<GraphNode>();
+			vertices.add(e.getSourceNode());
+			vertices.add(e.getTargetNode());
+			return vertices;
+		});
 	}
 
 	private Multimap<GraphNode, GraphEdgeAssignment> createEquipmentMap(

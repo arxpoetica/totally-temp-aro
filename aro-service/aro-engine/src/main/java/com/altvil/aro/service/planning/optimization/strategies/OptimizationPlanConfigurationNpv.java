@@ -1,7 +1,10 @@
 package com.altvil.aro.service.planning.optimization.strategies;
 
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
 
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
@@ -19,10 +22,10 @@ import com.altvil.aro.service.planning.NpvOptimizationPlan;
 public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfiguration implements NpvOptimizationPlan {
 	private static final long serialVersionUID = 1L;
 
-	private final double budget;
-	private final double discountRate;
-	private final int years;
-	
+	private final double	  budget;
+	private final double	  discountRate;
+	private final int		  years;
+
 	public OptimizationPlanConfigurationNpv(NpvOptimizationPlan fiberPlan) {
 		super(fiberPlan);
 		this.budget = fiberPlan.getBudget();
@@ -33,7 +36,7 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 	public double getBudget() {
 		return budget;
 	}
-	
+
 	@Override
 	public double score(GeneratingNode node) {
 		double npv = -node.getCapex();
@@ -51,42 +54,50 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 				npv += revenue / Math.pow(1 + discountRate, t);
 			}
 		}
-		
+
 		return npv;
 	}
 
 	@Override
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), getBudget(), g, s);
+		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(),
+				getBudget(), g, s);
 	}
 
 	public double getDiscountRate() {
 		return discountRate;
 	}
+
 	@Override
-	public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
-		return (e) ->
-		{
+	public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
+		return (e) -> {
 			GeoSegment value = e.getValue();
-			
+
 			if (value == null) {
-				return false;
+				return Collections.emptySet();
 			}
 			Collection<Long> selectedRoadLocationIds = networkData.getSelectedRoadLocationIds();
-			
-			for(GraphEdgeAssignment geoSegmentAssignments: value.getGeoSegmentAssignments()) {
-				Object ae = geoSegmentAssignments.getAroEntity();
+
+			// There may be multiple marked locations on this edge so it may be
+			// necessary to return both vertices of this edge.
+			Set<GraphNode> selectedNodes = new HashSet<>();
+			for (GraphEdgeAssignment geoSegmentAssignment : value.getGeoSegmentAssignments()) {
+				Object ae = geoSegmentAssignment.getAroEntity();
 				if (ae instanceof LocationEntity) {
 					LocationEntity le = (LocationEntity) ae;
-					
+
 					if (selectedRoadLocationIds.contains(le.getObjectId())) {
-						return true;
+						if (geoSegmentAssignment.getPinnedLocation().isAtStartVertex()) {
+							selectedNodes.add(e.getSourceNode());
+						} else {
+							selectedNodes.add(e.getTargetNode());
+						}
 					}
 				}
-				
+
 			}
-			
-			return false;
+
+			return selectedNodes;
 		};
 	}
 

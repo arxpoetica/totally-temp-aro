@@ -5,10 +5,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Predicate;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +19,6 @@ import org.apache.ignite.IgniteCompute;
 import org.apache.ignite.cluster.ClusterGroup;
 import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.lang.IgniteCallable;
-import org.apache.ignite.resources.IgniteInstanceResource;
 import org.apache.ignite.resources.SpringResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -308,7 +308,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = fiberPlanStrategy
 					.getClosestFirstSurfaceBuilder();
-			Predicate<AroEdge<GeoSegment>> selectedEdges = fiberPlanStrategy.getSelectedEdges(networkData);
+			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges = fiberPlanStrategy.getSelectedEdges(networkData);
 
 			Optional<CompositeNetworkModel> model = planService.computeNetworkModel(networkData,
 					closestFirstSurfaceBuilder, selectedEdges, constraints);
@@ -373,7 +373,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = fiberPlanStrategy
 					.getClosestFirstSurfaceBuilder();
-			Predicate<AroEdge<GeoSegment>> selectedEdges = fiberPlanStrategy.getSelectedEdges(networkData);
+			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges = fiberPlanStrategy.getSelectedEdges(networkData);
 
 			Optional<CompositeNetworkModel> model = planService.computeNetworkModel(networkData,
 					closestFirstSurfaceBuilder, selectedEdges, constraints);

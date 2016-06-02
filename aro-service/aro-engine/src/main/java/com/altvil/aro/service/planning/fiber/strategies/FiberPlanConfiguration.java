@@ -1,10 +1,11 @@
 package com.altvil.aro.service.planning.fiber.strategies;
 
-import com.altvil.enumerations.FiberPlanAlgorithm;
-
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
@@ -16,6 +17,7 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.NetworkConfiguration;
+import com.altvil.enumerations.FiberPlanAlgorithm;
 
 public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPlan, NetworkConfiguration {
 	private static final long serialVersionUID = 1L;
@@ -63,18 +65,32 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 		return true;
 	}
 
-	public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
+	public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
 		return (e) ->
 		{
 			GeoSegment value = e.getValue();
 			
 			if (value == null) {
-				return false;
+				return Collections.emptySet();
 			}
 			
 			Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
 			
-			return !geoSegmentAssignments.isEmpty();
+			if (geoSegmentAssignments.isEmpty()) {
+				return Collections.emptySet();
+			}
+			
+			// There may be multiple marked locations on this edge so it may be necessary to return both vertices of this edge.
+			Set<GraphNode> selectedNodes = new HashSet<>();
+			for (GraphEdgeAssignment assignment: geoSegmentAssignments) {
+				if (assignment.getPinnedLocation().isAtStartVertex()) {
+					selectedNodes.add(e.getSourceNode());
+				} else {
+					selectedNodes.add(e.getTargetNode());
+				}
+			}
+			
+			return selectedNodes;
 		};
 	}
 

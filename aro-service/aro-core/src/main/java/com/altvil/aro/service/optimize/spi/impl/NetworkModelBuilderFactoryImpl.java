@@ -4,7 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class NetworkModelBuilderFactoryImpl implements
 
 	@Override
 	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Predicate<AroEdge<GeoSegment>> selectedEdges,
+			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges,
 			FtthThreshholds fiberConstraints) {
 		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, selectedEdges, fiberConstraints);
 	}
@@ -48,14 +49,14 @@ public class NetworkModelBuilderFactoryImpl implements
 		private NetworkData networkData;
 		
 		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder;
-		Predicate<AroEdge<GeoSegment>> selectedEdges;
+		Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges;
 		
 		private FtthThreshholds constraints;
 
 		private Map<Long, NetworkAssignment> map;
 
 		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				Predicate<AroEdge<GeoSegment>> selectedEdges, 
+				Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, 
 				FtthThreshholds constraints) {
 			super();
 			this.networkData = networkData;

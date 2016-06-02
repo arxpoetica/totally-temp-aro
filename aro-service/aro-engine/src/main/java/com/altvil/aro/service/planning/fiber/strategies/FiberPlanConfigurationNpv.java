@@ -1,7 +1,10 @@
 package com.altvil.aro.service.planning.fiber.strategies;
 
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
 
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
@@ -15,9 +18,9 @@ import com.altvil.aro.service.planning.NpvFiberPlan;
 
 public class FiberPlanConfigurationNpv extends FiberPlanConfiguration implements NpvFiberPlan {
 	private static final long serialVersionUID = 1L;
-	final double discountRate;
-	final int years;
-	final double budget;
+	final double			  discountRate;
+	final int				  years;
+	final double			  budget;
 
 	public FiberPlanConfigurationNpv(NpvFiberPlan fiberPlan) {
 		super(fiberPlan);
@@ -28,9 +31,10 @@ public class FiberPlanConfigurationNpv extends FiberPlanConfiguration implements
 
 	@Override
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(), getBudget(), g, s);
+		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(),
+				getBudget(), g, s);
 	}
-	
+
 	public double getBudget() {
 		return budget;
 	}
@@ -38,30 +42,37 @@ public class FiberPlanConfigurationNpv extends FiberPlanConfiguration implements
 	public double getDiscountRate() {
 		return discountRate;
 	}
+
 	@Override
-	public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
-		return (e) ->
-		{
+	public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
+		return (e) -> {
 			GeoSegment value = e.getValue();
-			
+
 			if (value == null) {
-				return false;
+				return Collections.emptySet();
 			}
 			Collection<Long> selectedRoadLocationIds = networkData.getSelectedRoadLocationIds();
-			
-			for(GraphEdgeAssignment geoSegmentAssignments: value.getGeoSegmentAssignments()) {
-				Object ae = geoSegmentAssignments.getAroEntity();
+
+			// There may be multiple marked locations on this edge so it may be
+			// necessary to return both vertices of this edge.
+			Set<GraphNode> selectedNodes = new HashSet<>();
+			for (GraphEdgeAssignment geoSegmentAssignment : value.getGeoSegmentAssignments()) {
+				Object ae = geoSegmentAssignment.getAroEntity();
 				if (ae instanceof LocationEntity) {
 					LocationEntity le = (LocationEntity) ae;
-					
+
 					if (selectedRoadLocationIds.contains(le.getObjectId())) {
-						return true;
+						if (geoSegmentAssignment.getPinnedLocation().isAtStartVertex()) {
+							selectedNodes.add(e.getSourceNode());
+						} else {
+							selectedNodes.add(e.getTargetNode());
+						}
 					}
 				}
-				
+
 			}
-			
-			return false;
+
+			return selectedNodes;
 		};
 	}
 

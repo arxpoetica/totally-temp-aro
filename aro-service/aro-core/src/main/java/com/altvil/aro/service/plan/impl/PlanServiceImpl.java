@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -73,7 +73,7 @@ public class PlanServiceImpl implements PlanService {
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
 			NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Predicate<AroEdge<GeoSegment>> selectedEdges, FtthThreshholds request)
+			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request)
 			throws PlanException {
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
@@ -93,7 +93,7 @@ public class PlanServiceImpl implements PlanService {
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
 			NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Predicate<AroEdge<GeoSegment>> selectedEdges, FtthThreshholds constraints)
+			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds constraints)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
@@ -155,7 +155,7 @@ public class PlanServiceImpl implements PlanService {
 		}
 
 		public CompositeNetworkModel build(final NetworkData data, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				Predicate<AroEdge<GeoSegment>> selectedEdges, FtthThreshholds request) {
+				Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request) {
 			
 			GraphNetworkModel networkModel = transformFactory
 					.createGraphNetworkModel(data);

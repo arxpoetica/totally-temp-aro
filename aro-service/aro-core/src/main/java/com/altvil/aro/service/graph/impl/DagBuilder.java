@@ -6,8 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
@@ -35,7 +34,8 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 	private final GraphModel<T> graphModel;
 
 	private Set<AroEdge<T>> foundEdges = new HashSet<>();
-	private Set<AroEdge<T>> markedEdges;
+	private Set<GraphNode> vertices = new HashSet<>();
+	private Set<AroEdge<T>> markedEdges = new HashSet<>();
 
 	private final ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder;
 
@@ -45,12 +45,18 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
 	}
 
-	public DAGModel<T> createDAG(Predicate<AroEdge<T>> marked, GraphNode src) {
+	public DAGModel<T> createDAG(Function<AroEdge<T>, Set<GraphNode>> marked, GraphNode src) {
 
-		markedEdges = graphModel.getEdges().stream().filter(marked)
-				.collect(Collectors.toSet());
+		for(AroEdge<T> edge : graphModel.getEdges()) {
+			Set<GraphNode> markedVerticies = marked.apply(edge);
+			
+			if (!markedVerticies.isEmpty()) {
+				markedEdges.add(edge);
+				vertices.addAll(markedVerticies);
+			}
+		}
 		
-		if( log.isDebugEnabled() ) log.debug("marked edges " + markedEdges.size());
+		if( log.isDebugEnabled() ) log.debug("marked edges " + vertices.size());
 		
 		dagBuilder.addVertex(src) ;
 		
@@ -58,8 +64,6 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 			final WeightedGraph<GraphNode, AroEdge<T>> graph = graphModel.getGraph();
 			AllShortestPaths<GraphNode, AroEdge<T>> shortestPaths = new AllShortestPaths<GraphNode, AroEdge<T>>(
 					graph, closestFirstSurfaceBuilder, src);
-			
-			Set<GraphNode> vertices = toVertices(markedEdges) ;
 			
 			if( log.isDebugEnabled() ) log.debug("vertices count " + vertices.size());
 	
@@ -106,17 +110,6 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> getClosestFirstSurfaceBuilder() {
 		return closestFirstSurfaceBuilder;
-	}
-
-	public Set<GraphNode> toVertices(Set<AroEdge<T>> nodes) {
-		HashSet<GraphNode> result = new HashSet<GraphNode>();
-		nodes.forEach(e -> {
-			result.add(e.getSourceNode());
-			result.add(e.getTargetNode());
-		});
-
-		return result;
-
 	}
 
 	private void writeLeafEdges(AllShortestPaths<GraphNode, AroEdge<T>> sp, Set<AroEdge<T>>  remainingEdges) {

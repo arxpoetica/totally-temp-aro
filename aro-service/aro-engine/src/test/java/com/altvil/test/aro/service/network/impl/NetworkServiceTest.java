@@ -6,7 +6,8 @@ package com.altvil.test.aro.service.network.impl;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.function.Predicate;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -90,7 +91,7 @@ public class NetworkServiceTest {
 			}
 
 			@Override
-			public Predicate<AroEdge<GeoSegment>> getSelectedEdges(NetworkData networkData) {
+			public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
 				// TODO Auto-generated method stub
 				return null;
 			}

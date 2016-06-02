@@ -20,7 +20,6 @@ import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.JobService.JobRequest;
 import com.altvil.aro.service.network.NetworkService;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
