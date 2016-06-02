@@ -18,7 +18,7 @@ module.exports = class Location {
       households: 'JOIN households h ON h.location_id = locations.id'
     }
     joins[''] = `${joins['businesses']} ${joins['households']}`
-    var icon = `
+    var icon = `,
       CASE
         WHEN (SELECT COUNT(*) FROM businesses b WHERE b.location_id = locations.id) >
              (SELECT COUNT(*) FROM households h WHERE h.location_id = locations.id)
@@ -28,10 +28,10 @@ module.exports = class Location {
       AS icon
     `
     var sql = `
-        SELECT locations.id, locations.geom, ${icon}
+        SELECT locations.id, locations.geom ${icon}
           FROM locations ${joins[type || '']}
         EXCEPT
-        SELECT locations.id, locations.geom, ${icon}
+        SELECT locations.id, locations.geom ${icon}
           FROM locations ${joins[type || '']}
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
