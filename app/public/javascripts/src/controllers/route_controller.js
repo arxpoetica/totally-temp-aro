@@ -16,7 +16,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     }
 
     $http.get('/network_plan/' + plan.id).success((response) => {
-      redraw_route(response)
+      redrawRoute(response)
       selection.set_enabled(plan.owner_id === user_id)
       if ((response.metadata.sources || []).length > 0) {
         map_layers.getEquipmentLayer('network_nodes').show()
@@ -40,17 +40,21 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
 
   $rootScope.$on('equipment_nodes_changed', () => {
     $http.get('/network_plan/' + $scope.plan.id + '/metadata').success((response) => {
-      redraw_route(response, true)
+      redrawRoute(response, true)
     })
   })
 
   $rootScope.$on('route_planning_changed', () => {
     $http.get('/network_plan/' + $scope.plan.id).success((response) => {
-      redraw_route(response, false)
+      redrawRoute(response, false)
     })
   })
 
-  function redraw_route (data, only_metadata) {
+  $rootScope.$on('route_planning_changed', (e, response) => {
+    redrawRoute(response)
+  })
+
+  function redrawRoute (data, only_metadata) {
     if ($scope.plan && data.metadata) {
       $scope.plan.metadata = data.metadata
       $rootScope.$broadcast('plan_changed_metadata', $scope.plan)
@@ -80,24 +84,4 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     // to calculate market size
     $rootScope.$broadcast('route_changed')
   }
-
-  $rootScope.$on('map_layer_changed_selection', (e, layer, changes) => {
-    if (!$scope.plan) return
-
-    if (layer.type !== 'locations' &&
-      layer.type !== 'network_nodes' &&
-      layer.type !== 'towers') return
-
-    var url = '/network_plan/' + $scope.plan.id + '/edit'
-    var config = {
-      url: url,
-      method: 'post',
-      saving_plan: true,
-      data: changes
-    }
-    $http(config).success((response) => {
-      $rootScope.$broadcast('route_planning_changed')
-      redraw_route(response)
-    })
-  })
 }])

@@ -1119,7 +1119,7 @@
                     </div>
                   </div>
 
-                  
+
                 </div>
                 <br>
                 <p class="text-right"><small><a href="javascript:void(0)" ng-click="toggleAdvancedSettings()">basic inputs</a></small><p>
@@ -1356,7 +1356,7 @@
           <div class="panel-body" ng-show="map_tools.is_expanded('target_builder')">
             <form>
               <p><strong>Optimization type</strong></p>
-              <select class="form-control" ng-model="optimizationType">
+              <select class="form-control" ng-model="optimizationType" ng-change="optimizationTypeChanged()">
                 <option value="capex">Capex</option>
                 <option value="npv">NPV</option>
               </select>
@@ -1371,17 +1371,26 @@
                     Untargeted
                   </label>
                 </p>
-                <p><strong>Total budget</strong></p>
-                <div class="form-group form-group-sm" id="target-builder-budget">
-                  <div class="input-group input-group-sm">
-                    <div class="input-group-addon">$</div>
-                    <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000">
-                    <div class="input-group-btn">
-                      <button class="btn btn-default" disabled>Update</button>
+                <div ng-show="npvType === 'targeted'">
+                  <p><strong>Total budget</strong></p>
+                  <div class="form-group form-group-sm" id="target-builder-budget">
+                    <div class="input-group input-group-sm">
+                      <div class="input-group-addon">$</div>
+                      <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+                      <div class="input-group-btn">
+                        <button class="btn btn-default" disabled>Update</button>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-danger text-right" ng-show="overbugdet && npvType === 'targeted'">You are over budget. Current cost is {{plan.metadata.total_cost | currency}}</p>
+                  <p><strong>Discount rate</strong></p>
+                  <div class="form-group form-group-sm" id="target-builder-budget">
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control text-right" ng-model="discountRate" min="0" max="100" step="0.01">
+                      <div class="input-group-addon">%</div>
                     </div>
                   </div>
                 </div>
-                <p class="text-danger text-right" ng-show="overbugdet && npvType === 'targeted'">You are over budget. Current cost is {{plan.metadata.total_cost | currency}}</p>
               </div>
               <br>
               <p><strong>Search, Click or Upload Locations</strong></p>

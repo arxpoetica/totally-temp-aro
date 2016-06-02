@@ -10,6 +10,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     'polygon': 'polygon'
   }
   $scope.budget = 10000000
+  $scope.discountRate = 0.2
   $scope.npvType = 'targeted'
   $scope.user_id = user_id
   $scope.plan = null
@@ -67,7 +68,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   document.addEventListener('keydown', updateSelectionTools)
   document.addEventListener('keyup', updateSelectionTools)
 
-  var budgetInput = $('#target-builder-budget input')
+  var budgetInput = $('#target-builder-budget input[name=budget]')
   var budgetButton = $('#target-builder-budget button')
 
   budgetInput.val($scope.budget.toLocaleString())
@@ -97,6 +98,41 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       $scope.overbugdet = $scope.plan.metadata.total_cost > $scope.budget
       if (!$rootScope.$$phase) { $rootScope.$apply() } // if triggered by a jquery event
     }
+  }
+
+  $rootScope.$on('map_layer_changed_selection', (e, layer, changes) => {
+    if (!$scope.plan) return
+
+    if (layer.type !== 'locations' &&
+      layer.type !== 'network_nodes' &&
+      layer.type !== 'towers') return
+
+    postChanges(changes)
+  })
+
+  function postChanges (changes) {
+    changes.algorithm = $scope.optimizationType.toUpperCase()
+    if ($scope.optimizationType === 'npv') {
+      if ($scope.npvType === 'targeted') {
+        changes.budget = $scope.budget
+        changes.discountRate = $scope.discountRate
+      }
+    }
+
+    var url = '/network_plan/' + $scope.plan.id + '/edit'
+    var config = {
+      url: url,
+      method: 'post',
+      saving_plan: true,
+      data: changes
+    }
+    $http(config).success((response) => {
+      $rootScope.$broadcast('route_planning_changed', response)
+    })
+  }
+
+  $scope.optimizationTypeChanged = () => {
+    postChanges({})
   }
 
   // TODO: hide this tool if not config.route_planning

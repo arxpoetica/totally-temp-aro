@@ -80,9 +80,8 @@ exports.configure = (api, middleware) => {
   // Recalculate network nodes
   api.post('/network/nodes/:plan_id/recalc', check_owner_permission, (request, response, next) => {
     var plan_id = +request.params.plan_id
-    var algorithm = request.body.algorithm
-    // models.NetworkPlan.recalculate_route(plan_id, algorithm)
-    models.Network.recalculateNodes(plan_id, algorithm)
+    var options = request.body.options
+    models.Network.recalculateNodes(plan_id, options)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

@@ -308,7 +308,7 @@ module.exports = class NetworkPlan {
         this._deleteTargets(plan_id, changes.deletions && changes.deletions.locations)
       ))
       .then(() => (
-        models.Network.recalculateNodes(plan_id, changes.algorithm)
+        models.Network.recalculateNodes(plan_id, changes)
       ))
       .then(() => NetworkPlan.findPlan(plan_id))
   }
