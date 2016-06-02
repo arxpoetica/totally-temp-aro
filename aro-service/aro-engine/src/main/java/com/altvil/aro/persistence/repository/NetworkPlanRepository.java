@@ -121,7 +121,7 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"celltower_fiber as (\n" + 
-			"	select l.id, sum(1) * 256 as fiber_count\n" + 
+			"	select l.id, sum(1) * 5 as fiber_count\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 
 			"	group by l.id\n" + 

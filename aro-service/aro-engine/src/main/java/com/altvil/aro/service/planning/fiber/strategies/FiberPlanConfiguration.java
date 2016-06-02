@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
@@ -23,11 +24,27 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 	private static final long serialVersionUID = 1L;
 	private final FiberPlan fiberPlan;
 	private long planId;
+	
 
 	public FiberPlanConfiguration(FiberPlan fiberPlan) {
 		this.fiberPlan= fiberPlan;
 		this.planId = fiberPlan.getPlanId();
+	}	
+
+
+	@Override
+	public Set<LocationEntityType> getLocationEntityTypes() {
+		return fiberPlan.getLocationEntityTypes() ;
 	}
+
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		return super.clone();
+	}
+
+
 
 	public FiberPlanAlgorithm getAlgorithm() {
 		return fiberPlan.getAlgorithm();

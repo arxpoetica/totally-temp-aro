@@ -1,5 +1,8 @@
 package com.altvil.aro.service.planning.fiber.impl;
 
+import java.util.Set;
+
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.enumerations.FiberPlanAlgorithm;
@@ -9,6 +12,7 @@ public abstract class AbstractFiberPlan implements Cloneable, FiberPlan {
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private long					planId;
 	private int year = 2015;
+	private Set<LocationEntityType> locationEntityTypes ;
 
 	protected AbstractFiberPlan(FiberPlanAlgorithm algorithm) {
 		this.algorithm = algorithm;
@@ -52,6 +56,15 @@ public abstract class AbstractFiberPlan implements Cloneable, FiberPlan {
 
 	public void setPlanId(long planId) {
 		this.planId = planId;
+	}
+	
+	@Override
+	public Set<LocationEntityType> getLocationEntityTypes() {
+		return locationEntityTypes;
+	}
+
+	public void setLocationEntityTypes(Set<LocationEntityType> locationEntityTypes) {
+		this.locationEntityTypes = locationEntityTypes;
 	}
 
 	public void setYear(int year) {

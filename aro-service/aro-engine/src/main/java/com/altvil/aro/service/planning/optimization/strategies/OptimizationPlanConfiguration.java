@@ -4,9 +4,11 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
@@ -34,6 +36,13 @@ public abstract class OptimizationPlanConfiguration
 	public OptimizationPlanConfiguration(OptimizationPlan optimizationPlan) {
 		this.optimizationPlan = optimizationPlan;
 		this.planId = optimizationPlan.getPlanId();
+	}
+	
+	
+
+	@Override
+	public Set<LocationEntityType> getLocationEntityTypes() {
+		return optimizationPlan.getLocationEntityTypes() ;
 	}
 
 	@SuppressWarnings("unchecked")

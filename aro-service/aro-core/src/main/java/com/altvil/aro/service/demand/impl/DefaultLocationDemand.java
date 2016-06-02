@@ -14,6 +14,29 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	/**
 	 * 
 	 */
+
+	public Builder build() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+		Map<LocationEntityType, DemandStatistic> demands = new EnumMap<>(
+				LocationEntityType.class);
+
+		public Builder add(LocationEntityType type, double coverage,
+				double revenue) {
+			DemandStatistic houseHoldStat = new DefaultDemandStatistic(
+					coverage, coverage, revenue);
+			demands.put(type, houseHoldStat);
+			return this;
+		}
+
+		public LocationDemand build() {
+			return DefaultLocationDemand.create(demands);
+		}
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	public static LocationDemand ZERO_DEMAND = createHouseholdDemand(0);
@@ -22,13 +45,16 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 
 		Map<LocationEntityType, DemandStatistic> demands = new EnumMap<>(
 				LocationEntityType.class);
-		
-		DemandStatistic houseHoldStat = new DefaultDemandStatistic(houseHoldDemand) ;
-		
-		demands.put(LocationEntityType.Household, houseHoldStat) ;
-		demands.put(LocationEntityType.Business, DefaultDemandStatistic.ZERO_DEMAND) ;
-		demands.put(LocationEntityType.CellTower, DefaultDemandStatistic.ZERO_DEMAND) ;
-		
+
+		DemandStatistic houseHoldStat = new DefaultDemandStatistic(
+				houseHoldDemand);
+
+		demands.put(LocationEntityType.Household, houseHoldStat);
+		demands.put(LocationEntityType.Business,
+				DefaultDemandStatistic.ZERO_DEMAND);
+		demands.put(LocationEntityType.CellTower,
+				DefaultDemandStatistic.ZERO_DEMAND);
+
 		return new DefaultLocationDemand(demands, houseHoldStat);
 	}
 
@@ -36,7 +62,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 			DemandStatistic businessDemand, DemandStatistic towerDemand) {
 		Map<LocationEntityType, DemandStatistic> map = new EnumMap<>(
 				LocationEntityType.class);
-		
+
 		map.put(LocationEntityType.Household, houseHoldDemand);
 		map.put(LocationEntityType.Business, businessDemand);
 		map.put(LocationEntityType.CellTower, towerDemand);
@@ -46,7 +72,9 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 
 	public static LocationDemand create(double houseHoldDemand,
 			double businessDemand, double towerDemand) {
-		return create(new DefaultDemandStatistic(houseHoldDemand), new DefaultDemandStatistic(businessDemand), new DefaultDemandStatistic(towerDemand)) ;
+		return create(new DefaultDemandStatistic(houseHoldDemand),
+				new DefaultDemandStatistic(businessDemand),
+				new DefaultDemandStatistic(towerDemand));
 	}
 
 	public static LocationDemand create(
@@ -66,7 +94,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	}
 
 	private Map<LocationEntityType, DemandStatistic> demands;
-	
+
 	private DefaultLocationDemand(
 			Map<LocationEntityType, DemandStatistic> demands,
 			DemandStatistic stat) {
@@ -86,7 +114,6 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	public DemandStatistic getLocationDemand(LocationEntityType type) {
 		return demands.get(type);
 	}
-	
 
 	@Override
 	public LocationDemand add(LocationDemand other) {
@@ -111,6 +138,5 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		return new Pair<LocationDemand>(createHouseholdDemand(splitDemand),
 				createHouseholdDemand(getDemand() - splitDemand));
 	}
-	
 
 }

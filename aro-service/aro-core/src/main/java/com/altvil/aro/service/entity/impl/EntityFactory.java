@@ -2,6 +2,7 @@ package com.altvil.aro.service.entity.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ import com.altvil.aro.service.entity.JunctionNode;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.RootEntity;
 import com.altvil.aro.service.entity.SplicePoint;
@@ -29,14 +31,14 @@ import com.altvil.utils.EntityDoubleSum;
 public class EntityFactory {
 
 	public static EntityFactory FACTORY = new EntityFactory();
-
 	private AtomicLong idGen = new AtomicLong(-1);
 
 	private Long ensureId(Long id) {
 		return id == null ? idGen.getAndDecrement() : id;
 	}
 
-	public LocationEntity createLocationEntity(long locationId,
+	public LocationEntity createLocationEntity(
+			Set<LocationEntityType> entityMask, long locationId,
 			LocationDemand coverageAggregateStatistic) {
 		return new LocationEntityImpl(locationId, coverageAggregateStatistic);
 	}
@@ -50,9 +52,9 @@ public class EntityFactory {
 			DemandStatistic locationEntityDemand) {
 		return null;
 	}
-	
+
 	public JunctionNode createJunctionNode() {
-		return new JunctionImpl(ensureId(null)) ;
+		return new JunctionImpl(ensureId(null));
 	}
 
 	public FDTEquipment createFdt(Long id,
@@ -180,9 +182,9 @@ public class EntityFactory {
 		}
 
 	}
-	
-	
-	public static class JunctionImpl extends AbstractEntity implements JunctionNode {
+
+	public static class JunctionImpl extends AbstractEntity implements
+			JunctionNode {
 
 		/**
 		 * 
@@ -195,16 +197,14 @@ public class EntityFactory {
 
 		@Override
 		public Class<? extends AroEntity> getType() {
-			return JunctionNode.class ;
+			return JunctionNode.class;
 		}
 
 		@Override
 		public void accept(AroEntityVisitor visitor) {
-			visitor.visit(this) ;
+			visitor.visit(this);
 		}
-		
-		
-		
+
 	}
 
 	public static class SplicePointImpl extends AbstractEntity implements
@@ -427,7 +427,8 @@ public class EntityFactory {
 		public LocationDemand getLocationDemand() {
 			return coverageAggregateStatistic;
 		}
-
 	}
+
+	
 
 }
