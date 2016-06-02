@@ -314,6 +314,10 @@ footer nav {
   background: url(/images/button_icons/network_planning.png);
 }
 
+.icon-network-planning-targeted {
+  background: url(/images/button_icons/target_builder_03.png);
+}
+
 
 #market-size .nav-tabs > li, #market-size .nav-pills > li {
   float: none;
