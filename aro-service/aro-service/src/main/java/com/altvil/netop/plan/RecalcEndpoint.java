@@ -144,33 +144,26 @@ public class RecalcEndpoint {
 		}
 		
 		switch (algorithm) {
-		case NPV:
-			{FinancialConstraints financials = plan.getFinancialConstraints();
-			final NpvFiberPlanImpl npvFiberPlanImpl = new NpvFP();
-			npvFiberPlanImpl.setPlanId(plan.getPlanId());
-			npvFiberPlanImpl.setFiberNetworkConstraints(
-					new FiberNetworkConstraints() /*
-												   * plan.
-												   * getFiberNetworkConstraints(
-												   * )
-												   */);
-			if (financials == null) {
-				npvFiberPlanImpl.setDiscountRate(0.08);
-				npvFiberPlanImpl.setYear(2015);
-				npvFiberPlanImpl.setYears(5);
-				npvFiberPlanImpl.setBudget(10);
-			} else {
-				npvFiberPlanImpl.setBudget(financials.getBudget());
-				npvFiberPlanImpl.setDiscountRate(financials.getDiscountRate());
-				npvFiberPlanImpl.setYears(financials.getYears());
-			}
-			return npvFiberPlanImpl;}
+		case NPV: {
+			FinancialConstraints financials = plan.getFinancialConstraints();
+			final NpvFiberPlanImpl npvFiberPlan = new NpvFP();
+			npvFiberPlan.setPlanId(plan.getPlanId());
+			npvFiberPlan.setFiberNetworkConstraints(new FiberNetworkConstraints() /*
+																					   * plan.
+																					   * getFiberNetworkConstraints(
+																					   * )
+																					   */);
+			npvFiberPlan.setBudget(financials.getBudget());
+			npvFiberPlan.setDiscountRate(financials.getDiscountRate());
+			npvFiberPlan.setYears(financials.getYears());
+			return npvFiberPlan;
+		}
 		case CAPEX:
 		default:
-			final CapexFiberPlanImpl capexFiberPlanImpl = new CapexFP();
-			capexFiberPlanImpl.setPlanId(plan.getPlanId());
-			capexFiberPlanImpl.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
-			return capexFiberPlanImpl;
+			final CapexFiberPlanImpl capexFiberPlan = new CapexFP();
+			capexFiberPlan.setPlanId(plan.getPlanId());
+			capexFiberPlan.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
+			return capexFiberPlan;
 		}
 	}
 }

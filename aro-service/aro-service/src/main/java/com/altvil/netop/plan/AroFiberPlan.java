@@ -10,7 +10,7 @@ public class AroFiberPlan {
 
 	private FiberPlanAlgorithm algorithm;
 	
-	private FinancialConstraints financialConstraints;
+	private FinancialConstraints financialConstraints = new FinancialConstraints();
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	
 	public long getPlanId() {
