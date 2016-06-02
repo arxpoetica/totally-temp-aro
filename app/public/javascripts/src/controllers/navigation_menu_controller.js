@@ -109,31 +109,33 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   // --
   function recalculateMarketProfile () {
     $scope.market_profile_calculating = true
-    var bounds = map.getBounds()
-    var args = {
-      params: {
-        type: 'route',
-        nelat: bounds.getNorthEast().lat(),
-        nelon: bounds.getNorthEast().lng(),
-        swlat: bounds.getSouthWest().lat(),
-        swlon: bounds.getSouthWest().lng(),
-        zoom: map.getZoom(),
-        threshold: 0
-      }
-    }
-    $http.get('/market_size/plan/' + $scope.plan.id + '/calculate', args)
-      .success((response) => {
-        $scope.market_profile = response
-        $scope.market_profile_current_year = _.findWhere($scope.market_profile.market_size, { year: new Date().getFullYear() })
-        if ($scope.market_profile_current_year) {
-          $scope.market_profile_fair_share_current_year_total = $scope.market_profile_current_year.total * response.share
+    map.ready(() => {
+      var bounds = map.getBounds()
+      var args = {
+        params: {
+          type: 'route',
+          nelat: bounds.getNorthEast().lat(),
+          nelon: bounds.getNorthEast().lng(),
+          swlat: bounds.getSouthWest().lat(),
+          swlon: bounds.getSouthWest().lng(),
+          zoom: map.getZoom(),
+          threshold: 0
         }
-        $scope.market_profile_calculating = false
-        $scope.market_profile_share = response.share
-      })
-      .error(() => {
-        $scope.market_profile_calculating = false
-      })
+      }
+      $http.get('/market_size/plan/' + $scope.plan.id + '/calculate', args)
+        .success((response) => {
+          $scope.market_profile = response
+          $scope.market_profile_current_year = _.findWhere($scope.market_profile.market_size, { year: new Date().getFullYear() })
+          if ($scope.market_profile_current_year) {
+            $scope.market_profile_fair_share_current_year_total = $scope.market_profile_current_year.total * response.share
+          }
+          $scope.market_profile_calculating = false
+          $scope.market_profile_share = response.share
+        })
+        .error(() => {
+          $scope.market_profile_calculating = false
+        })
+    })
   }
 
   $scope.open_market_profile = () => {

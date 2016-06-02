@@ -12,6 +12,8 @@ exports.configure = (api, middleware) => {
     'displayable_client_carrier_name')
   public_config.ARO_CLIENT = process.env.ARO_CLIENT
 
+  config.client_carrier_name = 'VERIZON' // for demo
+
   api.get('/', (request, response, next) => {
     var q
     // for cities

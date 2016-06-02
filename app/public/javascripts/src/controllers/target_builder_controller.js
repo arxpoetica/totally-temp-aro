@@ -10,7 +10,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     'polygon': 'polygon'
   }
   $scope.budget = 10000000
-  $scope.discountRate = 0.2
+  $scope.discountRate = 2
   $scope.npvType = 'targeted'
   $scope.user_id = user_id
   $scope.plan = null
@@ -115,7 +115,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     if ($scope.optimizationType === 'npv') {
       if ($scope.npvType === 'targeted') {
         changes.budget = $scope.budget
-        changes.discountRate = $scope.discountRate
+        changes.discountRate = $scope.discountRate / 100
       }
     }
 
