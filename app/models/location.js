@@ -13,15 +13,14 @@ module.exports = class Location {
   * Returns the businesses and households locations except the selected ones
   */
   static findLocations (plan_id, type, filters, viewport) {
-    var joins = {
-      businesses: 'JOIN businesses b ON b.location_id = locations.id',
-      households: 'JOIN households h ON h.location_id = locations.id'
+    var where = {
+      businesses: 'WHERE locations.total_businesses > 0',
+      households: 'WHERE locations.total_households > 0',
+      '': ''
     }
-    joins[''] = `${joins['businesses']} ${joins['households']}`
     var icon = `,
       CASE
-        WHEN (SELECT COUNT(*) FROM businesses b WHERE b.location_id = locations.id) >
-             (SELECT COUNT(*) FROM households h WHERE h.location_id = locations.id)
+        WHEN locations.total_businesses > locations.total_households
         THEN '/images/map_icons/${process.env.ARO_CLIENT}/location_business_gray.png'
         ELSE '/images/map_icons/${process.env.ARO_CLIENT}/location_household.png'
       END
@@ -29,10 +28,10 @@ module.exports = class Location {
     `
     var sql = `
         SELECT locations.id, locations.geom ${icon}
-          FROM locations ${joins[type || '']}
+          FROM locations ${where[type || '']}
         EXCEPT
         SELECT locations.id, locations.geom ${icon}
-          FROM locations ${joins[type || '']}
+          FROM locations ${where[type || '']}
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
            AND plan_targets.location_id = locations.id
