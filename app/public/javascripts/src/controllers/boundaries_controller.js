@@ -12,7 +12,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
     area_layers['wirecenter'] = new MapLayer({
       short_name: 'WC',
-      name: 'Wirecenter',
+      name: config.ui.labels.wirecenter,
       type: 'wirecenter',
       api_endpoint: '/wirecenters',
       highlighteable: true,

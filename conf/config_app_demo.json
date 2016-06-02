@@ -37,7 +37,8 @@
       "fair_share": "blue"
     },
     "labels": {
-      "fiber": "Cable"
+      "fiber": "Cable",
+      "wirecenter": "Service Area"
     }
   }
 }

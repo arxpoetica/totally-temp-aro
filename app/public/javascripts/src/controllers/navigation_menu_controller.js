@@ -4,6 +4,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   // Controller instance variables
   $scope.new_plan_name = 'Untitled Plan'
   $scope.new_plan_area_name = ''
+  $scope.plan_area_label = 'Choose a ' + config.ui.labels.wirecenter
   $scope.new_plan_area_centroid
   $scope.new_plan_area_bounds
   $scope.edit_plan_name
