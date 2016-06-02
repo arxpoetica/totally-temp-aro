@@ -169,17 +169,10 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	private double netPresentValue(NpvData data) {
 		double npv = -data.cost;
 
-		// if the cost of this plan does NOT exceed the budget then include the
-		// revenue in the NPV calculation otherwise return NPV with no revenue
-		// to make this plan highly undesirable.
-		// NOTE: Do NOT return a constant value when the budget is exceeded as
-		// the plan's npv must get worse each time it is extended.
-		if (data.cost < budget) {
-			// NOTE: Assumes fixed revenue for every year INCLUDING THE FIRST
-			// YEAR.
-			for (int t = 1; t <= years; t++) {
-				npv += data.revenue / Math.pow(1 + discountRate, t);
-			}
+		// NOTE: Assumes fixed revenue for every year INCLUDING THE FIRST
+		// YEAR.
+		for (int t = 1; t <= years; t++) {
+			npv += data.revenue / Math.pow(1 + discountRate, t);
 		}
 
 		return npv;
@@ -242,33 +235,47 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		FibonacciHeapNode<QueueEntry<V, E>> baseNode = getSeenData(base);
 		baseData = baseNode.getData().npvData;
 
+		terminalData.cost = baseData.cost;
+		terminalData.revenue = baseData.revenue;
+
 		terminalData.totalLength = baseData.totalLength + base2terminal.getWeight();
 
 		GeoSegment segment = (GeoSegment) base2terminal.getValue();
 		if (segment != null) {
-			Collection<GraphEdgeAssignment> assignments = segment.getGeoSegmentAssignments();
+			// if the cost of this plan does NOT exceed the budget then include the
+			// cost, and revenue, of its assignments in the NPV calculation.
+			if (baseData.cost < budget) {
+				Collection<GraphEdgeAssignment> assignments = segment.getGeoSegmentAssignments();
 
-			assignments.forEach((assignment) -> {
-				LocationEntity le = (LocationEntity) assignment.getAroEntity();
-				LocationDemand d = le.getLocationDemand();
-				terminalData.locations++;
-				terminalData.revenue += d.getMonthlyRevenueImpact() * 12;
-				// # FDT to support this location
-				int fdt = (int) ((d.getDemand() + 50) / 50);
-				terminalData.fdt += fdt;
-				// Cost of distribution fiber (1 per FDT) from start of path
-				// to this location
-				terminalData.cost += (baseData.totalLength
-						+ assignment.getPinnedLocation().getEffectiveOffsetFromStartVertex()) * fdt * FIBER_PER_M;
-				// Cost of FDTs at this location
-				terminalData.cost += fdt * FDT_PER_UNIT;
-				// Labor cost for this edge (Assumes that the edge is not
-				// the terminal edge of the entire path)
+				assignments.forEach((assignment) -> {
+					LocationEntity le = (LocationEntity) assignment.getAroEntity();
+					LocationDemand d = le.getLocationDemand();
+					terminalData.locations++;
+					terminalData.revenue += d.getMonthlyRevenueImpact() * 12;
+					// # FDT to support this location
+					int fdt = (int) ((d.getDemand() + 50) / 50);
+					terminalData.fdt += fdt;
+
+					// Cost of distribution fiber (1 per FDT) from start of path
+					// to this location
+					terminalData.cost += (baseData.totalLength
+							+ assignment.getPinnedLocation().getEffectiveOffsetFromStartVertex()) * fdt * FIBER_PER_M;
+					// Cost of FDTs at this location
+					terminalData.cost += fdt * FDT_PER_UNIT;
+					// Labor cost for this edge (Assumes that the edge is not
+					// the terminal edge of the entire path)
+					terminalData.cost += base2terminal.getWeight() * LABOR_PER_M;
+					// NOTE: Cost of terminal fiber not included.
+					// NOTE: Presently assumes that the FDT is located on the
+					// edge rather than at the location.
+				});
+			} else { // otherwise include the minimal cost of building this edge without any offsetting revenue
+
+				// NOTE: Do NOT return a constant value when the budget is exceeded as
+				// the plan's npv must get worse each time it is extended.
+				terminalData.cost += base2terminal.getWeight() * FIBER_PER_M;
 				terminalData.cost += base2terminal.getWeight() * LABOR_PER_M;
-				// NOTE: Cost of terminal fiber not included.
-				// NOTE: Presently assumes that the FDT is located on the
-				// edge rather than at the location.
-			});
+			}
 		}
 
 		return terminalData;
