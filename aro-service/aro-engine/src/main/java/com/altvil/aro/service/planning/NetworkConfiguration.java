@@ -1,5 +1,9 @@
 package com.altvil.aro.service.planning;
 
+import java.util.Set;
+
+import com.altvil.aro.service.entity.LocationEntityType;
+
 public interface NetworkConfiguration {
 	long getPlanId();
 
@@ -8,6 +12,9 @@ public interface NetworkConfiguration {
 	boolean isFilteringRoadLocationDemandsBySelection();
 
 	int getYear();
-	
-	public <T> T dependentPlan(long dependentId);
+
+	<T> T dependentPlan(long dependentId);
+
+	Set<LocationEntityType> getLocationEntityTypes();
+
 }
