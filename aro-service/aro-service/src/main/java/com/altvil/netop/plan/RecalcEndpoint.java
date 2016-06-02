@@ -143,8 +143,6 @@ public class RecalcEndpoint {
 			algorithm = FiberPlanAlgorithm.CAPEX;
 		}
 		
-		algorithm = FiberPlanAlgorithm.NPV; // For demo
-		
 		switch (algorithm) {
 		case NPV:
 			{FinancialConstraints financials = plan.getFinancialConstraints();
@@ -157,9 +155,10 @@ public class RecalcEndpoint {
 												   * )
 												   */);
 			if (financials == null) {
-				npvFiberPlanImpl.setDiscountRate(0.2);
+				npvFiberPlanImpl.setDiscountRate(0.08);
 				npvFiberPlanImpl.setYear(2015);
 				npvFiberPlanImpl.setYears(5);
+				npvFiberPlanImpl.setBudget(10);
 			} else {
 				npvFiberPlanImpl.setBudget(financials.getBudget());
 				npvFiberPlanImpl.setDiscountRate(financials.getDiscountRate());

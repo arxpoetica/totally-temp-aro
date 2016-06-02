@@ -93,9 +93,9 @@
 		 This abstraction provides easy reconfiguration when using multiple grids. 
 		 For easy reconfiguration, autowire to the alias (below) instead of actual bean id. -->
 		 
-	<bean id="singleIgniteGrid" autowire="byName" class="org.apache.ignite.IgniteSpringBean">
+<!-- 	<bean id="singleIgniteGrid" autowire="byName" class="org.apache.ignite.IgniteSpringBean">
 		<property name="configuration">
-	        <bean parent="ignite-abstract.cfg">  <!-- Use bean parent "ignite-abstract-IDE.cfg" when running in IDE -->
+	        <bean parent="ignite-abstract.cfg">  <!- - Use bean parent "ignite-abstract-IDE.cfg" when running in IDE - ->
 	        	<property name="clientMode" value="${igniteClientMode}"/>
 	        	        
 		        <property name="cacheConfiguration">
@@ -123,11 +123,11 @@
 	    </property>
  	</bean>
  	
- 	<!-- Alias the defined grids so compute/cache/services can be 
+ 	<!- - Alias the defined grids so compute/cache/services can be 
  		 moved to different clusters without code changes.  When autowiring,
- 		 use method injection based on these aliases only. -->
+ 		 use method injection based on these aliases only. - ->
 	<alias name="singleIgniteGrid" alias="networkServiceIgniteGrid"/>
 	<alias name="singleIgniteGrid" alias="networkPlanningServiceIgniteGrid"/>
-	<alias name="singleIgniteGrid" alias="recalcEndpointIgniteGrid"/>
+	<alias name="singleIgniteGrid" alias="recalcEndpointIgniteGrid"/> -->
  	
 </beans>
