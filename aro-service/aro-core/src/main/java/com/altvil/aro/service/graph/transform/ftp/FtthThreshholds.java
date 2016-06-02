@@ -11,8 +11,8 @@ public class FtthThreshholds {
 	private DropCableModel dropCableModel = DropCableModel.DEFAULT_MODEL;
 	private double locationBulkThreshhold = 32;
 	private double maxOffsetInMeters = UnitUtils.toMeters(60000);
-	private double maxDropCableLengthInMeters = UnitUtils.toMeters(1500);
-	private double preferredDropCableLengthInMeters = UnitUtils.toMeters(500);
+	private double maxDropCableLengthInMeters = UnitUtils.toMeters(3000);
+	private double preferredDropCableLengthInMeters = UnitUtils.toMeters(3000);
 	private double sparseThreshholdInMeters = 1 / UnitUtils.toMeters(500); // Sparse
 	private boolean clusterMergingSupported = false;
 	private boolean dropCableConstraintsSupported = true;
