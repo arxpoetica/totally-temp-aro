@@ -21,6 +21,12 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $rootScope.$on('plan_selected', planChanged)
   $rootScope.$on('plan_changed_metadata', planChanged)
 
+  $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
+    if (tool === 'target_builder') {
+      $scope.setSelectedTool('single')
+    }
+  })
+
   $scope.isToolSelected = (name) => {
     return $scope.selectedTool === name
   }
