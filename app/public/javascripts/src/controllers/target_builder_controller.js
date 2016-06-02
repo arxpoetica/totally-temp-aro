@@ -104,6 +104,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     if (!$scope.plan) return
 
     if (layer.type !== 'locations' &&
+      layer.type !== 'selected_locations' &&
       layer.type !== 'network_nodes' &&
       layer.type !== 'towers') return
 
