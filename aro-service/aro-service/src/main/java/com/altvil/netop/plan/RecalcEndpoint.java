@@ -1,6 +1,8 @@
 package com.altvil.netop.plan;
 
 import java.security.Principal;
+import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.altvil.aro.service.demand.LocationTypeMask;
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
@@ -137,6 +141,10 @@ public class RecalcEndpoint {
 		return postRecalc(username, request);
 	}
 	
+	private Set<LocationEntityType> toMask(Collection<LocationEntityType> mask) {
+		return LocationTypeMask.MASK.toMask(mask) ;
+	}
+	
 	private FiberPlan toFiberPlan(AroFiberPlan plan) {
 		FiberPlanAlgorithm algorithm = plan.getAlgorithm();
 		if (algorithm == null) {
@@ -156,6 +164,7 @@ public class RecalcEndpoint {
 			npvFiberPlan.setBudget(financials.getBudget());
 			npvFiberPlan.setDiscountRate(financials.getDiscountRate());
 			npvFiberPlan.setYears(financials.getYears());
+			npvFiberPlan.setLocationEntityTypes(toMask(plan.getLocationTypes()));
 			return npvFiberPlan;
 		}
 		case CAPEX:
@@ -163,6 +172,7 @@ public class RecalcEndpoint {
 			final CapexFiberPlanImpl capexFiberPlan = new CapexFP();
 			capexFiberPlan.setPlanId(plan.getPlanId());
 			capexFiberPlan.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
+			capexFiberPlan.setLocationEntityTypes(toMask(plan.getLocationTypes()));
 			return capexFiberPlan;
 		}
 	}
