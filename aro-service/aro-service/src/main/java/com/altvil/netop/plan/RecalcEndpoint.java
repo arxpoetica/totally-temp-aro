@@ -157,9 +157,6 @@ public class RecalcEndpoint {
 			final NpvFiberPlanImpl npvFiberPlan = new NpvFP();
 			npvFiberPlan.setPlanId(plan.getPlanId());
 			npvFiberPlan.setFiberNetworkConstraints(new FiberNetworkConstraints() /*
-																					   * plan.
-																					   * getFiberNetworkConstraints(
-																					   * )
 																					   */);
 			npvFiberPlan.setBudget(financials.getBudget());
 			npvFiberPlan.setDiscountRate(financials.getDiscountRate());

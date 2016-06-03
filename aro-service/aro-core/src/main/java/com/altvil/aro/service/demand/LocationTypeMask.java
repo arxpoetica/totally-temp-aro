@@ -15,6 +15,21 @@ public class LocationTypeMask {
 
 	private LocationTypeMask() {
 	}
+	
+	public Set<LocationEntityType> asMask(Collection<String> mask) {
+		if (mask == null || mask.isEmpty()) {
+			return fullMask;
+		}
+		
+		Set<LocationEntityType> setMask =  EnumSet.noneOf(LocationEntityType.class) ;
+		mask.forEach(s -> {
+			LocationEntityType lt = LocationEntityType.valueOf(s) ;
+			if( lt != null ) {
+				setMask.add(lt) ;
+			}
+		});
+		return setMask ;
+	}
 
 	public Set<LocationEntityType> toMask(Collection<LocationEntityType> mask) {
 		if (mask == null || mask.isEmpty()) {
