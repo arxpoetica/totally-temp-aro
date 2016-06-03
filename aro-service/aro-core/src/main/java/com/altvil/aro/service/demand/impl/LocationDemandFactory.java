@@ -65,8 +65,7 @@ public class LocationDemandFactory {
 			DemandStatistic stat = null;
 
 			if (mask.contains(type)) {
-				double demoCount = (coverage == 0) ? 0 : 1;
-				stat = new DefaultDemandStatistic(demoCount, demoCount,
+				stat = new DefaultDemandStatistic(coverage, coverage,
 						coverage * arpu);
 			} else {
 				stat = zeroDemand;

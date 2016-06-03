@@ -61,7 +61,7 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"business_fiber as (\n" + 
-			"	select l.id, sum(f.fiber_count) as fiber_count\n" + 
+			"	select l.id, sum(1) as fiber_count\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
 			"	join client.employees_by_location e on (b.number_of_employees >= e.min_value) and  (b.number_of_employees <= e.max_value) \n" + 
