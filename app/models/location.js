@@ -222,6 +222,10 @@ module.exports = class Location {
     var location_id
     var type = values.type
 
+    var total_households = +values.number_of_households || 0
+    var total_businesses = type === 'combo' || type === 'commercial' ? 1 : 0
+    var total_towers = 0
+
     return Promise.resolve()
       .then(() => {
         var params = [
@@ -232,12 +236,15 @@ module.exports = class Location {
           values.state,
           values.zipcode,
           `POINT(${values.lon} ${values.lat})`,
-          `POINT(${values.lon} ${values.lat})`
+          `POINT(${values.lon} ${values.lat})`,
+          total_households,
+          total_businesses,
+          total_towers
         ]
         var sql = `
           INSERT INTO aro.locations
-            (address, lat, lon, city, state, zipcode, geog, geom)
-          VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7), ST_GeomFromText($8, 4326))
+            (address, lat, lon, city, state, zipcode, geog, geom, total_households, total_businesses, total_towers)
+          VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7), ST_GeomFromText($8, 4326), $9, $10, $11)
           RETURNING id
         `
         return database.findOne(sql, params)
@@ -250,7 +257,7 @@ module.exports = class Location {
         } else if (type === 'residential') {
           return insertHousehold()
         } else if (type === 'combo') {
-          return insertBusiness().then(() => insertHousehold())
+          return Promise.all([insertBusiness(), insertHousehold()])
         }
       })
       .then(() => database.findOne('SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations WHERE id=$1', [location_id]))

@@ -327,7 +327,7 @@
                 <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
                   <label class="col-sm-4 control-label">Business industry</label>
                   <div class="col-sm-8">
-                    <select class="form-control industries" ng-model="new_location_data.business_industry" ng-options="industry.description for industry in industries"></select>
+                    <select class="form-control industries" ng-model="new_location_data.business_industry" ng-options="industry.text for industry in industries"></select>
                   </div>
                 </div>
                 <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
