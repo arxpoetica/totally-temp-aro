@@ -1,4 +1,4 @@
-/* global app $ swal encodeURIComponent location Chart tinycolor */
+/* global app $ swal encodeURIComponent location Chart tinycolor map */
 // Market Size Controller
 app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http', 'map_tools', 'tracker', ($q, $scope, $rootScope, $http, map_tools, tracker) => {
   // Controller instance variables
@@ -69,13 +69,20 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   $scope.calculate_market_size = () => {
     $scope.market_size = null
     $scope.fair_share = null
+    var bounds = map.getBounds()
     var params = {
       boundary: geo_json && JSON.stringify(geo_json),
       type: $scope.market_type,
       industry: arr($scope.industry),
       employees_range: arr($scope.employees_range),
       product: arr($scope.product),
-      customer_type: $scope.customer_type && $scope.customer_type.id
+      customer_type: $scope.customer_type && $scope.customer_type.id,
+      nelat: bounds.getNorthEast().lat(),
+      nelon: bounds.getNorthEast().lng(),
+      swlat: bounds.getSouthWest().lat(),
+      swlon: bounds.getSouthWest().lng(),
+      zoom: map.getZoom(),
+      threshold: 0
     }
     tracker.track('Market profile calculation', params)
     if (canceller) canceller.resolve()
