@@ -133,7 +133,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     }
 
     var locationTypes = map_layers.getFeatureLayer('locations').shows
-    console.log('towers visible', map_layers.getFeatureLayer('towers').visible)
     if (map_layers.getFeatureLayer('towers').visible) locationTypes = locationTypes.concat('towers')
     changes.locationTypes = locationTypes
 
@@ -152,8 +151,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.optimizationTypeChanged = () => postChanges({})
   $scope.npvTypeChanged = () => postChanges({})
 
-  $rootScope.$on('locations_layer_changed', () => postChanges({}))
-  $rootScope.$on('towers_layer_changed', () => postChanges({}))
+  // $rootScope.$on('locations_layer_changed', () => postChanges({}))
+  // $rootScope.$on('towers_layer_changed', () => postChanges({}))
 
   // TODO: hide this tool if not config.route_planning
 }])
