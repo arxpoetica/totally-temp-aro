@@ -12,5 +12,7 @@ public interface WirecenterNetworkPlan {
 	Collection<NetworkNode> getNetworkNodes();
 
 	Collection<FiberRoute> getFiberRoutes();
+	
+	public int getAtomicCount() ;
 
 }

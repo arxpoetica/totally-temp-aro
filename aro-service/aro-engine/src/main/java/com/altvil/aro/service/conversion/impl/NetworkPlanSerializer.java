@@ -25,6 +25,7 @@ public class NetworkPlanSerializer<T> {
 							equipmentSerializer.serialize(model
 									.getFiberSourceMapping());
 							equipmentSerializer.commit(planMods::addEquipment);
+							planMods.addAtomicCount(equipmentSerializer.getAtomicCount()) ;
 
 							FiberRouteSerializer fibererSerializer = new FiberRouteSerializer(
 									planId, model, equipmentSerializer

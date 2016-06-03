@@ -316,6 +316,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				WirecenterNetworkPlan plan = conversionService.convert(fiberPlanStrategy.getPlanId(), model);
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
+				networkNodeRepository.updateTotalCount(plan.getPlanId(), plan.getAtomicCount());
 				return plan;
 			}
 
@@ -381,6 +382,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				WirecenterNetworkPlan plan = conversionService.convert(fiberPlanStrategy.getPlanId(), model);
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
+				networkNodeRepository.updateTotalCount(plan.getPlanId(), plan.getAtomicCount());
 				return plan;
 			}
 
@@ -467,6 +469,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
+				networkNodeRepository.updateTotalCount(plan.getPlanId(), plan.getAtomicCount());
 
 				return plan;
 			}

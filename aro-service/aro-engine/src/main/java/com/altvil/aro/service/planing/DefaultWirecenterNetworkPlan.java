@@ -10,14 +10,17 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 	private long planId;
 	private Collection<NetworkNode> networkNodes;
 	private Collection<FiberRoute> fiberRoutes;
+	private int atomicCount ;
 
 	public DefaultWirecenterNetworkPlan(long planId,
 			Collection<NetworkNode> networkNodes,
-			Collection<FiberRoute> fiberRoutes) {
+			Collection<FiberRoute> fiberRoutes,
+			int atomicCount) {
 		super();
 		this.planId = planId;
 		this.networkNodes = networkNodes;
 		this.fiberRoutes = fiberRoutes;
+		this.atomicCount = atomicCount ;
 	}
 
 	@Override
@@ -34,5 +37,11 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 	public Collection<FiberRoute> getFiberRoutes() {
 		return fiberRoutes;
 	}
+
+	@Override
+	public int getAtomicCount() {
+		return atomicCount;
+	}
+	
 
 }
