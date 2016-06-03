@@ -65,3 +65,15 @@ CREATE INDEX aro_locations_geom_gist
 VACUUM ANALYZE aro.locations;
 
 create index aro_locations on aro.locations using gist (geog);
+
+ALTER TABLE locations ADD COLUMN total_businesses integer NOT NULL DEFAULT 0;
+
+ALTER TABLE locations ADD COLUMN total_households integer NOT NULL DEFAULT 0;
+
+ALTER TABLE locations ADD COLUMN total_towers integer NOT NULL DEFAULT 0;
+
+CREATE INDEX locations_total_businesses_index ON locations(total_businesses);
+
+CREATE INDEX locations_total_households_index ON locations(total_households);
+
+CREATE INDEX locations_total_towers_index ON locations(total_towers);

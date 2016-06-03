@@ -38,20 +38,28 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   var locationStyles = {
     normal: {
-      icon: `/images/map_icons/${config.ARO_CLIENT}/location_business_gray.png`,
       visible: true,
       fillColor: 'blue',
       strokeColor: 'blue',
       strokeWeight: 1
     },
     selected: {
-      icon: `/images/map_icons/${config.ARO_CLIENT}/location_business_selected.png`,
       visible: true,
       fillColor: '#78D8C3',
       strokeColor: '#78D8C3',
       strokeWeight: 1,
       fillOpacity: 0.9
     }
+  }
+
+  var declarativeStyles = (feature, styles) => {
+    var totalBusinesses = feature.getProperty('total_businesses') || 0
+    var totalHouseholds = feature.getProperty('total_households') || 0
+    var selected = feature.getProperty('selected') ? 'selected' : 'default'
+    var type = (totalBusinesses && totalHouseholds)
+      ? 'composite_location'
+      : totalBusinesses ? 'businesses' : 'households'
+    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${selected}.png`
   }
 
   var locationsLayer = $scope.locations_layer = new MapLayer({
@@ -62,7 +70,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     style_options: locationStyles,
     threshold: 15,
     reload: 'always',
-    heatmap: true
+    heatmap: true,
+    declarativeStyles: declarativeStyles
   })
 
   var selectedLocationsLayer = $scope.selected_locations_layer = new MapLayer({
@@ -73,7 +82,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     api_endpoint: '/locations/:plan_id/selected',
     style_options: locationStyles,
     threshold: 15,
-    reload: 'always'
+    reload: 'always',
+    declarativeStyles: declarativeStyles
   })
 
   var customerProfileLayer = new MapLayer({
@@ -110,6 +120,19 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   map_layers.addFeatureLayer(selectedLocationsLayer)
   map_layers.addFeatureLayer(customerProfileLayer)
   map_layers.addFeatureLayer(towersLayer)
+
+  function whatLocationsAreShowing () {
+    if (!$scope.show_businesses && !$scope.show_households) {
+      locationsLayer.shows = []
+    } else if ($scope.show_businesses && $scope.show_households) {
+      locationsLayer.shows = ['businesses', 'households']
+    } else if ($scope.show_businesses) {
+      locationsLayer.shows = ['businesses']
+    } else if ($scope.show_households) {
+      locationsLayer.shows = ['households']
+    }
+  }
+  whatLocationsAreShowing()
 
   $http.get('/locations_filters').success((response) => {
     $scope.industries = response.industries
@@ -155,6 +178,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $scope.change_towers_layer = () => {
     towersLayer.toggleVisibility()
+    $rootScope.$broadcast('towers_layer_changed')
   }
 
   $scope.change_locations_layer = () => {
@@ -189,6 +213,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     } else {
       locationsLayer.hide()
     }
+    whatLocationsAreShowing()
+    $rootScope.$broadcast('locations_layer_changed')
 
     if ($scope.show_businesses && $scope.overlay === 'none') {
       $('#locations_controller .business-filter').prop('disabled', false)

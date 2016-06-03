@@ -1,10 +1,10 @@
 package com.altvil.aro.service.demand.impl;
 
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.altvil.aro.service.demand.LocationTypeMask;
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -39,27 +39,7 @@ public class LocationDemandFactory {
 		return new Builder(LocationTypeMask.MASK.toMask(mask));
 	}
 
-	private static class LocationTypeMask {
-
-		public static final LocationTypeMask MASK = new LocationTypeMask();
-
-		private Set<LocationEntityType> fullMask = EnumSet
-				.allOf(LocationEntityType.class);
-
-		private LocationTypeMask() {
-		}
-
-		public Set<LocationEntityType> toMask(Set<LocationEntityType> mask) {
-			if (mask == null || mask.isEmpty()) {
-				return fullMask;
-			}
-
-			return mask;
-		}
-
-	}
-
-	public  class Builder {
+	public class Builder {
 
 		private Set<LocationEntityType> mask;
 
@@ -81,18 +61,17 @@ public class LocationDemandFactory {
 
 		public Builder addWithArpu(LocationEntityType type, double coverage,
 				double arpu) {
-			
-			DemandStatistic stat = null ;
-			
-			if( mask.contains(type) ) {
+
+			DemandStatistic stat = null;
+
+			if (mask.contains(type)) {
 				double demoCount = (coverage == 0) ? 0 : 1;
-				stat = new DefaultDemandStatistic(
-						demoCount, demoCount, coverage * arpu);
+				stat = new DefaultDemandStatistic(demoCount, demoCount,
+						coverage * arpu);
 			} else {
-				stat = zeroDemand ;
+				stat = zeroDemand;
 			}
-			
-			
+
 			demands.put(type, stat);
 			return this;
 		}

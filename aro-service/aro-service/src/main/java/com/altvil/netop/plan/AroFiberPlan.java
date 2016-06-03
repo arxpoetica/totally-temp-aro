@@ -1,5 +1,9 @@
 package com.altvil.netop.plan;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.FiberPlanAlgorithm;
 import com.altvil.netop.optimize.FinancialConstraints;
@@ -12,6 +16,7 @@ public class AroFiberPlan {
 	
 	private FinancialConstraints financialConstraints = new FinancialConstraints();
 	private FiberNetworkConstraints fiberNetworkConstraints;
+	private List<LocationEntityType> locationTypes = new ArrayList<>() ;
 	
 	public long getPlanId() {
 		return planId;
@@ -38,4 +43,12 @@ public class AroFiberPlan {
 			FiberNetworkConstraints fiberNetworkConstraints) {
 		this.fiberNetworkConstraints = fiberNetworkConstraints;
 	}
+	public List<LocationEntityType> getLocationTypes() {
+		return locationTypes;
+	}
+	public void setLocationTypes(List<LocationEntityType> locationTypes) {
+		this.locationTypes = locationTypes;
+	}
+	
+	
 }

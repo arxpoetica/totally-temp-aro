@@ -1,6 +1,6 @@
 /* global app user_id google $ map */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', ($scope, $rootScope, $http, map_tools, map_layers) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.optimizationType = 'capex'
@@ -20,6 +20,12 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   }
   $rootScope.$on('plan_selected', planChanged)
   $rootScope.$on('plan_changed_metadata', planChanged)
+
+  $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
+    if (tool === 'target_builder') {
+      $scope.setSelectedTool('single')
+    }
+  })
 
   $scope.isToolSelected = (name) => {
     return $scope.selectedTool === name
@@ -69,6 +75,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   document.addEventListener('keyup', updateSelectionTools)
 
   var budgetInput = $('#target-builder-budget input[name=budget]')
+  var discountInput = $('#target-builder-budget input[name=discount_rate]')
   var budgetButton = $('#target-builder-budget button')
 
   budgetInput.val($scope.budget.toLocaleString())
@@ -87,10 +94,15 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     budgetButton.removeAttr('disabled')
   })
 
+  discountInput.on('input', () => {
+    budgetButton.removeAttr('disabled')
+  })
+
   budgetButton.on('click', () => {
     $scope.budget = parseBudget()
     budgetButton.attr('disabled', 'disabled')
     checkBudget()
+    postChanges({})
   })
 
   const checkBudget = () => {
@@ -120,6 +132,10 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       }
     }
 
+    var locationTypes = map_layers.getFeatureLayer('locations').shows
+    if (map_layers.getFeatureLayer('towers').visible) locationTypes = locationTypes.concat('towers')
+    changes.locationTypes = locationTypes
+
     var url = '/network_plan/' + $scope.plan.id + '/edit'
     var config = {
       url: url,
@@ -132,9 +148,11 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     })
   }
 
-  $scope.optimizationTypeChanged = () => {
-    postChanges({})
-  }
+  $scope.optimizationTypeChanged = () => postChanges({})
+  $scope.npvTypeChanged = () => postChanges({})
+
+  // $rootScope.$on('locations_layer_changed', () => postChanges({}))
+  // $rootScope.$on('towers_layer_changed', () => postChanges({}))
 
   // TODO: hide this tool if not config.route_planning
 }])

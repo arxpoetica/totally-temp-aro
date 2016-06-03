@@ -34,8 +34,24 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
       this.denisty_hue_to = options.denisty_hue_to
       this.minZoom = options.minZoom
       this.heatmap = options.heatmap
+      this.declarativeStyles = options.declarativeStyles
 
       var data_layer = this.data_layer
+      data_layer.setStyle((feature) => {
+        var styles = Object.assign({}, feature.getProperty('selected')
+          ? this.style_options.selected || this.style_options.normal
+          : this.style_options.normal)
+        if (this.highlighteable && feature.getProperty('highlighted')) {
+          styles = Object.assign({}, this.style_options.highlight)
+        }
+        if (feature.getProperty('draggable')) {
+          styles.draggable = true
+        }
+        var icon = !styles.icon && feature.getProperty('icon')
+        if (icon) styles.icon = icon
+        this.declarativeStyles && this.declarativeStyles(feature, styles)
+        return styles
+      })
 
       var feature_dragged
 
@@ -46,7 +62,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
         if (this.single_selection) {
           changes = this.createEmptyChanges()
           this.data_layer.forEach((feature) => {
-            if (feature.selected) {
+            if (feature.getProperty('selected')) {
               this.setFeatureSelected(feature, false, changes)
             }
           })
@@ -84,14 +100,14 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
 
       data_layer.addListener('mouseover', (event) => {
         if (this.highlighteable && event.feature) {
-          this.data_layer.overrideStyle(event.feature, this.style_options.highlight)
+          event.feature.setProperty('highlighted', true)
         }
         $rootScope.$broadcast('map_layer_mouseover_feature', event, this)
       })
 
       data_layer.addListener('mouseout', (event) => {
-        if (this.highlighteable && event.feature && !event.feature.selected) {
-          this.data_layer.overrideStyle(event.feature, this.style_options.normal)
+        if (this.highlighteable && event.feature) {
+          event.feature.setProperty('highlighted', false)
         }
       })
 
@@ -159,22 +175,17 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
     }
 
     selectFeature (feature) {
-      feature.selected = true
-      if (this.style_options.selected) {
-        this.data_layer.add(feature)
-        this.data_layer.overrideStyle(feature, this.style_options.selected)
-      }
+      this.data_layer.add(feature)
+      feature.setProperty('selected', true)
+      console.log('selected!')
     }
 
     deselectFeature (feature) {
-      feature.selected = false
-      if (this.style_options.selected) {
-        this.data_layer.overrideStyle(feature, this.style_options.normal)
-      }
+      feature.setProperty('selected', false)
     }
 
     setFeatureSelected (feature, select, changes) {
-      if (feature.selected === select) return
+      if (feature.getProperty('selected') === select) return
 
       var id = feature.getProperty('id')
       var type = this.changes || this.type
@@ -194,14 +205,14 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
     }
 
     toggleFeature (feature, changes) {
-      this.setFeatureSelected(feature, !feature.selected, changes)
+      this.setFeatureSelected(feature, !feature.getProperty('selected'), changes)
     }
 
     select_random_features () {
       var i = 0
       var changes = this.createEmptyChanges()
       this.data_layer.forEach((feature) => {
-        if (i < 3 && !feature.selected) {
+        if (i < 3 && !feature.getProperty('selected')) {
           this.toggleFeature(feature, changes)
           i++
         }
@@ -313,23 +324,10 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
       var maxdensity = Number.MIN_VALUE
       var mindensity = Number.MAX_VALUE
       data.forEach((feature) => {
-        var styles = {}
-        var icon = feature.getProperty('icon')
-        if (icon) {
-          styles.icon = icon
-        }
-        var draggable = feature.getProperty('draggable')
-        styles.draggable = draggable
-        if (_.size(styles) > 0) {
-          data.overrideStyle(feature, styles)
-        }
         if (feature.getGeometry()) {
           var density = feature.getProperty('density')
           maxdensity = Math.max(density, maxdensity)
           mindensity = Math.min(density, mindensity)
-        }
-        if (feature.getProperty('selected') === true) {
-          this.selectFeature(feature)
         }
       })
       var from = this.denisty_hue_from || 120
@@ -422,7 +420,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
       var data = this.data_layer
       data.revertStyle()
       data.forEach((feature) => {
-        delete feature.selected
+        feature.removeProperty('selected')
         var icon = feature.getProperty('icon')
         if (icon) {
           data.overrideStyle(feature, { icon: icon })

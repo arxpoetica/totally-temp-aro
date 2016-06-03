@@ -37,7 +37,13 @@
       "fair_share": "blue"
     },
     "labels": {
-      "fiber": "Cable"
+      "fiber": "Fiber",
+      "wirecenter": "Service Area"
+    },
+    "default_form_values": {
+      "create_plan": {
+        "select_area_text": "Search For a Service Area"
+      }
     }
   }
 }

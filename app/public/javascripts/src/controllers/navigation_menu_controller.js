@@ -4,6 +4,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   // Controller instance variables
   $scope.new_plan_name = 'Untitled Plan'
   $scope.new_plan_area_name = ''
+  $scope.plan_area_label = 'Choose a ' + config.ui.labels.wirecenter
   $scope.new_plan_area_centroid
   $scope.new_plan_area_bounds
   $scope.edit_plan_name
@@ -17,7 +18,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $('#new-plan select').select2({
-    placeholder: 'Enter a CLLI Code'
+    placeholder: config.ui.default_form_values.create_plan.select_area_text
   }).on('change', () => {
     $scope.look_up_area()
   })
@@ -353,11 +354,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     data.addColumn('string', 'Dependencies')
 
     data.addRows([
-      ['ABC123', 'ABC123', new Date(2016, 0, 1), new Date(2016, 0, 5), null, 100, null],
-      ['ABC124', 'ABC124', new Date(2016, 0, 2), new Date(2016, 0, 9), daysToMilliseconds(3), 25, null],
-      ['ABC125', 'ABC125', new Date(2016, 0, 3), new Date(2016, 0, 7), daysToMilliseconds(1), 20, null],
-      ['ABC126', 'ABC126', new Date(2016, 0, 4), new Date(2016, 0, 10), daysToMilliseconds(1), 0, null],
-      ['ABC127', 'ABC127', new Date(2016, 0, 5), new Date(2016, 0, 6), daysToMilliseconds(1), 100, null]
+      ['ABC123', 'ABC123', new Date(2016, 0, 1), new Date(2017, 0, 5), null, 100, null],
+      ['ABC124', 'ABC124', new Date(2016, 0, 2), new Date(2017, 0, 9), daysToMilliseconds(3), 25, null],
+      ['ABC125', 'ABC125', new Date(2017, 0, 3), new Date(2018, 0, 7), daysToMilliseconds(1), 20, null],
+      ['ABC126', 'ABC126', new Date(2017, 0, 4), new Date(2018, 0, 10), daysToMilliseconds(1), 0, null],
+      ['ABC127', 'ABC127', new Date(2018, 0, 5), new Date(2019, 0, 6), daysToMilliseconds(1), 100, null]
     ])
 
     var options = {
