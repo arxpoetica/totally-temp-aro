@@ -242,12 +242,7 @@ public interface NetworkPlanRepository extends
 			" select p.id as master_plan_id, p.* \n" + 
 			" from client.plan p where p.id = :planId\n" + 
 			")\n" + 
-			",\n" +
-//			"debug_plans as (\n" +
-//				"delete from client.plan where parent_plan_id in (select master_plan_id from inputs)\n" +
-//				"returning id\n" +
-//			")\n" + 
-//			",\n" +
+			",\n" + 
 			"original_targets as (\n" + 
 			" select pt.id, pt.location_id, pt.plan_id, mp.master_plan_id, wp.wirecenter_id\n" + 
 			" from inputs mp\n" + 
@@ -290,21 +285,38 @@ public interface NetworkPlanRepository extends
 			"	returning id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
 			")\n" + 
 			",\n" + 
+			"updated_new_cos as ( \n" + 
+			"			select \n" + 
+			"			\n" + 
+			"			pl.id,\n" + 
+			"			\n" + 
+			"			(select np.area_centroid\n" + 
+			"			from new_plans np \n" + 
+			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
+			"			and np.id = pl.id) as centroid,\n" + 
+			"			\n" + 
+			"			(select\n" + 
+			"			CO.geom\n" + 
+			"			from new_plans np\n" + 
+			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
+			"			join client.network_nodes CO on st_contains(w.geom, CO.geom) \n" + 
+			"			where CO.plan_id is null\n" + 
+			"			and np.id = pl.id) as location\n" + 
+			"			from new_plans pl 			\n" + 
+			"	)\n" + 
+			",\n" + 
 			"updated_network_nodes as (\n" + 
 			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
-			"	select np.id, 1,\n" + 
+			"	 select co.id, 1,\n" + 
 			"		case\n" + 
-			"		when CO.geog is not null then CO.geog\n" + 
-			"		else cast(np.area_centroid as geography)\n" + 
+			"		when co.location is not null then cast(co.location as geography)\n" + 
+			"		else cast(co.centroid as geography)\n" + 
 			"		end,\n" + 
 			"		case\n" + 
-			"		when CO.geom is not null then CO.geom\n" + 
-			"		else np.area_centroid\n" + 
+			"		when co.location is not null then cast(co.location as geometry)\n" + 
+			"		else cast(co.centroid  as geometry)\n" + 
 			"		end\n" + 
-			"	from new_plans np\n" + 
-			"	join aro.wirecenters w on w.id = np.wirecenter_id\n" +
-			"	left join client.network_nodes CO on st_contains(w.geom, CO.geom)\n" + 
-			"	where CO.plan_id is null\n" +
+			"		from  updated_new_cos co\n" + 
 			"	returning id, plan_id\n" + 
 			")\n" + 
 			",\n" + 
@@ -366,7 +378,7 @@ public interface NetworkPlanRepository extends
 			"		in (select plan_id from all_modified_plans)\n" + 
 			"	returning id\n" + 
 			")\n" + 
-			"select plan_id from all_modified_plans", nativeQuery = true)
+			"select plan_id from all_modified_plans\n", nativeQuery = true)
 	List<Number> computeWirecenterUpdates(@Param("planId") long planId);
 
 }
