@@ -54,7 +54,7 @@ module.exports = class Location {
   */
   static findSelected (plan_id, viewport) {
     var sql = `
-      SELECT locations.id, locations.geom AS geom, true AS selected
+      SELECT locations.id, locations.geom AS geom, true AS selected, total_businesses, total_households
         FROM aro.locations
         -- show only businesses and households. Do not show towers for example
         JOIN businesses b ON b.location_id = locations.id
