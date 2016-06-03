@@ -28,13 +28,15 @@ module.exports = class Location {
     `
     var sql = `
         SELECT locations.id, locations.geom ${icon}
-          FROM locations ${where[type || '']}
+          FROM locations
+               ${where[type || '']}
         EXCEPT
         SELECT locations.id, locations.geom ${icon}
-          FROM locations ${where[type || '']}
+          FROM locations
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
            AND plan_targets.location_id = locations.id
+               ${where[type || '']}
       GROUP BY locations.id
     `
     return database.points(sql, [plan_id], true, viewport)

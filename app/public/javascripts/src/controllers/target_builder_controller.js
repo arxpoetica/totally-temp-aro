@@ -1,6 +1,6 @@
 /* global app user_id google $ map */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', ($scope, $rootScope, $http, map_tools, map_layers) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.optimizationType = 'capex'
@@ -132,6 +132,11 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       }
     }
 
+    var locationTypes = map_layers.getFeatureLayer('locations').shows
+    console.log('towers visible', map_layers.getFeatureLayer('towers').visible)
+    if (map_layers.getFeatureLayer('towers').visible) locationTypes = locationTypes.concat('towers')
+    changes.locationTypes = locationTypes
+
     var url = '/network_plan/' + $scope.plan.id + '/edit'
     var config = {
       url: url,
@@ -144,13 +149,11 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     })
   }
 
-  $scope.optimizationTypeChanged = () => {
-    postChanges({})
-  }
+  $scope.optimizationTypeChanged = () => postChanges({})
+  $scope.npvTypeChanged = () => postChanges({})
 
-  $scope.npvTypeChanged = () => {
-    postChanges({})
-  }
+  $rootScope.$on('locations_layer_changed', () => postChanges({}))
+  $rootScope.$on('towers_layer_changed', () => postChanges({}))
 
   // TODO: hide this tool if not config.route_planning
 }])

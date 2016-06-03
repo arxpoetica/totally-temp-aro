@@ -111,6 +111,19 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   map_layers.addFeatureLayer(customerProfileLayer)
   map_layers.addFeatureLayer(towersLayer)
 
+  function whatLocationsAreShowing () {
+    if (!$scope.show_businesses && !$scope.show_households) {
+      locationsLayer.shows = []
+    } else if ($scope.show_businesses && $scope.show_households) {
+      locationsLayer.shows = ['businesses', 'households']
+    } else if ($scope.show_businesses) {
+      locationsLayer.shows = ['businesses']
+    } else if ($scope.show_households) {
+      locationsLayer.shows = ['households']
+    }
+  }
+  whatLocationsAreShowing()
+
   $http.get('/locations_filters').success((response) => {
     $scope.industries = response.industries
     $scope.customer_types = response.customer_types
@@ -155,6 +168,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $scope.change_towers_layer = () => {
     towersLayer.toggleVisibility()
+    $rootScope.$broadcast('towers_layer_changed')
   }
 
   $scope.change_locations_layer = () => {
@@ -189,6 +203,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     } else {
       locationsLayer.hide()
     }
+    whatLocationsAreShowing()
+    $rootScope.$broadcast('locations_layer_changed')
 
     if ($scope.show_businesses && $scope.overlay === 'none') {
       $('#locations_controller .business-filter').prop('disabled', false)

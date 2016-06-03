@@ -168,10 +168,16 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
+    var locationTypes = {
+      households: 'Household',
+      businesses: 'Business',
+      towers: 'CellTower'
+    }
     return new Promise((resolve, reject) => {
       var body = {
         planId: plan_id,
-        algorithm: options.algorithm
+        algorithm: options.algorithm,
+        locationTypes: options.locationTypes.map((key) => locationTypes[key])
       }
       var req = {
         method: 'POST',
