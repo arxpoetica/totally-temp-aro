@@ -34,11 +34,13 @@ import com.vividsolutions.jts.geom.Point;
 public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		extends CrossComponentIterator<V, E, FibonacciHeapNode<NpvClosestFirstIterator.QueueEntry<V, E>>>
 		implements ClosestFirstSurfaceIterator<V, E> {
+	private static final double EQUIPMENT_PER_COVERAGE = 76.5;
+
+	private static final double FIBER_PER_M = 5.28;
+
 	private static final double	MAX_NPV		 = 1.0E7;
 
 	private final Logger		log			 = LoggerFactory.getLogger(NpvClosestFirstIterator.class);
-
-	private static final int	FDT_PER_UNIT = 200;
 
 	/**
 	 * Private data to associate with each entry in the priority queue.
@@ -65,9 +67,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		QueueEntry() {
 		}
 	}
-
-	private final double					discountRate;
-	private final int						years;
 
 	/**
 	 * Priority queue of fringe vertices.
@@ -128,8 +127,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			double radius) {
 		super(g, startVertex);
 		this.budget = budget;
-		this.discountRate = discountRate;
-		this.years = years;
 		this.radius = radius;
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
@@ -174,7 +171,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		if (log.isTraceEnabled()) {
 			log.trace("|" + base2terminal.getTargetNode().getId() + "," + base2terminal.getSourceNode().getId() + ","
 					+ base2terminal.getWeight() + "," + terminalData.cost + "," + terminalData.revenue + ","
-					+ terminalData.totalLength + "," + terminalData.locations + "," + terminalData.fdt + "," + npv + ","
+					+ terminalData.totalLength + "," + terminalData.locations + "," + npv + ","
 					+ f);
 		}
 
@@ -194,18 +191,13 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		double	   revenue	   = 0;
 		double	   totalLength = 0;
 		public int locations   = 0;
-		public int fdt		   = 0;
 
 		@Override
 		public String toString() {
 			return "NpvData [cost=" + cost + ", revenue=" + revenue + ", totalLength=" + totalLength + ", locations="
-					+ locations + ", fdt=" + fdt + "]";
+					+ locations + "]";
 		}
 	}
-
-	private static final double	M_PER_FT	= 0.3048;
-	private static final double	FIBER_PER_M	= 1.68 / M_PER_FT;
-	private static final double	LABOR_PER_M	= 3.5 / M_PER_FT;
 
 	private void checkRadiusTraversal(boolean crossComponentTraversal) {
 		if (crossComponentTraversal && (radius != Double.POSITIVE_INFINITY)) {
@@ -251,10 +243,9 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 
 		destinationData.totalLength = sourceData.totalLength + source2Destination.getWeight();
 
-		// include a nominal cost of building this edge
+		// Increment by the cost of laying fiber on this edge
 
-		// NOTE: Using 5x was determined by trial and error.
-		destinationData.cost += 5 * source2Destination.getWeight() * (FIBER_PER_M + LABOR_PER_M);
+		destinationData.cost += source2Destination.getWeight() * FIBER_PER_M;
 
 		// if the cost of this plan does NOT exceed the budget then include the
 		// cost, and revenue, of its assignments in the NPV calculation.
@@ -270,26 +261,9 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 					// Count the locations on this page for later analysis
 					destinationData.locations++;
 					destinationData.revenue += d.getMonthlyRevenueImpact() * 12;
-					// # FDT to support this location
-					int fdt = (int) ((d.getDemand() + 50) / 50);
-					destinationData.fdt += fdt;
-
-					// Cost of distribution fiber (1 per FDT) from start of path
-					// to this location
-					destinationData.cost += (sourceData.totalLength
-							+ assignment.getPinnedLocation().getEffectiveOffsetFromStartVertex()) * fdt * FIBER_PER_M;
-					// Cost of FDTs at this location
-					destinationData.cost += fdt * FDT_PER_UNIT;
-					// Labor cost for this edge (Assumes that the edge is not
-					// the terminal edge of the entire path)
-					destinationData.cost += source2Destination.getWeight() * LABOR_PER_M;
-					// NOTE: Cost of terminal fiber not included.
-					// NOTE: Presently assumes that the FDT is located on the
-					// edge rather than at the location.
+					destinationData.cost += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
 				});
 			}
-		} else {
-			destinationData.cost += 5 * source2Destination.getWeight() * (FIBER_PER_M + LABOR_PER_M);			
 		}
 
 		return destinationData;
