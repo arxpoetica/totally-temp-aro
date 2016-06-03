@@ -38,7 +38,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   var locationStyles = {
     normal: {
-      icon: `/images/map_icons/${config.ARO_CLIENT}/location_business_gray.png`,
       visible: true,
       fillColor: 'blue',
       strokeColor: 'blue',
@@ -62,7 +61,16 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     style_options: locationStyles,
     threshold: 15,
     reload: 'always',
-    heatmap: true
+    heatmap: true,
+    declarativeStyles: (feature, styles) => {
+      if (feature.getProperty('selected')) return
+      var totalBusinesses = feature.getProperty('total_businesses') || 0
+      var totalHouseholds = feature.getProperty('total_households') || 0
+      styles.icon = totalBusinesses > totalHouseholds
+        ? `/images/map_icons/${config.ARO_CLIENT}/location_business_gray.png`
+        : `/images/map_icons/${config.ARO_CLIENT}/location_household.png`
+    }
+
   })
 
   var selectedLocationsLayer = $scope.selected_locations_layer = new MapLayer({

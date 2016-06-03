@@ -18,20 +18,12 @@ module.exports = class Location {
       households: 'WHERE locations.total_households > 0',
       '': ''
     }
-    var icon = `,
-      CASE
-        WHEN locations.total_businesses > locations.total_households
-        THEN '/images/map_icons/${process.env.ARO_CLIENT}/location_business_gray.png'
-        ELSE '/images/map_icons/${process.env.ARO_CLIENT}/location_household.png'
-      END
-      AS icon
-    `
     var sql = `
-        SELECT locations.id, locations.geom ${icon}
+        SELECT locations.id, locations.geom, total_businesses, total_households
           FROM locations
                ${where[type || '']}
         EXCEPT
-        SELECT locations.id, locations.geom ${icon}
+        SELECT locations.id, locations.geom, total_businesses, total_households
           FROM locations
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
@@ -260,7 +252,7 @@ module.exports = class Location {
           return Promise.all([insertBusiness(), insertHousehold()])
         }
       })
-      .then(() => database.findOne('SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations WHERE id=$1', [location_id]))
+      .then(() => database.findOne('SELECT id, ST_AsGeoJSON(geog)::json AS geom, total_businesses, total_households FROM aro.locations WHERE id=$1', [location_id]))
       .then((row) => {
         return {
           'type': 'Feature',
