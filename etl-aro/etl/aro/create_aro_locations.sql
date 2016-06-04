@@ -34,13 +34,7 @@ INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geog, geom)
         businesses.geog::geometry as geom
     FROM infousa.businesses
     JOIN aro.wirecenters
-      ON ST_Within(businesses.geog::geometry, wirecenters.geom)
-    WHERE
-      wirecenters.wirecenter = 'NYCMNY79'
-      OR
-      wirecenters.wirecenter = 'BFLONYEL'
-      OR
-      wirecenters.wirecenter = 'ORPKNYST';
+      ON ST_Within(businesses.geog::geometry, wirecenters.geom);
 
 -- Make locations out of InfoGroup households (temp_hh.households)
 INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
@@ -59,9 +53,13 @@ INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
     WHERE
         wc.wirecenter = 'NYCMNY79'
         OR
-        wc.wirecenter = 'BFLONYEL'
+        wc.wirecenter = 'SYRCNYGS'
         OR
-        wc.wirecenter = 'ORPKNYST';
+        wc.wirecenter = 'SYRCNYSU'
+        OR
+        wc.wirecenter = 'SYRCNYJS'
+        OR
+        wc.wirecenter = 'SYRCNYSA';
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations
