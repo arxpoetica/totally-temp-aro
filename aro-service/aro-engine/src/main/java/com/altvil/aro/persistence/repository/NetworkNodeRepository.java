@@ -3,6 +3,7 @@ package com.altvil.aro.persistence.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -41,6 +42,7 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 	
 	
 	@Query(value = "update client.plan set total_count = :totalCount where id = :planId", nativeQuery = true)
+	@Modifying
 	@Transactional
 	void updateTotalCount(@Param("planId")long planId, @Param("totalCount")int totalCount) ;
 
