@@ -15,6 +15,7 @@ public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> 
 
 	private List<NetworkNode> networkNodes = new ArrayList<>();
 	private List<FiberRoute> fiberRoutes = new ArrayList<FiberRoute>();
+	private Integer atomicCount = null ;
 
 	public WireCenterMods(long planId) {
 		super();
@@ -33,11 +34,19 @@ public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> 
 		fiberRoutes.add(update);
 		return this;
 	}
+	
+	
+
+	@Override
+	public PlanModifications<WirecenterNetworkPlan> addAtomicCount(int count) {
+		this.atomicCount = count ;
+		return this ;
+	}
 
 	@Override
 	public WirecenterNetworkPlan commit() {
 		return new DefaultWirecenterNetworkPlan(planId, networkNodes,
-				fiberRoutes);
+				fiberRoutes, atomicCount);
 	}
 
 }

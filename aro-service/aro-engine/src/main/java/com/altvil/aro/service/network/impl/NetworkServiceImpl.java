@@ -153,7 +153,7 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 
 	private enum LoctationDemandMap implements OrdinalAccessor {
-		location_id, buesiness_fiber, tower_fiber, household_fiber
+		location_id, business_fiber, bussiness_spend, tower_fiber, tower_spend, household_fiber, household_spend
 	}
 
 	private Map<Long, LocationDemand> getLocationDemand(
@@ -171,7 +171,10 @@ public class NetworkServiceImpl implements NetworkService {
 		// locDemands = locDemandCache.get(key);
 		locDemands = null;
 		if (null == locDemands) {
-			locDemands = queryLocationDemand(networkConfiguration.getLocationEntityTypes(), networkConfiguration.getPlanId(),
+			locDemands = queryLocationDemand(
+					networkConfiguration.isFilteringRoadLocationDemandsBySelection(),
+					networkConfiguration.getLocationEntityTypes(),
+					networkConfiguration.getPlanId(),
 					networkConfiguration.getYear());
 			// locDemandCache.put(key, locDemands);
 			// NOTE: currently no update policy used as LocationDemand is
@@ -224,22 +227,42 @@ public class NetworkServiceImpl implements NetworkService {
 		// System.out.println(logString);
 	}
 
-	private Map<Long, LocationDemand> queryLocationDemand(Set<LocationEntityType> type, long planId, int year) {
+	private Map<Long, LocationDemand> queryLocationDemand(
+			boolean isFilteringRoadLocationDemandsBySelection,
+			Set<LocationEntityType> type, long planId, int year) {
 
+		List<Object[]> demands = isFilteringRoadLocationDemandsBySelection ?
+				planRepository
+				.queryFiberDemand(planId, year) :
+					planRepository
+				.queryAllFiberDemand(planId, year) ;
+				
+		
 		Map<Long, LocationDemand> map = new HashMap<>();
-		planRepository.queryAllFiberDemand(planId, year).stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity).forEach(result -> {
-					map.put(result.getLong(LoctationDemandMap.location_id),
-							
-							LocationDemandFactory.FACTORY.build(type)
-							.addWithArpu(LocationEntityType.Household, 
-									result.getDouble(LoctationDemandMap.household_fiber),40.0)
-							.addWithArpu(LocationEntityType.Business, 
-									result.getDouble(LoctationDemandMap.buesiness_fiber),65.0)
-							.addWithArpu(LocationEntityType.CellTower, 
-									result.getDouble(LoctationDemandMap.tower_fiber),50.0).build()) ;
-							
-										
+		demands
+				.stream()
+				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+				.forEach(
+						result -> {
+							map.put(result
+									.getLong(LoctationDemandMap.location_id),
+
+									LocationDemandFactory.FACTORY
+											.build(type)
+											.addWithRevenue(
+													LocationEntityType.Household,
+													result.getDouble(LoctationDemandMap.household_fiber),
+													result.getDouble(LoctationDemandMap.household_spend))
+											.addWithRevenue(
+													LocationEntityType.Business,
+													result.getDouble(LoctationDemandMap.business_fiber),
+													result.getDouble(LoctationDemandMap.bussiness_spend))
+											.addWithRevenue(
+													LocationEntityType.CellTower,
+													result.getDouble(LoctationDemandMap.tower_fiber),
+													result.getDouble(LoctationDemandMap.tower_spend))
+											.build());
+
 						});
 
 		return map;
@@ -342,7 +365,8 @@ public class NetworkServiceImpl implements NetworkService {
 					}
 
 					AroEntity aroEntity = entityFactory.createLocationEntity(
-							networkConfiguration.getLocationEntityTypes(), locationId, ldm);
+							networkConfiguration.getLocationEntityTypes(),
+							locationId, ldm);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));

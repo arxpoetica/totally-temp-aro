@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.model.NetworkNode;
 
@@ -36,5 +38,10 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 			+ "join aro.edges e on e.gid = ll.gid \n"
 			+ "order by gid, intersect_position\n" + "limit 40000", nativeQuery = true)
 	List<Object> queryLinkedLocations(int test);
+	
+	
+	@Query(value = "update client.plan set total_count = :totalCount where id = :planId", nativeQuery = true)
+	@Transactional
+	void updateTotalCount(@Param("planId")long planId, @Param("totalCount")int totalCount) ;
 
 }

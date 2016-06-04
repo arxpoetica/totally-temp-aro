@@ -7,6 +7,7 @@ public interface PlanModifications<T> {
 	
 	public PlanModifications<T> addEquipment(NetworkNode update) ;
 	public PlanModifications<T> addFiber(FiberRoute update) ;
+	public PlanModifications<T> addAtomicCount(int count) ;
 	
 	public T commit() ;
 	

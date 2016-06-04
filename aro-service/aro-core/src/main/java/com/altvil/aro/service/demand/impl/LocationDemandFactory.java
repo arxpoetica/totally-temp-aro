@@ -59,14 +59,14 @@ public class LocationDemandFactory {
 			return this;
 		}
 
-		public Builder addWithArpu(LocationEntityType type, double coverage,
-				double arpu) {
+		public Builder addWithRevenue(LocationEntityType type, double coverage,
+				double revenue) {
 
 			DemandStatistic stat = null;
 
 			if (mask.contains(type)) {
 				stat = new DefaultDemandStatistic(coverage, coverage,
-						coverage * arpu);
+						revenue);
 			} else {
 				stat = zeroDemand;
 			}
