@@ -29,13 +29,7 @@ INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_em
 	JOIN aro.locations l
 		ON ST_Equals(l.geom, b.geog::geometry)
 	JOIN aro.wirecenters wc
-		ON ST_Within(b.geog::geometry, wc.geom)
-  WHERE
-  	wc.wirecenter = 'NYCMNY79'
-  	OR
-  	wc.wirecenter = 'BFLONYEL'
-  	OR
-  	wc.wirecenter = 'ORPKNYST';
+		ON ST_Within(b.geog::geometry, wc.geom);
 
 CREATE INDEX aro_businesses_location_index ON aro.businesses(location_id);
 CREATE INDEX aro_businesses_industry_index ON aro.businesses(industry_id);
