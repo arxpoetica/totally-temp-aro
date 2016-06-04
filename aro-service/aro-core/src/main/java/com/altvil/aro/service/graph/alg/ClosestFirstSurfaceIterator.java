@@ -40,8 +40,6 @@ public interface ClosestFirstSurfaceIterator<V, E> extends GraphIterator<V, E> {
 	 */
 	E getSpanningTreeEdge(V vertex);
 
-	void logWeight(V v);
-
 	boolean isGlobalConstraintMet();
 
 }

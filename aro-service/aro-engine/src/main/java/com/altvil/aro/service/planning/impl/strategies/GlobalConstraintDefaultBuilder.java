@@ -4,7 +4,6 @@ import com.altvil.annotation.FiberPlanDefaultStrategy;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.GlobalConstraint;
-import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.GlobalConstraintBuilder;
 

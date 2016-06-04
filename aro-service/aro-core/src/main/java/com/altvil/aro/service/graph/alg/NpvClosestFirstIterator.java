@@ -79,6 +79,9 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * Maximum distance to search.
 	 */
 	private double							radius		= Double.POSITIVE_INFINITY;
+
+	private double marketPenetration;
+	
 	/**
 	 * Creates a new closest-first iterator for the specified graph.
 	 *
@@ -121,10 +124,11 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 *            limit on weighted path length, or Double.POSITIVE_INFINITY for
 	 *            unbounded search.
 	 */
-	public NpvClosestFirstIterator(double parametric, double discountRate, int years, Graph<V, E> g, V startVertex,
+	public NpvClosestFirstIterator(double marketPenetration, double discountRate, int years, Graph<V, E> g, V startVertex,
 			double radius) {
 		super(g, startVertex);
 		this.radius = radius;
+		this.marketPenetration = marketPenetration;
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
 
@@ -136,7 +140,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			npv += 1 / Math.pow(1 + discountRate, t);
 		}
 
-		npvFactor = npv * parametric;
+		npvFactor = npv;
 	}
 
 	private final double npvFactor;
@@ -240,8 +244,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				LocationDemand d = le.getLocationDemand();
 				// Count the locations on this page for later analysis
 				destinationData.locations++;
-				destinationData.revenue += d.getMonthlyRevenueImpact() * 12;
-				destinationData.cost += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
+				destinationData.revenue += marketPenetration * d.getMonthlyRevenueImpact();
+				destinationData.cost += marketPenetration * d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
 			});
 		}
 
@@ -348,8 +352,9 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			if (point != null) {
 				Coordinate coord = point.getCoordinate();
 
-				log.trace(v + "," + coord.y + " " + coord.x + "," + data.npvData.totalLength + "," + data.npvData.cost
-						+ "," + data.npvData.revenue + "," + netPresentValue(data.npvData));
+				log.trace("{},{} {},{},{},{},{}",
+						v, coord.y, coord.x, data.npvData.totalLength, data.npvData.cost, data.npvData.revenue,
+						netPresentValue(data.npvData));
 
 				if (spanningTreeEdge != null) {
 					log.trace(
@@ -359,16 +364,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		}
 
 		return spanningTreeEdge;
-	}
-
-	@Override
-	public void logWeight(V vertex) {
-		FibonacciHeapNode<QueueEntry<V, E>> node = getSeenData(vertex);
-		NpvData d = node.getData().npvData;
-
-		if (log.isTraceEnabled()) {
-			log.trace("|" + vertex + "," + netPresentValue(d));
-		}
 	}
 
 	/**

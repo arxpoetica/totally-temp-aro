@@ -100,8 +100,6 @@ public class AllShortestPaths<V, E> {
 
 		V v = endVertex;
 		
-		itr.logWeight(v);
-
 		while (true) {
 			E edge = itr.getSpanningTreeEdge(v);
 
