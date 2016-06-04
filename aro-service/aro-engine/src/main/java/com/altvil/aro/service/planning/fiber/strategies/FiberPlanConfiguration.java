@@ -30,6 +30,12 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 		this.fiberPlan= fiberPlan;
 		this.planId = fiberPlan.getPlanId();
 	}	
+	
+
+	@Override
+	public Set<Integer> getSelectedWireCenters() {
+		return fiberPlan.getSelectedWireCenters() ;
+	}
 
 
 	@Override
@@ -79,7 +85,7 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 	}
 
 	public boolean isFilteringRoadLocationsBySelection() {
-		return true;
+		return this.getSelectedWireCenters().isEmpty() ;
 	}
 
 	public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {

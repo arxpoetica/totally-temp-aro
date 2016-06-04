@@ -14,4 +14,5 @@ public interface FiberPlan {
 	FiberPlanAlgorithm getAlgorithm();
 	Set<LocationEntityType> getLocationEntityTypes();
 	FiberNetworkConstraints getFiberNetworkConstraints();
+	Set<Integer> getSelectedWireCenters() ;
 }

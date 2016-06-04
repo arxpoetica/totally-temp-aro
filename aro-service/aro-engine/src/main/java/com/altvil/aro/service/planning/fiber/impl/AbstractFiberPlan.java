@@ -1,5 +1,6 @@
 package com.altvil.aro.service.planning.fiber.impl;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -13,6 +14,7 @@ public abstract class AbstractFiberPlan implements Cloneable, FiberPlan {
 	private long					planId;
 	private int year = 2015;
 	private Set<LocationEntityType> locationEntityTypes ;
+	private Set<Integer> selectedWireCenters = new HashSet<>() ;
 
 	protected AbstractFiberPlan(FiberPlanAlgorithm algorithm) {
 		this.algorithm = algorithm;
@@ -69,5 +71,17 @@ public abstract class AbstractFiberPlan implements Cloneable, FiberPlan {
 
 	public void setYear(int year) {
 		this.year = year;
-	};
+	}
+
+	@Override
+	public Set<Integer> getSelectedWireCenters() {
+		return selectedWireCenters;
+	}
+
+	public void setSelectedWireCenters(Set<Integer> selectedWireCenters) {
+		this.selectedWireCenters = selectedWireCenters;
+	}
+	
+	
+	
 }

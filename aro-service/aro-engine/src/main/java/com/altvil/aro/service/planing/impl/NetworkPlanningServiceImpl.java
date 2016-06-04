@@ -200,9 +200,14 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	public MasterPlanBuilder planMasterFiber(Principal requestor, FiberPlanConfiguration fiberPlanConfiguration,
 			FtthThreshholds constraints, GlobalConstraint globalConstraint) throws InterruptedException {
 		networkPlanRepository.deleteWireCenterPlans(fiberPlanConfiguration.getPlanId());
-
+		
+		List<Number> wireCentersPlans = 
+				fiberPlanConfiguration.getSelectedWireCenters().isEmpty() ?
+				networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId()) :
+				networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId(), fiberPlanConfiguration.getSelectedWireCenters()) ;
+		
 		List<FiberPlanConfiguration> plans = StreamUtil
-				.map(networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId()), (plan)->fiberPlanConfiguration.dependentPlan(plan.longValue()));
+				.map(wireCentersPlans, (plan)->fiberPlanConfiguration.dependentPlan(plan.longValue()));
 
 		final List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor.invokeAll(
 				plans.stream().map(plan -> createPlanningCallable(plan, constraints, globalConstraint)).collect(Collectors.toList()));

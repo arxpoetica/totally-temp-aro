@@ -1,6 +1,7 @@
 package com.altvil.aro.persistence.repository;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -404,5 +405,54 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			"select plan_id from all_modified_plans\n", nativeQuery = true)
 	List<Number> computeWirecenterUpdates(@Param("planId") long planId);
+    
+    
+    
+    @Modifying
+    @Transactional
+	@Query(value="with new_plans as (\n" + 
+			"	insert into client.plan (name, plan_type, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at, parent_plan_id)\n" + 
+			"	select p.name, 'W', w.id, w.wirecenter, st_centroid(w.geom), w.geom,  NOW(), NOW(), p.id \n" + 
+			"	from client.plan p, aro.wirecenters w\n" + 
+			"	where w.id in (:wireCentersIds) and p.id = :planId\n" + 
+			"	\n" + 
+			"   returning id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
+			")\n" + 
+			",\n" + 
+			"new_cos as ( \n" + 
+			"			select \n" + 
+			"			\n" + 
+			"			pl.id,\n" + 
+			"\n" + 
+			"			(select np.area_centroid\n" + 
+			"			from new_plans np \n" + 
+			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
+			"			and np.id = pl.id) as centroid,\n" + 
+			"			\n" + 
+			"			(select\n" + 
+			"			CO.geom\n" + 
+			"			from new_plans np\n" + 
+			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
+			"			join client.network_nodes CO on st_contains(w.geom, CO.geom) \n" + 
+			"			where CO.plan_id is null\n" + 
+			"			and np.id = pl.id) as location\n" + 
+			"			from new_plans pl 			\n" + 
+			"),\n" + 
+			"updated_network_nodes as (\n" + 
+			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
+			"	 select co.id, 1,\n" + 
+			"		case\n" + 
+			"		when co.location is not null then cast(co.location as geography)\n" + 
+			"		else cast(co.centroid as geography)\n" + 
+			"		end,\n" + 
+			"		case\n" + 
+			"		when co.location is not null then cast(co.location as geometry)\n" + 
+			"		else cast(co.centroid  as geometry)\n" + 
+			"		end\n" + 
+			"		from  new_cos co\n" + 
+			"	returning plan_id\n" + 
+			")\n" + 
+			"select plan_id from updated_network_nodes",nativeQuery = true) 
+    List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("wireCentersIds") Collection<Integer> wireCentersIds);
 
 }
