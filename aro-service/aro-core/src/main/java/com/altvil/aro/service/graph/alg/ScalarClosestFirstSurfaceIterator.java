@@ -17,6 +17,11 @@ public class ScalarClosestFirstSurfaceIterator<V, E> extends ClosestFirstIterato
 	}
 
 	@Override
+	public boolean isGlobalConstraintMet() {
+		return true;
+	}
+
+	@Override
 	public void logWeight(V vertex) {
 		double d = getShortestPathLength(vertex);
 		

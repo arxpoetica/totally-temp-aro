@@ -42,4 +42,6 @@ public interface ClosestFirstSurfaceIterator<V, E> extends GraphIterator<V, E> {
 
 	void logWeight(V v);
 
+	boolean isGlobalConstraintMet();
+
 }

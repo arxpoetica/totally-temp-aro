@@ -45,7 +45,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
 	}
 
-	public DAGModel<T> createDAG(Function<AroEdge<T>, Set<GraphNode>> marked, GraphNode src) {
+	public DAGModel<T> createDAG(double parametric, Function<AroEdge<T>, Set<GraphNode>> marked, GraphNode src) {
 
 		for(AroEdge<T> edge : graphModel.getEdges()) {
 			Set<GraphNode> markedVerticies = marked.apply(edge);
@@ -63,7 +63,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		if( markedEdges.size() > 0 ) {
 			final WeightedGraph<GraphNode, AroEdge<T>> graph = graphModel.getGraph();
 			AllShortestPaths<GraphNode, AroEdge<T>> shortestPaths = new AllShortestPaths<GraphNode, AroEdge<T>>(
-					graph, closestFirstSurfaceBuilder, src);
+					graph, closestFirstSurfaceBuilder, parametric, src);
 			
 			if( log.isDebugEnabled() ) log.debug("vertices count " + vertices.size());
 	

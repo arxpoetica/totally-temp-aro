@@ -49,6 +49,7 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.PricingModel;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
@@ -197,14 +198,14 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Override
 	public MasterPlanBuilder planMasterFiber(Principal requestor, FiberPlanConfiguration fiberPlanConfiguration,
-			FtthThreshholds constraints) throws InterruptedException {
+			FtthThreshholds constraints, GlobalConstraint globalConstraint) throws InterruptedException {
 		networkPlanRepository.deleteWireCenterPlans(fiberPlanConfiguration.getPlanId());
 
 		List<FiberPlanConfiguration> plans = StreamUtil
 				.map(networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId()), (plan)->fiberPlanConfiguration.dependentPlan(plan.longValue()));
 
 		final List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor.invokeAll(
-				plans.stream().map(plan -> createPlanningCallable(plan, constraints)).collect(Collectors.toList()));
+				plans.stream().map(plan -> createPlanningCallable(plan, constraints, globalConstraint)).collect(Collectors.toList()));
 
 		IgniteCallable<MasterPlanUpdate> callable = (() -> {
 			return new MasterPlanUpdate(futures.stream().map(wf -> {
@@ -252,14 +253,15 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 	@Override
 	public Future<WirecenterNetworkPlan> planFiber(FiberPlanConfiguration fiberPlanStrategy,
-			FtthThreshholds constraints) {
-		return executorService.submit(createPlanningCallable(fiberPlanStrategy, constraints));
+			FtthThreshholds constraints, GlobalConstraint globalConstraint) {
+		return executorService.submit(createPlanningCallable(fiberPlanStrategy, constraints, globalConstraint));
 	}
 
 	public static class FiberPlanningCallable implements IgniteCallable<WirecenterNetworkPlan>, LocalBinding {
 		private static final long				 serialVersionUID = 1L;
 		private final FiberPlanConfiguration	 fiberPlanStrategy;
 		private final FtthThreshholds	 constraints;
+		private final GlobalConstraint globalConstraint;
 
 		@SpringResource(resourceName = "networkService")
 		private transient NetworkService		 networkService;
@@ -282,9 +284,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		@SpringResource(resourceName = "fiberRouteRepository")
 		private transient FiberRouteRepository	 fiberRouteRepository;
 
-		FiberPlanningCallable(FiberPlanConfiguration fiberPlanStrategy, FtthThreshholds constraints) {
+		FiberPlanningCallable(FiberPlanConfiguration fiberPlanStrategy, FtthThreshholds constraints, GlobalConstraint globalConstraint) {
 			this.fiberPlanStrategy = fiberPlanStrategy;
 			this.constraints = constraints;
+			this.globalConstraint = globalConstraint;
 		}
 		
 		
@@ -311,7 +314,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges = fiberPlanStrategy.getSelectedEdges(networkData);
 
 			Optional<CompositeNetworkModel> model = planService.computeNetworkModel(networkData,
-					closestFirstSurfaceBuilder, selectedEdges, constraints);
+					closestFirstSurfaceBuilder, selectedEdges, constraints, globalConstraint);
 			if (model.isPresent()) {
 				WirecenterNetworkPlan plan = conversionService.convert(fiberPlanStrategy.getPlanId(), model);
 				networkNodeRepository.save(plan.getNetworkNodes());
@@ -327,6 +330,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		private static final long					serialVersionUID = 1L;
 		private final OptimizationPlanConfiguration	fiberPlanStrategy;
 		private final FtthThreshholds		constraints;
+		private final GlobalConstraint globalConstraint;
 
 		@SpringResource(resourceName = "networkService")
 		private transient NetworkService			networkService;
@@ -350,9 +354,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		private transient FiberRouteRepository		fiberRouteRepository;
 
 		OptimizationPlanningCallable(OptimizationPlanConfiguration fiberPlanStrategy,
-				FtthThreshholds constraints) {
+				FtthThreshholds constraints, GlobalConstraint globalConstraint) {
 			this.fiberPlanStrategy = fiberPlanStrategy;
 			this.constraints = constraints;
+			this.globalConstraint = globalConstraint;
 		}
 		
 		@Override
@@ -376,7 +381,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges = fiberPlanStrategy.getSelectedEdges(networkData);
 
 			Optional<CompositeNetworkModel> model = planService.computeNetworkModel(networkData,
-					closestFirstSurfaceBuilder, selectedEdges, constraints);
+					closestFirstSurfaceBuilder, selectedEdges, constraints, globalConstraint);
 			if (model.isPresent()) {
 				WirecenterNetworkPlan plan = conversionService.convert(fiberPlanStrategy.getPlanId(), model);
 				networkNodeRepository.save(plan.getNetworkNodes());
@@ -389,8 +394,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	}
 
 	private IgniteCallable<WirecenterNetworkPlan> createPlanningCallable(FiberPlanConfiguration fiberPlanStrategy,
-			FtthThreshholds constraints) {
-		return bind(new FiberPlanningCallable(fiberPlanStrategy, constraints));
+			FtthThreshholds constraints, GlobalConstraint globalConstraint) {
+		return bind(new FiberPlanningCallable(fiberPlanStrategy, constraints, globalConstraint));
 	}
 
 	public static class OptimizeCallable implements IgniteCallable<WirecenterNetworkPlan>, LocalBinding {

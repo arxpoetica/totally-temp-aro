@@ -81,7 +81,7 @@ public interface GraphTransformerFactory {
 	 * @param selectedEdges
 	 * @return
 	 */
-	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder, GraphModel<T> graphModel,
+	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder, GraphModel<T> graphModel, double parametric,
 			GraphNode srcNode, Function<AroEdge<T>, Set<GraphNode>> selectedEdges);
 
 	/**

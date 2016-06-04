@@ -49,7 +49,7 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 	private NetworkConstrainer createConstrainer(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
 			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
-				.create(networkData, closestFirstSurfaceBuilder, selectedEdges, ctx.getFtthThreshholds());
+				.create(networkData, closestFirstSurfaceBuilder, selectedEdges, ctx.getFtthThreshholds(), null);
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder,
 						ctx, scoringStrategy);

@@ -31,8 +31,8 @@ public class FiberPlanConfigurationNpv extends FiberPlanConfiguration implements
 
 	@Override
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>(getDiscountRate(), getYears(),
-				getBudget(), g, s);
+		return (p, g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>
+		(p, getDiscountRate(), getYears(), g, s);
 	}
 
 	public double getBudget() {

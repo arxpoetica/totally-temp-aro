@@ -23,6 +23,6 @@ public interface PlanService {
 	 */
 	public Optional<CompositeNetworkModel> computeNetworkModel(NetworkData networkData,
 			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request) throws PlanException;
+			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request, GlobalConstraint globalConstraint) throws PlanException;
 
 }

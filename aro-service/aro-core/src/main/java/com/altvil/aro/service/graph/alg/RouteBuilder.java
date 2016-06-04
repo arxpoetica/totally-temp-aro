@@ -41,7 +41,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 				sourceRootMap.get(target).add(target, target, new HashSet<E>());
 			} else {
 				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, builder, target));
+						new AllShortestPaths<V, E>(source, builder, 1, target));
 			}
 		}
 
@@ -109,7 +109,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			// Exclude any source target match
 			if (!target.equals(root)) {
 				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, closestFirstBuilder.build(source, target), target));
+						new AllShortestPaths<V, E>(source, closestFirstBuilder, 1, target));
 			}
 		}
 

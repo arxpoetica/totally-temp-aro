@@ -20,18 +20,14 @@ public class AllShortestPaths<V, E> {
 
 	private Set<V> currentTargets;
 
-	public AllShortestPaths(WeightedGraph<V, E> graph, ClosestFirstSurfaceIterator<V, E> bestFirstIterator, V source) {
+	public AllShortestPaths(WeightedGraph<V, E> graph,
+			ClosestFirstSurfaceBuilder<V, E> closestFirstSurfaceBuilder, double parametric, V source) {
 		this.graph = graph;
 		this.source = source;
 		this.seenVertices = new HashSet<>();
-		this.itr = bestFirstIterator;
+		this.itr = closestFirstSurfaceBuilder.build(parametric, graph, source);
 	}
-
-	public AllShortestPaths(WeightedGraph<V, E> graph,
-			ClosestFirstSurfaceBuilder<V, E> closestFirstSurfaceBuilder, V src) {
-		this(graph, closestFirstSurfaceBuilder.build(graph, src), src);
-	}
-
+	
 	public TreeMultimap<Double, V> findPaths(Collection<V> targets) {
 		TreeMultimap<Double, V> lengthToPath = TreeMultimap.create(Double::compare, (o1, o2) -> Integer.compare(o1.hashCode(), o2.hashCode()));
 		currentTargets = new HashSet<>(targets);
@@ -66,8 +62,7 @@ public class AllShortestPaths<V, E> {
 
 		return lengthToPath;
 	}
-	
-	
+
 	public Collection<V> findPathVertices(Collection<V> targets) {
 
 		List<V> result = new ArrayList<>();

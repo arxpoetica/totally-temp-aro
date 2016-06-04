@@ -63,9 +63,9 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return new DefaultGraphBuilder<T>(factory, graph, new AroEdgeFactory<T>());
 	}
 
-	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder, GraphModel<T> graph, GraphNode srcNode,
+	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder, GraphModel<T> graph, double parametric, GraphNode srcNode,
 			Function<AroEdge<T>, Set<GraphNode>> marked) {
-		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(marked,
+		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(parametric, marked,
 				srcNode);
 	}
 

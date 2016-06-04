@@ -20,6 +20,7 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.alg.RouteBuilder;
+import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
@@ -37,6 +38,7 @@ import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanException;
 import com.altvil.aro.service.plan.PlanService;
@@ -73,13 +75,13 @@ public class PlanServiceImpl implements PlanService {
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
 			NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request)
+			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request, GlobalConstraint globalConstraint)
 			throws PlanException {
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					networkData, closestFirstSurfaceBuilder, selectedEdges, request);
+					networkData, closestFirstSurfaceBuilder, selectedEdges, request, globalConstraint);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
@@ -93,12 +95,12 @@ public class PlanServiceImpl implements PlanService {
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
 			NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds constraints)
+			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds constraints, GlobalConstraint globalConstraint)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
 		CompositeNetworkModel networkModel = planning.build(networkData, closestFirstSurfaceBuilder, selectedEdges,
-				constraints);
+				constraints, globalConstraint);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
@@ -155,7 +157,7 @@ public class PlanServiceImpl implements PlanService {
 		}
 
 		public CompositeNetworkModel build(final NetworkData data, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request) {
+				Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request, GlobalConstraint globalConstraint) {
 			
 			GraphNetworkModel networkModel = transformFactory
 					.createGraphNetworkModel(data);
@@ -192,15 +194,35 @@ public class PlanServiceImpl implements PlanService {
 			// Create a virtual root whose edges connect to all of the assigned fiber sources.
 			GraphNode rootNode = modifier.addVirtualRoot(StreamUtil.map(assignedFiberSources, Assignment::getDomain));
 			
-			// Create a tree leading to each AroEdge with a value.
-			//KJG ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = transformFactory.createClosestFirstSurfaceBuilder(data, networkConfiguration);
-			//KJG Predicate<AroEdge<GeoSegment>> marked = createMarkedPredicate(networkConfiguration, data);
-			DAGModel<GeoSegment> dag = transformFactory.createDAG(closestFirstSurfaceBuilder, modifier.build(), rootNode, selectedEdges);
-
-			if (dag.getEdges().isEmpty()) {
-				log.warn("Unable to build DAG as no locations found on edges");
-				return null;
+			if (globalConstraint == null) {
+				globalConstraint = new GlobalConstraint() {
+					@Override
+					public double nextParametric() {
+						return 1;
+					}
+					
+					@Override
+					public boolean isConverging(DAGModel<GeoSegment> model) {
+						return false;
+					}
+				};
 			}
+			
+			DAGModel<GeoSegment> dag;
+
+			do {
+				// Create a tree leading to each AroEdge with a value.
+				final double nextParametric = globalConstraint.nextParametric();
+				log.debug("creating DAG with parametric: " + nextParametric);
+				
+				dag = transformFactory.createDAG(closestFirstSurfaceBuilder, modifier.build(),
+						nextParametric, rootNode, selectedEdges);
+
+				if (dag.getEdges().isEmpty()) {
+					log.warn("Unable to build DAG as no locations found on edges");
+					return null;
+				}
+			} while (globalConstraint.isConverging(dag));
 						
 			RootGraphMapping rootGraphMapping = transformFactory
 					.createWirecenterTransformer(request)
@@ -213,10 +235,9 @@ public class PlanServiceImpl implements PlanService {
 				edgeMap.get(gm.getGraphAssignment()).setGraphMapping(gm) ;
 			});
 			
-
 			return new CompositeNetworkModelImpl(assignedFiberSources.stream()
 				.filter(fsb -> fsb.getGraphMapping() != null)
-				.map(createNetworkModelTransform(dag, closestFirstSurfaceBuilder))
+				.map(createNetworkModelTransform(dag, (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s)))
 				.collect(Collectors.toList())) ;
 			
 		}

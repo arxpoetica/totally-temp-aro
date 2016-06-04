@@ -31,6 +31,10 @@ public class StrategyServiceImpl implements StrategyService {
 			this.type = type;
 			this.algorithm = algorithm;
 		}
+		
+		public String toString() {
+			return type.getName() + "/" + algorithm;
+		}
 
 		@Override
 		public boolean equals(Object obj) {
@@ -39,10 +43,6 @@ public class StrategyServiceImpl implements StrategyService {
 
 			StrategyKey other = (StrategyKey) obj;
 			
-			if (type != other.type) {
-				return false;
-			}
-
 			return (type == other.type && algorithm == other.algorithm);
 		}
 

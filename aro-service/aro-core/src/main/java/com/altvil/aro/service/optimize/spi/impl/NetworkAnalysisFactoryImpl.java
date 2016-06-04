@@ -129,7 +129,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		private void createAnalyis(Builder builder, GraphMapping gm,
 				FiberType ft, Collection<AroEdge<GeoSegment>> pathEdges) {
-			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder, (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s),
+			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder, (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s),
 					vertex, gm, pathEdges);
 
 			nodeBuilder = builder;

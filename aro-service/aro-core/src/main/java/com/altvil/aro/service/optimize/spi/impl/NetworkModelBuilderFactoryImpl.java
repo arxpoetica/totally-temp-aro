@@ -19,6 +19,7 @@ import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
@@ -40,8 +41,8 @@ public class NetworkModelBuilderFactoryImpl implements
 	@Override
 	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
 			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges,
-			FtthThreshholds fiberConstraints) {
-		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, selectedEdges, fiberConstraints);
+			FtthThreshholds fiberConstraints, GlobalConstraint globalConstraints) {
+		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, selectedEdges, fiberConstraints, globalConstraints);
 	}
 
 	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
@@ -52,17 +53,19 @@ public class NetworkModelBuilderFactoryImpl implements
 		Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges;
 		
 		private FtthThreshholds constraints;
+		private GlobalConstraint globalConstraints;
 
 		private Map<Long, NetworkAssignment> map;
 
 		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
 				Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, 
-				FtthThreshholds constraints) {
+				FtthThreshholds constraints, GlobalConstraint globalConstraints) {
 			super();
 			this.networkData = networkData;
 			this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
 			this.selectedEdges = selectedEdges;
 			this.constraints = constraints;
+			this.globalConstraints = globalConstraints;
 
 			map = StreamUtil.hash(networkData.getRoadLocations(),
 					a -> a.getSource().getObjectId());
@@ -106,7 +109,7 @@ public class NetworkModelBuilderFactoryImpl implements
 		@Override
 		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
 			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, selectedEdges, constraints);
+					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, selectedEdges, constraints, globalConstraints);
 		}
 	}
 }

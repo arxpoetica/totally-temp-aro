@@ -9,11 +9,12 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.plan.GlobalConstraint;
 
 public interface NetworkModelBuilderFactory {
 
 	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
 			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, 
-			FtthThreshholds fiberConstraints);
+			FtthThreshholds fiberConstraints, GlobalConstraint globalConstraints);
 
 }

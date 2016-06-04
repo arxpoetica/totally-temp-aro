@@ -79,16 +79,14 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * Maximum distance to search.
 	 */
 	private double							radius		= Double.POSITIVE_INFINITY;
-	private double							budget		= Double.POSITIVE_INFINITY;
-
 	/**
 	 * Creates a new closest-first iterator for the specified graph.
 	 *
 	 * @param g
 	 *            the graph to be iterated.
 	 */
-	public NpvClosestFirstIterator(double discountRate, int years, double budget, Graph<V, E> g) {
-		this(discountRate, years, budget, g, null);
+	public NpvClosestFirstIterator(double parametric, double discountRate, int years, Graph<V, E> g) {
+		this(parametric, discountRate, years, g, null);
 	}
 
 	/**
@@ -103,8 +101,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param startVertex
 	 *            the vertex iteration to be started.
 	 */
-	public NpvClosestFirstIterator(double discountRate, int years, double budget, Graph<V, E> g, V startVertex) {
-		this(discountRate, years, budget, g, startVertex, Double.POSITIVE_INFINITY);
+	public NpvClosestFirstIterator(double parametric, double discountRate, int years, Graph<V, E> g, V startVertex) {
+		this(parametric, discountRate, years, g, startVertex, Double.POSITIVE_INFINITY);
 	}
 
 	/**
@@ -123,24 +121,22 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 *            limit on weighted path length, or Double.POSITIVE_INFINITY for
 	 *            unbounded search.
 	 */
-	public NpvClosestFirstIterator(double discountRate, int years, double budget, Graph<V, E> g, V startVertex,
+	public NpvClosestFirstIterator(double parametric, double discountRate, int years, Graph<V, E> g, V startVertex,
 			double radius) {
 		super(g, startVertex);
-		this.budget = budget;
 		this.radius = radius;
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
-		ONCE = true;
 
 		// NOTE: Calculate a scale factor that can be used to reduce the npv
-		// function to a linear equation. Assumes that the net revenue is
+		// function to a linear equation. Assumes that the net revenue is fixed.
 		double npv = 0;
 
 		for (int t = 1; t <= years; t++) {
 			npv += 1 / Math.pow(1 + discountRate, t);
 		}
 
-		npvFactor = npv;
+		npvFactor = npv * parametric;
 	}
 
 	private final double npvFactor;
@@ -162,19 +158,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		double npv = netPresentValue(terminalData);
 
 		final double f = f(npv);
-		if (ONCE) {
-			log.trace(
-					"|Source Vertex, Target Vertex, Edge Length, Path Cost, Path Revenue, Path Length, Path Locations, Path FDT, NPV, F");
-			ONCE = false;
-		}
-
-		if (log.isTraceEnabled()) {
-			log.trace("|" + base2terminal.getTargetNode().getId() + "," + base2terminal.getSourceNode().getId() + ","
-					+ base2terminal.getWeight() + "," + terminalData.cost + "," + terminalData.revenue + ","
-					+ terminalData.totalLength + "," + terminalData.locations + "," + npv + ","
-					+ f);
-		}
-
 		return f;
 	}
 
@@ -183,8 +166,6 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 
 		return npv;
 	}
-
-	private static boolean ONCE = false;
 
 	private static class NpvData {
 		double	   cost		   = 0;
@@ -249,21 +230,19 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 
 		// if the cost of this plan does NOT exceed the budget then include the
 		// cost, and revenue, of its assignments in the NPV calculation.
-		if (sourceData.cost < budget) {
-			GeoSegment segment = (GeoSegment) source2Destination.getValue();
+		GeoSegment segment = (GeoSegment) source2Destination.getValue();
 
-			if (segment != null) {
-				Collection<GraphEdgeAssignment> assignments = segment.getGeoSegmentAssignments();
+		if (segment != null) {
+			Collection<GraphEdgeAssignment> assignments = segment.getGeoSegmentAssignments();
 
-				assignments.forEach((assignment) -> {
-					LocationEntity le = (LocationEntity) assignment.getAroEntity();
-					LocationDemand d = le.getLocationDemand();
-					// Count the locations on this page for later analysis
-					destinationData.locations++;
-					destinationData.revenue += d.getMonthlyRevenueImpact() * 12;
-					destinationData.cost += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
-				});
-			}
+			assignments.forEach((assignment) -> {
+				LocationEntity le = (LocationEntity) assignment.getAroEntity();
+				LocationDemand d = le.getLocationDemand();
+				// Count the locations on this page for later analysis
+				destinationData.locations++;
+				destinationData.revenue += d.getMonthlyRevenueImpact() * 12;
+				destinationData.cost += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
+			});
 		}
 
 		return destinationData;
@@ -369,11 +348,11 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			if (point != null) {
 				Coordinate coord = point.getCoordinate();
 
-				log.debug(v + " " + coord.y + " " + coord.x + " " + data.npvData.totalLength + " " + data.npvData.cost
-						+ " " + data.npvData.revenue + " " + netPresentValue(data.npvData));
+				log.trace(v + "," + coord.y + " " + coord.x + "," + data.npvData.totalLength + "," + data.npvData.cost
+						+ "," + data.npvData.revenue + "," + netPresentValue(data.npvData));
 
 				if (spanningTreeEdge != null) {
-					log.debug(
+					log.trace(
 							spanningTreeEdge.getSourceNode().getId() + " " + spanningTreeEdge.getTargetNode().getId());
 				}
 			}
@@ -428,5 +407,11 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			checkRadiusTraversal(crossComponentTraversal);
 		}
 		super.setCrossComponentTraversal(crossComponentTraversal);
+	}
+
+	@Override
+	public boolean isGlobalConstraintMet() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }
