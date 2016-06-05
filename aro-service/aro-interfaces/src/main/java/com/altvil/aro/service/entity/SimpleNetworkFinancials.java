@@ -3,9 +3,9 @@ package com.altvil.aro.service.entity;
 public class SimpleNetworkFinancials {
 
 	public static double costPerAtomicUnit = 76.50;
-	public static double coRatio = 26.2;
-	public static double fdhRatio = 34.6;
-	public static double fdtRatio = 39.2;
+	public static double coRatio = 0.262;
+	public static double fdhRatio = 0.346;
+	public static double fdtRatio = 0.392;
 	public static double costPerMeter = 17.32;
 
 	private LocationDemand locationDemand;
