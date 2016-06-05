@@ -24,8 +24,23 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 	public static final double EQUIPMENT_PER_COVERAGE = 76.5;
 
 	public static final double FIBER_PER_M			  = 5.28;
+	private static final int NUM_PROBES = 20;
 
 	private class NpvBudgetConstraint implements GlobalConstraint {
+		private static final int EQUIPMENT_COST = 6;
+
+		private static final int FIBER_COST = 5;
+
+		private static final int LENGTH = 4;
+
+		private static final int RAW_COVERAGE = 3;
+
+		private static final int TOTAL_LOCATIONS = 2;
+
+		private static final int SCALED_REVENUE = 1;
+
+		private static final int SCALED_COST = 0;
+
 		public NpvBudgetConstraint(double budget, double discountRate, int years) {
 			this.budget = budget;
 			
@@ -40,10 +55,11 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 
 		private final Logger		log			 = LoggerFactory.getLogger(NpvBudgetConstraint.class);
 		private final double budget;
-		private double		 minMarketPenetration = 0;
-		private double		 maxMarketPenetration = 1;
-		private double		 marketPenetration	  = maxMarketPenetration;
 		private boolean once = true;
+		private int step = 0;
+		private double marketPenetration = 1;
+		private double bestNpv = Double.NEGATIVE_INFINITY;
+		private double bestMarketPenetration = 0;
 
 		@Override
 		public double nextParametric() {
@@ -55,23 +71,36 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 			double[] financials = financials(model);
 			if (once) {
 				log.debug(
-						"marketPenetration, Scaled Cost, Scaled Revenue, Total Locations, Total Demand, NPV");
+						"budget, scale, Scaled Cost, Scaled Revenue, Fiber Cost, Equipment Cost, Total Locations, Path Length, Total Demand, NPV");
 				once = false;
 			}
-			log.debug("{}, {}, {}, {}, {}, {}" , marketPenetration, 
-					financials[0], financials[1],
-					financials[2], financials[3], 					
-					(npvFactor *  financials[1] * marketPenetration) - (financials[0] * marketPenetration));
+			final double npv = (npvFactor *  financials[SCALED_REVENUE]) - financials[SCALED_COST];
+			log.debug("{}, {}, {}, {}, {}, {}, {}, {}, {}, {}" ,
+					budget, marketPenetration, 
+					financials[SCALED_COST], financials[SCALED_REVENUE],financials[FIBER_COST], financials[EQUIPMENT_COST],
+					financials[TOTAL_LOCATIONS], financials[LENGTH], financials[RAW_COVERAGE], 					
+					npv);
 			
 			if (financials[0] < budget) {
-				minMarketPenetration = marketPenetration;
-			} else {
-				maxMarketPenetration = marketPenetration;
+				if (npv > bestNpv) {
+					bestNpv = npv;
+					bestMarketPenetration = marketPenetration;
+					
+					if (step == 0) {
+						return false;
+					}
+				}
 			}
-
-			marketPenetration = (minMarketPenetration + maxMarketPenetration) / 2;
-
-			return (maxMarketPenetration - minMarketPenetration) > 0.00001;
+			
+			if (step++ < NUM_PROBES) {
+				marketPenetration -= 1.0 / (NUM_PROBES - 1.0);
+			} else if (bestMarketPenetration == marketPenetration) {
+				return false;
+			} else {
+				marketPenetration =  bestMarketPenetration;
+			}
+			
+			return true;
 		}
 
 		private double[] financials(DAGModel<GeoSegment> model) {
@@ -79,7 +108,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 		}
 
 		private double[] financials(Set<AroEdge<GeoSegment>> edges) {
-			double[] results = new double[4];
+			double[] results = new double[7];
 			edges.stream().forEach((e) -> financials(e, results));
 			return results;
 		}
@@ -87,7 +116,9 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 		private void financials(AroEdge<GeoSegment> edge, double[] results) {
 			GeoSegment segment = edge.getValue();
 			
-			results[0] += edge.getWeight() * FIBER_PER_M;
+			results[SCALED_COST] += edge.getWeight() * FIBER_PER_M;
+			results[LENGTH] += edge.getWeight();
+			results[FIBER_COST] += edge.getWeight() * FIBER_PER_M;
 
 			if (segment != null) {
 				Collection<GraphEdgeAssignment> assignments = segment.getGeoSegmentAssignments();
@@ -95,10 +126,11 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 				assignments.forEach((assignment) -> {
 					LocationEntity le = (LocationEntity) assignment.getAroEntity();
 					LocationDemand d = le.getLocationDemand();
-					results[0] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE * marketPenetration;
-					results[1] += d.getMonthlyRevenueImpact() * marketPenetration;
-					results[2]++;
-					results[3] += d.getRawCoverage();
+					results[SCALED_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE * marketPenetration;
+					results[EQUIPMENT_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE * marketPenetration;
+					results[SCALED_REVENUE] += d.getMonthlyRevenueImpact() * marketPenetration;
+					results[TOTAL_LOCATIONS]++;
+					results[RAW_COVERAGE] += d.getRawCoverage();
 				});
 			}
 		}
