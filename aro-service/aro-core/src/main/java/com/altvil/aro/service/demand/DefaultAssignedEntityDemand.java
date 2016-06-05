@@ -20,13 +20,18 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 		this.pinnedLocation = pinnedLocation;
 		this.locationDemand = locationDemand;
 	}
-
+	
 	public DefaultAssignedEntityDemand(LocationEntity locationEntity,
 			PinnedLocation pinnedLocation) {
 		this(locationEntity, pinnedLocation, locationEntity.getLocationDemand());
 	}
 	
 	
+	@Override
+	public DemandStatistic ratio(double ratio) {
+		 return new DefaultAssignedEntityDemand(getLocationEntity(), this.pinnedLocation, (LocationDemand) locationDemand.ratio(ratio));
+	}
+
 	@Override
 	public double getRawCoverage() {
 		return locationDemand.getRawCoverage() ;

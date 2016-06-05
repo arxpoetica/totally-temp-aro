@@ -1,22 +1,36 @@
 package com.altvil.aro.service.conversion.impl;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.model.NetworkNodeTypeEnum;
-import com.altvil.aro.service.conversion.ModelSerialization;
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationDropAssignment;
+import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
+import com.altvil.utils.func.Aggregator;
 import com.vividsolutions.jts.geom.Point;
 
 public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 
-	private int atomicCount;
-
+	private Aggregator<LocationDemand> demandAggregator = DefaultLocationDemand.demandAggregate();
+	private Set<LocationEntity> seenLocations = new HashSet<>() ;
+	
 	public EquipmentSerializer(long planId) {
 		super(planId);
+	}
+	
+	
+	protected void add(LocationEntity entity) {
+		if( !seenLocations.contains(entity) ) {
+			seenLocations.add(entity) ;
+			demandAggregator.add(entity.getLocationDemand()) ;
+		}
 	}
 
 	protected void serializeCentralOffice(NetworkNode parent,
@@ -57,7 +71,7 @@ public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 			GraphMapping graphMapping) {
 
 		BulkFiberTerminal bft = (BulkFiberTerminal) graphMapping.getAroEntity();
-		atomicCount += bft.getAssignedEntityDemand().getDemand();
+		add(bft.getLocationEntity()) ;
 
 		try {
 			createNetworkNode(graphMapping.getGraphAssignment().getPoint(),
@@ -105,19 +119,17 @@ public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 
 	protected void serializeLocations(NetworkNode parent,
 			Collection<GraphEdgeAssignment> edgeAssignments) {
-		atomicCount += edgeAssignments
-				.stream()
-				.mapToInt(
-						e -> {
-							LocationDropAssignment lda = ((LocationDropAssignment) e
-									.getAroEntity());
-							return (int) lda.getAssignedEntityDemand()
-									.getDemand();
-						}).sum();
+		
+		edgeAssignments.forEach(e -> {
+			add(((LocationDropAssignment) e
+					.getAroEntity()).getLocationEntity());
+		});
+		
+		
 	}
 	
 
-	public int getAtomicCount() {
-		return atomicCount ;
+	public LocationDemand getLocationDemand() {
+		return demandAggregator.apply() ;
 	}
 }
