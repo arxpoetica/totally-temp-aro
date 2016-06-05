@@ -32,8 +32,11 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.MaterialType;
+import com.altvil.aro.service.entity.SimpleNetworkFinancials;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
@@ -213,14 +216,18 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				plans.stream().map(plan -> createPlanningCallable(plan, constraints, globalConstraint)).collect(Collectors.toList()));
 
 		IgniteCallable<MasterPlanUpdate> callable = (() -> {
-			return new MasterPlanUpdate(futures.stream().map(wf -> {
+		
+			List<WirecenterNetworkPlan> updates = futures.stream().map(wf -> {
 				try {
 					return wf.get();
 				} catch (Exception e) {
 					log.error(e.getMessage());
 					return null;
 				}
-			}).filter(p -> p != null).collect(Collectors.toList()));
+			}).filter(p -> p != null).collect(Collectors.toList()) ;
+			
+			
+			return new MasterPlanUpdate(updates);
 		});
 		MasterPlanBuilder builder = createMasterPlanBuilder(requestor, callable);
 		builder.setWireCenterPlans(plans);
@@ -260,6 +267,39 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	public Future<WirecenterNetworkPlan> planFiber(FiberPlanConfiguration fiberPlanStrategy,
 			FtthThreshholds constraints, GlobalConstraint globalConstraint) {
 		return executorService.submit(createPlanningCallable(fiberPlanStrategy, constraints, globalConstraint));
+	}
+	
+	
+	
+	
+	
+	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, WirecenterNetworkPlan plan) {
+		
+		double fiberLength = 0 ;
+		fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER) ;
+		fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
+
+		SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength) ;
+		updateFinancials(nr, planId, f) ;
+		
+		return f ;
+		
+	} 
+	
+	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, SimpleNetworkFinancials f) {
+		
+		nr.updateFinancials(planId, 
+		f.getLocationDemand().getDemand(), 
+		f.getTotalCost(),
+		f.getFiberCost(),
+		f.getEquipmentCost(), f.getCoCost(), f.getFdhCost(), f.getFdtCost(), 
+		f.getLocationDemand().getMonthlyRevenueImpact()*12, 
+		f.getLocationDemand().getLocationDemand(LocationEntityType.Household).getMonthlyRevenueImpact() *12,
+		f.getLocationDemand().getLocationDemand(LocationEntityType.CellTower).getMonthlyRevenueImpact() *12,
+		f.getLocationDemand().getLocationDemand(LocationEntityType.Business).getMonthlyRevenueImpact() *12);
+		
+		return f ;
+
 	}
 
 	public static class FiberPlanningCallable implements IgniteCallable<WirecenterNetworkPlan>, LocalBinding {
@@ -324,7 +364,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				WirecenterNetworkPlan plan = conversionService.convert(fiberPlanStrategy.getPlanId(), model);
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
-				networkNodeRepository.updateTotalCount(plan.getPlanId(), (int) plan.getTotalDemand().getDemand());
+				updateFinancials(networkNodeRepository, plan.getPlanId(), plan);
 				return plan;
 			}
 
@@ -392,7 +432,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				WirecenterNetworkPlan plan = conversionService.convert(fiberPlanStrategy.getPlanId(), model);
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
-				networkNodeRepository.updateTotalCount(plan.getPlanId(), (int) plan.getTotalDemand().getDemand());
+				updateFinancials(this.networkNodeRepository, plan.getPlanId(), plan) ;
 				return plan;
 			}
 
@@ -479,8 +519,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
-				networkNodeRepository.updateTotalCount(plan.getPlanId(),(int) plan.getTotalDemand().getDemand());
-
+				updateFinancials(this.networkNodeRepository, plan.getPlanId(), plan) ;
+				
 				return plan;
 			}
 

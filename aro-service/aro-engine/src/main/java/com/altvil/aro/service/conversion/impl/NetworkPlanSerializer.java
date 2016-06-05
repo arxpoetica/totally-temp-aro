@@ -33,6 +33,7 @@ public class NetworkPlanSerializer<T> {
 							fibererSerializer.serialize(model
 									.getFiberSourceMapping());
 							fibererSerializer.commit(planMods::addFiber);
+							planMods.setFiberLengths(fibererSerializer.getFiberLengthMap()) ;
 
 						});
 
