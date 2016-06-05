@@ -36,9 +36,9 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		implements ClosestFirstSurfaceIterator<V, E> {
 	private static final double EQUIPMENT_PER_COVERAGE = 76.5;
 
-	private static final double FIBER_PER_M = 5.28;
+	private static final double FIBER_PER_M = 17.32;
 
-	private static final double	MAX_NPV		 = 1.0E7;
+	private static final double	MAX_NPV		 = 1.0E10;
 
 	private final Logger		log			 = LoggerFactory.getLogger(NpvClosestFirstIterator.class);
 
@@ -244,7 +244,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				LocationDemand d = le.getLocationDemand();
 				// Count the locations on this page for later analysis
 				destinationData.locations++;
-				destinationData.revenue += marketPenetration * d.getMonthlyRevenueImpact();
+				destinationData.revenue += marketPenetration * d.getMonthlyRevenueImpact() * 12;
 				destinationData.cost += marketPenetration * d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
 			});
 		}

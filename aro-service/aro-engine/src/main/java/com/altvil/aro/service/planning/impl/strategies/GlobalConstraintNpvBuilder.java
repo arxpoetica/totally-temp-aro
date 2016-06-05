@@ -139,7 +139,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 					LocationDemand d = le.getLocationDemand();
 					results[SCALED_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE * marketPenetration;
 					results[EQUIPMENT_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE * marketPenetration;
-					results[SCALED_REVENUE] += d.getMonthlyRevenueImpact() * 3;// * marketPenetration;
+					results[SCALED_REVENUE] += d.getMonthlyRevenueImpact() * 12;// * marketPenetration;
 					results[TOTAL_LOCATIONS]++;
 					results[RAW_COVERAGE] += d.getRawCoverage();
 				});
