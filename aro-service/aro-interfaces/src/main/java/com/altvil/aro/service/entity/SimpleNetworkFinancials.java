@@ -1,5 +1,7 @@
 package com.altvil.aro.service.entity;
 
+import javax.print.attribute.standard.Finishings;
+
 public class SimpleNetworkFinancials {
 
 	public static double costPerAtomicUnit = 76.50;
@@ -19,13 +21,15 @@ public class SimpleNetworkFinancials {
 	private double fdhCost;
 	private double fdtCost;
 	private double totalCost;
-
+	private double npv ;
+	
+	
 	public SimpleNetworkFinancials(LocationDemand locationDemand,
-			double fiberLength) {
-		init(locationDemand, fiberLength);
+			double fiberLength, FinancialInputs fi) {
+		init(locationDemand, fiberLength, fi);
 	}
 
-	private void init(LocationDemand locationDemand, double fiberLength) {
+	private void init(LocationDemand locationDemand, double fiberLength, FinancialInputs fi) {
 		this.locationDemand = locationDemand;
 		this.fiberLength = fiberLength;
 
@@ -36,7 +40,23 @@ public class SimpleNetworkFinancials {
 		this.coCost = equipmentCost * coRatio;
 		this.fdhCost = equipmentCost * fdhRatio;
 		this.fdtCost = equipmentCost * fdtRatio;
+		
+		this.npv = calcNpv(fi) ;
+		
 
+	}
+	
+	
+	private double calcNpv(FinancialInputs fi) {
+		return (locationDemand.getMonthlyRevenueImpact() * 12 * fi.getP() * calcNpvFactor(fi)) - this.getTotalCost() ;
+	}
+	
+	private double calcNpvFactor(FinancialInputs fi) {
+		double npvFactor = 0;
+        for (int t = 1; t <= fi.getYears(); t++) {
+            npvFactor += 1 / Math.pow(1 + fi.getDiscountRate(), t);
+        }
+        return npvFactor ;
 	}
 
 	public LocationDemand getLocationDemand() {
@@ -102,5 +122,11 @@ public class SimpleNetworkFinancials {
 	public void setTotalCost(double totalCost) {
 		this.totalCost = totalCost;
 	}
+
+	public double getNpv() {
+		return npv;
+	}
+	
+	
 
 }

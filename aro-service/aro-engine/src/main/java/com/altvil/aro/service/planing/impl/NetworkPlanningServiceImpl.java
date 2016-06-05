@@ -33,6 +33,7 @@ import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.FinancialInputs;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -212,7 +213,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			fiberLength += p.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
 			aggregator.add(p.getTotalDemand()) ;
 		}		
-		updateFinancials(networkNodeRepository, planId, new SimpleNetworkFinancials(aggregator.apply(), fiberLength)) ;
+		updateFinancials(networkNodeRepository, planId, new SimpleNetworkFinancials(aggregator.apply(), fiberLength, FinancialInputs.DEFAULT)) ;
 	}
 
 	@Override
@@ -296,7 +297,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER) ;
 		fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
 
-		SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength) ;
+		SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength, FinancialInputs.DEFAULT) ;
 		updateFinancials(nr, planId, f) ;
 		
 		return f ;
@@ -313,7 +314,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		f.getLocationDemand().getMonthlyRevenueImpact()*12, 
 		f.getLocationDemand().getLocationDemand(LocationEntityType.Household).getMonthlyRevenueImpact() *12,
 		f.getLocationDemand().getLocationDemand(LocationEntityType.CellTower).getMonthlyRevenueImpact() *12,
-		f.getLocationDemand().getLocationDemand(LocationEntityType.Business).getMonthlyRevenueImpact() *12);
+		f.getLocationDemand().getLocationDemand(LocationEntityType.Business).getMonthlyRevenueImpact() *12, 
+		f.getNpv());
 		
 		return f ;
 
