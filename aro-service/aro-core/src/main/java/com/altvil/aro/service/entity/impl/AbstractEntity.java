@@ -25,6 +25,31 @@ public abstract class AbstractEntity implements AroEntity {
 		return getType().getSimpleName() + ":" + objectId;
 	}
 
+	@Override
+	public int hashCode() {
+		return getObjectId().hashCode() ;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		
+		if( obj == null ) {
+			return false ;
+		}
+		
+		if( obj == this ) {
+			return true ;
+		}
+		
+		if( this.getClass().isAssignableFrom(obj.getClass())) {
+			return this.getObjectId() .equals(((AroEntity) obj).getObjectId()) ;
+		}
+		
+		return false ;
+	}
+	
+	
+
 	
 	
 	

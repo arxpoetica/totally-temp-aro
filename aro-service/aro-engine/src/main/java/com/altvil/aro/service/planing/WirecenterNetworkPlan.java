@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationDemand;
 
 public interface WirecenterNetworkPlan {
 
@@ -13,6 +15,8 @@ public interface WirecenterNetworkPlan {
 
 	Collection<FiberRoute> getFiberRoutes();
 	
-	public int getAtomicCount() ;
+	public LocationDemand getTotalDemand() ;
+	
+	public Double getFiberLengthInMeters(FiberType fiberType) ;
 
 }
