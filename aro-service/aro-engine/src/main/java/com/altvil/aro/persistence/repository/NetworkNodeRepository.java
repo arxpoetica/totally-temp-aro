@@ -42,7 +42,7 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 		
 	@Query(value = "update client.plan set total_count = :totalCount \n " +
 	", total_cost=:totalCost, fiber_cost=:fiberCost " +
-	", equipment_cost=:equipmentCost, co_cost = :co_cost, fdh_cost=:fdhCost, fdt_cost=fdtCost \n" +
+	", equipment_cost=:equipmentCost, co_cost = :coCost, fdh_cost=:fdhCost, fdt_cost=:fdtCost \n" +
 	", total_revenue = :totalRevenue, household_revenue = :hhRevenue, celltower_revenue = :cellTowerRevenue\n" +
 	", business_revenue = :bizRevenue \n " +
 	" where id = :planId", nativeQuery = true)
