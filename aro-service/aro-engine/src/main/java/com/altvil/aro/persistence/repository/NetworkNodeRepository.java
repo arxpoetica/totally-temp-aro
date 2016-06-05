@@ -44,7 +44,7 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 	", total_cost=:totalCost, fiber_cost=:fiberCost " +
 	", equipment_cost=:equipmentCost, co_cost = :coCost, fdh_cost=:fdhCost, fdt_cost=:fdtCost \n" +
 	", total_revenue = :totalRevenue, household_revenue = :hhRevenue, celltower_revenue = :cellTowerRevenue\n" +
-	", business_revenue = :bizRevenue, npv := :npv \n " +
+	", business_revenue = :bizRevenue, npv = :npv \n " +
 	" where id = :planId", nativeQuery = true)
 	@Modifying
 	@Transactional
