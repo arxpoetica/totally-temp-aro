@@ -252,15 +252,15 @@ public class NetworkServiceImpl implements NetworkService {
 											.addWithRevenue(
 													LocationEntityType.Household,
 													result.getDouble(LoctationDemandMap.household_fiber),
-													result.getDouble(LoctationDemandMap.household_spend))
+													result.getDouble(LoctationDemandMap.household_spend) * 0.3)
 											.addWithRevenue(
 													LocationEntityType.Business,
 													result.getDouble(LoctationDemandMap.business_fiber),
-													result.getDouble(LoctationDemandMap.bussiness_spend))
+													result.getDouble(LoctationDemandMap.bussiness_spend) * 0.3)
 											.addWithRevenue(
 													LocationEntityType.CellTower,
 													result.getDouble(LoctationDemandMap.tower_fiber),
-													result.getDouble(LoctationDemandMap.tower_spend))
+													result.getDouble(LoctationDemandMap.tower_spend)  * 0.3)
 											.build());
 
 						});
