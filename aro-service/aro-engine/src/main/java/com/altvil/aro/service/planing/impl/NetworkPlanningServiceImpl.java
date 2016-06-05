@@ -30,6 +30,7 @@ import com.altvil.aro.persistence.repository.FiberRouteRepository;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
@@ -62,6 +63,7 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.utils.StreamUtil;
+import com.altvil.utils.func.Aggregator;
 
 
 @Service("networkPlanningService")
@@ -72,6 +74,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	
 	@Autowired
 	private NetworkPlanRepository networkPlanRepository;
+	@Autowired
+	private NetworkNodeRepository networkNodeRepository ;
 
 	@Autowired
 	private ApplicationContext appCtx ;
@@ -198,6 +202,18 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		return builder;
 	}
+	
+	private void updateMasterPlanFinancials(long planId,Collection<WirecenterNetworkPlan> plans) {
+	
+		double fiberLength = 0 ; 
+		Aggregator<LocationDemand> aggregator = DefaultLocationDemand.demandAggregate() ;
+		for(WirecenterNetworkPlan p : plans) {
+			fiberLength += p.getFiberLengthInMeters(FiberType.FEEDER) ;
+			fiberLength += p.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
+			aggregator.add(p.getTotalDemand()) ;
+		}		
+		updateFinancials(networkNodeRepository, planId, new SimpleNetworkFinancials(aggregator.apply(), fiberLength)) ;
+	}
 
 	@Override
 	public MasterPlanBuilder planMasterFiber(Principal requestor, FiberPlanConfiguration fiberPlanConfiguration,
@@ -225,7 +241,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					return null;
 				}
 			}).filter(p -> p != null).collect(Collectors.toList()) ;
-			
+		
+			updateMasterPlanFinancials(fiberPlanConfiguration.getPlanId(), updates) ;
 			
 			return new MasterPlanUpdate(updates);
 		});
