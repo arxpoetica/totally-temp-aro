@@ -21,131 +21,30 @@ import com.altvil.enumerations.FiberPlanAlgorithm;
 
 @FiberPlanStrategy(type = GlobalConstraintBuilder.class, algorithms = FiberPlanAlgorithm.NPV)
 public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
-	public static final double EQUIPMENT_PER_COVERAGE = 76.5;
+	private static class BasicFinanceEstimator {
+		private double cost;
 
-	public static final double FIBER_PER_M			  = 17.32;
-	private static class SearchPlan {
-		final int numProbs;
-		SearchPlan(int numProbs, double lowerCutoff) {
-			this.numProbs = numProbs;
-			this.lowerCutoff = lowerCutoff;
-		}
-		final double lowerCutoff;
-	}
-	private static final SearchPlan[] PROBES = {new SearchPlan(100, 0.3), new SearchPlan(200, 0.2), new SearchPlan(600, 0.0)};
+		private double equipmentCost = 0.0;
 
-	private class NpvBudgetConstraint implements GlobalConstraint {
-		private static final int EQUIPMENT_COST = 6;
+		private double fiberCost;
 
-		private static final int FIBER_COST = 5;
+		private double length;
 
-		private static final int LENGTH = 4;
+		private int	   numLocations;
 
-		private static final int RAW_COVERAGE = 3;
+		private double rawCoverage;
 
-		private static final int TOTAL_LOCATIONS = 2;
+		private double revenue;
 
-		private static final int SCALED_REVENUE = 1;
-
-		private static final int SCALED_COST = 0;
-
-		public NpvBudgetConstraint(double budget, double discountRate, int years) {
-			this.budget = budget;
-			
-			npvFactor = 0;
-			for (int t = 1; t <= years; t++) {
-				npvFactor += 1 / Math.pow(1 + discountRate, t);
-			}
-
-		}
-		
-		private double npvFactor;
-
-		private final Logger		log			 = LoggerFactory.getLogger(NpvBudgetConstraint.class);
-		private final double budget;
-		private boolean once = true;
-		private int step = 0;
-		private int maxSteps = 0;
-		private int planIndex = 0;
-		private double increment = 0;
-		private double parametric = 1;
-		private double bestNpv = Double.NEGATIVE_INFINITY;
-		private double bestMarketPenetration = 0;
-		private double bestOverBudget = Double.POSITIVE_INFINITY;
-		private double b =0;
-
-		@Override
-		public double nextParametric() {
-			return parametric;
+		private BasicFinanceEstimator(DAGModel<GeoSegment> model) {
+			financials(model.getEdges());
 		}
 
-		@Override
-		public boolean isConverging(DAGModel<GeoSegment> model) {
-			double[] financials = financials(model);
-			if (once) {
-				log.debug(
-						"budget, scale, Scaled Cost, Scaled Revenue, Fiber Cost, Equipment Cost, Total Locations, Path Length, Total Demand, NPV");
-				once = false;
-			}
-			final double npv = (npvFactor *  financials[SCALED_REVENUE]) - financials[SCALED_COST];
-			log.debug("{}, {}, {}, {}, {}, {}, {}, {}, {}, {}" ,
-					budget, parametric, 
-					financials[SCALED_COST], financials[SCALED_REVENUE],financials[FIBER_COST], financials[EQUIPMENT_COST],
-					financials[TOTAL_LOCATIONS], financials[LENGTH], financials[RAW_COVERAGE], 					
-					npv);
-			
-			if (financials[0] < budget) {
-				if (npv > bestNpv) {
-					bestNpv = npv;
-					bestMarketPenetration = parametric;
-					
-					if (step == 0) {
-						return false;
-					}
-				}
-			} else {
-				if (financials[0] < bestOverBudget) {
-					bestOverBudget = financials[0];
-					b = parametric;
-				}
-			}
-
-			if (step++ < maxSteps) {
-				parametric -= increment;
-			} else if (planIndex < PROBES.length) {
-				SearchPlan searchPlan = PROBES[planIndex++];
-				increment = (parametric - searchPlan.lowerCutoff) / (searchPlan.numProbs - 1);
-				maxSteps = searchPlan.numProbs - 1;
-				parametric -= increment;
-			} else if (bestNpv > Double.NEGATIVE_INFINITY && bestMarketPenetration == parametric) {
-				return false;
-			} else if (bestOverBudget > Double.NEGATIVE_INFINITY && b == parametric) {
-				return false;
-			} else if (bestNpv == Double.NEGATIVE_INFINITY) {
-				parametric = b;
-			} else {
-				parametric = bestMarketPenetration;
-			}
-			
-			return true;
-		}
-
-		private double[] financials(DAGModel<GeoSegment> model) {
-			return financials(model.getEdges());
-		}
-
-		private double[] financials(Set<AroEdge<GeoSegment>> edges) {
-			double[] results = new double[7];
-			edges.stream().forEach((e) -> financials(e, results));
-			return results;
-		}
-		
-		private void financials(AroEdge<GeoSegment> edge, double[] results) {
+		private void financials(AroEdge<GeoSegment> edge) {
 			GeoSegment segment = edge.getValue();
-			
-			results[SCALED_COST] += edge.getWeight() * FIBER_PER_M;
-			results[LENGTH] += edge.getWeight();
-			results[FIBER_COST] += edge.getWeight() * FIBER_PER_M;
+
+			length += edge.getWeight();
+			fiberCost += edge.getWeight() * FIBER_PER_M;
 
 			if (segment != null) {
 				Collection<GraphEdgeAssignment> assignments = segment.getGeoSegmentAssignments();
@@ -153,15 +52,149 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 				assignments.forEach((assignment) -> {
 					LocationEntity le = (LocationEntity) assignment.getAroEntity();
 					LocationDemand d = le.getLocationDemand();
-					results[SCALED_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;// * marketPenetration;
-					results[EQUIPMENT_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;// * marketPenetration;
-					results[SCALED_REVENUE] += d.getMonthlyRevenueImpact() * 12;// * marketPenetration;
-					results[TOTAL_LOCATIONS]++;
-					results[RAW_COVERAGE] += d.getRawCoverage();
+					equipmentCost += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
+					revenue += d.getMonthlyRevenueImpact() * 12;
+					numLocations++;
+					rawCoverage += d.getRawCoverage();
 				});
 			}
+
+			cost = fiberCost + equipmentCost;
+		}
+
+		private void financials(Set<AroEdge<GeoSegment>> edges) {
+			edges.stream().forEach((e) -> financials(e));
+		}
+
+		public double getCost() {
+			return cost;
+		}
+
+		public double getEquipmentCost() {
+			return equipmentCost;
+		}
+
+		public double getFiberCost() {
+			return fiberCost;
+		}
+
+		public double getLength() {
+			return length;
+		}
+
+		public int getNumLocations() {
+			return numLocations;
+		}
+
+		public double getRawCoverage() {
+			return rawCoverage;
+		}
+
+		public double getRevenue() {
+			return revenue;
 		}
 	}
+
+	private class NpvBudgetConstraint implements GlobalConstraint {
+		private double		 bestNpv				  = Double.NEGATIVE_INFINITY;
+		private double		 bestNpvParametric		  = 0;
+		private double		 bestOverBudget			  = Double.POSITIVE_INFINITY;
+		private double		 bestOverBudgetParametric = 0;
+		private final double budget;
+		private double		 increment				  = 0;
+		private final Logger log					  = LoggerFactory.getLogger(NpvBudgetConstraint.class);
+		private int			 maxSteps				  = 0;
+		private double		 npvFactor;
+		private boolean		 once					  = true;
+		private double		 parametric				  = 1;
+		private int			 planIndex				  = 0;
+		private int			 step					  = 0;
+
+		public NpvBudgetConstraint(double budget, double discountRate, int years) {
+			this.budget = budget;
+
+			npvFactor = 0;
+			for (int t = 1; t <= years; t++) {
+				npvFactor += 1 / Math.pow(1 + discountRate, t);
+			}
+
+		}
+
+		@Override
+		public boolean isConverging(DAGModel<GeoSegment> model) {
+			BasicFinanceEstimator estimator = new BasicFinanceEstimator(model);
+			
+			if (once) {
+				log.debug(
+						"budget, scale, Scaled Cost, Scaled Revenue, Fiber Cost, Equipment Cost, Total Locations, Path Length, Total Demand, NPV");
+				once = false;
+			}
+			
+			final double npv = (npvFactor * estimator.getRevenue()) - estimator.getCost();
+			
+			log.debug("{}, {}, {}, {}, {}, {}, {}, {}, {}, {}", budget, parametric, estimator.getCost(),
+					estimator.getRevenue(), estimator.getFiberCost(), estimator.getEquipmentCost(),
+					estimator.getNumLocations(), estimator.getLength(), estimator.getRawCoverage(), npv);
+
+			if (estimator.getCost() < budget) {
+				if (npv > bestNpv) {
+					bestNpv = npv;
+					bestNpvParametric = parametric;
+
+					if (parametric == 1) {
+						return false;
+					}
+				}
+			} else {
+				if (estimator.getCost() < bestOverBudget) {
+					bestOverBudget = estimator.getCost();
+					bestOverBudgetParametric = parametric;
+				}
+			}
+
+			if (step++ < maxSteps) {
+				parametric -= increment;
+			} else if (planIndex < SEARCH_PLAN.length) {
+				SearchPlan searchPlan = SEARCH_PLAN[planIndex++];
+				increment = (parametric - searchPlan.lowerCutoff) / (searchPlan.numProbs - 1);
+				step = 0;
+				maxSteps = searchPlan.numProbs;
+				parametric -= increment;
+			} else if (bestNpv > Double.NEGATIVE_INFINITY && bestNpvParametric == parametric) {
+				return false;
+			} else if (bestOverBudget > Double.NEGATIVE_INFINITY && bestOverBudgetParametric == parametric) {
+				return false;
+			} else if (bestNpv > Double.NEGATIVE_INFINITY) {
+				parametric = bestNpvParametric;
+			} else {
+				parametric = bestOverBudgetParametric;
+			}
+
+			return true;
+		}
+
+		@Override
+		public double nextParametric() {
+			return parametric;
+		}
+	}
+
+	private static class SearchPlan {
+		final double lowerCutoff;
+		final int	 numProbs;
+
+		SearchPlan(int numProbs, double lowerCutoff) {
+			this.numProbs = numProbs;
+			this.lowerCutoff = lowerCutoff;
+		}
+	}
+
+	public static final double		  EQUIPMENT_PER_COVERAGE = 76.5;
+
+	public static final double		  FIBER_PER_M			 = 17.32;
+
+	private static final SearchPlan[] SEARCH_PLAN			 = { new SearchPlan(100, 0.3), new SearchPlan(200, 0.2),
+			new SearchPlan(600, 0.0) };
 
 	@Override
 	public GlobalConstraint build(FiberPlan fiberPlan) {
