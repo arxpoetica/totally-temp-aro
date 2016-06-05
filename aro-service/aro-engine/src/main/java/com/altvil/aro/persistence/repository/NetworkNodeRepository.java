@@ -39,11 +39,27 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 			+ "join aro.edges e on e.gid = ll.gid \n"
 			+ "order by gid, intersect_position\n" + "limit 40000", nativeQuery = true)
 	List<Object> queryLinkedLocations(int test);
-	
-	
-	@Query(value = "update client.plan set total_count = :totalCount where id = :planId", nativeQuery = true)
+		
+	@Query(value = "update client.plan set total_count = :totalCount \n " +
+	", total_cost=:totalCost, fiber_cost=:fiberCost " +
+	", equipment_cost=:equipmentCost, co_cost = :coCost, fdh_cost=:fdhCost, fdt_cost=:fdtCost \n" +
+	", total_revenue = :totalRevenue, household_revenue = :hhRevenue, celltower_revenue = :cellTowerRevenue\n" +
+	", business_revenue = :bizRevenue \n " +
+	" where id = :planId", nativeQuery = true)
 	@Modifying
 	@Transactional
-	void updateTotalCount(@Param("planId")long planId, @Param("totalCount")int totalCount) ;
+	void updateFinancials(
+			@Param("planId")long planId,
+			@Param("totalCount")double totalCount,
+			@Param("totalCost")double totalCost,
+			@Param("fiberCost")double fiberCost,
+			@Param("equipmentCost")double equipmentCost,
+			@Param("coCost")double coCost,
+			@Param("fdhCost") double fdhCost,
+			@Param("fdtCost")double fdtCost,
+			@Param("totalRevenue")double totalRevenue,
+			@Param("hhRevenue")double hhRevenue,
+			@Param("cellTowerRevenue")double cellTowerRevenue, 
+			@Param("bizRevenue")double bizRevenue) ;
 
 }

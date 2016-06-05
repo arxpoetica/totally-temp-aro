@@ -1,6 +1,7 @@
 package com.altvil.aro.service.conversion.impl;
 
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.Map;
 
 import com.altvil.aro.model.FiberRoute;
@@ -20,6 +21,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 
 	private NetworkModel networkModel;
 	private Map<GraphEdgeAssignment, NetworkNode> equipmentMapping;
+	private Map<FiberType, Double> fiberLengthMap = new EnumMap<>(FiberType.class);
 
 	public FiberRouteSerializer(long planId, NetworkModel networkModel,
 			Map<GraphEdgeAssignment, NetworkNode> equipmentMapping) {
@@ -96,6 +98,9 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 			Collection<AroEdge<GeoSegment>> segments, FiberType fiberType,
 			NetworkNode equipment) {
 
+		double length = segments.stream().mapToDouble(e -> e.getValue().getLength()).sum() ;
+		fiberLengthMap.put(fiberType, length) ;
+		
 		FiberRoute fr = new FiberRoute();
 		
 		fr.setPlanId(planId);
@@ -109,6 +114,10 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 	@Override
 	protected void serializeFdt(FiberRoute parent, GraphMapping graphMapping) {
 		// TODO capture and store Drop cable lengths
+	}
+
+	public Map<FiberType, Double> getFiberLengthMap() {
+		return fiberLengthMap;
 	}
 
 }

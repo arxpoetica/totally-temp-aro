@@ -21,10 +21,18 @@ import com.altvil.enumerations.FiberPlanAlgorithm;
 
 @FiberPlanStrategy(type = GlobalConstraintBuilder.class, algorithms = FiberPlanAlgorithm.NPV)
 public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
-	public static final double EQUIPMENT_PER_COVERAGE = 0;//76.5;
+	public static final double EQUIPMENT_PER_COVERAGE = 76.5;
 
 	public static final double FIBER_PER_M			  = 17.32;
-	private static final int NUM_PROBES = 1000;
+	private static class SearchPlan {
+		final int numProbs;
+		SearchPlan(int numProbs, double lowerCutoff) {
+			this.numProbs = numProbs;
+			this.lowerCutoff = lowerCutoff;
+		}
+		final double lowerCutoff;
+	}
+	private static final SearchPlan[] PROBES = {new SearchPlan(100, 0.3), new SearchPlan(200, 0.2), new SearchPlan(600, 0.0)};
 
 	private class NpvBudgetConstraint implements GlobalConstraint {
 		private static final int EQUIPMENT_COST = 6;
@@ -57,7 +65,10 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 		private final double budget;
 		private boolean once = true;
 		private int step = 0;
-		private double marketPenetration = 1;
+		private int maxSteps = 0;
+		private int planIndex = 0;
+		private double increment = 0;
+		private double parametric = 1;
 		private double bestNpv = Double.NEGATIVE_INFINITY;
 		private double bestMarketPenetration = 0;
 		private double bestOverBudget = Double.POSITIVE_INFINITY;
@@ -65,7 +76,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 
 		@Override
 		public double nextParametric() {
-			return marketPenetration;
+			return parametric;
 		}
 
 		@Override
@@ -78,7 +89,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 			}
 			final double npv = (npvFactor *  financials[SCALED_REVENUE]) - financials[SCALED_COST];
 			log.debug("{}, {}, {}, {}, {}, {}, {}, {}, {}, {}" ,
-					budget, marketPenetration, 
+					budget, parametric, 
 					financials[SCALED_COST], financials[SCALED_REVENUE],financials[FIBER_COST], financials[EQUIPMENT_COST],
 					financials[TOTAL_LOCATIONS], financials[LENGTH], financials[RAW_COVERAGE], 					
 					npv);
@@ -86,7 +97,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 			if (financials[0] < budget) {
 				if (npv > bestNpv) {
 					bestNpv = npv;
-					bestMarketPenetration = marketPenetration;
+					bestMarketPenetration = parametric;
 					
 					if (step == 0) {
 						return false;
@@ -95,20 +106,25 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 			} else {
 				if (financials[0] < bestOverBudget) {
 					bestOverBudget = financials[0];
-					b = marketPenetration;
+					b = parametric;
 				}
 			}
-			
-			if (step++ < NUM_PROBES) {
-				marketPenetration -= 1.0 / (NUM_PROBES - 1.0);
-			} else if (bestNpv > Double.NEGATIVE_INFINITY && bestMarketPenetration == marketPenetration) {
+
+			if (step++ < maxSteps) {
+				parametric -= increment;
+			} else if (planIndex < PROBES.length) {
+				SearchPlan searchPlan = PROBES[planIndex++];
+				increment = (parametric - searchPlan.lowerCutoff) / (searchPlan.numProbs - 1);
+				maxSteps = searchPlan.numProbs - 1;
+				parametric -= increment;
+			} else if (bestNpv > Double.NEGATIVE_INFINITY && bestMarketPenetration == parametric) {
 				return false;
-			} else if (bestOverBudget > Double.NEGATIVE_INFINITY && b == marketPenetration) {
+			} else if (bestOverBudget > Double.NEGATIVE_INFINITY && b == parametric) {
 				return false;
 			} else if (bestNpv == Double.NEGATIVE_INFINITY) {
-				marketPenetration =  b;
+				parametric = b;
 			} else {
-				marketPenetration =  bestMarketPenetration;
+				parametric = bestMarketPenetration;
 			}
 			
 			return true;
@@ -137,8 +153,8 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 				assignments.forEach((assignment) -> {
 					LocationEntity le = (LocationEntity) assignment.getAroEntity();
 					LocationDemand d = le.getLocationDemand();
-					results[SCALED_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE * marketPenetration;
-					results[EQUIPMENT_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE * marketPenetration;
+					results[SCALED_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;// * marketPenetration;
+					results[EQUIPMENT_COST] += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;// * marketPenetration;
 					results[SCALED_REVENUE] += d.getMonthlyRevenueImpact() * 12;// * marketPenetration;
 					results[TOTAL_LOCATIONS]++;
 					results[RAW_COVERAGE] += d.getRawCoverage();
