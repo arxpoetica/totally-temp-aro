@@ -7,6 +7,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 # Create ARO carriers table
 ${PSQL} -a -f $DIR/create_aro_carriers.sql
 
+# Create ARO county subdivisions
 ${PSQL} -a -f $DIR/create_aro_cousub.sql
 
 # Create aro edges from tiger edges
@@ -24,14 +25,14 @@ ${PSQL} -a -f $DIR/create_aro_wirecenters.sql
 # # Create aro.industries table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_industries.sql
 
-# Create aro.businesses table from infousa.businesses table
-${PSQL} -a -f $DIR/create_aro_businesses.sql
-
 # Create aro.locations table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_locations.sql
 
-# Create aro.cities table
-${PSQL} -a -f $DIR/create_aro_cities.sql
+# Create aro.businesses table from infousa.businesses table
+${PSQL} -a -f $DIR/create_aro_businesses.sql
+
+# Create aro.businesses table from infousa.businesses table
+${PSQL} -a -f $DIR/create_aro_temp_households.sql
 
 # Create aro.aro_household_summary table. This will reference the locations table
 ${PSQL} -a -f $DIR/create_aro_households.sql
