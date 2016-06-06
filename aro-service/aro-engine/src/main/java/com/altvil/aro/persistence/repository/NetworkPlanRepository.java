@@ -63,7 +63,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"business_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	8 as fiber_count,\n" + 
+			"	(case when b.number_of_employees >= 20 then 8 else 1 end)  as fiber_count,\n" + 
 			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
@@ -126,7 +126,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"business_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	8 as fiber_count,\n" + 
+			"	(case when b.number_of_employees >= 20 then 8 else 1 end)  as fiber_count,\n" + 
 			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
