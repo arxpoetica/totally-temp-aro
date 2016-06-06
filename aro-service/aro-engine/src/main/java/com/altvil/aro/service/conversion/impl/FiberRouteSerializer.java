@@ -2,6 +2,7 @@ package com.altvil.aro.service.conversion.impl;
 
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.altvil.aro.model.FiberRoute;
@@ -14,6 +15,7 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
+import com.altvil.utils.func.AggregatorFactory.DoubleSummer;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 
@@ -21,7 +23,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 
 	private NetworkModel networkModel;
 	private Map<GraphEdgeAssignment, NetworkNode> equipmentMapping;
-	private Map<FiberType, Double> fiberLengthMap = new EnumMap<>(FiberType.class);
+	private Map<FiberType, DoubleSummer> fiberLengthMap = new EnumMap<>(FiberType.class);
 
 	public FiberRouteSerializer(long planId, NetworkModel networkModel,
 			Map<GraphEdgeAssignment, NetworkNode> equipmentMapping) {
@@ -99,7 +101,11 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 			NetworkNode equipment) {
 
 		double length = segments.stream().mapToDouble(e -> e.getValue().getLength()).sum() ;
-		fiberLengthMap.put(fiberType, length) ;
+		DoubleSummer ds = fiberLengthMap.get(fiberType) ;
+		if(ds == null ) {
+			fiberLengthMap.put(fiberType, ds=new DoubleSummer()) ;
+		}
+		ds.add(length);
 		
 		FiberRoute fr = new FiberRoute();
 		
@@ -117,7 +123,13 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 	}
 
 	public Map<FiberType, Double> getFiberLengthMap() {
-		return fiberLengthMap;
+		 Map<FiberType, Double> result = new HashMap<>() ;
+		 
+		 fiberLengthMap.entrySet().forEach(e -> {
+			 result.put(e.getKey(), e.getValue().apply()) ;
+		 });
+		 
+		return result ;
 	}
 
 }
