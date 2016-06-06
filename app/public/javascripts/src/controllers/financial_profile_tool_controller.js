@@ -3,6 +3,7 @@
 app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
   // Controller instance variables
   $scope.map_tools = map_tools
+  $scope.aboveWirecenter = false
 
   var charts = {}
   var chartStyles = [
@@ -33,6 +34,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
+
+    $scope.aboveWirecenter = layer.type === 'county_subdivisions'
 
     var feature = event.feature
     if (feature.getGeometry().getType() === 'MultiPolygon') {

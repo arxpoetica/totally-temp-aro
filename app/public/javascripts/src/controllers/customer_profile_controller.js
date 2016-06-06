@@ -18,7 +18,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
 
     geo_json = json
     $scope.type = 'all'
-    $scope.calculate_customer_profile()
+    $scope.calculateCustomerProfile()
     open_modal(title)
   })
 
@@ -36,7 +36,7 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
   }
 
   var canceller = null
-  $scope.calculate_customer_profile = () => {
+  $scope.calculateCustomerProfile = () => {
     $scope.data = {}
     var params = {
       boundary: geo_json && JSON.stringify(geo_json),

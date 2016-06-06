@@ -35,10 +35,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
-    area_layers['county_subdivisions_layer'] = new MapLayer({
+    area_layers['county_subdivisions'] = new MapLayer({
       short_name: 'CS',
       name: 'County Subdivisions',
-      type: 'county_subdivisions_layer',
+      type: 'county_subdivisions',
       api_endpoint: '/county_subdivisions/36',
       highlighteable: true,
       style_options: {
@@ -116,13 +116,13 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     $scope.boundaries = []
     if (!plan) return
 
-    var county_subdivisions = area_layers['county_subdivisions_layer']
+    var county_subdivisions = area_layers['county_subdivisions']
     var census_blocks = area_layers['census_blocks_layer']
 
     if (plan && (county_subdivisions || census_blocks)) {
       $http.get(`/network_plan/${plan.id}/area_data`)
         .success((response) => {
-          area_layers['county_subdivisions_layer'].setApiEndpoint('/county_subdivisions/' + response.statefp)
+          area_layers['county_subdivisions'].setApiEndpoint('/county_subdivisions/' + response.statefp)
           area_layers['census_blocks_layer'].setApiEndpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
         })
     }
