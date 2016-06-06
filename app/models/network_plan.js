@@ -9,7 +9,6 @@ var config = helpers.config
 var database = helpers.database
 var validate = helpers.validate
 var models = require('./')
-var RouteOptimizer = require('./route_optimizer')
 var _ = require('underscore')
 var pync = require('pync')
 
