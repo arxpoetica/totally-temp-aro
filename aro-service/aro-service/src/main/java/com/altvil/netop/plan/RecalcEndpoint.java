@@ -190,7 +190,7 @@ public class RecalcEndpoint {
 		if (selectedRegions != null) {
 			for (SelectedRegion sr : selectedRegions) {
 				switch (sr.getRegionType()) {
-				case WIRE_CENTER:
+				case WIRECENTER:
 					result.add(Integer.parseInt(sr.getId()));
 					break;
 				default:
