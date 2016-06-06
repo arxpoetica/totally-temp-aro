@@ -1,0 +1,45 @@
+<p ng-show="plans.length < 1" class="text-center">
+  No plans stored in the database yet
+</p>
+<div ng-show="plans.length > 0">
+  <form>
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Search Plans by Name" ng-model="search_text" ng-change="loadPlans()">
+      <span class="input-group-addon">
+        <span class="glyphicon glyphicon-search"></span>
+      </span>
+    </div>
+    <hr>
+  </form>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>
+          Name
+          <a href="javascript:void(0)" ng-click="sort_by('name', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="sort_by('name', false)">↑</a>
+        </th>
+        <th>
+          Created at
+          <a href="javascript:void(0)" ng-click="sort_by('created_at', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="sort_by('created_at', false)">↑</a>
+        </th>
+        <th>
+          Updated at
+          <a href="javascript:void(0)" ng-click="sort_by('updated_at', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="sort_by('updated_at', false)">↑</a>
+        </th>
+        <th>Owner</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="plan in plans">
+        <td><a href="javascript:void(0)" ng-click="select_plan(plan)">{{plan.name}}</a></th>
+        <td>{{plan.updated_at | date:'shortDate'}}</th>
+        <td>{{plan.created_at | date:'shortDate'}}</th>
+        <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</th>
+      </tr>
+    </tbody>
+  </table>
+</div>

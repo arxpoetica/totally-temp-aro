@@ -45,11 +45,11 @@
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="show_plans()">Open Network Plan</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showPlans()">Open Network Plan</a>
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manage_network_plans()">Manage Network Plans</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manageNetworkPlans()">Manage Network Plans</a>
               <br>
             </div>
             <% if (user.rol === 'admin') { %>
@@ -71,6 +71,8 @@
       <% include modal_edit_plan.html %>
 
       <% include modal_share_plan.html %>
+
+      <% include modal_plan_combo.html %>
 
       <div class="modal" id="export-plan" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -112,7 +114,7 @@
               <span class="icon-bar"></span>
             </button>
             <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="select_plan(null)"><span class="fa fa-chevron-left"></span></button>
-            <a class="navbar-brand" href="javascript:void(0)">{{plan.name}}</a>
+            <a href="javascript:void(0)" class="navbar-brand" ng-click="showCombo()">{{plan.name}}</a>
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
               <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
@@ -120,11 +122,11 @@
                 <span class="label label-info">{{plan.metadata.total_npv | currency}}</span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
               </span>
-              <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
+              <span data-toggle="modal" ng-click="openCustomerProfile()" style="cursor:pointer" ng-show="show_customer_profile">
                 <span class="fa fa-users"></span> {{ plan.metadata.total_customers | number }} customers covered
               </span>
 
-              <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
+              <span data-toggle="modal" ng-click="openMarketProfile()" style="cursor:pointer" ng-show="show_market_profile">
                 <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
                 <span ng-show="market_profile_current_year.total">
                   <span class="label label-success"><span>Market Size</span>
@@ -182,14 +184,14 @@
                 <ul class="dropdown-menu">
                   <li><a href="javascript:void(0)" ng-click="save_as()" ng-show="plan.owner_id === user_id">Save as…</a></li>
                   <li role="separator" class="divider" ng-show="plan.owner_id === user_id"></li>
-                  <li><a href="javascript:void(0)" ng-click="clear_plan()"
+                  <li><a href="javascript:void(0)" ng-click="clearPlan()"
                     <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Clear plan</a></li>
                   <li><a href="javascript:void(0)" ng-click="delete_plan(plan)"
                     <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Delete plan</a></li>
                   <li role="separator" class="divider" ng-show="plan.owner_id === user_id"></li>
                   <li><a href="javascript:void(0)" ng-click="show_share_plan(plan)">Share…</a></li>
                   <% if (config.route_planning.length > 0) { %>
-                  <li><a href="javascript:void(0)" ng-click="export_kml_name()">Export KML…</a></li>
+                  <li><a href="javascript:void(0)" ng-click="exportKmlName()">Export KML…</a></li>
                   <% } %>
                 </ul>
               </li>

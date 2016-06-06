@@ -17,10 +17,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.market_size_scale_s = 'B'
   }
 
-  $('#new-plan select').select2({
+  $('#new-plan select, #plan-combo select').select2({
     placeholder: config.ui.default_form_values.create_plan.select_area_text
   }).on('change', () => {
-    $scope.look_up_area()
+    $scope.lookUpArea()
   })
 
   $scope.shared_plan
@@ -34,10 +34,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.show_customer_profile = config.ui.top_bar_tools.indexOf('customer_profile') >= 0
   $scope.show_financial_profile = config.ui.top_bar_tools.indexOf('financial_profile') >= 0
 
-  var new_plan_map
+  var newPlanMap
 
   function initMap () {
-    if (new_plan_map) return
+    if (newPlanMap) return
 
     var styles = [{
       featureType: 'poi',
@@ -45,7 +45,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       stylers: [ { visibility: 'off' } ]
     }]
 
-    new_plan_map = new google.maps.Map(document.getElementById('new_plan_map_canvas'), {
+    newPlanMap = new google.maps.Map(document.getElementById('newPlanMap_canvas'), {
       zoom: 12,
       center: {lat: -34.397, lng: 150.644},
       styles: styles,
@@ -54,8 +54,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.look_up_area = function () {
-    $scope.new_plan_area_name = $('#new-plan select').select2('val')
+  $scope.lookUpArea = function () {
+    $scope.new_plan_area_name = $('#new-plan select').select2('val') || $('#plan-combo select').select2('val')
     var address = encodeURIComponent($scope.new_plan_area_name)
     $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address)
       .success((response) => {
@@ -64,12 +64,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         if (!result) return
         $scope.new_plan_area_name = result.formatted_address
         // use centroid...
-        new_plan_map.setCenter(result.geometry.location)
+        newPlanMap && newPlanMap.setCenter(result.geometry.location)
         // ...or use bounds
         // var bounds = new google.maps.LatLngBounds()
         // bounds.extend(new google.maps.LatLng(result.geometry.bounds.northeast.lat, result.geometry.bounds.northeast.lng))
         // bounds.extend(new google.maps.LatLng(result.geometry.bounds.southwest.lat, result.geometry.bounds.southwest.lng))
-        // new_plan_map.fitBounds(bounds)
+        // newPlanMap.fitBounds(bounds)
         $scope.new_plan_area_centroid = result.geometry.location
         $scope.new_plan_area_bounds = result.geometry.viewport
       })
@@ -80,6 +80,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     state.loadPlan(plan)
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
+    $('#plan-combo').modal('hide')
     var centroid = plan && plan.area_centroid
     if (centroid) {
       try {
@@ -139,12 +140,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.open_market_profile = () => {
+  $scope.openMarketProfile = () => {
     $rootScope.$broadcast('market_profile_selected', $scope.market_profile)
     tracker.track('Global market profile')
   }
 
-  $scope.open_customer_profile = () => {
+  $scope.openCustomerProfile = () => {
     $rootScope.$broadcast('customer_profile_selected', $scope.market_profile)
     tracker.track('Global customer profile')
   }
@@ -168,12 +169,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $rootScope.$broadcast('plan_selected', null)
       }
       $http.post('/network_plan/' + plan.id + '/delete').success((response) => {
-        $scope.load_plans()
+        $scope.loadPlans()
       })
     })
   }
 
-  $scope.load_plans = (callback) => {
+  $scope.loadPlans = (callback) => {
     var options = {
       url: '/network_plan/find_all',
       method: 'GET',
@@ -191,7 +192,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   var path = $location.path()
   if (path.indexOf('/plan/') === 0) {
     var plan_id = path.substring('/plan/'.length)
-    $scope.load_plans(() => {
+    $scope.loadPlans(() => {
       var plan = _.findWhere($scope.plans, { id: plan_id })
       if (plan) {
         $scope.select_plan(plan)
@@ -199,15 +200,22 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.show_plans = () => {
-    $scope.load_plans(() => {
+  $scope.showPlans = () => {
+    $scope.loadPlans(() => {
       $('#select-plan').modal('show')
       tracker.track('Open Analysis')
     })
   }
 
-  $scope.manage_network_plans = () => {
-    $scope.load_plans(() => {
+  $scope.showCombo = () => {
+    $scope.loadPlans(() => {
+      $('#plan-combo').modal('show')
+      tracker.track('Open Analysis')
+    })
+  }
+
+  $scope.manageNetworkPlans = () => {
+    $scope.loadPlans(() => {
       $('#manage-network-plans').modal('show')
       tracker.track('Manage Analyses')
     })
@@ -231,7 +239,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.new_plan_name = ''
   }
 
-  $scope.save_new_plan = () => {
+  $scope.saveNewPlan = () => {
     var params = {
       name: $scope.new_plan_name,
       area: {
@@ -243,7 +251,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/network_plan/create', params).success((response) => {
       $scope.select_plan(response)
       $('#new-plan').modal('hide')
-      $scope.load_plans()
+      $('#plan-combo').modal('hide')
+      $scope.loadPlans()
     })
   }
 
@@ -251,7 +260,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.new_plan_name = 'Untitled Analysis'
     $scope.new_plan_area_name = ''
     $('#new-plan select').select2('val', '')
-    new_plan_map.setCenter({lat: -34.397, lng: 150.644})
+    newPlanMap.setCenter({lat: -34.397, lng: 150.644})
   })
 
   $scope.save_as = () => {
@@ -266,7 +275,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.clear_plan = () => {
+  $scope.clearPlan = () => {
     swal({
       title: 'Are you sure?',
       text: 'You will not be able to recover the deleted data!',
@@ -282,7 +291,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.export_kml_name = () => {
+  $scope.exportKmlName = () => {
     $('#export-plan').modal('show')
   }
 
