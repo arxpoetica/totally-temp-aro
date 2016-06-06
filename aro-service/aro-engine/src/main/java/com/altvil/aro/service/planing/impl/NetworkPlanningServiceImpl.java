@@ -52,6 +52,7 @@ import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.PricingModel;
+import com.altvil.aro.service.plan.BasicFinanceEstimator;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.PlanService;
@@ -69,6 +70,8 @@ import com.altvil.utils.func.Aggregator;
 @Service("networkPlanningService")
 public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	private static final Logger	  log = LoggerFactory.getLogger(NetworkPlanningServiceImpl.class.getName());
+	public static final ThreadLocal<BasicFinanceEstimator> FINANCE_ESTIMATOR = new ThreadLocal<>();
+
 
 	private boolean useIgnite = false ;
 	
@@ -365,8 +368,6 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			fiberRouteRepository = ctx.getBean(FiberRouteRepository.class) ;
 		}
 
-
-
 		@Override
 		public WirecenterNetworkPlan call() throws Exception {
 			NetworkData networkData = networkService.getNetworkData(fiberPlanStrategy);
@@ -375,6 +376,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					.getClosestFirstSurfaceBuilder();
 			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges = fiberPlanStrategy.getSelectedEdges(networkData);
 
+			// Reset estimator as threads may be reused.
+			FINANCE_ESTIMATOR.set(null);
 			Optional<CompositeNetworkModel> model = planService.computeNetworkModel(networkData,
 					closestFirstSurfaceBuilder, selectedEdges, constraints, globalConstraint);
 			if (model.isPresent()) {

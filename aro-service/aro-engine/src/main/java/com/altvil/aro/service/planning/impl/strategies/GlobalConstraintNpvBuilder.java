@@ -1,19 +1,15 @@
 package com.altvil.aro.service.planning.impl.strategies;
 
-import java.util.Collection;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.altvil.annotation.FiberPlanStrategy;
-import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.entity.LocationEntity;
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.plan.BasicFinanceEstimator;
 import com.altvil.aro.service.plan.GlobalConstraint;
+import com.altvil.aro.service.plan.impl.PlanServiceImpl;
+import com.altvil.aro.service.planing.impl.NetworkPlanningServiceImpl;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.GlobalConstraintBuilder;
 import com.altvil.aro.service.planning.NpvFiberPlan;
@@ -21,80 +17,6 @@ import com.altvil.enumerations.FiberPlanAlgorithm;
 
 @FiberPlanStrategy(type = GlobalConstraintBuilder.class, algorithms = FiberPlanAlgorithm.NPV)
 public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
-	private static class BasicFinanceEstimator {
-		private double cost;
-
-		private double equipmentCost = 0.0;
-
-		private double fiberCost;
-
-		private double length;
-
-		private int	   numLocations;
-
-		private double rawCoverage;
-
-		private double revenue;
-
-		private BasicFinanceEstimator(DAGModel<GeoSegment> model) {
-			financials(model.getEdges());
-		}
-
-		private void financials(AroEdge<GeoSegment> edge) {
-			GeoSegment segment = edge.getValue();
-
-			length += edge.getWeight();
-			fiberCost += edge.getWeight() * FIBER_PER_M;
-
-			if (segment != null) {
-				Collection<GraphEdgeAssignment> assignments = segment.getGeoSegmentAssignments();
-
-				assignments.forEach((assignment) -> {
-					LocationEntity le = (LocationEntity) assignment.getAroEntity();
-					LocationDemand d = le.getLocationDemand();
-					equipmentCost += d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
-					revenue += d.getMonthlyRevenueImpact() * 12;
-					numLocations++;
-					rawCoverage += d.getRawCoverage();
-				});
-			}
-
-			cost = fiberCost + equipmentCost;
-		}
-
-		private void financials(Set<AroEdge<GeoSegment>> edges) {
-			edges.stream().forEach((e) -> financials(e));
-		}
-
-		public double getCost() {
-			return cost;
-		}
-
-		public double getEquipmentCost() {
-			return equipmentCost;
-		}
-
-		public double getFiberCost() {
-			return fiberCost;
-		}
-
-		public double getLength() {
-			return length;
-		}
-
-		public int getNumLocations() {
-			return numLocations;
-		}
-
-		public double getRawCoverage() {
-			return rawCoverage;
-		}
-
-		public double getRevenue() {
-			return revenue;
-		}
-	}
-
 	private class NpvBudgetConstraint implements GlobalConstraint {
 		private double		 bestNpv				  = Double.NEGATIVE_INFINITY;
 		private double		 bestNpvParametric		  = 0;
@@ -161,8 +83,10 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 				maxSteps = searchPlan.numProbs;
 				parametric -= increment;
 			} else if (bestNpv > Double.NEGATIVE_INFINITY && bestNpvParametric == parametric) {
+				NetworkPlanningServiceImpl.FINANCE_ESTIMATOR.set(estimator);
 				return false;
 			} else if (bestOverBudget > Double.NEGATIVE_INFINITY && bestOverBudgetParametric == parametric) {
+				NetworkPlanningServiceImpl.FINANCE_ESTIMATOR.set(estimator);
 				return false;
 			} else if (bestNpv > Double.NEGATIVE_INFINITY) {
 				parametric = bestNpvParametric;
@@ -188,10 +112,6 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 			this.lowerCutoff = lowerCutoff;
 		}
 	}
-
-	public static final double		  EQUIPMENT_PER_COVERAGE = 76.5;
-
-	public static final double		  FIBER_PER_M			 = 17.32;
 
 	private static final SearchPlan[] SEARCH_PLAN			 = { new SearchPlan(100, 0.3), new SearchPlan(200, 0.2),
 			new SearchPlan(600, 0.0) };
