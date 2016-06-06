@@ -637,17 +637,17 @@
               <form>
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" ng-click=""> Households
+                    <input type="checkbox" ng-model="coverHouseholds"> Households
                   </label>
                 </div>
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" ng-click=""> Businesses
+                    <input type="checkbox" ng-model="coverBusinesses"> Businesses
                   </label>
                 </div>
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" ng-click=""> Towers
+                    <input type="checkbox" ng-model="coverTowers"> Towers
                   </label>
                 </div>
               </form>
@@ -1127,23 +1127,15 @@
             </div>
             <div ng-show="wizardStatus === 'progress'">
               <p><strong>Running Optimization...</strong></p>
-              <div class="row">
+              <div class="row" ng-repeat="geography in selectedGeographies">
                 <div class="col-md-4">
-                  ABC123
+                  {{geography.name}}
                 </div>
                 <div class="col-md-8">
                   <div class="progress">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md-4">
-                  DEF456
-                </div>
-                <div class="col-md-8">
-                  <div class="progress">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 20%;"></div>
+                    <div class="progress-bar"
+                      ng-class="{'active progress-bar-striped': calculating}"
+                      role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
                   </div>
                 </div>
               </div>

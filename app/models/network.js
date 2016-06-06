@@ -5,7 +5,8 @@
 var helpers = require('../helpers')
 var database = helpers.database
 var _ = require('underscore')
-var request = require('request')
+var pify = require('pify')
+var request = pify(require('request'), { multiArgs: true })
 var config = helpers.config
 var models = require('./')
 var pync = require('pync')
@@ -57,7 +58,6 @@ module.exports = class Network {
         var sql = `
           SELECT
             n.id, ST_AsGeoJSON(geom)::json AS geom, t.name AS name,
-            '/images/map_icons/${process.env.ARO_CLIENT}/' || t.name || '.png' AS icon,
             plan_id IS NOT NULL AS draggable,
             name <> 'central_office' AS unselectable
           FROM client.network_nodes n
@@ -173,32 +173,50 @@ module.exports = class Network {
       businesses: 'Business',
       towers: 'CellTower'
     }
-    return new Promise((resolve, reject) => {
-      var body = {
-        planId: plan_id,
-        algorithm: options.algorithm,
-        locationTypes: options.locationTypes.map((key) => locationTypes[key])
-      }
-      var req = {
-        method: 'POST',
-        url: config.aro_service_url + '/rest/recalc/masterplan',
-        json: true,
-        body: body
-      }
+    var body = {
+      planId: plan_id,
+      algorithm: options.algorithm,
+      locationTypes: options.locationTypes.map((key) => locationTypes[key])
+    }
+    var req = {
+      method: 'POST',
+      url: config.aro_service_url + '/rest/recalc/masterplan',
+      json: true,
+      body: body
+    }
+    return Promise.resolve().then(() => {
       if (options.algorithm === 'NPV') {
         var financialConstraints = body.financialConstraints = { years: 10 }
         if (options.budget) financialConstraints.budget = options.budget
         if (options.discountRate) financialConstraints.discountRate = options.discountRate
       }
-      console.log('sending request to aro-service', JSON.stringify(req, null, 2))
-      request(req, (err, res, body) => {
-        if (err) return reject(err)
-        // if (err) return resolve()
+      if (options.geographies) {
+        body.selectedRegions = []
+        var promises = options.geographies.map((geography) => {
+          var n = geography.id.indexOf(':')
+          var type = geography.id.substring(0, n)
+          var id = geography.id.substring(n + 1)
+          return database.findValue('SELECT ST_AsText(ST_GeomFromGeoJSON($1)) AS wkt', [JSON.stringify(geography.geog)], 'wkt')
+            .then((wkt) => {
+              body.selectedRegions.push({
+                regionType: type.toUpperCase(),
+                id: id,
+                wkt: wkt
+              })
+            })
+        })
+        return Promise.all(promises)
+      }
+    })
+    .then(() => {
+      console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
+      return request(req).then((result) => {
+        var res = result[0]
+        var body = result[1]
         console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
         if (res.statusCode && res.statusCode >= 400) {
-          return reject(new Error(`ARO-service returned status code ${res.statusCode}`))
+          return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
         }
-        resolve()
       })
     })
   }

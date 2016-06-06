@@ -416,30 +416,3 @@ module.exports = class NetworkPlan {
   }
 
 }
-
-// if (module.id === require.main.id) {
-//   var pify = require('pify')
-//   var request = pify(require('request'), { multiArgs: true })
-//   var options = {
-//     url: config.aro_service_url + '/rest/optimize/masterplan',
-//     method: 'POST',
-//     json: true,
-//     body: {
-//       optimizationType: 'NPV',
-//       planId: String(352),
-//       financialConstraints: {
-//         // budget: 10000000,
-//         discountRate: String(0.2),
-//         years: String(5)
-//       }
-//     }
-//   }
-//   console.log('options', options)
-//   request(options).then((result) => {
-//     let [, body] = result
-//     console.log('body', body)
-//   })
-//   .catch((err) => {
-//     console.error(err)
-//   })
-// }

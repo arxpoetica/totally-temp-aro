@@ -53,6 +53,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   }
 
   var declarativeStyles = (feature, styles) => {
+    if (styles.icon) return
     var totalBusinesses = feature.getProperty('total_businesses') || 0
     var totalHouseholds = feature.getProperty('total_households') || 0
     var selected = feature.getProperty('selected') ? 'selected' : 'default'

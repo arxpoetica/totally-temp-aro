@@ -15,14 +15,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     short_name: 'NN',
     style_options: {
       normal: {
-        icon: `/images/map_icons/${config.ARO_CLIENT}/central_office.png`,
         visible: true
       },
       selected: {
-        icon: `/images/map_icons/${config.ARO_CLIENT}/central_office_selected.png`,
         visible: true
       }
+    },
+    declarativeStyles: (feature, styles) => {
+      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${feature.getProperty('name')}.png`
     }
+
   })
   network_nodes_layer.hide_in_ui = true
 

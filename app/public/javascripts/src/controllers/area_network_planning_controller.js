@@ -8,6 +8,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.wizardStatus = $scope.allStatus[0]
   $scope.advancedSettings = false
   $scope.selectedGeographies = []
+  $scope.calculating = false
+
+  $scope.coverHouseholds = true
+  $scope.coverBusinesses = true
+  $scope.coverTowers = true
 
   var selectionLayer = new google.maps.Data()
   $(document).ready(() => {
@@ -18,6 +23,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     var index = $scope.allStatus.indexOf($scope.wizardStatus)
     if (index + 1 < $scope.allStatus.length) {
       $scope.wizardStatus = $scope.allStatus[index + 1]
+      if ($scope.wizardStatus === 'progress') {
+        calculate()
+      }
     }
   }
 
@@ -33,6 +41,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   }
 
   $scope.cancel = () => {
+    if (!$scope.calculating) return $scope.back()
     swal({
       title: 'Are you sure?',
       text: 'Are you sure you want to cancel?',
@@ -66,7 +75,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (feature.getGeometry().getType() === 'MultiPolygon') {
       feature.toGeoJson((obj) => {
         selectGeography({
-          id: feature.getProperty('id'),
+          id: layer.type + ':' + feature.getProperty('id'),
           name: name,
           geog: obj.geometry
         })
@@ -86,7 +95,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         id: geography.id
       }
     })
-    console.log('features', geography.features.length)
   }
 
   var search = $('#area-network-planning-search')
@@ -128,4 +136,39 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     search.select2('val', '')
     $scope.$apply()
   })
+
+  $scope.plan = null
+  $rootScope.$on('plan_selected', (e, plan) => {
+    $scope.plan = plan
+  })
+
+  function calculate () {
+    var locationTypes = []
+    if ($scope.coverHouseholds) locationTypes.push('households')
+    if ($scope.coverBusinesses) locationTypes.push('businesses')
+    if ($scope.coverTowers) locationTypes.push('towers')
+    var changes = {
+      locationTypes: locationTypes,
+      geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id }))
+    }
+
+    var url = '/network_plan/' + $scope.plan.id + '/edit'
+    var config = {
+      url: url,
+      method: 'post',
+      saving_plan: true,
+      data: changes
+    }
+    $scope.calculating = true
+    $http(config)
+      .success((response) => {
+        $scope.calculating = false
+        $rootScope.$broadcast('route_planning_changed', response)
+        $scope.wizardStatus = $scope.allStatus[0]
+        $scope.selectedGeographies = []
+      })
+      .error(() => {
+        $scope.calculating = false
+      })
+  }
 }])
