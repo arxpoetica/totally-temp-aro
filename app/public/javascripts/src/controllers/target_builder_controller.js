@@ -24,6 +24,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (tool === 'target_builder') {
       $scope.setSelectedTool('single')
+      drawingManager.setMap(map_tools.is_visible('target_builder') ? map : null)
     }
   })
 
