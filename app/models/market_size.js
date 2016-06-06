@@ -303,23 +303,13 @@ module.exports = class MarketSize {
 
         var params = []
         var sql = this._prepareMarketSizeQuery(plan_id, type, options, params)
-        params.push(plan_id)
-
         sql += `
           SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM biz
           JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
           JOIN carriers c ON lc.carrier_id = c.id
           JOIN locations l
             ON l.id = lc.location_id
-          JOIN cities ct
-            ON ct.buffer_geog && l.geog
-            AND ct.id = (
-              SELECT cities.id
-              FROM cities
-              JOIN client.plan r ON r.id = $${params.length}
-              ORDER BY r.area_centroid <#> cities.buffer_geog::geometry
-              LIMIT 1
-            )
+            ${database.intersects(options.viewport, 'l.geom', 'WHERE')}
             GROUP BY c.id ORDER BY c.name
         `
         return database.query(sql, params)
