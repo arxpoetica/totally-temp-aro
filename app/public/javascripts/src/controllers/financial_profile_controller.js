@@ -35,6 +35,6 @@ app.controller('financial_profile_controller', ['$scope', '$rootScope', ($scope,
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }
     var ctx = document.getElementById('financial-profile-chart').getContext('2d')
-    chart = new Chart(ctx).Line(data, options)
+    chart = new Chart(ctx).Bar(data, options)
   })
 }])
