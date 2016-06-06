@@ -138,11 +138,19 @@ module.exports = class NetworkPlan {
 
         return RouteOptimizer.calculateRevenueAndNPV(plan_id, plan.fiberCost || 0)
           .then((calculation) => {
-            // output.metadata.revenue = calculation.revenue
-            output.metadata.revenue = plan.total_revenue || 0
-            output.metadata.npv = calculation.npv
-            // output.metadata.total_npv = calculation.npv.reduce((total, item) => total + item.value, 0)
+            plan.total_revenue = plan.total_revenue || 0
+            plan.total_cost = plan.total_cost || 0
+            output.metadata.revenue = plan.total_revenue
+            var year = new Date().getFullYear()
             output.metadata.total_npv = plan.npv || 0
+            output.metadata.npv = [
+              { year: year--, value: plan.total_revenue || 0 - plan.total_cost },
+              { year: year--, value: plan.total_revenue },
+              { year: year--, value: plan.total_revenue },
+              { year: year--, value: plan.total_revenue },
+              { year: year--, value: plan.total_revenue }
+            ].reverse()
+            console.log('output.metadata.npv', output.metadata.npv)
             // return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
             return database.query('SELECT * FROM client.network_node_types')
           })
