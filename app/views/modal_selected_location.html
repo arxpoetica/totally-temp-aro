@@ -103,11 +103,20 @@
           </div>
           <div role="tabpanel" class="tab-pane active" id="selected_location_customer_profile">
             <div class="row" style="margin-top: 30px">
-              <div class="col-md-8">
-                <canvas id="location_customer_profile_chart" style="width:100%; height:200px"></canvas>
+              <div class="col-md-4">
+                <p class="text-center">Businesses</p>
+                <canvas id="location_customer_profile_chart_businesses" style="width:100%; height:200px"></canvas>
+                <div id="location_customer_profile_chart_legend_businesses"></div>
               </div>
               <div class="col-md-4">
-                <div id="location_customer_profile_chart_legend"></div>
+                <p class="text-center">Households</p>
+                <canvas id="location_customer_profile_chart_households" style="width:100%; height:200px"></canvas>
+                <div id="location_customer_profile_chart_legend_households"></div>
+              </div>
+              <div class="col-md-4">
+                <p class="text-center">Towers</p>
+                <canvas id="location_customer_profile_chart_towers" style="width:100%; height:200px"></canvas>
+                <div id="location_customer_profile_chart_legend_towers"></div>
               </div>
             </div>
           </div>

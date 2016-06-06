@@ -23,21 +23,7 @@ INSERT INTO client.network_nodes (node_type_id, geog, geom)
 		ST_Centroid(wirecenters.geom) as geom
 		
 	FROM
-		aro.wirecenters
-	WHERE
-	  -- NYC Upper East Side (URBAN)
-    wirecenters.wirecenter = 'NYCMNY79'
-    OR
-    -- Buffalo, New York (URBAN)
-    wirecenters.wirecenter = 'BFLONYEL'
-    OR
-    wirecenters.wirecenter = 'BFLONYFR'
-    OR
-    -- Orchard Park, NY (SUBURBAN)
-    wirecenters.wirecenter = 'ORPKNYST'
-    OR
-    -- North Collins, NY (RURAL)
-    wirecenters.wirecenter = 'NCLNNYNO';
+		aro.wirecenters;
 
 -- Round the CO coordinates so that they are near, but not on, the centroid
 --update client.network_nodes set geog = st_setsrid(st_makepoint(round(st_x(geog::geometry)::numeric, 2), round(st_y(geog::geometry)::numeric, 2)), st_srid(geog)) where plan_id is null and node_type_id = 1;

@@ -102,11 +102,11 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 
 		double length = segments.stream().mapToDouble(e -> e.getValue().getLength()).sum() ;
 		DoubleSummer ds = fiberLengthMap.get(fiberType) ;
-		if( ds == null ) {
-			fiberLengthMap.put(fiberType, ds = new DoubleSummer()) ;
+
+		if(ds == null ) {
+			fiberLengthMap.put(fiberType, ds=new DoubleSummer()) ;
 		}
-		
-		ds.add(length) ;
+		ds.add(length);
 		
 		FiberRoute fr = new FiberRoute();
 		
@@ -124,11 +124,13 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 	}
 
 	public Map<FiberType, Double> getFiberLengthMap() {
-		Map<FiberType, Double> result = new HashMap<>() ;
-		fiberLengthMap.entrySet().forEach(e -> {
-			result.put(e.getKey(), e.getValue().apply()) ;
-		});
-		return result;
+		 Map<FiberType, Double> result = new HashMap<>() ;
+		 
+		 fiberLengthMap.entrySet().forEach(e -> {
+			 result.put(e.getKey(), e.getValue().apply()) ;
+		 });
+		 
+		return result ;
 	}
 
 }
