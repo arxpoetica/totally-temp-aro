@@ -115,7 +115,7 @@ module.exports = class NetworkPlan {
         plan = _plan
         output.metadata.costs.push({
           name: 'Fiber Capex',
-          value: plan.fiberCost || 0
+          value: plan.fiber_cost || 0
         })
 
         if (config.route_planning.length === 0) return
@@ -136,7 +136,7 @@ module.exports = class NetworkPlan {
       .then(() => {
         if (config.route_planning.length === 0) return output
 
-        return RouteOptimizer.calculateRevenueAndNPV(plan_id, plan.fiberCost || 0)
+        return RouteOptimizer.calculateRevenueAndNPV(plan_id, plan.fiber_cost || 0)
           .then((calculation) => {
             plan.total_revenue = plan.total_revenue || 0
             plan.total_cost = plan.total_cost || 0
@@ -144,12 +144,12 @@ module.exports = class NetworkPlan {
             var year = new Date().getFullYear()
             output.metadata.total_npv = plan.npv || 0
             output.metadata.npv = [
-              { year: year--, value: plan.total_revenue || 0 - plan.total_cost },
-              { year: year--, value: plan.total_revenue },
-              { year: year--, value: plan.total_revenue },
-              { year: year--, value: plan.total_revenue },
-              { year: year--, value: plan.total_revenue }
-            ].reverse()
+              { year: year--, value: plan.total_revenue - plan.total_cost },
+              { year: year++, value: plan.total_revenue },
+              { year: year++, value: plan.total_revenue },
+              { year: year++, value: plan.total_revenue },
+              { year: year++, value: plan.total_revenue }
+            ]
             console.log('output.metadata.npv', output.metadata.npv)
             // return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
             return database.query('SELECT * FROM client.network_node_types')
