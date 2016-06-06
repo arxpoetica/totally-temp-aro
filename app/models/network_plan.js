@@ -137,7 +137,7 @@ module.exports = class NetworkPlan {
         var year = new Date().getFullYear()
         output.metadata.total_npv = plan.npv || 0
         output.metadata.npv = [
-          { year: year--, value: plan.total_revenue - plan.total_cost },
+          { year: year++, value: plan.total_revenue - plan.total_cost },
           { year: year++, value: plan.total_revenue },
           { year: year++, value: plan.total_revenue },
           { year: year++, value: plan.total_revenue },
