@@ -150,13 +150,14 @@ module.exports = class NetworkPlan {
             var itemized = equipmentNodeTypes.map((equipmentNodeType) => {
               var name = equipmentNodeType.name
               var col = name.split('_').map((s) => s.substring(0, 1)).join('') + '_cost'
+              if (!plan[col]) return null
               return {
                 key: name,
                 name: equipmentNodeType.description,
                 count: 1,
                 value: plan[col] || 0
               }
-            })
+            }).filter((i) => i)
             output.metadata.costs.push({
               name: 'Equipment Capex',
               value: plan.equipment_cost,
