@@ -549,7 +549,7 @@ module.exports = class MarketSize {
       ))
   }
 
-  static market_size_for_location (location_id, filters) {
+  static marketSizeForLocation (location_id, filters) {
     var output = {}
 
     return Promise.resolve()
@@ -636,7 +636,7 @@ module.exports = class MarketSize {
       })
   }
 
-  static market_size_for_business (business_id, options) {
+  static marketSizeForBusiness (business_id, options) {
     var output = {}
     var filters = options.filters
 

@@ -30,7 +30,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
     geo_json = json
     $scope.market_type = 'boundary'
-    $scope.calculate_market_size()
+    $scope.calculateMarketSize()
     $('#market-size .modal-title').text('Market profile · ' + title)
     $('#market-size').modal('show')
   })
@@ -49,7 +49,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       $scope.share = market_profile.share
       destroy_charts()
     } else {
-      $scope.calculate_market_size()
+      $scope.calculateMarketSize()
     }
     $('#market-size').modal('show')
   })
@@ -66,7 +66,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   })
 
   var canceller = null
-  $scope.calculate_market_size = () => {
+  $scope.calculateMarketSize = () => {
     $scope.market_size = null
     $scope.fair_share = null
     var bounds = map.getBounds()
