@@ -101,17 +101,23 @@ module.exports = class NetworkPlan {
   }
 
   static findPlan (plan_id, metadata_only) {
-    var cost_per_meter = 200
+    // var cost_per_meter = 200
     var output = {
       'feature_collection': {
         'type': 'FeatureCollection'
       },
       'metadata': { costs: [] }
     }
-    var fiber_cost
+    var plan
 
-    return Promise.resolve()
-      .then(() => {
+    return database.findOne('SELECT * FROM client.plan WHERE id=$1', [plan_id])
+      .then((_plan) => {
+        plan = _plan
+        output.metadata.costs.push({
+          name: 'Fiber Capex',
+          value: plan.fiberCost || 0
+        })
+
         if (config.route_planning.length === 0) return
         return Promise.resolve()
           .then(() => NetworkPlan.findEdges(plan_id))
@@ -120,45 +126,43 @@ module.exports = class NetworkPlan {
               'type': 'Feature',
               'geometry': edge.geom
             }))
-
-            fiber_cost = RouteOptimizer.calculateFiberCost(edges, cost_per_meter)
-            output.metadata.costs.push({
-              name: 'Fiber Capex',
-              value: fiber_cost
-            })
-            // return RouteOptimizer.calculateLocationsCost(plan_id)
           })
-          // .then((locations_cost) => {
-          //   Ignore by now
-          //   output.metadata.costs.push({
-          //     name: 'Locations cost',
-          //     value: locations_cost
-          //   })
-          // })
       })
-      .then(() => (
-        config.route_planning.length > 0
-          ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
-          : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
-      ))
+      // .then(() => (
+      //   config.route_planning.length > 0
+      //     ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
+      //     : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
+      // ))
       .then(() => {
         if (config.route_planning.length === 0) return output
 
-        return RouteOptimizer.calculateRevenueAndNPV(plan_id, fiber_cost)
+        return RouteOptimizer.calculateRevenueAndNPV(plan_id, plan.fiberCost || 0)
           .then((calculation) => {
-            output.metadata.revenue = calculation.revenue
+            // output.metadata.revenue = calculation.revenue
+            output.metadata.revenue = plan.total_revenue || 0
             output.metadata.npv = calculation.npv
-            output.metadata.total_npv = calculation.npv.reduce((total, item) => total + item.value, 0)
-            return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
+            // output.metadata.total_npv = calculation.npv.reduce((total, item) => total + item.value, 0)
+            output.metadata.total_npv = plan.npv || 0
+            // return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
+            return database.query('SELECT * FROM client.network_node_types')
           })
-          .then((equipment_nodes_cost) => {
+          .then((equipmentNodeTypes) => {
+            var itemized = equipmentNodeTypes.map((equipmentNodeType) => {
+              var name = equipmentNodeType.name
+              var col = name.split('_').map((s) => s.substring(0, 1)).join('') + '_cost'
+              return {
+                key: name,
+                name: equipmentNodeType.description,
+                count: 1,
+                value: plan[col] || 0
+              }
+            })
             output.metadata.costs.push({
               name: 'Equipment Capex',
-              value: equipment_nodes_cost.total,
-              itemized: equipment_nodes_cost.equipment_node_types
+              value: plan.equipment_cost,
+              itemized: itemized
             })
-            output.metadata.total_cost = output.metadata.costs
-              .reduce((total, cost) => total + cost.value, 0)
+            output.metadata.total_cost = plan.total_cost || 0
 
             output.metadata.profit = output.metadata.revenue - output.metadata.total_cost
             if (metadata_only) delete output.feature_collection
