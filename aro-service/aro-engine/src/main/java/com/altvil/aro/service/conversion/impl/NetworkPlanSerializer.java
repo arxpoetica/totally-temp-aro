@@ -12,7 +12,7 @@ public class NetworkPlanSerializer<T> {
 		this.planId = planId;
 	}
 
-	public T serialize(CompositeNetworkModel compositeModel,
+	public PlanModifications<T> serialize(CompositeNetworkModel compositeModel,
 			PlanModifications<T> planMods) {
 
 		compositeModel
@@ -37,7 +37,7 @@ public class NetworkPlanSerializer<T> {
 
 						});
 
-		return planMods.commit();
+		return planMods ;
 
 	}
 

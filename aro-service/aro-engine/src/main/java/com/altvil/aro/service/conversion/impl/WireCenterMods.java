@@ -2,18 +2,17 @@ package com.altvil.aro.service.conversion.impl;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.service.conversion.PlanModifications;
-import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
-import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.plan.BasicFinanceEstimator;
 import com.altvil.aro.service.planing.DefaultWirecenterNetworkPlan;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
@@ -21,6 +20,11 @@ import com.altvil.aro.service.planing.impl.NetworkPlanningServiceImpl;
 
 public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> {
 
+
+	private static final Logger log = LoggerFactory
+			.getLogger(WireCenterMods.class.getName());
+
+	
 	private long planId;
 
 	private List<NetworkNode> networkNodes = new ArrayList<>();
@@ -68,6 +72,9 @@ public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> 
 		LocationDemand ld = locationDemand;
 		Map<FiberType, Double> flm = fiberLengthMap;
 		
+		log.info("Real FEEEDER " + fiberLengthMap.get(FiberType.FEEDER));
+		log.info("Real DIST " + fiberLengthMap.get(FiberType.DISTRIBUTION));
+		
 		BasicFinanceEstimator estimator = NetworkPlanningServiceImpl.FINANCE_ESTIMATOR.get();
 		if (estimator != null) {
 			flm = new EnumMap<>(FiberType.class);
@@ -76,6 +83,7 @@ public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> 
 			}
 			//Must be either DISTRIBUTION or FEEDER for SimpleNetworkFinancials to sum it.
 			flm.put(FiberType.DISTRIBUTION, estimator.getLength());
+			log.info("HACKED DIST " +  estimator.getLength());
 		}
 
 		return new DefaultWirecenterNetworkPlan(planId, networkNodes, fiberRoutes, ld, flm);
