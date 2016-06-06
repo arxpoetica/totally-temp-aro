@@ -128,55 +128,45 @@ module.exports = class NetworkPlan {
             }))
           })
       })
-      // .then(() => (
-      //   config.route_planning.length > 0
-      //     ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
-      //     : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
-      // ))
       .then(() => {
         if (config.route_planning.length === 0) return output
 
-        return RouteOptimizer.calculateRevenueAndNPV(plan_id, plan.fiber_cost || 0)
-          .then((calculation) => {
-            plan.total_revenue = plan.total_revenue || 0
-            plan.total_cost = plan.total_cost || 0
-            output.metadata.revenue = plan.total_revenue
-            var year = new Date().getFullYear()
-            output.metadata.total_npv = plan.npv || 0
-            output.metadata.npv = [
-              { year: year--, value: plan.total_revenue - plan.total_cost },
-              { year: year++, value: plan.total_revenue },
-              { year: year++, value: plan.total_revenue },
-              { year: year++, value: plan.total_revenue },
-              { year: year++, value: plan.total_revenue }
-            ]
-            console.log('output.metadata.npv', output.metadata.npv)
-            // return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
-            return database.query('SELECT * FROM client.network_node_types')
-          })
-          .then((equipmentNodeTypes) => {
-            var itemized = equipmentNodeTypes.map((equipmentNodeType) => {
-              var name = equipmentNodeType.name
-              var col = name.split('_').map((s) => s.substring(0, 1)).join('') + '_cost'
-              if (!plan[col]) return null
-              return {
-                key: name,
-                name: equipmentNodeType.description,
-                count: 1,
-                value: plan[col] || 0
-              }
-            }).filter((i) => i)
-            output.metadata.costs.push({
-              name: 'Equipment Capex',
-              value: plan.equipment_cost,
-              itemized: itemized
-            })
-            output.metadata.total_cost = plan.total_cost || 0
+        plan.total_revenue = plan.total_revenue || 0
+        plan.total_cost = plan.total_cost || 0
+        output.metadata.revenue = plan.total_revenue
+        var year = new Date().getFullYear()
+        output.metadata.total_npv = plan.npv || 0
+        output.metadata.npv = [
+          { year: year--, value: plan.total_revenue - plan.total_cost },
+          { year: year++, value: plan.total_revenue },
+          { year: year++, value: plan.total_revenue },
+          { year: year++, value: plan.total_revenue },
+          { year: year++, value: plan.total_revenue }
+        ]
+        return database.query('SELECT * FROM client.network_node_types ORDER BY description')
+      })
+      .then((equipmentNodeTypes) => {
+        var itemized = equipmentNodeTypes.map((equipmentNodeType) => {
+          var name = equipmentNodeType.name
+          var col = name.split('_').map((s) => s.substring(0, 1)).join('') + '_cost'
+          if (!plan[col]) return null
+          return {
+            key: name,
+            name: equipmentNodeType.description,
+            count: 1,
+            value: plan[col] || 0
+          }
+        }).filter((i) => i)
+        output.metadata.costs.push({
+          name: 'Equipment Capex',
+          value: plan.equipment_cost,
+          itemized: itemized
+        })
+        output.metadata.total_cost = plan.total_cost || 0
 
-            output.metadata.profit = output.metadata.revenue - output.metadata.total_cost
-            if (metadata_only) delete output.feature_collection
-            return output
-          })
+        output.metadata.profit = output.metadata.revenue - output.metadata.total_cost
+        if (metadata_only) delete output.feature_collection
+        return output
       })
   }
 
