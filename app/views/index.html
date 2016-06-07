@@ -496,8 +496,13 @@
 
               <hr>
               <div ng-repeat="node_type in view_node_types">
-                <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png"> = {{node_type.description}}</p>
+                <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png" style="width:16px"> = {{node_type.description}}</p>
               </div>
+
+              <ul class="pie-legend">
+                <li><span style="background-color:red"></span> = Feeder Fiber</li>
+                <li><span style="background-color:blue"></span> = Distribution Fiber</li>
+              </ul>
 
 
               <% if (env_is_test) { %>
