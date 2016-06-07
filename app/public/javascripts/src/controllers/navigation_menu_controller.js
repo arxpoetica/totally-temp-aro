@@ -328,23 +328,23 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  var nonLinearSlider = document.getElementById('year-slider')
-  noUiSlider.create(nonLinearSlider, {
-    behaviour: 'tap',
-    connect: true,
-    start: [ 2016, 2019 ],
-    range: {
-      min: 2016,
-      max: 2019,
-      '0%': [ 2016, 1 ],
-      '100%': [ 2019, 1 ]
-    },
-    pips: {
-      mode: 'values',
-      values: [2016, 2017, 2018, 2019],
-      density: 0
-    }
-  })
+  // var nonLinearSlider = document.getElementById('year-slider')
+  // noUiSlider.create(nonLinearSlider, {
+  //   behaviour: 'tap',
+  //   connect: true,
+  //   start: [ 2016, 2019 ],
+  //   range: {
+  //     min: 2016,
+  //     max: 2019,
+  //     '0%': [ 2016, 1 ],
+  //     '100%': [ 2019, 1 ]
+  //   },
+  //   pips: {
+  //     mode: 'values',
+  //     values: [2016, 2017, 2018, 2019],
+  //     density: 0
+  //   }
+  // })
 
   google.charts.load('current', {'packages': ['gantt']})
 
