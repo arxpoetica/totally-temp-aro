@@ -64,6 +64,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 					bestNpvParametric = parametric;
 
 					if (parametric == 1) {
+						NetworkPlanningServiceImpl.FINANCE_ESTIMATOR.set(estimator);
 						return false;
 					}
 				}
