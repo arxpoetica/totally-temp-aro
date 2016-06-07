@@ -47,6 +47,9 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 
 	public DAGModel<T> createDAG(double parametric, Function<AroEdge<T>, Set<GraphNode>> marked, GraphNode src) {
 
+		if( log.isDebugEnabled() ) log.debug("src vertex " + src);
+		
+		
 		for(AroEdge<T> edge : graphModel.getEdges()) {
 			Set<GraphNode> markedVerticies = marked.apply(edge);
 			
@@ -92,6 +95,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 					AroEdge<T> edge = graph.getEdge(previous, next) ;
 					markedEdges.remove(edge) ;
 					if( !minEdges.contains(edge) ) {
+						log.debug("add edge " + previous + "->" + next);
 						minEdges.add(edge) ;
 						addEdge(previous, next, edge);
 					}
@@ -115,14 +119,23 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 	private void writeLeafEdges(AllShortestPaths<GraphNode, AroEdge<T>> sp, Set<AroEdge<T>>  remainingEdges) {
 		for (AroEdge<T> e : remainingEdges) {
 			
-			
 			GraphNode src = graphModel.getGraph().getEdgeSource(e) ;
 			GraphNode target =  graphModel.getGraph().getEdgeTarget(e) ;
 			
-			if( sp.getWeight(src) > sp.getWeight(target) ) {
-				addEdge(src, target, e);
+			
+			double srcWeight = sp.getWeight(src) ;
+			double targetWeight = sp.getWeight(target) ;
+			
+			log.debug("leaf src weight " +  srcWeight) ;
+			log.debug("leaf target weight " +  targetWeight) ;
+			
+			if( targetWeight > srcWeight ) {
+				log.debug("add flipped leaf edge " + target + "->" + src);
+				addEdge(target, src, e);
+				
 			} else {
-				addEdge(target, src, e);		
+				log.debug("add leaf edge " + src + "->" + target);
+				addEdge(src, target, e);
 			}
 		}
 	}
