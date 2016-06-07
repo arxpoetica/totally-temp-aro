@@ -127,6 +127,11 @@ module.exports = class NetworkPlan {
             }))
           })
       })
+      .then(() => (
+        config.route_planning.length > 0
+          ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
+          : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
+      ))
       .then(() => {
         if (config.route_planning.length === 0) return output
 
