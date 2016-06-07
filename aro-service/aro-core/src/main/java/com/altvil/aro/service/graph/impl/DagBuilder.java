@@ -95,7 +95,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 					AroEdge<T> edge = graph.getEdge(previous, next) ;
 					markedEdges.remove(edge) ;
 					if( !minEdges.contains(edge) ) {
-						log.debug("add edge " + previous + "->" + next);
+						//log.debug("add edge " + previous + "->" + next);
 						minEdges.add(edge) ;
 						addEdge(previous, next, edge);
 					}
@@ -122,7 +122,6 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 			GraphNode src = graphModel.getGraph().getEdgeSource(e) ;
 			GraphNode target =  graphModel.getGraph().getEdgeTarget(e) ;
 			
-			
 			double srcWeight = sp.getWeight(src) ;
 			double targetWeight = sp.getWeight(target) ;
 			
@@ -130,12 +129,12 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 			log.debug("leaf target weight " +  targetWeight) ;
 			
 			if( targetWeight > srcWeight ) {
-				log.debug("add flipped leaf edge " + target + "->" + src);
-				addEdge(target, src, e);
-				
-			} else {
-				log.debug("add leaf edge " + src + "->" + target);
+				//log.debug("add leaf edge " + src + "->" + target);
 				addEdge(src, target, e);
+			} else {
+				//log.debug("add flipped leaf edge " + target + "->" + src);
+				addEdge(target, src, e);
+			
 			}
 		}
 	}
