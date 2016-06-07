@@ -67,9 +67,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     var href = $('#financial_profile_controller .nav-tabs li.active a').attr('href')
     if (href === '#financialProfileCashFlow') {
       showCashFlowChart()
-    } else if (href === '#financialProfileBudget') {
-      showBudgetChart()
     } else if (href === '#financialProfileCapex') {
+      showBudgetChart()
       showCapexChart()
     } else if (href === '#financialProfileRevenue') {
       showRevenueChart()
