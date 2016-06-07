@@ -218,6 +218,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request('penetration', {}, (penetration) => {
       var data = buildChartData(penetration, datasets)
       var options = {
+        datasetFill: false,
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) + '%' %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value %>` // eslint-disable-line
       }
