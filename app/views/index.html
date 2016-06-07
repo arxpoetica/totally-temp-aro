@@ -123,7 +123,11 @@
                 <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
               </span>
               <span data-toggle="modal" ng-click="openCustomerProfile()" style="cursor:pointer" ng-show="show_customer_profile">
-                <span class="fa fa-users"></span> {{ plan.metadata.total_customers | number }} customers covered
+                <span class="fa fa-users"></span>
+                  {{ plan.metadata.customers_businesses_total | number }} businesses,
+                  {{ plan.metadata.customers_households_total | number }} households,
+                  {{ plan.metadata.customers_towers_total | number }} towers
+                  covered
               </span>
 
               <span data-toggle="modal" ng-click="openMarketProfile()" style="cursor:pointer" ng-show="show_market_profile">
