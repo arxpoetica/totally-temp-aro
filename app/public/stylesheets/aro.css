@@ -258,8 +258,12 @@ footer nav {
 }
 
 #aro_logo {
-  margin-left: -30px;
-  margin-bottom: -10px;
+margin-top: 150px;
+margin-left: -5px;
+margin-bottom: 10px;
+width: 500px;
+height:100px;
+
 }
 
 #home_screen_logo {
