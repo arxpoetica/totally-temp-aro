@@ -143,7 +143,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
       }
-      showChart('financial-profile-chart-budget', 'StackedBar', data, options)
+      showChart('financial-profile-chart-budget', 'Bar', data, options)
     })
   }
 
