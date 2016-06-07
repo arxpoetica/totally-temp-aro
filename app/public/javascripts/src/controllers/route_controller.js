@@ -73,7 +73,9 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
           }
         },
         declarativeStyles: (feature, styles) => {
-          if (feature.getProperty('fiber_type') === 'backbone') {
+          if (feature.getProperty('fiber_type') === 'feeder') {
+            styles.strokeColor = 'red'
+          } else {
             styles.strokeColor = 'blue'
           }
         }
