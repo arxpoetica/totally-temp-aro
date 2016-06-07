@@ -4,6 +4,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
+  $scope.entityType = 'businesses'
 
   $scope.select_random_location = () => {
     var map_layer = map_layers.getFeatureLayer('locations')
@@ -41,7 +42,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       $('#selected_location_market_profile select[multiple]').select2('val', [])
       $scope.market_size = null
       $scope.fair_share = null
-      $scope.calculate_market_size()
+      $scope.calculateMarketSize()
     })
   }
 
@@ -113,13 +114,14 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     })
   })
 
-  $scope.calculate_market_size = () => {
+  $scope.calculateMarketSize = () => {
     $scope.loading = true
     var params = {
       industry: arr($scope.industry),
       employees_range: arr($scope.employees_range),
       product: arr($scope.product),
-      customer_type: $scope.customer_type && $scope.customer_type.id
+      customer_type: $scope.customer_type && $scope.customer_type.id,
+      entity_type: $scope.entityType
     }
     var args = {
       params: params

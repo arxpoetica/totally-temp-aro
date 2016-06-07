@@ -8,7 +8,7 @@ var _ = require('underscore')
 var moment = require('moment')
 var config = require('../helpers').config
 
-const empty_array = (arr) => !Array.isArray(arr) || arr.length === 0
+const emptyArray = (arr) => !Array.isArray(arr) || arr.length === 0
 
 module.exports = class MarketSize {
 
@@ -125,19 +125,19 @@ module.exports = class MarketSize {
           .concat(years)
         csv = header.join(',') + '\n' + csv
 
-        if (empty_array(filters.product)) return []
+        if (emptyArray(filters.product)) return []
         var sql = 'SELECT product_type, product_name FROM client.products WHERE id IN($1)'
         return database.query(sql, [filters.product])
       })
       .then((_products) => {
         products = _products
-        if (empty_array(filters.employees_range)) return []
+        if (emptyArray(filters.employees_range)) return []
         var sql = 'SELECT value_range FROM client.employees_by_location WHERE id IN($1)'
         return database.query(sql, [filters.employees_range])
       })
       .then((_employees_by_location) => {
         employees_by_location = _employees_by_location
-        if (empty_array(filters.industry)) return []
+        if (emptyArray(filters.industry)) return []
         var sql = 'SELECT industry_name FROM client.industries WHERE id IN($1)'
         return database.query(sql, [filters.industry])
       })
@@ -247,7 +247,7 @@ module.exports = class MarketSize {
                   ON m.sic4 = b.industry_id
         `
 
-        if (!empty_array(filters.industry)) {
+        if (!emptyArray(filters.industry)) {
           params.push(filters.industry)
           sql += `\n AND m.industry_id IN ($${params.length})`
         }
@@ -258,7 +258,7 @@ module.exports = class MarketSize {
                  AND e.max_value >= b.number_of_employees
          `
 
-        if (!empty_array(filters.employees_range)) {
+        if (!emptyArray(filters.employees_range)) {
           params.push(filters.employees_range)
           sql += `\n AND e.id IN ($${params.length})`
         }
@@ -273,7 +273,7 @@ module.exports = class MarketSize {
                 ON c.industry_id = spend.industry_id
                AND c.employees_by_location_id = spend.employees_by_location_id
          `
-        if (!empty_array(filters.product)) {
+        if (!emptyArray(filters.product)) {
           params.push(filters.product)
           sql += `\n AND spend.product_id IN ($${params.length})`
         }
@@ -406,15 +406,15 @@ module.exports = class MarketSize {
             AND spend.monthly_spend <> 'NaN'
         `
 
-        if (!empty_array(filters.industry)) {
+        if (!emptyArray(filters.industry)) {
           params.push(filters.industry)
           sql += ` AND spend.industry_id IN ($${params.length})`
         }
-        if (!empty_array(filters.product)) {
+        if (!emptyArray(filters.product)) {
           params.push(filters.product)
           sql += ` AND spend.product_id IN ($${params.length})`
         }
-        if (!empty_array(filters.employees_range)) {
+        if (!emptyArray(filters.employees_range)) {
           params.push(filters.employees_range)
           sql += ` AND spend.employees_by_location_id IN ($${params.length})`
         }
@@ -508,15 +508,15 @@ module.exports = class MarketSize {
             AND spend.monthly_spend <> 'NaN'
         `
 
-        if (!empty_array(filters.industry)) {
+        if (!emptyArray(filters.industry)) {
           params.push(filters.industry)
           sql += ` AND spend.industry_id IN ($${params.length})`
         }
-        if (!empty_array(filters.product)) {
+        if (!emptyArray(filters.product)) {
           params.push(filters.product)
           sql += ` AND spend.product_id IN ($${params.length})`
         }
-        if (!empty_array(filters.employees_range)) {
+        if (!emptyArray(filters.employees_range)) {
           params.push(filters.employees_range)
           sql += ` AND spend.employees_by_location_id IN ($${params.length})`
         }
@@ -570,15 +570,15 @@ module.exports = class MarketSize {
           JOIN client.industry_mapping m ON m.sic4 = b.industry_id
           JOIN client.spend ON spend.industry_id = m.industry_id
         `
-        if (!empty_array(filters.industry)) {
+        if (!emptyArray(filters.industry)) {
           params.push(filters.industry)
           sql += ` AND spend.industry_id IN ($${params.length})`
         }
-        if (!empty_array(filters.product)) {
+        if (!emptyArray(filters.product)) {
           params.push(filters.product)
           sql += ` AND spend.product_id IN ($${params.length})`
         }
-        if (!empty_array(filters.employees_range)) {
+        if (!emptyArray(filters.employees_range)) {
           params.push(filters.employees_range)
           sql += ` AND spend.employees_by_location_id IN ($${params.length})`
         }
@@ -605,6 +605,7 @@ module.exports = class MarketSize {
       .then((market_size) => {
         output.market_size = market_size
 
+        var table = ['businesses', 'households', 'towers'].indexOf(filters.entity_type) >= 0 ? filters.entity_type : 'businesses'
         var params = [location_id]
         var sql = `
           SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color,
@@ -612,7 +613,7 @@ module.exports = class MarketSize {
               WHERE ldtc.carrier_id = c.id
               AND ldtc.location_id = $1
             )
-          FROM businesses biz
+          FROM ${table} biz
           JOIN locations l ON l.id = biz.location_id AND l.id = $1
           JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
           JOIN carriers c ON lc.carrier_id = c.id
@@ -652,7 +653,7 @@ module.exports = class MarketSize {
           JOIN client.industry_mapping m ON m.sic4 = b.industry_id
           JOIN client.spend ON spend.industry_id = m.industry_id
         `
-        if (!empty_array(filters.product)) {
+        if (!emptyArray(filters.product)) {
           params.push(filters.product)
           sql += `\n AND spend.product_id IN ($${params.length})`
         }

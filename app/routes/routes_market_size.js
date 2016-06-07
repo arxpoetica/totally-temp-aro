@@ -26,7 +26,7 @@ exports.configure = (api, middleware) => {
     }
   }
 
-  function export_handler (request, response, next) {
+  function exportHandler (request, response, next) {
     var filename = request.query.filename
     var userid = request.user.id
     var t = timer(5,
@@ -101,7 +101,7 @@ exports.configure = (api, middleware) => {
       }
     }
     models.MarketSize.exportBusinesses(plan_id, type, options, request.user)
-      .then(export_handler(request, response, next))
+      .then(exportHandler(request, response, next))
       .catch(next)
   })
 
@@ -123,7 +123,8 @@ exports.configure = (api, middleware) => {
       industry: arr(request.query.industry),
       employees_range: arr(request.query.employees_range),
       product: arr(request.query.product),
-      customer_type: request.query.customer_type
+      customer_type: request.query.customer_type,
+      entity_type: request.query.entity_type
     }
     models.MarketSize.market_size_for_location(location_id, filters)
       .then(jsonSuccess(response, next))
@@ -143,7 +144,7 @@ exports.configure = (api, middleware) => {
       }
     }
     models.MarketSize.exportBusinessesAtLocation(plan_id, location_id, type, options, request.user)
-      .then(export_handler(request, response, next))
+      .then(exportHandler(request, response, next))
       .catch(next)
   })
 
