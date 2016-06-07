@@ -115,12 +115,14 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 	private void writeLeafEdges(AllShortestPaths<GraphNode, AroEdge<T>> sp, Set<AroEdge<T>>  remainingEdges) {
 		for (AroEdge<T> e : remainingEdges) {
 			
-			GraphNode src = e.getSourceNode() ;
-			GraphNode target = e.getTargetNode() ;
+			
+			GraphNode src = graphModel.getGraph().getEdgeSource(e) ;
+			GraphNode target =  graphModel.getGraph().getEdgeTarget(e) ;
+			
 			if( sp.getWeight(src) > sp.getWeight(target) ) {
-				addEdge(target, src, e);
-			} else {
 				addEdge(src, target, e);
+			} else {
+				addEdge(target, src, e);		
 			}
 		}
 	}
