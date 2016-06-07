@@ -205,7 +205,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
       }
-      showChart('financial-profile-chart-subscribers', 'StackedBar', data, options)
+      showChart('financial-profile-chart-subscribers', 'Bar', data, options)
     })
   }
 
