@@ -134,8 +134,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function showBudgetChart () {
     var datasets = [
-      { key: 'planned', name: 'Planned' },
-      { key: 'spent', name: 'Spent' }
+      { key: 'budget', name: 'Budget' },
+      { key: 'plan', name: 'Plan' }
     ]
     request('budget', {}, (budget) => {
       var data = buildChartData(budget, datasets)

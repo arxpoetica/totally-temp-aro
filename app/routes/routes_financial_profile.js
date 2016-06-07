@@ -22,13 +22,13 @@ exports.configure = (api, middleware) => {
 
   api.get('/financial_profile/:plan_id/budget', (request, response, next) => {
     var budget = [
-      { year: 2016, planned: 65, spent: 28 },
-      { year: 2017, planned: 59, spent: 48 },
-      { year: 2018, planned: 80, spent: 40 },
-      { year: 2019, planned: 81, spent: 19 },
-      { year: 2020, planned: 56, spent: 86 },
-      { year: 2020, planned: 55, spent: 27 },
-      { year: 2020, planned: 40, spent: 90 }
+      { year: 2016, budget: 65, plan: 28 },
+      { year: 2017, budget: 59, plan: 48 },
+      { year: 2018, budget: 80, plan: 40 },
+      { year: 2019, budget: 81, plan: 19 },
+      { year: 2020, budget: 56, plan: 86 },
+      { year: 2020, budget: 55, plan: 27 },
+      { year: 2020, budget: 40, plan: 90 }
     ]
     proxy('/budget', null, budget)
       .then(jsonSuccess(response, next))
