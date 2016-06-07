@@ -125,6 +125,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request('cash_flow', {}, (cashFlow) => {
       var data = buildChartData(cashFlow, datasets)
       var options = {
+        datasetFill: false,
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
       }

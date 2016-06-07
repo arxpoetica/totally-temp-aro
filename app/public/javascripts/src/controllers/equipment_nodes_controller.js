@@ -7,7 +7,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.ARO_CLIENT = config.ARO_CLIENT
 
   $scope.selected_tool = null
-  $scope.show_clear_nodes = config.ui.map_tools.equipment.actions.indexOf('clear') >= 0
 
   var network_nodes_layer = new MapLayer({
     type: 'network_nodes',
@@ -135,22 +134,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
       changes = empty_changes()
       $rootScope.$broadcast('equipment_nodes_changed')
-    })
-  }
-
-  $scope.clear_nodes = () => {
-    swal({
-      title: 'Are you sure?',
-      text: 'You will not be able to recover the deleted data!',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, clear them!',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, () => {
-      $http.post('/network/nodes/' + $scope.plan.id + '/clear').success((response) => {
-        network_nodes_layer.reloadData()
-      })
     })
   }
 

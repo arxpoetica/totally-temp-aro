@@ -364,6 +364,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
     show () {
       if (this.visible) return
       this.visible = true
+      this.reloadIfDirty()
       this.configureVisibility()
     }
 
