@@ -261,7 +261,9 @@ module.exports = class Location {
         return {
           'type': 'Feature',
           'properties': {
-            'id': row.id
+            'id': row.id,
+            'total_businesses': row.total_businesses,
+            'total_households': row.total_households
           },
           'geometry': row.geom
         }

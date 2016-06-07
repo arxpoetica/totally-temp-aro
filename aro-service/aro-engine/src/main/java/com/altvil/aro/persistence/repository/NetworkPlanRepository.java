@@ -63,7 +63,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"business_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	8 as fiber_count,\n" + 
+			"	(case when sum(b.number_of_employees) >= 20 then 8 else 1 end)  as fiber_count,\n" + 
 			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
@@ -75,7 +75,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"celltower_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	sum(1) as fiber_count,\n" + 
+			"	sum(1) * 64 as fiber_count,\n" + 
 			"	sum(1) * 500 as monthly_spend\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 
@@ -126,7 +126,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"business_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	8 as fiber_count,\n" + 
+			"	(case when sum(b.number_of_employees) >= 20 then 8 else 1 end)  as fiber_count,\n" + 
 			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
@@ -138,7 +138,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"celltower_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	sum(1) as fiber_count,\n" + 
+			"	sum(1) * 64  as fiber_count,\n" + 
 			"	sum(1) * 500 as monthly_spend\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 

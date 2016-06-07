@@ -24,6 +24,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (tool === 'target_builder') {
       $scope.setSelectedTool('single')
+      drawingManager.setMap(map_tools.is_visible('target_builder') ? map : null)
     }
   })
 
@@ -75,8 +76,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   document.addEventListener('keyup', updateSelectionTools)
 
   var budgetInput = $('#target-builder-budget input[name=budget]')
-  var discountInput = $('#target-builder-budget input[name=discount_rate]')
-  var budgetButton = $('#target-builder-budget button')
+  // var discountInput = $('#target-builder-budget input[name=discount_rate]')
+  var updateButton = $('#target-builder-budget button')
 
   budgetInput.val($scope.budget.toLocaleString())
 
@@ -90,17 +91,16 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     budgetInput.val(parseBudget().toLocaleString())
   })
 
-  budgetInput.on('input', () => {
-    budgetButton.removeAttr('disabled')
-  })
+  // budgetInput.on('input', () => {
+  //   updateButton.removeAttr('disabled')
+  // })
+  //
+  // discountInput.on('input', () => {
+  //   updateButton.removeAttr('disabled')
+  // })
 
-  discountInput.on('input', () => {
-    budgetButton.removeAttr('disabled')
-  })
-
-  budgetButton.on('click', () => {
+  updateButton.on('click', () => {
     $scope.budget = parseBudget()
-    budgetButton.attr('disabled', 'disabled')
     checkBudget()
     postChanges({})
   })
@@ -143,8 +143,12 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       saving_plan: true,
       data: changes
     }
+    updateButton.attr('disabled', 'disabled')
     $http(config).success((response) => {
+      updateButton.removeAttr('disabled')
       $rootScope.$broadcast('route_planning_changed', response)
+    }).error(() => {
+      updateButton.removeAttr('disabled')
     })
   }
 

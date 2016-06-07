@@ -67,9 +67,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     var href = $('#financial_profile_controller .nav-tabs li.active a').attr('href')
     if (href === '#financialProfileCashFlow') {
       showCashFlowChart()
-    } else if (href === '#financialProfileBudget') {
-      showBudgetChart()
     } else if (href === '#financialProfileCapex') {
+      showBudgetChart()
       showCapexChart()
     } else if (href === '#financialProfileRevenue') {
       showRevenueChart()
@@ -135,8 +134,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function showBudgetChart () {
     var datasets = [
-      { key: 'planned', name: 'Planned' },
-      { key: 'spent', name: 'Spent' }
+      { key: 'budget', name: 'Budget' },
+      { key: 'plan', name: 'Plan' }
     ]
     request('budget', {}, (budget) => {
       var data = buildChartData(budget, datasets)
@@ -144,7 +143,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
       }
-      showChart('financial-profile-chart-budget', 'StackedBar', data, options)
+      showChart('financial-profile-chart-budget', 'Bar', data, options)
     })
   }
 

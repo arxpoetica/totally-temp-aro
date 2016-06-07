@@ -112,7 +112,7 @@ exports.configure = (api, middleware) => {
         product: arr(request.query.product)
       }
     }
-    models.MarketSize.market_size_for_business(business_id, options)
+    models.MarketSize.marketSizeForBusiness(business_id, options)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -126,7 +126,7 @@ exports.configure = (api, middleware) => {
       customer_type: request.query.customer_type,
       entity_type: request.query.entity_type
     }
-    models.MarketSize.market_size_for_location(location_id, filters)
+    models.MarketSize.marketSizeForLocation(location_id, filters)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

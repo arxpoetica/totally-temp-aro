@@ -30,23 +30,22 @@ exports.configure = (api, middleware) => {
 
   api.get('/financial_profile/:plan_id/budget', (request, response, next) => {
     var budget = [
-      { year: 2016, planned: 2500, spent: 2220 },
-      { year: 2017, planned: 2500, spent: 2220 },
-      { year: 2018, planned: 2500, spent: 2220 },
-      { year: 2019, planned: 0, spent: 0 },
-      { year: 2020, planned: 0, spent: 0 },
-      { year: 2020, planned: 0, spent: 0 },
-      { year: 2021, planned: 0, spent: 0 },
-      { year: 2022, planned: 0, spent: 0 },
-      { year: 2023, planned: 0, spent: 0 },
-      { year: 2024, planned: 0, spent: 0 },
-      { year: 2025, planned: 0, spent: 0 },
-      { year: 2026, planned: 0, spent: 0 },
-      { year: 2027, planned: 0, spent: 0 },
-      { year: 2028, planned: 0, spent: 0 },
-      { year: 2029, planned: 0, spent: 0 },
-      { year: 2030, planned: 0, spent: 0 }
-
+      { year: 2016, budget: 2500, plan: 2220 },
+      { year: 2017, budget: 2500, plan: 2220 },
+      { year: 2018, budget: 2500, plan: 2220 },
+      { year: 2019, budget: 0, plan: 0 },
+      { year: 2020, budget: 0, plan: 0 },
+      { year: 2020, budget: 0, plan: 0 },
+      { year: 2021, budget: 0, plan: 0 },
+      { year: 2022, budget: 0, plan: 0 },
+      { year: 2023, budget: 0, plan: 0 },
+      { year: 2024, budget: 0, plan: 0 },
+      { year: 2025, budget: 0, plan: 0 },
+      { year: 2026, budget: 0, plan: 0 },
+      { year: 2027, budget: 0, plan: 0 },
+      { year: 2028, budget: 0, plan: 0 },
+      { year: 2029, budget: 0, plan: 0 },
+      { year: 2030, budget: 0, plan: 0 }
     ]
     proxy('/budget', null, budget)
       .then(jsonSuccess(response, next))

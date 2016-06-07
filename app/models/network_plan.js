@@ -90,10 +90,15 @@ module.exports = class NetworkPlan {
 
   static findEdges (plan_id) {
     var sql = `
-      SELECT fiber_route.id, ST_Length(geom::geography) AS edge_length, ST_AsGeoJSON(fiber_route.geom)::json AS geom
+      SELECT
+        fiber_route.id,
+        ST_Length(geom::geography) AS edge_length,
+        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        frt.name AS fiber_type
       FROM client.plan
       JOIN client.plan p ON p.parent_plan_id = plan.id
       JOIN client.fiber_route ON fiber_route.plan_id = p.id
+      JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
       WHERE plan.id=$1
     `
     return database.query(sql, [plan_id])
@@ -123,7 +128,10 @@ module.exports = class NetworkPlan {
           .then((edges) => {
             output.feature_collection.features = edges.map((edge) => ({
               'type': 'Feature',
-              'geometry': edge.geom
+              'geometry': edge.geom,
+              'properties': {
+                'fiber_type': edge.fiber_type
+              }
             }))
           })
       })
