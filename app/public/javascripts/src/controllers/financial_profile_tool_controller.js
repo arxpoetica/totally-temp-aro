@@ -126,8 +126,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request('cash_flow', {}, (cashFlow) => {
       var data = buildChartData(cashFlow, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-cash-flow', 'Line', data, options)
     })
@@ -141,8 +141,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request('budget', {}, (budget) => {
       var data = buildChartData(budget, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-budget', 'StackedBar', data, options)
     })
@@ -157,8 +157,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request('capex', {}, (capex) => {
       var data = buildChartData(capex, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-capex', 'StackedBar', data, options)
     })
@@ -173,8 +173,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request('revenue', {}, (revenue) => {
       var data = buildChartData(revenue, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-revenue', 'StackedBar', data, options)
     })
@@ -182,14 +182,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function showPremisesChart () {
     var datasets = [
-      { key: 'existing', name: 'Existing OFS' },
-      { key: 'incremental', name: 'Incremental OFS' }
+      { key: 'incremental', name: 'Incremental OFS' },
+      { key: 'existing', name: 'Existing OFS' }
     ]
     request('premises', {}, (premises) => {
       var data = buildChartData(premises, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-premises', 'StackedBar', data, options)
     })
@@ -198,14 +198,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   function showSubscribersChart () {
     var datasets = [
       { key: 'bau', name: 'BAU' },
-      { key: 'fiber', name: 'Fiber' },
-      { key: 'incremental', name: 'Incremental' }
+      { key: 'fiber', name: 'Fiber' }
     ]
     request('subscribers', {}, (subscribers) => {
       var data = buildChartData(subscribers, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-subscribers', 'StackedBar', data, options)
     })
@@ -220,8 +219,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request('penetration', {}, (penetration) => {
       var data = buildChartData(penetration, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) + '%' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-penetration', 'Line', data, options)
     })
