@@ -513,7 +513,7 @@
                 <span id="equipment_nodes_controller_number_of_features">{{number_of_features}}</span>
               <% } %>
 
-              <div ng-show="plan.owner_id === user_id && (build_node_types.length > 0 || show_clear_nodes || show_recalculate)">
+              <div ng-show="plan.owner_id === user_id && (build_node_types.length > 0 || show_recalculate)">
                 <hr>
                 <h2>Build</h2>
                 <div class="row">
@@ -523,14 +523,6 @@
                   <div class="col-sm-12" ng-repeat="node in build_node_types">
                     <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === node.name}" ng-click="select_tool(node.name)">{{node.description}}</a>
                     <br>
-                  </div>
-                </div>
-                <hr>
-                <div class="row">
-                  <div class="col-sm-12">
-                    <button class="btn btn-sm btn-danger btn-block"
-                      ng-show="show_clear_nodes"
-                      ng-click="clear_nodes()" type="button">Clear network nodes</button>
                   </div>
                 </div>
               </div>
