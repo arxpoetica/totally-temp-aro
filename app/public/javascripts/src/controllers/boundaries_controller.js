@@ -18,14 +18,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       highlighteable: true,
       style_options: {
         normal: {
-          fillColor: 'green',
-          strokeColor: 'green',
-          strokeWeight: 2
+          strokeColor: '#00ff00',
+          strokeWeight: 4,
+          fillOpacity: 0
         },
         highlight: {
-          fillColor: 'green',
-          strokeColor: 'green',
-          strokeWeight: 4
+          strokeColor: '#00ff00',
+          strokeWeight: 6,
+          fillOpacity: 0
         }
       },
       reload: 'always',

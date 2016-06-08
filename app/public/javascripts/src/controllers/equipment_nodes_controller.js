@@ -5,6 +5,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.map_tools = map_tools
   $scope.user_id = user_id
   $scope.ARO_CLIENT = config.ARO_CLIENT
+  $scope.showFeederFiber = true
+  $scope.showDistributionFiber = true
 
   $scope.selected_tool = null
 
@@ -212,4 +214,26 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
     })
   })
+
+  $scope.changedFiberVisibility = () => {
+    var routeLayer = map_layers.getEquipmentLayer('route')
+    if (!$scope.showFeederFiber && !$scope.showDistributionFiber) {
+      routeLayer.hide()
+    } else {
+      routeLayer.setDeclarativeStyle((feature, styles) => {
+        if (feature.getProperty('fiber_type') === 'feeder') {
+          styles.strokeColor = 'red'
+          if (!$scope.showDistributionFiber) {
+            styles.visible = false
+          }
+        } else {
+          styles.strokeColor = 'blue'
+          if (!$scope.showFeederFiber) {
+            styles.visible = false
+          }
+        }
+      })
+      routeLayer.show()
+    }
+  }
 }])

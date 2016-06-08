@@ -494,6 +494,22 @@
                 </div>
               </div>
 
+              <div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-model="showFeederFiber" ng-change="changedFiberVisibility()"> Feeder fiber
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-model="showDistributionFiber" ng-change="changedFiberVisibility()"> Distribution fiber
+                  </label>
+                </div>
+              </div>
+
               <hr>
               <div ng-repeat="node_type in view_node_types">
                 <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png" style="width:16px"> = {{node_type.description}}</p>

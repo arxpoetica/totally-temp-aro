@@ -80,6 +80,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
           }
         }
       })
+      route.hide_in_ui = true
       route.show()
       if ($scope.route_layer) {
         $scope.route_layer.remove()

@@ -34,25 +34,10 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
       this.denisty_hue_to = options.denisty_hue_to
       this.minZoom = options.minZoom
       this.heatmap = options.heatmap
-      this.declarativeStyles = options.declarativeStyles
+
+      this.setDeclarativeStyle(options.declarativeStyles)
 
       var data_layer = this.data_layer
-      data_layer.setStyle((feature) => {
-        var styles = Object.assign({}, feature.getProperty('selected')
-          ? this.style_options.selected || this.style_options.normal
-          : this.style_options.normal)
-        if (this.highlighteable && feature.getProperty('highlighted')) {
-          styles = Object.assign({}, this.style_options.highlight)
-        }
-        if (feature.getProperty('draggable')) {
-          styles.draggable = true
-        }
-        var icon = !styles.icon && feature.getProperty('icon')
-        if (icon) styles.icon = icon
-        this.declarativeStyles && this.declarativeStyles(feature, styles)
-        return styles
-      })
-
       var feature_dragged
 
       data_layer.addListener('click', (event) => {
@@ -141,6 +126,25 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
           map.ready(() => this._mapReady())
         })
       }
+    }
+
+    setDeclarativeStyle (declarativeStyles) {
+      this.declarativeStyles = declarativeStyles
+      this.data_layer.setStyle((feature) => {
+        var styles = Object.assign({}, feature.getProperty('selected')
+          ? this.style_options.selected || this.style_options.normal
+          : this.style_options.normal)
+        if (this.highlighteable && feature.getProperty('highlighted')) {
+          styles = Object.assign({}, this.style_options.highlight)
+        }
+        if (feature.getProperty('draggable')) {
+          styles.draggable = true
+        }
+        var icon = !styles.icon && feature.getProperty('icon')
+        if (icon) styles.icon = icon
+        this.declarativeStyles && this.declarativeStyles(feature, styles)
+        return styles
+      })
     }
 
     _mapReady () {
