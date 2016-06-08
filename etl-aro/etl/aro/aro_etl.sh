@@ -31,7 +31,7 @@ ${PSQL} -a -f $DIR/create_aro_locations.sql
 # Create aro.businesses table from infousa.businesses table
 ${PSQL} -a -f $DIR/create_aro_businesses.sql
 
-# Create aro.businesses table from infousa.businesses table
+# Create aro.btemp_households from temp_hh.households table
 ${PSQL} -a -f $DIR/create_aro_temp_households.sql
 
 # Create aro.aro_household_summary table. This will reference the locations table
