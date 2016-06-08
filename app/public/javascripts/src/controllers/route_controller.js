@@ -75,8 +75,10 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
         declarativeStyles: (feature, styles) => {
           if (feature.getProperty('fiber_type') === 'feeder') {
             styles.strokeColor = 'red'
+            styles.strokeWeight = 2
           } else {
             styles.strokeColor = 'blue'
+            styles.strokeWeight = 4
           }
         }
       })
