@@ -92,7 +92,7 @@ module.exports = class NetworkPlan {
     var sql = `
       SELECT
         fiber_route.id,
-        ST_Length(geom::geography) AS edge_length,
+        ST_Length(geom::geography) * 0.000621371 AS edge_length,
         ST_AsGeoJSON(fiber_route.geom)::json AS geom,
         frt.name AS fiber_type
       FROM client.plan
@@ -112,20 +112,21 @@ module.exports = class NetworkPlan {
       },
       'metadata': { costs: [] }
     }
-    var plan
+    var plan, equipmentCounts
 
     return database.findOne('SELECT * FROM client.plan WHERE id=$1', [plan_id])
       .then((_plan) => {
         plan = _plan
-        output.metadata.costs.push({
-          name: 'Fiber Capex',
-          value: plan.fiber_cost || 0
-        })
 
         if (config.route_planning.length === 0) return
         return Promise.resolve()
           .then(() => NetworkPlan.findEdges(plan_id))
           .then((edges) => {
+            var fiberLength = (edges.reduce((total, edge) => edge.edge_length, 0)).toFixed(2)
+            output.metadata.costs.push({
+              name: `Fiber Capex (${fiberLength} mi)`,
+              value: plan.fiber_cost || 0
+            })
             output.feature_collection.features = edges.map((edge) => ({
               'type': 'Feature',
               'geometry': edge.geom,
@@ -135,11 +136,28 @@ module.exports = class NetworkPlan {
             }))
           })
       })
-      .then(() => (
-        config.route_planning.length > 0
+      .then(() => {
+        var params = [plan_id]
+        return database.query(`
+          SELECT nnt.id, COUNT(*) AS count
+          FROM client.network_node_types nnt
+          JOIN client.network_nodes nn
+          ON nn.node_type_id = nnt.id
+          AND nn.plan_id IN (
+            SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
+            UNION ALL
+            SELECT $${params.length}
+          )
+          GROUP BY nnt.id
+        `, params)
+      })
+      .then((_equipmentCounts) => {
+        equipmentCounts = _equipmentCounts
+
+        return config.route_planning.length > 0
           ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
           : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
-      ))
+      })
       .then(() => {
         if (config.route_planning.length === 0) return output
 
@@ -162,10 +180,13 @@ module.exports = class NetworkPlan {
           var name = equipmentNodeType.name
           var col = name.split('_').map((s) => s.substring(0, 1)).join('') + '_cost'
           if (!plan[col]) return null
+          var count = equipmentCounts.find((eq) => eq.id === equipmentNodeType.id)
+          count = count ? count.count : 0
           return {
             key: name,
             name: equipmentNodeType.description,
-            count: 1,
+            description: equipmentNodeType.description + (name === 'central_office' ? '' : ` (x${count})`),
+            count: count.count,
             value: plan[col] || 0
           }
         }).filter((i) => i)
