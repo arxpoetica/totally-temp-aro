@@ -241,7 +241,8 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
 
     // Load GeoJSON data into the layer if it's not already loaded
     loadData () {
-      if (!this.data_loaded) {
+      if (!this.data_loaded || this.dirty) {
+        this.dirty = false
         if (this.data) {
           this.addGeoJson(this.data)
           this.data_loaded = true
@@ -368,7 +369,6 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
     show () {
       if (this.visible) return
       this.visible = true
-      this.reloadIfDirty()
       this.configureVisibility()
     }
 

@@ -30,7 +30,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       },
       reload: 'always',
       threshold: 0,
-      minZoom: 12
+      minZoom: 6
     })
   }
 
