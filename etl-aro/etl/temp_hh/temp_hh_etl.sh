@@ -16,7 +16,7 @@ wget https://s3.amazonaws.com/public.aro/infousa/ny_households.zip -nd -nc
 unzip ny_households.zip -d ${TMPDIR}
 
 # Placing this CSV file here because eventually this should download from S3 and get deleted after it loads into the db
-${PSQL} -a -c "COPY temp_hh.households (address, city, state, zip5, lat, lon, geog) FROM STDIN DELIMITER ',' CSV HEADER;" </$TMPDIR/ny_households.csv
+${PSQL} -a -c "COPY temp_hh.households (address, city, state, zip5, lat, lon, geog) FROM STDIN DELIMITER ',' CSV HEADER;" </$TMPDIR/ny_housholds.csv
 
 ${PSQL} -a -f $DIR/optimize_temp_hh.sql
 
