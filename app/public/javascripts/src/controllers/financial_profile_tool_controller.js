@@ -198,7 +198,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   function showSubscribersChart () {
     var datasets = [
       { key: 'bau', name: 'BAU' },
-      { key: 'fiber', name: 'Fiber' }
+      { key: 'fiber', name: 'Plan' }
     ]
     request('subscribers', {}, (subscribers) => {
       var data = buildChartData(subscribers, datasets)
