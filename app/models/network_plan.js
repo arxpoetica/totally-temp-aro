@@ -94,7 +94,8 @@ module.exports = class NetworkPlan {
         fiber_route.id,
         ST_Length(geom::geography) * 0.000621371 AS edge_length,
         ST_AsGeoJSON(fiber_route.geom)::json AS geom,
-        frt.name AS fiber_type
+        frt.name AS fiber_type,
+        frt.description AS fiber_name
       FROM client.plan
       JOIN client.plan p ON p.parent_plan_id = plan.id
       JOIN client.fiber_route ON fiber_route.plan_id = p.id
@@ -122,10 +123,22 @@ module.exports = class NetworkPlan {
         return Promise.resolve()
           .then(() => NetworkPlan.findEdges(plan_id))
           .then((edges) => {
+            var fiberLengths = {}
+            edges.forEach((edge) => {
+              var type = edge.fiber_name
+              fiberLengths[type] = (fiberLengths[type] || 0) + edge.edge_length
+            })
             var fiberLength = (edges.reduce((total, edge) => edge.edge_length, 0)).toFixed(2)
             output.metadata.costs.push({
               name: `Fiber Capex (${fiberLength} mi)`,
-              value: plan.fiber_cost || 0
+              value: plan.fiber_cost || 0,
+              itemized: Object.keys(fiberLengths).map((type) => {
+                var length = (fiberLengths[type]).toFixed(2)
+                return {
+                  description: `${type} (${length} mi)`,
+                  value: 0
+                }
+              })
             })
             output.feature_collection.features = edges.map((edge) => ({
               'type': 'Feature',
