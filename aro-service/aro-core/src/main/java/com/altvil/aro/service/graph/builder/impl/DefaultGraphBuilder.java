@@ -77,7 +77,7 @@ public class DefaultGraphBuilder<T> implements GraphModelBuilder<T> {
 		
 		AroEdge<T> edge = edgeFactory.createEdge(src, target);
 		if( !graph.addEdge(src, target, edge) ) {
-			if( log.isInfoEnabled() ) log.trace("Failed to add Edge " + src + "->" + target) ;
+			if( log.isInfoEnabled() ) log.trace("Failed to add Edge {}->{}", src, target) ;
 			return null ;
 		};
 		graph.setEdgeWeight(edge, weight);

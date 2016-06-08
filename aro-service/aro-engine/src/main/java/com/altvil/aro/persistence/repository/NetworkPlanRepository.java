@@ -1,5 +1,7 @@
 package com.altvil.aro.persistence.repository;
 
+import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +15,10 @@ import com.altvil.aro.model.NetworkPlan;
 public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
-	
+	@Query(value = "SELECT r.wirecenter_id \n" +
+			"FROM client.plan r \n" +
+			"WHERE r.id = :planId", nativeQuery = true)
+	Long queryWirecenterIdForPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n" + 
 			"SELECT\n" + 
@@ -38,18 +43,18 @@ public interface NetworkPlanRepository extends
 			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" + 
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
-			"order by gid, intersect_position limit 40000", nativeQuery = true)
+			"order by gid, intersect_position limit 40000", nativeQuery = true) // KG debugging
 	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
 
 	
 	@Query(value = "with location_ids as (\n" + 
-			"	select location_id as id from \n" + 
-			"	client.plan_targets \n" + 
-			"	where plan_id = :planId \n" + 
+			"select location_id as id\n" + 
+			"from client.plan_targets\n" + 
+			"where plan_id = :planId	\n" + 
 			")\n" + 
 			",\n" + 
 			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, ceil(sum(monthly_spend) / 65) as fiber_count\n" + 
+			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend\n" + 
 			"	from client.spend s\n" + 
 			"	where city_id = 1 and year = :year\n" + 
 			"	group by industry_id, employees_by_location_id\n" + 
@@ -57,24 +62,29 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"business_fiber as (\n" + 
-			"	select l.id, sum(f.fiber_count) as fiber_count\n" + 
+			"	select l.id,\n" + 
+			"	(case when sum(b.number_of_employees) >= 20 then 8 else 1 end)  as fiber_count,\n" + 
+			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
 			"	join client.employees_by_location e on (b.number_of_employees >= e.min_value) and  (b.number_of_employees <= e.max_value) \n" + 
 			"	join client.industry_mapping m on m.sic4 = b.industry_id\n" + 
 			"	join fiber_model f on f.industry_id = m.industry_id and f.employees_by_location_id = e.id \n" + 
-			"	group by l.id\n" +
+			"	group by l.id\n" + 
 			")\n" + 
 			",\n" + 
 			"celltower_fiber as (\n" + 
-			"	select l.id, sum(1) * 256 as fiber_count\n" + 
+			"	select l.id,\n" + 
+			"	sum(1) * 64 as fiber_count,\n" + 
+			"	sum(1) * 500 as monthly_spend\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 
 			"	group by l.id\n" + 
 			")\n" + 
 			",\n" + 
 			"household_fiber as (\n" + 
-			"	select l.id, sum(case when h.number_of_households is null then 1 else h.number_of_households end) as fiber_count\n" + 
+			"	select l.id, sum(case when h.number_of_households is null then 1 else h.number_of_households end) as fiber_count, \n" + 
+			"	sum(case when h.number_of_households is null then 1 else h.number_of_households end) * 60 as monthly_spend\n" + 
 			"	from aro.households h\n" + 
 			"	join location_ids l on l.id = h.location_id\n" + 
 			"	group by l.id\n" + 
@@ -82,24 +92,32 @@ public interface NetworkPlanRepository extends
 			"select \n" + 
 			"l.id,\n" + 
 			"case when b.fiber_count is null then 0 else b.fiber_count end as business_fiber,\n" + 
+			"case when b.fiber_count is null then 0 else b.monthly_spend end as business_spend,\n" + 
+			"\n" + 
 			"case when t.fiber_count is null then 0 else t.fiber_count end as celltower_fiber,\n" + 
-			"case when h.fiber_count is null then 0 else h.fiber_count end as household_fiber\n" + 
+			"case when t.fiber_count is null then 0 else t.monthly_spend end as celltower_spend,\n" + 
+			"\n" + 
+			"case when h.fiber_count is null then 0 else h.fiber_count end as household_fiber,\n" + 
+			"case when h.fiber_count is null then 0 else h.monthly_spend end as household_spend\n" + 
+			"\n" + 
 			"from location_ids l\n" + 
 			"left join business_fiber b on b.id = l.id\n" + 
 			"left join celltower_fiber t on t.id = l.id\n" + 
-			"left join household_fiber h on h.id = l.id", nativeQuery = true)
+			"left join household_fiber h on h.id = l.id\n" + 
+			"limit 40000\n", 
+			nativeQuery = true)
 	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year);
 	
 	@Query(value = "with location_ids as (\n" + 
-			"	select l.id as id \n" + 
-			"	from client.plan p\n" + 
+			"	select l.id as id\n" + 
+			"	from client.plan p \n" + 
 			"	join aro.wirecenters w on w.id = p.wirecenter_id\n" + 
 			"	join aro.locations l on st_contains(w.geom, l.geom)\n" + 
 			"	where p.id = :planId\n" + 
 			")\n" + 
 			",\n" + 
 			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, ceil(sum(monthly_spend) / 65) as fiber_count\n" + 
+			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend\n" + 
 			"	from client.spend s\n" + 
 			"	where city_id = 1 and year = :year\n" + 
 			"	group by industry_id, employees_by_location_id\n" + 
@@ -107,7 +125,9 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"business_fiber as (\n" + 
-			"	select l.id, sum(f.fiber_count) as fiber_count\n" + 
+			"	select l.id,\n" + 
+			"	(case when sum(b.number_of_employees) >= 20 then 8 else 1 end)  as fiber_count,\n" + 
+			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
 			"	join client.employees_by_location e on (b.number_of_employees >= e.min_value) and  (b.number_of_employees <= e.max_value) \n" + 
@@ -117,14 +137,17 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"celltower_fiber as (\n" + 
-			"	select l.id, sum(1) * 256 as fiber_count\n" + 
+			"	select l.id,\n" + 
+			"	sum(1) * 64  as fiber_count,\n" + 
+			"	sum(1) * 500 as monthly_spend\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 
 			"	group by l.id\n" + 
 			")\n" + 
 			",\n" + 
 			"household_fiber as (\n" + 
-			"	select l.id, sum(case when h.number_of_households is null then 1 else h.number_of_households end) as fiber_count\n" + 
+			"	select l.id, sum(case when h.number_of_households is null then 1 else h.number_of_households end) as fiber_count, \n" + 
+			"	sum(case when h.number_of_households is null then 1 else h.number_of_households end) * 60 as monthly_spend\n" + 
 			"	from aro.households h\n" + 
 			"	join location_ids l on l.id = h.location_id\n" + 
 			"	group by l.id\n" + 
@@ -132,17 +155,25 @@ public interface NetworkPlanRepository extends
 			"select \n" + 
 			"l.id,\n" + 
 			"case when b.fiber_count is null then 0 else b.fiber_count end as business_fiber,\n" + 
+			"case when b.fiber_count is null then 0 else b.monthly_spend end as business_spend,\n" + 
+			"\n" + 
 			"case when t.fiber_count is null then 0 else t.fiber_count end as celltower_fiber,\n" + 
-			"case when h.fiber_count is null then 0 else h.fiber_count end as household_fiber\n" + 
+			"case when t.fiber_count is null then 0 else t.monthly_spend end as celltower_spend,\n" + 
+			"\n" + 
+			"case when h.fiber_count is null then 0 else h.fiber_count end as household_fiber,\n" + 
+			"case when h.fiber_count is null then 0 else h.monthly_spend end as household_spend\n" + 
+			"\n" + 
 			"from location_ids l\n" + 
 			"left join business_fiber b on b.id = l.id\n" + 
 			"left join celltower_fiber t on t.id = l.id\n" + 
 			"left join household_fiber h on h.id = l.id\n" + 
 			"limit 40000\n" + 
-			"", nativeQuery = true)
+			"\n", nativeQuery = true)
 	List<Object[]> queryAllFiberDemand(@Param("planId") long planId, @Param("year") int year);
 
-
+	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
+			"WHERE pt.plan_id = :planId", nativeQuery = true)
+	List<BigInteger> querySelectedLocationsByPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n"
 			+ "SELECT\n"
@@ -236,12 +267,7 @@ public interface NetworkPlanRepository extends
 			" select p.id as master_plan_id, p.* \n" + 
 			" from client.plan p where p.id = :planId\n" + 
 			")\n" + 
-			",\n" +
-//			"debug_plans as (\n" +
-//				"delete from client.plan where parent_plan_id in (select master_plan_id from inputs)\n" +
-//				"returning id\n" +
-//			")\n" + 
-//			",\n" +
+			",\n" + 
 			"original_targets as (\n" + 
 			" select pt.id, pt.location_id, pt.plan_id, mp.master_plan_id, wp.wirecenter_id\n" + 
 			" from inputs mp\n" + 
@@ -284,10 +310,38 @@ public interface NetworkPlanRepository extends
 			"	returning id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
 			")\n" + 
 			",\n" + 
+			"updated_new_cos as ( \n" + 
+			"			select \n" + 
+			"			\n" + 
+			"			pl.id,\n" + 
+			"			\n" + 
+			"			(select np.area_centroid\n" + 
+			"			from new_plans np \n" + 
+			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
+			"			and np.id = pl.id) as centroid,\n" + 
+			"			\n" + 
+			"			(select\n" + 
+			"			CO.geom\n" + 
+			"			from new_plans np\n" + 
+			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
+			"			join client.network_nodes CO on st_contains(w.geom, CO.geom) \n" + 
+			"			where CO.plan_id is null\n" + 
+			"			and np.id = pl.id) as location\n" + 
+			"			from new_plans pl 			\n" + 
+			"	)\n" + 
+			",\n" + 
 			"updated_network_nodes as (\n" + 
 			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
-			"	select np.id, 1, cast(np.area_centroid as geography), np.area_centroid \n" + 
-			"	from new_plans np\n" + 
+			"	 select co.id, 1,\n" + 
+			"		case\n" + 
+			"		when co.location is not null then cast(co.location as geography)\n" + 
+			"		else cast(co.centroid as geography)\n" + 
+			"		end,\n" + 
+			"		case\n" + 
+			"		when co.location is not null then cast(co.location as geometry)\n" + 
+			"		else cast(co.centroid  as geometry)\n" + 
+			"		end\n" + 
+			"		from  updated_new_cos co\n" + 
 			"	returning id, plan_id\n" + 
 			")\n" + 
 			",\n" + 
@@ -349,7 +403,56 @@ public interface NetworkPlanRepository extends
 			"		in (select plan_id from all_modified_plans)\n" + 
 			"	returning id\n" + 
 			")\n" + 
-			"select plan_id from all_modified_plans", nativeQuery = true)
+			"select plan_id from all_modified_plans\n", nativeQuery = true)
 	List<Number> computeWirecenterUpdates(@Param("planId") long planId);
+    
+    
+    
+    @Modifying
+    @Transactional
+	@Query(value="with new_plans as (\n" + 
+			"	insert into client.plan (name, plan_type, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at, parent_plan_id)\n" + 
+			"	select p.name, 'W', w.id, w.wirecenter, st_centroid(w.geom), w.geom,  NOW(), NOW(), p.id \n" + 
+			"	from client.plan p, aro.wirecenters w\n" + 
+			"	where w.id in (:wireCentersIds) and p.id = :planId\n" + 
+			"	\n" + 
+			"   returning id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
+			")\n" + 
+			",\n" + 
+			"new_cos as ( \n" + 
+			"			select \n" + 
+			"			\n" + 
+			"			pl.id,\n" + 
+			"\n" + 
+			"			(select np.area_centroid\n" + 
+			"			from new_plans np \n" + 
+			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
+			"			and np.id = pl.id) as centroid,\n" + 
+			"			\n" + 
+			"			(select\n" + 
+			"			CO.geom\n" + 
+			"			from new_plans np\n" + 
+			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
+			"			join client.network_nodes CO on st_contains(w.geom, CO.geom) \n" + 
+			"			where CO.plan_id is null\n" + 
+			"			and np.id = pl.id) as location\n" + 
+			"			from new_plans pl 			\n" + 
+			"),\n" + 
+			"updated_network_nodes as (\n" + 
+			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
+			"	 select co.id, 1,\n" + 
+			"		case\n" + 
+			"		when co.location is not null then cast(co.location as geography)\n" + 
+			"		else cast(co.centroid as geography)\n" + 
+			"		end,\n" + 
+			"		case\n" + 
+			"		when co.location is not null then cast(co.location as geometry)\n" + 
+			"		else cast(co.centroid  as geometry)\n" + 
+			"		end\n" + 
+			"		from  new_cos co\n" + 
+			"	returning plan_id\n" + 
+			")\n" + 
+			"select plan_id from updated_network_nodes",nativeQuery = true) 
+    List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("wireCentersIds") Collection<Integer> wireCentersIds);
 
 }

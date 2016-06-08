@@ -6,9 +6,20 @@
       <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
     </layout>
   </appender>
-   
+
+	<!-- LevelChangePropagator ensures efficiency if libraries are still using java util logging -->
+	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+		<!-- <resetJUL>true</resetJUL> -->
+	</contextListener>
+     
   <logger name="com.altvil" level="DEBUG"/>
-   
+  <logger name="com.altvil.aro.service" level="DEBUG"/>
+  <logger name="com.altvil.netop" level="INFO"/>
+  <logger name="springfox" level="WARN"/>
+  <logger name="org.springframework.web.filter" level="INFO"/>
+  <logger name="org.apache.ignite" level="INFO"/>
+  <logger name="org.apache.ignite.internal" level="WARN"/>
+  <logger name="com.altvil.aro.service.graph.alg.NpvClosestFirstIterator" level="WARN"/>
  
   <root level="info">
     <appender-ref ref="STDOUT" />

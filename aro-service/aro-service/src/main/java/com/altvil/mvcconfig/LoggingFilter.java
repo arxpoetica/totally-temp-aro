@@ -1,12 +1,13 @@
 package com.altvil.mvcconfig;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class LoggingFilter extends AbstractRequestLoggingFilter {
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public LoggingFilter() {
         setIncludePayload(true);

@@ -3,7 +3,6 @@ package com.altvil.aro.service.recalc.protocol;
 import java.util.Date;
 
 public class RecalcResponse<T> {
-
 	private RecalcJob job;
 
 	public T result;

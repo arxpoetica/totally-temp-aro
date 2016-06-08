@@ -26,6 +26,7 @@ import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.SplicePoint;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
@@ -128,7 +129,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		private void createAnalyis(Builder builder, GraphMapping gm,
 				FiberType ft, Collection<AroEdge<GeoSegment>> pathEdges) {
-			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder,
+			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder, (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s),
 					vertex, gm, pathEdges);
 
 			nodeBuilder = builder;
@@ -226,12 +227,9 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			super();
 			this.networkModelBuilder = networkModelBuilder;
 			this.context = context;
-			this.ftpThreshholds = context.getFtpThreshholds();
+			this.ftpThreshholds = context.getFtthThreshholds();
 			this.scoringStrategy = scoringStrategy ;
 			
-			planService.createFtthThreshholds(this.context
-					.getFiberNetworkConstraints());
-
 			builderFactory = new BuilderFactory(this);
 
 			init();

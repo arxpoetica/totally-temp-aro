@@ -6,7 +6,6 @@
         <h4 class="modal-title">Location details</h4>
       </div>
       <div class="modal-body">
-
         <div class="row">
           <div class="col-md-6">
             <img ng-attr-src="{{ map_url }}">
@@ -103,11 +102,20 @@
           </div>
           <div role="tabpanel" class="tab-pane active" id="selected_location_customer_profile">
             <div class="row" style="margin-top: 30px">
-              <div class="col-md-8">
-                <canvas id="location_customer_profile_chart" style="width:100%; height:200px"></canvas>
+              <div class="col-md-4">
+                <p class="text-center">Businesses</p>
+                <canvas id="location_customer_profile_chart_businesses" style="width:100%; height:200px"></canvas>
+                <div id="location_customer_profile_chart_legend_businesses"></div>
               </div>
               <div class="col-md-4">
-                <div id="location_customer_profile_chart_legend"></div>
+                <p class="text-center">Households</p>
+                <canvas id="location_customer_profile_chart_households" style="width:100%; height:200px"></canvas>
+                <div id="location_customer_profile_chart_legend_households"></div>
+              </div>
+              <div class="col-md-4">
+                <p class="text-center">Towers</p>
+                <canvas id="location_customer_profile_chart_towers" style="width:100%; height:200px"></canvas>
+                <div id="location_customer_profile_chart_legend_towers"></div>
               </div>
             </div>
           </div>
@@ -119,30 +127,40 @@
               <div class="col-md-6">
                 <form class="form-horizontal" style="margin-top: 30px">
                   <div class="form-group form-group-sm">
+                    <label class="col-sm-3 control-label">Entity Type</label>
+                    <div class="col-sm-9">
+                      <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
+                        <option value="businesses">Businesses</option>
+                        <option value="households">Households</option>
+                        <option value="towers">Towers</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
                     <label class="col-sm-3 control-label">Industry</label>
                     <div class="col-sm-9">
-                      <select class="form-control" ng-options="industry.industry_name for industry in filters.industries" ng-model="industry" ng-change="calculate_market_size()" multiple data-placeholder="All industries">
+                      <select class="form-control" ng-options="industry.industry_name for industry in filters.industries" ng-model="industry" ng-change="calculateMarketSize()" multiple data-placeholder="All industries">
                       </select>
                     </div>
                   </div>
-                  <div class="form-group form-group-sm">
+                  <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
                     <label class="col-sm-3 control-label">Product</label>
                     <div class="col-sm-9">
-                      <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculate_market_size()" multiple data-placeholder="All products">
+                      <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculateMarketSize()" multiple data-placeholder="All products">
                       </select>
                     </div>
                   </div>
-                  <div class="form-group form-group-sm">
+                  <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
                     <label class="col-sm-3 control-label">Business size</label>
                     <div class="col-sm-9">
-                      <select class="form-control" ng-options="range.value_range for range in filters.employees_by_location" ng-model="employees_range" ng-change="calculate_market_size()" multiple data-placeholder="All business sizes">
+                      <select class="form-control" ng-options="range.value_range for range in filters.employees_by_location" ng-model="employees_range" ng-change="calculateMarketSize()" multiple data-placeholder="All business sizes">
                       </select>
                     </div>
                   </div>
                   <div class="form-group form-group-sm">
                     <label class="col-sm-3 control-label">Customer type</label>
                     <div class="col-sm-9">
-                      <select class="form-control" ng-options="customer_type.name for customer_type in filters.customer_types" ng-model="customer_type" ng-change="calculate_market_size()">
+                      <select class="form-control" ng-options="customer_type.name for customer_type in filters.customer_types" ng-model="customer_type" ng-change="calculateMarketSize()">
                         <option value="">Any customer type</option>
                       </select>
                     </div>
@@ -159,6 +177,22 @@
           </div>
 
           <div role="tabpanel" class="tab-pane" id="selected_location_fair_share" style="margin-top:30px">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group form-group-sm">
+                  <label class="col-sm-3 control-label">Entity Type</label>
+                  <div class="col-sm-9">
+                    <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
+                      <option value="businesses">Businesses</option>
+                      <option value="households">Households</option>
+                      <option value="towers">Towers</option>
+                    </select>
+                  </div>
+                </div>
+                <br><br>
+              </div>
+            </div>
+            <p class="form-control-static text-center" ng-show="fair_share.length === 0">No data available for this location with the selected filters</p>
             <div class="row">
               <div class="col-md-8">
                 <canvas id="location_fair_share_chart" style="width:100%; height:200px"></canvas>

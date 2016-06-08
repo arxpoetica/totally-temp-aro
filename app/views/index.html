@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="aro">
   <head>
-    <title>ARO</title>
+    <title>OneFiber</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
@@ -38,18 +38,18 @@
         <div class="container">
           <div class="row">
             <div class="col-sm-12">
-              <img id="aro_logo" src="/images/logos/aro_logo_2.png" />
+              <img id="aro_logo" src="/images/logos/one_fiber_logo.png" />
             </div>
             <div class="col-sm-8">
               <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="new_plan()">Create New Network Plan</a>
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="show_plans()">Open Network Plan</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showPlans()">Open Network Plan</a>
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manage_network_plans()">Manage Network Plans</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manageNetworkPlans()">Manage Network Plans</a>
               <br>
             </div>
             <% if (user.rol === 'admin') { %>
@@ -71,6 +71,8 @@
       <% include modal_edit_plan.html %>
 
       <% include modal_share_plan.html %>
+
+      <% include modal_plan_combo.html %>
 
       <div class="modal" id="export-plan" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -112,21 +114,23 @@
               <span class="icon-bar"></span>
             </button>
             <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="select_plan(null)"><span class="fa fa-chevron-left"></span></button>
-            <a class="navbar-brand" href="javascript:void(0)">{{plan.name}}</a>
+            <a href="javascript:void(0)" class="navbar-brand" ng-click="showCombo()">{{plan.name}}</a>
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
-              <!--
               <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
                 <span class="fa fa-usd"></span>
+                <span class="label label-info">{{plan.metadata.total_npv | currency}}</span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
-                <span class="label label-success">{{plan.metadata.revenue | currency}}</span>
               </span>
-              -->
-              <span data-toggle="modal" ng-click="open_customer_profile()" style="cursor:pointer" ng-show="show_customer_profile">
-                <span class="fa fa-users"></span> {{ plan.metadata.total_customers | number }} customers covered
+              <span data-toggle="modal" ng-click="openCustomerProfile()" style="cursor:pointer" ng-show="show_customer_profile">
+                <span class="fa fa-users"></span>
+                  {{ plan.metadata.customers_businesses_total | number }} businesses,
+                  {{ plan.metadata.customers_households_total | number }} households,
+                  {{ plan.metadata.customers_towers_total | number }} towers
+                  covered
               </span>
 
-              <span data-toggle="modal" ng-click="open_market_profile()" style="cursor:pointer" ng-show="show_market_profile">
+              <span data-toggle="modal" ng-click="openMarketProfile()" style="cursor:pointer" ng-show="show_market_profile">
                 <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
                 <span ng-show="market_profile_current_year.total">
                   <span class="label label-success"><span>Market Size</span>
@@ -151,13 +155,13 @@
               <small><span class="fa fa-check"></span> Plan saved</small>
             </p>
 
-            <p class="navbar-text" ng-show="plan">
+<!--             <p class="navbar-text" ng-show="plan">
               <a style="cursor:pointer; color:white" data-target="#build-sequence" data-toggle="modal"><small>Build Sequence</small></a>
-            </p>
+            </p> -->
 
-            <div class="navbar-text" style="width: 200px" ng-show="plan">
+<!--             <div class="navbar-text" style="width: 200px" ng-show="plan">
               <div id="year-slider"></div>
-            </div>
+            </div> -->
 
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
@@ -184,14 +188,14 @@
                 <ul class="dropdown-menu">
                   <li><a href="javascript:void(0)" ng-click="save_as()" ng-show="plan.owner_id === user_id">Save as…</a></li>
                   <li role="separator" class="divider" ng-show="plan.owner_id === user_id"></li>
-                  <li><a href="javascript:void(0)" ng-click="clear_plan()"
+                  <li><a href="javascript:void(0)" ng-click="clearPlan()"
                     <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Clear plan</a></li>
                   <li><a href="javascript:void(0)" ng-click="delete_plan(plan)"
                     <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Delete plan</a></li>
                   <li role="separator" class="divider" ng-show="plan.owner_id === user_id"></li>
                   <li><a href="javascript:void(0)" ng-click="show_share_plan(plan)">Share…</a></li>
                   <% if (config.route_planning.length > 0) { %>
-                  <li><a href="javascript:void(0)" ng-click="export_kml_name()">Export KML…</a></li>
+                  <li><a href="javascript:void(0)" ng-click="exportKmlName()">Export KML…</a></li>
                   <% } %>
                 </ul>
               </li>
@@ -215,20 +219,6 @@
             </p>
           </div>
         </div>
-
-        <hr>
-
-        <div ng-controller="selection_tools_controller">
-          <div ng-repeat="(key, tool) in available_tools" ng-show="plan.owner_id === user_id">
-            <p>
-              <a href="javascript:void(0)" class="btn btn-default btn-block btn-sm"
-                ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
-                ng-class="{'btn-success active': isToolSelected(key) && (!key || !deselect_mode), 'btn-danger active': isToolSelected(key) && key && deselect_mode}"
-                ng-click="setSelectedTool(key)"><span ng-attr-class="{{tool.icon}}"></span></a>
-            </p>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -343,7 +333,7 @@
                 <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
                   <label class="col-sm-4 control-label">Business industry</label>
                   <div class="col-sm-8">
-                    <select class="form-control industries" ng-model="new_location_data.business_industry" ng-options="industry.description for industry in industries"></select>
+                    <select class="form-control industries" ng-model="new_location_data.business_industry" ng-options="industry.text for industry in industries"></select>
                   </div>
                 </div>
                 <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
@@ -504,10 +494,31 @@
                 </div>
               </div>
 
+              <div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-model="showFeederFiber" ng-change="changedFiberVisibility()"> Feeder fiber
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-model="showDistributionFiber" ng-change="changedFiberVisibility()"> Distribution fiber
+                  </label>
+                </div>
+              </div>
+
               <hr>
               <div ng-repeat="node_type in view_node_types">
-                <p><img ng-attr-src="/images/map_icons/{{node_type.name}}.png"> = {{node_type.description}}</p>
+                <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png" style="width:16px"> = {{node_type.description}}</p>
               </div>
+
+              <ul class="pie-legend">
+                <li><span style="background-color:blue"></span> = Feeder Fiber</li>
+                <li><span style="background-color:red"></span> = Distribution Fiber</li>
+              </ul>
 
 
               <% if (env_is_test) { %>
@@ -518,7 +529,8 @@
                 <span id="equipment_nodes_controller_number_of_features">{{number_of_features}}</span>
               <% } %>
 
-              <div ng-show="plan.owner_id === user_id && (build_node_types.length > 0 || show_clear_nodes || show_recalculate)">
+              <!--
+              <div ng-show="plan.owner_id === user_id && (build_node_types.length > 0 || show_recalculate)">
                 <hr>
                 <h2>Build</h2>
                 <div class="row">
@@ -530,15 +542,8 @@
                     <br>
                   </div>
                 </div>
-                <hr>
-                <div class="row">
-                  <div class="col-sm-12">
-                    <button class="btn btn-sm btn-danger btn-block"
-                      ng-show="show_clear_nodes"
-                      ng-click="clear_nodes()" type="button">Clear network nodes</button>
-                  </div>
-                </div>
               </div>
+              -->
             </div>
           </div>
         </div>
@@ -653,24 +658,24 @@
               <form>
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" ng-click=""> Households
+                    <input type="checkbox" ng-model="coverHouseholds"> Households
                   </label>
                 </div>
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" ng-click=""> Businesses
+                    <input type="checkbox" ng-model="coverBusinesses"> Businesses
                   </label>
                 </div>
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" ng-click=""> Towers
+                    <input type="checkbox" ng-model="coverTowers"> Towers
                   </label>
                 </div>
               </form>
             </div>
             <div ng-show="wizardStatus === 'budget'">
               <div ng-hide="advancedSettings">
-                <p><strong>Budget</strong></p>
+                <!-- <p><strong>Budget</strong></p>
                 <form class="text-center">
                   <div class="row">
                     <div class="col-md-3">
@@ -687,11 +692,11 @@
                     </div>
                   </div>
                 </form>
-                <hr>
-                <p><strong>IRR Threshold</strong></p>
+                <hr> -->
+                <!-- <p><strong>IRR Threshold</strong></p>
                 <p>
                   <input type="range" min="100" max="500" step="10">
-                </p>
+                </p> -->
                 <p class="text-right"><small><a href="javascript:void(0)" ng-click="toggleAdvancedSettings()">advanced inputs</a></small><p>
               </div>
               <div ng-show="advancedSettings">
@@ -1135,7 +1140,7 @@
                     </div>
                   </div>
 
-                  
+
                 </div>
                 <br>
                 <p class="text-right"><small><a href="javascript:void(0)" ng-click="toggleAdvancedSettings()">basic inputs</a></small><p>
@@ -1143,23 +1148,15 @@
             </div>
             <div ng-show="wizardStatus === 'progress'">
               <p><strong>Running Optimization...</strong></p>
-              <div class="row">
+              <div class="row" ng-repeat="geography in selectedGeographies">
                 <div class="col-md-4">
-                  ABC123
+                  {{geography.name}}
                 </div>
                 <div class="col-md-8">
                   <div class="progress">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md-4">
-                  DEF456
-                </div>
-                <div class="col-md-8">
-                  <div class="progress">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 20%;"></div>
+                    <div class="progress-bar"
+                      ng-class="{'active progress-bar-striped': calculating}"
+                      role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
                   </div>
                 </div>
               </div>
@@ -1202,12 +1199,10 @@
             <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
             <ul class="nav nav-tabs" role="tablist" ng-show="selectedArea">
               <li role="presentation" class="active"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
-              <li role="presentation"><a href="#financialProfileBudget" aria-controls="profile" role="tab" data-toggle="tab">Budget</a></li>
               <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
               <li role="presentation"><a href="#financialProfileRevenue" aria-controls="messages" role="tab" data-toggle="tab">Revenue</a></li>
               <li role="presentation"><a href="#financialProfilePremises" aria-controls="messages" role="tab" data-toggle="tab">Premises</a></li>
               <li role="presentation"><a href="#financialProfileSubscribers" aria-controls="messages" role="tab" data-toggle="tab">Subscribers</a></li>
-              <li role="presentation"><a href="#financialProfileEquipment" aria-controls="messages" role="tab" data-toggle="tab">Equipment</a></li>
             </ul>
             <div class="tab-content" ng-show="selectedArea">
               <div role="tabpanel" class="tab-pane active" id="financialProfileCashFlow">
@@ -1215,12 +1210,6 @@
                 <p class="text-center"><strong>Cash Flow Summary</strong></p>
                 <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
                 <div id="financial-profile-chart-cash-flow-legend"></div>
-              </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfileBudget">
-                <br>
-                <p class="text-center"><strong>Budget Allocation</strong></p>
-                <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-budget-legend"></div>
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfileCapex">
                 <br>
@@ -1252,6 +1241,10 @@
                 <p class="text-center"><strong>BAU Capex</strong></p>
                 <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
                 <div id="financial-profile-chart-capex-legend"></div>
+                <br>
+                <p class="text-center"><strong>Budget Allocation</strong></p>
+                <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-budget-legend"></div>
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfileRevenue">
                 <br>
@@ -1271,7 +1264,7 @@
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfilePremises">
                 <br>
-                <form class="form-inline">
+                <form class="form-inline" ng-show="aboveWirecenter">
                   <div class="form-group">
                     <select class="form-control">
                       <option>BAU</option>
@@ -1280,16 +1273,6 @@
                     </select>
                   </div>
                 </form>
-                <br>
-                <div class="alert alert-info text-center">
-                  <strong>Total</strong>: 12,345
-                  <strong>% Passed</strong>: 12.3
-                  <strong>Cost / Premise</strong>: $123.45
-                  |
-                  <strong>Businesses</strong>: 12,345
-                  <strong>Households</strong>: 12,345
-                  <strong>Towers</strong>: 12,345
-                </div>
                 <form class="form-inline">
                   <div class="checkbox" style="margin-left: 10px">
                     <label>
@@ -1340,24 +1323,91 @@
                 <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
                 <div id="financial-profile-chart-penetration-legend"></div>
               </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfileEquipment">
-                <br>
-                <form class="form-inline">
-                  <div class="form-group form-group-sm">
-                    <label>Start</label>
-                    <input class="form-control" type="text">
-                  </div>
-                  <div class="form-group form-group-sm" style="margin-left:10px">
-                    <label>End</label>
-                    <input class="form-control" type="text">
-                  </div>
-                </form>
-                <br>
-                <div class="alert alert-info">
-                  <strong>Total cost of Plan</strong>: $123.45
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div ng-controller="target-builder-controller" class="map-tool-wrapper">
+      <div ng-show="map_tools.is_visible('target_builder')" class="map-tool panel panel-primary" id="target_builder_controller">
+        <div class="panel-heading">
+          {{ map_tools.get_tool_name('target_builder') }}
+        </div>
+        <div>
+          <div class="panel-body" ng-show="map_tools.is_expanded('target_builder')">
+            <form>
+              <p><strong>Optimization type</strong></p>
+              <select class="form-control" ng-model="optimizationType" ng-change="optimizationTypeChanged()">
+                <option value="capex">Capex</option>
+                <option value="npv">NPV</option>
+              </select>
+              <div ng-show="optimizationType === 'npv'" style="margin-top:5px" id="target-builder-budget">
+                <p>
+                  <label style="font-weight: 100; margin-right: 20px">
+                    <input type="radio" name="npvType" value="targeted" ng-model="npvType" ng-change="npvTypeChanged()">
+                    Targeted
+                  </label>
+                  <label style="font-weight: 100">
+                    <input type="radio" name="npvType" value="untargeted" ng-model="npvType" ng-change="npvTypeChanged()">
+                    Untargeted
+                  </label>
+                </p>
+                <div ng-show="npvType === 'targeted'">
+                  <div class="row">
+                    <div class="col-md-7">
+                      <p><strong>Total budget</strong></p>
+                    </div>
+                    <div class="col-md-5">
+                      <p class="text-right"><strong>Discount rate</strong></p>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-7">
+                      <div class="form-group form-group-sm">
+                        <div class="input-group input-group-sm">
+                          <div class="input-group-addon">$</div>
+                          <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-5">
+                      <div class="form-group form-group-sm">
+                        <div class="input-group input-group-sm">
+                          <input type="number" class="form-control text-right" ng-model="discountRate" min="0" max="100" step="1" name="discount_rate">
+                          <div class="input-group-addon">%</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-danger text-right" ng-show="overbugdet && npvType === 'targeted'">You are over budget. Current cost is {{plan.metadata.total_cost | currency}}</p>
+                </div>
+                <p class="text-right">
+                  <button class="btn btn-default btn-small">Update</button>
+                </p>
+              </div>
+
+              <br>
+              <p><strong>Search, Click or Upload Locations</strong></p>
+              <input class="form-control" placeholder="Address, Business Name">
+              <br>
+              <p>
+                Select:
+                <button class="btn btn-default btn-sm"
+                  ng-class="{'btn-success active': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
+                  ng-click="setSelectedTool('single')">Single</button>
+                <button class="btn btn-default btn-sm"
+                  ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
+                  ng-click="setSelectedTool('polygon')">Many</button>
+                <i class="fa fa-file-o"></i>
+              </p>
+              <p><strong>Targeted Locations</strong></p>
+              <ul style="padding: 0 20px">
+                <li>Businesses: {{plan.metadata.customers_businesses_total}}</li>
+                <li>Households: {{plan.metadata.customers_households_total}}</li>
+                <li>Towers: {{plan.metadata.customers_towers_total}}</li>
+              </ul>
+            </form>
           </div>
         </div>
       </div>
@@ -1457,11 +1507,11 @@
   <script src="javascripts/lib/controllers/fiber_plant_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_location_controller.js"></script>
   <script src="javascripts/lib/controllers/contextual_menu_controller.js"></script>
-  <script src="javascripts/lib/controllers/selection_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
   <script src="javascripts/lib/controllers/area_network_planning_controller.js"></script>
   <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
+  <script src="javascripts/lib/controllers/target_builder_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
@@ -1470,7 +1520,6 @@
   <script src="javascripts/lib/models/map_tools.js"></script>
   <script src="javascripts/lib/models/custom_overlay.js"></script>
   <script src="javascripts/lib/models/map_layers.js"></script>
-  <script src="javascripts/lib/models/network_planning.js"></script>
   <script src="javascripts/lib/models/state.js"></script>
   <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
   <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>

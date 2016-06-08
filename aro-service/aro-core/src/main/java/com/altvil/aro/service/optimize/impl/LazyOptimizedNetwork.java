@@ -1,15 +1,15 @@
 package com.altvil.aro.service.optimize.impl;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.AnalysisNode;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.interfaces.NetworkAssignment;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public class LazyOptimizedNetwork implements OptimizedNetwork {
 
@@ -39,8 +39,8 @@ public class LazyOptimizedNetwork implements OptimizedNetwork {
 
 
 	@Override
-	public FiberNetworkConstraints getFiberNetworkConstraints() {
-		return networkModelBuilder.getFiberNetworkConstraints() ;
+	public FtthThreshholds getFiberNetworkConstraints() {
+		return networkModelBuilder.getFtthThreshholds() ;
 	}
 
 

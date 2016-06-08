@@ -12,7 +12,7 @@ public class NetworkPlanSerializer<T> {
 		this.planId = planId;
 	}
 
-	public T serialize(CompositeNetworkModel compositeModel,
+	public PlanModifications<T> serialize(CompositeNetworkModel compositeModel,
 			PlanModifications<T> planMods) {
 
 		compositeModel
@@ -25,6 +25,7 @@ public class NetworkPlanSerializer<T> {
 							equipmentSerializer.serialize(model
 									.getFiberSourceMapping());
 							equipmentSerializer.commit(planMods::addEquipment);
+							planMods.setLocationDemand(equipmentSerializer.getLocationDemand()) ;
 
 							FiberRouteSerializer fibererSerializer = new FiberRouteSerializer(
 									planId, model, equipmentSerializer
@@ -32,10 +33,11 @@ public class NetworkPlanSerializer<T> {
 							fibererSerializer.serialize(model
 									.getFiberSourceMapping());
 							fibererSerializer.commit(planMods::addFiber);
+							planMods.setFiberLengths(fibererSerializer.getFiberLengthMap()) ;
 
 						});
 
-		return planMods.commit();
+		return planMods ;
 
 	}
 

@@ -13,20 +13,22 @@ module.exports = class Location {
   * Returns the businesses and households locations except the selected ones
   */
   static findLocations (plan_id, type, filters, viewport) {
-    var joins = {
-      businesses: 'JOIN businesses b ON b.location_id = locations.id',
-      households: 'JOIN households h ON h.location_id = locations.id'
+    var where = {
+      businesses: 'WHERE locations.total_businesses > 0',
+      households: 'WHERE locations.total_households > 0',
+      '': ''
     }
-    joins[''] = `${joins['businesses']} ${joins['households']}`
     var sql = `
-        SELECT locations.id, locations.geom
-          FROM locations ${joins[type || '']}
+        SELECT locations.id, locations.geom, total_businesses, total_households
+          FROM locations
+               ${where[type || '']}
         EXCEPT
-        SELECT locations.id, locations.geom
-          FROM locations ${joins[type || '']}
+        SELECT locations.id, locations.geom, total_businesses, total_households
+          FROM locations
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
            AND plan_targets.location_id = locations.id
+               ${where[type || '']}
       GROUP BY locations.id
     `
     return database.points(sql, [plan_id], true, viewport)
@@ -52,7 +54,7 @@ module.exports = class Location {
   */
   static findSelected (plan_id, viewport) {
     var sql = `
-      SELECT locations.id, locations.geom AS geom, true AS selected
+      SELECT locations.id, locations.geom AS geom, true AS selected, total_businesses, total_households
         FROM aro.locations
         -- show only businesses and households. Do not show towers for example
         JOIN businesses b ON b.location_id = locations.id
@@ -146,54 +148,58 @@ module.exports = class Location {
       })
       .then((_info) => {
         info = _info
-        var sql = `
-          SELECT ct.name, SUM(households)::integer as households, SUM(businesses)::integer as businesses FROM (
-            (SELECT
-              bct.customer_type_id as id, COUNT(*)::integer AS businesses, 0 as households
-            FROM
-              businesses b
-            JOIN
-              client.business_customer_types bct
-            ON
-              bct.business_id = b.id
-            WHERE
-              b.location_id=$1
-            GROUP BY bct.customer_type_id)
+        info.customer_profile = {}
+        var sql
 
-            UNION
+        var add = (type, values) => {
+          info.customer_profile[type] = values
+        }
 
-            (SELECT
-              hct.customer_type_id as id, 0 as businesses, COUNT(*)::integer AS households
-            FROM
-              households h
-            JOIN
-              client.household_customer_types hct
-            ON
-              hct.household_id = h.id
-            WHERE
-              h.location_id=$1
-            GROUP BY hct.customer_type_id)
-
-            ) t
-          JOIN
-            client.customer_types ct
-          ON
-            ct.id=t.id
-          GROUP BY
-            ct.name
-          ORDER BY
-            ct.name
+        sql = `
+          SELECT
+            ct.name, COUNT(*)::integer AS total
+          FROM businesses b
+          JOIN client.business_customer_types bct
+            ON bct.business_id = b.id
+          JOIN client.customer_types ct
+            ON ct.id = bct.customer_type_id
+          WHERE b.location_id=$1
+          GROUP BY ct.id
         `
-        return database.query(sql, [location_id])
+        var businesses = database.query(sql, [location_id])
+          .then((values) => add('businesses', values))
+
+        sql = `
+          SELECT
+            ct.name, COUNT(*)::integer AS total
+          FROM households h
+          JOIN client.household_customer_types hct
+            ON hct.household_id = h.id
+          JOIN client.customer_types ct
+            ON ct.id = hct.customer_type_id
+          WHERE h.location_id=$1
+          GROUP BY ct.id
+        `
+        var households = database.query(sql, [location_id])
+          .then((values) => add('households', values))
+
+        sql = `
+          SELECT
+            ct.name, COUNT(*)::integer AS total
+          FROM towers t
+          JOIN client.tower_customer_types tct
+            ON tct.tower_id = t.id
+          JOIN client.customer_types ct
+            ON ct.id = tct.customer_type_id
+          WHERE t.location_id=$1
+          GROUP BY ct.id
+        `
+        var towers = database.query(sql, [location_id])
+          .then((values) => add('towers', values))
+
+        return Promise.all([businesses, households, towers])
       })
-      .then((customer_types) => {
-        info.customer_types = customer_types
-
-        info.customers_businesses_total = customer_types
-          .reduce((total, customer_type) => total + customer_type.businesses, 0)
-        info.customers_households_total = customer_types
-          .reduce((total, customer_type) => total + customer_type.households, 0)
-
+      .then(() => {
         var sql = `
           SELECT address, ST_AsGeojson(geog)::json AS geog,
             (SELECT distance FROM client.locations_distance_to_carrier
@@ -212,6 +218,10 @@ module.exports = class Location {
     var location_id
     var type = values.type
 
+    var total_households = +values.number_of_households || 0
+    var total_businesses = type === 'combo' || type === 'commercial' ? 1 : 0
+    var total_towers = 0
+
     return Promise.resolve()
       .then(() => {
         var params = [
@@ -222,12 +232,15 @@ module.exports = class Location {
           values.state,
           values.zipcode,
           `POINT(${values.lon} ${values.lat})`,
-          `POINT(${values.lon} ${values.lat})`
+          `POINT(${values.lon} ${values.lat})`,
+          total_households,
+          total_businesses,
+          total_towers
         ]
         var sql = `
           INSERT INTO aro.locations
-            (address, lat, lon, city, state, zipcode, geog, geom)
-          VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7), ST_GeomFromText($8, 4326))
+            (address, lat, lon, city, state, zipcode, geog, geom, total_households, total_businesses, total_towers)
+          VALUES ($1, $2, $3, $4, $5, $6, ST_GeogFromText($7), ST_GeomFromText($8, 4326), $9, $10, $11)
           RETURNING id
         `
         return database.findOne(sql, params)
@@ -240,15 +253,17 @@ module.exports = class Location {
         } else if (type === 'residential') {
           return insertHousehold()
         } else if (type === 'combo') {
-          return insertBusiness().then(() => insertHousehold())
+          return Promise.all([insertBusiness(), insertHousehold()])
         }
       })
-      .then(() => database.findOne('SELECT id, ST_AsGeoJSON(geog)::json AS geom FROM aro.locations WHERE id=$1', [location_id]))
+      .then(() => database.findOne('SELECT id, ST_AsGeoJSON(geog)::json AS geom, total_businesses, total_households FROM aro.locations WHERE id=$1', [location_id]))
       .then((row) => {
         return {
           'type': 'Feature',
           'properties': {
-            'id': row.id
+            'id': row.id,
+            'total_businesses': row.total_businesses,
+            'total_households': row.total_households
           },
           'geometry': row.geom
         }

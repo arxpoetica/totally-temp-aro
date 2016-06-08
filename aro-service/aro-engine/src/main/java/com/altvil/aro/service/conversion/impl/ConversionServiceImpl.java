@@ -8,7 +8,7 @@ import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
-@Service
+@Service("serializationService")
 public class ConversionServiceImpl implements SerializationService {
 
 	@Override

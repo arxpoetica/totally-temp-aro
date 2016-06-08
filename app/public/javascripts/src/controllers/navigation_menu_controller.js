@@ -4,6 +4,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   // Controller instance variables
   $scope.new_plan_name = 'Untitled Plan'
   $scope.new_plan_area_name = ''
+  $scope.plan_area_label = 'Choose a ' + config.ui.labels.wirecenter
   $scope.new_plan_area_centroid
   $scope.new_plan_area_bounds
   $scope.edit_plan_name
@@ -16,10 +17,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.market_size_scale_s = 'B'
   }
 
-  $('#new-plan select').select2({
-    placeholder: 'Enter a CLLI Code'
+  $('#new-plan select, #plan-combo select').select2({
+    placeholder: config.ui.default_form_values.create_plan.select_area_text
   }).on('change', () => {
-    $scope.look_up_area()
+    $scope.lookUpArea()
   })
 
   $scope.shared_plan
@@ -33,10 +34,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.show_customer_profile = config.ui.top_bar_tools.indexOf('customer_profile') >= 0
   $scope.show_financial_profile = config.ui.top_bar_tools.indexOf('financial_profile') >= 0
 
-  var new_plan_map
+  var newPlanMap
 
   function initMap () {
-    if (new_plan_map) return
+    if (newPlanMap) return
 
     var styles = [{
       featureType: 'poi',
@@ -44,7 +45,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       stylers: [ { visibility: 'off' } ]
     }]
 
-    new_plan_map = new google.maps.Map(document.getElementById('new_plan_map_canvas'), {
+    newPlanMap = new google.maps.Map(document.getElementById('newPlanMap_canvas'), {
       zoom: 12,
       center: {lat: -34.397, lng: 150.644},
       styles: styles,
@@ -53,8 +54,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.look_up_area = function () {
-    $scope.new_plan_area_name = $('#new-plan select').select2('val')
+  $scope.lookUpArea = function () {
+    $scope.new_plan_area_name = $('#new-plan select').select2('val') || $('#plan-combo select').select2('val')
     var address = encodeURIComponent($scope.new_plan_area_name)
     $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address)
       .success((response) => {
@@ -63,12 +64,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         if (!result) return
         $scope.new_plan_area_name = result.formatted_address
         // use centroid...
-        new_plan_map.setCenter(result.geometry.location)
+        newPlanMap && newPlanMap.setCenter(result.geometry.location)
         // ...or use bounds
         // var bounds = new google.maps.LatLngBounds()
         // bounds.extend(new google.maps.LatLng(result.geometry.bounds.northeast.lat, result.geometry.bounds.northeast.lng))
         // bounds.extend(new google.maps.LatLng(result.geometry.bounds.southwest.lat, result.geometry.bounds.southwest.lng))
-        // new_plan_map.fitBounds(bounds)
+        // newPlanMap.fitBounds(bounds)
         $scope.new_plan_area_centroid = result.geometry.location
         $scope.new_plan_area_bounds = result.geometry.viewport
       })
@@ -79,6 +80,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     state.loadPlan(plan)
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
+    $('#plan-combo').modal('hide')
     var centroid = plan && plan.area_centroid
     if (centroid) {
       try {
@@ -97,35 +99,53 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('route_changed', (e) => {
     if (!$scope.plan) return
-    recalculate_market_profile()
+    recalculateMarketProfile()
   })
 
-  function recalculate_market_profile () {
+  ;['dragend', 'zoom_changed'].forEach((event_name) => {
+    $rootScope.$on('map_' + event_name, () => {
+      recalculateMarketProfile()
+    })
+  })
+
+  // --
+  function recalculateMarketProfile () {
     $scope.market_profile_calculating = true
-    var args = {
-      params: { type: 'route' }
-    }
-    $http.get('/market_size/plan/' + $scope.plan.id + '/calculate', args)
-      .success((response) => {
-        $scope.market_profile = response
-        $scope.market_profile_current_year = _.findWhere($scope.market_profile.market_size, { year: new Date().getFullYear() })
-        if ($scope.market_profile_current_year) {
-          $scope.market_profile_fair_share_current_year_total = $scope.market_profile_current_year.total * response.share
+    map.ready(() => {
+      var bounds = map.getBounds()
+      var args = {
+        params: {
+          type: 'route',
+          nelat: bounds.getNorthEast().lat(),
+          nelon: bounds.getNorthEast().lng(),
+          swlat: bounds.getSouthWest().lat(),
+          swlon: bounds.getSouthWest().lng(),
+          zoom: map.getZoom(),
+          threshold: 0
         }
-        $scope.market_profile_calculating = false
-        $scope.market_profile_share = response.share
-      })
-      .error(() => {
-        $scope.market_profile_calculating = false
-      })
+      }
+      $http.get('/market_size/plan/' + $scope.plan.id + '/calculate', args)
+        .success((response) => {
+          $scope.market_profile = response
+          $scope.market_profile_current_year = _.findWhere($scope.market_profile.market_size, { year: new Date().getFullYear() })
+          if ($scope.market_profile_current_year) {
+            $scope.market_profile_fair_share_current_year_total = $scope.market_profile_current_year.total * response.share
+          }
+          $scope.market_profile_calculating = false
+          $scope.market_profile_share = response.share
+        })
+        .error(() => {
+          $scope.market_profile_calculating = false
+        })
+    })
   }
 
-  $scope.open_market_profile = () => {
+  $scope.openMarketProfile = () => {
     $rootScope.$broadcast('market_profile_selected', $scope.market_profile)
     tracker.track('Global market profile')
   }
 
-  $scope.open_customer_profile = () => {
+  $scope.openCustomerProfile = () => {
     $rootScope.$broadcast('customer_profile_selected', $scope.market_profile)
     tracker.track('Global customer profile')
   }
@@ -149,12 +169,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $rootScope.$broadcast('plan_selected', null)
       }
       $http.post('/network_plan/' + plan.id + '/delete').success((response) => {
-        $scope.load_plans()
+        $scope.loadPlans()
       })
     })
   }
 
-  $scope.load_plans = (callback) => {
+  $scope.loadPlans = (callback) => {
     var options = {
       url: '/network_plan/find_all',
       method: 'GET',
@@ -172,7 +192,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   var path = $location.path()
   if (path.indexOf('/plan/') === 0) {
     var plan_id = path.substring('/plan/'.length)
-    $scope.load_plans(() => {
+    $scope.loadPlans(() => {
       var plan = _.findWhere($scope.plans, { id: plan_id })
       if (plan) {
         $scope.select_plan(plan)
@@ -180,15 +200,22 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.show_plans = () => {
-    $scope.load_plans(() => {
+  $scope.showPlans = () => {
+    $scope.loadPlans(() => {
       $('#select-plan').modal('show')
       tracker.track('Open Analysis')
     })
   }
 
-  $scope.manage_network_plans = () => {
-    $scope.load_plans(() => {
+  $scope.showCombo = () => {
+    $scope.loadPlans(() => {
+      $('#plan-combo').modal('show')
+      tracker.track('Open Analysis')
+    })
+  }
+
+  $scope.manageNetworkPlans = () => {
+    $scope.loadPlans(() => {
       $('#manage-network-plans').modal('show')
       tracker.track('Manage Analyses')
     })
@@ -212,7 +239,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.new_plan_name = ''
   }
 
-  $scope.save_new_plan = () => {
+  $scope.saveNewPlan = () => {
     var params = {
       name: $scope.new_plan_name,
       area: {
@@ -224,7 +251,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/network_plan/create', params).success((response) => {
       $scope.select_plan(response)
       $('#new-plan').modal('hide')
-      $scope.load_plans()
+      $('#plan-combo').modal('hide')
+      $scope.loadPlans()
     })
   }
 
@@ -232,7 +260,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.new_plan_name = 'Untitled Analysis'
     $scope.new_plan_area_name = ''
     $('#new-plan select').select2('val', '')
-    new_plan_map.setCenter({lat: -34.397, lng: 150.644})
+    newPlanMap.setCenter({lat: -34.397, lng: 150.644})
   })
 
   $scope.save_as = () => {
@@ -247,7 +275,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.clear_plan = () => {
+  $scope.clearPlan = () => {
     swal({
       title: 'Are you sure?',
       text: 'You will not be able to recover the deleted data!',
@@ -263,7 +291,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.export_kml_name = () => {
+  $scope.exportKmlName = () => {
     $('#export-plan').modal('show')
   }
 
@@ -300,23 +328,23 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  var nonLinearSlider = document.getElementById('year-slider')
-  noUiSlider.create(nonLinearSlider, {
-    behaviour: 'tap',
-    connect: true,
-    start: [ 2016, 2019 ],
-    range: {
-      min: 2016,
-      max: 2019,
-      '0%': [ 2016, 1 ],
-      '100%': [ 2019, 1 ]
-    },
-    pips: {
-      mode: 'values',
-      values: [2016, 2017, 2018, 2019],
-      density: 0
-    }
-  })
+  // var nonLinearSlider = document.getElementById('year-slider')
+  // noUiSlider.create(nonLinearSlider, {
+  //   behaviour: 'tap',
+  //   connect: true,
+  //   start: [ 2016, 2019 ],
+  //   range: {
+  //     min: 2016,
+  //     max: 2019,
+  //     '0%': [ 2016, 1 ],
+  //     '100%': [ 2019, 1 ]
+  //   },
+  //   pips: {
+  //     mode: 'values',
+  //     values: [2016, 2017, 2018, 2019],
+  //     density: 0
+  //   }
+  // })
 
   google.charts.load('current', {'packages': ['gantt']})
 
@@ -335,11 +363,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     data.addColumn('string', 'Dependencies')
 
     data.addRows([
-      ['ABC123', 'ABC123', new Date(2016, 0, 1), new Date(2016, 0, 5), null, 100, null],
-      ['ABC124', 'ABC124', new Date(2016, 0, 2), new Date(2016, 0, 9), daysToMilliseconds(3), 25, null],
-      ['ABC125', 'ABC125', new Date(2016, 0, 3), new Date(2016, 0, 7), daysToMilliseconds(1), 20, null],
-      ['ABC126', 'ABC126', new Date(2016, 0, 4), new Date(2016, 0, 10), daysToMilliseconds(1), 0, null],
-      ['ABC127', 'ABC127', new Date(2016, 0, 5), new Date(2016, 0, 6), daysToMilliseconds(1), 100, null]
+      ['ABC123', 'ABC123', new Date(2016, 0, 1), new Date(2017, 0, 5), null, 100, null],
+      ['ABC124', 'ABC124', new Date(2016, 0, 2), new Date(2017, 0, 9), daysToMilliseconds(3), 25, null],
+      ['ABC125', 'ABC125', new Date(2017, 0, 3), new Date(2018, 0, 7), daysToMilliseconds(1), 20, null],
+      ['ABC126', 'ABC126', new Date(2017, 0, 4), new Date(2018, 0, 10), daysToMilliseconds(1), 0, null],
+      ['ABC127', 'ABC127', new Date(2018, 0, 5), new Date(2019, 0, 6), daysToMilliseconds(1), 100, null]
     ])
 
     var options = {

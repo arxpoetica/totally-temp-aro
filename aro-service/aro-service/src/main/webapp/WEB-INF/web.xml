@@ -3,29 +3,59 @@
   version="3.0">
 
 	<context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/applicationContext*.xml</param-value>
-</context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/applicationContext*.xml classpath*:/aroServices.xml</param-value>
+	</context-param>
 
 	<listener>
 	   <listener-class>
 	        org.springframework.web.context.ContextLoaderListener
 	   </listener-class>
 	</listener> 
-	 <servlet>
+	<servlet>
         <servlet-name>aroServlet</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- Set dispatchOptionsRequest and async-supported to enable support for WebSockets -->
+	    <init-param>
+	      <param-name>dispatchOptionsRequest</param-name>
+	      <param-value>true</param-value>
+	    </init-param>
+        <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>default</servlet-name>
+        <servlet-class>
+          org.apache.catalina.servlets.DefaultServlet
+        </servlet-class>
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>1000</param-value>
+        </init-param>
+        <init-param>
+            <param-name>listings</param-name>
+            <param-value>false</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/static/*</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>aroServlet</servlet-name>
         <url-pattern>/rest/*</url-pattern>
+        <url-pattern>/ws/*</url-pattern>
     </servlet-mapping>
 
     <filter>
         <filter-name>requestLoggingFilter</filter-name>
         <filter-class>org.springframework.web.filter.CommonsRequestLoggingFilter</filter-class>
+        <async-supported>true</async-supported>
         <init-param>
             <param-name>includePayload</param-name>
             <param-value>true</param-value>
@@ -42,12 +72,22 @@
             <param-name>maxPayloadLength</param-name>
             <param-value>2000</param-value>
         </init-param>
-
+    </filter>
+    <filter>
+		<filter-name>aroServletAuthenticationFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<init-param>
+			<param-name>targetBeanName</param-name>
+			<param-value>jwtAuthenticationFilterBean</param-value>
+		</init-param>
     </filter>
 
     <filter-mapping>
         <filter-name>requestLoggingFilter</filter-name>
         <servlet-name>aroServlet</servlet-name>
-        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>aroServletAuthenticationFilter</filter-name>
+        <servlet-name>aroServlet</servlet-name>
     </filter-mapping>
 </web-app>

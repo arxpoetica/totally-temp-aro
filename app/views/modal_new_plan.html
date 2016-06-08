@@ -6,32 +6,11 @@
         <h4 class="modal-title">Create New Network Plan</h4>
       </div>
       <div class="modal-body">
-        <form class="form-horizontal">
-          <div class="form-group">
-            <label class="col-sm-4 control-label">Plan Name</label>
-            <div class="col-sm-8">
-              <input type="text" class="form-control" ng-focus="clear_default_text()" ng-model="new_plan_name">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-sm-4 control-label">Choose a Wirecenter</label>
-            <div class="col-sm-8">
-              <select style="width: 100%">
-                <option></option>
-                <% areas.forEach(function(area) { %>
-                  <option value="<%= area.value %>"><%= area.name %></option>
-                <% }) %>
-              </select>
-              <div style="width:100%; height:100%; padding: 20px 0">
-                <div id="new_plan_map_canvas"></div>
-              </div>
-            </div>
-          </div>
-        </form>
+        <% include modal_new_plan_body.html %>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" ng-click="save_new_plan()">Create Plan</button>
+        <button type="button" class="btn btn-primary" ng-click="saveNewPlan()">Create Plan</button>
       </div>
     </div>
   </div>

@@ -106,18 +106,29 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       icon: 'fa fa-search'
     },
     {
+      id: 'financial_profile',
+      name: 'Financial Profile',
+      short_name: 'F',
+      icon: 'fa fa-usd'
+    },
+    {
       id: 'area_network_planning',
       name: 'Area Network Planning',
       short_name: 'A',
       icon: 'icon icon-network-planning'
     },
     {
-      id: 'financial_profile',
-      name: 'Financial Profile',
-      short_name: 'F',
-      icon: 'fa fa-usd'
+      id: 'target_builder',
+      name: 'Target builder',
+      short_name: 'TB',
+      icon: 'icon icon-network-planning-targeted'
     }
   ]
+
+  if (config.ARO_CLIENT === 'demo') {
+    var tool = tools.available_tools.find((item) => item.id === 'area_network_planning')
+    tools.available_tools.splice(tools.available_tools.indexOf(tool), 1)
+  }
 
   return tools
 }])

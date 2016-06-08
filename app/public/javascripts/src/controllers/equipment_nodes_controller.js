@@ -1,12 +1,14 @@
-/* global app user_id config map _ google swal */
+/* global app user_id config map _ google swal config */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'network_planning', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, network_planning) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
+  $scope.ARO_CLIENT = config.ARO_CLIENT
+  $scope.showFeederFiber = true
+  $scope.showDistributionFiber = true
 
   $scope.selected_tool = null
-  $scope.show_clear_nodes = config.ui.map_tools.equipment.actions.indexOf('clear') >= 0
 
   var network_nodes_layer = new MapLayer({
     type: 'network_nodes',
@@ -14,19 +16,21 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     short_name: 'NN',
     style_options: {
       normal: {
-        icon: '/images/map_icons/central_office.png',
         visible: true
       },
       selected: {
-        icon: '/images/map_icons/central_office_selected.png',
         visible: true
       }
+    },
+    declarativeStyles: (feature, styles) => {
+      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${feature.getProperty('name')}.png`
     }
+
   })
   network_nodes_layer.hide_in_ui = true
 
   var fiber_plant_layer = new MapLayer({
-    name: 'Fiber',
+    name: config.ui.labels.fiber,
     type: 'fiber_plant',
     short_name: 'F',
     api_endpoint: '/network/fiber_plant/:client_carrier_name',
@@ -135,22 +139,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.clear_nodes = () => {
-    swal({
-      title: 'Are you sure?',
-      text: 'You will not be able to recover the deleted data!',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, clear them!',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, () => {
-      $http.post('/network/nodes/' + $scope.plan.id + '/clear').success((response) => {
-        network_nodes_layer.reloadData()
-      })
-    })
-  }
-
   $scope.place_random_equipment = () => {
     var gm_event = {
       latLng: new google.maps.LatLng(40.77682494132765, -73.95257949829102)
@@ -194,7 +182,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     var arr = data_layer.addGeoJson(feature)
     arr.forEach((feature) => {
       data_layer.overrideStyle(feature, {
-        icon: '/images/map_icons/' + type + '.png',
+        icon: `/images/map_icons/${config.ARO_CLIENT}/${type}.png`,
         draggable: true
       })
     })
@@ -226,4 +214,28 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
     })
   })
+
+  $scope.changedFiberVisibility = () => {
+    var routeLayer = map_layers.getEquipmentLayer('route')
+    if (!$scope.showFeederFiber && !$scope.showDistributionFiber) {
+      routeLayer.hide()
+    } else {
+      routeLayer.setDeclarativeStyle((feature, styles) => {
+        if (feature.getProperty('fiber_type') === 'feeder') {
+          styles.strokeColor = 'red'
+          styles.strokeWeight = 2
+          if (!$scope.showDistributionFiber) {
+            styles.visible = false
+          }
+        } else {
+          styles.strokeColor = 'blue'
+          styles.strokeWeight = 4
+          if (!$scope.showFeederFiber) {
+            styles.visible = false
+          }
+        }
+      })
+      routeLayer.show()
+    }
+  }
 }])

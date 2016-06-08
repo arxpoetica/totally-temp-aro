@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'network_planning', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, network_planning) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -12,33 +12,33 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
     area_layers['wirecenter'] = new MapLayer({
       short_name: 'WC',
-      name: 'Wirecenter',
+      name: config.ui.labels.wirecenter,
       type: 'wirecenter',
       api_endpoint: '/wirecenters',
       highlighteable: true,
       style_options: {
         normal: {
-          fillColor: 'green',
-          strokeColor: 'green',
-          strokeWeight: 2
+          strokeColor: '#00ff00',
+          strokeWeight: 4,
+          fillOpacity: 0
         },
         highlight: {
-          fillColor: 'green',
-          strokeColor: 'green',
-          strokeWeight: 4
+          strokeColor: '#00ff00',
+          strokeWeight: 6,
+          fillOpacity: 0
         }
       },
       reload: 'always',
       threshold: 0,
-      minZoom: 12
+      minZoom: 6
     })
   }
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
-    area_layers['county_subdivisions_layer'] = new MapLayer({
+    area_layers['county_subdivisions'] = new MapLayer({
       short_name: 'CS',
       name: 'County Subdivisions',
-      type: 'county_subdivisions_layer',
+      type: 'county_subdivisions',
       api_endpoint: '/county_subdivisions/36',
       highlighteable: true,
       style_options: {
@@ -116,13 +116,13 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     $scope.boundaries = []
     if (!plan) return
 
-    var county_subdivisions = area_layers['county_subdivisions_layer']
+    var county_subdivisions = area_layers['county_subdivisions']
     var census_blocks = area_layers['census_blocks_layer']
 
     if (plan && (county_subdivisions || census_blocks)) {
       $http.get(`/network_plan/${plan.id}/area_data`)
         .success((response) => {
-          area_layers['county_subdivisions_layer'].setApiEndpoint('/county_subdivisions/' + response.statefp)
+          area_layers['county_subdivisions'].setApiEndpoint('/county_subdivisions/' + response.statefp)
           area_layers['census_blocks_layer'].setApiEndpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
         })
     }
@@ -231,7 +231,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     var name = event.feature.getProperty('name')
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson((obj) => {
-        if (network_planning.getAlgorithm()) {
+        if (false) { // TODO
           tracker.track('Boundaries / Network planning')
           $scope.network_planning_boundary(obj.geometry)
         } else {
@@ -349,10 +349,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $scope.network_planning_boundary = (geojson) => {
-    var data = {
-      boundary: geojson,
-      algorithm: network_planning.getAlgorithm().id
-    }
+    var data = { boundary: geojson }
     var config = {
       url: '/network/nodes/' + $scope.plan.id + '/select_boundary',
       method: 'post',

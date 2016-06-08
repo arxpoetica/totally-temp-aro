@@ -76,6 +76,11 @@ module.exports = class Database {
       .then((rows) => rows.map((row) => row[field]))
   }
 
+  static intersects (viewport, column, prefix) {
+    if (!viewport) return ''
+    return `${prefix} ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText('${viewport.linestring}')), 4326), ${column})`
+  }
+
   static points (sql, params, asFeatureCollection, viewport) {
     var finalSql
     if (viewport.zoom > viewport.threshold) {

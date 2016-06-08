@@ -31,6 +31,7 @@ app.controller('financial_profile_controller', ['$scope', '$rootScope', ($scope,
 
     chart && chart.destroy()
     var options = {
+      bezierCurve: false,
       scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }

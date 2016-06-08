@@ -1,6 +1,5 @@
 package com.altvil.test.graph;
 
-
 import org.junit.Test;
 
 public class TestFDT {

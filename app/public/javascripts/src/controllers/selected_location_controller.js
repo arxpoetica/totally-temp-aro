@@ -1,9 +1,10 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular randomColor */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, map_layers, tracker, network_planning) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, map_layers, tracker, map_tools) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
+  $scope.entityType = 'businesses'
 
   $scope.select_random_location = () => {
     var map_layer = map_layers.getFeatureLayer('locations')
@@ -21,44 +22,32 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     $rootScope.$broadcast('contextual_menu_feature', options, map_layer, feature)
   }
 
-  if (config.route_planning.length === 0) {
-    $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
-      if (map_layer.type !== 'locations') return
-      // if (network_planning.getAlgorithm().interactive) return;
-      var feature = options.feature
-      var id = feature.getProperty('id')
-      open_location(id)
-      tracker.track('Location selected')
-    })
-  } else {
-    $rootScope.$on('contextual_menu_feature', (event, options, map_layer, feature) => {
-      if (map_layer.type !== 'locations' && map_layer.type !== 'selected_locations') return
-      // if (!network_planning.getAlgorithm().interactive) return
-      options.add('See more information', (map_layer, feature) => {
-        var id = feature.getProperty('id')
-        open_location(id)
-      })
-    })
-  }
-
-  $rootScope.$on('open_location', (event, id) => {
-    open_location(id)
+  $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+    if (map_layer.type !== 'locations' || map_tools.is_visible('target_builder')) return
+    var feature = options.feature
+    var id = feature.getProperty('id')
+    openLocation(id)
+    tracker.track('Location selected')
   })
 
-  function open_location (id) {
+  $rootScope.$on('openLocation', (event, id) => {
+    openLocation(id)
+  })
+
+  function openLocation (id) {
     $http.get('/locations/' + id + '/show').success((response) => {
       response.id = id
-      set_selected_location(response)
+      setSelectedLocation(response)
       $('#selected_location_controller').modal('show')
       $('#selected_location_market_profile select[multiple]').select2('val', [])
       $scope.market_size = null
       $scope.fair_share = null
-      $scope.calculate_market_size()
+      $scope.calculateMarketSize()
     })
   }
 
   $('#selected_location_controller').on('shown.bs.tab', (e) => {
-    show_current_chart()
+    showCurrentChart()
   })
 
   $scope.update = () => {
@@ -71,7 +60,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     })
   }
 
-  function set_selected_location (location) {
+  function setSelectedLocation (location) {
     location.total_costs = location.entry_fee +
                           location.household_install_costs * location.number_of_households +
                           location.business_install_costs * location.number_of_businesses
@@ -90,11 +79,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     $scope.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
 
-    preserve_business_detail()
+    preserveBusinessDetail()
     $scope.businesses = null
     $scope.selected_business = null
     $http.get('/locations/businesses/' + location.id).success((response) => {
-      preserve_business_detail()
+      preserveBusinessDetail()
       $scope.businesses = response
       if (!location.address) {
         var business = $scope.businesses.filter((business) => {
@@ -105,7 +94,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     })
   }
 
-  function preserve_business_detail () {
+  function preserveBusinessDetail () {
     $('#selected_location_businesses tbody:first').append($('#location_business_selected_info').hide())
   }
 
@@ -125,13 +114,14 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     })
   })
 
-  $scope.calculate_market_size = () => {
+  $scope.calculateMarketSize = () => {
     $scope.loading = true
     var params = {
       industry: arr($scope.industry),
       employees_range: arr($scope.employees_range),
       product: arr($scope.product),
-      customer_type: $scope.customer_type && $scope.customer_type.id
+      customer_type: $scope.customer_type && $scope.customer_type.id,
+      entity_type: $scope.entityType
     }
     var args = {
       params: params
@@ -141,8 +131,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       $scope.fair_share = response.fair_share
       $scope.share = response.share
       $scope.loading = false
-      destroy_charts()
-      show_current_chart()
+      destroyCharts()
+      showCurrentChart()
     })
   }
 
@@ -183,25 +173,29 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     })
   }
 
-  function destroy_market_size_chart () {
+  function destroyMarketSizeChart () {
     market_size_chart && market_size_chart.destroy()
     $('#location_market_size_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
-  function destroy_fair_share_chart () {
+  function destroyFairShareChart () {
     fair_share_chart && fair_share_chart.destroy()
     $('#location_fair_share_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
-  function destroy_customer_profile_chart () {
-    customer_profile_chart && customer_profile_chart.destroy()
+  function destroyCustomerProfileChart (type) {
+    customerProfileCharts[type] && customerProfileCharts[type].destroy()
     $('#location_customer_profile_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
-  function destroy_charts () {
-    destroy_market_size_chart()
-    destroy_fair_share_chart()
-    destroy_customer_profile_chart()
+  function destroyCustomerProfileCharts () {
+    Object.keys(customerProfileCharts).forEach(destroyCustomerProfileChart)
+  }
+
+  function destroyCharts () {
+    destroyMarketSizeChart()
+    destroyFairShareChart()
+    destroyCustomerProfileCharts()
   }
 
   function arr (value) {
@@ -209,19 +203,19 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     return value.map((elem) => elem.id).join(',')
   }
 
-  function show_current_chart () {
+  function showCurrentChart () {
     var href = $('#selected_location_controller .nav-tabs > .active a').attr('href')
     if (href === '#selected_location_fair_share') {
-      show_fair_share_chart()
+      showFaiShareChart()
     } else if (href === '#selected_location_market_profile') {
-      show_market_size_chart()
+      showMarketProfileCharts()
     } else if (href === '#selected_location_customer_profile') {
-      show_customer_profile_chart()
+      showCustomerProfileCharts()
     }
   }
 
   var market_size_chart
-  function show_market_size_chart () {
+  function showMarketProfileCharts () {
     var dataset = {
       label: 'Market size',
       fillColor: 'rgba(151,187,205,0.2)',
@@ -261,12 +255,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }
     var ctx = document.getElementById('location_market_size_chart').getContext('2d')
-    destroy_market_size_chart()
+    destroyMarketSizeChart()
     market_size_chart = new Chart(ctx).Line(data, options)
   };
 
   var fair_share_chart = null
-  function show_fair_share_chart () {
+  function showFaiShareChart () {
     $scope.fair_share = $scope.fair_share || []
     var total = $scope.fair_share.reduce((total, carrier) => total + carrier.value, 0)
 
@@ -284,52 +278,41 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       tooltipTemplate: `<%if (label){%><%=label%>: <%}%><%= value %>%` // eslint-disable-line
     }
     var ctx = document.getElementById('location_fair_share_chart').getContext('2d')
-    destroy_fair_share_chart()
+    destroyFairShareChart()
     fair_share_chart = new Chart(ctx).Pie(data, options)
     document.getElementById('location_fair_share_chart_legend').innerHTML = fair_share_chart.generateLegend()
   }
 
-  var customer_profile_chart = null
-  function show_customer_profile_chart () {
-    var n = 0
-    if ($scope.show_households) {
-      n = $scope.location.customer_types.length * 4
-    } else {
-      n = $scope.location.customer_types.length * 2
-    }
-    var colors = randomColor({ seed: 1, count: n })
+  var customerProfileCharts = {}
+  function showCustomerProfileCharts () {
+    ['households', 'businesses', 'towers'].forEach(showCustomerProfileChart)
+  }
+
+  var customerTypeColorsArray = randomColor({ seed: 1, count: 3 })
+  var customerTypeColor = {}
+  function showCustomerProfileChart (type) {
+    var customer_types = $scope.location.customer_profile[type]
 
     var data = []
-    // var total = $scope.location.customers_businesses_total + $scope.location.customers_households_total
-    $scope.location.customer_types.forEach((customer_type) => {
-      var color
-      if ($scope.show_households) {
-        color = colors.shift()
-        data.push({
-          label: customer_type.name + ' households',
-          value: customer_type.households,
-          color: color,
-          highlight: tinycolor(color).lighten().toString()
-        })
-      }
-
-      color = colors.shift()
+    customer_types.forEach((customerType) => {
+      var color = customerTypeColor[customerType.name] || customerTypeColorsArray.shift()
+      customerTypeColor[customerType.name] = color
       data.push({
-        label: customer_type.name + ' businesses',
-        value: customer_type.businesses,
+        label: customerType.name,
+        value: customerType.total,
         color: color,
         highlight: tinycolor(color).lighten().toString()
       })
     })
 
     var options = {
-      tooltipTemplate: `<%if (label){%><%=label%>: <%}%><%= value %>` // eslint-disable-line
+      tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value %>'
     }
-    var ctx = document.getElementById('location_customer_profile_chart').getContext('2d')
-    destroy_customer_profile_chart()
-    customer_profile_chart = new Chart(ctx).Pie(data, options)
-    document.getElementById('location_customer_profile_chart_legend').innerHTML = customer_profile_chart.generateLegend()
-  };
+    var ctx = document.getElementById('location_customer_profile_chart_' + type).getContext('2d')
+    destroyCustomerProfileChart(type)
+    customerProfileCharts[type] = new Chart(ctx).Pie(data, options)
+    document.getElementById('location_customer_profile_chart_legend_' + type).innerHTML = customerProfileCharts[type].generateLegend()
+  }
 
   $scope.show_market_profile = (business) => {
     if ($scope.selected_business && $scope.selected_business.id === business.id) {
@@ -355,17 +338,17 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     }
     $http.get('/market_size/business/' + $scope.selected_business.id, args).success((response) => {
       $scope.business_market_size = response.market_size
-      show_business_chart()
+      showBusinessChart()
     })
   }
 
-  function destroy_business_market_size_chart () {
+  function destroyBusinessMarketSizeChart () {
     business_market_size_chart && business_market_size_chart.destroy()
     $('#business_market_size_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
   var business_market_size_chart
-  function show_business_chart () {
+  function showBusinessChart () {
     var dataset = {
       label: 'Market size',
       fillColor: 'rgba(151,187,205,0.2)',
@@ -391,7 +374,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }
-    destroy_business_market_size_chart()
+    destroyBusinessMarketSizeChart()
     var ctx = document.getElementById('business_market_size_chart').getContext('2d')
     business_market_size_chart = new Chart(ctx).Line(data, options)
   }
