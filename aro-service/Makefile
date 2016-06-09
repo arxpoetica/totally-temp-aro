@@ -18,6 +18,33 @@ SERVICE_IMAGE = $(ALTMAN_REGISTRY)/aro-service
 NODE_IMAGE = $(ALTMAN_REGISTRY)/aro-ignitenode
 
 ###############################
+# Deployment Variables
+###############################
+
+DEPLOY_BRANCH = origin/development
+#DEPLOY_TARGET
+
+###############################
+# Build Tools
+###############################
+
+git_clone:
+	(mkdir ~/aro && git clone https://octocat.altvil.com/AIT/ARO-Platform.git)
+git_pull:
+	(git pull)
+git_log:
+	(git log --oneline --decorate)
+git_reset_head:
+	(git reset --hard HEAD)
+checkout_branch:
+	(git checkout --track origin/$(branch))
+tail:
+	(sudo docker logs -f tail aro-service)
+
+server_redeploy: git_pull rebuild_war uninstall build_docker_image install push tail
+
+
+###############################
 # Host OS targets
 ###############################
 
@@ -29,44 +56,40 @@ deploy_war:
 
 war rebuild_war: compile_war deploy_war
 
-run_service run_docker:
+###############################
+# Docker targets
+###############################
+
+tag:
+	(docker tag aro-service $(SERVICE_IMAGE))
+
+push:
+	(docker push $(SERVICE_IMAGE))
+
+pull:
+	(docker pull $(SERVICE_IMAGE))
+
+build_docker:
+	(cd docker && docker build -t aro-service .)
+
+build_docker_image: build_docker tag
+
+build_tag_push: build_docker tag push
+
+uninstall:
+	(docker stop aro-service && docker rm aro-service && docker rmi -f $(SERVICE_IMAGE))
+
+run:
+ifeq($(DEPLOY_TARGET), server)
 	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e ARO_THREAD_COUNT=5 -d -p 8080:8080 --name aro-service $(SERVICE_IMAGE))
+else 
+	(docker run -e CATALINA_OPTS='' -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb $(SERVICE_IMAGE))
+endif
 
 pull_run: pull run_service
 
-###############################
-# Vagrant/Virtualbox targets
-###############################
+install: build_docker_image run
 
-vagrant_tag tag:
-	(docker tag aro-service $(SERVICE_IMAGE))
-
-vagrant_build_docker build_docker:
-	(cd docker && docker build -t aro-service .)
-
-vagrant_build_docker_image build_docker_image war_docker: vagrant_build_docker vagrant_tag
-
-vagrant_build_tag_push build_tag_push: build_docker tag push
-
-vagrant_push push:
-	(docker push $(SERVICE_IMAGE))
-
-vagrant_pull pull:
-	(docker pull $(SERVICE_IMAGE))
-
-vagrant_pull_run: pull_run
-
-vagrant_pull_run pull_run_vagrant: pull vagrant_run_service
-
-vagrant_uninstall uninstall:
-	(docker stop aro-service && docker rm aro-service && docker rmi -f $(SERVICE_IMAGE))
-
-vagrant_run_service vagrant_run vagrant_run_docker run_vagrant_docker:
-	(docker run -e CATALINA_OPTS='' -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb $(SERVICE_IMAGE))
-
-vagrant_install install_vagrant install: build_docker_image run_vagrant_docker
-
-vagrant_reinstall reinstall_vagrant reinstall: uninstall install_vagrant
 
 ###############################
 #IGNITE NODES IN VAGRANT DOCKER
