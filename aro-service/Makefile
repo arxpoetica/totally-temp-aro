@@ -39,7 +39,7 @@ git_reset_head:
 checkout_branch:
 	(git checkout --track origin/$(branch))
 tail:
-	(sudo docker logs -f tail aro-service)
+	(sudo docker logs -f aro-service)
 
 build_redeploy: git_pull rebuild_war uninstall build_docker_image install push tail
 
