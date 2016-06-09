@@ -43,6 +43,8 @@ tail:
 
 build_redeploy: git_pull rebuild_war uninstall build_docker_image install push tail
 
+pull_redeploy: uninstall pull_run
+
 redeploy: uninstall install	
 
 pull_run: pull run_service
