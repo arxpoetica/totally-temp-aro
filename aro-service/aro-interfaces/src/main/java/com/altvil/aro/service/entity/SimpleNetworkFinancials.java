@@ -4,10 +4,10 @@ import javax.print.attribute.standard.Finishings;
 
 public class SimpleNetworkFinancials {
 
-	public static double costPerAtomicUnit = 76.50;
-	public static double coRatio = 0.262;
-	public static double fdhRatio = 0.346;
-	public static double fdtRatio = 0.392;
+	public static double costPerAtomicUnit = 199.11;
+	public static double coRatio = 0.269;
+	public static double fdhRatio = 0.383;
+	public static double fdtRatio = 0.348;
 	public static double costPerMeter = 17.32;
 
 	private LocationDemand locationDemand;
