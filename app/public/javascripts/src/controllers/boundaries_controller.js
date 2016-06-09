@@ -25,7 +25,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         highlight: {
           strokeColor: '#00ff00',
           strokeWeight: 6,
-          fillOpacity: 0
+          fillOpacity: 0.1
         }
       },
       reload: 'always',

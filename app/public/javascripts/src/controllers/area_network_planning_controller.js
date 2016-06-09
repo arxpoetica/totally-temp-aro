@@ -14,9 +14,23 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.coverBusinesses = true
   $scope.coverTowers = true
 
-  var selectionLayer = new google.maps.Data()
-  $(document).ready(() => {
+  var selectionLayer
+  function initSelectionLayer () {
+    selectionLayer && selectionLayer.setMap(null)
+    selectionLayer = new google.maps.Data()
+    selectionLayer.setStyle({
+      fillColor: 'green'
+    })
     selectionLayer.setMap(map)
+  }
+
+  $(document).ready(() => {
+    initSelectionLayer()
+  })
+
+  $rootScope.$on('plan_selected', (e, plan) => {
+    initSelectionLayer()
+    $scope.selectedGeographies = []
   })
 
   $scope.forward = () => {
