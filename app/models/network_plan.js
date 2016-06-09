@@ -128,7 +128,7 @@ module.exports = class NetworkPlan {
               var type = edge.fiber_name
               fiberLengths[type] = (fiberLengths[type] || 0) + edge.edge_length
             })
-            var fiberLength = (edges.reduce((total, edge) => edge.edge_length, 0)).toFixed(2)
+            var fiberLength = (edges.reduce((total, edge) => total + edge.edge_length, 0)).toFixed(2)
             output.metadata.costs.push({
               name: `Fiber Capex (${fiberLength} mi)`,
               value: plan.fiber_cost || 0,
@@ -205,8 +205,8 @@ module.exports = class NetworkPlan {
         }).filter((i) => i)
         output.metadata.costs.push({
           name: 'Equipment Capex',
-          value: plan.equipment_cost,
-          itemized: itemized
+          value: plan.equipment_cost
+          // itemized: itemized
         })
         output.metadata.total_cost = plan.total_cost || 0
 
