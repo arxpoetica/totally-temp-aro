@@ -79,16 +79,10 @@ etl_test_aro:
 etl_test_all: etl_test_aro etl_test_client
 
 install_service:
-	(cd ../aro-service  && make pull_run)
+	(cd ../aro-service  && make pull_deploy)
 
 reinstall_service:
-	(cd ../aro-service  && make uninstall && make pull_run)
-
-install_vagrant_service:
-	(cd ../aro-service  && make pull run_vagrant_docker)
-
-reinstall_vagrant_service:
-	(cd ../aro-service  && make uninstall pull run_vagrant_docker)
+	(cd ../aro-service  && make uninstall && make pull_redeploy)
 
 webapp:
 	(cd ../app && npm install --no-bin-link && npm run build)
