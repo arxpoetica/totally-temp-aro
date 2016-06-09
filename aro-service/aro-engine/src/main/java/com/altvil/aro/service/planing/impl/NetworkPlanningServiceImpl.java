@@ -52,7 +52,6 @@ import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.OptimizerContext;
-import com.altvil.aro.service.optimize.PricingModel;
 import com.altvil.aro.service.plan.BasicFinanceEstimator;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.GlobalConstraint;
@@ -64,6 +63,7 @@ import com.altvil.aro.service.planing.ScoringStrategyFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
+import com.altvil.aro.service.price.PricingModel;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
