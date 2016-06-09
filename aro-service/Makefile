@@ -1,12 +1,14 @@
 usage help:
-	@echo '  Useful host OS targets include:'
-	@echo '    war         (compile service war and copy to docker build dir)'
-	@echo '  Useful virtualbox targets include:'
-	@echo '    war_docker  (build and tag the service docker image)'
-	@echo '    push        (pushes service docker image to altman registry)'
-	@echo '    install     (build service docker image, run in vagrant)'
-	@echo '    uninstall   (stop service container, rm container and rmi the aro-service image)'
-	@echo '    reinstall   (uninstall, then install)'
+	@echo '    ---- Deployment Build Machine Commands'
+	@echo '    deploy (run this on the build machine (compiles code, then creates a running docker image as well as registers docker image))'
+	@echo '    redeploy (run this on the build machine (compiles code, then creates a running docker image as well as registers docker image))'
+	@echo '    ---- Deployment Install  Commands'
+	@echo '    pull_deploy (pull down docker image and start docker instance)'
+	@echo '    pull_redeploy (unsitall current docker instance, then pull down docker image and start a new docker instance)'
+	@echo '    ---- Dev  Commands'
+	@echo '    war  (build and deploy war ready for DOCKER building. Typically done  on host machine)'
+	@echo '    dev_redeploy (unsitall current docker instance, build new docker image and start a new docker instance, Typically done  on virtual machine)'
+	@echo '    ---- IgniteCommands'
 	@echo '    node1       (launch ignite node container named 'node1' (works for node1 thru node4))'
 
 ###############################
@@ -24,34 +26,29 @@ NODE_IMAGE = $(ALTMAN_REGISTRY)/aro-ignitenode
 DEPLOY_BRANCH = origin/development
 DEPLOY_TARGET=server
 
+
 ###############################
-# Deployment Tools
+# Server Deployment Tools
 ###############################
 
-git_clone:
-	(mkdir ~/aro && git clone https://octocat.altvil.com/AIT/ARO-Platform.git)
-git_pull:
-	(git pull)
-git_log:
-	(git log --oneline --decorate)
-git_reset_head:
-	(git reset --hard HEAD)
-checkout_branch:
-	(git checkout --track origin/$(branch))
-tail:
-	(sudo docker logs -f aro-service)
+deploy: git_pull rebuild_war build_docker_image install push tail
 
-build_redeploy: git_pull rebuild_war uninstall build_docker_image install push tail
+redeploy: git_pull rebuild_war uninstall build_docker_image install push tail
 
-pull_redeploy: uninstall pull_run
+pull_deploy:  pull run
 
-redeploy: uninstall install	
-
-pull_run: pull run_service
+pull_redeploy: uninstall pull run
 
 
 ###############################
-# Host OS targets
+# dev Deployment Tools
+###############################
+
+dev_redeploy: uninstall install	
+
+
+###############################
+# Compile targets
 ###############################
 
 compile_war:
@@ -121,6 +118,25 @@ node1 node2 node3 node4:
 
 vagrant_ignite_visor:
 	(docker run -it --rm $(NODE_IMAGE) apache-ignite-fabric-1.5.0.final-bin/bin/ignitevisorcmd.sh)
+
+###############################
+# Def Util Tools
+###############################
+
+git_clone:
+	(mkdir ~/aro && git clone https://octocat.altvil.com/AIT/ARO-Platform.git)
+git_pull:
+	(git pull)
+git_log:
+	(git log --oneline --decorate)
+git_reset_head:
+	(git reset --hard HEAD)
+checkout_branch:
+	(git checkout --track origin/$(branch))
+tail:
+	(sudo docker logs -f aro-service)
+
+
 
 ###############################
 # EOF
