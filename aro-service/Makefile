@@ -25,7 +25,7 @@ DEPLOY_BRANCH = origin/development
 DEPLOY_TARGET=server
 
 ###############################
-# Build Tools
+# Deployment Tools
 ###############################
 
 git_clone:
@@ -41,7 +41,11 @@ checkout_branch:
 tail:
 	(sudo docker logs -f tail aro-service)
 
-server_redeploy: git_pull rebuild_war uninstall build_docker_image install push tail
+build_redeploy: git_pull rebuild_war uninstall build_docker_image install push tail
+
+pull_redeploy: uninstall pull install
+
+redeploy: uninstall install	
 
 
 ###############################
