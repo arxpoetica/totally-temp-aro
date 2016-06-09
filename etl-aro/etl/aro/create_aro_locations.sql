@@ -45,19 +45,19 @@ INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
         lon,
         hh.geog::geometry as geom,
         hh.geog
-    FROM temp_hh.households hh
-    JOIN aro.wirecenters wc
-        ON ST_Within(hh.geog::geometry, wc.geom)
-    WHERE
-        wc.wirecenter = 'NYCMNY79'
-        OR
-        wc.wirecenter = 'SYRCNYGS'
-        OR
-        wc.wirecenter = 'SYRCNYSU'
-        OR
-        wc.wirecenter = 'SYRCNYJS'
-        OR
-        wc.wirecenter = 'SYRCNYSA';
+    FROM temp_hh.households hh;
+    -- JOIN aro.wirecenters wc
+    --     ON ST_Within(hh.geog::geometry, wc.geom)
+    -- WHERE
+    --     wc.wirecenter = 'NYCMNY79'
+    --     OR
+    --     wc.wirecenter = 'SYRCNYGS'
+    --     OR
+    --     wc.wirecenter = 'SYRCNYSU'
+    --     OR
+    --     wc.wirecenter = 'SYRCNYJS'
+    --     OR
+    --     wc.wirecenter = 'SYRCNYSA';
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations
