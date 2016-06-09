@@ -43,9 +43,9 @@ tail:
 
 build_redeploy: git_pull rebuild_war uninstall build_docker_image install push tail
 
-pull_redeploy: uninstall pull install
-
 redeploy: uninstall install	
+
+pull_run: pull run_service
 
 
 ###############################
@@ -90,7 +90,6 @@ else
 	(docker run -e CATALINA_OPTS='' -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb $(SERVICE_IMAGE))
 endif
 
-pull_run: pull run_service
 
 install: build_docker_image run
 

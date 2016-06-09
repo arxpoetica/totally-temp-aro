@@ -125,8 +125,8 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 			double srcWeight = sp.getWeight(src) ;
 			double targetWeight = sp.getWeight(target) ;
 			
-			log.debug("leaf src weight " +  srcWeight) ;
-			log.debug("leaf target weight " +  targetWeight) ;
+			//log.debug("leaf src weight " +  srcWeight) ;
+			//log.debug("leaf target weight " +  targetWeight) ;
 			
 			if( targetWeight > srcWeight ) {
 				//log.debug("add leaf edge " + src + "->" + target);
