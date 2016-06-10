@@ -31,19 +31,19 @@ INSERT INTO aro.temp_households (location_id, address, city, state, zipcode, lat
 		hh.geog::geometry AS geom
 	FROM temp_hh.households hh
 	JOIN aro.locations loc
-		ON ST_Equals(loc.geom, hh.geog::geometry);
-	-- JOIN aro.wirecenters wc
- --  	ON ST_Within(hh.geog::geometry, wc.geom)
- --    WHERE
- --        wc.wirecenter = 'NYCMNY79'
- --        OR
- --        wc.wirecenter = 'SYRCNYGS'
- --        OR
- --        wc.wirecenter = 'SYRCNYSU'
- --        OR
- --        wc.wirecenter = 'SYRCNYJS'
- --        OR
- --        wc.wirecenter = 'SYRCNYSA';
+		ON ST_Equals(loc.geom, hh.geog::geometry)
+	JOIN aro.wirecenters wc
+  	ON ST_Within(hh.geog::geometry, wc.geom)
+    WHERE
+        wc.wirecenter = 'NYCMNY79'
+        OR
+        wc.wirecenter = 'SYRCNYGS'
+        OR
+        wc.wirecenter = 'SYRCNYSU'
+        OR
+        wc.wirecenter = 'SYRCNYJS'
+        OR
+        wc.wirecenter = 'SYRCNYSA';
 
 CREATE INDEX aro_temp_households_location_index ON aro.temp_households(location_id);
 CREATE INDEX aro_temp_households_geog_index ON aro.temp_households USING gist(geog);
