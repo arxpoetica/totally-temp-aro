@@ -16,27 +16,36 @@ import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.utils.func.Aggregator;
 import com.vividsolutions.jts.geom.Point;
 
-public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
+public class EquipmentSerializer extends
+		GraphMappingSerializer<NetworkNodeAssembler> {
 
-	private Aggregator<LocationDemand> demandAggregator = DefaultLocationDemand.demandAggregate();
-	private Set<LocationEntity> seenLocations = new HashSet<>() ;
-	
+	private Aggregator<LocationDemand> demandAggregator = DefaultLocationDemand
+			.demandAggregate();
+	private Set<LocationEntity> seenLocations = new HashSet<>();
+
 	public EquipmentSerializer(long planId) {
 		super(planId);
 	}
-	
-	
+
+	protected NetworkNodeAssembler trackDemand(NetworkNodeAssembler parent,
+			NetworkNodeAssembler child) {
+		parent.addChildDemand(child.getLocationDemand());
+		return child;
+	}
+
 	protected void add(LocationEntity entity) {
-		if( !seenLocations.contains(entity) ) {
-			seenLocations.add(entity) ;
-			demandAggregator.add(entity.getLocationDemand()) ;
+		if (!seenLocations.contains(entity)) {
+			seenLocations.add(entity);
+			demandAggregator.add(entity.getLocationDemand());
 		}
 	}
 
-	protected void serializeCentralOffice(NetworkNode parent,
+	protected void serializeCentralOffice(NetworkNodeAssembler parent,
 			GraphMapping graphMapping) {
 		// TODO Extend Serialization
-		NetworkNode equipment = null; // Load Existing
+		NetworkNodeAssembler equipment = new NetworkNodeAssembler(null); // Load
+																			// Existing
+																			// Data
 		register(graphMapping.getGraphAssignment(), equipment);
 
 		serialize(equipment, graphMapping.getChildren());
@@ -44,65 +53,67 @@ public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 	}
 
 	@Override
-	protected void serializeSplicePoint(NetworkNode parent,
+	protected void serializeSplicePoint(NetworkNodeAssembler parent,
 			GraphMapping graphMapping) {
 
-		NetworkNode equipment = null; // Load Existing
+		NetworkNodeAssembler equipment = null; // Load Existing
 		register(graphMapping.getGraphAssignment(), equipment);
 
 		serialize(equipment, graphMapping.getChildren());
 
 	}
 
-	protected void serializeFdh(NetworkNode parent, GraphMapping graphMapping) {
+	protected void serializeFdh(NetworkNodeAssembler parent,
+			GraphMapping graphMapping) {
 
-		serialize(
-				register(
-						graphMapping.getGraphAssignment(),
-						createNetworkNode(graphMapping.getGraphAssignment()
-								.getPoint(),
-								NetworkNodeTypeEnum.fiber_distribution_hub)),
+		NetworkNodeAssembler node = createNetworkNode(graphMapping
+				.getGraphAssignment().getPoint(),
+				NetworkNodeTypeEnum.fiber_distribution_hub);
+
+		serialize(register(graphMapping.getGraphAssignment(), node),
 				graphMapping.getChildren());
+
+		node.setParent(parent);
 
 	}
 
 	@Override
-	protected void serializeBulkFiberTerminals(NetworkNode parent,
+	protected void serializeBulkFiberTerminals(NetworkNodeAssembler parent,
 			GraphMapping graphMapping) {
 
 		BulkFiberTerminal bft = (BulkFiberTerminal) graphMapping.getAroEntity();
-		add(bft.getLocationEntity()) ;
+		add(bft.getLocationEntity());
 
-		try {
-			createNetworkNode(graphMapping.getGraphAssignment().getPoint(),
-					NetworkNodeTypeEnum.bulk_distrubution_terminal);
-		} catch (Throwable err) {
-			err.printStackTrace();
-		}
+		NetworkNodeAssembler node = createNetworkNode(graphMapping.getGraphAssignment()
+				.getPoint(),
+				NetworkNodeTypeEnum.bulk_distrubution_terminal) ;
 
 		serialize(
 				register(
 						graphMapping.getGraphAssignment(),
-						createNetworkNode(graphMapping.getGraphAssignment()
-								.getPoint(),
-								NetworkNodeTypeEnum.bulk_distrubution_terminal)),
+						node),
 				graphMapping.getChildren());
-
+		
+		node.setParent(parent) ;
 	}
 
-	protected void serializeFdt(NetworkNode parent, GraphMapping graphMapping) {
+	protected void serializeFdt(NetworkNodeAssembler parent,
+			GraphMapping graphMapping) {
 
-		serializeLocations(
-				register(
-						graphMapping.getGraphAssignment(),
-						createNetworkNode(graphMapping.getGraphAssignment()
-								.getPoint(),
-								NetworkNodeTypeEnum.fiber_distribution_terminal)),
+		NetworkNodeAssembler node = createNetworkNode(graphMapping
+				.getGraphAssignment().getPoint(),
+				NetworkNodeTypeEnum.fiber_distribution_terminal);
+
+		LocationDemand ld = serializeLocations(
+				register(graphMapping.getGraphAssignment(), node),
 				graphMapping.getChildAssignments());
 
+		node.addChildDemand(ld) ;
+		node.setParent(parent);
+
 	}
 
-	protected NetworkNode createNetworkNode(Point point,
+	protected NetworkNodeAssembler createNetworkNode(Point point,
 			NetworkNodeTypeEnum type) {
 		NetworkNode node = new NetworkNode();
 
@@ -114,22 +125,28 @@ public class EquipmentSerializer extends GraphMappingSerializer<NetworkNode> {
 		node.setGeogPoint(point);
 		node.setRouteId(planId);
 
-		return node;
+		return new NetworkNodeAssembler(node);
 	}
 
-	protected void serializeLocations(NetworkNode parent,
+	protected LocationDemand serializeLocations(NetworkNodeAssembler parent,
 			Collection<GraphEdgeAssignment> edgeAssignments) {
-		
+
+		Aggregator<LocationDemand> aggregator = DefaultLocationDemand
+				.demandAggregate();
+
 		edgeAssignments.forEach(e -> {
-			add(((LocationDropAssignment) e
-					.getAroEntity()).getLocationEntity());
+			LocationDropAssignment lds = (LocationDropAssignment) e
+					.getAroEntity();
+
+			aggregator.add(lds.getAssignedEntityDemand().getLocationDemand());
+			add(lds.getLocationEntity());
 		});
-		
-		
+
+		return aggregator.apply();
+
 	}
-	
 
 	public LocationDemand getLocationDemand() {
-		return demandAggregator.apply() ;
+		return demandAggregator.apply();
 	}
 }

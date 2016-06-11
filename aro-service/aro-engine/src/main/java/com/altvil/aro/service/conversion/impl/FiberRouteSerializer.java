@@ -22,11 +22,11 @@ import com.vividsolutions.jts.geom.MultiLineString;
 public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 
 	private NetworkModel networkModel;
-	private Map<GraphEdgeAssignment, NetworkNode> equipmentMapping;
+	private Map<GraphEdgeAssignment, NetworkNodeAssembler> equipmentMapping;
 	private Map<FiberType, DoubleSummer> fiberLengthMap = new EnumMap<>(FiberType.class);
 
 	public FiberRouteSerializer(long planId, NetworkModel networkModel,
-			Map<GraphEdgeAssignment, NetworkNode> equipmentMapping) {
+			Map<GraphEdgeAssignment, NetworkNodeAssembler> equipmentMapping) {
 		super(planId);
 		this.networkModel = networkModel;
 		this.equipmentMapping = equipmentMapping;
@@ -38,7 +38,8 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 	}
 
 	private NetworkNode getEquipmentNodeEntity(GraphMapping gm) {
-		return equipmentMapping.get(gm.getGraphAssignment());
+		NetworkNodeAssembler na = equipmentMapping.get(gm.getGraphAssignment());
+		return na == null ? null : na.getNetworkNode() ;
 	}
 
 	@Override

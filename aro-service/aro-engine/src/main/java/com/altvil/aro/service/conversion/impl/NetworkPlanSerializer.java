@@ -24,7 +24,7 @@ public class NetworkPlanSerializer<T> {
 									planId);
 							equipmentSerializer.serialize(model
 									.getFiberSourceMapping());
-							equipmentSerializer.commit(planMods::addEquipment);
+							equipmentSerializer.commit(a -> a.getNetworkNode());
 							planMods.setLocationDemand(equipmentSerializer.getLocationDemand()) ;
 
 							FiberRouteSerializer fibererSerializer = new FiberRouteSerializer(
