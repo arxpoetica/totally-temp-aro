@@ -83,7 +83,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     },
     {
       id: 'network_nodes',
-      name: config.client_carrier_name + ' Network',
+      name: 'Network Equipment',
       short_name: 'E',
       icon: 'icon icon-network-equipment'
     },
