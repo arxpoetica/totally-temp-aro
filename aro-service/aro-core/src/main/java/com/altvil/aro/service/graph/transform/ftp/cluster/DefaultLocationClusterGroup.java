@@ -240,8 +240,8 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				Collection<PinnedAssignedEntityDemand> demands = split(
 						thresholds.getMaxlocationPerFDT(),
 						currentCluster.getRemainingDemand(), d);
-				if (log.isInfoEnabled()) {
-					log.info("Overflowed Demand " + d.getDemand()
+				if (log.isTraceEnabled()) {
+					log.trace("Overflowed Demand " + d.getDemand()
 							+ " remainder =  "
 							+ currentCluster.getRemainingDemand() + " .... "
 							+ toDebugInfo(demands));
