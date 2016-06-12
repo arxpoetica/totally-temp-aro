@@ -14,6 +14,7 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.utils.StreamUtil;
 
@@ -39,7 +40,6 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	public DemandStatistic ratio(double ratio) {
 		return new DefaultFiberCoverage((LocationDemand) coverage.ratio(ratio), locationEntities) ;
 	}
-
 
 
 	@Override

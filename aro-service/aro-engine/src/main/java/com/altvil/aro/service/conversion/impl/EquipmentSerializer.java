@@ -28,11 +28,6 @@ public class EquipmentSerializer extends
 		super(planId);
 	}
 
-	protected NetworkNodeAssembler trackDemand(NetworkNodeAssembler parent,
-			NetworkNodeAssembler child) {
-		parent.addChildDemand(child.getLocationDemand());
-		return child;
-	}
 
 	protected void add(LocationEntity entity) {
 		if (!seenLocations.contains(entity)) {
@@ -89,7 +84,6 @@ public class EquipmentSerializer extends
 				NetworkNodeTypeEnum.bulk_distrubution_terminal) ;
 
 		add(bft.getLocationEntity());
-		node.addChildDemand(bft.getAssignedEntityDemand().getLocationDemand());
 		
 		serialize(
 				register(
@@ -97,7 +91,7 @@ public class EquipmentSerializer extends
 						node),
 				graphMapping.getChildren());
 		
-		node.setParent(parent) ;
+		node.setParent(parent, bft.getAssignedEntityDemand().getLocationDemand()) ;
 	}
 	
 	
@@ -110,12 +104,9 @@ public class EquipmentSerializer extends
 				.getGraphAssignment().getPoint(),
 				NetworkNodeTypeEnum.fiber_distribution_terminal);
 
-		LocationDemand ld = serializeLocations(
-				register(graphMapping.getGraphAssignment(), node),
-				graphMapping.getChildAssignments());
-
-		node.addChildDemand(ld) ;
-		node.setParent(parent);
+		register(graphMapping.getGraphAssignment(), node) ;
+		
+		node.setParent(parent, serializeLocations(graphMapping.getChildAssignments()));
 
 	}
 
@@ -134,7 +125,7 @@ public class EquipmentSerializer extends
 		return new NetworkNodeAssembler(node);
 	}
 
-	protected LocationDemand serializeLocations(NetworkNodeAssembler parent,
+	protected LocationDemand serializeLocations(
 			Collection<GraphEdgeAssignment> edgeAssignments) {
 
 		Aggregator<LocationDemand> aggregator = DefaultLocationDemand

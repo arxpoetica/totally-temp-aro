@@ -46,8 +46,13 @@ public class NetworkNodeAssembler {
 	}
 	
 	
-	public void addChildDemand(LocationDemand demand) {
+	private void addChildDemand(LocationDemand demand) {
 		 aggregator.add(demand) ;
+	}
+	
+	public NetworkNodeAssembler setParent(NetworkNodeAssembler parent, LocationDemand ld) {
+		addChildDemand(ld) ;
+		return setParent(parent) ;
 	}
 	
 	public NetworkNodeAssembler setParent(NetworkNodeAssembler parent) {
