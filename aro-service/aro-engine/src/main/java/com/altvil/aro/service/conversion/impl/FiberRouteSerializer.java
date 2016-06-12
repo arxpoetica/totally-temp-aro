@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.service.analysis.GraphMappingSerializer;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;

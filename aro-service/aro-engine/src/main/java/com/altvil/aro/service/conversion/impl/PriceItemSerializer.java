@@ -3,6 +3,7 @@ package com.altvil.aro.service.conversion.impl;
 import java.util.Collection;
 
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.service.analysis.GraphMappingSerializer;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;

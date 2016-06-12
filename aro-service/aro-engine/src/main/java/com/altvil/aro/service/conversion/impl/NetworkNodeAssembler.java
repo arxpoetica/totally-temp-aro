@@ -3,11 +3,18 @@ package com.altvil.aro.service.conversion.impl;
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.utils.func.Aggregator;
 
 public class NetworkNodeAssembler {
 	
+	
+	public interface EquipmentResolver {
+		NetworkNode getCentralOffice(long planId) ;
+	}
+	
 	private NetworkNode networkNode ;
+	
 	private Aggregator<LocationDemand> aggregator = DefaultLocationDemand.demandAggregate() ;
 	
 	public NetworkNodeAssembler(NetworkNode networkNode) {
@@ -18,9 +25,26 @@ public class NetworkNodeAssembler {
 		return aggregator ;
 	}
 	
+	public NetworkNode assemble(long planId, EquipmentResolver resolver) {
+		if( networkNode == null ) {
+			networkNode = resolver.getCentralOffice(planId) ;
+		}
+		
+		LocationDemand ld = aggregator.apply() ;
+		
+		networkNode.setHouseHoldCount(ld.getLocationDemand(LocationEntityType.Household).getDemand()) ;
+		networkNode.setBusinessCount(ld.getLocationDemand(LocationEntityType.Business).getDemand()) ;
+		networkNode.setCellTowerCount(ld.getLocationDemand(LocationEntityType.CellTower).getDemand()) ;
+		networkNode.setAtomicUnit(ld.getDemand()) ;
+		return networkNode ;
+		
+	}
+	
+	
 	public NetworkNode getNetworkNode() {
 		return networkNode ;
 	}
+	
 	
 	public void addChildDemand(LocationDemand demand) {
 		 aggregator.add(demand) ;

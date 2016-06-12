@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.model.NetworkNodeTypeEnum;
+import com.altvil.aro.service.analysis.GraphMappingSerializer;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.LocationDemand;
@@ -82,12 +83,14 @@ public class EquipmentSerializer extends
 			GraphMapping graphMapping) {
 
 		BulkFiberTerminal bft = (BulkFiberTerminal) graphMapping.getAroEntity();
-		add(bft.getLocationEntity());
-
+		
 		NetworkNodeAssembler node = createNetworkNode(graphMapping.getGraphAssignment()
 				.getPoint(),
 				NetworkNodeTypeEnum.bulk_distrubution_terminal) ;
 
+		add(bft.getLocationEntity());
+		node.addChildDemand(bft.getAssignedEntityDemand().getLocationDemand());
+		
 		serialize(
 				register(
 						graphMapping.getGraphAssignment(),
@@ -96,6 +99,9 @@ public class EquipmentSerializer extends
 		
 		node.setParent(parent) ;
 	}
+	
+	
+	
 
 	protected void serializeFdt(NetworkNodeAssembler parent,
 			GraphMapping graphMapping) {

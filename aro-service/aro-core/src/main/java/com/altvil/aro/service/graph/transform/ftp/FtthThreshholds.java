@@ -96,9 +96,9 @@ public class FtthThreshholds {
 
 		private int splitterRatio = 32;
 
-		private int minSplitters = 6;
-		private int idealSplitters = 26;
-		private int maxSplitters = 32;
+		private int minSplitters = 10;
+		private int idealSplitters = 15;
+		private int maxSplitters = 20;
 
 		public Builder setFdtCount(Integer count) {
 			if (count != null) {

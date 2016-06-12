@@ -39,6 +39,12 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 			+ "join aro.edges e on e.gid = ll.gid \n"
 			+ "order by gid, intersect_position\n" + "limit 40000", nativeQuery = true)
 	List<Object> queryLinkedLocations(int test);
+	
+	
+	@Transactional
+	@Query(value = "select n from NetworkNode n where n.routeId =:planId and n.nodeTypeId=:nodeTypeId")
+	public List<NetworkNode> findEquipment(@Param("nodeTypeId") int nodeTypeId, @Param("planId") long planId) ;
+	
 		
 	@Query(value = "update client.plan set total_count = :totalCount \n " +
 	", total_cost=:totalCost, fiber_cost=:fiberCost " +
