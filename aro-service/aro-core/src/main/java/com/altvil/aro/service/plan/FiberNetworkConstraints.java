@@ -24,6 +24,10 @@ public class FiberNetworkConstraints implements Serializable {
 	private Boolean clusterMergingSupported ;
 	private Boolean dropCableConstraintsSupported ;
 
+	public FiberNetworkConstraints() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public Integer getFdtCount() {
 		return fdtCount;
 	}

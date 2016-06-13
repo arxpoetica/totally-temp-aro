@@ -10,17 +10,10 @@
         http://www.springframework.org/schema/mvc 
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/context 
-        http://www.springframework.org/schema/context/spring-context.xsd
-		http://www.springframework.org/schema/websocket
-		http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+        http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!--<websocket:message-broker application-destination-prefix="/app">
-        <websocket:stomp-endpoint path="/jobs">
-            <websocket:sockjs/>
-        </websocket:stomp-endpoint>
-        <websocket:simple-broker prefix="/topic, /queue"/>
-    </websocket:message-broker>
-
-	<context:component-scan base-package="com.altvil.aro"/>
-	<context:component-scan base-package="com.altvil.netop"/>-->
+	<bean id="jwtAuthenticationFilterBean"
+		class="com.altvil.authentication.JwtAuthenticationFilterBean">
+		<constructor-arg type="java.lang.String" value="${JWT_SECRET}"/>
+	</bean>
 </beans>

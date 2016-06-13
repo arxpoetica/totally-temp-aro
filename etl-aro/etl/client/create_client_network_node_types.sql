@@ -12,5 +12,4 @@ insert into client.network_node_types (name, description) values('central_office
 insert into client.network_node_types (name, description) values('splice_point','Splice Point') ;
 insert into client.network_node_types (name, description) values('fiber_distribution_hub','Fiber Distribution Hub') ;
 insert into client.network_node_types (name, description) values('fiber_distribution_terminal','Fiber Distribution Terminal') ;
-insert into client.network_node_types (name, description) values('bulk_distrubution_terminal','Bulk Distribution Terminal') ;
-insert into client.network_node_types (name, description) values('bulk_distribution_consumer','Bulk Distribution Consumer') ;
+insert into client.network_node_types (name, description) values('bulk_distrubution_terminal','Direct Feeder Fiber') ;

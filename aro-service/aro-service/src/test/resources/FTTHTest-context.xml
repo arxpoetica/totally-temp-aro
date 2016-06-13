@@ -42,11 +42,6 @@ http://www.springframework.org/schema/tx/spring-tx.xsd
         </mvc:message-converters>
     </mvc:annotation-driven>
 
-    <task:executor id="myExecutor" pool-size="1"/>
-    <task:annotation-driven executor="myExecutor"
-                            scheduler="myScheduler"/>
-
-    <task:scheduler id="myScheduler" pool-size="1"/>
     <bean
             class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
         <property name="messageConverters">

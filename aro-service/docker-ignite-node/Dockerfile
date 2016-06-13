@@ -1,8 +1,9 @@
-FROM apacheignite/ignite:1.5.0.final
+FROM aro-ignite-jdk8
 MAINTAINER Altvil
 ENV PGUSER=${PGUSER}
 ENV PGPASSWORD=${PGPASSWORD}
 ENV PGHOST=${PGHOST}
 ENV PGDATABASE=${PGDATABASE}
-ADD aroServlet-igniteConfig.xml aroServlet-igniteConfig.xml
+ADD igniteConfig-abstract.xml igniteConfig-abstract.xml
+ADD igniteConfig-basicNode-docker.xml igniteConfig-basicNode-docker.xml
 

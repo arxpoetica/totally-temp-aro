@@ -9,7 +9,6 @@ var config = helpers.config
 var database = helpers.database
 var validate = helpers.validate
 var models = require('./')
-var RouteOptimizer = require('./route_optimizer')
 var _ = require('underscore')
 var pync = require('pync')
 
@@ -91,85 +90,129 @@ module.exports = class NetworkPlan {
 
   static findEdges (plan_id) {
     var sql = `
-      SELECT fiber_route.id, 0 AS edge_length, ST_AsGeoJSON(fiber_route.geom)::json AS geom
+      SELECT
+        fiber_route.id,
+        ST_Length(geom::geography) * 0.000621371 AS edge_length,
+        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        frt.name AS fiber_type,
+        frt.description AS fiber_name
       FROM client.plan
       JOIN client.plan p ON p.parent_plan_id = plan.id
       JOIN client.fiber_route ON fiber_route.plan_id = p.id
+      JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
       WHERE plan.id=$1
     `
     return database.query(sql, [plan_id])
   }
 
   static findPlan (plan_id, metadata_only) {
-    var cost_per_meter = 200
+    // var cost_per_meter = 200
     var output = {
       'feature_collection': {
         'type': 'FeatureCollection'
       },
       'metadata': { costs: [] }
     }
-    var fiber_cost
+    var plan, equipmentCounts
 
-    return Promise.resolve()
-      .then(() => {
+    return database.findOne('SELECT * FROM client.plan WHERE id=$1', [plan_id])
+      .then((_plan) => {
+        plan = _plan
+
         if (config.route_planning.length === 0) return
         return Promise.resolve()
           .then(() => NetworkPlan.findEdges(plan_id))
           .then((edges) => {
+            var fiberLengths = {}
+            edges.forEach((edge) => {
+              var type = edge.fiber_name
+              fiberLengths[type] = (fiberLengths[type] || 0) + edge.edge_length
+            })
+            var fiberLength = (edges.reduce((total, edge) => total + edge.edge_length, 0)).toFixed(0)
+            output.metadata.costs.push({
+              name: `Fiber Capex (${fiberLength} mi)`,
+              value: plan.fiber_cost || 0,
+              itemized: Object.keys(fiberLengths).map((type) => {
+                var length = (fiberLengths[type]).toFixed(0)
+                return {
+                  description: `${type} (${length} mi)`,
+                  value: 0
+                }
+              })
+            })
             output.feature_collection.features = edges.map((edge) => ({
               'type': 'Feature',
-              'geometry': edge.geom
+              'geometry': edge.geom,
+              'properties': {
+                'fiber_type': edge.fiber_type
+              }
             }))
-
-            fiber_cost = RouteOptimizer.calculateFiberCost(edges, cost_per_meter)
-            output.metadata.costs.push({
-              name: 'Fiber cost',
-              value: fiber_cost
-            })
-            return RouteOptimizer.calculateLocationsCost(plan_id)
-          })
-          .then((locations_cost) => {
-            output.metadata.costs.push({
-              name: 'Locations cost',
-              value: locations_cost
-            })
           })
       })
-      .then(() => (
-        config.route_planning.length > 0
+      .then(() => {
+        var params = [plan_id]
+        return database.query(`
+          SELECT nnt.id, COUNT(*) AS count
+          FROM client.network_node_types nnt
+          JOIN client.network_nodes nn
+          ON nn.node_type_id = nnt.id
+          AND nn.plan_id IN (
+            SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
+            UNION ALL
+            SELECT $${params.length}
+          )
+          GROUP BY nnt.id
+        `, params)
+      })
+      .then((_equipmentCounts) => {
+        equipmentCounts = _equipmentCounts
+
+        return config.route_planning.length > 0
           ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
           : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
-      ))
+      })
       .then(() => {
         if (config.route_planning.length === 0) return output
 
-        return RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost)
-          .then((calculation) => {
-            output.metadata.revenue = calculation.revenue
-            output.metadata.npv = calculation.npv
-            return RouteOptimizer.calculateEquipmentNodesCost(plan_id)
-          })
-          .then((equipment_nodes_cost) => {
-            output.metadata.costs.push({
-              name: 'Equipment nodes cost',
-              value: equipment_nodes_cost.total,
-              itemized: equipment_nodes_cost.equipment_node_types
-            })
+        plan.total_revenue = plan.total_revenue || 0
+        plan.total_cost = plan.total_cost || 0
+        output.metadata.revenue = plan.total_revenue
+        var year = new Date().getFullYear()
+        output.metadata.total_npv = plan.npv || 0
+        output.metadata.npv = [
+          { year: year++, value: plan.total_revenue - plan.total_cost },
+          { year: year++, value: plan.total_revenue },
+          { year: year++, value: plan.total_revenue },
+          { year: year++, value: plan.total_revenue },
+          { year: year++, value: plan.total_revenue }
+        ]
+        return database.query('SELECT * FROM client.network_node_types ORDER BY description')
+      })
+      .then((equipmentNodeTypes) => {
+        var itemized = equipmentNodeTypes.map((equipmentNodeType) => {
+          var name = equipmentNodeType.name
+          var col = name.split('_').map((s) => s.substring(0, 1)).join('') + '_cost'
+          if (!plan[col]) return null
+          var count = equipmentCounts.find((eq) => eq.id === equipmentNodeType.id)
+          count = count ? count.count : 0
+          return {
+            key: name,
+            name: equipmentNodeType.description,
+            description: equipmentNodeType.description + (name === 'central_office' ? '' : ` (x${count})`),
+            count: count.count,
+            value: plan[col] || 0
+          }
+        }).filter((i) => i)
+        output.metadata.costs.push({
+          name: 'Equipment Capex',
+          value: plan.equipment_cost
+          // itemized: itemized
+        })
+        output.metadata.total_cost = plan.total_cost || 0
 
-            // var up_front_costs = equipment_nodes_cost.total + fiber_cost
-            return RouteOptimizer.calculate_revenue_and_npv(plan_id, fiber_cost)
-          })
-          .then((calculation) => {
-            output.metadata.revenue = calculation.revenue
-            output.metadata.npv = calculation.npv
-
-            output.metadata.total_cost = output.metadata.costs
-              .reduce((total, cost) => total + cost.value, 0)
-
-            output.metadata.profit = output.metadata.revenue - output.metadata.total_cost
-            if (metadata_only) delete output.feature_collection
-            return output
-          })
+        output.metadata.profit = output.metadata.revenue - output.metadata.total_cost
+        if (metadata_only) delete output.feature_collection
+        return output
       })
   }
 
@@ -314,7 +357,7 @@ module.exports = class NetworkPlan {
         this._deleteTargets(plan_id, changes.deletions && changes.deletions.locations)
       ))
       .then(() => (
-        models.Network.recalculateNodes(plan_id, changes.algorithm)
+        models.Network.recalculateNodes(plan_id, changes)
       ))
       .then(() => NetworkPlan.findPlan(plan_id))
   }

@@ -1,18 +1,23 @@
 package com.altvil.aro.service.conversion.impl;
 
 import com.altvil.aro.service.conversion.PlanModifications;
+import com.altvil.aro.service.conversion.impl.NetworkNodeAssembler.EquipmentResolver;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 
 public class NetworkPlanSerializer<T> {
 
 	private long planId;
+	private EquipmentResolver equipmentResolver ;
 	
-	public NetworkPlanSerializer(long planId) {
+	public NetworkPlanSerializer(EquipmentResolver equipmentResolver, long planId) {
 		super();
+		this.equipmentResolver = equipmentResolver ;
 		this.planId = planId;
 	}
+	
+	
 
-	public T serialize(CompositeNetworkModel compositeModel,
+	public PlanModifications<T> serialize(CompositeNetworkModel compositeModel,
 			PlanModifications<T> planMods) {
 
 		compositeModel
@@ -24,7 +29,8 @@ public class NetworkPlanSerializer<T> {
 									planId);
 							equipmentSerializer.serialize(model
 									.getFiberSourceMapping());
-							equipmentSerializer.commit(planMods::addEquipment);
+							equipmentSerializer.commit(a -> planMods.addEquipment(a.assemble(planId, equipmentResolver)));
+							planMods.setLocationDemand(equipmentSerializer.getLocationDemand()) ;
 
 							FiberRouteSerializer fibererSerializer = new FiberRouteSerializer(
 									planId, model, equipmentSerializer
@@ -32,10 +38,11 @@ public class NetworkPlanSerializer<T> {
 							fibererSerializer.serialize(model
 									.getFiberSourceMapping());
 							fibererSerializer.commit(planMods::addFiber);
+							planMods.setFiberLengths(fibererSerializer.getFiberLengthMap()) ;
 
 						});
 
-		return planMods.commit();
+		return planMods ;
 
 	}
 

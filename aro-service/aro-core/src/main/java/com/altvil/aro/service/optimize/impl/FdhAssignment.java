@@ -10,6 +10,7 @@ import com.altvil.aro.service.optimize.model.FiberProducer;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.serialize.ModelSerializer;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
+import com.altvil.aro.service.optimize.spi.PricingContext;
 
 public class FdhAssignment extends AbstractEquipmentAssignment {
 
@@ -22,7 +23,7 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 	}
 
 	@Override
-	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer,
+	public double getCost(PricingContext ctx, FiberConsumer fiberConsumer,
 			FiberProducer fiberProducer, DemandCoverage coverage) {
 
 		int roundedUpSplitters = calculateSplitterCount(ctx, fiberConsumer) ;
@@ -58,7 +59,7 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 	}
 
 	
-	private int calculateSplitterCount(AnalysisContext ctx, FiberConsumer fiberConsumer) {
+	private int calculateSplitterCount(PricingContext ctx, FiberConsumer fiberConsumer) {
 		double distributionDemand = fiberConsumer
 				.getCount(FiberType.DISTRIBUTION);
 		int roundedUpSplitters = (int) Math.ceil(((double) distributionDemand)

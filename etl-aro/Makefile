@@ -30,6 +30,12 @@ etl_client:
 etl_auth:
 	etl/auth/auth_etl.sh
 
+etl_temp_hh:
+	etl/temp_hh/temp_hh_etl.sh
+
+etl_financial:
+	etl/financial/etl.sh
+
 reset_tiger:
 	etl/reset_tiger_data.sh
 
@@ -54,13 +60,21 @@ reset_client:
 reset_auth:
 	etl/reset_auth_data.sh
 
-etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_aro
+reset_financial:
+	etl/reset_financial.sh
 
-etl_reload_client: reset_client etl_client
+reset_temp_hh:
+	etl/reset_temp_hh.sh
+
+etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_temp_hh reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_temp_hh etl_aro
+
+etl_reload_client: reset_client etl_client reset_financial etl_financial
+
+etl_reload_financial: reset_financial etl_financial
 
 etl_reload_auth: reset_auth etl_auth
 
-etl_reload_all: etl_reload_general etl_reload_client
+etl_reload_all: etl_reload_general etl_reload_client etl_reload_financial
 
 etl_really_reload_all: etl_reload_general etl_reload_client etl_reload_auth
 
@@ -70,19 +84,14 @@ etl_test_client:
 etl_test_aro:
 	etl/test/aro.sh
 
+
 etl_test_all: etl_test_aro etl_test_client
 
 install_service:
-	(cd ../aro-service  && make pull_run)
+	(cd ../aro-service  && make pull_deploy)
 
 reinstall_service:
-	(cd ../aro-service  && make uninstall && make pull_run)
-
-install_vagrant_service:
-	(cd ../aro-service  && make pull run_vagrant_docker)
-
-reinstall_vagrant_service:
-	(cd ../aro-service  && make uninstall pull run_vagrant_docker)
+	(cd ../aro-service  && make uninstall && make pull_redeploy)
 
 webapp:
 	(cd ../app && npm install --no-bin-link && npm run build)

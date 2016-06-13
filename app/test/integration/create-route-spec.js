@@ -15,7 +15,7 @@ describe('Create a route', function() {
     element(by.css('[ng-click="new_route()"]')).click();
     element(by.css('input[ng-model="new_route_name"]')).clear().sendKeys(name);
     element(by.css('input[ng-model="new_route_area_name"]')).clear().sendKeys('Manhattan');
-    element(by.css('[ng-click="look_up_area()"]')).click();
+    element(by.css('[ng-click="lookUpArea()"]')).click();
     element(by.css('[ng-click="save_new_route()"]')).click();
     browser.waitForText(element(by.css('.navbar-brand')), name);
   });
@@ -43,7 +43,7 @@ describe('Create a route', function() {
 
   it('should export a route to KML', function(done) {
     element(by.css('#network_plan_menu > a')).click();
-    element(by.css('[ng-click="export_kml_name()"]')).click();
+    element(by.css('[ng-click="exportKmlName()"]')).click();
 
     var fileName = "test-kml-export";
     element(by.css('input[ng-model="kml_file_name"]')).clear().sendKeys(fileName).then(function(){

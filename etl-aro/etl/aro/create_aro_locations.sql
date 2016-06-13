@@ -18,11 +18,12 @@ CREATE TABLE aro.locations
 
 SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 
--- Load locations from infousa_businesses
+-- SELECT setval('aro.locations_id_seq', COALESCE((SELECT MAX(id)+1 FROM locations), 1));
+
+-- Make locations out of InfoUSA businesses (infousa.businesses)
 -- ONLY using UES wirecenter for Verizon
-INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geom)
+INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geog, geom)
     SELECT DISTINCT ON (bldgid)
-        bldgid as id,
         address,
         city,
         businesses.state,
@@ -31,24 +32,32 @@ INSERT INTO aro.locations(id, address, city, state, zipcode, lat, lon, geog, geo
         long AS lon,
         businesses.geog as geog,
         businesses.geog::geometry as geom
+    FROM infousa.businesses;
 
-    FROM infousa.businesses;-- JOIN aro.wirecenters
-      -- ON businesses.geog && wirecenters.geog
-    --   ON ST_Within(businesses.geog::geometry, wirecenters.geom)
-    -- WHERE
-    --   -- NYC Upper East Side (URBAN)
-    --   wirecenters.wirecenter = 'NYCMNY79'
-    --   OR
-    --   -- Buffalo, New York (URBAN)
-    --   wirecenters.wirecenter = 'BFLONYEL'
-    --   OR
-    --   wirecenters.wirecenter = 'BFLONYFR'
-    --   OR
-    --   -- Orchard Park, NY (SUBURBAN)
-    --   wirecenters.wirecenter = 'ORPKNYST'
-    --   OR
-    --   -- North Collins, NY (RURAL)
-    --   wirecenters.wirecenter = 'NCLNNYNO';
+-- Make locations out of InfoGroup households (temp_hh.households)
+INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
+    SELECT DISTINCT ST_AsText(hh.geog)
+        address,
+        city,
+        hh.state,
+        zip5 AS zipcode,
+        lat,
+        lon,
+        hh.geog::geometry as geom,
+        hh.geog
+    FROM temp_hh.households hh
+    JOIN aro.wirecenters wc
+        ON ST_Within(hh.geog::geometry, wc.geom)
+    WHERE
+        wc.wirecenter = 'NYCMNY79'
+        OR
+        wc.wirecenter = 'SYRCNYGS'
+        OR
+        wc.wirecenter = 'SYRCNYSU'
+        OR
+        wc.wirecenter = 'SYRCNYJS'
+        OR
+        wc.wirecenter = 'SYRCNYSA';
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations
@@ -63,3 +72,15 @@ CREATE INDEX aro_locations_geom_gist
 VACUUM ANALYZE aro.locations;
 
 create index aro_locations on aro.locations using gist (geog);
+
+ALTER TABLE locations ADD COLUMN total_businesses integer NOT NULL DEFAULT 0;
+
+ALTER TABLE locations ADD COLUMN total_households integer NOT NULL DEFAULT 0;
+
+ALTER TABLE locations ADD COLUMN total_towers integer NOT NULL DEFAULT 0;
+
+CREATE INDEX locations_total_businesses_index ON locations(total_businesses);
+
+CREATE INDEX locations_total_households_index ON locations(total_households);
+
+CREATE INDEX locations_total_towers_index ON locations(total_towers);

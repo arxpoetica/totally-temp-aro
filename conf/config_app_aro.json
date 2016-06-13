@@ -35,6 +35,15 @@
     "colors": {
       "fiber": "red",
       "fair_share": "blue"
+    },
+    "labels": {
+      "fiber": "Fiber",
+      "wirecenter": "Wirecenter"
+    },
+    "default_form_values": {
+      "create_plan": {
+        "select_area_text": "Enter a CLLI Code"
+      }
     }
   }
 }

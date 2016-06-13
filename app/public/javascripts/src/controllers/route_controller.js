@@ -1,6 +1,6 @@
 /* global app user_id config */
 // Route Controller
-app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', 'map_layers', 'network_planning', ($scope, $rootScope, $http, selection, MapLayer, map_tools, map_layers, network_planning) => {
+app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', 'map_layers', ($scope, $rootScope, $http, selection, MapLayer, map_tools, map_layers) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.selection = selection
@@ -16,7 +16,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     }
 
     $http.get('/network_plan/' + plan.id).success((response) => {
-      redraw_route(response)
+      redrawRoute(response)
       selection.set_enabled(plan.owner_id === user_id)
       if ((response.metadata.sources || []).length > 0) {
         map_layers.getEquipmentLayer('network_nodes').show()
@@ -25,7 +25,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
   })
 
   $rootScope.$on('plan_cleared', (e, plan) => {
-    selection.clear_selection()
+    selection.clearSelection()
     $scope.route_layer.clearData()
     $scope.plan.metadata = {
       total_cost: 0,
@@ -40,21 +40,26 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
 
   $rootScope.$on('equipment_nodes_changed', () => {
     $http.get('/network_plan/' + $scope.plan.id + '/metadata').success((response) => {
-      redraw_route(response, true)
+      redrawRoute(response, true)
     })
   })
 
   $rootScope.$on('route_planning_changed', () => {
     $http.get('/network_plan/' + $scope.plan.id).success((response) => {
-      redraw_route(response, false)
+      redrawRoute(response, false)
     })
   })
 
-  function redraw_route (data, only_metadata) {
+  $rootScope.$on('route_planning_changed', (e, response) => {
+    redrawRoute(response)
+  })
+
+  function redrawRoute (data, only_metadata) {
     if ($scope.plan && data.metadata) {
       $scope.plan.metadata = data.metadata
       $rootScope.$broadcast('plan_changed_metadata', $scope.plan)
     }
+    if (only_metadata) return
 
     if (config.route_planning.length > 0) {
       var route = new MapLayer({
@@ -66,8 +71,18 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
           normal: {
             strokeColor: 'red'
           }
+        },
+        declarativeStyles: (feature, styles) => {
+          if (feature.getProperty('fiber_type') === 'feeder') {
+            styles.strokeColor = 'blue'
+            styles.strokeWeight = 4
+          } else {
+            styles.strokeColor = 'red'
+            styles.strokeWeight = 2
+          }
         }
       })
+      route.hide_in_ui = true
       route.show()
       if ($scope.route_layer) {
         $scope.route_layer.remove()
@@ -79,26 +94,4 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     // to calculate market size
     $rootScope.$broadcast('route_changed')
   }
-
-  $rootScope.$on('map_layer_changed_selection', (e, layer, changes) => {
-    if (!$scope.plan) return
-    if (network_planning.getAlgorithm()) {
-      changes.algorithm = network_planning.getAlgorithm().id
-    }
-
-    if (layer.type !== 'locations' &&
-      layer.type !== 'network_nodes') return
-
-    var url = '/network_plan/' + $scope.plan.id + '/edit'
-    var config = {
-      url: url,
-      method: 'post',
-      saving_plan: true,
-      data: changes
-    }
-    $http(config).success((response) => {
-      $rootScope.$broadcast('route_planning_changed')
-      redraw_route(response)
-    })
-  })
 }])

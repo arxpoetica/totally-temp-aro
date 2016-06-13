@@ -47,13 +47,6 @@
 	<context:component-scan base-package="com.altvil"/>
  
 
-	<task:executor id="myExecutor" pool-size="1" />
-	
-	<task:annotation-driven executor="myExecutor"
-		scheduler="myScheduler" />
-
-	<task:scheduler id="myScheduler" pool-size="1" />
-	
 	<bean
 		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
 		<property name="messageConverters">
@@ -76,15 +69,6 @@
 	</bean>
 
 	<context:property-placeholder location="classpath*:/aroConfig.properties" />
-
-	<bean
-		class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>classpath*:aroConfig.properties</value>
-			</list>
-		</property>
-	</bean>
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 	
@@ -136,4 +120,54 @@
 	
 	<mvc:resources mapping="/webjars/**"
 		location="classpath:/META-INF/resources/webjars/" />
+
+
+<!-- ***************************** -->
+<!-- IGNITE GRID CONFIGURATIONS    -->
+<!-- ***************************** -->
+		
+    <import resource="classpath:/META-INF/igniteConfig-abstract.xml"/>
+    
+	<!-- NOTE the IgniteSpringBean bean id is used for Autowiring, while 
+		 the configuration's gridName is the actual Ignite grid being used.  
+		 This abstraction provides easy reconfiguration when using multiple grids. 
+		 For easy reconfiguration, autowire to the alias (below) instead of actual bean id. -->
+		 
+	<bean id="singleIgniteGrid" autowire="byName" class="org.apache.ignite.IgniteSpringBean">
+		<property name="configuration">
+	        <bean parent="ignite-abstract-IDE.cfg">  <!-- Remove "-IDE" from parent name if not running in IDE -->
+	        	<property name="clientMode" value="true"/>
+
+		        <property name="cacheConfiguration">
+		        	<list>
+						<bean parent="basicCache.cfg">
+							<property name="name" value="NetworkService_LocationDemandsByWCID"/>
+							<property name="statisticsEnabled" value="false"/>
+						</bean>
+						<bean parent="basicCache.cfg">
+							<property name="name" value="NetworkService_RoadLocationsByWCID"/>
+							<property name="statisticsEnabled" value="false"/>
+						</bean>
+						<bean parent="basicCache.cfg">
+							<property name="name" value="NetworkService_FiberSourcesByWCID"/>
+							<property name="statisticsEnabled" value="false"/>
+						</bean>
+						<bean parent="basicCache.cfg">
+							<property name="name" value="NetworkService_RoadEdgesByWCID"/>
+							<property name="statisticsEnabled" value="false"/>
+						</bean>
+					</list>
+		    	</property>
+	        	
+	        </bean>
+	    </property>
+ 	</bean>
+ 	
+ 	<!-- Alias the defined grids so compute/cache/services can be 
+ 		 moved to different clusters without code changes.  When autowiring,
+ 		 use method injection based on these aliases only. -->
+	<alias name="singleIgniteGrid" alias="networkServiceIgniteGrid"/>
+	<alias name="singleIgniteGrid" alias="networkPlanningServiceIgniteGrid"/>
+	<alias name="singleIgniteGrid" alias="recalcEndpointIgniteGrid"/>
+ 	
 </beans>

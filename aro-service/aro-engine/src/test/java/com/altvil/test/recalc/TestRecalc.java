@@ -7,7 +7,6 @@ import org.junit.Test;
 import com.altvil.aro.service.recalc.RecalcException;
 
 public class TestRecalc {
-
 	@Test
 	public void test() throws RecalcException, InterruptedException,
 			ExecutionException {

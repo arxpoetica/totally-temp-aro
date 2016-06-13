@@ -35,13 +35,11 @@ ALTER TABLE client.locations_distance_to_carrier ADD COLUMN carrier_id bigint RE
 ALTER TABLE client.locations_distance_to_carrier ADD PRIMARY KEY (location_id, carrier_id);
 
 
--- INSERT INTO client.locations_distance_to_carrier (location_id, carrier_id, distance)
---   SELECT locations.id AS location_id,
---     carriers.id AS carrier_id,
---     ST_Distance(locations.geog,
---         (SELECT geog FROM fiber_plant WHERE carrier_id=carriers.id ORDER BY fiber_plant.geom <-> locations.geom LIMIT 1)) AS distance
---     FROM locations
--- 	CROSS JOIN carriers
--- 	WHERE carriers.route_type='fiber';
-
--- DELETE FROM client.locations_distance_to_carrier WHERE distance IS NULL;
+INSERT INTO client.locations_distance_to_carrier (location_id, carrier_id, distance)
+  SELECT locations.id AS location_id,
+    carriers.id AS carrier_id,
+    MIN(ST_Distance(locations.geog, fiber_plant.geog)) AS distance
+    FROM locations
+    JOIN fiber_plant ON locations.geom && fiber_plant.buffer_geom
+    JOIN carriers ON fiber_plant.carrier_id = carriers.id AND carriers.route_type='fiber'
+    GROUP BY locations.id, carriers.id;

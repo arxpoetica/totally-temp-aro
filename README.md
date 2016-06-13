@@ -55,19 +55,19 @@ node app/cli/register_user.js -f John -l Smith -e john@example.com -p foobar
 
 #### Testing
 
- There's a `make test` task that can be run as described before that will run the unit tests for the backend code.
+There's a `make test` task that can be run as described before that will run the unit tests for the backend code.
 
- However there are a few other command that we can run:
- - `cd app && npm run test-cov`. Runs backend unit tests generating a coverage report.
- - `cd app && npm run test-ui`. Runs unit tests on the UI code.
- - `cd app && npm run test-integration`. Runs integration tests.
+However there are a few other command that we can run:
+- `cd app && npm run test-cov`. Runs backend unit tests generating a coverage report.
+- `cd app && npm run test-ui`. Runs unit tests on the UI code.
+- `cd app && npm run test-integration`. Runs integration tests.
 
- If you get this error while running integration tests `[launcher] Error: Error: Could not find chromedriver` that means you need to update WebDriver:
+If you get this error while running integration tests `[launcher] Error: Error: Could not find chromedriver` that means you need to update WebDriver:
 
- ```
- cd app && node_modules/protractor/bin/webdriver-manager update
- ```
+```
+cd app && node_modules/protractor/bin/webdriver-manager update
+```
 
- That is usually only required the first time you run the integration tests.
+That is usually only required the first time you run the integration tests.
 
- Note about UI testing: these tests run in real browsers you they are not expected to work on basic VMs such as Vagrant.
+Note about UI testing: these tests run in real browsers you they are not expected to work on basic VMs such as Vagrant.

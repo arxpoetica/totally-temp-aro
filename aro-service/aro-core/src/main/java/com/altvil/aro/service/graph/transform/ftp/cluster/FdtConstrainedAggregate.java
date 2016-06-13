@@ -90,7 +90,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	}
 	
 	public boolean isFull() {
-		return (thresholds.getMaxlocationPerFDT() - coverage) < 0.001 ;
+		return Math.abs((thresholds.getMaxlocationPerFDT() - coverage)) < 0.001 ;
 	}
 
 	//

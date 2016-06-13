@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.altvil.aro.service.demand.impl.DefaultDemandStatistic;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.AssignedEntityDemand;
 import com.altvil.aro.service.entity.DemandStatistic;
@@ -31,6 +32,14 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		this.coverage = coverage;
 		this.locationEntities = locationEntities;
 	}
+	
+	
+
+	@Override
+	public DemandStatistic ratio(double ratio) {
+		return new DefaultFiberCoverage((LocationDemand) coverage.ratio(ratio), locationEntities) ;
+	}
+
 
 	@Override
 	public double getRequiredFiberStrands(FiberType fiberType) {
@@ -107,6 +116,13 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		@Override
 		public double getMonthlyRevenueImpact() {
 			return revenue;
+		}
+		
+		@Override
+		public DemandStatistic ratio(double ratio) {
+			return new DefaultDemandStatistic(this.getRawCoverage() * ratio,
+					this.getDemand() * ratio, this.getMonthlyRevenueImpact()
+							* ratio);
 		}
 
 	}

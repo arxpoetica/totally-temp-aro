@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'network_planning', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, network_planning) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -12,32 +12,33 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
     area_layers['wirecenter'] = new MapLayer({
       short_name: 'WC',
-      name: 'Wirecenter',
+      name: config.ui.labels.wirecenter,
       type: 'wirecenter',
       api_endpoint: '/wirecenters',
       highlighteable: true,
       style_options: {
         normal: {
-          fillColor: 'green',
-          strokeColor: 'green',
-          strokeWeight: 2
+          strokeColor: '#00ff00',
+          strokeWeight: 4,
+          fillOpacity: 0
         },
         highlight: {
-          fillColor: 'green',
-          strokeColor: 'green',
-          strokeWeight: 4
+          strokeColor: '#00ff00',
+          strokeWeight: 6,
+          fillOpacity: 0.1
         }
       },
       reload: 'always',
-      threshold: 0
+      threshold: 0,
+      minZoom: 6
     })
   }
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
-    area_layers['county_subdivisions_layer'] = new MapLayer({
+    area_layers['county_subdivisions'] = new MapLayer({
       short_name: 'CS',
       name: 'County Subdivisions',
-      type: 'county_subdivisions_layer',
+      type: 'county_subdivisions',
       api_endpoint: '/county_subdivisions/36',
       highlighteable: true,
       style_options: {
@@ -53,7 +54,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         }
       },
       reload: 'always',
-      threshold: 0
+      threshold: 0,
+      minZoom: 9
     })
   }
 
@@ -84,7 +86,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         }
       },
       threshold: 13,
-      reload: 'dynamic'
+      reload: 'dynamic',
+      minZoom: 14
     })
   }
 
@@ -102,6 +105,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     }
   })
 
+  $rootScope.$on('map_layer_changed_visibility', () => {
+    if (!$scope.$$phase) { $scope.$apply() } // refresh button state
+  })
+
   $scope.plan = null
 
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -109,18 +116,18 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     $scope.boundaries = []
     if (!plan) return
 
-    var county_subdivisions = area_layers['county_subdivisions_layer']
+    var county_subdivisions = area_layers['county_subdivisions']
     var census_blocks = area_layers['census_blocks_layer']
 
     if (plan && (county_subdivisions || census_blocks)) {
       $http.get(`/network_plan/${plan.id}/area_data`)
         .success((response) => {
-          area_layers['county_subdivisions_layer'].setApiEndpoint('/county_subdivisions/' + response.statefp)
+          area_layers['county_subdivisions'].setApiEndpoint('/county_subdivisions/' + response.statefp)
           area_layers['census_blocks_layer'].setApiEndpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
         })
     }
 
-    $http.get('/boundary/' + plan.id + '/find')
+    $http.get(`/boundary/${plan.id}/find`)
       .success((boundaries) => {
         $scope.boundaries = boundaries
         boundaries.forEach((boundary) => {
@@ -218,10 +225,13 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (map_tools.is_visible('area_network_planning')) return
+    if (true) return
+
     var name = event.feature.getProperty('name')
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson((obj) => {
-        if (network_planning.getAlgorithm()) {
+        if (false) { // TODO
           tracker.track('Boundaries / Network planning')
           $scope.network_planning_boundary(obj.geometry)
         } else {
@@ -259,6 +269,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     overlay.marker.addListener('click', () => {
       if (map_tools.is_visible('network_planning')) {
         $scope.run_network_planning(boundary)
+      } else if (map_tools.is_visible('financial_profile')) {
+        $rootScope.$broadcast('custom_boundary_clicked', boundary)
       } else {
         $scope.show_market_size(boundary)
       }
@@ -337,10 +349,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $scope.network_planning_boundary = (geojson) => {
-    var data = {
-      boundary: geojson,
-      algorithm: network_planning.getAlgorithm().id
-    }
+    var data = { boundary: geojson }
     var config = {
       url: '/network/nodes/' + $scope.plan.id + '/select_boundary',
       method: 'post',
@@ -352,7 +361,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  $scope.delete_boundary = (boundary) => {
+  $scope.deleteBoundary = (boundary) => {
     tracker.track('Boundaries / Delete')
     swal({
       title: 'Are you sure?',
@@ -366,7 +375,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       $http.post('/boundary/' + $scope.plan.id + '/delete/' + boundary.id)
         .success((response) => {
           boundary.overlay.setMap(null)
-          $scope.boundaries = _.reject($scope.boundaries, (b) => boundary.id === b.i)
+          $scope.boundaries = _.reject($scope.boundaries, (b) => boundary.id === b.id)
         })
     })
   }

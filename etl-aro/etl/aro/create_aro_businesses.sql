@@ -16,20 +16,22 @@ CREATE TABLE aro.businesses
 	CONSTRAINT aro_businesses_pkey PRIMARY KEY (id)
 );
 
+INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_employees, geog, geom)
+	SELECT
+		l.id AS location_id,
+		b.sic4 AS industry_id,
+		b.business AS name,
+		b.address AS address,
+		b.emps AS number_of_employees,
+		b.geog AS geog,
+		b.geog::geometry AS geom
+	FROM infousa.businesses b
+	JOIN aro.locations l
+		ON ST_Equals(l.geom, b.geog::geometry);
+
 CREATE INDEX aro_businesses_location_index ON aro.businesses(location_id);
 CREATE INDEX aro_businesses_industry_index ON aro.businesses(industry_id);
 CREATE INDEX aro_businesses_geog_index ON aro.businesses USING gist(geog);
 CREATE INDEX aro_businesses_geom_index ON aro.businesses USING gist(geom);
 
-
-INSERT INTO aro.businesses(id, location_id, industry_id, name, address, number_of_employees, geog, geom)
-	SELECT
-		sourceid as id,
-		bldgid as location_id,
-		sic4 as industry_id,
-		business as name,
-		address,
-		emps as number_of_employees,
-		geog::geography as geography,
-		geog::geometry as geometry
-	FROM infousa.businesses;
+CREATE EXTENSION unaccent;

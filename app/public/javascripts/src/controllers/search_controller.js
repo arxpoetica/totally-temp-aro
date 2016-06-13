@@ -6,10 +6,12 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
   $scope.route = null
   $scope.search_results = null
 
+  var marker
+
   var search = $('#search_controller input')
   search.select2({
     ajax: {
-      url: '/search',
+      url: '/search/locations',
       dataType: 'json',
       delay: 250,
       data: (term) => ({ text: term }),
@@ -39,8 +41,9 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
     var location = _.findWhere($scope.search_results, { id: value })
     var center = { lat: location.geog.coordinates[1], lng: location.geog.coordinates[0] }
     map.setCenter(center)
+    if (marker) marker.setMap(null)
 
-    var marker = new google.maps.Marker({
+    marker = new google.maps.Marker({
       position: center,
       map: map,
       animation: google.maps.Animation.DROP
@@ -49,5 +52,10 @@ app.controller('search-controller', ['$scope', '$rootScope', '$http', 'map_tools
     google.maps.event.addListener(marker, 'click', (event) => {
       $rootScope.$broadcast('open_location', location.id)
     })
+  })
+
+  $rootScope.$on('plan_selected', (e, plan) => {
+    if (marker) marker.setMap(null)
+    search.select2('val', '')
   })
 }])

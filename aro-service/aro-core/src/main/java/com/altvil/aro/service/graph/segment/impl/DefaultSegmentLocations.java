@@ -250,11 +250,6 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 		return length;
 	}
 
-	@Override
-	public boolean isEmpty() {
-		return roadLocations.isEmpty();
-	}
-
 	private AroRoadLocation createAroRoadLocation(Point locationPoint,
 			double distanceOffset, Point intersectPoint, double distance) {
 

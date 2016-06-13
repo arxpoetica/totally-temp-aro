@@ -3,23 +3,20 @@ package com.altvil.authentication;
 import java.security.Principal;
 
 public class SimplePrincipal implements Principal {
-	private final String name;
+	private final String jwtSubject;
 	
-	public SimplePrincipal(String name) {
-		this.name = name;
+	public SimplePrincipal(String jwtSubject) {
+		this.jwtSubject = jwtSubject;
 	}
 
 	@Override
 	public String getName() {
-		return name;
+		return jwtSubject;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
+		return 11 + jwtSubject.hashCode();
 	}
 
 	@Override
@@ -31,11 +28,6 @@ public class SimplePrincipal implements Principal {
 		if (getClass() != obj.getClass())
 			return false;
 		SimplePrincipal other = (SimplePrincipal) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
+		return jwtSubject.equals(other.jwtSubject);
 	}
 }

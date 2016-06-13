@@ -7,6 +7,8 @@ public interface DemandStatistic {
 	double getDemand();
 	
 	double getMonthlyRevenueImpact() ;
-
+	
+	DemandStatistic ratio(double ratio) ;
+	
 
 }

@@ -5,7 +5,8 @@
 var helpers = require('../helpers')
 var database = helpers.database
 var _ = require('underscore')
-var request = require('request')
+var pify = require('pify')
+var request = pify(require('request'), { multiArgs: true })
 var config = helpers.config
 var models = require('./')
 var pync = require('pync')
@@ -35,7 +36,7 @@ module.exports = class Network {
   // View existing fiber plant for competitors with a heat map
   static viewFiberPlantDensity (viewport) {
     var sql = `
-      SELECT geom
+      SELECT geom, carrier_name
       FROM fiber_plant
       WHERE carrier_name <> $1
     `
@@ -57,7 +58,6 @@ module.exports = class Network {
         var sql = `
           SELECT
             n.id, ST_AsGeoJSON(geom)::json AS geom, t.name AS name,
-            '/images/map_icons/' || t.name || '.png' AS icon,
             plan_id IS NOT NULL AS draggable,
             name <> 'central_office' AS unselectable
           FROM client.network_nodes n
@@ -167,26 +167,56 @@ module.exports = class Network {
     return database.execute('DELETE FROM client.network_nodes WHERE plan_id=$1;', [plan_id])
   }
 
-  static recalculateNodes (plan_id, algorithm) {
-    return new Promise((resolve, reject) => {
-      var options = {
-        method: 'POST',
-        url: config.aro_service_url + '/rest/recalc/masterplan',
-        json: true,
-        body: {
-          planId: plan_id,
-          algorithm: algorithm
-        }
+  static recalculateNodes (plan_id, options) {
+    var locationTypes = {
+      households: 'Household',
+      businesses: 'Business',
+      towers: 'CellTower'
+    }
+    var body = {
+      planId: plan_id,
+      algorithm: options.algorithm,
+      locationTypes: options.locationTypes.map((key) => locationTypes[key])
+    }
+    var req = {
+      method: 'POST',
+      url: config.aro_service_url + '/rest/recalc/masterplan',
+      json: true,
+      body: body
+    }
+    return Promise.resolve().then(() => {
+      if (options.algorithm === 'NPV') {
+        var financialConstraints = body.financialConstraints = { years: 10 }
+        if (options.budget) financialConstraints.budget = options.budget
+        if (options.discountRate) financialConstraints.discountRate = options.discountRate
       }
-      console.log('sending request to aro-service', options)
-      request(options, (err, res, body) => {
-        if (err) return reject(err)
-        // if (err) return resolve()
-        console.log('ARO-service responded with', res.statusCode, body)
+      if (options.geographies) {
+        body.selectedRegions = []
+        var promises = options.geographies.map((geography) => {
+          var n = geography.id.indexOf(':')
+          var type = geography.id.substring(0, n)
+          var id = geography.id.substring(n + 1)
+          return database.findValue('SELECT ST_AsText(ST_GeomFromGeoJSON($1)) AS wkt', [JSON.stringify(geography.geog)], 'wkt')
+            .then((wkt) => {
+              body.selectedRegions.push({
+                regionType: type.toUpperCase(),
+                id: id,
+                wkt: wkt
+              })
+            })
+        })
+        return Promise.all(promises)
+      }
+    })
+    .then(() => {
+      console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
+      return request(req).then((result) => {
+        var res = result[0]
+        var body = result[1]
+        console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
         if (res.statusCode && res.statusCode >= 400) {
-          return reject(new Error(`ARO-service returned status code ${res.statusCode}`))
+          return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
         }
-        resolve()
       })
     })
   }
@@ -208,6 +238,35 @@ module.exports = class Network {
         // models.NetworkPlan.recalculate_route(plan_id, data.algorithm, callback);
         models.Network.recalculateNodes(plan_id, data.algorithm)
       ))
+  }
+
+  static searchBoundaries (text) {
+    var sql = `
+      SELECT 'wirecenter:' || id AS id, wirecenter AS name, ST_AsGeoJSON(geom)::json AS geog
+        FROM wirecenters
+       WHERE lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
+
+      UNION ALL
+
+      SELECT 'census_block:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+        FROM census_blocks
+       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+
+      UNION ALL
+
+      SELECT 'custom_boundary:' || id AS id, name, ST_AsGeoJSON(geom)::json AS geog
+        FROM client.boundaries
+       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+
+       UNION ALL
+
+      SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+        FROM aro.cousub
+       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+
+      LIMIT 100
+    `
+    return database.query(sql, [`%${text}%`])
   }
 
 }

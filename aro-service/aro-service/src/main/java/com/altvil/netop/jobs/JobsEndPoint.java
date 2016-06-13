@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
+import com.altvil.aro.service.job.impl.JobRequestLocal;
 
 @RestController
 public class JobsEndPoint {
@@ -30,7 +31,7 @@ public class JobsEndPoint {
 	
 	@RequestMapping(value = "/jobs/test", method = RequestMethod.GET)
 	public @ResponseBody Object test(Principal requestor) {
-		return jobService.submit(new JobService.Builder<Void>(requestor).setCallable(() -> {Thread.sleep(10000); return null;}));
+		return jobService.submit(new JobRequestLocal<Void>(requestor, () -> {Thread.sleep(10000); return null;}));
 	}
 
 	@RequestMapping(value = "/jobs/status", method = RequestMethod.POST)
