@@ -22,6 +22,7 @@ public interface NetworkPlanRepository extends
 			"WHERE r.id = :planId", nativeQuery = true)
 	Long queryWirecenterIdForPlanId(@Param("planId") long planId);
 	
+	
 	@Query(value = "with linked_locations as (\n" + 
 			"SELECT\n" + 
 			"l.id as id,\n" + 

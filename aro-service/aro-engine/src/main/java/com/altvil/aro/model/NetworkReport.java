@@ -36,7 +36,7 @@ public class NetworkReport {
 		this.id = id;
 	}
 
-	@Column(name = "name")
+	@Column(name = "report_type_id")
 	@Enumerated(EnumType.ORDINAL)
 	public ReportType getReportType() {
 		return reportType;
@@ -55,7 +55,7 @@ public class NetworkReport {
 		this.planId = planId;
 	}
 
-	@Column(name = "state")
+	@Column(name = "state_code")
 	public String getState() {
 		return state;
 	}
@@ -64,7 +64,7 @@ public class NetworkReport {
 		this.state = state;
 	}
 
-	@Column(name = "date")
+	@Column(name = "pricing_date")
 	@Temporal(TemporalType.DATE)
 	public Date getDate() {
 		return date;

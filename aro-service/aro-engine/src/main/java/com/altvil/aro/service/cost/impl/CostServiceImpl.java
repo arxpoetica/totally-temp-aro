@@ -25,8 +25,9 @@ public class CostServiceImpl implements CostService {
 	}
 
 	@Override
-	@Transactional
 	public void updateWireCenterCosts(long planId) {
+		
+		networkReportRepository.deleteReportsForPlan(planId);
 
 		update(planId, ReportType.detail_equipment,
 				(report) -> networkReportRepository
@@ -44,6 +45,8 @@ public class CostServiceImpl implements CostService {
 
 	@Override
 	public void updateMasterPlanCosts(long planId) {
+		
+		networkReportRepository.deleteReportsForPlan(planId);
 
 		update(planId, ReportType.summary_equipment,
 				(report) -> networkReportRepository
@@ -54,13 +57,18 @@ public class CostServiceImpl implements CostService {
 						.updateMasterPlanFiberSummary(report.getId()));
 	}
 
-	@Transactional
-	@Modifying
 	private void update(long planId, ReportType rt,
 			Consumer<NetworkReport> action) {
 		NetworkReport report = createNetworkReport(planId, rt);
 		networkReportRepository.save(report);
 		action.accept(report);
+	}
+	
+	@Transactional
+	private NetworkReport createReport(long planId, ReportType rt) {
+		NetworkReport report = createNetworkReport(planId, rt);
+		networkReportRepository.save(report);
+		return report ;
 	}
 
 	private NetworkReport createNetworkReport(long planId, ReportType type) {
