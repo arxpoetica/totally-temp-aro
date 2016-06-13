@@ -184,7 +184,8 @@ module.exports = class Network {
       json: true,
       body: body
     }
-    return Promise.resolve().then(() => {
+    return database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id])
+    .then(() => {
       if (options.algorithm === 'NPV') {
         var financialConstraints = body.financialConstraints = { years: 10 }
         if (options.budget) financialConstraints.budget = options.budget
@@ -196,13 +197,21 @@ module.exports = class Network {
           var n = geography.id.indexOf(':')
           var type = geography.id.substring(0, n)
           var id = geography.id.substring(n + 1)
-          return database.findValue('SELECT ST_AsText(ST_GeomFromGeoJSON($1)) AS wkt', [JSON.stringify(geography.geog)], 'wkt')
-            .then((wkt) => {
-              body.selectedRegions.push({
-                regionType: type.toUpperCase(),
-                id: id,
-                wkt: wkt
-              })
+          var geog = JSON.stringify(geography.geog)
+          return database.execute(`
+            INSERT INTO client.selected_regions (
+              plan_id, region_name, region_id, region_type, geom
+            ) VALUES ($1, $2, $3, $4, ST_GeomFromGeoJSON($5))
+          `, [plan_id, geography.name, id, type, geog])
+            .then(() => {
+              return database.findValue('SELECT ST_AsText(ST_GeomFromGeoJSON($1)) AS wkt', [geog], 'wkt')
+                .then((wkt) => {
+                  body.selectedRegions.push({
+                    regionType: type.toUpperCase(),
+                    id: id,
+                    wkt: wkt
+                  })
+                })
             })
         })
         return Promise.all(promises)

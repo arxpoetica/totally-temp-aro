@@ -21,7 +21,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     selectionLayer.setStyle({
       fillColor: 'green'
     })
-    selectionLayer.setMap(map)
+    selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
   }
 
   $(document).ready(() => {
@@ -31,6 +31,23 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $rootScope.$on('plan_selected', (e, plan) => {
     initSelectionLayer()
     $scope.selectedGeographies = []
+  })
+
+  $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    $scope.selectedGeographies = plan.metadata.selectedRegions
+    $scope.selectedGeographies.forEach((geography) => {
+      geography.features = selectionLayer.addGeoJson({
+        type: 'Feature',
+        geometry: geography.geog,
+        properties: {
+          id: geography.id
+        }
+      })
+    })
+  })
+
+  $rootScope.$on('map_tool_changed_visibility', () => {
+    selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
   })
 
   $scope.forward = () => {
