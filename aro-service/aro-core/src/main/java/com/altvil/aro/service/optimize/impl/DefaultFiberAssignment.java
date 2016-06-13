@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class DefaultFiberAssignment implements FiberAssignment {
 
 	private Collection<AroEdge<GeoSegment>> edges;
@@ -60,4 +62,7 @@ public class DefaultFiberAssignment implements FiberAssignment {
 		return fiberType;
 	}
 
+	public String toString() {
+		return new ToStringBuilder(this).append("edges", edges).append("fiberLengthMeters", fiberLengthMeters).append("fiberType", fiberType).toString();
+	}
 }
