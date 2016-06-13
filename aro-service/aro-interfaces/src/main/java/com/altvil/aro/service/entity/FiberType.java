@@ -9,7 +9,7 @@ public enum FiberType {
 	5,drop,Drop Cable
 */
 	
-	UNKNOWN("unknown"), BACKBONE("backbone"), FEEDER("feed"), DISTRIBUTION("dist"), DROP("drop"),  ROOT("root")
+	 ROOT("root"), UNKNOWN("unknown"), BACKBONE("backbone"), FEEDER("feed"), DISTRIBUTION("dist"), DROP("drop")
 
 	;
 

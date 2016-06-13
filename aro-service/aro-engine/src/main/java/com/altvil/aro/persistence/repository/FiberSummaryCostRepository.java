@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.altvil.aro.model.FiberSummaryCost;
 
-@Repository("networkReportRepository")
+@Repository
 public interface FiberSummaryCostRepository extends
 		JpaRepository<FiberSummaryCost, Long> {
 	

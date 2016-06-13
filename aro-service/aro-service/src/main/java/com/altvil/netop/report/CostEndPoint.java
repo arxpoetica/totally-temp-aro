@@ -2,6 +2,7 @@ package com.altvil.netop.report;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,6 +17,7 @@ import com.altvil.aro.service.strategy.NoSuchStrategy;
 @RestController
 public class CostEndPoint {
 	
+	@Autowired
 	private CostService costService ;
 	
 	@RequestMapping(value = "/report/plan/{id}/equipment_summary", method = RequestMethod.GET)

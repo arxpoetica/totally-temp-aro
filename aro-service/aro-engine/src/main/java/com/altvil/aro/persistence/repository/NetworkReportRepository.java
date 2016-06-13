@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.altvil.aro.model.NetworkReport;
 import com.altvil.aro.model.ReportType;
 
-@Repository("networkReportRepository")
+@Repository
 public interface NetworkReportRepository extends
 		JpaRepository<NetworkReport, Long> {
 	
@@ -75,7 +75,7 @@ public interface NetworkReportRepository extends
 			" join financial.report_type rt on rt.id = dh.report_type_id and rt.name = 'summary_equipment'\n" + 
 			")\n" + 
 			"insert into financial.equipment_summary_cost (network_cost_code_id, network_report_id, atomic_count, quantity, price, total_cost)\n" + 
-			"select c.network_cost_code_id, h.id, sum(c.atomic_count), sum(1), avg(c.price),  sum(c.total_cost) \n" + 
+			"select c.network_cost_code_id, h.id, sum(c.atomic_count), sum(atomic_count), avg(c.price),  sum(c.total_cost) \n" + 
 			"from hdr h, wire_reports wr\n" + 
 			"join financial.equipment_summary_cost c on c.network_report_id = wr.id\n" + 
 			"group by c.network_cost_code_id, h.id" + 
@@ -85,19 +85,22 @@ public interface NetworkReportRepository extends
 	void updateMasterPlanEquipmentSummary(@Param("reportId") long reportId);
 	
 	
-	@Query(value = "with hdr as (\n" + 
+	@Query(value = "\n" + 
+			"with hdr as (\n" + 
 			"select * from financial.network_report where id = :reportId\n" + 
 			"),\n" + 
 			"wire_reports as (\n" + 
-			" select h.* \n" + 
+			" select r.* \n" + 
 			" from client.plan p\n" + 
 			" join hdr h on h.plan_id = p.parent_plan_id\n" + 
+			" join financial.network_report r on r.plan_id = p.id \n" + 
+			" join financial.report_type rt on rt.\"id\" = r.report_type_id  and rt.name ='summary_fiber'\n" + 
 			")\n" + 
 			"insert into financial.fiber_summary_cost\n" + 
 			"   (network_cost_code_id, network_report_id, length_meters, cost_per_meter, total_cost)\n" + 
 			"select c.network_cost_code_id, h.id, sum(c.length_meters), avg(c.cost_per_meter), sum(c.total_cost)  \n" + 
-			"from hdr h, financial.fiber_summary_cost c\n" + 
-			"join wire_reports wr on wr.id = c.network_report_id \n" + 
+			"from hdr h, wire_reports wr\n" + 
+			"join financial.fiber_summary_cost c on c.network_report_id = wr.id\n" + 
 			"group by c.network_cost_code_id, h.id	", nativeQuery = true)
 	@Modifying
 	@Transactional

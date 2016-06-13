@@ -30,11 +30,11 @@ public class EquipmentSummaryCost {
 		this.id = id;
 	}
 
+	@Column(name = "network_cost_code_id")
 	public int getCostCode() {
 		return costCode;
 	}
 
-	@Column(name = "network_cost_code_id")
 	public void setCostCode(int costCode) {
 		this.costCode = costCode;
 	}

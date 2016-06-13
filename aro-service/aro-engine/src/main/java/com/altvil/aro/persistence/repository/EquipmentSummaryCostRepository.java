@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.altvil.aro.model.EquipmentSummaryCost;
 
-@Repository("networkReportRepository")
+@Repository
 public interface EquipmentSummaryCostRepository extends JpaRepository<EquipmentSummaryCost, Long> {
 	
 	@Query(value = "select c from EquipmentSummaryCost c where c.networkReportId = :networkReportId")
