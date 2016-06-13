@@ -31,10 +31,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.show_businesses = $scope.show_commercial
   $scope.show_households = $scope.show_residential
   $scope.show_towers = false
-
   $scope.new_location_data = null
-
   $scope.industries = []
+  $scope.business_categories_selected = []
 
   var locationStyles = {
     normal: {
@@ -139,6 +138,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.industries = response.industries
     $scope.customer_types = response.customer_types
     $scope.employees_by_location = response.employees_by_location
+    $scope.business_categories = response.business_categories
+    console.log('categories', response)
 
     // industries
     $('#create-location select.industries').select2({ placeholder: 'Select an industry' })
@@ -188,10 +189,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
     if ($scope.overlay === 'none') {
-      var industries = $('#locations_controller .select2-industries').select2('val')
-      var customer_types = $('#locations_controller .select2-customer-types').select2('val')
-      var number_of_employees = $('#locations_controller .select2-number-of-employees').select2('val')
-
       if (!$scope.show_businesses && !$scope.show_households) {
         locationsLayer.hide()
       } else {
@@ -204,9 +201,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
           type = 'households'
         }
         locationsLayer.setApiEndpoint('/locations/:plan_id', {
-          industries: industries.join(','),
-          customer_types: customer_types.join(','),
-          number_of_employees: number_of_employees.join(','),
+          business_categories: Object.keys($scope.business_categories_selected),
           type: type
         })
         locationsLayer.show()

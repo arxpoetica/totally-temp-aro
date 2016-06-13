@@ -18,10 +18,21 @@ module.exports = class Location {
       households: 'WHERE locations.total_households > 0',
       '': ''
     }
+    var params = [plan_id]
+    var join = ''
+    if ((!type || type === 'businesses') && filters.business_categories.length > 0) {
+      join = `
+        JOIN businesses b ON b.location_id = locations.id AND locations.total_businesses > 0
+        JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
+        JOIN client.business_categories bc ON bc.id IN ($2)
+      `
+      params.push(filters.business_categories)
+    }
     var sql = `
         SELECT locations.id, locations.geom, total_businesses, total_households
           FROM locations
                ${where[type || '']}
+               ${join}
         EXCEPT
         SELECT locations.id, locations.geom, total_businesses, total_households
           FROM locations
@@ -29,9 +40,10 @@ module.exports = class Location {
             ON plan_targets.plan_id = $1
            AND plan_targets.location_id = locations.id
                ${where[type || '']}
+               ${join}
       GROUP BY locations.id
     `
-    return database.points(sql, [plan_id], true, viewport)
+    return database.points(sql, params, true, viewport)
   }
 
   /*
@@ -430,6 +442,10 @@ module.exports = class Location {
       })
       .then((rows) => {
         output.products = rows
+        return database.query('SELECT * FROM client.business_categories')
+      })
+      .then((rows) => {
+        output.business_categories = rows
         return output
       })
   }
