@@ -20,13 +20,13 @@ public interface NetworkReportRepository extends
 	@Transactional
 	void deleteReportsForPlan(@Param("planId") long planId);
 
-	@Query(value = "insert into financial.equipment_item_cost (network_cost_code_id, network_report_id, network_node_id, atomic_count, quantity, price, total_cost)\n"
-			+ "select nt.network_code_id, hdr.id, n.id, n.atomic_count, 1, pr.price,  case when pr.atomic_counting = 1 then n.atomic_count * pr.price else pr.price end  \n"
-			+ "	from financial.network_report hdr \n"
-			+ "	join client.network_nodes n on n.id = hdr.plan_id\n"
-			+ "	join financial.network_cost_code_node_type nt on nt.network_node_type_id = n.node_type_id\n"
-			+ "	join financial.network_price pr on pr.id = nt.network_code_id\n"
-			+ "	where hdr.id = :reportId", nativeQuery = true)
+	@Query(value = "insert into financial.equipment_item_cost (network_cost_code_id, network_report_id, network_node_id, atomic_count, quantity, price, total_cost)\n" + 
+			"			select nt.network_code_id, hdr.id, n.id, n.atomic_count, 1, pr.price,  case when pr.atomic_counting = 1 then n.atomic_count * pr.price else pr.price end\n" + 
+			"			from financial.network_report hdr\n" + 
+			"			join client.network_nodes n on n.plan_id = hdr.plan_id\n" + 
+			"			join financial.network_cost_code_node_type nt on nt.network_node_type_id = n.node_type_id\n" + 
+			"			join financial.network_price pr on pr.id = nt.network_code_id\n" + 
+			"			where hdr.id = :reportId", nativeQuery = true)
 	@Modifying
 	@Transactional
 	void updateWireCenterEquipmentCost(@Param("reportId") long reportId);
@@ -64,15 +64,18 @@ public interface NetworkReportRepository extends
 			"select * from financial.network_report where id = :reportId\n" + 
 			"),\n" + 
 			"wire_reports as (\n" + 
-			" select h.* \n" + 
-			" from client.plan p\n" + 
-			" join hdr h on h.plan_id = p.parent_plan_id\n" + 
+			" select \n" + 
+			"	dh.* \n" + 
+			" from hdr h\n" + 
+			" join client.plan p on p.parent_plan_id = h.plan_id\n" + 
+			" join financial.network_report dh on dh.plan_id = p.id\n" + 
+			" join financial.report_type rt on rt.id = dh.report_type_id and rt.name = 'summary_equipment'\n" + 
 			")\n" + 
 			"insert into financial.equipment_summary_cost (network_cost_code_id, network_report_id, atomic_count, quantity, price, total_cost)\n" + 
 			"select c.network_cost_code_id, h.id, sum(c.atomic_count), sum(1), avg(c.price),  sum(c.total_cost) \n" + 
 			"from hdr h, wire_reports wr\n" + 
-			"join financial.equipment_item_cost c on c.network_report_id = wr.id\n" + 
-			"group by c.network_cost_code_id, h.id\n" + 
+			"join financial.equipment_summary_cost c on c.network_report_id = wr.id\n" + 
+			"group by c.network_cost_code_id, h.id" + 
 			"	", nativeQuery = true)
 	@Modifying
 	@Transactional
