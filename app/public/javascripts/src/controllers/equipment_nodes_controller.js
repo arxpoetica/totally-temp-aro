@@ -222,14 +222,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     } else {
       routeLayer.setDeclarativeStyle((feature, styles) => {
         if (feature.getProperty('fiber_type') === 'feeder') {
-          styles.strokeColor = 'red'
-          styles.strokeWeight = 2
+          styles.strokeColor = 'blue'
+          styles.strokeWeight = 4
           if (!$scope.showDistributionFiber) {
             styles.visible = false
           }
         } else {
-          styles.strokeColor = 'blue'
-          styles.strokeWeight = 4
+          styles.strokeColor = 'red'
+          styles.strokeWeight = 2
           if (!$scope.showFeederFiber) {
             styles.visible = false
           }
