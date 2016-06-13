@@ -177,7 +177,10 @@ public class OptimizeEndPoint {
 			return new NpvOptimizationPlanImpl(financials.getBudget(),
 					financials.getDiscountRate(), financials.getYears());
 		case COVERAGE:
-			return new CoverageOptimizationPlanImpl(plan.getCoverage());
+			CoverageOptimizationPlanImpl coverage = new CoverageOptimizationPlanImpl();
+			coverage.setCoverage(plan.getCoverage());
+			coverage.setPlanId(plan.getPlanId());
+			return coverage;
 
 		case CAPEX:
 		case PENETRATION:

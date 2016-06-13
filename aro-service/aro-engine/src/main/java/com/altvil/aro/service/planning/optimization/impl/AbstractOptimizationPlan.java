@@ -9,7 +9,6 @@ import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.enumerations.OptimizationType;
 
 public abstract class AbstractOptimizationPlan implements OptimizationPlan {
-	private FiberNetworkConstraints fiberNetworkConstraints;
 	private final OptimizationType optimizationType;
 	private long						   planId;
 	private int year = 2015;
@@ -33,10 +32,6 @@ public abstract class AbstractOptimizationPlan implements OptimizationPlan {
 		return null;
 	}
 
-	public FiberNetworkConstraints getFiberNetworkConstraints() {
-		return fiberNetworkConstraints;
-	}
-
 	@Override
 	public OptimizationType getOptimizationType() {
 		return optimizationType;
@@ -50,10 +45,6 @@ public abstract class AbstractOptimizationPlan implements OptimizationPlan {
 	@Override
 	public int getYear() {
 		return year;
-	}
-
-	public void setFiberNetworkConstraints(FiberNetworkConstraints fiberNetworkConstraints) {
-		this.fiberNetworkConstraints = fiberNetworkConstraints;
 	}
 
 	public void setPlanId(long planId) {

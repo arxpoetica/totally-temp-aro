@@ -29,7 +29,6 @@ public abstract class OptimizationPlanConfiguration
 	private static final long	   serialVersionUID	= 1L;
 	private NetworkData			   networkData;
 	private final OptimizationPlan optimizationPlan;
-	private OptimizationType	   optimizationType;
 	private long				   planId;
 
 	public OptimizationPlanConfiguration(OptimizationPlan optimizationPlan) {
@@ -64,16 +63,12 @@ public abstract class OptimizationPlanConfiguration
 		return (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
 	}
 
-	public FiberNetworkConstraints getFiberNetworkConstraints() {
-		return optimizationPlan.getFiberNetworkConstraints();
-	}
-
 	public NetworkData getNetworkData() {
 		return networkData;
 	}
 
 	public OptimizationType getOptimizationType() {
-		return optimizationType;
+		return optimizationPlan.getOptimizationType();
 	}
 
 	public long getPlanId() {

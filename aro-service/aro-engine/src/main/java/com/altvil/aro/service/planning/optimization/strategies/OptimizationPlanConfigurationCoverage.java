@@ -58,7 +58,7 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 			GeoSegment value = e.getValue();
 			
 			if (value == null) {
-				return null;
+				return Collections.emptySet();
 			}
 			
 			Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
@@ -111,14 +111,15 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 
 	@Override
 	public boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork) {
-		double ratio = optimizedNetwork.getAnalysisNode().getFiberCoverage()
-				.getDemand()
-				/ totalDemand;
+		if (optimizedNetwork.isEmpty()) {
+			return false;
+		}
+		
+		final double demand = optimizedNetwork.getAnalysisNode().getFiberCoverage()
+				.getDemand();
+		double ratio = demand / totalDemand;
 
-		System.out.println(ratio);
-
-		boolean predicate = !optimizedNetwork.isEmpty()
-				&& (ratio >= getCoverage());
+		boolean predicate = ratio >= getCoverage();
 		return predicate;
 	}
 }
