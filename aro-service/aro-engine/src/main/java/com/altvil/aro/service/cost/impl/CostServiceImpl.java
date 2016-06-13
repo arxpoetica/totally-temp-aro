@@ -1,15 +1,19 @@
 package com.altvil.aro.service.cost.impl;
 
 import java.util.Date;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.altvil.aro.model.EquipmentSummaryCost;
+import com.altvil.aro.model.FiberSummaryCost;
 import com.altvil.aro.model.NetworkReport;
 import com.altvil.aro.model.ReportType;
+import com.altvil.aro.persistence.repository.EquipmentSummaryCostRepository;
+import com.altvil.aro.persistence.repository.FiberSummaryCostRepository;
 import com.altvil.aro.persistence.repository.NetworkReportRepository;
 import com.altvil.aro.service.cost.CostService;
 
@@ -17,11 +21,17 @@ import com.altvil.aro.service.cost.CostService;
 public class CostServiceImpl implements CostService {
 
 	private NetworkReportRepository networkReportRepository;
+	private EquipmentSummaryCostRepository equipmentSummaryCostRepository ;
+	private FiberSummaryCostRepository fiberSummaryCostRepository ;
 	
 	@Autowired
-	public CostServiceImpl(NetworkReportRepository networkReportRepository) {
+	public CostServiceImpl(NetworkReportRepository networkReportRepository,
+			EquipmentSummaryCostRepository equipmentSummaryCostRepository,
+			FiberSummaryCostRepository fiberSummaryCostRepository) {
 		super();
 		this.networkReportRepository = networkReportRepository;
+		this.equipmentSummaryCostRepository = equipmentSummaryCostRepository;
+		this.fiberSummaryCostRepository = fiberSummaryCostRepository;
 	}
 
 	@Override
@@ -69,6 +79,21 @@ public class CostServiceImpl implements CostService {
 		NetworkReport report = createNetworkReport(planId, rt);
 		networkReportRepository.save(report);
 		return report ;
+	}
+	
+	
+	
+
+	@Override
+	public List<FiberSummaryCost> getFiberReport(long planId) {
+		NetworkReport report = networkReportRepository.findReport(planId, ReportType.summary_fiber) ;
+		return fiberSummaryCostRepository.findEquipmentSummaryCosts(report.getId());
+	}
+
+	@Override
+	public List<EquipmentSummaryCost> getEquipmentReport(long planId) {
+		NetworkReport report = networkReportRepository.findReport(planId, ReportType.summary_equipment) ;
+		return equipmentSummaryCostRepository.findEquipmentSummaryCost(report.getId());
 	}
 
 	private NetworkReport createNetworkReport(long planId, ReportType type) {

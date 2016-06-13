@@ -8,11 +8,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.model.NetworkReport;
+import com.altvil.aro.model.ReportType;
 
 @Repository("networkReportRepository")
 public interface NetworkReportRepository extends
 		JpaRepository<NetworkReport, Long> {
 	
+	@Query("select r from NetworkReport r where r.planId=:planId and r.reportType = :reportType") 
+	NetworkReport findReport(@Param("planId") long planId, @Param("reportType") ReportType reportType) ;
 	
 	
 	@Query(value = "delete from financial.network_report  r where r.plan_id = :planId", nativeQuery = true)
