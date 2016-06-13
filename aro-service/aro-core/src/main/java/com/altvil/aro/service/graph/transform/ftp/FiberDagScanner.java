@@ -435,6 +435,7 @@ public class FiberDagScanner {
 
 								builder.add(truncated);
 								remainingCount -= truncated.getLocationCount();
+								remainingDemand -= truncated.getLocationDemand();
 
 								if (remaining != null
 										&& remaining.getLocationCount() > 0) {
@@ -451,6 +452,7 @@ public class FiberDagScanner {
 
 		public TerminatedVertex.Builder reduce(Map<ValuedItem, EdgeStream> map,
 				TerminatedVertex.Builder builder) {
+			do {
 
 			// Tricky remainder Basis
 			if (remainingDemand < thresholds.getMinLocationPerFDH()) {
@@ -472,27 +474,36 @@ public class FiberDagScanner {
 			//
 			// TODO convert to dynamic programming form
 			if (thresholds.isReduceIncomingStreams()) {
-				if (thresholds.isReduceIncomingStreams()
-						&& reduceEdgeStreams(thresholds.getLocationPerFDH(),
-								map, builder) > 0) {
-					return reduce(map, builder);
-				} else {
-					if (reduceEdgeStreams(thresholds.getMinLocationPerFDH(),
-							map, builder) > 0) {
-						return reduce(map, builder);
+					if (reduceEdgeStreams(thresholds.getLocationPerFDH(), map, builder) > 0) {
+						continue;
 					}
+
+					if (reduceEdgeStreams(thresholds.getMinLocationPerFDH(), map, builder) > 0) {
+						continue;
 				}
 			}
 
 			//
 			// Induction on best fill plan
 			//
-			Knapsack knapsack = new Knapsack(map.keySet(),
-					thresholds.getMaxLocationPerFDH());
+				Knapsack knapsack = new Knapsack(map.keySet(), thresholds.getMaxLocationPerFDH());
+				
+				final List<ValuedItem> knapsackSelectedItems = knapsack.getSelectedItems();
+				if (knapsackSelectedItems.size() == 0) {
+					// Temporarily ignore the isReduceIncomingStreams threshold
+					if (reduceEdgeStreams(thresholds.getLocationPerFDH(), map, builder) > 0) {
+						continue;
+					}
 
-			builder.close(write(map, knapsack.getSelectedItems()));
+					if (reduceEdgeStreams(thresholds.getMinLocationPerFDH(), map, builder) > 0) {
+						continue;
+					}
+					
+					throw new IllegalStateException();
+				}
 
-			return reduce(map, builder);
+				builder.close(write(map, knapsackSelectedItems));
+			} while (true);
 
 		}
 
