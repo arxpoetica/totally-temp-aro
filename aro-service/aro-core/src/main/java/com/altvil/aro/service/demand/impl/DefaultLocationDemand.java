@@ -1,6 +1,5 @@
 package com.altvil.aro.service.demand.impl;
 
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -9,7 +8,6 @@ import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.Pair;
 import com.altvil.utils.func.Aggregator;
-import com.altvil.utils.func.AggregatorFactory.DoubleSummer;
 
 public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		LocationDemand {

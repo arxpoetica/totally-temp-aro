@@ -1,7 +1,6 @@
 package com.altvil.aro.service.demand.impl;
 
 import com.altvil.aro.service.entity.DemandStatistic;
-import com.altvil.aro.service.entity.Pair;
 import com.altvil.utils.func.Aggregator;
 
 public class DefaultDemandStatistic implements DemandStatistic {

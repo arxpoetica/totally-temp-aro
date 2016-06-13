@@ -14,7 +14,6 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
-import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.utils.StreamUtil;
 
