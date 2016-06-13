@@ -1,6 +1,7 @@
 <beans xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
 	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:util="http://www.springframework.org/schema/util"
 	xmlns="http://www.springframework.org/schema/beans"
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans
@@ -12,7 +13,18 @@
 		http://www.springframework.org/schema/tx
 		http://www.springframework.org/schema/tx/spring-tx.xsd
 		http://www.springframework.org/schema/data/jpa
-		http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+		http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		http://www.springframework.org/schema/util
+		http://www.springframework.org/schema/util/spring-util.xsd">
+		
+	<bean id="toStringBuilderSetup" class="org.springframework.beans.factory.config.MethodInvokingBean">
+		<property name="staticMethod" value="org.apache.commons.lang3.builder.ToStringBuilder.setDefaultStyle"/>
+		<property name="arguments">
+			<list>
+				<util:constant static-field="org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE"/>
+			</list>
+		</property>
+	</bean>
 
 	<context:component-scan base-package="com.altvil">
 		<!-- NOTE: aroServices is included as part of the application context so 

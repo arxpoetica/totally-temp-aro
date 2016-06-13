@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler {
 
 	private static List<GraphEdgeAssignment> EMPTY_LOCATIONS = Collections
@@ -300,6 +302,10 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 				double offsetInMeters) {
 			this.location = location;
 			this.offset =  offsetInMeters ;
+		}
+		
+		public String toString() {
+			return new ToStringBuilder(this).append("location", location).append("offset", offset).toString();
 		}
 
 
