@@ -217,16 +217,35 @@ module.exports = class Network {
         return Promise.all(promises)
       }
     })
-    .then(() => {
-      console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
-      return request(req).then((result) => {
-        var res = result[0]
-        var body = result[1]
-        console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
-        if (res.statusCode && res.statusCode >= 400) {
-          return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
-        }
-      })
+    .then(() => this._callService(req))
+  }
+
+  static equipmentSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}/equipment_summary`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
+  static fiberSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}/fiber_summary`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
+  static _callService (req) {
+    console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
+    return request(req).then((result) => {
+      var res = result[0]
+      var body = result[1]
+      console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
+      if (res.statusCode && res.statusCode >= 400) {
+        return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
+      }
+      return body
     })
   }
 
