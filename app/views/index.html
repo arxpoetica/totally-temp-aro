@@ -1227,7 +1227,9 @@
                 <li ng-class="{ 'disabled': wizardStatus !== allStatus[2] }"><a href="javascript:void(0)" style="cursor:default">3</a></li>
 
                 <li ng-class="{ 'disabled': wizardStatus === allStatus[allStatus.length - 1] }" class="next">
-                  <a href="javascript:void(0)" ng-click="forward()">Next</a>
+                  <a href="javascript:void(0)" ng-click="forward()">
+                    {{wizardStatus === allStatus[allStatus.length - 2] ? 'Run' : 'Next' }}
+                  </a>
                 </li>
               </ul>
             </nav>
