@@ -165,8 +165,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 		private void flushCluster() {
 			if (!currentCluster.isEmpty()) {
 				if (currentCluster.getPinnedLocation() == null) {
-					throw new RuntimeException(
-							"Failed tp assign pin to Cluster");
+					log.error("Failed tp assign pin to Cluster") ;
 				} else {
 					clusters.add(currentCluster);
 					currentCluster = new FdtConstrainedAggregate(
