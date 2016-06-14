@@ -1,7 +1,7 @@
 package com.altvil.aro.service.roic.analysis.spi;
 
+import com.altvil.aro.service.roic.RoicModel;
 import com.altvil.aro.service.roic.analysis.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.RoicAnalysis;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 
 public interface StreamAssembler {
@@ -12,7 +12,7 @@ public interface StreamAssembler {
 	
 	StreamAssembler addOutput(CurveIdentifier id) ;
 	
-	RoicAnalysis resolveAndBuild() ;
+	RoicModel resolveAndBuild() ;
 	
 
 }
