@@ -123,9 +123,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (feature.getGeometry().getType() === 'MultiPolygon') {
       feature.toGeoJson((obj) => {
         selectGeography({
-          id: layer.type + ':' + feature.getProperty('id'),
+          id: feature.getProperty('id'),
           name: name,
-          geog: obj.geometry
+          geog: obj.geometry,
+          type: layer.type
         })
         $scope.$apply()
       })
@@ -133,14 +134,16 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   })
 
   function selectGeography (geography) {
-    if ($scope.selectedGeographies.find((geog) => geog.id === geography.id)) return
+    geography.id = String(geography.id)
+    if ($scope.selectedGeographies.find((geog) => geog.id === geography.id && geog.type === geography.type)) return
     $scope.selectedGeographies.push(geography)
 
     geography.features = selectionLayer.addGeoJson({
       type: 'Feature',
       geometry: geography.geog,
       properties: {
-        id: geography.id
+        id: geography.id,
+        type: geography.type
       }
     })
   }
@@ -176,10 +179,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   search.on('change', () => {
     var value = search.select2('val')
     var boundary = $scope.searchResults.find((boundary) => boundary.id === value)
+    var n = boundary.id.indexOf(':')
+    var type = boundary.id.substring(0, n)
+    var id = boundary.id.substring(n + 1)
+
     selectGeography({
-      id: boundary.id,
+      id: id,
       name: boundary.text,
-      geog: boundary.geog
+      geog: boundary.geog,
+      type: type
     })
     search.select2('val', '')
     $scope.$apply()
@@ -197,7 +205,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if ($scope.coverTowers) locationTypes.push('towers')
     var changes = {
       locationTypes: locationTypes,
-      geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id })),
+      geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id, type: i.type })),
       algorithm: $scope.optimizationType,
       budget: parseBudget()
     }

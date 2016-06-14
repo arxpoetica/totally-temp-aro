@@ -176,8 +176,8 @@ module.exports = class Network {
     var body = {
       planId: plan_id,
       algorithm: options.algorithm,
-      locationTypes: options.locationTypes.map((key) => locationTypes[key]),
-      budget: options.budget
+      locationTypes: options.locationTypes.map((key) => locationTypes[key])
+      // budget: options.budget
     }
     var req = {
       method: 'POST',
@@ -195,9 +195,8 @@ module.exports = class Network {
       if (options.geographies) {
         body.selectedRegions = []
         var promises = options.geographies.map((geography) => {
-          var n = geography.id.indexOf(':')
-          var type = geography.id.substring(0, n)
-          var id = geography.id.substring(n + 1)
+          var type = geography.type
+          var id = geography.id
           var geog = JSON.stringify(geography.geog)
           return database.execute(`
             INSERT INTO client.selected_regions (
