@@ -21,6 +21,9 @@ etl_geotel:
 etl_demographics:
 	etl/demographics/demographics_etl.sh
 
+etl_nbm:
+	etl/nbm/nbm_etl.sh
+
 etl_aro:
 	etl/aro/aro_etl.sh
 
@@ -45,6 +48,9 @@ reset_aro:
 reset_infousa:
 	etl/reset_infousa_data.sh
 
+reset_nbm:
+		etl/reset_nbm_data.sh
+
 reset_geotel:
 	etl/reset_geotel_data.sh
 
@@ -60,7 +66,7 @@ reset_auth:
 reset_temp_hh:
 	etl/reset_temp_hh.sh
 
-etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_temp_hh reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_temp_hh etl_aro
+etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_nbm reset_temp_hh reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_nbm etl_temp_hh etl_aro
 
 etl_reload_client: reset_client etl_client
 
