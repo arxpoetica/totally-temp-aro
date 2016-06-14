@@ -5,7 +5,7 @@ public interface PenetrationService {
 	
 
 	NetworkPenetration createNetworkTypePenetration(PenetrationInput input) ;
-	NetworkPenetration calculateRate(PenetrationHistory historu, double targetFairShare) ;
+	NetworkPenetration calculateRate(PenetrationHistory history, double targetFairShare) ;
 
 
 }

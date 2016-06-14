@@ -1,9 +1,9 @@
 package com.altvil.aro.service.roic.analysis.impl;
 
-import com.altvil.aro.service.roic.analysis.PeriodFunction;
+import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 
-public class AnalysisCurve implements PeriodFunction {
+public class AnalysisCurve extends AbstractStreamFunction {
 
 	// private double startPercent;
 	private double endPercent;
@@ -15,11 +15,15 @@ public class AnalysisCurve implements PeriodFunction {
 		this.endPercent = networkPenetration.getEndPenetration();
 		this.rate = networkPenetration.getRate();
 
-		difference = networkPenetration.getStartPenetration() - endPercent;
+		difference = networkPenetration.getStartPenetration() - endPercent ;
+	}
+	
+	@Override
+	public double calc(CalcContext ctx) {
+		return (difference) * Math.pow(1 + rate, ctx.getPeriod()) + endPercent;
 	}
 
-	@Override
-	public double apply(int t) {
-		return (difference) * Math.pow(1 + rate, t) + endPercent;
-	}
+
+
+	
 }

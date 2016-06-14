@@ -2,7 +2,7 @@ package com.altvil.aro.service.roic.analysis;
 
 public interface RowReference {
 	
-	String getName() ;
+	CurveIdentifier getIdentifier() ;
 	AnalysisRow getAnalysisRow() ;
 
 }
