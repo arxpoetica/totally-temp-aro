@@ -22,6 +22,15 @@ public class PenetrationTest {
 				return null;
 			}
 			
+			
+			
+			@Override
+			public int getCurrentYear() {
+				return 0;
+			}
+
+
+
 			@Override
 			public int getPeriod() {
 				return 20;

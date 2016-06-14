@@ -29,8 +29,17 @@ public class StreamAssemblerImpl implements RoicAssembler {
 
 	@Override
 	public RoicAssembler setPeriod(int period) {
-		return null;
+		this.period = period ;
+		return this;
 	}
+	
+	
+	@Override
+	public RoicAssembler setStartYear(int startYear) {
+		this.startYear = startYear ;
+		return this ;
+	}
+	
 
 	@Override
 	public RoicAssembler add(CurveIdentifier id, StreamFunction f) {
@@ -94,6 +103,7 @@ public class StreamAssemblerImpl implements RoicAssembler {
 			doubleResult = new double[size];
 		}
 
+		
 		private double[] doubleResult;
 	}
 
@@ -314,9 +324,14 @@ public class StreamAssemblerImpl implements RoicAssembler {
 		private void run(List<RowBinding> rowBindings) {
 
 			CalcContextImpl ctx = new CalcContextImpl(startYear,
-					new ResultStreamImpl(size));
+					new ResultStreamImpl(streamFunctions.size()));
+			
+			double[] result = ctx.resultStream.doubleResult ;
 
 			for (int i = 0; i < size; i++) {
+				for(int fi=0 ; fi<streamFunctions.size() ; fi++) {
+					result[fi] = streamFunctions.get(fi).calc(ctx) ;
+				}
 				streamFunctions.forEach(f -> f.calc(ctx));
 				rowBindings.forEach(b -> b.update(ctx));
 				ctx.inc() ;
