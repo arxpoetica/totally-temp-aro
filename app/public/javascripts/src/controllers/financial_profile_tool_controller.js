@@ -1,6 +1,6 @@
 /* global app $ Chart */
 // Search Controller
-app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
+app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', ($scope, $rootScope, $http, $timeout, map_tools) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
@@ -65,7 +65,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function refreshCurrentTab () {
     var href = $('#financial_profile_controller .nav-tabs li.active a').attr('href')
-    if (href === '#financialProfileCashFlow') {
+    if (href === '#financialProfileSummary') {
+      showSummaryChart()
+    } else if (href === '#financialProfileCashFlow') {
       showCashFlowChart()
     } else if (href === '#financialProfileCapex') {
       showBudgetChart()
@@ -85,6 +87,17 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.plan = plan
   })
 
+  $rootScope.$on('route_planning_changed', (e) => {
+    if (!$scope.plan) return
+    showSummaryChart()
+  })
+
+  $rootScope.$on('map_tool_changed_visibility', (e) => {
+    if (map_tools.is_visible('financial_profile')) {
+      $timeout(refreshCurrentTab, 0)
+    }
+  })
+
   $scope.financialData = {}
   function request (key, params, callback) {
     if (!$scope.plan) return
@@ -98,7 +111,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function showChart (id, type, data, options) {
     charts[id] && charts[id].destroy()
-    var ctx = document.getElementById(id).getContext('2d')
+    var elem = document.getElementById(id)
+    elem.removeAttribute('width')
+    elem.removeAttribute('height')
+    elem.style.width = '100%'
+    elem.style.height = '200px'
+    var ctx = elem.getContext('2d')
     charts[id] = new Chart(ctx)[type](data, options)
     var legend = document.getElementById(id + '-legend')
     if (legend) {
@@ -225,5 +243,46 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       }
       showChart('financial-profile-chart-penetration', 'Line', data, options)
     })
+  }
+
+  var chart = null
+
+  function showSummaryChart () {
+    var dataset = {
+      label: 'NPV',
+      fillColor: 'rgba(151,187,205,0.2)',
+      strokeColor: 'rgba(151,187,205,1)',
+      pointColor: 'rgba(151,187,205,1)',
+      pointStrokeColor: '#fff',
+      pointHighlightFill: '#fff',
+      pointHighlightStroke: 'rgba(151,187,205,1)',
+      data: []
+    }
+
+    var data = {
+      labels: [],
+      datasets: [dataset]
+    }
+
+    console.log('metadata', $scope.plan.metadata)
+
+    ;($scope.plan.metadata.npv || []).forEach((revenue) => {
+      data.labels.push(revenue.year)
+      dataset.data.push(revenue.value)
+    })
+
+    chart && chart.destroy()
+    var options = {
+      bezierCurve: false,
+      scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
+      tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+    }
+    var elem = document.getElementById('financial-profile-chart')
+    elem.removeAttribute('width')
+    elem.removeAttribute('height')
+    elem.style.width = '100%'
+    elem.style.height = '200px'
+    var ctx = elem.getContext('2d')
+    chart = new Chart(ctx).Line(data, options)
   }
 }])

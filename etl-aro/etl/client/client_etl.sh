@@ -52,3 +52,6 @@ python $DIR/manage.py data spend values add $DIR/reformatted_spend.csv
 python $DIR/manage.py data spend mapping add $DIR/industry_mapping.csv
 
 ${PSQL} -a -f $DIR/create_city_spend_mapping.sql
+
+# Create boundaries
+${PSQL} -a -f $DIR/create_client_selected_regions.sql
