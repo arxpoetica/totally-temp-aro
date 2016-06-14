@@ -176,7 +176,8 @@ module.exports = class Network {
     var body = {
       planId: plan_id,
       algorithm: options.algorithm,
-      locationTypes: options.locationTypes.map((key) => locationTypes[key])
+      locationTypes: options.locationTypes.map((key) => locationTypes[key]),
+      budget: options.budget
     }
     var req = {
       method: 'POST',

@@ -16,6 +16,20 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.optimizationType = 'capex'
   $scope.irrThreshold = 100
+  $scope.budget = 10000000
+
+  var budgetInput = $('#area_network_planning_controller input[name=budget]')
+  budgetInput.val($scope.budget.toLocaleString())
+
+  const parseBudget = () => +budgetInput.val().match(/\d+/g).join('') || 0
+
+  budgetInput.on('focus', () => {
+    budgetInput.val(String(parseBudget()))
+  })
+
+  budgetInput.on('blur', () => {
+    budgetInput.val(parseBudget().toLocaleString())
+  })
 
   var selectionLayer
   function initSelectionLayer () {
@@ -184,7 +198,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     var changes = {
       locationTypes: locationTypes,
       geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id })),
-      algorithm: $scope.optimizationType
+      algorithm: $scope.optimizationType,
+      budget: parseBudget()
     }
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'

@@ -661,7 +661,7 @@
                   </label>
                 </div>
               </form>
-              <div ng-show="optimizationType === 'irr_target'">
+              <div ng-show="optimizationType === 'irr_target' || optimizationType === 'budget_irr_floor'">
                 <br>
                 <p><strong>IRR Threshold</strong></p>
                 <div class="row">
@@ -671,6 +671,20 @@
                   <div class="col-md-4">
                     <div class="form-group form-group-sm">
                       <input type="number" min="100" max="500" step="10" ng-model="irrThreshold" class="form-control text-right">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div ng-show="optimizationType === 'budget_irr_floor'">
+                <br>
+                <p><strong>Budget</strong></p>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group form-group-sm">
+                      <div class="input-group input-group-sm">
+                        <div class="input-group-addon">$</div>
+                        <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+                      </div>
                     </div>
                   </div>
                 </div>
