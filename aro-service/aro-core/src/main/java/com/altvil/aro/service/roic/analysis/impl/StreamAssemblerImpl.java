@@ -9,12 +9,12 @@ import java.util.Map;
 
 import com.altvil.aro.service.roic.RoicModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.ResultStream;
 import com.altvil.aro.service.roic.analysis.calc.StreamAccessor;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
+import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.spi.ResolveContext;
 import com.altvil.aro.service.roic.analysis.spi.RoicAssembler;
 import com.altvil.utils.StreamUtil;

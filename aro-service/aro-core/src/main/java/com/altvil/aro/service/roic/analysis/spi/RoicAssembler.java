@@ -1,8 +1,8 @@
 package com.altvil.aro.service.roic.analysis.spi;
 
 import com.altvil.aro.service.roic.RoicModel;
-import com.altvil.aro.service.roic.analysis.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
+import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 
 public interface RoicAssembler {
 	

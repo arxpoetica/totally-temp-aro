@@ -4,10 +4,10 @@ import org.junit.Test;
 
 import com.altvil.aro.service.roic.RoicModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.impl.StreamAssemblerImpl;
+import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.spi.ResolveContext;
 import com.vividsolutions.jts.util.Assert;
 

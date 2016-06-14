@@ -1,16 +1,17 @@
-package com.altvil.aro.service.roic.analysis;
+package com.altvil.aro.service.roic.analysis.builder;
 
-import java.util.Collection;
-
-import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.roic.penetration.NetworkPenetration;
-import com.altvil.aro.service.roic.product.ProductSet;
+import com.altvil.aro.service.roic.model.NetworkType;
 
 
 public interface AnalysisBuilder {
 
-	AnalysisBuilder setAnalysisPeriod(int periodInMonths) ;
-	AnalysisBuilder setProductSets(Collection<ProductSet> productSets) ;
+	AnalysisBuilder setAnalysisPeriod(int periodInYears) ;
+	AnalysisBuilder setStartYear(int year) ;
+	
+	NetworkAnalysisBuilder networkAnalysisBuilder(NetworkType type) ;
+	
+	/*
+	EntityAnalysisBuilder entityAnalysis(LocationEntityType type) ;
 	
 	//By Network By LocationType
 	AnalysisBuilder addNetworkPenetration(NetworkPenetration penetration) ;
@@ -39,5 +40,8 @@ public interface AnalysisBuilder {
 	//  Network Deployment 
 	//  Connect Crazy Formula By Year
 	//  Revenue * 4.23% 
+	 * 
+	 * 
+	 */
 	
 }
