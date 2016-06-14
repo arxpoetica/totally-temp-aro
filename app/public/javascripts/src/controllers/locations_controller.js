@@ -139,7 +139,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.customer_types = response.customer_types
     $scope.employees_by_location = response.employees_by_location
     $scope.business_categories = response.business_categories
-    console.log('categories', response)
+
+    $scope.business_categories_selected = []
+    $scope.business_categories.forEach((category) => {
+      $scope.business_categories_selected[category.id] = true
+    })
 
     // industries
     $('#create-location select.industries').select2({ placeholder: 'Select an industry' })
@@ -200,10 +204,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         } else if ($scope.show_households) {
           type = 'households'
         }
-        locationsLayer.setApiEndpoint('/locations/:plan_id', {
-          business_categories: Object.keys($scope.business_categories_selected),
-          type: type
-        })
+        var options = { type }
+        var business_categories = Object.keys($scope.business_categories_selected).filter((key) => $scope.business_categories_selected[key])
+        if (business_categories.length < $scope.business_categories.length) {
+          options.business_categories = business_categories
+        }
+        console.log('options', options, business_categories, $scope.business_categories.length, $scope.business_categories_selected)
+        locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
       }
     } else {
