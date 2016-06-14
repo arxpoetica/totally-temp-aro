@@ -4,7 +4,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   // Controller instance variables
   $scope.map_tools = map_tools
 
-  $scope.allStatus = ['geographies', 'cover', 'budget', 'progress']
+  $scope.allStatus = ['optimization', 'geographies', 'cover', 'progress']
   $scope.wizardStatus = $scope.allStatus[0]
   $scope.advancedSettings = false
   $scope.selectedGeographies = []
@@ -13,6 +13,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.coverHouseholds = true
   $scope.coverBusinesses = true
   $scope.coverTowers = true
+
+  $scope.optimizationType = 'capex'
+  $scope.irrThreshold = 100
 
   var selectionLayer
   function initSelectionLayer () {
@@ -180,7 +183,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if ($scope.coverTowers) locationTypes.push('towers')
     var changes = {
       locationTypes: locationTypes,
-      geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id }))
+      geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id })),
+      algorithm: $scope.optimizationType
     }
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'
