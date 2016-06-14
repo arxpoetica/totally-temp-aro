@@ -4,13 +4,15 @@ import com.altvil.aro.service.roic.RoicModel;
 import com.altvil.aro.service.roic.analysis.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 
-public interface StreamAssembler {
+public interface RoicAssembler {
 	
-	StreamAssembler setPeriod(int period) ;
+	RoicAssembler setStartYear(int startYear) ;
 	
-	StreamAssembler add(CurveIdentifier id, StreamFunction f) ;
+	RoicAssembler setPeriod(int period) ;
 	
-	StreamAssembler addOutput(CurveIdentifier id) ;
+	RoicAssembler add(CurveIdentifier id, StreamFunction f) ;
+	
+	RoicAssembler addOutput(CurveIdentifier id) ;
 	
 	RoicModel resolveAndBuild() ;
 	

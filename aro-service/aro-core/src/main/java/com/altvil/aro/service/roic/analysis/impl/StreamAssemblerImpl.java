@@ -10,17 +10,16 @@ import java.util.Map;
 import com.altvil.aro.service.roic.RoicModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.RoicAnalysis;
 import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.ResultStream;
 import com.altvil.aro.service.roic.analysis.calc.StreamAccessor;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.spi.ResolveContext;
-import com.altvil.aro.service.roic.analysis.spi.StreamAssembler;
+import com.altvil.aro.service.roic.analysis.spi.RoicAssembler;
 import com.altvil.utils.StreamUtil;
 
-public class StreamAssemblerImpl implements StreamAssembler {
+public class StreamAssemblerImpl implements RoicAssembler {
 
 	private int startYear;
 	private int period;
@@ -29,18 +28,18 @@ public class StreamAssemblerImpl implements StreamAssembler {
 	private List<CurveIdentifier> outputCurves = new ArrayList<>();
 
 	@Override
-	public StreamAssembler setPeriod(int period) {
+	public RoicAssembler setPeriod(int period) {
 		return null;
 	}
 
 	@Override
-	public StreamAssembler add(CurveIdentifier id, StreamFunction f) {
+	public RoicAssembler add(CurveIdentifier id, StreamFunction f) {
 		funcMap.put(id, f);
 		return this;
 	}
 
 	@Override
-	public StreamAssembler addOutput(CurveIdentifier id) {
+	public RoicAssembler addOutput(CurveIdentifier id) {
 		outputCurves.add(id);
 		return this;
 	}
@@ -320,6 +319,7 @@ public class StreamAssemblerImpl implements StreamAssembler {
 			for (int i = 0; i < size; i++) {
 				streamFunctions.forEach(f -> f.calc(ctx));
 				rowBindings.forEach(b -> b.update(ctx));
+				ctx.inc() ;
 			}
 
 		}
