@@ -32,7 +32,7 @@ public class EngineTest {
 			
 			@Override
 			public double calc(CalcContext ctx) {
-				return ctx.getPeriod();
+				return ctx.getPeriod() +1;
 			}
 		})
 		.addOutput(id);
@@ -41,7 +41,7 @@ public class EngineTest {
 		AnalysisRow row = m.getAnalysisRow(id) ;
 		
 		for(int i=0 ; i<10 ; i++) {
-			Assert.equals((double) i, row.getValue(i));
+			Assert.equals((double) i +1, row.getValue(i));
 		}
 		
 	}

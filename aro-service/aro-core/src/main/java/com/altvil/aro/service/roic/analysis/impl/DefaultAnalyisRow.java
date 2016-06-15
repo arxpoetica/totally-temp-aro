@@ -8,7 +8,7 @@ public class DefaultAnalyisRow implements AnalysisRow {
 
 	public static AnalysisRow sum(int size, Collection<AnalysisRow> rows) {
 		double[] values = new double[size];
-		for (int i = 0; 0 < size; i++) {
+		for (int i = 0; i < size; i++) {
 			double total = 0;
 			for (AnalysisRow r : rows) {
 				total += r.getValue(i);

@@ -2,6 +2,7 @@ package com.altvil.aro.service.roic.analysis;
 
 import com.altvil.aro.service.roic.analysis.builder.ComponentBuilder;
 import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
+import com.altvil.aro.service.roic.analysis.builder.RoicModelBuilder;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
@@ -11,6 +12,7 @@ public interface AnalysisService {
 	
 	ComponentBuilder createComponentBuilder() ;
 	NetworkAnalysisBuilder createNetworkAnalysisBuilder() ;
+	RoicModelBuilder createRoicModelBuilder() ;
 	
 	StreamFunction createCurve(NetworkPenetration networkPenetration);
 
@@ -19,6 +21,8 @@ public interface AnalysisService {
 	StreamFunction createHouseHolds(double start, double growth);
 
 	StreamFunction createMultiplyOp(CurveIdentifier id, double cost);
+	
+	StreamFunction createMultiplyOp(CurveIdentifier id, CurveIdentifier id2);
 	
 	StreamFunction createCost(double cost);
 	
@@ -35,5 +39,7 @@ public interface AnalysisService {
 			CurveIdentifier arpuIdentifier) ;
 	
 	StreamFunction createDeploymentCost(double cost) ;
-
+	
+	StreamFunction createStreamDiff(CurveIdentifier id) ;
+ 
 }

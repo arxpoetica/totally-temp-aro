@@ -3,8 +3,10 @@ package com.altvil.aro.service.roic.analysis.impl;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentBuilder;
 import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
+import com.altvil.aro.service.roic.analysis.builder.RoicModelBuilder;
 import com.altvil.aro.service.roic.analysis.builder.impl.ComponentBuilderImpl;
 import com.altvil.aro.service.roic.analysis.builder.impl.NetworkAnalysisBuilderImpl;
+import com.altvil.aro.service.roic.analysis.builder.impl.RoicAnalysisBuilder;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.impl.HouseHoldsConnectedPercent.Params;
@@ -26,6 +28,26 @@ public class AnalysisServiceImpl implements AnalysisService {
 	@Override
 	public NetworkAnalysisBuilder createNetworkAnalysisBuilder() {
 		return new NetworkAnalysisBuilderImpl(this);
+	}
+	
+	
+	
+	
+
+	@Override
+	public RoicModelBuilder createRoicModelBuilder() {
+		return new RoicAnalysisBuilder() ;
+	}
+
+	@Override
+	public StreamFunction createMultiplyOp(CurveIdentifier id,
+			CurveIdentifier id2) {
+		return new TimesStreamFunction(id, id2) ;
+	}
+
+	@Override
+	public StreamFunction createStreamDiff(CurveIdentifier id) {
+		return new StreamDiff(id) ;
 	}
 
 	@Override

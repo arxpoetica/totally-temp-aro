@@ -17,6 +17,8 @@ public enum AnalysisCode implements CurveIdentifier {
 	subscribers_penetration,
 	network_deployment,
 	new_connections,
+	new_connections_count,
+	new_connections_period,
 	opex_expenses,
 
 	// Revenue By Network By LocationType

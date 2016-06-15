@@ -1,7 +1,5 @@
 package com.altvil.aro.service.roic.analysis.builder;
 
-import java.util.Collection;
-
 import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 

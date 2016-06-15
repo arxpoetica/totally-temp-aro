@@ -67,36 +67,60 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	// Revenue * 4.23%
 
 	private void assignOutputs() {
-		roicAssembler.addOutput(AnalysisCode.revenue)
+		roicAssembler
+				.addOutput(AnalysisCode.penetration)
+				.addOutput(AnalysisCode.revenue)
 				.addOutput(AnalysisCode.premises_passed)
 				.addOutput(AnalysisCode.subscribers_count)
 				.addOutput(AnalysisCode.subscribers_penetration)
 				.addOutput(AnalysisCode.new_connections)
-				.addOutput(AnalysisCode.opex_expenses);
+				.addOutput(AnalysisCode.opex_expenses)
+				.addOutput(AnalysisCode.new_connections_period);
 	}
 
 	private void assemble(ComponentInput inputs) {
 		roicAssembler.add(AnalysisCode.penetration,
 				analysisService.createCurve(inputs.getPenetration()));
 
+		roicAssembler.add(AnalysisCode.premises_passed,
+				analysisService.createPremisesPassed(inputs.getEntityCount()));
+
+		roicAssembler.add(AnalysisCode.subscribers_count, analysisService
+				.createMultiplyOp(AnalysisCode.penetration,
+						inputs.getEntityCount()));
+
+		roicAssembler
+				.add(AnalysisCode.subscribers_penetration, analysisService
+						.createMultiplyOp(AnalysisCode.penetration, 1.0));
+		
+
 		roicAssembler.add(AnalysisCode.houseHolds, analysisService
 				.createHouseHolds(inputs.getEntityCount(),
 						inputs.getEntityGrowth()));
+		
+		
 
 		roicAssembler.add(AnalysisCode.revenue, analysisService.createRevenue(
-				AnalysisCode.revenue, AnalysisCode.penetration,
-				AnalysisCode.houseHolds));
+				AnalysisCode.houseHolds, AnalysisCode.penetration,
+				AnalysisCode.arpu));
 
 		roicAssembler.add(AnalysisCode.new_connections, analysisService
 				.createConnectedHouseHolds(inputs.getPenetration().getRate(),
 						inputs.getEntityCount(), inputs.getChurnRate(),
 						inputs.getChurnRateDecrease()));
+		
+		roicAssembler.add(AnalysisCode.new_connections_count, 
+				analysisService.createMultiplyOp(AnalysisCode.houseHolds, AnalysisCode.new_connections)) ;
+			
+		roicAssembler.add(AnalysisCode.new_connections_period, 
+				analysisService.createStreamDiff(AnalysisCode.new_connections_count)) ;
+		
 
 		roicAssembler.add(AnalysisCode.arpu,
 				analysisService.createARPU(inputs.getArpu()));
 
 		roicAssembler.add(
-				AnalysisCode.houseHolds,
+				AnalysisCode.opex_expenses,
 				analysisService.createMultiplyOp(AnalysisCode.revenue,
 						inputs.getOpexPercent()));
 

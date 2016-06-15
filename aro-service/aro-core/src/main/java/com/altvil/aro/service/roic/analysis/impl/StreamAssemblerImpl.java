@@ -21,7 +21,7 @@ import com.altvil.utils.StreamUtil;
 
 public class StreamAssemblerImpl implements StreamAssembler {
 
-	private AnalysisPeriod analysisPeriod ; ;
+	private AnalysisPeriod analysisPeriod ;
 
 	private Map<CurveIdentifier, StreamFunction> funcMap = new HashMap<>();
 	private List<CurveIdentifier> outputCurves = new ArrayList<>();
@@ -131,9 +131,17 @@ public class StreamAssemblerImpl implements StreamAssembler {
 		}
 
 		private Binding resolveBinding(CurveIdentifier id) {
+			
+			System.out.println("id = " + id) ;
+			
 			Binding b = resolved.get(id);
 			if (b == null) {
 				StreamFunction f = funcMap.get(id);
+				
+				if( f == null ) {
+					throw new RuntimeException("No Function defined for " + id) ;
+				}
+				
 				f.resolve(this);
 				resolved.put(id, b = createBinding(f));
 			}
@@ -277,6 +285,9 @@ public class StreamAssemblerImpl implements StreamAssembler {
 				List<RowBinding> rowBindings) {
 			Map<CurveIdentifier, AnalysisRow> map = new HashMap<>();
 			rowBindings.forEach(b -> {
+				
+				System.out.println("Output Row " + b.getCurveIdentifier()) ;
+				
 				map.put(b.getCurveIdentifier(), b.getAnalysisRow());
 			});
 			return map;

@@ -13,14 +13,15 @@ import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
 import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
 import com.altvil.aro.service.roic.analysis.impl.AnalysisServiceImpl;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
+import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
 
-public class RoicComponentTest {
+public class RoicTest {
 
 	private AnalysisService analysisService;
 
@@ -30,30 +31,36 @@ public class RoicComponentTest {
 	}
 
 	@Test
-	public void testRoicComponent() {
+	public void testRoic() {
 
 		AnalysisPeriod ap = new AnalysisPeriod(2016, 20);
-		RoicComponent component = analysisService.createComponentBuilder()
-				.setAnalysisPeriod(ap)
-				.setComponentType(ComponentType.household)
-				.setRoicModelInputs(createComponentInput()).build();
+
+		RoicModel model = analysisService.createRoicModelBuilder().setAnalysisPeriod(ap)
+				.addRoicInputs(createRoicInputs())
+				.addRoicInputs(createRoicInputs())
+				.addRoicInputs(createCopperRoicInputs())
+				.build();
 		
-		dump(component, AnalysisCode.penetration) ;
-		dump(component, AnalysisCode.revenue) ;
+		RoicNetworkModel networkModel = model.getRoicNetworkModel(NetworkAnalysisType.planned) ;
+		
+		dump(networkModel, AnalysisCode.cost) ;
+		dump(networkModel, AnalysisCode.revenue) ;
+		
 	}
-	
+
+	private void dump(RoicNetworkModel model, CurveIdentifier id) {
+		System.out.println(toInfo(model.getAnalysisRow(id), id));
+	}
+
 	private void dump(RoicComponent component, CurveIdentifier id) {
-		System.out.println(toInfo(component,id)) ;
+		System.out.println(toInfo(component.getAnalysisRow(id), id));
 	}
 
-	private String toInfo(RoicComponent component, CurveIdentifier id) {
+	private String toInfo(AnalysisRow row, CurveIdentifier id) {
 
-		
 		StringBuffer sb = new StringBuffer();
 
 		sb.append(id + " ---> ");
-
-		AnalysisRow row = component.getAnalysisRow(id);
 
 		for (int i = 0; i < row.getSize(); i++) {
 			if (i > 0) {
@@ -66,14 +73,32 @@ public class RoicComponentTest {
 
 	}
 
-	//
-	// private RoicInputs createRoicInputs() {
-	// RoicInputs ri = new RoicInputs();
-	// ri.setComponentInputs(Collections.singleton(createComponentInput()));
-	// ri.setFixedCost(10000);
-	// ri.setType(NetworkAnalysisType.fiber);
-	// return ri;
-	// }
+	private RoicInputs createRoicInputs() {
+		RoicInputs ri = new RoicInputs();
+		ri.setComponentInputs(Collections.singleton(createComponentInput()));
+		ri.setFixedCost(10000);
+		ri.setType(NetworkAnalysisType.fiber);
+		return ri;
+	}
+	
+	
+	private RoicInputs createCopperRoicInputs() {
+		RoicInputs ri = new RoicInputs();
+		ri.setComponentInputs(Collections.singleton(createCopperComponentInput()));
+		ri.setFixedCost(10000);
+		ri.setType(NetworkAnalysisType.copper);
+		return ri;
+	}
+	
+	private ComponentInput createCopperComponentInput() {
+
+		return ComponentInput.build().setArpu(20).setChurnRate(0.01)
+				.setChurnRateDecrease(0.00006).setEntityCount(500)
+				.setEntityGrowth(0.0000)
+				.setNetworkPenetration(new DefaultNetworkPenetration(0.8, 0.4, -.03))
+				.setOpexPercent(0.043).assemble();
+	}
+	
 
 	private ComponentInput createComponentInput() {
 
