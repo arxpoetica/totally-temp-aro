@@ -10,21 +10,21 @@ import java.util.Set;
 
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.model.ComponentModel;
-import com.altvil.aro.service.roic.analysis.model.ComponentModel.EntityAnalysisType;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
 
 public class RoicNetworkModelImpl implements RoicNetworkModel {
 
 	private NetworkAnalysisType type;
-	private Map<EntityAnalysisType, ComponentModel> map;
-	private ComponentModel networkCurves;
+	private Map<ComponentType, RoicComponent> map;
+	private RoicComponent networkCurves;
 
 	private Collection<RoicNetworkModel> baseModels;
 
 	public RoicNetworkModelImpl(NetworkAnalysisType type,
-			Map<EntityAnalysisType, ComponentModel> map,
-			ComponentModel networkCurves,
+			Map<ComponentType, RoicComponent> map,
+			RoicComponent networkCurves,
 			Collection<RoicNetworkModel> baseModels) {
 		super();
 		this.type = type;
@@ -34,8 +34,8 @@ public class RoicNetworkModelImpl implements RoicNetworkModel {
 	}
 
 	public RoicNetworkModelImpl(NetworkAnalysisType type,
-			Map<EntityAnalysisType, ComponentModel> map,
-			ComponentModel networkCurves) {
+			Map<ComponentType, RoicComponent> map,
+			RoicComponent networkCurves) {
 		this(type, map, networkCurves, new ArrayList<>());
 	}
 
@@ -50,12 +50,12 @@ public class RoicNetworkModelImpl implements RoicNetworkModel {
 	}
 
 	@Override
-	public ComponentModel getEntityAnalysis(EntityAnalysisType type) {
+	public RoicComponent getEntityAnalysis(ComponentType type) {
 		return map.get(type);
 	}
 
 	@Override
-	public AnalysisRow getAnalysisRow(EntityAnalysisType type,
+	public AnalysisRow getAnalysisRow(ComponentType type,
 			CurveIdentifier id) {
 		return map.get(type).getAnalysisRow(id);
 	}
@@ -66,7 +66,7 @@ public class RoicNetworkModelImpl implements RoicNetworkModel {
 	}
 
 	@Override
-	public ComponentModel getNetworkCurves() {
+	public RoicComponent getNetworkCurves() {
 		return networkCurves;
 	}
 
@@ -76,15 +76,15 @@ public class RoicNetworkModelImpl implements RoicNetworkModel {
 
 			@Override
 			public RoicNetworkModel apply() {
-				Map<EntityAnalysisType, ComponentModel> result = new EnumMap<>(
-						EntityAnalysisType.class);
+				Map<ComponentType, RoicComponent> result = new EnumMap<>(
+						ComponentType.class);
 
-				for (ComponentModel component : map.values()) {
+				for (RoicComponent component : map.values()) {
 					result.put(
-							component.getAnalysisType(),
-							model.getEntityAnalysis(component.getAnalysisType())
+							component.getComponentType(),
+							model.getEntityAnalysis(component.getComponentType())
 									.add(model.getEntityAnalysis(component
-											.getAnalysisType())));
+											.getComponentType())));
 				}
 
 				return new RoicNetworkModelImpl(type, result,
@@ -100,8 +100,8 @@ public class RoicNetworkModelImpl implements RoicNetworkModel {
 		return new AbstractTransformerImpl() {
 			@Override
 			public RoicNetworkModel apply() {
-				Map<EntityAnalysisType, ComponentModel> result = new EnumMap<>(
-						EntityAnalysisType.class);
+				Map<ComponentType, RoicComponent> result = new EnumMap<>(
+						ComponentType.class);
 
 				return new RoicNetworkModelImpl(type, result,
 						networkCurves.minus(model.getNetworkCurves()),

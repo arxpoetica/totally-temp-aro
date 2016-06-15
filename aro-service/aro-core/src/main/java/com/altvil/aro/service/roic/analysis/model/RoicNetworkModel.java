@@ -4,12 +4,12 @@ import java.util.Collection;
 
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.model.ComponentModel.EntityAnalysisType;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 
 public interface RoicNetworkModel {
 
 	public enum NetworkAnalysisType {
-		bau, fiber, planned, incremental,
+		undefined, bau, fiber, planned, incremental,
 	}
 	
 	/*
@@ -35,11 +35,11 @@ public interface RoicNetworkModel {
 	
 	NetworkAnalysisType getNetworkAnalysisType();
 	
-	AnalysisRow getAnalysisRow(EntityAnalysisType type, CurveIdentifier id) ;
+	AnalysisRow getAnalysisRow(ComponentType type, CurveIdentifier id) ;
 	AnalysisRow getAnalysisRow(CurveIdentifier id) ;
 	
-	ComponentModel getNetworkCurves() ;
-	ComponentModel getEntityAnalysis(EntityAnalysisType type) ;
+	RoicComponent getNetworkCurves() ;
+	RoicComponent getEntityAnalysis(ComponentType type) ;
 	
 	Transformer add() ;
 	Transformer difference() ;

@@ -1,6 +1,10 @@
 package com.altvil.aro.service.roic.analysis.builder;
 
-import com.altvil.aro.service.roic.penetration.NetworkPenetration;
+import com.altvil.aro.service.roic.AnalysisPeriod;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
+
+
 
 public interface ComponentBuilder {
 
@@ -8,18 +12,13 @@ public interface ComponentBuilder {
 
 	//// 40% fair share
 	
-	ComponentBuilder setNetworkPenetration(NetworkPenetration penetration);
-	ComponentBuilder setNetworkPenetration(double start, double end,
-			double rate);
-	ComponentBuilder setArpu(double arpu);
-	ComponentBuilder setOpEx(double percent);
-
-	ComponentBuilder setEntityCount(double startCount) ;
-	ComponentBuilder setEntityGrowth(double growth) ;
-	ComponentBuilder setChurnRate(double churnRate) ;
-	ComponentBuilder setChurnRateDecrease(double churnRateDecrease) ;
+	ComponentBuilder setComponentType(ComponentType type) ;
+	ComponentBuilder setAnalysisPeriod(AnalysisPeriod period) ;
 	
-	NetworkAnalysisBuilder resolve();
+	
+	ComponentBuilder setRoicModelInputs(ComponentInput inputs) ;
+	
+	RoicComponent build();
 	
 	// BAU Copper (Opex)
 

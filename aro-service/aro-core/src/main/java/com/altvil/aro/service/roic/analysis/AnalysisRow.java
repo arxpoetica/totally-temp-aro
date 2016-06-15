@@ -1,5 +1,6 @@
 package com.altvil.aro.service.roic.analysis;
 
+
 public interface AnalysisRow {
 	
 	int getSize() ;

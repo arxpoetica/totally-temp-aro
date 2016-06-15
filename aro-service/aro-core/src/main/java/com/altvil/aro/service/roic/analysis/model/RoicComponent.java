@@ -1,8 +1,8 @@
 package com.altvil.aro.service.roic.analysis.model;
 
-import java.util.Collection;
-
-import com.altvil.aro.service.roic.analysis.RowReference;
+import com.altvil.aro.service.roic.AnalysisPeriod;
+import com.altvil.aro.service.roic.StreamModel;
+import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 
 public interface RoicComponent {
@@ -15,8 +15,13 @@ public interface RoicComponent {
 		
 	}
 
+	AnalysisPeriod getAnalysisPeriod() ;
 	ComponentType getComponentType() ;
-	RowReference getNetworkAnalysis(CurveIdentifier id);
-	public Collection<RowReference> getCurves() ;
-
+	AnalysisRow getAnalysisRow(CurveIdentifier id);
+	StreamModel getStreamModel() ;
+	
+	
+	RoicComponent add(RoicComponent other) ;
+	RoicComponent minus(RoicComponent other) ;
+	
 }

@@ -1,16 +1,18 @@
 package com.altvil.aro.service.roic.analysis.model.impl;
 
+import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.model.ComponentModel;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 
-public class ComponentModelImpl implements ComponentModel {
+public class ComponentModelImpl implements RoicComponent {
 
-	private EntityAnalysisType type;
+	private AnalysisPeriod analysisPeriod ;
+	private ComponentType type;
 	private StreamModel streamModel;
 
-	public ComponentModelImpl(EntityAnalysisType type, StreamModel streamModel) {
+	public ComponentModelImpl(AnalysisPeriod analysisPeriod, ComponentType type, StreamModel streamModel) {
 		super();
 		this.type = type;
 		this.streamModel = streamModel;
@@ -22,7 +24,7 @@ public class ComponentModelImpl implements ComponentModel {
 	}
 
 	@Override
-	public EntityAnalysisType getAnalysisType() {
+	public ComponentType getComponentType() {
 		return type;
 	}
 
@@ -32,14 +34,19 @@ public class ComponentModelImpl implements ComponentModel {
 	}
 
 	@Override
-	public ComponentModel add(ComponentModel other) {
-		return new ComponentModelImpl(type, streamModel.add(other
+	public AnalysisPeriod getAnalysisPeriod() {
+		return analysisPeriod ;
+	}
+
+	@Override
+	public RoicComponent add(RoicComponent other) {
+		return new ComponentModelImpl(analysisPeriod, type, streamModel.add(other
 				.getStreamModel()));
 	}
 
 	@Override
-	public ComponentModel minus(ComponentModel other) {
-		return new ComponentModelImpl(type, streamModel.minus(other
+	public RoicComponent minus(RoicComponent other) {
+		return new ComponentModelImpl(analysisPeriod, type, streamModel.minus(other
 				.getStreamModel()));
 	}
 

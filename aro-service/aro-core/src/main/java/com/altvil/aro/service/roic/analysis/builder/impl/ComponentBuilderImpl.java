@@ -1,82 +1,59 @@
 package com.altvil.aro.service.roic.analysis.builder.impl;
 
+import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisCode;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentBuilder;
-import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
-import com.altvil.aro.service.roic.analysis.model.ComponentModel.EntityAnalysisType;
+import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
+import com.altvil.aro.service.roic.analysis.impl.StreamAssemblerImpl;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
+import com.altvil.aro.service.roic.analysis.model.impl.ComponentModelImpl;
 import com.altvil.aro.service.roic.analysis.spi.StreamAssembler;
-import com.altvil.aro.service.roic.model.NetworkType;
-import com.altvil.aro.service.roic.penetration.NetworkPenetration;
-import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
 
 public class ComponentBuilderImpl implements ComponentBuilder {
 
-	private NetworkType networkType;
-	private EntityAnalysisType entityAnalysisType;
-
-	private StreamAssembler roicAssembler;
 	private AnalysisService analysisService;
 
-	private NetworkPenetration penetration;
-	private double entityCount = 1;
-	private double entityGrowth = 0;
-	private double churnRate = 0;
-	private double churnRateDecrease = 0;
-	private double opexPercent;
-	private double arpu;
+	private StreamAssembler roicAssembler;
+
+	private ComponentType componentType = ComponentType.undefined;
+	private ComponentInput inputs;
+	private AnalysisPeriod analysisPeriod;
+
+	public ComponentBuilderImpl(AnalysisService analysisService) {
+		super();
+		this.analysisService = analysisService;
+		roicAssembler = new StreamAssemblerImpl();
+	}
 
 	@Override
-	public ComponentBuilder setNetworkPenetration(
-			NetworkPenetration penetration) {
-		roicAssembler.add(AnalysisCode.penetration,
-				analysisService.createCurve(penetration));
+	public ComponentBuilder setAnalysisPeriod(AnalysisPeriod period) {
+		roicAssembler.setAnalysisPeriod(analysisPeriod = period);
 		return this;
 	}
 
 	@Override
-	public ComponentBuilder setEntityCount(double startCount) {
-		this.entityCount = startCount;
+	public ComponentBuilder setRoicModelInputs(ComponentInput inputs) {
+		this.inputs = inputs;
 		return this;
 	}
 
 	@Override
-	public ComponentBuilder setEntityGrowth(double growth) {
-		this.entityGrowth = growth;
+	public ComponentBuilder setComponentType(ComponentType type) {
+		this.componentType = type;
 		return this;
 	}
 
 	@Override
-	public ComponentBuilder setChurnRate(double churnRate) {
-		this.churnRate = churnRate;
-		return this;
-	}
+	public RoicComponent build() {
 
-	@Override
-	public ComponentBuilder setChurnRateDecrease(double churnRateDecrease) {
-		this.churnRateDecrease = churnRateDecrease;
-		return this;
-	}
+		assemble(inputs);
+		assignOutputs();
 
-	@Override
-	public ComponentBuilder setNetworkPenetration(double start,
-			double end, double rate) {
-		return setNetworkPenetration(new DefaultNetworkPenetration(start, end,
-				rate));
-	}
+		return new ComponentModelImpl(analysisPeriod, componentType,
+				roicAssembler.resolveAndBuild());
 
-	@Override
-	public ComponentBuilder setArpu(double arpu) {
-		roicAssembler.add(AnalysisCode.arpu, analysisService.createARPU(arpu));
-		return this;
-	}
-
-	@Override
-	public ComponentBuilder setOpEx(double percent) {
-		roicAssembler
-				.add(AnalysisCode.houseHolds, analysisService.createMultiplyOp(
-						AnalysisCode.revenue, percent));
-		return this;
 	}
 
 	// Revenue By Network By LocationType
@@ -89,31 +66,40 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	// Connect Crazy Formula By Year
 	// Revenue * 4.23%
 
-	@Override
-	public NetworkAnalysisBuilder resolve() {
-		
-		roicAssembler.add(AnalysisCode.penetration, analysisService
-				.createCurve(this.penetration));
-		
+	private void assignOutputs() {
+		roicAssembler.addOutput(AnalysisCode.revenue)
+				.addOutput(AnalysisCode.premises_passed)
+				.addOutput(AnalysisCode.subscribers_count)
+				.addOutput(AnalysisCode.subscribers_penetration)
+				.addOutput(AnalysisCode.new_connections)
+				.addOutput(AnalysisCode.opex_expenses);
+	}
+
+	private void assemble(ComponentInput inputs) {
+		roicAssembler.add(AnalysisCode.penetration,
+				analysisService.createCurve(inputs.getPenetration()));
+
 		roicAssembler.add(AnalysisCode.houseHolds, analysisService
-				.createHouseHolds(entityCount, this.entityGrowth));
+				.createHouseHolds(inputs.getEntityCount(),
+						inputs.getEntityGrowth()));
 
 		roicAssembler.add(AnalysisCode.revenue, analysisService.createRevenue(
 				AnalysisCode.revenue, AnalysisCode.penetration,
 				AnalysisCode.houseHolds));
 
 		roicAssembler.add(AnalysisCode.new_connections, analysisService
-				.createConnectedHouseHolds(penetration.getRate(),
-						this.entityCount, churnRate, this.churnRateDecrease));
+				.createConnectedHouseHolds(inputs.getPenetration().getRate(),
+						inputs.getEntityCount(), inputs.getChurnRate(),
+						inputs.getChurnRateDecrease()));
 
-		roicAssembler.add(AnalysisCode.arpu, analysisService.createARPU(arpu));
+		roicAssembler.add(AnalysisCode.arpu,
+				analysisService.createARPU(inputs.getArpu()));
 
-		roicAssembler.add(AnalysisCode.houseHolds, analysisService
-				.createMultiplyOp(AnalysisCode.revenue, opexPercent));
+		roicAssembler.add(
+				AnalysisCode.houseHolds,
+				analysisService.createMultiplyOp(AnalysisCode.revenue,
+						inputs.getOpexPercent()));
 
-		
-
-		return null;
 	}
 
 }
