@@ -2,6 +2,7 @@ package com.altvil.aro.service.roic.analysis.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,17 +30,15 @@ public class StreamAssemblerImpl implements StreamAssembler {
 
 	@Override
 	public StreamAssembler setPeriod(int period) {
-		this.period = period ;
+		this.period = period;
 		return this;
 	}
-	
-	
+
 	@Override
 	public StreamAssembler setStartYear(int startYear) {
-		this.startYear = startYear ;
-		return this ;
+		this.startYear = startYear;
+		return this;
 	}
-	
 
 	@Override
 	public StreamAssembler add(CurveIdentifier id, StreamFunction f) {
@@ -103,7 +102,6 @@ public class StreamAssemblerImpl implements StreamAssembler {
 			doubleResult = new double[size];
 		}
 
-		
 		private double[] doubleResult;
 	}
 
@@ -258,12 +256,14 @@ public class StreamAssemblerImpl implements StreamAssembler {
 
 	}
 
-	private static class RoicModelImpl implements StreamModel {
+	private static class StreamModelImpl implements StreamModel {
 
 		private Map<CurveIdentifier, AnalysisRow> map;
+		private int size;
 
-		public RoicModelImpl(Map<CurveIdentifier, AnalysisRow> map) {
+		public StreamModelImpl(int size, Map<CurveIdentifier, AnalysisRow> map) {
 			super();
+			this.size = size;
 			this.map = map;
 		}
 
@@ -275,6 +275,34 @@ public class StreamAssemblerImpl implements StreamAssembler {
 		@Override
 		public Collection<AnalysisRow> getAnalysisRow() {
 			return map.values();
+		}
+
+		@Override
+		public StreamModel add(StreamModel other) {
+			Map<CurveIdentifier, AnalysisRow> result = new HashMap<>();
+			for (Map.Entry<CurveIdentifier, AnalysisRow> e : map.entrySet()) {
+				result.put(
+						e.getKey(),
+						DefaultAnalyisRow.minus(e.getValue(),
+								other.getAnalysisRow(e.getKey())));
+			}
+
+			return new StreamModelImpl(size, result);
+		}
+
+		@Override
+		public StreamModel minus(StreamModel other) {
+			Map<CurveIdentifier, AnalysisRow> result = new HashMap<>();
+			for (Map.Entry<CurveIdentifier, AnalysisRow> e : map.entrySet()) {
+				AnalysisRow row = other.getAnalysisRow(e.getKey());
+				if (row != null) {
+					row = DefaultAnalyisRow.sum(size,
+							Collections.singleton(row));
+				}
+				result.put(e.getKey(), row);
+			}
+
+			return new StreamModelImpl(size, result);
 		}
 
 	}
@@ -299,7 +327,7 @@ public class StreamAssemblerImpl implements StreamAssembler {
 		public StreamModel buildAndRun(List<CurveIdentifier> ids) {
 			List<RowBinding> rowBindings = bindRows(ids);
 			run(rowBindings);
-			return new RoicModelImpl(resolveRows(rowBindings));
+			return new StreamModelImpl(resolveRows(rowBindings));
 		}
 
 		private Map<CurveIdentifier, AnalysisRow> resolveRows(
@@ -325,16 +353,16 @@ public class StreamAssemblerImpl implements StreamAssembler {
 
 			CalcContextImpl ctx = new CalcContextImpl(startYear,
 					new ResultStreamImpl(streamFunctions.size()));
-			
-			double[] result = ctx.resultStream.doubleResult ;
+
+			double[] result = ctx.resultStream.doubleResult;
 
 			for (int i = 0; i < size; i++) {
-				for(int fi=0 ; fi<streamFunctions.size() ; fi++) {
-					result[fi] = streamFunctions.get(fi).calc(ctx) ;
+				for (int fi = 0; fi < streamFunctions.size(); fi++) {
+					result[fi] = streamFunctions.get(fi).calc(ctx);
 				}
 				streamFunctions.forEach(f -> f.calc(ctx));
 				rowBindings.forEach(b -> b.update(ctx));
-				ctx.inc() ;
+				ctx.inc();
 			}
 
 		}

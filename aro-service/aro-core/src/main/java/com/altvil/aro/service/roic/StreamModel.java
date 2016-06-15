@@ -10,4 +10,8 @@ public interface StreamModel {
 	AnalysisRow getAnalysisRow(CurveIdentifier id) ;
 	Collection<AnalysisRow> getAnalysisRow() ;
 	
+	StreamModel add(StreamModel other) ;
+	StreamModel minus(StreamModel other) ;
+	
+	
 }

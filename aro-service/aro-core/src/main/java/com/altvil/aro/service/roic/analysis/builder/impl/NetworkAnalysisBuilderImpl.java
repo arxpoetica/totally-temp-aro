@@ -11,12 +11,12 @@ import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.builder.AnalysisBuilder;
 import com.altvil.aro.service.roic.analysis.builder.ComponentBuilder;
 import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
-import com.altvil.aro.service.roic.analysis.entity.RoicComponent;
-import com.altvil.aro.service.roic.analysis.entity.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.impl.DefaultAnalyisRow;
 import com.altvil.aro.service.roic.analysis.impl.DefaultRowReference;
 import com.altvil.aro.service.roic.analysis.impl.StreamAssemblerImpl;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.spi.StreamAssembler;
 import com.altvil.utils.StreamUtil;
 

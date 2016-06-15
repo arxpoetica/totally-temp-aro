@@ -1,6 +1,6 @@
 package com.altvil.aro.service.roic.analysis.builder;
 
-import com.altvil.aro.service.roic.analysis.entity.RoicComponent.ComponentType;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 
 public class ComponentInput {

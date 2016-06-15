@@ -1,7 +1,9 @@
-package com.altvil.aro.service.roic.analysis.entity;
+package com.altvil.aro.service.roic.analysis.model;
 
+import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisCode;
+import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 
 
 public interface ComponentModel {
@@ -14,6 +16,8 @@ public interface ComponentModel {
 	}
 	
 	public EntityAnalysisType getAnalysisType() ;
+	
+	StreamModel getStreamModel() ;
 
 	// Revenue By Network By LocationType  Count * Arpu
 	// Premises Passed Locations connected By LocationType 
@@ -25,11 +29,12 @@ public interface ComponentModel {
 	// Connect Crazy Formula By Year
 	// Revenue * 4.23%
 	
-	AnalysisRow getAnalysisRow(AnalysisCode code) ;
+	AnalysisRow getAnalysisRow(CurveIdentifier id) ;
+	
 	
 	
 	ComponentModel add(ComponentModel other) ;
-	ComponentModel difference(ComponentModel other) ;
+	ComponentModel minus(ComponentModel other) ;
 	
 	
 

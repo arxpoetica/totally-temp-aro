@@ -1,4 +1,4 @@
-package com.altvil.aro.service.roic.analysis.entity;
+package com.altvil.aro.service.roic.analysis.model;
 
 import java.util.Collection;
 

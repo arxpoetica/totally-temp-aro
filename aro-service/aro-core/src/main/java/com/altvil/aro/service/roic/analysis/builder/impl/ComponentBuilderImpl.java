@@ -4,7 +4,7 @@ import com.altvil.aro.service.roic.analysis.AnalysisCode;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentBuilder;
 import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
-import com.altvil.aro.service.roic.analysis.entity.ComponentModel.EntityAnalysisType;
+import com.altvil.aro.service.roic.analysis.model.ComponentModel.EntityAnalysisType;
 import com.altvil.aro.service.roic.analysis.spi.StreamAssembler;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
