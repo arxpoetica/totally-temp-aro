@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimize.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.AroException;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.FiberType;
@@ -80,6 +82,7 @@ public abstract class AbstractEquipmentAssignment implements
 
 	}
 
-	
-
+	public String toString() {
+		return new ToStringBuilder(this).append("graphAssignment", graphAssignment).toString();
+	}
 }

@@ -185,4 +185,7 @@ public class DefaultFiberCoverage implements DemandCoverage {
 
 	}
 
+	public String toString() {
+		return new ToStringBuilder(this).append("coverage", coverage).toString();
+	}
 }
