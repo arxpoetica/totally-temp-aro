@@ -126,7 +126,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	@Override
 	public String toString() {
-		return "Seg(gid=" + gid + ",len=" + length + ")";
+		return new ToStringBuilder(this).append("gid", gid).append("length", length).append("roadLocations", roadLocations).toString();
 	}
 
 	@Override

@@ -63,6 +63,6 @@ public class DefaultFiberAssignment implements FiberAssignment {
 	}
 
 	public String toString() {
-		return new ToStringBuilder(this).append("edges", edges).append("fiberLengthMeters", fiberLengthMeters).append("fiberType", fiberType).toString();
+		return new ToStringBuilder(this).append("fiberLengthMeters", fiberLengthMeters).append("fiberType", fiberType)/*.append("edges", edges)*/.toString();
 	}
 }

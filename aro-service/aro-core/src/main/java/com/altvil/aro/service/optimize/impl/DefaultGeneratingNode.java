@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -322,6 +323,13 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	@Override
 	public boolean isJunctionNode() {
 		return equipmentAssigment == null ? false : equipmentAssigment.isJunctionNode();
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("capex", capex)
+				.append("coverage", coverage).append("directCoverage", directCoverage)
+				.append("equipmentAssignment", equipmentAssigment).append("fiberAssignment", fiberAssignment)
+				.append("hasParent", parent != null).append("children", children).toString();
 	}
 
 	public static class BuilderImpl implements Builder {

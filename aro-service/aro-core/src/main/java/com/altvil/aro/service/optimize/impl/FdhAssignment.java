@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimize.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
@@ -67,5 +69,7 @@ public class FdhAssignment extends AbstractEquipmentAssignment {
 		return roundedUpSplitters;
 	}
 	
-
+	public String toString() {
+		return new ToStringBuilder(this).append("fdhEquipment", fdhEquipment).toString();
+	}
 }
