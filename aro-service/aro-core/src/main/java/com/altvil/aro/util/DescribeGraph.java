@@ -51,22 +51,25 @@ public class DescribeGraph {
 
 		double totalLength = 0;
 
-		for (DefaultWeightedEdge edge : graph.edgeSet()) {
-			totalLength += weightOf(edge);
-			V source = sourceOf(edge);
-			V target = targetOf(edge);
+		if (graph != null) {
+			for (DefaultWeightedEdge edge : graph.edgeSet()) {
+				totalLength += weightOf(edge);
+				V source = sourceOf(edge);
+				V target = targetOf(edge);
 
-			if (!branchNodes.contains(source)) {
-				leafNodes.add(source);
+				if (!branchNodes.contains(source)) {
+					leafNodes.add(source);
+				}
+				leafNodes.remove(target);
+				branchNodes.add(target);
 			}
-			leafNodes.remove(target);
-			branchNodes.add(target);
-		}
 
-		for (V source : leafNodes) {
-			StringBuilder bldr = new StringBuilder();
-			log(out, graph, source, bldr);
+			for (V source : leafNodes) {
+				StringBuilder bldr = new StringBuilder();
+				log(out, graph, source, bldr);
+			}
 		}
+		
 		out.accept("Total Length = " + totalLength);
 	}
 
