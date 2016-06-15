@@ -15,10 +15,6 @@
   </head>
   <body>
 
-    <div ng-controller="financial_profile_controller">
-      <% include modal_financial_profile.html %>
-    </div>
-
     <div ng-controller="customer_profile_controller">
       <% include modal_customer_profile.html %>
     </div>
@@ -117,7 +113,7 @@
             <a href="javascript:void(0)" class="navbar-brand" ng-click="showCombo()">{{plan.name}}</a>
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
-              <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
+              <span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
                 <span class="fa fa-usd"></span>
                 <span class="label label-info">{{plan.metadata.total_npv | currency}}</span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
@@ -637,6 +633,59 @@
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('area_network_planning')">
+            <div ng-show="wizardStatus === 'optimization'">
+              <p><strong>Optimization Type</strong></p>
+              <form>
+                <div class="radio">
+                  <label>
+                    <input type="radio" ng-model="optimizationType" value="capex"> Capex
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input type="radio" ng-model="optimizationType" value="maximum_irr"> Maximum IRR
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input type="radio" ng-model="optimizationType" value="irr_target"> IRR Target
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input type="radio" ng-model="optimizationType" value="budget_irr_floor"> Budget and IRR Floor
+                  </label>
+                </div>
+              </form>
+              <div ng-show="optimizationType === 'irr_target' || optimizationType === 'budget_irr_floor'">
+                <br>
+                <p><strong>IRR Threshold</strong></p>
+                <div class="row">
+                  <div class="col-md-8">
+                    <input type="range" min="100" max="500" step="10" ng-model="irrThreshold" style="margin-top: 10px">
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group form-group-sm">
+                      <input type="number" min="100" max="500" step="10" ng-model="irrThreshold" class="form-control text-right">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div ng-show="optimizationType === 'budget_irr_floor'">
+                <br>
+                <p><strong>Budget</strong></p>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group form-group-sm">
+                      <div class="input-group input-group-sm">
+                        <div class="input-group-addon">$</div>
+                        <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div ng-show="wizardStatus === 'geographies'">
               <p><strong>Search or Click Geographies</strong></p>
               <form>
@@ -1174,7 +1223,9 @@
                 <li ng-class="{ 'disabled': wizardStatus !== allStatus[2] }"><a href="javascript:void(0)" style="cursor:default">3</a></li>
 
                 <li ng-class="{ 'disabled': wizardStatus === allStatus[allStatus.length - 1] }" class="next">
-                  <a href="javascript:void(0)" ng-click="forward()">Next</a>
+                  <a href="javascript:void(0)" ng-click="forward()">
+                    {{wizardStatus === allStatus[allStatus.length - 2] ? 'Run' : 'Next' }}
+                  </a>
                 </li>
               </ul>
             </nav>
@@ -1198,132 +1249,169 @@
         </div>
         <div>
           <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
-            <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
-            <ul class="nav nav-tabs" role="tablist" ng-show="selectedArea">
-              <li role="presentation" class="active"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
-              <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
-              <li role="presentation"><a href="#financialProfileRevenue" aria-controls="messages" role="tab" data-toggle="tab">Revenue</a></li>
+            <ul class="nav nav-tabs" role="tablist">
+              <li role="presentation" class="active"><a href="#financialProfileSummary" aria-controls="home" role="tab" data-toggle="tab">Summary</a></li>
               <li role="presentation"><a href="#financialProfilePremises" aria-controls="messages" role="tab" data-toggle="tab">Premises</a></li>
               <li role="presentation"><a href="#financialProfileSubscribers" aria-controls="messages" role="tab" data-toggle="tab">Subscribers</a></li>
+              <li role="presentation"><a href="#financialProfileRevenue" aria-controls="messages" role="tab" data-toggle="tab">Revenue</a></li>
+              <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
+              <li role="presentation"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
             </ul>
-            <div class="tab-content" ng-show="selectedArea">
-              <div role="tabpanel" class="tab-pane active" id="financialProfileCashFlow">
-                <br>
-                <p class="text-center"><strong>Cash Flow Summary</strong></p>
-                <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-cash-flow-legend"></div>
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane active" id="financialProfileSummary" style="margin-top: 20px">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <table class="table">
+                      <tbody>
+                        <tr ng-repeat-start="cost in plan.metadata.costs">
+                          <th colspan="3">{{cost.name}}</th>
+                          <td colspan="2" class="text-right">{{cost.value / 1000 | currency:"$":1}}K</td>
+                        </tr>
+                        <tr ng-repeat-end ng-repeat="item in cost.itemized">
+                          <td colspan="3"><small> ↳ {{item.description}}</small></td>
+                          <td colspan="2" class="text-right"><small ng-hide="item.value === 0">{{item.value / 1000 | currency:"$":1}}K</small></td>
+                        </tr>
+                        <tr>
+                          <th>Total Capex</th>
+                          <td colspan="4" class="text-right">{{plan.metadata.total_cost / 1000 | currency:"$":1}}K</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="col-sm-6">
+                    <p class="text-right"><strong>NPV</strong>: {{plan.metadata.total_npv / 1000 | currency:"$":1}}K</p>
+                    <p><strong>Cash Flow</strong></p>
+                    <canvas id="financial-profile-chart" style="width:100%; height:200px"></canvas>
+                  </div>
+                </div>
               </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfileCapex">
-                <br>
-                <form class="form-inline">
-                  <div class="form-group">
-                    <select class="form-control">
-                      <option>BAU</option>
-                      <option>Fiber</option>
-                      <option>Incremental capex</option>
-                    </select>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Businesses
-                    </label>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Households
-                    </label>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Towers
-                    </label>
-                  </div>
-                </form>
-                <br>
-                <p class="text-center"><strong>BAU Capex</strong></p>
-                <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-capex-legend"></div>
-                <br>
-                <p class="text-center"><strong>Budget Allocation</strong></p>
-                <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-budget-legend"></div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileCashFlow" style="margin-top: 20px">
+                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
+                <div ng-show="selectedArea">
+                  <p class="text-center"><strong>Cash Flow Summary</strong></p>
+                  <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
+                  <div id="financial-profile-chart-cash-flow-legend"></div>
+                </div>
               </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfileRevenue">
-                <br>
-                <form class="form-inline">
-                  <div class="form-group">
-                    <select class="form-control">
-                      <option>BAU</option>
-                      <option>Fiber</option>
-                      <option>Incremental</option>
-                    </select>
-                  </div>
-                </form>
-                <br>
-                <p class="text-center"><strong>BAU Revenue</strong></p>
-                <canvas id="financial-profile-chart-revenue" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-revenue-legend"></div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileCapex" style="margin-top: 20px">
+                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
+                <div ng-show="selectedArea">
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <select class="form-control">
+                        <option>BAU</option>
+                        <option>Fiber</option>
+                        <option>Incremental capex</option>
+                      </select>
+                    </div>
+                    <div class="checkbox" style="margin-left: 10px">
+                      <label>
+                        <input type="checkbox"> Businesses
+                      </label>
+                    </div>
+                    <div class="checkbox" style="margin-left: 10px">
+                      <label>
+                        <input type="checkbox"> Households
+                      </label>
+                    </div>
+                    <div class="checkbox" style="margin-left: 10px">
+                      <label>
+                        <input type="checkbox"> Towers
+                      </label>
+                    </div>
+                  </form>
+                  <br>
+                  <p class="text-center"><strong>BAU Capex</strong></p>
+                  <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
+                  <div id="financial-profile-chart-capex-legend"></div>
+                  <br>
+                  <p class="text-center"><strong>Budget Allocation</strong></p>
+                  <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
+                  <div id="financial-profile-chart-budget-legend"></div>
+                </div>
               </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfilePremises">
-                <br>
-                <form class="form-inline" ng-show="aboveWirecenter">
-                  <div class="form-group">
-                    <select class="form-control">
-                      <option>BAU</option>
-                      <option>Fiber</option>
-                      <option>Incremental</option>
-                    </select>
-                  </div>
-                </form>
-                <form class="form-inline">
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Businesses
-                    </label>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Households
-                    </label>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Towers
-                    </label>
-                  </div>
-                </form>
-                <br>
-                <p class="text-center"><strong>All Premises Passed</strong></p>
-                <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-premises-legend"></div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileRevenue" style="margin-top: 20px">
+                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
+                <div ng-show="selectedArea">
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <select class="form-control">
+                        <option>BAU</option>
+                        <option>Fiber</option>
+                        <option>Incremental</option>
+                      </select>
+                    </div>
+                  </form>
+                  <br>
+                  <p class="text-center"><strong>BAU Revenue</strong></p>
+                  <canvas id="financial-profile-chart-revenue" style="width:100%; height:200px"></canvas>
+                  <div id="financial-profile-chart-revenue-legend"></div>
+                </div>
               </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers">
-                <br>
-                <form class="form-inline">
-                  <div class="radio" style="margin-left: 10px">
-                    <label>
-                      <input type="radio"> Businesses
-                    </label>
-                  </div>
-                  <div class="radio" style="margin-left: 10px">
-                    <label>
-                      <input type="radio"> Households
-                    </label>
-                  </div>
-                  <div class="radio" style="margin-left: 10px">
-                    <label>
-                      <input type="radio"> Towers
-                    </label>
-                  </div>
-                </form>
-                <br>
-                <p class="text-center"><strong>Subscribers</strong></p>
-                <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-subscribers-legend"></div>
-                <br>
-                <p class="text-center"><strong>Penetration</strong></p>
-                <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-penetration-legend"></div>
+              <div role="tabpanel" class="tab-pane" id="financialProfilePremises" style="margin-top: 20px">
+                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
+                <div ng-show="selectedArea">
+                  <form class="form-inline" ng-show="aboveWirecenter">
+                    <div class="form-group">
+                      <select class="form-control">
+                        <option>BAU</option>
+                        <option>Fiber</option>
+                        <option>Incremental</option>
+                      </select>
+                    </div>
+                  </form>
+                  <form class="form-inline">
+                    <div class="checkbox" style="margin-left: 10px">
+                      <label>
+                        <input type="checkbox"> Businesses
+                      </label>
+                    </div>
+                    <div class="checkbox" style="margin-left: 10px">
+                      <label>
+                        <input type="checkbox"> Households
+                      </label>
+                    </div>
+                    <div class="checkbox" style="margin-left: 10px">
+                      <label>
+                        <input type="checkbox"> Towers
+                      </label>
+                    </div>
+                  </form>
+                  <br>
+                  <p class="text-center"><strong>All Premises Passed</strong></p>
+                  <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
+                  <div id="financial-profile-chart-premises-legend"></div>
+                </div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers" style="margin-top: 20px">
+                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
+                <div ng-show="selectedArea">
+                  <form class="form-inline">
+                    <div class="radio" style="margin-left: 10px">
+                      <label>
+                        <input type="radio"> Businesses
+                      </label>
+                    </div>
+                    <div class="radio" style="margin-left: 10px">
+                      <label>
+                        <input type="radio"> Households
+                      </label>
+                    </div>
+                    <div class="radio" style="margin-left: 10px">
+                      <label>
+                        <input type="radio"> Towers
+                      </label>
+                    </div>
+                  </form>
+                  <br>
+                  <p class="text-center"><strong>Subscribers</strong></p>
+                  <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
+                  <div id="financial-profile-chart-subscribers-legend"></div>
+                  <br>
+                  <p class="text-center"><strong>Penetration</strong></p>
+                  <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
+                  <div id="financial-profile-chart-penetration-legend"></div>
+                </div>
               </div>
             </div>
           </div>

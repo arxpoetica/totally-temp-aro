@@ -234,6 +234,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     tracker.track('Create New Analysis')
   }
 
+  $scope.openFinancialProfile = () => {
+    map_tools.show('financial_profile')
+  }
+
   // If we use this more than once it should be more generalized...
   $scope.clear_default_text = () => {
     $scope.new_plan_name = ''
