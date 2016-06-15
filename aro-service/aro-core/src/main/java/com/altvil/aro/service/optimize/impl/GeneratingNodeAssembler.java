@@ -98,9 +98,7 @@ public class GeneratingNodeAssembler {
 					graph.incomingEdgesOf(vertex), 1);
 		} 
 		
-		if( getGraphAssignments(builder.getParentAssignment(), vertex, 1).size() > 0 )  {
-			depthFirstTraversal(builder, vertex, 1);
-		}
+		depthFirstTraversal(builder, vertex, 1);
 	}
 	
 	private Multimap<GraphNode, GraphEdgeAssignment> createEquipmentMap(
