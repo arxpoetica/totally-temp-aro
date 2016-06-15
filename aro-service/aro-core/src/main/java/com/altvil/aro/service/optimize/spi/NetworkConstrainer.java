@@ -49,6 +49,10 @@ public class NetworkConstrainer {
 		ResultAssembler resultAssembler = new ResultAssembler(networkModelBuilder);
 		if (networkAnalysis != null) {
 			{
+				// Remove nodes that do not satisfy the generating node
+				// constraint. Nodes are removed from least desirable to most
+				// with the score (desirability) of the remaining nodes
+				// recalculated each time the least desirable node is removed.
 				GeneratingNode node;
 				while ((node = networkAnalysis.getMinimumNode(generatingNodeConstraint.negate())) != null) {
 					node.remove();

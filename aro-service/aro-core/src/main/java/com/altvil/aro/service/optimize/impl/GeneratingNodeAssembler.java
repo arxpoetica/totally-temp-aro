@@ -185,18 +185,16 @@ public class GeneratingNodeAssembler {
 				fiberPath.add(e);
 				depthFirstTraversal(builder, e.getSourceNode(), level);
 				return ;
-			} else {
-	
-				if (childBuilder == null) {
-					// TODO create Synthetic
-					
-					childBuilder =  builder.addChild(new DefaultFiberAssignment(fiberType, extractFiberPath()), new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode())) ;
-				}
+			}
+			
+			if (childBuilder == null) {
+				// TODO create Synthetic
 				
-				// Induction
-				depthFirstTraversal(childBuilder, edges, level +1);
-				
-			} 
+				childBuilder =  builder.addChild(new DefaultFiberAssignment(fiberType, extractFiberPath()), new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode())) ;
+			}
+			
+			// Induction
+			depthFirstTraversal(childBuilder, edges, level +1); 
 		} 
 		
 		if( childBuilder != null ) {

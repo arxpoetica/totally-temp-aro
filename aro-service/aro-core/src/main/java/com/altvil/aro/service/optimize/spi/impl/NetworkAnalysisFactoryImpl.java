@@ -382,18 +382,6 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		@Override
-		public double getNpv() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public double getIrr() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
 		public void addToAnalysis(GeneratingNode node) {
 			treeMap.put(node.getScore(), node);
 		}

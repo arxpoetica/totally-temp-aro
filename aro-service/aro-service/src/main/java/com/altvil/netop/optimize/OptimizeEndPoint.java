@@ -26,6 +26,7 @@ import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
+import com.altvil.aro.service.planning.MaxIrrOptimizationPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfigurationBuilder;
 import com.altvil.aro.service.planning.optimization.impl.CapexOptimizationPlanImpl;
@@ -35,6 +36,7 @@ import com.altvil.aro.service.planning.optimization.impl.NpvOptimizationPlanImpl
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
+import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.DummyRequester;
 import com.altvil.netop.plan.MasterPlanJobResponse;
 
@@ -174,19 +176,28 @@ public class OptimizeEndPoint {
 
 		switch (plan.getOptimizationType()) {
 		case NPV:
-			FinancialConstraints financials = plan.getFinancialConstraints();
+			{FinancialConstraints financials = plan.getFinancialConstraints();
 			return new NpvOptimizationPlanImpl(financials.getBudget(),
-					financials.getDiscountRate(), financials.getYears());
+					financials.getDiscountRate(), financials.getYears());}
 		case COVERAGE:
-			CoverageOptimizationPlanImpl coverage = new CoverageOptimizationPlanImpl();
+			{CoverageOptimizationPlanImpl coverage = new CoverageOptimizationPlanImpl();
 			coverage.setCoverage(plan.getCoverage());
 			coverage.setPlanId(plan.getPlanId());
-			return coverage;
+			return coverage;}
 			
 		case MAX_IRR:
-			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl();
-			maxIrr.setPlanId(plan.getPlanId());
-			return maxIrr;
+		{FinancialConstraints financials = plan.getFinancialConstraints();
+		MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.MAX_IRR);
+		maxIrr.setPlanId(plan.getPlanId());
+		maxIrr.setYears(financials.getYears());
+		return maxIrr;}
+		case BUDGET_IRR:
+		{FinancialConstraints financials = plan.getFinancialConstraints();
+		MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.BUDGET_IRR);
+		maxIrr.setPlanId(plan.getPlanId());
+		maxIrr.setYears(financials.getYears());
+		maxIrr.setBudget(financials.getBudget());
+		return maxIrr;}
 		case CAPEX:
 		case PENETRATION:
 		case IRR:
