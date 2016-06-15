@@ -30,6 +30,7 @@ import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfigurationBuilder;
 import com.altvil.aro.service.planning.optimization.impl.CapexOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.CoverageOptimizationPlanImpl;
+import com.altvil.aro.service.planning.optimization.impl.MaxIrrOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.NpvOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
@@ -181,7 +182,11 @@ public class OptimizeEndPoint {
 			coverage.setCoverage(plan.getCoverage());
 			coverage.setPlanId(plan.getPlanId());
 			return coverage;
-
+			
+		case MAX_IRR:
+			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl();
+			maxIrr.setPlanId(plan.getPlanId());
+			return maxIrr;
 		case CAPEX:
 		case PENETRATION:
 		case IRR:

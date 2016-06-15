@@ -17,31 +17,24 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
-import com.altvil.aro.service.planning.CoverageOptimizationPlan;
+import com.altvil.aro.service.planning.OptimizationPlan;
 
-public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfiguration implements CoverageOptimizationPlan {
+public class OptimizationPlanConfigurationMaxIrr extends OptimizationPlanConfiguration implements OptimizationPlan {
 	private static final long serialVersionUID = 1L;
-
-	final double coverage;
-	
-	public double getCoverage() {
-		return coverage;
-	}
 
 	@Override
 	public
 	double score(GeneratingNode node) {
-		final double rawCoverage = node.getFiberCoverage().getRawCoverage();
-		if (rawCoverage == 0) {
+		final double monthlyRevenueImpact = node.getFiberCoverage().getMonthlyRevenueImpact();
+		if (monthlyRevenueImpact == 0) {
 			return 0;
 		}
 		
-		return node.getCapex() / rawCoverage; 
+		return -node.getCapex() / monthlyRevenueImpact; 
 	}
 
-	public OptimizationPlanConfigurationCoverage(CoverageOptimizationPlan fiberPlan) {
+	public OptimizationPlanConfigurationMaxIrr(OptimizationPlan fiberPlan) {
 		super(fiberPlan);
-		this.coverage = fiberPlan.getCoverage();
 	}
 	
 	public boolean isFilteringRoadLocationDemandsBySelection() {
@@ -103,9 +96,11 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 	}
 
 	
+	/**
+	 * ???????
+	 */
 	@Override
 	public boolean isConstraintMet(NetworkAnalysis analysis) {
-		// TODO Auto-generated method stub
 				return false;
 	}
 
@@ -119,7 +114,6 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 				.getDemand();
 		double ratio = demand / totalDemand;
 
-		boolean predicate = ratio >= getCoverage();
-		return predicate;
+		return true;
 	}
 }

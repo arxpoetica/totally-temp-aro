@@ -55,6 +55,11 @@ public abstract class OptimizationPlanConfiguration
 		}
 	}
 
+	/**
+	 * A constraint that must be satisfied for the specified generating node to be considered an acceptable solution.
+	 * @param generatingNode
+	 * @return true when the constraint has been satisfied
+	 */
 	public boolean generatingNodeConstraint(GeneratingNode generatingNode) {
 		return true;
 	}
@@ -116,8 +121,11 @@ public abstract class OptimizationPlanConfiguration
 		return true;
 	}
 
-	public abstract boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork);
+	public abstract boolean satisfiesGlobalConstraint$(OptimizedNetwork optimizedNetwork);
 
+	/**
+	 * The score provides an assessment by which two generating nodes may be compared to each other.  Lower scores are preferable over higher scores.
+	 */
 	public abstract double score(GeneratingNode node);
 
 	public void setNetworkData(NetworkData networkData) {

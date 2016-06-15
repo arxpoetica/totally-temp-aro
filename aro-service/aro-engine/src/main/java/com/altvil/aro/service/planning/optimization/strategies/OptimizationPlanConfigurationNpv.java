@@ -121,7 +121,7 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 	}
 
 	@Override
-	public boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork) {
+	public boolean satisfiesGlobalConstraint$(OptimizedNetwork optimizedNetwork) {
 		return true;
 	}
 }

@@ -529,10 +529,11 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 			Collection<OptimizedNetwork> optimizedPlans = planner.getOptimizedPlans();
 
-			List<OptimizedNetwork> plans = optimizedPlans.stream()
-					.filter(optimizationPlanConfiguration::satisfiesGlobalConstraint).collect(Collectors.toList());
+			Collection<OptimizedNetwork> plans = optimizedPlans;//.stream()
+					//.filter(optimizationPlanConfiguration::satisfiesGlobalConstraint).collect(Collectors.toList());
+			
 
-			Collections.reverse(plans);
+			//Collections.reverse(plans);
 			Optional<OptimizedNetwork> model = plans.stream().findFirst();
 
 			if (model.isPresent()) {
