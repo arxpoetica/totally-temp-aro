@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.function.Predicate;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,17 +22,17 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
-import com.altvil.aro.service.graph.builder.GraphModelBuilder;
+import com.altvil.aro.service.graph.impl.AroEdgeFactory;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.ParentResolver;
 import com.altvil.aro.service.plan.NetworkModel;
+import com.altvil.aro.util.DescribeGraph;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -56,8 +55,7 @@ public class GeneratingNodeAssembler {
 	}
 
 	private AnalysisContext ctx;
-	private DAGModel<GeoSegment> dagModel;
-	private DirectedGraph<GraphNode, AroEdge<GeoSegment>> graph;
+	private SimpleDirectedGraph<GraphNode, AroEdge<GeoSegment>> graph;
 	private Multimap<GraphNode, GraphEdgeAssignment> equipmentMap;
 	private FiberType fiberType ;
 	private Set<Class<?>> matchingEquipmentType;
@@ -69,15 +67,29 @@ public class GeneratingNodeAssembler {
 		this.fiberType = fiberType ;
 		this.parentResolver = ctx.getParentResolver() ;
 		matchingEquipmentType = matchingEquipmentMap.get(fiberType);
+		DescribeGraph.debug(log, graph);
 	}
 
 	public void createAnalysis(GeneratingNode.Builder builder, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder, GraphNode vertex, GraphMapping gm,
 			Collection<AroEdge<GeoSegment>> pathEdges) {
 
-		this.dagModel = createDagModel(closestFirstSurfaceBuilder, 1, vertex, pathEdges);
-		this.graph = this.dagModel.getAsDirectedGraph();
+		// pathEdges is a subset of the plan being optimized. As such, it is a
+		// sparse graph containing what may be the minimum number of edges
+		// necessary to connect the root vertex with the target(s).
+		//
+		// There's no point in searching such a confined space for alternatives.  Simply assemble a graph so that it can be traversed.
+		graph  = new SimpleDirectedWeightedGraph<GraphNode, AroEdge<GeoSegment>>(new AroEdgeFactory<GeoSegment>() {
+			@Override
+			public AroEdge<GeoSegment> createEdge(GraphNode sourceVertex, GraphNode targetVertex) {
+				throw new IllegalStateException("This graph can not create its own edges.");
+			}});
 
-		assert isTree(vertex, graph);
+		graph.addVertex(vertex);
+		pathEdges.forEach((e) -> {
+			graph.addVertex(e.getSourceNode());
+			graph.addVertex(e.getTargetNode());
+			graph.addEdge(e.getSourceNode(), e.getTargetNode(), e);
+		});
 
 		equipmentMap = createEquipmentMap(ctx.getNetworkModel(), gm);
 		
@@ -89,53 +101,8 @@ public class GeneratingNodeAssembler {
 		if( getGraphAssignments(builder.getParentAssignment(), vertex, 1).size() > 0 )  {
 			depthFirstTraversal(builder, vertex, 1);
 		}
-		
-
 	}
 	
-	private boolean isTree(GraphNode vertex, DirectedGraph<GraphNode, AroEdge<GeoSegment>> directedGraph) {
-		Set<Long> knownGraphNodeIds = new HashSet<Long>();
-		Stack<GraphNode> candidates = new Stack<>();
-		
-		candidates.add(vertex);
-		
-		while (!candidates.isEmpty()) {
-			GraphNode candidate = candidates.pop();
-			
-			if (!knownGraphNodeIds.add(candidate.getId())) {
-				System.err.println(candidate.getId() + "; " + candidate);
-				return false;
-			}
-			
-			directedGraph.incomingEdgesOf(candidate).stream().map(AroEdge::getSourceNode).forEach((n) -> {candidates.push(n);});			
-		}
-		
-		return true;
-	}
-
-	private DAGModel<GeoSegment> createDagModel(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder, double parametric, GraphNode vertex,
-			Collection<AroEdge<GeoSegment>> pathEdges) {
-		
-		
-		GraphModelBuilder<GeoSegment> b = ctx.getGraphTransformerFactory()
-				.createGraphBuilder();
-		if( pathEdges.size() == 0 ) {
-			b.addVertex(vertex) ;
-		} else {
-			for (AroEdge<GeoSegment> e : pathEdges) {
-				b.add(e.getSourceNode(), e.getTargetNode(), e.getValue(),
-						e.getWeight());
-			}
-		}
-
-		return ctx.getGraphTransformerFactory().createDAG(closestFirstSurfaceBuilder, b.build(), parametric, vertex, e -> {
-			Set<GraphNode> vertices = new HashSet<GraphNode>();
-			vertices.add(e.getSourceNode());
-			vertices.add(e.getTargetNode());
-			return vertices;
-		});
-	}
-
 	private Multimap<GraphNode, GraphEdgeAssignment> createEquipmentMap(
 			NetworkModel model, GraphMapping mapping) {
 		Multimap<GraphNode, GraphEdgeAssignment> map = Multimaps.newListMultimap(
@@ -237,7 +204,7 @@ public class GeneratingNodeAssembler {
 		if( childBuilder != null ) {
 			childBuilder.build() ;
 		} else {
-			System.err.println("Failed to terminate child node");
+			System.err.println("Failed to terminate child node " + vertex);
 		}
 
 	}
