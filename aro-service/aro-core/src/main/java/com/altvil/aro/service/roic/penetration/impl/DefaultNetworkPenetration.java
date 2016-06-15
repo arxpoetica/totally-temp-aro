@@ -9,13 +9,19 @@ public class DefaultNetworkPenetration implements NetworkPenetration {
 	private double rate;
 
 	public DefaultNetworkPenetration(double startPenetration,
-			double endPenetration,  double rate) {
+			double endPenetration, double rate) {
 		super();
 		this.startPenetration = startPenetration;
 		this.endPenetration = endPenetration;
 		this.rate = rate;
 	}
-	
+
+	@Override
+	public NetworkPenetration negate(NetworkPenetration other) {
+		return new DefaultNetworkPenetration(startPenetration, endPenetration,
+				other.getRate() * -1);
+	}
+
 	@Override
 	public double getRate() {
 		return rate;

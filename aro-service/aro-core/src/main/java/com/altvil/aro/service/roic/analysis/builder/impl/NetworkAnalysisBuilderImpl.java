@@ -36,23 +36,19 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 	private double fixedCost = 0;
 
 	private boolean assigned = false;
-	private AnalysisPeriod analysisPeriod ;
+	private AnalysisPeriod analysisPeriod;
 
 	public NetworkAnalysisBuilderImpl(AnalysisService analysisService) {
 		super();
 		this.analysisService = analysisService;
 	}
-	
-	
 
 	@Override
 	public NetworkAnalysisBuilder setAnalysisPeriod(AnalysisPeriod period) {
-		this.analysisPeriod = period ;
-		this.assigned = true ;
+		this.analysisPeriod = period;
+		this.assigned = true;
 		return this;
 	}
-
-
 
 	@Override
 	public NetworkAnalysisBuilder setNetworkAnalysisType(
@@ -62,18 +58,16 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 	}
 
 	@Override
-	public NetworkAnalysisBuilder RoicComponent(RoicComponent component) {
+	public NetworkAnalysisBuilder addRoicComponent(RoicComponent component) {
 
 		if (!assigned) {
 			assigned = true;
-			this.analysisPeriod = component.getAnalysisPeriod() ;
+			this.analysisPeriod = component.getAnalysisPeriod();
 		}
 
 		roicComponents.put(component.getComponentType(), component);
 		return this;
 	}
-
-	
 
 	@Override
 	public NetworkAnalysisBuilder setFixedCosts(double costs) {
@@ -82,14 +76,9 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 	}
 
 	@Override
-	public RoicNetworkModel resolve() {
-
-		new RoicNetworkModelImpl(type, roicComponents, createNetworkComponent());
-
-		AnalysisRow costCurve = createCostRow();
-		AnalysisRow revenueCurve = sumCurves(AnalysisCode.revenue);
-
-		return null;
+	public RoicNetworkModel build() {
+		return new RoicNetworkModelImpl(type, roicComponents,
+				createNetworkComponent());
 	}
 
 	private RoicComponent createNetworkComponent() {

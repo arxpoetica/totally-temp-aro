@@ -9,6 +9,11 @@ public class ComponentInput {
 
 		private ComponentInput input;
 
+		public Builder(ComponentInput input) {
+			super();
+			this.input = input;
+		}
+
 		public Builder setNetworkPenetration(NetworkPenetration penetration) {
 			input.penetration = penetration;
 			return this;
@@ -43,7 +48,19 @@ public class ComponentInput {
 			input.arpu = arpu;
 			return this;
 		}
+		
+		public ComponentInput assemble() {
+			return input ;
+		}
 
+	}
+
+	public static Builder build() {
+		return build(new ComponentInput());
+	}
+
+	private static Builder build(ComponentInput input) {
+		return new Builder(input);
 	}
 
 	private ComponentType componentType;
@@ -90,6 +107,23 @@ public class ComponentInput {
 
 	public double getPremisesCount() {
 		return premisesCount;
+	}
+
+	public Builder clone() {
+		ComponentInput m = new ComponentInput();
+
+		m.arpu = arpu;
+		m.churnRate = churnRate;
+		m.churnRateDecrease = churnRateDecrease;
+		m.componentType = componentType;
+		m.entityCount = entityCount;
+		m.entityGrowth = entityGrowth;
+		m.opexPercent = opexPercent;
+		m.premisesCount = premisesCount;
+		m.penetration = penetration;
+
+		return build(m);
+
 	}
 
 }

@@ -9,7 +9,7 @@ import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 public interface RoicNetworkModel {
 
 	public enum NetworkAnalysisType {
-		undefined, bau, fiber, planned, incremental,
+		undefined, bau, planned, incremental, copper, fiber, modified_copper,
 	}
 	
 	/*

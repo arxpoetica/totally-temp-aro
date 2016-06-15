@@ -11,7 +11,7 @@ public interface NetworkAnalysisBuilder {
 	NetworkAnalysisBuilder setAnalysisPeriod(AnalysisPeriod period) ;
 	
 	NetworkAnalysisBuilder setFixedCosts(double costs) ;
-	NetworkAnalysisBuilder RoicComponent(RoicComponent component) ;
-	RoicNetworkModel resolve() ; 
+	NetworkAnalysisBuilder addRoicComponent(RoicComponent component) ;
+	RoicNetworkModel build() ; 
 
 }

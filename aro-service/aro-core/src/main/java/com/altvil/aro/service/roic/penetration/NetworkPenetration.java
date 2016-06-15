@@ -8,5 +8,9 @@ public interface NetworkPenetration {
 	double getStartPenetration();
 
 	double getEndPenetration();
+	
+	
+	NetworkPenetration negate(NetworkPenetration other) ;
+	
 
 }

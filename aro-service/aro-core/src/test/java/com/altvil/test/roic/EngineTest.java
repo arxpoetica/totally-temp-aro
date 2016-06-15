@@ -2,6 +2,7 @@ package com.altvil.test.roic;
 
 import org.junit.Test;
 
+import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
@@ -23,7 +24,7 @@ public class EngineTest {
 		};
 		
 		StreamAssemblerImpl a = new StreamAssemblerImpl() ;
-		a.setPeriod(10).setStartYear(2015).add(id, new StreamFunction() {
+		a.setAnalysisPeriod(new AnalysisPeriod(2015,10)).add(id, new StreamFunction() {
 			
 			@Override
 			public void resolve(ResolveContext ctx) {
