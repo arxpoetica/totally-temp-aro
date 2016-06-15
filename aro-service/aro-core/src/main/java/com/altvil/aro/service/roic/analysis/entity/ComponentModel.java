@@ -4,7 +4,7 @@ import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisCode;
 
 
-public interface EntityAnalysis {
+public interface ComponentModel {
 	
 	public enum EntityAnalysisType {
 		household,
@@ -15,8 +15,8 @@ public interface EntityAnalysis {
 	
 	public EntityAnalysisType getAnalysisType() ;
 
-	// Revenue By Network By LocationType
-	// Premises Passed Locations connected By LocationType
+	// Revenue By Network By LocationType  Count * Arpu
+	// Premises Passed Locations connected By LocationType 
 	// Subscribers By EntityType ( Penetration * Location )
 	// Subscribers By EntityType ( Penetration )
 
@@ -26,6 +26,11 @@ public interface EntityAnalysis {
 	// Revenue * 4.23%
 	
 	AnalysisRow getAnalysisRow(AnalysisCode code) ;
+	
+	
+	ComponentModel add(ComponentModel other) ;
+	ComponentModel difference(ComponentModel other) ;
+	
 	
 
 }

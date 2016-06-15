@@ -1,66 +1,94 @@
 package com.altvil.aro.service.roic.analysis.impl;
 
+import java.util.function.Function;
+
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
-import com.altvil.aro.service.roic.analysis.calc.StreamAccessor;
-import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 
 public class HouseHoldsConnectedPercent extends AbstractStreamFunction {
 
-	public static class Coefficents {
-		private double intercept;
+	public static class Params {
 
-		private double time;
+		public static Params COEF = new Params(0.132, 0.005, 4.494, 1.973,
+				5.599, 314.924);
 
-		private double r_penetration;
-		private double hhGrowth;
-		private double churnRate;
-		private double churnDecrease;
+		private double intercept = 0.132;
 
-		public double getIntercept() {
-			return intercept;
+		private double timeCoef;
+		
+		private double rCoef;
+		private double hhGrowth ;
+		private double churnRateCoef;
+		private double churnDecreaseCoef;
+
+		public Params(double intercept, double time, double rCoef,
+				double hhGrowth, double churnRateCoef, double churnDecreaseCoef) {
+			super();
+			this.intercept = intercept;
+			this.timeCoef = time;
+
+			this.rCoef = rCoef;
+			this.hhGrowth = hhGrowth;
+			this.churnRateCoef = churnRateCoef;
+			this.churnDecreaseCoef = churnDecreaseCoef;
 		}
 
-		public double getTime() {
-			return time;
+		public Params(double rCoef, double hhGrowth, double churnRateCoef,
+				double churnDecreaseCoef) {
+			this(0.0, 0.0, rCoef, hhGrowth, churnRateCoef, churnDecreaseCoef);
 		}
 
-		public double getRPenetration() {
-			return r_penetration;
+		public Function<Double, Double> bindParams(Params model) {
+
+			double coef = (rCoef * model.rCoef) + (hhGrowth * model.hhGrowth)
+					+ (churnRateCoef + model.churnRateCoef)
+					+ (churnDecreaseCoef + model.churnDecreaseCoef) + intercept;
+
+			return (time) -> coef + (timeCoef * time);
+
+		}
+
+		public double getRCoef() {
+			return rCoef;
+		}
+
+		public void setrCoef(double rCoef) {
+			this.rCoef = rCoef;
 		}
 
 		public double getHhGrowth() {
 			return hhGrowth;
 		}
 
-		public double getChurnRate() {
-			return churnRate;
+		public void setHhGrowth(double hhGrowth) {
+			this.hhGrowth = hhGrowth;
 		}
 
-		public double getChurnDecrease() {
-			return churnDecrease;
+		public double getChurnRateCoef() {
+			return churnRateCoef;
 		}
 
+		public void setChurnRateCoef(double churnRateCoef) {
+			this.churnRateCoef = churnRateCoef;
+		}
+
+		public double getChurnDecreaseCoef() {
+			return churnDecreaseCoef;
+		}
+
+		public void setChurnDecreaseCoef(double churnDecreaseCoef) {
+			this.churnDecreaseCoef = churnDecreaseCoef;
+		}
 	}
 
-	private Coefficents coefficents;
-
-	private StreamAccessor penetrationCurve;
-	private StreamAccessor hhCounts;
-	private StreamAccessor churnRate;
-	private StreamAccessor churnDecrease;
-
+	private Function<Double, Double> f;
+	
+	public HouseHoldsConnectedPercent(Params modelParams) {
+		f = Params.COEF.bindParams(modelParams) ;
+	}
+	
 	@Override
 	public double calc(CalcContext ctx) {
-		return coefficents.getIntercept()
-				+ (ctx.getPeriod() * coefficents.getTime()
-						+ penetrationCurve.getValue(ctx.getResultStream())
-						* coefficents.getRPenetration()
-						+ hhCounts.getValue(ctx.getResultStream())
-						* coefficents.getHhGrowth()
-						+ churnRate.getValue(ctx.getResultStream())
-						* coefficents.getChurnRate() + churnDecrease
-						.getValue(ctx.getResultStream())
-						* coefficents.getChurnDecrease());
+		return f.apply((double) ctx.getPeriod());
 	}
 
 }

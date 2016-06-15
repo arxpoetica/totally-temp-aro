@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.altvil.aro.service.roic.RoicModel;
+import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
@@ -16,10 +16,10 @@ import com.altvil.aro.service.roic.analysis.calc.StreamAccessor;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.spi.ResolveContext;
-import com.altvil.aro.service.roic.analysis.spi.RoicAssembler;
+import com.altvil.aro.service.roic.analysis.spi.StreamAssembler;
 import com.altvil.utils.StreamUtil;
 
-public class StreamAssemblerImpl implements RoicAssembler {
+public class StreamAssemblerImpl implements StreamAssembler {
 
 	private int startYear;
 	private int period;
@@ -28,33 +28,33 @@ public class StreamAssemblerImpl implements RoicAssembler {
 	private List<CurveIdentifier> outputCurves = new ArrayList<>();
 
 	@Override
-	public RoicAssembler setPeriod(int period) {
+	public StreamAssembler setPeriod(int period) {
 		this.period = period ;
 		return this;
 	}
 	
 	
 	@Override
-	public RoicAssembler setStartYear(int startYear) {
+	public StreamAssembler setStartYear(int startYear) {
 		this.startYear = startYear ;
 		return this ;
 	}
 	
 
 	@Override
-	public RoicAssembler add(CurveIdentifier id, StreamFunction f) {
+	public StreamAssembler add(CurveIdentifier id, StreamFunction f) {
 		funcMap.put(id, f);
 		return this;
 	}
 
 	@Override
-	public RoicAssembler addOutput(CurveIdentifier id) {
+	public StreamAssembler addOutput(CurveIdentifier id) {
 		outputCurves.add(id);
 		return this;
 	}
 
 	@Override
-	public RoicModel resolveAndBuild() {
+	public StreamModel resolveAndBuild() {
 
 		return new RoicBuilder(startYear, period,
 				new Resolver(funcMap).resolve()).buildAndRun(outputCurves);
@@ -258,7 +258,7 @@ public class StreamAssemblerImpl implements RoicAssembler {
 
 	}
 
-	private static class RoicModelImpl implements RoicModel {
+	private static class RoicModelImpl implements StreamModel {
 
 		private Map<CurveIdentifier, AnalysisRow> map;
 
@@ -296,7 +296,7 @@ public class StreamAssemblerImpl implements RoicAssembler {
 			this.streamFunctions = resolver.getOrderedStreamFunctions();
 		}
 
-		public RoicModel buildAndRun(List<CurveIdentifier> ids) {
+		public StreamModel buildAndRun(List<CurveIdentifier> ids) {
 			List<RowBinding> rowBindings = bindRows(ids);
 			run(rowBindings);
 			return new RoicModelImpl(resolveRows(rowBindings));

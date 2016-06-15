@@ -1,7 +1,6 @@
 package com.altvil.aro.service.roic.analysis.impl;
 
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
-import com.altvil.aro.service.roic.analysis.spi.ResolveContext;
 
 public class GrowthCurve extends AbstractStreamFunction {
 

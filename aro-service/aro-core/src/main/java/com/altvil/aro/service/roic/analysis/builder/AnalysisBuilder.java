@@ -1,5 +1,8 @@
 package com.altvil.aro.service.roic.analysis.builder;
 
+import java.util.Collection;
+
+import com.altvil.aro.service.roic.RoicInputs;
 import com.altvil.aro.service.roic.model.NetworkType;
 
 
@@ -8,7 +11,13 @@ public interface AnalysisBuilder {
 	AnalysisBuilder setAnalysisPeriod(int periodInYears) ;
 	AnalysisBuilder setStartYear(int year) ;
 	
+	AnalysisBuilder setCopper(Collection<RoicInputs> inputs) ;
+	AnalysisBuilder setFibber(Collection<RoicInputs> inputs) ;
+	
 	NetworkAnalysisBuilder networkAnalysisBuilder(NetworkType type) ;
+	
+	
+	
 	
 	/*
 	EntityAnalysisBuilder entityAnalysis(LocationEntityType type) ;

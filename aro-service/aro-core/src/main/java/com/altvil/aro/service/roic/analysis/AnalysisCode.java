@@ -1,8 +1,17 @@
 package com.altvil.aro.service.roic.analysis;
 
-public enum AnalysisCode {
+import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
+
+public enum AnalysisCode implements CurveIdentifier {
 	
+	penetration,
+	arpu,
+	houseHolds,
 	revenue,
+	cost,
+	
+	new_connections_percent,
+
 	premises_passed,
 	subscribers_count,
 	subscribers_penetration,

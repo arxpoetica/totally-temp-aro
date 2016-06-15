@@ -2,7 +2,7 @@ package com.altvil.test.roic;
 
 import org.junit.Test;
 
-import com.altvil.aro.service.roic.RoicModel;
+import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
@@ -36,7 +36,7 @@ public class EngineTest {
 		})
 		.addOutput(id);
 		
-		RoicModel m = a.resolveAndBuild() ;
+		StreamModel m = a.resolveAndBuild() ;
 		AnalysisRow row = m.getAnalysisRow(id) ;
 		
 		for(int i=0 ; i<10 ; i++) {
