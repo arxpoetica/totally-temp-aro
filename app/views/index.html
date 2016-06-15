@@ -392,6 +392,13 @@
                   <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Commercial
                 </label>
               </div>
+              <div style="margin-left: 20px">
+                <div class="checkbox" ng-repeat="category in business_categories">
+                  <label>
+                    <input type="checkbox" ng-model="business_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_businesses"> {{category.description}}
+                  </label>
+                </div>
+              </div>
               <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
                 <label>
                   <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Residential
@@ -403,22 +410,6 @@
                 </label>
               </div>
             </form>
-            <div ng-show="show_commercial && !show_residential">
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" ng-change="change_locations_layer()" ng-model="show_businesses" ng-disabled="overlay !== 'none'"> Show businesses
-                </label>
-              </div>
-              <p>
-                <input class="form-control business-filter select2-industries" ng-model="selected_industries" ng-change="change_locations_layer()"></input>
-              </p>
-              <p>
-                <input class="form-control business-filter select2-customer-types" ng-model="selected_customer_types" ng-change="change_locations_layer()"></input>
-              </p>
-              <p>
-                <input class="form-control business-filter select2-number-of-employees" ng-model="selected_number_of_employees" ng-change="change_locations_layer()"></input>
-              </p>
-            </div>
             <% if (env_is_test) { %>
               <a href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">.</a>
             <% } %>
