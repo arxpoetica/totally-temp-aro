@@ -5,8 +5,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.web.accept.FixedContentNegotiationStrategy;
-
 import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
@@ -40,38 +38,58 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 		return this;
 	}
 
-	private ComponentInput modifyComponentInput(ComponentInput copper,
+	private ComponentInput modifyIntersectComponentInput(ComponentInput copper,
 			ComponentInput fiber) {
-		
-		if( fiber == null ) {
-			return copper ;
+
+		if (fiber == null) {
+			return copper;
 		}
-		
+
 		return copper
 				.clone()
 				.setNetworkPenetration(
 						copper.getPenetration().negate(fiber.getPenetration()))
+				.setEntityCount(fiber.getEntityCount()).assemble();
+	}
+
+	private ComponentInput modifyRemainingComponentInput(ComponentInput copper,
+			ComponentInput fiber) {
+
+		if (fiber == null) {
+			return copper;
+		}
+
+		return copper
+				.clone()
 				.setEntityCount(
 						copper.getEntityCount() - fiber.getEntityCount())
 				.assemble();
 	}
 
-	private RoicInputs modifyCopper(RoicInputs copper, RoicInputs fiber) {
+	private RoicInputs modifyCopper(RoicInputs copper, RoicInputs fiber,
+			NetworkAnalysisType at) {
 
 		RoicInputs modified = new RoicInputs();
 
 		Map<ComponentType, ComponentInput> fiberComponents = StreamUtil.hash(
 				fiber.getComponentInputs(), ci -> ci.getComponentType());
-		
+
 		modified.setFixedCost(copper.getFixedCost());
-		modified.setType(NetworkAnalysisType.modified_copper);
-		
-		Collection<ComponentInput> modfiedInputs = copper
+		modified.setType(at);
+
+		Collection<ComponentInput> modfiedInputs = null;
+
+		modfiedInputs = copper
 				.getComponentInputs()
 				.stream()
-				.map(ci -> modifyComponentInput(ci,
-						fiberComponents.get(ci.getComponentType())))
-				.collect(Collectors.toList());
+				.map(ci -> {
+					ComponentInput fiberInput = fiberComponents.get(ci
+							.getComponentType());
+					return (at == NetworkAnalysisType.copper_intersects) ? modifyIntersectComponentInput(
+							ci, fiberInput) : modifyRemainingComponentInput(ci,
+							fiberInput);
+
+				}).collect(Collectors.toList());
 
 		modified.setComponentInputs(modfiedInputs);
 
@@ -85,20 +103,32 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.copper),
 				NetworkAnalysisType.copper);
+
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.fiber),
 				NetworkAnalysisType.fiber);
+
 		modelBuilder.addNetwork(
 				modifyCopper(roicInputsMap.get(NetworkAnalysisType.copper),
-						roicInputsMap.get(NetworkAnalysisType.copper)),
-				NetworkAnalysisType.modified_copper);
+						roicInputsMap.get(NetworkAnalysisType.fiber),
+						NetworkAnalysisType.copper_intersects),
+				NetworkAnalysisType.copper_intersects);
+
+		modelBuilder.addNetwork(
+				modifyCopper(roicInputsMap.get(NetworkAnalysisType.copper),
+						roicInputsMap.get(NetworkAnalysisType.fiber),
+						NetworkAnalysisType.copper_remaining),
+				NetworkAnalysisType.copper_remaining);
 
 		modelBuilder
 				.addModel(modelBuilder
 						.get(NetworkAnalysisType.fiber)
 						.add()
-						.setModel(
+						.addModel(
 								modelBuilder
-										.get(NetworkAnalysisType.modified_copper))
+										.get(NetworkAnalysisType.copper_intersects))
+						.addModel(
+								modelBuilder
+										.get(NetworkAnalysisType.copper_remaining))
 						.setType(NetworkAnalysisType.planned).apply());
 
 		modelBuilder.addModel(modelBuilder.get(NetworkAnalysisType.planned)
@@ -138,7 +168,7 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 			inputs.getComponentInputs().forEach(
 					ci -> {
 						b.addRoicComponent(analysisService
-								.createComponentBuilder()
+								.createComponentBuilder(type.getNetworkType())
 								.setAnalysisPeriod(analysisPeriod)
 								.setComponentType(ci.getComponentType())
 								.setRoicModelInputs(ci).build());

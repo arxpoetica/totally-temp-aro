@@ -49,6 +49,16 @@ public class ComponentInput {
 			return this;
 		}
 		
+		public Builder setConnectionCost(double cost) {
+			this.input.connectionCost = cost;
+			return this;
+		}
+		
+		public Builder setMaintenanceExpenses(double cost) {
+			this.input.maintenanceExpenses = cost;
+			return this;
+		}
+		
 		public ComponentInput assemble() {
 			return input ;
 		}
@@ -70,8 +80,10 @@ public class ComponentInput {
 	private double churnRate = 0;
 	private double churnRateDecrease = 0;
 	private double opexPercent;
+	private double maintenanceExpenses ;
 	private double arpu;
 	private double premisesCount;
+	private double connectionCost ;
 
 	public ComponentType getComponentType() {
 		return componentType;
@@ -79,6 +91,10 @@ public class ComponentInput {
 
 	public NetworkPenetration getPenetration() {
 		return penetration;
+	}
+
+	public double getConnectionCost() {
+		return connectionCost;
 	}
 
 	public double getEntityCount() {
@@ -108,6 +124,13 @@ public class ComponentInput {
 	public double getPremisesCount() {
 		return premisesCount;
 	}
+	
+
+	
+
+	public double getMaintenancePercent() {
+		return maintenanceExpenses;
+	}
 
 	public Builder clone() {
 		ComponentInput m = new ComponentInput();
@@ -121,6 +144,8 @@ public class ComponentInput {
 		m.opexPercent = opexPercent;
 		m.premisesCount = premisesCount;
 		m.penetration = penetration;
+		m.connectionCost = connectionCost ;
+		m.maintenanceExpenses = maintenanceExpenses ;
 
 		return build(m);
 

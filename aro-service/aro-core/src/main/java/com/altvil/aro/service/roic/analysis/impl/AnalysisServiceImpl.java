@@ -11,6 +11,7 @@ import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.impl.HouseHoldsConnectedPercent.Params;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
+import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 
 public class AnalysisServiceImpl implements AnalysisService {
@@ -21,8 +22,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	@Override
-	public ComponentBuilder createComponentBuilder() {
-		return new ComponentBuilderImpl(this);
+	public ComponentBuilder createComponentBuilder(NetworkType type) {
+		return new ComponentBuilderImpl(this, type);
 	}
 
 	@Override
@@ -30,9 +31,15 @@ public class AnalysisServiceImpl implements AnalysisService {
 		return new NetworkAnalysisBuilderImpl(this);
 	}
 	
-	
-	
-	
+	@Override
+	public StreamFunction createConstant(double constValue) {
+		return new AbstractStreamFunction() {
+			@Override
+			public double calc(CalcContext ctx) {
+				return constValue;
+			}
+		};
+	}
 
 	@Override
 	public RoicModelBuilder createRoicModelBuilder() {

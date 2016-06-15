@@ -10,6 +10,7 @@ import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.impl.ComponentModelImpl;
 import com.altvil.aro.service.roic.analysis.spi.StreamAssembler;
+import com.altvil.aro.service.roic.model.NetworkType;
 
 public class ComponentBuilderImpl implements ComponentBuilder {
 
@@ -20,11 +21,13 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	private ComponentType componentType = ComponentType.undefined;
 	private ComponentInput inputs;
 	private AnalysisPeriod analysisPeriod;
+	private NetworkType networkType ;
 
-	public ComponentBuilderImpl(AnalysisService analysisService) {
+	public ComponentBuilderImpl(AnalysisService analysisService, NetworkType networkType) {
 		super();
 		this.analysisService = analysisService;
 		roicAssembler = new StreamAssemblerImpl();
+		 this.networkType  = networkType ;
 	}
 
 	@Override
@@ -75,7 +78,8 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 				.addOutput(AnalysisCode.subscribers_penetration)
 				.addOutput(AnalysisCode.new_connections)
 				.addOutput(AnalysisCode.opex_expenses)
-				.addOutput(AnalysisCode.new_connections_period);
+				.addOutput(AnalysisCode.maintenance_expenses)
+				.addOutput(AnalysisCode.new_connections_cost);
 	}
 
 	private void assemble(ComponentInput inputs) {
@@ -98,24 +102,46 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 				.createHouseHolds(inputs.getEntityCount(),
 						inputs.getEntityGrowth()));
 		
-		
 
 		roicAssembler.add(AnalysisCode.revenue, analysisService.createRevenue(
 				AnalysisCode.houseHolds, AnalysisCode.penetration,
 				AnalysisCode.arpu));
-
-		roicAssembler.add(AnalysisCode.new_connections, analysisService
-				.createConnectedHouseHolds(inputs.getPenetration().getRate(),
-						inputs.getEntityCount(), inputs.getChurnRate(),
-						inputs.getChurnRateDecrease()));
 		
-		roicAssembler.add(AnalysisCode.new_connections_count, 
-				analysisService.createMultiplyOp(AnalysisCode.houseHolds, AnalysisCode.new_connections)) ;
+		
+		//TODO Move to Strategy
+		if( networkType == NetworkType.Fiber ) {
+			roicAssembler.add(AnalysisCode.new_connections, analysisService
+					.createConnectedHouseHolds(inputs.getPenetration().getRate(),
+							inputs.getEntityCount(), inputs.getChurnRate(),
+							inputs.getChurnRateDecrease()));
 			
-		roicAssembler.add(AnalysisCode.new_connections_period, 
-				analysisService.createStreamDiff(AnalysisCode.new_connections_count)) ;
+			roicAssembler.add(AnalysisCode.new_connections_count, 
+					analysisService.createMultiplyOp(AnalysisCode.houseHolds, AnalysisCode.new_connections)) ;
+			
+			roicAssembler.add(AnalysisCode.new_connections_period, 
+					analysisService.createStreamDiff(AnalysisCode.new_connections_count)) ;
+			
+			roicAssembler.add(AnalysisCode.new_connections_cost, 
+					analysisService.createMultiplyOp(AnalysisCode.new_connections_period, inputs.getConnectionCost())) ;
+			
+		} else {
+			
+			roicAssembler.add(AnalysisCode.new_connections, analysisService
+					.createConstant(0));
+			
+			roicAssembler.add(AnalysisCode.new_connections_count, analysisService
+					.createConstant(0));
+			
+			roicAssembler.add(AnalysisCode.new_connections_period, analysisService
+					.createConstant(0));
+			
+			roicAssembler.add(AnalysisCode.new_connections, analysisService
+					.createConstant(0));
+			
+			roicAssembler.add(AnalysisCode.new_connections_cost, 
+					analysisService.createConstant(0)) ;
+		}
 		
-
 		roicAssembler.add(AnalysisCode.arpu,
 				analysisService.createARPU(inputs.getArpu()));
 
@@ -123,6 +149,11 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 				AnalysisCode.opex_expenses,
 				analysisService.createMultiplyOp(AnalysisCode.revenue,
 						inputs.getOpexPercent()));
+		
+		roicAssembler.add(
+				AnalysisCode.maintenance_expenses,
+				analysisService.createMultiplyOp(AnalysisCode.revenue,
+						inputs.getMaintenancePercent()));
 
 	}
 

@@ -1,5 +1,9 @@
 package com.altvil.aro.service.roic.analysis.model.impl;
 
+import java.util.Collection;
+
+import javax.naming.OperationNotSupportedException;
+
 import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
@@ -49,5 +53,12 @@ public class ComponentModelImpl implements RoicComponent {
 		return new ComponentModelImpl(analysisPeriod, type, streamModel.minus(other
 				.getStreamModel()));
 	}
+
+	@Override
+	public RoicComponent add(Collection<RoicComponent> other) {
+		throw new RuntimeException("Implement me now") ;
+	}
+	
+	
 
 }

@@ -5,18 +5,21 @@ import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
 import com.altvil.aro.service.roic.analysis.builder.RoicModelBuilder;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
+import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 
 public interface AnalysisService {
 	
 	
-	ComponentBuilder createComponentBuilder() ;
+	ComponentBuilder createComponentBuilder(NetworkType type) ;
 	NetworkAnalysisBuilder createNetworkAnalysisBuilder() ;
 	RoicModelBuilder createRoicModelBuilder() ;
 	
 	StreamFunction createCurve(NetworkPenetration networkPenetration);
 
 	StreamFunction createARPU(double arpu);
+	
+	StreamFunction createConstant(double constValue) ;
 
 	StreamFunction createHouseHolds(double start, double growth);
 

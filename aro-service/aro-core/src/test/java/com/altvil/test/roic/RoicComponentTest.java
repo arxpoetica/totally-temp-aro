@@ -17,6 +17,7 @@ import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
+import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
 
@@ -33,7 +34,7 @@ public class RoicComponentTest {
 	public void testRoicComponent() {
 
 		AnalysisPeriod ap = new AnalysisPeriod(2016, 20);
-		RoicComponent component = analysisService.createComponentBuilder()
+		RoicComponent component = analysisService.createComponentBuilder(NetworkType.Fiber)
 				.setAnalysisPeriod(ap)
 				.setComponentType(ComponentType.household)
 				.setRoicModelInputs(createComponentInput()).build();
