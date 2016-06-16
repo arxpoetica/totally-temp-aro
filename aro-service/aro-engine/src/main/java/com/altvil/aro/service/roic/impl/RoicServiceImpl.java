@@ -19,6 +19,7 @@ import com.altvil.aro.model.WirecenterPlan;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.roic.AnalysisPeriod;
+import com.altvil.aro.service.roic.RoicConstants;
 import com.altvil.aro.service.roic.RoicService;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.RoicInputs;

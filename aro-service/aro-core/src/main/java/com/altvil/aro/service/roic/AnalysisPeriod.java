@@ -10,10 +10,6 @@ public class AnalysisPeriod {
 		this.startYear = startYear;
 		this.periods = periods;
 		
-		if( periods == 14 ) {
-			int x = 10 ;
-		}
-		
 	}
 
 	public int getStartYear() {

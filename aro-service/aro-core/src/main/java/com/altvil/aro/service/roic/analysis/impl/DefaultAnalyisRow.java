@@ -25,7 +25,7 @@ public class DefaultAnalyisRow implements AnalysisRow {
 		}
 		
 		double[] values = new double[a.getSize()];
-		for (int i = 0; 0 < values.length; i++) {
+		for (int i = 0; i < values.length; i++) {
 			values[i] = a.getValue(i) - b.getValue(i);
 		}
 		return new DefaultAnalyisRow(values);

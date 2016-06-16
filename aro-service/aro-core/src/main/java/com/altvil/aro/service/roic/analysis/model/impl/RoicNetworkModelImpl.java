@@ -153,7 +153,7 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements Ro
 
 		@Override
 		public Transformer addModel(RoicNetworkModel model) {
-			models.addAll(models);
+			models.add(model);
 			return this;
 		}
 

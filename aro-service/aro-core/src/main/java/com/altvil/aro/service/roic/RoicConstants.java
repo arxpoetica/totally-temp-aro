@@ -1,4 +1,4 @@
-package com.altvil.aro.service.roic.impl;
+package com.altvil.aro.service.roic;
 
 import java.util.Collections;
 
@@ -47,7 +47,9 @@ public class RoicConstants {
 				.setArpu(1898.7264)
 				.setNetworkPenetration(
 						new DefaultNetworkPenetration(0.0, 0.5, -.25))
-				.setEntityGrowth(0.01).setChurnRateDecrease(20.56)
+				.setEntityGrowth(0.01)
+				.setChurnRate(0.2056)
+				.setChurnRateDecrease(0.0)
 				.setOpexPercent(0.4).setMaintenanceExpenses(0.0423)
 				.setEntityGrowth(0.01).setConnectionCost(204.0).assemble();
 

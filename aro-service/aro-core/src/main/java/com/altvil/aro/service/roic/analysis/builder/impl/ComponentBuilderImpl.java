@@ -22,7 +22,6 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	private ComponentInput inputs;
 	private AnalysisPeriod analysisPeriod;
 	private NetworkType networkType;
-	
 
 	public ComponentBuilderImpl(AnalysisService analysisService,
 			NetworkType networkType) {
@@ -46,11 +45,11 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 
 	@Override
 	public ComponentBuilder setComponentType(ComponentType type) {
-		
-		if( type == null ) {
-			throw new NullPointerException() ;
+
+		if (type == null) {
+			throw new NullPointerException();
 		}
-		
+
 		this.componentType = type;
 		return this;
 	}
@@ -84,24 +83,24 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 				.addOutput(AnalysisCode.premises_passed)
 				.addOutput(AnalysisCode.subscribers_count)
 				.addOutput(AnalysisCode.subscribers_penetration)
-				.addOutput(AnalysisCode.new_connections)
 				.addOutput(AnalysisCode.opex_expenses)
 				.addOutput(AnalysisCode.maintenance_expenses)
+
+				.addOutput(AnalysisCode.new_connections_count)
 				.addOutput(AnalysisCode.new_connections_cost);
+
 	}
 
 	private void assemble(ComponentInput inputs) {
 		roicAssembler.add(AnalysisCode.penetration,
 				analysisService.createCurve(inputs.getPenetration()));
-		
-		
+
 		roicAssembler.add(AnalysisCode.premises_passed,
 				analysisService.createPremisesPassed(inputs.getEntityCount()));
 
 		roicAssembler.add(AnalysisCode.subscribers_count, analysisService
 				.createMultiplyOp(AnalysisCode.penetration,
 						AnalysisCode.houseHolds));
-		
 
 		roicAssembler
 				.add(AnalysisCode.subscribers_penetration, analysisService
@@ -117,21 +116,15 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 
 		// TODO Move to Strategy
 		if (networkType == NetworkType.Fiber) {
-			roicAssembler.add(AnalysisCode.new_connections, analysisService
-					.createYearlyConnectedHouseHolds(15, inputs.getPenetration().getEndPenetration(), inputs.getChurnRate(), inputs.getEntityCount())) ;
-
-			roicAssembler.add(AnalysisCode.new_connections_count,
-					analysisService.createMultiplyOp(AnalysisCode.houseHolds,
-							AnalysisCode.new_connections));
-
-			roicAssembler
-					.add(AnalysisCode.new_connections_period,
-							analysisService
-									.createStreamDiff(AnalysisCode.new_connections_count));
+			roicAssembler.add(AnalysisCode.new_connections_count, analysisService
+					.createYearlyConnectedHouseHolds(15, inputs
+							.getPenetration().getEndPenetration(), inputs
+							.getChurnRate(), inputs.getEntityCount()));
+			
 
 			roicAssembler.add(AnalysisCode.new_connections_cost,
 					analysisService.createMultiplyOp(
-							AnalysisCode.new_connections_period,
+							AnalysisCode.new_connections_count,
 							inputs.getConnectionCost()));
 
 		} else {
@@ -164,6 +157,6 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 				AnalysisCode.maintenance_expenses,
 				analysisService.createMultiplyOp(AnalysisCode.revenue,
 						inputs.getMaintenancePercent()));
-		
+
 	}
 }
