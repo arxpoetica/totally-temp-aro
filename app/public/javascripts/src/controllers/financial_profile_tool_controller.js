@@ -105,6 +105,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $http.get(`/financial_profile/${$scope.plan.id}/${key}`)
       .success((response) => {
         $scope.financialData[key] = response
+        console.log('Requested', key)
+        console.table(response)
         callback(response)
       })
   }
@@ -263,8 +265,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       labels: [],
       datasets: [dataset]
     }
-
-    console.log('metadata', $scope.plan.metadata)
 
     ;($scope.plan.metadata.npv || []).forEach((revenue) => {
       data.labels.push(revenue.year)
