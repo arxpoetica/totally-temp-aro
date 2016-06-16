@@ -43,6 +43,40 @@ public class RoicEndPoint {
 			this.incremental = incremental;
 		}
 
+		public int getYear() {
+			return year;
+		}
+
+		public void setYear(int year) {
+			this.year = year;
+		}
+
+		public double getBau() {
+			return bau;
+		}
+
+		public void setBau(double bau) {
+			this.bau = bau;
+		}
+
+		public double getFiber() {
+			return fiber;
+		}
+
+		public void setFiber(double fiber) {
+			this.fiber = fiber;
+		}
+
+		public double getIncremental() {
+			return incremental;
+		}
+
+		public void setIncremental(double incremental) {
+			this.incremental = incremental;
+		}
+		
+		
+
 	}
 
 	@RequestMapping(value = "/financial_profile/{id}/cash_flow", method = RequestMethod.GET)
@@ -93,6 +127,56 @@ public class RoicEndPoint {
 		double network_deployment;
 		double connect;
 		double maintenance_capacity;
+		
+		
+
+		public int getYear() {
+			return year;
+		}
+
+
+
+		public void setYear(int year) {
+			this.year = year;
+		}
+
+
+
+		public double getNetwork_deployment() {
+			return network_deployment;
+		}
+
+
+
+		public void setNetwork_deployment(double network_deployment) {
+			this.network_deployment = network_deployment;
+		}
+
+
+
+		public double getConnect() {
+			return connect;
+		}
+
+
+
+		public void setConnect(double connect) {
+			this.connect = connect;
+		}
+
+
+
+		public double getMaintenance_capacity() {
+			return maintenance_capacity;
+		}
+
+
+
+		public void setMaintenance_capacity(double maintenance_capacity) {
+			this.maintenance_capacity = maintenance_capacity;
+		}
+
+
 
 		public Capex(int year, double network_deployment, double connect,
 				double maintenance_capacity) {
@@ -151,6 +235,56 @@ public class RoicEndPoint {
 		double houseHolds;
 		double businesses;
 		double towers;
+		
+		
+
+		public int getYear() {
+			return year;
+		}
+
+
+
+		public void setYear(int year) {
+			this.year = year;
+		}
+
+
+
+		public double getHouseHolds() {
+			return houseHolds;
+		}
+
+
+
+		public void setHouseHolds(double houseHolds) {
+			this.houseHolds = houseHolds;
+		}
+
+
+
+		public double getBusinesses() {
+			return businesses;
+		}
+
+
+
+		public void setBusinesses(double businesses) {
+			this.businesses = businesses;
+		}
+
+
+
+		public double getTowers() {
+			return towers;
+		}
+
+
+
+		public void setTowers(double towers) {
+			this.towers = towers;
+		}
+
+
 
 		public Revenue(int year, double houseHolds, double businesses,
 				double towers) {
@@ -201,6 +335,51 @@ public class RoicEndPoint {
 		int year;
 		double incremental;
 		double existing;
+		
+		
+		
+
+		public int getYear() {
+			return year;
+		}
+
+
+
+
+		public void setYear(int year) {
+			this.year = year;
+		}
+
+
+
+
+		public double getIncremental() {
+			return incremental;
+		}
+
+
+
+
+		public void setIncremental(double incremental) {
+			this.incremental = incremental;
+		}
+
+
+
+
+		public double getExisting() {
+			return existing;
+		}
+
+
+
+
+		public void setExisting(double existing) {
+			this.existing = existing;
+		}
+
+
+
 
 		public Premisies(int year, double incremental, double existing) {
 			super();
@@ -211,7 +390,7 @@ public class RoicEndPoint {
 
 	}
 
-	@RequestMapping(value = "/financial_profile/{planId}/premises", method = RequestMethod.GET)
+	@RequestMapping(value = "/financial_profile/{id}/premises", method = RequestMethod.GET)
 	public @ResponseBody List<Premisies> getPremises(
 			@PathVariable("id") long planId) throws NoSuchStrategy,
 			InterruptedException {
@@ -252,6 +431,44 @@ public class RoicEndPoint {
 		int year;
 		double bau;
 		double fiber;
+		
+		
+
+		public int getYear() {
+			return year;
+		}
+
+
+
+		public void setYear(int year) {
+			this.year = year;
+		}
+
+
+
+		public double getBau() {
+			return bau;
+		}
+
+
+
+		public void setBau(double bau) {
+			this.bau = bau;
+		}
+
+
+
+		public double getFiber() {
+			return fiber;
+		}
+
+
+
+		public void setFiber(double fiber) {
+			this.fiber = fiber;
+		}
+
+
 
 		public Subscribers(int year, double bau, double fiber) {
 			super();
@@ -304,6 +521,56 @@ public class RoicEndPoint {
 		double business;
 		double households;
 		double towers;
+		
+		
+
+		public int getYear() {
+			return year;
+		}
+
+
+
+		public void setYear(int year) {
+			this.year = year;
+		}
+
+
+
+		public double getBusiness() {
+			return business;
+		}
+
+
+
+		public void setBusiness(double business) {
+			this.business = business;
+		}
+
+
+
+		public double getHouseholds() {
+			return households;
+		}
+
+
+
+		public void setHouseholds(double households) {
+			this.households = households;
+		}
+
+
+
+		public double getTowers() {
+			return towers;
+		}
+
+
+
+		public void setTowers(double towers) {
+			this.towers = towers;
+		}
+
+
 
 		public Penetration(int year, double business, double households,
 				double towers) {
