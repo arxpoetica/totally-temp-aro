@@ -1,10 +1,29 @@
 package com.altvil.aro.service.roic.analysis.builder;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
 
 public class RoicInputs {
+	
+	
+	public static RoicInputs updateInputs(RoicInputs inputs, double totalDemand,
+			double cost) {
+
+		RoicInputs result = new RoicInputs();
+		result.setFixedCost(cost);
+		result.setType(inputs.getType());
+
+		result.setComponentInputs(inputs.getComponentInputs().stream()
+				.map(ci -> {
+					return ci.clone().setEntityCount(totalDemand).assemble();
+				}).collect(Collectors.toList()));
+
+		return result;
+
+	}
+	
 
 	private NetworkAnalysisType type ;
 	private Collection<ComponentInput> componentInputs ;

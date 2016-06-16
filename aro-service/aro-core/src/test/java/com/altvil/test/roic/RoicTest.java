@@ -49,15 +49,9 @@ public class RoicTest {
 		RoicNetworkModel networkModel = model
 				.getRoicNetworkModel(NetworkAnalysisType.planned);
 
-		dump(networkModel, AnalysisCode.cost);
-		dump(networkModel, AnalysisCode.revenue);
-
-		Map<String, AnalysisRow> map = new HashMap<>();
-		dump("", map, model);
-
-		//dump("", model) ;
-		dump(map);
-
+		
+		
+		
 	}
 
 	private void dump(Map<String, AnalysisRow> map) {

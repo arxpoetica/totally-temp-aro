@@ -94,27 +94,13 @@ public class RoicServiceImpl implements RoicService {
 		return model;
 	}
 
-	private RoicInputs updateInputs(RoicInputs inputs, double totalDemand,
-			double cost) {
-
-		RoicInputs result = new RoicInputs();
-		result.setFixedCost(cost);
-		result.setType(inputs.getType());
-
-		result.setComponentInputs(inputs.getComponentInputs().stream()
-				.map(ci -> {
-					return ci.clone().setEntityCount(totalDemand).assemble();
-				}).collect(Collectors.toList()));
-
-		return result;
-
-	}
+	
 
 	private RoicModel loadRoic(Long planId) {
-		RoicInputs copperInputs = updateInputs(map.get(NetworkType.Copper),
+		RoicInputs copperInputs = RoicInputs.updateInputs(map.get(NetworkType.Copper),
 				getTotalDemand(planId), 0);
 
-		RoicInputs fiberInputs = updateInputs(map.get(NetworkType.Fiber),
+		RoicInputs fiberInputs = RoicInputs.updateInputs(map.get(NetworkType.Fiber),
 				getLocationDemand(planId), getCapex(planId));
 
 		return analysisService.createRoicModelBuilder()
