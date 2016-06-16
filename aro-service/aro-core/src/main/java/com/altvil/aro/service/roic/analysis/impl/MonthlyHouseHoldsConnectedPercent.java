@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 
-public class HouseHoldsConnectedPercent extends AbstractStreamFunction {
+public class MonthlyHouseHoldsConnectedPercent extends AbstractStreamFunction {
 
 	public static class Params {
 
@@ -82,7 +82,7 @@ public class HouseHoldsConnectedPercent extends AbstractStreamFunction {
 
 	private Function<Double, Double> f;
 	
-	public HouseHoldsConnectedPercent(Params modelParams) {
+	public MonthlyHouseHoldsConnectedPercent(Params modelParams) {
 		f = Params.COEF.bindParams(modelParams) ;
 	}
 	

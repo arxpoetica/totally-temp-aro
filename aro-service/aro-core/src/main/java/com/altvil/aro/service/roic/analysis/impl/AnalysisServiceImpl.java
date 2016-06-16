@@ -12,7 +12,7 @@ import com.altvil.aro.service.roic.analysis.builder.impl.NetworkAnalysisBuilderI
 import com.altvil.aro.service.roic.analysis.builder.impl.RoicAnalysisBuilder;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
-import com.altvil.aro.service.roic.analysis.impl.HouseHoldsConnectedPercent.Params;
+import com.altvil.aro.service.roic.analysis.impl.MonthlyHouseHoldsConnectedPercent.Params;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
@@ -31,14 +31,13 @@ public class AnalysisServiceImpl implements AnalysisService {
 			CurveIdentifier networkCapexId) {
 		return new CashFlow(revenueId, capexId, connectCapexId, networkCapexId);
 	}
-	
-	
+
 	@Override
 	public StreamFunction createCurve(AnalysisRow row) {
 		return new AbstractStreamFunction() {
 			@Override
 			public double calc(CalcContext ctx) {
-				return row.getValue(ctx.getPeriod()) ;
+				return row.getValue(ctx.getPeriod());
 			}
 		};
 	}
@@ -46,7 +45,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 	@Override
 	public StreamFunction createTruncatedConstantStream(double constValue,
 			int endPeriod) {
-		return new TruncatedConstantStream(constValue, endPeriod) ;
+		return new TruncatedConstantStream(constValue, endPeriod);
 	}
 
 	@Override
@@ -67,6 +66,13 @@ public class AnalysisServiceImpl implements AnalysisService {
 				return constValue;
 			}
 		};
+	}
+
+	@Override
+	public StreamFunction createYearlyConnectedHouseHolds(int timeToConnection,
+			double fairShare, double churnRate) {
+		return new YearlyHouseHoldsConnectedPercent(timeToConnection,
+				fairShare, churnRate);
 	}
 
 	@Override
@@ -130,10 +136,10 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	@Override
-	public StreamFunction createConnectedHouseHolds(double r, double hhGrowth,
-			double churnRate, double churnDecrease) {
+	public StreamFunction createMonthlyConnectedHouseHolds(double r,
+			double hhGrowth, double churnRate, double churnDecrease) {
 		Params params = new Params(r, hhGrowth, churnRate, churnDecrease);
-		return new HouseHoldsConnectedPercent(params);
+		return new MonthlyHouseHoldsConnectedPercent(params);
 	}
 
 	@Override
