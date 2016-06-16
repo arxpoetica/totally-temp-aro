@@ -70,9 +70,9 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	@Override
 	public StreamFunction createYearlyConnectedHouseHolds(int timeToConnection,
-			double fairShare, double churnRate) {
+			double fairShare, double churnRate, double entityCount) {
 		return new YearlyHouseHoldsConnectedPercent(timeToConnection,
-				fairShare, churnRate);
+				fairShare, churnRate, entityCount);
 	}
 
 	@Override

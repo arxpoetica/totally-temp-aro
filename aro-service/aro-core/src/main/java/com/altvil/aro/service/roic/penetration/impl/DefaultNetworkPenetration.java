@@ -15,14 +15,13 @@ public class DefaultNetworkPenetration implements NetworkPenetration {
 		this.endPenetration = endPenetration;
 		this.rate = rate;
 	}
+	
 
 	@Override
-	public NetworkPenetration negate(NetworkPenetration other) {
+	public NetworkPenetration modifyRate(double rate) {
 		return new DefaultNetworkPenetration(startPenetration, endPenetration,
-				other.getRate() * -1);
+				rate);
 	}
-	
-	
 
 	@Override
 	public NetworkPenetration zeroFairShare() {
