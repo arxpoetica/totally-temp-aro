@@ -1,5 +1,7 @@
 package com.altvil.aro.service.graph.segment.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.graph.segment.AroRoadLocation;
 import com.vividsolutions.jts.geom.Point;
 
@@ -17,6 +19,10 @@ public class RoadLocationImpl implements AroRoadLocation {
 		this.distanceOffset = distanceOffset;
 		this.intersectPoint = intersectPoint;
 		this.distance = distance;
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("locationPoint", String.valueOf(locationPoint.getY()) + " " + locationPoint.getX()).toString();
 	}
 
 	@Override

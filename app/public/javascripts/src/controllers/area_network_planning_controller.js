@@ -4,7 +4,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   // Controller instance variables
   $scope.map_tools = map_tools
 
-  $scope.allStatus = ['geographies', 'cover', 'budget', 'progress']
+  $scope.allStatus = ['optimization', 'geographies', 'cover', 'progress']
   $scope.wizardStatus = $scope.allStatus[0]
   $scope.advancedSettings = false
   $scope.selectedGeographies = []
@@ -14,6 +14,23 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.coverBusinesses = true
   $scope.coverTowers = true
 
+  $scope.optimizationType = 'capex'
+  $scope.irrThreshold = 100
+  $scope.budget = 10000000
+
+  var budgetInput = $('#area_network_planning_controller input[name=budget]')
+  budgetInput.val($scope.budget.toLocaleString())
+
+  const parseBudget = () => +budgetInput.val().match(/\d+/g).join('') || 0
+
+  budgetInput.on('focus', () => {
+    budgetInput.val(String(parseBudget()))
+  })
+
+  budgetInput.on('blur', () => {
+    budgetInput.val(parseBudget().toLocaleString())
+  })
+
   var selectionLayer
   function initSelectionLayer () {
     selectionLayer && selectionLayer.setMap(null)
@@ -21,7 +38,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     selectionLayer.setStyle({
       fillColor: 'green'
     })
-    selectionLayer.setMap(map)
+    selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
   }
 
   $(document).ready(() => {
@@ -31,6 +48,23 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $rootScope.$on('plan_selected', (e, plan) => {
     initSelectionLayer()
     $scope.selectedGeographies = []
+  })
+
+  $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    $scope.selectedGeographies = plan.metadata.selectedRegions
+    $scope.selectedGeographies.forEach((geography) => {
+      geography.features = selectionLayer.addGeoJson({
+        type: 'Feature',
+        geometry: geography.geog,
+        properties: {
+          id: geography.id
+        }
+      })
+    })
+  })
+
+  $rootScope.$on('map_tool_changed_visibility', () => {
+    selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
   })
 
   $scope.forward = () => {
@@ -89,9 +123,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (feature.getGeometry().getType() === 'MultiPolygon') {
       feature.toGeoJson((obj) => {
         selectGeography({
-          id: layer.type + ':' + feature.getProperty('id'),
+          id: feature.getProperty('id'),
           name: name,
-          geog: obj.geometry
+          geog: obj.geometry,
+          type: layer.type
         })
         $scope.$apply()
       })
@@ -99,14 +134,16 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   })
 
   function selectGeography (geography) {
-    if ($scope.selectedGeographies.find((geog) => geog.id === geography.id)) return
+    geography.id = String(geography.id)
+    if ($scope.selectedGeographies.find((geog) => geog.id === geography.id && geog.type === geography.type)) return
     $scope.selectedGeographies.push(geography)
 
     geography.features = selectionLayer.addGeoJson({
       type: 'Feature',
       geometry: geography.geog,
       properties: {
-        id: geography.id
+        id: geography.id,
+        type: geography.type
       }
     })
   }
@@ -142,10 +179,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   search.on('change', () => {
     var value = search.select2('val')
     var boundary = $scope.searchResults.find((boundary) => boundary.id === value)
+    var n = boundary.id.indexOf(':')
+    var type = boundary.id.substring(0, n)
+    var id = boundary.id.substring(n + 1)
+
     selectGeography({
-      id: boundary.id,
+      id: id,
       name: boundary.text,
-      geog: boundary.geog
+      geog: boundary.geog,
+      type: type
     })
     search.select2('val', '')
     $scope.$apply()
@@ -163,7 +205,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if ($scope.coverTowers) locationTypes.push('towers')
     var changes = {
       locationTypes: locationTypes,
-      geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id }))
+      geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id, type: i.type })),
+      algorithm: $scope.optimizationType,
+      budget: parseBudget()
     }
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'

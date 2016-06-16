@@ -592,12 +592,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					networkData, ctx, optimizationPlanConfiguration::generatingNodeConstraint, optimizationPlanConfiguration);
 
 			Collection<OptimizedNetwork> optimizedPlans = planner.getOptimizedPlans();
-
-			List<OptimizedNetwork> plans = optimizedPlans.stream()
-					.filter(optimizationPlanConfiguration::satisfiesGlobalConstraint).collect(Collectors.toList());
-
-			Collections.reverse(plans);
-			Optional<OptimizedNetwork> model = plans.stream().findFirst();
+			
+			Optional<OptimizedNetwork> model = optimizationPlanConfiguration.selectOptimization(optimizedPlans);
 
 			if (model.isPresent()) {
 				WirecenterNetworkPlan plan = conversionService.convert(optimizationPlanConfiguration.getPlanId(),

@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.AroEntityVisitor;
 import com.altvil.aro.service.entity.AssignedEntityDemand;
@@ -180,7 +182,11 @@ public class EntityFactory {
 		public int getSplitterCount() {
 			return splitterCount;
 		}
-
+		
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this).appendSuper(super.toString()).append("splitterCount", splitterCount).toString();
+		}
 	}
 
 	public static class JunctionImpl extends AbstractEntity implements
@@ -353,7 +359,13 @@ public class EntityFactory {
 			visitor.visit(this);
 
 		}
-
+		
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this).appendSuper(super.toString())
+					.append("dropCable", dropCable).append("dropLengthInMeters", dropLengthInMeters)
+					.append("assignedEntityDemand", assignedEntityDemand).toString();
+		}
 	}
 
 	private static class BulkFiberTerminalImpl extends AbstractEntity implements
@@ -395,7 +407,12 @@ public class EntityFactory {
 		public double getTotalFiberDemand() {
 			return assignedEntityDemand.getLocationDemand().getDemand();
 		}
-
+		
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this).appendSuper(super.toString())
+					.append("assignedEntityDemand", assignedEntityDemand).toString();
+		}
 	}
 
 	public static class LocationEntityImpl extends AbstractEntity implements
@@ -427,8 +444,11 @@ public class EntityFactory {
 		public LocationDemand getLocationDemand() {
 			return coverageAggregateStatistic;
 		}
+		
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this).appendSuper(super.toString())
+					.append("coverageAggregateStatistic", coverageAggregateStatistic).toString();
+		}
 	}
-
-	
-
 }

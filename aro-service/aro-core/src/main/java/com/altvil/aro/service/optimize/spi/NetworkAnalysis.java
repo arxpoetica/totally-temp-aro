@@ -11,11 +11,6 @@ import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 
 public interface NetworkAnalysis {
-
-	public double getNpv();
-
-	public double getIrr();
-
 	public NetworkModelBuilder getNetworkModelBuilder() ;
 	
 	public Optional<CompositeNetworkModel> createNetworkModel() ;

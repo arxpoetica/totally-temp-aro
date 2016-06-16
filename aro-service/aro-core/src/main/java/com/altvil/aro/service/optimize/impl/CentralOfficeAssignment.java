@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimize.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
@@ -41,6 +43,7 @@ public class CentralOfficeAssignment extends AbstractEquipmentAssignment {
 		return true;
 	}
 
-	
-
+	public String toString() {
+		return new ToStringBuilder(this).append("equipment", equipment).toString();
+	}
 }

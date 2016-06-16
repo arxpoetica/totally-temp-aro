@@ -14,6 +14,8 @@ import com.altvil.aro.service.optimize.model.FiberConsumer;
 import com.altvil.aro.service.optimize.model.FiberProducer;
 import com.altvil.aro.service.optimize.spi.PricingContext;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class DefaultFiberAssignment implements FiberAssignment {
 
 	private Collection<AroEdge<GeoSegment>> edges;
@@ -60,4 +62,7 @@ public class DefaultFiberAssignment implements FiberAssignment {
 		return fiberType;
 	}
 
+	public String toString() {
+		return new ToStringBuilder(this).append("fiberLengthMeters", fiberLengthMeters).append("fiberType", fiberType)/*.append("edges", edges)*/.toString();
+	}
 }

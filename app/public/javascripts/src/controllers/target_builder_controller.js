@@ -14,6 +14,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.npvType = 'targeted'
   $scope.user_id = user_id
   $scope.plan = null
+
   const planChanged = (e, plan) => {
     $scope.plan = plan
     checkBudget()

@@ -3,6 +3,7 @@ package com.altvil.aro.service.planning.optimization.strategies;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -121,7 +122,11 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 	}
 
 	@Override
-	public boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork) {
-		return true;
+	public Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans) {
+		if (optimizedPlans.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(optimizedPlans.iterator().next());
 	}
 }

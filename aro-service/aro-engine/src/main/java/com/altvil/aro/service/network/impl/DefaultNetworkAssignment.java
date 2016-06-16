@@ -1,5 +1,7 @@
 package com.altvil.aro.service.network.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadLocation;
@@ -30,4 +32,7 @@ public class DefaultNetworkAssignment implements NetworkAssignment {
 		return domain.getRoadSegmentId() ;
 	}
 	
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}	
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -381,18 +382,6 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		@Override
-		public double getNpv() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public double getIrr() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
 		public void addToAnalysis(GeneratingNode node) {
 			treeMap.put(node.getScore(), node);
 		}
@@ -493,8 +482,10 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		public SplitterNodeAssignment createSplitterNodeAssignment() {
 			 return new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode()) ;
 		}
-
-
+		
+		public String toString() {
+			return new ToStringBuilder(this).append("rootNode", rootNode).toString();
+		}
 	}
 
 }

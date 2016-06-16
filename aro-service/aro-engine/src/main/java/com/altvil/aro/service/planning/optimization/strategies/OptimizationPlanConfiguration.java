@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -29,7 +30,6 @@ public abstract class OptimizationPlanConfiguration
 	private static final long	   serialVersionUID	= 1L;
 	private NetworkData			   networkData;
 	private final OptimizationPlan optimizationPlan;
-	private OptimizationType	   optimizationType;
 	private long				   planId;
 
 	public OptimizationPlanConfiguration(OptimizationPlan optimizationPlan) {
@@ -56,6 +56,11 @@ public abstract class OptimizationPlanConfiguration
 		}
 	}
 
+	/**
+	 * A constraint, or filter, that is applied to exclude all generating nodes that do not satisfy it.
+	 * @param generatingNode
+	 * @return true when the generating node passes the constraint.
+	 */
 	public boolean generatingNodeConstraint(GeneratingNode generatingNode) {
 		return true;
 	}
@@ -64,16 +69,12 @@ public abstract class OptimizationPlanConfiguration
 		return (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
 	}
 
-	public FiberNetworkConstraints getFiberNetworkConstraints() {
-		return optimizationPlan.getFiberNetworkConstraints();
-	}
-
 	public NetworkData getNetworkData() {
 		return networkData;
 	}
 
 	public OptimizationType getOptimizationType() {
-		return optimizationType;
+		return optimizationPlan.getOptimizationType();
 	}
 
 	public long getPlanId() {
@@ -121,11 +122,14 @@ public abstract class OptimizationPlanConfiguration
 		return true;
 	}
 
-	public abstract boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork);
-
+	/**
+	 * The score provides an assessment by which generating nodes may be sorted from least (lowest) to most (highest) desirability.
+	 */
 	public abstract double score(GeneratingNode node);
 
 	public void setNetworkData(NetworkData networkData) {
 		this.networkData = networkData;
 	}
+
+	public abstract Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans);
 }

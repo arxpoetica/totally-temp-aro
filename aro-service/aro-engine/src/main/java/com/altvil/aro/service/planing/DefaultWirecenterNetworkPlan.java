@@ -1,6 +1,7 @@
 package com.altvil.aro.service.planing;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import com.altvil.aro.model.FiberRoute;
@@ -26,7 +27,7 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 		this.networkNodes = networkNodes;
 		this.fiberRoutes = fiberRoutes;
 		this.locationDemand = locationDemand ;
-		this.fiberLengthMap = fiberLengthMap ;
+		this.fiberLengthMap = fiberLengthMap == null ? Collections.emptyMap() : fiberLengthMap ;
 	}
 	
 	@Override

@@ -3,6 +3,7 @@ package com.altvil.aro.service.planning.optimization.strategies;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -58,7 +59,7 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 			GeoSegment value = e.getValue();
 			
 			if (value == null) {
-				return null;
+				return Collections.emptySet();
 			}
 			
 			Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
@@ -110,15 +111,19 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 	}
 
 	@Override
-	public boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork) {
-		double ratio = optimizedNetwork.getAnalysisNode().getFiberCoverage()
-				.getDemand()
-				/ totalDemand;
+	public Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans) {
+		for(OptimizedNetwork optimizedPlan : optimizedPlans) {
+			final double demand = optimizedPlan.getAnalysisNode().getFiberCoverage()
+					.getDemand();
+			double ratio = demand / totalDemand;
 
-		System.out.println(ratio);
-
-		boolean predicate = !optimizedNetwork.isEmpty()
-				&& (ratio >= getCoverage());
-		return predicate;
+			boolean predicate = ratio >= getCoverage();
+			
+			if (predicate) {
+				return Optional.of(optimizedPlan);
+			}
+		}
+		
+		return Optional.empty();
 	}
 }

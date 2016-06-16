@@ -150,6 +150,15 @@ module.exports = class NetworkPlan {
           })
       })
       .then(() => {
+        return database.query(`
+          SELECT
+            region_id AS id, region_name AS name, region_type AS type, ST_AsGeoJSON(geom)::json AS geog
+          FROM client.selected_regions WHERE plan_id = $1
+        `, [plan_id])
+      })
+      .then((selectedRegions) => {
+        output.metadata.selectedRegions = selectedRegions
+
         var params = [plan_id]
         return database.query(`
           SELECT nnt.id, COUNT(*) AS count

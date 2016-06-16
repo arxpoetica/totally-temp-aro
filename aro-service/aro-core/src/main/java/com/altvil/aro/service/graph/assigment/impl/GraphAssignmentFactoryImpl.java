@@ -1,5 +1,7 @@
 package com.altvil.aro.service.graph.assigment.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
@@ -44,6 +46,10 @@ public class GraphAssignmentFactoryImpl implements GraphAssignmentFactory {
 			return aroEntity;
 		}
 
+		public String toString() {
+			return new ToStringBuilder(this).append("aroEntity", aroEntity).toString();
+
+	}
 	}
 
 	private static class GraphEdgeAssignmentImpl extends AbstractGraphAssigment
@@ -73,6 +79,10 @@ public class GraphAssignmentFactoryImpl implements GraphAssignmentFactory {
 		@Override
 		public Point getPoint() {
 			return pinnedLocation.getIntersectionPoint();
+		}
+
+		public String toString() {
+			return new ToStringBuilder(this).append("pinnedLocation", pinnedLocation).appendSuper(super.toString()).toString();
 		}
 
 	}

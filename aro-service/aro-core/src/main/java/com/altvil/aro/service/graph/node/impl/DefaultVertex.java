@@ -2,6 +2,8 @@ package com.altvil.aro.service.graph.node.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.vividsolutions.jts.geom.Point;
 
@@ -13,7 +15,6 @@ public class DefaultVertex implements GraphNode {
 	private long id;
 
 	protected DefaultVertex(long id, Point point) {
-		super();
 		this.id = id;
 		this.point = point;
 	}
@@ -26,11 +27,6 @@ public class DefaultVertex implements GraphNode {
 	@Override
 	public Point getPoint() {
 		return point;
-	}
-
-	@Override
-	public String toString() {
-		return "Vertex(" + id + ")";
 	}
 
 	@Override
@@ -48,6 +44,10 @@ public class DefaultVertex implements GraphNode {
 	@Override
 	public long getId() {
 		return id;
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("id", id).append("point", point == null ? null : String.valueOf(point.getY()) + " " + point.getX()).toString();
 	}
 
 }

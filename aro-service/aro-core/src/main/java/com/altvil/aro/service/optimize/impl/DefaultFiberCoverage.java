@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.demand.impl.DefaultDemandStatistic;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.AssignedEntityDemand;
@@ -125,6 +127,9 @@ public class DefaultFiberCoverage implements DemandCoverage {
 							* ratio);
 		}
 
+		public String toString() {
+			return new ToStringBuilder(this).append("rawCoverate", rawCoverage).append("demand", demand).append("revenue", revenue).toString();
+		}
 	}
 
 	public static class Accumulator {
@@ -172,7 +177,14 @@ public class DefaultFiberCoverage implements DemandCoverage {
 					demands.get(LocationEntityType.CellTower)),
 					locationEntities);
 		}
+		
+		public String toString() {
+			return new ToStringBuilder(this).append("demands", demands).toString();
+		}
 
 	}
 
+	public String toString() {
+		return new ToStringBuilder(this).append("coverage", coverage).toString();
+	}
 }
