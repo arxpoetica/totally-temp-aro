@@ -14,9 +14,18 @@ exports.configure = (api, middleware) => {
     }
     console.log('req', req)
     return request(req).then((result) => {
+      var res = result[0]
+      if (res.statusCode !== 200) {
+        console.log('aro-service returned', res.statusCode)
+        return def
+      }
       var body = result[1]
-      console.log('body', body)
+      console.log('aro-service returned', body)
       return body
+    })
+    .catch((err) => {
+      console.log(err)
+      return def
     })
   }
 
