@@ -118,7 +118,7 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 		// TODO Move to Strategy
 		if (networkType == NetworkType.Fiber) {
 			roicAssembler.add(AnalysisCode.new_connections, analysisService
-					.createYearlyConnectedHouseHolds(15, inputs.getPenetration().getEndPenetration(), inputs.getChurnRate())) ;
+					.createYearlyConnectedHouseHolds(15, inputs.getPenetration().getEndPenetration(), inputs.getChurnRate(), inputs.getEntityCount())) ;
 
 			roicAssembler.add(AnalysisCode.new_connections_count,
 					analysisService.createMultiplyOp(AnalysisCode.houseHolds,

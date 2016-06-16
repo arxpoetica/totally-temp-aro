@@ -40,11 +40,13 @@ public interface AnalysisService {
 	
 	StreamFunction createSubscribersCount(CurveIdentifier penetrationId, double subscriberCount);
 
+	
 	StreamFunction createMonthlyConnectedHouseHolds(double r, double hhGrowth,
 			double churnRate, double churnDecrease);
 	
+	//( (time to full connection) - (time t) ) * (fair share) * (1 + churn) * (starting HHs) / 75
 	StreamFunction createYearlyConnectedHouseHolds(int timeToConnection,
-			double fairShare, double churnRate);
+			double fairShare, double churnRate, double houseHolds );
 	
 	StreamFunction createRevenue(CurveIdentifier hhId, CurveIdentifier penetrationId,
 			CurveIdentifier arpuIdentifier) ;
