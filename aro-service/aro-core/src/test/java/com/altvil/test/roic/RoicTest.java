@@ -39,7 +39,7 @@ public class RoicTest {
 	@Test
 	public void testRoic() {
 
-		AnalysisPeriod ap = new AnalysisPeriod(2016, 20);
+		AnalysisPeriod ap = new AnalysisPeriod(2016, 15);
 
 		RoicModel model = analysisService.createRoicModelBuilder()
 				.setAnalysisPeriod(ap).addRoicInputs(createRoicInputs())
@@ -55,6 +55,7 @@ public class RoicTest {
 		Map<String, AnalysisRow> map = new HashMap<>();
 		dump("", map, model);
 
+		//dump("", model) ;
 		dump(map);
 
 	}
@@ -71,16 +72,15 @@ public class RoicTest {
 	private void dump(String name, AnalysisRow row) {
 		System.out.print(name);
 		
-//		for (int i = 0; i < row.getSize(); i++) {
-//			System.out.print(",");
-//			System.out.print(row.getValue(i));
-//		}
+		for (int i = 0; i < row.getSize(); i++) {
+			System.out.print(",");
+			System.out.print(row.getValue(i));
+		}
 
 		System.out.println();
 
 	}
 
-	/*
 	private void dump(String path, CurveRegistry cr) {
 		for (CurveIdentifier id : cr.getCurveIdentifiers()) {
 			System.out.println(path + id.toString());
@@ -88,8 +88,9 @@ public class RoicTest {
 		for (CurveRegistry r : cr.getCurveRegestries()) {
 			dump(path + r.getNameSpace() + ".", r);
 		}
-	}*/
-
+	}
+	
+	
 	private void dump(String path, Map<String, AnalysisRow> map,
 			CurveRegistry cr) {
 		for (CurveIdentifier id : cr.getCurveIdentifiers()) {
@@ -116,7 +117,7 @@ public class RoicTest {
 				}
 			});
 
-			map.put(path + path + id.toString(), row);
+			map.put(path + id.toString(), row);
 		}
 		for (CurveRegistry r : cr.getCurveRegestries()) {
 			dump(path + r.getNameSpace() + ".", map, r);
