@@ -107,6 +107,11 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	
 	public double assign(PinnedAssignedEntityDemand li) {
 		
+		
+		if( this.getPinnedLocation() == null ) {
+			throw new RuntimeException("Undefined Pin") ;
+		}
+		
 		if( li.getDemand() == 0 ) {
 			throw new RuntimeException("Grrrr") ;
 		}

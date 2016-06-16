@@ -135,8 +135,10 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 	private List<LocationCluster> _reclusterConstrained() {
 
 		ClusterAssembler assembler = new ClusterAssembler();
-
-		getLocationAssignments().forEach(d -> {
+		
+		Collection<DefaultAssignedEntityDemand> assinged = getLocationAssignments() ;
+		
+		assinged.forEach(d -> {
 			assembler.assign(d);
 		});
 
@@ -166,7 +168,6 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			if (!currentCluster.isEmpty()) {
 				if (currentCluster.getPinnedLocation() == null) {
 					log.error("Failed to assign pin to Cluster");
-					log.error("Failed tp assign pin to Cluster") ;
 				} else {
 					clusters.add(currentCluster);
 					currentCluster = new FdtConstrainedAggregate(
@@ -231,10 +232,14 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 		public void assign(PinnedAssignedEntityDemand d) {
 
-			if (currentCluster.isFull()
-					|| !currentCluster.assignConstraint(d.getPinnedLocation())) {
+			if( currentCluster.isFull() ) {
 				flushCluster();
 			}
+			
+			if( !currentCluster.assignConstraint(d.getPinnedLocation())) {
+				flushCluster();
+			}
+			
 
 			if (d.getDemand() > currentCluster.getRemainingDemand()) {
 				Collection<PinnedAssignedEntityDemand> demands = split(
