@@ -35,6 +35,8 @@ public class StreamRevenue implements StreamFunction {
 	@Override
 	public double calc(CalcContext ctx) {
 		ResultStream rs = ctx.getResultStream();
+		
+		
 		return houseHoldAccessor.getValue(rs)
 				* penetrationAccessor.getValue(rs) * arpuAccessor.getValue(rs);
 	}

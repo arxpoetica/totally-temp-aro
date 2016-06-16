@@ -39,8 +39,8 @@ public class ComponentInput {
 			return this;
 		}
 
-		public Builder setOpexPercent(double churnRateDecrease) {
-			input.churnRateDecrease = churnRateDecrease;
+		public Builder setOpexPercent(double opexPercent) {
+			input.opexPercent = opexPercent;
 			return this;
 		}
 

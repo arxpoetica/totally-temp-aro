@@ -1,5 +1,9 @@
 package com.altvil.test.roic;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +12,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.postgresql.util.StreamWrapper;
 
 import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisCode;
@@ -24,6 +29,7 @@ import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
 import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
+import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
 
@@ -41,17 +47,83 @@ public class RoicTest {
 
 		AnalysisPeriod ap = new AnalysisPeriod(2016, 15);
 
+		RoicInputs copperInputs = RoicInputs.updateInputs(createCopper(), 200, 0);
+		RoicInputs fiberInputs = RoicInputs.updateInputs(createFiber(), 120, 0);
+
 		RoicModel model = analysisService.createRoicModelBuilder()
-				.setAnalysisPeriod(ap).addRoicInputs(createRoicInputs())
-				.addRoicInputs(createRoicInputs())
+				.setAnalysisPeriod(ap).addRoicInputs(copperInputs)
+				.addRoicInputs(fiberInputs)
 				.addRoicInputs(createCopperRoicInputs()).build();
 
-		RoicNetworkModel networkModel = model
-				.getRoicNetworkModel(NetworkAnalysisType.planned);
+		
+		Writer w = new StringWriter() ;
+		PrintWriter pw = new PrintWriter(w, true) ;
+		pw.flush(); 
+		write(model, pw) ;
+		System.out.println(w.toString()) ;
+		
+	}
 
+	public void write(RoicModel model, PrintWriter ps) {
+		List<String> curves = new ArrayList<>(model.getCurvePaths());
+		Collections.sort(curves);
 		
+		for(String c : curves) {
+			write(ps, c, model.getAnalysisRow(c)) ;
+		}
+
+	}
+	
+	private void write(PrintWriter ps, String c, AnalysisRow r) {
+		ps.print(c);
 		
+		for(int i = 0 ; i<r.getSize() ; i++) {
+			ps.print(",");
+			ps.print(r.getValue(i));
+		}
 		
+		ps.println();
+	}
+
+	private RoicInputs createCopper() {
+
+		RoicInputs ri = new RoicInputs();
+		ri.setFixedCost(0);
+		ri.setType(NetworkAnalysisType.copper);
+
+		ComponentInput ci = ComponentInput
+				.build()
+				.setComponentType(ComponentType.household)
+				.setArpu(487.26)
+				.setNetworkPenetration(
+						new DefaultNetworkPenetration(0.3, 0.15,
+								-0.2062994740159)).setChurnRate(0.28)
+				.setChurnRateDecrease(0.027).setEntityGrowth(0.01)
+				.setOpexPercent(0.4).setMaintenanceExpenses(0.0423).assemble();
+
+		ri.setComponentInputs(Collections.singleton(ci));
+		return ri;
+	}
+
+	private RoicInputs createFiber() {
+
+		RoicInputs ri = new RoicInputs();
+		ri.setFixedCost(0);
+		ri.setType(NetworkAnalysisType.fiber);
+
+		ComponentInput ci = ComponentInput
+				.build()
+				.setComponentType(ComponentType.household)
+				.setArpu(1898.7264)
+				.setNetworkPenetration(
+						new DefaultNetworkPenetration(0.0, 0.5, -.25))
+				.setEntityGrowth(0.01).setChurnRateDecrease(20.56)
+				.setOpexPercent(0.5).setMaintenanceExpenses(0.0423)
+				.setEntityGrowth(0.01).setConnectionCost(204.0).assemble();
+
+		ri.setComponentInputs(Collections.singleton(ci));
+		return ri;
+
 	}
 
 	private void dump(Map<String, AnalysisRow> map) {
@@ -65,7 +137,7 @@ public class RoicTest {
 
 	private void dump(String name, AnalysisRow row) {
 		System.out.print(name);
-		
+
 		for (int i = 0; i < row.getSize(); i++) {
 			System.out.print(",");
 			System.out.print(row.getValue(i));
@@ -81,40 +153,6 @@ public class RoicTest {
 		}
 		for (CurveRegistry r : cr.getCurveRegestries()) {
 			dump(path + r.getNameSpace() + ".", r);
-		}
-	}
-	
-	
-	private void dump(String path, Map<String, AnalysisRow> map,
-			CurveRegistry cr) {
-		for (CurveIdentifier id : cr.getCurveIdentifiers()) {
-
-			AnalysisRow row = cr.getAnalysisRow(new CurvePath() {
-				@Override
-				public String nextElement() {
-					return id.toString() ;
-				}
-
-				@Override
-				public CurveIdentifier nextCurveIdentifier() {
-					return id;
-				}
-
-				@Override
-				public boolean isLastElement() {
-					return true;
-				}
-
-				@Override
-				public boolean isEmpty() {
-					return false;
-				}
-			});
-
-			map.put(path + id.toString(), row);
-		}
-		for (CurveRegistry r : cr.getCurveRegestries()) {
-			dump(path + r.getNameSpace() + ".", map, r);
 		}
 	}
 

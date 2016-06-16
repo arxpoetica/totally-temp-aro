@@ -79,6 +79,8 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	private void assignOutputs() {
 		roicAssembler.addOutput(AnalysisCode.penetration)
 				.addOutput(AnalysisCode.revenue)
+				.addOutput(AnalysisCode.houseHolds)
+				.addOutput(AnalysisCode.arpu)
 				.addOutput(AnalysisCode.premises_passed)
 				.addOutput(AnalysisCode.subscribers_count)
 				.addOutput(AnalysisCode.subscribers_penetration)
