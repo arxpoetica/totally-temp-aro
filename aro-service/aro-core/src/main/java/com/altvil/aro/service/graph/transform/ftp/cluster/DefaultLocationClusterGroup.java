@@ -16,6 +16,7 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.transform.ftp.EdgeList;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 
 public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
@@ -264,6 +265,10 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 			} else {
 
+				//Temp Fix For Alberto
+				if( currentCluster.getPinnedLocation() == null ) {
+					currentCluster.assignConstraint(d.getPinnedLocation()) ;
+				}
 				currentCluster.assign(d);
 			}
 
