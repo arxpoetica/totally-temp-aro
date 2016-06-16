@@ -30,7 +30,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function refresh () {
     $scope.financialData = {}
-    refreshCurrentTab()
+    if ($scope.plan && $scope.plan.metadata) {
+      refreshCurrentTab()
+    }
   }
 
   $rootScope.$on('route_planning_changed', () => {
@@ -94,6 +96,11 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+  })
+
+  $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    $scope.plan = plan
+    refresh()
   })
 
   $rootScope.$on('route_planning_changed', (e) => {
