@@ -50,6 +50,14 @@ public class OptimizationPlanConfigurationMaxIrr extends OptimizationPlanConfigu
 		this.years = fiberPlan.getYears();
 	}
 	
+	public double getBudget() {
+		return budget;
+	}
+
+	public int getYears() {
+		return years;
+	}
+
 	public boolean isFilteringRoadLocationDemandsBySelection() {
 		return false;
 	}
@@ -133,7 +141,7 @@ public class OptimizationPlanConfigurationMaxIrr extends OptimizationPlanConfigu
 		return maxIrrPlan == null ? Optional.empty() : Optional.of(maxIrrPlan);
 	}
 
-	private double calculateIrr(double capex, double annualRevenue) {
+	protected double calculateIrr(double capex, double annualRevenue) {
 		double rate1 = 0;			
 		double npv1 = npv(capex, annualRevenue, rate1);
 		double rate2 = 0.1;
