@@ -47,7 +47,7 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 	
 	
 	
-	@Query(value = "select totalCost from client.plan where id =:planId", nativeQuery=true)
+	@Query(value = "select total_cost from client.plan where id =:planId", nativeQuery=true)
 	public Double getTotalCost(@Param("planId") long planId) ;
 	
 	

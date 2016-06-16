@@ -10,11 +10,7 @@ public interface RoicService {
 	
 	//Total Count, HouseHold Count, Cost, ARPU
 	
-	
-	public RoicModel getMasterRoicModel(long planId) ;
-	
-	
-	public RoicModel getWirecenterRoicModel(long planId) ;
+	public RoicModel getRoicModel(long planId) ;
 	
 	public void invalidatePlan(long planId) ;
 	

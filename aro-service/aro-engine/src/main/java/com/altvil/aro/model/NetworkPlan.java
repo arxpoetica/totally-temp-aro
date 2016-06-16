@@ -17,7 +17,6 @@ import org.hibernate.annotations.DiscriminatorOptions;
 
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 
 @Entity
@@ -31,9 +30,12 @@ public class NetworkPlan extends ComparableModel {
 	private String name ;
 	private String areaName ;
 	private Point areaCentroid ;
-	private MultiPolygon areaBounds ;
+	//private Polygon areaBounds ;
 	private Date createAt;
 	private Date updateAt ;
+	
+	private Double totalCost ;
+	private Double totalCount ;
 	
 	@Transient
 	@Override
@@ -70,15 +72,15 @@ public class NetworkPlan extends ComparableModel {
 	}
 	
 	
-	@Column(name = "area_bounds")
-	@JsonDeserialize(using = GeometryJsonDeserializer.class)
-	public MultiPolygon getAreaBounds() {
-		return areaBounds;
-	}
-	
-	public void setAreaBounds(MultiPolygon areaBounds) {
-		this.areaBounds = areaBounds;
-	}
+//	@Column(name = "area_bounds")
+//	@JsonDeserialize(using = GeometryJsonDeserializer.class)
+//	public Polygon getAreaBounds() {
+//		return areaBounds;
+//	}
+//	
+//	public void setAreaBounds(Polygon areaBounds) {
+//		this.areaBounds = areaBounds;
+//	}
 	
 
 	@Column(name = "area_centroid")
@@ -106,6 +108,26 @@ public class NetworkPlan extends ComparableModel {
 	public void setUpdateAt(Date updateAt) {
 		this.updateAt = updateAt;
 	}
+
+	@Column(name = "total_cost")
+	public Double getTotalCost() {
+		return totalCost;
+	}
+
+	public void setTotalCost(Double totalCost) {
+		this.totalCost = totalCost;
+	}
+
+	@Column(name = "total_count")
+	public Double getTotalCount() {
+		return totalCount;
+	}
+	
+	public void setTotalCount(Double totalCount) {
+		this.totalCount = totalCount;
+	}
+	
+	
 	
 
 }

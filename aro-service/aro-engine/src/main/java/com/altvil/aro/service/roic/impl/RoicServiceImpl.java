@@ -6,16 +6,20 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.model.MasterPlan;
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.model.NetworkNodeType;
+import com.altvil.aro.model.NetworkPlan;
 import com.altvil.aro.model.WirecenterPlan;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
@@ -24,8 +28,8 @@ import com.altvil.aro.service.roic.RoicService;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
 import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
-import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
+import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
@@ -51,27 +55,36 @@ public class RoicServiceImpl implements RoicService {
 
 		cache = new SuperSimpleCache();
 	}
-	
-	
 
 	@Override
 	public void invalidatePlan(long planId) {
 		cache.invalidate(planId);
 	}
 
-
-
 	@Override
-	public RoicModel getMasterRoicModel(long planId) {
-		List<WirecenterPlan> childPlans = planRepostory.queryChildPlans(planId);
-		if (childPlans.size() > 0) {
-			return getWirecenterRoicModel(childPlans.get(0).getId());
+	public RoicModel getRoicModel(long planId) {
+
+		NetworkPlan plan = planRepostory.findOne(planId);
+		if (plan instanceof MasterPlan) {
+			List<WirecenterPlan> childPlans = planRepostory
+					.queryChildPlans(planId);
+			if (childPlans.size() > 0) {
+
+				Optional<WirecenterPlan> wp = childPlans.stream()
+						.filter(p -> p.getTotalCost() != null).findFirst();
+				if (wp.isPresent()) {
+					return getWirecenterRoicModel(wp.get().getId());
+				}
+
+			}
+			return null;
 		}
-		return null;
+
+		return getWirecenterRoicModel(planId);
+
 	}
 
-	@Override
-	public RoicModel getWirecenterRoicModel(long planId) {
+	private RoicModel getWirecenterRoicModel(long planId) {
 
 		RoicModel model = cache.get(planId);
 		if (model == null) {
@@ -88,9 +101,10 @@ public class RoicServiceImpl implements RoicService {
 		result.setFixedCost(cost);
 		result.setType(inputs.getType());
 
-		result.getComponentInputs().stream().map(ci -> {
-			return ci.clone().setEntityCount(totalDemand).assemble();
-		});
+		result.setComponentInputs(inputs.getComponentInputs().stream()
+				.map(ci -> {
+					return ci.clone().setEntityCount(totalDemand).assemble();
+				}).collect(Collectors.toList()));
 
 		return result;
 
@@ -100,11 +114,11 @@ public class RoicServiceImpl implements RoicService {
 		RoicInputs copperInputs = updateInputs(map.get(NetworkType.Copper),
 				getTotalDemand(planId), 0);
 
-		RoicInputs fiberInputs = updateInputs(map.get(NetworkType.Copper),
+		RoicInputs fiberInputs = updateInputs(map.get(NetworkType.Fiber),
 				getLocationDemand(planId), getCapex(planId));
 
 		return analysisService.createRoicModelBuilder()
-				.setAnalysisPeriod(new AnalysisPeriod(2016, 14))
+				.setAnalysisPeriod(new AnalysisPeriod(2016, 15))
 				.addRoicInputs(copperInputs).addRoicInputs(fiberInputs).build();
 
 	}
@@ -112,7 +126,7 @@ public class RoicServiceImpl implements RoicService {
 	private double getLocationDemand(long planId) {
 
 		NetworkNode node = networkNodeRepository.findEquipment(
-				NetworkNodeType.central_office.ordinal(), planId).get(0);
+				NetworkNodeType.central_office.getId(), planId).get(0);
 
 		return node.getHouseHoldCount();
 	}
@@ -122,7 +136,7 @@ public class RoicServiceImpl implements RoicService {
 	}
 
 	private double getCapex(long planId) {
-		return networkNodeRepository.getTotalCost(planId) ;
+		return networkNodeRepository.getTotalCost(planId);
 	}
 
 	@PostConstruct
@@ -143,10 +157,8 @@ public class RoicServiceImpl implements RoicService {
 				.setArpu(487.26)
 				.setNetworkPenetration(
 						new DefaultNetworkPenetration(0.3, 0.15,
-								-0.2062994740159))
-								.setChurnRate(0.28)
-								.setChurnRateDecrease(0.027)
-								.setEntityGrowth(0.01)
+								-0.2062994740159)).setChurnRate(0.28)
+				.setChurnRateDecrease(0.027).setEntityGrowth(0.01)
 				.setOpexPercent(0.4).setMaintenanceExpenses(0.0423).assemble();
 
 		ri.setComponentInputs(Collections.singleton(ci));
@@ -165,11 +177,9 @@ public class RoicServiceImpl implements RoicService {
 				.setArpu(1898.7264)
 				.setNetworkPenetration(
 						new DefaultNetworkPenetration(0.0, 0.5, -.25))
-				.setEntityGrowth(0.01)
-				.setChurnRateDecrease(20.56).setOpexPercent(0.5)
-				.setMaintenanceExpenses(0.0423)
-				.setEntityGrowth(0.01)
-				.setConnectionCost(204.0).assemble();
+				.setEntityGrowth(0.01).setChurnRateDecrease(20.56)
+				.setOpexPercent(0.5).setMaintenanceExpenses(0.0423)
+				.setEntityGrowth(0.01).setConnectionCost(204.0).assemble();
 
 		ri.setComponentInputs(Collections.singleton(ci));
 		return ri;

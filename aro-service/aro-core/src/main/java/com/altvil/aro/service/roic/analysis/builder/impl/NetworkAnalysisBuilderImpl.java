@@ -149,6 +149,9 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 			assembler.addOutput(AnalysisCode.opex_expenses);
 			assembler.addOutput(AnalysisCode.new_connections_cost);
 			assembler.addOutput(AnalysisCode.chashflow);
+			assembler.addOutput(AnalysisCode.premises_passed);
+			assembler.addOutput(AnalysisCode.subscribers_count);
+			assembler.addOutput(AnalysisCode.subscribers_penetration);
 		}
 
 		private void assignCurves() {
@@ -156,7 +159,10 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 			sumCurves(AnalysisCode.revenue,
 					AnalysisCode.new_connections_cost,
 					AnalysisCode.opex_expenses,
-					AnalysisCode.maintenance_expenses);
+					AnalysisCode.maintenance_expenses,
+					AnalysisCode.premises_passed,
+					AnalysisCode.subscribers_count,
+					AnalysisCode.subscribers_penetration);
 
 			assembler.add(AnalysisCode.cost,
 					analysisService.createCost(fixedCost));

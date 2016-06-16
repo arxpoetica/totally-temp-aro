@@ -112,6 +112,9 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.copper),
 				NetworkAnalysisType.copper);
 
+		modelBuilder.alias(NetworkAnalysisType.bau, modelBuilder.get(NetworkAnalysisType.copper));
+		
+		
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.fiber),
 				NetworkAnalysisType.fiber);
 
@@ -157,13 +160,18 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 		}
 
 		public RoicModel build() {
-			return new RoicModelImpl(result);
+			return new RoicModelImpl(analysisPeriod, result);
 		}
 
 		public void addModel(RoicNetworkModel model) {
 			result.put(model.getNetworkAnalysisType(), model);
 		}
-
+		
+		public void alias(NetworkAnalysisType type, RoicNetworkModel model) {
+			result.put(type, model);
+		}
+		
+		
 		public RoicNetworkModel addNetwork(RoicInputs inputs,
 				NetworkAnalysisType type) {
 
