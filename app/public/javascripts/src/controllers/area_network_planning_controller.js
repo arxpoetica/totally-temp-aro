@@ -14,7 +14,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.coverBusinesses = true
   $scope.coverTowers = true
 
-  $scope.optimizationType = 'capex'
+  $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = 100
   $scope.budget = 10000000
 
