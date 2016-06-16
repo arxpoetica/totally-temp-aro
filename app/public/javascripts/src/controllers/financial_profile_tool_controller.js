@@ -106,7 +106,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       .success((response) => {
         $scope.financialData[key] = response
         console.log('Requested', key)
-        console.table(response)
+        console.table && console.table(response)
         callback(response)
       })
   }
