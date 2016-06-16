@@ -49,6 +49,9 @@ public interface RoicNetworkModel extends CurveRegistry {
 		RoicNetworkModel apply();
 	}
 
+	
+	Collection<RoicComponent> getRoicComponents() ;
+	
 	Collection<RoicNetworkModel> getBaseModels();
 
 	NetworkAnalysisType getNetworkAnalysisType();

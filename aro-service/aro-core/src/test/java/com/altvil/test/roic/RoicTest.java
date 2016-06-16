@@ -6,7 +6,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,18 +14,9 @@ import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.RoicConstants;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
-import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
 import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
 import com.altvil.aro.service.roic.analysis.impl.AnalysisServiceImpl;
-import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.model.RoicComponent;
-import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
-import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
-import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
-import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
-import com.altvil.aro.service.roic.penetration.NetworkPenetration;
-import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
 
 public class RoicTest {
 
@@ -43,7 +33,7 @@ public class RoicTest {
 		AnalysisPeriod ap = new AnalysisPeriod(2016, 15);
 
 		RoicInputs copperInputs = RoicInputs.updateInputs(RoicConstants.CopperInputs, 200, 0);
-		RoicInputs fiberInputs = RoicInputs.updateInputs(RoicConstants.FiberConstants, 120, 0);
+		RoicInputs fiberInputs = RoicInputs.updateInputs(RoicConstants.FiberConstants, 120, 100000);
 
 		RoicModel model = analysisService.createRoicModelBuilder()
 				.setAnalysisPeriod(ap).addRoicInputs(copperInputs)

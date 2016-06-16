@@ -12,8 +12,6 @@ import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.spi.ResolveContext;
 import com.vividsolutions.jts.util.Assert;
 
-import static org.junit.Assert.*;
-
 public class EngineTest {
 	
 	

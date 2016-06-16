@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.enumerations.OptimizationType;
 

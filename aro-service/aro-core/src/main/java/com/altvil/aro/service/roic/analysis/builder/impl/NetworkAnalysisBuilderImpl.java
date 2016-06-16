@@ -2,18 +2,15 @@ package com.altvil.aro.service.roic.analysis.builder.impl;
 
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.altvil.aro.service.roic.AnalysisPeriod;
-import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisCode;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
 import com.altvil.aro.service.roic.analysis.impl.DefaultAnalyisRow;
 import com.altvil.aro.service.roic.analysis.impl.StreamAssemblerImpl;
-import com.altvil.aro.service.roic.analysis.impl.StreamModelImpl;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
@@ -132,7 +129,7 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 			Collection<AnalysisRow> rows = StreamUtil.map(
 					roicComponents.values(), c -> c.getAnalysisRow(id));
 
-			return DefaultAnalyisRow.sum(analysisPeriod.getPeriods(), rows);
+			return DefaultAnalyisRow.sum(rows);
 		}
 
 		public RoicComponent buildAndRun() {
@@ -148,7 +145,7 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 			assembler.addOutput(AnalysisCode.maintenance_expenses);
 			assembler.addOutput(AnalysisCode.opex_expenses);
 			assembler.addOutput(AnalysisCode.new_connections_cost);
-			assembler.addOutput(AnalysisCode.chashflow);
+			assembler.addOutput(AnalysisCode.cashflow);
 			assembler.addOutput(AnalysisCode.premises_passed);
 			assembler.addOutput(AnalysisCode.subscribers_count);
 			assembler.addOutput(AnalysisCode.subscribers_penetration);
@@ -167,7 +164,7 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 			assembler.add(AnalysisCode.cost,
 					analysisService.createCost(fixedCost));
 
-			assembler.add(AnalysisCode.chashflow, analysisService
+			assembler.add(AnalysisCode.cashflow, analysisService
 					.createCashFlow(AnalysisCode.revenue,
 							AnalysisCode.maintenance_expenses,
 							AnalysisCode.opex_expenses,

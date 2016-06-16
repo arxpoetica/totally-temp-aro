@@ -269,9 +269,9 @@ public class NetworkServiceImpl implements NetworkService {
 
 	}
 
-	private Long getWirecenterIdByPlanId(long planId) {
-		return planRepository.queryWirecenterIdForPlanId(planId);
-	}
+//	private Long getWirecenterIdByPlanId(long planId) {
+//		return planRepository.queryWirecenterIdForPlanId(planId);
+//	}
 
 	private Map<Long, RoadLocation> queryRoadLocations(long planId) {
 		Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();

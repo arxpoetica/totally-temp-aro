@@ -1,7 +1,6 @@
 package com.altvil.aro.service.planning.optimization.impl;
 
 import com.altvil.aro.service.planning.MaxIrrOptimizationPlan;
-import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.enumerations.OptimizationType;
 
 public class MaxIrrOptimizationPlanImpl extends AbstractOptimizationPlan implements MaxIrrOptimizationPlan {

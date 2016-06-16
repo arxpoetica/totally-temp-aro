@@ -1,7 +1,5 @@
 package com.altvil.test.roic;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,7 +8,6 @@ import com.altvil.aro.service.roic.analysis.AnalysisCode;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
-import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
 import com.altvil.aro.service.roic.analysis.impl.AnalysisServiceImpl;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
@@ -55,10 +52,6 @@ public class RoicNetworkModelTest {
 		System.out.println(toInfo(model.getAnalysisRow(id), id));
 	}
 
-	private void dump(RoicComponent component, CurveIdentifier id) {
-		System.out.println(toInfo(component.getAnalysisRow(id), id));
-	}
-
 	private String toInfo(AnalysisRow row, CurveIdentifier id) {
 
 		StringBuffer sb = new StringBuffer();
@@ -76,13 +69,6 @@ public class RoicNetworkModelTest {
 
 	}
 
-	private RoicInputs createRoicInputs() {
-		RoicInputs ri = new RoicInputs();
-		ri.setComponentInputs(Collections.singleton(createComponentInput()));
-		ri.setFixedCost(10000);
-		ri.setType(NetworkAnalysisType.fiber);
-		return ri;
-	}
 
 	private ComponentInput createComponentInput() {
 

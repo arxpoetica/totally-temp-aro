@@ -1,6 +1,5 @@
 package com.altvil.aro.service.entity;
 
-import javax.print.attribute.standard.Finishings;
 
 public class SimpleNetworkFinancials {
 

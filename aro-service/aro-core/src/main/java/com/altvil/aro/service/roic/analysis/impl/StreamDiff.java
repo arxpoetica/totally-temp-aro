@@ -1,7 +1,5 @@
 package com.altvil.aro.service.roic.analysis.impl;
 
-import org.apache.poi.ss.usermodel.charts.ValueAxis;
-
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.StreamAccessor;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;

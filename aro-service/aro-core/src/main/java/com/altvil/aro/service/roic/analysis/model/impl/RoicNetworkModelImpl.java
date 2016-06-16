@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
@@ -14,8 +15,10 @@ import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
 import com.altvil.aro.service.roic.analysis.registry.DefaultContainerRegistry;
+import com.altvil.utils.StreamUtil;
 
-public class RoicNetworkModelImpl extends DefaultContainerRegistry implements RoicNetworkModel {
+public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
+		RoicNetworkModel {
 
 	private NetworkAnalysisType type;
 	private Map<ComponentType, RoicComponent> map;
@@ -31,16 +34,23 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements Ro
 		this.map = map;
 		this.networkCurves = networkCurves;
 		this.baseModels = baseModels;
-		
-		add(map.values()) ;
-		add(networkCurves) ;
-		//add(baseModels);
-		
+
+		add(map.values());
+		add(networkCurves);
+		// add(baseModels);
+
 	}
 
 	public RoicNetworkModelImpl(NetworkAnalysisType type,
 			Map<ComponentType, RoicComponent> map, RoicComponent networkCurves) {
 		this(type, map, networkCurves, new ArrayList<>());
+	}
+	
+	
+
+	@Override
+	public Collection<RoicComponent> getRoicComponents() {
+		return map.values() ;
 	}
 
 	@Override
@@ -77,35 +87,38 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements Ro
 	public Transformer add() {
 		return new AbstractTransformerImpl() {
 
-			//TODO simplify And speed up
 			private Map<ComponentType, RoicComponent> sumComponents(
 					Collection<RoicNetworkModel> models) {
+
+				List<RoicNetworkModel> allComponents = new ArrayList<>(models);
+				allComponents.add(RoicNetworkModelImpl.this);
+
+				Map<ComponentType, List<RoicComponent>> arrayMap = allComponents
+						.stream()
+						.flatMap(c -> c.getRoicComponents().stream())
+						.collect(
+								Collectors.groupingBy(c -> c.getComponentType()));
 
 				Map<ComponentType, RoicComponent> result = new EnumMap<>(
 						ComponentType.class);
 
-				result.putAll(map);
-
-				for (RoicNetworkModel m : models) {
-					for (ComponentType ct : result.keySet()) {
-						RoicComponent component = result.get(ct);
-						result.put(ct, component.add(m.getEntityAnalysis(ct)));
-					}
-				}
+				arrayMap.entrySet().forEach(
+						e -> {
+							List<RoicComponent> list = e.getValue();
+							result.put(
+									e.getKey(),
+									list.get(0).add(
+											list.subList(1, list.size())));
+						});
 
 				return result;
 			}
 
-			// TODO Simplify and speed up
 			private RoicComponent sumNetworkCurves(
 					Collection<RoicNetworkModel> models) {
-				RoicComponent c = networkCurves;
 
-				for (RoicNetworkModel m : models) {
-					c = c.add(m.getNetworkCurves());
-				}
-
-				return c;
+				return networkCurves.add(StreamUtil.map(models,
+						RoicNetworkModel::getNetworkCurves));
 
 			}
 
@@ -171,7 +184,5 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements Ro
 		}
 
 	}
-	
-	
 
 }

@@ -1,7 +1,5 @@
 package com.altvil.test.roic;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,13 +8,10 @@ import com.altvil.aro.service.roic.analysis.AnalysisCode;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
-import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
 import com.altvil.aro.service.roic.analysis.impl.AnalysisServiceImpl;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
-import com.altvil.aro.service.roic.analysis.model.RoicModel;
-import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;

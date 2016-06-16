@@ -97,15 +97,15 @@ public class RoicEndPoint {
 
 		streamRows.put(NetworkAnalysisType.bau,
 				model.getRoicNetworkModel(NetworkAnalysisType.bau)
-						.getAnalysisRow(AnalysisCode.chashflow));
+						.getAnalysisRow(AnalysisCode.cashflow));
 
 		streamRows.put(NetworkAnalysisType.planned,
 				model.getRoicNetworkModel(NetworkAnalysisType.planned)
-						.getAnalysisRow(AnalysisCode.chashflow));
+						.getAnalysisRow(AnalysisCode.cashflow));
 
 		streamRows.put(NetworkAnalysisType.incremental, model
 				.getRoicNetworkModel(NetworkAnalysisType.incremental)
-				.getAnalysisRow(AnalysisCode.chashflow));
+				.getAnalysisRow(AnalysisCode.cashflow));
 
 		AnalysisPeriod p = model.getAnalysisPeriod();
 

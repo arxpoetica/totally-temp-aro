@@ -20,7 +20,6 @@ import com.altvil.aro.service.optimize.NetworkConstraint;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
-import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.planning.NetworkConfiguration;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.enumerations.OptimizationType;

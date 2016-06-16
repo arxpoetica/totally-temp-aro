@@ -70,6 +70,7 @@ public class NetworkServiceTest {
 	}
 	
 	
+	@SuppressWarnings("serial")
 	private FiberPlanConfiguration mockFiberPlanStrategy(final long planId, final FiberPlanAlgorithm algorithm, final int year, final boolean filteringRoadLocationsBySelection) {
 		return new FiberPlanConfiguration(mockFiberPlan(algorithm, year)) {
 

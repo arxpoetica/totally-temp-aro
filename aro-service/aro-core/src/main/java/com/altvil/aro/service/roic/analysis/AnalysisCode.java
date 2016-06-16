@@ -4,7 +4,7 @@ import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 
 public enum AnalysisCode implements CurveIdentifier {
 	
-	chashflow,
+	cashflow,
 	penetration,
 	arpu,
 	houseHolds,

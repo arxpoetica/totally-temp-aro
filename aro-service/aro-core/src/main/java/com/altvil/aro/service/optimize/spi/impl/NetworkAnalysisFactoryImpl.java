@@ -77,7 +77,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 	
 	
 	private GraphTransformerFactory graphTransformerFactory;
-	private PlanService planService;
+	//private PlanService planService;
 
 	@Autowired
 	@Inject
@@ -86,7 +86,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			PlanService planService) {
 		super();
 		this.graphTransformerFactory = graphTransformerFactory;
-		this.planService = planService;
+		//this.planService = planService;
 	}
 
 	@Override

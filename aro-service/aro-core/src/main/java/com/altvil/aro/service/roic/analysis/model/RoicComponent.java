@@ -1,6 +1,7 @@
 package com.altvil.aro.service.roic.analysis.model;
 
 import java.util.Collection;
+import java.util.Set;
 
 import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.StreamModel;
@@ -27,8 +28,10 @@ public interface RoicComponent extends CurveRegistry {
 	StreamModel getStreamModel() ;
 	
 	
+	RoicComponent and(Set<CurveIdentifier> ids) ;
 	RoicComponent add(RoicComponent other) ;
 	RoicComponent add(Collection<RoicComponent> other) ;
+	
 	RoicComponent minus(RoicComponent other) ;
 	
 }
