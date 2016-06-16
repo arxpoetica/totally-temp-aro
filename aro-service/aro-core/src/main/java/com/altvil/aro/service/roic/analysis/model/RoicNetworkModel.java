@@ -5,9 +5,10 @@ import java.util.Collection;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
+import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
 import com.altvil.aro.service.roic.model.NetworkType;
 
-public interface RoicNetworkModel {
+public interface RoicNetworkModel extends CurveRegistry {
 
 	public enum NetworkAnalysisType {
 		undefined(NetworkType.Undefined), bau(NetworkType.Copper), planned(

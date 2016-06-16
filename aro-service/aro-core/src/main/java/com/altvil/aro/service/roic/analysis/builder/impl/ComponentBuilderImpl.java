@@ -22,6 +22,7 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	private ComponentInput inputs;
 	private AnalysisPeriod analysisPeriod;
 	private NetworkType networkType;
+	
 
 	public ComponentBuilderImpl(AnalysisService analysisService,
 			NetworkType networkType) {

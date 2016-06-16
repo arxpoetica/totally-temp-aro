@@ -6,8 +6,9 @@ import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
+import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
 
-public interface RoicComponent {
+public interface RoicComponent extends CurveRegistry {
 	
 	public enum ComponentType {
 		undefined,

@@ -2,20 +2,24 @@ package com.altvil.aro.service.roic.analysis.model.impl;
 
 import java.util.Collection;
 
+import org.apache.commons.math3.distribution.AbstractRealDistribution;
+
 import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.StreamModel;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
+import com.altvil.aro.service.roic.analysis.registry.AbstractCurveRegistry;
+import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 
-public class ComponentModelImpl implements RoicComponent {
+public class ComponentModelImpl extends AbstractCurveRegistry implements RoicComponent {
 
 	private AnalysisPeriod analysisPeriod ;
 	private ComponentType type;
 	private StreamModel streamModel;
 
 	public ComponentModelImpl(AnalysisPeriod analysisPeriod, ComponentType type, StreamModel streamModel) {
-		super();
+		super(type.name());
 		
 		if( type == null || analysisPeriod == null ) {
 			throw new NullPointerException() ;
@@ -25,6 +29,20 @@ public class ComponentModelImpl implements RoicComponent {
 		this.type = type;
 		this.streamModel = streamModel;
 	}
+	
+
+	@Override
+	public String getNameSpace() {
+		return super.getNameSpace();
+	}
+
+
+
+	@Override
+	public AnalysisRow getAnalysisRow(CurvePath path) {
+		return getAnalysisRow(path.nextCurveIdentifier()) ;
+	}
+
 
 	@Override
 	public StreamModel getStreamModel() {

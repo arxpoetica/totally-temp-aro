@@ -6,17 +6,21 @@ import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
+import com.altvil.aro.service.roic.analysis.registry.DefaultContainerRegistry;
 
-public class RoicModelImpl implements RoicModel {
+public class RoicModelImpl extends DefaultContainerRegistry implements
+		RoicModel {
 
 	private AnalysisPeriod analysisPeriod;
 	private Map<NetworkAnalysisType, RoicNetworkModel> map;
 
 	public RoicModelImpl(AnalysisPeriod analysisPeriod,
 			Map<NetworkAnalysisType, RoicNetworkModel> map) {
-		super();
+		super("roic");
 		this.analysisPeriod = analysisPeriod;
 		this.map = map;
+
+		add(map.values());
 	}
 
 	public AnalysisPeriod getAnalysisPeriod() {

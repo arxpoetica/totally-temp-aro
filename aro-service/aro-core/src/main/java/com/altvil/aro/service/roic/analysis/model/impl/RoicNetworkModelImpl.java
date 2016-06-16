@@ -13,9 +13,9 @@ import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
-import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.Transformer;
+import com.altvil.aro.service.roic.analysis.registry.DefaultContainerRegistry;
 
-public class RoicNetworkModelImpl implements RoicNetworkModel {
+public class RoicNetworkModelImpl extends DefaultContainerRegistry implements RoicNetworkModel {
 
 	private NetworkAnalysisType type;
 	private Map<ComponentType, RoicComponent> map;
@@ -26,11 +26,16 @@ public class RoicNetworkModelImpl implements RoicNetworkModel {
 	public RoicNetworkModelImpl(NetworkAnalysisType type,
 			Map<ComponentType, RoicComponent> map, RoicComponent networkCurves,
 			Collection<RoicNetworkModel> baseModels) {
-		super();
+		super(type.name());
 		this.type = type;
 		this.map = map;
 		this.networkCurves = networkCurves;
 		this.baseModels = baseModels;
+		
+		add(map.values()) ;
+		add(networkCurves) ;
+		//add(baseModels);
+		
 	}
 
 	public RoicNetworkModelImpl(NetworkAnalysisType type,
@@ -166,5 +171,7 @@ public class RoicNetworkModelImpl implements RoicNetworkModel {
 		}
 
 	}
+	
+	
 
 }
