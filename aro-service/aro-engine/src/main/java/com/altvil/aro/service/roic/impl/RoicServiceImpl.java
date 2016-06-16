@@ -1,16 +1,12 @@
 package com.altvil.aro.service.roic.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,13 +21,8 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.RoicService;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
-import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
 import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
-import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
-import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
-import com.altvil.aro.service.roic.model.NetworkType;
-import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
 
 @Service
 public class RoicServiceImpl implements RoicService {
@@ -40,7 +31,6 @@ public class RoicServiceImpl implements RoicService {
 	private NetworkPlanRepository planRepostory;
 	private NetworkNodeRepository networkNodeRepository;
 
-	private Map<NetworkType, RoicInputs> map = new EnumMap<>(NetworkType.class);
 	private SuperSimpleCache cache;
 
 	@Autowired
@@ -96,10 +86,10 @@ public class RoicServiceImpl implements RoicService {
 	
 
 	private RoicModel loadRoic(Long planId) {
-		RoicInputs copperInputs = RoicInputs.updateInputs(map.get(NetworkType.Copper),
+		RoicInputs copperInputs = RoicInputs.updateInputs(RoicConstants.CopperInputs,
 				getTotalDemand(planId), 0);
 
-		RoicInputs fiberInputs = RoicInputs.updateInputs(map.get(NetworkType.Fiber),
+		RoicInputs fiberInputs = RoicInputs.updateInputs(RoicConstants.FiberConstants,
 				getLocationDemand(planId), getCapex(planId));
 
 		return analysisService.createRoicModelBuilder()
@@ -124,53 +114,8 @@ public class RoicServiceImpl implements RoicService {
 		return networkNodeRepository.getTotalCost(planId);
 	}
 
-	@PostConstruct
-	public void postConstruct() {
-		map.put(NetworkType.Copper, initCopper());
-		map.put(NetworkType.Fiber, initFiber());
-	}
-
-	private RoicInputs initCopper() {
-
-		RoicInputs ri = new RoicInputs();
-		ri.setFixedCost(0);
-		ri.setType(NetworkAnalysisType.copper);
-
-		ComponentInput ci = ComponentInput
-				.build()
-				.setComponentType(ComponentType.household)
-				.setArpu(487.26)
-				.setNetworkPenetration(
-						new DefaultNetworkPenetration(0.3, 0.15,
-								-0.2062994740159)).setChurnRate(0.28)
-				.setChurnRateDecrease(0.027).setEntityGrowth(0.01)
-				.setOpexPercent(0.4).setMaintenanceExpenses(0.0423).assemble();
-
-		ri.setComponentInputs(Collections.singleton(ci));
-		return ri;
-	}
-
-	private RoicInputs initFiber() {
-
-		RoicInputs ri = new RoicInputs();
-		ri.setFixedCost(0);
-		ri.setType(NetworkAnalysisType.fiber);
-
-		ComponentInput ci = ComponentInput
-				.build()
-				.setComponentType(ComponentType.household)
-				.setArpu(1898.7264)
-				.setNetworkPenetration(
-						new DefaultNetworkPenetration(0.0, 0.5, -.25))
-				.setEntityGrowth(0.01).setChurnRateDecrease(20.56)
-				.setOpexPercent(0.5).setMaintenanceExpenses(0.0423)
-				.setEntityGrowth(0.01).setConnectionCost(204.0).assemble();
-
-		ri.setComponentInputs(Collections.singleton(ci));
-		return ri;
-
-	}
-
+	
+	
 	private static class ObjectHolder<T> {
 		private long lastTouched;
 		private T value;

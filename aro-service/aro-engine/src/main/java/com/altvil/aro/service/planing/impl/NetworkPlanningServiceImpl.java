@@ -512,7 +512,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				WirecenterNetworkPlan plan = conversionService.convert(fiberPlanStrategy.getPlanId(), model);
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
-				//updateFinancials(this.networkNodeRepository, plan.getPlanId(), plan) ;
+				updateFinancials(this.networkNodeRepository, plan.getPlanId(), plan) ;
 				costService.updateWireCenterCosts(plan.getPlanId());
 				return plan;
 			}
@@ -601,7 +601,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
-				//updateFinancials(this.networkNodeRepository, plan.getPlanId(), plan) ;
+				updateFinancials(this.networkNodeRepository, plan.getPlanId(), plan) ;
 				costService.updateWireCenterCosts(plan.getPlanId()) ;
 				return plan;
 			}
