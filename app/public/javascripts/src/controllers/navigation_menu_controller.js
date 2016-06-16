@@ -230,7 +230,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.new_plan = () => {
     $('#new-plan').modal('show')
-    initMap()
+    // initMap()
     tracker.track('Create New Analysis')
   }
 
