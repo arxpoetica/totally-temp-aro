@@ -24,14 +24,13 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.AnalysisNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
-import com.altvil.aro.service.planning.MaxIrrOptimizationPlan;
+import com.altvil.aro.service.planning.IrrOptimizationPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
 
-public class OptimizationPlanConfigurationMaxIrr extends OptimizationPlanConfiguration implements OptimizationPlan {
+public class OptimizationPlanConfigurationIrr extends OptimizationPlanConfiguration implements OptimizationPlan {
 	private static final long serialVersionUID = 1L;
-	private final double budget;
 	private final int years;
-	private final Logger log = LoggerFactory.getLogger(OptimizationPlanConfigurationMaxIrr.class);
+	private final Logger log = LoggerFactory.getLogger(OptimizationPlanConfigurationIrr.class);
 
 	@Override
 	public
@@ -44,16 +43,11 @@ public class OptimizationPlanConfigurationMaxIrr extends OptimizationPlanConfigu
 		return node.getCapex() / monthlyRevenueImpact; 
 	}
 
-	public OptimizationPlanConfigurationMaxIrr(MaxIrrOptimizationPlan fiberPlan) {
+	public OptimizationPlanConfigurationIrr(IrrOptimizationPlan fiberPlan) {
 		super(fiberPlan);
-		this.budget = fiberPlan.getBudget();
 		this.years = fiberPlan.getYears();
 	}
 	
-	public double getBudget() {
-		return budget;
-	}
-
 	public int getYears() {
 		return years;
 	}
@@ -119,26 +113,37 @@ public class OptimizationPlanConfigurationMaxIrr extends OptimizationPlanConfigu
 			AnalysisNode analysisNode = optimizedPlan.getAnalysisNode();
 			double capex = analysisNode.getCapex();
 			
-			if (capex > budget) {
-				log.debug("Capex ({}) > Budget ({})", capex, budget);
-				continue;
-			}
-			
 			double annualRevenue = 12 * analysisNode.getFiberCoverage().getMonthlyRevenueImpact();
 
 			double irr = calculateIrr(capex, annualRevenue);
+			
+			if (rejectPlan(capex, annualRevenue, irr)) {
+				continue;
+			}
 			
 			log.debug("Capex = {}, Annual Revenue = {}, IRR = {}", capex, annualRevenue, irr);
 
 			if (irr > maxIrr) {
 				maxIrr = irr;
 				maxIrrPlan = optimizedPlan;
+				
+				if (chooseIrr(irr)) {
+					break;
+				}
 			}
 		}
 		
 		log.debug("Selected plan w/IRR = {}", maxIrr);
 
 		return maxIrrPlan == null ? Optional.empty() : Optional.of(maxIrrPlan);
+	}
+	
+	protected boolean chooseIrr(double irr) {
+		return false;
+	}
+
+	protected boolean rejectPlan(double capex, double annualRevenue, double irr) {
+		return false;
 	}
 
 	protected double calculateIrr(double capex, double annualRevenue) {

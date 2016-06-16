@@ -89,21 +89,7 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 	}
 	
 
-	private double totalDemand;
 
-	@Override
-	public void setNetworkData(NetworkData networkData) {
-		super.setNetworkData(networkData);
-		
-		 totalDemand = networkData
-				.getRoadLocations()
-				.stream()
-				.mapToDouble(
-						a -> ((LocationEntity) a.getSource())
-								.getLocationDemand().getDemand()).sum();
-	}
-
-	
 	@Override
 	public boolean isConstraintMet(NetworkAnalysis analysis) {
 		// TODO Auto-generated method stub
@@ -112,6 +98,8 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 
 	@Override
 	public Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans) {
+		// KJG Deliberately broken until we show a need to fix.
+		double totalDemand = Double.NaN;
 		for(OptimizedNetwork optimizedPlan : optimizedPlans) {
 			final double demand = optimizedPlan.getAnalysisNode().getFiberCoverage()
 					.getDemand();

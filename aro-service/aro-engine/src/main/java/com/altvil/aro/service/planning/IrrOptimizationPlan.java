@@ -1,6 +1,6 @@
 package com.altvil.aro.service.planning;
 
-public interface MaxIrrOptimizationPlan extends OptimizationPlan {
+public interface IrrOptimizationPlan extends OptimizationPlan {
 	/**
 	 * The minimum acceptable IRR when selecting optimization plans.
 	 */

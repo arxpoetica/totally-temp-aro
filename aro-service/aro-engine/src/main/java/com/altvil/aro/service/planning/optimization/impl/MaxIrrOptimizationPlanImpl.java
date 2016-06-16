@@ -1,10 +1,10 @@
 package com.altvil.aro.service.planning.optimization.impl;
 
-import com.altvil.aro.service.planning.MaxIrrOptimizationPlan;
+import com.altvil.aro.service.planning.IrrOptimizationPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.enumerations.OptimizationType;
 
-public class MaxIrrOptimizationPlanImpl extends AbstractOptimizationPlan implements MaxIrrOptimizationPlan {
+public class MaxIrrOptimizationPlanImpl extends AbstractOptimizationPlan implements IrrOptimizationPlan {
 	private double budget = Double.POSITIVE_INFINITY;
 	private int	   years;
 	

@@ -1,5 +1,7 @@
 package com.altvil.aro.service.network.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.interfaces.RoadEdge;
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -52,5 +54,11 @@ public class RoadEdgeImpl implements RoadEdge {
 	}
 	
 	
-
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append("tlid", tlid)
+				.append("tnidt", tnidt)
+				.append("lengthMeters", lengthMeters)
+				.toString();
+	}
 }

@@ -4,13 +4,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.impl.AnalysisNodeImpl;
 import com.altvil.aro.service.optimize.impl.LazyOptimizedNetwork;
@@ -59,6 +62,7 @@ public class NetworkConstrainer {
 				}
 			}
 
+			Set<LocationEntity> rejectedLocations = Collections.emptySet();
 			boolean optimized = false;
 			while (!optimized) {
 				if (networkAnalysis.getAnalyisNode() == null) {
@@ -77,7 +81,12 @@ public class NetworkConstrainer {
 						}
 						optimized = true;
 					} else {
-						resultAssembler.add(optimizedNetwork);
+						// The optimizer is only able to persist network changes that result from a location being removed (rejected) from the plan.
+						// Filter out all other types of optimizations until the persistence layer can be changed
+						if (!rejectedLocations.equals(networkAnalysis.getRejectetedLocations())) {
+							resultAssembler.add(optimizedNetwork);
+							rejectedLocations = new HashSet<>(networkAnalysis.getRejectetedLocations());
+						}
 
 						if (log.isTraceEnabled()) {
 							log.trace("prune ..." + networkAnalysis.getAnalyisNode().getScore());
