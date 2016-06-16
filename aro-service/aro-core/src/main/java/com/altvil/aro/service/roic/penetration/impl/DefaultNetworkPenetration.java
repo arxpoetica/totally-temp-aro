@@ -21,6 +21,13 @@ public class DefaultNetworkPenetration implements NetworkPenetration {
 		return new DefaultNetworkPenetration(startPenetration, endPenetration,
 				other.getRate() * -1);
 	}
+	
+	
+
+	@Override
+	public NetworkPenetration zeroFairShare() {
+		return new DefaultNetworkPenetration(startPenetration, 0, rate) ;
+	}
 
 	@Override
 	public double getRate() {

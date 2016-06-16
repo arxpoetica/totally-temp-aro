@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.altvil.aro.model.EquipmentSummaryCost;
 import com.altvil.aro.model.FiberSummaryCost;
-import com.altvil.aro.model.ReportType;
 
 public interface CostService {
 	

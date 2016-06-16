@@ -10,6 +10,7 @@ public interface NetworkPenetration {
 	double getEndPenetration();
 	
 	
+	NetworkPenetration zeroFairShare() ;
 	NetworkPenetration negate(NetworkPenetration other) ;
 	
 

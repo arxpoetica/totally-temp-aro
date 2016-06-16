@@ -56,7 +56,7 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 		return copper
 				.clone()
 				.setNetworkPenetration(
-						copper.getPenetration().negate(fiber.getPenetration()))
+						copper.getPenetration().zeroFairShare())
 				.setEntityCount(fiber.getEntityCount()).assemble();
 	}
 
