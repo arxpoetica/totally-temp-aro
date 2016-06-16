@@ -100,7 +100,7 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 
 		roicAssembler.add(AnalysisCode.subscribers_count, analysisService
 				.createMultiplyOp(AnalysisCode.penetration,
-						inputs.getEntityCount()));
+						AnalysisCode.houseHolds));
 		
 
 		roicAssembler

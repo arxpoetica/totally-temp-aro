@@ -25,7 +25,7 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 			NetworkAnalysisType.class);
 
 	private AnalysisService analysisService;
-	
+
 	@Override
 	public RoicModelBuilder setAnalysisPeriod(AnalysisPeriod period) {
 		this.analysisPeriod = period;
@@ -53,7 +53,8 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 		return copper
 				.clone()
 				.setNetworkPenetration(
-						copper.getPenetration().zeroFairShare())
+						copper.getPenetration().zeroFairShare()
+								.modifyRate(fiber.getPenetration().getRate()))
 				.setEntityCount(fiber.getEntityCount()).assemble();
 	}
 
@@ -109,9 +110,9 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.copper),
 				NetworkAnalysisType.copper);
 
-		modelBuilder.alias(NetworkAnalysisType.bau, modelBuilder.get(NetworkAnalysisType.copper));
-		
-		
+		modelBuilder.alias(NetworkAnalysisType.bau,
+				modelBuilder.get(NetworkAnalysisType.copper));
+
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.fiber),
 				NetworkAnalysisType.fiber);
 
@@ -163,12 +164,11 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 		public void addModel(RoicNetworkModel model) {
 			result.put(model.getNetworkAnalysisType(), model);
 		}
-		
+
 		public void alias(NetworkAnalysisType type, RoicNetworkModel model) {
 			result.put(type, model);
 		}
-		
-		
+
 		public RoicNetworkModel addNetwork(RoicInputs inputs,
 				NetworkAnalysisType type) {
 
