@@ -12,6 +12,12 @@ public class DefaultFairShareModel implements FairShareModel {
 	private ModelType modelType;
 	private final NetworkTypeShare networkTypeShare;
 	private final CalcRow<NetworkType, Double> fairShareRow;
+	
+	//TODO Fix init 
+	public DefaultFairShareModel() {
+		networkTypeShare = null ;
+		fairShareRow = null ;
+	}
 
 	public DefaultFairShareModel(ModelType modelType,
 			NetworkTypeShare networkTypeShare,

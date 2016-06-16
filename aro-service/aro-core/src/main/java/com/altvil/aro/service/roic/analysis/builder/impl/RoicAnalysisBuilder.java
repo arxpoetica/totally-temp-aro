@@ -5,12 +5,15 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.junit.Before;
+
 import com.altvil.aro.service.roic.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
 import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
 import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
 import com.altvil.aro.service.roic.analysis.builder.RoicModelBuilder;
+import com.altvil.aro.service.roic.analysis.impl.AnalysisServiceImpl;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
@@ -25,11 +28,16 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 			NetworkAnalysisType.class);
 
 	private AnalysisService analysisService;
-
+	
 	@Override
 	public RoicModelBuilder setAnalysisPeriod(AnalysisPeriod period) {
 		this.analysisPeriod = period;
 		return this;
+	}
+
+	public RoicAnalysisBuilder(AnalysisService analysisService) {
+		super();
+		this.analysisService = analysisService;
 	}
 
 	@Override

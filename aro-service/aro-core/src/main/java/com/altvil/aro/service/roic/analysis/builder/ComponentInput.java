@@ -59,7 +59,15 @@ public class ComponentInput {
 			return this;
 		}
 		
+		public Builder setComponentType(ComponentType ct) {
+			input.componentType = ct ;
+			return this ;
+		}
+		
 		public ComponentInput assemble() {
+			if( input.componentType == null ) {
+				throw new NullPointerException() ;
+			}
 			return input ;
 		}
 

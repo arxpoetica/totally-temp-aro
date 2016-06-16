@@ -10,7 +10,6 @@ public class RoicInputs {
 	private Collection<ComponentInput> componentInputs ;
 	private double fixedCost ;
 	
-	
 	public NetworkAnalysisType getType() {
 		return type;
 	}

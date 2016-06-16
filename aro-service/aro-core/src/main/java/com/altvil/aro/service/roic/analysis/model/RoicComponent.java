@@ -14,8 +14,11 @@ public interface RoicComponent {
 		household,
 		business,
 		cellTower,
+		network,
 		
 	}
+	
+	Collection<CurveIdentifier> getCurveIdentifiers() ;
 
 	AnalysisPeriod getAnalysisPeriod() ;
 	ComponentType getComponentType() ;

@@ -16,4 +16,6 @@ public interface RoicService {
 	
 	public RoicModel getWirecenterRoicModel(long planId) ;
 	
+	public void invalidatePlan(long planId) ;
+	
 }

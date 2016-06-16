@@ -65,7 +65,9 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 			this.analysisPeriod = component.getAnalysisPeriod();
 		}
 
-		roicComponents.put(component.getComponentType(), component);
+		System.out.println(component.getComponentType()) ;
+		ComponentType ct  = component.getComponentType() ;
+		roicComponents.put(ct, component);
 		return this;
 	}
 
@@ -83,30 +85,90 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 
 	private RoicComponent createNetworkComponent() {
 
-		Map<CurveIdentifier, AnalysisRow> result = new HashMap<>();
-		result.put(AnalysisCode.cost, createCostRow());
-		result.put(AnalysisCode.revenue, sumCurves(AnalysisCode.revenue));
+		return new NetworkComponentBuilder().buildAndRun();
 
-		return new ComponentModelImpl(analysisPeriod, ComponentType.undefined,
-				new StreamModelImpl(analysisPeriod, result));
+		// Map<CurveIdentifier, AnalysisRow> result = new HashMap<>();
+		// result.put(AnalysisCode.cost, createCostRow());
+		// result.put(AnalysisCode.revenue, sumCurves(AnalysisCode.revenue));
+		//
+		// return new ComponentModelImpl(analysisPeriod,
+		// ComponentType.undefined,
+		// new StreamModelImpl(analysisPeriod, result));
 
 	}
 
-	private AnalysisRow createCostRow() {
-		StreamAssembler assembler = new StreamAssemblerImpl();
-		StreamModel sm = assembler.setAnalysisPeriod(analysisPeriod)
-				.add(AnalysisCode.cost, analysisService.createCost(fixedCost))
-				.addOutput(AnalysisCode.cost).resolveAndBuild();
-		return sm.getAnalysisRow(AnalysisCode.cost);
-	}
+	// private AnalysisRow createCostRow() {
+	// StreamAssembler assembler = new StreamAssemblerImpl();
+	// StreamModel sm = assembler.setAnalysisPeriod(analysisPeriod)
+	// .add(AnalysisCode.cost, analysisService.createCost(fixedCost))
+	// .addOutput(AnalysisCode.cost).resolveAndBuild();
+	// return sm.getAnalysisRow(AnalysisCode.cost);
+	// }
+	//
+	// private AnalysisRow sumCurves(CurveIdentifier id) {
+	//
+	// Collection<AnalysisRow> rows = StreamUtil.map(roicComponents.values(),
+	// c -> c.getAnalysisRow(id));
+	// return DefaultAnalyisRow.sum(analysisPeriod.getPeriods(), rows);
+	//
+	// }
 
-	private AnalysisRow sumCurves(CurveIdentifier id) {
+	private class NetworkComponentBuilder {
+		private StreamAssembler assembler;
 
-		Collection<AnalysisRow> rows = StreamUtil.map(roicComponents.values(),
-				c -> c.getAnalysisRow(id));
+		public NetworkComponentBuilder() {
+			assembler = new StreamAssemblerImpl()
+					.setAnalysisPeriod(analysisPeriod);
+		}
 
-		return DefaultAnalyisRow.sum(analysisPeriod.getPeriods(), rows);
+		public void sumCurves(CurveIdentifier... ids) {
+			for (CurveIdentifier id : ids) {
+				assembler.add(id, analysisService.createCurve(_sumCurves(id)));
+			}
+		}
 
+		private AnalysisRow _sumCurves(CurveIdentifier id) {
+
+			Collection<AnalysisRow> rows = StreamUtil.map(
+					roicComponents.values(), c -> c.getAnalysisRow(id));
+
+			return DefaultAnalyisRow.sum(analysisPeriod.getPeriods(), rows);
+		}
+
+		public RoicComponent buildAndRun() {
+			assignCurves();
+			assignOutputs();
+			return new ComponentModelImpl(analysisPeriod,
+					ComponentType.network, assembler.resolveAndBuild());
+		}
+
+		private void assignOutputs() {
+			assembler.addOutput(AnalysisCode.cost);
+			assembler.addOutput(AnalysisCode.revenue);
+			assembler.addOutput(AnalysisCode.maintenance_expenses);
+			assembler.addOutput(AnalysisCode.opex_expenses);
+			assembler.addOutput(AnalysisCode.new_connections_cost);
+			assembler.addOutput(AnalysisCode.chashflow);
+		}
+
+		private void assignCurves() {
+
+			sumCurves(AnalysisCode.revenue,
+					AnalysisCode.new_connections_cost,
+					AnalysisCode.opex_expenses,
+					AnalysisCode.maintenance_expenses);
+
+			assembler.add(AnalysisCode.cost,
+					analysisService.createCost(fixedCost));
+
+			assembler.add(AnalysisCode.chashflow, analysisService
+					.createCashFlow(AnalysisCode.revenue,
+							AnalysisCode.maintenance_expenses,
+							AnalysisCode.opex_expenses,
+							AnalysisCode.new_connections_cost));
+
+			assembler.addOutput(AnalysisCode.cost);
+		}
 	}
 
 }

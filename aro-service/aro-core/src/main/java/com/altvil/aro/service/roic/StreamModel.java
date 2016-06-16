@@ -7,6 +7,8 @@ import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 
 public interface StreamModel {
 	
+	Collection<CurveIdentifier>  getCurveIdentifiers() ;
+	
 	AnalysisPeriod getAnalysisPeriod() ;
 	
 	AnalysisRow getAnalysisRow(CurveIdentifier id) ;

@@ -1,5 +1,8 @@
 package com.altvil.aro.service.roic.analysis.impl;
 
+import org.springframework.stereotype.Service;
+
+import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentBuilder;
 import com.altvil.aro.service.roic.analysis.builder.NetworkAnalysisBuilder;
@@ -14,11 +17,36 @@ import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 
+@Service
 public class AnalysisServiceImpl implements AnalysisService {
 
 	@Override
 	public StreamFunction createCurve(NetworkPenetration networkPenetration) {
 		return new AnalysisCurve(networkPenetration);
+	}
+
+	@Override
+	public StreamFunction createCashFlow(CurveIdentifier revenueId,
+			CurveIdentifier capexId, CurveIdentifier connectCapexId,
+			CurveIdentifier networkCapexId) {
+		return new CashFlow(revenueId, capexId, connectCapexId, networkCapexId);
+	}
+	
+	
+	@Override
+	public StreamFunction createCurve(AnalysisRow row) {
+		return new AbstractStreamFunction() {
+			@Override
+			public double calc(CalcContext ctx) {
+				return row.getValue(ctx.getPeriod()) ;
+			}
+		};
+	}
+
+	@Override
+	public StreamFunction createTruncatedConstantStream(double constValue,
+			int endPeriod) {
+		return new TruncatedConstantStream(constValue, endPeriod) ;
 	}
 
 	@Override
@@ -30,7 +58,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 	public NetworkAnalysisBuilder createNetworkAnalysisBuilder() {
 		return new NetworkAnalysisBuilderImpl(this);
 	}
-	
+
 	@Override
 	public StreamFunction createConstant(double constValue) {
 		return new AbstractStreamFunction() {
@@ -43,18 +71,18 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	@Override
 	public RoicModelBuilder createRoicModelBuilder() {
-		return new RoicAnalysisBuilder() ;
+		return new RoicAnalysisBuilder(this);
 	}
 
 	@Override
 	public StreamFunction createMultiplyOp(CurveIdentifier id,
 			CurveIdentifier id2) {
-		return new TimesStreamFunction(id, id2) ;
+		return new TimesStreamFunction(id, id2);
 	}
 
 	@Override
 	public StreamFunction createStreamDiff(CurveIdentifier id) {
-		return new StreamDiff(id) ;
+		return new StreamDiff(id);
 	}
 
 	@Override

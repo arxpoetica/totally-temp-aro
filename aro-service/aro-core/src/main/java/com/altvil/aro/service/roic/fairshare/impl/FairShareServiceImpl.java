@@ -26,7 +26,7 @@ public class FairShareServiceImpl implements FairShareService {
 	private Map<String, ModelType> modelTypeMap = new HashMap<>();
 	
 	private String[] factories = new String[]{
-			"com.altvil.aro.service.roic.fairshare.impl.DefaultFairShareModel",
+			"com.altvil.aro.service.roic.fairshare.impl.StandardFairShareModelFactory",
 			"com.altvil.aro.service.roic.fairshare.impl.SimpleFairShareModelFactory",
 			"com.altvil.aro.service.roic.fairshare.impl.StrangeFairShareModelFactory"} ;
 	

@@ -21,6 +21,12 @@ public class StreamModelImpl implements StreamModel {
 		this.analysisPeriod = analysisPeriod;
 		this.map = map;
 	}
+	
+
+	@Override
+	public Collection<CurveIdentifier> getCurveIdentifiers() {
+		return map.keySet() ;
+	}
 
 	@Override
 	public AnalysisPeriod getAnalysisPeriod() {

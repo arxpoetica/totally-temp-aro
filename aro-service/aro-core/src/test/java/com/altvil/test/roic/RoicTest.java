@@ -92,7 +92,9 @@ public class RoicTest {
 	
 	private ComponentInput createCopperComponentInput() {
 
-		return ComponentInput.build().setArpu(20).setChurnRate(0.01)
+		return ComponentInput.build()
+				.setComponentType(ComponentType.household)
+				.setArpu(20).setChurnRate(0.01)
 				.setChurnRateDecrease(0.00006).setEntityCount(500)
 				.setEntityGrowth(0.0000)
 				.setNetworkPenetration(new DefaultNetworkPenetration(0.8, 0.4, -.03))
@@ -102,7 +104,9 @@ public class RoicTest {
 
 	private ComponentInput createComponentInput() {
 
-		return ComponentInput.build().setArpu(100).setChurnRate(0.01)
+		return ComponentInput.build()
+				.setComponentType(ComponentType.household)
+				.setArpu(100).setChurnRate(0.01)
 				.setChurnRateDecrease(0.00006).setEntityCount(150)
 				.setEntityGrowth(0.0005)
 				.setNetworkPenetration(createPenetration())

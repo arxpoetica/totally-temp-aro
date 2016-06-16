@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.model.NetworkPlan;
+import com.altvil.aro.model.WirecenterPlan;
 
 @Repository("networkPlanRepository")
 public interface NetworkPlanRepository extends
@@ -21,6 +22,19 @@ public interface NetworkPlanRepository extends
 			"FROM client.plan r \n" +
 			"WHERE r.id = :planId", nativeQuery = true)
 	Long queryWirecenterIdForPlanId(@Param("planId") long planId);
+	
+	
+	@Query(value = "select p from WirecenterPlan p where p.masterPlan.id = :planId")
+	List<WirecenterPlan> queryChildPlans(@Param("planId") long planId);
+	
+	
+	@Query(value = "select count(*) \n" + 
+			"from client.plan p\n" + 
+			"join aro.wirecenters w on p.wirecenter_id = w.id \n" + 
+			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
+			"join aro.households h on h.location_id = l.id\n" + 
+			"where p.id = :planId", nativeQuery = true)
+	Integer queryTotalHouseholdLocations(@Param("planId") long planId);
 	
 	
 	@Query(value = "with linked_locations as (\n" + 

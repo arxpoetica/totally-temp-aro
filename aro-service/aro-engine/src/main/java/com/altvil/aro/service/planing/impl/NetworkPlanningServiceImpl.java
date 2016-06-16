@@ -31,10 +31,15 @@ import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.cost.CostService;
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.FinancialInputs;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.MaterialType;
+import com.altvil.aro.service.entity.SimpleNetworkFinancials;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
@@ -61,6 +66,7 @@ import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.utils.StreamUtil;
+import com.altvil.utils.func.Aggregator;
 
 
 @Service("networkPlanningService")
@@ -146,6 +152,52 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		
 		return val ;
 	}
+	
+
+	private void updateMasterPlanFinancials(long planId,Collection<WirecenterNetworkPlan> plans) {
+		
+		double fiberLength = 0 ; 
+		Aggregator<LocationDemand> aggregator = DefaultLocationDemand.demandAggregate() ;
+		for(WirecenterNetworkPlan p : plans) {
+			fiberLength += p.getFiberLengthInMeters(FiberType.FEEDER) ;
+			fiberLength += p.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
+			aggregator.add(p.getTotalDemand()) ;
+		}		
+		updateFinancials(networkNodeRepository, planId, new SimpleNetworkFinancials(aggregator.apply(), fiberLength, FinancialInputs.DEFAULT)) ;
+	}
+
+	
+	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, WirecenterNetworkPlan plan) {
+		
+		double fiberLength = 0 ;
+		fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER) ;
+		fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
+
+		SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength, FinancialInputs.DEFAULT) ;
+		updateFinancials(nr, planId, f) ;
+		
+		return f ;
+		
+	} 
+	
+	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, SimpleNetworkFinancials f) {
+		
+		nr.updateFinancials(planId, 
+		f.getLocationDemand().getDemand(), 
+		f.getTotalCost(),
+		f.getFiberCost(),
+		f.getEquipmentCost(), f.getCoCost(), f.getFdhCost(), f.getFdtCost(), 
+		f.getLocationDemand().getMonthlyRevenueImpact()*12, 
+		f.getLocationDemand().getLocationDemand(LocationEntityType.Household).getMonthlyRevenueImpact() *12,
+		f.getLocationDemand().getLocationDemand(LocationEntityType.CellTower).getMonthlyRevenueImpact() *12,
+		f.getLocationDemand().getLocationDemand(LocationEntityType.Business).getMonthlyRevenueImpact() *12, 
+		f.getNpv());
+		
+		return f ;
+
+	}
+
+
 	
 	public MasterPlanBuilder createMasterPlanBuilder(Principal creator,  IgniteCallable<MasterPlanUpdate> callable) {
 		if( useIgnite ) {
@@ -243,7 +295,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				}
 			}).filter(p -> p != null).collect(Collectors.toList()) ;
 		
-			//updateMasterPlanFinancials(fiberPlanConfiguration.getPlanId(), updates) ;
+			updateMasterPlanFinancials(fiberPlanConfiguration.getPlanId(), updates) ;
 			costService.updateMasterPlanCosts(fiberPlanConfiguration.getPlanId());
 			return new MasterPlanUpdate(updates);
 		});
@@ -389,7 +441,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
 				costService.updateWireCenterCosts(plan.getPlanId());
-				//updateFinancials(networkNodeRepository, plan.getPlanId(), plan);
+				updateFinancials(networkNodeRepository, plan.getPlanId(), plan);
 				return plan;
 			}
 

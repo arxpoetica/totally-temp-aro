@@ -15,8 +15,13 @@ public interface AnalysisService {
 	NetworkAnalysisBuilder createNetworkAnalysisBuilder() ;
 	RoicModelBuilder createRoicModelBuilder() ;
 	
+	StreamFunction createCurve(AnalysisRow row) ;
+
+	
 	StreamFunction createCurve(NetworkPenetration networkPenetration);
 
+	StreamFunction createTruncatedConstantStream(double constValue, int endPeriod) ;
+	
 	StreamFunction createARPU(double arpu);
 	
 	StreamFunction createConstant(double constValue) ;
@@ -44,5 +49,8 @@ public interface AnalysisService {
 	StreamFunction createDeploymentCost(double cost) ;
 	
 	StreamFunction createStreamDiff(CurveIdentifier id) ;
+	
+	StreamFunction createCashFlow(CurveIdentifier revenueId, CurveIdentifier capexId,
+			CurveIdentifier connectCapexId, CurveIdentifier networkCapexId) ;
  
 }

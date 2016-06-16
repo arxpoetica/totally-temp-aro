@@ -21,13 +21,14 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	private ComponentType componentType = ComponentType.undefined;
 	private ComponentInput inputs;
 	private AnalysisPeriod analysisPeriod;
-	private NetworkType networkType ;
+	private NetworkType networkType;
 
-	public ComponentBuilderImpl(AnalysisService analysisService, NetworkType networkType) {
+	public ComponentBuilderImpl(AnalysisService analysisService,
+			NetworkType networkType) {
 		super();
 		this.analysisService = analysisService;
 		roicAssembler = new StreamAssemblerImpl();
-		 this.networkType  = networkType ;
+		this.networkType = networkType;
 	}
 
 	@Override
@@ -44,6 +45,11 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 
 	@Override
 	public ComponentBuilder setComponentType(ComponentType type) {
+		
+		if( type == null ) {
+			throw new NullPointerException() ;
+		}
+		
 		this.componentType = type;
 		return this;
 	}
@@ -70,8 +76,7 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	// Revenue * 4.23%
 
 	private void assignOutputs() {
-		roicAssembler
-				.addOutput(AnalysisCode.penetration)
+		roicAssembler.addOutput(AnalysisCode.penetration)
 				.addOutput(AnalysisCode.revenue)
 				.addOutput(AnalysisCode.premises_passed)
 				.addOutput(AnalysisCode.subscribers_count)
@@ -85,63 +90,67 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 	private void assemble(ComponentInput inputs) {
 		roicAssembler.add(AnalysisCode.penetration,
 				analysisService.createCurve(inputs.getPenetration()));
-
+		
+		
 		roicAssembler.add(AnalysisCode.premises_passed,
 				analysisService.createPremisesPassed(inputs.getEntityCount()));
 
 		roicAssembler.add(AnalysisCode.subscribers_count, analysisService
 				.createMultiplyOp(AnalysisCode.penetration,
 						inputs.getEntityCount()));
+		
 
 		roicAssembler
 				.add(AnalysisCode.subscribers_penetration, analysisService
 						.createMultiplyOp(AnalysisCode.penetration, 1.0));
-		
 
 		roicAssembler.add(AnalysisCode.houseHolds, analysisService
 				.createHouseHolds(inputs.getEntityCount(),
 						inputs.getEntityGrowth()));
-		
 
 		roicAssembler.add(AnalysisCode.revenue, analysisService.createRevenue(
 				AnalysisCode.houseHolds, AnalysisCode.penetration,
 				AnalysisCode.arpu));
-		
-		
-		//TODO Move to Strategy
-		if( networkType == NetworkType.Fiber ) {
+
+		// TODO Move to Strategy
+		if (networkType == NetworkType.Fiber) {
 			roicAssembler.add(AnalysisCode.new_connections, analysisService
-					.createConnectedHouseHolds(inputs.getPenetration().getRate(),
-							inputs.getEntityCount(), inputs.getChurnRate(),
-							inputs.getChurnRateDecrease()));
-			
-			roicAssembler.add(AnalysisCode.new_connections_count, 
-					analysisService.createMultiplyOp(AnalysisCode.houseHolds, AnalysisCode.new_connections)) ;
-			
-			roicAssembler.add(AnalysisCode.new_connections_period, 
-					analysisService.createStreamDiff(AnalysisCode.new_connections_count)) ;
-			
-			roicAssembler.add(AnalysisCode.new_connections_cost, 
-					analysisService.createMultiplyOp(AnalysisCode.new_connections_period, inputs.getConnectionCost())) ;
-			
+					.createConnectedHouseHolds(inputs.getPenetration()
+							.getRate(), inputs.getEntityCount(), inputs
+							.getChurnRate(), inputs.getChurnRateDecrease()));
+
+			roicAssembler.add(AnalysisCode.new_connections_count,
+					analysisService.createMultiplyOp(AnalysisCode.houseHolds,
+							AnalysisCode.new_connections));
+
+			roicAssembler
+					.add(AnalysisCode.new_connections_period,
+							analysisService
+									.createStreamDiff(AnalysisCode.new_connections_count));
+
+			roicAssembler.add(AnalysisCode.new_connections_cost,
+					analysisService.createMultiplyOp(
+							AnalysisCode.new_connections_period,
+							inputs.getConnectionCost()));
+
 		} else {
-			
-			roicAssembler.add(AnalysisCode.new_connections, analysisService
-					.createConstant(0));
-			
-			roicAssembler.add(AnalysisCode.new_connections_count, analysisService
-					.createConstant(0));
-			
-			roicAssembler.add(AnalysisCode.new_connections_period, analysisService
-					.createConstant(0));
-			
-			roicAssembler.add(AnalysisCode.new_connections, analysisService
-					.createConstant(0));
-			
-			roicAssembler.add(AnalysisCode.new_connections_cost, 
-					analysisService.createConstant(0)) ;
+
+			roicAssembler.add(AnalysisCode.new_connections,
+					analysisService.createConstant(0));
+
+			roicAssembler.add(AnalysisCode.new_connections_count,
+					analysisService.createConstant(0));
+
+			roicAssembler.add(AnalysisCode.new_connections_period,
+					analysisService.createConstant(0));
+
+			roicAssembler.add(AnalysisCode.new_connections,
+					analysisService.createConstant(0));
+
+			roicAssembler.add(AnalysisCode.new_connections_cost,
+					analysisService.createConstant(0));
 		}
-		
+
 		roicAssembler.add(AnalysisCode.arpu,
 				analysisService.createARPU(inputs.getArpu()));
 
@@ -149,12 +158,11 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 				AnalysisCode.opex_expenses,
 				analysisService.createMultiplyOp(AnalysisCode.revenue,
 						inputs.getOpexPercent()));
-		
+
 		roicAssembler.add(
 				AnalysisCode.maintenance_expenses,
 				analysisService.createMultiplyOp(AnalysisCode.revenue,
 						inputs.getMaintenancePercent()));
-
+		
 	}
-
 }
