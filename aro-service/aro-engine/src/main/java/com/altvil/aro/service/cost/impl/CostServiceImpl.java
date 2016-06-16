@@ -1,5 +1,6 @@
 package com.altvil.aro.service.cost.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -87,12 +88,20 @@ public class CostServiceImpl implements CostService {
 	@Override
 	public List<FiberSummaryCost> getFiberReport(long planId) {
 		NetworkReport report = networkReportRepository.findReport(planId, ReportType.summary_fiber) ;
+		if( report == null ) {
+			return Collections.emptyList() ;
+		}
 		return fiberSummaryCostRepository.findEquipmentSummaryCosts(report.getId());
 	}
 
 	@Override
 	public List<EquipmentSummaryCost> getEquipmentReport(long planId) {
 		NetworkReport report = networkReportRepository.findReport(planId, ReportType.summary_equipment) ;
+		
+		if( report == null ) {
+			return Collections.emptyList() ;
+		}
+		
 		return equipmentSummaryCostRepository.findEquipmentSummaryCost(report.getId());
 	}
 

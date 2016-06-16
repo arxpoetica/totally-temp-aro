@@ -1,21 +1,17 @@
 package com.altvil.test.roic;
 
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.postgresql.util.StreamWrapper;
 
 import com.altvil.aro.service.roic.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisCode;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
 import com.altvil.aro.service.roic.analysis.builder.ComponentInput;
@@ -23,13 +19,11 @@ import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
 import com.altvil.aro.service.roic.analysis.impl.AnalysisServiceImpl;
 import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
-import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
-import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
-import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
 
@@ -52,8 +46,8 @@ public class RoicTest {
 
 		RoicModel model = analysisService.createRoicModelBuilder()
 				.setAnalysisPeriod(ap).addRoicInputs(copperInputs)
-				.addRoicInputs(fiberInputs)
-				.addRoicInputs(createCopperRoicInputs()).build();
+				.addRoicInputs(copperInputs)
+				.addRoicInputs(fiberInputs).build();
 
 		
 		Writer w = new StringWriter() ;
@@ -181,46 +175,46 @@ public class RoicTest {
 
 	}
 
-	private RoicInputs createRoicInputs() {
-		RoicInputs ri = new RoicInputs();
-		ri.setComponentInputs(Collections.singleton(createComponentInput()));
-		ri.setFixedCost(10000);
-		ri.setType(NetworkAnalysisType.fiber);
-		return ri;
-	}
+//	private RoicInputs createRoicInputs() {
+//		RoicInputs ri = new RoicInputs();
+//		ri.setComponentInputs(Collections.singleton(createComponentInput()));
+//		ri.setFixedCost(10000);
+//		ri.setType(NetworkAnalysisType.fiber);
+//		return ri;
+//	}
+//
+//	private RoicInputs createCopperRoicInputs() {
+//		RoicInputs ri = new RoicInputs();
+//		ri.setComponentInputs(Collections
+//				.singleton(createCopperComponentInput()));
+//		ri.setFixedCost(10000);
+//		ri.setType(NetworkAnalysisType.copper);
+//		return ri;
+//	}
 
-	private RoicInputs createCopperRoicInputs() {
-		RoicInputs ri = new RoicInputs();
-		ri.setComponentInputs(Collections
-				.singleton(createCopperComponentInput()));
-		ri.setFixedCost(10000);
-		ri.setType(NetworkAnalysisType.copper);
-		return ri;
-	}
-
-	private ComponentInput createCopperComponentInput() {
-
-		return ComponentInput
-				.build()
-				.setComponentType(ComponentType.household)
-				.setArpu(20)
-				.setChurnRate(0.01)
-				.setChurnRateDecrease(0.00006)
-				.setEntityCount(500)
-				.setEntityGrowth(0.0000)
-				.setNetworkPenetration(
-						new DefaultNetworkPenetration(0.8, 0.4, -.03))
-				.setOpexPercent(0.043).assemble();
-	}
-
-	private ComponentInput createComponentInput() {
-
-		return ComponentInput.build().setComponentType(ComponentType.household)
-				.setArpu(100).setChurnRate(0.01).setChurnRateDecrease(0.00006)
-				.setEntityCount(150).setEntityGrowth(0.0005)
-				.setNetworkPenetration(createPenetration())
-				.setOpexPercent(0.043).assemble();
-	}
+//	private ComponentInput createCopperComponentInput() {
+//
+//		return ComponentInput
+//				.build()
+//				.setComponentType(ComponentType.household)
+//				.setArpu(20)
+//				.setChurnRate(0.01)
+//				.setChurnRateDecrease(0.00006)
+//				.setEntityCount(500)
+//				.setEntityGrowth(0.0000)
+//				.setNetworkPenetration(
+//						new DefaultNetworkPenetration(0.8, 0.4, -.03))
+//				.setOpexPercent(0.043).assemble();
+//	}
+//
+//	private ComponentInput createComponentInput() {
+//
+//		return ComponentInput.build().setComponentType(ComponentType.household)
+//				.setArpu(100).setChurnRate(0.01).setChurnRateDecrease(0.00006)
+//				.setEntityCount(150).setEntityGrowth(0.0005)
+//				.setNetworkPenetration(createPenetration())
+//				.setOpexPercent(0.043).assemble();
+//	}
 
 	private NetworkPenetration createPenetration() {
 		return new DefaultNetworkPenetration(0.2, 0.6, -.03);
