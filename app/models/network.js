@@ -175,7 +175,7 @@ module.exports = class Network {
     }
     var body = {
       planId: plan_id,
-      algorithm: options.algorithm,
+      algorithm: 'CAPEX', // options.algorithm,
       locationTypes: options.locationTypes.map((key) => locationTypes[key])
       // budget: options.budget
     }
@@ -218,6 +218,25 @@ module.exports = class Network {
       }
     })
     .then(() => this._callService(req))
+    .then(() => {
+      var optimizationTypes = ['MAX_IRR', 'BUDGET_IRR', 'TARGET_IRR']
+      if (optimizationTypes.indexOf(options.algorithm) === -1) return
+      var body = {
+        planId: plan_id,
+        optimizationType: options.algorithm,
+        financialConstraints: { years: 10 }
+      }
+      if (options.budget) body.financialConstraints.budget = options.budget
+      if (options.discountRate) body.financialConstraints.discountRate = options.discountRate
+      var req = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/optimize/masterplan',
+        json: true,
+        body: body
+      }
+      return this._callService(req)
+    })
+    .then(() => ({}))
   }
 
   static equipmentSummary (plan_id) {

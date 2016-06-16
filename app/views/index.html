@@ -629,26 +629,26 @@
               <form>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="capex"> Capex
+                    <input type="radio" ng-model="optimizationType" value="CAPEX"> Capex
                   </label>
                 </div>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="maximum_irr"> Maximum IRR
+                    <input type="radio" ng-model="optimizationType" value="MAX_IRR"> Maximum IRR
                   </label>
                 </div>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="irr_target"> IRR Target
+                    <input type="radio" ng-model="optimizationType" value="TARGET_IRR"> IRR Target
                   </label>
                 </div>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="budget_irr_floor"> Budget and IRR Floor
+                    <input type="radio" ng-model="optimizationType" value="BUDGET_IRR"> Budget and IRR Floor
                   </label>
                 </div>
               </form>
-              <div ng-show="optimizationType === 'irr_target' || optimizationType === 'budget_irr_floor'">
+              <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
                 <br>
                 <p><strong>IRR Threshold</strong></p>
                 <div class="row">
@@ -662,7 +662,7 @@
                   </div>
                 </div>
               </div>
-              <div ng-show="optimizationType === 'budget_irr_floor'">
+              <div ng-show="optimizationType === 'BUDGET_IRR'">
                 <br>
                 <p><strong>Budget</strong></p>
                 <div class="row">
