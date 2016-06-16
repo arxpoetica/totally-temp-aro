@@ -4,6 +4,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
+  var dirty = false
 
   var charts = {}
   var chartStyles = [
@@ -31,6 +32,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.financialData = {}
     refreshCurrentTab()
   }
+
+  $rootScope.$on('route_planning_changed', () => {
+    if (map_tools.is_visible('financial_profile')) {
+      refresh()
+    } else {
+      dirty = true
+    }
+  })
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
@@ -94,7 +103,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_tool_changed_visibility', (e) => {
     if (map_tools.is_visible('financial_profile')) {
-      $timeout(refreshCurrentTab, 0)
+      $timeout(dirty ? refresh : refreshCurrentTab, 0)
+      dirty = false
     }
   })
 

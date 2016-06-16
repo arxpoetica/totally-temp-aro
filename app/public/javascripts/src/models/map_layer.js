@@ -181,7 +181,6 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
     selectFeature (feature) {
       this.data_layer.add(feature)
       feature.setProperty('selected', true)
-      console.log('selected!')
     }
 
     deselectFeature (feature) {
