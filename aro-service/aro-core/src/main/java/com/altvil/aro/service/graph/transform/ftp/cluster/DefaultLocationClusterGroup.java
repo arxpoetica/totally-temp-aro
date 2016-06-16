@@ -54,7 +54,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.altvil.aro.service.graph.transform.ftx.cluster.LocationClusterGroup
 	 * #getAggregates()
@@ -166,6 +166,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			if (!currentCluster.isEmpty()) {
 				if (currentCluster.getPinnedLocation() == null) {
 					log.error("Failed to assign pin to Cluster");
+					log.error("Failed tp assign pin to Cluster") ;
 				} else {
 					clusters.add(currentCluster);
 					currentCluster = new FdtConstrainedAggregate(
@@ -247,44 +248,44 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				}
 
 				for (PinnedAssignedEntityDemand pd : demands) {
-					
+
 					currentCluster.assignConstraint(pd.getPinnedLocation()) ;
 					currentCluster.assign(pd);
-					
+
 					if (currentCluster.isFull()) {
 						flushCluster();
 					}
 				}
 
 			} else {
-				
+
 				currentCluster.assign(d);
 			}
 
 			/*
 			 * if( !currentCluster.assignConstraint(d.getPinnedLocation()) ) {
 			 * flushAndAssignLocation(d.getPinnedLocation()) ; }
-			 * 
+			 *
 			 * StringBuffer sb = new StringBuffer() ;
-			 * 
+			 *
 			 * if( d.getDemand() > currentCluster.getRemainingDemand() ) {
 			 * sb.append("Multi Assignment ") ; sb.append(d.getDemand()) ;
 			 * sb.append(" ===> ") ; while(d.getDemand() >
 			 * currentCluster.getRemainingDemand() ) { sb.append(" | ") ;
 			 * sb.append(d.getDemand()) ;
-			 * 
+			 *
 			 * Pair<PinnedAssignedEntityDemand> pair =
 			 * d.split(currentCluster.getRemainingDemand()) ;
 			 * currentCluster.assign(pair.getHead()) ;
 			 * flushAndAssignLocation(d.getPinnedLocation()) ; d =
 			 * pair.getTail() ;
-			 * 
+			 *
 			 * } sb.append(" remainder = ") ; sb.append(d.getDemand()) ;
 			 * sb.append("\n") ; log.info(sb.toString()) ; }
-			 * 
-			 * 
+			 *
+			 *
 			 * if( d.getDemand() > 0 ) {
-			 * 
+			 *
 			 * currentCluster.assign(d) ; }
 			 */
 
