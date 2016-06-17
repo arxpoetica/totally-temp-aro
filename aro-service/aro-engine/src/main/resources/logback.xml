@@ -19,7 +19,6 @@
   <logger name="org.springframework.web.filter" level="INFO"/>
   <logger name="org.apache.ignite" level="INFO"/>
   <logger name="org.apache.ignite.internal" level="WARN"/>
-  <logger name="com.altvil.aro.service.graph.alg.NpvClosestFirstIterator" level="WARN"/>
  
   <root level="info">
     <appender-ref ref="STDOUT" />

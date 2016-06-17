@@ -27,7 +27,6 @@ import com.altvil.enumerations.OptimizationType;
 public abstract class OptimizationPlanConfiguration
 		implements Cloneable, Serializable, OptimizationPlan, NetworkConfiguration, ScoringStrategy, NetworkConstraint {
 	private static final long	   serialVersionUID	= 1L;
-	private NetworkData			   networkData;
 	private final OptimizationPlan optimizationPlan;
 	private long				   planId;
 
@@ -66,10 +65,6 @@ public abstract class OptimizationPlanConfiguration
 
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
 		return (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
-	}
-
-	public NetworkData getNetworkData() {
-		return networkData;
 	}
 
 	public OptimizationType getOptimizationType() {
@@ -125,10 +120,6 @@ public abstract class OptimizationPlanConfiguration
 	 * The score provides an assessment by which generating nodes may be sorted from least (lowest) to most (highest) desirability.
 	 */
 	public abstract double score(GeneratingNode node);
-
-	public void setNetworkData(NetworkData networkData) {
-		this.networkData = networkData;
-	}
 
 	public abstract Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans);
 }

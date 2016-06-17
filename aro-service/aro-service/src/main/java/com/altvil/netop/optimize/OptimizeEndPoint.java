@@ -183,20 +183,30 @@ public class OptimizeEndPoint {
 			coverage.setCoverage(plan.getCoverage());
 			coverage.setPlanId(plan.getPlanId());
 			return coverage;}
-			
-		case MAX_IRR:
-		{FinancialConstraints financials = plan.getFinancialConstraints();
-		MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.MAX_IRR);
-		maxIrr.setPlanId(plan.getPlanId());
-		maxIrr.setYears(financials.getYears());
-		return maxIrr;}
-		case BUDGET_IRR:
-		{FinancialConstraints financials = plan.getFinancialConstraints();
-		MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.BUDGET_IRR);
-		maxIrr.setPlanId(plan.getPlanId());
-		maxIrr.setYears(financials.getYears());
-		maxIrr.setBudget(financials.getBudget());
-		return maxIrr;}
+
+		case MAX_IRR: {
+			FinancialConstraints financials = plan.getFinancialConstraints();
+			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.MAX_IRR);
+			maxIrr.setPlanId(plan.getPlanId());
+			maxIrr.setYears(financials.getYears());
+			return maxIrr;
+		}
+		case BUDGET_IRR: {
+			FinancialConstraints financials = plan.getFinancialConstraints();
+			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.BUDGET_IRR);
+			maxIrr.setPlanId(plan.getPlanId());
+			maxIrr.setYears(financials.getYears());
+			maxIrr.setBudget(financials.getBudget());
+			return maxIrr;
+		}
+		case TARGET_IRR: {
+			FinancialConstraints financials = plan.getFinancialConstraints();
+			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.TARGET_IRR);
+			maxIrr.setPlanId(plan.getPlanId());
+			maxIrr.setYears(financials.getYears());
+			maxIrr.setBudget(financials.getBudget());
+			return maxIrr;
+		}
 		case CAPEX:
 		case PENETRATION:
 		case IRR:

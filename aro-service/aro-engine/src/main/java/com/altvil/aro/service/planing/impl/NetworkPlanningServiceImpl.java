@@ -575,8 +575,6 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		public WirecenterNetworkPlan call() throws Exception {
 			NetworkData networkData = networkService.getNetworkData(optimizationPlanConfiguration);
 
-			optimizationPlanConfiguration.setNetworkData(networkData);
-
 			OptimizerContext ctx = new OptimizerContext(new DefaultPriceModel(),
 					constraints);
 
