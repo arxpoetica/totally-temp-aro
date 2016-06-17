@@ -2,7 +2,7 @@ package com.altvil.aro.service.roic.analysis.model;
 
 import java.util.Collection;
 
-import com.altvil.aro.service.roic.AnalysisPeriod;
+import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
 import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;

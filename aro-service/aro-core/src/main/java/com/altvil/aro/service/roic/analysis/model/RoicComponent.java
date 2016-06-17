@@ -3,10 +3,10 @@ package com.altvil.aro.service.roic.analysis.model;
 import java.util.Collection;
 import java.util.Set;
 
-import com.altvil.aro.service.roic.AnalysisPeriod;
-import com.altvil.aro.service.roic.StreamModel;
+import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
+import com.altvil.aro.service.roic.analysis.calc.StreamModel;
+import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
 
 public interface RoicComponent extends CurveRegistry {

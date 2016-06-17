@@ -6,7 +6,7 @@ import org.junit.Test;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.ResultStream;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
-import com.altvil.aro.service.roic.analysis.impl.AnalysisCurve;
+import com.altvil.aro.service.roic.analysis.op.AnalysisCurve;
 import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
 
 public class PenetrationTest {

@@ -4,15 +4,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.altvil.aro.service.roic.AnalysisPeriod;
+import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
+import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
-import com.altvil.aro.service.roic.analysis.registry.DefaultContainerRegistry;
+import com.altvil.aro.service.roic.analysis.registry.impl.DefaultContainerRegistry;
 
 public class RoicModelImpl extends DefaultContainerRegistry implements
 		RoicModel {

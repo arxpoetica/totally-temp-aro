@@ -10,11 +10,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
-import com.altvil.aro.service.roic.analysis.registry.DefaultContainerRegistry;
+import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
+import com.altvil.aro.service.roic.analysis.registry.impl.DefaultContainerRegistry;
 import com.altvil.utils.StreamUtil;
 
 public class RoicNetworkModelImpl extends DefaultContainerRegistry implements

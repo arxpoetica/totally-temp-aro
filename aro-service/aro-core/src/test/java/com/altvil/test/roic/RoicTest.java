@@ -10,13 +10,13 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.altvil.aro.service.roic.AnalysisPeriod;
-import com.altvil.aro.service.roic.RoicConstants;
+import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
-import com.altvil.aro.service.roic.analysis.builder.RoicInputs;
 import com.altvil.aro.service.roic.analysis.impl.AnalysisServiceImpl;
+import com.altvil.aro.service.roic.analysis.model.RoicConstants;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
+import com.altvil.aro.service.roic.analysis.model.builder.RoicInputs;
 
 public class RoicTest {
 

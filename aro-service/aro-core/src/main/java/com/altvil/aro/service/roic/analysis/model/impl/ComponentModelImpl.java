@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import com.altvil.aro.service.roic.AnalysisPeriod;
-import com.altvil.aro.service.roic.StreamModel;
+import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
+import com.altvil.aro.service.roic.analysis.calc.StreamModel;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
-import com.altvil.aro.service.roic.analysis.registry.AbstractCurveRegistry;
+import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.CurvePath;
+import com.altvil.aro.service.roic.analysis.registry.impl.AbstractCurveRegistry;
 import com.altvil.utils.StreamUtil;
 
 public class ComponentModelImpl extends AbstractCurveRegistry implements

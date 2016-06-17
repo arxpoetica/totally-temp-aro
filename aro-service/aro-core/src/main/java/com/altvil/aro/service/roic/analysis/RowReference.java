@@ -1,6 +1,7 @@
 package com.altvil.aro.service.roic.analysis;
 
-import com.altvil.aro.service.roic.analysis.key.CurveIdentifier;
+import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
+
 
 public interface RowReference {
 	
