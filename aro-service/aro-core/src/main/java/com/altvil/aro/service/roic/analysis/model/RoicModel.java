@@ -5,9 +5,8 @@ import java.util.Collection;
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
-import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
 
-public interface RoicModel extends CurveRegistry {
+public interface RoicModel extends RoicAnalysis {
 
 	AnalysisPeriod getAnalysisPeriod();
 

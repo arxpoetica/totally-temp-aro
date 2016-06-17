@@ -2,13 +2,14 @@ package com.altvil.aro.service.roic.analysis.model;
 
 import java.util.Collection;
 
+import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
+import com.altvil.aro.service.roic.analysis.op.Transformer;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
-import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
 import com.altvil.aro.service.roic.model.NetworkType;
 
-public interface RoicNetworkModel extends CurveRegistry {
+public interface RoicNetworkModel extends RoicAnalysis {
 
 	public enum NetworkAnalysisType {
 		undefined(NetworkType.Undefined), bau(NetworkType.Copper), planned(
@@ -30,26 +31,12 @@ public interface RoicNetworkModel extends CurveRegistry {
 
 	}
 
-	/*
-	 * 
-	 * bau -> copper planned -> fiber count copper flipped ratio
-	 * 
-	 * incremental
-	 */
-
-	public interface Transformer {
-		Transformer setType(NetworkAnalysisType type);
-
-		Transformer setModel(RoicNetworkModel model);
-
-		Transformer addModel(RoicNetworkModel model);
-
-		Transformer setCurveIds(Collection<CurveIdentifier> ids);
-
-		RoicNetworkModel apply();
-	}
-
 	
+	public AnalysisPeriod getAnalysisPeriod() ;
+	
+
+
+	RoicComponent getNetworkCurves();
 	Collection<RoicComponent> getRoicComponents() ;
 	
 	Collection<RoicNetworkModel> getBaseModels();
@@ -59,13 +46,12 @@ public interface RoicNetworkModel extends CurveRegistry {
 	AnalysisRow getAnalysisRow(ComponentType type, CurveIdentifier id);
 
 	AnalysisRow getAnalysisRow(CurveIdentifier id);
-
-	RoicComponent getNetworkCurves();
+	
 
 	RoicComponent getEntityAnalysis(ComponentType type);
 
-	Transformer add();
+	Transformer<RoicNetworkModel> add(NetworkAnalysisType type);
 
-	Transformer difference();
+	RoicNetworkModel minus(RoicNetworkModel other);
 
 }

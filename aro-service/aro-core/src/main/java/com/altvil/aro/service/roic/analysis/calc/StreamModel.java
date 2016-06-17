@@ -5,9 +5,10 @@ import java.util.Set;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
+import com.altvil.aro.service.roic.analysis.model.RoicAnalysis;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 
-public interface StreamModel {
+public interface StreamModel extends RoicAnalysis {
 	
 	Collection<CurveIdentifier>  getCurveIdentifiers() ;
 	

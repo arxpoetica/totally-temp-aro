@@ -2,35 +2,35 @@ package com.altvil.aro.service.roic.analysis.model.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
+import com.altvil.aro.service.roic.analysis.op.ModelOp;
+import com.altvil.aro.service.roic.analysis.op.Transformer;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.impl.DefaultContainerRegistry;
-import com.altvil.utils.StreamUtil;
 
 public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 		RoicNetworkModel {
 
 	private NetworkAnalysisType type;
+	private AnalysisPeriod analysisPeriod;
 	private Map<ComponentType, RoicComponent> map;
 	private RoicComponent networkCurves;
 
 	private Collection<RoicNetworkModel> baseModels;
 
 	public RoicNetworkModelImpl(NetworkAnalysisType type,
+			AnalysisPeriod analysisPeriod,
 			Map<ComponentType, RoicComponent> map, RoicComponent networkCurves,
 			Collection<RoicNetworkModel> baseModels) {
 		super(type.name());
 		this.type = type;
+		this.analysisPeriod = analysisPeriod;
 		this.map = map;
 		this.networkCurves = networkCurves;
 		this.baseModels = baseModels;
@@ -41,16 +41,20 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 
 	}
 
-	public RoicNetworkModelImpl(NetworkAnalysisType type,
-			Map<ComponentType, RoicComponent> map, RoicComponent networkCurves) {
-		this(type, map, networkCurves, new ArrayList<>());
+	@Override
+	public AnalysisPeriod getAnalysisPeriod() {
+		return analysisPeriod;
 	}
-	
-	
+
+	public RoicNetworkModelImpl(NetworkAnalysisType type,
+			AnalysisPeriod analysisPeriod,
+			Map<ComponentType, RoicComponent> map, RoicComponent networkCurves) {
+		this(type, analysisPeriod, map, networkCurves, new ArrayList<>());
+	}
 
 	@Override
 	public Collection<RoicComponent> getRoicComponents() {
-		return map.values() ;
+		return map.values();
 	}
 
 	@Override
@@ -82,7 +86,12 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 	public RoicComponent getNetworkCurves() {
 		return networkCurves;
 	}
-
+	
+	
+	
+	
+	
+/*
 	@Override
 	public Transformer add() {
 		return new AbstractTransformerImpl() {
@@ -124,8 +133,9 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 
 			@Override
 			public RoicNetworkModel apply() {
-				return new RoicNetworkModelImpl(type, sumComponents(models),
-						sumNetworkCurves(models), getSources());
+				return new RoicNetworkModelImpl(type, analysisPeriod,
+						sumComponents(models), sumNetworkCurves(models),
+						getSources());
 			}
 		};
 	}
@@ -138,51 +148,23 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 				Map<ComponentType, RoicComponent> result = new EnumMap<>(
 						ComponentType.class);
 
-				return new RoicNetworkModelImpl(type, result,
+				return new RoicNetworkModelImpl(type, analysisPeriod, result,
 						networkCurves.minus(models.iterator().next()
 								.getNetworkCurves()), getSources());
 			}
 		};
 	}
+	*/
 
-	private abstract class AbstractTransformerImpl implements Transformer {
+	@Override
+	public Transformer<RoicNetworkModel> add(NetworkAnalysisType type) {
+		return ModelOp.sumRoicNetworkModels(type).add(this) ;
+		
+	}
 
-		protected NetworkAnalysisType type;
-		protected List<RoicNetworkModel> models = new ArrayList<RoicNetworkModel>();
-		protected Set<CurveIdentifier> ids;
-
-		@Override
-		public Transformer setType(NetworkAnalysisType type) {
-			this.type = type;
-			return this;
-		}
-
-		protected List<RoicNetworkModel> getSources() {
-			java.util.List<RoicNetworkModel> sources = new ArrayList<>();
-			sources.add(RoicNetworkModelImpl.this);
-			sources.addAll(models);
-			return sources;
-		}
-
-		@Override
-		public Transformer addModel(RoicNetworkModel model) {
-			models.add(model);
-			return this;
-		}
-
-		@Override
-		public Transformer setModel(RoicNetworkModel model) {
-			models.clear();
-			models.add(model);
-			return this;
-		}
-
-		@Override
-		public Transformer setCurveIds(Collection<CurveIdentifier> ids) {
-			this.ids = new HashSet<>(ids);
-			return this;
-		}
-
+	@Override
+	public RoicNetworkModel minus(RoicNetworkModel other) {
+		return ModelOp.minus(this, other) ;
 	}
 
 }

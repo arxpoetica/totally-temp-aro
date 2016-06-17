@@ -1,8 +1,6 @@
 package com.altvil.aro.service.roic.analysis.model.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
@@ -12,7 +10,6 @@ import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 import com.altvil.aro.service.roic.analysis.registry.impl.AbstractCurveRegistry;
-import com.altvil.utils.StreamUtil;
 
 public class ComponentModelImpl extends AbstractCurveRegistry implements
 		RoicComponent {
@@ -75,24 +72,19 @@ public class ComponentModelImpl extends AbstractCurveRegistry implements
 		return analysisPeriod;
 	}
 
-	@Override
-	public RoicComponent add(RoicComponent other) {
-		return new ComponentModelImpl(analysisPeriod, type,
-				streamModel.add(other.getStreamModel()));
-	}
-
+	
 	@Override
 	public RoicComponent minus(RoicComponent other) {
 		return new ComponentModelImpl(analysisPeriod, type,
 				streamModel.minus(other.getStreamModel()));
 	}
 
-	@Override
-	public RoicComponent add(Collection<RoicComponent> others) {
-		List<RoicComponent> allComponents = new ArrayList<>(others) ;
-		allComponents.add(this) ;
-		return new ComponentModelImpl(analysisPeriod, ComponentType.network,
-				streamModel.add(StreamUtil.map(allComponents,
-						RoicComponent::getStreamModel)));
-	}
+//	private RoicComponent add(Collection<RoicComponent> others) {
+//		
+//		List<RoicComponent> allComponents = new ArrayList<>(others) ;
+//		allComponents.add(this) ;
+//		return new ComponentModelImpl(analysisPeriod, ComponentType.network,
+//				streamModel.add(StreamUtil.map(allComponents,
+//						RoicComponent::getStreamModel)));
+//	}
 }

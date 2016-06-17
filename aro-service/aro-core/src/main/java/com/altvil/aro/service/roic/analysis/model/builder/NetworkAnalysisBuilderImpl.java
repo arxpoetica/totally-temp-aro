@@ -73,7 +73,7 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 
 	@Override
 	public RoicNetworkModel build() {
-		return new RoicNetworkModelImpl(type, roicComponents,
+		return new RoicNetworkModelImpl(type, analysisPeriod, roicComponents,
 				createNetworkComponent());
 	}
 

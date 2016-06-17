@@ -14,15 +14,16 @@ import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.calc.StreamModel;
 import com.altvil.aro.service.roic.analysis.model.builder.DefaultAnalyisRow;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
+import com.altvil.aro.service.roic.analysis.registry.impl.AbstractCurveRegistry;
 
-public class StreamModelImpl implements StreamModel {
-
+public class StreamModelImpl  extends AbstractCurveRegistry implements StreamModel {
+	
 	private Map<CurveIdentifier, AnalysisRow> map;
 	private AnalysisPeriod analysisPeriod;
 
 	public StreamModelImpl(AnalysisPeriod analysisPeriod,
 			Map<CurveIdentifier, AnalysisRow> map) {
-		super();
+		super("");
 		this.analysisPeriod = analysisPeriod;
 		this.map = map;
 	}

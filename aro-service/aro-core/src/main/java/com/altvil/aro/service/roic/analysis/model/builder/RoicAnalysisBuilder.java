@@ -128,20 +128,18 @@ public class RoicAnalysisBuilder implements RoicModelBuilder {
 		modelBuilder
 				.addModel(modelBuilder
 						.get(NetworkAnalysisType.fiber)
-						.add()
-						.addModel(
+						.add(NetworkAnalysisType.planned)
+						.add(
 								modelBuilder
 										.get(NetworkAnalysisType.copper_intersects))
-						.addModel(
+						.add(
 								modelBuilder
 										.get(NetworkAnalysisType.copper_remaining))
-						.setType(NetworkAnalysisType.planned).apply());
+						.apply());
 
 		modelBuilder.addModel(modelBuilder.get(NetworkAnalysisType.planned)
-				.difference()
-				.setModel(modelBuilder.get(NetworkAnalysisType.copper))
-				.setType(NetworkAnalysisType.incremental).apply());
-
+				.minus(modelBuilder.get(NetworkAnalysisType.copper))) ;
+	
 		return modelBuilder.build();
 	}
 

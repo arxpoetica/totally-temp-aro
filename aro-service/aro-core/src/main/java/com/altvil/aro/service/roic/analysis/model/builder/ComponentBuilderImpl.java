@@ -123,6 +123,9 @@ public class ComponentBuilderImpl implements ComponentBuilder {
 							inputs.getConnectionCost()));
 
 		} else {
+			
+			roicAssembler.add(AnalysisCode.new_connections_count,
+					Op.constCurve(0));
 
 			roicAssembler.add(AnalysisCode.new_connections_cost,
 					Op.constCurve(0));
