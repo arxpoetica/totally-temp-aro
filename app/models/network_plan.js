@@ -429,7 +429,7 @@ module.exports = class NetworkPlan {
 }
 
 var financialCosts = []
-database.query('SELECT * FROM financial.cost_code').then((rows) => { financialCosts = rows })
+database.query('SELECT * FROM financial.network_cost_code').then((rows) => { financialCosts = rows })
 
 const attachCostDescription = (arr) => {
   arr.forEach((item) => {
