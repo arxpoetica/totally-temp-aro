@@ -64,4 +64,9 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 			@Param("npv")double npv
 			) ;
 
+	@Query(value = "delete from client.network_nodes where plan_id = :planId", nativeQuery = true)
+	@Modifying
+	@Transactional
+	void deleteNetworkNodes(@Param("planId")long planId);
+
 }

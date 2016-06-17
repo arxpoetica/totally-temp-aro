@@ -26,7 +26,6 @@ import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
-import com.altvil.aro.service.planning.IrrOptimizationPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfigurationBuilder;
 import com.altvil.aro.service.planning.optimization.impl.CapexOptimizationPlanImpl;
@@ -175,15 +174,17 @@ public class OptimizeEndPoint {
 	private OptimizationPlan toOptimizationPlan(AroOptimizationPlan plan) {
 
 		switch (plan.getOptimizationType()) {
-		case NPV:
-			{FinancialConstraints financials = plan.getFinancialConstraints();
-			return new NpvOptimizationPlanImpl(financials.getBudget(),
-					financials.getDiscountRate(), financials.getYears());}
-		case COVERAGE:
-			{CoverageOptimizationPlanImpl coverage = new CoverageOptimizationPlanImpl();
+		case NPV: {
+			FinancialConstraints financials = plan.getFinancialConstraints();
+			return new NpvOptimizationPlanImpl(financials.getBudget(), financials.getDiscountRate(),
+					financials.getYears());
+		}
+		case COVERAGE: {
+			CoverageOptimizationPlanImpl coverage = new CoverageOptimizationPlanImpl();
 			coverage.setCoverage(plan.getCoverage());
 			coverage.setPlanId(plan.getPlanId());
-			return coverage;}
+			return coverage;
+		}
 
 		case MAX_IRR: {
 			FinancialConstraints financials = plan.getFinancialConstraints();

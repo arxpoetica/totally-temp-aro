@@ -1,23 +1,17 @@
 package com.altvil.aro.service.planning.optimization.strategies;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
-import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
-import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.CoverageOptimizationPlan;
 
 public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfiguration implements CoverageOptimizationPlan {
@@ -53,39 +47,9 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 		return true;
 	}
 
-	public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
-		return (e) ->
-		{
-			GeoSegment value = e.getValue();
-			
-			if (value == null) {
-				return Collections.emptySet();
-			}
-			
-			Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
-
-			if (geoSegmentAssignments.isEmpty()) {
-				return Collections.emptySet();
-			}
-
-			// There may be multiple marked locations on this edge so it may be
-			// necessary to return both vertices of this edge.
-			Set<GraphNode> selectedNodes = new HashSet<>();
-			for (GraphEdgeAssignment assignment : geoSegmentAssignments) {
-				if (assignment.getPinnedLocation().isAtStartVertex()) {
-					selectedNodes.add(e.getSourceNode());
-				} else {
-					selectedNodes.add(e.getTargetNode());
-				}
-			}
-
-			return selectedNodes;
-		};
-	}
-	
 	@Override
-	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
+	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder(GlobalConstraint globalConstraint) {
+		return (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
 	}
 	
 

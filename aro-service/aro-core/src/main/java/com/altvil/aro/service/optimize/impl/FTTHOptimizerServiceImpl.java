@@ -1,7 +1,5 @@
 package com.altvil.aro.service.optimize.impl;
 
-import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +40,14 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 
 	@Override
 	public NetworkPlanner createNetworkPlanner(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
-		return DefaultNetworkPlannerImpl.create(createConstrainer(closestFirstSurfaceBuilder, selectedEdges, constraint, networkData, ctx, generatingNodeConstraint, scoringStrategy));
+			NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
+		return DefaultNetworkPlannerImpl.create(createConstrainer(closestFirstSurfaceBuilder, constraint, networkData, ctx, generatingNodeConstraint, scoringStrategy));
 	}
 
 	private NetworkConstrainer createConstrainer(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
+			NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy) {
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
-				.create(networkData, closestFirstSurfaceBuilder, selectedEdges, ctx.getFtthThreshholds(), null);
+				.create(networkData, closestFirstSurfaceBuilder, ctx.getFtthThreshholds(), null);
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder,
 						ctx, scoringStrategy);

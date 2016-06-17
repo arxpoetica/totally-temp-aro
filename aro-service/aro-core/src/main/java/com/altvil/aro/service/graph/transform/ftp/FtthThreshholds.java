@@ -1,5 +1,7 @@
 package com.altvil.aro.service.graph.transform.ftp;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.utils.UnitUtils;
 
 public class FtthThreshholds {
@@ -88,6 +90,10 @@ public class FtthThreshholds {
 
 	public boolean isDropCableConstraintsSupported() {
 		return dropCableConstraintsSupported;
+	}
+
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
 	}
 
 	public static class Builder {

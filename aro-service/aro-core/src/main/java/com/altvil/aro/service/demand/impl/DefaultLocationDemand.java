@@ -2,11 +2,9 @@ package com.altvil.aro.service.demand.impl;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.Pair;
 import com.altvil.utils.func.Aggregator;

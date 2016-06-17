@@ -3,6 +3,8 @@ package com.altvil.aro.service.graph.assigment.impl;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
@@ -48,5 +50,8 @@ public class DefaultGraphMapping implements GraphMapping {
 	public AroEntity getAroEntity() {
 		return graphAssignment.getAroEntity();
 	}
-
+	
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
 }

@@ -47,10 +47,31 @@ public class GraphNetworkBuilder extends AbstractNetworkBuilder {
 
 	public GraphNetworkBuilder setNetworkAssignments(
 			Collection<NetworkAssignment> networkAssignments) {
-		networkAssignmentsById = groupRoadSegmentId(networkAssignments);
+		final Map<Long, List<NetworkAssignment>> groupedRoadSegments = groupRoadSegmentId(networkAssignments);
+
+		networkAssignmentsById = mergeLists(networkAssignmentsById, groupedRoadSegments);
 		return this;
 	}
 
+	protected Map<Long, List<NetworkAssignment>> mergeLists(final Map<Long, List<NetworkAssignment>> primary, final Map<Long, List<NetworkAssignment>> secondary) {
+		if (primary == null) {
+			return secondary;
+		}
+		
+		final Map<Long, List<NetworkAssignment>> currentMap = primary;
+		secondary.entrySet().forEach((me) -> {
+			List<NetworkAssignment> current = currentMap.get(me.getKey());
+			
+			if (current == null) {
+				currentMap.put(me.getKey(), me.getValue());
+			} else {
+				current.addAll(me.getValue());
+			}	
+		});
+		
+		return primary;
+	}
+	
 	private Map<Long, List<NetworkAssignment>> groupRoadSegmentId(
 			Collection<NetworkAssignment> networkAssignments) {
 		return networkAssignments.stream().collect(

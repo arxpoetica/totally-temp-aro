@@ -1,8 +1,6 @@
 package com.altvil.aro.service.graph.transform.impl;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.function.Function;
 
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.WeightedGraph;
@@ -63,9 +61,9 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return new DefaultGraphBuilder<T>(factory, graph, new AroEdgeFactory<T>());
 	}
 
-	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder, GraphModel<T> graph, double parametric, GraphNode srcNode,
-			Function<AroEdge<T>, Set<GraphNode>> marked) {
-		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(parametric, marked,
+	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder, GraphModel<T> graph, GraphNode srcNode,
+			Collection<GraphNode> marked) {
+		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(marked,
 				srcNode);
 	}
 
@@ -116,7 +114,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 				factory, GraphAssignmentFactoryImpl.FACTORY);
 
 		b.setFiberSources(locationData.getFiberSources()) 
-				.setRoadLocations(locationData.getRoadLocations())
+				.setSelectedRoadLocations(locationData.getRoadLocations(), locationData.getSelectedRoadLocationIds())
 				.setRoadEdges(locationData.getRoadEdges());
 		return b.build();
 		

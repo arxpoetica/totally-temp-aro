@@ -1,12 +1,8 @@
 package com.altvil.aro.service.graph.impl;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
@@ -34,8 +30,6 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 	private final GraphModel<T> graphModel;
 
 	private Set<AroEdge<T>> foundEdges = new HashSet<>();
-	private Set<GraphNode> vertices = new HashSet<>();
-	private Set<AroEdge<T>> markedEdges = new HashSet<>();
 
 	private final ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder;
 
@@ -45,100 +39,52 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
 	}
 
-	public DAGModel<T> createDAG(double parametric, Function<AroEdge<T>, Set<GraphNode>> marked, GraphNode src) {
+	public DAGModel<T> createDAG(Collection<GraphNode> targets, GraphNode src) {
 
 		if( log.isDebugEnabled() ) log.debug("src vertex " + src);
+		if( log.isDebugEnabled() ) log.debug("targets " + targets.size());
 		
 		
-		for(AroEdge<T> edge : graphModel.getEdges()) {
-			Set<GraphNode> markedVerticies = marked.apply(edge);
-			
-			if (!markedVerticies.isEmpty()) {
-				markedEdges.add(edge);
-				vertices.addAll(markedVerticies);
-			}
-		}
-		
-		if( log.isDebugEnabled() ) log.debug("marked edges " + vertices.size());
-		
-		dagBuilder.addVertex(src) ;
-		
-		if( markedEdges.size() > 0 ) {
+		if( targets.size() > 0 ) {
 			final WeightedGraph<GraphNode, AroEdge<T>> graph = graphModel.getGraph();
 			AllShortestPaths<GraphNode, AroEdge<T>> shortestPaths = new AllShortestPaths<GraphNode, AroEdge<T>>(
-					graph, closestFirstSurfaceBuilder, parametric, src);
+					graph, closestFirstSurfaceBuilder, src);
 			
-			if( log.isDebugEnabled() ) log.debug("vertices count " + vertices.size());
-	
 			// Find shortest (minimizes sum of path weights) path to each vertex.
 			Collection<GraphNode> foundPaths = shortestPaths
-					.findPathVertices(vertices);
+					.findPathVertices(targets);
 			
 			if( log.isDebugEnabled() ) log.debug("found Paths " + foundPaths.size());
 			
-			// Remove duplicate edges
-			Set<AroEdge<T>> minEdges = new HashSet<>();
-			for (GraphNode v : vertices) {
-	
-				List<GraphNode> path = Graphs.getPathVertexList(shortestPaths
-						.getGraphPath(v));
+			Set<AroEdge<T>> knownEdges = new HashSet<>();
+			int dagEdges = 0;
+			while (!targets.isEmpty()) {
+				Set<GraphNode> sources = new HashSet<GraphNode>();
 				
-				if( log.isTraceEnabled() ) log.trace("path Length for v " + path.size());
-				
-				Collections.reverse(path) ;
-				
-				Iterator<GraphNode> itr = path.iterator() ;
-			
-				GraphNode previous = itr.next();
-				while(itr.hasNext() ) {
-					GraphNode next = itr.next() ;
-					AroEdge<T> edge = graph.getEdge(previous, next) ;
-					markedEdges.remove(edge) ;
-					if( !minEdges.contains(edge) ) {
-						//log.debug("add edge " + previous + "->" + next);
-						minEdges.add(edge) ;
-						addEdge(previous, next, edge);
+				for(GraphNode target : targets) {
+					AroEdge<T> spanningEdge = shortestPaths.getSpanningTreeEdge(target);
+					
+					if (spanningEdge != null && knownEdges.add(spanningEdge)) {
+						final GraphNode source = Graphs.getOppositeVertex(graph, spanningEdge, target);
+						addEdge(target, source, spanningEdge);
+						dagEdges++;
+
+						sources.add(source);
 					}
-					previous = next ;
 				}
+				
+				targets = sources;
 			}
 			
-			writeLeafEdges(shortestPaths, markedEdges);
-			
-			if( log.isDebugEnabled() ) log.debug("minEdges " + minEdges.size());
+			if( log.isDebugEnabled() ) log.debug("dagEdges " + dagEdges);
 		}
 		dagBuilder.setRoot(src);
 		return dagBuilder.buildDAG();
-
 	}
 
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> getClosestFirstSurfaceBuilder() {
 		return closestFirstSurfaceBuilder;
 	}
-
-	private void writeLeafEdges(AllShortestPaths<GraphNode, AroEdge<T>> sp, Set<AroEdge<T>>  remainingEdges) {
-		for (AroEdge<T> e : remainingEdges) {
-			
-			GraphNode src = graphModel.getGraph().getEdgeSource(e) ;
-			GraphNode target =  graphModel.getGraph().getEdgeTarget(e) ;
-			
-			double srcWeight = sp.getWeight(src) ;
-			double targetWeight = sp.getWeight(target) ;
-			
-			//log.debug("leaf src weight " +  srcWeight) ;
-			//log.debug("leaf target weight " +  targetWeight) ;
-			
-			if( targetWeight > srcWeight ) {
-				//log.debug("add leaf edge " + src + "->" + target);
-				addEdge(src, target, e);
-			} else {
-				//log.debug("add flipped leaf edge " + target + "->" + src);
-				addEdge(target, src, e);
-			
-			}
-		}
-	}
-
 
 	@Override
 	public boolean onPathFound(DAGPath<GraphNode, AroEdge<T>> path) {
@@ -148,7 +94,6 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 
 			if (!foundEdges.contains(edge)) {
 				foundEdges.add(edge);
-				markedEdges.remove(edge);
 				add(e);
 			}
 		});

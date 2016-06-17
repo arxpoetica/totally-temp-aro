@@ -72,7 +72,7 @@ public class DropCableModel {
 	// the model supports.
 
 	public DropCable getDropCable(double length) {
-		assert length > 0 : "Drop cables must have a positive length.";
+		assert length >= 0 : "Drop cables must have a positive length.";
 
 		int index = Arrays.binarySearch(dropLengths, length);
 

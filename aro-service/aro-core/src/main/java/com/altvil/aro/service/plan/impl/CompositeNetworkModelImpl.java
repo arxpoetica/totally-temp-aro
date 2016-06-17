@@ -3,6 +3,8 @@ package com.altvil.aro.service.plan.impl;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
@@ -27,4 +29,7 @@ public class CompositeNetworkModelImpl implements CompositeNetworkModel {
 		return map.values();
 	}
 
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
 }

@@ -16,6 +16,7 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.node.impl.DefaultVertex;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
@@ -80,7 +81,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 */
 	private double							radius		= Double.POSITIVE_INFINITY;
 
-	private double marketPenetration;
+	private double parametric;
 	
 	/**
 	 * Creates a new closest-first iterator for the specified graph.
@@ -88,8 +89,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param g
 	 *            the graph to be iterated.
 	 */
-	public NpvClosestFirstIterator(double parametric, double discountRate, int years, Graph<V, E> g) {
-		this(parametric, discountRate, years, g, null);
+	public NpvClosestFirstIterator(GlobalConstraint globalConstraint, double discountRate, int years, Graph<V, E> g) {
+		this(globalConstraint, discountRate, years, g, null);
 	}
 
 	/**
@@ -104,8 +105,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param startVertex
 	 *            the vertex iteration to be started.
 	 */
-	public NpvClosestFirstIterator(double parametric, double discountRate, int years, Graph<V, E> g, V startVertex) {
-		this(parametric, discountRate, years, g, startVertex, Double.POSITIVE_INFINITY);
+	public NpvClosestFirstIterator(GlobalConstraint globalConstraint, double discountRate, int years, Graph<V, E> g, V startVertex) {
+		this(globalConstraint, discountRate, years, g, startVertex, Double.POSITIVE_INFINITY);
 	}
 
 	/**
@@ -124,11 +125,11 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 *            limit on weighted path length, or Double.POSITIVE_INFINITY for
 	 *            unbounded search.
 	 */
-	public NpvClosestFirstIterator(double marketPenetration, double discountRate, int years, Graph<V, E> g, V startVertex,
+	public NpvClosestFirstIterator(GlobalConstraint globalConstraint, double discountRate, int years, Graph<V, E> g, V startVertex,
 			double radius) {
 		super(g, startVertex);
 		this.radius = radius;
-		this.marketPenetration = marketPenetration;
+		this.parametric = globalConstraint == null ? 1 : globalConstraint.nextParametric();
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
 
@@ -244,8 +245,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				LocationDemand d = le.getLocationDemand();
 				// Count the locations on this page for later analysis
 				destinationData.locations++;
-				destinationData.revenue += marketPenetration * d.getMonthlyRevenueImpact() * 12;
-				destinationData.cost += marketPenetration * d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
+				destinationData.revenue += parametric * d.getMonthlyRevenueImpact() * 12;
+				destinationData.cost += parametric * d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
 			});
 		}
 

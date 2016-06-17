@@ -36,17 +36,18 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 			this.bulkFiberThreshold = bulkFiberThreshold;
 		}
 		
-
 		@Override
 		public EdgeDemand createDemandAnalyis(GeoSegment geoSegment) {
-			EdgeDemandAnalyisImpl.Builder b = EdgeDemandAnalyisImpl.build() ;
-			
-			geoSegment.getGeoSegmentAssignments().forEach(a -> {
-				assemble(a, b) ;
-			});
-			return b.build() ;
-		}
+			EdgeDemandAnalyisImpl.Builder b = EdgeDemandAnalyisImpl.build();
 
+			if (geoSegment != null) {
+				geoSegment.getGeoSegmentAssignments().forEach(a -> {
+					assemble(a, b);
+				});
+			}
+
+			return b.build();
+		}
 
 		private void assemble(GraphEdgeAssignment locationAssignment,
 				EdgeDemandAnalyisImpl.Builder builder) {

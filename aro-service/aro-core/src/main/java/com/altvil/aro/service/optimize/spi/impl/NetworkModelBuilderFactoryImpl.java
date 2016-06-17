@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,9 +38,8 @@ public class NetworkModelBuilderFactoryImpl implements
 
 	@Override
 	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges,
 			FtthThreshholds fiberConstraints, GlobalConstraint globalConstraints) {
-		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, selectedEdges, fiberConstraints, globalConstraints);
+		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, fiberConstraints, globalConstraints);
 	}
 
 	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
@@ -50,7 +47,6 @@ public class NetworkModelBuilderFactoryImpl implements
 		private NetworkData networkData;
 		
 		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder;
-		Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges;
 		
 		private FtthThreshholds constraints;
 		private GlobalConstraint globalConstraints;
@@ -58,12 +54,10 @@ public class NetworkModelBuilderFactoryImpl implements
 		private Map<Long, NetworkAssignment> map;
 
 		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, 
 				FtthThreshholds constraints, GlobalConstraint globalConstraints) {
 			super();
 			this.networkData = networkData;
 			this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
-			this.selectedEdges = selectedEdges;
 			this.constraints = constraints;
 			this.globalConstraints = globalConstraints;
 
@@ -84,6 +78,8 @@ public class NetworkModelBuilderFactoryImpl implements
 		private NetworkData createNetworkData(Collection<Long> rejectedLocations) {
 			if (rejectedLocations.size() == 0) {
 				return networkData;
+			} else if (rejectedLocations.size() > 2562) {
+				int kjg = 0;
 			}
 
 			Map<Long, NetworkAssignment> map = new HashMap<>(this.map);
@@ -109,7 +105,7 @@ public class NetworkModelBuilderFactoryImpl implements
 		@Override
 		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
 			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, selectedEdges, constraints, globalConstraints);
+					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, constraints, globalConstraints);
 		}
 	}
 }

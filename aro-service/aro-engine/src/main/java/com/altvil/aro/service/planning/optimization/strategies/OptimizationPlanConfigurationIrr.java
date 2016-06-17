@@ -7,12 +7,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.entity.DefaultAroVisitor;
-import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
@@ -24,8 +22,10 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.AnalysisNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.IrrOptimizationPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
+import com.altvil.enumerations.OptimizationType;
 
 public class OptimizationPlanConfigurationIrr extends OptimizationPlanConfiguration implements OptimizationPlan {
 	private static final long serialVersionUID = 1L;
@@ -91,8 +91,9 @@ public class OptimizationPlanConfigurationIrr extends OptimizationPlanConfigurat
 	}
 	
 	@Override
-	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
+	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder(
+			GlobalConstraint globalConstraint) {
+		return (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
 	}
 	
 
@@ -145,46 +146,44 @@ public class OptimizationPlanConfigurationIrr extends OptimizationPlanConfigurat
 	protected boolean rejectPlan(double capex, double annualRevenue, double irr) {
 		return false;
 	}
-
+	
 	protected double calculateIrr(double capex, double annualRevenue) {
-		double rate1 = 0;			
-		double npv1 = npv(capex, annualRevenue, rate1);
-		double rate2 = 0.1;
-		double npv2 = npv(capex, annualRevenue, rate2);
+		double[] rates = {-.1, .1};
+		double[] npv = {npv(capex, annualRevenue, rates[0]), npv(capex, annualRevenue, rates[1])};
+		int oldest = 0;
+		int kjg = 50;
 		
 		do {
-			double deltaRate = rate2 - rate1;
-			double deltaNpv = npv2 - npv1;
+			double deltaRate = rates[0] - rates[1];
+			double deltaNpv = npv[0] - npv[1];
 
-			double nextRate = rate1 - (npv1 * deltaRate / deltaNpv);
+			double nextRate = rates[1] - (npv[1] * deltaRate / deltaNpv);
 			double nextNpv = npv(capex, annualRevenue, nextRate);
 			
-			final double err1 = Math.abs(nextRate - rate1);
-			final double err2 = Math.abs(nextRate - rate2);
-			if (err1 < err2) {
-				if (err2 < 0.01) {
-					return nextRate;
-				}
-				rate2 = nextRate;
-				npv2 = nextNpv;
-			} else {
-				if (err1 < 0.01) {
-					return nextRate;
-				}
-				rate1 = nextRate;
-				npv1 = nextNpv;
+			if (Math.abs(rates[0] - rates[1]) < 0.001 || Double.isNaN(rates[0])) {
+				break;
+			}
+			
+			rates[oldest] = nextRate;
+			npv[oldest] = nextNpv;
+			oldest = 1 - oldest;
+			if (kjg-- < 0) {
+				kjg = 50;
+				break;
 			}
 		} while (true);
+		
+		return rates[0];		
 	}
 	
 	protected double npv(double capex, double revenue, double discountRate) {
-		double npv = 0;
+		double npv = -capex;
 
-		for (int t = 1; t <= years; t++) {
-			npv += 1 / Math.pow(1 + discountRate, t);
+		for (int t = 1; t < years; t++) {
+			npv += revenue / Math.pow(1 + discountRate, t);
 		}
 		
-		return revenue * npv - capex;
+		return npv;
 	}
 }
 

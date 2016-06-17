@@ -44,12 +44,22 @@ public class RoadModelBuilder extends GraphNetworkBuilder {
 
 	public RoadModelBuilder setRoadLocations(
 			Collection<NetworkAssignment> roadLocations) {
-		// roadLocationsByGid = groupByGid(roadLocations);
-
 		int locationsLoaded = roadLocations.size();
 		if (log.isDebugEnabled())
-			log.debug("Locations Loaded " + locationsLoaded);
-		roadLocationsByTlid = groupByTlid(roadLocations);
+			log.debug("Road Locations Loaded " + locationsLoaded);
+		roadLocationsByTlid = mergeLists(roadLocationsByTlid, groupByTlid(roadLocations));
+		return this;
+	}
+
+	public RoadModelBuilder setSelectedRoadLocations(
+			Collection<NetworkAssignment> roadLocations, final Collection<Long> selectedRoadLocationIds) {
+		setRoadLocations(roadLocations);
+		
+		if (selectedRoadLocationIds != null) {
+			final List<NetworkAssignment> selectedRoadLocations = roadLocations.stream().filter((rl)->selectedRoadLocationIds.contains(rl.getSource().getObjectId())).collect(Collectors.toList());
+			super.setNetworkAssignments(selectedRoadLocations);
+		}
+		
 		return this;
 	}
 

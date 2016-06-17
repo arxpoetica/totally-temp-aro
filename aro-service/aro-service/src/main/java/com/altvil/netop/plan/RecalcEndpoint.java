@@ -28,14 +28,12 @@ import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
 import com.altvil.aro.service.job.impl.JobRequestIgniteCallable;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
-import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planing.MasterPlanBuilder;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.aro.service.planing.NetworkPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
 import com.altvil.aro.service.planning.FiberPlan;
-import com.altvil.aro.service.planning.GlobalConstraintBuilder;
 import com.altvil.aro.service.planning.fiber.FiberPlanConfigurationBuilder;
 import com.altvil.aro.service.planning.fiber.impl.CapexFiberPlanImpl;
 import com.altvil.aro.service.planning.fiber.impl.NpvFiberPlanImpl;
@@ -92,13 +90,9 @@ public class RecalcEndpoint {
 		FtthThreshholds fiberNetworkConstraints = strategyService.getStrategy(
 				FiberNetworkConstraintsBuilder.class, request.getAlgorithm())
 				.build(request.getFiberNetworkConstraints());
-		GlobalConstraint globalConstraint = strategyService.getStrategy(
-				GlobalConstraintBuilder.class, request.getAlgorithm()).build(
-				request);
 
 		MasterPlanBuilder mpc = networkPlanningService
-				.planMasterFiber(requestor, fiberPlan, fiberNetworkConstraints,
-						globalConstraint);
+				.planMasterFiber(requestor, fiberPlan, fiberNetworkConstraints);
 
 		Job<MasterPlanUpdate> job = jobService.submit(mpc);
 
@@ -133,9 +127,6 @@ public class RecalcEndpoint {
 				.getStrategy(FiberNetworkConstraintsBuilder.class,
 						request.getAlgorithm()).build(
 						request.getFiberNetworkConstraints());
-		GlobalConstraint globalConstraint = strategyService.getStrategy(
-				GlobalConstraintBuilder.class, request.getAlgorithm()).build(
-				request);
 
 		Job<FiberPlanResponse> job = jobService
 				.submit(new JobRequestIgniteCallable<FiberPlanResponse>(
@@ -145,8 +136,7 @@ public class RecalcEndpoint {
 
 							Future<WirecenterNetworkPlan> future = networkPlanningService
 									.planFiber(fiberPlan,
-											fiberNetworkConstraints,
-											globalConstraint);
+											fiberNetworkConstraints);
 
 							WirecenterNetworkPlan plan = future.get();
 
