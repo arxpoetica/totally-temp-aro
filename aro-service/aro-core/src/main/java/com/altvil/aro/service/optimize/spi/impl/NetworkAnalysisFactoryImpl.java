@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
@@ -316,13 +317,11 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public Supplier<Optional<CompositeNetworkModel>> lazySerialize() {
-			Set<LocationEntity> _rejectedLocations = new HashSet<LocationEntity>(
-					this.rejectedLocations);
+			Collection<Long> rejectedLocations = this.rejectedLocations.stream().map(AroEntity::getObjectId).collect(Collectors.toList());
 			return new Supplier<Optional<CompositeNetworkModel>>() {
 				@Override
 				public Optional<CompositeNetworkModel> get() {
-					return networkModelBuilder.createModel(StreamUtil.map(
-							_rejectedLocations, AroEntity::getObjectId));
+					return networkModelBuilder.createModel(rejectedLocations);
 				}
 			};
 		}
