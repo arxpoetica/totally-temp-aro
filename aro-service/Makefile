@@ -24,7 +24,7 @@ NODE_IMAGE = $(ALTMAN_REGISTRY)/aro-ignitenode
 ###############################
 
 DEPLOY_BRANCH = origin/development
-DEPLOY_TARGET=vagrant
+DEPLOY_TARGET=server
 
 
 ###############################
