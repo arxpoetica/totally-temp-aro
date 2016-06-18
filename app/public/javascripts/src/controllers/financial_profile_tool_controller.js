@@ -4,6 +4,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
+  var dirty = false
 
   var charts = {}
   var chartStyles = [
@@ -29,8 +30,18 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function refresh () {
     $scope.financialData = {}
-    refreshCurrentTab()
+    if ($scope.plan && $scope.plan.metadata) {
+      refreshCurrentTab()
+    }
   }
+
+  $rootScope.$on('route_planning_changed', () => {
+    if (map_tools.is_visible('financial_profile')) {
+      refresh()
+    } else {
+      dirty = true
+    }
+  })
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
@@ -87,6 +98,11 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.plan = plan
   })
 
+  $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    $scope.plan = plan
+    refresh()
+  })
+
   $rootScope.$on('route_planning_changed', (e) => {
     if (!$scope.plan) return
     showSummaryChart()
@@ -94,7 +110,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_tool_changed_visibility', (e) => {
     if (map_tools.is_visible('financial_profile')) {
-      $timeout(refreshCurrentTab, 0)
+      $timeout(dirty ? refresh : refreshCurrentTab, 0)
+      dirty = false
     }
   })
 
@@ -105,6 +122,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $http.get(`/financial_profile/${$scope.plan.id}/${key}`)
       .success((response) => {
         $scope.financialData[key] = response
+        console.log('Requested', key)
+        console.table && console.table(response)
         callback(response)
       })
   }
@@ -263,8 +282,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       labels: [],
       datasets: [dataset]
     }
-
-    console.log('metadata', $scope.plan.metadata)
 
     ;($scope.plan.metadata.npv || []).forEach((revenue) => {
       data.labels.push(revenue.year)

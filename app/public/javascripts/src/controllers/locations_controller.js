@@ -196,20 +196,20 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       if (!$scope.show_businesses && !$scope.show_households) {
         locationsLayer.hide()
       } else {
+        var business_categories = Object.keys($scope.business_categories_selected).filter((key) => $scope.business_categories_selected[key])
         var type
-        if ($scope.show_businesses && $scope.show_households) {
+        var show_businesses = $scope.show_businesses && business_categories.length > 0
+        if (show_businesses && $scope.show_households) {
           type = ''
-        } else if ($scope.show_businesses) {
+        } else if (show_businesses) {
           type = 'businesses'
         } else if ($scope.show_households) {
           type = 'households'
         }
         var options = { type }
-        var business_categories = Object.keys($scope.business_categories_selected).filter((key) => $scope.business_categories_selected[key])
         if (business_categories.length < $scope.business_categories.length) {
           options.business_categories = business_categories
         }
-        console.log('options', options, business_categories, $scope.business_categories.length, $scope.business_categories_selected)
         locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
       }

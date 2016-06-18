@@ -43,7 +43,6 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	}
 
 
-
 	@Override
 	public double getRequiredFiberStrands(FiberType fiberType) {
 		switch (fiberType) {

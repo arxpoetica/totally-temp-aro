@@ -28,6 +28,7 @@ import com.altvil.aro.persistence.repository.FiberRouteRepository;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
@@ -50,7 +51,6 @@ import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.OptimizerContext;
-import com.altvil.aro.service.optimize.PricingModel;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.PlanService;
@@ -61,6 +61,7 @@ import com.altvil.aro.service.planing.ScoringStrategyFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
+import com.altvil.aro.service.price.PricingModel;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
@@ -75,6 +76,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	private NetworkPlanRepository networkPlanRepository;
 	@Autowired
 	private NetworkNodeRepository networkNodeRepository ;
+	@Autowired
+	private CostService costService ;
 
 	@Autowired
 	private ApplicationContext appCtx ;
@@ -145,6 +148,52 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		return val ;
 	}
 	
+
+	private void updateMasterPlanFinancials(long planId,Collection<WirecenterNetworkPlan> plans) {
+		
+		double fiberLength = 0 ; 
+		Aggregator<LocationDemand> aggregator = DefaultLocationDemand.demandAggregate() ;
+		for(WirecenterNetworkPlan p : plans) {
+			fiberLength += p.getFiberLengthInMeters(FiberType.FEEDER) ;
+			fiberLength += p.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
+			aggregator.add(p.getTotalDemand()) ;
+		}		
+		updateFinancials(networkNodeRepository, planId, new SimpleNetworkFinancials(aggregator.apply(), fiberLength, FinancialInputs.DEFAULT)) ;
+	}
+
+	
+	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, WirecenterNetworkPlan plan) {
+		
+		double fiberLength = 0 ;
+		fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER) ;
+		fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
+
+		SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength, FinancialInputs.DEFAULT) ;
+		updateFinancials(nr, planId, f) ;
+		
+		return f ;
+		
+	} 
+	
+	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, SimpleNetworkFinancials f) {
+		
+		nr.updateFinancials(planId, 
+		f.getLocationDemand().getDemand(), 
+		f.getTotalCost(),
+		f.getFiberCost(),
+		f.getEquipmentCost(), f.getCoCost(), f.getFdhCost(), f.getFdtCost(), 
+		f.getLocationDemand().getMonthlyRevenueImpact()*12, 
+		f.getLocationDemand().getLocationDemand(LocationEntityType.Household).getMonthlyRevenueImpact() *12,
+		f.getLocationDemand().getLocationDemand(LocationEntityType.CellTower).getMonthlyRevenueImpact() *12,
+		f.getLocationDemand().getLocationDemand(LocationEntityType.Business).getMonthlyRevenueImpact() *12, 
+		f.getNpv());
+		
+		return f ;
+
+	}
+
+
+	
 	public MasterPlanBuilder createMasterPlanBuilder(Principal creator,  IgniteCallable<MasterPlanUpdate> callable) {
 		if( useIgnite ) {
 			return new MasterPlanBuilder(creator, wirePlanComputeGrid, callable) ;
@@ -203,18 +252,18 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		return builder;
 	}
 	
-	private void updateMasterPlanFinancials(long planId,Collection<WirecenterNetworkPlan> plans) {
+//	private void updateMasterPlanFinancials(long planId,Collection<WirecenterNetworkPlan> plans) {
+//	
+//		double fiberLength = 0 ; 
+//		Aggregator<LocationDemand> aggregator = DefaultLocationDemand.demandAggregate() ;
+//		for(WirecenterNetworkPlan p : plans) {
+//			fiberLength += p.getFiberLengthInMeters(FiberType.FEEDER) ;
+//			fiberLength += p.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
+//			aggregator.add(p.getTotalDemand()) ;
+//		}		
+//		updateFinancials(networkNodeRepository, planId, new SimpleNetworkFinancials(aggregator.apply(), fiberLength, FinancialInputs.DEFAULT)) ;
+//	}
 	
-		double fiberLength = 0 ; 
-		Aggregator<LocationDemand> aggregator = DefaultLocationDemand.demandAggregate() ;
-		for(WirecenterNetworkPlan p : plans) {
-			fiberLength += p.getFiberLengthInMeters(FiberType.FEEDER) ;
-			fiberLength += p.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
-			aggregator.add(p.getTotalDemand()) ;
-		}		
-		updateFinancials(networkNodeRepository, planId, new SimpleNetworkFinancials(aggregator.apply(), fiberLength, FinancialInputs.DEFAULT)) ;
-	}
-
 	@Override
 	public MasterPlanBuilder planMasterFiber(Principal requestor, FiberPlanConfiguration fiberPlanConfiguration,
 			FtthThreshholds constraints) throws InterruptedException {
@@ -243,7 +292,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			}).filter(p -> p != null).collect(Collectors.toList()) ;
 		
 			updateMasterPlanFinancials(fiberPlanConfiguration.getPlanId(), updates) ;
-			
+			costService.updateMasterPlanCosts(fiberPlanConfiguration.getPlanId());
 			return new MasterPlanUpdate(updates);
 		});
 		MasterPlanBuilder builder = createMasterPlanBuilder(requestor, callable);
@@ -290,35 +339,35 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	
 	
 	
-	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, WirecenterNetworkPlan plan) {
+//	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, WirecenterNetworkPlan plan) {
+//		
+//		double fiberLength = 0 ;
+//		fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER) ;
+//		fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
+//
+//		SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength, FinancialInputs.DEFAULT) ;
+//		updateFinancials(nr, planId, f) ;
+//		
+//		return f ;
+//		
+//	} 
 		
-		double fiberLength = 0 ;
-		fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER) ;
-		fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
-
-		SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength, FinancialInputs.DEFAULT) ;
-		updateFinancials(nr, planId, f) ;
-		
-		return f ;
-		
-	} 
-	
-	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, SimpleNetworkFinancials f) {
-		
-		nr.updateFinancials(planId, 
-		f.getLocationDemand().getDemand(), 
-		f.getTotalCost(),
-		f.getFiberCost(),
-		f.getEquipmentCost(), f.getCoCost(), f.getFdhCost(), f.getFdtCost(), 
-		f.getLocationDemand().getMonthlyRevenueImpact()*12, 
-		f.getLocationDemand().getLocationDemand(LocationEntityType.Household).getMonthlyRevenueImpact() *12,
-		f.getLocationDemand().getLocationDemand(LocationEntityType.CellTower).getMonthlyRevenueImpact() *12,
-		f.getLocationDemand().getLocationDemand(LocationEntityType.Business).getMonthlyRevenueImpact() *12, 
-		f.getNpv());
-		
-		return f ;
-
-	}
+//	private static SimpleNetworkFinancials updateFinancials(NetworkNodeRepository nr, long planId, SimpleNetworkFinancials f) {
+//		
+//		nr.updateFinancials(planId, 
+//		f.getLocationDemand().getDemand(), 
+//		f.getTotalCost(),
+//		f.getFiberCost(),
+//		f.getEquipmentCost(), f.getCoCost(), f.getFdhCost(), f.getFdtCost(), 
+//		f.getLocationDemand().getMonthlyRevenueImpact()*12, 
+//		f.getLocationDemand().getLocationDemand(LocationEntityType.Household).getMonthlyRevenueImpact() *12,
+//		f.getLocationDemand().getLocationDemand(LocationEntityType.CellTower).getMonthlyRevenueImpact() *12,
+//		f.getLocationDemand().getLocationDemand(LocationEntityType.Business).getMonthlyRevenueImpact() *12, 
+//		f.getNpv());
+//		
+//		return f ;
+//
+//	}
 
 	public static class FiberPlanningCallable implements IgniteCallable<WirecenterNetworkPlan>, LocalBinding {
 		private static final long				 serialVersionUID = 1L;
@@ -346,6 +395,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		@SpringResource(resourceName = "fiberRouteRepository")
 		private transient FiberRouteRepository	 fiberRouteRepository;
 
+		@SpringResource(resourceName = "costService")
+		private transient CostService costService;
+
+		
 		FiberPlanningCallable(FiberPlanConfiguration fiberPlanStrategy, FtthThreshholds constraints) {
 			this.fiberPlanStrategy = fiberPlanStrategy;
 			this.constraints = constraints;
@@ -362,6 +415,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			conversionService = ctx.getBean(SerializationService.class) ;
 			networkNodeRepository = ctx.getBean(NetworkNodeRepository.class) ;
 			fiberRouteRepository = ctx.getBean(FiberRouteRepository.class) ;
+			costService = ctx.getBean(CostService.class) ;
 		}
 
 		@Override
@@ -429,6 +483,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		@SpringResource(resourceName = "fiberRouteRepository")
 		private transient FiberRouteRepository		fiberRouteRepository;
 
+		@SpringResource(resourceName = "costService")
+		private transient CostService	costService;
 		OptimizationPlanningCallable(OptimizationPlanConfiguration fiberPlanStrategy,
 				FtthThreshholds constraints, GlobalConstraint globalConstraint) {
 			this.fiberPlanStrategy = fiberPlanStrategy;
@@ -445,6 +501,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			conversionService = ctx.getBean(SerializationService.class) ;
 			networkNodeRepository = ctx.getBean(NetworkNodeRepository.class) ;
 			fiberRouteRepository = ctx.getBean(FiberRouteRepository.class) ;
+			costService = ctx.getBean(CostService.class) ;
 		}
 
 
@@ -462,6 +519,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
 				updateFinancials(this.networkNodeRepository, plan.getPlanId(), plan) ;
+				costService.updateWireCenterCosts(plan.getPlanId());
 				return plan;
 			}
 
@@ -497,6 +555,10 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		@SpringResource(resourceName = "fiberRouteRepository")
 		private transient FiberRouteRepository		fiberRouteRepository;
 
+		@SpringResource(resourceName = "costService")
+		private transient CostService costService ;
+
+		
 		public OptimizeCallable(OptimizationPlanConfiguration optimizationPlanStrategy,
 				FtthThreshholds constraints) {
 			this.optimizationPlanConfiguration = optimizationPlanStrategy;
@@ -512,6 +574,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			conversionService = ctx.getBean(SerializationService.class) ;
 			networkNodeRepository = ctx.getBean(NetworkNodeRepository.class) ;
 			fiberRouteRepository = ctx.getBean(FiberRouteRepository.class) ;
+			costService = ctx.getBean(CostService.class) ;
 		}
 
 		
@@ -543,7 +606,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				if (!plan.getNetworkNodes().isEmpty()) {				
 					saveUpdate(plan);
 				}
-				
+				costService.updateWireCenterCosts(plan.getPlanId()) ;
 				return plan;
 			}
 

@@ -12,6 +12,8 @@ public class DefaultDemandStatistic implements DemandStatistic {
 	public static Aggregator<DemandStatistic> aggregate() {
 		return new DemandAggregator();
 	}
+	
+	
 
 	public static class DemandAggregator implements Aggregator<DemandStatistic> {
 
@@ -87,6 +89,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 		}
 		return demandSummer;
 	}
+	
 
 	public static class DemandSummer implements DemandStatistic {
 		private double rawCoverage = 0;

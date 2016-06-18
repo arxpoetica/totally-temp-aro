@@ -47,8 +47,8 @@ public abstract class AbstractEquipmentAssignment implements
 		return false;
 	}
 
-	@Override
-	public boolean rebuildNetwork(GeneratingNode node, AnalysisContext ctx) {
+	@Deprecated
+	protected boolean rebuildNetwork(GeneratingNode node, AnalysisContext ctx) {
 		return false;
 	}
 

@@ -1,5 +1,6 @@
 package com.altvil.aro.service.planning.optimization.impl;
 
+
 import com.altvil.aro.service.planning.IrrOptimizationPlan;
 import com.altvil.enumerations.OptimizationType;
 

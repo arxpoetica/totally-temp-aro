@@ -14,7 +14,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.coverBusinesses = true
   $scope.coverTowers = true
 
-  $scope.optimizationType = 'capex'
+  $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = 100
   $scope.budget = 10000000
 
@@ -51,6 +51,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   })
 
   $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    initSelectionLayer()
     $scope.selectedGeographies = plan.metadata.selectedRegions
     $scope.selectedGeographies.forEach((geography) => {
       geography.features = selectionLayer.addGeoJson({
@@ -223,7 +224,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         $scope.calculating = false
         $rootScope.$broadcast('route_planning_changed', response)
         $scope.wizardStatus = $scope.allStatus[0]
-        $scope.selectedGeographies = []
       })
       .error(() => {
         $scope.calculating = false

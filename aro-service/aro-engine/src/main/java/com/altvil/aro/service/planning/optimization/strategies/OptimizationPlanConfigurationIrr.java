@@ -10,7 +10,6 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
@@ -25,7 +24,6 @@ import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.IrrOptimizationPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
-import com.altvil.enumerations.OptimizationType;
 
 public class OptimizationPlanConfigurationIrr extends OptimizationPlanConfiguration implements OptimizationPlan {
 	private static final long serialVersionUID = 1L;
@@ -134,7 +132,9 @@ public class OptimizationPlanConfigurationIrr extends OptimizationPlanConfigurat
 			}
 		}
 		
-		log.debug("Selected plan w/IRR = {}", maxIrr);
+		if (maxIrrPlan != null) {
+			log.debug("Selected plan w/IRR = {}", maxIrr);
+		}
 
 		return maxIrrPlan == null ? Optional.empty() : Optional.of(maxIrrPlan);
 	}

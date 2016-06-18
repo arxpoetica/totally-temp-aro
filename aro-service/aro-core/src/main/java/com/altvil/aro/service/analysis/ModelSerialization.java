@@ -1,4 +1,4 @@
-package com.altvil.aro.service.conversion;
+package com.altvil.aro.service.analysis;
 
 public interface ModelSerialization<T> {
 

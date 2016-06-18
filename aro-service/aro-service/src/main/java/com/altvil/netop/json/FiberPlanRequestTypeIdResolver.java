@@ -65,7 +65,6 @@ public class FiberPlanRequestTypeIdResolver implements TypeIdResolver {
 		return "undefined";
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public JavaType typeFromId(String id) {
 		try {

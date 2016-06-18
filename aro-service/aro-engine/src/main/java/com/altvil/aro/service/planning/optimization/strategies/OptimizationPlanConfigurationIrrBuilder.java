@@ -7,7 +7,7 @@ import com.altvil.aro.service.planning.optimization.OptimizationPlanConfiguratio
 import com.altvil.enumerations.OptimizationType;
 
 @OptimizationPlanStrategy(type=OptimizationPlanConfigurationBuilder.class, types={OptimizationType.BUDGET_IRR, OptimizationType.MAX_IRR, OptimizationType.TARGET_IRR})
-public class OptimizationPlanConfigurationMaxBuilder implements OptimizationPlanConfigurationBuilder<OptimizationPlanConfigurationIrr> {
+public class OptimizationPlanConfigurationIrrBuilder implements OptimizationPlanConfigurationBuilder<OptimizationPlanConfigurationIrr> {
 	@Override
 	public OptimizationPlanConfigurationIrr build(OptimizationPlan fiberPlan) {
 		switch(fiberPlan.getOptimizationType()) {

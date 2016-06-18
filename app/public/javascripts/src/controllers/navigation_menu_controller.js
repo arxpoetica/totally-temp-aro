@@ -230,7 +230,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.new_plan = () => {
     $('#new-plan').modal('show')
-    initMap()
+    // initMap()
     tracker.track('Create New Analysis')
   }
 
@@ -264,7 +264,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.new_plan_name = 'Untitled Analysis'
     $scope.new_plan_area_name = ''
     $('#new-plan select').select2('val', '')
-    newPlanMap.setCenter({lat: -34.397, lng: 150.644})
+    newPlanMap && newPlanMap.setCenter({lat: -34.397, lng: 150.644})
   })
 
   $scope.save_as = () => {

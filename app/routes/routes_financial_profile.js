@@ -1,8 +1,32 @@
+var helpers = require('../helpers')
+var pify = require('pify')
+var config = helpers.config
+
+var request = pify(require('request'), { multiArgs: true })
+
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
   const proxy = (path, params, def) => {
-    return Promise.resolve(def)
+    var req = {
+      url: config.aro_service_url + `/rest/financial_profile/${params.plan_id}/${path}`,
+      json: true
+    }
+    console.log('req', req)
+    return request(req).then((result) => {
+      var res = result[0]
+      if (res.statusCode !== 200) {
+        console.log('aro-service returned', res.statusCode)
+        return def
+      }
+      var body = result[1]
+      console.log('aro-service returned', body)
+      return body
+    })
+    .catch((err) => {
+      console.log(err)
+      return def
+    })
   }
 
   api.get('/financial_profile/:plan_id/cash_flow', (request, response, next) => {
@@ -23,7 +47,7 @@ exports.configure = (api, middleware) => {
       { year: 2029, bau: 290, fiber: 4176, incremental: 3887 },
       { year: 2030, bau: 223, fiber: 4225, incremental: 4032 }
     ]
-    proxy('/cash_flow', null, cashFlow)
+    proxy('cash_flow', { plan_id: request.params.plan_id }, cashFlow)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -47,7 +71,7 @@ exports.configure = (api, middleware) => {
       { year: 2029, budget: 0, plan: 0 },
       { year: 2030, budget: 0, plan: 0 }
     ]
-    proxy('/budget', null, budget)
+    proxy('budget', { plan_id: request.params.plan_id }, budget)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -70,7 +94,7 @@ exports.configure = (api, middleware) => {
       { year: 2029, network_deployment: 0, connect: 44, maintenance_capacity: 222 },
       { year: 2030, network_deployment: 0, connect: 44, maintenance_capacity: 226 }
     ]
-    proxy('/capex', null, capex)
+    proxy('capex', { plan_id: request.params.plan_id }, capex)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -93,7 +117,7 @@ exports.configure = (api, middleware) => {
       { year: 2029, households: 6360, businesses: 954, towers: 90 },
       { year: 2030, households: 6480, businesses: 972, towers: 90 }
     ]
-    proxy('/revenue', null, revenue)
+    proxy('revenue', { plan_id: request.params.plan_id }, revenue)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -116,7 +140,7 @@ exports.configure = (api, middleware) => {
       { year: 2029, incremental: 10000, existing: 0 },
       { year: 2030, incremental: 10000, existing: 0 }
     ]
-    proxy('/premises', null, premises)
+    proxy('premises', { plan_id: request.params.plan_id }, premises)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -139,7 +163,7 @@ exports.configure = (api, middleware) => {
       { year: 2029, bau: 500, fiber: 5300 },
       { year: 2030, bau: 400, fiber: 5400 }
     ]
-    proxy('/subscribers', null, subscribers)
+    proxy('subscribers', { plan_id: request.params.plan_id }, subscribers)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -162,7 +186,7 @@ exports.configure = (api, middleware) => {
       { year: 2029, businesses: 53, households: 53, towers: 15 },
       { year: 2030, businesses: 54, households: 54, towers: 15 }
     ]
-    proxy('/penetration', null, penetration)
+    proxy('penetration', { plan_id: request.params.plan_id }, penetration)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

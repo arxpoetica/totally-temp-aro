@@ -8,8 +8,6 @@ import org.apache.ignite.resources.IgniteInstanceResource;
 import org.apache.ignite.resources.SpringApplicationContextResource;
 import org.springframework.context.ApplicationContext;
 
-import com.altvil.aro.service.network.impl.NetworkServiceImpl;
-
 public class AroLifecycleBean implements LifecycleBean {
 	@IgniteInstanceResource
 	Ignite ignite;
@@ -20,7 +18,7 @@ public class AroLifecycleBean implements LifecycleBean {
 	@Override
 	public void onLifecycleEvent(LifecycleEventType evt) throws IgniteException {
 		if (evt == LifecycleEventType.AFTER_NODE_START) {     
-			NetworkServiceImpl nsi = (NetworkServiceImpl) applicationContext.getBean("networkService");
+			//NetworkServiceImpl nsi = (NetworkServiceImpl) applicationContext.getBean("networkService");
 			
 			//nsi.setNetworkServiceIgniteGrid(ignite);
 			//NetworkPlanningServiceImpl npsi = (NetworkPlanningServiceImpl) applicationContext.getBean("networkPlanningService");

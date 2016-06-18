@@ -38,7 +38,6 @@ import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.ftp.HubModel;
 import com.altvil.aro.service.optimize.OptimizerContext;
-import com.altvil.aro.service.optimize.PricingModel;
 import com.altvil.aro.service.optimize.impl.BulkFiberTerminalAssignment;
 import com.altvil.aro.service.optimize.impl.CentralOfficeAssignment;
 import com.altvil.aro.service.optimize.impl.DefaultFiberAssignment;
@@ -66,6 +65,7 @@ import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanService;
+import com.altvil.aro.service.price.PricingModel;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.TreeMultimap;
 import com.google.inject.Inject;
@@ -78,7 +78,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 	
 	
 	private GraphTransformerFactory graphTransformerFactory;
-	private PlanService planService;
+	//private PlanService planService;
 
 	@Autowired
 	@Inject
@@ -87,7 +87,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			PlanService planService) {
 		super();
 		this.graphTransformerFactory = graphTransformerFactory;
-		this.planService = planService;
+		//this.planService = planService;
 	}
 
 	@Override

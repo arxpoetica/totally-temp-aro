@@ -175,7 +175,7 @@ module.exports = class Network {
     }
     var body = {
       planId: plan_id,
-      algorithm: options.algorithm,
+      algorithm: 'CAPEX', // options.algorithm,
       locationTypes: options.locationTypes.map((key) => locationTypes[key])
       // budget: options.budget
     }
@@ -217,16 +217,54 @@ module.exports = class Network {
         return Promise.all(promises)
       }
     })
+    .then(() => this._callService(req))
     .then(() => {
-      console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
-      return request(req).then((result) => {
-        var res = result[0]
-        var body = result[1]
-        console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
-        if (res.statusCode && res.statusCode >= 400) {
-          return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
-        }
-      })
+      var optimizationTypes = ['MAX_IRR', 'BUDGET_IRR', 'TARGET_IRR']
+      if (optimizationTypes.indexOf(options.algorithm) === -1) return
+      var body = {
+        planId: plan_id,
+        optimizationType: options.algorithm,
+        financialConstraints: { years: 10 }
+      }
+      if (options.budget) body.financialConstraints.budget = options.budget
+      if (options.discountRate) body.financialConstraints.discountRate = options.discountRate
+      var req = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/optimize/masterplan',
+        json: true,
+        body: body
+      }
+      return this._callService(req)
+    })
+    .then(() => ({}))
+  }
+
+  static equipmentSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}/equipment_summary`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
+  static fiberSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}/fiber_summary`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
+  static _callService (req) {
+    console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
+    return request(req).then((result) => {
+      var res = result[0]
+      var body = result[1]
+      console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
+      if (res.statusCode && res.statusCode >= 400) {
+        return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
+      }
+      return body
     })
   }
 
