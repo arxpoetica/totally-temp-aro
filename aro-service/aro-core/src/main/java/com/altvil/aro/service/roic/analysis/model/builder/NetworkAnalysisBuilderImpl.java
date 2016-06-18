@@ -59,7 +59,6 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 			this.analysisPeriod = component.getAnalysisPeriod();
 		}
 
-		System.out.println(component.getComponentType());
 		ComponentType ct = component.getComponentType();
 		roicComponents.put(ct, component);
 		return this;
