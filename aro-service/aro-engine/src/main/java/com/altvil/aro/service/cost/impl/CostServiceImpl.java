@@ -34,6 +34,15 @@ public class CostServiceImpl implements CostService {
 		this.equipmentSummaryCostRepository = equipmentSummaryCostRepository;
 		this.fiberSummaryCostRepository = fiberSummaryCostRepository;
 	}
+	
+	
+	
+
+	@Override
+	public Double getTotalPlanCost(long planId) {
+		return networkReportRepository.getTotalPlanCost(planId) ;
+	}
+
 
 	@Override
 	public void updateWireCenterCosts(long planId) {

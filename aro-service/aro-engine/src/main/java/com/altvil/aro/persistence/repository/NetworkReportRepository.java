@@ -18,6 +18,35 @@ public interface NetworkReportRepository extends
 	NetworkReport findReport(@Param("planId") long planId, @Param("reportType") ReportType reportType) ;
 	
 	
+	
+	@Query(value = "with selected_plan as (\n" + 
+			"	select *\n" + 
+			"	from client.plan p\n" + 
+			"	where p.id = :planId \n" + 
+			")\n" + 
+			",\n" + 
+			"cost_fiber as (\n" + 
+			"	select p.id, sum(c.total_cost) as cost\n" + 
+			"		from selected_plan p\n" + 
+			"		join financial.network_report h on h.plan_id = p.id \n" + 
+			"		join financial.fiber_summary_cost c on c.network_report_id = h.id\n" + 
+			"		group by p.id\n" + 
+			"),\n" + 
+			"cost_equipment as (\n" + 
+			"	select p.id, sum(c.total_cost) as cost\n" + 
+			"		from selected_plan p\n" + 
+			"		join financial.network_report h on h.plan_id = p.id \n" + 
+			"		join financial.equipment_summary_cost c on c.network_report_id = h.id\n" + 
+			"		group by p.id\n" + 
+			")\n" + 
+			"select e.cost + f.cost \n" + 
+			"from cost_fiber f\n" + 
+			"join cost_equipment e on e.id = f.id", nativeQuery = true) 
+	@Transactional
+	Double getTotalPlanCost(@Param("planId") long planId) ;
+	
+	
+	
 	@Query(value = "delete from financial.network_report  r where r.plan_id = :planId", nativeQuery = true)
 	@Modifying
 	@Transactional

@@ -18,6 +18,7 @@ import com.altvil.aro.model.NetworkPlan;
 import com.altvil.aro.model.WirecenterPlan;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
+import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.roic.RoicService;
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisService;
@@ -31,17 +32,20 @@ public class RoicServiceImpl implements RoicService {
 	private AnalysisService analysisService;
 	private NetworkPlanRepository planRepostory;
 	private NetworkNodeRepository networkNodeRepository;
+	private CostService costService ;
 
 	private SuperSimpleCache cache;
 
 	@Autowired
 	public RoicServiceImpl(AnalysisService analysisService,
 			NetworkPlanRepository planRepostory,
-			NetworkNodeRepository networkNodeRepository) {
+			NetworkNodeRepository networkNodeRepository,
+			CostService costService) {
 		super();
 		this.analysisService = analysisService;
 		this.planRepostory = planRepostory;
 		this.networkNodeRepository = networkNodeRepository;
+		this.costService = costService ;
 
 		cache = new SuperSimpleCache();
 	}
@@ -112,7 +116,7 @@ public class RoicServiceImpl implements RoicService {
 	}
 
 	private double getCapex(long planId) {
-		return networkNodeRepository.getTotalCost(planId);
+		return costService.getTotalPlanCost(planId);
 	}
 
 	
