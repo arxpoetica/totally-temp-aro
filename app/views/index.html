@@ -1279,7 +1279,7 @@
                     <table class="table">
                       <tbody>
                         <tr>
-                          <th colspan="3">Premises passed</th>
+                          <th colspan="3">Premises Passed</th>
                           <td colspan="2" class="text-right">{{plan.metadata.total_premises | number}}</td>
                         </tr>
                         <tr ng-repeat="premise in plan.metadata.premises">
@@ -1287,8 +1287,8 @@
                           <td colspan="2" class="text-right">{{premise.value | number}}</td>
                         </tr>
                         <tr>
-                          <th colspan="3">$ / Premises passed</th>
-                          <td colspan="2" class="text-right">{{plan.metadata.total_cost / plan.metadata.total_premises / 1000 | currency:"$":1}}K</td>
+                          <th colspan="3">$ / Premises Passed</th>
+                          <td colspan="2" class="text-right">{{plan.metadata.total_cost / plan.metadata.total_premises | currency:"$":0}}</td>
                         </tr>
                       </tbody>
                     </table>
