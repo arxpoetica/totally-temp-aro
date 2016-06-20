@@ -155,6 +155,7 @@ module.exports = class NetworkPlan {
             UNION ALL
             SELECT $1
           )
+          AND n.node_type_id = 1
         `
         return database.findOne(sql, [plan_id])
       })
