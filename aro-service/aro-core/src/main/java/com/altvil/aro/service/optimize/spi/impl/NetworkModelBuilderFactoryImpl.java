@@ -2,8 +2,10 @@ package com.altvil.aro.service.optimize.spi.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,18 +80,20 @@ public class NetworkModelBuilderFactoryImpl implements
 		private NetworkData createNetworkData(Collection<Long> rejectedLocations) {
 			if (rejectedLocations.size() == 0) {
 				return networkData;
-			} else if (rejectedLocations.size() > 2562) {
-				int kjg = 0;
 			}
 
 			Map<Long, NetworkAssignment> map = new HashMap<>(this.map);
 
 			rejectedLocations.forEach(map::remove);
+			
+			Set<Long> selectedRoadLocationIds = new HashSet<Long> (this.networkData.getSelectedRoadLocationIds());
+			rejectedLocations.forEach(selectedRoadLocationIds::remove);
 
 			NetworkData nd = new NetworkData();
 			nd.setFiberSources(networkData.getFiberSources());
 			nd.setRoadEdges(networkData.getRoadEdges());
 			nd.setRoadLocations(map.values());
+			nd.setSelectedRoadLocationIds(selectedRoadLocationIds);
 
 			return nd;
 

@@ -178,10 +178,6 @@ public class PlanServiceImpl implements PlanService {
 
 			Collection<GraphNode> roadLocations = data.getSelectedRoadLocations().stream().map((rl)->routeModel.getVertex(rl)).collect(Collectors.toList());
 			
-			if (roadLocations.isEmpty()) {
-				int kjg = 0; // KJG Magic sauce
-			}
-			
 			Collection<FiberSourceBinding> possibleFiberSources = StreamUtil
 					.map(data.getFiberSources(),
 							fs -> {
