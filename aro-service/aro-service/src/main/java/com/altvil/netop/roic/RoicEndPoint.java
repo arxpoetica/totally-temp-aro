@@ -232,7 +232,7 @@ public class RoicEndPoint {
 	public static class Revenue {
 
 		int year;
-		double houseHolds;
+		double households;
 		double businesses;
 		double towers;
 		
