@@ -446,12 +446,16 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@Transactional
 		public void saveUpdate(WirecenterNetworkPlan plan) {
-			networkNodeRepository.deleteNetworkNodes(plan.getPlanId());
-			fiberRouteRepository.deleteFiberRoutes(plan.getPlanId());
+			
+			//TODO KEVIN + HT REview why network nodes are being deleted (THIS SHOULD NOT HAPPEN)
+			
+			//networkNodeRepository.deleteNetworkNodes(plan.getPlanId());
+			//fiberRouteRepository.deleteFiberRoutes(plan.getPlanId());
 			
 			networkNodeRepository.save(plan.getNetworkNodes());
 			fiberRouteRepository.save(plan.getFiberRoutes());
 			
+			costService.updateWireCenterCosts(plan.getPlanId()) ;
 			updateFinancials(networkNodeRepository, plan.getPlanId(), plan);
 		}
 	}
