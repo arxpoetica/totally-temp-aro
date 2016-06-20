@@ -24,12 +24,15 @@ public class RoicQueryEndPoint {
 			@PathVariable("id") long planId,
 			@RequestParam(value = "$select") String selectClause) {
 
-		Collection<RowReference> cols = roicQueryService.queryRoic(planId,
+		Collection<RowReference> cols = (selectClause == null || selectClause == null) ? roicQueryService
+				.queryRoicAll(planId) : roicQueryService.queryRoic(planId,
 				toStringList(selectClause));
 
-		return cols.stream().map(
-				rr -> new RoicCurve(rr.getIdentifier().toString(), rr
-						.getAnalysisRow().getRawData())).collect(Collectors.toList());
+		return cols
+				.stream()
+				.map(rr -> new RoicCurve(rr.getIdentifier().toString(), rr
+						.getAnalysisRow().getRawData()))
+				.collect(Collectors.toList());
 
 	}
 

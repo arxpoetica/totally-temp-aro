@@ -15,19 +15,26 @@ import com.altvil.aro.service.roic.analysis.model.RoicModel;
 public class RoicQueryServiceImpl implements RoicQueryService {
 
 	private RoicService roicService;
-	
+
 	@Autowired
 	public RoicQueryServiceImpl(RoicService roicService) {
 		super();
 		this.roicService = roicService;
 	}
 
-
 	@Override
 	public Collection<RowReference> queryRoic(Long planId,
 			Collection<String> curveNames) {
 		RoicModel model = roicService.getRoicModel(planId);
 		return curveNames.stream().map(id -> model.getRowReference(id))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<RowReference> queryRoicAll(Long planId) {
+		RoicModel model = roicService.getRoicModel(planId);
+		return model.getCurvePaths().stream()
+				.map(id -> model.getRowReference(id))
 				.collect(Collectors.toList());
 	}
 
