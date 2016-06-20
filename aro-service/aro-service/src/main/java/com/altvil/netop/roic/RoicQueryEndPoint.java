@@ -26,7 +26,7 @@ public class RoicQueryEndPoint {
 	@RequestMapping(value = "/roic/models/{id}", method = RequestMethod.GET)
 	public @ResponseBody List<RoicCurve> getEquipmentSummary(
 			@PathVariable("id") long planId,
-			@RequestParam(value = "$select") String selectClause) {
+			@RequestParam(value = "$select", required=false) String selectClause) {
 
 		Collection<RowReference> cols = (selectClause == null || selectClause == null) ? roicQueryService
 				.queryRoicAll(planId) : roicQueryService.queryRoic(planId,
