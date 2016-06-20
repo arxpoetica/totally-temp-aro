@@ -160,11 +160,21 @@ public class StreamAssemblerImpl implements StreamAssembler {
 
 		private CurveIdentifier curveId;
 		private double value[];
+		
 
 		public Row(CurveIdentifier curveId, int size) {
 			this.curveId = curveId;
 			this.value = new double[size];
 		}
+		
+		
+
+		@Override
+		public double[] getRawData() {
+			return value;
+		}
+
+
 
 		public void setValue(int period, double v) {
 			value[period] = v;

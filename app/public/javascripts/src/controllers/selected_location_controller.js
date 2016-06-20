@@ -46,6 +46,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     })
   }
 
+  $('#selected_location_controller').on('shown.bs.modal', (e) => {
+    $('#selected_location_controller a[href="#selected_location_customer_profile"]').tab('show')
+    showCurrentChart()
+  })
+
   $('#selected_location_controller').on('shown.bs.tab', (e) => {
     showCurrentChart()
   })
