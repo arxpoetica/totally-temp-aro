@@ -150,13 +150,11 @@ module.exports = class NetworkPlan {
             SUM(business_count) AS business_count,
             SUM(celltower_count) AS tower_count
           FROM client.network_nodes n
-          JOIN client.network_node_types t
-            ON n.node_type_id = t.id
           WHERE plan_id IN (
-              SELECT id FROM client.plan WHERE parent_plan_id=$1
-              UNION ALL
-              SELECT $1
-            )
+            SELECT id FROM client.plan WHERE parent_plan_id=$1
+            UNION ALL
+            SELECT $1
+          )
         `
         return database.findOne(sql, [plan_id])
       })
