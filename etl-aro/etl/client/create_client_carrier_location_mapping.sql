@@ -28,10 +28,10 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 -- This DOES NOT cover the fiber carriers that match with NBM carriers. Need to figure this out
 INSERT INTO client.locations_carriers(location_id, carrier_id, download_speed, upload_speed, provider_type)
 	SELECT
-		l.id AS location_id,
+		DISTINCT(l.id) AS location_id,
 		c.id AS carrier_id,
-		blks.maxaddown AS download_speed,
-		blks.maxadup AS upload_speed,
+		MAX(blks.maxaddown) AS download_speed,
+		MAX(blks.maxadup) AS upload_speed,
 		blks.provider_type AS provider_type
 	FROM aro.locations l
 	JOIN aro.census_blocks cb
@@ -39,7 +39,7 @@ INSERT INTO client.locations_carriers(location_id, carrier_id, download_speed, u
 	JOIN nbm.blocks blks
 	ON cb.tabblock_id = blks.fullfipsid
 	JOIN aro.carriers c
-	ON c.name = blks.hoconame -- THIS MIGHT BE A PROBLEMATIC JOIN CHECK ME WHEN THINGS GO WRONG
+	ON LOWER(c.name) = LOWER(blks.hoconame) -- THIS MIGHT BE A PROBLEMATIC JOIN CHECK ME WHEN THINGS GO WRONG
 	WHERE c.route_type = 'ilec';
 
 -- Calculate distnace to fiber for each location for each carrier
