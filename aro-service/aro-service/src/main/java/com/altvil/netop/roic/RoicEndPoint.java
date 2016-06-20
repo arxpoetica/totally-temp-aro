@@ -257,7 +257,7 @@ public class RoicEndPoint {
 
 
 		public void setHouseHolds(double houseHolds) {
-			this.houseHolds = houseHolds;
+			this.households = houseHolds;
 		}
 
 
@@ -291,7 +291,7 @@ public class RoicEndPoint {
 			super();
 
 			this.year = year;
-			this.houseHolds = houseHolds;
+			this.households = houseHolds;
 			this.businesses = businesses;
 			this.towers = towers;
 		}
