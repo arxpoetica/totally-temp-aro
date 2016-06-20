@@ -9,6 +9,7 @@ CREATE TABLE aro.carriers
 	CONSTRAINT aro_carriers_pkey PRIMARY KEY (id)
 );
 
+-- Fiber providers from Geotel
 INSERT INTO aro.carriers (name, route_type, color) values('186 COMMUNICATIONS', 'fiber', '#fcafae');
 INSERT INTO aro.carriers (name, route_type, color) values('ALLIED PROPOSED', 'fiber', '#f2cc10');
 INSERT INTO aro.carriers (name, route_type, color) values('AT&T', 'fiber', '#dca1fc');
@@ -43,3 +44,26 @@ INSERT INTO aro.carriers (name, route_type, color) values('WINDSTREAM', 'fiber',
 INSERT INTO aro.carriers (name, route_type, color) values('XO COMMUNICATIONS', 'fiber', '#e2cb8e');
 INSERT INTO aro.carriers (name, route_type, color) values('ZAYO', 'fiber', '#e896ca');
 INSERT INTO aro.carriers (name, route_type, color) values('ZITO', 'fiber', '#7053e2');
+
+-- Carriers from NBM wich have not already been loaded
+WITH distinct_nbm_carrier_names AS
+(
+	SELECT 
+		distinct hoconame
+	FROM nbm.blocks
+),
+geotel_nbm_matching AS
+(
+SELECT
+	nbm.hoconame AS nbm_name,
+	carriers.name AS geotel_name
+FROM distinct_nbm_carrier_names nbm
+LEFT JOIN aro.carriers carriers
+ON (UPPER(nbm.hoconame) ~ ('\m' || UPPER(carriers.name)))
+)
+INSERT INTO aro.carriers (name, route_type)
+	SELECT 
+		nbm_name,
+		'ilec'
+	FROM geotel_nbm_matching
+	WHERE geotel_name IS NULL;

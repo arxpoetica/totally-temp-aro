@@ -20,8 +20,23 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 	JOIN aro.fiber_plant fiber
 	ON ST_Contains(fiber.buffer_geom, locations.geom);
 
--- Calculate distnace to fiber for each location for each carrier
 
+-- Mapping for carriers from NBM
+-- This DOES NOT cover the fiber carriers that match with NBM carriers. Need to figure this out
+INSERT INTO client.locations_carriers(location_id, carrier_id)
+	SELECT
+		l.id AS location_id,
+		c.id AS carrier_id
+	FROM aro.locations l
+	JOIN aro.census_blocks cb
+	ON st_contains(cb.geom, l.geom)
+	JOIN nbm.blocks blks
+	ON cb.tabblock_id = blks.fullfipsid
+	JOIN aro.carriers c
+	ON c.name = blks.hoconame
+	WHERE c.route_type = 'ilec';
+
+-- Calculate distnace to fiber for each location for each carrier
 DROP TABLE IF EXISTS client.locations_distance_to_carrier;
 
 CREATE TABLE client.locations_distance_to_carrier (

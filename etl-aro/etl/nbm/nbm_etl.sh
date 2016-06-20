@@ -10,5 +10,5 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 ${PSQL} -a -f $DIR/create_nbm_blocks.sql
 
 # Replace with S3 step...
-cd $TMPDIR
-cat /$TMPDIR/NY-NBM-CBLOCK-CSV-JUN-2014.CSV | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;"
+cd $GISROOT
+cat /$GISROOT/NY-NBM-CBLOCK-CSV-JUN-2014.CSV | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;"
