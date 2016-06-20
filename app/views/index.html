@@ -1276,6 +1276,22 @@
                         </tr>
                       </tbody>
                     </table>
+                    <table class="table">
+                      <tbody>
+                        <tr>
+                          <th colspan="3">Premises passed</th>
+                          <td colspan="2" class="text-right">{{plan.metadata.total_premises | number}}</td>
+                        </tr>
+                        <tr ng-repeat="premise in plan.metadata.premises">
+                          <td colspan="3"><small> ↳ {{premise.name}}</small></td>
+                          <td colspan="2" class="text-right">{{premise.value | number}}</td>
+                        </tr>
+                        <tr>
+                          <th colspan="3">$ / Premises passed</th>
+                          <td colspan="2" class="text-right">{{plan.metadata.total_cost / plan.metadata.total_premises / 1000 | currency:"$":1}}K</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                   <div class="col-sm-6">
                     <p><strong>Cash Flow</strong></p>
