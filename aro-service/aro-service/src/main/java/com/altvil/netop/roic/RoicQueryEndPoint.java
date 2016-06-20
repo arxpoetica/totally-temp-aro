@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.roic.RoicQueryService;
 import com.altvil.aro.service.roic.analysis.RowReference;
-import com.altvil.netop.roic.RoicEndPoint.CashFlow;
 import com.altvil.utils.StreamUtil;
 
+
+@RestController
 public class RoicQueryEndPoint {
 
 	private RoicQueryService roicQueryService;
