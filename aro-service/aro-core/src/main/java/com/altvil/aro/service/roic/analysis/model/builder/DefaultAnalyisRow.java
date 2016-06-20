@@ -26,6 +26,13 @@ public class DefaultAnalyisRow implements AnalysisRow {
 		}
 		return new DefaultAnalyisRow(values);
 	}
+	
+	
+
+	@Override
+	public double[] getRawData() {
+		return values;
+	}
 
 	public static AnalysisRow minus(AnalysisRow a, AnalysisRow b) {
 
