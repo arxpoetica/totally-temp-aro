@@ -130,15 +130,25 @@ public class NetworkServiceImpl implements NetworkService {
 					+ ") returned null.");
 		} else {
 			List<Long> selectedRoadLocations = selectedRoadLocationIds(planId);
-			networkData.setSelectedRoadLocationIds(selectedRoadLocations);
+			// networkData.setSelectedRoadLocationIds(selectedRoadLocations);
 
 			// TODO MEDIUM Compare performance
 			networkData
 					.setFiberSources(getFiberSourceNetworkAssignments(networkConfiguration));
+
 			networkData.setRoadLocations(getRoadLocationNetworkAssignments(
 					networkConfiguration, selectedRoadLocations));
+
 			networkData.setRoadEdges(getRoadEdges(networkConfiguration));
+
+			if (selectedRoadLocations.size() == 0) {
+				selectedRoadLocations = networkData.getRoadLocations().stream()
+						.map(a -> a.getSource().getObjectId())
+						.collect(Collectors.toList());
+			}
+
 			networkData.setSelectedRoadLocationIds(selectedRoadLocations);
+
 		}
 
 		return networkData;
@@ -173,10 +183,11 @@ public class NetworkServiceImpl implements NetworkService {
 		locDemands = null;
 		if (null == locDemands) {
 			locDemands = queryLocationDemand(
-					networkConfiguration.isFilteringRoadLocationDemandsBySelection(),
+					networkConfiguration
+							.isFilteringRoadLocationDemandsBySelection(),
 					networkConfiguration.getLocationEntityTypes(),
-					networkConfiguration.getPlanId(),
-					networkConfiguration.getYear());
+					networkConfiguration.getPlanId(), networkConfiguration
+							.getYear());
 			// locDemandCache.put(key, locDemands);
 			// NOTE: currently no update policy used as LocationDemand is
 			// temporarily assumed immutable
@@ -232,16 +243,12 @@ public class NetworkServiceImpl implements NetworkService {
 			boolean isFilteringRoadLocationDemandsBySelection,
 			Set<LocationEntityType> type, long planId, int year) {
 
-		List<Object[]> demands = isFilteringRoadLocationDemandsBySelection ?
-				planRepository
-				.queryFiberDemand(planId, year) :
-					planRepository
-				.queryAllFiberDemand(planId, year) ;
-				
-		
+		List<Object[]> demands = isFilteringRoadLocationDemandsBySelection ? planRepository
+				.queryFiberDemand(planId, year) : planRepository
+				.queryAllFiberDemand(planId, year);
+
 		Map<Long, LocationDemand> map = new HashMap<>();
-		demands
-				.stream()
+		demands.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
 						result -> {
@@ -261,7 +268,7 @@ public class NetworkServiceImpl implements NetworkService {
 											.addWithRevenue(
 													LocationEntityType.CellTower,
 													result.getDouble(LoctationDemandMap.tower_fiber),
-													result.getDouble(LoctationDemandMap.tower_spend)  * 0.3)
+													result.getDouble(LoctationDemandMap.tower_spend) * 0.3)
 											.build());
 
 						});
@@ -270,9 +277,9 @@ public class NetworkServiceImpl implements NetworkService {
 
 	}
 
-//	private Long getWirecenterIdByPlanId(long planId) {
-//		return planRepository.queryWirecenterIdForPlanId(planId);
-//	}
+	// private Long getWirecenterIdByPlanId(long planId) {
+	// return planRepository.queryWirecenterIdForPlanId(planId);
+	// }
 
 	private Map<Long, RoadLocation> queryRoadLocations(long planId) {
 		Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
