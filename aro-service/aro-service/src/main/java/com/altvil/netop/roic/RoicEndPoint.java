@@ -251,7 +251,7 @@ public class RoicEndPoint {
 
 
 		public double getHouseHolds() {
-			return houseHolds;
+			return households;
 		}
 
 
