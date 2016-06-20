@@ -104,7 +104,7 @@ public interface NetworkReportRepository extends
 			" join financial.report_type rt on rt.id = dh.report_type_id and rt.name = 'summary_equipment'\n" + 
 			")\n" + 
 			"insert into financial.equipment_summary_cost (network_cost_code_id, network_report_id, atomic_count, quantity, price, total_cost)\n" + 
-			"select c.network_cost_code_id, h.id, sum(c.atomic_count), sum(1), avg(c.price),  sum(c.total_cost) \n" + 
+			"select c.network_cost_code_id, h.id, sum(c.atomic_count), sum(c.quantity), avg(c.price),  sum(c.total_cost) \n" + 
 			"from hdr h, wire_reports wr\n" + 
 			"join financial.equipment_summary_cost c on c.network_report_id = wr.id\n" + 
 			"group by c.network_cost_code_id, h.id" + 
