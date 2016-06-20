@@ -138,6 +138,7 @@ public class NetworkServiceImpl implements NetworkService {
 			networkData.setRoadLocations(getRoadLocationNetworkAssignments(
 					networkConfiguration, selectedRoadLocations));
 			networkData.setRoadEdges(getRoadEdges(networkConfiguration));
+			networkData.setSelectedRoadLocationIds(selectedRoadLocations);
 		}
 
 		return networkData;
