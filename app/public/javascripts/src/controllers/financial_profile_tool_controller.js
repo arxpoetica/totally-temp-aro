@@ -283,7 +283,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       datasets: [dataset]
     }
 
-    ;($scope.plan.metadata.npv || []).forEach((revenue) => {
+    ;($scope.plan.metadata && $scope.plan.metadata.npv || []).forEach((revenue) => {
       data.labels.push(revenue.year)
       dataset.data.push(revenue.value)
     })

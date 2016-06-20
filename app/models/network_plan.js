@@ -129,7 +129,7 @@ module.exports = class NetworkPlan {
         output.metadata.fiber_summary = attachCostDescription(results[1])
 
         output.metadata.equipment_cost = results[0].reduce((total, item) => item.totalCost + total, 0)
-        output.metadata.fiber_cost = results[0].reduce((total, item) => item.totalCost + total, 0)
+        output.metadata.fiber_cost = results[1].reduce((total, item) => item.totalCost + total, 0)
 
         plan.total_cost = output.metadata.equipment_cost + output.metadata.fiber_cost
 
@@ -143,8 +143,40 @@ module.exports = class NetworkPlan {
             'fiber_type': edge.fiber_type
           }
         }))
+
+        var sql = `
+          SELECT
+            SUM(household_count) AS household_count,
+            SUM(business_count) AS business_count,
+            SUM(celltower_count) AS tower_count
+          FROM client.network_nodes n
+          JOIN client.network_node_types t
+            ON n.node_type_id = t.id
+          WHERE plan_id IN (
+              SELECT id FROM client.plan WHERE parent_plan_id=$1
+              UNION ALL
+              SELECT $1
+            )
+        `
+        return database.findOne(sql, [plan_id])
       })
-      .then(() => {
+      .then((row) => {
+        output.metadata.premises = [
+          {
+            name: 'Households',
+            value: row.household_count
+          },
+          {
+            name: 'Businesses',
+            value: row.business_count
+          },
+          {
+            name: 'Towers',
+            value: row.tower_count
+          }
+        ]
+        output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
+
         return database.query(`
           SELECT
             region_id AS id, region_name AS name, region_type AS type, ST_AsGeoJSON(geom)::json AS geog

@@ -6,13 +6,16 @@ import java.util.Map;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.AnalysisRow;
+import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
+import com.altvil.aro.service.roic.analysis.model.builder.DefaultRowReference;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
 import com.altvil.aro.service.roic.analysis.registry.impl.DefaultContainerRegistry;
+import com.altvil.aro.service.roic.analysis.registry.impl.ScopedCurveIdentifier;
 
 public class RoicModelImpl extends DefaultContainerRegistry implements
 		RoicModel {
@@ -48,8 +51,20 @@ public class RoicModelImpl extends DefaultContainerRegistry implements
 	}
 
 	@Override
-	public AnalysisRow getAnalysisRow(String row) {
-		return getRowMap().get(row) ;
+	public AnalysisRow getAnalysisRow(String curveName) {
+		AnalysisRow ar =  getRowMap().get(curveName) ;
+		if( ar == null ) {
+			throw new RuntimeException("Unknown curve name : " + curveName) ;
+		}
+		
+		return ar ;
+	
+	}
+	
+
+	@Override
+	public RowReference getRowReference(String path) {
+		return new DefaultRowReference(new ScopedCurveIdentifier(path), getAnalysisRow(path)) ;
 	}
 
 	private Map<String, AnalysisRow> getRowMap() {

@@ -9,7 +9,8 @@ exports.configure = (api, middleware) => {
 
   const proxy = (path, params, def) => {
     var req = {
-      url: config.aro_service_url + `/rest/financial_profile/${params.plan_id}/${path}`,
+      url: config.aro_service_url + `/rest/roic/models/${params.plan_id}`,
+      qs: { select: path },
       json: true
     }
     console.log('req', req)
