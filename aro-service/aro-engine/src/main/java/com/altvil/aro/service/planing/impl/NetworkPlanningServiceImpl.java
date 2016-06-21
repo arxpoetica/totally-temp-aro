@@ -15,6 +15,7 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCompute;
 import org.apache.ignite.cluster.ClusterGroup;
 import org.apache.ignite.cluster.ClusterNode;
+import org.apache.ignite.configuration.AtomicConfiguration;
 import org.apache.ignite.lang.IgniteCallable;
 import org.apache.ignite.resources.SpringResource;
 import org.slf4j.Logger;
@@ -638,33 +639,44 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@Override
 		public double getPrice(DropCable dropCable) {
-			return 0.5 * dropCable.getLength();
+			//return 0.5 * dropCable.getLength();
+			return 0 ;
 		}
 
 		@Override
 		public double getMaterialCost(MaterialType type) {
+			return getMaterialCost(type, 0) ;
+		}
+		
+		
+		@Override
+		public double getMaterialCost(MaterialType type, double atomicUnit) {
 			switch (type) {
+		
+			case CO:
+				return 53.51 * atomicUnit;
 			case FDT:
-				return 20;
+				return 547.5;
 			case FDH:
-				return 2000;
+				return 28595;
 			case BFT:
-				return 400;
+				return 0;
 			case SPLITTER_16:
-				return 1500;
+				return 0;
 			case SPLITTER_32:
-				return 2000;
+				return 0;
 			case SPLITTER_64:
-				return 2500;
+				return 0;
 
 			default:
 				return 0;
 			}
 		}
+		
 
 		@Override
 		public double getFiberCostPerMeter(FiberType fiberType, int requiredFiberStrands) {
-			return 4;
+			return 22.96;
 		}
 
 	}

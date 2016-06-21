@@ -9,7 +9,9 @@ public interface PricingModel {
 	double  getPrice(DropCable dropCable) ;
 
 	double getMaterialCost(MaterialType type);
-
+	
+	double getMaterialCost(MaterialType type, double atomicUnits);
+	
 	double getFiberCostPerMeter(FiberType fiberType, int requiredFiberStrands);
 
 }
