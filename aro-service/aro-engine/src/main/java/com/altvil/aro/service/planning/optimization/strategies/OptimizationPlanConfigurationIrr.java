@@ -38,7 +38,7 @@ public class OptimizationPlanConfigurationIrr extends OptimizationPlanConfigurat
 			return 0;
 		}
 		
-		return node.getCapex() / monthlyRevenueImpact; 
+		return -node.getCapex() / monthlyRevenueImpact; 
 	}
 
 	public OptimizationPlanConfigurationIrr(IrrOptimizationPlan fiberPlan) {
