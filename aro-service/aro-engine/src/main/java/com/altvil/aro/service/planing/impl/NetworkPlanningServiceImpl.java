@@ -227,12 +227,20 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	@Override
 	public MasterPlanBuilder optimizeMasterFiber(Principal requestor, OptimizationPlanConfiguration optimizationPlanStrategy,
 			FtthThreshholds constraints) throws InterruptedException {
-		final List<Number> currentWirecenterPlans = networkPlanRepository.wireCenterPlanIdsFor(optimizationPlanStrategy.getPlanId());
+		
+		networkPlanRepository.deleteWireCenterPlans(optimizationPlanStrategy.getPlanId());
+		
+		List<Number> wireCentersPlans = 
+				optimizationPlanStrategy.getWireCenters().isEmpty() ?
+				networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId()) :
+				networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId(), optimizationPlanStrategy.getWireCenters()) ;
+		
+		//final List<Number> currentWirecenterPlans = networkPlanRepository.wireCenterPlanIdsFor(optimizationPlanStrategy.getPlanId());
 		
 		//final List<Number> computedWirecenterUpdates = networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId());
 		
 		List<OptimizationPlanConfiguration> plans = StreamUtil
-				.map(currentWirecenterPlans, (plan)->optimizationPlanStrategy.dependentPlan(plan.longValue()));
+				.map(wireCentersPlans, (plan)->optimizationPlanStrategy.dependentPlan(plan.longValue()));
 
 		List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor.invokeAll(
 				plans.stream().map(plan -> createOptimzedCallable(plan, constraints)).collect(Collectors.toList()));
@@ -620,8 +628,8 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@Transactional
 		private void saveUpdate(WirecenterNetworkPlan plan) {
-			networkNodeRepository.deleteNetworkNodes(plan.getPlanId());
-			fiberRouteRepository.deleteFiberRoutes(plan.getPlanId());
+			//networkNodeRepository.deleteNetworkNodes(plan.getPlanId());
+			//fiberRouteRepository.deleteFiberRoutes(plan.getPlanId());
 
 			networkNodeRepository.save(plan.getNetworkNodes());
 			fiberRouteRepository.save(plan.getFiberRoutes());

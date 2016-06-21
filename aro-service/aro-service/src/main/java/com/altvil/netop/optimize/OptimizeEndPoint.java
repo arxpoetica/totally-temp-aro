@@ -1,9 +1,12 @@
 package com.altvil.netop.optimize;
 
 import java.security.Principal;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.demand.LocationTypeMask;
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
@@ -38,6 +43,7 @@ import com.altvil.aro.service.strategy.StrategyService;
 import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.DummyRequester;
 import com.altvil.netop.plan.MasterPlanJobResponse;
+import com.altvil.netop.plan.SelectedRegion;
 
 @RestController
 public class OptimizeEndPoint {
@@ -67,6 +73,11 @@ public class OptimizeEndPoint {
 		return completeRecalcWirecenterPlan(job.getId());
 	}
 
+	
+	private Set<LocationEntityType> toMask(Collection<LocationEntityType> mask) {
+		return LocationTypeMask.MASK.toMask(mask);
+	}
+	
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
 	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(
 			@RequestBody AroOptimizationPlan aroRequest)
@@ -170,10 +181,31 @@ public class OptimizeEndPoint {
 
 		return mpr;
 	}
+	
+	
+	private Set<Integer> toSelectedWireCenters(
+			Collection<SelectedRegion> selectedRegions) {
+
+		Set<Integer> result = new HashSet<>();
+
+		if (selectedRegions != null) {
+			for (SelectedRegion sr : selectedRegions) {
+				switch (sr.getRegionType()) {
+				case WIRECENTER:
+					result.add(Integer.parseInt(sr.getId()));
+					break;
+				default:
+				}
+			}
+		}
+
+		return result;
+
+	}
 
 	private OptimizationPlan toOptimizationPlan(AroOptimizationPlan plan) {
 
-		switch (plan.getOptimizationType()) {
+		switch (plan.getAlgorithm()) {
 		case NPV: {
 			FinancialConstraints financials = plan.getFinancialConstraints();
 			return new NpvOptimizationPlanImpl(financials.getBudget(), financials.getDiscountRate(),
@@ -182,6 +214,8 @@ public class OptimizeEndPoint {
 		case COVERAGE: {
 			CoverageOptimizationPlanImpl coverage = new CoverageOptimizationPlanImpl();
 			coverage.setCoverage(plan.getCoverage());
+			coverage.setLocationEntityTypes(toMask(plan.getLocationTypes()));
+			coverage.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
 			coverage.setPlanId(plan.getPlanId());
 			return coverage;
 		}
@@ -189,6 +223,8 @@ public class OptimizeEndPoint {
 		case MAX_IRR: {
 			FinancialConstraints financials = plan.getFinancialConstraints();
 			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.MAX_IRR);
+			maxIrr.setLocationEntityTypes(toMask(plan.getLocationTypes()));
+			maxIrr.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
 			maxIrr.setPlanId(plan.getPlanId());
 			maxIrr.setYears(financials.getYears());
 			return maxIrr;
@@ -196,6 +232,8 @@ public class OptimizeEndPoint {
 		case BUDGET_IRR: {
 			FinancialConstraints financials = plan.getFinancialConstraints();
 			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.BUDGET_IRR);
+			maxIrr.setLocationEntityTypes(toMask(plan.getLocationTypes()));
+			maxIrr.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
 			maxIrr.setPlanId(plan.getPlanId());
 			maxIrr.setYears(financials.getYears());
 			maxIrr.setBudget(financials.getBudget());
@@ -205,6 +243,8 @@ public class OptimizeEndPoint {
 		case TARGET_IRR: {
 			FinancialConstraints financials = plan.getFinancialConstraints();
 			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.TARGET_IRR);
+			maxIrr.setLocationEntityTypes(toMask(plan.getLocationTypes()));
+			maxIrr.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
 			maxIrr.setPlanId(plan.getPlanId());
 			maxIrr.setYears(financials.getYears());
 			maxIrr.setBudget(financials.getBudget());

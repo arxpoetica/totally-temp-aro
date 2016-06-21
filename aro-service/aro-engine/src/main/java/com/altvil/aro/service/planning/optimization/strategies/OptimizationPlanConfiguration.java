@@ -1,7 +1,9 @@
 package com.altvil.aro.service.planning.optimization.strategies;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,11 +27,17 @@ public abstract class OptimizationPlanConfiguration
 	private static final long	   serialVersionUID	= 1L;
 	private final OptimizationPlan optimizationPlan;
 	private long				   planId;
+	private List<LocationEntityType> locationTypes = new ArrayList<>();
+	private List<Integer> wireCenters = new ArrayList<>();
+
+	
 
 	public OptimizationPlanConfiguration(OptimizationPlan optimizationPlan) {
 		this.optimizationPlan = optimizationPlan;
 		this.planId = optimizationPlan.getPlanId();
 	}
+	
+	
 	
 	
 
@@ -82,6 +90,24 @@ public abstract class OptimizationPlanConfiguration
 	public boolean isFilteringRoadLocationsBySelection() {
 		return true;
 	}
+	
+	
+
+	public List<Integer> getWireCenters() {
+		return wireCenters;
+	}
+
+
+
+
+
+	public void setWireCenters(List<Integer> wireCenters) {
+		this.wireCenters = wireCenters;
+	}
+
+
+
+
 
 	/**
 	 * The score provides an assessment by which generating nodes may be sorted from least (lowest) to most (highest) desirability.

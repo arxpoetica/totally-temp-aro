@@ -12,6 +12,7 @@ public abstract class AbstractOptimizationPlan implements OptimizationPlan {
 	private long						   planId;
 	private int year = 2015;
 	private Set<LocationEntityType> locationEntityTypes = new HashSet<>() ;
+	private Set<Integer> wireCenterIds = new HashSet<>() ;
 	
 	
 	protected AbstractOptimizationPlan(OptimizationType optimizationType) {
@@ -63,7 +64,13 @@ public abstract class AbstractOptimizationPlan implements OptimizationPlan {
 	public void setLocationEntityTypes(Set<LocationEntityType> locationEntityTypes) {
 		this.locationEntityTypes = locationEntityTypes;
 	}
-	
-	
+
+	public Set<Integer> getWireCenterIds() {
+		return wireCenterIds;
+	}
+
+	public void setWireCenterIds(Set<Integer> wireCenterIds) {
+		this.wireCenterIds = wireCenterIds;
+	}
 	
 }
