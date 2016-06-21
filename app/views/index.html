@@ -1312,46 +1312,50 @@
                 <div>
                   <form class="form-inline">
                     <div class="form-group">
-                      <select class="form-control">
-                        <option>BAU</option>
-                        <option>Fiber</option>
-                        <option>Incremental capex</option>
+                      <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+                        <option value="bau">BAU</option>
+                        <option value="plan">Fiber</option>
+                        <option value="incremental">Incremental</option>
                       </select>
                     </div>
+                    <!--
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Businesses
+                        <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Businesses
                       </label>
                     </div>
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Households
+                        <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Households
                       </label>
                     </div>
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Towers
+                        <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Towers
                       </label>
                     </div>
+                    -->
                   </form>
                   <br>
                   <p class="text-center"><strong>BAU Capex</strong></p>
                   <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
                   <div id="financial-profile-chart-capex-legend"></div>
+                  <!--
                   <br>
                   <p class="text-center"><strong>Budget Allocation</strong></p>
                   <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
                   <div id="financial-profile-chart-budget-legend"></div>
+                  -->
                 </div>
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfileRevenue" style="margin-top: 20px">
                 <div>
                   <form class="form-inline">
                     <div class="form-group">
-                      <select class="form-control">
-                        <option>BAU</option>
-                        <option>Fiber</option>
-                        <option>Incremental</option>
+                      <select class="form-control" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
+                        <option value="bau">BAU</option>
+                        <option value="plan">Fiber</option>
+                        <option value="incremental">Incremental</option>
                       </select>
                     </div>
                   </form>
@@ -1365,27 +1369,27 @@
                 <div>
                   <form class="form-inline" ng-show="aboveWirecenter">
                     <div class="form-group">
-                      <select class="form-control">
-                        <option>BAU</option>
-                        <option>Fiber</option>
-                        <option>Incremental</option>
+                      <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+                        <option value="bau">BAU</option>
+                        <option value="plan">Fiber</option>
+                        <option value="incremental">Incremental</option>
                       </select>
                     </div>
                   </form>
                   <form class="form-inline">
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Businesses
+                        <input type="checkbox" ng-model="premisesFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Businesses
                       </label>
                     </div>
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Households
+                        <input type="checkbox" ng-model="premisesFilterEntityTypes['households']" ng-change="refreshCurrentTab(true)"> Households
                       </label>
                     </div>
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Towers
+                        <input type="checkbox" ng-model="premisesFilterEntityTypes['towers']" ng-change="refreshCurrentTab(true)"> Towers
                       </label>
                     </div>
                   </form>
@@ -1400,17 +1404,17 @@
                   <form class="form-inline">
                     <div class="radio" style="margin-left: 10px">
                       <label>
-                        <input type="radio"> Businesses
+                        <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="businesses"> Businesses
                       </label>
                     </div>
                     <div class="radio" style="margin-left: 10px">
                       <label>
-                        <input type="radio"> Households
+                        <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="households"> Households
                       </label>
                     </div>
                     <div class="radio" style="margin-left: 10px">
                       <label>
-                        <input type="radio"> Towers
+                        <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="towers"> Towers
                       </label>
                     </div>
                   </form>
