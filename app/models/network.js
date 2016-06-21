@@ -173,7 +173,7 @@ module.exports = class Network {
     }
     var body = {
       planId: plan_id,
-      algorithm: 'CAPEX', // options.algorithm,
+      algorithm: options.algorithm,
       locationTypes: options.locationTypes.map((key) => locationTypes[key])
       // budget: options.budget
     }
