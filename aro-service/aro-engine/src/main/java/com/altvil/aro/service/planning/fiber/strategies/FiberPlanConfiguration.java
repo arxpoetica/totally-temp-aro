@@ -86,7 +86,7 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 	}
 
 	public boolean isFilteringRoadLocationsBySelection() {
-		return this.getSelectedWireCenters().isEmpty() ;
+		return true;
 	}
 
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
