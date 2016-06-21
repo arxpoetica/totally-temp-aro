@@ -199,6 +199,14 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     $scope.plan = plan
   })
 
+  $scope.irrThresholdRangeChanged = () => {
+    $scope.irrThreshold = +$scope.irrThresholdRange
+  }
+
+  $scope.irrThresholdChanged = () => {
+    $scope.irrThresholdRange = $scope.irrThreshold
+  }
+
   function calculate () {
     var locationTypes = []
     if ($scope.coverHouseholds) locationTypes.push('households')
@@ -208,7 +216,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       locationTypes: locationTypes,
       geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id, type: i.type })),
       algorithm: $scope.optimizationType,
-      budget: parseBudget()
+      budget: parseBudget(),
+      irrThreshold: $scope.irrThreshold / 100
     }
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'
