@@ -1,3 +1,5 @@
+'use strict'
+
 var pify = require('pify')
 var request = pify(require('request'), { multiArgs: true })
 
