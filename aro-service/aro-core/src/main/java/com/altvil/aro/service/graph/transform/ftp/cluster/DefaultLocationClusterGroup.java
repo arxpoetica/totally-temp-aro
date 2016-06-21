@@ -169,6 +169,12 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				if (currentCluster.getPinnedLocation() == null) {
 					log.error("Failed to assign pin to Cluster");
 				} else {
+					
+					if( currentCluster.getRemainingDemand() >= 6 ) {
+						log.debug("assigned locations = " + currentCluster.getLocations().size() + " " + currentCluster.getRemainingDemand()) ;
+					}
+					
+					
 					clusters.add(currentCluster);
 					currentCluster = new FdtConstrainedAggregate(
 							edgeList.getGeoSegment(), thresholds);
