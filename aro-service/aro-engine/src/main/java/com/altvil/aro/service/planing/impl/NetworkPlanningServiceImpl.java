@@ -638,24 +638,25 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@Override
 		public double getPrice(DropCable dropCable) {
-			return 0.5 * dropCable.getLength();
+			//return 0.5 * dropCable.getLength();
+			return 0 ;
 		}
 
 		@Override
 		public double getMaterialCost(MaterialType type) {
 			switch (type) {
 			case FDT:
-				return 20;
+				return 600;
 			case FDH:
-				return 2000;
+				return 25000;
 			case BFT:
-				return 400;
+				return 0;
 			case SPLITTER_16:
-				return 1500;
+				return 0;
 			case SPLITTER_32:
-				return 2000;
+				return 0;
 			case SPLITTER_64:
-				return 2500;
+				return 0;
 
 			default:
 				return 0;
@@ -664,7 +665,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@Override
 		public double getFiberCostPerMeter(FiberType fiberType, int requiredFiberStrands) {
-			return 4;
+			return 22.95;
 		}
 
 	}
