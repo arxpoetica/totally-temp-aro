@@ -5,8 +5,6 @@
 var helpers = require('../helpers')
 var database = helpers.database
 var _ = require('underscore')
-var pify = require('pify')
-var request = pify(require('request'), { multiArgs: true })
 var config = helpers.config
 var models = require('./')
 var pync = require('pync')
@@ -256,16 +254,7 @@ module.exports = class Network {
   }
 
   static _callService (req) {
-    console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
-    return request(req).then((result) => {
-      var res = result[0]
-      var body = result[1]
-      console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
-      if (res.statusCode && res.statusCode >= 400) {
-        return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
-      }
-      return body
-    })
+    return models.AROService.request(req)
   }
 
   static selectBoundary (plan_id, data) {
