@@ -1,6 +1,7 @@
 package com.altvil.aro.service.graph.transform.impl;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.WeightedGraph;
@@ -16,7 +17,6 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
-import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
@@ -61,9 +61,10 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return new DefaultGraphBuilder<T>(factory, graph, new AroEdgeFactory<T>());
 	}
 
-	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> builder, GraphModel<T> graph, GraphNode srcNode,
-			Collection<GraphNode> marked) {
-		return new DagBuilder<T>(createDAGBuilder(), graph, builder).createDAG(marked,
+	@Override
+	public <T> DAGModel<T> createDAG(GraphModel<T> graph, GraphNode srcNode,
+			Predicate<AroEdge<T>> predicate) {
+		return new DagBuilder<T>(createDAGBuilder(), graph).createDAG(predicate,
 				srcNode);
 	}
 
@@ -114,7 +115,8 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 				factory, GraphAssignmentFactoryImpl.FACTORY);
 
 		b.setFiberSources(locationData.getFiberSources()) 
-				.setSelectedRoadLocations(locationData.getRoadLocations(), locationData.getSelectedRoadLocationIds())
+				.setRoadLocations(locationData.getRoadLocations())
+				//.setSelectedRoadLocations(locationData.getRoadLocations(), locationData.getSelectedRoadLocationIds())
 				.setRoadEdges(locationData.getRoadEdges());
 		return b.build();
 		
