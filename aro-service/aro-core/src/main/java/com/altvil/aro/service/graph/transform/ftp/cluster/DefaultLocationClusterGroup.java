@@ -170,7 +170,10 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 					log.error("Failed to assign pin to Cluster");
 				} else {
 					
-					log.info("assigned locations = " + currentCluster.getLocations().size() + " " + currentCluster.getRemainingDemand()) ;
+					if( currentCluster.getRemainingDemand() >= 6 ) {
+						log.debug("assigned locations = " + currentCluster.getLocations().size() + " " + currentCluster.getRemainingDemand()) ;
+					}
+					
 					
 					clusters.add(currentCluster);
 					currentCluster = new FdtConstrainedAggregate(
