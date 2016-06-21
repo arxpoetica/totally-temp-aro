@@ -232,7 +232,7 @@ public class RoicEndPoint {
 	public static class Revenue {
 
 		int year;
-		double houseHolds;
+		double households;
 		double businesses;
 		double towers;
 		
@@ -251,13 +251,13 @@ public class RoicEndPoint {
 
 
 		public double getHouseHolds() {
-			return houseHolds;
+			return households;
 		}
 
 
 
 		public void setHouseHolds(double houseHolds) {
-			this.houseHolds = houseHolds;
+			this.households = houseHolds;
 		}
 
 
@@ -291,7 +291,7 @@ public class RoicEndPoint {
 			super();
 
 			this.year = year;
-			this.houseHolds = houseHolds;
+			this.households = houseHolds;
 			this.businesses = businesses;
 			this.towers = towers;
 		}

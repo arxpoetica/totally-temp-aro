@@ -4,25 +4,29 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.roic.RoicQueryService;
 import com.altvil.aro.service.roic.analysis.RowReference;
-import com.altvil.netop.roic.RoicEndPoint.CashFlow;
 import com.altvil.utils.StreamUtil;
 
+
+@RestController
 public class RoicQueryEndPoint {
 
+	@Autowired
 	private RoicQueryService roicQueryService;
 
 	@RequestMapping(value = "/roic/models/{id}", method = RequestMethod.GET)
 	public @ResponseBody List<RoicCurve> getEquipmentSummary(
 			@PathVariable("id") long planId,
-			@RequestParam(value = "$select") String selectClause) {
+			@RequestParam(value = "$select", required=false) String selectClause) {
 
 		Collection<RowReference> cols = (selectClause == null || selectClause == null) ? roicQueryService
 				.queryRoicAll(planId) : roicQueryService.queryRoic(planId,
