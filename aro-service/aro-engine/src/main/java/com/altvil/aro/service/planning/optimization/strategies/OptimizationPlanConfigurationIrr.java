@@ -104,6 +104,11 @@ public class OptimizationPlanConfigurationIrr extends OptimizationPlanConfigurat
 	}
 
 	@Override
+	public boolean requiredNode(GeneratingNode generatingNode) {
+		return !generatingNode.getChildren().isEmpty();
+	}
+
+	@Override
 	public Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans) {
 		double maxIrr = Double.NEGATIVE_INFINITY;
 		OptimizedNetwork maxIrrPlan = null;

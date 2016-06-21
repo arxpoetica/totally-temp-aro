@@ -13,6 +13,7 @@ public class AroOptimizationPlan {
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	
 	private Double coverage ;
+	private Double threshold;
 
 	public long getPlanId() {
 		return planId;
@@ -46,7 +47,11 @@ public class AroOptimizationPlan {
 		this.coverage = coverage;
 	}
 	
+	public Double getThreshold() {
+		return threshold;
+	}
 	
-	
-
+	public void setThreshold(Double threshold) {
+		this.threshold = threshold;
+	}
 }

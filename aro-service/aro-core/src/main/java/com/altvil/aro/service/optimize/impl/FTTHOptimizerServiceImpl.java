@@ -52,7 +52,7 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 				.createNetworkAnalysis(networkModelBuilder,
 						ctx, scoringStrategy);
 
-		return NetworkConstrainer.create(networkModelBuilder, generatingNodeConstraint, constraint::isConstraintMet, networkAnalysis);
+		return NetworkConstrainer.create(networkModelBuilder, generatingNodeConstraint, constraint::requiredNode, constraint::isConstraintMet, networkAnalysis);
 	}
 
 

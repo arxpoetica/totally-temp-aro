@@ -29,22 +29,24 @@ public class NetworkConstrainer {
 	private NetworkModelBuilder		   networkModelBuilder;
 	private Predicate<GeneratingNode>  generatingNodeConstraint;
 	private Predicate<NetworkAnalysis> constraintMatcher;
+	private Predicate<GeneratingNode> 	requiredNodeConstraint;
 	private NetworkAnalysis			   networkAnalysis;
 
 	private NetworkConstrainer(NetworkModelBuilder networkModelBuilder,
-			Predicate<GeneratingNode> generatingNodeConstraint, Predicate<NetworkAnalysis> constraintMatcher,
+			Predicate<GeneratingNode> generatingNodeConstraint, Predicate<GeneratingNode> requiredNodeConstraint, Predicate<NetworkAnalysis> constraintMatcher,
 			NetworkAnalysis networkAnalysis) {
 		super();
 		this.networkModelBuilder = networkModelBuilder;
 		this.generatingNodeConstraint = generatingNodeConstraint;
 		this.networkAnalysis = networkAnalysis;
 		this.constraintMatcher = constraintMatcher;
+		this.requiredNodeConstraint = requiredNodeConstraint == null ? (node) -> false : requiredNodeConstraint;
 	}
 
 	public static NetworkConstrainer create(NetworkModelBuilder networkModelBuilder,
-			Predicate<GeneratingNode> generatingNodeConstraint, Predicate<NetworkAnalysis> constraintMatcher,
+			Predicate<GeneratingNode> generatingNodeConstraint, Predicate<GeneratingNode> requiredNodeConstraint, Predicate<NetworkAnalysis> constraintMatcher,
 			NetworkAnalysis networkAnalysis) {
-		return new NetworkConstrainer(networkModelBuilder, generatingNodeConstraint, constraintMatcher,
+		return new NetworkConstrainer(networkModelBuilder, generatingNodeConstraint, requiredNodeConstraint, constraintMatcher,
 				networkAnalysis);
 	}
 
@@ -97,7 +99,7 @@ public class NetworkConstrainer {
 						// USE GeneratingNode::isValueNode or get rid of it
 						GeneratingNode node = networkAnalysis.getMinimumNode(
 								generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
-										|| generatingNode.getEquipmentAssignment().isRoot()));
+										|| generatingNode.getEquipmentAssignment().isRoot()) || requiredNodeConstraint.test(generatingNode));
 						if (node == null) {
 							optimized = true;
 						} else {

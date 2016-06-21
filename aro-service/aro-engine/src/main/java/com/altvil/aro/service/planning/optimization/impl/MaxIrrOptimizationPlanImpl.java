@@ -6,6 +6,7 @@ import com.altvil.enumerations.OptimizationType;
 
 public class MaxIrrOptimizationPlanImpl extends AbstractOptimizationPlan implements IrrOptimizationPlan {
 	private double budget = Double.POSITIVE_INFINITY;
+	private double irr;
 	private int	   years;
 	
 	public MaxIrrOptimizationPlanImpl(OptimizationType optimizationType) {
@@ -16,9 +17,8 @@ public class MaxIrrOptimizationPlanImpl extends AbstractOptimizationPlan impleme
 		return budget;
 	}
 
-	@Override
 	public double getIrr() {
-		return Double.NaN;
+		return irr;
 	}
 
 	public int getYears() {
@@ -27,6 +27,10 @@ public class MaxIrrOptimizationPlanImpl extends AbstractOptimizationPlan impleme
 
 	public void setBudget(double budget) {
 		this.budget = budget;
+	}
+
+	public void setIrr(double irr) {
+		this.irr = irr;
 	}
 
 	public void setYears(int years) {

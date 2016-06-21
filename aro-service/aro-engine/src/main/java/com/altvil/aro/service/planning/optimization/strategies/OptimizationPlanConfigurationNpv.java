@@ -83,6 +83,12 @@ public class OptimizationPlanConfigurationNpv extends OptimizationPlanConfigurat
 	}
 
 	@Override
+	public boolean requiredNode(GeneratingNode generatingNode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
 	public Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans) {
 		if (optimizedPlans.isEmpty()) {
 			return Optional.empty();

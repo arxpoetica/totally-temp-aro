@@ -59,6 +59,11 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 		// TODO Auto-generated method stub
 				return false;
 	}
+	
+	public boolean requiredNode(GeneratingNode generatingNode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 	@Override
 	public Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans) {

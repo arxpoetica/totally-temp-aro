@@ -199,6 +199,7 @@ public class OptimizeEndPoint {
 			maxIrr.setPlanId(plan.getPlanId());
 			maxIrr.setYears(financials.getYears());
 			maxIrr.setBudget(financials.getBudget());
+			maxIrr.setIrr(plan.getThreshold() == null ? Double.NaN : plan.getThreshold());
 			return maxIrr;
 		}
 		case TARGET_IRR: {
@@ -207,6 +208,7 @@ public class OptimizeEndPoint {
 			maxIrr.setPlanId(plan.getPlanId());
 			maxIrr.setYears(financials.getYears());
 			maxIrr.setBudget(financials.getBudget());
+			maxIrr.setIrr(plan.getThreshold() == null ? Double.NaN : plan.getThreshold());
 			return maxIrr;
 		}
 		case CAPEX:
