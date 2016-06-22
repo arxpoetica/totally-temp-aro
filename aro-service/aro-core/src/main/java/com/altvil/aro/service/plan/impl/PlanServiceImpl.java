@@ -215,7 +215,7 @@ public class PlanServiceImpl implements PlanService {
 			DAGModel<GeoSegment> dag = transformFactory.createDAG(
 					modifier.build(), rootNode, e -> {
 						GeoSegment gs =  e.getValue() ;
-						return gs == null ? false :  gs.getGeoSegmentAssignments()
+						return gs == null ? false :  !gs.getGeoSegmentAssignments()
 								.isEmpty() ;
 					});
 
