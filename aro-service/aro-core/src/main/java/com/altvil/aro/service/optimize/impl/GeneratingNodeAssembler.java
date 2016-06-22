@@ -135,9 +135,9 @@ public class GeneratingNodeAssembler {
 				new HashMap<>(),
 				ArrayList::new);
 		
-//		mapping.getChildAssignments().forEach(a -> {
-//			log.info("assign equipment " + model.getVertex(a)  + " -> " + a.getAroEntity());
-//		}) ;
+		mapping.getChildAssignments().forEach(a -> {
+			log.info("assign equipment " + model.getVertex(a)  + " -> " + a.getAroEntity());
+		}) ;
 
 		mapping.getChildAssignments().forEach(a -> map.put(model.getVertex(a), a));
 		
@@ -193,6 +193,15 @@ public class GeneratingNodeAssembler {
 	
 	private void depthFirstTraversal(GeneratingNode.Builder builder, GraphNode vertex, int level) {
 
+		
+		if(  builder.getAssignment() == null ) {
+			log.info("dft  spliiter  " + vertex + " " + level);
+			
+		} else {
+			log.info("dft " +  vertex + " " + builder.getAssignment().getAroEntity() + " " + level);
+		}
+	
+		
 		GeneratingNode.Builder childBuilder = null;
 		
 		
@@ -227,7 +236,10 @@ public class GeneratingNodeAssembler {
 				// TODO create Synthetic
 				
 				childBuilder =  builder.addChild(new DefaultFiberAssignment(fiberType, extractFiberPath()), new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode())) ;
+		
+				log.info("add splitter node ");
 			}
+			
 			
 			// Induction
 			depthFirstTraversal(childBuilder, edges, level +1); 
