@@ -52,7 +52,7 @@ reset_infousa:
 	etl/reset_infousa_data.sh
 
 reset_nbm:
-		etl/reset_nbm_data.sh
+	etl/reset_nbm_data.sh
 
 reset_geotel:
 	etl/reset_geotel_data.sh
