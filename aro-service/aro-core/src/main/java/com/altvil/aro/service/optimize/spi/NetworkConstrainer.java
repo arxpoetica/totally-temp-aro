@@ -50,6 +50,7 @@ public class NetworkConstrainer {
 				networkAnalysis);
 	}
 
+
 	public List<OptimizedNetwork> constrainNetwork() {
 		ResultAssembler resultAssembler = new ResultAssembler(networkModelBuilder);
 		if (networkAnalysis != null) {
