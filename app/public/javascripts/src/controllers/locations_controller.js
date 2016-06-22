@@ -34,6 +34,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.new_location_data = null
   $scope.industries = []
   $scope.business_categories_selected = []
+  $scope.household_categories_selected = []
 
   var locationStyles = {
     normal: {
@@ -139,10 +140,16 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.customer_types = response.customer_types
     $scope.employees_by_location = response.employees_by_location
     $scope.business_categories = response.business_categories
+    $scope.household_categories = response.household_categories
 
     $scope.business_categories_selected = []
     $scope.business_categories.forEach((category) => {
       $scope.business_categories_selected[category.id] = true
+    })
+
+    $scope.household_categories_selected = []
+    $scope.household_categories.forEach((category) => {
+      $scope.household_categories_selected[category.id] = true
     })
 
     // industries
@@ -192,6 +199,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
+    const subcategories = (key, options) => {
+      var obj = $scope[`${key}_categories_selected`]
+      var categories = Object.keys(obj).filter((key) => obj[key])
+      if (categories.length < $scope[`${key}_categories`].length) {
+        options[`${key}_categories`] = categories
+      }
+    }
+
     if ($scope.overlay === 'none') {
       if (!$scope.show_businesses && !$scope.show_households) {
         locationsLayer.hide()
@@ -205,11 +220,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
           type = 'households'
         }
         var options = { type }
-        var business_categories = Object.keys($scope.business_categories_selected).filter((key) => $scope.business_categories_selected[key])
-        if (business_categories.length < $scope.business_categories.length) {
-          options.business_categories = business_categories
-        }
-        console.log('options', options, business_categories, $scope.business_categories.length, $scope.business_categories_selected)
+        subcategories('business', options)
+        subcategories('household', options)
         locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
       }

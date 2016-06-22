@@ -404,6 +404,13 @@
                   <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Residential
                 </label>
               </div>
+              <div style="margin-left: 20px">
+                <div class="checkbox" ng-repeat="category in household_categories">
+                  <label>
+                    <input type="checkbox" ng-model="household_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_households"> {{category.description}}
+                  </label>
+                </div>
+              </div>
               <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}">
                 <label>
                   <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
