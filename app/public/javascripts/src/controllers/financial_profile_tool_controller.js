@@ -82,7 +82,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   function refreshCurrentTab (force) {
     var href = $('#financial_profile_controller .nav-tabs li.active a').attr('href')
     if (href === '#financialProfileSummary') {
-      showSummaryChart(force)
     } else if (href === '#financialProfileCashFlow') {
       showCashFlowChart(force)
     } else if (href === '#financialProfileCapex') {
@@ -111,7 +110,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('route_planning_changed', (e) => {
     if (!$scope.plan) return
-    showSummaryChart()
+    refreshCurrentTab()
   })
 
   $rootScope.$on('map_tool_changed_visibility', (e) => {
@@ -238,7 +237,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       var data = buildChartData(premises, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
+        // scaleOverride: true,
+        // scaleSteps: 10,
+        // scaleStepWidth: 10000,
+        // scaleStartValue: 0
       }
       showChart('financial-profile-chart-premises', 'StackedBar', data, options)
     })
@@ -274,45 +278,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       }
       showChart('financial-profile-chart-penetration', 'Line', data, options)
     })
-  }
-
-  var chart = null
-
-  function showSummaryChart () {
-    var dataset = {
-      label: 'NPV',
-      fillColor: 'rgba(151,187,205,0.2)',
-      strokeColor: 'rgba(151,187,205,1)',
-      pointColor: 'rgba(151,187,205,1)',
-      pointStrokeColor: '#fff',
-      pointHighlightFill: '#fff',
-      pointHighlightStroke: 'rgba(151,187,205,1)',
-      data: []
-    }
-
-    var data = {
-      labels: [],
-      datasets: [dataset]
-    }
-
-    ;($scope.plan.metadata && $scope.plan.metadata.npv || []).forEach((revenue) => {
-      data.labels.push(revenue.year)
-      dataset.data.push(revenue.value)
-    })
-
-    chart && chart.destroy()
-    var options = {
-      bezierCurve: false,
-      scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-      tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
-    }
-    var elem = document.getElementById('financial-profile-chart')
-    elem.removeAttribute('width')
-    elem.removeAttribute('height')
-    elem.style.width = '100%'
-    elem.style.height = '200px'
-    var ctx = elem.getContext('2d')
-    chart = new Chart(ctx).Line(data, options)
   }
 
   function selectedKeys (obj) {
