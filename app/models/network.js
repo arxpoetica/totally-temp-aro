@@ -171,25 +171,24 @@ module.exports = class Network {
       businesses: 'Business',
       towers: 'CellTower'
     }
+    var endpoint = options.algorithm.indexOf('IRR') >= 0 ? 'optimize' : 'recalc'
     var body = {
       planId: plan_id,
-      algorithm: options.algorithm,
-      locationTypes: options.locationTypes.map((key) => locationTypes[key])
-      // budget: options.budget
+      locationTypes: options.locationTypes.map((key) => locationTypes[key]),
+      algorithm: options.algorithm
     }
     var req = {
       method: 'POST',
-      url: config.aro_service_url + '/rest/recalc/masterplan',
+      url: config.aro_service_url + `/rest/${endpoint}/masterplan`,
       json: true,
       body: body
     }
+    var financialConstraints = body.financialConstraints = { years: 10 }
+    if (options.budget) financialConstraints.budget = options.budget
+    if (options.discountRate) financialConstraints.discountRate = options.discountRate
+    if (options.irrThreshold) body.threshold = options.irrThreshold
     return database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id])
     .then(() => {
-      if (options.algorithm === 'NPV') {
-        var financialConstraints = body.financialConstraints = { years: 10 }
-        if (options.budget) financialConstraints.budget = options.budget
-        if (options.discountRate) financialConstraints.discountRate = options.discountRate
-      }
       if (options.geographies) {
         body.selectedRegions = []
         var promises = options.geographies.map((geography) => {
@@ -216,24 +215,6 @@ module.exports = class Network {
       }
     })
     .then(() => this._callService(req))
-    .then(() => {
-      var optimizationTypes = ['MAX_IRR', 'BUDGET_IRR', 'TARGET_IRR']
-      if (optimizationTypes.indexOf(options.algorithm) === -1) return
-      var body = {
-        planId: plan_id,
-        optimizationType: options.algorithm,
-        financialConstraints: { years: 10 }
-      }
-      if (options.budget) body.financialConstraints.budget = options.budget
-      if (options.discountRate) body.financialConstraints.discountRate = options.discountRate
-      var req = {
-        method: 'POST',
-        url: config.aro_service_url + '/rest/optimize/masterplan',
-        json: true,
-        body: body
-      }
-      return this._callService(req)
-    })
     .then(() => ({}))
   }
 
