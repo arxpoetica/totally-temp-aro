@@ -160,9 +160,11 @@ public class NetworkAnalysisBuilderImpl implements NetworkAnalysisBuilder {
 					Op.constCurveTruncated(fixedCost, 1));
 
 			assembler.add(AnalysisCode.cashflow, Op.cashFlow(
-					AnalysisCode.revenue, AnalysisCode.maintenance_expenses,
+					AnalysisCode.revenue, 
+					AnalysisCode.maintenance_expenses,
 					AnalysisCode.opex_expenses,
-					AnalysisCode.new_connections_cost));
+					AnalysisCode.new_connections_cost,
+					AnalysisCode.cost));
 
 			assembler.addOutput(AnalysisCode.cost);
 		}

@@ -21,10 +21,10 @@ public class Op {
 	}
 	
 
-	public static StreamFunction cashFlow(CurveIdentifier revenueId,
-			CurveIdentifier capexId, CurveIdentifier connectCapexId,
-			CurveIdentifier networkCapexId) {
-		return new CashFlow(revenueId, capexId, connectCapexId, networkCapexId);
+	public static StreamFunction cashFlow(CurveIdentifier revenueId, CurveIdentifier maintenanceId,
+			CurveIdentifier opExId, CurveIdentifier newConnectionsId,
+			CurveIdentifier networkCostId) {
+		return new CashFlow(revenueId, maintenanceId, opExId, newConnectionsId, networkCostId) ;
 	}
 
 	public static StreamFunction constCurve(AnalysisRow row) {
