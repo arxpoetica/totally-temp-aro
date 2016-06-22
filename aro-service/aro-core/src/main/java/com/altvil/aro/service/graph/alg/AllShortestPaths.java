@@ -21,11 +21,11 @@ public class AllShortestPaths<V, E> {
 	private Set<V> currentTargets;
 
 	public AllShortestPaths(WeightedGraph<V, E> graph,
-			ClosestFirstSurfaceBuilder<V, E> closestFirstSurfaceBuilder, double parametric, V source) {
+			ClosestFirstSurfaceBuilder<V, E> closestFirstSurfaceBuilder, V source) {
 		this.graph = graph;
 		this.source = source;
 		this.seenVertices = new HashSet<>();
-		this.itr = closestFirstSurfaceBuilder.build(parametric, graph, source);
+		this.itr = closestFirstSurfaceBuilder.build(graph, source);
 	}
 	
 	public TreeMultimap<Double, V> findPaths(Collection<V> targets) {
@@ -125,4 +125,7 @@ public class AllShortestPaths<V, E> {
 		return itr.getShortestPathLength(vertex) ;
 	}
 
+	public E getSpanningTreeEdge(V target) {
+		return itr.getSpanningTreeEdge(target);
+	}
 }

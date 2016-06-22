@@ -2,10 +2,10 @@ package com.altvil.aro.service.optimize.spi.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,9 +40,8 @@ public class NetworkModelBuilderFactoryImpl implements
 
 	@Override
 	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges,
 			FtthThreshholds fiberConstraints, GlobalConstraint globalConstraints) {
-		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, selectedEdges, fiberConstraints, globalConstraints);
+		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, fiberConstraints, globalConstraints);
 	}
 
 	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
@@ -50,7 +49,6 @@ public class NetworkModelBuilderFactoryImpl implements
 		private NetworkData networkData;
 		
 		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder;
-		Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges;
 		
 		private FtthThreshholds constraints;
 		private GlobalConstraint globalConstraints;
@@ -58,12 +56,10 @@ public class NetworkModelBuilderFactoryImpl implements
 		private Map<Long, NetworkAssignment> map;
 
 		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, 
 				FtthThreshholds constraints, GlobalConstraint globalConstraints) {
 			super();
 			this.networkData = networkData;
 			this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
-			this.selectedEdges = selectedEdges;
 			this.constraints = constraints;
 			this.globalConstraints = globalConstraints;
 
@@ -89,11 +85,15 @@ public class NetworkModelBuilderFactoryImpl implements
 			Map<Long, NetworkAssignment> map = new HashMap<>(this.map);
 
 			rejectedLocations.forEach(map::remove);
+			
+			Set<Long> selectedRoadLocationIds = new HashSet<Long> (this.networkData.getSelectedRoadLocationIds());
+			rejectedLocations.forEach(selectedRoadLocationIds::remove);
 
 			NetworkData nd = new NetworkData();
 			nd.setFiberSources(networkData.getFiberSources());
 			nd.setRoadEdges(networkData.getRoadEdges());
 			nd.setRoadLocations(map.values());
+			nd.setSelectedRoadLocationIds(selectedRoadLocationIds);
 
 			return nd;
 
@@ -109,7 +109,7 @@ public class NetworkModelBuilderFactoryImpl implements
 		@Override
 		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
 			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, selectedEdges, constraints, globalConstraints);
+					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, constraints, globalConstraints);
 		}
 	}
 }

@@ -8,6 +8,12 @@ CREATE TABLE client.network_nodes
 	lon double precision,
 	node_type_id int references client.network_node_types,
 	geog geography('POINT', 4326),
+
+	household_count double precision default 0,
+	business_count double precision default 0,
+	celltower_count double precision default 0,
+	atomic_count double precision default 0,
+
 	CONSTRAINT network_nodes_pkey PRIMARY KEY (id)
 );
 

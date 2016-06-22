@@ -1,8 +1,6 @@
 package com.altvil.aro.service.planning.impl.strategies;
 
 import com.altvil.annotation.FiberPlanDefaultStrategy;
-import com.altvil.aro.service.graph.DAGModel;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.GlobalConstraintBuilder;
@@ -17,9 +15,12 @@ public class GlobalConstraintDefaultBuilder implements GlobalConstraintBuilder {
 				return 1;
 			}
 
+			// TODO Move WirecenterNetworkPlan from engine to core then use it
+			// in place of Object.
 			@Override
-			public boolean isConverging(DAGModel<GeoSegment> model) {
+			public boolean isConverging(Object object) {
 				return false;
-			}};
+			}
+		};
 	}
 }

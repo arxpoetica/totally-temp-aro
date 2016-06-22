@@ -13,6 +13,7 @@ import com.altvil.aro.service.optimize.model.FiberProducer;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.serialize.ModelSerializer;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
+import com.altvil.aro.service.optimize.spi.PricingContext;
 import com.altvil.utils.StreamUtil;
 
 public class FdtAssignment extends AbstractEquipmentAssignment {
@@ -35,7 +36,7 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 	}
 
 	@Override
-	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer,
+	public double getCost(PricingContext ctx, FiberConsumer fiberConsumer,
 			FiberProducer fiberProducer, DemandCoverage coverage) {
 		double dropCableCosts = fdtEquipment
 				.getDropCableSummary()

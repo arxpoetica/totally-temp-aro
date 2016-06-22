@@ -5,8 +5,6 @@
 var helpers = require('../helpers')
 var database = helpers.database
 var _ = require('underscore')
-var pify = require('pify')
-var request = pify(require('request'), { multiArgs: true })
 var config = helpers.config
 var models = require('./')
 var pync = require('pync')
@@ -173,25 +171,24 @@ module.exports = class Network {
       businesses: 'Business',
       towers: 'CellTower'
     }
+    var endpoint = options.algorithm.indexOf('IRR') >= 0 ? 'optimize' : 'recalc'
     var body = {
       planId: plan_id,
-      algorithm: options.algorithm,
-      locationTypes: options.locationTypes.map((key) => locationTypes[key])
-      // budget: options.budget
+      locationTypes: options.locationTypes.map((key) => locationTypes[key]),
+      algorithm: options.algorithm
     }
     var req = {
       method: 'POST',
-      url: config.aro_service_url + '/rest/recalc/masterplan',
+      url: config.aro_service_url + `/rest/${endpoint}/masterplan`,
       json: true,
       body: body
     }
+    var financialConstraints = body.financialConstraints = { years: 10 }
+    if (options.budget) financialConstraints.budget = options.budget
+    if (options.discountRate) financialConstraints.discountRate = options.discountRate
+    if (options.irrThreshold) body.threshold = options.irrThreshold
     return database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id])
     .then(() => {
-      if (options.algorithm === 'NPV') {
-        var financialConstraints = body.financialConstraints = { years: 10 }
-        if (options.budget) financialConstraints.budget = options.budget
-        if (options.discountRate) financialConstraints.discountRate = options.discountRate
-      }
       if (options.geographies) {
         body.selectedRegions = []
         var promises = options.geographies.map((geography) => {
@@ -217,17 +214,28 @@ module.exports = class Network {
         return Promise.all(promises)
       }
     })
-    .then(() => {
-      console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
-      return request(req).then((result) => {
-        var res = result[0]
-        var body = result[1]
-        console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
-        if (res.statusCode && res.statusCode >= 400) {
-          return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
-        }
-      })
-    })
+    .then(() => this._callService(req))
+    .then(() => ({}))
+  }
+
+  static equipmentSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}/equipment_summary`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
+  static fiberSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}/fiber_summary`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
+  static _callService (req) {
+    return models.AROService.request(req)
   }
 
   static selectBoundary (plan_id, data) {

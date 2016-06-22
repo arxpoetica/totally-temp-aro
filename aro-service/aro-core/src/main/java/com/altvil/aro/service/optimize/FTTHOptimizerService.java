@@ -1,7 +1,5 @@
 package com.altvil.aro.service.optimize;
 
-import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.altvil.aro.service.graph.AroEdge;
@@ -15,6 +13,6 @@ import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 public interface FTTHOptimizerService {
 
 	NetworkPlanner createNetworkPlanner(ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy);
+			NetworkConstraint constraint, NetworkData networkData, OptimizerContext ctx, Predicate<GeneratingNode> generatingNodeConstraint, ScoringStrategy scoringStrategy);
 	
 }

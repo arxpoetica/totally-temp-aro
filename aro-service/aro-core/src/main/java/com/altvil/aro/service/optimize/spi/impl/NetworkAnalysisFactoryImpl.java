@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
@@ -37,7 +38,6 @@ import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.ftp.HubModel;
 import com.altvil.aro.service.optimize.OptimizerContext;
-import com.altvil.aro.service.optimize.PricingModel;
 import com.altvil.aro.service.optimize.impl.BulkFiberTerminalAssignment;
 import com.altvil.aro.service.optimize.impl.CentralOfficeAssignment;
 import com.altvil.aro.service.optimize.impl.DefaultFiberAssignment;
@@ -65,6 +65,7 @@ import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanService;
+import com.altvil.aro.service.price.PricingModel;
 import com.altvil.utils.StreamUtil;
 import com.google.common.collect.TreeMultimap;
 import com.google.inject.Inject;
@@ -77,7 +78,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 	
 	
 	private GraphTransformerFactory graphTransformerFactory;
-	private PlanService planService;
+	//private PlanService planService;
 
 	@Autowired
 	@Inject
@@ -86,7 +87,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			PlanService planService) {
 		super();
 		this.graphTransformerFactory = graphTransformerFactory;
-		this.planService = planService;
+		//this.planService = planService;
 	}
 
 	@Override
@@ -130,7 +131,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		private void createAnalyis(Builder builder, GraphMapping gm,
 				FiberType ft, Collection<AroEdge<GeoSegment>> pathEdges) {
-			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder, (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s),
+			new GeneratingNodeAssembler(ctx, ft).createAnalysis(builder, (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s),
 					vertex, gm, pathEdges);
 
 			nodeBuilder = builder;
@@ -316,13 +317,11 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public Supplier<Optional<CompositeNetworkModel>> lazySerialize() {
-			Set<LocationEntity> _rejectedLocations = new HashSet<LocationEntity>(
-					this.rejectedLocations);
+			Collection<Long> rejectedLocations = this.rejectedLocations.stream().map(AroEntity::getObjectId).collect(Collectors.toList());
 			return new Supplier<Optional<CompositeNetworkModel>>() {
 				@Override
 				public Optional<CompositeNetworkModel> get() {
-					return networkModelBuilder.createModel(StreamUtil.map(
-							_rejectedLocations, AroEntity::getObjectId));
+					return networkModelBuilder.createModel(rejectedLocations);
 				}
 			};
 		}
@@ -379,18 +378,6 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		@Override
 		public Collection<LocationEntity> getRejectetedLocations() {
 			return rejectedLocations;
-		}
-
-		@Override
-		public double getNpv() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public double getIrr() {
-			// TODO Auto-generated method stub
-			return 0;
 		}
 
 		@Override

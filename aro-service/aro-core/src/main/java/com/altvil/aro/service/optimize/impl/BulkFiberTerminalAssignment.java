@@ -10,6 +10,7 @@ import com.altvil.aro.service.optimize.model.FiberProducer;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.serialize.ModelSerializer;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
+import com.altvil.aro.service.optimize.spi.PricingContext;
 
 public class BulkFiberTerminalAssignment extends AbstractEquipmentAssignment {
 
@@ -28,7 +29,7 @@ public class BulkFiberTerminalAssignment extends AbstractEquipmentAssignment {
 	
 
 	@Override
-	public double getCost(AnalysisContext ctx, FiberConsumer fiberConsumer,
+	public double getCost(PricingContext ctx, FiberConsumer fiberConsumer,
 			FiberProducer fiberProducer, DemandCoverage coverage) {
 		ctx.getPricingModel().getMaterialCost(MaterialType.BFT) ;
 		return ctx.getPricingModel().getMaterialCost(MaterialType.BFT) ;

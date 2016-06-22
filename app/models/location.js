@@ -49,6 +49,7 @@ module.exports = class Location {
           JOIN businesses b ON b.location_id = locations.id
           JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
           JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($${params.length})
+          JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($2)
         `
       }
       parts.push(`(

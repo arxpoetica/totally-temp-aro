@@ -4,12 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.altvil.annotation.FiberPlanStrategy;
-import com.altvil.aro.service.graph.DAGModel;
-import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.plan.BasicFinanceEstimator;
+import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.SimpleNetworkFinancials;
 import com.altvil.aro.service.plan.GlobalConstraint;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
-import com.altvil.aro.service.planing.impl.NetworkPlanningServiceImpl;
+import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.GlobalConstraintBuilder;
 import com.altvil.aro.service.planning.NpvFiberPlan;
@@ -26,51 +24,47 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 		private double		 increment				  = 0;
 		private final Logger log					  = LoggerFactory.getLogger(NpvBudgetConstraint.class);
 		private int			 maxSteps				  = 0;
-		private double		 npvFactor;
 		private boolean		 once					  = true;
 		private double		 parametric				  = 1;
 		private int			 planIndex				  = 0;
 		private int			 step					  = 0;
+		private double discountRate;
+		private int years;
 
 		public NpvBudgetConstraint(double budget, double discountRate, int years) {
 			this.budget = budget;
-
-			npvFactor = 0;
-			for (int t = 1; t <= years; t++) {
-				npvFactor += 1 / Math.pow(1 + discountRate, t);
-			}
-
+			this.discountRate = discountRate;
+			this.years = years;
 		}
 
 		@Override
-		public boolean isConverging(DAGModel<GeoSegment> model) {
-			BasicFinanceEstimator estimator = new BasicFinanceEstimator(model);
+		public boolean isConverging(Object object) {
+			WirecenterNetworkPlan plan = (WirecenterNetworkPlan) object;
 			
-			if (once) {
-				log.debug(
-						"budget, scale, Scaled Cost, Scaled Revenue, Fiber Cost, Equipment Cost, Total Locations, Path Length, Total Demand, NPV");
-				once = false;
-			}
-			
-			final double npv = (npvFactor * estimator.getRevenue()) - estimator.getCost();
-			
-			log.debug("{}, {}, {}, {}, {}, {}, {}, {}, {}, {}", budget, parametric, estimator.getCost(),
-					estimator.getRevenue(), estimator.getFiberCost(), estimator.getEquipmentCost(),
-					estimator.getNumLocations(), estimator.getLength(), estimator.getRawCoverage(), npv);
+			double fiberLength = 0 ;
+			fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER) ;
+			fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
 
-			if (estimator.getCost() < budget) {
+			SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength, discountRate, years) ;
+			final double npv = f.getNpv();
+			
+			log.debug("{}, {}, {}, {}, {}, {}, {}, {}, {}", budget, parametric, f.getTotalCost(),
+					f.getRevenue(), f.getFiberCost(), f.getEquipmentCost(),
+					f.getFiberLength(), f.getLocationDemand().getRawCoverage(), npv);
+			
+			if (f.getTotalCost() < budget) {
 				if (npv > bestNpv) {
 					bestNpv = npv;
 					bestNpvParametric = parametric;
 
 					if (parametric == 1) {
-						NetworkPlanningServiceImpl.FINANCE_ESTIMATOR.set(estimator);
+						log.debug("Solved: Under budget");
 						return false;
 					}
 				}
 			} else {
-				if (estimator.getCost() < bestOverBudget) {
-					bestOverBudget = estimator.getCost();
+				if (f.getTotalCost() < bestOverBudget) {
+					bestOverBudget = f.getTotalCost();
 					bestOverBudgetParametric = parametric;
 				}
 			}
@@ -84,16 +78,18 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 				maxSteps = searchPlan.numProbs;
 				parametric -= increment;
 			} else if (bestNpv > Double.NEGATIVE_INFINITY && bestNpvParametric == parametric) {
-				NetworkPlanningServiceImpl.FINANCE_ESTIMATOR.set(estimator);
+				log.debug("Solved: Best NPV under budget");
 				return false;
 			} else if (bestOverBudget > Double.NEGATIVE_INFINITY && bestOverBudgetParametric == parametric) {
-				NetworkPlanningServiceImpl.FINANCE_ESTIMATOR.set(estimator);
+				log.debug("Solved: Least over budget");
 				return false;
 			} else if (bestNpv > Double.NEGATIVE_INFINITY) {
 				parametric = bestNpvParametric;
 			} else {
 				parametric = bestOverBudgetParametric;
 			}
+			
+			log.debug("parametric = " + parametric);
 
 			return true;
 		}

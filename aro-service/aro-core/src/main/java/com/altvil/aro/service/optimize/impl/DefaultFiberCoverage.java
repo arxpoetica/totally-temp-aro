@@ -43,7 +43,6 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	}
 
 
-
 	@Override
 	public double getRequiredFiberStrands(FiberType fiberType) {
 		switch (fiberType) {
@@ -186,6 +185,6 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	}
 
 	public String toString() {
-		return new ToStringBuilder(this).append("coverage", coverage).toString();
+		return new ToStringBuilder(this).append("coverage", coverage).append("locationEntities", locationEntities).toString();
 	}
 }

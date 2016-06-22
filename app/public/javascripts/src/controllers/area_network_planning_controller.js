@@ -14,8 +14,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.coverBusinesses = true
   $scope.coverTowers = true
 
-  $scope.optimizationType = 'capex'
-  $scope.irrThreshold = 100
+  $scope.optimizationType = 'CAPEX'
+  $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
 
   var budgetInput = $('#area_network_planning_controller input[name=budget]')
@@ -51,6 +51,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   })
 
   $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    initSelectionLayer()
     $scope.selectedGeographies = plan.metadata.selectedRegions
     $scope.selectedGeographies.forEach((geography) => {
       geography.features = selectionLayer.addGeoJson({
@@ -198,6 +199,14 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     $scope.plan = plan
   })
 
+  $scope.irrThresholdRangeChanged = () => {
+    $scope.irrThreshold = +$scope.irrThresholdRange
+  }
+
+  $scope.irrThresholdChanged = () => {
+    $scope.irrThresholdRange = $scope.irrThreshold
+  }
+
   function calculate () {
     var locationTypes = []
     if ($scope.coverHouseholds) locationTypes.push('households')
@@ -207,7 +216,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       locationTypes: locationTypes,
       geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id, type: i.type })),
       algorithm: $scope.optimizationType,
-      budget: parseBudget()
+      budget: parseBudget(),
+      irrThreshold: $scope.irrThreshold / 100
     }
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'
@@ -223,7 +233,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         $scope.calculating = false
         $rootScope.$broadcast('route_planning_changed', response)
         $scope.wizardStatus = $scope.allStatus[0]
-        $scope.selectedGeographies = []
       })
       .error(() => {
         $scope.calculating = false

@@ -41,7 +41,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 				sourceRootMap.get(target).add(target, target, new HashSet<E>());
 			} else {
 				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, builder, 1, target));
+						new AllShortestPaths<V, E>(source, builder, target));
 			}
 		}
 
@@ -107,9 +107,9 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 		targetMap = new HashMap<>(targets.size());
 		for (V target : targets) {
 			// Exclude any source target match
-			if (!target.equals(root)) {
+			if (target != null && !target.equals(root)) {
 				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, closestFirstBuilder, 1, target));
+						new AllShortestPaths<V, E>(source, closestFirstBuilder, target));
 			}
 		}
 
@@ -190,8 +190,6 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 		public void add(V start, V end, double w) {
 
-			// System.out.println(start + "->" + end);
-
 			g.addVertex(start);
 			g.addVertex(end);
 
@@ -200,8 +198,6 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 			} else {
 				g.setEdgeWeight(e, w);
-				// System.out.println("Duplicated Validated Edge " + start +
-				// "->" + end) ;
 			}
 
 		}

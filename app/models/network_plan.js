@@ -113,43 +113,69 @@ module.exports = class NetworkPlan {
       },
       'metadata': { costs: [] }
     }
-    var plan, equipmentCounts
+    var plan
 
     return database.findOne('SELECT * FROM client.plan WHERE id=$1', [plan_id])
       .then((_plan) => {
         plan = _plan
 
-        if (config.route_planning.length === 0) return
-        return Promise.resolve()
-          .then(() => NetworkPlan.findEdges(plan_id))
-          .then((edges) => {
-            var fiberLengths = {}
-            edges.forEach((edge) => {
-              var type = edge.fiber_name
-              fiberLengths[type] = (fiberLengths[type] || 0) + edge.edge_length
-            })
-            var fiberLength = (edges.reduce((total, edge) => total + edge.edge_length, 0)).toFixed(0)
-            output.metadata.costs.push({
-              name: `Fiber Capex (${fiberLength} mi)`,
-              value: plan.fiber_cost || 0,
-              itemized: Object.keys(fiberLengths).map((type) => {
-                var length = (fiberLengths[type]).toFixed(0)
-                return {
-                  description: `${type} (${length} mi)`,
-                  value: 0
-                }
-              })
-            })
-            output.feature_collection.features = edges.map((edge) => ({
-              'type': 'Feature',
-              'geometry': edge.geom,
-              'properties': {
-                'fiber_type': edge.fiber_type
-              }
-            }))
-          })
+        return Promise.all([
+          models.Network.equipmentSummary(plan_id),
+          models.Network.fiberSummary(plan_id)
+        ])
       })
-      .then(() => {
+      .then((results) => {
+        output.metadata.equipment_summary = attachCostDescription(results[0])
+        output.metadata.fiber_summary = attachCostDescription(results[1])
+
+        output.metadata.equipment_cost = results[0].reduce((total, item) => item.totalCost + total, 0)
+        output.metadata.fiber_cost = results[1].reduce((total, item) => item.totalCost + total, 0)
+
+        plan.total_cost = output.metadata.equipment_cost + output.metadata.fiber_cost
+
+        return NetworkPlan.findEdges(plan_id)
+      })
+      .then((edges) => {
+        output.feature_collection.features = edges.map((edge) => ({
+          'type': 'Feature',
+          'geometry': edge.geom,
+          'properties': {
+            'fiber_type': edge.fiber_type
+          }
+        }))
+
+        var sql = `
+          SELECT
+            SUM(household_count) AS household_count,
+            SUM(business_count) AS business_count,
+            SUM(celltower_count) AS tower_count
+          FROM client.network_nodes n
+          WHERE plan_id IN (
+            SELECT id FROM client.plan WHERE parent_plan_id=$1
+            UNION ALL
+            SELECT $1
+          )
+          AND n.node_type_id = 1
+        `
+        return database.findOne(sql, [plan_id])
+      })
+      .then((row) => {
+        output.metadata.premises = [
+          {
+            name: 'Households',
+            value: row.household_count
+          },
+          {
+            name: 'Businesses',
+            value: row.business_count
+          },
+          {
+            name: 'Towers',
+            value: row.tower_count
+          }
+        ]
+        output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
+
         return database.query(`
           SELECT
             region_id AS id, region_name AS name, region_type AS type, ST_AsGeoJSON(geom)::json AS geog
@@ -159,29 +185,9 @@ module.exports = class NetworkPlan {
       .then((selectedRegions) => {
         output.metadata.selectedRegions = selectedRegions
 
-        var params = [plan_id]
-        return database.query(`
-          SELECT nnt.id, COUNT(*) AS count
-          FROM client.network_node_types nnt
-          JOIN client.network_nodes nn
-          ON nn.node_type_id = nnt.id
-          AND nn.plan_id IN (
-            SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
-            UNION ALL
-            SELECT $${params.length}
-          )
-          GROUP BY nnt.id
-        `, params)
-      })
-      .then((_equipmentCounts) => {
-        equipmentCounts = _equipmentCounts
-
-        return config.route_planning.length > 0
-          ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
-          : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
-      })
-      .then(() => {
-        if (config.route_planning.length === 0) return output
+        // return config.route_planning.length > 0
+        //   ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
+        //   : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
 
         plan.total_revenue = plan.total_revenue || 0
         plan.total_cost = plan.total_cost || 0
@@ -195,31 +201,9 @@ module.exports = class NetworkPlan {
           { year: year++, value: plan.total_revenue },
           { year: year++, value: plan.total_revenue }
         ]
-        return database.query('SELECT * FROM client.network_node_types ORDER BY description')
-      })
-      .then((equipmentNodeTypes) => {
-        var itemized = equipmentNodeTypes.map((equipmentNodeType) => {
-          var name = equipmentNodeType.name
-          var col = name.split('_').map((s) => s.substring(0, 1)).join('') + '_cost'
-          if (!plan[col]) return null
-          var count = equipmentCounts.find((eq) => eq.id === equipmentNodeType.id)
-          count = count ? count.count : 0
-          return {
-            key: name,
-            name: equipmentNodeType.description,
-            description: equipmentNodeType.description + (name === 'central_office' ? '' : ` (x${count})`),
-            count: count.count,
-            value: plan[col] || 0
-          }
-        }).filter((i) => i)
-        output.metadata.costs.push({
-          name: 'Equipment Capex',
-          value: plan.equipment_cost
-          // itemized: itemized
-        })
         output.metadata.total_cost = plan.total_cost || 0
-
         output.metadata.profit = output.metadata.revenue - output.metadata.total_cost
+
         if (metadata_only) delete output.feature_collection
         return output
       })
@@ -473,4 +457,18 @@ module.exports = class NetworkPlan {
       }))
   }
 
+}
+
+var financialCosts = []
+database.query('SELECT * FROM financial.network_cost_code').then((rows) => { financialCosts = rows })
+
+const attachCostDescription = (arr) => {
+  arr.forEach((item) => {
+    var code = item.costCode
+    var cost = financialCosts.find((item) => item.id === code)
+    if (cost) {
+      item.description = cost.description
+    }
+  })
+  return arr
 }

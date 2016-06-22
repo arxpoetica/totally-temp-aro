@@ -1,8 +1,6 @@
 package com.altvil.aro.service.plan;
 
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
@@ -23,6 +21,9 @@ public interface PlanService {
 	 */
 	public Optional<CompositeNetworkModel> computeNetworkModel(NetworkData networkData,
 			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			Function<AroEdge<GeoSegment>, Set<GraphNode>> selectedEdges, FtthThreshholds request, GlobalConstraint globalConstraint) throws PlanException;
+			FtthThreshholds request, GlobalConstraint globalConstraint) throws PlanException;
 
+	
+	
+	
 }

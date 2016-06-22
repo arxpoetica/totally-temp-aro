@@ -4,13 +4,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.impl.AnalysisNodeImpl;
 import com.altvil.aro.service.optimize.impl.LazyOptimizedNetwork;
@@ -21,83 +24,87 @@ import com.altvil.interfaces.NetworkAssignment;
 
 public class NetworkConstrainer {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(NetworkConstrainer.class.getName());
-	
-	private NetworkModelBuilder networkModelBuilder;
-	private Predicate<GeneratingNode> generatingNodeConstraint;
+	private static final Logger		   log = LoggerFactory.getLogger(NetworkConstrainer.class.getName());
+
+	private NetworkModelBuilder		   networkModelBuilder;
+	private Predicate<GeneratingNode>  generatingNodeConstraint;
 	private Predicate<NetworkAnalysis> constraintMatcher;
-	private NetworkAnalysis networkAnalysis;
+	private Predicate<GeneratingNode> 	requiredNodeConstraint;
+	private NetworkAnalysis			   networkAnalysis;
 
 	private NetworkConstrainer(NetworkModelBuilder networkModelBuilder,
-			Predicate<GeneratingNode> generatingNodeConstraint,
-			Predicate<NetworkAnalysis> constraintMatcher,
+			Predicate<GeneratingNode> generatingNodeConstraint, Predicate<GeneratingNode> requiredNodeConstraint, Predicate<NetworkAnalysis> constraintMatcher,
 			NetworkAnalysis networkAnalysis) {
 		super();
 		this.networkModelBuilder = networkModelBuilder;
-		this.generatingNodeConstraint = generatingNode -> !generatingNodeConstraint
-				.test(generatingNode);
+		this.generatingNodeConstraint = generatingNodeConstraint;
 		this.networkAnalysis = networkAnalysis;
 		this.constraintMatcher = constraintMatcher;
+		this.requiredNodeConstraint = requiredNodeConstraint == null ? (node) -> false : requiredNodeConstraint;
 	}
 
-	public static NetworkConstrainer create(
-			NetworkModelBuilder networkModelBuilder,
-			Predicate<GeneratingNode> generatingNodeConstraint,
-			Predicate<NetworkAnalysis> constraintMatcher,
+	public static NetworkConstrainer create(NetworkModelBuilder networkModelBuilder,
+			Predicate<GeneratingNode> generatingNodeConstraint, Predicate<GeneratingNode> requiredNodeConstraint, Predicate<NetworkAnalysis> constraintMatcher,
 			NetworkAnalysis networkAnalysis) {
-		return new NetworkConstrainer(networkModelBuilder,
-				generatingNodeConstraint, constraintMatcher, networkAnalysis);
+		return new NetworkConstrainer(networkModelBuilder, generatingNodeConstraint, requiredNodeConstraint, constraintMatcher,
+				networkAnalysis);
 	}
 
 	public List<OptimizedNetwork> constrainNetwork() {
-
-		boolean constraintSatisfied = false;
-		while (!constraintSatisfied) {
-			// Establish CapexPerm Constraint
-			GeneratingNode node = networkAnalysis
-					.getMinimumNode(generatingNodeConstraint);
-			if (node == null) {
-				constraintSatisfied = true;
-			} else {
-				node.remove();
-			}
-		}
-
 		ResultAssembler resultAssembler = new ResultAssembler(networkModelBuilder);
+		if (networkAnalysis != null) {
+			{
+				// Remove nodes that do not satisfy the generating node
+				// constraint. Nodes are removed from least desirable to most
+				// with the score (desirability) of the remaining nodes
+				// recalculated each time the least desirable node is removed.
+				GeneratingNode node;
+				while ((node = networkAnalysis.getMinimumNode(generatingNodeConstraint.negate())) != null) {
+					node.remove();
+				}
+			}
 
-		boolean optimized = false;
-		while (!optimized) {
-			if (networkAnalysis == null
-					|| networkAnalysis.getAnalyisNode() == null) {
-				// Empty Delta
+			Set<LocationEntity> rejectedLocations = Collections.emptySet();
+			boolean optimized = false;
+			while (!optimized) {
+				if (networkAnalysis.getAnalyisNode() == null) {
+					// Empty Delta
 
-				optimized = true;
-			} else {
-				OptimizedNetwork optimizedNetwork = createOptimizedNetwork(networkAnalysis);
-				boolean isAnalysisEmpty = optimizedNetwork.getAnalysisNode()
-						.getFiberCoverage().getLocations().isEmpty();
-				if (isAnalysisEmpty || constraintMatcher.test(networkAnalysis)) {
-					if (resultAssembler.isEmpty() && !isAnalysisEmpty) {
-						resultAssembler.add(optimizedNetwork);
-					}
 					optimized = true;
 				} else {
-					resultAssembler.add(optimizedNetwork);
-					
-					if( log.isTraceEnabled() ) {
-						log.trace("prune ..." + networkAnalysis.getAnalyisNode().getScore()) ;
-					}
-					
-					// TODO after adding support of multiple fiber soudes. maybe
-					// USE GeneratingNode::isValueNode or get rid of it
-					GeneratingNode node = networkAnalysis
-							.getMinimumNode(generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment() 
-														|| generatingNode.getEquipmentAssignment().isRoot()));
-					if (node == null) {
+					OptimizedNetwork optimizedNetwork = createOptimizedNetwork(networkAnalysis);
+					boolean isAnalysisEmpty = optimizedNetwork.getAnalysisNode().getFiberCoverage().getLocations()
+							.isEmpty();
+					if (isAnalysisEmpty) {
+						optimized = true;
+					} else if (constraintMatcher.test(networkAnalysis)) {
+						if (resultAssembler.isEmpty()) {
+							resultAssembler.add(optimizedNetwork);
+						}
 						optimized = true;
 					} else {
-						node.remove();
+						// The optimizer is only able to persist network changes that result from a location being removed (rejected) from the plan.
+						// Filter out all other types of optimizations until the persistence layer can be changed
+						if (!rejectedLocations.equals(networkAnalysis.getRejectetedLocations())) {
+							resultAssembler.add(optimizedNetwork);
+							rejectedLocations = new HashSet<>(networkAnalysis.getRejectetedLocations());
+						}
+
+						if (log.isTraceEnabled()) {
+							log.trace("prune ..." + networkAnalysis.getAnalyisNode().getScore());
+						}
+
+						// TODO after adding support of multiple fiber soudes.
+						// maybe
+						// USE GeneratingNode::isValueNode or get rid of it
+						GeneratingNode node = networkAnalysis.getMinimumNode(
+								generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
+										|| generatingNode.getEquipmentAssignment().isRoot()) || requiredNodeConstraint.test(generatingNode));
+						if (node == null) {
+							optimized = true;
+						} else {
+							node.remove();
+						}
 					}
 				}
 			}
@@ -107,11 +114,9 @@ public class NetworkConstrainer {
 
 	}
 
-	private OptimizedNetwork createOptimizedNetwork(
-			NetworkAnalysis networkAnalysis) {
+	private OptimizedNetwork createOptimizedNetwork(NetworkAnalysis networkAnalysis) {
 
-		return new LazyOptimizedNetwork(new AnalysisNodeImpl(
-				networkAnalysis.getAnalyisNode()),
+		return new LazyOptimizedNetwork(new AnalysisNodeImpl(networkAnalysis.getAnalyisNode()),
 				networkAnalysis.lazySerialize(), networkModelBuilder);
 
 		// return new OptimizedNetworkImpl(networkAnalysis.createNetworkModel(),
@@ -120,7 +125,7 @@ public class NetworkConstrainer {
 
 	private static class ResultAssembler {
 
-		private NetworkModelBuilder networkModelBuilder;
+		private NetworkModelBuilder	   networkModelBuilder;
 
 		private List<OptimizedNetwork> result = new ArrayList<OptimizedNetwork>();
 
@@ -128,7 +133,6 @@ public class NetworkConstrainer {
 			super();
 			this.networkModelBuilder = networkModelBuilder;
 		}
-
 
 		public void add(OptimizedNetwork network) {
 			result.add(network);
@@ -140,28 +144,25 @@ public class NetworkConstrainer {
 
 		private OptimizedNetwork createEmptyNetwork() {
 			return new LazyOptimizedNetwork(AnalysisNodeImpl.ZERO_IDENTITY,
-					() -> Optional.of(EmptyCompositeNetworkModel.MODEL),
-					networkModelBuilder);
+					() -> Optional.of(EmptyCompositeNetworkModel.MODEL), networkModelBuilder);
 		}
-
 
 		public List<OptimizedNetwork> assemble() {
 			if (result.isEmpty()) {
-				result.add(createEmptyNetwork()) ;
+				result.add(createEmptyNetwork());
 			}
 			return result;
 		}
 
 	}
 
-	public static class EmptyCompositeNetworkModel implements
-			CompositeNetworkModel, Serializable {
+	public static class EmptyCompositeNetworkModel implements CompositeNetworkModel, Serializable {
 
 		/**
 		 *
 		 */
-		private static final long serialVersionUID = 1L;
-		public static CompositeNetworkModel MODEL = new EmptyCompositeNetworkModel();
+		private static final long			serialVersionUID = 1L;
+		public static CompositeNetworkModel	MODEL			 = new EmptyCompositeNetworkModel();
 
 		@Override
 		public NetworkModel getNetworkModel(NetworkAssignment networkAssignment) {

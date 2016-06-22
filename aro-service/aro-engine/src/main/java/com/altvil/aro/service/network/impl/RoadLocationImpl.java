@@ -71,7 +71,7 @@ public class RoadLocationImpl implements RoadLocation {
 	
 	public String toString() {
 		return new ToStringBuilder(this).append("tlid", tlid)
-				.append("point",
+				.append("roadSegmentClosestPoint",
 						roadSegmentClosestPoint == null ? null
 								: String.valueOf(roadSegmentClosestPoint.getY()) + " " + roadSegmentClosestPoint.getX())
 				.toString();

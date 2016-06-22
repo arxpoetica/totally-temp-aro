@@ -1,9 +1,12 @@
 package com.altvil.netop.optimize;
 
 import java.security.Principal;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.demand.LocationTypeMask;
+import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.job.JobService;
@@ -28,14 +33,18 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfigurationBuilder;
+import com.altvil.aro.service.planning.optimization.impl.AbstractOptimizationPlan;
 import com.altvil.aro.service.planning.optimization.impl.CapexOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.CoverageOptimizationPlanImpl;
+import com.altvil.aro.service.planning.optimization.impl.MaxIrrOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.NpvOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
+import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.DummyRequester;
 import com.altvil.netop.plan.MasterPlanJobResponse;
+import com.altvil.netop.plan.SelectedRegion;
 
 @RestController
 public class OptimizeEndPoint {
@@ -65,6 +74,11 @@ public class OptimizeEndPoint {
 		return completeRecalcWirecenterPlan(job.getId());
 	}
 
+	
+	private Set<LocationEntityType> toMask(Collection<LocationEntityType> mask) {
+		return LocationTypeMask.MASK.toMask(mask);
+	}
+	
 	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
 	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(
 			@RequestBody AroOptimizationPlan aroRequest)
@@ -168,26 +182,61 @@ public class OptimizeEndPoint {
 
 		return mpr;
 	}
+	
+	
+	private Set<Integer> toSelectedWireCenters(
+			Collection<SelectedRegion> selectedRegions) {
 
-	private OptimizationPlan toOptimizationPlan(AroOptimizationPlan plan) {
+		Set<Integer> result = new HashSet<>();
 
-		switch (plan.getOptimizationType()) {
-		case NPV:
-			FinancialConstraints financials = plan.getFinancialConstraints();
-			return new NpvOptimizationPlanImpl(financials.getBudget(),
-					financials.getDiscountRate(), financials.getYears());
-		case COVERAGE:
-			CoverageOptimizationPlanImpl coverage = new CoverageOptimizationPlanImpl();
-			coverage.setCoverage(plan.getCoverage());
-			coverage.setPlanId(plan.getPlanId());
-			return coverage;
-
-		case CAPEX:
-		case PENETRATION:
-		case IRR:
-		default:
-			return new CapexOptimizationPlanImpl() ;
+		if (selectedRegions != null) {
+			for (SelectedRegion sr : selectedRegions) {
+				switch (sr.getRegionType()) {
+				case WIRECENTER:
+					result.add(Integer.parseInt(sr.getId()));
+					break;
+				default:
+				}
+			}
 		}
 
+		return result;
+
+	}
+
+	private OptimizationPlan toOptimizationPlan(AroOptimizationPlan plan) {
+		FinancialConstraints financials = plan.getFinancialConstraints();
+		
+		AbstractOptimizationPlan optimizationPlan;
+		
+		switch (plan.getAlgorithm()) {
+		case NPV: {
+			optimizationPlan = new NpvOptimizationPlanImpl(financials.getBudget(),
+					financials.getDiscountRate(), financials.getYears());
+		}
+		break;
+		case MAX_IRR:
+		case BUDGET_IRR:
+		case TARGET_IRR: {
+			MaxIrrOptimizationPlanImpl irrOptimizationPlan = new MaxIrrOptimizationPlanImpl(plan.getAlgorithm());
+			irrOptimizationPlan.setYears(financials.getYears());
+			irrOptimizationPlan.setBudget(financials.getBudget());
+			irrOptimizationPlan.setIrr(plan.getThreshold() == null ? Double.NaN : plan.getThreshold());
+			optimizationPlan = irrOptimizationPlan;
+		}
+		break;
+		case CAPEX:
+			optimizationPlan = new CapexOptimizationPlanImpl();
+			break;
+		default:
+			throw new IllegalStateException();
+		}
+		
+		optimizationPlan.setPlanId(plan.getPlanId());
+		optimizationPlan.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
+		optimizationPlan.setLocationEntityTypes(toMask(plan.getLocationTypes()));
+		optimizationPlan.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
+
+		return optimizationPlan;
 	}
 }

@@ -9,6 +9,6 @@ public interface DemandStatistic {
 	double getMonthlyRevenueImpact() ;
 	
 	DemandStatistic ratio(double ratio) ;
-
+	
 
 }

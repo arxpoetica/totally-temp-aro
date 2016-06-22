@@ -1,10 +1,9 @@
-package com.altvil.aro.service.conversion.impl;
+package com.altvil.aro.service.analysis;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.altvil.aro.service.conversion.ModelSerialization;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;

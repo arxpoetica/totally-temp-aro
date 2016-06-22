@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimize;
 
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.price.PricingModel;
 
 public class OptimizerContext {
 

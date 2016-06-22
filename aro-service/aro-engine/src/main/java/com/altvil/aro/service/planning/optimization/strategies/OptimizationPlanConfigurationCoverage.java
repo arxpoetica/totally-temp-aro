@@ -1,22 +1,17 @@
 package com.altvil.aro.service.planning.optimization.strategies;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.Optional;
 
-import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
-import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.CoverageOptimizationPlan;
 
 public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfiguration implements CoverageOptimizationPlan {
@@ -52,74 +47,40 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 		return true;
 	}
 
-	public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
-		return (e) ->
-		{
-			GeoSegment value = e.getValue();
-			
-			if (value == null) {
-				return Collections.emptySet();
-			}
-			
-			Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
-
-			if (geoSegmentAssignments.isEmpty()) {
-				return Collections.emptySet();
-			}
-
-			// There may be multiple marked locations on this edge so it may be
-			// necessary to return both vertices of this edge.
-			Set<GraphNode> selectedNodes = new HashSet<>();
-			for (GraphEdgeAssignment assignment : geoSegmentAssignments) {
-				if (assignment.getPinnedLocation().isAtStartVertex()) {
-					selectedNodes.add(e.getSourceNode());
-				} else {
-					selectedNodes.add(e.getTargetNode());
-				}
-			}
-
-			return selectedNodes;
-		};
-	}
-	
 	@Override
-	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
+	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder(GlobalConstraint globalConstraint) {
+		return (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
 	}
 	
 
-	private double totalDemand;
 
-	@Override
-	public void setNetworkData(NetworkData networkData) {
-		super.setNetworkData(networkData);
-		
-		 totalDemand = networkData
-				.getRoadLocations()
-				.stream()
-				.mapToDouble(
-						a -> ((LocationEntity) a.getSource())
-								.getLocationDemand().getDemand()).sum();
-	}
-
-	
 	@Override
 	public boolean isConstraintMet(NetworkAnalysis analysis) {
 		// TODO Auto-generated method stub
 				return false;
 	}
+	
+	public boolean requiredNode(GeneratingNode generatingNode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 	@Override
-	public boolean satisfiesGlobalConstraint(OptimizedNetwork optimizedNetwork) {
-		if (optimizedNetwork.isEmpty()) {
-			return false;
+	public Optional<OptimizedNetwork> selectOptimization(Collection<OptimizedNetwork> optimizedPlans) {
+		// KJG Deliberately broken until we show a need to fix.
+		double totalDemand = Double.NaN;
+		for(OptimizedNetwork optimizedPlan : optimizedPlans) {
+			final double demand = optimizedPlan.getAnalysisNode().getFiberCoverage()
+					.getDemand();
+			double ratio = demand / totalDemand;
+
+			boolean predicate = ratio >= getCoverage();
+			
+			if (predicate) {
+				return Optional.of(optimizedPlan);
+			}
 		}
 		
-		final double demand = optimizedNetwork.getAnalysisNode().getFiberCoverage()
-				.getDemand();
-		double ratio = demand / totalDemand;
-
-		boolean predicate = ratio >= getCoverage();
-		return predicate;
+		return Optional.empty();
 	}
 }

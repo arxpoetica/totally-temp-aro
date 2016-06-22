@@ -21,8 +21,8 @@ public class ScoringStrategyFactoryImpl implements ScoringStrategyFactory {
 	public void init() {
 		map.put(OptimizationType.CAPEX, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getRawCoverage()))) ;
 		map.put(OptimizationType.COVERAGE, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getRawCoverage()))) ;
-		map.put(OptimizationType.PENETRATION, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getDemand()))) ;
-		map.put(OptimizationType.IRR, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getMonthlyRevenueImpact()))) ;
+//		map.put(OptimizationType.PENETRATION, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getDemand()))) ;
+//		map.put(OptimizationType.IRR, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getMonthlyRevenueImpact()))) ;
 	}
 	
 	private static final double divide(double a, double b) {

@@ -6,6 +6,7 @@ import com.altvil.aro.service.entity.LocationEntityType;
 
 public interface NetworkConfiguration {
 	long getPlanId();
+	long getMasterPlanId();
 
 	boolean isFilteringRoadLocationsBySelection();
 
@@ -13,7 +14,7 @@ public interface NetworkConfiguration {
 
 	int getYear();
 
-	<T> T dependentPlan(long dependentId);
+	<T> T dependentPlan(long dependentId, int wireCenterId);
 
 	Set<LocationEntityType> getLocationEntityTypes();
 

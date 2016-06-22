@@ -1,5 +1,7 @@
 package com.altvil.aro.service.demand;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
@@ -84,6 +86,14 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 				new DefaultAssignedEntityDemand(locationEntity, pinnedLocation, pair
 						.getTail()));
 
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append("locationDemand", locationDemand)
+				.append("locationEntity", locationEntity)
+				.append("pinnedLocation", pinnedLocation)
+				.toString();
 	}
 
 }

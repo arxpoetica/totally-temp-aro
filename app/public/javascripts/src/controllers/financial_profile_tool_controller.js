@@ -4,6 +4,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
+  $scope.premisesFilterEntityTypes = { households: true }
+  $scope.subscribersFilterEntityType = 'households'
+  $scope.revenueFilter = 'bau'
+  $scope.capexFilterEntityTypes = { households: true }
+  $scope.capexFilter = 'bau'
+  var dirty = false
 
   var charts = {}
   var chartStyles = [
@@ -29,8 +35,18 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function refresh () {
     $scope.financialData = {}
-    refreshCurrentTab()
+    if ($scope.plan && $scope.plan.metadata) {
+      refreshCurrentTab()
+    }
   }
+
+  $rootScope.$on('route_planning_changed', () => {
+    if (map_tools.is_visible('financial_profile')) {
+      refresh()
+    } else {
+      dirty = true
+    }
+  })
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
@@ -63,28 +79,34 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $('#financial_profile_controller .nav-tabs').on('shown.bs.tab', (e) => refreshCurrentTab())
 
-  function refreshCurrentTab () {
+  function refreshCurrentTab (force) {
     var href = $('#financial_profile_controller .nav-tabs li.active a').attr('href')
     if (href === '#financialProfileSummary') {
-      showSummaryChart()
+      showSummaryChart(force)
     } else if (href === '#financialProfileCashFlow') {
-      showCashFlowChart()
+      showCashFlowChart(force)
     } else if (href === '#financialProfileCapex') {
-      showBudgetChart()
-      showCapexChart()
+      // showBudgetChart(force)
+      showCapexChart(force)
     } else if (href === '#financialProfileRevenue') {
-      showRevenueChart()
+      showRevenueChart(force)
     } else if (href === '#financialProfilePremises') {
-      showPremisesChart()
+      showPremisesChart(force)
     } else if (href === '#financialProfileSubscribers') {
-      showSubscribersChart()
-      showPenetrationChart()
+      showSubscribersChart(force)
+      showPenetrationChart(force)
     }
   }
+  $scope.refreshCurrentTab = refreshCurrentTab
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+  })
+
+  $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    $scope.plan = plan
+    refresh()
   })
 
   $rootScope.$on('route_planning_changed', (e) => {
@@ -94,17 +116,22 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_tool_changed_visibility', (e) => {
     if (map_tools.is_visible('financial_profile')) {
-      $timeout(refreshCurrentTab, 0)
+      $timeout(dirty ? refresh : refreshCurrentTab, 0)
+      dirty = false
     }
   })
 
   $scope.financialData = {}
-  function request (key, params, callback) {
+  function request (force, key, params, callback) {
     if (!$scope.plan) return
-    if ($scope.financialData[key]) return $scope.financialData[key]
-    $http.get(`/financial_profile/${$scope.plan.id}/${key}`)
+    if (force) delete $scope.financialData[key]
+    else if ($scope.financialData[key]) return $scope.financialData[key]
+    console.log('params', params)
+    $http({ url: `/financial_profile/${$scope.plan.id}/${key}`, params: params })
       .success((response) => {
         $scope.financialData[key] = response
+        console.log('Requested', key)
+        console.table && console.table(response)
         callback(response)
       })
   }
@@ -134,13 +161,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     }
   }
 
-  function showCashFlowChart () {
+  function showCashFlowChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
-      { key: 'fiber', name: 'Fiber' },
+      { key: 'plan', name: 'Fiber' },
       { key: 'incremental', name: 'Incremental' }
     ]
-    request('cash_flow', {}, (cashFlow) => {
+    request(force, 'cash_flow', {}, (cashFlow) => {
       var data = buildChartData(cashFlow, datasets)
       var options = {
         datasetFill: false,
@@ -151,12 +178,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function showBudgetChart () {
+  function showBudgetChart (force) {
     var datasets = [
       { key: 'budget', name: 'Budget' },
       { key: 'plan', name: 'Plan' }
     ]
-    request('budget', {}, (budget) => {
+    request(force, 'budget', {}, (budget) => {
       var data = buildChartData(budget, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
@@ -166,13 +193,17 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function showCapexChart () {
+  function showCapexChart (force) {
     var datasets = [
       { key: 'network_deployment', name: 'Network Deployment' },
       { key: 'connect', name: 'Connect' },
       { key: 'maintenance_capacity', name: 'Maintenance/Capacity' }
     ]
-    request('capex', {}, (capex) => {
+    var params = {
+      filter: $scope.capexFilter,
+      entityTypes: selectedKeys($scope.capexFilterEntityTypes)
+    }
+    request(force, 'capex', params, (capex) => {
       var data = buildChartData(capex, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
@@ -182,13 +213,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function showRevenueChart () {
+  function showRevenueChart (force) {
     var datasets = [
       { key: 'businesses', name: 'Businesses' },
       { key: 'households', name: 'Households' },
       { key: 'towers', name: 'Towers' }
     ]
-    request('revenue', {}, (revenue) => {
+    request(force, 'revenue', { filter: $scope.revenueFilter }, (revenue) => {
       var data = buildChartData(revenue, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
@@ -198,12 +229,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function showPremisesChart () {
+  function showPremisesChart (force) {
     var datasets = [
       { key: 'incremental', name: 'Incremental OFS' },
       { key: 'existing', name: 'Existing OFS' }
     ]
-    request('premises', {}, (premises) => {
+    request(force, 'premises', { entityTypes: selectedKeys($scope.premisesFilterEntityTypes) }, (premises) => {
       var data = buildChartData(premises, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
@@ -213,12 +244,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function showSubscribersChart () {
+  function showSubscribersChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
-      { key: 'fiber', name: 'Plan' }
+      { key: 'plan', name: 'Plan' }
     ]
-    request('subscribers', {}, (subscribers) => {
+    request(force, 'subscribers', { entityType: $scope.subscribersFilterEntityType }, (subscribers) => {
       var data = buildChartData(subscribers, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
@@ -228,13 +259,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function showPenetrationChart () {
+  function showPenetrationChart (force) {
     var datasets = [
       { key: 'businesses', name: 'Businesses' },
       { key: 'households', name: 'Households' },
       { key: 'towers', name: 'Towers' }
     ]
-    request('penetration', {}, (penetration) => {
+    request(force, 'penetration', {}, (penetration) => {
       var data = buildChartData(penetration, datasets)
       var options = {
         datasetFill: false,
@@ -264,9 +295,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       datasets: [dataset]
     }
 
-    console.log('metadata', $scope.plan.metadata)
-
-    ;($scope.plan.metadata.npv || []).forEach((revenue) => {
+    ;($scope.plan.metadata && $scope.plan.metadata.npv || []).forEach((revenue) => {
       data.labels.push(revenue.year)
       dataset.data.push(revenue.value)
     })
@@ -284,5 +313,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     elem.style.height = '200px'
     var ctx = elem.getContext('2d')
     chart = new Chart(ctx).Line(data, options)
+  }
+
+  function selectedKeys (obj) {
+    return Object.keys(obj).filter((item) => !!obj[item])
   }
 }])

@@ -1,6 +1,7 @@
 package com.altvil.aro.service.route.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -100,6 +101,7 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 		private GraphModel<GeoSegment> model;
 		private Map<GraphAssignment, GraphNode> resolved;
 		private Multimap<GraphNode, NetworkAssignment> vertexToAssignments ;
+		private Multimap<GraphNode, GraphAssignment> vertexToGraphAssignments ;
 
 		public DefaultNodedModel(GraphNetworkModel graphModel,
 				GraphModel<GeoSegment> model,
@@ -120,8 +122,24 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 			}
 			
 			return vertexToAssignments ;
+		}		
+
+		private  Multimap<GraphNode, GraphAssignment> getVertexToGraphAssignments() {
+			if( vertexToGraphAssignments == null ) {
+				vertexToGraphAssignments = ArrayListMultimap.create() ;
+				resolved.entrySet().forEach(e -> {
+					vertexToGraphAssignments.put(e.getValue(), e.getKey()) ;
+				});
+			}
+			
+			return vertexToGraphAssignments ;
 		}
 		
+		@Override
+		public Collection<GraphAssignment> getGraphAssignments(GraphNode graphNode) {
+			final Collection<GraphAssignment> collection = getVertexToGraphAssignments().get(graphNode);
+			return collection == null ? Collections.emptyList() : collection;
+		}		
 
 		@Override
 		public Collection<NetworkAssignment> getNetworkAssignments(

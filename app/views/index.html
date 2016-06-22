@@ -636,40 +636,40 @@
               <form>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="capex"> Capex
+                    <input type="radio" ng-model="optimizationType" value="CAPEX"> Capex
                   </label>
                 </div>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="maximum_irr"> Maximum IRR
+                    <input type="radio" ng-model="optimizationType" value="MAX_IRR"> Maximum IRR
                   </label>
                 </div>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="irr_target"> IRR Target
+                    <input type="radio" ng-model="optimizationType" value="TARGET_IRR"> IRR Target
                   </label>
                 </div>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="budget_irr_floor"> Budget and IRR Floor
+                    <input type="radio" ng-model="optimizationType" value="BUDGET_IRR"> Budget and IRR Floor
                   </label>
                 </div>
               </form>
-              <div ng-show="optimizationType === 'irr_target' || optimizationType === 'budget_irr_floor'">
+              <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
                 <br>
                 <p><strong>IRR Threshold</strong></p>
                 <div class="row">
                   <div class="col-md-8">
-                    <input type="range" min="100" max="500" step="10" ng-model="irrThreshold" style="margin-top: 10px">
+                    <input type="range" min="0" max="100" step="1" value="10" ng-model="irrThresholdRange" style="margin-top: 10px" ng-change="irrThresholdRangeChanged()">
                   </div>
                   <div class="col-md-4">
                     <div class="form-group form-group-sm">
-                      <input type="number" min="100" max="500" step="10" ng-model="irrThreshold" class="form-control text-right">
+                      <input type="number" min="0" max="100" step="1" ng-model="irrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
                     </div>
                   </div>
                 </div>
               </div>
-              <div ng-show="optimizationType === 'budget_irr_floor'">
+              <div ng-show="optimizationType === 'BUDGET_IRR'">
                 <br>
                 <p><strong>Budget</strong></p>
                 <div class="row">
@@ -1261,82 +1261,108 @@
                   <div class="col-sm-6">
                     <table class="table">
                       <tbody>
-                        <tr ng-repeat-start="cost in plan.metadata.costs">
-                          <th colspan="3">{{cost.name}}</th>
-                          <td colspan="2" class="text-right">{{cost.value / 1000 | currency:"$":1}}K</td>
+                        <tr>
+                          <th colspan="3">Fiber Capex</th>
+                          <td colspan="2" class="text-right">{{plan.metadata.fiber_cost / 1000 | currency:"$":1}}K</td>
                         </tr>
-                        <tr ng-repeat-end ng-repeat="item in cost.itemized">
-                          <td colspan="3"><small> ↳ {{item.description}}</small></td>
-                          <td colspan="2" class="text-right"><small ng-hide="item.value === 0">{{item.value / 1000 | currency:"$":1}}K</small></td>
+                        <tr ng-repeat="cost in plan.metadata.fiber_summary">
+                          <td colspan="3"><small> ↳ {{cost.description}} ({{cost.lengthMeters * 0.000621371 | number : 0}} mi)</small></td>
+                          <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"$":1}}K</td>
                         </tr>
                         <tr>
-                          <th>Total Capex</th>
-                          <td colspan="4" class="text-right">{{plan.metadata.total_cost / 1000 | currency:"$":1}}K</td>
+                          <th colspan="3">Equipment Capex</th>
+                          <td colspan="2" class="text-right">{{plan.metadata.equipment_cost / 1000 | currency:"$":1}}K</td>
+                        </tr>
+                        <tr ng-repeat="cost in plan.metadata.equipment_summary">
+                          <td colspan="3"><small> ↳ {{cost.description}} (x{{cost.quantity}})</small></td>
+                          <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"$":1}}K</td>
+                        </tr>
+                        <tr>
+                          <th colspan="3">Total Capex</th>
+                          <td colspan="2" class="text-right">{{plan.metadata.total_cost / 1000 | currency:"$":1}}K</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table class="table">
+                      <tbody>
+                        <tr>
+                          <th colspan="3">Premises Passed</th>
+                          <td colspan="2" class="text-right">{{plan.metadata.total_premises | number}}</td>
+                        </tr>
+                        <tr ng-repeat="premise in plan.metadata.premises">
+                          <td colspan="3"><small> ↳ {{premise.name}}</small></td>
+                          <td colspan="2" class="text-right">{{premise.value | number}}</td>
+                        </tr>
+                        <tr>
+                          <th colspan="3">$ / Premises Passed</th>
+                          <td colspan="2" class="text-right">{{plan.metadata.total_cost / plan.metadata.total_premises | currency:"$":0}}</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
                   <div class="col-sm-6">
-                    <p class="text-right"><strong>NPV</strong>: {{plan.metadata.total_npv / 1000 | currency:"$":1}}K</p>
                     <p><strong>Cash Flow</strong></p>
                     <canvas id="financial-profile-chart" style="width:100%; height:200px"></canvas>
+                    <br><br>
+                    <p><strong>NPV</strong>: {{plan.metadata.total_npv / 1000 | currency:"$":1}}K</p>
                   </div>
                 </div>
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfileCashFlow" style="margin-top: 20px">
-                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
-                <div ng-show="selectedArea">
+                <div>
                   <p class="text-center"><strong>Cash Flow Summary</strong></p>
                   <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
                   <div id="financial-profile-chart-cash-flow-legend"></div>
                 </div>
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfileCapex" style="margin-top: 20px">
-                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
-                <div ng-show="selectedArea">
+                <div>
                   <form class="form-inline">
                     <div class="form-group">
-                      <select class="form-control">
-                        <option>BAU</option>
-                        <option>Fiber</option>
-                        <option>Incremental capex</option>
+                      <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+                        <option value="bau">BAU</option>
+                        <option value="plan">Fiber</option>
+                        <option value="incremental">Incremental</option>
                       </select>
                     </div>
+                    <!--
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Businesses
+                        <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Businesses
                       </label>
                     </div>
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Households
+                        <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Households
                       </label>
                     </div>
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Towers
+                        <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Towers
                       </label>
                     </div>
+                    -->
                   </form>
                   <br>
                   <p class="text-center"><strong>BAU Capex</strong></p>
                   <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
                   <div id="financial-profile-chart-capex-legend"></div>
+                  <!--
                   <br>
                   <p class="text-center"><strong>Budget Allocation</strong></p>
                   <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
                   <div id="financial-profile-chart-budget-legend"></div>
+                  -->
                 </div>
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfileRevenue" style="margin-top: 20px">
-                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
-                <div ng-show="selectedArea">
+                <div>
                   <form class="form-inline">
                     <div class="form-group">
-                      <select class="form-control">
-                        <option>BAU</option>
-                        <option>Fiber</option>
-                        <option>Incremental</option>
+                      <select class="form-control" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
+                        <option value="bau">BAU</option>
+                        <option value="plan">Fiber</option>
+                        <option value="incremental">Incremental</option>
                       </select>
                     </div>
                   </form>
@@ -1347,31 +1373,30 @@
                 </div>
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfilePremises" style="margin-top: 20px">
-                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
-                <div ng-show="selectedArea">
+                <div>
                   <form class="form-inline" ng-show="aboveWirecenter">
                     <div class="form-group">
-                      <select class="form-control">
-                        <option>BAU</option>
-                        <option>Fiber</option>
-                        <option>Incremental</option>
+                      <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+                        <option value="bau">BAU</option>
+                        <option value="plan">Fiber</option>
+                        <option value="incremental">Incremental</option>
                       </select>
                     </div>
                   </form>
                   <form class="form-inline">
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Businesses
+                        <input type="checkbox" ng-model="premisesFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Businesses
                       </label>
                     </div>
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Households
+                        <input type="checkbox" ng-model="premisesFilterEntityTypes['households']" ng-change="refreshCurrentTab(true)"> Households
                       </label>
                     </div>
                     <div class="checkbox" style="margin-left: 10px">
                       <label>
-                        <input type="checkbox"> Towers
+                        <input type="checkbox" ng-model="premisesFilterEntityTypes['towers']" ng-change="refreshCurrentTab(true)"> Towers
                       </label>
                     </div>
                   </form>
@@ -1382,22 +1407,21 @@
                 </div>
               </div>
               <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers" style="margin-top: 20px">
-                <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
-                <div ng-show="selectedArea">
+                <div>
                   <form class="form-inline">
                     <div class="radio" style="margin-left: 10px">
                       <label>
-                        <input type="radio"> Businesses
+                        <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="businesses"> Businesses
                       </label>
                     </div>
                     <div class="radio" style="margin-left: 10px">
                       <label>
-                        <input type="radio"> Households
+                        <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="households"> Households
                       </label>
                     </div>
                     <div class="radio" style="margin-left: 10px">
                       <label>
-                        <input type="radio"> Towers
+                        <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="towers"> Towers
                       </label>
                     </div>
                   </form>

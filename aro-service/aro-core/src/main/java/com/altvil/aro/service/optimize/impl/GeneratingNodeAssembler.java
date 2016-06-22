@@ -77,7 +77,7 @@ public class GeneratingNodeAssembler {
 		// sparse graph containing what may be the minimum number of edges
 		// necessary to connect the root vertex with the target(s).
 		//
-		// There's no point in searching such a confined space for alternatives.  Simply assemble a graph so that it can be traversed.
+		// There doesn't appear to be any point in searching such a confined space for alternatives.  Simply assemble a graph so that it can be traversed.
 		graph  = new SimpleDirectedWeightedGraph<GraphNode, AroEdge<GeoSegment>>(new AroEdgeFactory<GeoSegment>() {
 			@Override
 			public AroEdge<GeoSegment> createEdge(GraphNode sourceVertex, GraphNode targetVertex) {
@@ -185,18 +185,16 @@ public class GeneratingNodeAssembler {
 				fiberPath.add(e);
 				depthFirstTraversal(builder, e.getSourceNode(), level);
 				return ;
-			} else {
-	
-				if (childBuilder == null) {
-					// TODO create Synthetic
-					
-					childBuilder =  builder.addChild(new DefaultFiberAssignment(fiberType, extractFiberPath()), new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode())) ;
-				}
+			}
+			
+			if (childBuilder == null) {
+				// TODO create Synthetic
 				
-				// Induction
-				depthFirstTraversal(childBuilder, edges, level +1);
-				
-			} 
+				childBuilder =  builder.addChild(new DefaultFiberAssignment(fiberType, extractFiberPath()), new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode())) ;
+			}
+			
+			// Induction
+			depthFirstTraversal(childBuilder, edges, level +1); 
 		} 
 		
 		if( childBuilder != null ) {

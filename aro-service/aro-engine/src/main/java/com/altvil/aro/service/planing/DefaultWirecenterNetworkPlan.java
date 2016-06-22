@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.service.demand.impl.LocationDemandFactory;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
 
@@ -26,7 +27,7 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 		this.planId = planId;
 		this.networkNodes = networkNodes;
 		this.fiberRoutes = fiberRoutes;
-		this.locationDemand = locationDemand ;
+		this.locationDemand = locationDemand == null ? LocationDemandFactory.FACTORY.new Builder(Collections.emptySet()).build() : locationDemand;
 		this.fiberLengthMap = fiberLengthMap == null ? Collections.emptyMap() : fiberLengthMap ;
 	}
 	
