@@ -170,8 +170,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       var data = buildChartData(cashFlow, datasets)
       var options = {
         datasetFill: false,
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
       showChart('financial-profile-chart-cash-flow', 'Line', data, options)
     })
@@ -205,8 +206,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request(force, 'capex', params, (capex) => {
       var data = buildChartData(capex, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-capex', 'StackedBar', data, options)
     })
@@ -221,8 +223,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request(force, 'revenue', { filter: $scope.revenueFilter }, (revenue) => {
       var data = buildChartData(revenue, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
       showChart('financial-profile-chart-revenue', 'StackedBar', data, options)
     })
