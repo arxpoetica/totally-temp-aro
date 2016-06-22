@@ -146,7 +146,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 //		System.out.println("coverage = " + coverage) ;
 //		
 		
-		if( log.isTraceEnabled()() ) {
+		if( log.isTraceEnabled() ) {
 			log.trace("Capex " + nodeCapex + " => "
 				+ (nodeCapex + childrenCapex) + " coverage = "
 							+ coverage.getDemand() + " fc="
