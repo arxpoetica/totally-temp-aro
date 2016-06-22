@@ -13,8 +13,8 @@ ${PSQL} -a -f $DIR/create_nbm_blocks.sql
 cd $GISROOT;
 rm -f ${TMPDIR}/*.*
 wget https://s3.amazonaws.com/public.aro/nbm/NY-NBM-CBLOCK-CSV-JUN-2014.zip -nd -nc
-unzip NY-NBM-CBLOCK-CSV-JUN-2014.zip -d ${TMPDIR}
+#unzip NY-NBM-CBLOCK-CSV-JUN-2014.zip -d ${TMPDIR}
 
-cat /$GISROOT/NY-NBM-CBLOCK-CSV-JUN-2014.CSV | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;"
+unzip -p NY-NBM-CBLOCK-CSV-JUN-2014.zip | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;" 
 
 ${PSQL} -a -f $DIR/optimize_nbm_blocks.sql
