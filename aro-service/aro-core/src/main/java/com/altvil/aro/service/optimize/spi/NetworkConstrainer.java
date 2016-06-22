@@ -64,7 +64,9 @@ public class NetworkConstrainer {
 				}
 			}
 
-			Set<LocationEntity> rejectedLocations = Collections.emptySet();
+			Set<LocationEntity> rejectedLocations = new HashSet<>();
+			rejectedLocations.add(null);
+			
 			boolean optimized = false;
 			while (!optimized) {
 				if (networkAnalysis.getAnalyisNode() == null) {
@@ -99,7 +101,7 @@ public class NetworkConstrainer {
 						// USE GeneratingNode::isValueNode or get rid of it
 						GeneratingNode node = networkAnalysis.getMinimumNode(
 								generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
-										|| generatingNode.getEquipmentAssignment().isRoot()) || requiredNodeConstraint.test(generatingNode));
+										|| generatingNode.getEquipmentAssignment().isRoot() || requiredNodeConstraint.test(generatingNode)));
 						if (node == null) {
 							optimized = true;
 						} else {
