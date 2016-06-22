@@ -84,9 +84,9 @@ uninstall:
 
 run:
 ifeq ($(DEPLOY_TARGET), server) 
-	(docker run -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e ARO_THREAD_COUNT=5 -d -p 8080:8080 --name aro-service $(SERVICE_IMAGE))
+	(docker run -e CATALINA_OPTS=-Xmx10g -e PGUSER=${PGUSER} -e PGPASSWORD=${PGPASSWORD} -e PGHOST=${PGHOST} -e PGDATABASE=${PGDATABASE} -e ARO_THREAD_COUNT=5 -d -p 8080:8080 --name aro-service $(SERVICE_IMAGE))
 else  
-	(docker run -e CATALINA_OPTS='' -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb $(SERVICE_IMAGE))
+	(docker run -e CATALINA_OPTS=-Xmx1g -e PGUSER=aro -e PGPASSWORD=aro -e PGHOST=arodb -e PGDATABASE=aro -e ARO_THREAD_COUNT=2 -d -p 8080:8080 --name aro-service --link postgres:arodb $(SERVICE_IMAGE))
 endif
 
 
