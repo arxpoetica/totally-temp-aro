@@ -229,7 +229,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		
 		networkPlanRepository.deleteWireCenterPlans(optimizationPlanStrategy.getPlanId());
 		
-		List<Object[]> wireCentersPlans = 
+		List<Number> wireCentersPlans = 
 				optimizationPlanStrategy.getSelectedWireCenters().isEmpty() ?
 				networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId()) :
 				networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId(), optimizationPlanStrategy.getSelectedWireCenters()) ;
@@ -238,9 +238,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		
 		//final List<Number> computedWirecenterUpdates = networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId());
 		
-		List<OptimizationPlanConfiguration> plans = StreamUtil.map(wireCentersPlans, (planIds) -> {
-			long planId = ((Number) planIds[0]).longValue();
-			int wireCenterId = ((Number) planIds[1]).intValue();
+		List<OptimizationPlanConfiguration> plans = StreamUtil.map(wireCentersPlans, (id) -> {
+			long planId =id.longValue();
+			int wireCenterId = networkPlanRepository.queryWirecenterIdForPlanId(planId);
 			return optimizationPlanStrategy.dependentPlan(planId, wireCenterId);
 		});
 
@@ -282,14 +282,14 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		// Compute the id of each wire center plan returning both it and the id
 		// of the plan's wire center.
-		List<Object[]> wireCentersPlans = fiberPlanConfiguration.getSelectedWireCenters().isEmpty()
+		List<Number> wireCentersPlans = fiberPlanConfiguration.getSelectedWireCenters().isEmpty()
 				? networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId())
 				: networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId(),
 						fiberPlanConfiguration.getSelectedWireCenters());
 
-		List<FiberPlanConfiguration> plans = StreamUtil.map(wireCentersPlans, (planIds) -> {
-			long planId = ((Number) planIds[0]).longValue();
-			int wireCenterId = ((Number) planIds[1]).intValue();
+		List<FiberPlanConfiguration> plans = StreamUtil.map(wireCentersPlans, (id) -> {
+			long planId = id.longValue();
+			int wireCenterId = networkPlanRepository.queryWirecenterIdForPlanId(planId);
 			return fiberPlanConfiguration.dependentPlan(planId, wireCenterId);
 		});
 

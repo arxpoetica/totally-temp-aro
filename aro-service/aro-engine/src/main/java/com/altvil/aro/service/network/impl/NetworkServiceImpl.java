@@ -120,12 +120,12 @@ public class NetworkServiceImpl implements NetworkService {
 
 	@Override
 	public NetworkData getNetworkData(NetworkConfiguration networkConfiguration) {
-		final long planId = networkConfiguration.getPlanId();
+		//final long planId = networkConfiguration.getPlanId();
 		NetworkData networkData = new NetworkData();
 
 		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkConfiguration);
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkConfiguration);
-		List<Long> selectedRoadLocations = selectedRoadLocationIds(networkConfiguration.getMasterPlanId(), roadLocationByLocationIdMap);
+		List<Long> selectedRoadLocations = selectedRoadLocationIds(networkConfiguration.getPlanId(), roadLocationByLocationIdMap);
 
 		// TODO MEDIUM Compare performance
 		networkData
@@ -354,7 +354,7 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 
 	private List<Long> selectedRoadLocationIds(long planId, Map<Long, RoadLocation> roadLocationByLocationIdMap) {
-		List<Long> selectedRoadLocations = planRepository.querySelectedLocationsByMasterPlanId(planId).stream()
+		List<Long> selectedRoadLocations = planRepository.querySelectedLocationsByPlanId(planId).stream()
 				.mapToLong(bi -> bi.longValue()).boxed()
 				.collect(Collectors.toList());
 		

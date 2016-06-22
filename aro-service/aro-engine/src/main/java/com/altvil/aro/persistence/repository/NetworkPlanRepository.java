@@ -21,7 +21,7 @@ public interface NetworkPlanRepository extends
 	@Query(value = "SELECT r.wirecenter_id \n" +
 			"FROM client.plan r \n" +
 			"WHERE r.id = :planId", nativeQuery = true)
-	Long queryWirecenterIdForPlanId(@Param("planId") long planId);
+	Integer queryWirecenterIdForPlanId(@Param("planId") long planId);
 	
 	
 	@Query(value = "select p from WirecenterPlan p where p.masterPlan.id = :planId")
@@ -190,7 +190,7 @@ public interface NetworkPlanRepository extends
 
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
 			"WHERE pt.plan_id = :planId", nativeQuery = true)
-	List<BigInteger> querySelectedLocationsByMasterPlanId(@Param("planId") long planId);
+	List<BigInteger> querySelectedLocationsByPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n"
 			+ "SELECT\n"
@@ -420,8 +420,8 @@ public interface NetworkPlanRepository extends
 			"		in (select plan_id from all_modified_plans)\n" + 
 			"	returning id\n" + 
 			")\n" + 
-			"select plan_id,wirecenter_id from all_modified_plans\n", nativeQuery = true)
-	List<Object[]> computeWirecenterUpdates(@Param("planId") long planId);
+			"select plan_id from all_modified_plans\n", nativeQuery = true)
+	List<Number> computeWirecenterUpdates(@Param("planId") long planId);
     
     
     
@@ -469,8 +469,8 @@ public interface NetworkPlanRepository extends
 			"		from  new_cos co\n" + 
 			"	returning plan_id\n" + 
 			")\n" + 
-			"select id, wirecenter_id from new_plans",nativeQuery = true) 
-    List<Object[]> computeWirecenterUpdates(@Param("planId") long planId, @Param("wireCentersIds") Collection<Integer> wireCentersIds);
+			"select plan_id from updated_network_nodes",nativeQuery = true) 
+    List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("wireCentersIds") Collection<Integer> wireCentersIds);
 
 	@Query(value = "select id from client.plan where parent_plan_id = :planId", nativeQuery = true)
 	List<Number> wireCenterPlanIdsFor(@Param("planId") long planId);
