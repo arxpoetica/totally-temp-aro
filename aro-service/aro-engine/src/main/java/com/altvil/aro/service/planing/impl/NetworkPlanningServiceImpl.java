@@ -15,7 +15,6 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCompute;
 import org.apache.ignite.cluster.ClusterGroup;
 import org.apache.ignite.cluster.ClusterNode;
-import org.apache.ignite.configuration.AtomicConfiguration;
 import org.apache.ignite.lang.IgniteCallable;
 import org.apache.ignite.resources.SpringResource;
 import org.slf4j.Logger;
@@ -230,17 +229,20 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		
 		networkPlanRepository.deleteWireCenterPlans(optimizationPlanStrategy.getPlanId());
 		
-		List<Number> wireCentersPlans = 
-				optimizationPlanStrategy.getWireCenters().isEmpty() ?
+		List<Object[]> wireCentersPlans = 
+				optimizationPlanStrategy.getSelectedWireCenters().isEmpty() ?
 				networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId()) :
-				networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId(), optimizationPlanStrategy.getWireCenters()) ;
+				networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId(), optimizationPlanStrategy.getSelectedWireCenters()) ;
 		
 		//final List<Number> currentWirecenterPlans = networkPlanRepository.wireCenterPlanIdsFor(optimizationPlanStrategy.getPlanId());
 		
 		//final List<Number> computedWirecenterUpdates = networkPlanRepository.computeWirecenterUpdates(optimizationPlanStrategy.getPlanId());
 		
-		List<OptimizationPlanConfiguration> plans = StreamUtil
-				.map(wireCentersPlans, (plan)->optimizationPlanStrategy.dependentPlan(plan.longValue()));
+		List<OptimizationPlanConfiguration> plans = StreamUtil.map(wireCentersPlans, (planIds) -> {
+			long planId = ((Number) planIds[0]).longValue();
+			int wireCenterId = ((Number) planIds[1]).intValue();
+			return optimizationPlanStrategy.dependentPlan(planId, wireCenterId);
+		});
 
 		List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor.invokeAll(
 				plans.stream().map(plan -> createOptimzedCallable(plan, constraints)).collect(Collectors.toList()));
@@ -277,14 +279,19 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	public MasterPlanBuilder planMasterFiber(Principal requestor, FiberPlanConfiguration fiberPlanConfiguration,
 			FtthThreshholds constraints) throws InterruptedException {
 		networkPlanRepository.deleteWireCenterPlans(fiberPlanConfiguration.getPlanId());
-		
-		List<Number> wireCentersPlans = 
-				fiberPlanConfiguration.getSelectedWireCenters().isEmpty() ?
-				networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId()) :
-				networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId(), fiberPlanConfiguration.getSelectedWireCenters()) ;
-		
-		List<FiberPlanConfiguration> plans = StreamUtil
-				.map(wireCentersPlans, (plan)->fiberPlanConfiguration.dependentPlan(plan.longValue()));
+
+		// Compute the id of each wire center plan returning both it and the id
+		// of the plan's wire center.
+		List<Object[]> wireCentersPlans = fiberPlanConfiguration.getSelectedWireCenters().isEmpty()
+				? networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId())
+				: networkPlanRepository.computeWirecenterUpdates(fiberPlanConfiguration.getPlanId(),
+						fiberPlanConfiguration.getSelectedWireCenters());
+
+		List<FiberPlanConfiguration> plans = StreamUtil.map(wireCentersPlans, (planIds) -> {
+			long planId = ((Number) planIds[0]).longValue();
+			int wireCenterId = ((Number) planIds[1]).intValue();
+			return fiberPlanConfiguration.dependentPlan(planId, wireCenterId);
+		});
 
 		final List<Future<WirecenterNetworkPlan>> futures = wirePlanExecutor.invokeAll(
 				plans.stream().map(plan -> createPlanningCallable(plan, constraints)).collect(Collectors.toList()));

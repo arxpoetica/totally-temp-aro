@@ -1,13 +1,10 @@
 package com.altvil.enumerations;
 
 public enum OptimizationType {
-	
 	CAPEX,
- 	PENETRATION,
+	COVERAGE,
  	MAX_IRR,
  	BUDGET_IRR,
- 	IRR,
  	NPV,
-    COVERAGE, TARGET_IRR
-
+ 	TARGET_IRR
 }

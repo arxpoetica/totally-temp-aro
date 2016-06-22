@@ -120,54 +120,45 @@ public class NetworkServiceImpl implements NetworkService {
 
 	@Override
 	public NetworkData getNetworkData(NetworkConfiguration networkConfiguration) {
-
 		final long planId = networkConfiguration.getPlanId();
 		NetworkData networkData = new NetworkData();
 
-		// determine wirecenter ID
-		Long wcid = planRepository.queryWirecenterIdForPlanId(planId);
-		if (wcid == null) {
-			LOG.debug("queryWirecenteridForPlanId(" + planId
-					+ ") returned null.");
-		} else {
-			Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkConfiguration);
-			Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkConfiguration);
-			List<Long> selectedRoadLocations = selectedRoadLocationIds(planId, roadLocationByLocationIdMap);
+		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkConfiguration);
+		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkConfiguration);
+		List<Long> selectedRoadLocations = selectedRoadLocationIds(networkConfiguration.getMasterPlanId(), roadLocationByLocationIdMap);
 
-			// TODO MEDIUM Compare performance
-			networkData
-					.setFiberSources(getFiberSourceNetworkAssignments(networkConfiguration));
+		// TODO MEDIUM Compare performance
+		networkData
+				.setFiberSources(getFiberSourceNetworkAssignments(networkConfiguration));
 
-			if (networkConfiguration.isFilteringRoadLocationsBySelection()) {
-				roadLocationByLocationIdMap.keySet().retainAll(selectedRoadLocations);
-			}
-
-			Collection<NetworkAssignment> roadLocations =  toValidAssignments(roadLocationByLocationIdMap
-					.keySet()
-					.stream()
-					.map(result -> {
-						Long locationId = result;
-
-						LocationDemand ldm = demandByLocationIdMap.get(locationId);
-						if (ldm == null || ldm.getDemand() == 0) {
-							// No Demand no location mapped in for fiber Linking
-							return null;
-						}
-
-						AroEntity aroEntity = entityFactory.createLocationEntity(
-								networkConfiguration.getLocationEntityTypes(),
-								locationId, ldm);
-
-						return new DefaultNetworkAssignment(aroEntity,
-								roadLocationByLocationIdMap.get(locationId));
-					}));			
-	
-			networkData.setRoadLocations(roadLocations);
-
-			networkData.setRoadEdges(getRoadEdges(networkConfiguration));
-			networkData.setSelectedRoadLocationIds(selectedRoadLocations);
-
+		if (networkConfiguration.isFilteringRoadLocationsBySelection()) {
+			roadLocationByLocationIdMap.keySet().retainAll(selectedRoadLocations);
 		}
+
+		Collection<NetworkAssignment> roadLocations =  toValidAssignments(roadLocationByLocationIdMap
+				.keySet()
+				.stream()
+				.map(result -> {
+					Long locationId = result;
+
+					LocationDemand ldm = demandByLocationIdMap.get(locationId);
+					if (ldm == null || ldm.getDemand() == 0) {
+						// No Demand no location mapped in for fiber Linking
+						return null;
+					}
+
+					AroEntity aroEntity = entityFactory.createLocationEntity(
+							networkConfiguration.getLocationEntityTypes(),
+							locationId, ldm);
+
+					return new DefaultNetworkAssignment(aroEntity,
+							roadLocationByLocationIdMap.get(locationId));
+				}));			
+
+		networkData.setRoadLocations(roadLocations);
+
+		networkData.setRoadEdges(getRoadEdges(networkConfiguration));
+		networkData.setSelectedRoadLocationIds(selectedRoadLocations);
 
 		return networkData;
 	}
@@ -363,7 +354,7 @@ public class NetworkServiceImpl implements NetworkService {
 	}
 
 	private List<Long> selectedRoadLocationIds(long planId, Map<Long, RoadLocation> roadLocationByLocationIdMap) {
-		List<Long> selectedRoadLocations = planRepository.querySelectedLocationsByPlanId(planId).stream()
+		List<Long> selectedRoadLocations = planRepository.querySelectedLocationsByMasterPlanId(planId).stream()
 				.mapToLong(bi -> bi.longValue()).boxed()
 				.collect(Collectors.toList());
 		

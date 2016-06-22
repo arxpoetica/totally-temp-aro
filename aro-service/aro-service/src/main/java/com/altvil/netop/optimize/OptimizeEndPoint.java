@@ -33,6 +33,7 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.FiberNetworkConstraintsBuilder;
 import com.altvil.aro.service.planning.OptimizationPlan;
 import com.altvil.aro.service.planning.optimization.OptimizationPlanConfigurationBuilder;
+import com.altvil.aro.service.planning.optimization.impl.AbstractOptimizationPlan;
 import com.altvil.aro.service.planning.optimization.impl.CapexOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.CoverageOptimizationPlanImpl;
 import com.altvil.aro.service.planning.optimization.impl.MaxIrrOptimizationPlanImpl;
@@ -204,59 +205,38 @@ public class OptimizeEndPoint {
 	}
 
 	private OptimizationPlan toOptimizationPlan(AroOptimizationPlan plan) {
-
+		FinancialConstraints financials = plan.getFinancialConstraints();
+		
+		AbstractOptimizationPlan optimizationPlan;
+		
 		switch (plan.getAlgorithm()) {
 		case NPV: {
-			FinancialConstraints financials = plan.getFinancialConstraints();
-			return new NpvOptimizationPlanImpl(financials.getBudget(), financials.getDiscountRate(),
-					financials.getYears());
+			optimizationPlan = new NpvOptimizationPlanImpl(financials.getBudget(),
+					financials.getDiscountRate(), financials.getYears());
 		}
-		case COVERAGE: {
-			CoverageOptimizationPlanImpl coverage = new CoverageOptimizationPlanImpl();
-			coverage.setCoverage(plan.getCoverage());
-			coverage.setLocationEntityTypes(toMask(plan.getLocationTypes()));
-			coverage.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
-			coverage.setPlanId(plan.getPlanId());
-			return coverage;
-		}
-
-		case MAX_IRR: {
-			FinancialConstraints financials = plan.getFinancialConstraints();
-			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.MAX_IRR);
-			maxIrr.setLocationEntityTypes(toMask(plan.getLocationTypes()));
-			maxIrr.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
-			maxIrr.setPlanId(plan.getPlanId());
-			maxIrr.setYears(financials.getYears());
-			return maxIrr;
-		}
-		case BUDGET_IRR: {
-			FinancialConstraints financials = plan.getFinancialConstraints();
-			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.BUDGET_IRR);
-			maxIrr.setLocationEntityTypes(toMask(plan.getLocationTypes()));
-			maxIrr.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
-			maxIrr.setPlanId(plan.getPlanId());
-			maxIrr.setYears(financials.getYears());
-			maxIrr.setBudget(financials.getBudget());
-			maxIrr.setIrr(plan.getThreshold() == null ? Double.NaN : plan.getThreshold());
-			return maxIrr;
-		}
+		break;
+		case MAX_IRR:
+		case BUDGET_IRR:
 		case TARGET_IRR: {
-			FinancialConstraints financials = plan.getFinancialConstraints();
-			MaxIrrOptimizationPlanImpl maxIrr = new MaxIrrOptimizationPlanImpl(OptimizationType.TARGET_IRR);
-			maxIrr.setLocationEntityTypes(toMask(plan.getLocationTypes()));
-			maxIrr.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
-			maxIrr.setPlanId(plan.getPlanId());
-			maxIrr.setYears(financials.getYears());
-			maxIrr.setBudget(financials.getBudget());
-			maxIrr.setIrr(plan.getThreshold() == null ? Double.NaN : plan.getThreshold());
-			return maxIrr;
+			MaxIrrOptimizationPlanImpl irrOptimizationPlan = new MaxIrrOptimizationPlanImpl(plan.getAlgorithm());
+			irrOptimizationPlan.setYears(financials.getYears());
+			irrOptimizationPlan.setBudget(financials.getBudget());
+			irrOptimizationPlan.setIrr(plan.getThreshold() == null ? Double.NaN : plan.getThreshold());
+			optimizationPlan = irrOptimizationPlan;
 		}
+		break;
 		case CAPEX:
-		case PENETRATION:
-		case IRR:
+			optimizationPlan = new CapexOptimizationPlanImpl();
+			break;
 		default:
-			return new CapexOptimizationPlanImpl() ;
+			throw new IllegalStateException();
 		}
+		
+		optimizationPlan.setPlanId(plan.getPlanId());
+		optimizationPlan.setFiberNetworkConstraints(plan.getFiberNetworkConstraints());
+		optimizationPlan.setLocationEntityTypes(toMask(plan.getLocationTypes()));
+		optimizationPlan.setWireCenterIds(toSelectedWireCenters(plan.getSelectedRegions()));
 
+		return optimizationPlan;
 	}
 }

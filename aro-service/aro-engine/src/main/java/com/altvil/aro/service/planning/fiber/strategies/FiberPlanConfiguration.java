@@ -1,6 +1,7 @@
 package com.altvil.aro.service.planning.fiber.strategies;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -20,12 +21,14 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 	private final FiberPlan fiberPlan;
 	private final GlobalConstraint globalConstraint;
 	private long planId;
-	
+	private long masterPlanId = -1;
+	private Set<Integer> wireCenterIds;
 
 	public FiberPlanConfiguration(FiberPlan fiberPlan, GlobalConstraint globalConstraint) {
 		this.fiberPlan= fiberPlan;
 		this.globalConstraint = globalConstraint;
 		this.planId = fiberPlan.getPlanId();
+		this.wireCenterIds = fiberPlan.getSelectedWireCenters();
 	}		
 	
 	public GlobalConstraint getGlobalConstraint() {
@@ -35,22 +38,18 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 
 	@Override
 	public Set<Integer> getSelectedWireCenters() {
-		return fiberPlan.getSelectedWireCenters() ;
+		return wireCenterIds;
 	}
 
+
+	public long getMasterPlanId() {
+		return masterPlanId;
+	}
 
 	@Override
 	public Set<LocationEntityType> getLocationEntityTypes() {
 		return fiberPlan.getLocationEntityTypes() ;
 	}
-
-
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		// TODO Auto-generated method stub
-		return super.clone();
-	}
-
 
 
 	public FiberPlanAlgorithm getAlgorithm() {
@@ -71,10 +70,14 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T dependentPlan(long dependentId) {
+	public <T> T dependentPlan(long dependentId, int wireCenterId) {
 		try {
 			FiberPlanConfiguration copy = (FiberPlanConfiguration) clone();
 			copy.planId = dependentId;
+			copy.masterPlanId = this.planId;
+			Set<Integer> dependentWireCenters = new HashSet<>();
+			dependentWireCenters.add(wireCenterId);
+			copy.wireCenterIds = dependentWireCenters;
 			return (T) copy;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);

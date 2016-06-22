@@ -94,7 +94,7 @@ public class NetworkServiceTest {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public FiberPlanConfiguration dependentPlan(long dependentId) {
+			public FiberPlanConfiguration dependentPlan(long dependentId, int wireCenterId) {
 				// TODO Auto-generated method stub
 				return null;
 			}
