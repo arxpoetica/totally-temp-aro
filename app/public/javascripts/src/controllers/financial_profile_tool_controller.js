@@ -265,16 +265,16 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function showPenetrationChart (force) {
     var datasets = [
-      { key: 'businesses', name: 'Businesses' },
-      { key: 'households', name: 'Households' },
-      { key: 'towers', name: 'Towers' }
+      { key: 'bau', name: 'BAU' },
+      { key: 'plan', name: 'Plan' }
     ]
-    request(force, 'penetration', {}, (penetration) => {
+    request(force, 'penetration', { entityType: $scope.subscribersFilterEntityType }, (penetration) => {
       var data = buildChartData(penetration, datasets)
       var options = {
         datasetFill: false,
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) + '%' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value %>` // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 1) + '%' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-penetration', 'Line', data, options)
     })
