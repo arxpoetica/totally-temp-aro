@@ -10,38 +10,45 @@ public class CashFlow extends AbstractStreamFunction {
 	// Revenue - OpEx - Maintenance-CapEx - Connect-CapEx - Network-Capex
 
 	private CurveIdentifier revenueId;
-	private CurveIdentifier capexId;
-	private CurveIdentifier connectCapexId;
-	private CurveIdentifier networkCapexId;
-
+	private CurveIdentifier maintenanceId ;
+	private CurveIdentifier opExId ;
+	private CurveIdentifier newConnectionsId;
+	private CurveIdentifier networkCostId;
+	
 	private StreamAccessor revenue;
-	private StreamAccessor capex;
-	private StreamAccessor connectCapex;
-	private StreamAccessor networkCapex;
-
-	public CashFlow(CurveIdentifier revenueId, CurveIdentifier capexId,
-			CurveIdentifier connectCapexId, CurveIdentifier networkCapexId) {
+	private StreamAccessor maintenance ;
+	private StreamAccessor opEx ;
+	private StreamAccessor newConnections;
+	private StreamAccessor networkCost;
+	
+	
+	public CashFlow(CurveIdentifier revenueId, CurveIdentifier maintenanceId,
+			CurveIdentifier opExId, CurveIdentifier newConnectionsId,
+			CurveIdentifier networkCostId) {
 		super();
 		this.revenueId = revenueId;
-		this.capexId = capexId;
-		this.connectCapexId = connectCapexId;
-		this.networkCapexId = networkCapexId;
+		this.maintenanceId = maintenanceId;
+		this.opExId = opExId;
+		this.newConnectionsId = newConnectionsId;
+		this.networkCostId = networkCostId;
 	}
 
 	@Override
 	public double calc(CalcContext ctx) {
 		return revenue.getValue(ctx.getResultStream())
-				- capex.getValue(ctx.getResultStream())
-				- connectCapex.getValue(ctx.getResultStream())
-				- networkCapex.getValue(ctx.getResultStream());
+				- maintenance.getValue(ctx.getResultStream())
+				- opEx.getValue(ctx.getResultStream())
+				- newConnections.getValue(ctx.getResultStream())
+				- networkCost.getValue(ctx.getResultStream());
 	}
 
 	@Override
 	public void resolve(ResolveContext ctx) {
 		revenue = ctx.getStreamAccessor(revenueId);
-		capex = ctx.getStreamAccessor(capexId);
-		connectCapex = ctx.getStreamAccessor(connectCapexId);
-		networkCapex = ctx.getStreamAccessor(networkCapexId);
+		maintenance = ctx.getStreamAccessor(maintenanceId);
+		opEx = ctx.getStreamAccessor(opExId);
+		newConnections = ctx.getStreamAccessor(newConnectionsId);
+		networkCost =  ctx.getStreamAccessor(networkCostId);
 		super.resolve(ctx);
 	}
 
