@@ -49,6 +49,7 @@ public class NetworkConstrainer {
 		return new NetworkConstrainer(networkModelBuilder, generatingNodeConstraint, requiredNodeConstraint, constraintMatcher,
 				networkAnalysis);
 	}
+	
 
 	public List<OptimizedNetwork> constrainNetwork() {
 		ResultAssembler resultAssembler = new ResultAssembler(networkModelBuilder);
@@ -99,7 +100,7 @@ public class NetworkConstrainer {
 						// USE GeneratingNode::isValueNode or get rid of it
 						GeneratingNode node = networkAnalysis.getMinimumNode(
 								generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
-										|| generatingNode.getEquipmentAssignment().isRoot()) || requiredNodeConstraint.test(generatingNode));
+										|| generatingNode.getEquipmentAssignment().isRoot())); //TODO add Terminating Stop
 						if (node == null) {
 							optimized = true;
 						} else {
