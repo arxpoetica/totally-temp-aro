@@ -5,7 +5,7 @@ var config = helpers.config
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
-  function contains(arr, value) {
+  function contains (arr, value) {
     if (typeof arr === 'string') {
       return arr === value
     }
@@ -110,19 +110,26 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/financial_profile/:plan_id/penetration', (request, response, next) => {
+    var curves = {}
+    var zeros = ['bau', 'plan']
+    if (request.query.entityType === 'households') {
+      curves = {
+        bau: 'copper.household.subscribers_penetration',
+        plan: 'planned.network.subscribers_penetration'
+      }
+      zeros = []
+    }
     requestData({
       plan_id: request.params.plan_id,
-      curves: {
-        households: 'fiber.household.subscribers_penetration'
-      },
-      zeros: ['businesses', 'towers']
-    })
+      curves: curves,
+      zeros: zeros
+    }, (value) => value * 100)
     .then(jsonSuccess(response, next))
     .catch(next)
   })
 }
 
-const requestData = (params) => {
+const requestData = (params, filter) => {
   var year = new Date().getFullYear()
   var select = Object.keys(params.curves).map((key) => params.curves[key])
   var chart = []
@@ -153,7 +160,7 @@ const requestData = (params) => {
             obj = { year: year++ }
             chart.push(obj)
           }
-          obj[key] = value
+          obj[key] = (filter && filter(value)) || value
         })
       })
       ;(params.zeros || []).forEach((key) => {

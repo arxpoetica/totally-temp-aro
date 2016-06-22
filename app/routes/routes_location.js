@@ -9,7 +9,7 @@ exports.configure = (api, middleware) => {
     var plan_id = +request.params.plan_id
 
     var filters = {}
-    var keys = ['business_categories']
+    var keys = ['business_categories', 'household_categories']
     keys.forEach((key) => {
       var value = request.query[key] || ''
       if (typeof value === 'string') {

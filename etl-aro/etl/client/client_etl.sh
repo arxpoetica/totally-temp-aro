@@ -49,8 +49,14 @@ ${PSQL} -a -f $DIR/create_client_customer_type_mapping.sql
 # Create business categories table
 ${PSQL} -a -f $DIR/create_client_business_categories.sql
 
-# Create and load mapping tables for businesses and households to client's customer types
+# Map businesses to categories
 ${PSQL} -a -f $DIR/create_client_business_category_mapping.sql
+
+# Create household categories table
+${PSQL} -a -f $DIR/create_client_household_categories.sql
+
+# Map households to categories
+${PSQL} -a -f $DIR/create_client_household_category_mapping.sql
 
 # Create the tables for products and spend for a client
 ${PSQL} -a -f $DIR/create_client_spend.sql
