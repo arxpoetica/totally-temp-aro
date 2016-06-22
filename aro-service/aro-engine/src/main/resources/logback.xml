@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
- 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <layout class="ch.qos.logback.classic.PatternLayout">
       <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
     </layout>
   </appender>
 
-	<!-- LevelChangePropagator ensures efficiency if libraries are still using java util logging -->
-	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
-		<!-- <resetJUL>true</resetJUL> -->
-	</contextListener>
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${catalina.home}/logs/aro-services.txt</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- daily rollover -->
+      <fileNamePattern>${catalina.home}/logs/aro-services.%d{yyyy-MM-dd}.txt</fileNamePattern>
+      <maxHistory>3</maxHistory>
+    </rollingPolicy>
+    <append>true</append>
+    <encoder>
+      <pattern>%-4relative [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- LevelChangePropagator ensures efficiency if libraries are still using java util logging -->
+  <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+    <!-- <resetJUL>true</resetJUL> -->
+  </contextListener>
      
   <logger name="com.altvil" level="DEBUG"/>
   <logger name="com.altvil.aro.service" level="DEBUG"/>
@@ -22,5 +34,6 @@
  
   <root level="info">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILE" />
   </root>
 </configuration>
