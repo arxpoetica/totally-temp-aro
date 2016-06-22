@@ -25,7 +25,8 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 
 
 -- Mapping for carriers from NBM
--- This DOES NOT cover the fiber carriers that match with NBM carriers. Need to figure this out
+-- This is currently only being used for consumer locations, but will be mapped to any location
+-- so we can easily incorporate this for commercial locations  in the future
 INSERT INTO client.locations_carriers(location_id, carrier_id, download_speed, upload_speed, provider_type)
 	SELECT
 		DISTINCT(l.id) AS location_id,

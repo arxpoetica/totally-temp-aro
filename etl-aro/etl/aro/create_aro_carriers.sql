@@ -46,24 +46,37 @@ INSERT INTO aro.carriers (name, route_type, color) values('ZAYO', 'fiber', '#e89
 INSERT INTO aro.carriers (name, route_type, color) values('ZITO', 'fiber', '#7053e2');
 
 -- Carriers from NBM wich have not already been loaded
+-- WITH distinct_nbm_carrier_names AS
+-- (
+-- 	SELECT 
+-- 		distinct hoconame
+-- 	FROM nbm.blocks
+-- ),
+-- geotel_nbm_matching AS
+-- (
+-- SELECT
+-- 	nbm.hoconame AS nbm_name,
+-- 	carriers.name AS geotel_name
+-- FROM distinct_nbm_carrier_names nbm
+-- LEFT JOIN aro.carriers carriers
+-- ON (UPPER(nbm.hoconame) ~ ('\m' || UPPER(carriers.name)))
+-- )
+-- INSERT INTO aro.carriers (name, route_type)
+-- 	SELECT 
+-- 		nbm_name,
+-- 		'ilec'
+-- 	FROM geotel_nbm_matching
+-- 	WHERE geotel_name IS NULL;
+
+-- Load all distinct carriers from NBM right now since NBM and Geotel are being used in mutually exclusive fashion
 WITH distinct_nbm_carrier_names AS
 (
 	SELECT 
 		distinct hoconame
 	FROM nbm.blocks
-),
-geotel_nbm_matching AS
-(
-SELECT
-	nbm.hoconame AS nbm_name,
-	carriers.name AS geotel_name
-FROM distinct_nbm_carrier_names nbm
-LEFT JOIN aro.carriers carriers
-ON (UPPER(nbm.hoconame) ~ ('\m' || UPPER(carriers.name)))
 )
 INSERT INTO aro.carriers (name, route_type)
-	SELECT 
-		nbm_name,
+	SELECT
+		hoconame,
 		'ilec'
-	FROM geotel_nbm_matching
-	WHERE geotel_name IS NULL;
+	FROM distinct_nbm_carrier_names;
