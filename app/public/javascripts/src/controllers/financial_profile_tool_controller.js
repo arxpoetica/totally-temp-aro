@@ -257,7 +257,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       var data = buildChartData(subscribers, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-subscribers', 'Bar', data, options)
     })
