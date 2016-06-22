@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
 import com.altvil.aro.service.entity.FDHEquipment;
@@ -63,6 +65,7 @@ public class GeneratingNodeAssembler {
 	private Set<Class<?>> matchingEquipmentType;
 	private List<AroEdge<GeoSegment>> fiberPath = new ArrayList<>();
 	private ParentResolver parentResolver ;
+	private Set<AroEntity> visited = new HashSet<AroEntity>() ;
 
 	public GeneratingNodeAssembler(AnalysisContext ctx, FiberType fiberType) {
 		this.ctx = ctx;
@@ -125,6 +128,10 @@ public class GeneratingNodeAssembler {
 					graph.incomingEdgesOf(vertex), 1);
 		} 
 		
+//		if( getGraphAssignments(builder.getParentAssignment(), vertex, 1).size() > 0 )  {
+//			depthFirstTraversal(builder, vertex, 1);
+//		}
+		
 		depthFirstTraversal(builder, vertex, 1);
 	}
 	
@@ -135,9 +142,9 @@ public class GeneratingNodeAssembler {
 				new HashMap<>(),
 				ArrayList::new);
 		
-		mapping.getChildAssignments().forEach(a -> {
-			log.info("assign equipment " + model.getVertex(a)  + " -> " + a.getAroEntity());
-		}) ;
+//		mapping.getChildAssignments().forEach(a -> {
+//			log.info("assign equipment " + model.getVertex(a)  + " -> " + a.getAroEntity());
+//		}) ;
 
 		mapping.getChildAssignments().forEach(a -> map.put(model.getVertex(a), a));
 		
@@ -195,10 +202,25 @@ public class GeneratingNodeAssembler {
 
 		
 		if(  builder.getAssignment() == null ) {
-			log.info("dft  spliiter  " + vertex + " " + level);
+			//log.info("dft  spliiter  " + vertex + " " + level);
 			
 		} else {
-			log.info("dft " +  vertex + " " + builder.getAssignment().getAroEntity() + " " + level);
+			
+			if(visited.contains( builder.getAssignment().getAroEntity()) ) {
+				return ;
+			}
+			
+			visited.add( builder.getAssignment().getAroEntity()) ;
+			
+//			if( builder.getAssignment().getAroEntity().getObjectId().longValue() == -1L) {
+//				int x = 10 ;
+//				int y = x ;
+//				
+//				log.info("dft " +  vertex + " " + builder.getAssignment().getAroEntity() + " " + level);
+//				
+//			}
+			
+			//log.info("dft " +  vertex + " " + builder.getAssignment().getAroEntity() + " " + level);
 		}
 	
 		
@@ -209,9 +231,9 @@ public class GeneratingNodeAssembler {
 		Collection<GraphEdgeAssignment> gas = getGraphAssignments(builder.getParentAssignment(), vertex, level);
 		if (gas.size() > 0) {
 			
-			gas.forEach( a -> {
-				log.info("assign " + a.getAroEntity());
-			});
+//			gas.forEach( a -> {
+//				log.info("assign " + a.getAroEntity() + " " + vertex);
+//			});
 
 			//Partition edges
 			childBuilder = ctx.addNode(new DefaultFiberAssignment(fiberType, extractFiberPath()), gas, builder, vertex);
@@ -236,8 +258,11 @@ public class GeneratingNodeAssembler {
 				// TODO create Synthetic
 				
 				childBuilder =  builder.addChild(new DefaultFiberAssignment(fiberType, extractFiberPath()), new SplitterNodeAssignment(null, EntityFactory.FACTORY.createJunctionNode())) ;
-		
-				log.info("add splitter node ");
+			
+				log.info("add splitter node " + vertex);
+//				depthFirstTraversal(childBuilder, edges,1); 
+//				return ;
+				
 			}
 			
 			
