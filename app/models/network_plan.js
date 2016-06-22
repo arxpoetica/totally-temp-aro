@@ -106,7 +106,6 @@ module.exports = class NetworkPlan {
   }
 
   static findPlan (plan_id, metadata_only) {
-    // var cost_per_meter = 200
     var output = {
       'feature_collection': {
         'type': 'FeatureCollection'
@@ -121,10 +120,14 @@ module.exports = class NetworkPlan {
 
         return Promise.all([
           models.Network.equipmentSummary(plan_id),
-          models.Network.fiberSummary(plan_id)
+          models.Network.fiberSummary(plan_id),
+          models.Network.irrAndNpv(plan_id)
         ])
       })
       .then((results) => {
+        output.metadata.npv = results[2].npv
+        output.metadata.irr = results[2].irr
+
         output.metadata.equipment_summary = attachCostDescription(results[0])
         output.metadata.fiber_summary = attachCostDescription(results[1])
 
@@ -192,15 +195,6 @@ module.exports = class NetworkPlan {
         plan.total_revenue = plan.total_revenue || 0
         plan.total_cost = plan.total_cost || 0
         output.metadata.revenue = plan.total_revenue
-        var year = new Date().getFullYear()
-        output.metadata.total_npv = plan.npv || 0
-        output.metadata.npv = [
-          { year: year++, value: plan.total_revenue - plan.total_cost },
-          { year: year++, value: plan.total_revenue },
-          { year: year++, value: plan.total_revenue },
-          { year: year++, value: plan.total_revenue },
-          { year: year++, value: plan.total_revenue }
-        ]
         output.metadata.total_cost = plan.total_cost || 0
         output.metadata.profit = output.metadata.revenue - output.metadata.total_cost
 
