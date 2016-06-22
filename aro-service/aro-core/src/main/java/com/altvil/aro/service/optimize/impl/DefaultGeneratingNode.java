@@ -102,6 +102,10 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		 * if (getEquipmentAssignment().rebuildNetwork(this, ctx)) {
 		 * ctx.rebuildRequired(this); } else {
 		 */
+		
+		
+		//log.info("remove " + this.getEquipmentAssignment().getClass().getName());
+		
 		try {
 			recalcMode++ ;
 			 new ArrayList<>(children).forEach(GeneratingNode::remove);
