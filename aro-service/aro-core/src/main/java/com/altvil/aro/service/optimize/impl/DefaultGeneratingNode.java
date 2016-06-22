@@ -50,6 +50,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		this.parent = parent;
 		this.children = children;
 		this.directCoverage = equipmentAssigment.getDirectCoverage(ctx);
+		
+		//log.info("direct coverage = " + directCoverage.getDemand());
 
 	}
 
@@ -140,6 +142,9 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		double childrenCapex = getChildren().stream()
 				.mapToDouble(GeneratingNode::getCapex).sum();
 		
+//		System.out.println("coverage = " + coverage) ;
+//		System.out.println("coverage = " + coverage) ;
+//		
 		
 		if( log.isTraceEnabled() ) {
 			log.trace("Capex " + nodeCapex + " => "
