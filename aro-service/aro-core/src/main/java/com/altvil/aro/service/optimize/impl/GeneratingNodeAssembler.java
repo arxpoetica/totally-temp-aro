@@ -192,7 +192,7 @@ public class GeneratingNodeAssembler {
 			return Collections.emptyList();
 		}
 
-		return StreamUtil.filter(gas, a -> matchingEquipmentType.contains(a.getAroEntity().getType()) && parentPredicate.test(a));
+		return StreamUtil.filter(gas, a -> matchingEquipmentType.contains(a.getAroEntity().getType()) && !visited.contains(a.getAroEntity()) && parentPredicate.test(a));
 
 	}
 	
@@ -206,19 +206,21 @@ public class GeneratingNodeAssembler {
 			
 		} else {
 			
-			if(visited.contains( builder.getAssignment().getAroEntity()) ) {
-				return ;
+			if( builder.getAssignment().getAroEntity().getObjectId().longValue() == -1L) {
+				int x = 10 ;
+				int y = x ;
+				
+				log.info("dft " +  vertex + " " + builder.getAssignment().getAroEntity() + " " + level);
+				
 			}
 			
-			visited.add( builder.getAssignment().getAroEntity()) ;
-			
-//			if( builder.getAssignment().getAroEntity().getObjectId().longValue() == -1L) {
-//				int x = 10 ;
-//				int y = x ;
-//				
-//				log.info("dft " +  vertex + " " + builder.getAssignment().getAroEntity() + " " + level);
-//				
+//			if(visited.contains( builder.getAssignment().getAroEntity()) ) {
+//				return ;
 //			}
+			
+		
+			
+			
 			
 			//log.info("dft " +  vertex + " " + builder.getAssignment().getAroEntity() + " " + level);
 		}
@@ -234,6 +236,10 @@ public class GeneratingNodeAssembler {
 //			gas.forEach( a -> {
 //				log.info("assign " + a.getAroEntity() + " " + vertex);
 //			});
+			
+			gas.forEach(a -> {
+				visited.add(a.getAroEntity()) ;
+			});
 
 			//Partition edges
 			childBuilder = ctx.addNode(new DefaultFiberAssignment(fiberType, extractFiberPath()), gas, builder, vertex);
@@ -273,7 +279,7 @@ public class GeneratingNodeAssembler {
 		if( childBuilder != null ) {
 			childBuilder.build() ;
 		} else {
-			System.err.println("Failed to terminate child node " + vertex);
+			//System.err.println("Failed to terminate child node " + vertex);
 		}
 
 	}
