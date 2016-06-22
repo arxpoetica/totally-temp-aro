@@ -110,6 +110,12 @@ insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, de
 	, 'install_fiber', 'Install Fiber') ;
 
 
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id,  name, description)
+	values (
+	(select id from financial.cost_code_type where name = 'material'),
+	(select id from aro.uom where name = 'unit_cost')
+	, 'bulk_distribution_terminal', 'Bulk Distribution Terminal Equipment') ;
+
 
 -- Price for a Given Cost Coode By Time By State
 
@@ -143,6 +149,9 @@ insert into financial.cost_assignment (date_from, date_to, state_code,  cost_cod
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
 	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'distribution_fiber'), 4.88) ;
 
+
+insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
+	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'bulk_distribution_terminal'), 0.0) ;
 
 -- NETWORK_COST_CODE Primary Code Used BY ARO to identify network cost elements
 
@@ -217,9 +226,9 @@ insert into financial.network_code_detail (network_cost_code_id, cost_code_id, u
 
 insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
 	values ((select id from financial.network_cost_code where name = 'bulk_distribution_hub'), 
-			(select id from financial.cost_code where name = 'fdh_equipment'),
+			(select id from financial.cost_code where name = 'bulk_distribution_terminal'),
 			(select id from aro.uom where name = 'unit_cost'),
-			1,  1.0, 'FDH Cabinet and equipment') ;
+			1,  1.0, 'bulk_distribution_terminal') ;
 
 insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity,ratio_fixed_cost, comment)
 	values ((select id from financial.network_cost_code where name = 'fiber_distribution_terminal'), 
