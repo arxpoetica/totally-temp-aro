@@ -15,11 +15,22 @@ module.exports = class Location {
   static findLocations (plan_id, type, filters, viewport) {
     var params = [plan_id]
     var parts = []
+    var join
     if (!type || type === 'households') {
+      join = ''
+      if (filters.household_categories.length > 0) {
+        params.push(filters.household_categories)
+        join = `
+          JOIN households b ON b.location_id = locations.id
+          JOIN client.household_category_mappings bcm ON b.id = bcm.household_id
+          JOIN client.household_categories bc ON bc.id = bcm.household_category_id AND bc.id IN ($${params.length})
+        `
+      }
       parts.push(`(
         -- households
         SELECT locations.id, locations.geom, total_businesses, total_households
           FROM locations
+               ${join}
          WHERE locations.total_households > 0
         EXCEPT
         SELECT locations.id, locations.geom, total_businesses, total_households
@@ -31,14 +42,15 @@ module.exports = class Location {
       )`)
     }
     if (!type || type === 'businesses') {
-      var join = ''
+      join = ''
       if (filters.business_categories.length > 0) {
+        params.push(filters.business_categories)
         join = `
           JOIN businesses b ON b.location_id = locations.id
           JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
+          JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($${params.length})
           JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($2)
         `
-        params.push(filters.business_categories)
       }
       parts.push(`(
         -- businesses
@@ -460,6 +472,10 @@ module.exports = class Location {
       })
       .then((rows) => {
         output.business_categories = rows
+        return database.query('SELECT * FROM client.household_categories')
+      })
+      .then((rows) => {
+        output.household_categories = rows
         return output
       })
   }

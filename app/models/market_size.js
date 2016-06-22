@@ -598,7 +598,12 @@ module.exports = class MarketSize {
         var table = ['businesses', 'households', 'towers'].indexOf(filters.entity_type) >= 0 ? filters.entity_type : 'businesses'
         var params = [location_id]
         var sql = `
-          SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color,
+          SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
+            CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
+            ELSE '#' ||
+              to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
+              to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
+            END AS color,
             (SELECT distance FROM client.locations_distance_to_carrier ldtc
               WHERE ldtc.carrier_id = c.id
               AND ldtc.location_id = $1
@@ -607,6 +612,7 @@ module.exports = class MarketSize {
           JOIN locations l ON l.id = biz.location_id AND l.id = $1
           JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
           JOIN carriers c ON lc.carrier_id = c.id
+            ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
           GROUP BY c.id ORDER BY c.name
         `
         return database.query(sql, params)

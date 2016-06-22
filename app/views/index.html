@@ -404,6 +404,13 @@
                   <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Residential
                 </label>
               </div>
+              <div style="margin-left: 20px">
+                <div class="checkbox" ng-repeat="category in household_categories">
+                  <label>
+                    <input type="checkbox" ng-model="household_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_households"> {{category.description}}
+                  </label>
+                </div>
+              </div>
               <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}">
                 <label>
                   <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
@@ -1276,6 +1283,8 @@
                         </tr>
                       </tbody>
                     </table>
+                  </div>
+                  <div class="col-sm-6">
                     <table class="table">
                       <tbody>
                         <tr>
@@ -1292,10 +1301,6 @@
                         </tr>
                       </tbody>
                     </table>
-                  </div>
-                  <div class="col-sm-6">
-                    <p><strong>Cash Flow</strong></p>
-                    <canvas id="financial-profile-chart" style="width:100%; height:200px"></canvas>
                     <br><br>
                     <p><strong>NPV</strong>: {{plan.metadata.total_npv / 1000 | currency:"$":1}}K</p>
                   </div>
@@ -1354,7 +1359,7 @@
                     <div class="form-group">
                       <select class="form-control" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
                         <option value="bau">BAU</option>
-                        <option value="plan">Fiber</option>
+                        <option value="plan">Plan</option>
                         <option value="incremental">Incremental</option>
                       </select>
                     </div>
@@ -1371,7 +1376,7 @@
                     <div class="form-group">
                       <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
                         <option value="bau">BAU</option>
-                        <option value="plan">Fiber</option>
+                        <option value="plan">Plan</option>
                         <option value="incremental">Incremental</option>
                       </select>
                     </div>
