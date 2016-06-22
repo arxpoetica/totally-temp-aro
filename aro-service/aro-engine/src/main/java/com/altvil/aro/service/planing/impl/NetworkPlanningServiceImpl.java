@@ -248,14 +248,21 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				plans.stream().map(plan -> createOptimzedCallable(plan, constraints)).collect(Collectors.toList()));
 
 		IgniteCallable<MasterPlanUpdate> callable = (() -> {
-			return new MasterPlanUpdate(futures.stream().map(wf -> {
+			
+			List<WirecenterNetworkPlan> updates = futures.stream().map(wf -> {
 				try {
 					return wf.get();
 				} catch (Exception e) {
 					log.error("Failed to create master plan update in master plan " + optimizationPlanStrategy.getPlanId(), e);
 					return null;
 				}
-			}).filter(p -> p != null).collect(Collectors.toList()));
+			}).filter(p -> p != null).collect(Collectors.toList()) ;
+			
+			updateMasterPlanFinancials(optimizationPlanStrategy.getPlanId(), updates) ;
+			costService.updateMasterPlanCosts(optimizationPlanStrategy.getPlanId());
+			
+			return new MasterPlanUpdate(updates) ;
+			
 		});
 		MasterPlanBuilder builder =  createMasterPlanBuilder(requestor, callable);
 		builder.setWireCenterPlans(plans);
@@ -462,12 +469,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@Transactional
 		public void saveUpdate(WirecenterNetworkPlan plan) {
-			
-			//TODO KEVIN + HT REview why network nodes are being deleted (THIS SHOULD NOT HAPPEN)
-			
-			//networkNodeRepository.deleteNetworkNodes(plan.getPlanId());
-			//fiberRouteRepository.deleteFiberRoutes(plan.getPlanId());
-			
+		
 			networkNodeRepository.save(plan.getNetworkNodes());
 			fiberRouteRepository.save(plan.getFiberRoutes());
 			
@@ -505,6 +507,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@SpringResource(resourceName = "costService")
 		private transient CostService	costService;
+		
 		OptimizationPlanningCallable(OptimizationPlanConfiguration fiberPlanStrategy,
 				FtthThreshholds constraints, GlobalConstraint globalConstraint) {
 			this.fiberPlanStrategy = fiberPlanStrategy;
