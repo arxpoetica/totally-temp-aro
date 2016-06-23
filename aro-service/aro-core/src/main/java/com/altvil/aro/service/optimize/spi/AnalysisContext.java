@@ -9,6 +9,7 @@ import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.impl.FiberProducerConsumerFactory;
 import com.altvil.aro.service.optimize.impl.SplitterNodeAssignment;
+import com.altvil.aro.service.optimize.model.EquipmentAssignment;
 import com.altvil.aro.service.optimize.model.FiberAssignment;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode.Builder;
@@ -45,11 +46,9 @@ public interface AnalysisContext extends PricingContext {
 	void addToAnalysis(GeneratingNode node);
 
 	void removeFromAnalysis(GeneratingNode node);
-
-	Builder addNode(FiberAssignment fiberAssignment,
-			Collection<GraphEdgeAssignment> assignments,
-			GeneratingNode.Builder parent, GraphNode vertex);
-
+	
+	Builder createNode(FiberAssignment fiberAssignment, EquipmentAssignment equipment); ;
+	
 	SplitterNodeAssignment createSplitterNodeAssignment() ;
 	
 	//Builder addSplitterNode(FiberAssignment fiberAssignment, GeneratingNode.Builder parent);

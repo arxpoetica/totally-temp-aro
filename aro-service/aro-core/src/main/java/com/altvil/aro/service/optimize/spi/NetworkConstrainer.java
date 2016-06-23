@@ -51,7 +51,6 @@ public class NetworkConstrainer {
 				networkAnalysis);
 	}
 
-
 	public List<OptimizedNetwork> constrainNetwork() {
 		ResultAssembler resultAssembler = new ResultAssembler(networkModelBuilder);
 		if (networkAnalysis != null) {
@@ -106,22 +105,24 @@ public class NetworkConstrainer {
 						// maybe
 						// USE GeneratingNode::isValueNode or get rid of it
 						GeneratingNode node = networkAnalysis.getMinimumNode(
-								generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
-										|| generatingNode.getEquipmentAssignment().isRoot() || requiredNodeConstraint.test(generatingNode)));
+								generatingNode -> !(generatingNode.isSourceEquipment()));
 						
-						if (node == null) {
-							// NOTE: The requiredNodeConstraint may be used to
-							// control the order in which nodes are removed. As
-							// such it is a heuristic that can be ignored when
-							// no other options remain.
-							node = networkAnalysis.getMinimumNode(
-									generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
-											|| generatingNode.getEquipmentAssignment().isRoot()));
-
-							if (node != null) {
-								log.warn("Overridding requiredNodeConstraint to complete analysis");
-							}
-						}
+//					
+//		                This causes the TreeMap to fail				
+//     						
+//						if (node == null) {
+//							// NOTE: The requiredNodeConstraint may be used to
+//							// control the order in which nodes are removed. As
+//							// such it is a heuristic that can be ignored when
+//							// no other options remain.
+//							node = networkAnalysis.getMinimumNode(
+//									generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
+//											|| generatingNode.getEquipmentAssignment().isRoot()));
+//
+//							if (node != null) {
+//								log.warn("Overridding requiredNodeConstraint to complete analysis");
+//							}
+//						}
 						
 						if (node == null) {
 							optimized = true;

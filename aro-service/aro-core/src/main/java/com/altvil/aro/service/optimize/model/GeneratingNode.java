@@ -12,6 +12,8 @@ public interface GeneratingNode extends AnalysisNode,
 	AnalysisContext getAnalysisContext() ;
 	
 	FiberAssignment getFiberAssignment();
+	
+	boolean isSourceEquipment() ;
 
 	EquipmentAssignment getEquipmentAssignment();
 	
@@ -35,18 +37,14 @@ public interface GeneratingNode extends AnalysisNode,
 	
 	interface Builder {
 		
-		Builder addCompositeChild(FiberAssignment fiberAssignment)  ;
-		
-		Builder addChild(FiberAssignment fiberAssignment, EquipmentAssignment equipment);
-		
-		GraphEdgeAssignment getParentAssignment() ;
-		
-		GraphEdgeAssignment getAssignment() ;
-		
-		boolean isInitMode() ;
-		void setInitMode(boolean mode) ;
-
+		//Builder addChild(FiberAssignment fiberAssignment, EquipmentAssignment equipment);
+		void addChild(Builder child) ;
+		void addChildren(Collection<Builder> children) ;
 		GeneratingNode build();
+		GeneratingNode getGeneratingNode() ;
+		
+
+
 	}
 
 }
