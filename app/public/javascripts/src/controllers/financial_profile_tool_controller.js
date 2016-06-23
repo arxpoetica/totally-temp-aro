@@ -163,7 +163,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   function showCashFlowChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
-      { key: 'plan', name: 'Fiber' },
+      { key: 'plan', name: 'Plan' },
       { key: 'incremental', name: 'Incremental' }
     ]
     request(force, 'cash_flow', {}, (cashFlow) => {
