@@ -10,6 +10,9 @@ import com.altvil.aro.service.roic.RoicQueryService;
 import com.altvil.aro.service.roic.RoicService;
 import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
+import com.altvil.aro.service.roic.analysis.model.builder.DefaultAnalyisRow;
+import com.altvil.aro.service.roic.analysis.model.builder.DefaultRowReference;
+import com.altvil.aro.service.roic.analysis.registry.impl.ScopedCurveIdentifier;
 
 @Service
 public class RoicQueryServiceImpl implements RoicQueryService {
@@ -22,10 +25,21 @@ public class RoicQueryServiceImpl implements RoicQueryService {
 		this.roicService = roicService;
 	}
 
+	private RowReference toEmptyReference(String name, int period) {
+		return new DefaultRowReference(new ScopedCurveIdentifier(name),
+				new DefaultAnalyisRow(new double[period]));
+	}
+
 	@Override
 	public Collection<RowReference> queryRoic(Long planId,
 			Collection<String> curveNames) {
 		RoicModel model = roicService.getRoicModel(planId);
+
+		if (model == null) {
+			return curveNames.stream().map(id -> toEmptyReference(id, 15))
+					.collect(Collectors.toList());
+		}
+
 		return curveNames.stream().map(id -> model.getRowReference(id))
 				.collect(Collectors.toList());
 	}
