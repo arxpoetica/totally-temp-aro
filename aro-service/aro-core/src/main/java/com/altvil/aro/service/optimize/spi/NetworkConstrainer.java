@@ -17,6 +17,7 @@ import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.impl.AnalysisNodeImpl;
 import com.altvil.aro.service.optimize.impl.LazyOptimizedNetwork;
+import com.altvil.aro.service.optimize.model.AnalysisNode;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
@@ -76,7 +77,11 @@ public class NetworkConstrainer {
 					optimized = true;
 				} else {
 					OptimizedNetwork optimizedNetwork = createOptimizedNetwork(networkAnalysis);
-					boolean isAnalysisEmpty = optimizedNetwork.getAnalysisNode().getFiberCoverage().getLocations()
+					final AnalysisNode analysisNode = optimizedNetwork.getAnalysisNode();
+					
+					log.trace("Analysis Node: {} {} {} {}", analysisNode.getFiberCoverage().getDemand(), analysisNode.getCapex(), analysisNode.getSuccessBasedCapex(), analysisNode.getFiberCoverage().getRawCoverage());
+					
+					boolean isAnalysisEmpty = analysisNode.getFiberCoverage().getLocations()
 							.isEmpty();
 					if (isAnalysisEmpty) {
 						optimized = true;
@@ -103,6 +108,21 @@ public class NetworkConstrainer {
 						GeneratingNode node = networkAnalysis.getMinimumNode(
 								generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
 										|| generatingNode.getEquipmentAssignment().isRoot() || requiredNodeConstraint.test(generatingNode)));
+						
+						if (node == null) {
+							// NOTE: The requiredNodeConstraint may be used to
+							// control the order in which nodes are removed. As
+							// such it is a heuristic that can be ignored when
+							// no other options remain.
+							node = networkAnalysis.getMinimumNode(
+									generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
+											|| generatingNode.getEquipmentAssignment().isRoot()));
+
+							if (node != null) {
+								log.warn("Overridding requiredNodeConstraint to complete analysis");
+							}
+						}
+						
 						if (node == null) {
 							optimized = true;
 						} else {
