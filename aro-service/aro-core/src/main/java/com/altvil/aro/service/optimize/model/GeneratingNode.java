@@ -2,7 +2,6 @@ package com.altvil.aro.service.optimize.model;
 
 import java.util.Collection;
 
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 

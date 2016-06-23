@@ -76,7 +76,7 @@ public class NodeAssembler {
 		DescribeGraph.debug(log, graph);
 	}
 	
-	public  Collection<GeneratingNode.Builder> assemble(GraphNode vertex, GraphMapping gm,
+	public  GeneratingNode.Builder assemble(GraphNode vertex, GraphMapping gm,
 			Collection<AroEdge<GeoSegment>> pathEdges) {
 		
 		this.dagModel = createDagModel(vertex, pathEdges);
@@ -84,12 +84,14 @@ public class NodeAssembler {
 
 		equipmentMap = createEquipmentMap(ctx.getNetworkModel(), gm);
 		
-		if( graph.edgeSet().size() > 0 ) {
-			return depthFirstTraversal(
-					graph.incomingEdgesOf(vertex), 1);
-		} else {
-			return Collections.singleton(depthFirstTraversal(vertex, 1)) ;
-		}
+		return depthFirstTraversal(vertex, 1) ;
+		
+//		if( graph.edgeSet().size() > 0 ) {
+//			return depthFirstTraversal(
+//					graph.incomingEdgesOf(vertex), 1);
+//		} else {
+//			return Collections.singleton(depthFirstTraversal(vertex, 1)) ;
+//		}
 		
 	}
 	
@@ -220,7 +222,7 @@ public class NodeAssembler {
 			@Override
 			public void visit(CentralOfficeEquipment co) {
 				GeneratingNode.Builder node = createNode(new CentralOfficeAssignment((GraphEdgeAssignment) graphAssignment, co)) ;
-				node.addChildren(new NodeAssembler(networkModel, ctx,FiberType.FEEDER).assemble(vertex, gm, networkModel.getFiberRouteForFdh(
+				node.addChild(new NodeAssembler(networkModel, ctx,FiberType.FEEDER).assemble(vertex, gm, networkModel.getFiberRouteForFdh(
 						graphAssignment))) ;
 				update(node) ;
 			}
@@ -228,7 +230,7 @@ public class NodeAssembler {
 			@Override
 			public void visit(FDHEquipment fdh) {
 				GeneratingNode.Builder node = createNode(new FdhAssignment((GraphEdgeAssignment) graphAssignment, fdh)) ;
-				node.addChildren(new NodeAssembler(networkModel, ctx,FiberType.DISTRIBUTION).assemble(vertex, gm, networkModel.getFiberRouteForFdh(
+				node.addChild(new NodeAssembler(networkModel, ctx,FiberType.DISTRIBUTION).assemble(vertex, gm, networkModel.getFiberRouteForFdh(
 							graphAssignment))) ;
 				update(node) ;
 			}
@@ -240,7 +242,7 @@ public class NodeAssembler {
 
 			@Override
 			public void visit(BulkFiberTerminal fiberTerminal) {
-				update(createNode(new FdtAssignment(gm))) ;
+				update(createNode(new BulkFiberTerminalAssignment(gm))) ;
 			}
 		} ;
 		
@@ -266,12 +268,12 @@ public class NodeAssembler {
 			return addNode(vertex, fiberAssignment, assignments.iterator().next());
 		}
 		
-		System.out.print("cluster types ");
-		for(GraphAssignment ga : assignments) {
-			System.out.print(" | ");
-			System.out.print(ga.getAroEntity().getType().getSimpleName()) ;
-		}
-		System.out.println("") ;
+//		System.out.print("cluster types ");
+//		for(GraphAssignment ga : assignments) {
+//			System.out.print(" | ");
+//			System.out.print(ga.getAroEntity().getType().getSimpleName()) ;
+//		}
+//		System.out.println("") ;
 		
 		Builder splitter = ctx.createNode(fiberAssignment, ctx.createSplitterNodeAssignment()) ;
 		

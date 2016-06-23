@@ -18,6 +18,7 @@ import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> {
 
 
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 			.getLogger(WireCenterMods.class.getName());
 

@@ -13,7 +13,6 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.plan.GlobalConstraint;
-import com.altvil.aro.service.planning.CoverageOptimizationPlan;
 import com.altvil.aro.service.planning.OptimizationPlan;
 
 public class OptimizationPlanConfigurationCapex extends OptimizationPlanConfiguration implements OptimizationPlan {

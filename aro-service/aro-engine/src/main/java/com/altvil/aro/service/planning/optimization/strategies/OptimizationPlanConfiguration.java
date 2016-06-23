@@ -1,10 +1,8 @@
 package com.altvil.aro.service.planning.optimization.strategies;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,7 +20,6 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.NetworkConfiguration;
 import com.altvil.aro.service.planning.OptimizationPlan;
-import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.enumerations.OptimizationType;
 
 public abstract class OptimizationPlanConfiguration
@@ -31,7 +28,7 @@ public abstract class OptimizationPlanConfiguration
 	private final OptimizationPlan optimizationPlan;
 	private long				   planId;
 	private long masterPlanId = -1;
-	private Set<Integer> wireCenterIds;
+	private Set<Integer> wireCenterIds; //TODO REMOVE
 	
 
 	public OptimizationPlanConfiguration(OptimizationPlan optimizationPlan) {

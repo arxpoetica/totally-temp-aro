@@ -1,10 +1,6 @@
 package com.altvil.aro.service.optimize.spi;
 
-import java.util.Collection;
-
 import com.altvil.aro.service.entity.AroEntity;
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.impl.FiberProducerConsumerFactory;

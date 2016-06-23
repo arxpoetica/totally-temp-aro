@@ -108,21 +108,20 @@ public class NetworkConstrainer {
 								generatingNode -> !(generatingNode.isSourceEquipment()));
 						
 //					
-//		                This causes the TreeMap to fail				
+//		                This causes the TreeMap to fail	some times			
 //     						
-//						if (node == null) {
-//							// NOTE: The requiredNodeConstraint may be used to
-//							// control the order in which nodes are removed. As
-//							// such it is a heuristic that can be ignored when
-//							// no other options remain.
-//							node = networkAnalysis.getMinimumNode(
-//									generatingNode -> !(generatingNode.getEquipmentAssignment().isSourceEquipment()
-//											|| generatingNode.getEquipmentAssignment().isRoot()));
-//
-//							if (node != null) {
-//								log.warn("Overridding requiredNodeConstraint to complete analysis");
-//							}
-//						}
+						if (node == null) {
+							// NOTE: The requiredNodeConstraint may be used to
+							// control the order in which nodes are removed. As
+							// such it is a heuristic that can be ignored when
+							// no other options remain.
+							node = networkAnalysis.getMinimumNode(
+									generatingNode -> !(generatingNode.isSourceEquipment()));
+
+							if (node != null) {
+								log.warn("Overridding requiredNodeConstraint to complete analysis");
+							}
+						}
 						
 						if (node == null) {
 							optimized = true;

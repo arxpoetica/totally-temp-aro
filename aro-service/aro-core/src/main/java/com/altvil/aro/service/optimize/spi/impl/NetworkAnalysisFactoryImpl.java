@@ -16,41 +16,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
-import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.CentralOfficeEquipment;
-import com.altvil.aro.service.entity.DefaultAroVisitor;
-import com.altvil.aro.service.entity.FDHEquipment;
-import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.entity.LocationEntity;
-import com.altvil.aro.service.entity.RemoteTerminal;
-import com.altvil.aro.service.entity.SplicePoint;
 import com.altvil.aro.service.entity.impl.EntityFactory;
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
-import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.ftp.HubModel;
 import com.altvil.aro.service.optimize.OptimizerContext;
-import com.altvil.aro.service.optimize.impl.BulkFiberTerminalAssignment;
 import com.altvil.aro.service.optimize.impl.CentralOfficeAssignment;
 import com.altvil.aro.service.optimize.impl.DefaultFiberAssignment;
 import com.altvil.aro.service.optimize.impl.DefaultGeneratingNode;
 import com.altvil.aro.service.optimize.impl.DefaultGeneratingNode.BuilderImpl;
-import com.altvil.aro.service.optimize.impl.FdhAssignment;
-import com.altvil.aro.service.optimize.impl.FdtAssignment;
 import com.altvil.aro.service.optimize.impl.FiberProducerConsumerFactory;
 import com.altvil.aro.service.optimize.impl.GeneratingNodeComparator;
 import com.altvil.aro.service.optimize.impl.NodeAssembler;
-import com.altvil.aro.service.optimize.impl.RemoteTerminalAssignment;
 import com.altvil.aro.service.optimize.impl.RootAssignment;
-import com.altvil.aro.service.optimize.impl.SplicePointAssignment;
 import com.altvil.aro.service.optimize.impl.SplitterNodeAssignment;
 import com.altvil.aro.service.optimize.model.AnalysisNode;
 import com.altvil.aro.service.optimize.model.EquipmentAssignment;
@@ -290,7 +273,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 			Builder source = createSource(coEdgeAssignment);
 
-			source.addChildren(new NodeAssembler(model, this, FiberType.FEEDER).assemble(coVertex,
+			source.addChild(new NodeAssembler(model, this, FiberType.FEEDER).assemble(coVertex,
 					model.getFiberSourceMapping(),
 					model.getCentralOfficeFeederFiber()));
 			
