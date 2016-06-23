@@ -21,9 +21,9 @@ module.exports = class Location {
       if (filters.household_categories.length > 0) {
         params.push(filters.household_categories)
         join = `
-          JOIN households b ON b.location_id = locations.id
-          JOIN client.household_category_mappings bcm ON b.id = bcm.household_id
-          JOIN client.household_categories bc ON bc.id = bcm.household_category_id AND bc.id IN ($${params.length})
+          JOIN households h ON h.location_id = locations.id
+          JOIN client.household_category_mappings hcm ON h.id = hcm.household_id
+          JOIN client.household_categories hc ON hc.id = hcm.household_category_id AND hc.id IN ($${params.length})
         `
       }
       parts.push(`(
@@ -38,6 +38,7 @@ module.exports = class Location {
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
            AND plan_targets.location_id = locations.id
+               ${join}
          WHERE locations.total_households > 0
       )`)
     }
@@ -49,7 +50,6 @@ module.exports = class Location {
           JOIN businesses b ON b.location_id = locations.id
           JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
           JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($${params.length})
-          JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($2)
         `
       }
       parts.push(`(
