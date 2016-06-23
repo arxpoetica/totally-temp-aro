@@ -215,7 +215,11 @@ public class OptimizeEndPoint {
 					financials.getDiscountRate(), financials.getYears());
 		}
 		break;
-		case MAX_IRR:
+		case MAX_IRR: {
+			MaxIrrOptimizationPlanImpl irrOptimizationPlan = new MaxIrrOptimizationPlanImpl(plan.getAlgorithm());
+			irrOptimizationPlan.setYears(financials.getYears());
+			optimizationPlan = irrOptimizationPlan;
+		}
 		case BUDGET_IRR:
 		case TARGET_IRR: {
 			MaxIrrOptimizationPlanImpl irrOptimizationPlan = new MaxIrrOptimizationPlanImpl(plan.getAlgorithm());

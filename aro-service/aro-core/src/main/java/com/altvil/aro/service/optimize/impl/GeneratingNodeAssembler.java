@@ -73,7 +73,6 @@ public class GeneratingNodeAssembler {
 		this.fiberType = fiberType;
 		this.parentResolver = ctx.getParentResolver();
 		matchingEquipmentType = matchingEquipmentMap.get(fiberType);
-		DescribeGraph.debug(log, graph);
 	}
 
 	private DAGModel<GeoSegment> createDagModel(GraphNode vertex,
@@ -130,6 +129,7 @@ public class GeneratingNodeAssembler {
 
 		this.dagModel = createDagModel(vertex, pathEdges);
 		this.graph = this.dagModel.getAsDirectedGraph();
+		DescribeGraph.debug(log, graph);
 
 		equipmentMap = createEquipmentMap(ctx.getNetworkModel(), gm);
 
