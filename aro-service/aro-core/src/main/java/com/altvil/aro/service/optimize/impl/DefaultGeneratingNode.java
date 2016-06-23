@@ -105,10 +105,6 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		 * ctx.rebuildRequired(this); } else {
 		 */
 		
-		log.info("remove" + this.getEquipmentAssignment().getClass().getName());
-		
-		//log.info("remove " + this.getEquipmentAssignment().getClass().getName());
-		
 		try {
 			recalcMode++ ;
 			 new ArrayList<>(children).forEach(GeneratingNode::remove);
