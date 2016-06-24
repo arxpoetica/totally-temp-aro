@@ -1,5 +1,6 @@
 var helpers = require('../helpers')
 var models = require('../models')
+var moment = require('moment')
 var config = helpers.config
 
 exports.configure = (api, middleware) => {
@@ -11,6 +12,17 @@ exports.configure = (api, middleware) => {
     }
     return Array.isArray(arr) && arr.indexOf(value) >= 0
   }
+
+  api.get('/financial_profile/:plan_id/export', (request, response, next) => {
+    var req = {
+      url: config.aro_service_url + `/rest/roic/models/${request.params.plan_id}.csv`
+    }
+    return models.AROService.request(req)
+      .then((output) => {
+        response.attachment(`financial_profile_${moment().format('YYYY-MM-DD_HH:mm:ss')}.csv`)
+        response.send(output)
+      })
+  })
 
   api.get('/financial_profile/:plan_id/cash_flow', (request, response, next) => {
     requestData({

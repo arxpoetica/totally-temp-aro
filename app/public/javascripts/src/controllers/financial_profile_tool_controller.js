@@ -287,4 +287,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   function selectedKeys (obj) {
     return Object.keys(obj).filter((item) => !!obj[item])
   }
+
+  $scope.download = () => {
+    window.location.href = `/financial_profile/${$scope.plan.id}/export`
+  }
 }])
