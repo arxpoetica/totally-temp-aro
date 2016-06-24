@@ -659,12 +659,15 @@
                 <br>
                 <p><strong>IRR Threshold</strong></p>
                 <div class="row">
-                  <div class="col-md-8">
+                  <div class="col-md-7">
                     <input type="range" min="0" max="100" step="1" value="10" ng-model="irrThresholdRange" style="margin-top: 10px" ng-change="irrThresholdRangeChanged()">
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-5">
                     <div class="form-group form-group-sm">
-                      <input type="number" min="0" max="100" step="1" ng-model="irrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
+                      <div class="input-group input-group-sm">
+                        <input type="number" min="0" max="100" step="1" ng-model="irrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
+                        <div class="input-group-addon">%</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1330,7 +1333,7 @@
                     <div class="form-group">
                       <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
                         <option value="bau">BAU</option>
-                        <option value="plan">Fiber</option>
+                        <option value="plan">Plan</option>
                         <option value="incremental">Incremental</option>
                       </select>
                     </div>

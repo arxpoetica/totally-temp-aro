@@ -144,14 +144,14 @@ insert into financial.cost_assignment (date_from, date_to, state_code,  cost_cod
 	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'fdt_equipment'), 547.5) ;
 
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'feeder_fiber'), 4.88) ;
+	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'feeder_fiber'), 22.95) ;
 
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
 	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'distribution_fiber'), 22.95) ;
 
 
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'bulk_distribution_terminal'), 22.95) ;
+	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'bulk_distribution_terminal'), 0.0) ;
 
 -- NETWORK_COST_CODE Primary Code Used BY ARO to identify network cost elements
 

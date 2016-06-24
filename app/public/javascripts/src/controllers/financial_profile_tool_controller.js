@@ -163,13 +163,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   function showCashFlowChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
-      { key: 'plan', name: 'Fiber' },
+      { key: 'plan', name: 'Plan' },
       { key: 'incremental', name: 'Incremental' }
     ]
     request(force, 'cash_flow', {}, (cashFlow) => {
       var data = buildChartData(cashFlow, datasets)
       var options = {
         datasetFill: false,
+        bezierCurve: false,
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
@@ -276,6 +277,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       var data = buildChartData(penetration, datasets)
       var options = {
         datasetFill: false,
+        bezierCurve: false,
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) + '%' %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 1) + '%' %>` // eslint-disable-line

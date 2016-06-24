@@ -57,7 +57,11 @@ INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
         OR
         wc.wirecenter = 'SYRCNYJS'
         OR
-        wc.wirecenter = 'SYRCNYSA';
+        wc.wirecenter = 'SYRCNYSA'
+        OR
+        wc.wirecenter = 'ADCTNYXA'
+        OR
+        wc.wirecenter = 'LOWVNYXA';
 
 CREATE INDEX aro_locations_geog_gist
   ON aro.locations

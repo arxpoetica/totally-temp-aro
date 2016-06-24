@@ -253,6 +253,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       }
     }
     $http.post('/network_plan/create', params).success((response) => {
+      state.clearPlan(response)
       $scope.select_plan(response)
       $('#new-plan').modal('hide')
       $('#plan-combo').modal('hide')
