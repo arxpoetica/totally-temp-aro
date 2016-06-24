@@ -35,6 +35,7 @@
 				<entry key="json" value="application/json" />
 				<entry key="html" value="text/html" />
 				<entry key="xml" value="application/xml" />
+				<entry key="csv" value="text/csv" />
 				<entry key="text" value="text/plain" />
 			</map>
 		</property>

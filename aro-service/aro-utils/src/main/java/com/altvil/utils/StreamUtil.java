@@ -105,6 +105,10 @@ public class StreamUtil {
 		return value instanceof List ? (List<T>) value
 				: new ArrayList<T>(value);
 	}
+	
+	public static List<String> toStringList(String s) {
+		return map(s.split(","), String::trim);
+	}
 
 	public static <T, D> List<D> map(T[] src, Function<T, D> function) {
 		List<D> result = new ArrayList<D>(src.length);
