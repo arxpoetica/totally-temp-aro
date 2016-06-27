@@ -12,18 +12,18 @@
               <tr>
                 <th>
                   Name
-                  <a href="javascript:void(0)" ng-click="sort_by('first_name', true)">↓</a>
-                  <a href="javascript:void(0)" ng-click="sort_by('first_name', false)">↑</a>
+                  <a href="javascript:void(0)" ng-click="sortBy('first_name', true)">↓</a>
+                  <a href="javascript:void(0)" ng-click="sortBy('first_name', false)">↑</a>
                 </th>
                 <th>
                   Email
-                  <a href="javascript:void(0)" ng-click="sort_by('email', true)">↓</a>
-                  <a href="javascript:void(0)" ng-click="sort_by('email', false)">↑</a>
+                  <a href="javascript:void(0)" ng-click="sortBy('email', true)">↓</a>
+                  <a href="javascript:void(0)" ng-click="sortBy('email', false)">↑</a>
                 </th>
                 <th>
                   Rol
-                  <a href="javascript:void(0)" ng-click="sort_by('rol', true)">↓</a>
-                  <a href="javascript:void(0)" ng-click="sort_by('rol', false)">↑</a>
+                  <a href="javascript:void(0)" ng-click="sortBy('rol', true)">↓</a>
+                  <a href="javascript:void(0)" ng-click="sortBy('rol', false)">↑</a>
                 </th>
                 <th>
                 </th>
@@ -35,7 +35,12 @@
                 <td>{{user.email}}</th>
                 <td>{{user.rol}}</th>
                 <td>
-                  <a class="btn btn-sm btn-danger" ng-click="delete_user(user)" ng-show="user.id !== user_id"><span class="glyphicon glyphicon-trash"></span></a>
+                  <div class="pull-right">
+                    <a ng-show="user.resend_link" title="Link copied to the clipboard"
+                       class="btn btn-sm btn-default" data-clipboard-text="{{user.resend_link}}"><span class="glyphicon glyphicon-link"></span></a>
+                    <a class="btn btn-sm btn-primary" ng-click="resendLink(user)" ng-show="user.id !== user_id"><span class="glyphicon glyphicon-send"></span></a>
+                    <a class="btn btn-sm btn-danger" ng-click="deleteUser(user)" ng-show="user.id !== user_id"><span class="glyphicon glyphicon-trash"></span></a>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -43,7 +48,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <a type="button" class="btn btn-default" ng-click="open_new_user()">Register a new user</a>
+        <a type="button" class="btn btn-default" ng-click="openNewUser()">Register a new user</a>
         <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
       </div>
     </div>

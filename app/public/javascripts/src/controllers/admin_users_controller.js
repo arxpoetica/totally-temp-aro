@@ -1,22 +1,33 @@
-/* global $ app user_id swal _ */
+/* global $ app user_id swal _ Clipboard */
 // Admin users controller
-app.controller('admin_users_controller', ($scope, $http) => {
+app.controller('admin_users_controller', ($scope, $http, $timeout) => {
   $scope.users = []
   $scope.user_id = user_id
   $scope.new_user = {}
 
   $('#manage-users').on('shown.bs.modal', () => {
-    $scope.load_users()
+    loadUsers()
   })
 
-  $scope.load_users = () => {
+  function loadUsers () {
     $http.get('/admin/users')
       .success((response) => {
         $scope.users = response
+        $timeout(() => {
+          var clipboard = new Clipboard('#manage-users [data-clipboard-text]') // eslint-disable-line
+          clipboard.on('success', (e) => {
+            var el = $(e.trigger)
+            el.tooltip('show')
+            el.one('hidden.bs.tooltip', () => {
+              el.tooltip('destroy')
+            })
+            e.clearSelection()
+          })
+        }, 1)
       })
   }
 
-  $scope.sort_by = (key, descending) => {
+  $scope.sortBy = (key, descending) => {
     $scope.users = _.sortBy($scope.users, (user) => {
       return user[key] || ''
     })
@@ -25,7 +36,7 @@ app.controller('admin_users_controller', ($scope, $http) => {
     }
   }
 
-  $scope.open_new_user = () => {
+  $scope.openNewUser = () => {
     $('#manage-users').modal('hide')
     $('#new-user').modal('show')
   }
@@ -46,7 +57,23 @@ app.controller('admin_users_controller', ($scope, $http) => {
       })
   }
 
-  $scope.delete_user = (user) => {
+  $scope.resendLink = (user) => {
+    swal({
+      title: 'Are you sure?',
+      text: 'A new mail will be sent to this user',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, send it!',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, () => {
+      $http.post('/admin/users/resend', { user: user.id }).success((response) => {
+        loadUsers()
+      })
+    })
+  }
+
+  $scope.deleteUser = (user) => {
     swal({
       title: 'Are you sure?',
       text: 'You will not be able to recover the deleted user!',
@@ -57,7 +84,7 @@ app.controller('admin_users_controller', ($scope, $http) => {
       closeOnConfirm: true
     }, () => {
       $http.post('/admin/users/delete', { user: user.id }).success((response) => {
-        $scope.load_users()
+        loadUsers()
       })
     })
   }
