@@ -1316,7 +1316,7 @@
                         </tr>
                         <tr>
                           <th colspan="3">IRR</th>
-                          <td colspan="2" class="text-right" ng-show="hasIRR()">{{plan.metadata.irr | number: 1}}%</td>
+                          <td colspan="2" class="text-right" ng-show="hasIRR()">{{plan.metadata.irr * 100 | number: 1}}%</td>
                           <td colspan="2" class="text-right" ng-hide="hasIRR()">{{plan.metadata.irr}}%</td>
                         </tr>
                       </tbody>
