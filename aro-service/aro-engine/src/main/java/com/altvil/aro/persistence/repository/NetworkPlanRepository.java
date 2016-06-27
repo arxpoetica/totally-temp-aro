@@ -18,6 +18,12 @@ import com.altvil.aro.model.WirecenterPlan;
 public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
+	
+	//TODO Create Price Repository
+	@Query(value = "select name, uom_name, price from financial.network_price", nativeQuery = true)
+	List<Object[]> queryPriceModelElements();
+	
+	
 	@Query(value = "SELECT r.wirecenter_id \n" +
 			"FROM client.plan r \n" +
 			"WHERE r.id = :planId", nativeQuery = true)
