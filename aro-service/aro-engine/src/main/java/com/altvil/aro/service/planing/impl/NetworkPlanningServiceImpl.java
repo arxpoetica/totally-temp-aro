@@ -603,6 +603,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			networkNodeRepository = ctx.getBean(NetworkNodeRepository.class) ;
 			fiberRouteRepository = ctx.getBean(FiberRouteRepository.class) ;
 			costService = ctx.getBean(CostService.class) ;
+			pricingService = ctx.getBean(PricingService.class) ;
 		}
 
 		
