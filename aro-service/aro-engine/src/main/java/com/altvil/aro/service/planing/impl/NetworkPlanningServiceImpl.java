@@ -2,6 +2,7 @@ package com.altvil.aro.service.planing.impl;
 
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -30,13 +31,11 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
-import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.FinancialInputs;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
-import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.entity.SimpleNetworkFinancials;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
@@ -61,7 +60,7 @@ import com.altvil.aro.service.planing.ScoringStrategyFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.aro.service.planning.optimization.strategies.OptimizationPlanConfiguration;
-import com.altvil.aro.service.price.PricingModel;
+import com.altvil.aro.service.price.PricingService;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
@@ -78,6 +77,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 	private NetworkNodeRepository networkNodeRepository ;
 	@Autowired
 	private CostService costService ;
+	
+	@Autowired
+	private PricingService pricingService;
 
 	@Autowired
 	private ApplicationContext appCtx ;
@@ -580,6 +582,9 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 
 		@SpringResource(resourceName = "costService")
 		private transient CostService costService ;
+		
+		@SpringResource(resourceName = "pricingService")
+		private transient PricingService pricingService ;
 
 		
 		public OptimizeCallable(OptimizationPlanConfiguration optimizationPlanStrategy,
@@ -605,7 +610,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		public WirecenterNetworkPlan call() throws Exception {
 			NetworkData networkData = networkService.getNetworkData(optimizationPlanConfiguration);
 
-			OptimizerContext ctx = new OptimizerContext(new DefaultPriceModel(),
+			OptimizerContext ctx = new OptimizerContext(pricingService.getPricingModel("*", new Date()),
 					constraints);
 
 			double totalDemand = networkData.getRoadLocations().stream()
@@ -653,6 +658,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		return bind(new OptimizeCallable(optimizationPlanStrategy, constraints));
 	}
 
+	/*
 	private static class DefaultPriceModel implements PricingModel {
 
 		@Override
@@ -698,4 +704,5 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		}
 
 	}
+	*/
 }
