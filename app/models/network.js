@@ -8,7 +8,6 @@ var _ = require('underscore')
 var config = helpers.config
 var models = require('./')
 var pync = require('pync')
-var Finance = require('financejs')
 
 module.exports = class Network {
 
@@ -243,15 +242,11 @@ module.exports = class Network {
     }
     return this._callService(req)
       .then((result) => {
-        var finance = new Finance()
         var arr = result[0].values
         // NPV = CF0 / (1+.08)^0 + CF1 / (1.08)^1 + CF2 / (1.08)^2 ..... + CFn / (1.08)^n
         var i = 0
         var npv = arr.reduce((total, value) => total + value / Math.pow(1.08, i++), 0)
-        var irr = finance.IRR.apply(null, arr)
-        console.log('values', arr)
-        console.log('npv', npv)
-        console.log('irr', irr)
+        var irr = helpers.irr(arr)
         return { npv: npv, irr: irr }
       })
   }

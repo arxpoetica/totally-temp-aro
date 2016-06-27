@@ -293,4 +293,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.download = () => {
     window.location.href = `/financial_profile/${$scope.plan.id}/export`
   }
+
+  $scope.hasIRR = () => {
+    return $scope.plan && $scope.plan.metadata &&
+      +$scope.plan.metadata.irr == $scope.plan.metadata.irr // eslint-disable-line
+  }
 }])
