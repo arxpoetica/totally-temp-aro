@@ -453,3 +453,9 @@ height:100px;
 .noUi-value {
   font-size: 10px;
 }
+
+#legend-controller {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
