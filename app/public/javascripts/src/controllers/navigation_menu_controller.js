@@ -46,7 +46,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       cache: true
     }
   }).on('change', (e) => {
-    console.log('changes')
     var selected = e.added
     if (selected) {
       $scope.new_plan_area_name = selected.text
@@ -93,8 +92,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $('#select-plan').modal('hide')
     $('#plan-combo').modal('hide')
     var centroid = plan && plan.area_centroid
-    console.log('plan', plan, centroid)
-    console.log('state', state.get('mapCenter'), state.get('mapZoom'))
     if (centroid) {
       try {
         map.setCenter(JSON.parse(state.get('mapCenter')))
