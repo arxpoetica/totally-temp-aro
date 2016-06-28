@@ -17,10 +17,42 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.market_size_scale_s = 'B'
   }
 
-  $('#new-plan select, #plan-combo select').select2({
-    placeholder: config.ui.default_form_values.create_plan.select_area_text
-  }).on('change', () => {
-    $scope.lookUpArea()
+  var ids = 0
+  var search = $('#new-plan .select2, #plan-combo .select2')
+  search.select2({
+    placeholder: 'Search an address, city, state or CLLI code', // config.ui.default_form_values.create_plan.select_area_text,
+    ajax: {
+      url: '/search/addresses',
+      dataType: 'json',
+      delay: 250,
+      data: (term) => ({ text: term }),
+      results: (data, params) => {
+        var items = data.map((location) => {
+          return {
+            id: 'id-' + (++ids),
+            text: location.name,
+            bounds: location.bounds,
+            centroid: location.centroid
+          }
+        })
+        $scope.search_results = items
+        return {
+          results: items,
+          pagination: {
+            more: false
+          }
+        }
+      },
+      cache: true
+    }
+  }).on('change', (e) => {
+    console.log('changes')
+    var selected = e.added
+    if (selected) {
+      $scope.new_plan_area_name = selected.text
+      $scope.new_plan_area_bounds = selected.bounds
+      $scope.new_plan_area_centroid = selected.centroid
+    }
   })
 
   $scope.shared_plan
@@ -54,27 +86,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.lookUpArea = function () {
-    $scope.new_plan_area_name = $('#new-plan select').select2('val') || $('#plan-combo select').select2('val')
-    var address = encodeURIComponent($scope.new_plan_area_name)
-    $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address)
-      .success((response) => {
-        var results = response.results
-        var result = results[0]
-        if (!result) return
-        $scope.new_plan_area_name = result.formatted_address
-        // use centroid...
-        newPlanMap && newPlanMap.setCenter(result.geometry.location)
-        // ...or use bounds
-        // var bounds = new google.maps.LatLngBounds()
-        // bounds.extend(new google.maps.LatLng(result.geometry.bounds.northeast.lat, result.geometry.bounds.northeast.lng))
-        // bounds.extend(new google.maps.LatLng(result.geometry.bounds.southwest.lat, result.geometry.bounds.southwest.lng))
-        // newPlanMap.fitBounds(bounds)
-        $scope.new_plan_area_centroid = result.geometry.location
-        $scope.new_plan_area_bounds = result.geometry.viewport
-      })
-  }
-
   $scope.select_plan = function (plan) {
     $scope.plan = plan
     state.loadPlan(plan)
@@ -82,6 +93,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $('#select-plan').modal('hide')
     $('#plan-combo').modal('hide')
     var centroid = plan && plan.area_centroid
+    console.log('plan', plan, centroid)
+    console.log('state', state.get('mapCenter'), state.get('mapZoom'))
     if (centroid) {
       try {
         map.setCenter(JSON.parse(state.get('mapCenter')))

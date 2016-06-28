@@ -11,6 +11,8 @@ var validate = helpers.validate
 var models = require('./')
 var _ = require('underscore')
 var pync = require('pync')
+var pify = require('pify')
+var request = pify(require('request'), { multiArgs: true })
 
 module.exports = class NetworkPlan {
 
@@ -230,30 +232,27 @@ module.exports = class NetworkPlan {
   static createPlan (name, area, user) {
     var id
 
+    console.log('area', area)
+    console.log('', JSON.stringify(area.centroid))
+    console.log('', JSON.stringify(area.bounds))
     return validate((expect) => {
       expect(area, 'area', 'object')
+      // area name?
       expect(area, 'area.centroid', 'object')
-      expect(area, 'area.centroid.lat', 'number')
-      expect(area, 'area.centroid.lng', 'number')
       expect(area, 'area.bounds', 'object')
-      expect(area, 'area.bounds.northeast', 'object')
-      expect(area, 'area.bounds.northeast.lat', 'number')
-      expect(area, 'area.bounds.northeast.lng', 'number')
-      expect(area, 'area.bounds.southwest', 'object')
-      expect(area, 'area.bounds.southwest.lat', 'number')
-      expect(area, 'area.bounds.southwest.lng', 'number')
     })
     .then(() => {
       var sql = `
         INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type)
-        VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_Envelope(ST_GeomFromText($4, 4326)), NOW(), NOW(), 'M') RETURNING id;
+        VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326), ST_Envelope(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)), NOW(), NOW(), 'M') RETURNING id;
       `
       var params = [
         name,
         area.name,
-        `POINT(${area.centroid.lng} ${area.centroid.lat})`,
-        `LINESTRING(${area.bounds.northeast.lng} ${area.bounds.northeast.lat}, ${area.bounds.southwest.lng} ${area.bounds.southwest.lat})`
+        JSON.stringify(area.centroid),
+        JSON.stringify(area.bounds)
       ]
+      console.log('params', params)
       return database.findOne(sql, params)
     })
     .then((row) => {
@@ -449,6 +448,42 @@ module.exports = class NetworkPlan {
         statefp: row.statefp,
         countyfp: row.countyfp
       }))
+  }
+
+  static searchAddresses (text) {
+    var sql = `
+      SELECT
+        wirecenter || ' - ' || aocn_name as name,
+        ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json as bounds
+      FROM wirecenters
+      WHERE
+        lower(unaccent(aocn_name)) LIKE lower(unaccent($1)) OR
+        lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
+      ORDER BY wirecenter ASC
+    `
+    var wirecenters = database.query(sql, [`%${text}%`])
+    var addresses = request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+    return Promise.all([wirecenters, addresses])
+      .then((results) => {
+        var wirecenters = results[0]
+        var addresses = results[1][1].results.map((item) => {
+          var ne = item.geometry.viewport.northeast
+          var sw = item.geometry.viewport.southwest
+          return {
+            name: item.formatted_address,
+            centroid: {
+              type: 'Point',
+              coordinates: [item.geometry.location.lng, item.geometry.location.lat]
+            },
+            bounds: {
+              type: 'Polygon',
+              coordinates: [[[ne.lng, ne.lat], [ne.lng, sw.lat], [sw.lng, sw.lat], [sw.lng, ne.lat], [ne.lng, ne.lat]]
+            ]}
+          }
+        })
+        return wirecenters.concat(addresses)
+      })
   }
 
 }
