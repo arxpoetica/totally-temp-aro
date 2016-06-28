@@ -208,13 +208,78 @@
     <div id="left-col-wrapper">
       <div id="left-col">
         <div ng-controller="map_tools_controller">
-          <div ng-repeat="tool in map_tools.available_tools">
-            <p>
-              <a href="javascript:void(0)" class="btn btn-primary btn-block btn-sm map_tools_button" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
-                ng-attr-id="map_tools_toggle_{{tool.id}}"
-                ng-class="{'btn-success active': map_tools.is_visible(tool.id), 'disabled': !map_tools.is_enabled(tool.id)}"
-                ng-click="map_tools.toggle(tool.id)"><span ng-attr-class="{{tool.icon}}"></span></a>
-            </p>
+          <% include controller_global_search.html %>
+          <div class="panel-group" id="map-tools-accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab">
+                <h4 class="panel-title">
+                  <a role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-customers">
+                    Customers
+                  </a>
+                </h4>
+              </div>
+              <div id="map-tools-customers" class="panel-collapse collapse" role="tabpanel" data-tool="locations">
+                <div class="panel-body">
+                  <% include controller_locations.html %>
+                </div>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab">
+                <h4 class="panel-title">
+                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-carriers">
+                    Carriers
+                  </a>
+                </h4>
+              </div>
+              <div id="map-tools-carriers" class="panel-collapse collapse" role="tabpanel" data-tool="fiber_plant">
+                <div class="panel-body">
+                  <% include controller_fiber_plant.html %>
+                </div>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab">
+                <h4 class="panel-title">
+                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-network">
+                    Network
+                  </a>
+                </h4>
+              </div>
+              <div id="map-tools-network" class="panel-collapse collapse" role="tabpanel" data-tool="network_nodes">
+                <div class="panel-body">
+                  <% include controller_equipment.html %>
+                </div>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab">
+                <h4 class="panel-title">
+                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-boundaries">
+                    Boundaries
+                  </a>
+                </h4>
+              </div>
+              <div id="map-tools-boundaries" class="panel-collapse collapse" role="tabpanel" data-tool="boundaries">
+                <div class="panel-body">
+                  <% include controller_boundaries.html %>
+                </div>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab">
+                <h4 class="panel-title">
+                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-modeling">
+                    Scenario Modeling Tools
+                  </a>
+                </h4>
+              </div>
+              <div id="map-tools-modeling" class="panel-collapse collapse" role="tabpanel" data-tool="">
+                <div class="panel-body">
+                  WIP
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -233,357 +298,8 @@
     <div ng-controller="route_controller">
     </div>
 
-    <!-- Boundaries Layer Modal -->
-    <div ng-controller="boundaries_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('boundaries')" class="map-tool panel panel-primary">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('boundaries')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('boundaries')" ng-click="map_tools.collapse('boundaries')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('boundaries')" ng-click="map_tools.expand('boundaries')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div class="panel-body" ng-show="map_tools.is_expanded('boundaries')">
-          <div ng-show="number_of_area_layers() > 0 || boundaries.length > 0">
-            <h2>View</h2>
-            <div ng-repeat="(key, layer) in area_layers">
-              <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-class="{ 'disabled': layer.disabled }">
-                <!--
-                <div class="pull-right">
-                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
-                </div>
-                -->
-                <label>
-                  <input type="checkbox" ng-click="layer.toggleVisibility()" ng-disabled="layer.disabled"> {{layer.name}}
-                </label>
-              </div>
-            </div>
-            <% if (env_is_test) { %>
-              <a href="javascript:void(0)" ng-click="area_layers.census_blocks_layer.select_random_area()" ng-attr-data-loaded="{{area_layers.census_blocks_layer.data_loaded}}">.</a>
-            <% } %>
-            <div ng-repeat="boundary in boundaries">
-              <div class="checkbox">
-                <div class="pull-right boundary-options">
-                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
-                    title="Edit" ng-click="rename_boundary(boundary)">
-                      <span class="fa fa-pencil"></span>
-                  </a>
-                  <a href="javascript:void(0)" class="text-danger" data-toggle="tooltip"
-                    data-placement="top" title="Delete" ng-click="deleteBoundary(boundary)">
-                      <span class="fa fa-trash-o"></span>
-                  </a>
-                  <a href="javascript:void(0)" class="text-success" data-toggle="tooltip"
-                    data-placement="top" title="Market profile" ng-click="show_market_size(boundary)">
-                      <span class="<%= config.ui.icons.market_profile %>"></span>
-                  </a>
-                  <a href="javascript:void(0)" class="text-warning" data-toggle="tooltip"
-                    data-placement="top" title="Customer profile" ng-click="show_customer_profile(boundary)">
-                      <span class="fa fa-users"></span>
-                  </a>
-                  <% if (config.route_planning.length >= 0) { %>
-                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
-                    title="Network planning" ng-click="run_network_planning(boundary)">
-                      <span class="fa fa-wrench"></span>
-                  </a>
-                  <% } %>
-                </div>
-                <label>
-                  <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
-                </label>
-              </div>
-            </div>
-            <hr>
-          </div>
-          <div ng-show="plan.owner_id === user_id">
-            <h2>Build</h2>
-            <p>
-              <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggle_tool()">Custom</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div ng-controller="locations_controller">
-
-      <div class="modal" id="create-location" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Create location</h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal">
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Business name</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.business_name">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Number of employees</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.number_of_employees">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Business industry</label>
-                  <div class="col-sm-8">
-                    <select class="form-control industries" ng-model="new_location_data.business_industry" ng-options="industry.text for industry in industries"></select>
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Annual recurring cost</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.annual_recurring_cost">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Install cost</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.install_cost">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Business customer type</label>
-                  <div class="col-sm-8">
-                    <select class="form-control businesses_customer_types" ng-model="new_location_data.business_customer_type" ng-options="customer_type.name for customer_type in customer_types"></select>
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'residential' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Number of households</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.number_of_households">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'residential' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Household customer type</label>
-                  <div class="col-sm-8">
-                    <select class="form-control households_customer_types" ng-model="new_location_data.household_customer_type" ng-options="customer_type.name for customer_type in customer_types"></select>
-                  </div>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" ng-click="create_location()">Create location</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Locations layer modal -->
-      <div class="map-tool-wrapper">
-        <div ng-show="map_tools.is_visible('locations')" class="map-tool panel panel-primary" id="locations_controller">
-          <div class="panel-heading" ng-bind="map_tools.get_tool_name('locations')">
-            <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
-              <span style="color:white" class="fa fa-chevron-up"></span>
-            </a>
-            <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
-              <span style="color:white" class="fa fa-chevron-down"></span>
-            </a>
-          </div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
-            <h2>View</h2>
-            <form ng-hide="show_commercial && !show_residential">
-              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-                <label>
-                  <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Commercial
-                </label>
-              </div>
-              <div style="margin-left: 20px">
-                <div class="checkbox" ng-repeat="category in business_categories">
-                  <label>
-                    <input type="checkbox" ng-model="business_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_businesses"> {{category.description}}
-                  </label>
-                </div>
-              </div>
-              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
-                <label>
-                  <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Residential
-                </label>
-              </div>
-              <div style="margin-left: 20px">
-                <div class="checkbox" ng-repeat="category in household_categories">
-                  <label>
-                    <input type="checkbox" ng-model="household_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_households"> {{category.description}}
-                  </label>
-                </div>
-              </div>
-              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}">
-                <label>
-                  <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
-                </label>
-              </div>
-            </form>
-            <% if (env_is_test) { %>
-              <a href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">.</a>
-            <% } %>
-            <hr>
-            <div>
-              <h2>Overlay</h2>
-              <div class="form-group">
-                <select class="form-control" ng-model="overlay" ng-change="change_locations_layer()">
-                  <option value="none">None</option>
-                  <option value="customer_profile">Prospect Density</option>
-                </select>
-                <div ng-show="overlay_is_loading()">
-                  <% include spinner.html %>
-                </div>
-                <div class="row" style="margin-top: 10px" ng-show="overlay === 'customer_profile'">
-                  <div class="col-md-2">Low</div>
-                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-                  <div class="col-md-2 text-right">High</div>
-                </div>
-              </div>
-            </div>
-            <div ng-show="plan.owner_id === user_id && available_tools.length > 0">
-              <hr>
-              <h2>Build</h2>
-              <div class="row">
-                <div class="col-sm-6" ng-repeat="tool in available_tools">
-                  <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === tool.key}" ng-click="select_tool(tool.key)">{{tool.name}}</a>
-                  <br>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div ng-controller="market_size_controller">
-
       <% include modal_market_profile.html %>
-
-    </div>
-    <!-- Client carrier network equipment modal -->
-    <div ng-controller="equipment_nodes_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('network_nodes')" class="map-tool panel panel-primary" id="equipment_nodes_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('network_nodes')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_nodes')" ng-click="map_tools.collapse('network_nodes')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_nodes')" ng-click="map_tools.expand('network_nodes')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('network_nodes')">
-            <div ng-show="plan">
-              <h2>View</h2>
-
-              <div ng-repeat="node_type in view_node_types">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="node_type.visible" ng-change="change_node_types_visibility()"> {{node_type.description}}
-                  </label>
-                </div>
-              </div>
-
-              <div ng-repeat="(key, layer) in equipment_layers">
-                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-hide="layer.hide_in_ui">
-                  <label>
-                    <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible"> {{layer.name}}
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="showFeederFiber" ng-change="changedFiberVisibility()"> Feeder fiber
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="showDistributionFiber" ng-change="changedFiberVisibility()"> Distribution fiber
-                  </label>
-                </div>
-              </div>
-
-              <% if (env_is_test) { %>
-                <a href="javascript:void(0)" ng-click="equipment_layers.network_nodes.select_random_features()" ng-attr-data-loaded="{{equipment_layers.network_nodes.data_loaded}}">.</a>
-                <a href="javascript:void(0)" ng-click="show_number_of_features()">.</a>
-
-                <a href="javascript:void(0)" ng-click="place_random_equipment()">.</a>
-                <span id="equipment_nodes_controller_number_of_features">{{number_of_features}}</span>
-              <% } %>
-
-              <!--
-              <div ng-show="plan.owner_id === user_id && (build_node_types.length > 0 || show_recalculate)">
-                <hr>
-                <h2>Build</h2>
-                <div class="row">
-                  <p></p>
-                </div>
-                <div class="row">
-                  <div class="col-sm-12" ng-repeat="node in build_node_types">
-                    <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === node.name}" ng-click="select_tool(node.name)">{{node.description}}</a>
-                    <br>
-                  </div>
-                </div>
-              </div>
-              -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Competitor network equipment modal -->
-    <div ng-controller="fiber_plant_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('fiber_plant')" class="map-tool panel panel-primary" id="fiber_plant_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('fiber_plant')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('fiber_plant')">
-            <div>
-              <h2>View</h2>
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" ng-change="toggle_all_competitors()" ng-model="show_all_competitors" ng-disabled="overlay !== 'none'"> All competitors
-                </label>
-              </div>
-              <input class="form-control" ng-model="selected_carriers" ng-change="carriers_changed()"></input>
-            </div>
-            <hr>
-            <div>
-              <h2>Overlay</h2>
-              <div class="form-group">
-                <select class="form-control" ng-model="overlay" ng-change="overlay_changed()">
-                  <option value="none">None</option>
-                  <option value="density">Density</option>
-                  <option value="fairshare">Fair share</option>
-                </select>
-                <div class="row" style="margin-top: 10px" ng-show="overlay === 'fairshare'">
-                  <div class="col-md-2">Low</div>
-                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-                  <div class="col-md-2 text-right">High</div>
-                </div>
-                <div class="row" style="margin-top: 10px" ng-show="overlay === 'density'">
-                  <div class="col-md-2">Low</div>
-                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-                  <div class="col-md-2 text-right">High</div>
-                </div>
-                <div ng-show="overlay_is_loading()">
-                  <% include spinner.html %>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div ng-controller="search-controller" class="map-tool-wrapper">
@@ -1659,6 +1375,7 @@
   <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
   <script src="javascripts/lib/controllers/target_builder_controller.js"></script>
   <script src="javascripts/lib/controllers/legend_controller.js"></script>
+  <script src="javascripts/lib/controllers/global_search_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
