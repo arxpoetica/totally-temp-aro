@@ -11,6 +11,8 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
@@ -29,6 +31,7 @@ import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.enumerations.OptimizationType;
 
+@Service
 public class OptimizationStrategyServiceImpl implements
 		OptimizationStrategyService {
 
@@ -42,37 +45,49 @@ public class OptimizationStrategyServiceImpl implements
 	private PlanAnalysisService planAnalysisService;
 	private SerializationService serializationService;
 
+	@Autowired
+	public OptimizationStrategyServiceImpl(
+			PlanAnalysisService planAnalysisService,
+			SerializationService serializationService) {
+		super();
+		this.planAnalysisService = planAnalysisService;
+		this.serializationService = serializationService;
+	}
+
 	@PostConstruct
 	void postConstruct() {
 		init();
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	private <T extends OptimizationConstraints> OptimizationStrategyFactory<T> getFactory(T constraints) {
-		return (OptimizationStrategyFactory<T>) strategyMap.get(constraints) ;
+	private <T extends OptimizationConstraints> OptimizationStrategyFactory<T> getFactory(
+			T constraints) {
+		return (OptimizationStrategyFactory<T>) strategyMap.get(constraints.getOptimizationType());
 	}
 
 	private <T extends OptimizationConstraints> SpiOptimizationStrategy createSpiOptimizationStrategy(
 			T constraints) {
-		return getFactory(constraints).createOptimizationStrategy(constraints) ;
+		return getFactory(constraints).createOptimizationStrategy(constraints);
 	}
 
 	@Override
 	public OptimizationStrategy getOptimizationStrategy(
 			OptimizationConstraints constraints) {
-		return createSpiOptimizationStrategy(constraints) ;
+		return createSpiOptimizationStrategy(constraints);
 	}
 
 	@Override
 	public PruningStrategy getPruningStrategy(
 			OptimizationConstraints constraints) {
-		return new DefaultPruningStrategy(createSpiOptimizationStrategy(constraints));
+		return new DefaultPruningStrategy(
+				createSpiOptimizationStrategy(constraints));
 	}
 
 	@Override
 	public ScoringStrategy getScoringStrategy(
 			OptimizationConstraints constraints) {
-		return null;
+		return ScoringStrategyFactory.FACTORY.getScoringStrategy(constraints
+				.getOptimizationType());
 	}
 
 	private interface SpiOptimizationStrategy extends OptimizationStrategy {
@@ -163,7 +178,7 @@ public class OptimizationStrategyServiceImpl implements
 			}
 
 			if (thresholdActive) {
-				return createThesholdStrategy(constraints);
+				return createThresholdStrategy(constraints);
 			}
 
 			if (capexActive) {
@@ -185,7 +200,7 @@ public class OptimizationStrategyServiceImpl implements
 					createPlanAnalysisFunctor(constraints), thresholdFunction);
 		}
 
-		protected SpiOptimizationStrategy createThesholdStrategy(T constraints) {
+		protected SpiOptimizationStrategy createThresholdStrategy(T constraints) {
 			return new ThreshholdStrategy<ThresholdBudgetConstraint>(
 					constraints, createPlanAnalysisFunctor(constraints),
 					thresholdFunction);
@@ -193,7 +208,7 @@ public class OptimizationStrategyServiceImpl implements
 
 		protected SpiOptimizationStrategy createMaxStrategy(T constraints) {
 			return new MaxStrategy<>(constraints,
-					createPlanAnalysisFunctor(constraints));
+					createPlanAnalysisFunctor(constraints), thresholdFunction);
 		}
 	}
 
@@ -264,8 +279,12 @@ public class OptimizationStrategyServiceImpl implements
 
 	private class MaxStrategy<T extends ThresholdBudgetConstraint> extends
 			AbstractOptimizationStrategy<T> {
+
+		private ThesholdFunction thresholdFunction;
+
 		public MaxStrategy(T optimizationConstraints,
-				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor) {
+				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
+				ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
 		}
 
@@ -273,7 +292,8 @@ public class OptimizationStrategyServiceImpl implements
 		protected Optional<PlanAnalysis> selectPlan(
 				Collection<PlanAnalysis> plans) {
 			return plans.stream().max(
-					(c1, c2) -> Double.compare(c1.getIrr(), c2.getIrr()));
+					(c1, c2) -> Double.compare(thresholdFunction.getValue(c1),
+							thresholdFunction.getValue(c2)));
 		}
 	}
 
@@ -302,9 +322,8 @@ public class OptimizationStrategyServiceImpl implements
 			return plans
 					.stream()
 					.filter(this::isValid)
-					.sorted((c1, c2) -> Double.compare(
-							thresholdFunction.getValue(c1),
-							thresholdFunction.getValue(c2))
+					.sorted((c1, c2) -> Double.compare(c1.getBudget(),
+							c2.getBudget())
 							* -1).findFirst();
 
 		}
@@ -370,40 +389,65 @@ public class OptimizationStrategyServiceImpl implements
 			return plans
 					.stream()
 					.filter(this::isValid)
-					.sorted((c1, c2) -> Double.compare(
-							thresholdFunction.getValue(c1),
-							thresholdFunction.getValue(c2))
+					.sorted((c1, c2) -> Double.compare(c1.getBudget(),
+							c2.getBudget())
 							* -1).findFirst();
 
 		}
 	}
-	
-	
+
 	private static class ScoringStrategyFactory {
 
-		private Map<OptimizationType, ScoringStrategy> map = new EnumMap<>(OptimizationType.class) ;
-		
-		@PostConstruct
+		public static final ScoringStrategyFactory FACTORY = new ScoringStrategyFactory();
+
+		private ScoringStrategyFactory() {
+			init();
+		}
+
+		private Map<OptimizationType, ScoringStrategy> map = new EnumMap<>(
+				OptimizationType.class);
+
 		public void init() {
-			map.put(OptimizationType.CAPEX, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getRawCoverage()))) ;
-			map.put(OptimizationType.COVERAGE, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getRawCoverage()))) ;
-//			map.put(OptimizationType.PENETRATION, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getDemand()))) ;
-//			map.put(OptimizationType.IRR, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getMonthlyRevenueImpact()))) ;
+			map.put(OptimizationType.IRR,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getMonthlyRevenueImpact())));
+			map.put(OptimizationType.BUDGET_IRR,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getMonthlyRevenueImpact())));
+			map.put(OptimizationType.BUDGET_THRESHHOLD_IRR,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getMonthlyRevenueImpact())));
+			map.put(OptimizationType.TARGET_IRR,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getMonthlyRevenueImpact())));
+
+			map.put(OptimizationType.CAPEX,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getRawCoverage())));
+			map.put(OptimizationType.PRUNNING_NPV,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getRawCoverage())));
+			map.put(OptimizationType.COVERAGE,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getMonthlyRevenueImpact())));
+			map.put(OptimizationType.NPV,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getMonthlyRevenueImpact())));
+
 		}
-		
+
 		private static final double divide(double a, double b) {
-			if( b == 0 ) {
-				return 0 ;
+			if (b == 0) {
+				return 0;
 			}
-			return a / b ;
+			return a / b;
 		}
-		
-		public ScoringStrategy getScoringStrategy(OptimizationType optimizationType) {
-			return map.get(optimizationType) ;
+
+		public ScoringStrategy getScoringStrategy(
+				OptimizationType optimizationType) {
+			return map.get(optimizationType);
 		}
-		
 
 	}
-
 
 }

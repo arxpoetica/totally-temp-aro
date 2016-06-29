@@ -78,7 +78,7 @@ public class NetworkConstrainer {
 					final AnalysisNode analysisNode = optimizedNetwork
 							.getAnalysisNode();
 
-					log.trace("Analysis Node: {} {} {} {}", analysisNode
+					log.info("Analysis Node: {} {} {} {}", analysisNode
 							.getFiberCoverage().getDemand(), analysisNode
 							.getCapex(), analysisNode.getSuccessBasedCapex(),
 							analysisNode.getFiberCoverage().getRawCoverage());
@@ -107,8 +107,8 @@ public class NetworkConstrainer {
 							resultAssembler.add(optimizedNetwork);
 						}
 
-						if (log.isTraceEnabled()) {
-							log.trace("prune ..."
+						if (log.isInfoEnabled()) {
+							log.info("prune ..."
 									+ networkAnalysis.getAnalyisNode()
 											.getScore());
 						}

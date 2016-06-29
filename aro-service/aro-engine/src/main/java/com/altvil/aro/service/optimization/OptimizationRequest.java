@@ -9,7 +9,7 @@ public class OptimizationRequest {
 	private OptimizationConstraints optimizationConstraints;
 	private FiberNetworkConstraints constraints;
 	private NetworkDataRequest networkDataRequest;
-
+	
 	public OptimizationRequest(OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints,
 			NetworkDataRequest networkDataRequest) {

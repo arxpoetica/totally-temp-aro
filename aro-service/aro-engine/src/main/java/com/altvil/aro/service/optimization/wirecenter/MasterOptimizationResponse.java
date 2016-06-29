@@ -1,4 +1,4 @@
-package com.altvil.aro.service.optimization.master;
+package com.altvil.aro.service.optimization.wirecenter;
 
 import java.util.List;
 

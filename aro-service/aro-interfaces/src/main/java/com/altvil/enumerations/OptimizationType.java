@@ -6,13 +6,13 @@ public enum OptimizationType {
 	COVERAGE,
 	
 	IRR,
+	MAX_IRR,
+ 	TARGET_IRR,
  	BUDGET_IRR,
  	BUDGET_THRESHHOLD_IRR,
  	
- 	MAX_IRR,
- 	
- 	TARGET_IRR,
  	
  	NPV,
+ 	PRUNNING_NPV,
  	
 }

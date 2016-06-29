@@ -116,6 +116,11 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		@Override
+		public boolean debugContains(GeneratingNode node) {
+			return treeMap.containsEntry(node.getScore(), node);
+		}
+
+		@Override
 		public Builder createNode(FiberAssignment fiberAssignment,
 				EquipmentAssignment equipment) {
 			return new BuilderImpl(new DefaultGeneratingNode(this, equipment,
@@ -196,10 +201,10 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public NetworkGenerator lazySerialize() {
-			Set<Long> rejectedLocations = this.rejectedLocations
-					.stream().map(AroEntity::getObjectId)
-					.collect(Collectors.toSet());
-			return new DefaultNetworkGenerator(networkModelBuilder, rejectedLocations) ;
+			Set<Long> rejectedLocations = this.rejectedLocations.stream()
+					.map(AroEntity::getObjectId).collect(Collectors.toSet());
+			return new DefaultNetworkGenerator(networkModelBuilder,
+					rejectedLocations);
 		}
 
 		@Override
@@ -234,7 +239,27 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 				// Assign Root node
 				//
 				rootNode = builder.build();
+
+				verifyTree(new HashSet<Integer>(), rootNode);
 			}
+		}
+
+		private void verifyTree(Set<Integer> hashCodes, GeneratingNode node) {
+			Integer hashCode = System.identityHashCode(node);
+
+			if (hashCodes.contains(hashCode)) {
+				throw new RuntimeException("Not a tree");
+			}
+
+			if (!node.getAnalysisContext().debugContains(node)) {
+				throw new RuntimeException("Not regsitered");
+			}
+
+			hashCodes.add(hashCode);
+			for (GeneratingNode n : node.getChildren()) {
+				verifyTree(hashCodes, n);
+			}
+
 		}
 
 		private Builder createSource(GraphEdgeAssignment coEdgeAssignment) {
@@ -285,25 +310,45 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		@Override
 		public void addToAnalysis(GeneratingNode node) {
 			treeMap.put(node.getScore(), node);
+			
+			log.info("add to analysis " + System.identityHashCode(node) + " = "
+					+ node.getScore() + " " + node.isJunctionNode());
 		}
 
 		@Override
 		public void removeFromAnalysis(GeneratingNode node) {
+			log.info("remove node " + System.identityHashCode(node) + " = "
+					+ node.getScore() + " " + node.isJunctionNode());
 			rejectedLocations.addAll(node.getFiberCoverage().getLocations());
 			treeMap.remove(node.getScore(), node);
 		}
 
 		@Override
 		public void changing_end(GeneratingNode node) {
+			log.info("end node " + System.identityHashCode(node) + " = "
+					+ node.getScore() + " " + node.isJunctionNode());
 			treeMap.put(node.getScore(), node);
 
 		}
 
 		@Override
 		public void changing_start(GeneratingNode node) {
+			
+			if( node.getScore() == -1714.6622004132682 ) {
+				int x = 10 ;
+			}
+			
+			log.info("start node " + System.identityHashCode(node) + " = "
+					+ node.getScore());
 			boolean removed = treeMap.remove(node.getScore(), node);
 			if (!removed) {
-				log.warn("Failed to generating node");
+				int hashCode = System.identityHashCode(node) ;
+				treeMap.values().forEach( n -> {
+					if( System.identityHashCode(n)  == hashCode ) {
+						log.warn("Identified Node .... " + node.isJunctionNode());
+					}
+				});
+				log.warn("Failed to generating node " + node.isJunctionNode());
 			}
 		}
 

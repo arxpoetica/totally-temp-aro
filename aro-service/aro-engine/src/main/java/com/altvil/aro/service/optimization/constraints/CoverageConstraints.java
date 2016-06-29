@@ -4,9 +4,9 @@ import com.altvil.enumerations.OptimizationType;
 
 public class CoverageConstraints extends ThresholdBudgetConstraint {
 
-	public CoverageConstraints(OptimizationType optimizationType, int years,
+	public CoverageConstraints(int years,
 			double discountRate, double threshhold, double capex) {
-		super(optimizationType, years, discountRate, threshhold, capex);
+		super(OptimizationType.COVERAGE, years, discountRate, threshhold, capex);
 	}
 
 }

@@ -13,6 +13,8 @@ import com.altvil.aro.service.plan.NetworkModel;
 
 public interface AnalysisContext extends PricingContext {
 	
+	boolean debugContains(GeneratingNode node) ;
+	
 	boolean debugVerify(AroEntity entity) ;
 	
 	FiberProducerConsumerFactory getFiberProducerConsumerFactory() ;

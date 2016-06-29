@@ -2,13 +2,16 @@ package com.altvil.aro.service.optimization.strategy.impl;
 
 import java.util.function.Function;
 
+import org.springframework.stereotype.Service;
+
 import com.altvil.aro.service.optimization.strategy.StrategyUtils;
 import com.altvil.aro.service.optimization.strategy.spi.ComputedField;
-import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
+import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.AnalysisNode;
 
+@Service
 public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 
 	@Override

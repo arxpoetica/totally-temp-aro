@@ -9,14 +9,13 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.AroException;
 import com.altvil.aro.service.network.LocationSelectionMode;
-import com.altvil.aro.service.optimization.master.MasterOptimizationRequest;
-import com.altvil.aro.service.optimization.master.MasterOptimizationResponse;
-import com.altvil.aro.service.optimization.master.OptimizationPlannerService;
+import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.master.PruningAnalysis;
 import com.altvil.aro.service.optimization.spi.ComputeUnitCallable;
 import com.altvil.aro.service.optimization.spi.OptimizationException;
@@ -25,6 +24,8 @@ import com.altvil.aro.service.optimization.spi.OptimizationExecutorService;
 import com.altvil.aro.service.optimization.spi.OptimizationExecutorService.ExecutorType;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
+import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
+import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationResponse;
 import com.altvil.aro.service.optimization.wirecenter.OptimizedWirecenter;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
@@ -48,6 +49,7 @@ public class OptimizationPlannerServiceImpl implements
 	private OptimizationExecutor wirecenterExecutor;
 	private OptimizationExecutor masterPlanExecutor;
 
+	@Autowired
 	public OptimizationPlannerServiceImpl(
 			NetworkPlanRepository networkPlanRepository,
 			OptimizationStrategyService strategyService,
