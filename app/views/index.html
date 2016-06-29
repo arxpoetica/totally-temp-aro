@@ -625,7 +625,7 @@
               <form>
                 <div class="radio">
                   <label>
-                    <input type="radio" ng-model="optimizationType" value="CAPEX"> Capex
+                    <input type="radio" ng-model="optimizationType" value="CAPEX"> Full Coverage
                   </label>
                 </div>
                 <div class="radio">
@@ -633,6 +633,7 @@
                     <input type="radio" ng-model="optimizationType" value="MAX_IRR"> Maximum IRR
                   </label>
                 </div>
+                <!--
                 <div class="radio">
                   <label>
                     <input type="radio" ng-model="optimizationType" value="TARGET_IRR"> IRR Target
@@ -641,6 +642,12 @@
                 <div class="radio">
                   <label>
                     <input type="radio" ng-model="optimizationType" value="BUDGET_IRR"> Budget and IRR Floor
+                  </label>
+                </div>
+                -->
+                <div class="radio">
+                  <label>
+                    <input type="radio" ng-model="optimizationType" value="BUDGET"> Budget
                   </label>
                 </div>
               </form>
@@ -661,7 +668,7 @@
                   </div>
                 </div>
               </div>
-              <div ng-show="optimizationType === 'BUDGET_IRR'">
+              <div ng-show="optimizationType === 'BUDGET_IRR' || optimizationType === 'BUDGET'">
                 <br>
                 <p><strong>Budget</strong></p>
                 <div class="row">
