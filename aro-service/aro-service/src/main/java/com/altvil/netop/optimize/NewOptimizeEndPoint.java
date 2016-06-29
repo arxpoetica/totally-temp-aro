@@ -97,6 +97,7 @@ public class NewOptimizeEndPoint {
 							.getThreshold(), financials.getBudget());
 
 		case PRUNNING_NPV:
+			NPV:
 			return new NpvConstraints(OptimizationType.PRUNNING_NPV,
 					financials.getYears(), financials.getDiscountRate(),
 					plan.getThreshold() == null ? Double.NaN : plan
