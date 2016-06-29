@@ -1,0 +1,99 @@
+<div ng-controller="area-network-planning-controller">
+  <p><strong>Select Tool</strong></p>
+  <select ng-model="optimizationType" class="form-control">
+    <option value="CAPEX">Full Coverage</option>
+    <option value="MAX_IRR">Maximum IRR</option>
+    <!--
+    <option value="TARGET_IRR">IRR Target</option>
+    <option value="BUDGET_IRR">Budget and IRR Floor</option>
+    -->
+    <option value="BUDGET">Budget</option>
+  </select>
+  <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
+    <br>
+    <p><strong>IRR Threshold</strong></p>
+    <div class="row">
+      <div class="col-md-7">
+        <input type="range" min="0" max="100" step="1" value="10" ng-model="irrThresholdRange" style="margin-top: 10px" ng-change="irrThresholdRangeChanged()">
+      </div>
+      <div class="col-md-5">
+        <div class="form-group form-group-sm">
+          <div class="input-group input-group-sm">
+            <input type="number" min="0" max="100" step="1" ng-model="irrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
+            <div class="input-group-addon">%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div ng-show="optimizationType === 'BUDGET_IRR' || optimizationType === 'BUDGET'">
+    <br>
+    <p><strong>Budget</strong></p>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group form-group-sm">
+          <div class="input-group input-group-sm">
+            <div class="input-group-addon">$</div>
+            <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <p><strong>Search or Click Geographies</strong></p>
+  <div class="form-group form-group-sm">
+    <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
+  </div>
+
+  <p><strong>Selected Geographies</strong></p>
+  <p ng-hide="selectedGeographies.length > 0"><em>No geographies selected</em></p>
+  <ul ng-show="selectedGeographies.length > 0" style="list-style-type:none; padding:0">
+    <li ng-repeat="geography in selectedGeographies">
+      <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
+        <span class="fa fa-trash-o"></span>
+      </a>
+      {{ geography.name }}
+    </li>
+  </ul>
+  <p><strong>Customers</strong></p>
+  <form>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-model="coverHouseholds"> Households
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-model="coverBusinesses"> Businesses
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-model="coverTowers"> Towers
+      </label>
+    </div>
+  </form>
+
+  <div>
+    <p class="pull-right">
+      <button class="btn btn-primary" ng-hide="calculating" ng-click="run()">Get Results</button>
+      <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
+    </p>
+    <!--
+    <div class="row" ng-repeat="geography in selectedGeographies">
+      <div class="col-md-4">
+        {{geography.name}}
+      </div>
+      <div class="col-md-8">
+        <div class="progress">
+          <div class="progress-bar"
+            ng-class="{'active progress-bar-striped': calculating}"
+            role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+    -->
+  </div>
+</div>

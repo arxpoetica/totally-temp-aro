@@ -17,6 +17,8 @@ app.service('state', ($rootScope, map_layers) => {
   })
 
   service.clearPlan = (plan) => {
+    key = null
+    state = null
     localStorage.removeItem(`plan_${plan.id}`)
   }
 

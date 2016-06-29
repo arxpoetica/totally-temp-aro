@@ -1,9 +1,18 @@
-/* global app config */
+/* global app config $ */
 app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
   var tools = {}
   var visible = []
   var collapsed = {}
   var disabled = []
+
+  var accordion = $('#map-tools-accordion')
+  accordion.on('click', '[data-parent="#map-tools-accordion"]', (e) => {
+    e.preventDefault()
+  })
+  accordion.on('shown.bs.collapse', (e) => {
+    var tool = $(e.target).attr('data-tool')
+    tools.show(tool)
+  })
 
   tools.enable = (name) => {
     var i = disabled.indexOf(name)

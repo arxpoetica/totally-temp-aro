@@ -1,0 +1,272 @@
+<div ng-controller="financial-profile-tool-controller">
+
+  <div class="pull-right" style="position: relative; top: -48px">
+    <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'global'}" ng-click="setMode('global')">Global</button>
+    <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'area'}" ng-click="setMode('area')">Area</button>
+  </div>
+
+  <table class="table">
+    <tbody>
+      <tr>
+        <th colspan="3">Total Cost</th>
+        <td colspan="2" class="text-right">{{plan.metadata.total_cost / 1000 | currency:"$":1}}K</td>
+      </tr>
+      <tr>
+        <th colspan="3">Fiber Cost</th>
+        <td colspan="2" class="text-right">{{plan.metadata.fiber_cost / 1000 | currency:"$":1}}K</td>
+      </tr>
+      <tr>
+        <th colspan="3">Equipment Cost</th>
+        <td colspan="2" class="text-right">{{plan.metadata.equipment_cost / 1000 | currency:"$":1}}K</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="table">
+    <tbody>
+      <tr>
+        <th colspan="3">Premises Passed</th>
+        <td colspan="2" class="text-right">{{plan.metadata.total_premises | number}}</td>
+      </tr>
+      <tr ng-repeat="premise in plan.metadata.premises">
+        <td colspan="3"><small> ↳ {{premise.name}}</small></td>
+        <td colspan="2" class="text-right">{{premise.value | number}}</td>
+      </tr>
+      <tr>
+        <th colspan="3">$ / Premises Passed</th>
+        <td colspan="2" class="text-right">{{plan.metadata.total_cost / plan.metadata.total_premises | currency:"$":0}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="table">
+    <tbody>
+      <tr>
+        <th colspan="3">NPV</th>
+        <td colspan="2" class="text-right">{{plan.metadata.npv / 1000 | currency:"$":1}}K</td>
+      </tr>
+      <tr>
+        <th colspan="3">IRR</th>
+        <td colspan="2" class="text-right" ng-show="hasIRR()">{{plan.metadata.irr * 100 | number: 1}}%</td>
+        <td colspan="2" class="text-right" ng-hide="hasIRR()">{{plan.metadata.irr}}%</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <p class="text-center">
+    <button class="btn btn-primary" ng-click="showDetails(true)">Details</button>
+    <button class="btn btn-primary" ng-click="download()">Download</button>
+  </p>
+
+
+  <div class="map-tool-wrapper" style="left: 400px; top: 47px">
+    <div ng-show="details" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 800px">
+      <div class="panel-heading">
+        {{ map_tools.get_tool_name('financial_profile') }}
+        {{ mode === 'area' && selectedArea ? ' · '+selectedArea.name : '' }}
+        <a href="javascript:void(0)" class="pull-right" ng-click="showDetails(false)">
+          <span style="color:white" class="fa fa-close"></span>
+        </a>
+      </div>
+      <div>
+        <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
+          <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#financialProfileSummary" aria-controls="home" role="tab" data-toggle="tab">Summary</a></li>
+            <li role="presentation"><a href="#financialProfilePremises" aria-controls="messages" role="tab" data-toggle="tab">Premises</a></li>
+            <li role="presentation"><a href="#financialProfileSubscribers" aria-controls="messages" role="tab" data-toggle="tab">Subscribers</a></li>
+            <li role="presentation"><a href="#financialProfileRevenue" aria-controls="messages" role="tab" data-toggle="tab">Revenue</a></li>
+            <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
+            <li role="presentation"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
+          </ul>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="financialProfileSummary" style="margin-top: 20px">
+              <div class="row">
+                <div class="col-sm-6">
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <th colspan="3">Fiber Capex</th>
+                        <td colspan="2" class="text-right">{{plan.metadata.fiber_cost / 1000 | currency:"$":1}}K</td>
+                      </tr>
+                      <tr ng-repeat="cost in plan.metadata.fiber_summary">
+                        <td colspan="3"><small> ↳ {{cost.description}} ({{cost.lengthMeters * 0.000621371 | number : 0}} mi)</small></td>
+                        <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"$":1}}K</td>
+                      </tr>
+                      <tr>
+                        <th colspan="3">Equipment Capex</th>
+                        <td colspan="2" class="text-right">{{plan.metadata.equipment_cost / 1000 | currency:"$":1}}K</td>
+                      </tr>
+                      <tr ng-repeat="cost in plan.metadata.equipment_summary">
+                        <td colspan="3"><small> ↳ {{cost.description}} (x{{cost.quantity}})</small></td>
+                        <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"$":1}}K</td>
+                      </tr>
+                      <tr>
+                        <th colspan="3">Total Capex</th>
+                        <td colspan="2" class="text-right">{{plan.metadata.total_cost / 1000 | currency:"$":1}}K</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="col-sm-6">
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <th colspan="3">Premises Passed</th>
+                        <td colspan="2" class="text-right">{{plan.metadata.total_premises | number}}</td>
+                      </tr>
+                      <tr ng-repeat="premise in plan.metadata.premises">
+                        <td colspan="3"><small> ↳ {{premise.name}}</small></td>
+                        <td colspan="2" class="text-right">{{premise.value | number}}</td>
+                      </tr>
+                      <tr>
+                        <th colspan="3">$ / Premises Passed</th>
+                        <td colspan="2" class="text-right">{{plan.metadata.total_cost / plan.metadata.total_premises | currency:"$":0}}</td>
+                      </tr>
+                      <tr>
+                        <th colspan="3">NPV</th>
+                        <td colspan="2" class="text-right">{{plan.metadata.npv / 1000 | currency:"$":1}}K</td>
+                      </tr>
+                      <tr>
+                        <th colspan="3">IRR</th>
+                        <td colspan="2" class="text-right" ng-show="hasIRR()">{{plan.metadata.irr * 100 | number: 1}}%</td>
+                        <td colspan="2" class="text-right" ng-hide="hasIRR()">{{plan.metadata.irr}}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="financialProfileCashFlow" style="margin-top: 20px">
+              <div>
+                <p class="text-center"><strong>Cash Flow Summary</strong></p>
+                <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-cash-flow-legend"></div>
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="financialProfileCapex" style="margin-top: 20px">
+              <div>
+                <form class="form-inline">
+                  <div class="form-group">
+                    <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+                      <option value="bau">BAU</option>
+                      <option value="plan">Plan</option>
+                      <option value="incremental">Incremental</option>
+                    </select>
+                  </div>
+                  <!--
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Businesses
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Households
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Towers
+                    </label>
+                  </div>
+                  -->
+                </form>
+                <br>
+                <p class="text-center"><strong>BAU Capex</strong></p>
+                <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-capex-legend"></div>
+                <!--
+                <br>
+                <p class="text-center"><strong>Budget Allocation</strong></p>
+                <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-budget-legend"></div>
+                -->
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="financialProfileRevenue" style="margin-top: 20px">
+              <div>
+                <form class="form-inline">
+                  <div class="form-group">
+                    <select class="form-control" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
+                      <option value="bau">BAU</option>
+                      <option value="plan">Plan</option>
+                      <option value="incremental">Incremental</option>
+                    </select>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>BAU Revenue</strong></p>
+                <canvas id="financial-profile-chart-revenue" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-revenue-legend"></div>
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="financialProfilePremises" style="margin-top: 20px">
+              <div>
+                <form class="form-inline" ng-show="aboveWirecenter">
+                  <div class="form-group">
+                    <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+                      <option value="bau">BAU</option>
+                      <option value="plan">Plan</option>
+                      <option value="incremental">Incremental</option>
+                    </select>
+                  </div>
+                </form>
+                <form class="form-inline">
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox" ng-model="premisesFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Businesses
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox" ng-model="premisesFilterEntityTypes['households']" ng-change="refreshCurrentTab(true)"> Households
+                    </label>
+                  </div>
+                  <div class="checkbox" style="margin-left: 10px">
+                    <label>
+                      <input type="checkbox" ng-model="premisesFilterEntityTypes['towers']" ng-change="refreshCurrentTab(true)"> Towers
+                    </label>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>All Premises Passed</strong></p>
+                <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-premises-legend"></div>
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers" style="margin-top: 20px">
+              <div>
+                <form class="form-inline">
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="businesses"> Businesses
+                    </label>
+                  </div>
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="households"> Households
+                    </label>
+                  </div>
+                  <div class="radio" style="margin-left: 10px">
+                    <label>
+                      <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="towers"> Towers
+                    </label>
+                  </div>
+                </form>
+                <br>
+                <p class="text-center"><strong>Subscribers</strong></p>
+                <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-subscribers-legend"></div>
+                <br>
+                <p class="text-center"><strong>Penetration</strong></p>
+                <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
+                <div id="financial-profile-chart-penetration-legend"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

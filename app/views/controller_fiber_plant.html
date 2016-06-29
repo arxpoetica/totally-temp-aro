@@ -1,0 +1,35 @@
+<div ng-controller="fiber_plant_controller" id="fiber_plant_controller">
+  <div>
+    <h2>View</h2>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-change="toggle_all_competitors()" ng-model="show_all_competitors" ng-disabled="overlay !== 'none'"> All competitors
+      </label>
+    </div>
+    <input class="form-control" ng-model="selected_carriers" ng-change="carriers_changed()"></input>
+  </div>
+  <hr>
+  <div>
+    <h2>Overlay</h2>
+    <div class="form-group">
+      <select class="form-control" ng-model="overlay" ng-change="overlay_changed()">
+        <option value="none">None</option>
+        <option value="density">Density</option>
+        <option value="fairshare">Fair share</option>
+      </select>
+      <div class="row" style="margin-top: 10px" ng-show="overlay === 'fairshare'">
+        <div class="col-md-2">Low</div>
+        <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
+        <div class="col-md-2 text-right">High</div>
+      </div>
+      <div class="row" style="margin-top: 10px" ng-show="overlay === 'density'">
+        <div class="col-md-2">Low</div>
+        <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
+        <div class="col-md-2 text-right">High</div>
+      </div>
+      <div ng-show="overlay_is_loading()">
+        <% include spinner.html %>
+      </div>
+    </div>
+  </div>
+</div>
