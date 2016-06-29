@@ -207,7 +207,7 @@
 
     <div id="left-col-wrapper">
       <div id="left-col">
-        <div ng-controller="map_tools_controller">
+        <div>
           <% include controller_global_search.html %>
           <div class="panel-group" id="map-tools-accordion" role="tablist" aria-multiselectable="true">
             <div class="panel panel-default">
@@ -280,9 +280,14 @@
                 </div>
               </div>
             </div>
-            <div class="panel panel-default">
+            <div class="panel panel-default" ng-controller="financial-profile-tool-controller">
               <div class="panel-heading" role="tab" style="background-color: black">
                 <h4 class="panel-title">
+                  <div class="pull-right" style="margin-top: -5px">
+                    <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'global'}" ng-click="setMode('global')">Global</button>
+                    <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'area'}" ng-click="setMode('area')">Area</button>
+                  </div>
+
                   <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-financial">
                     Results
                   </a>
@@ -536,7 +541,6 @@
   <script src="javascripts/lib/controllers/financial_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
-  <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
   <script src="javascripts/lib/controllers/boundaries_controller.js"></script>
   <script src="javascripts/lib/controllers/locations_controller.js"></script>
