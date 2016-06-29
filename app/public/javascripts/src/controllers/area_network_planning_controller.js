@@ -1,12 +1,9 @@
 /* global app swal $ google map */
 // Search Controller
-app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
+app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', ($scope, $rootScope, $http, $q, map_tools) => {
   // Controller instance variables
   $scope.map_tools = map_tools
 
-  $scope.allStatus = ['optimization', 'geographies', 'cover', 'progress']
-  $scope.wizardStatus = $scope.allStatus[0]
-  $scope.advancedSettings = false
   $scope.selectedGeographies = []
   $scope.calculating = false
 
@@ -21,7 +18,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   var budgetInput = $('#area_network_planning_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
 
-  const parseBudget = () => +budgetInput.val().match(/\d+/g).join('') || 0
+  const parseBudget = () => +(budgetInput.val() || '0').match(/\d+/g).join('') || 0
 
   budgetInput.on('focus', () => {
     budgetInput.val(String(parseBudget()))
@@ -67,44 +64,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $rootScope.$on('map_tool_changed_visibility', () => {
     selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
   })
-
-  $scope.forward = () => {
-    var index = $scope.allStatus.indexOf($scope.wizardStatus)
-    if (index + 1 < $scope.allStatus.length) {
-      $scope.wizardStatus = $scope.allStatus[index + 1]
-      if ($scope.wizardStatus === 'progress') {
-        calculate()
-      }
-    }
-  }
-
-  $scope.back = () => {
-    var index = $scope.allStatus.indexOf($scope.wizardStatus)
-    if (index > 0) {
-      $scope.wizardStatus = $scope.allStatus[index - 1]
-    }
-  }
-
-  $scope.toggleAdvancedSettings = () => {
-    $scope.advancedSettings = !$scope.advancedSettings
-  }
-
-  $scope.cancel = () => {
-    if (!$scope.calculating) return $scope.back()
-    swal({
-      title: 'Are you sure?',
-      text: 'Are you sure you want to cancel?',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, cancel it',
-      cancelButtonText: 'Keep Going',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, () => {
-      $scope.back()
-      $scope.$apply()
-    })
-  }
 
   $scope.removeGeography = (geography) => {
     var index = $scope.selectedGeographies.indexOf(geography)
@@ -207,7 +166,24 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     $scope.irrThresholdRange = $scope.irrThreshold
   }
 
-  function calculate () {
+  var canceler = null
+  $scope.cancel = () => {
+    swal({
+      title: 'Are you sure?',
+      text: 'Are you sure you want to cancel?',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, cancel it',
+      cancelButtonText: 'Keep Going',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, () => {
+      canceler.resolve()
+      canceler = null
+    })
+  }
+
+  $scope.run = () => {
     var locationTypes = []
     if ($scope.coverHouseholds) locationTypes.push('households')
     if ($scope.coverBusinesses) locationTypes.push('businesses')
@@ -220,19 +196,20 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       irrThreshold: $scope.irrThreshold / 100
     }
 
+    canceler = $q.defer()
     var url = '/network_plan/' + $scope.plan.id + '/edit'
     var config = {
       url: url,
       method: 'post',
       saving_plan: true,
-      data: changes
+      data: changes,
+      timeout: canceler.promise
     }
     $scope.calculating = true
     $http(config)
       .success((response) => {
         $scope.calculating = false
         $rootScope.$broadcast('route_planning_changed', response)
-        $scope.wizardStatus = $scope.allStatus[0]
       })
       .error(() => {
         $scope.calculating = false
