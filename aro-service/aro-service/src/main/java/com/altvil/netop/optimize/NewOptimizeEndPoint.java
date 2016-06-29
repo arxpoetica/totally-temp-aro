@@ -84,6 +84,7 @@ public class NewOptimizeEndPoint {
 		case IRR:
 		case MAX_IRR:
 		case BUDGET_IRR:
+		case BUDGET :
 		case TARGET_IRR:
 			return new IrrConstraints(plan.getAlgorithm(),
 					financials.getYears(), financials.getDiscountRate(),
@@ -97,7 +98,6 @@ public class NewOptimizeEndPoint {
 							.getThreshold(), financials.getBudget());
 
 		case PRUNNING_NPV:
-			NPV:
 			return new NpvConstraints(OptimizationType.PRUNNING_NPV,
 					financials.getYears(), financials.getDiscountRate(),
 					plan.getThreshold() == null ? Double.NaN : plan

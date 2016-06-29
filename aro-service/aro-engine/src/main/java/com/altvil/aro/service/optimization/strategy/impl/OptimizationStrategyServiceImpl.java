@@ -108,6 +108,8 @@ public class OptimizationStrategyServiceImpl implements
 	private void init() {
 		register(OptimizationType.BUDGET_IRR, new ThresholdOptizationFactory<>(
 				(plan) -> plan.getIrr()));
+		register(OptimizationType.BUDGET, new ThresholdOptizationFactory<>(
+				(plan) -> plan.getIrr()));
 		register(OptimizationType.BUDGET_THRESHHOLD_IRR,
 				new ThresholdOptizationFactory<>((plan) -> plan.getIrr()));
 		register(OptimizationType.IRR, new ThresholdOptizationFactory<>(
@@ -413,6 +415,11 @@ public class OptimizationStrategyServiceImpl implements
 			map.put(OptimizationType.IRR,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getMonthlyRevenueImpact())));
+			
+			map.put(OptimizationType.BUDGET,
+					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
+							.getMonthlyRevenueImpact())));
+			
 			map.put(OptimizationType.BUDGET_IRR,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getMonthlyRevenueImpact())));
