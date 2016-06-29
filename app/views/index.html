@@ -206,14 +206,15 @@
 
 
     <div id="left-col-wrapper">
-      <div id="left-col">
+      <div id="left-col" class="left-col-expanded">
         <div>
           <% include controller_global_search.html %>
-          <div class="panel-group" id="map-tools-accordion" role="tablist" aria-multiselectable="true">
+          <div class="panel-group" id="map-tools-accordion" role="tablist" aria-multiselectable="true" style="float: left">
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <a role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-customers">
+                  <span class="hide-on-expanded">C</span>
+                  <a role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-customers" class="hide-on-collapsed">
                     Customers
                   </a>
                 </h4>
@@ -227,7 +228,8 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-carriers">
+                  <span class="hide-on-expanded">C</span>
+                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-carriers">
                     Carriers
                   </a>
                 </h4>
@@ -241,7 +243,8 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-network">
+                  <span class="hide-on-expanded">N</span>
+                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-network">
                     Network
                   </a>
                 </h4>
@@ -255,7 +258,8 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-boundaries">
+                  <span class="hide-on-expanded">B</span>
+                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-boundaries">
                     Boundaries
                   </a>
                 </h4>
@@ -269,7 +273,8 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-modeling">
+                  <span class="hide-on-expanded">M</span>
+                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-modeling">
                     Scenario Modeling Tools
                   </a>
                 </h4>
@@ -283,12 +288,12 @@
             <div class="panel panel-default" ng-controller="financial-profile-tool-controller">
               <div class="panel-heading" role="tab" style="background-color: black">
                 <h4 class="panel-title">
-                  <div class="pull-right" style="margin-top: -5px">
+                  <div class="pull-right hide-on-collapsed" style="margin-top: -5px">
                     <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'global'}" ng-click="setMode('global')">Global</button>
                     <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'area'}" ng-click="setMode('area')">Area</button>
                   </div>
-
-                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-financial">
+                  <span class="hide-on-expanded">R</span>
+                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-financial">
                     Results
                   </a>
                 </h4>
@@ -299,6 +304,9 @@
                 </div>
               </div>
             </div>
+          </div>
+          <div style="float: left; margin-top: 1px">
+            <button class="btn btn-sm btn-default" id="expander"><span class="fa fa-chevron-left"></span></button>
           </div>
         </div>
       </div>
@@ -522,6 +530,8 @@
       }
     }
 
+    $()
+
     var user_id = <%= user.id %>;
     var config = <%- JSON.stringify(config) %>;
 
@@ -572,9 +582,27 @@
     $(function () {
       var tooltips = $('#left-col [data-toggle="tooltip"]');
       tooltips.tooltip();
-      tooltips.on('click mouseout', function() {
+      tooltips.on('click mouseout', function () {
         $(this).tooltip('hide')
       })
+    })
+
+    var expander = $('#expander')
+    var icon = $('#expander .fa')
+    var leftcol = $('#left-col')
+    expander.on('click', function () {
+      if (leftcol.hasClass('left-col-expanded')) {
+        $('#map-tools-accordion .collapse.in').removeClass('in')
+        icon.removeClass('fa-chevron-left')
+        icon.addClass('fa-chevron-right')
+        leftcol.removeClass('left-col-expanded')
+        leftcol.addClass('left-col-collapsed')
+      } else {
+        icon.addClass('fa-chevron-left')
+        icon.removeClass('fa-chevron-right')
+        leftcol.removeClass('left-col-collapsed')
+        leftcol.addClass('left-col-expanded')
+      }
     })
 
     swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> })
