@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -44,6 +43,7 @@ import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.FiberStrandConverter;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysisFactory;
+import com.altvil.aro.service.optimize.spi.NetworkGenerator;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.ParentResolver;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
@@ -195,16 +195,11 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		@Override
-		public Supplier<Optional<CompositeNetworkModel>> lazySerialize() {
-			Collection<Long> rejectedLocations = this.rejectedLocations
+		public NetworkGenerator lazySerialize() {
+			Set<Long> rejectedLocations = this.rejectedLocations
 					.stream().map(AroEntity::getObjectId)
-					.collect(Collectors.toList());
-			return new Supplier<Optional<CompositeNetworkModel>>() {
-				@Override
-				public Optional<CompositeNetworkModel> get() {
-					return networkModelBuilder.createModel(rejectedLocations);
-				}
-			};
+					.collect(Collectors.toSet());
+			return new DefaultNetworkGenerator(networkModelBuilder, rejectedLocations) ;
 		}
 
 		@Override
@@ -273,13 +268,13 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 			Builder source = createSource(coEdgeAssignment);
 
-			source.addChild(new NodeAssembler(model, this, FiberType.FEEDER).assemble(coVertex,
-					model.getFiberSourceMapping(),
-					model.getCentralOfficeFeederFiber()));
-			
-			source.build() ;
-			
-			return source ;
+			source.addChild(new NodeAssembler(model, this, FiberType.FEEDER)
+					.assemble(coVertex, model.getFiberSourceMapping(),
+							model.getCentralOfficeFeederFiber()));
+
+			source.build();
+
+			return source;
 		}
 
 		@Override
@@ -307,7 +302,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		@Override
 		public void changing_start(GeneratingNode node) {
 			boolean removed = treeMap.remove(node.getScore(), node);
-			if( !removed ) {
+			if (!removed) {
 				log.warn("Failed to generating node");
 			}
 		}
@@ -353,6 +348,34 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			return new ToStringBuilder(this).append("rootNode", rootNode)
 					.toString();
 		}
+	}
+
+	private static class DefaultNetworkGenerator implements NetworkGenerator {
+
+		private NetworkModelBuilder networkModelBuilder;
+		private Set<Long> rejectedLocations;
+
+		public DefaultNetworkGenerator(NetworkModelBuilder networkModelBuilder,
+				Set<Long> rejectedLocations) {
+			super();
+			this.networkModelBuilder = networkModelBuilder;
+			this.rejectedLocations = rejectedLocations;
+		}
+
+		@Override
+		public Optional<CompositeNetworkModel> get() {
+			return networkModelBuilder.createModel(rejectedLocations);
+		}
+
+		@Override
+		public boolean matches(NetworkGenerator other) {
+			if (other instanceof DefaultNetworkGenerator) {
+				return ((DefaultNetworkGenerator) other).rejectedLocations
+						.equals(rejectedLocations);
+			}
+			return false;
+		}
+
 	}
 
 }

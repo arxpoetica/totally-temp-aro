@@ -3,7 +3,6 @@ package com.altvil.aro.service.optimize.spi;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.optimize.model.AnalysisNode;
@@ -19,7 +18,7 @@ public interface NetworkAnalysis {
 
 	public GeneratingNode getMinimumNode(Predicate<GeneratingNode> predicate);
 
-	public Supplier<Optional<CompositeNetworkModel>> lazySerialize() ;
+	public NetworkGenerator lazySerialize() ;
 
 	public Optional<CompositeNetworkModel> serialize();
 	

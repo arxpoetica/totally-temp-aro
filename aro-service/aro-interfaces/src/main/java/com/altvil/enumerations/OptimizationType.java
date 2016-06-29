@@ -2,9 +2,17 @@ package com.altvil.enumerations;
 
 public enum OptimizationType {
 	CAPEX,
+	
 	COVERAGE,
- 	MAX_IRR,
+	
+	IRR,
  	BUDGET_IRR,
+ 	BUDGET_THRESHHOLD_IRR,
+ 	
+ 	MAX_IRR,
+ 	
+ 	TARGET_IRR,
+ 	
  	NPV,
- 	TARGET_IRR
+ 	
 }

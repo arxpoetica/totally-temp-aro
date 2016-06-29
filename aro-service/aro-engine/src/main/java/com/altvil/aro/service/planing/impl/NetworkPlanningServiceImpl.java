@@ -619,7 +619,6 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			log.info("Target total = " + totalDemand);
 
 			NetworkPlanner planner = optimizerService.createNetworkPlanner(
-					optimizationPlanConfiguration.getClosestFirstSurfaceBuilder(null),
 					optimizationPlanConfiguration,
 					networkData, ctx, optimizationPlanConfiguration::generatingNodeConstraint, optimizationPlanConfiguration);
 
