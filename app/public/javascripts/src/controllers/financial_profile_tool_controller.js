@@ -1,7 +1,5 @@
 /* global app $ Chart */
-// Search Controller
 app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', ($scope, $rootScope, $http, $timeout, map_tools) => {
-  // Controller instance variables
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
   $scope.premisesFilterEntityTypes = { households: true }
@@ -9,6 +7,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.revenueFilter = 'bau'
   $scope.capexFilterEntityTypes = { households: true }
   $scope.capexFilter = 'bau'
+  $scope.details = false
   var dirty = false
 
   var charts = {}
@@ -297,5 +296,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.hasIRR = () => {
     return $scope.plan && $scope.plan.metadata &&
       +$scope.plan.metadata.irr == $scope.plan.metadata.irr // eslint-disable-line
+  }
+
+  $scope.showDetails = (show) => {
+    $scope.details = show
   }
 }])
