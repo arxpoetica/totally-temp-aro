@@ -12,6 +12,6 @@ public interface PruningStrategy {
 	boolean isConstraintSatisfied(NetworkAnalysis node);
 
 	// Can this candidate network be rejected early
-	boolean isNetworkRejected(OptimizedNetwork network);
+	boolean isCandidatePlan(OptimizedNetwork network);
 
 }

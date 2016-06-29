@@ -78,7 +78,7 @@ public class NetworkConstrainer {
 					final AnalysisNode analysisNode = optimizedNetwork
 							.getAnalysisNode();
 
-					log.info("Analysis Node: {} {} {} {}", analysisNode
+					log.trace("Analysis Node: {} {} {} {}", analysisNode
 							.getFiberCoverage().getDemand(), analysisNode
 							.getCapex(), analysisNode.getSuccessBasedCapex(),
 							analysisNode.getFiberCoverage().getRawCoverage());
@@ -100,15 +100,15 @@ public class NetworkConstrainer {
 						// Filter out all other types of optimizations until the
 						// persistence layer can be changed
 
-						if (!pruningStrategy
-								.isNetworkRejected(optimizedNetwork)
+						if (pruningStrategy
+								.isCandidatePlan(optimizedNetwork)
 								&& verifyDifferentNetwork
 										.isDifferent(optimizedNetwork)) {
 							resultAssembler.add(optimizedNetwork);
 						}
 
-						if (log.isInfoEnabled()) {
-							log.info("prune ..."
+						if (log.isTraceEnabled()) {
+							log.trace("prune ..."
 									+ networkAnalysis.getAnalyisNode()
 											.getScore());
 						}

@@ -147,7 +147,7 @@ public class OptimizationStrategyServiceImpl implements
 		}
 
 		@Override
-		public boolean isNetworkRejected(OptimizedNetwork network) {
+		public boolean isCandidatePlan(OptimizedNetwork network) {
 			return spiOptimizationStrategy.isValid(network);
 		}
 
@@ -170,8 +170,8 @@ public class OptimizationStrategyServiceImpl implements
 		@Override
 		public SpiOptimizationStrategy createOptimizationStrategy(T constraints) {
 
-			boolean thresholdActive = Double.NaN != constraints.getThreshhold();
-			boolean capexActive = Double.NaN != constraints.getCapex();
+			boolean thresholdActive = !Double.isNaN(constraints.getThreshhold()) ;
+			boolean capexActive = !Double.isNaN(constraints.getCapex()) && !Double.isInfinite(constraints.getCapex())   ;
 
 			if (thresholdActive && capexActive) {
 				return createBudgetThresholdStrategy(constraints);
@@ -264,7 +264,7 @@ public class OptimizationStrategyServiceImpl implements
 					.getOptimizedNetworks().stream()
 					.map(n -> planAnalysisFunctor.apply(n))
 					.filter(PlanAnalysis::isValid).collect(Collectors.toList());
-
+			
 			Optional<PlanAnalysis> selectedPlan = selectPlan(plans);
 
 			return selectedPlan.isPresent() ? Optional
@@ -286,6 +286,7 @@ public class OptimizationStrategyServiceImpl implements
 				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
 				ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
+			this.thresholdFunction = thresholdFunction ;
 		}
 
 		@Override
@@ -376,6 +377,7 @@ public class OptimizationStrategyServiceImpl implements
 
 		@Override
 		protected boolean isValid(PlanAnalysis planAnalysis) {
+			
 			return super.isValid(planAnalysis)
 					&& planAnalysis.getBudget() <= optimizationConstraints
 							.getCapex()

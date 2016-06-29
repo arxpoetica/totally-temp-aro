@@ -81,6 +81,7 @@ public class NewOptimizeEndPoint {
 
 		switch (plan.getAlgorithm()) {
 
+		case IRR:
 		case MAX_IRR:
 		case BUDGET_IRR:
 		case TARGET_IRR:

@@ -52,7 +52,7 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 		PruningStrategy strategy  = new PruningStrategy() {
 			
 			@Override
-			public boolean isNetworkRejected(OptimizedNetwork network) {
+			public boolean isCandidatePlan(OptimizedNetwork network) {
 				return false;
 			}
 			

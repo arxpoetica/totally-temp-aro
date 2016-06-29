@@ -16,6 +16,7 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.AroException;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
+import com.altvil.aro.service.optimization.master.MasterPlanningService;
 import com.altvil.aro.service.optimization.master.PruningAnalysis;
 import com.altvil.aro.service.optimization.spi.ComputeUnitCallable;
 import com.altvil.aro.service.optimization.spi.OptimizationException;
@@ -45,6 +46,7 @@ public class OptimizationPlannerServiceImpl implements
 	private WirecenterOptimizationService wirecenterOptimizationService;
 	private WirecenterPlanningService wirecenterPlanningService;
 	private OptimizationExecutorService optimizationExecutorService;
+	private MasterPlanningService masterPlanningService ;
 
 	private OptimizationExecutor wirecenterExecutor;
 	private OptimizationExecutor masterPlanExecutor;
@@ -55,13 +57,15 @@ public class OptimizationPlannerServiceImpl implements
 			OptimizationStrategyService strategyService,
 			WirecenterOptimizationService wirecenterOptimizationService,
 			WirecenterPlanningService wirecenterPlanningService,
-			OptimizationExecutorService optimizationExecutorService) {
+			OptimizationExecutorService optimizationExecutorService,
+			 MasterPlanningService masterPlanningService) {
 		super();
 		this.networkPlanRepository = networkPlanRepository;
 		this.strategyService = strategyService;
 		this.wirecenterOptimizationService = wirecenterOptimizationService;
 		this.wirecenterPlanningService = wirecenterPlanningService;
 		this.optimizationExecutorService = optimizationExecutorService;
+		this.masterPlanningService = masterPlanningService ;
 	}
 
 	@PostConstruct
@@ -96,6 +100,8 @@ public class OptimizationPlannerServiceImpl implements
 			optimizedWirecenters.forEach(w -> {
 				wirecenterPlanningService.save(w.getPlan());
 			});
+			
+			masterPlanningService.updateMasterPlan(request.getPlanId());
 
 			return new MasterOptimizationResponse(StreamUtil.map(
 					optimizedWirecenters, OptimizedWirecenter::getPlan));
