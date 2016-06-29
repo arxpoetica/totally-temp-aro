@@ -14,3 +14,5 @@ try {
   module.exports = require(def_conf)
   console.log('File', filename, 'not found. Using default configuration file', def_conf)
 }
+
+module.exports.base_url = process.env.APP_BASE_URL || 'http://localhost:8000'

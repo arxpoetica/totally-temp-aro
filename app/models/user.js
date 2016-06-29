@@ -59,7 +59,14 @@ module.exports = class User {
   }
 
   static find () {
-    return database.query('SELECT * FROM auth.users')
+    return database.query(`
+      SELECT *,
+      CASE WHEN reset_code IS NOT NULL AND reset_code_expiration > NOW() THEN
+        $1 || '/reset_password?code=' || reset_code
+      ELSE NULL END
+      AS resend_link
+      FROM auth.users
+    `, [config.base_url])
   }
 
   static deleteUser (user_id) {
@@ -107,7 +114,7 @@ module.exports = class User {
     .then((usr) => {
       if (!user.password) {
         var email = user.email
-        var base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
+        var base_url = config.base_url
         var url = base_url + '/reset_password?' + querystring.stringify({ code: code })
         var text = 'Follow the link below to set your password\n' + url
 
@@ -154,25 +161,39 @@ module.exports = class User {
   }
 
   static forgotPassword (email) {
-    var code
     email = email && email.toLowerCase()
 
     return Promise.resolve()
       .then(() => (
-        database.findOne('SELECT id FROM auth.users WHERE email=$1', [email])
+        database.findOne('SELECT id, email FROM auth.users WHERE email=$1', [email])
       ))
       .then((user) => {
         if (!user) return Promise.reject(errors.notFound('No user found with email `%s`', email))
-        code = this.randomCode()
-        var sql = `
-          UPDATE auth.users
-          SET reset_code=$1, reset_code_expiration=(NOW() + interval \'1 day\')
-          WHERE id=$2
-        `
-        return database.execute(sql, [code, user.id])
+        this.sendLink(user)
       })
+  }
+
+  static resendLink (user_id) {
+    return Promise.resolve()
+      .then(() => (
+        database.findOne('SELECT id, email FROM auth.users WHERE id=$1', [user_id])
+      ))
+      .then((user) => {
+        if (!user) return Promise.reject(errors.notFound('No user found with user_id `%s`', user_id))
+        this.sendLink(user)
+      })
+  }
+
+  static sendLink (user) {
+    var code = this.randomCode()
+    var sql = `
+      UPDATE auth.users
+      SET reset_code=$1, reset_code_expiration=(NOW() + interval \'1 day\')
+      WHERE id=$2
+    `
+    return database.execute(sql, [code, user.id])
       .then(() => {
-        var base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
+        var base_url = config.base_url
         var text = dedent`
           You're receiving this email because a password reset was requested for your user account in the ${config.client_carrier_name} ARO platform
 
@@ -183,7 +204,7 @@ module.exports = class User {
         `
         helpers.mail.sendMail({
           subject: 'Password reset: ARO Application',
-          to: email,
+          to: user.email,
           text: text
         })
       })
