@@ -301,4 +301,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.showDetails = (show) => {
     $scope.details = show
   }
+
+  $scope.mode = 'global'
+  $scope.setMode = (mode) => {
+    $scope.mode = mode
+  }
 }])

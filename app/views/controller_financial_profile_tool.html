@@ -1,5 +1,10 @@
 <div ng-controller="financial-profile-tool-controller">
 
+  <div class="pull-right" style="position: relative; top: -48px">
+    <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'global'}" ng-click="setMode('global')">Global</button>
+    <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'area'}" ng-click="setMode('area')">Area</button>
+  </div>
+
   <table class="table">
     <tbody>
       <tr>
@@ -59,7 +64,7 @@
     <div ng-show="details" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 800px">
       <div class="panel-heading">
         {{ map_tools.get_tool_name('financial_profile') }}
-        {{ selectedArea ? ' · '+selectedArea.name : '' }}
+        {{ mode === 'area' && selectedArea ? ' · '+selectedArea.name : '' }}
         <a href="javascript:void(0)" class="pull-right" ng-click="showDetails(false)">
           <span style="color:white" class="fa fa-close"></span>
         </a>
