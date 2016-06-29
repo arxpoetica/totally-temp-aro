@@ -475,3 +475,7 @@ height:100px;
   font-weight: bold;
   text-align: center;
 }
+
+.panel-body {
+  overflow: auto
+}
