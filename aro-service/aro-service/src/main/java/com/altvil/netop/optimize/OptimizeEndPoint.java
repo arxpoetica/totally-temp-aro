@@ -62,7 +62,7 @@ public class OptimizeEndPoint {
 	@Autowired
 	private NetworkPlanningService networkPlanningService;
 
-	@RequestMapping(value = "/optimize/wirecenter", method = RequestMethod.POST)
+	@RequestMapping(value = "v0/optimize/wirecenter", method = RequestMethod.POST)
 	public @ResponseBody WirecenterUpdate postRecalcWirecenterPlan(
 			Principal requestor, @RequestBody AroOptimizationPlan aroRequest)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
@@ -77,7 +77,7 @@ public class OptimizeEndPoint {
 		return LocationTypeMask.MASK.toMask(mask);
 	}
 	
-	@RequestMapping(value = "/optimize/wirecenter/start", method = RequestMethod.POST)
+	@RequestMapping(value = "v0/optimize/wirecenter/start", method = RequestMethod.POST)
 	public @ResponseBody com.altvil.aro.service.job.Job<WirecenterNetworkPlan> beginRecalcWirecenterPlan(
 			@RequestBody AroOptimizationPlan aroRequest)
 			throws NoSuchStrategy {
@@ -103,7 +103,7 @@ public class OptimizeEndPoint {
 		return jobService.submit(networkPlanRequest);
 	}
 
-	@RequestMapping(value = "/optimize/wirecenter/results", method = RequestMethod.POST)
+	@RequestMapping(value = "v0/optimize/wirecenter/results", method = RequestMethod.POST)
 	public @ResponseBody WirecenterUpdate completeRecalcWirecenterPlan(
 			@RequestBody com.altvil.aro.service.job.Job.Id request)
 			throws InterruptedException, ExecutionException {
@@ -115,7 +115,7 @@ public class OptimizeEndPoint {
 		return wu;
 	}
 
-	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
+	@RequestMapping(value = "v0/optimize/masterplan", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(
 			@RequestBody AroOptimizationPlan request)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
@@ -131,7 +131,7 @@ public class OptimizeEndPoint {
 	@Autowired
 	private StrategyService strategyService;
 
-	@RequestMapping(value = "/optimize/masterplan/start", method = RequestMethod.POST)
+	@RequestMapping(value = "v0/optimize/masterplan/start", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse beginRecalcMasterPlan(
 			 @RequestBody AroOptimizationPlan aroRequest)
 			throws NoSuchStrategy, InterruptedException {
@@ -162,7 +162,7 @@ public class OptimizeEndPoint {
 		return mpr;
 	}
 
-	@RequestMapping(value = "/optimize/masterplan/results", method = RequestMethod.POST)
+	@RequestMapping(value = "v0/optimize/masterplan/results", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse completeRecalcMasterPlan(
 			@RequestBody com.altvil.aro.service.job.Job.Id request)
 			throws InterruptedException, ExecutionException {

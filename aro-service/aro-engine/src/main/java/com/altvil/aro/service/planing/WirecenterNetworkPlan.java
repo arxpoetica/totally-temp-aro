@@ -14,9 +14,9 @@ public interface WirecenterNetworkPlan {
 	Collection<NetworkNode> getNetworkNodes();
 
 	Collection<FiberRoute> getFiberRoutes();
-	
-	public LocationDemand getTotalDemand() ;
-	
-	public Double getFiberLengthInMeters(FiberType fiberType) ;
+
+	LocationDemand getTotalDemand();
+
+	Double getFiberLengthInMeters(FiberType fiberType);
 
 }

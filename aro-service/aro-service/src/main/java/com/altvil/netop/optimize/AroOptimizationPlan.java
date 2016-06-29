@@ -13,14 +13,13 @@ public class AroOptimizationPlan {
 	private long planId;
 
 	private OptimizationType algorithm;
+	private Double threshold;
 
 	private FinancialConstraints financialConstraints;
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<LocationEntityType> locationTypes = new ArrayList<>();
 	private List<SelectedRegion> selectedRegions = new ArrayList<>();
 
-	private Double coverage;
-	private Double threshold;
 
 	public long getPlanId() {
 		return planId;
@@ -55,14 +54,7 @@ public class AroOptimizationPlan {
 			FiberNetworkConstraints fiberNetworkConstraints) {
 		this.fiberNetworkConstraints = fiberNetworkConstraints;
 	}
-
-	public Double getCoverage() {
-		return coverage;
-	}
-
-	public void setCoverage(Double coverage) {
-		this.coverage = coverage;
-	}
+	
 
 	public Double getThreshold() {
 		return threshold;

@@ -36,6 +36,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	private FiberProducer fiberProducer;
 	private List<GeneratingNode> children;
 	private int recalcMode = 0 ;
+	private double score ;
 	
 	protected DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment,
@@ -172,6 +173,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		}
 
 		this.capex = nodeCapex + childrenCapex;
+		
+		this.score = ctx.getScoringStrategy().score(this) ;
 
 	}
 
@@ -291,7 +294,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public double getScore() {
-		return ctx.getScoringStrategy().score(this) ;
+		return this.score ;
 	}
 
 	@Override
@@ -393,6 +396,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
         	if( !inited ) {
         		this.inited = true ;
     			return node.initReclc();
+			} else {
+				int x = 10 ;
 			}
         	
         	return node ;
