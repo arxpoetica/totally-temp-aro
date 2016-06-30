@@ -171,7 +171,17 @@ module.exports = class Network {
       businesses: 'Business',
       towers: 'CellTower'
     }
-    var endpoint = options.algorithm.indexOf('IRR') >= 0 ? 'optimize' : 'recalc'
+    var endpoints = {
+      'CAPEX': 'recalc',
+      'MAX_IRR': 'optimize',
+      'TARGET_IRR': 'optimize',
+      'BUDGET_IRR': 'optimize',
+      'BUDGET': 'optimize'
+    }
+    var endpoint = endpoints[options.algorithm]
+    if (!endpoint) {
+      return Promise.reject(new Error(`No endpoint configured for ${options.algorithm}`))
+    }
     var body = {
       planId: plan_id,
       locationTypes: options.locationTypes.map((key) => locationTypes[key]),
