@@ -45,7 +45,7 @@ public class NewOptimizeEndPoint {
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
 		mpr.setWireCenterids(response.getUpdates().stream()
-				.map((update) -> update.getPlan().getPlanId())
+				.map(w -> w.getPlanId())
 				.collect(Collectors.toList()));
 		return mpr;
 

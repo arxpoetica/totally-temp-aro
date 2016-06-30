@@ -18,10 +18,10 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationServ
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
-import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
 import com.altvil.aro.service.price.PricingService;
+import com.altvil.utils.StreamUtil;
 
 @Service
 public class OptimizationPlanningImpl implements WirecenterOptimizationService {
@@ -53,16 +53,15 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	}
 
 	@Override
-	public PlannedNetwork planNetwork(
+	public Optional<PlannedNetwork> planNetwork(
 			WirecenterOptimizationRequest request) {
 
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
 
-//		return planService.computeNetworkModel(networkData,
-//				FiberConstraintUtils.build(request.getConstraints()));
-		
-		return null ;
+		return StreamUtil.map(planService.computeNetworkModel(networkData,
+				FiberConstraintUtils.build(request.getConstraints())),
+				n -> new DefaultPlannedNetwork(request.getPlanId(), n));
 
 	}
 
@@ -80,7 +79,8 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 						.getOptimizationConstraints()),
 				createOptimizerContext(request));
 
-		return new DefaultPrunedNetwork(request, planner.getOptimizedPlans());
+		return new PrunedNetworkImpl(request.getPlanId(),
+				planner.getOptimizedPlans());
 
 		// Collection<OptimizedNetwork> optimizedPlans = planner
 		// .getOptimizedPlans();

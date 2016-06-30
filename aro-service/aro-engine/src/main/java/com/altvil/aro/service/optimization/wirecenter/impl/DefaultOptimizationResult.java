@@ -1,16 +1,16 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
 import com.altvil.aro.service.optimization.spi.OptimizationException;
-import com.altvil.aro.service.optimization.wirecenter.OptimizationResult;
+import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 
-public class DefaultPrunedNetwork<T> implements OptimizationResult<T> {
+public class DefaultOptimizationResult<T> implements WirecenterOptimization<T> {
 
 	private WirecenterOptimizationRequest wirecenterOptimizationRequest;
 	private T optimizedNetworks;
 	private OptimizationException optimizationException;
 
-	public DefaultPrunedNetwork(
+	public DefaultOptimizationResult(
 			WirecenterOptimizationRequest wirecenterOptimizationRequest,
 			T optimizedNetworks) {
 		super();
@@ -18,7 +18,7 @@ public class DefaultPrunedNetwork<T> implements OptimizationResult<T> {
 		this.optimizedNetworks = optimizedNetworks;
 	}
 
-	public DefaultPrunedNetwork(
+	public DefaultOptimizationResult(
 			WirecenterOptimizationRequest wirecenterOptimizationRequest,
 			OptimizationException exception) {
 		super();

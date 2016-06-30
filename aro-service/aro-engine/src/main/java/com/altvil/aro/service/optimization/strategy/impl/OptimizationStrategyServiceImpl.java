@@ -17,15 +17,15 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
-import com.altvil.aro.service.optimization.master.MasterOptimizationResult;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
-import com.altvil.aro.service.optimization.wirecenter.OptimizationResult;
 import com.altvil.aro.service.optimization.wirecenter.OptimizedWirecenter;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
+import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
+import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
@@ -238,11 +238,11 @@ public class OptimizationStrategyServiceImpl implements
 		}
 
 		@Override
-		public MasterOptimizationResult<PlannedNetwork> evaluateNetworks(
-				MasterOptimizationResult<PrunedNetwork> analysis) {
-			analysis.getWirecenterOptimizations().stream()
-					.map(this::evaluateNetwork).filter(Optional::isPresent)
-					.map(Optional::get).collect(Collectors.toList());
+		public Collection<PlannedNetwork> evaluateNetworks(
+				Collection<PrunedNetwork> analysis) {
+			analysis.stream().map(this::evaluateNetwork)
+					.filter(Optional::isPresent).map(Optional::get)
+					.collect(Collectors.toList());
 
 			return null;
 		}
@@ -256,19 +256,26 @@ public class OptimizationStrategyServiceImpl implements
 			return planAnalysis.isValid();
 		}
 
-		protected Optional<PlannedNetwork> toPlannedNetwork(
+		protected Optional<PlannedNetwork> toPlannedNetwork(long planId,
 				Optional<PlanAnalysis> plan) {
-		
-			if( !plan.isPresent() ) {
-				return Optional.empty() ;
+
+			if (!plan.isPresent()) {
+				return Optional.empty();
 			}
-			
-			
-			
+
+			Optional<CompositeNetworkModel> p = plan.get()
+					.getOptimizedNetwork().getNetworkPlan();
+			if (!p.isPresent()) {
+				return Optional.empty();
+			}
+
+			return Optional.of(new DefaultPlannedNetwork(planId, plan.get()
+					.getOptimizedNetwork().getNetworkPlan().get()));
+
 		}
 
 		protected Optional<CompositeNetworkModel> toOptimizedWirecenter(
-				OptimizationResult<PrunedNetwork> prunedNetwork,
+				WirecenterOptimization<PrunedNetwork> prunedNetwork,
 				Optional<PlanAnalysis> plan) {
 
 			new OptimizedWirecenter(prunedNetwork.getOptimizationRequest(),
@@ -281,18 +288,15 @@ public class OptimizationStrategyServiceImpl implements
 
 		@Override
 		public Optional<PlannedNetwork> evaluateNetwork(
-				OptimizationResult<PrunedNetwork> prunedNetwork) {
+				PrunedNetwork prunedNetwork) {
 
-			Collection<PlanAnalysis> plans = prunedNetwork.getResult()
+			Collection<PlanAnalysis> plans = prunedNetwork
 					.getOptimizedNetworks().stream()
 					.map(n -> planAnalysisFunctor.apply(n))
 					.filter(PlanAnalysis::isValid).collect(Collectors.toList());
 
-			Optional<PlanAnalysis> selectedPlan = selectPlan(plans);
-
-			return selectedPlan.isPresent() ? Optional
-					.of(toOptimizedWirecenter(prunedNetwork, selectedPlan))
-					: Optional.empty();
+			return toPlannedNetwork(prunedNetwork.getPlanId(),
+					selectPlan(plans));
 
 		}
 
@@ -324,13 +328,13 @@ public class OptimizationStrategyServiceImpl implements
 	private class BudgetStrategy<T extends ThresholdBudgetConstraint> extends
 			AbstractOptimizationStrategy<T> {
 
-		private ThesholdFunction thresholdFunction;
+		// private ThesholdFunction thresholdFunction;
 
 		public BudgetStrategy(T optimizationConstraints,
 				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
 				ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
-			this.thresholdFunction = thresholdFunction;
+			// this.thresholdFunction = thresholdFunction;
 		}
 
 		@Override

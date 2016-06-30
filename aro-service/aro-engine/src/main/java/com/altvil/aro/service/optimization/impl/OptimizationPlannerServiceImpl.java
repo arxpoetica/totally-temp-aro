@@ -3,7 +3,9 @@ package com.altvil.aro.service.optimization.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -17,8 +19,6 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
-import com.altvil.aro.service.optimization.master.DefaultPruningAnalysis;
-import com.altvil.aro.service.optimization.master.MasterOptimizationResult;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
 import com.altvil.aro.service.optimization.spi.ComputeUnitCallable;
 import com.altvil.aro.service.optimization.spi.OptimizationException;
@@ -29,14 +29,13 @@ import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationResponse;
-import com.altvil.aro.service.optimization.wirecenter.OptimizationResult;
-import com.altvil.aro.service.optimization.wirecenter.OptimizedWirecenter;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
+import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
-import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPrunedNetwork;
+import com.altvil.aro.service.optimization.wirecenter.impl.DefaultOptimizationResult;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.enumerations.OptimizationType;
 import com.altvil.utils.StreamUtil;
@@ -112,29 +111,33 @@ public class OptimizationPlannerServiceImpl implements
 	private abstract class MasterOptimizer {
 
 		MasterOptimizationResponse optimize(MasterOptimizationRequest request) {
-			MasterOptimizationResult<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
-			Collection<OptimizedWirecenter> optimizedNetworks = updateNetworks(plannedNetworks);
+			Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
+
+			Collection<WirecenterNetworkPlan> optimizedNetworks = updateNetworks(plannedNetworks);
+			
+			masterPlanningService.updateMasterPlan(request.getPlanId()) ;
+			
 			return new MasterOptimizationResponse(optimizedNetworks);
 		}
 
-		protected abstract MasterOptimizationResult<PlannedNetwork> planNetworks(
+		protected abstract Collection<PlannedNetwork> planNetworks(
 				Collection<WirecenterOptimizationRequest> wirecenters);
 
-		protected OptimizedWirecenter reify(
-				OptimizationResult<PlannedNetwork> network) {
+		protected WirecenterNetworkPlan reify(PlannedNetwork plan) {
+
 			WirecenterNetworkPlan reifiedPlan = conversionService.convert(
-					network.getPlanId(), network.getResult()
-							.getPlannedNetwork());
+					plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
+
 			wirecenterPlanningService.save(reifiedPlan);
-			return new OptimizedWirecenter(network.getOptimizationRequest(),
-					reifiedPlan);
+
+			return reifiedPlan;
 		}
 
-		protected Collection<OptimizedWirecenter> updateNetworks(
-				MasterOptimizationResult<PlannedNetwork> plannedNetworks) {
+		protected Collection<WirecenterNetworkPlan> updateNetworks(
+				Collection<PlannedNetwork> plannedNetworks) {
 
-			return plannedNetworks.getWirecenterOptimizations().stream()
-					.map(this::reify).collect(Collectors.toList());
+			return plannedNetworks.stream().map(this::reify)
+					.collect(Collectors.toList());
 
 		}
 
@@ -162,13 +165,29 @@ public class OptimizationPlannerServiceImpl implements
 					});
 		}
 
+		protected <T> Collection<T> filter(
+				Collection<WirecenterOptimization<T>> optimizations,
+				Predicate<T> validResult) {
+			return optimizations.stream()
+					.filter(o -> o.getOpitmizationException() != null)
+					.map(WirecenterOptimization::getResult).filter(validResult)
+					.collect(Collectors.toList());
+		}
+
 	}
 
 	private class PlanningOptimizer extends MasterOptimizer {
 		@Override
-		protected MasterOptimizationResult<PlannedNetwork> planNetworks(
+		protected Collection<PlannedNetwork> planNetworks(
 				Collection<WirecenterOptimizationRequest> wirecenters) {
-			return evaluate(StreamUtil.map(wirecenters, r -> asPlanCommand(r)));
+			Collection<ComputeUnitCallable<WirecenterOptimization<Optional<PlannedNetwork>>>> cmds = StreamUtil
+					.map(wirecenters, r -> asPlanCommand(r));
+
+			return evaluate(cmds).stream()
+					.filter(w -> w.getOpitmizationException() != null)
+					.filter(w -> w.getResult().isPresent())
+					.map(w -> w.getResult().get()).collect(Collectors.toList());
+
 		}
 	}
 
@@ -182,11 +201,13 @@ public class OptimizationPlannerServiceImpl implements
 		}
 
 		@Override
-		protected MasterOptimizationResult<PlannedNetwork> planNetworks(
+		protected Collection<PlannedNetwork> planNetworks(
 				Collection<WirecenterOptimizationRequest> wirecenters) {
 
-			return optimizationStrategy.evaluateNetworks(evaluate(StreamUtil
-					.map(wirecenters, w -> asPrunedCommand1(w))));
+			return optimizationStrategy.evaluateNetworks(filter(
+					evaluate(StreamUtil.map(wirecenters,
+							w -> asPrunedCommand(w))), v -> v
+							.getOptimizedNetworks().size() > 0));
 
 		}
 
@@ -222,64 +243,53 @@ public class OptimizationPlannerServiceImpl implements
 	// }
 	// }
 
-	private ComputeUnitCallable<OptimizationResult<PlannedNetwork>> asPlanCommand(
+	private ComputeUnitCallable<WirecenterOptimization<Optional<PlannedNetwork>>> asPlanCommand(
 			WirecenterOptimizationRequest request) {
 		return () -> {
 			try {
-				return new DefaultPrunedNetwork<>(request,
+				return new DefaultOptimizationResult<>(request,
 						wirecenterOptimizationService.planNetwork(request));
 			} catch (Throwable err) {
 				log.error(err.getMessage(), err);
-				return new DefaultPrunedNetwork<>(request,
+				return new DefaultOptimizationResult<>(request,
 						new OptimizationException(err.getMessage()));
 			}
 		};
 
 	}
 
-	private ComputeUnitCallable<OptimizationResult<PrunedNetwork>> asPrunedCommand1(
+	private ComputeUnitCallable<WirecenterOptimization<PrunedNetwork>> asPrunedCommand(
 			WirecenterOptimizationRequest request) {
 		return () -> {
 			try {
-				return new DefaultPrunedNetwork<>(request,
+				return new DefaultOptimizationResult<>(request,
 						wirecenterOptimizationService.pruneNetwork(request));
 			} catch (Throwable err) {
 				log.error(err.getMessage(), err);
-				return new DefaultPrunedNetwork<>(request,
+				return new DefaultOptimizationResult<>(request,
 						new OptimizationException(err.getMessage()));
 			}
 		};
 
 	}
 
-	private ComputeUnitCallable<PrunedNetwork> asPrunnedCommand(
-			WirecenterOptimizationRequest request) {
-		return () -> wirecenterOptimizationService.pruneNetwork(request);
-	}
+	private <S> Collection<WirecenterOptimization<S>> evaluate(
+			Collection<ComputeUnitCallable<WirecenterOptimization<S>>> cmds) {
 
-	private <S> MasterOptimizationResult<S> evaluate(
-			Collection<ComputeUnitCallable<OptimizationResult<S>>> cmds) {
-
-		List<Future<OptimizationResult<S>>> evalFutures = wirecenterExecutor
+		List<Future<WirecenterOptimization<S>>> evalFutures = wirecenterExecutor
 				.invokeAll(cmds);
 
-		List<OptimizationResult<S>> networks = new ArrayList<>();
-		List<OptimizationException> exceptions = new ArrayList<>();
+		List<WirecenterOptimization<S>> networks = new ArrayList<>();
 		evalFutures.forEach(f -> {
 			try {
-				OptimizationResult<S> pn = f.get();
-				if (pn.getOpitmizationException() == null) {
-					networks.add(pn);
-				} else {
-					exceptions.add(pn.getOpitmizationException());
-				}
+				WirecenterOptimization<S> pn = f.get();
+				networks.add(pn);
 			} catch (Exception e) {
-				exceptions.add(new OptimizationException(e.getMessage()));
 				log.error(e.getMessage(), e);
 			}
 		});
 
-		return new DefaultPruningAnalysis<S>(false, networks, exceptions);
+		return networks;
 
 	}
 
@@ -307,27 +317,30 @@ public class OptimizationPlannerServiceImpl implements
 	// return new DefaultPruningAnalysis(false, prunedNetworks, exceptions);
 	// }
 
-	private Collection<WirecenterOptimizationRequest> computeWireCenterRequests(
-			MasterOptimizationRequest request) {
-		networkPlanRepository.deleteWireCenterPlans(request.getPlanId());
-
-		boolean selectAllLocations = !request.getWireCenters().isEmpty();
-
-		List<Number> wireCentersPlans = selectAllLocations ? networkPlanRepository
-				.computeWirecenterUpdates(request.getPlanId(),
-						request.getWireCenters()) : networkPlanRepository
-				.computeWirecenterUpdates(request.getPlanId());
-		final LocationSelectionMode selectionMode = selectAllLocations ? LocationSelectionMode.ALL_LOCATIONS
-				: LocationSelectionMode.SELECTED_LOCATIONS;
-
-		return StreamUtil.map(
-				wireCentersPlans,
-				id -> {
-					return new WirecenterOptimizationRequest(request
-							.getOptimizationConstraints(), request
-							.getConstraints(), request.getNetworkDataRequest()
-							.createRequest(id.longValue(), selectionMode));
-				});
-	}
+	// private Collection<WirecenterOptimizationRequest>
+	// computeWireCenterRequests(
+	// MasterOptimizationRequest request) {
+	// networkPlanRepository.deleteWireCenterPlans(request.getPlanId());
+	//
+	// boolean selectAllLocations = !request.getWireCenters().isEmpty();
+	//
+	// List<Number> wireCentersPlans = selectAllLocations ?
+	// networkPlanRepository
+	// .computeWirecenterUpdates(request.getPlanId(),
+	// request.getWireCenters()) : networkPlanRepository
+	// .computeWirecenterUpdates(request.getPlanId());
+	// final LocationSelectionMode selectionMode = selectAllLocations ?
+	// LocationSelectionMode.ALL_LOCATIONS
+	// : LocationSelectionMode.SELECTED_LOCATIONS;
+	//
+	// return StreamUtil.map(
+	// wireCentersPlans,
+	// id -> {
+	// return new WirecenterOptimizationRequest(request
+	// .getOptimizationConstraints(), request
+	// .getConstraints(), request.getNetworkDataRequest()
+	// .createRequest(id.longValue(), selectionMode));
+	// });
+	// }
 
 }

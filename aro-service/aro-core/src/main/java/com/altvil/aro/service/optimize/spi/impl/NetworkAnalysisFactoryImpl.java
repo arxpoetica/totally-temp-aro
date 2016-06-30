@@ -60,6 +60,7 @@ import com.google.inject.Inject;
 @Service
 public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkAnalysisFactoryImpl.class.getName());
 
@@ -414,11 +415,11 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			treeMap.clear();
 		}
 
-		public Collection<T> values() {
-			return treeMap.values().stream().flatMap(v -> v.stream())
-					.collect(Collectors.toList());
-
-		}
+//		public Collection<T> values() {
+//			return treeMap.values().stream().flatMap(v -> v.stream())
+//					.collect(Collectors.toList());
+//
+//		}
 
 		public Iterator<T> iterator() {
 			return new TreeListIterator<T>(treeMap.values().iterator());

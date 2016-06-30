@@ -4,16 +4,16 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.altvil.aro.service.optimization.spi.OptimizationException;
-import com.altvil.aro.service.optimization.wirecenter.OptimizationResult;
+import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 
-public class DefaultPruningAnalysis<T> implements MasterOptimizationResult<T> {
+public class DefaultMasterOptimizationResult<T> implements MasterOptimizationResult<T> {
 
 	private boolean cancelled;
-	private Collection<OptimizationResult<T>> prunedNetworks;
+	private Collection<WirecenterOptimization<T>> prunedNetworks;
 	private Collection<OptimizationException> optimizationExceptions;
 
-	public DefaultPruningAnalysis(boolean cancelled,
-			Collection<OptimizationResult<T>> prunedNetworks,
+	public DefaultMasterOptimizationResult(boolean cancelled,
+			Collection<WirecenterOptimization<T>> prunedNetworks,
 			Collection<OptimizationException> optimizationExceptions) {
 		super();
 		this.cancelled = cancelled;
@@ -21,7 +21,7 @@ public class DefaultPruningAnalysis<T> implements MasterOptimizationResult<T> {
 		this.optimizationExceptions = optimizationExceptions;
 	}
 
-	public DefaultPruningAnalysis(Collection<OptimizationResult<T>> result) {
+	public DefaultMasterOptimizationResult(Collection<WirecenterOptimization<T>> result) {
 		this(false, result, Collections.emptyList());
 	}
 
@@ -37,7 +37,7 @@ public class DefaultPruningAnalysis<T> implements MasterOptimizationResult<T> {
 	}
 
 	@Override
-	public Collection<OptimizationResult<T>> getWirecenterOptimizations() {
+	public Collection<WirecenterOptimization<T>> getWirecenterOptimizations() {
 		return prunedNetworks;
 	}
 
