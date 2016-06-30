@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.AroException;
+import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
@@ -47,6 +48,7 @@ public class OptimizationPlannerServiceImpl implements
 	private WirecenterPlanningService wirecenterPlanningService;
 	private OptimizationExecutorService optimizationExecutorService;
 	private MasterPlanningService masterPlanningService ;
+	private CostService costService ;
 
 	private OptimizationExecutor wirecenterExecutor;
 	private OptimizationExecutor masterPlanExecutor;
@@ -58,7 +60,8 @@ public class OptimizationPlannerServiceImpl implements
 			WirecenterOptimizationService wirecenterOptimizationService,
 			WirecenterPlanningService wirecenterPlanningService,
 			OptimizationExecutorService optimizationExecutorService,
-			 MasterPlanningService masterPlanningService) {
+			 MasterPlanningService masterPlanningService,
+			 CostService costService) {
 		super();
 		this.networkPlanRepository = networkPlanRepository;
 		this.strategyService = strategyService;
@@ -66,6 +69,7 @@ public class OptimizationPlannerServiceImpl implements
 		this.wirecenterPlanningService = wirecenterPlanningService;
 		this.optimizationExecutorService = optimizationExecutorService;
 		this.masterPlanningService = masterPlanningService ;
+		this.costService  = costService ;
 	}
 
 	@PostConstruct
@@ -99,6 +103,7 @@ public class OptimizationPlannerServiceImpl implements
 
 			optimizedWirecenters.forEach(w -> {
 				wirecenterPlanningService.save(w.getPlan());
+				costService.updateWireCenterCosts(w.getPlan().getPlanId());
 			});
 			
 			masterPlanningService.updateMasterPlan(request.getPlanId());
