@@ -65,7 +65,7 @@ public class RoicServiceImpl implements RoicService {
 			if (childPlans.size() > 0) {
 
 				Optional<WirecenterPlan> wp = childPlans.stream()
-						.filter(p -> p.getTotalCost() != null).findFirst();
+						.findFirst();
 				if (wp.isPresent()) {
 					return getWirecenterRoicModel(wp.get().getId());
 				}
