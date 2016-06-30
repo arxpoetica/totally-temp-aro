@@ -26,8 +26,11 @@ public class CentralOfficeAssignment extends AbstractEquipmentAssignment {
 	public double getCost(PricingContext ctx, FiberConsumer fiberConsumer,
 			FiberProducer fiberProducer, DemandCoverage coverage) {
 		// BIG TODO Add equipment to the CentralOffice as a function of Network
+		
+		System.out.println("Demand " + coverage.getDemand() + " versus " + fiberProducer.getFiberCount() *32) ;
+		
 		// demand
-		return ctx.getPricingModel().getMaterialCost(MaterialType.CO, coverage.getDemand());
+		return ctx.getPricingModel().getMaterialCost(MaterialType.CO, fiberProducer.getFiberCount() * 32) ;
 	}
 
 	public CentralOfficeEquipment getCentralOfficeEquipment() {
