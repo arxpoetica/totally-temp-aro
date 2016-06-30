@@ -304,6 +304,21 @@
                 </div>
               </div>
             </div>
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab">
+                <h4 class="panel-title">
+                  <span class="hide-on-expanded icon icon-network-planning-targeted"></span>
+                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-target-builder">
+                    Target builder
+                  </a>
+                </h4>
+              </div>
+              <div id="map-tools-target-builder" class="panel-collapse collapse" role="tabpanel" data-tool="target_builder">
+                <div class="panel-body">
+                  <% include controller_target_builder.html %>
+                </div>
+              </div>
+            </div>
           </div>
           <div style="float: left; margin-top: 1px">
             <button class="btn btn-sm btn-default" id="expander"><span class="fa fa-chevron-left"></span></button>
@@ -345,90 +360,6 @@
               <div class="form-group form-group-sm">
                 <input type="text" class="form-control" placeholder="Search a business">
               </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div ng-controller="target-builder-controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('target_builder')" class="map-tool panel panel-primary" id="target_builder_controller">
-        <div class="panel-heading">
-          {{ map_tools.get_tool_name('target_builder') }}
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('target_builder')">
-            <form>
-              <p><strong>Optimization type</strong></p>
-              <select class="form-control" ng-model="optimizationType" ng-change="optimizationTypeChanged()">
-                <option value="capex">Capex</option>
-                <option value="npv">NPV</option>
-              </select>
-              <div ng-show="optimizationType === 'npv'" style="margin-top:5px" id="target-builder-budget">
-                <p>
-                  <label style="font-weight: 100; margin-right: 20px">
-                    <input type="radio" name="npvType" value="targeted" ng-model="npvType" ng-change="npvTypeChanged()">
-                    Targeted
-                  </label>
-                  <label style="font-weight: 100">
-                    <input type="radio" name="npvType" value="untargeted" ng-model="npvType" ng-change="npvTypeChanged()">
-                    Untargeted
-                  </label>
-                </p>
-                <div ng-show="npvType === 'targeted'">
-                  <div class="row">
-                    <div class="col-md-7">
-                      <p><strong>Total budget</strong></p>
-                    </div>
-                    <div class="col-md-5">
-                      <p class="text-right"><strong>Discount rate</strong></p>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-7">
-                      <div class="form-group form-group-sm">
-                        <div class="input-group input-group-sm">
-                          <div class="input-group-addon">$</div>
-                          <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-5">
-                      <div class="form-group form-group-sm">
-                        <div class="input-group input-group-sm">
-                          <input type="number" class="form-control text-right" ng-model="discountRate" min="0" max="100" step="1" name="discount_rate">
-                          <div class="input-group-addon">%</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-danger text-right" ng-show="overbugdet && npvType === 'targeted'">You are over budget. Current cost is {{plan.metadata.total_cost | currency}}</p>
-                </div>
-                <p class="text-right">
-                  <button class="btn btn-default btn-small">Update</button>
-                </p>
-              </div>
-
-              <br>
-              <p><strong>Search, Click or Upload Locations</strong></p>
-              <input class="form-control" placeholder="Address, Business Name">
-              <br>
-              <p>
-                Select:
-                <button class="btn btn-default btn-sm"
-                  ng-class="{'btn-success active': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
-                  ng-click="setSelectedTool('single')">Single</button>
-                <button class="btn btn-default btn-sm"
-                  ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
-                  ng-click="setSelectedTool('polygon')">Many</button>
-                <i class="fa fa-file-o"></i>
-              </p>
-              <p><strong>Targeted Locations</strong></p>
-              <ul style="padding: 0 20px">
-                <li>Businesses: {{plan.metadata.customers_businesses_total}}</li>
-                <li>Households: {{plan.metadata.customers_households_total}}</li>
-                <li>Towers: {{plan.metadata.customers_towers_total}}</li>
-              </ul>
             </form>
           </div>
         </div>
@@ -614,7 +545,7 @@
     })
 
     function calculatePanelHeight () {
-      var maxHeight = $(document).height() - 360
+      var maxHeight = $(document).height() - 400
       $('.panel-collapse > .panel-body').css('max-height', maxHeight)
     }
 
