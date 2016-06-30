@@ -160,7 +160,7 @@ public class PricingServiceImpl implements PricingService {
 			add(MaterialType.FDT, "fiber_distribution_terminal");
 			add(MaterialType.FDH, "fiber_distribution_hub");
 
-			add(FiberType.FEEDER, "feeder");
+			add(FiberType.FEEDER, "feeder_fiber");
 			add(FiberType.DISTRIBUTION, "distribution_fiber");
 		}
 	}
