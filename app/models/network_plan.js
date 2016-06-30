@@ -116,9 +116,22 @@ module.exports = class NetworkPlan {
     }
     var plan
 
-    return database.findOne('SELECT * FROM client.plan WHERE id=$1', [plan_id])
+    return database.findOne(`
+        SELECT
+          $2::text AS carrier_name,
+          plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
+          users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
+          created_at, updated_at
+        FROM client.plan
+        LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
+        LEFT JOIN auth.users ON users.id = permissions.user_id
+        WHERE plan.id=$1
+      `, [plan_id, config.client_carrier_name])
       .then((_plan) => {
         plan = _plan
+        Object.keys(plan).forEach((key) => {
+          output[key] = plan[key]
+        })
 
         return Promise.all([
           models.Network.equipmentSummary(plan_id),
@@ -232,9 +245,6 @@ module.exports = class NetworkPlan {
   static createPlan (name, area, user) {
     var id
 
-    console.log('area', area)
-    console.log('', JSON.stringify(area.centroid))
-    console.log('', JSON.stringify(area.bounds))
     return validate((expect) => {
       expect(area, 'area', 'object')
       // area name?

@@ -34,7 +34,7 @@
     </thead>
     <tbody>
       <tr ng-repeat="plan in plans">
-        <td><a href="javascript:void(0)" ng-click="select_plan(plan)">{{plan.name}}</a></th>
+        <td><a href="javascript:void(0)" ng-click="selectPlan(plan)">{{plan.name}}</a></th>
         <td>{{plan.updated_at | date:'shortDate'}}</th>
         <td>{{plan.created_at | date:'shortDate'}}</th>
         <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</th>

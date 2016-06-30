@@ -109,7 +109,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="select_plan(null)"><span class="fa fa-chevron-left"></span></button>
+            <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="selectPlan(null)"><span class="fa fa-chevron-left"></span></button>
             <a href="javascript:void(0)" class="navbar-brand" ng-click="showCombo()">{{plan.name}}</a>
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
@@ -285,7 +285,7 @@
                 </div>
               </div>
             </div>
-            <div class="panel panel-default" ng-controller="financial-profile-tool-controller">
+            <div class="panel panel-default" ng-controller="financial-profile-tool-controller" ng-show="plan.metadata.total_cost">
               <div class="panel-heading" role="tab" style="background-color: black">
                 <h4 class="panel-title">
                   <div class="pull-right hide-on-collapsed" style="margin-top: -5px">

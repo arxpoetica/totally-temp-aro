@@ -85,7 +85,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.select_plan = function (plan) {
+  $scope.selectPlan = function (plan) {
     $scope.plan = plan
     state.loadPlan(plan)
     $rootScope.$broadcast('plan_selected', plan)
@@ -202,11 +202,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   var path = $location.path()
   if (path.indexOf('/plan/') === 0) {
     var plan_id = path.substring('/plan/'.length)
-    $scope.loadPlans(() => {
-      var plan = _.findWhere($scope.plans, { id: plan_id })
-      if (plan) {
-        $scope.select_plan(plan)
-      }
+    $http.get('/network_plan/' + plan_id).success((response) => {
+      $scope.selectPlan(response)
     })
   }
 
@@ -264,7 +261,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     }
     $http.post('/network_plan/create', params).success((response) => {
       state.clearPlan(response)
-      $scope.select_plan(response)
+      $scope.selectPlan(response)
       $('#new-plan').modal('hide')
       $('#plan-combo').modal('hide')
       $scope.loadPlans()
