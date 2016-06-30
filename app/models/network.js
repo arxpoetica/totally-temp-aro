@@ -171,6 +171,13 @@ module.exports = class Network {
       businesses: 'Business',
       towers: 'CellTower'
     }
+    var algorithms = {
+      'CAPEX': 'CAPEX',
+      'MAX_IRR': 'IRR',
+      'TARGET_IRR': 'IRR',
+      'BUDGET_IRR': 'IRR',
+      'IRR': 'IRR'
+    }
     var endpoints = {
       'CAPEX': 'recalc',
       'MAX_IRR': 'optimize',
@@ -178,6 +185,7 @@ module.exports = class Network {
       'BUDGET_IRR': 'optimize',
       'IRR': 'optimize'
     }
+    options.algorithm = algorithms[options.algorithm]
     var endpoint = endpoints[options.algorithm]
     if (!endpoint) {
       return Promise.reject(new Error(`No endpoint configured for ${options.algorithm}`))

@@ -188,12 +188,24 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if ($scope.coverHouseholds) locationTypes.push('households')
     if ($scope.coverBusinesses) locationTypes.push('businesses')
     if ($scope.coverTowers) locationTypes.push('towers')
+    var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
       geographies: $scope.selectedGeographies.map((i) => ({ geog: i.geog, name: i.name, id: i.id, type: i.type })),
       algorithm: $scope.optimizationType,
       budget: parseBudget(),
       irrThreshold: $scope.irrThreshold / 100
+    }
+
+    if (algorithm === 'CAPEX') {
+      delete changes.budget
+      delete changes.irrThreshold
+    } else if (algorithm === 'MAX_IRR') {
+      delete changes.budget
+      delete changes.irrThreshold
+    } else if (algorithm === 'IRR') {
+      delete changes.irrThreshold
+    } else if (algorithm === 'BUDGET_IRR') {
     }
 
     canceler = $q.defer()
