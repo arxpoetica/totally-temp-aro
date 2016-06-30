@@ -213,7 +213,7 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <span class="hide-on-expanded">C</span>
+                  <span class="hide-on-expanded fa fa-building"></span>
                   <a role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-customers" class="hide-on-collapsed">
                     Customers
                   </a>
@@ -228,7 +228,7 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <span class="hide-on-expanded">C</span>
+                  <span class="hide-on-expanded fa fa-pie-chart"></span>
                   <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-carriers">
                     Carriers
                   </a>
@@ -243,7 +243,7 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <span class="hide-on-expanded">N</span>
+                  <span class="hide-on-expanded icon icon-network-equipment"></span>
                   <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-network">
                     Network
                   </a>
@@ -258,7 +258,7 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <span class="hide-on-expanded">B</span>
+                  <span class="hide-on-expanded icon icon-boundaries"></span>
                   <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-boundaries">
                     Boundaries
                   </a>
@@ -273,7 +273,7 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
-                  <span class="hide-on-expanded">M</span>
+                  <span class="hide-on-expanded icon icon-network-planning"></span>
                   <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-modeling">
                     Scenario Modeling Tools
                   </a>
@@ -615,7 +615,7 @@
 
     function calculatePanelHeight () {
       var maxHeight = $(document).height() - 360
-      $('.panel-body').css('max-height', maxHeight)
+      $('.panel-collapse > .panel-body').css('max-height', maxHeight)
     }
 
     calculatePanelHeight()

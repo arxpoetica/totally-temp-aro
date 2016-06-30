@@ -176,7 +176,7 @@ module.exports = class Network {
       'MAX_IRR': 'optimize',
       'TARGET_IRR': 'optimize',
       'BUDGET_IRR': 'optimize',
-      'BUDGET': 'optimize'
+      'IRR': 'optimize'
     }
     var endpoint = endpoints[options.algorithm]
     if (!endpoint) {
