@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
 import java.util.Date;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,12 +11,15 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
+import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
+import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
 import com.altvil.aro.service.price.PricingService;
 
@@ -38,17 +42,28 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	@Autowired
 	private PricingService pricingService;
 
-	// @Transactional
-	// private void saveUpdate(WirecenterNetworkPlan plan) {
-	// networkNodeRepository.save(plan.getNetworkNodes());
-	// fiberRouteRepository.save(plan.getFiberRoutes());
-	// }
+	@Autowired
+	private PlanService planService;
 
 	private OptimizerContext createOptimizerContext(
 			WirecenterOptimizationRequest request) {
 		return new OptimizerContext(pricingService.getPricingModel("*",
 				new Date()), FiberConstraintUtils.build(request
 				.getConstraints()));
+	}
+
+	@Override
+	public PlannedNetwork planNetwork(
+			WirecenterOptimizationRequest request) {
+
+		NetworkData networkData = networkService.getNetworkData(request
+				.getNetworkDataRequest());
+
+//		return planService.computeNetworkModel(networkData,
+//				FiberConstraintUtils.build(request.getConstraints()));
+		
+		return null ;
+
 	}
 
 	@Override

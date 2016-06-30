@@ -1,18 +1,17 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
+import java.util.Collection;
 import java.util.List;
-
-import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
 public class MasterOptimizationResponse {
 
-	private List<WirecenterNetworkPlan> updates;
+	private Collection<OptimizedWirecenter> updates;
 
-	public MasterOptimizationResponse(List<WirecenterNetworkPlan> updates) {
+	public MasterOptimizationResponse(Collection<OptimizedWirecenter> updates) {
 		this.updates = updates;
 	}
 
-	public List<WirecenterNetworkPlan> getUpdates() {
+	public List<OptimizedWirecenter> getUpdates() {
 		return updates;
 	}
 

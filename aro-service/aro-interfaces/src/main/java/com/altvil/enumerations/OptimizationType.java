@@ -1,6 +1,10 @@
 package com.altvil.enumerations;
 
 public enum OptimizationType {
+	
+	
+	UNCONSTRAINED,
+	
 	CAPEX,
 	
 	COVERAGE,
