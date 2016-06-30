@@ -45,9 +45,14 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 				.mapToDouble(
 						s -> ctx.getPricingModel().getPrice(s.getDropCable())
 								* s.getCount()).sum();
+		
+		return  ctx.getPricingModel().getMaterialCost(MaterialType.FDT) ;
 
-		return dropCableCosts
-				+ ctx.getPricingModel().getMaterialCost(MaterialType.FDT);
+//		System.out.println("FDT COSTS" + dropCableCosts
+//				+ ctx.getPricingModel().getMaterialCost(MaterialType.FDT)) ;
+//		
+//		return dropCableCosts
+//				+ ctx.getPricingModel().getMaterialCost(MaterialType.FDT);
 
 	}
 
