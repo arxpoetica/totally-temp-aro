@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/layout_<%= config.ui.layout %>.css">
   </head>
   <body>
 
@@ -207,123 +208,11 @@
 
     <div id="left-col-wrapper">
       <div id="left-col" class="left-col-expanded">
-        <div>
-          <% include controller_global_search.html %>
-          <div class="panel-group" id="map-tools-accordion" role="tablist" aria-multiselectable="true" style="float: left">
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab">
-                <h4 class="panel-title">
-                  <span class="hide-on-expanded fa fa-building"></span>
-                  <a role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-customers" class="hide-on-collapsed">
-                    Customers
-                  </a>
-                </h4>
-              </div>
-              <div id="map-tools-customers" class="panel-collapse collapse" role="tabpanel" data-tool="locations">
-                <div class="panel-body">
-                  <% include controller_locations.html %>
-                </div>
-              </div>
-            </div>
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab">
-                <h4 class="panel-title">
-                  <span class="hide-on-expanded fa fa-pie-chart"></span>
-                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-carriers">
-                    Carriers
-                  </a>
-                </h4>
-              </div>
-              <div id="map-tools-carriers" class="panel-collapse collapse" role="tabpanel" data-tool="fiber_plant">
-                <div class="panel-body">
-                  <% include controller_fiber_plant.html %>
-                </div>
-              </div>
-            </div>
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab">
-                <h4 class="panel-title">
-                  <span class="hide-on-expanded icon icon-network-equipment"></span>
-                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-network">
-                    Network
-                  </a>
-                </h4>
-              </div>
-              <div id="map-tools-network" class="panel-collapse collapse" role="tabpanel" data-tool="network_nodes">
-                <div class="panel-body">
-                  <% include controller_equipment.html %>
-                </div>
-              </div>
-            </div>
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab">
-                <h4 class="panel-title">
-                  <span class="hide-on-expanded icon icon-boundaries"></span>
-                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-boundaries">
-                    Boundaries
-                  </a>
-                </h4>
-              </div>
-              <div id="map-tools-boundaries" class="panel-collapse collapse" role="tabpanel" data-tool="boundaries">
-                <div class="panel-body">
-                  <% include controller_boundaries.html %>
-                </div>
-              </div>
-            </div>
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab">
-                <h4 class="panel-title">
-                  <span class="hide-on-expanded icon icon-network-planning"></span>
-                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-modeling">
-                    Scenario Modeling Tools
-                  </a>
-                </h4>
-              </div>
-              <div id="map-tools-modeling" class="panel-collapse collapse" role="tabpanel" data-tool="area_network_planning">
-                <div class="panel-body">
-                  <% include controller_area_network_planning.html %>
-                </div>
-              </div>
-            </div>
-            <div class="panel panel-default" ng-controller="financial-profile-tool-controller" ng-show="plan.metadata.total_cost">
-              <div class="panel-heading" role="tab" style="background-color: black">
-                <h4 class="panel-title">
-                  <div class="pull-right hide-on-collapsed" style="margin-top: -5px">
-                    <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'global'}" ng-click="setMode('global')">Global</button>
-                    <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'area'}" ng-click="setMode('area')">Area</button>
-                  </div>
-                  <span class="hide-on-expanded">R</span>
-                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-financial">
-                    Results
-                  </a>
-                </h4>
-              </div>
-              <div id="map-tools-financial" class="panel-collapse collapse" role="tabpanel" data-tool="financial_profile">
-                <div class="panel-body">
-                  <% include controller_financial_profile_tool.html %>
-                </div>
-              </div>
-            </div>
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab">
-                <h4 class="panel-title">
-                  <span class="hide-on-expanded icon icon-network-planning-targeted"></span>
-                  <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-target-builder">
-                    Target builder
-                  </a>
-                </h4>
-              </div>
-              <div id="map-tools-target-builder" class="panel-collapse collapse" role="tabpanel" data-tool="target_builder">
-                <div class="panel-body">
-                  <% include controller_target_builder.html %>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style="float: left; margin-top: 1px">
-            <button class="btn btn-sm btn-default" id="expander"><span class="fa fa-chevron-left"></span></button>
-          </div>
-        </div>
+        <% if (config.ui.layout === 'accordion') { %>
+          <% include layout_accordion.html %>
+        <% } else if (config.ui.layout === 'default') { %>
+          <% include layout_default.html %>
+        <% } %>
       </div>
     </div>
 
@@ -342,28 +231,6 @@
 
     <div ng-controller="market_size_controller">
       <% include modal_market_profile.html %>
-    </div>
-
-    <div ng-controller="search-controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('search')" class="map-tool panel panel-primary" id="search_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('search')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('search')" ng-click="map_tools.collapse('search')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('search')" ng-click="map_tools.expand('search')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('search')">
-            <form>
-              <div class="form-group form-group-sm">
-                <input type="text" class="form-control" placeholder="Search a business">
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div id="map-canvas-wrapper">
@@ -497,6 +364,7 @@
   <script src="javascripts/lib/controllers/target_builder_controller.js"></script>
   <script src="javascripts/lib/controllers/legend_controller.js"></script>
   <script src="javascripts/lib/controllers/global_search_controller.js"></script>
+  <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>

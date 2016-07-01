@@ -3,7 +3,7 @@
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', ($scope, $rootScope, $http, map_tools, map_layers) => {
   // Controller instance variables
   $scope.map_tools = map_tools
-  $scope.optimizationType = 'capex'
+  $scope.optimizationType = 'unconstrained'
   $scope.selectedTool = 'single'
   $scope.modes = {
     'single': null,

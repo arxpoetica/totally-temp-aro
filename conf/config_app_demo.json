@@ -7,6 +7,7 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "ui": {
+    "layout": "default",
     "map_tools": {
       "locations": {
         "view": ["commercial", "residential"],
@@ -25,6 +26,8 @@
       "competitors": {
         "view": ["all", "fiber_segments"],
         "overlay": ["density"]
+      },
+      "target_builder": {
       }
     },
     "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
