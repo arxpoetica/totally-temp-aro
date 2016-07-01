@@ -14,17 +14,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
-import com.altvil.aro.service.optimization.wirecenter.OptimizedWirecenter;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
-import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
@@ -46,15 +43,12 @@ public class OptimizationStrategyServiceImpl implements
 			OptimizationType.class);
 
 	private PlanAnalysisService planAnalysisService;
-	private SerializationService serializationService;
 
 	@Autowired
 	public OptimizationStrategyServiceImpl(
-			PlanAnalysisService planAnalysisService,
-			SerializationService serializationService) {
+			PlanAnalysisService planAnalysisService) {
 		super();
 		this.planAnalysisService = planAnalysisService;
-		this.serializationService = serializationService;
 	}
 
 	@PostConstruct
@@ -240,11 +234,10 @@ public class OptimizationStrategyServiceImpl implements
 		@Override
 		public Collection<PlannedNetwork> evaluateNetworks(
 				Collection<PrunedNetwork> analysis) {
-			analysis.stream().map(this::evaluateNetwork)
+			return analysis.stream().map(this::evaluateNetwork)
 					.filter(Optional::isPresent).map(Optional::get)
 					.collect(Collectors.toList());
 
-			return null;
 		}
 
 		@Override
@@ -271,18 +264,6 @@ public class OptimizationStrategyServiceImpl implements
 
 			return Optional.of(new DefaultPlannedNetwork(planId, plan.get()
 					.getOptimizedNetwork().getNetworkPlan().get()));
-
-		}
-
-		protected Optional<CompositeNetworkModel> toOptimizedWirecenter(
-				WirecenterOptimization<PrunedNetwork> prunedNetwork,
-				Optional<PlanAnalysis> plan) {
-
-			new OptimizedWirecenter(prunedNetwork.getOptimizationRequest(),
-					serializationService.convert(prunedNetwork.getPlanId(),
-							plan.get().getOptimizedNetwork().getNetworkPlan()));
-
-			return null;
 
 		}
 

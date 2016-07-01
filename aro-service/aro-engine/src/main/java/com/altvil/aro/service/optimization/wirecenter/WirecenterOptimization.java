@@ -8,6 +8,8 @@ public interface WirecenterOptimization<T> {
 
 	long getPlanId() ;
 	
+	boolean isInError() ;
+	
 	WirecenterOptimizationRequest getOptimizationRequest() ;
 	OptimizationException getOpitmizationException() ;
 	T getResult() ;

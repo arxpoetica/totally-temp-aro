@@ -17,6 +17,15 @@ public class DefaultOptimizationResult<T> implements WirecenterOptimization<T> {
 		this.wirecenterOptimizationRequest = wirecenterOptimizationRequest;
 		this.optimizedNetworks = optimizedNetworks;
 	}
+	
+	
+
+	@Override
+	public boolean isInError() {
+		return this.optimizationException != null;
+	}
+
+
 
 	public DefaultOptimizationResult(
 			WirecenterOptimizationRequest wirecenterOptimizationRequest,

@@ -21,8 +21,8 @@ import com.altvil.aro.service.optimization.constraints.CoverageConstraints;
 import com.altvil.aro.service.optimization.constraints.IrrConstraints;
 import com.altvil.aro.service.optimization.constraints.NpvConstraints;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
+import com.altvil.aro.service.optimization.master.MasterOptimizationAnalysis;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
-import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationResponse;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
 import com.altvil.enumerations.OptimizationType;
@@ -40,11 +40,11 @@ public class NewOptimizeEndPoint {
 			@RequestBody AroOptimizationPlan aroRequest)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
 
-		MasterOptimizationResponse response = optimizationPlannerService
+		MasterOptimizationAnalysis response = optimizationPlannerService
 				.optimize(toOptimizationPlan(aroRequest)).get();
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
-		mpr.setWireCenterids(response.getUpdates().stream()
+		mpr.setWireCenterids(response.getWirecenters().stream()
 				.map(w -> w.getPlanId())
 				.collect(Collectors.toList()));
 		return mpr;

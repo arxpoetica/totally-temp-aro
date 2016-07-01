@@ -7,6 +7,7 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 public interface PrunedNetwork {
 
 	long getPlanId() ;
+	boolean isEmpty() ;
 	Collection<OptimizedNetwork> getOptimizedNetworks();
 
 }

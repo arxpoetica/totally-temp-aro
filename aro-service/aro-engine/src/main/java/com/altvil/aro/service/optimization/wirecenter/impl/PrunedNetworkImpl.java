@@ -23,6 +23,11 @@ public class PrunedNetworkImpl implements PrunedNetwork {
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return optimizedNetworks.isEmpty();
+	}
+
+	@Override
 	public Collection<OptimizedNetwork> getOptimizedNetworks() {
 		return optimizedNetworks;
 	}
