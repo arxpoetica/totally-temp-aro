@@ -1,0 +1,51 @@
+#map-tools-accordion {
+  transition: width 0.3s ease-in-out;
+}
+
+#map-tools-accordion .panel-heading {
+  background-color: rgb(0, 164, 153);
+  color: white;
+}
+
+#map-tools-accordion .panel+.panel {
+  margin-top: 0;
+}
+
+#map-tools-accordion h2 {
+  margin-top: 0;
+  padding-bottom: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.panel-body {
+  overflow: auto
+}
+
+.left-col-collapsed #map-tools-accordion {
+  width: 50px;
+}
+
+.left-col-expanded #map-tools-accordion {
+  width: 340px;
+}
+
+.left-col-expanded .hide-on-expanded {
+  display: none;
+}
+
+.left-col-collapsed .hide-on-collapsed {
+  display: none;
+}
+
+#map-tools-accordion .panel-heading {
+  max-height: 37px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#financial_profile_controller {
+  left: 400px;
+  top: 47px;
+}

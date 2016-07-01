@@ -8,6 +8,7 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "ui": {
+    "layout": "default",
     "map_tools": {
       "locations": {
         "view": ["commercial", "residential"],

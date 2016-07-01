@@ -1,8 +1,8 @@
-<div ng-controller="target-builder-controller">
+<div>
   <form>
     <p><strong>Optimization type</strong></p>
     <select class="form-control" ng-model="optimizationType" ng-change="optimizationTypeChanged()">
-      <option value="capex">Capex</option>
+      <option value="unconstrained">Capex</option>
       <option value="npv">NPV</option>
     </select>
     <div ng-show="optimizationType === 'npv'" style="margin-top:5px" id="target-builder-budget">

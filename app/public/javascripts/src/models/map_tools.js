@@ -125,14 +125,17 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       name: 'Area Network Planning',
       short_name: 'A',
       icon: 'icon icon-network-planning'
-    },
-    {
+    }
+  ]
+
+  if (!config.ui.map_tools.target_builder.disabled) {
+    tools.available_tools.push({
       id: 'target_builder',
       name: 'Target builder',
       short_name: 'TB',
       icon: 'icon icon-network-planning-targeted'
-    }
-  ]
+    })
+  }
 
   if (config.ARO_CLIENT === 'demo') {
     var tool = tools.available_tools.find((item) => item.id === 'area_network_planning')
