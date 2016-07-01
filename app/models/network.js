@@ -172,24 +172,12 @@ module.exports = class Network {
       towers: 'CellTower'
     }
     var algorithms = {
-      'CAPEX': 'CAPEX',
       'MAX_IRR': 'IRR',
       'TARGET_IRR': 'IRR',
       'BUDGET_IRR': 'IRR',
       'IRR': 'IRR'
     }
-    var endpoints = {
-      'CAPEX': 'recalc',
-      'MAX_IRR': 'optimize',
-      'TARGET_IRR': 'optimize',
-      'BUDGET_IRR': 'optimize',
-      'IRR': 'optimize'
-    }
-    options.algorithm = algorithms[options.algorithm]
-    var endpoint = endpoints[options.algorithm]
-    if (!endpoint) {
-      return Promise.reject(new Error(`No endpoint configured for ${options.algorithm}`))
-    }
+    options.algorithm = algorithms[options.algorithm] || options.algorithm
     var body = {
       planId: plan_id,
       locationTypes: options.locationTypes.map((key) => locationTypes[key]),
@@ -197,7 +185,7 @@ module.exports = class Network {
     }
     var req = {
       method: 'POST',
-      url: config.aro_service_url + `/rest/${endpoint}/masterplan`,
+      url: `${config.aro_service_url}/rest/optimize/masterplan`,
       json: true,
       body: body
     }
