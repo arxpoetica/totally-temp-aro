@@ -14,21 +14,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
-import com.altvil.aro.service.optimization.master.PruningAnalysis;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
-import com.altvil.aro.service.optimization.wirecenter.OptimizedWirecenter;
+import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
+import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
+import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.enumerations.OptimizationType;
 
 @Service
@@ -43,15 +43,12 @@ public class OptimizationStrategyServiceImpl implements
 			OptimizationType.class);
 
 	private PlanAnalysisService planAnalysisService;
-	private SerializationService serializationService;
 
 	@Autowired
 	public OptimizationStrategyServiceImpl(
-			PlanAnalysisService planAnalysisService,
-			SerializationService serializationService) {
+			PlanAnalysisService planAnalysisService) {
 		super();
 		this.planAnalysisService = planAnalysisService;
-		this.serializationService = serializationService;
 	}
 
 	@PostConstruct
@@ -62,7 +59,8 @@ public class OptimizationStrategyServiceImpl implements
 	@SuppressWarnings("unchecked")
 	private <T extends OptimizationConstraints> OptimizationStrategyFactory<T> getFactory(
 			T constraints) {
-		return (OptimizationStrategyFactory<T>) strategyMap.get(constraints.getOptimizationType());
+		return (OptimizationStrategyFactory<T>) strategyMap.get(constraints
+				.getOptimizationType());
 	}
 
 	private <T extends OptimizationConstraints> SpiOptimizationStrategy createSpiOptimizationStrategy(
@@ -108,8 +106,7 @@ public class OptimizationStrategyServiceImpl implements
 	private void init() {
 		register(OptimizationType.BUDGET_IRR, new ThresholdOptizationFactory<>(
 				(plan) -> plan.getIrr()));
-		register(OptimizationType.BUDGET, new ThresholdOptizationFactory<>(
-				(plan) -> plan.getIrr()));
+
 		register(OptimizationType.BUDGET_THRESHHOLD_IRR,
 				new ThresholdOptizationFactory<>((plan) -> plan.getIrr()));
 		register(OptimizationType.IRR, new ThresholdOptizationFactory<>(
@@ -172,8 +169,10 @@ public class OptimizationStrategyServiceImpl implements
 		@Override
 		public SpiOptimizationStrategy createOptimizationStrategy(T constraints) {
 
-			boolean thresholdActive = !Double.isNaN(constraints.getThreshhold()) ;
-			boolean capexActive = !Double.isNaN(constraints.getCapex()) && !Double.isInfinite(constraints.getCapex())   ;
+			boolean thresholdActive = !Double
+					.isNaN(constraints.getThreshhold());
+			boolean capexActive = !Double.isNaN(constraints.getCapex())
+					&& !Double.isInfinite(constraints.getCapex());
 
 			if (thresholdActive && capexActive) {
 				return createBudgetThresholdStrategy(constraints);
@@ -232,11 +231,12 @@ public class OptimizationStrategyServiceImpl implements
 		}
 
 		@Override
-		public Collection<OptimizedWirecenter> evaluateNetworks(
-				PruningAnalysis analysis) {
-			return analysis.getPrunedNetworks().stream()
-					.map(this::evaluateNetwork).filter(Optional::isPresent)
-					.map(Optional::get).collect(Collectors.toList());
+		public Collection<PlannedNetwork> evaluateNetworks(
+				Collection<PrunedNetwork> analysis) {
+			return analysis.stream().map(this::evaluateNetwork)
+					.filter(Optional::isPresent).map(Optional::get)
+					.collect(Collectors.toList());
+
 		}
 
 		@Override
@@ -248,30 +248,35 @@ public class OptimizationStrategyServiceImpl implements
 			return planAnalysis.isValid();
 		}
 
-		protected OptimizedWirecenter toOptimizedWirecenter(
-				PrunedNetwork prunedNetwork, Optional<PlanAnalysis> plan) {
+		protected Optional<PlannedNetwork> toPlannedNetwork(long planId,
+				Optional<PlanAnalysis> plan) {
 
-			return new OptimizedWirecenter(
-					prunedNetwork.getOptimizationRequest(),
-					serializationService.convert(prunedNetwork.getPlanId(),
-							plan.get().getOptimizedNetwork().getNetworkPlan()));
+			if (!plan.isPresent()) {
+				return Optional.empty();
+			}
+
+			Optional<CompositeNetworkModel> p = plan.get()
+					.getOptimizedNetwork().getNetworkPlan();
+			if (!p.isPresent()) {
+				return Optional.empty();
+			}
+
+			return Optional.of(new DefaultPlannedNetwork(planId, plan.get()
+					.getOptimizedNetwork().getNetworkPlan().get()));
 
 		}
 
 		@Override
-		public Optional<OptimizedWirecenter> evaluateNetwork(
+		public Optional<PlannedNetwork> evaluateNetwork(
 				PrunedNetwork prunedNetwork) {
 
 			Collection<PlanAnalysis> plans = prunedNetwork
 					.getOptimizedNetworks().stream()
 					.map(n -> planAnalysisFunctor.apply(n))
 					.filter(PlanAnalysis::isValid).collect(Collectors.toList());
-			
-			Optional<PlanAnalysis> selectedPlan = selectPlan(plans);
 
-			return selectedPlan.isPresent() ? Optional
-					.of(toOptimizedWirecenter(prunedNetwork, selectedPlan))
-					: Optional.empty();
+			return toPlannedNetwork(prunedNetwork.getPlanId(),
+					selectPlan(plans));
 
 		}
 
@@ -288,7 +293,7 @@ public class OptimizationStrategyServiceImpl implements
 				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
 				ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
-			this.thresholdFunction = thresholdFunction ;
+			this.thresholdFunction = thresholdFunction;
 		}
 
 		@Override
@@ -303,13 +308,13 @@ public class OptimizationStrategyServiceImpl implements
 	private class BudgetStrategy<T extends ThresholdBudgetConstraint> extends
 			AbstractOptimizationStrategy<T> {
 
-		private ThesholdFunction thresholdFunction;
+		// private ThesholdFunction thresholdFunction;
 
 		public BudgetStrategy(T optimizationConstraints,
 				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
 				ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
-			this.thresholdFunction = thresholdFunction;
+			// this.thresholdFunction = thresholdFunction;
 		}
 
 		@Override
@@ -379,7 +384,7 @@ public class OptimizationStrategyServiceImpl implements
 
 		@Override
 		protected boolean isValid(PlanAnalysis planAnalysis) {
-			
+
 			return super.isValid(planAnalysis)
 					&& planAnalysis.getBudget() <= optimizationConstraints
 							.getCapex()
@@ -415,11 +420,7 @@ public class OptimizationStrategyServiceImpl implements
 			map.put(OptimizationType.IRR,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getMonthlyRevenueImpact())));
-			
-			map.put(OptimizationType.BUDGET,
-					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
-							.getMonthlyRevenueImpact())));
-			
+
 			map.put(OptimizationType.BUDGET_IRR,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getMonthlyRevenueImpact())));

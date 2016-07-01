@@ -74,6 +74,21 @@ public class PlanServiceImpl implements PlanService {
 		this.vertexFactory = vertexFactory;
 		this.routePlaningService = routePlaningService;
 	}
+	
+
+	@Override
+	public Optional<CompositeNetworkModel> computeNetworkModel(
+			NetworkData networkData,FtthThreshholds constraints)
+			throws PlanException {
+
+		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = (
+				g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(
+				g, s);
+			
+		return computeNetworkModel(networkData, closestFirstSurfaceBuilder, constraints, null) ;
+				
+	}
+
 
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(

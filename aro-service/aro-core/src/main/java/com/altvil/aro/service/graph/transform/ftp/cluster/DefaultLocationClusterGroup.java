@@ -171,7 +171,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				} else {
 					
 					if( currentCluster.getRemainingDemand() >= 6 ) {
-						log.debug("assigned locations = " + currentCluster.getLocations().size() + " " + currentCluster.getRemainingDemand()) ;
+						log.trace("assigned locations = " + currentCluster.getLocations().size() + " " + currentCluster.getRemainingDemand()) ;
 					}
 					
 					

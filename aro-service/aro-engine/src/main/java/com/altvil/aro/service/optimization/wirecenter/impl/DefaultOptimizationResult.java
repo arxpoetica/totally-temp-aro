@@ -1,27 +1,33 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
-import java.util.Collection;
-
 import com.altvil.aro.service.optimization.spi.OptimizationException;
-import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
+import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
-import com.altvil.aro.service.optimize.OptimizedNetwork;
 
-public class DefaultPrunedNetwork implements PrunedNetwork {
+public class DefaultOptimizationResult<T> implements WirecenterOptimization<T> {
 
 	private WirecenterOptimizationRequest wirecenterOptimizationRequest;
-	private Collection<OptimizedNetwork> optimizedNetworks;
+	private T optimizedNetworks;
 	private OptimizationException optimizationException;
 
-	public DefaultPrunedNetwork(
+	public DefaultOptimizationResult(
 			WirecenterOptimizationRequest wirecenterOptimizationRequest,
-			Collection<OptimizedNetwork> optimizedNetworks) {
+			T optimizedNetworks) {
 		super();
 		this.wirecenterOptimizationRequest = wirecenterOptimizationRequest;
 		this.optimizedNetworks = optimizedNetworks;
 	}
+	
+	
 
-	public DefaultPrunedNetwork(
+	@Override
+	public boolean isInError() {
+		return this.optimizationException != null;
+	}
+
+
+
+	public DefaultOptimizationResult(
 			WirecenterOptimizationRequest wirecenterOptimizationRequest,
 			OptimizationException exception) {
 		super();
@@ -45,7 +51,7 @@ public class DefaultPrunedNetwork implements PrunedNetwork {
 	}
 
 	@Override
-	public Collection<OptimizedNetwork> getOptimizedNetworks() {
+	public T getResult() {
 		return optimizedNetworks;
 	}
 

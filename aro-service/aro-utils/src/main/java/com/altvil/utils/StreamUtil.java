@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -19,27 +20,35 @@ import java.util.stream.StreamSupport;
 
 public class StreamUtil {
 
+	public static <S, D> Optional<D> map(Optional<S> optional, Function<S, D> f) {
+		if (!optional.isPresent()) {
+			return Optional.empty();
+		}
+		return Optional.of(f.apply(optional.get()));
+	}
+
 	public static <T> Stream<T> asStream(Iterator<T> itr) {
 		return StreamSupport.stream(
 				Spliterators.spliteratorUnknownSize(itr, Spliterator.ORDERED),
 				false);
 	}
-	
-	public static <T> void forEach(Iterable<T> iterable, Consumer<? super T> action) {
-		for(T v : iterable) {
-			action.accept(v) ;
+
+	public static <T> void forEach(Iterable<T> iterable,
+			Consumer<? super T> action) {
+		for (T v : iterable) {
+			action.accept(v);
 		}
 	}
 
 	@SafeVarargs
-	public static <T> Set<T> asSet(T ... values) {
-		Set<T> result = new HashSet<>(values.length) ;
-		for(T v : values) {
-			result.add(v) ;
+	public static <T> Set<T> asSet(T... values) {
+		Set<T> result = new HashSet<>(values.length);
+		for (T v : values) {
+			result.add(v);
 		}
-		return result ;
+		return result;
 	}
-	
+
 	public static <T> List<T> asList(T[] source) {
 		List<T> result = new ArrayList<T>(source.length);
 
@@ -50,7 +59,8 @@ public class StreamUtil {
 		return result;
 	}
 
-	public static <K, V> Map<K, V> hash(Collection<? extends V> src, Function<V, K> f) {
+	public static <K, V> Map<K, V> hash(Collection<? extends V> src,
+			Function<V, K> f) {
 		HashMap<K, V> result = new HashMap<K, V>(src.size());
 
 		for (V v : src) {
@@ -61,15 +71,15 @@ public class StreamUtil {
 	}
 
 	public static <T> List<T> toList(T[] values) {
-		List<T> result = new ArrayList<T>(values.length) ;
-		
-		for(T v : values) {
-			result.add(v) ;
+		List<T> result = new ArrayList<T>(values.length);
+
+		for (T v : values) {
+			result.add(v);
 		}
-		
-		return result ;
+
+		return result;
 	}
-	
+
 	public static <T> List<T> filter(Collection<T> values,
 			Predicate<T> predicate) {
 		return values.stream().filter(predicate).collect(Collectors.toList());
@@ -90,8 +100,9 @@ public class StreamUtil {
 
 		return result;
 	}
-	
-	public static <T, D> Set<D> mapSet(Collection<T> src, Function<T, D> function) {
+
+	public static <T, D> Set<D> mapSet(Collection<T> src,
+			Function<T, D> function) {
 		Set<D> result = new HashSet<D>(src.size());
 
 		for (T v : src) {
@@ -105,7 +116,7 @@ public class StreamUtil {
 		return value instanceof List ? (List<T>) value
 				: new ArrayList<T>(value);
 	}
-	
+
 	public static List<String> toStringList(String s) {
 		return map(s.split(","), String::trim);
 	}

@@ -396,9 +396,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
         	if( !inited ) {
         		this.inited = true ;
     			return node.initReclc();
-			} else {
-				int x = 10 ;
-			}
+			} 
         	
         	return node ;
 			

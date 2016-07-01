@@ -27,6 +27,7 @@ import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
+import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
 import com.altvil.utils.conversion.OrdinalEntityFactory;
 
@@ -43,23 +44,47 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	@Override
 	public NetworkData getNetworkData(NetworkDataRequest request) {
-		// final long planId = networkConfiguration.getPlanId();
+
 		NetworkData networkData = new NetworkData();
 
+		//TODO Simplify Locations
+		Collection<NetworkAssignment> roadLocations = getNetworkLocations(request) ;
+		networkData.setRoadLocations(roadLocations);
+		networkData.setSelectedRoadLocationIds(toSelectedRoadLocationIds(roadLocations));
+
+		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
+		networkData.setRoadEdges(getRoadEdges(request));
+		
+		return networkData;
+	}
+	
+	private Collection<Long> toSelectedRoadLocationIds(Collection<NetworkAssignment> locations) {
+		return StreamUtil.map(locations, l -> l.getSource().getObjectId()) ;
+	}
+	
+
+	@Override
+	public Collection<NetworkAssignment> getFiberSources(
+			NetworkDataRequest request) {
+		return getFiberSourceNetworkAssignments(request) ;
+	}
+
+
+	@Override
+	public Collection<NetworkAssignment> getNetworkLocations(
+			NetworkDataRequest request) {
 		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(request);
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request);
 		List<Long> selectedRoadLocations = selectedRoadLocationIds(
 				request.getPlanId(), roadLocationByLocationIdMap);
 
-		// TODO MEDIUM Compare performance
-		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
-
+		
 		if (request.getSelectionMode() == LocationSelectionMode.SELECTED_LOCATIONS) {
 			roadLocationByLocationIdMap.keySet().retainAll(
 					selectedRoadLocations);
 		}
 
-		Collection<NetworkAssignment> roadLocations = toValidAssignments(roadLocationByLocationIdMap
+		return toValidAssignments(roadLocationByLocationIdMap
 				.keySet()
 				.stream()
 				.map(result -> {
@@ -77,14 +102,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
 				}));
-
-		networkData.setRoadLocations(roadLocations);
-
-		networkData.setRoadEdges(getRoadEdges(request));
-		networkData.setSelectedRoadLocationIds(selectedRoadLocations);
-
-		return networkData;
 	}
+
+
+
 
 	public NetworkData _getNetworkData(NetworkDataRequest networkConfiguration) {
 		// final long planId = networkConfiguration.getPlanId();

@@ -18,11 +18,12 @@ import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.constraints.CapexConstraints;
 import com.altvil.aro.service.optimization.constraints.CoverageConstraints;
+import com.altvil.aro.service.optimization.constraints.DefaultConstraints;
 import com.altvil.aro.service.optimization.constraints.IrrConstraints;
 import com.altvil.aro.service.optimization.constraints.NpvConstraints;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
+import com.altvil.aro.service.optimization.master.MasterOptimizationAnalysis;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
-import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationResponse;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.aro.service.strategy.StrategyService;
 import com.altvil.enumerations.OptimizationType;
@@ -40,13 +41,12 @@ public class NewOptimizeEndPoint {
 			@RequestBody AroOptimizationPlan aroRequest)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
 
-		MasterOptimizationResponse response = optimizationPlannerService
+		MasterOptimizationAnalysis response = optimizationPlannerService
 				.optimize(toOptimizationPlan(aroRequest)).get();
 
 		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
-		mpr.setWireCenterids(response.getUpdates().stream()
-				.map((update) -> update.getPlanId())
-				.collect(Collectors.toList()));
+		mpr.setWireCenterids(response.getWirecenters().stream()
+				.map(w -> w.getPlanId()).collect(Collectors.toList()));
 		return mpr;
 
 	}
@@ -84,7 +84,7 @@ public class NewOptimizeEndPoint {
 		case IRR:
 		case MAX_IRR:
 		case BUDGET_IRR:
-		case BUDGET :
+		case BUDGET:
 		case TARGET_IRR:
 			return new IrrConstraints(plan.getAlgorithm(),
 					financials.getYears(), financials.getDiscountRate(),
@@ -104,10 +104,13 @@ public class NewOptimizeEndPoint {
 							.getThreshold(), financials.getBudget());
 
 		case CAPEX:
-		default:
 			return new CapexConstraints(OptimizationType.CAPEX,
 					financials.getYears(), financials.getDiscountRate(),
 					Double.NaN, financials.getBudget());
+
+		case UNCONSTRAINED:
+		default:
+			return new DefaultConstraints(OptimizationType.UNCONSTRAINED);
 
 		}
 

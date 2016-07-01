@@ -10,6 +10,10 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 
 public interface PlanService {
+	
+	public Optional<CompositeNetworkModel> computeNetworkModel(NetworkData networkData,
+			FtthThreshholds consraints) throws PlanException;
+	
 	/**
 	 * 
 	 * @param networkData
