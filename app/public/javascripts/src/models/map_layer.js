@@ -246,7 +246,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
           this.addGeoJson(this.data)
           this.data_loaded = true
           $rootScope.$broadcast('map_layer_loaded_data', this)
-          this.configure_feature_styles()
+          this.configureFeatureStyles()
         } else if (this.api_endpoint) {
           var bounds = map.getBounds()
           var params = {
@@ -295,13 +295,15 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
                   }
                 })
               )
+              this.heatmapLayer.setMap(map)
             } else {
               this.addGeoJson(data.feature_collection)
+              this.heatmapLayer && this.heatmapLayer.setMap(null)
             }
             this.metadata = data.metadata
             this.data_loaded = true
             $rootScope.$broadcast('map_layer_loaded_data', this)
-            this.configure_feature_styles()
+            this.configureFeatureStyles()
             // set the layer visible or not again
             this.setVisible(visible)
           })
@@ -331,7 +333,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
       this.loadData()
     }
 
-    configure_feature_styles () {
+    configureFeatureStyles () {
       var data = this.data_layer
       var maxdensity = Number.MIN_VALUE
       var mindensity = Number.MAX_VALUE
@@ -412,6 +414,10 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
       }
     }
 
+    heatmapIsVisible () {
+      return this.heatmapLayer && this.heatmapLayer.getMap()
+    }
+
     toggleVisibility () {
       this.visible ? this.hide() : this.show()
     }
@@ -472,6 +478,11 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
       changes.insertions[type] = []
       changes.deletions[type] = []
       return changes
+    }
+
+    setThreshold (threshold) {
+      this.threshold = threshold || 0
+      this.reloadData()
     }
 
   }

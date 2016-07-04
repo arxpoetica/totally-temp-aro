@@ -27,8 +27,12 @@
   width: 50px;
 }
 
+#left-col-wrapper {
+  width: 420px;
+}
+
 .left-col-expanded #map-tools-accordion {
-  width: 340px;
+  width: 360px;
 }
 
 .left-col-expanded .hide-on-expanded {

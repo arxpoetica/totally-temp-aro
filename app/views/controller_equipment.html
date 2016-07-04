@@ -1,35 +1,121 @@
 <div id="equipment_nodes_controller">
   <h2>View</h2>
 
-  <div ng-repeat="node_type in view_node_types">
-    <div class="checkbox">
-      <label>
-        <input type="checkbox" ng-model="node_type.visible" ng-change="change_node_types_visibility()"> {{node_type.description}}
-      </label>
+  <div class="row">
+    <div class="col-md-2">
+      <p style="margin-top: 10px"><strong>LOB</strong></p>
+    </div>
+    <div class="col-md-5">
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> VZT FTTP
+        </label>
+      </div>
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> VZT Core
+        </label>
+      </div>
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> VZB Owned
+        </label>
+      </div>
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> VZB Leased
+        </label>
+      </div>
+    </div>
+    <div class="col-md-5" style="padding-left: 0">
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> Wireless Owned
+        </label>
+      </div>
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> Wireless Leased
+        </label>
+      </div>
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> XO Owned
+        </label>
+      </div>
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> XO Leased
+        </label>
+      </div>
     </div>
   </div>
 
-  <div ng-repeat="(key, layer) in equipment_layers">
-    <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-hide="layer.hide_in_ui">
-      <label>
-        <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible"> {{layer.name}}
-      </label>
+  <div class="row">
+    <div class="col-md-2">
+      <p style="margin-top: 10px"><strong>Asset Type</strong></p>
+    </div>
+    <div class="col-md-10">
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> Aerial
+        </label>
+      </div>
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> Underground
+        </label>
+      </div>
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> Buried
+        </label>
+      </div>
     </div>
   </div>
 
-  <div>
-    <div class="checkbox">
-      <label>
-        <input type="checkbox" ng-model="showFeederFiber" ng-change="changedFiberVisibility()"> Feeder fiber
-      </label>
+  <div class="row">
+    <div class="col-md-2">
+      <p style="margin-top: 10px"><strong>Assets</strong></p>
     </div>
-  </div>
+    <div class="col-md-10">
+      <div ng-repeat="node_type in view_node_types">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="node_type.visible" ng-change="change_node_types_visibility()"> {{node_type.description}}
+          </label>
+        </div>
+      </div>
 
-  <div>
-    <div class="checkbox">
-      <label>
-        <input type="checkbox" ng-model="showDistributionFiber" ng-change="changedFiberVisibility()"> Distribution fiber
-      </label>
+      <div ng-repeat="(key, layer) in equipment_layers">
+        <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-hide="layer.hide_in_ui">
+          <label>
+            <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible"> {{layer.name}}
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="showFeederFiber" ng-change="changedFiberVisibility()"> Feeder fiber
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="showDistributionFiber" ng-change="changedFiberVisibility()"> Distribution fiber
+          </label>
+        </div>
+      </div>
+
+      <div class="checkbox disabled">
+        <label>
+          <input type="checkbox" disabled> Poles
+        </label>
+      </div>
     </div>
   </div>
 

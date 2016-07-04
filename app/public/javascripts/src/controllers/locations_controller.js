@@ -18,6 +18,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     }
   ]
   $scope.overlay = 'none'
+  $scope.heatmapVisible = false
+  $scope.heatmapOn = true
 
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
@@ -371,4 +373,19 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   }
 
   $rootScope.$on('map_zoom_changed', configure_overlays_visibility)
+
+  $rootScope.$on('map_layer_loaded_data', (e, layer) => {
+    if (layer === locationsLayer) {
+      $scope.heatmapVisible = layer.heatmapIsVisible()
+    }
+  })
+
+  $scope.toggleHeatmap = () => {
+    $scope.heatmapOn = !$scope.heatmapOn
+    if (!$scope.heatmapOn) {
+      locationsLayer.setThreshold(0)
+    } else {
+      locationsLayer.setThreshold(15)
+    }
+  }
 }])
