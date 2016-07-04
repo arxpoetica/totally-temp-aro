@@ -46,7 +46,7 @@ import com.altvil.aro.service.cu.execute.SpiAroExecutorContext;
 import com.altvil.aro.service.cu.key.AroKey;
 import com.altvil.aro.service.cu.resource.CompositeVersion;
 import com.altvil.aro.service.cu.resource.ResourceVersion;
-import com.altvil.aro.service.cu.spi.SpiTrackingCache;
+import com.altvil.aro.service.cu.spi.SpiComputeUnit;
 import com.altvil.aro.service.cu.version.VersionChangedListener;
 import com.altvil.aro.service.cu.version.VersionEvent;
 import com.altvil.aro.service.cu.version.VersionTrackingService;
@@ -256,7 +256,7 @@ public class ComputeUnitServiceImpl  implements ComuteUnitService {
 	}
 
 	private class TrackingCacheImpl<T extends Serializable> implements
-			ComputeUnit<T>, SpiTrackingCache, VersionChangedListener,
+			ComputeUnit<T>, SpiComputeUnit, VersionChangedListener,
 			PreCacheAgent {
 
 		private ExecutorContext<T> executorContext;

@@ -10,7 +10,7 @@ import org.apache.ignite.compute.ComputeTask;
 import com.altvil.aro.service.cu.ComputeUnit;
 import com.altvil.aro.service.cu.ComputeServiceApi;
 import com.altvil.aro.service.cu.cache.query.CacheQuery;
-import com.altvil.aro.service.cu.spi.SpiTrackingCache;
+import com.altvil.aro.service.cu.spi.SpiComputeUnit;
 
 public interface SpiAroExecutorContext {
 	
@@ -19,7 +19,7 @@ public interface SpiAroExecutorContext {
 
 	void executeInGrid(Runnable runnable);
 
-	SpiTrackingCache getBsaExecutor(String name, String beanClassName);
+	SpiComputeUnit getBsaExecutor(String name, String beanClassName);
 	
 	<R extends Serializable> ComputeTask<Collection<CacheQuery>, List<R>> createComputeJob(
 			ComputeUnit<R> executor, Priority priority,

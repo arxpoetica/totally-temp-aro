@@ -22,7 +22,7 @@ import com.altvil.aro.service.cu.cache.query.CacheQuery;
 import com.altvil.aro.service.cu.execute.JobProgressListener;
 import com.altvil.aro.service.cu.execute.Priority;
 import com.altvil.aro.service.cu.execute.SpiAroExecutorContext;
-import com.altvil.aro.service.cu.spi.SpiTrackingCache;
+import com.altvil.aro.service.cu.spi.SpiComputeUnit;
 
 
 @Service
@@ -65,7 +65,7 @@ public class SpiAroExecutorContextImpl implements SpiAroExecutorContext {
 	}
 
 	@Override
-	public SpiTrackingCache getBsaExecutor(String name, String beanClassName) {
+	public SpiComputeUnit getBsaExecutor(String name, String beanClassName) {
 
 		if (!loaderMap.containsKey(beanClassName)) {
 			try {
@@ -79,7 +79,7 @@ public class SpiAroExecutorContextImpl implements SpiAroExecutorContext {
 			}
 		}
 
-		return (SpiTrackingCache) applicationContext.getBean(
+		return (SpiComputeUnit) applicationContext.getBean(
 				ComuteUnitService.class).getBsaExecutor(name);
 	}
 
