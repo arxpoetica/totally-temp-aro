@@ -3,9 +3,8 @@ package com.altvil.aro.service.roic.analysis.model;
 import java.util.Collection;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
-import com.altvil.aro.service.roic.analysis.op.Transformer;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.model.NetworkType;
 
@@ -36,7 +35,11 @@ public interface RoicNetworkModel extends RoicAnalysis {
 	
 
 
+	RoicComponent getRoicComponent(ComponentType ct) ;
 	RoicComponent getNetworkCurves();
+	
+	
+
 	Collection<RoicComponent> getRoicComponents() ;
 	
 	Collection<RoicNetworkModel> getBaseModels();
@@ -47,11 +50,10 @@ public interface RoicNetworkModel extends RoicAnalysis {
 
 	AnalysisRow getAnalysisRow(CurveIdentifier id);
 	
+	
+	
 
 	RoicComponent getEntityAnalysis(ComponentType type);
 
-	Transformer<RoicNetworkModel> add(NetworkAnalysisType type);
-
-	RoicNetworkModel minus(RoicNetworkModel other);
 
 }

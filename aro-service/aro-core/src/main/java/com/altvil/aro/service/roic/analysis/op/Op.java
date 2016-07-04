@@ -1,8 +1,8 @@
 package com.altvil.aro.service.roic.analysis.op;
 
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.op.MonthlyHouseHoldsConnectedPercent.Params;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
@@ -19,7 +19,35 @@ public class Op {
 		return new AnalysisCurve(new DefaultNetworkPenetration(startShare,
 				endShare, rate));
 	}
+
+	public static StreamFunction divide(CurveIdentifier lhs, CurveIdentifier rhs) {
+		return new BinaryOp(lhs, rhs) {
+			@Override
+			protected double doCalc(double lhs, double rhs) {
+
+				if (rhs == 0) {
+					return 0;
+				}
+
+				return lhs / rhs;
+			}
+		};
+
+	}
 	
+	@FunctionalInterface
+	public interface BinaryFunc {
+		double calc(double lhs, double rhs) ;
+	}
+	
+	public static StreamFunction binaryOp(CurveIdentifier lhs, CurveIdentifier rhs, BinaryFunc f) {
+		return new BinaryOp(lhs, rhs) {
+			@Override
+			protected double doCalc(double lhs, double rhs) {
+				return f.calc(lhs, rhs) ;
+			}
+		};
+	}
 
 	public static StreamFunction cashFlow(CurveIdentifier revenueId, CurveIdentifier maintenanceId,
 			CurveIdentifier opExId, CurveIdentifier newConnectionsId,
@@ -49,6 +77,15 @@ public class Op {
 			}
 		};
 	}
+	
+	public static StreamFunction ref(CurveIdentifier id) {
+		return new UnaryRef(id) {
+			@Override
+			protected double doCalc(double val) {
+				return val;
+			}
+		};
+	}
 
 	public static StreamFunction connectedHouseHoldsYearly(
 			int timeToConnection, double fairShare, double churnRate,
@@ -57,12 +94,25 @@ public class Op {
 				fairShare, churnRate, entityCount);
 	}
 
-	public static StreamFunction times(CurveIdentifier id, CurveIdentifier id2) {
-		return new TimesStreamFunction(id, id2);
+	public static StreamFunction multiply(CurveIdentifier id, CurveIdentifier id2) {
+		return new BinaryOp(id, id2) {
+			@Override
+			protected double doCalc(double lhs, double rhs) {
+				return lhs * rhs;
+			}
+
+		};
 	}
 
-	public static StreamFunction times(CurveIdentifier id, double constValue) {
-		return new ValueTimesConstantOp(id, constValue);
+
+	public static StreamFunction multiply(CurveIdentifier id, double constValue) {
+		return new UnaryRef(id) {
+			@Override
+			protected double doCalc(double val) {
+				return val * constValue ;
+			}
+			
+		} ;
 	}
 
 	public static StreamFunction monthlyConnectedHouseHolds(double r,

@@ -1,5 +1,6 @@
 package com.altvil.aro.service.roic.analysis;
 
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
 import com.altvil.aro.service.roic.model.NetworkType;
 
 public interface PeriodAnalysis {

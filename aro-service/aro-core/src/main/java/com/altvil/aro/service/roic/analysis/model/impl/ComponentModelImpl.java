@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.calc.StreamModel;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 import com.altvil.aro.service.roic.analysis.registry.impl.AbstractCurveRegistry;
@@ -73,11 +73,10 @@ public class ComponentModelImpl extends AbstractCurveRegistry implements
 	}
 
 	
-	@Override
-	public RoicComponent minus(RoicComponent other) {
-		return new ComponentModelImpl(analysisPeriod, type,
-				streamModel.minus(other.getStreamModel()));
-	}
+//	private RoicComponent minus(RoicComponent other) {
+//		return new ComponentModelImpl(analysisPeriod, type,
+//				streamModel.minus(other.getStreamModel()));
+//	}
 
 //	private RoicComponent add(Collection<RoicComponent> others) {
 //		

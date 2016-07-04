@@ -2,7 +2,7 @@ package com.altvil.aro.service.roic;
 
 import java.util.Collection;
 
-import com.altvil.aro.service.roic.analysis.RowReference;
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
 
 public interface RoicQueryService {
 	

@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.roic.RoicQueryService;
 import com.altvil.aro.service.roic.RoicService;
-import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
-import com.altvil.aro.service.roic.analysis.model.builder.DefaultAnalyisRow;
-import com.altvil.aro.service.roic.analysis.model.builder.DefaultRowReference;
+import com.altvil.aro.service.roic.analysis.model.curve.DefaultAnalyisRow;
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
+import com.altvil.aro.service.roic.analysis.model.impl.DefaultRowReference;
 import com.altvil.aro.service.roic.analysis.registry.impl.ScopedCurveIdentifier;
 
 @Service

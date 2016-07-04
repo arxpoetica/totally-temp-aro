@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.calc.StreamModel;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 
 public interface RoicComponent extends RoicAnalysis {
@@ -29,6 +29,6 @@ public interface RoicComponent extends RoicAnalysis {
 	
 	RoicComponent and(Set<CurveIdentifier> ids) ;
 	
-	RoicComponent minus(RoicComponent other) ;
+	//RoicComponent minus(RoicComponent other) ;
 	
 }

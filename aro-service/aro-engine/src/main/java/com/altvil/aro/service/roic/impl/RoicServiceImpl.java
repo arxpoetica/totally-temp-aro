@@ -1,12 +1,14 @@
 package com.altvil.aro.service.roic.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,31 +23,30 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.roic.RoicService;
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisService;
-import com.altvil.aro.service.roic.analysis.model.RoicConstants;
+import com.altvil.aro.service.roic.analysis.builder.RoicConstants;
+import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilderService;
+import com.altvil.aro.service.roic.analysis.builder.network.RoicInputs;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
-import com.altvil.aro.service.roic.analysis.model.builder.RoicInputs;
 
 @Service
 public class RoicServiceImpl implements RoicService {
 
-	private AnalysisService analysisService;
+	private RoicBuilderService roicBuilderService;
 	private NetworkPlanRepository planRepostory;
 	private NetworkNodeRepository networkNodeRepository;
-	private CostService costService ;
+	private CostService costService;
 
 	private SuperSimpleCache cache;
 
 	@Autowired
-	public RoicServiceImpl(AnalysisService analysisService,
+	public RoicServiceImpl(RoicBuilderService roicBuilderService,
 			NetworkPlanRepository planRepostory,
-			NetworkNodeRepository networkNodeRepository,
-			CostService costService) {
+			NetworkNodeRepository networkNodeRepository, CostService costService) {
 		super();
-		this.analysisService = analysisService;
+		this.roicBuilderService = roicBuilderService;
 		this.planRepostory = planRepostory;
 		this.networkNodeRepository = networkNodeRepository;
-		this.costService = costService ;
+		this.costService = costService;
 
 		cache = new SuperSimpleCache();
 	}
@@ -59,45 +60,58 @@ public class RoicServiceImpl implements RoicService {
 	public RoicModel getRoicModel(long planId) {
 
 		NetworkPlan plan = planRepostory.findOne(planId);
-		if (plan instanceof MasterPlan) {
-			List<WirecenterPlan> childPlans = planRepostory
-					.queryChildPlans(planId);
-			if (childPlans.size() > 0) {
 
-				Optional<WirecenterPlan> wp = childPlans.stream()
-						.findFirst();
-				if (wp.isPresent()) {
-					return getWirecenterRoicModel(wp.get().getId());
-				}
+		Optional<RoicModel> m = (plan instanceof MasterPlan) ? getMasterRoicModel((MasterPlan) plan)
+				: getWirecenterRoicModel((WirecenterPlan) plan);
 
-			}
-			return null;
-		}
-
-		return getWirecenterRoicModel(planId);
-
+		return m.isPresent() ? m.get() : null;
 	}
 
-	private RoicModel getWirecenterRoicModel(long planId) {
+	private <T extends NetworkPlan> Optional<RoicModel> getRoicModel(T plan,
+			Supplier<Optional<RoicModel>> s) {
+		Long planId = plan.getId();
 
-		RoicModel model = cache.get(planId);
+		Optional<RoicModel> model = cache.get(planId);
 		if (model == null) {
-			cache.write(planId, model = loadRoic(planId));
+			cache.write(planId, model = s.get());
 		}
 
 		return model;
 	}
 
-	
+	private Optional<RoicModel> getMasterRoicModel(MasterPlan plan) {
+		return getRoicModel(plan, () -> loadMasterRoicModel(plan));
+	}
 
-	private RoicModel loadRoic(Long planId) {
-		RoicInputs copperInputs = RoicInputs.updateInputs(RoicConstants.CopperInputs,
-				getTotalDemand(planId), 0);
+	private Optional<RoicModel> getWirecenterRoicModel(WirecenterPlan plan) {
+		return getRoicModel(plan, () -> Optional.of(loadRoic(plan)));
+	}
 
-		RoicInputs fiberInputs = RoicInputs.updateInputs(RoicConstants.FiberConstants,
-				getLocationDemand(planId), getCapex(planId));
+	private Optional<RoicModel> loadMasterRoicModel(MasterPlan plan) {
 
-		return analysisService.createRoicModelBuilder()
+		Collection<RoicModel> models = planRepostory
+				.queryChildPlans(plan.getId()).stream().map(this::loadRoic)
+				.collect(Collectors.toList());
+
+		if (models.size() == 0) {
+			return Optional.empty();
+		}
+
+		return Optional.of(roicBuilderService.aggregate().addAll(models).sum());
+	}
+
+	private RoicModel loadRoic(WirecenterPlan plan) {
+
+		long planId = plan.getId();
+
+		RoicInputs copperInputs = RoicInputs.updateInputs(
+				RoicConstants.CopperInputs, getTotalDemand(planId), 0);
+
+		RoicInputs fiberInputs = RoicInputs.updateInputs(
+				RoicConstants.FiberConstants, getLocationDemand(planId),
+				getCapex(planId));
+
+		return roicBuilderService.buildModel()
 				.setAnalysisPeriod(new AnalysisPeriod(2016, 15))
 				.addRoicInputs(copperInputs).addRoicInputs(fiberInputs).build();
 
@@ -119,8 +133,6 @@ public class RoicServiceImpl implements RoicService {
 		return costService.getTotalPlanCost(planId);
 	}
 
-	
-	
 	private static class ObjectHolder<T> {
 		private long lastTouched;
 		private T value;
@@ -139,7 +151,7 @@ public class RoicServiceImpl implements RoicService {
 
 	private static class SuperSimpleCache {
 
-		private Map<Long, ObjectHolder<RoicModel>> map = new HashMap<>();
+		private Map<Long, ObjectHolder<Optional<RoicModel>>> map = new HashMap<>();
 		private Timer timer;
 
 		public SuperSimpleCache() {
@@ -157,19 +169,19 @@ public class RoicServiceImpl implements RoicService {
 		private synchronized void reap() {
 			long time = System.currentTimeMillis();
 			for (Long id : new ArrayList<>(map.keySet())) {
-				ObjectHolder<RoicModel> m = map.get(id);
+				ObjectHolder<Optional<RoicModel>> m = map.get(id);
 				if (m.isStale(time)) {
 					map.remove(id);
 				}
 			}
 		}
 
-		public synchronized RoicModel get(Long id) {
-			ObjectHolder<RoicModel> h = map.get(id);
+		public synchronized Optional<RoicModel> get(Long id) {
+			ObjectHolder<Optional<RoicModel>> h = map.get(id);
 			return (h == null) ? null : h.value;
 		}
 
-		public synchronized void write(Long id, RoicModel model) {
+		public synchronized void write(Long id, Optional<RoicModel> model) {
 			map.put(id, new ObjectHolder<>(model));
 		}
 

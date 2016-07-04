@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.roic.RoicExportService;
 import com.altvil.aro.service.roic.RoicQueryService;
-import com.altvil.aro.service.roic.analysis.RowReference;
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
 import com.altvil.utils.StreamUtil;
 
 @RestController

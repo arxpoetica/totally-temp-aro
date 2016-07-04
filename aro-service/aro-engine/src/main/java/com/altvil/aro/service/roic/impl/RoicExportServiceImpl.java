@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.roic.RoicExportService;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.RowReference;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
 
 @Service
 public class RoicExportServiceImpl implements RoicExportService {

@@ -3,7 +3,7 @@ package com.altvil.aro.service.roic.analysis.registry.impl;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;

@@ -5,12 +5,10 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
-import com.altvil.aro.service.roic.analysis.op.ModelOp;
-import com.altvil.aro.service.roic.analysis.op.Transformer;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.impl.DefaultContainerRegistry;
 
@@ -20,23 +18,21 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 	private NetworkAnalysisType type;
 	private AnalysisPeriod analysisPeriod;
 	private Map<ComponentType, RoicComponent> map;
-	private RoicComponent networkCurves;
-
+	
 	private Collection<RoicNetworkModel> baseModels;
 
 	public RoicNetworkModelImpl(NetworkAnalysisType type,
 			AnalysisPeriod analysisPeriod,
-			Map<ComponentType, RoicComponent> map, RoicComponent networkCurves,
+			Map<ComponentType, RoicComponent> map,
 			Collection<RoicNetworkModel> baseModels) {
 		super(type.name());
 		this.type = type;
 		this.analysisPeriod = analysisPeriod;
 		this.map = map;
-		this.networkCurves = networkCurves;
 		this.baseModels = baseModels;
 
 		add(map.values());
-		add(networkCurves);
+		//add(networkCurves);
 		// add(baseModels);
 
 	}
@@ -48,8 +44,15 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 
 	public RoicNetworkModelImpl(NetworkAnalysisType type,
 			AnalysisPeriod analysisPeriod,
-			Map<ComponentType, RoicComponent> map, RoicComponent networkCurves) {
-		this(type, analysisPeriod, map, networkCurves, new ArrayList<>());
+			Map<ComponentType, RoicComponent> map) {
+		this(type, analysisPeriod, map, new ArrayList<>());
+	}
+	
+	
+
+	@Override
+	public RoicComponent getRoicComponent(ComponentType ct) {
+		return map.get(ct) ;
 	}
 
 	@Override
@@ -76,19 +79,17 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 	public AnalysisRow getAnalysisRow(ComponentType type, CurveIdentifier id) {
 		return map.get(type).getAnalysisRow(id);
 	}
-
-	@Override
-	public AnalysisRow getAnalysisRow(CurveIdentifier id) {
-		return networkCurves.getAnalysisRow(id);
-	}
+	
 
 	@Override
 	public RoicComponent getNetworkCurves() {
-		return networkCurves;
+		return map.get(ComponentType.network);
 	}
-	
-	
-	
+
+	@Override
+	public AnalysisRow getAnalysisRow(CurveIdentifier id) {
+		throw new RuntimeException("Operation not supported") ;
+	}
 	
 	
 /*
@@ -156,15 +157,15 @@ public class RoicNetworkModelImpl extends DefaultContainerRegistry implements
 	}
 	*/
 
-	@Override
-	public Transformer<RoicNetworkModel> add(NetworkAnalysisType type) {
-		return ModelOp.sumRoicNetworkModels(type).add(this) ;
-		
-	}
+//	@Override
+//	public Transformer<RoicNetworkModel> add(NetworkAnalysisType type) {
+//		return CurveOp.sumRoicNetworkModels(type).add(this) ;
+//		
+//	}
 
-	@Override
-	public RoicNetworkModel minus(RoicNetworkModel other) {
-		return ModelOp.minus(this, other) ;
-	}
+//	@Override
+//	public RoicNetworkModel minus(RoicNetworkModel other) {
+//		return ModelOp.minus(this, other) ;
+//	}
 
 }

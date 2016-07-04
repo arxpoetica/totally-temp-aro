@@ -9,5 +9,5 @@ public class AroServiceObjectMapper extends HibernateAwareObjectMapper {
 	public AroServiceObjectMapper() {
 		registerModule(new AroServiceModule());
 		configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-			}
+	}
 }

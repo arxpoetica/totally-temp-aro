@@ -5,12 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
-import com.altvil.aro.service.roic.analysis.model.builder.DefaultRowReference;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.roic.analysis.registry.CurvePath;
 import com.altvil.aro.service.roic.analysis.registry.CurveRegistry;
@@ -43,7 +42,10 @@ public class RoicModelImpl extends DefaultContainerRegistry implements
 		return map.get(type);
 	}
 	
-	
+	@Override
+	public Collection<RoicNetworkModel> getRoicNetworkModels() {
+		return map.values() ;
+	}
 
 	@Override
 	public Collection<String> getCurvePaths() {

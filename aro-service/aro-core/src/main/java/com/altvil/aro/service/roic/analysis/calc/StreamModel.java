@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.model.RoicAnalysis;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 
 public interface StreamModel extends RoicAnalysis {
@@ -16,11 +17,12 @@ public interface StreamModel extends RoicAnalysis {
 	
 	AnalysisRow getAnalysisRow(CurveIdentifier id) ;
 	Collection<AnalysisRow> getAnalysisRow() ;
+	Collection<RowReference> getCurveReferences() ;
 	
-	StreamModel add(Collection<StreamModel> other) ;
-	StreamModel add(StreamModel other) ;
-	StreamModel minus(StreamModel other) ;
+	StreamAssembler modify() ;
+	
 	StreamModel mask(Set<CurveIdentifier> ids) ;
+	StreamModel notIn(Set<CurveIdentifier> ids) ;
 	
 	
 }

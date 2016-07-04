@@ -3,12 +3,12 @@ package com.altvil.test.roic;
 import org.junit.Test;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.ResolveContext;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.calc.StreamModel;
 import com.altvil.aro.service.roic.analysis.calc.impl.StreamAssemblerImpl;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.vividsolutions.jts.util.Assert;
 

@@ -30,6 +30,7 @@ public class DefaultContainerRegistry extends AbstractCurveRegistry implements
 		map.put(cr.getNameSpace(), cr);
 	}
 
+
 	public void add(Collection<? extends CurveRegistry> subContainers) {
 		subContainers.forEach(this::add);
 	}

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
 
-import com.altvil.aro.service.roic.analysis.RowReference;
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
 
 public interface RoicExportService {
 

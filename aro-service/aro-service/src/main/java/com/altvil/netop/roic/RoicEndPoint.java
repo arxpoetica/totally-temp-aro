@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.roic.RoicService;
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.calc.AnalysisCode;
+import com.altvil.aro.service.roic.analysis.builder.config.AnalysisCode;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 

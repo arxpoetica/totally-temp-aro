@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
-import com.altvil.aro.service.roic.analysis.AnalysisRow;
-import com.altvil.aro.service.roic.analysis.RowReference;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.ResolveContext;
 import com.altvil.aro.service.roic.analysis.calc.ResultStream;
@@ -16,26 +14,59 @@ import com.altvil.aro.service.roic.analysis.calc.StreamAccessor;
 import com.altvil.aro.service.roic.analysis.calc.StreamAssembler;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.calc.StreamModel;
+import com.altvil.aro.service.roic.analysis.model.curve.AnalysisRow;
+import com.altvil.aro.service.roic.analysis.model.curve.RowReference;
+import com.altvil.aro.service.roic.analysis.op.Op;
 import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 import com.altvil.utils.StreamUtil;
 
 public class StreamAssemblerImpl implements StreamAssembler {
 
-	private AnalysisPeriod analysisPeriod ;
-
+	public static StreamAssembler create(AnalysisPeriod period, Map<CurveIdentifier, StreamFunction> funcMap) {
+		Map<CurveIdentifier, StreamFunction> clonedMap = new HashMap<>() ;
+		clonedMap.putAll(funcMap);
+		return new StreamAssemblerImpl(clonedMap) ;
+	}
+	
+	public static StreamAssembler create() {
+		return new StreamAssemblerImpl() ;
+	}
+	
+	
+	private AnalysisPeriod analysisPeriod;
+	
 	private Map<CurveIdentifier, StreamFunction> funcMap = new HashMap<>();
 	private List<CurveIdentifier> outputCurves = new ArrayList<>();
 
 	
+
+	
+	public StreamAssemblerImpl(Map<CurveIdentifier, StreamFunction> funcMap) {
+		super();
+		this.funcMap = funcMap;
+	}
+
+	public StreamAssemblerImpl() {
+		this(new HashMap<>());
+	}
+
 	@Override
 	public StreamAssembler setAnalysisPeriod(AnalysisPeriod period) {
-		this.analysisPeriod = period ;
+		this.analysisPeriod = period;
 		return this;
 	}
 
 	@Override
 	public StreamAssembler add(CurveIdentifier id, StreamFunction f) {
 		funcMap.put(id, f);
+		return this;
+	}
+
+	@Override
+	public StreamAssembler add(StreamModel sm) {
+		for (CurveIdentifier id : sm.getCurveIdentifiers()) {
+			add(id, Op.constCurve(sm.getAnalysisRow(id)));
+		}
 		return this;
 	}
 
@@ -48,8 +79,9 @@ public class StreamAssemblerImpl implements StreamAssembler {
 	@Override
 	public StreamModel resolveAndBuild() {
 
-		return new RoicBuilder(analysisPeriod.getStartYear(), analysisPeriod.getPeriods(),
-				new Resolver(funcMap).resolve()).buildAndRun(outputCurves);
+		return new RoicBuilder(analysisPeriod.getStartYear(),
+				analysisPeriod.getPeriods(), new Resolver(funcMap).resolve())
+				.buildAndRun(outputCurves);
 
 	}
 
@@ -131,15 +163,15 @@ public class StreamAssemblerImpl implements StreamAssembler {
 		}
 
 		private Binding resolveBinding(CurveIdentifier id) {
-			
+
 			Binding b = resolved.get(id);
 			if (b == null) {
 				StreamFunction f = funcMap.get(id);
-				
-				if( f == null ) {
-					throw new RuntimeException("No Function defined for " + id) ;
+
+				if (f == null) {
+					throw new RuntimeException("No Function defined for " + id);
 				}
-				
+
 				f.resolve(this);
 				resolved.put(id, b = createBinding(f));
 			}
@@ -160,21 +192,16 @@ public class StreamAssemblerImpl implements StreamAssembler {
 
 		private CurveIdentifier curveId;
 		private double value[];
-		
 
 		public Row(CurveIdentifier curveId, int size) {
 			this.curveId = curveId;
 			this.value = new double[size];
 		}
-		
-		
 
 		@Override
 		public double[] getRawData() {
 			return value;
 		}
-
-
 
 		public void setValue(int period, double v) {
 			value[period] = v;
@@ -265,7 +292,6 @@ public class StreamAssemblerImpl implements StreamAssembler {
 
 	}
 
-
 	private static class RoicBuilder {
 
 		private int startYear;
@@ -286,7 +312,8 @@ public class StreamAssemblerImpl implements StreamAssembler {
 		public StreamModel buildAndRun(List<CurveIdentifier> ids) {
 			List<RowBinding> rowBindings = bindRows(ids);
 			run(rowBindings);
-			return new StreamModelImpl(new AnalysisPeriod(startYear, size), resolveRows(rowBindings));
+			return new StreamModelImpl(new AnalysisPeriod(startYear, size),
+					resolveRows(rowBindings));
 		}
 
 		private Map<CurveIdentifier, AnalysisRow> resolveRows(
