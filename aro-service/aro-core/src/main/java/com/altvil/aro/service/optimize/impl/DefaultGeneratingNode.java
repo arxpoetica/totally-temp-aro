@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage.Accumulator;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.optimize.model.EquipmentAssignment;
@@ -36,6 +36,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	private FiberProducer fiberProducer;
 	private List<GeneratingNode> children;
 	private int recalcMode = 0 ;
+	private double score ;
 	
 	protected DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment,
@@ -49,10 +50,23 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		this.parent = parent;
 		this.children = children;
 		this.directCoverage = equipmentAssigment.getDirectCoverage(ctx);
+		
+		//log.info("direct coverage = " + directCoverage.getDemand());
 
 	}
+	
+	
 
 	
+
+	@Override
+	public boolean isSourceEquipment() {
+		return this.getEquipmentAssignment().isSourceEquipment() || this.getEquipmentAssignment().isRoot() ;
+	}
+
+
+
+
 
 	@Override
 	public AnalysisContext getAnalysisContext() {
@@ -72,6 +86,11 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	public DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment, FiberAssignment fiberAssignment, DefaultGeneratingNode parent) {
 		this(ctx, equipmentAssigment, fiberAssignment, parent, new ArrayList<>());
+	}
+	
+	private void add(GeneratingNode node) {
+		children.add(node) ;
+		((DefaultGeneratingNode) node).parent = this ;
 	}
 
 	public static Builder build(AnalysisContext ctx,
@@ -101,6 +120,9 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		 * if (getEquipmentAssignment().rebuildNetwork(this, ctx)) {
 		 * ctx.rebuildRequired(this); } else {
 		 */
+		
+		log.trace("remove {}", this.getEquipmentAssignment().getClass().getName());
+
 		try {
 			recalcMode++ ;
 			 new ArrayList<>(children).forEach(GeneratingNode::remove);
@@ -126,6 +148,10 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		this.fiberConsumer = aggregateIncomingFiberStrands(directCoverage);
 		this.fiberProducer = this.equipmentAssigment.createFiberProducer(ctx,
 				this.getFiberAssignment().getFiberType(), fiberConsumer);
+		
+		if( fiberProducer == null ) {
+			throw new NullPointerException() ;
+		}
 
 		this.coverage = calcFiberCoverage(children);
 		
@@ -135,6 +161,9 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		double childrenCapex = getChildren().stream()
 				.mapToDouble(GeneratingNode::getCapex).sum();
 		
+//		System.out.println("coverage = " + coverage) ;
+//		System.out.println("coverage = " + coverage) ;
+//		
 		
 		if( log.isTraceEnabled() ) {
 			log.trace("Capex " + nodeCapex + " => "
@@ -144,6 +173,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		}
 
 		this.capex = nodeCapex + childrenCapex;
+		
+		this.score = ctx.getScoringStrategy().score(this) ;
 
 	}
 
@@ -263,7 +294,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public double getScore() {
-		return ctx.getScoringStrategy().score(this) ;
+		return this.score ;
 	}
 
 	@Override
@@ -323,10 +354,18 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	public boolean isJunctionNode() {
 		return equipmentAssigment == null ? false : equipmentAssigment.isJunctionNode();
 	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("capex", capex)
+				.append("coverage", coverage).append("directCoverage", directCoverage)
+				.append("equipmentAssignment", equipmentAssigment).append("fiberAssignment", fiberAssignment)
+				.append("hasParent", parent != null).append("children", children).toString();
+	}
 
 	public static class BuilderImpl implements Builder {
 
 		private DefaultGeneratingNode node;
+		private boolean inited = false ;
 
 		//private List<DefaultGeneratingNode> unresolvedNodes ;
 
@@ -335,63 +374,34 @@ public class DefaultGeneratingNode implements GeneratingNode {
 			this.node = node;
 		}
 		
-
-
 		@Override
-		public boolean isInitMode() {
-			return false;
-		}
-
-
-
-		@Override
-		public void setInitMode(boolean mode) {
-		}
-
-
-
-		@Override
-		public Builder addCompositeChild(FiberAssignment fiberAssignment) {
-			return new CompositeNodeBuilder(new CompositeGeneratingNode(
-					node.getAnalysisContext(), new NoEquipment(), fiberAssignment, node));
+		public GeneratingNode getGeneratingNode() {
+			build() ;
+			return node ;
 		}
 
 		@Override
-		public GraphEdgeAssignment getParentAssignment() {
-			GeneratingNode parentNode = node.getParent() ;
-			if( parentNode != null ) {
-				EquipmentAssignment assignment = parentNode
-						.getEquipmentAssignment();
-				if( assignment != null ) {
-					return assignment.getGraphAssignment() ;
-				}
-			}
-			return null ;
+		public void addChild(Builder child) {
+			node.add(child.getGeneratingNode()) ;
 		}
 
 		@Override
-		public GraphEdgeAssignment getAssignment() {
-			EquipmentAssignment assignment = node.getEquipmentAssignment() ;
-			if( assignment != null ) {
-				return assignment.getGraphAssignment() ;
-			}
-			return null ;
+		public void addChildren(Collection<Builder> children) {
+			children.forEach(this::addChild);
 		}
 
-		
+				
         @Override
 		public GeneratingNode build() {
-			return node.initReclc();
+        	if( !inited ) {
+        		this.inited = true ;
+    			return node.initReclc();
+			} 
+        	
+        	return node ;
+			
+        
         }
-
-
-
-		@Override
-		public Builder addChild(FiberAssignment fiberAssignment,
-				EquipmentAssignment equipment) {
-			return new BuilderImpl(new DefaultGeneratingNode(node.ctx,
-					equipment, fiberAssignment, node));
-		}
 
 	}
 

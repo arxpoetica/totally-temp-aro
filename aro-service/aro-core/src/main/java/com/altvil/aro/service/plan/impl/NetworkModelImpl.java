@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphModel;
@@ -112,5 +114,8 @@ public class NetworkModelImpl implements NetworkModel {
 			GraphAssignment ga) {
 		return distributionFiber.get(ga);
 	}
-
+	
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
 }

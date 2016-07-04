@@ -2,6 +2,10 @@ package com.altvil.aro.service.graph.model;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 
@@ -50,5 +54,21 @@ public class NetworkData {
 
 	public void setSelectedRoadLocationIds(Collection<Long> selectedRoadLocationIds) {
 		this.selectedRoadLocationIds = selectedRoadLocationIds;
+	}
+
+	public Collection<NetworkAssignment> getSelectedRoadLocations() {
+		if (selectedRoadLocationIds == null || selectedRoadLocationIds.isEmpty() || roadLocations == null) {
+			return Collections.emptyList();
+		}
+		
+		return roadLocations.stream().filter((rl) -> selectedRoadLocationIds.contains(rl.getSource().getObjectId())).collect(Collectors.toList());
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("fiberSources", fiberSources)
+		.append("roadEdges", roadEdges)
+		.append("roadLocations", roadLocations)
+		.append("selectedRoadLocationIds", selectedRoadLocationIds)
+		.toString();
 	}
 }

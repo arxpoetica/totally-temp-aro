@@ -1,7 +1,7 @@
 /* global app google map _ encodeURIComponent config document $ */
 'use strict'
 
-app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
+app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
   var plan = null
   $rootScope.$on('plan_selected', (e, p) => {
     plan = p
@@ -181,7 +181,6 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
     selectFeature (feature) {
       this.data_layer.add(feature)
       feature.setProperty('selected', true)
-      console.log('selected!')
     }
 
     deselectFeature (feature) {
@@ -265,10 +264,18 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools) => {
           var api_endpoint = this.api_endpoint
                                 .replace(/\:plan_id/g, (plan && plan.id) || 'none')
                                 .replace(/\:client_carrier_name/g, carrier)
+
+          if (this._canceler) {
+            this._canceler.promise.canceled = true
+            this._canceler.resolve()
+            this._canceler = null
+          }
+          this._canceler = $q.defer()
           $http({
             url: api_endpoint,
             method: 'GET',
-            params: params
+            params: params,
+            timeout: this._canceler.promise
           })
           .success((response) => {
             this.is_loading = false

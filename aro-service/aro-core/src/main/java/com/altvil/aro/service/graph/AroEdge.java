@@ -1,5 +1,6 @@
 package com.altvil.aro.service.graph;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -11,8 +12,8 @@ public class AroEdge<T> extends DefaultWeightedEdge {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private Long gid;
-	private T value ;
+	private Long			  gid;
+	private T				  value;
 
 	public GraphNode getSourceNode() {
 		return (GraphNode) super.getSource();
@@ -21,16 +22,15 @@ public class AroEdge<T> extends DefaultWeightedEdge {
 	public GraphNode getTargetNode() {
 		return (GraphNode) super.getTarget();
 	}
-	
+
 	@Override
 	public double getWeight() {
 		// NOTE: As of May 2016 the edge's weight is set to the length of the edge in meters by
 		// com.altvil.aro.service.graph.builder.AbstractNetworkBuilder.add(GraphNode, GraphNode, GeoSegment)
-		
+
 		return super.getWeight();
 	}
-	
-	
+
 	public T getValue() {
 		return value;
 	}
@@ -49,7 +49,9 @@ public class AroEdge<T> extends DefaultWeightedEdge {
 
 	@Override
 	public String toString() {
-		return "(" + getSource() + " : " + getTarget() + "):" + this.getWeight() + " ... " + value.toString() ;
+		return new ToStringBuilder(this).append("gid", gid).append("source", getSourceNode())
+				.append("target", getTargetNode()).append("weight", getWeight()).append("target", getValue())
+				.toString();
 	}
 
 }

@@ -39,6 +39,18 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 			+ "join aro.edges e on e.gid = ll.gid \n"
 			+ "order by gid, intersect_position\n" + "limit 40000", nativeQuery = true)
 	List<Object> queryLinkedLocations(int test);
+	
+	
+	@Transactional
+	@Query(value = "select n from NetworkNode n where n.routeId =:planId and n.nodeTypeId=:nodeTypeId")
+	public List<NetworkNode> findEquipment(@Param("nodeTypeId") int nodeTypeId, @Param("planId") long planId) ;
+	
+	
+	
+	@Query(value = "select total_cost from client.plan where id =:planId", nativeQuery=true)
+	public Double getTotalCost(@Param("planId") long planId) ;
+	
+	
 		
 	@Query(value = "update client.plan set total_count = :totalCount \n " +
 	", total_cost=:totalCost, fiber_cost=:fiberCost " +
@@ -63,5 +75,10 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 			@Param("bizRevenue")double bizRevenue,
 			@Param("npv")double npv
 			) ;
+
+	@Query(value = "delete from client.network_nodes where plan_id = :planId", nativeQuery = true)
+	@Modifying
+	@Transactional
+	void deleteNetworkNodes(@Param("planId")long planId);
 
 }

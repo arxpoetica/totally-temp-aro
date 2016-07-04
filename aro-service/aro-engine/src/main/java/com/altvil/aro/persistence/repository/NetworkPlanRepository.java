@@ -8,17 +8,40 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.model.NetworkPlan;
+import com.altvil.aro.model.WirecenterPlan;
 
+@Repository("networkPlanRepository")
 public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
+	
+	
+	//TODO Create Price Repository
+	@Query(value = "select name, uom_name, price from financial.network_price", nativeQuery = true)
+	List<Object[]> queryPriceModelElements();
+	
 	
 	@Query(value = "SELECT r.wirecenter_id \n" +
 			"FROM client.plan r \n" +
 			"WHERE r.id = :planId", nativeQuery = true)
-	Long queryWirecenterIdForPlanId(@Param("planId") long planId);
+	Integer queryWirecenterIdForPlanId(@Param("planId") long planId);
+	
+	
+	@Query(value = "select p from WirecenterPlan p where p.masterPlan.id = :planId")
+	List<WirecenterPlan> queryChildPlans(@Param("planId") long planId);
+	
+	
+	@Query(value = "select count(*) \n" + 
+			"from client.plan p\n" + 
+			"join aro.wirecenters w on p.wirecenter_id = w.id \n" + 
+			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
+			"join aro.households h on h.location_id = l.id\n" + 
+			"where p.id = :planId", nativeQuery = true)
+	Integer queryTotalHouseholdLocations(@Param("planId") long planId);
+	
 	
 	@Query(value = "with linked_locations as (\n" + 
 			"SELECT\n" + 
@@ -455,4 +478,6 @@ public interface NetworkPlanRepository extends
 			"select plan_id from updated_network_nodes",nativeQuery = true) 
     List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("wireCentersIds") Collection<Integer> wireCentersIds);
 
+	@Query(value = "select id from client.plan where parent_plan_id = :planId", nativeQuery = true)
+	List<Number> wireCenterPlanIdsFor(@Param("planId") long planId);
 }

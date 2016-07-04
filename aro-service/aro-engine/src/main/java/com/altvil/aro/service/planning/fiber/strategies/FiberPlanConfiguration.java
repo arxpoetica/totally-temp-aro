@@ -1,21 +1,17 @@
 package com.altvil.aro.service.planning.fiber.strategies;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
-import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.FiberPlan;
 import com.altvil.aro.service.planning.NetworkConfiguration;
 import com.altvil.enumerations.FiberPlanAlgorithm;
@@ -23,33 +19,37 @@ import com.altvil.enumerations.FiberPlanAlgorithm;
 public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPlan, NetworkConfiguration {
 	private static final long serialVersionUID = 1L;
 	private final FiberPlan fiberPlan;
+	private final GlobalConstraint globalConstraint;
 	private long planId;
-	
+	private long masterPlanId = -1;
+	private Set<Integer> wireCenterIds;
 
-	public FiberPlanConfiguration(FiberPlan fiberPlan) {
+	public FiberPlanConfiguration(FiberPlan fiberPlan, GlobalConstraint globalConstraint) {
 		this.fiberPlan= fiberPlan;
+		this.globalConstraint = globalConstraint;
 		this.planId = fiberPlan.getPlanId();
-	}	
+		this.wireCenterIds = fiberPlan.getSelectedWireCenters();
+	}		
+	
+	public GlobalConstraint getGlobalConstraint() {
+		return globalConstraint;
+	}
 	
 
 	@Override
 	public Set<Integer> getSelectedWireCenters() {
-		return fiberPlan.getSelectedWireCenters() ;
+		return wireCenterIds;
 	}
 
+
+	public long getMasterPlanId() {
+		return masterPlanId;
+	}
 
 	@Override
 	public Set<LocationEntityType> getLocationEntityTypes() {
 		return fiberPlan.getLocationEntityTypes() ;
 	}
-
-
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		// TODO Auto-generated method stub
-		return super.clone();
-	}
-
 
 
 	public FiberPlanAlgorithm getAlgorithm() {
@@ -70,10 +70,14 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T dependentPlan(long dependentId) {
+	public <T> T dependentPlan(long dependentId, int wireCenterId) {
 		try {
 			FiberPlanConfiguration copy = (FiberPlanConfiguration) clone();
 			copy.planId = dependentId;
+			copy.masterPlanId = this.planId;
+			Set<Integer> dependentWireCenters = new HashSet<>();
+			dependentWireCenters.add(wireCenterId);
+			copy.wireCenterIds = dependentWireCenters;
 			return (T) copy;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
@@ -85,39 +89,10 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 	}
 
 	public boolean isFilteringRoadLocationsBySelection() {
-		return this.getSelectedWireCenters().isEmpty() ;
-	}
-
-	public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
-		return (e) ->
-		{
-			GeoSegment value = e.getValue();
-			
-			if (value == null) {
-				return Collections.emptySet();
-			}
-			
-			Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
-			
-			if (geoSegmentAssignments.isEmpty()) {
-				return Collections.emptySet();
-			}
-			
-			// There may be multiple marked locations on this edge so it may be necessary to return both vertices of this edge.
-			Set<GraphNode> selectedNodes = new HashSet<>();
-			for (GraphEdgeAssignment assignment: geoSegmentAssignments) {
-				if (assignment.getPinnedLocation().isAtStartVertex()) {
-					selectedNodes.add(e.getSourceNode());
-				} else {
-					selectedNodes.add(e.getTargetNode());
-				}
-			}
-			
-			return selectedNodes;
-		};
+		return true;
 	}
 
 	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (p, g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
+		return (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
 	}
 }

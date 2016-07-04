@@ -1,4 +1,4 @@
-/* global app user_id config */
+/* global app user_id config map */
 // Route Controller
 app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection', 'MapLayer', 'map_tools', 'map_layers', ($scope, $rootScope, $http, selection, MapLayer, map_tools, map_layers) => {
   // Controller instance variables
@@ -75,10 +75,10 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
         declarativeStyles: (feature, styles) => {
           if (feature.getProperty('fiber_type') === 'feeder') {
             styles.strokeColor = 'blue'
-            styles.strokeWeight = 2
+            styles.strokeWeight = 4
           } else {
             styles.strokeColor = 'red'
-            styles.strokeWeight = 4
+            styles.strokeWeight = 2
           }
         }
       })
@@ -94,4 +94,14 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
     // to calculate market size
     $rootScope.$broadcast('route_changed')
   }
+
+  $rootScope.$on('map_zoom_changed', () => {
+    if (map.getZoom() < 11) {
+      map_tools.disable('locations')
+      map_tools.disable('fiber_plant')
+    } else {
+      map_tools.enable('locations')
+      map_tools.enable('fiber_plant')
+    }
+  })
 }])

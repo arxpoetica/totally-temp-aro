@@ -11,7 +11,7 @@ public class CoverageOptimizationPlanImpl extends AbstractOptimizationPlan imple
 	}
 	
 	public CoverageOptimizationPlanImpl(double coverage) {
-		super(OptimizationType.COVERAGE);
+		this();
 		this.coverage = coverage ;
 	}
 

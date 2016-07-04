@@ -5,8 +5,6 @@
 var helpers = require('../helpers')
 var database = helpers.database
 var _ = require('underscore')
-var pify = require('pify')
-var request = pify(require('request'), { multiArgs: true })
 var config = helpers.config
 var models = require('./')
 var pync = require('pync')
@@ -173,52 +171,94 @@ module.exports = class Network {
       businesses: 'Business',
       towers: 'CellTower'
     }
+    var algorithms = {
+      'MAX_IRR': 'IRR',
+      'TARGET_IRR': 'IRR',
+      'BUDGET_IRR': 'IRR',
+      'IRR': 'IRR'
+    }
+    options.algorithm = algorithms[options.algorithm] || options.algorithm
     var body = {
       planId: plan_id,
-      algorithm: options.algorithm,
-      locationTypes: options.locationTypes.map((key) => locationTypes[key])
+      locationTypes: options.locationTypes.map((key) => locationTypes[key]),
+      algorithm: options.algorithm
     }
     var req = {
       method: 'POST',
-      url: config.aro_service_url + '/rest/recalc/masterplan',
+      url: `${config.aro_service_url}/rest/optimize/masterplan`,
       json: true,
       body: body
     }
-    return Promise.resolve().then(() => {
-      if (options.algorithm === 'NPV') {
-        var financialConstraints = body.financialConstraints = { years: 10 }
-        if (options.budget) financialConstraints.budget = options.budget
-        if (options.discountRate) financialConstraints.discountRate = options.discountRate
-      }
+    var financialConstraints = body.financialConstraints = { years: 10 }
+    if (options.budget) financialConstraints.budget = options.budget
+    if (options.discountRate) financialConstraints.discountRate = options.discountRate
+    if (options.irrThreshold) body.threshold = options.irrThreshold
+    return database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id])
+    .then(() => {
       if (options.geographies) {
         body.selectedRegions = []
         var promises = options.geographies.map((geography) => {
-          var n = geography.id.indexOf(':')
-          var type = geography.id.substring(0, n)
-          var id = geography.id.substring(n + 1)
-          return database.findValue('SELECT ST_AsText(ST_GeomFromGeoJSON($1)) AS wkt', [JSON.stringify(geography.geog)], 'wkt')
-            .then((wkt) => {
-              body.selectedRegions.push({
-                regionType: type.toUpperCase(),
-                id: id,
-                wkt: wkt
-              })
+          var type = geography.type
+          var id = geography.id
+          var geog = JSON.stringify(geography.geog)
+          return database.execute(`
+            INSERT INTO client.selected_regions (
+              plan_id, region_name, region_id, region_type, geom
+            ) VALUES ($1, $2, $3, $4, ST_GeomFromGeoJSON($5))
+          `, [plan_id, geography.name, id, type, geog])
+            .then(() => {
+              return database.findValue('SELECT ST_AsText(ST_GeomFromGeoJSON($1)) AS wkt', [geog], 'wkt')
+                .then((wkt) => {
+                  body.selectedRegions.push({
+                    regionType: type.toUpperCase(),
+                    id: id,
+                    wkt: wkt
+                  })
+                })
             })
         })
         return Promise.all(promises)
       }
     })
-    .then(() => {
-      console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
-      return request(req).then((result) => {
-        var res = result[0]
-        var body = result[1]
-        console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
-        if (res.statusCode && res.statusCode >= 400) {
-          return Promise.reject(new Error(`ARO-service returned status code ${res.statusCode}`))
-        }
+    .then(() => this._callService(req))
+    .then(() => ({}))
+  }
+
+  static equipmentSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}/equipment_summary`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
+  static fiberSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}/fiber_summary`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
+  static irrAndNpv (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/roic/models/${plan_id}`,
+      qs: { '$select': 'incremental.network.cashflow' },
+      json: true
+    }
+    return this._callService(req)
+      .then((result) => {
+        var arr = result[0].values
+        // NPV = CF0 / (1+.08)^0 + CF1 / (1.08)^1 + CF2 / (1.08)^2 ..... + CFn / (1.08)^n
+        var i = 0
+        var npv = arr.reduce((total, value) => total + value / Math.pow(1.08, i++), 0)
+        var irr = helpers.irr(arr)
+        return { npv: npv, irr: irr }
       })
-    })
+  }
+
+  static _callService (req) {
+    return models.AROService.request(req)
   }
 
   static selectBoundary (plan_id, data) {

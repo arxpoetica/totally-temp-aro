@@ -1,5 +1,4 @@
 var models = require('../models')
-var _ = require('underscore')
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
@@ -10,9 +9,13 @@ exports.configure = (api, middleware) => {
     var plan_id = +request.params.plan_id
 
     var filters = {}
-    var keys = ['industries', 'customer_types', 'number_of_employees']
+    var keys = ['business_categories', 'household_categories']
     keys.forEach((key) => {
-      filters[key] = _.compact((request.query[key] || '').split(',').map((v) => +v || null))
+      var value = request.query[key] || ''
+      if (typeof value === 'string') {
+        value = value.split(',')
+      }
+      filters[key] = value.map((v) => +v || null).filter((n) => n)
     })
     models.Location.findLocations(plan_id, type, filters, viewport)
       .then(jsonSuccess(response, next))

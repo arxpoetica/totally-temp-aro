@@ -7,6 +7,7 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "ui": {
+    "layout": "accordion",
     "map_tools": {
       "locations": {
         "view": ["commercial", "residential"],
@@ -25,6 +26,9 @@
       "competitors": {
         "view": ["all", "fiber_segments"],
         "overlay": ["density"]
+      },
+      "target_builder": {
+        "disabled": true
       }
     },
     "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
@@ -37,7 +41,13 @@
       "fair_share": "blue"
     },
     "labels": {
-      "fiber": "Fiber"
+      "fiber": "Fiber",
+      "wirecenter": "Wirecenter"
+    },
+    "default_form_values": {
+      "create_plan": {
+        "select_area_text": "Enter a CLLI Code"
+      }
     }
   }
 }

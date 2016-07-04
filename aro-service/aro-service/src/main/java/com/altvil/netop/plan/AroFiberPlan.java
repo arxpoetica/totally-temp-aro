@@ -13,6 +13,8 @@ public class AroFiberPlan {
 	private long planId;
 
 	private FiberPlanAlgorithm algorithm;
+	
+	private Double threshold ;
 
 	private FinancialConstraints financialConstraints = new FinancialConstraints();
 	private FiberNetworkConstraints fiberNetworkConstraints;
@@ -25,6 +27,15 @@ public class AroFiberPlan {
 
 	public void setPlanId(long planId) {
 		this.planId = planId;
+	}
+	
+	
+	public Double getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(Double threshold) {
+		this.threshold = threshold;
 	}
 
 	public FiberPlanAlgorithm getAlgorithm() {

@@ -1,9 +1,18 @@
-/* global app config */
+/* global app config $ */
 app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
   var tools = {}
   var visible = []
   var collapsed = {}
   var disabled = []
+
+  var accordion = $('#map-tools-accordion')
+  accordion.on('click', '[data-parent="#map-tools-accordion"]', (e) => {
+    e.preventDefault()
+  })
+  accordion.on('shown.bs.collapse', (e) => {
+    var tool = $(e.target).attr('data-tool')
+    tools.show(tool)
+  })
 
   tools.enable = (name) => {
     var i = disabled.indexOf(name)
@@ -83,7 +92,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     },
     {
       id: 'network_nodes',
-      name: config.client_carrier_name + ' Network',
+      name: 'Network Equipment',
       short_name: 'E',
       icon: 'icon icon-network-equipment'
     },
@@ -116,14 +125,17 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       name: 'Area Network Planning',
       short_name: 'A',
       icon: 'icon icon-network-planning'
-    },
-    {
+    }
+  ]
+
+  if (!config.ui.map_tools.target_builder.disabled) {
+    tools.available_tools.push({
       id: 'target_builder',
       name: 'Target builder',
       short_name: 'TB',
       icon: 'icon icon-network-planning-targeted'
-    }
-  ]
+    })
+  }
 
   if (config.ARO_CLIENT === 'demo') {
     var tool = tools.available_tools.find((item) => item.id === 'area_network_planning')

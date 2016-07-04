@@ -1,5 +1,7 @@
 package com.altvil.aro.service.demand.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.utils.func.Aggregator;
 
@@ -10,6 +12,8 @@ public class DefaultDemandStatistic implements DemandStatistic {
 	public static Aggregator<DemandStatistic> aggregate() {
 		return new DemandAggregator();
 	}
+	
+	
 
 	public static class DemandAggregator implements Aggregator<DemandStatistic> {
 
@@ -85,6 +89,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 		}
 		return demandSummer;
 	}
+	
 
 	public static class DemandSummer implements DemandStatistic {
 		private double rawCoverage = 0;
@@ -119,5 +124,9 @@ public class DefaultDemandStatistic implements DemandStatistic {
 							* ratio);
 		}
 
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("demand", demand).append("rawCoverage", rawCoverage).append("revenue", revenue).toString();
 	}
 }

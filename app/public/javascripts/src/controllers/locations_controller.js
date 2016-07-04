@@ -31,10 +31,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.show_businesses = $scope.show_commercial
   $scope.show_households = $scope.show_residential
   $scope.show_towers = false
-
   $scope.new_location_data = null
-
   $scope.industries = []
+  $scope.business_categories_selected = []
+  $scope.household_categories_selected = []
 
   var locationStyles = {
     normal: {
@@ -139,6 +139,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.industries = response.industries
     $scope.customer_types = response.customer_types
     $scope.employees_by_location = response.employees_by_location
+    $scope.business_categories = response.business_categories
+    $scope.household_categories = response.household_categories
+
+    $scope.business_categories_selected = []
+    $scope.business_categories.forEach((category) => {
+      $scope.business_categories_selected[category.id] = true
+    })
+
+    $scope.household_categories_selected = []
+    $scope.household_categories.forEach((category) => {
+      $scope.household_categories_selected[category.id] = true
+    })
 
     // industries
     $('#create-location select.industries').select2({ placeholder: 'Select an industry' })
@@ -187,28 +199,32 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
-    if ($scope.overlay === 'none') {
-      var industries = $('#locations_controller .select2-industries').select2('val')
-      var customer_types = $('#locations_controller .select2-customer-types').select2('val')
-      var number_of_employees = $('#locations_controller .select2-number-of-employees').select2('val')
+    const subcategories = (key, options) => {
+      var obj = $scope[`${key}_categories_selected`]
+      var categories = Object.keys(obj).filter((key) => obj[key])
+      if (categories.length < $scope[`${key}_categories`].length) {
+        options[`${key}_categories`] = categories
+      }
+    }
 
+    if ($scope.overlay === 'none') {
       if (!$scope.show_businesses && !$scope.show_households) {
         locationsLayer.hide()
       } else {
+        var business_categories = Object.keys($scope.business_categories_selected).filter((key) => $scope.business_categories_selected[key])
         var type
-        if ($scope.show_businesses && $scope.show_households) {
+        var show_businesses = $scope.show_businesses && business_categories.length > 0
+        if (show_businesses && $scope.show_households) {
           type = ''
-        } else if ($scope.show_businesses) {
+        } else if (show_businesses) {
           type = 'businesses'
         } else if ($scope.show_households) {
           type = 'households'
         }
-        locationsLayer.setApiEndpoint('/locations/:plan_id', {
-          industries: industries.join(','),
-          customer_types: customer_types.join(','),
-          number_of_employees: number_of_employees.join(','),
-          type: type
-        })
+        var options = { type }
+        subcategories('business', options)
+        subcategories('household', options)
+        locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
       }
     } else {

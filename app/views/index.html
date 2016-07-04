@@ -12,12 +12,9 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/layout_<%= config.ui.layout %>.css">
   </head>
   <body>
-
-    <div ng-controller="financial_profile_controller">
-      <% include modal_financial_profile.html %>
-    </div>
 
     <div ng-controller="customer_profile_controller">
       <% include modal_customer_profile.html %>
@@ -113,13 +110,13 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="select_plan(null)"><span class="fa fa-chevron-left"></span></button>
+            <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="selectPlan(null)"><span class="fa fa-chevron-left"></span></button>
             <a href="javascript:void(0)" class="navbar-brand" ng-click="showCombo()">{{plan.name}}</a>
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
-              <span data-toggle="modal" data-target="#modal-financial-profile" style="cursor:pointer" ng-show="show_financial_profile">
+              <span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
                 <span class="fa fa-usd"></span>
-                <span class="label label-info">{{plan.metadata.total_npv | currency}}</span>
+                <span class="label label-info">{{plan.metadata.npv | currency}}</span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
               </span>
               <!--
@@ -210,17 +207,12 @@
 
 
     <div id="left-col-wrapper">
-      <div id="left-col">
-        <div ng-controller="map_tools_controller">
-          <div ng-repeat="tool in map_tools.available_tools">
-            <p>
-              <a href="javascript:void(0)" class="btn btn-primary btn-block btn-sm map_tools_button" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
-                ng-attr-id="map_tools_toggle_{{tool.id}}"
-                ng-class="{'btn-success active': map_tools.is_visible(tool.id), 'disabled': !map_tools.is_enabled(tool.id)}"
-                ng-click="map_tools.toggle(tool.id)"><span ng-attr-class="{{tool.icon}}"></span></a>
-            </p>
-          </div>
-        </div>
+      <div id="left-col" class="left-col-expanded">
+        <% if (config.ui.layout === 'accordion') { %>
+          <% include layout_accordion.html %>
+        <% } else if (config.ui.layout === 'default') { %>
+          <% include layout_default.html %>
+        <% } %>
       </div>
     </div>
 
@@ -237,1182 +229,8 @@
     <div ng-controller="route_controller">
     </div>
 
-    <!-- Boundaries Layer Modal -->
-    <div ng-controller="boundaries_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('boundaries')" class="map-tool panel panel-primary">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('boundaries')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('boundaries')" ng-click="map_tools.collapse('boundaries')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('boundaries')" ng-click="map_tools.expand('boundaries')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div class="panel-body" ng-show="map_tools.is_expanded('boundaries')">
-          <div ng-show="number_of_area_layers() > 0 || boundaries.length > 0">
-            <h2>View</h2>
-            <div ng-repeat="(key, layer) in area_layers">
-              <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-class="{ 'disabled': layer.disabled }">
-                <!--
-                <div class="pull-right">
-                  <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
-                </div>
-                -->
-                <label>
-                  <input type="checkbox" ng-click="layer.toggleVisibility()" ng-disabled="layer.disabled"> {{layer.name}}
-                </label>
-              </div>
-            </div>
-            <% if (env_is_test) { %>
-              <a href="javascript:void(0)" ng-click="area_layers.census_blocks_layer.select_random_area()" ng-attr-data-loaded="{{area_layers.census_blocks_layer.data_loaded}}">.</a>
-            <% } %>
-            <div ng-repeat="boundary in boundaries">
-              <div class="checkbox">
-                <div class="pull-right boundary-options">
-                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
-                    title="Edit" ng-click="rename_boundary(boundary)">
-                      <span class="fa fa-pencil"></span>
-                  </a>
-                  <a href="javascript:void(0)" class="text-danger" data-toggle="tooltip"
-                    data-placement="top" title="Delete" ng-click="deleteBoundary(boundary)">
-                      <span class="fa fa-trash-o"></span>
-                  </a>
-                  <a href="javascript:void(0)" class="text-success" data-toggle="tooltip"
-                    data-placement="top" title="Market profile" ng-click="show_market_size(boundary)">
-                      <span class="<%= config.ui.icons.market_profile %>"></span>
-                  </a>
-                  <a href="javascript:void(0)" class="text-warning" data-toggle="tooltip"
-                    data-placement="top" title="Customer profile" ng-click="show_customer_profile(boundary)">
-                      <span class="fa fa-users"></span>
-                  </a>
-                  <% if (config.route_planning.length >= 0) { %>
-                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
-                    title="Network planning" ng-click="run_network_planning(boundary)">
-                      <span class="fa fa-wrench"></span>
-                  </a>
-                  <% } %>
-                </div>
-                <label>
-                  <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
-                </label>
-              </div>
-            </div>
-            <hr>
-          </div>
-          <div ng-show="plan.owner_id === user_id">
-            <h2>Build</h2>
-            <p>
-              <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggle_tool()">Custom</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div ng-controller="locations_controller">
-
-      <div class="modal" id="create-location" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Create location</h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal">
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Business name</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.business_name">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Number of employees</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.number_of_employees">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Business industry</label>
-                  <div class="col-sm-8">
-                    <select class="form-control industries" ng-model="new_location_data.business_industry" ng-options="industry.text for industry in industries"></select>
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Annual recurring cost</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.annual_recurring_cost">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Install cost</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.install_cost">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'commercial' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Business customer type</label>
-                  <div class="col-sm-8">
-                    <select class="form-control businesses_customer_types" ng-model="new_location_data.business_customer_type" ng-options="customer_type.name for customer_type in customer_types"></select>
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'residential' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Number of households</label>
-                  <div class="col-sm-8">
-                    <input class="form-control" ng-model="new_location_data.number_of_households">
-                  </div>
-                </div>
-                <div class="form-group" ng-show="selected_tool === 'residential' || selected_tool === 'combo'">
-                  <label class="col-sm-4 control-label">Household customer type</label>
-                  <div class="col-sm-8">
-                    <select class="form-control households_customer_types" ng-model="new_location_data.household_customer_type" ng-options="customer_type.name for customer_type in customer_types"></select>
-                  </div>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" ng-click="create_location()">Create location</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Locations layer modal -->
-      <div class="map-tool-wrapper">
-        <div ng-show="map_tools.is_visible('locations')" class="map-tool panel panel-primary" id="locations_controller">
-          <div class="panel-heading" ng-bind="map_tools.get_tool_name('locations')">
-            <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
-              <span style="color:white" class="fa fa-chevron-up"></span>
-            </a>
-            <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
-              <span style="color:white" class="fa fa-chevron-down"></span>
-            </a>
-          </div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('locations')">
-            <h2>View</h2>
-            <form ng-hide="show_commercial && !show_residential">
-              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-                <label>
-                  <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Commercial
-                </label>
-              </div>
-              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
-                <label>
-                  <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Residential
-                </label>
-              </div>
-              <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}">
-                <label>
-                  <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
-                </label>
-              </div>
-            </form>
-            <div ng-show="show_commercial && !show_residential">
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" ng-change="change_locations_layer()" ng-model="show_businesses" ng-disabled="overlay !== 'none'"> Show businesses
-                </label>
-              </div>
-              <p>
-                <input class="form-control business-filter select2-industries" ng-model="selected_industries" ng-change="change_locations_layer()"></input>
-              </p>
-              <p>
-                <input class="form-control business-filter select2-customer-types" ng-model="selected_customer_types" ng-change="change_locations_layer()"></input>
-              </p>
-              <p>
-                <input class="form-control business-filter select2-number-of-employees" ng-model="selected_number_of_employees" ng-change="change_locations_layer()"></input>
-              </p>
-            </div>
-            <% if (env_is_test) { %>
-              <a href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">.</a>
-            <% } %>
-            <hr>
-            <div>
-              <h2>Overlay</h2>
-              <div class="form-group">
-                <select class="form-control" ng-model="overlay" ng-change="change_locations_layer()">
-                  <option value="none">None</option>
-                  <option value="customer_profile">Prospect Density</option>
-                </select>
-                <div ng-show="overlay_is_loading()">
-                  <% include spinner.html %>
-                </div>
-                <div class="row" style="margin-top: 10px" ng-show="overlay === 'customer_profile'">
-                  <div class="col-md-2">Low</div>
-                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-                  <div class="col-md-2 text-right">High</div>
-                </div>
-              </div>
-            </div>
-            <div ng-show="plan.owner_id === user_id && available_tools.length > 0">
-              <hr>
-              <h2>Build</h2>
-              <div class="row">
-                <div class="col-sm-6" ng-repeat="tool in available_tools">
-                  <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === tool.key}" ng-click="select_tool(tool.key)">{{tool.name}}</a>
-                  <br>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div ng-controller="market_size_controller">
-
       <% include modal_market_profile.html %>
-
-    </div>
-    <!-- Client carrier network equipment modal -->
-    <div ng-controller="equipment_nodes_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('network_nodes')" class="map-tool panel panel-primary" id="equipment_nodes_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('network_nodes')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_nodes')" ng-click="map_tools.collapse('network_nodes')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_nodes')" ng-click="map_tools.expand('network_nodes')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('network_nodes')">
-            <div ng-show="plan">
-              <h2>View</h2>
-
-              <div ng-repeat="node_type in view_node_types">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="node_type.visible" ng-change="change_node_types_visibility()"> {{node_type.description}}
-                  </label>
-                </div>
-              </div>
-
-              <div ng-repeat="(key, layer) in equipment_layers">
-                <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-hide="layer.hide_in_ui">
-                  <label>
-                    <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible"> {{layer.name}}
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="showFeederFiber" ng-change="changedFiberVisibility()"> Feeder fiber
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="showDistributionFiber" ng-change="changedFiberVisibility()"> Distribution fiber
-                  </label>
-                </div>
-              </div>
-
-              <hr>
-              <div ng-repeat="node_type in view_node_types">
-                <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png" style="width:16px"> = {{node_type.description}}</p>
-              </div>
-
-              <ul class="pie-legend">
-                <li><span style="background-color:blue"></span> = Feeder Fiber</li>
-                <li><span style="background-color:red"></span> = Distribution Fiber</li>
-              </ul>
-
-
-              <% if (env_is_test) { %>
-                <a href="javascript:void(0)" ng-click="equipment_layers.network_nodes.select_random_features()" ng-attr-data-loaded="{{equipment_layers.network_nodes.data_loaded}}">.</a>
-                <a href="javascript:void(0)" ng-click="show_number_of_features()">.</a>
-
-                <a href="javascript:void(0)" ng-click="place_random_equipment()">.</a>
-                <span id="equipment_nodes_controller_number_of_features">{{number_of_features}}</span>
-              <% } %>
-
-              <!--
-              <div ng-show="plan.owner_id === user_id && (build_node_types.length > 0 || show_recalculate)">
-                <hr>
-                <h2>Build</h2>
-                <div class="row">
-                  <p></p>
-                </div>
-                <div class="row">
-                  <div class="col-sm-12" ng-repeat="node in build_node_types">
-                    <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === node.name}" ng-click="select_tool(node.name)">{{node.description}}</a>
-                    <br>
-                  </div>
-                </div>
-              </div>
-              -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Competitor network equipment modal -->
-    <div ng-controller="fiber_plant_controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('fiber_plant')" class="map-tool panel panel-primary" id="fiber_plant_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('fiber_plant')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('fiber_plant')">
-            <div>
-              <h2>View</h2>
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" ng-change="toggle_all_competitors()" ng-model="show_all_competitors" ng-disabled="overlay !== 'none'"> All competitors
-                </label>
-              </div>
-              <input class="form-control" ng-model="selected_carriers" ng-change="carriers_changed()"></input>
-            </div>
-            <hr>
-            <div>
-              <h2>Overlay</h2>
-              <div class="form-group">
-                <select class="form-control" ng-model="overlay" ng-change="overlay_changed()">
-                  <option value="none">None</option>
-                  <option value="density">Density</option>
-                  <option value="fairshare">Fair share</option>
-                </select>
-                <div class="row" style="margin-top: 10px" ng-show="overlay === 'fairshare'">
-                  <div class="col-md-2">Low</div>
-                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-                  <div class="col-md-2 text-right">High</div>
-                </div>
-                <div class="row" style="margin-top: 10px" ng-show="overlay === 'density'">
-                  <div class="col-md-2">Low</div>
-                  <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-                  <div class="col-md-2 text-right">High</div>
-                </div>
-                <div ng-show="overlay_is_loading()">
-                  <% include spinner.html %>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div ng-controller="search-controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('search')" class="map-tool panel panel-primary" id="search_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('search')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('search')" ng-click="map_tools.collapse('search')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('search')" ng-click="map_tools.expand('search')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('search')">
-            <form>
-              <div class="form-group form-group-sm">
-                <input type="text" class="form-control" placeholder="Search a business">
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div ng-controller="area-network-planning-controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('area_network_planning')" class="map-tool panel panel-primary" id="area_network_planning_controller">
-        <div class="panel-heading" ng-bind="map_tools.get_tool_name('area_network_planning')">
-          <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('area_network_planning')" ng-click="map_tools.collapse('area_network_planning')">
-            <span style="color:white" class="fa fa-chevron-up"></span>
-          </a>
-          <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('area_network_planning')" ng-click="map_tools.expand('area_network_planning')">
-            <span style="color:white" class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('area_network_planning')">
-            <div ng-show="wizardStatus === 'geographies'">
-              <p><strong>Search or Click Geographies</strong></p>
-              <form>
-                <div class="form-group form-group-sm">
-                  <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
-                </div>
-              </form>
-              <p><strong>Selected Geographies</strong></p>
-              <p ng-hide="selectedGeographies.length > 0"><em>No geographies selected</em></p>
-              <ul ng-show="selectedGeographies.length > 0" style="list-style-type:none; padding:0">
-                <li ng-repeat="geography in selectedGeographies">
-                  <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
-                    <span class="fa fa-trash-o"></span>
-                  </a>
-                  {{ geography.name }}
-                </li>
-              </ul>
-            </div>
-            <div ng-show="wizardStatus === 'cover'">
-              <p><strong>Cover</strong></p>
-              <form>
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="coverHouseholds"> Households
-                  </label>
-                </div>
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="coverBusinesses"> Businesses
-                  </label>
-                </div>
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" ng-model="coverTowers"> Towers
-                  </label>
-                </div>
-              </form>
-            </div>
-            <div ng-show="wizardStatus === 'budget'">
-              <div ng-hide="advancedSettings">
-                <!-- <p><strong>Budget</strong></p>
-                <form class="text-center">
-                  <div class="row">
-                    <div class="col-md-3">
-                      <small>2016</small> <br> <input type="text" value="5.0" class="text-center" style="width:100%">
-                    </div>
-                    <div class="col-md-3">
-                      <small>2017</small> <br> <input type="text" value="5.0" class="text-center" style="width:100%">
-                    </div>
-                    <div class="col-md-3">
-                      <small>2018</small> <br> <input type="text" value="5.0" class="text-center" style="width:100%">
-                    </div>
-                    <div class="col-md-3">
-                      <small>2019</small> <br> <input type="text" value="5.0" class="text-center" style="width:100%">
-                    </div>
-                  </div>
-                </form>
-                <hr> -->
-                <!-- <p><strong>IRR Threshold</strong></p>
-                <p>
-                  <input type="range" min="100" max="500" step="10">
-                </p> -->
-                <p class="text-right"><small><a href="javascript:void(0)" ng-click="toggleAdvancedSettings()">advanced inputs</a></small><p>
-              </div>
-              <div ng-show="advancedSettings">
-                <div>
-                  <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active"><a href="#advancedSettingsBuild" aria-controls="home" role="tab" data-toggle="tab">Build</a></li>
-                    <li role="presentation"><a href="#advancedSettingsProducts" aria-controls="profile" role="tab" data-toggle="tab">Products</a></li>
-                    <li role="presentation"><a href="#advancedSettingsEquipment" aria-controls="messages" role="tab" data-toggle="tab">Equipment</a></li>
-                  </ul>
-                  <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="advancedSettingsBuild">
-                      <br>
-                      <p><strong>Build Type</strong></p>
-                      <div class="radio">
-                        <label>
-                          <input type="radio" name="buildType" value="build" checked>
-                          Build
-                        </label>
-                      </div>
-                      <div class="radio">
-                        <label>
-                          <input type="radio" name="buildType" value="lease">
-                          Lease
-                        </label>
-                      </div>
-                      <hr>
-
-                      <p><strong>Maintenance % of Revenue</strong></p>
-                      <p>
-                        <input type="range" min="100" max="500" step="10">
-                      </p>
-                      <hr>
-
-                      <p><strong>Build Timeline</strong></p>
-                      <div class="row text-center">
-                        <div class="col-md-8 col-md-offset-4">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding"><small>2016</small></div>
-                            <div class="col-md-3 nopadding"><small>2017</small></div>
-                            <div class="col-md-3 nopadding"><small>2018</small></div>
-                            <div class="col-md-3 nopadding"><small>2019</small></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Complete
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="70%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="15%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="15%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <hr>
-
-                      <p><strong>MTU/MDU Constraint</strong></p>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Entities
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="10" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <hr>
-
-                      <p><strong>CO Upgrade Cost</strong></p>
-                      <div class="row">
-                        <div class="col-md-4">
-                          $
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="1000" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <br>
-
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="advancedSettingsProducts">
-                      <br>
-                      <select class="form-control">
-                        <option>Households</option>
-                        <option>Businesses</option>
-                        <option>Towers</option>
-                      </select>
-                      <hr>
-
-                      <p><strong>Product ARPU</strong></p>
-                      <div class="row text-center">
-                        <div class="col-md-8 col-md-offset-4">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding"><small>2016</small></div>
-                            <div class="col-md-3 nopadding"><small>2017</small></div>
-                            <div class="col-md-3 nopadding"><small>2018</small></div>
-                            <div class="col-md-3 nopadding"><small>2019</small></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Product 1
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Product 2
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <hr>
-
-                      <p><strong>Product Cost Margin</strong></p>
-                      <div class="row text-center">
-                        <div class="col-md-8 col-md-offset-4">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding"><small>2016</small></div>
-                            <div class="col-md-3 nopadding"><small>2017</small></div>
-                            <div class="col-md-3 nopadding"><small>2018</small></div>
-                            <div class="col-md-3 nopadding"><small>2019</small></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Product 1
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Product 2
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <hr>
-
-                      <p><strong>Penetration End State</strong></p>
-                      <div class="row">
-                        <div class="col-md-7">
-                          Business
-                        </div>
-                        <div class="col-md-5">
-                          <input type="text" value="5%" class="text-center" style="width:100%">
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-7">
-                          Household
-                        </div>
-                        <div class="col-md-5">
-                          <input type="text" value="5%" class="text-center" style="width:100%">
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-7">
-                          Tower
-                        </div>
-                        <div class="col-md-5">
-                          <input type="text" value="5%" class="text-center" style="width:100%">
-                        </div>
-                      </div>
-
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="advancedSettingsEquipment">
-                      <p><strong>Terminal Cost Settings</strong></p>
-                      <div class="row text-center">
-                        <div class="col-md-8 col-md-offset-4">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding"><small>Ports</small></div>
-                            <div class="col-md-3 nopadding"><small>Cost</small></div>
-                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
-                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          FDH
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="32" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="$150" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          FDT
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="12" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="$75" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <hr>
-
-                      <p><strong>Fiber Settings</strong></p>
-                      <div class="row text-center">
-                        <div class="col-md-8 col-md-offset-4">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding"><small>Cost/Ft.</small></div>
-                            <div class="col-md-3 nopadding"><small>Strands</small></div>
-                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
-                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Feeder
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="$3.50" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="256" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Distribution
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="$2.50" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="128" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Drop
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="$1.50" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="64" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <hr>
-
-                      <p><strong>CPE Settings</strong></p>
-                      <div class="row text-center">
-                        <div class="col-md-8 col-md-offset-4">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding"><small>Cost</small></div>
-                            <div class="col-md-3 nopadding"><small>Lifecycle</small></div>
-                            <div class="col-md-3 nopadding"><small>Cost Change</small></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          ONT
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="$55.50" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          STB
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="$25.50" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-md-4">
-                          Router
-                        </div>
-                        <div class="col-md-8">
-                          <div class="row" style="margin-right: 10px">
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="$12.50" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="100" class="text-center" style="width:100%">
-                            </div>
-                            <div class="col-md-3 nopadding">
-                              <input type="text" value="5%" class="text-center" style="width:100%">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                </div>
-                <br>
-                <p class="text-right"><small><a href="javascript:void(0)" ng-click="toggleAdvancedSettings()">basic inputs</a></small><p>
-              </div>
-            </div>
-            <div ng-show="wizardStatus === 'progress'">
-              <p><strong>Running Optimization...</strong></p>
-              <div class="row" ng-repeat="geography in selectedGeographies">
-                <div class="col-md-4">
-                  {{geography.name}}
-                </div>
-                <div class="col-md-8">
-                  <div class="progress">
-                    <div class="progress-bar"
-                      ng-class="{'active progress-bar-striped': calculating}"
-                      role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <nav ng-hide="wizardStatus === 'progress'">
-              <ul class="pager">
-                <li ng-class="{ 'disabled': wizardStatus === allStatus[0] }" class="previous">
-                  <a href="javascript:void(0)" ng-click="back()">Back</a>
-                </li>
-
-                <li ng-class="{ 'disabled': wizardStatus !== allStatus[0] }"><a href="javascript:void(0)" style="cursor:default">1</a></li>
-                <li ng-class="{ 'disabled': wizardStatus !== allStatus[1] }"><a href="javascript:void(0)" style="cursor:default">2</a></li>
-                <li ng-class="{ 'disabled': wizardStatus !== allStatus[2] }"><a href="javascript:void(0)" style="cursor:default">3</a></li>
-
-                <li ng-class="{ 'disabled': wizardStatus === allStatus[allStatus.length - 1] }" class="next">
-                  <a href="javascript:void(0)" ng-click="forward()">Next</a>
-                </li>
-              </ul>
-            </nav>
-            <nav ng-show="wizardStatus === 'progress'">
-              <ul class="pager">
-                <li class="next">
-                  <a href="javascript:void(0)" ng-click="cancel()">Cancel</a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div ng-controller="financial-profile-tool-controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('financial_profile')" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 800px">
-        <div class="panel-heading">
-          {{ map_tools.get_tool_name('financial_profile') }}
-          {{ selectedArea ? ' · '+selectedArea.name : '' }}
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
-            <p ng-hide="selectedArea" class="text-center">Select a geographic area</p>
-            <ul class="nav nav-tabs" role="tablist" ng-show="selectedArea">
-              <li role="presentation" class="active"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
-              <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
-              <li role="presentation"><a href="#financialProfileRevenue" aria-controls="messages" role="tab" data-toggle="tab">Revenue</a></li>
-              <li role="presentation"><a href="#financialProfilePremises" aria-controls="messages" role="tab" data-toggle="tab">Premises</a></li>
-              <li role="presentation"><a href="#financialProfileSubscribers" aria-controls="messages" role="tab" data-toggle="tab">Subscribers</a></li>
-            </ul>
-            <div class="tab-content" ng-show="selectedArea">
-              <div role="tabpanel" class="tab-pane active" id="financialProfileCashFlow">
-                <br>
-                <p class="text-center"><strong>Cash Flow Summary</strong></p>
-                <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-cash-flow-legend"></div>
-              </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfileCapex">
-                <br>
-                <form class="form-inline">
-                  <div class="form-group">
-                    <select class="form-control">
-                      <option>BAU</option>
-                      <option>Fiber</option>
-                      <option>Incremental capex</option>
-                    </select>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Businesses
-                    </label>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Households
-                    </label>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Towers
-                    </label>
-                  </div>
-                </form>
-                <br>
-                <p class="text-center"><strong>BAU Capex</strong></p>
-                <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-capex-legend"></div>
-                <br>
-                <p class="text-center"><strong>Budget Allocation</strong></p>
-                <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-budget-legend"></div>
-              </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfileRevenue">
-                <br>
-                <form class="form-inline">
-                  <div class="form-group">
-                    <select class="form-control">
-                      <option>BAU</option>
-                      <option>Fiber</option>
-                      <option>Incremental</option>
-                    </select>
-                  </div>
-                </form>
-                <br>
-                <p class="text-center"><strong>BAU Revenue</strong></p>
-                <canvas id="financial-profile-chart-revenue" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-revenue-legend"></div>
-              </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfilePremises">
-                <br>
-                <form class="form-inline" ng-show="aboveWirecenter">
-                  <div class="form-group">
-                    <select class="form-control">
-                      <option>BAU</option>
-                      <option>Fiber</option>
-                      <option>Incremental</option>
-                    </select>
-                  </div>
-                </form>
-                <form class="form-inline">
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Businesses
-                    </label>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Households
-                    </label>
-                  </div>
-                  <div class="checkbox" style="margin-left: 10px">
-                    <label>
-                      <input type="checkbox"> Towers
-                    </label>
-                  </div>
-                </form>
-                <br>
-                <p class="text-center"><strong>All Premises Passed</strong></p>
-                <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-premises-legend"></div>
-              </div>
-              <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers">
-                <br>
-                <form class="form-inline">
-                  <div class="radio" style="margin-left: 10px">
-                    <label>
-                      <input type="radio"> Businesses
-                    </label>
-                  </div>
-                  <div class="radio" style="margin-left: 10px">
-                    <label>
-                      <input type="radio"> Households
-                    </label>
-                  </div>
-                  <div class="radio" style="margin-left: 10px">
-                    <label>
-                      <input type="radio"> Towers
-                    </label>
-                  </div>
-                </form>
-                <br>
-                <p class="text-center"><strong>Subscribers</strong></p>
-                <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-subscribers-legend"></div>
-                <br>
-                <p class="text-center"><strong>Penetration</strong></p>
-                <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
-                <div id="financial-profile-chart-penetration-legend"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div ng-controller="target-builder-controller" class="map-tool-wrapper">
-      <div ng-show="map_tools.is_visible('target_builder')" class="map-tool panel panel-primary" id="target_builder_controller">
-        <div class="panel-heading">
-          {{ map_tools.get_tool_name('target_builder') }}
-        </div>
-        <div>
-          <div class="panel-body" ng-show="map_tools.is_expanded('target_builder')">
-            <form>
-              <p><strong>Optimization type</strong></p>
-              <select class="form-control" ng-model="optimizationType" ng-change="optimizationTypeChanged()">
-                <option value="capex">Capex</option>
-                <option value="npv">NPV</option>
-              </select>
-              <div ng-show="optimizationType === 'npv'" style="margin-top:5px" id="target-builder-budget">
-                <p>
-                  <label style="font-weight: 100; margin-right: 20px">
-                    <input type="radio" name="npvType" value="targeted" ng-model="npvType" ng-change="npvTypeChanged()">
-                    Targeted
-                  </label>
-                  <label style="font-weight: 100">
-                    <input type="radio" name="npvType" value="untargeted" ng-model="npvType" ng-change="npvTypeChanged()">
-                    Untargeted
-                  </label>
-                </p>
-                <div ng-show="npvType === 'targeted'">
-                  <div class="row">
-                    <div class="col-md-7">
-                      <p><strong>Total budget</strong></p>
-                    </div>
-                    <div class="col-md-5">
-                      <p class="text-right"><strong>Discount rate</strong></p>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-7">
-                      <div class="form-group form-group-sm">
-                        <div class="input-group input-group-sm">
-                          <div class="input-group-addon">$</div>
-                          <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-5">
-                      <div class="form-group form-group-sm">
-                        <div class="input-group input-group-sm">
-                          <input type="number" class="form-control text-right" ng-model="discountRate" min="0" max="100" step="1" name="discount_rate">
-                          <div class="input-group-addon">%</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-danger text-right" ng-show="overbugdet && npvType === 'targeted'">You are over budget. Current cost is {{plan.metadata.total_cost | currency}}</p>
-                </div>
-                <p class="text-right">
-                  <button class="btn btn-default btn-small">Update</button>
-                </p>
-              </div>
-
-              <br>
-              <p><strong>Search, Click or Upload Locations</strong></p>
-              <input class="form-control" placeholder="Address, Business Name">
-              <br>
-              <p>
-                Select:
-                <button class="btn btn-default btn-sm"
-                  ng-class="{'btn-success active': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
-                  ng-click="setSelectedTool('single')">Single</button>
-                <button class="btn btn-default btn-sm"
-                  ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
-                  ng-click="setSelectedTool('polygon')">Many</button>
-                <i class="fa fa-file-o"></i>
-              </p>
-              <p><strong>Targeted Locations</strong></p>
-              <ul style="padding: 0 20px">
-                <li>Businesses: {{plan.metadata.customers_businesses_total}}</li>
-                <li>Households: {{plan.metadata.customers_households_total}}</li>
-                <li>Towers: {{plan.metadata.customers_towers_total}}</li>
-              </ul>
-            </form>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div id="map-canvas-wrapper">
@@ -1425,6 +243,34 @@
           <a href="javascript:void(0)" ng-click="select_option($index)">{{option.label}}</a>
         </li>
       </ul>
+    </div>
+
+    <div ng-controller="legend-controller" id="legend-controller">
+      <div class="map-tool panel panel-primary">
+        <div ng-show="expanded" style="padding: 10px">
+          <p><strong>Locations</strong></p>
+          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_default.png" style="width:16px"> = Business</p>
+          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_default.png" style="width:16px"> = Household</p>
+          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="height:16px"> = Tower</p>
+          <hr>
+          <p><strong>Network</strong></p>
+          <div ng-repeat="node_type in view_node_types">
+            <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png" style="width:16px"> = {{node_type.description}}</p>
+          </div>
+
+          <ul class="pie-legend">
+            <li><span style="background-color:blue"></span> = Feeder Fiber</li>
+            <li><span style="background-color:red"></span> = Distribution Fiber</li>
+          </ul>
+        </div>
+        <div class="panel-heading">
+          Legend
+          <div class="pull-right">
+            <a href="javascript:void(0)" ng-click="toggle()" ng-hide="expanded"><span style="color:white" class="fa fa-chevron-up"></span></a>
+            <a href="javascript:void(0)" ng-click="toggle()" ng-show="expanded"><span style="color:white" class="fa fa-chevron-down"></span></a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="loader-wrapper"><div class="loader"></div></div>
@@ -1482,6 +328,8 @@
       }
     }
 
+    $()
+
     var user_id = <%= user.id %>;
     var config = <%- JSON.stringify(config) %>;
 
@@ -1496,11 +344,11 @@
   <script src="javascripts/vendors/randomColor.min.js"></script>
   <script src="javascripts/vendors/Chart.StackedBar.js"></script>
   <script src="javascripts/vendors/nouislider.min.js"></script>
+  <script src="javascripts/vendors/clipboard.min.js"></script>
 
   <script src="javascripts/lib/controllers/financial_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
-  <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
   <script src="javascripts/lib/controllers/boundaries_controller.js"></script>
   <script src="javascripts/lib/controllers/locations_controller.js"></script>
@@ -1514,6 +362,9 @@
   <script src="javascripts/lib/controllers/area_network_planning_controller.js"></script>
   <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
   <script src="javascripts/lib/controllers/target_builder_controller.js"></script>
+  <script src="javascripts/lib/controllers/legend_controller.js"></script>
+  <script src="javascripts/lib/controllers/global_search_controller.js"></script>
+  <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
@@ -1530,9 +381,27 @@
     $(function () {
       var tooltips = $('#left-col [data-toggle="tooltip"]');
       tooltips.tooltip();
-      tooltips.on('click mouseout', function() {
+      tooltips.on('click mouseout', function () {
         $(this).tooltip('hide')
       })
+    })
+
+    var expander = $('#expander')
+    var icon = $('#expander .fa')
+    var leftcol = $('#left-col')
+    expander.on('click', function () {
+      if (leftcol.hasClass('left-col-expanded')) {
+        $('#map-tools-accordion .collapse.in').removeClass('in')
+        icon.removeClass('fa-chevron-left')
+        icon.addClass('fa-chevron-right')
+        leftcol.removeClass('left-col-expanded')
+        leftcol.addClass('left-col-collapsed')
+      } else {
+        icon.addClass('fa-chevron-left')
+        icon.removeClass('fa-chevron-right')
+        leftcol.removeClass('left-col-collapsed')
+        leftcol.addClass('left-col-expanded')
+      }
     })
 
     swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> })
@@ -1544,8 +413,8 @@
     })
 
     function calculatePanelHeight () {
-      var maxHeight = $(document).height() - 154
-      $('.panel-body').css('max-height', maxHeight)
+      var maxHeight = $(document).height() - 400
+      $('.panel-collapse > .panel-body').css('max-height', maxHeight)
     }
 
     calculatePanelHeight()

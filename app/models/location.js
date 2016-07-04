@@ -13,25 +13,63 @@ module.exports = class Location {
   * Returns the businesses and households locations except the selected ones
   */
   static findLocations (plan_id, type, filters, viewport) {
-    var where = {
-      businesses: 'WHERE locations.total_businesses > 0',
-      households: 'WHERE locations.total_households > 0',
-      '': ''
-    }
-    var sql = `
+    var params = [plan_id]
+    var parts = []
+    var join
+    if (!type || type === 'households') {
+      join = ''
+      if (filters.household_categories.length > 0) {
+        params.push(filters.household_categories)
+        join = `
+          JOIN households h ON h.location_id = locations.id
+          JOIN client.household_category_mappings hcm ON h.id = hcm.household_id
+          JOIN client.household_categories hc ON hc.id = hcm.household_category_id AND hc.id IN ($${params.length})
+        `
+      }
+      parts.push(`(
+        -- households
         SELECT locations.id, locations.geom, total_businesses, total_households
           FROM locations
-               ${where[type || '']}
+               ${join}
+         WHERE locations.total_households > 0
         EXCEPT
         SELECT locations.id, locations.geom, total_businesses, total_households
           FROM locations
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
            AND plan_targets.location_id = locations.id
-               ${where[type || '']}
-      GROUP BY locations.id
-    `
-    return database.points(sql, [plan_id], true, viewport)
+               ${join}
+         WHERE locations.total_households > 0
+      )`)
+    }
+    if (!type || type === 'businesses') {
+      join = ''
+      if (filters.business_categories.length > 0) {
+        params.push(filters.business_categories)
+        join = `
+          JOIN businesses b ON b.location_id = locations.id
+          JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
+          JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($${params.length})
+        `
+      }
+      parts.push(`(
+        -- businesses
+        SELECT locations.id, locations.geom, total_businesses, total_households
+          FROM locations
+               ${join}
+         WHERE locations.total_businesses > 0
+        EXCEPT
+        SELECT locations.id, locations.geom, total_businesses, total_households
+          FROM locations
+          JOIN client.plan_targets
+            ON plan_targets.plan_id = $1
+           AND plan_targets.location_id = locations.id
+               ${join}
+         WHERE locations.total_businesses > 0
+      )`)
+    }
+    var sql = parts.join(' UNION ALL ')
+    return database.points(sql, params, true, viewport)
   }
 
   /*
@@ -430,6 +468,14 @@ module.exports = class Location {
       })
       .then((rows) => {
         output.products = rows
+        return database.query('SELECT * FROM client.business_categories')
+      })
+      .then((rows) => {
+        output.business_categories = rows
+        return database.query('SELECT * FROM client.household_categories')
+      })
+      .then((rows) => {
+        output.household_categories = rows
         return output
       })
   }

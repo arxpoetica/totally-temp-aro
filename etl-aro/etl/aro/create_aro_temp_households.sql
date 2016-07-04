@@ -43,7 +43,23 @@ INSERT INTO aro.temp_households (location_id, address, city, state, zipcode, lat
         OR
         wc.wirecenter = 'SYRCNYJS'
         OR
-        wc.wirecenter = 'SYRCNYSA';
+        wc.wirecenter = 'SYRCNYSA'
+        OR
+        wc.wirecenter = 'ADCTNYXA'
+        OR
+        wc.wirecenter = 'LOWVNYXA'
+        OR
+        wc.wirecenter = 'BFLONYHE'
+        OR
+        wc.wirecenter = 'BFLONYMA'
+        OR
+        wc.wirecenter = 'BFLONYEL'
+        OR
+        wc.wirecenter = 'BFLONYBA'
+        OR
+        wc.wirecenter = 'BFLONYSP'
+        OR
+        wc.wirecenter = 'BFLONYFR';
 
 CREATE INDEX aro_temp_households_location_index ON aro.temp_households(location_id);
 CREATE INDEX aro_temp_households_geog_index ON aro.temp_households USING gist(geog);

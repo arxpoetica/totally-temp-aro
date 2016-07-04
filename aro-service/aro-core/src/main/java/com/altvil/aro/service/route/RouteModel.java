@@ -33,4 +33,5 @@ public interface RouteModel {
 	
 	public Collection<NetworkAssignment> getNetworkAssignments(GraphNode graphNode) ; 
 
+	Collection<GraphAssignment> getGraphAssignments(GraphNode graphNode); 
 }

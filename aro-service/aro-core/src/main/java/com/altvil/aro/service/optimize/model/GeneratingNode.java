@@ -2,7 +2,6 @@ package com.altvil.aro.service.optimize.model;
 
 import java.util.Collection;
 
-import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.optimize.spi.AnalysisContext;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 
@@ -12,6 +11,8 @@ public interface GeneratingNode extends AnalysisNode,
 	AnalysisContext getAnalysisContext() ;
 	
 	FiberAssignment getFiberAssignment();
+	
+	boolean isSourceEquipment() ;
 
 	EquipmentAssignment getEquipmentAssignment();
 	
@@ -35,18 +36,14 @@ public interface GeneratingNode extends AnalysisNode,
 	
 	interface Builder {
 		
-		Builder addCompositeChild(FiberAssignment fiberAssignment)  ;
-		
-		Builder addChild(FiberAssignment fiberAssignment, EquipmentAssignment equipment);
-		
-		GraphEdgeAssignment getParentAssignment() ;
-		
-		GraphEdgeAssignment getAssignment() ;
-		
-		boolean isInitMode() ;
-		void setInitMode(boolean mode) ;
-
+		//Builder addChild(FiberAssignment fiberAssignment, EquipmentAssignment equipment);
+		void addChild(Builder child) ;
+		void addChildren(Collection<Builder> children) ;
 		GeneratingNode build();
+		GeneratingNode getGeneratingNode() ;
+		
+
+
 	}
 
 }

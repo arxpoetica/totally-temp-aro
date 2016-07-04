@@ -33,6 +33,7 @@ public class FiberStrandConverterImpl implements FiberStrandConverter {
 		register(FiberType.DROP, FiberType.DISTRIBUTION, (val) -> val) ;
 		register(FiberType.DISTRIBUTION, FiberType.FEEDER, (val) -> val / 32.0); //TODO KG move to config
 		register(FiberType.FEEDER, FiberType.BACKBONE, (val) -> val); 
+		register(FiberType.FEEDER, FiberType.ROOT, (val) -> val); 
 		register(FiberType.BACKBONE, FiberType.ROOT, (val) -> val); 
 		
 
@@ -46,7 +47,9 @@ public class FiberStrandConverterImpl implements FiberStrandConverter {
 	private void fill() {
 		
 		Converter identity = (val) -> val ;
- 		Converter error = (val) -> {throw new AroException("Fiber Conversion Exception") ; };
+ 		Converter error = (val) -> {
+ 			throw new AroException("Fiber Conversion Exception") ; 
+ 		};
 		
 		for (FiberType source : FiberType.values()) {
 			for(FiberType target : FiberType.values()) {

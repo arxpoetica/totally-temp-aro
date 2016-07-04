@@ -90,7 +90,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	}
 	
 	public boolean isFull() {
-		return (thresholds.getMaxlocationPerFDT() - coverage) < 0.001 ;
+		return Math.abs((thresholds.getMaxlocationPerFDT() - coverage)) < 0.001 ;
 	}
 
 	//
@@ -106,6 +106,11 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	
 	
 	public double assign(PinnedAssignedEntityDemand li) {
+		
+		
+		if( this.getPinnedLocation() == null ) {
+			throw new RuntimeException("Undefined Pin") ;
+		}
 		
 		if( li.getDemand() == 0 ) {
 			throw new RuntimeException("Grrrr") ;

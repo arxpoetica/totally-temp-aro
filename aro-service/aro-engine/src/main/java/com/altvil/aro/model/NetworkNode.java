@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.altvil.aro.util.json.GeometryJsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.Point;
 
 @Entity
@@ -18,11 +20,17 @@ public class NetworkNode extends ComparableModel {
 
 	private Long id;
 	//private String stateCode; //Create a Logical Partition 
-	private double lattitude;
-	private double longitude;
+	private Double lattitude;
+	private Double longitude;
 	private int node_type_id;
 	private Point point;
 	private Point geogPoint;
+	
+	private double houseHoldCount ;
+	private double businessCount ;
+	private double cellTowerCount ;
+	private double atomicUnit ;
+	
 	private long routeId;
 	
 	@Transient
@@ -45,20 +53,20 @@ public class NetworkNode extends ComparableModel {
 	}
 
 	@Column(name = "lat")
-	public double getLattitude() {
+	public Double getLattitude() {
 		return lattitude;
 	}
 
-	public void setLattitude(double lattitude) {
+	public void setLattitude(Double lattitude) {
 		this.lattitude = lattitude;
 	}
 
 	@Column(name = "lon")
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 
@@ -72,6 +80,7 @@ public class NetworkNode extends ComparableModel {
 	}
 
 	@Column(name = "geom")
+	@JsonDeserialize(using = GeometryJsonDeserializer.class)
 	public Point getPoint() {
 		return point;
 	}
@@ -81,12 +90,50 @@ public class NetworkNode extends ComparableModel {
 	}
 
 	@Column(name = "geog")
+	@JsonDeserialize(using = GeometryJsonDeserializer.class)
 	public Point getGeogPoint() {
 		return geogPoint;
 	}
 
 	public void setGeogPoint(Point geogPoint) {
 		this.geogPoint = geogPoint;
+	}
+	
+	
+	@Column(name = "atomic_count")
+	public Double getAtomicUnit() {
+		return atomicUnit;
+	}
+
+	public void setAtomicUnit(Double atomicUnit) {
+		this.atomicUnit = atomicUnit;
+	}
+	
+	@Column(name = "household_count")
+	public double getHouseHoldCount() {
+		return houseHoldCount;
+	}
+
+	public void setHouseHoldCount(double houseHoldCount) {
+		this.houseHoldCount = houseHoldCount;
+	}
+
+	@Column(name = "business_count")
+	public double getBusinessCount() {
+		return businessCount;
+	}
+
+	public void setBusinessCount(double businessCount) {
+		this.businessCount = businessCount;
+	}
+
+	@Column(name = "celltower_count")
+	public double getCellTowerCount() {
+		return cellTowerCount;
+	}
+
+	public void setCellTowerCount(double cellTowerCount) {
+		this.cellTowerCount = cellTowerCount;
 	}
 
 	@Column(name = "plan_id")

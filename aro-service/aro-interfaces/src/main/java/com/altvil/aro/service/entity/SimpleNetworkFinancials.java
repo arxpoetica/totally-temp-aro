@@ -1,7 +1,5 @@
 package com.altvil.aro.service.entity;
 
-import javax.print.attribute.standard.Finishings;
-
 public class SimpleNetworkFinancials {
 
 	public static double costPerAtomicUnit = 199.11;
@@ -26,10 +24,15 @@ public class SimpleNetworkFinancials {
 	
 	public SimpleNetworkFinancials(LocationDemand locationDemand,
 			double fiberLength, FinancialInputs fi) {
-		init(locationDemand, fiberLength, fi);
+		init(locationDemand, fiberLength, fi.getDiscountRate(), fi.getYears());
 	}
 
-	private void init(LocationDemand locationDemand, double fiberLength, FinancialInputs fi) {
+	public SimpleNetworkFinancials(LocationDemand locationDemand,
+			double fiberLength, double discountRate, int years) {
+		init(locationDemand, fiberLength, discountRate, years);
+	}
+
+	private void init(LocationDemand locationDemand, double fiberLength, double discountRate, int years) {
 		this.locationDemand = locationDemand;
 		this.fiberLength = fiberLength;
 
@@ -41,20 +44,20 @@ public class SimpleNetworkFinancials {
 		this.fdhCost = equipmentCost * fdhRatio;
 		this.fdtCost = equipmentCost * fdtRatio;
 		
-		this.npv = calcNpv(fi) ;
+		this.npv = calcNpv(discountRate, years) ;
 		
 
 	}
 	
 	
-	private double calcNpv(FinancialInputs fi) {
-		return (locationDemand.getMonthlyRevenueImpact() * 12 * fi.getP() * calcNpvFactor(fi)) - this.getTotalCost() ;
+	private double calcNpv(double discountRate, int years) {
+		return (getRevenue() * calcNpvFactor(discountRate, years)) - this.getTotalCost() ;
 	}
 	
-	private double calcNpvFactor(FinancialInputs fi) {
+	private double calcNpvFactor(double discountRate, int years) {
 		double npvFactor = 0;
-        for (int t = 1; t <= fi.getYears(); t++) {
-            npvFactor += 1 / Math.pow(1 + fi.getDiscountRate(), t);
+        for (int t = 1; t <= years; t++) {
+            npvFactor += 1 / Math.pow(1 + discountRate, t);
         }
         return npvFactor ;
 	}
@@ -113,6 +116,10 @@ public class SimpleNetworkFinancials {
 
 	public void setFdtCost(double fdtCost) {
 		this.fdtCost = fdtCost;
+	}
+
+	public double getRevenue() {
+		return locationDemand.getMonthlyRevenueImpact() * 12;
 	}
 
 	public double getTotalCost() {

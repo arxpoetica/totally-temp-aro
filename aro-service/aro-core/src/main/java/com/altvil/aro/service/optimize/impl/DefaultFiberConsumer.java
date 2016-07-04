@@ -5,6 +5,8 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.optimize.model.FiberConsumer;
 import com.altvil.aro.service.optimize.model.FiberProducer;
@@ -87,4 +89,7 @@ public class DefaultFiberConsumer implements FiberConsumer {
 		
 	}
 
+	public String toString() {
+		return new ToStringBuilder(this).append("map", map).append("set", set).toString();
+	}
 }

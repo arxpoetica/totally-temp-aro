@@ -15,7 +15,7 @@ public interface EquipmentAssignment extends MaterialAssigment {
 	AroEntity getParentEntity() ;
 	GraphEdgeAssignment getGraphAssignment() ;
 
-	boolean rebuildNetwork(GeneratingNode node, AnalysisContext ctx);
+	//boolean rebuildNetwork(GeneratingNode node, AnalysisContext ctx);
 	void serialize(GeneratingNode node, ModelSerializer serializer) ;
 
 	/**

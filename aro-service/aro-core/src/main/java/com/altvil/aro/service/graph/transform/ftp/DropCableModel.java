@@ -6,11 +6,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.UnitUtils;
 
 public class DropCableModel {
+	
+	private static final Logger log = LoggerFactory
+			.getLogger(DropCableModel.class.getName());
+
 	
 	
 	public static DropCableModel create(Collection<DropCable> dropCables) {
@@ -65,15 +72,21 @@ public class DropCableModel {
 	// the model supports.
 
 	public DropCable getDropCable(double length) {
-		assert length > 0 : "Drop cables must have a positive length.";
+		assert length >= 0 : "Drop cables must have a positive length.";
 
 		int index = Arrays.binarySearch(dropLengths, length);
 
 		if (index < 0) {
 			index = -index - 1;
 
-			assert index < dropLengths.length : "Drop cable exceeded max length of model.";
+			if( index >= dropLengths.length ) {
+				index = dropLengths.length  -1 ;
+				log.info("Drop Cable Model violated : length=" + length);
+			}
+			
 		}
+		
+		
 
 		return dropCables.get(index);
 	}

@@ -21,16 +21,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler {
-
-	private static List<GraphEdgeAssignment> EMPTY_LOCATIONS = Collections
-			.emptyList();
-
 	private GeoSegment parent;
 	private double length;
 	private Long gid;
 	private Geometry geometry;
-	private List<GraphEdgeAssignment> roadLocations = EMPTY_LOCATIONS;
+	private List<GraphEdgeAssignment> roadLocations;
 	private LengthIndexedLine lengthIndexedLine;
 	private double angleInRadians;
 	private double geometryLength;
@@ -59,7 +57,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	protected DefaultSegmentLocations(GeoSegment parent, double length,
 			Long gid, Geometry geometry) {
-		this(parent, length, gid, geometry, EMPTY_LOCATIONS);
+		this(parent, length, gid, geometry, new ArrayList<>());
 	}
 
 	public static GeoSegment create(GeoSegment parent, double length, Long gid,
@@ -124,7 +122,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	@Override
 	public String toString() {
-		return "Seg(gid=" + gid + ",len=" + length + ")";
+		return new ToStringBuilder(this).append("gid", gid).append("length", length).append("roadLocations", roadLocations).toString();
 	}
 
 	@Override
@@ -188,6 +186,52 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	@Override
 	public Collection<GraphEdgeAssignment> getGeoSegmentAssignments() {
+		//KJG I'm hoping that this is no longer needed
+//		if (parent != null) {
+//			return new AbstractCollection<GraphEdgeAssignment>() {
+//				@Override
+//				public Iterator<GraphEdgeAssignment> iterator() {
+//					@SuppressWarnings("unchecked")
+//					final Iterator<GraphEdgeAssignment>[] iterators =new Iterator[]{ roadLocations.iterator(), parent.getGeoSegmentAssignments().iterator()};
+//					
+//					return new Iterator<GraphEdgeAssignment>() {
+//						int itr = 0;
+//						@Override
+//						public boolean hasNext() {
+//							while (itr < iterators.length) {
+//								if (iterators[itr].hasNext()) {
+//									return true;
+//								}
+//								itr++;
+//							}
+//							
+//							return false;
+//						}
+//
+//						@Override
+//						public GraphEdgeAssignment next() {
+//							return iterators[itr].next();
+//						}
+//
+//						@Override
+//						public void remove() {
+//							iterators[itr].remove();
+//						}						
+//					};
+//				}
+//
+//				@Override
+//				public int size() {
+//					return roadLocations.size() + parent.getGeoSegmentAssignments().size();
+//				}
+//
+//				@Override
+//				public boolean add(GraphEdgeAssignment e) {
+//					return roadLocations.add(e);
+//				}
+//			};
+//		}
+		
 		return roadLocations;
 	}
 
@@ -205,7 +249,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	@Override
 	public GeoSegment reverse() {
 		DefaultSegmentLocations seg = new DefaultSegmentLocations(this, length,
-				gid, geometry.reverse(), EMPTY_LOCATIONS);
+				gid, geometry.reverse(), new ArrayList<>());
 
 		seg.reverseOriginalLocations(this);
 
@@ -221,7 +265,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 			Collection<GraphEdgeAssignment> orginalLocations) {
 
 		if (orginalLocations.size() == 0) {
-			return EMPTY_LOCATIONS;
+			return new ArrayList<>();
 		}
 
 		List<GraphEdgeAssignment> updated = StreamUtil.map(orginalLocations,
@@ -300,6 +344,10 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 				double offsetInMeters) {
 			this.location = location;
 			this.offset =  offsetInMeters ;
+		}
+		
+		public String toString() {
+			return new ToStringBuilder(this).append("location", location).append("offset", offset).toString();
 		}
 
 

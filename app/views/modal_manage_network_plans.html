@@ -6,18 +6,18 @@
         <h4 class="modal-title">Manage Network Plans</h4>
       </div>
       <div class="modal-body">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Search Plans by Name" ng-model="search_text" ng-change="loadPlans()">
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-search"></span>
+          </span>
+        </div>
+        <hr>
         <p ng-show="plans.length < 1" class="text-center">
-          No plans stored in the database yet
+          No plans found
         </p>
         <div>
           <form ng-show="plans.length > 0">
-            <div class="input-group">
-              <input type="text" class="form-control" placeholder="Search Plans by Name" ng-model="search_text" ng-change="loadPlans()">
-              <span class="input-group-addon">
-                <span class="glyphicon glyphicon-search"></span>
-              </span>
-            </div>
-            <hr>
           </form>
           <table class="table table-striped">
             <thead>

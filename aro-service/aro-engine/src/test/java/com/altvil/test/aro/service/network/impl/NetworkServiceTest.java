@@ -6,9 +6,6 @@ package com.altvil.test.aro.service.network.impl;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Set;
-import java.util.function.Function;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,6 +20,7 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
 import com.altvil.aro.service.planning.fiber.strategies.FiberPlanConfiguration;
 import com.altvil.enumerations.FiberPlanAlgorithm;
@@ -70,8 +68,19 @@ public class NetworkServiceTest {
 	}
 	
 	
+	@SuppressWarnings("serial")
 	private FiberPlanConfiguration mockFiberPlanStrategy(final long planId, final FiberPlanAlgorithm algorithm, final int year, final boolean filteringRoadLocationsBySelection) {
-		return new FiberPlanConfiguration(mockFiberPlan(algorithm, year)) {
+		GlobalConstraint globalConstraint = new GlobalConstraint() {
+			@Override
+			public double nextParametric() {
+				return 1;
+			}
+
+			@Override
+			public boolean isConverging(Object plan) {
+				return false;
+			}};
+		return new FiberPlanConfiguration(mockFiberPlan(algorithm, year), globalConstraint) {
 
 			@Override
 			public boolean isFilteringRoadLocationDemandsBySelection() {
@@ -85,13 +94,7 @@ public class NetworkServiceTest {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public FiberPlanConfiguration dependentPlan(long dependentId) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public Function<AroEdge<GeoSegment>, Set<GraphNode>> getSelectedEdges(NetworkData networkData) {
+			public FiberPlanConfiguration dependentPlan(long dependentId, int wireCenterId) {
 				// TODO Auto-generated method stub
 				return null;
 			}

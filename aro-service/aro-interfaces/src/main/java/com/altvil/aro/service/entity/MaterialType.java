@@ -1,8 +1,10 @@
 package com.altvil.aro.service.entity;
 
+
+//Ths should more properly be ready as NetworkCode
 public enum MaterialType {
 
-	FDT, FDH, BFT, SPLITTER_16, SPLITTER_32, SPLITTER_64,
+	CO, FDT, FDH, BFT, SPLITTER_16, SPLITTER_32, SPLITTER_64,
 
 	;
 

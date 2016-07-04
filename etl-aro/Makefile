@@ -21,6 +21,9 @@ etl_geotel:
 etl_demographics:
 	etl/demographics/demographics_etl.sh
 
+etl_nbm:
+	etl/nbm/nbm_etl.sh
+
 etl_aro:
 	etl/aro/aro_etl.sh
 
@@ -32,6 +35,9 @@ etl_auth:
 
 etl_temp_hh:
 	etl/temp_hh/temp_hh_etl.sh
+
+etl_financial:
+	etl/financial/etl.sh
 
 reset_tiger:
 	etl/reset_tiger_data.sh
@@ -45,6 +51,9 @@ reset_aro:
 reset_infousa:
 	etl/reset_infousa_data.sh
 
+reset_nbm:
+	etl/reset_nbm_data.sh
+
 reset_geotel:
 	etl/reset_geotel_data.sh
 
@@ -57,16 +66,21 @@ reset_client:
 reset_auth:
 	etl/reset_auth_data.sh
 
+reset_financial:
+	etl/reset_financial.sh
+
 reset_temp_hh:
 	etl/reset_temp_hh.sh
 
-etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_temp_hh reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_temp_hh etl_aro
+etl_reload_general: reset_tiger reset_sita reset_infousa reset_geotel reset_demographics reset_nbm reset_temp_hh reset_aro etl_tiger etl_sita etl_infousa etl_geotel etl_demographics etl_nbm etl_temp_hh etl_aro
 
-etl_reload_client: reset_client etl_client
+etl_reload_client: reset_client etl_client reset_financial etl_financial
+
+etl_reload_financial: reset_financial etl_financial
 
 etl_reload_auth: reset_auth etl_auth
 
-etl_reload_all: etl_reload_general etl_reload_client
+etl_reload_all: etl_reload_general etl_reload_client etl_reload_financial
 
 etl_really_reload_all: etl_reload_general etl_reload_client etl_reload_auth
 
@@ -75,6 +89,7 @@ etl_test_client:
 
 etl_test_aro:
 	etl/test/aro.sh
+
 
 etl_test_all: etl_test_aro etl_test_client
 

@@ -1,5 +1,7 @@
 package com.altvil.aro.service.graph.transform.ftp;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.utils.UnitUtils;
 
 public class FtthThreshholds {
@@ -90,15 +92,19 @@ public class FtthThreshholds {
 		return dropCableConstraintsSupported;
 	}
 
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
+
 	public static class Builder {
 
 		private FtthThreshholds thresholds = new FtthThreshholds();
 
 		private int splitterRatio = 32;
 
-		private int minSplitters = 6;
-		private int idealSplitters = 26;
-		private int maxSplitters = 32;
+		private int minSplitters = 10;
+		private int idealSplitters = 15;
+		private int maxSplitters = 20;
 
 		public Builder setFdtCount(Integer count) {
 			if (count != null) {

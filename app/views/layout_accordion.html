@@ -1,0 +1,138 @@
+<div>
+  <% include controller_global_search.html %>
+  <div class="panel-group" id="map-tools-accordion" role="tablist" aria-multiselectable="true" style="float: left">
+
+    <div class="panel panel-default" ng-controller="locations_controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <span class="hide-on-expanded fa fa-building"></span>
+          <a role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-customers" class="hide-on-collapsed">
+            Customers
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-customers" class="panel-collapse collapse" role="tabpanel" data-tool="locations">
+        <div class="panel-body">
+          <% include controller_locations.html %>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default" ng-controller="fiber_plant_controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <span class="hide-on-expanded fa fa-pie-chart"></span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-carriers">
+            Carriers
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-carriers" class="panel-collapse collapse" role="tabpanel" data-tool="fiber_plant">
+        <div class="panel-body">
+          <% include controller_fiber_plant.html %>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default" ng-controller="equipment_nodes_controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <span class="hide-on-expanded icon icon-network-equipment"></span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-network">
+            Network
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-network" class="panel-collapse collapse" role="tabpanel" data-tool="network_nodes">
+        <div class="panel-body">
+          <% include controller_equipment.html %>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default" ng-controller="boundaries_controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <span class="hide-on-expanded icon icon-boundaries"></span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-boundaries">
+            Boundaries
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-boundaries" class="panel-collapse collapse" role="tabpanel" data-tool="boundaries">
+        <div class="panel-body">
+          <% include controller_boundaries.html %>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default" ng-controller="area-network-planning-controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <span class="hide-on-expanded icon icon-network-planning"></span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-modeling">
+            Scenario Modeling Tools
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-modeling" class="panel-collapse collapse" role="tabpanel" data-tool="area_network_planning">
+        <div class="panel-body">
+          <% include controller_area_network_planning.html %>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default" ng-controller="financial-profile-tool-controller" ng-show="plan.metadata.total_cost">
+      <div class="panel-heading" role="tab" style="background-color: black">
+        <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed" style="margin-top: -5px">
+            <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'global'}" ng-click="setMode('global')">Global</button>
+            <button class="btn btn-sm btn-default" ng-class="{'btn-primary': mode === 'area'}" ng-click="setMode('area')">Area</button>
+          </div>
+          <span class="hide-on-expanded">R</span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-financial">
+            Results
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-financial" class="panel-collapse collapse" role="tabpanel" data-tool="financial_profile">
+        <div class="panel-body">
+          <% include controller_financial_profile_summary.html %>
+          <div class="map-tool-wrapper" style="left: 400px; top: 47px">
+            <div ng-show="details" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 800px">
+              <div class="panel-heading">
+                {{ map_tools.get_tool_name('financial_profile') }}
+                {{ mode === 'area' && selectedArea ? ' · '+selectedArea.name : '' }}
+                <a href="javascript:void(0)" class="pull-right" ng-click="showDetails(false)">
+                  <span style="color:white" class="fa fa-close"></span>
+                </a>
+              </div>
+              <% include controller_financial_profile_tool.html %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if (!config.ui.map_tools.target_builder.disabled) { %>
+    <div class="panel panel-default" ng-controller="target-builder-controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <span class="hide-on-expanded icon icon-network-planning-targeted"></span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-target-builder">
+            Target builder
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-target-builder" class="panel-collapse collapse" role="tabpanel" data-tool="target_builder">
+        <div class="panel-body">
+          <% include controller_target_builder.html %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <div style="float: left; margin-top: 1px">
+    <button class="btn btn-sm btn-default" id="expander"><span class="fa fa-chevron-left"></span></button>
+  </div>
+</div>

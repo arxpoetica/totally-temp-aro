@@ -1,5 +1,7 @@
 package com.altvil.aro.service.entity.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.AroEntity;
 
 public abstract class AbstractEntity implements AroEntity {
@@ -22,7 +24,7 @@ public abstract class AbstractEntity implements AroEntity {
 
 	@Override
 	public String toString() {
-		return getType().getSimpleName() + ":" + objectId;
+		return new ToStringBuilder(this).append("objectId", objectId).toString();
 	}
 
 	@Override

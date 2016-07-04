@@ -1,5 +1,7 @@
 package com.altvil.aro.service.network.impl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.GeometryUtil;
 import com.vividsolutions.jts.geom.Point;
@@ -66,6 +68,14 @@ public class RoadLocationImpl implements RoadLocation {
 	private Point roadSegmentClosestPoint;
 	private double distanceFromRoadSegmentInMeters;
 	private Point locationPoint;
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("tlid", tlid)
+				.append("roadSegmentClosestPoint",
+						roadSegmentClosestPoint == null ? null
+								: String.valueOf(roadSegmentClosestPoint.getY()) + " " + roadSegmentClosestPoint.getX())
+				.toString();
+	}
 
 	private RoadLocationImpl() {
 	}

@@ -1,9 +1,14 @@
 /* global app $ Chart */
-// Search Controller
-app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
-  // Controller instance variables
+app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', ($scope, $rootScope, $http, $timeout, map_tools) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
+  $scope.premisesFilterEntityTypes = { households: true }
+  $scope.subscribersFilterEntityType = 'households'
+  $scope.revenueFilter = 'bau'
+  $scope.capexFilterEntityTypes = { households: true }
+  $scope.capexFilter = 'bau'
+  $scope.details = false
+  var dirty = false
 
   var charts = {}
   var chartStyles = [
@@ -29,8 +34,18 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function refresh () {
     $scope.financialData = {}
-    refreshCurrentTab()
+    if ($scope.plan && $scope.plan.metadata) {
+      refreshCurrentTab()
+    }
   }
+
+  $rootScope.$on('route_planning_changed', () => {
+    if (map_tools.is_visible('financial_profile')) {
+      refresh()
+    } else {
+      dirty = true
+    }
+  })
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
@@ -63,42 +78,70 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $('#financial_profile_controller .nav-tabs').on('shown.bs.tab', (e) => refreshCurrentTab())
 
-  function refreshCurrentTab () {
+  function refreshCurrentTab (force) {
     var href = $('#financial_profile_controller .nav-tabs li.active a').attr('href')
-    if (href === '#financialProfileCashFlow') {
-      showCashFlowChart()
+    if (href === '#financialProfileSummary') {
+    } else if (href === '#financialProfileCashFlow') {
+      showCashFlowChart(force)
     } else if (href === '#financialProfileCapex') {
-      showBudgetChart()
-      showCapexChart()
+      // showBudgetChart(force)
+      showCapexChart(force)
     } else if (href === '#financialProfileRevenue') {
-      showRevenueChart()
+      showRevenueChart(force)
     } else if (href === '#financialProfilePremises') {
-      showPremisesChart()
+      showPremisesChart(force)
     } else if (href === '#financialProfileSubscribers') {
-      showSubscribersChart()
-      showPenetrationChart()
+      showSubscribersChart(force)
+      showPenetrationChart(force)
     }
   }
+  $scope.refreshCurrentTab = refreshCurrentTab
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
   })
 
-  $scope.financialData = {}
-  function request (key, params, callback) {
+  $rootScope.$on('plan_changed_metadata', (e, plan) => {
+    $scope.plan = plan
+    refresh()
+  })
+
+  $rootScope.$on('route_planning_changed', (e) => {
     if (!$scope.plan) return
-    if ($scope.financialData[key]) return $scope.financialData[key]
-    $http.get(`/financial_profile/${$scope.plan.id}/${key}`)
+    refreshCurrentTab()
+  })
+
+  $rootScope.$on('map_tool_changed_visibility', (e) => {
+    if (map_tools.is_visible('financial_profile')) {
+      $timeout(dirty ? refresh : refreshCurrentTab, 0)
+      dirty = false
+    }
+  })
+
+  $scope.financialData = {}
+  function request (force, key, params, callback) {
+    if (!$scope.plan) return
+    if (force) delete $scope.financialData[key]
+    else if ($scope.financialData[key]) return $scope.financialData[key]
+    console.log('params', params)
+    $http({ url: `/financial_profile/${$scope.plan.id}/${key}`, params: params })
       .success((response) => {
         $scope.financialData[key] = response
+        console.log('Requested', key)
+        console.table && console.table(response)
         callback(response)
       })
   }
 
   function showChart (id, type, data, options) {
     charts[id] && charts[id].destroy()
-    var ctx = document.getElementById(id).getContext('2d')
+    var elem = document.getElementById(id)
+    elem.removeAttribute('width')
+    elem.removeAttribute('height')
+    elem.style.width = '100%'
+    elem.style.height = '200px'
+    var ctx = elem.getContext('2d')
     charts[id] = new Chart(ctx)[type](data, options)
     var legend = document.getElementById(id + '-legend')
     if (legend) {
@@ -116,29 +159,31 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     }
   }
 
-  function showCashFlowChart () {
+  function showCashFlowChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
-      { key: 'fiber', name: 'Fiber' },
+      { key: 'plan', name: 'Plan' },
       { key: 'incremental', name: 'Incremental' }
     ]
-    request('cash_flow', {}, (cashFlow) => {
+    request(force, 'cash_flow', {}, (cashFlow) => {
       var data = buildChartData(cashFlow, datasets)
       var options = {
         datasetFill: false,
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
+        bezierCurve: false,
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
       showChart('financial-profile-chart-cash-flow', 'Line', data, options)
     })
   }
 
-  function showBudgetChart () {
+  function showBudgetChart (force) {
     var datasets = [
       { key: 'budget', name: 'Budget' },
       { key: 'plan', name: 'Plan' }
     ]
-    request('budget', {}, (budget) => {
+    request(force, 'budget', {}, (budget) => {
       var data = buildChartData(budget, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
@@ -148,82 +193,117 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function showCapexChart () {
+  function showCapexChart (force) {
     var datasets = [
       { key: 'network_deployment', name: 'Network Deployment' },
       { key: 'connect', name: 'Connect' },
       { key: 'maintenance_capacity', name: 'Maintenance/Capacity' }
     ]
-    request('capex', {}, (capex) => {
+    var params = {
+      filter: $scope.capexFilter,
+      entityTypes: selectedKeys($scope.capexFilterEntityTypes)
+    }
+    request(force, 'capex', params, (capex) => {
       var data = buildChartData(capex, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-capex', 'StackedBar', data, options)
     })
   }
 
-  function showRevenueChart () {
+  function showRevenueChart (force) {
     var datasets = [
       { key: 'businesses', name: 'Businesses' },
       { key: 'households', name: 'Households' },
       { key: 'towers', name: 'Towers' }
     ]
-    request('revenue', {}, (revenue) => {
+    request(force, 'revenue', { filter: $scope.revenueFilter }, (revenue) => {
       var data = buildChartData(revenue, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
       showChart('financial-profile-chart-revenue', 'StackedBar', data, options)
     })
   }
 
-  function showPremisesChart () {
+  function showPremisesChart (force) {
     var datasets = [
       { key: 'incremental', name: 'Incremental OFS' },
       { key: 'existing', name: 'Existing OFS' }
     ]
-    request('premises', {}, (premises) => {
+    request(force, 'premises', { entityTypes: selectedKeys($scope.premisesFilterEntityTypes) }, (premises) => {
       var data = buildChartData(premises, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
+        // scaleOverride: true,
+        // scaleSteps: 10,
+        // scaleStepWidth: 10000,
+        // scaleStartValue: 0
       }
       showChart('financial-profile-chart-premises', 'StackedBar', data, options)
     })
   }
 
-  function showSubscribersChart () {
+  function showSubscribersChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
-      { key: 'fiber', name: 'Plan' }
+      { key: 'plan', name: 'Plan' }
     ]
-    request('subscribers', {}, (subscribers) => {
+    request(force, 'subscribers', { entityType: $scope.subscribersFilterEntityType }, (subscribers) => {
       var data = buildChartData(subscribers, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-subscribers', 'Bar', data, options)
     })
   }
 
-  function showPenetrationChart () {
+  function showPenetrationChart (force) {
     var datasets = [
-      { key: 'businesses', name: 'Businesses' },
-      { key: 'households', name: 'Households' },
-      { key: 'towers', name: 'Towers' }
+      { key: 'bau', name: 'BAU' },
+      { key: 'plan', name: 'Plan' }
     ]
-    request('penetration', {}, (penetration) => {
+    request(force, 'penetration', { entityType: $scope.subscribersFilterEntityType }, (penetration) => {
       var data = buildChartData(penetration, datasets)
       var options = {
         datasetFill: false,
+        bezierCurve: false,
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) + '%' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value %>` // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 1) + '%' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-penetration', 'Line', data, options)
     })
+  }
+
+  function selectedKeys (obj) {
+    return Object.keys(obj).filter((item) => !!obj[item])
+  }
+
+  $scope.download = () => {
+    window.location.href = `/financial_profile/${$scope.plan.id}/export`
+  }
+
+  $scope.hasIRR = () => {
+    return $scope.plan && $scope.plan.metadata &&
+      +$scope.plan.metadata.irr == $scope.plan.metadata.irr // eslint-disable-line
+  }
+
+  $scope.showDetails = (show) => {
+    $scope.details = show
+  }
+
+  $scope.mode = 'global'
+  $scope.setMode = (mode) => {
+    $scope.mode = mode
   }
 }])
