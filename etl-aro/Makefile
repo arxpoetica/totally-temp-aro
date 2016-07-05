@@ -82,7 +82,7 @@ etl_reload_auth: reset_auth etl_auth
 
 etl_reload_all: etl_reload_general etl_reload_client etl_reload_financial
 
-etl_really_reload_all: etl_reload_general etl_reload_client etl_reload_auth
+etl_hard_reload: etl_reload_general etl_reload_client etl_reload_auth
 
 etl_test_client:
 	etl/test/client.sh
