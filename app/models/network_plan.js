@@ -221,10 +221,19 @@ module.exports = class NetworkPlan {
   static findAll (user, text) {
     var sql = `
       SELECT
+        plan.*,
         $1::text AS carrier_name,
         plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
         users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
-        created_at, updated_at
+        created_at, updated_at,
+        (
+          SELECT 0.000621371 * length_meters
+          FROM financial.network_report
+          JOIN financial.fiber_summary_cost fsc ON fsc.network_report_id = network_report.id
+          WHERE plan_id = plan.id
+          ORDER BY fsc.id DESC
+          LIMIT 1
+        ) AS fiber_length
       FROM client.plan
       LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
       LEFT JOIN auth.users ON users.id = permissions.user_id
