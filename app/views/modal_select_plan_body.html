@@ -56,11 +56,11 @@
           <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
           <td class="text-right">{{plan.total_cost | currency}}</td>
           <td class="text-right">{{plan.total_revenue | currency}}</td>
-          <td></td>
-          <td></td>
+          <td class="text-right">{{plan.irr * 100 | number: 1}}%</td>
+          <td class="text-right">{{plan.npv / 1000 | currency:"$":1}}K</td>
           <td class="text-right">{{plan.total_count | number}}</td>
           <td class="text-right"></td>
-          <td class="text-right">{{plan.fiber_length | number}}</td>
+          <td class="text-right">{{plan.fiber_length | number: 0}} mi</td>
           <td></td>
           <td></td>
           <td></td>
