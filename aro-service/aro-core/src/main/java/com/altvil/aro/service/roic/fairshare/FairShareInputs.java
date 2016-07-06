@@ -21,16 +21,25 @@ public class FairShareInputs {
 
 		private FairShareInputs inputs = new FairShareInputs();
 
-		
 		public Builder setProvider(NetworkProvider provider, Double strength,
 				Set<NetworkType> supportedTypes) {
-			
+
 			inputs.providerCapability = new DefaultNetworkCapability(provider,
 					strength, supportedTypes);
 			return this;
 		}
-		
-		public Builder setProvider(NetworkProvider provider, Map<NetworkType, Double> strengthMap,
+
+		public Builder setProvider(NetworkProvider provider,
+				Map<NetworkType, Double> brandStrengths,
+				Map<NetworkType, Double> networkStrength) {
+
+			inputs.providerCapability = new DefaultNetworkCapability(provider,
+					brandStrengths, networkStrength);
+			return this;
+		}
+
+		public Builder setProvider(NetworkProvider provider,
+				Map<NetworkType, Double> strengthMap,
 				Set<NetworkType> supportedTypes) {
 			inputs.providerCapability = new DefaultNetworkCapability(provider,
 					strengthMap, supportedTypes);
@@ -63,11 +72,19 @@ public class FairShareInputs {
 					supportedTypes));
 			return this;
 		}
+		
+		public Builder addCompetitor(NetworkProvider provider,
+				Map<NetworkType, Double> brandStrengths,
+				Map<NetworkType, Double> networkStrength) {
+			addCompetitor(new DefaultNetworkCapability(provider,
+					brandStrengths, networkStrength));
+			return this;
+		}
 
 		public Builder setProviderPenetration(NetworkType type,
 				Double pentrationPercent) {
 			inputs.providerPenetrationByType.put(type, pentrationPercent);
-			return this ;
+			return this;
 		}
 
 		public FairShareInputs build() {
