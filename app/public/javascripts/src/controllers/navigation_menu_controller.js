@@ -228,7 +228,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.sort_by = (key, descending) => {
+  $scope.sortBy = (key, descending) => {
     $scope.plans = _.sortBy($scope.plans, (plan) => plan[key])
     if (descending) {
       $scope.plans = $scope.plans.reverse()
