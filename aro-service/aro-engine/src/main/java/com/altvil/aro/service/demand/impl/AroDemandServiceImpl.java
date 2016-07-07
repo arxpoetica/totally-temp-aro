@@ -152,7 +152,7 @@ public class AroDemandServiceImpl implements AroDemandService {
 
 		if (demand == null) {
 			demandMap.put(block,
-					demand = loadEffectiveLocationDemand(block, SpeedCategory.cat6));
+					demand = loadEffectiveLocationDemand(block, SpeedCategory.cat7));
 		}
 
 		return demand;

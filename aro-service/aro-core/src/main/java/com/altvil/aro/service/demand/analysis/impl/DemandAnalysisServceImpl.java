@@ -372,7 +372,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 			double atomicCount = countEmployees >= employeeCount ? 32 : 1;
 			return new DefaultDemandStatistic(mapping.getMappedDemand(),
-					atomicCount * demand, revenue * revenueRatio * demand);
+					atomicCount, revenue * revenueRatio * demand);
 
 		}
 
@@ -403,7 +403,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		public void assemble(ProductDemandAssembler assembler) {
 			double arpu = getArpu();
 			if (isValidArpu(arpu)) {
-				assembler.addConstantRevenue(this, atomicUnitCounts * demand,
+				assembler.addConstantRevenue(this, atomicUnitCounts,
 						getArpu() * demand);
 			}
 		}

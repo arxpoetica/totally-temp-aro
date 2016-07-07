@@ -433,10 +433,10 @@ public class OptimizationStrategyServiceImpl implements
 
 			map.put(OptimizationType.CAPEX,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
-							.getRawCoverage())));
+							.getDemand())));
 			map.put(OptimizationType.PRUNNING_NPV,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
-							.getRawCoverage())));
+							.getDemand())));
 			map.put(OptimizationType.COVERAGE,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getMonthlyRevenueImpact())));
