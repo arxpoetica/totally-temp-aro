@@ -1,17 +1,23 @@
 <div class="row">
-  <div class="col-md-4">
+  <div class="col-md-3">
     <p><strong>Annual Growth</strong></p>
   </div>
-  <div class="col-md-8">
-    <input type="range">
+  <div class="col-md-6">
+    <input type="range" min="-20" max="20" ng-model="growth">
+  </div>
+  <div class="col-md-3">
+    {{ growth }} %
   </div>
 </div>
 <div class="row">
-  <div class="col-md-4">
+  <div class="col-md-3">
     <p><strong>Duration</strong></p>
   </div>
-  <div class="col-md-8">
-    <input type="range">
+  <div class="col-md-6">
+    <input type="range" min="1" max="15" ng-model="duration">
+  </div>
+  <div class="col-md-3">
+    {{ duration }} Years
   </div>
 </div>
 <div class="row">

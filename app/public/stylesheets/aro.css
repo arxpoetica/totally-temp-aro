@@ -412,6 +412,10 @@ height:100px;
   color: #ccc;
 }
 
+.radio.disabled label {
+  color: #ccc;
+}
+
 
 .noUi-handle:before, .noUi-handle:after {
   height: 8px;
