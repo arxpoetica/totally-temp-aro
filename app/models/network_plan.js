@@ -241,29 +241,55 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static findAll (user, text) {
-    var sql = `
-      SELECT
-        plan.*,
-        $1::text AS carrier_name,
-        plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
-        users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
-        created_at, updated_at
-      FROM client.plan
-      LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
-      LEFT JOIN auth.users ON users.id = permissions.user_id
-    `
-    var params = [config.client_carrier_name]
-    if (user) {
-      sql += ' WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$2)'
-      params.push(user.id)
-    }
-    if (text) {
-      sql += ' AND lower(name) LIKE lower($3)'
-      params.push(`%${text}%`)
-    }
-    sql += '\n LIMIT 20'
-    return database.query(sql, params)
+  static findAll (user, text, page) {
+    var num = 20
+    return Promise.resolve()
+      .then(() => {
+        page = page || 1
+        var sql = `
+          SELECT
+            plan.*,
+            $1::text AS carrier_name,
+            plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
+            users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
+            created_at, updated_at
+          FROM client.plan
+          LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
+          LEFT JOIN auth.users ON users.id = permissions.user_id
+        `
+        var params = [config.client_carrier_name]
+        if (user) {
+          sql += ' WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$2)'
+          params.push(user.id)
+        }
+        if (text) {
+          sql += ' AND lower(name) LIKE lower($3)'
+          params.push(`%${text}%`)
+        }
+        sql += ` LIMIT ${num} OFFSET ${(page - 1) * num}`
+        return database.query(sql, params)
+      })
+      .then((plans) => {
+        var params = []
+        var sql = 'SELECT COUNT(*) AS count from client.plan'
+        if (user) {
+          sql += ' WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$1)'
+          params.push(user.id)
+        }
+        return database.findOne(sql, params)
+          .then((result) => {
+            var count = result.count
+            var pages = []
+            var i = 0
+            while (i * num < count) {
+              i++
+              pages.push(i)
+            }
+            return {
+              plans, pages
+            }
+          })
+      })
   }
 
   static createPlan (name, area, user) {
