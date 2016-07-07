@@ -49,7 +49,7 @@ describe('NetworkPlan', () => {
       .accept('application/json')
       .end((err, res) => {
         if (err) return done(err)
-        var plans = res.body
+        var plans = res.body.plans
         expect(res.statusCode).to.be.equal(200)
         expect(plans.length > 0).to.equal(true)
         var plan = plans[0]
