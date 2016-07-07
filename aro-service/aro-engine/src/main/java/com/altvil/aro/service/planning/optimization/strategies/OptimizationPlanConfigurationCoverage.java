@@ -26,7 +26,7 @@ public class OptimizationPlanConfigurationCoverage extends OptimizationPlanConfi
 	@Override
 	public
 	double score(GeneratingNode node) {
-		final double rawCoverage = node.getFiberCoverage().getRawCoverage();
+		final double rawCoverage = node.getFiberCoverage().getDemand();
 		if (rawCoverage == 0) {
 			return 0;
 		}

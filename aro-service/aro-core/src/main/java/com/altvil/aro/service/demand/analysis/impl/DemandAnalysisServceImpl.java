@@ -352,6 +352,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 	private static class BusinessProduct extends ProductDemandImpl {
 		private double employeeCount = 1000;
+		private double revenueRatio = 0.25 ; 
 
 		public BusinessProduct(NetworkType networkType,
 				ArpuMapping arpuMapping, FairShareModel fairShareModel,
@@ -371,7 +372,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 			double atomicCount = countEmployees >= employeeCount ? 32 : 1;
 			return new DefaultDemandStatistic(mapping.getMappedDemand(),
-					atomicCount * demand, revenue * demand);
+					atomicCount * demand, revenue * revenueRatio * demand);
 
 		}
 

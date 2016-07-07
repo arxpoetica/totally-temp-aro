@@ -18,7 +18,9 @@ case when maxaddown = 2 then 1
 	end) as speed_category
 from nbm.blocks n 
 join aro.census_blocks b on b.tabblock_id = n.fullfipsid
+where name not like '%Verizon%'
 group by b.gid, provname, stateabbr;
 
 CREATE INDEX nbm_competitor_speed_category_gid_index ON nbm.competitor_speed_category(gid);
 CREATE INDEX nbm_competitor_speed_category_stateabbr_index ON nbm.competitor_speed_category(stateabbr);
+

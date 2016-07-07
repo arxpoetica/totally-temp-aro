@@ -20,13 +20,6 @@ public interface NetworkPlanRepository extends
 	
 	
 	
-	/*
-	 * select provname, speed_category
-from nbm.competitor_speed_category 
-where fullfipsid = '360010001001005' ;
-	 */
-	
-	
 	//TODO Create SpeedCategory Repository
 	@Query(value = "select s.provname, s.speed_category, s.stateabbr, b.brand_strength\n" + 
 			"from nbm.competitor_speed_category s\n" + 
@@ -96,7 +89,7 @@ where fullfipsid = '360010001001005' ;
 			")\n" + 
 			",\n" + 
 			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend\n" + 
+			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) as monthly_spend\n" + 
 			"	from client.spend s\n" + 
 			"	where city_id = 1 and year = :year\n" + 
 			"	group by industry_id, employees_by_location_id\n" + 
@@ -105,7 +98,7 @@ where fullfipsid = '360010001001005' ;
 			",\n" + 
 			"business_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	(case when sum(b.number_of_employees) >= 1000 then 32 else 1 end)  as fiber_count,\n" + 
+			"	sum(b.number_of_employees) as fiber_count,\n" + 
 			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
@@ -117,7 +110,7 @@ where fullfipsid = '360010001001005' ;
 			",\n" + 
 			"celltower_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	sum(1) * 64 as fiber_count,\n" + 
+			"	sum(1) as fiber_count,\n" + 
 			"	sum(1) * 500 as monthly_spend\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 
@@ -161,7 +154,7 @@ where fullfipsid = '360010001001005' ;
 			")\n" + 
 			",\n" + 
 			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend\n" + 
+			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) as monthly_spend\n" + 
 			"	from client.spend s\n" + 
 			"	where city_id = 1 and year = :year\n" + 
 			"	group by industry_id, employees_by_location_id\n" + 
@@ -170,7 +163,7 @@ where fullfipsid = '360010001001005' ;
 			",\n" + 
 			"business_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	(case when sum(b.number_of_employees) >= 1000 then 32 else 1 end)  as fiber_count,\n" + 
+			"	sum(b.number_of_employees) as fiber_count,\n" + 
 			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
@@ -182,7 +175,7 @@ where fullfipsid = '360010001001005' ;
 			",\n" + 
 			"celltower_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	sum(1) * 64  as fiber_count,\n" + 
+			"	sum(1) as fiber_count,\n" + 
 			"	sum(1) * 500 as monthly_spend\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 
