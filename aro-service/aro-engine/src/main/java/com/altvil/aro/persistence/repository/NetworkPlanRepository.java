@@ -19,6 +19,16 @@ public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
 	
+	
+	//TODO Create SpeedCategory Repository
+	@Query(value = "select s.provname, s.speed_category, s.stateabbr, b.brand_strength\n" + 
+			"from nbm.competitor_speed_category s\n" + 
+			"join nbm.brand_strength b on b.provname = s.provname \n" + 
+			"where gid = :censusBlockId", nativeQuery = true)
+	@Transactional
+	List<Object[]> querySpeedCategoriesElements(@Param("censusBlockId") int cenusBlock);
+	
+	
 	//TODO Create Price Repository
 	@Query(value = "select name, uom_name, price from financial.network_price", nativeQuery = true)
 	List<Object[]> queryPriceModelElements();
@@ -71,13 +81,15 @@ public interface NetworkPlanRepository extends
 
 	
 	@Query(value = "with location_ids as (\n" + 
-			"select location_id as id\n" + 
-			"from client.plan_targets\n" + 
+			"select location_id as id, b.gid as block_id\n" + 
+			"from client.plan_targets t\n" + 
+			"	join aro.locations l on l.id = t.location_id\n" +
+			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
 			"where plan_id = :planId	\n" + 
 			")\n" + 
 			",\n" + 
 			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend\n" + 
+			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) as monthly_spend\n" + 
 			"	from client.spend s\n" + 
 			"	where city_id = 1 and year = :year\n" + 
 			"	group by industry_id, employees_by_location_id\n" + 
@@ -86,7 +98,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"business_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	(case when sum(b.number_of_employees) >= 1000 then 32 else 1 end)  as fiber_count,\n" + 
+			"	sum(b.number_of_employees) as fiber_count,\n" + 
 			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
@@ -98,7 +110,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"celltower_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	sum(1) * 64 as fiber_count,\n" + 
+			"	sum(1) as fiber_count,\n" + 
 			"	sum(1) * 500 as monthly_spend\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 
@@ -114,6 +126,7 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			"select \n" + 
 			"l.id,\n" + 
+			"l.block_id,\n" + 
 			"case when b.fiber_count is null then 0 else b.fiber_count end as business_fiber,\n" + 
 			"case when b.fiber_count is null then 0 else b.monthly_spend end as business_spend,\n" + 
 			"\n" + 
@@ -132,15 +145,16 @@ public interface NetworkPlanRepository extends
 	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year);
 	
 	@Query(value = "with location_ids as (\n" + 
-			"	select l.id as id\n" + 
+			"	select l.id as id, b.gid as block_id\n" + 
 			"	from client.plan p \n" + 
 			"	join aro.wirecenters w on w.id = p.wirecenter_id\n" + 
 			"	join aro.locations l on st_contains(w.geom, l.geom)\n" + 
+			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
 			"	where p.id = :planId\n" + 
 			")\n" + 
 			",\n" + 
 			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend\n" + 
+			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) as monthly_spend\n" + 
 			"	from client.spend s\n" + 
 			"	where city_id = 1 and year = :year\n" + 
 			"	group by industry_id, employees_by_location_id\n" + 
@@ -149,7 +163,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"business_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	(case when sum(b.number_of_employees) >= 1000 then 32 else 1 end)  as fiber_count,\n" + 
+			"	sum(b.number_of_employees) as fiber_count,\n" + 
 			"	sum(f.monthly_spend) as monthly_spend\n" + 
 			"	from location_ids l \n" + 
 			"	join aro.businesses b on b.location_id = l.id \n" + 
@@ -161,7 +175,7 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"celltower_fiber as (\n" + 
 			"	select l.id,\n" + 
-			"	sum(1) * 64  as fiber_count,\n" + 
+			"	sum(1) as fiber_count,\n" + 
 			"	sum(1) * 500 as monthly_spend\n" + 
 			"	from aro.towers t\n" + 
 			"	join location_ids l on l.id = t.location_id\n" + 
@@ -177,6 +191,7 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			"select \n" + 
 			"l.id,\n" + 
+			"l.block_id,\n" + 
 			"case when b.fiber_count is null then 0 else b.fiber_count end as business_fiber,\n" + 
 			"case when b.fiber_count is null then 0 else b.monthly_spend end as business_spend,\n" + 
 			"\n" + 

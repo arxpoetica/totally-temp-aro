@@ -78,6 +78,9 @@ public class NewOptimizeEndPoint {
 			AroOptimizationPlan plan) {
 
 		FinancialConstraints financials = plan.getFinancialConstraints();
+		if( financials == null ) {
+			financials = new FinancialConstraints() ;
+		}
 
 		switch (plan.getAlgorithm()) {
 

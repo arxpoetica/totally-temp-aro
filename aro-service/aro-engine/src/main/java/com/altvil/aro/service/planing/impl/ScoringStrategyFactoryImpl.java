@@ -25,8 +25,8 @@ public class ScoringStrategyFactoryImpl implements ScoringStrategyFactory {
 		map.put(OptimizationType.BUDGET_THRESHHOLD_IRR, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getMonthlyRevenueImpact()))) ;
 		map.put(OptimizationType.TARGET_IRR, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getMonthlyRevenueImpact()))) ;
 		
-		map.put(OptimizationType.CAPEX, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getRawCoverage()))) ;
-		map.put(OptimizationType.COVERAGE, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getRawCoverage()))) ;
+		map.put(OptimizationType.CAPEX, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getDemand()))) ;
+		map.put(OptimizationType.COVERAGE, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getDemand()))) ;
 		map.put(OptimizationType.COVERAGE, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getMonthlyRevenueImpact()))) ;
 		map.put(OptimizationType.NPV, (node) -> -(divide(node.getCapex(), node.getFiberCoverage().getMonthlyRevenueImpact()))) ;
 	}
