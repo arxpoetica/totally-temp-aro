@@ -52,7 +52,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 
 	}
 
-	public Builder build() {
+	public static Builder build() {
 		return new Builder();
 	}
 
@@ -67,6 +67,19 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 					coverage, coverage, revenue);
 			demands.put(type, houseHoldStat);
 			return this;
+		}
+		
+		public Builder add(LocationEntityType type, double rawCoverage, double coverage,
+				double revenue) {
+			DemandStatistic houseHoldStat = new DefaultDemandStatistic(
+					rawCoverage, coverage, revenue);
+			demands.put(type, houseHoldStat);
+			return this;
+		}
+		
+		public Builder add(LocationEntityType type, DemandStatistic demandStatistic) {
+			demands.put(type, demandStatistic) ;
+			return this ;
 		}
 
 		public LocationDemand build() {

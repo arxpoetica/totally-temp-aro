@@ -1,10 +1,10 @@
 package com.altvil.aro.service.demand.analysis;
 
-import com.altvil.aro.service.demand.analysis.model.EffectiveLocationDemand;
+import com.altvil.aro.service.demand.analysis.model.FairShareLocationDemand;
 
 public interface DemandAnalysisService {
 
-	EffectiveLocationDemand createEffectiveLocationDemand(
+	FairShareLocationDemand createEffectiveLocationDemand(
 			NetworkCapacityProfile profile);
 
 }

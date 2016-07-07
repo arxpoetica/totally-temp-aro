@@ -19,6 +19,23 @@ public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
 	
+	
+	/*
+	 * select provname, speed_category
+from nbm.competitor_speed_category 
+where fullfipsid = '360010001001005' ;
+	 */
+	
+	
+	//TODO Create SpeedCategory Repository
+	@Query(value = "select s.provname, s.speed_category, s.stateabbr, b.brand_strength\n" + 
+			"from nbm.competitor_speed_category s\n" + 
+			"join nbm.brand_strength b on b.provname = s.provname \n" + 
+			"where fullfipsid = censusBlockId", nativeQuery = true)
+	@Transactional
+	List<Object[]> querySpeedCategoriesElements(@Param("censusBlockId") String cenusBlock);
+	
+	
 	//TODO Create Price Repository
 	@Query(value = "select name, uom_name, price from financial.network_price", nativeQuery = true)
 	List<Object[]> queryPriceModelElements();

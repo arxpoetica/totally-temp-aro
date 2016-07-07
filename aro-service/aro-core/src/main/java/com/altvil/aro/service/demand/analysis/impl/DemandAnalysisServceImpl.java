@@ -1,10 +1,14 @@
 package com.altvil.aro.service.demand.analysis.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.altvil.aro.service.demand.DemandMapping;
 import com.altvil.aro.service.demand.analysis.ArpuMapping;
 import com.altvil.aro.service.demand.analysis.DemandAnalysisService;
 import com.altvil.aro.service.demand.analysis.DemandProfile;
@@ -12,9 +16,15 @@ import com.altvil.aro.service.demand.analysis.EntityNetworkProfile;
 import com.altvil.aro.service.demand.analysis.NetworkCapacity;
 import com.altvil.aro.service.demand.analysis.NetworkCapacityProfile;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
-import com.altvil.aro.service.demand.analysis.model.EffectiveLocationDemand;
-import com.altvil.aro.service.demand.analysis.model.EffectiveNetworkDemand;
+import com.altvil.aro.service.demand.analysis.model.FairShareLocationDemand;
+import com.altvil.aro.service.demand.analysis.model.FairShareDemandAnalysis;
 import com.altvil.aro.service.demand.analysis.model.ProductDemand;
+import com.altvil.aro.service.demand.analysis.spi.EntityDemandMapping;
+import com.altvil.aro.service.demand.analysis.spi.FairShareDemand;
+import com.altvil.aro.service.demand.impl.DefaultDemandStatistic;
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
+import com.altvil.aro.service.entity.DemandStatistic;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.roic.fairshare.FairShareInputs;
 import com.altvil.aro.service.roic.fairshare.FairShareModel;
@@ -22,13 +32,14 @@ import com.altvil.aro.service.roic.fairshare.FairShareModelTypeEnum;
 import com.altvil.aro.service.roic.fairshare.FairShareService;
 import com.altvil.aro.service.roic.model.NetworkProvider;
 import com.altvil.aro.service.roic.model.NetworkType;
+import com.altvil.utils.StreamUtil;
 
 public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 	private FairShareService fairShareService;
 
 	@Override
-	public EffectiveLocationDemand createEffectiveLocationDemand(
+	public FairShareLocationDemand createEffectiveLocationDemand(
 			NetworkCapacityProfile profile) {
 
 		return new CapacityBuilder(profile.getSupplierCapacity()).add(
@@ -40,7 +51,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 		private NetworkCapacity supplierCapacity;
 
-		private Map<LocationEntityType, EffectiveNetworkDemand> demandMap = new EnumMap<>(
+		private Map<LocationEntityType, FairShareDemandAnalysis> demandMap = new EnumMap<>(
 				LocationEntityType.class);
 
 		public CapacityBuilder(NetworkCapacity supplierCapacity) {
@@ -55,7 +66,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 		public CapacityBuilder add(EntityNetworkProfile entityNetworkProfile) {
 
-			EffectiveNetworkDemand demand = buildEffectiveNetworkDemand(
+			FairShareDemandAnalysis demand = buildEffectiveNetworkDemand(
 					entityNetworkProfile.getLocationEntityType(),
 					entityNetworkProfile.getDemandProfile(),
 					entityNetworkProfile.getArpuMapping())
@@ -69,10 +80,8 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			return this;
 		}
 
-		public EffectiveLocationDemand build() {
-			return new EffectiveLocationDemandImpl(demandMap, demandMap
-					.values().stream()
-					.mapToDouble(EffectiveNetworkDemand::getRevenue).sum());
+		public FairShareLocationDemand build() {
+			return new FairShareLocationDemandImpl(demandMap);
 		}
 
 	}
@@ -156,48 +165,95 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			return this;
 		}
 
-		private ProductDemand createProductDemand(FairShareModel model,
+		private SpiProductDemand createProductDemand(FairShareModel model,
 				NetworkType type) {
-			return new ProductDemandImpl(locationEntityType,
-					model.getShare(type), arpuMapping.getArpu(type));
+
+			switch (locationEntityType) {
+			case CellTower:
+				return new CellTowerProduct(type, arpuMapping, model, 64);
+			case Business:
+				return new BusinessProduct(type, arpuMapping, model, 1000.0);
+
+			case Household:
+			default:
+				return new ProductDemandImpl(locationEntityType, type,
+						arpuMapping, model);
+			}
+
 		}
 
-		public EffectiveNetworkDemand build() {
+		public FairShareDemandAnalysis build() {
 
 			FairShareModel model = fairShareService.createModel(
 					FairShareModelTypeEnum.StandardModel, inputBuilder.build());
 
-			Collection<ProductDemand> productDemands = model.getNetworkTypes()
-					.stream().map(t -> createProductDemand(model, t))
+			Collection<SpiProductDemand> productDemands = model
+					.getNetworkTypes().stream()
+					.map(t -> createProductDemand(model, t))
 					.collect(Collectors.toList());
 
-			double totalRevenue = productDemands.stream()
-					.mapToDouble(ProductDemand::getRevenue).sum();
-
-			return new EffectiveNetworkDemandImpl(locationEntityType,
-					productDemands, totalRevenue);
+			return FairShareDemandAnalysisImpl.build()
+					.setArpuMapping(arpuMapping)
+					.setProductDemands(productDemands)
+					.setLocationEnityType(locationEntityType).build();
 		}
 	}
 
-	private static class EffectiveNetworkDemandImpl implements
-			EffectiveNetworkDemand {
+	private static class FairShareDemandAnalysisImpl implements
+			FairShareDemandAnalysis {
+
+		public static Builder build() {
+			return new Builder();
+		}
+
+		public static class Builder {
+			private LocationEntityType locationEntityType;
+			private Collection<SpiProductDemand> demands;
+			private ArpuMapping arpuMapping;
+
+			public Builder setArpuMapping(ArpuMapping mapping) {
+				this.arpuMapping = mapping;
+				return this;
+			}
+
+			public Builder setProductDemands(
+					Collection<SpiProductDemand> demands) {
+				this.demands = demands;
+				return this;
+			}
+
+			public Builder setLocationEnityType(LocationEntityType type) {
+				this.locationEntityType = type;
+				return this;
+			}
+
+			public FairShareDemandAnalysis build() {
+
+				DemandFunction f = new ProductDemandAssembler()
+						.addProductDemands(demands).assembleDemandFunction();
+
+				return new FairShareDemandAnalysisImpl(locationEntityType,
+						StreamUtil.map(demands, p -> (ProductDemand) p), f);
+
+			}
+		}
 
 		private LocationEntityType locationEntityType;
 		private Collection<ProductDemand> demands;
-		private double revenue;
+		private DemandFunction demandFunction;
 
-		public EffectiveNetworkDemandImpl(
+		private FairShareDemandAnalysisImpl(
 				LocationEntityType locationEntityType,
-				Collection<ProductDemand> demands, double revenue) {
+				Collection<ProductDemand> demands, DemandFunction demandFunction) {
 			super();
 			this.locationEntityType = locationEntityType;
 			this.demands = demands;
-			this.revenue = revenue;
+			this.demandFunction = demandFunction;
 		}
 
 		@Override
-		public double getRevenue() {
-			return revenue;
+		public FairShareDemand createFairShareDemand(EntityDemandMapping mapping) {
+			return demandFunction.apply(mapping);
 		}
 
 		@Override
@@ -212,25 +268,43 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 	}
 
-	private static class ProductDemandImpl implements ProductDemand {
+	private static class ProductDemandImpl implements SpiProductDemand {
 
 		private LocationEntityType entityType;
-		private double demand;
-		private double arpu;
-		private double revenue;
+		private NetworkType networkType;
+		private ArpuMapping arpuMapping;
+		private FairShareModel fairShareModel;
+		protected double demand;
 
-		public ProductDemandImpl(LocationEntityType entityType, double demand,
-				double arpu) {
+		public ProductDemandImpl(LocationEntityType entityType,
+				NetworkType networkType, ArpuMapping arpuMapping,
+				FairShareModel fairShareModel) {
 			super();
 			this.entityType = entityType;
-			this.demand = demand;
-			this.arpu = arpu;
-			this.revenue = demand * arpu;
+			this.networkType = networkType;
+			this.arpuMapping = arpuMapping;
+			this.fairShareModel = fairShareModel;
+			this.demand = fairShareModel.getShare(networkType);
 		}
 
 		@Override
-		public double getRevenue() {
-			return revenue;
+		public FairShareModel getFairShareModel() {
+			return fairShareModel;
+		}
+
+		protected double getArpu() {
+			return arpuMapping.getArpu(networkType);
+		}
+
+		@Override
+		public NetworkType getNetworkType() {
+			return networkType;
+		}
+
+		@Override
+		public void assemble(ProductDemandAssembler assembler) {
+			assembler.addConstantRevenue(this, demand,
+					demand * arpuMapping.getArpu(networkType));
 		}
 
 		@Override
@@ -243,36 +317,234 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			return demand;
 		}
 
+	}
+
+	private static boolean isValidArpu(double arpu) {
+		return !Double.isNaN(arpu) && arpu > 0;
+	}
+
+	private static class BusinessProduct extends ProductDemandImpl {
+		private double employeeCount = 1000;
+
+		public BusinessProduct(NetworkType networkType,
+				ArpuMapping arpuMapping, FairShareModel fairShareModel,
+				double employeeCount) {
+			super(LocationEntityType.Business, networkType, arpuMapping,
+					fairShareModel);
+			this.employeeCount = employeeCount;
+		}
+
+		private DemandStatistic toDemandStatistic(EntityDemandMapping mapping) {
+			double revenue = mapping.getMappedRevenue();
+			double countEmployees = mapping.getMappedDemand();
+
+			if (revenue == 0) {
+				return DefaultDemandStatistic.ZERO_DEMAND;
+			}
+
+			double atomicCount = countEmployees >= employeeCount ? 32 : 1;
+			return new DefaultDemandStatistic(mapping.getMappedDemand(),
+					atomicCount * demand, revenue * demand);
+
+		}
+
 		@Override
-		public double getArpu() {
-			return arpu;
+		public void assemble(ProductDemandAssembler assembler) {
+			assembler
+					.add((demandMapping) -> {
+						return new FairShareDemandImpl(
+								toDemandStatistic(demandMapping));
+					});
+
 		}
 	}
 
-	private static class EffectiveLocationDemandImpl implements
-			EffectiveLocationDemand {
+	private static class CellTowerProduct extends ProductDemandImpl {
 
-		private Map<LocationEntityType, EffectiveNetworkDemand> demandMap = new EnumMap<>(
+		private double atomicUnitCounts = 64;
+
+		public CellTowerProduct(NetworkType networkType,
+				ArpuMapping arpuMapping, FairShareModel fairShareModel,
+				double atomicUnitCounts) {
+			super(LocationEntityType.CellTower, networkType, arpuMapping,
+					fairShareModel);
+			this.atomicUnitCounts = atomicUnitCounts;
+		}
+
+		@Override
+		public void assemble(ProductDemandAssembler assembler) {
+			double arpu = getArpu();
+			if (isValidArpu(arpu)) {
+				assembler.addConstantRevenue(this, atomicUnitCounts * demand,
+						getArpu() * demand);
+			}
+		}
+
+	}
+
+	private static class FairShareLocationDemandImpl implements
+			FairShareLocationDemand {
+
+		private Map<LocationEntityType, FairShareDemandAnalysis> demandMap = new EnumMap<>(
 				LocationEntityType.class);
-		private double revenue;
 
-		public EffectiveLocationDemandImpl(
-				Map<LocationEntityType, EffectiveNetworkDemand> demandMap,
-				double revenue) {
+		public FairShareLocationDemandImpl(
+				Map<LocationEntityType, FairShareDemandAnalysis> demandMap) {
 			super();
 			this.demandMap = demandMap;
-			this.revenue = revenue;
 		}
 
 		@Override
-		public double getRevenue() {
-			return revenue;
-		}
-
-		@Override
-		public EffectiveNetworkDemand getEffectiveNetworkDemand(
+		public FairShareDemandAnalysis getEffectiveNetworkDemand(
 				LocationEntityType type) {
 			return demandMap.get(type);
+		}
+
+		@Override
+		public LocationDemand createLocationDemand(DemandMapping demandMapping) {
+
+			DefaultLocationDemand.Builder builder = DefaultLocationDemand
+					.build();
+
+			for (LocationEntityType type : LocationEntityType.values()) {
+				FairShareDemandAnalysis analysis = demandMap.get(type);
+
+				EntityDemandMapping entityMapping = demandMapping
+						.getEntityDemandMapping(type);
+
+				DemandStatistic demandStatic = analysis == null
+						|| entityMapping == null ? DefaultDemandStatistic.ZERO_DEMAND
+						: analysis.createFairShareDemand(entityMapping)
+								.getDemandStatistic();
+
+				builder.add(type, demandStatic);
+			}
+
+			return builder.build();
+		}
+	}
+
+	private interface SpiProductDemand extends ProductDemand {
+		NetworkType getNetworkType();
+
+		FairShareModel getFairShareModel();
+
+		void assemble(ProductDemandAssembler assembler);
+	}
+
+	private interface DemandFunction extends
+			Function<EntityDemandMapping, FairShareDemand> {
+
+	}
+
+	private static class BasicDemand {
+		private double demand = 0;
+		private double revenue = 0;
+
+		public void add(double demand, double revenue) {
+			this.demand += demand;
+			this.revenue += revenue;
+		}
+
+		public boolean hasDemand() {
+			return revenue > 0;
+		}
+
+		private static DemandFunction asDemandFunction(double demand,
+				double revenue) {
+			return (demandMapping) -> {
+				double rawDemand = demandMapping.getMappedDemand();
+				return new FairShareDemandImpl(new DefaultDemandStatistic(
+						rawDemand, rawDemand * demand, rawDemand * revenue));
+			};
+		}
+
+		public DemandStatistic toDemandStatistic(EntityDemandMapping mapping) {
+			double rawDemand = mapping.getMappedDemand();
+			return new DefaultDemandStatistic(rawDemand, rawDemand * demand,
+					rawDemand * revenue);
+		}
+
+		public DemandFunction asDemandFunction() {
+			return asDemandFunction(demand, revenue);
+		}
+
+	}
+
+	private static class ProductDemandAssembler {
+		private BasicDemand basicDemand;
+		private List<DemandFunction> demandFunctions = new ArrayList<>();
+
+		public ProductDemandAssembler addProductDemands(
+				Collection<SpiProductDemand> demands) {
+			demands.forEach(d -> d.assemble(this));
+			return this;
+		}
+
+		public void add(DemandFunction demandFunction) {
+			demandFunctions.add(demandFunction);
+		}
+
+		public void addConstantRevenue(SpiProductDemand productDemand,
+				double demand, double revenue) {
+			basicDemand.add(demand, revenue);
+		}
+
+		public DemandFunction assembleDemandFunction() {
+
+			if (basicDemand.hasDemand()) {
+				demandFunctions.add(basicDemand.asDemandFunction());
+			}
+
+			if (demandFunctions.size() == 0) {
+				return new BasicDemand().asDemandFunction(); // Watch Boundary
+																// // no
+																// Products
+			} else if (demandFunctions.size() == 1) {
+				return demandFunctions.iterator().next();
+			} else {
+				return new CompositeDemandFunction(demandFunctions);
+			}
+		}
+
+	}
+
+	private static class CompositeDemandFunction implements DemandFunction {
+
+		private Collection<DemandFunction> demandFunctions;
+
+		public CompositeDemandFunction(
+				Collection<DemandFunction> demandFunctions) {
+			super();
+			this.demandFunctions = demandFunctions;
+		}
+
+		@Override
+		public FairShareDemand apply(EntityDemandMapping mapping) {
+			BasicDemand basicDemand = new BasicDemand();
+			for (DemandFunction f : demandFunctions) {
+				DemandStatistic stat = f.apply(mapping).getDemandStatistic();
+				basicDemand.add(stat.getDemand(),
+						stat.getMonthlyRevenueImpact());
+			}
+			return new FairShareDemandImpl(
+					basicDemand.toDemandStatistic(mapping));
+		}
+
+	}
+
+	private static class FairShareDemandImpl implements FairShareDemand {
+
+		private DemandStatistic demandStatistic;
+
+		public FairShareDemandImpl(DemandStatistic demandStatistic) {
+			super();
+			this.demandStatistic = demandStatistic;
+		}
+
+		@Override
+		public DemandStatistic getDemandStatistic() {
+			return demandStatistic;
 		}
 
 	}

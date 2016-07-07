@@ -5,7 +5,6 @@ import java.util.Collection;
 public class NetworkCapacityProfile {
 
 	private NetworkCapacity supplierCapacity;
-
 	private Collection<EntityNetworkProfile> entityNetworkProfiles;
 
 	public NetworkCapacity getSupplierCapacity() {

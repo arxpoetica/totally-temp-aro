@@ -6,8 +6,6 @@ import com.altvil.aro.service.roic.model.NetworkType;
 
 public interface DemandProfile {
 	
-	
-
 	 Collection<NetworkType> getSupportedNetworks() ;
 	 double getPenetration(NetworkType type) ;
 	 double getWeight(NetworkType networkType, SpeedCategory category) ;
