@@ -22,11 +22,15 @@ public class ArpuServiceImpl implements ArpuService {
 	void postConstruct() {
 
 		arpuMap.put(
+				LocationEntityType.Business,
+				ArpuMappingImpl.build().add(NetworkType.Fiber, Double.NaN)
+						.add(NetworkType.Copper, Double.NaN).build());
+
+		arpuMap.put(
 				LocationEntityType.Household,
 				ArpuMappingImpl.build().add(NetworkType.Fiber, 60.0)
 						.add(NetworkType.Copper, 20.0).build());
-		
-		
+
 		arpuMap.put(
 				LocationEntityType.CellTower,
 				ArpuMappingImpl.build().add(NetworkType.Fiber, 500.0)
@@ -36,7 +40,7 @@ public class ArpuServiceImpl implements ArpuService {
 
 	@Override
 	public ArpuMapping getArpuMapping(LocationEntityType type) {
-		return null;
+		return arpuMap.get(type);
 	}
 
 	private static class ArpuMappingImpl implements ArpuMapping {

@@ -72,7 +72,7 @@ public class FairShareInputs {
 					supportedTypes));
 			return this;
 		}
-		
+
 		public Builder addCompetitor(NetworkProvider provider,
 				Map<NetworkType, Double> brandStrengths,
 				Map<NetworkType, Double> networkStrength) {
@@ -88,6 +88,12 @@ public class FairShareInputs {
 		}
 
 		public FairShareInputs build() {
+
+			if (inputs.networkTypeShare == null
+					|| inputs.providerCapability == null) {
+				throw new NullPointerException();
+			}
+
 			return inputs;
 		}
 

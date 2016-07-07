@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.altvil.aro.service.demand.DemandMapping;
 import com.altvil.aro.service.demand.analysis.ArpuMapping;
 import com.altvil.aro.service.demand.analysis.DemandAnalysisService;
@@ -16,8 +19,8 @@ import com.altvil.aro.service.demand.analysis.EntityNetworkProfile;
 import com.altvil.aro.service.demand.analysis.NetworkCapacity;
 import com.altvil.aro.service.demand.analysis.NetworkCapacityProfile;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
-import com.altvil.aro.service.demand.analysis.model.FairShareLocationDemand;
 import com.altvil.aro.service.demand.analysis.model.FairShareDemandAnalysis;
+import com.altvil.aro.service.demand.analysis.model.FairShareLocationDemand;
 import com.altvil.aro.service.demand.analysis.model.ProductDemand;
 import com.altvil.aro.service.demand.analysis.spi.EntityDemandMapping;
 import com.altvil.aro.service.demand.analysis.spi.FairShareDemand;
@@ -30,16 +33,24 @@ import com.altvil.aro.service.roic.fairshare.FairShareInputs;
 import com.altvil.aro.service.roic.fairshare.FairShareModel;
 import com.altvil.aro.service.roic.fairshare.FairShareModelTypeEnum;
 import com.altvil.aro.service.roic.fairshare.FairShareService;
+import com.altvil.aro.service.roic.fairshare.NetworkTypeShare;
 import com.altvil.aro.service.roic.model.NetworkProvider;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.utils.StreamUtil;
 
+@Service
 public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 	private FairShareService fairShareService;
 
+	@Autowired
+	public DemandAnalysisServceImpl(FairShareService fairShareService) {
+		super();
+		this.fairShareService = fairShareService;
+	}
+
 	@Override
-	public FairShareLocationDemand createEffectiveLocationDemand(
+	public FairShareLocationDemand createFairShareLocationDemand(
 			NetworkCapacityProfile profile) {
 
 		return new CapacityBuilder(profile.getSupplierCapacity()).add(
@@ -104,10 +115,17 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		public EntityCapacityBuilder(LocationEntityType locationEntityType,
 				DemandProfile demandProfile, ArpuMapping arpuMapping) {
 			super();
+			this.locationEntityType = locationEntityType;
 			this.demandProfile = demandProfile;
 			this.arpuMapping = arpuMapping;
+			
+			if( locationEntityType == null || demandProfile == null || arpuMapping == null ) {
+				throw new NullPointerException() ;
+			}
 
-			inputBuilder = FairShareInputs.build();
+			inputBuilder = FairShareInputs.build().setNetworkTypes(
+					NetworkTypeShare.build().add(NetworkType.Fiber, 1.0)
+							.build());
 
 			for (NetworkType type : demandProfile.getSupportedNetworks()) {
 				inputBuilder.setProviderPenetration(type,
@@ -120,8 +138,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			Map<NetworkType, Double> map = new EnumMap<>(NetworkType.class);
 
 			for (NetworkType type : demandProfile.getSupportedNetworks()) {
-				inputBuilder.setProviderPenetration(type,
-						demandProfile.getWeight(type, speedCategory));
+				map.put(type, demandProfile.getWeight(type, speedCategory));
 			}
 
 			return map;
@@ -285,6 +302,12 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			this.arpuMapping = arpuMapping;
 			this.fairShareModel = fairShareModel;
 			this.demand = fairShareModel.getShare(networkType);
+
+			if (entityType == null || networkType == null
+					|| arpuMapping == null || fairShareModel == null) {
+				throw new NullPointerException();
+			}
+
 		}
 
 		@Override
@@ -303,8 +326,12 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 		@Override
 		public void assemble(ProductDemandAssembler assembler) {
-			assembler.addConstantRevenue(this, demand,
-					demand * arpuMapping.getArpu(networkType));
+
+			double arpu = getArpu();
+			if (isValidArpu(arpu)) {
+				assembler.addConstantRevenue(this, demand, demand * arpu);
+			}
+
 		}
 
 		@Override
@@ -472,7 +499,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 	}
 
 	private static class ProductDemandAssembler {
-		private BasicDemand basicDemand;
+		private BasicDemand basicDemand = new BasicDemand() ;
 		private List<DemandFunction> demandFunctions = new ArrayList<>();
 
 		public ProductDemandAssembler addProductDemands(

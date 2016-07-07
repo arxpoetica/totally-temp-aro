@@ -4,6 +4,6 @@ import com.altvil.aro.service.entity.LocationDemand;
 
 public interface AroDemandService {
 
-	 LocationDemand createDemandByCensusBlock(String censusBlockId, DemandMapping mapping) ;
+	 LocationDemand createDemandByCensusBlock(int blockId, DemandMapping mapping) ;
 	
 }

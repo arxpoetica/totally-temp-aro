@@ -4,7 +4,7 @@ import com.altvil.aro.service.demand.analysis.model.FairShareLocationDemand;
 
 public interface DemandAnalysisService {
 
-	FairShareLocationDemand createEffectiveLocationDemand(
+	FairShareLocationDemand createFairShareLocationDemand(
 			NetworkCapacityProfile profile);
 
 }

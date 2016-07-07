@@ -31,9 +31,9 @@ where fullfipsid = '360010001001005' ;
 	@Query(value = "select s.provname, s.speed_category, s.stateabbr, b.brand_strength\n" + 
 			"from nbm.competitor_speed_category s\n" + 
 			"join nbm.brand_strength b on b.provname = s.provname \n" + 
-			"where fullfipsid = censusBlockId", nativeQuery = true)
+			"where gid = :censusBlockId", nativeQuery = true)
 	@Transactional
-	List<Object[]> querySpeedCategoriesElements(@Param("censusBlockId") String cenusBlock);
+	List<Object[]> querySpeedCategoriesElements(@Param("censusBlockId") int cenusBlock);
 	
 	
 	//TODO Create Price Repository
@@ -88,8 +88,10 @@ where fullfipsid = '360010001001005' ;
 
 	
 	@Query(value = "with location_ids as (\n" + 
-			"select location_id as id\n" + 
-			"from client.plan_targets\n" + 
+			"select location_id as id, b.gid as block_id\n" + 
+			"from client.plan_targets t\n" + 
+			"	join aro.locations l on l.id = t.location_id\n" +
+			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
 			"where plan_id = :planId	\n" + 
 			")\n" + 
 			",\n" + 
@@ -131,6 +133,7 @@ where fullfipsid = '360010001001005' ;
 			")\n" + 
 			"select \n" + 
 			"l.id,\n" + 
+			"l.block_id,\n" + 
 			"case when b.fiber_count is null then 0 else b.fiber_count end as business_fiber,\n" + 
 			"case when b.fiber_count is null then 0 else b.monthly_spend end as business_spend,\n" + 
 			"\n" + 
@@ -149,10 +152,11 @@ where fullfipsid = '360010001001005' ;
 	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year);
 	
 	@Query(value = "with location_ids as (\n" + 
-			"	select l.id as id\n" + 
+			"	select l.id as id, b.gid as block_id\n" + 
 			"	from client.plan p \n" + 
 			"	join aro.wirecenters w on w.id = p.wirecenter_id\n" + 
 			"	join aro.locations l on st_contains(w.geom, l.geom)\n" + 
+			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
 			"	where p.id = :planId\n" + 
 			")\n" + 
 			",\n" + 
@@ -194,6 +198,7 @@ where fullfipsid = '360010001001005' ;
 			")\n" + 
 			"select \n" + 
 			"l.id,\n" + 
+			"l.block_id,\n" + 
 			"case when b.fiber_count is null then 0 else b.fiber_count end as business_fiber,\n" + 
 			"case when b.fiber_count is null then 0 else b.monthly_spend end as business_spend,\n" + 
 			"\n" + 
