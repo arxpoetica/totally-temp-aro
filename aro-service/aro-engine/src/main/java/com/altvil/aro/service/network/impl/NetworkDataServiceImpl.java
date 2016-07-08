@@ -19,7 +19,6 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.DemandMapping;
 import com.altvil.aro.service.demand.analysis.spi.EntityDemandMapping;
-import com.altvil.aro.service.demand.impl.LocationDemandFactory;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -33,7 +32,6 @@ import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
-import com.altvil.utils.conversion.OrdinalEntity;
 import com.altvil.utils.conversion.OrdinalEntityFactory;
 
 @Service
@@ -81,7 +79,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	@Override
 	public Collection<NetworkAssignment> getNetworkLocations(
 			NetworkDataRequest request) {
-		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(request);
+		Map<Long, LocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request);
 		List<Long> selectedRoadLocations = selectedRoadLocationIds(
 				request.getPlanId(), roadLocationByLocationIdMap);
@@ -97,14 +95,19 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				.map(result -> {
 					Long locationId = result;
 
-					LocationDemand ldm = demandByLocationIdMap.get(locationId);
-					if (ldm == null || ldm.getDemand() == 0) {
+					LocationDemandMapping ldm = demandByLocationIdMap
+							.get(locationId);
+					if (ldm == null || ldm.isEmpty()) {
 						// No Demand no location mapped in for fiber Linking
 						return null;
 					}
 
+					LocationDemand locationDemand = aroDemandService
+							.createDemandByCensusBlock(ldm.getBlockId(), ldm);
+
 					AroEntity aroEntity = entityFactory.createLocationEntity(
-							request.getLocationEntities(), locationId, ldm);
+							request.getLocationEntities(), locationId,
+							locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
@@ -115,12 +118,11 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		// final long planId = networkConfiguration.getPlanId();
 		NetworkData networkData = new NetworkData();
 
-		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkConfiguration);
+		Map<Long, LocationDemandMapping> demandByLocationIdMap = getLocationDemand(networkConfiguration);
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkConfiguration);
 		List<Long> selectedRoadLocations = selectedRoadLocationIds(
 				networkConfiguration.getPlanId(), roadLocationByLocationIdMap);
 
-		// TODO MEDIUM Compare performance
 		networkData
 				.setFiberSources(getFiberSourceNetworkAssignments(networkConfiguration));
 
@@ -135,15 +137,19 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				.map(result -> {
 					Long locationId = result;
 
-					LocationDemand ldm = demandByLocationIdMap.get(locationId);
-					if (ldm == null || ldm.getDemand() == 0) {
+					LocationDemandMapping ldm = demandByLocationIdMap
+							.get(locationId);
+					if (ldm == null || ldm.isEmpty()) {
 						// No Demand no location mapped in for fiber Linking
 						return null;
 					}
 
+					LocationDemand locationDemand = aroDemandService
+							.createDemandByCensusBlock(ldm.getBlockId(), ldm);
+
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							networkConfiguration.getLocationEntities(),
-							locationId, ldm);
+							locationId, locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
@@ -166,11 +172,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		id, gid, tlid, point, ratio, intersect_point, distance
 	}
 
-	private enum LoctationDemandMap implements OrdinalAccessor {
-		location_id, block_id, business_fiber, bussiness_spend, tower_fiber, tower_spend, household_fiber, household_spend
-	}
-
-	private Map<Long, LocationDemand> getLocationDemand(
+	private Map<Long, LocationDemandMapping> getLocationDemand(
 			NetworkDataRequest networkConfiguration) {
 
 		return queryLocationDemand(
@@ -181,57 +183,65 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	}
 
-	private Map<Long, LocationDemand> queryLocationDemand(
-			boolean isFilteringRoadLocationDemandsBySelection,
-			Set<LocationEntityType> type, long planId, int year) {
+	private enum EntityDemandMap implements OrdinalAccessor {
+		location_id, block_id, entity_type, count, monthly_spend
+	}
 
-		List<Object[]> demands = isFilteringRoadLocationDemandsBySelection ? planRepository
-				.queryFiberDemand(planId, year) : planRepository
-				.queryAllFiberDemand(planId, year);
+	private LocationEntityType toLocationEntityType(int entityTypeCode) {
+		switch (entityTypeCode) {
+		case 1:
+			return LocationEntityType.Business;
+		case 2:
+			return LocationEntityType.Business;
+		case 3:
+			return LocationEntityType.Business;
+		case 4:
+			return LocationEntityType.Household;
+		case 5:
+		default:
+			return LocationEntityType.CellTower;
+		}
+	}
 
-		Map<Long, LocationDemand> map = new HashMap<>();
+	private Map<Long, LocationDemandMapping> assembleMapping(
+			List<Object[]> entityDemands) {
+		Map<Long, LocationDemandMapping> map = new HashMap<>();
 
-		DemandMappingImpl demandMapping = new DemandMappingImpl();
-		demands.stream()
+		entityDemands
+				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
 						d -> {
-							
-							Long locationId = d.getLong(LoctationDemandMap.location_id) ;
-							
-							map.put(locationId, aroDemandService.createDemandByCensusBlock(
-									d.getInteger(LoctationDemandMap.block_id),
-									demandMapping.update(d))) ;
+							Long locationId = d
+									.getLong(EntityDemandMap.location_id);
+							LocationDemandMapping ldm = map.get(locationId);
+							if (ldm == null) {
+								map.put(locationId,
+										ldm = new LocationDemandMapping(
+												d.getInteger(EntityDemandMap.block_id)));
+							}
+
+							ldm.add(toLocationEntityType(d
+									.getInteger(EntityDemandMap.entity_type)),
+									d.getDouble(EntityDemandMap.count),
+									d.getDouble(EntityDemandMap.monthly_spend));
+
 						});
 
-//		demands.stream()
-//				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-//				.forEach(
-//						result -> {
-//							map.put(result
-//									.getLong(LoctationDemandMap.location_id),
-//
-//									LocationDemandFactory.FACTORY
-//											.build(type)
-//											.addWithRevenue(
-//													LocationEntityType.Household,
-//													result.getDouble(LoctationDemandMap.household_fiber),
-//													result.getDouble(LoctationDemandMap.household_spend) * 0.3)
-//											.addWithRevenue(
-//													LocationEntityType.Business,
-//													result.getDouble(LoctationDemandMap.business_fiber),
-//													result.getDouble(LoctationDemandMap.bussiness_spend) * 0.3)
-//											.addWithRevenue(
-//													LocationEntityType.CellTower,
-//													result.getDouble(LoctationDemandMap.tower_fiber),
-//													result.getDouble(LoctationDemandMap.tower_spend) * 0.3)
-//											.build());
-//
-//						});
-
 		return map;
+	}
+
+	private Map<Long, LocationDemandMapping> queryLocationDemand(
+			boolean isFilteringRoadLocationDemandsBySelection,
+			Set<LocationEntityType> type, long planId, int year) {
+
+		return assembleMapping(isFilteringRoadLocationDemandsBySelection ? planRepository
+				.queryFiberDemand(planId, year) : planRepository
+				.queryAllFiberDemand(planId, year));
 
 	}
+
+	
 
 	// private Long getWirecenterIdByPlanId(long planId) {
 	// return planRepository.queryWirecenterIdForPlanId(planId);
@@ -385,75 +395,66 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		return queryRoadEdges(networkConfiguration.getPlanId());
 	}
 
-	private class DemandMappingImpl implements DemandMapping {
+	private static class EntityDemandMappingImpl implements EntityDemandMapping {
 
-		private OrdinalEntity ordinalEntity;
+		private double demand;
+		private double revenue;
 
-		public DemandMappingImpl() {
-			init() ;
+		public EntityDemandMappingImpl(double demand, double revenue) {
+			super();
+			this.demand = demand;
+			this.revenue = revenue;
 		}
 
-		public DemandMapping update(OrdinalEntity ordinalEntity) {
-			this.ordinalEntity = ordinalEntity;
-			return this;
+		@Override
+		public double getMappedDemand() {
+			return demand;
 		}
 
-		private Map<LocationEntityType, EntityDemandMapping> entityMap = new EnumMap<>(
+		@Override
+		public double getMappedRevenue() {
+			return revenue;
+		}
+
+	}
+
+	private static class LocationDemandMapping implements DemandMapping {
+		private int blockId;
+
+		private Map<LocationEntityType, EntityDemandMapping> map = new EnumMap<>(
 				LocationEntityType.class);
+		private static final EntityDemandMapping zeroDemand = new EntityDemandMappingImpl(
+				0, 0);
 
-		private void init() {
-			entityMap.put(LocationEntityType.Household,
-					new EntityDemandMapping() {
-						@Override
-						public double getMappedRevenue() {
-							return ordinalEntity
-									.getDouble(LoctationDemandMap.household_spend);
-						}
+		public LocationDemandMapping(int blockId) {
+			super();
+			this.blockId = blockId;
+		}
 
-						@Override
-						public double getMappedDemand() {
-							return ordinalEntity
-									.getDouble(LoctationDemandMap.household_fiber);
-						}
-					});
+		public boolean isEmpty() {
+			return map.size() == 0;
+		}
 
-			entityMap.put(LocationEntityType.CellTower,
-					new EntityDemandMapping() {
-						@Override
-						public double getMappedRevenue() {
-							return ordinalEntity
-									.getDouble(LoctationDemandMap.bussiness_spend);
-						}
+		public int getBlockId() {
+			return blockId;
+		}
 
-						@Override
-						public double getMappedDemand() {
-							return ordinalEntity
-									.getDouble(LoctationDemandMap.business_fiber);
-						}
-					});
+		public void add(LocationEntityType type, EntityDemandMapping mapping) {
+			map.put(type, mapping);
+		}
 
-			entityMap.put(LocationEntityType.CellTower,
-					new EntityDemandMapping() {
-						@Override
-						public double getMappedRevenue() {
-							return ordinalEntity
-									.getDouble(LoctationDemandMap.tower_spend);
-						}
-
-						@Override
-						public double getMappedDemand() {
-							return ordinalEntity
-									.getDouble(LoctationDemandMap.tower_fiber);
-						}
-					});
+		public void add(LocationEntityType type, double demand, double revenue) {
+			add(type, new EntityDemandMappingImpl(demand, revenue));
 		}
 
 		@Override
 		public EntityDemandMapping getEntityDemandMapping(
 				LocationEntityType type) {
-			return entityMap.get(type);
+			EntityDemandMapping edm = map.get(type);
+			return edm == null ? zeroDemand : edm;
 		}
 
 	}
+
 
 }
