@@ -18,6 +18,7 @@ import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.utils.StreamUtil;
+import com.altvil.utils.func.Aggregator;
 
 public class DefaultFiberCoverage implements DemandCoverage {
 
@@ -34,14 +35,12 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		this.coverage = coverage;
 		this.locationEntities = locationEntities;
 	}
-	
-	
 
 	@Override
 	public DemandStatistic ratio(double ratio) {
-		return new DefaultFiberCoverage((LocationDemand) coverage.ratio(ratio), locationEntities) ;
+		return new DefaultFiberCoverage((LocationDemand) coverage.ratio(ratio),
+				locationEntities);
 	}
-
 
 	@Override
 	public double getRequiredFiberStrands(FiberType fiberType) {
@@ -49,19 +48,24 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		case ROOT:
 		case BACKBONE:
 		case FEEDER:
-			//TODO KG Move constant to Config and formalize UnitOfConsumtion
-			return getDemand() / 32 ;
+			// TODO KG Move constant to Config and formalize UnitOfConsumtion
+			return getAtomicUnits() / 32;
 		case DISTRIBUTION:
 		case UNKNOWN:
-			return getDemand() ;
-		default :
-			return getDemand() ;
+			return getAtomicUnits();
+		default:
+			return getAtomicUnits();
 		}
 	}
 
 	@Override
 	public double getRawCoverage() {
 		return coverage.getRawCoverage();
+	}
+
+	@Override
+	public double getAtomicUnits() {
+		return coverage.getAtomicUnits();
 	}
 
 	@Override
@@ -94,60 +98,22 @@ public class DefaultFiberCoverage implements DemandCoverage {
 				AssignedEntityDemand::getLocationEntity);
 	}
 
-	private static class DemandSummer implements DemandStatistic {
-		private double rawCoverage = 0;
-		private double demand = 0;
-		private double revenue = 0;
-
-		public void add(DemandStatistic value) {
-			rawCoverage += value.getRawCoverage();
-			demand += value.getDemand();
-			revenue += value.getMonthlyRevenueImpact();
-		}
-
-		@Override
-		public double getRawCoverage() {
-			return rawCoverage;
-		}
-
-		@Override
-		public double getDemand() {
-			return demand;
-		}
-
-		@Override
-		public double getMonthlyRevenueImpact() {
-			return revenue;
-		}
-		
-		@Override
-		public DemandStatistic ratio(double ratio) {
-			return new DefaultDemandStatistic(this.getRawCoverage() * ratio,
-					this.getDemand() * ratio, this.getMonthlyRevenueImpact()
-							* ratio);
-		}
-
-		public String toString() {
-			return new ToStringBuilder(this).append("rawCoverate", rawCoverage).append("demand", demand).append("revenue", revenue).toString();
-		}
-	}
-
 	public static class Accumulator {
 
-		Map<LocationEntityType, DemandSummer> demands = new EnumMap<>(
+		Map<LocationEntityType, Aggregator<DemandStatistic>> demands = new EnumMap<>(
 				LocationEntityType.class);
 
 		Set<AssignedEntityDemand> locationEntities = new HashSet<>();
 
 		public Accumulator() {
 			for (LocationEntityType t : LocationEntityType.values()) {
-				demands.put(t, new DemandSummer());
+				demands.put(t, DefaultDemandStatistic.aggregate());
 			}
 		}
 
 		public void add(AssignedEntityDemand assignedEntityDemand) {
 			assert !locationEntities.contains(assignedEntityDemand);
-			
+
 			if (!locationEntities.contains(assignedEntityDemand)) {
 
 				for (LocationEntityType t : LocationEntityType.values()) {
@@ -158,7 +124,7 @@ public class DefaultFiberCoverage implements DemandCoverage {
 
 				locationEntities.add(assignedEntityDemand);
 			} else {
-				System.out.println("WTF") ;
+				System.out.println("WTF");
 			}
 		}
 
@@ -171,20 +137,27 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		}
 
 		public DemandCoverage getResult() {
-			return new DefaultFiberCoverage(DefaultLocationDemand.create(
-					demands.get(LocationEntityType.Household),
-					demands.get(LocationEntityType.Business),
-					demands.get(LocationEntityType.CellTower)),
-					locationEntities);
+
+			DefaultLocationDemand.Builder builder = DefaultLocationDemand
+					.build();
+			for (LocationEntityType type : LocationEntityType.values()) {
+				DemandStatistic ds = demands.get(type);
+				builder.add(type,
+						ds == null ? DefaultDemandStatistic.ZERO_DEMAND : ds);
+			}
+
+			return new DefaultFiberCoverage(builder.build(), locationEntities);
 		}
-		
+
 		public String toString() {
-			return new ToStringBuilder(this).append("demands", demands).toString();
+			return new ToStringBuilder(this).append("demands", demands)
+					.toString();
 		}
 
 	}
 
 	public String toString() {
-		return new ToStringBuilder(this).append("coverage", coverage).append("locationEntities", locationEntities).toString();
+		return new ToStringBuilder(this).append("coverage", coverage)
+				.append("locationEntities", locationEntities).toString();
 	}
 }

@@ -127,7 +127,7 @@ public class EntityFactory {
 
 			dropAssignments.forEach(da -> {
 				summer.add(da.getDropCable(), da.getAssignedEntityDemand()
-						.getDemand());
+						.getAtomicUnits());
 			});
 
 			return new DropCableSummary(summer.getTotals().entrySet().stream()
@@ -405,7 +405,7 @@ public class EntityFactory {
 
 		@Override
 		public double getTotalFiberDemand() {
-			return assignedEntityDemand.getLocationDemand().getDemand();
+			return assignedEntityDemand.getLocationDemand().getAtomicUnits();
 		}
 		
 		@Override

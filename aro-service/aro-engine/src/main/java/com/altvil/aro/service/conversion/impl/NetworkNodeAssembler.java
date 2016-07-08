@@ -30,12 +30,12 @@ public class NetworkNodeAssembler {
 			networkNode = resolver.getCentralOffice(planId) ;
 		}
 		
-		LocationDemand ld = aggregator.apply() ;
-		
-		networkNode.setHouseHoldCount(ld.getLocationDemand(LocationEntityType.Household).getDemand()) ;
-		networkNode.setBusinessCount(ld.getLocationDemand(LocationEntityType.Business).getDemand()) ;
-		networkNode.setCellTowerCount(ld.getLocationDemand(LocationEntityType.CellTower).getDemand()) ;
-		networkNode.setAtomicUnit(ld.getDemand()) ;
+//		LocationDemand ld = aggregator.apply() ;
+		//TODO GIANT Develop Model for counting Premises by NetworkNode
+//		networkNode.setHouseHoldCount(ld.getLocationDemand(LocationEntityType.Household).getDemand()) ;
+//		networkNode.setBusinessCount(ld.getLocationDemand(LocationEntityType.LargeBusiness).getDemand()) ;
+//		networkNode.setCellTowerCount(ld.getLocationDemand(LocationEntityType.CellTower).getDemand()) ;
+//		networkNode.setAtomicUnit(ld.getDemand()) ;
 		return networkNode ;
 		
 	}

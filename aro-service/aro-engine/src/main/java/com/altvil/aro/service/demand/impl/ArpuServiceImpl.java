@@ -22,9 +22,24 @@ public class ArpuServiceImpl implements ArpuService {
 	void postConstruct() {
 
 		arpuMap.put(
-				LocationEntityType.Business,
+				LocationEntityType.SmallBusiness,
+				ArpuMappingImpl.build().add(NetworkType.Fiber, 100.0)
+						.add(NetworkType.Copper, 30.0).build());
+		
+		arpuMap.put(
+				LocationEntityType.MediumBusiness,
+				ArpuMappingImpl.build().add(NetworkType.Fiber, 120.0)
+						.add(NetworkType.Copper, 30.0).build());
+		
+		arpuMap.put(
+				LocationEntityType.LargeBusiness,
 				ArpuMappingImpl.build().add(NetworkType.Fiber, Double.NaN)
 						.add(NetworkType.Copper, Double.NaN).build());
+		
+		arpuMap.put(
+				LocationEntityType.SmallBusiness,
+				ArpuMappingImpl.build().add(NetworkType.Fiber, 100.0)
+						.add(NetworkType.Copper, 30.0).build());
 
 		arpuMap.put(
 				LocationEntityType.Household,

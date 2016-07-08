@@ -187,7 +187,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 		f.getLocationDemand().getMonthlyRevenueImpact()*12, 
 		f.getLocationDemand().getLocationDemand(LocationEntityType.Household).getMonthlyRevenueImpact() *12,
 		f.getLocationDemand().getLocationDemand(LocationEntityType.CellTower).getMonthlyRevenueImpact() *12,
-		f.getLocationDemand().getLocationDemand(LocationEntityType.Business).getMonthlyRevenueImpact() *12, 
+		f.getLocationDemand().getLocationDemand(LocationEntityType.LargeBusiness).getMonthlyRevenueImpact() *12, 
 		f.getNpv());
 		
 		return f ;
@@ -475,7 +475,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 			networkNodeRepository.save(plan.getNetworkNodes());
 			fiberRouteRepository.save(plan.getFiberRoutes());
 			
-			costService.updateWireCenterCosts(plan.getPlanId()) ;
+			costService.updateWireCenterCosts(plan) ;
 			updateFinancials(networkNodeRepository, plan.getPlanId(), plan);
 		}
 	}
@@ -544,7 +544,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				networkNodeRepository.save(plan.getNetworkNodes());
 				fiberRouteRepository.save(plan.getFiberRoutes());
 				updateFinancials(this.networkNodeRepository, plan.getPlanId(), plan) ;
-				costService.updateWireCenterCosts(plan.getPlanId());
+				costService.updateWireCenterCosts(plan);
 				return plan;
 			}
 
@@ -615,7 +615,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 					constraints);
 
 			double totalDemand = networkData.getRoadLocations().stream()
-					.mapToDouble(a -> ((LocationEntity) a.getSource()).getLocationDemand().getDemand()).sum();
+					.mapToDouble(a -> ((LocationEntity) a.getSource()).getLocationDemand().getAtomicUnits()).sum();
 
 			log.info("Target total = " + totalDemand);
 
@@ -634,7 +634,7 @@ public class NetworkPlanningServiceImpl implements NetworkPlanningService {
 				if (!plan.getNetworkNodes().isEmpty()) {				
 					saveUpdate(plan);
 				}
-				costService.updateWireCenterCosts(plan.getPlanId()) ;
+				costService.updateWireCenterCosts(plan) ;
 				return plan;
 			}
 

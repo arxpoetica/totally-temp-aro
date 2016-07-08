@@ -123,7 +123,7 @@ public class FDHAssembler {
 									a,
 									dropLength,
 									threshHolds.getDropCableModel().getDropCable(dropLength),
-									a.getDemand()
+									a.getAtomicUnits()
 							));
 
 				});

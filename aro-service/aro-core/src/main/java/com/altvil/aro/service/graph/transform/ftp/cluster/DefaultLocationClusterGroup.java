@@ -195,7 +195,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 		private Collection<PinnedAssignedEntityDemand> split(double maxDemand,
 				double remainder, PinnedAssignedEntityDemand d) {
-			if (d.getDemand() < remainder) {
+			if (d.getAtomicUnits() < remainder) {
 				return Collections.singleton(d);
 			}
 
@@ -205,13 +205,13 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			result.add(pair.getHead());
 			d = pair.getTail();
 
-			while (d.getDemand() > maxDemand) {
+			while (d.getAtomicUnits() > maxDemand) {
 				pair = d.split(maxDemand);
 				result.add(pair.getHead());
 				d = pair.getTail();
 			}
 
-			if (d.getDemand() > 0) {
+			if (d.getAtomicUnits() > 0) {
 				result.add(d);
 			}
 
@@ -223,7 +223,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			StringBuffer sb = new StringBuffer();
 
 			sb.append("Summed Demand = ");
-			sb.append(demands.stream().mapToDouble(d -> d.getDemand()).sum());
+			sb.append(demands.stream().mapToDouble(d -> d.getAtomicUnits()).sum());
 			int index = 0;
 			sb.append(" => ");
 			for (PinnedAssignedEntityDemand pd : demands) {
@@ -247,12 +247,12 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			}
 			
 
-			if (d.getDemand() > currentCluster.getRemainingDemand()) {
+			if (d.getAtomicUnits() > currentCluster.getRemainingDemand()) {
 				Collection<PinnedAssignedEntityDemand> demands = split(
 						thresholds.getMaxlocationPerFDT(),
 						currentCluster.getRemainingDemand(), d);
 				if (log.isTraceEnabled()) {
-					log.trace("Overflowed Demand " + d.getDemand()
+					log.trace("Overflowed Demand " + d.getAtomicUnits()
 							+ " remainder =  "
 							+ currentCluster.getRemainingDemand() + " .... "
 							+ toDebugInfo(demands));

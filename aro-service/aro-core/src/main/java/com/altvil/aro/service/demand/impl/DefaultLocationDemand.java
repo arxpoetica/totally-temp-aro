@@ -61,25 +61,11 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		Map<LocationEntityType, DemandStatistic> demands = new EnumMap<>(
 				LocationEntityType.class);
 
-		public Builder add(LocationEntityType type, double coverage,
-				double revenue) {
-			DemandStatistic houseHoldStat = new DefaultDemandStatistic(
-					coverage, coverage, revenue);
-			demands.put(type, houseHoldStat);
-			return this;
-		}
 		
-		public Builder add(LocationEntityType type, double rawCoverage, double coverage,
-				double revenue) {
-			DemandStatistic houseHoldStat = new DefaultDemandStatistic(
-					rawCoverage, coverage, revenue);
-			demands.put(type, houseHoldStat);
+		public Builder add(LocationEntityType type,
+				DemandStatistic demandStatistic) {
+			demands.put(type, demandStatistic);
 			return this;
-		}
-		
-		public Builder add(LocationEntityType type, DemandStatistic demandStatistic) {
-			demands.put(type, demandStatistic) ;
-			return this ;
 		}
 
 		public LocationDemand build() {
@@ -88,18 +74,6 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	}
 
 	private static final long serialVersionUID = 1L;
-
-	public static LocationDemand create(DemandStatistic houseHoldDemand,
-			DemandStatistic businessDemand, DemandStatistic towerDemand) {
-		Map<LocationEntityType, DemandStatistic> map = new EnumMap<>(
-				LocationEntityType.class);
-
-		map.put(LocationEntityType.Household, houseHoldDemand);
-		map.put(LocationEntityType.Business, businessDemand);
-		map.put(LocationEntityType.CellTower, towerDemand);
-
-		return create(map, sum(map.values()));
-	}
 
 	public static LocationDemand create(
 			Map<LocationEntityType, DemandStatistic> demands,
@@ -120,7 +94,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	private Map<LocationEntityType, DemandStatistic> demands;
 
 	private DefaultLocationDemand() {
-		super(0, 0, 0);
+		super(0, 0, 0, 0);
 		Map<LocationEntityType, DemandStatistic> map = new EnumMap<>(
 				LocationEntityType.class);
 		for (LocationEntityType t : LocationEntityType.values()) {
@@ -132,15 +106,15 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	private DefaultLocationDemand(
 			Map<LocationEntityType, DemandStatistic> demands,
 			DemandStatistic stat) {
-		super(stat.getRawCoverage(), stat.getDemand(), stat
+		super(stat.getRawCoverage(), stat.getAtomicUnits(), stat.getDemand(), stat
 				.getMonthlyRevenueImpact());
 		this.demands = demands;
 	}
 
 	private DefaultLocationDemand(
 			Map<LocationEntityType, DemandStatistic> demands, double raw,
-			double demand, double revenue) {
-		super(raw, demand, revenue);
+			double atomicUnits, double demand, double revenue) {
+		super(raw, atomicUnits, demand, revenue);
 		this.demands = demands;
 	}
 
@@ -184,13 +158,13 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	// }
 
 	private Pair<DemandStatistic> split(DemandStatistic ds, double demand) {
-		
-		if( demand == ds.getDemand()) {
-			return new Pair<>(ds, DefaultDemandStatistic.ZERO_DEMAND) ;
+
+		if (demand == ds.getDemand()) {
+			return new Pair<>(ds, DefaultDemandStatistic.ZERO_DEMAND);
 		}
-		
+
 		demand = Math.min(demand, ds.getDemand());
-		
+
 		double ratio = demand / ds.getDemand();
 		double tailRatio = Math.max(0.0, 1 - ratio);
 
@@ -198,41 +172,47 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		double tailDemand = ds.getDemand() - demand;
 
 		return new Pair<>(new DefaultDemandStatistic(ds.getRawCoverage()
-				* ratio, headDemand, ds.getMonthlyRevenueImpact() * ratio),
+				* ratio, headDemand, ratio * ds.getDemand(),
+				ds.getMonthlyRevenueImpact() * ratio),
 				new DefaultDemandStatistic(ds.getRawCoverage() * tailRatio,
-						tailDemand, getMonthlyRevenueImpact() * tailRatio));
+						tailDemand, getDemand() * tailRatio,
+						getMonthlyRevenueImpact() * tailRatio));
 
 	}
 
 	private Pair<LocationDemand> splitDemand(double demand,
 			LocationEntityType[] types) {
 
-		Map<LocationEntityType, DemandStatistic> head= new EnumMap<>(LocationEntityType.class) ;
-		Map<LocationEntityType, DemandStatistic> tail=  new EnumMap<>(LocationEntityType.class) ;
+		Map<LocationEntityType, DemandStatistic> head = new EnumMap<>(
+				LocationEntityType.class);
+		Map<LocationEntityType, DemandStatistic> tail = new EnumMap<>(
+				LocationEntityType.class);
 
-		double remainingDemand = demand ;
+		double remainingDemand = demand;
 		for (LocationEntityType lt : types) {
 			DemandStatistic ds = getLocationDemand(lt);
 			if (Math.abs(remainingDemand - 0) < 0.00001 || ds.getDemand() == 0) {
 				head.put(lt, DefaultDemandStatistic.ZERO_DEMAND);
 				tail.put(lt, ds);
 			} else {
-				
-				Pair<DemandStatistic> pair = split(ds, remainingDemand) ;
-				
+
+				Pair<DemandStatistic> pair = split(ds, remainingDemand);
+
 				head.put(lt, pair.getHead());
 				tail.put(lt, pair.getTail());
-				
+
 				remainingDemand -= pair.getHead().getDemand();
 			}
 		}
-		
-		return new Pair<LocationDemand>(create(head, sum(head)), create(tail, sum(tail))) ;
+
+		return new Pair<LocationDemand>(create(head, sum(head)), create(tail,
+				sum(tail)));
 	}
 
 	private static final LocationEntityType[] reduceTypes = new LocationEntityType[] {
-			LocationEntityType.Household, LocationEntityType.Business,
-			LocationEntityType.CellTower };
+			LocationEntityType.Household, LocationEntityType.SmallBusiness,
+			LocationEntityType.MediumBusiness,
+			LocationEntityType.LargeBusiness, LocationEntityType.CellTower };
 
 	@Override
 	public Pair<LocationDemand> splitDemand(double demand) {

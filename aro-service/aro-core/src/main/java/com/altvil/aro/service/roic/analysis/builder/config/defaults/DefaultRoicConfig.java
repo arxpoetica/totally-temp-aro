@@ -74,8 +74,10 @@ public class DefaultRoicConfig implements RoicConfiguration,
 
 		registry.register(new BasicComponentConfig(ComponentType.household));
 		registry.register(new BasicComponentConfig(ComponentType.cellTower));
-		registry.register(new BasicComponentConfig(ComponentType.business));
-
+		registry.register(new BasicComponentConfig(ComponentType.smallBusiness));
+		registry.register(new BasicComponentConfig(ComponentType.mediumBusiness));
+		registry.register(new BasicComponentConfig(ComponentType.largeBusiness));
+		
 		return registry;
 	}
 

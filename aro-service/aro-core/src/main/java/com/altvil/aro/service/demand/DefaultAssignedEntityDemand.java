@@ -43,6 +43,13 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 	public double getDemand() {
 		return locationDemand.getDemand() ;
 	}
+	
+	
+
+	@Override
+	public double getAtomicUnits() {
+		return locationDemand.getAtomicUnits() ;
+	}
 
 	@Override
 	public double getMonthlyRevenueImpact() {
@@ -55,7 +62,7 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 	}
 
 	public double getHouseholdFiberDemandValue() {
-		return locationDemand.getDemand();
+		return locationDemand.getAtomicUnits();
 	}
 
 	public double getTotalDemand() {

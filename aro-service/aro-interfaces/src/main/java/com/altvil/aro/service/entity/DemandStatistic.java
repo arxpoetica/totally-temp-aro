@@ -2,11 +2,13 @@ package com.altvil.aro.service.entity;
 
 public interface DemandStatistic {
 	
-	double getRawCoverage();
+	double getRawCoverage(); //Premises Passed
 
-	double getDemand();
+	double getAtomicUnits() ; //Units Demanded From network
 	
-	double getMonthlyRevenueImpact() ;
+	double getDemand(); //Effective Demand
+	
+	double getMonthlyRevenueImpact() ; //Revenue Impact
 	
 	DemandStatistic ratio(double ratio) ;
 	

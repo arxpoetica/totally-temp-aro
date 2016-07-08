@@ -27,14 +27,11 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 		this.costService = costService ;
 	}
 
-
-
 	@Override
 	public void save(WirecenterNetworkPlan plan) {
 		networkNodeRepository.save(plan.getNetworkNodes());
 		fiberRouteRepository.save(plan.getFiberRoutes());
 		costService.updateWireCenterCosts(plan.getPlanId()) ;
-
 	}
 
 

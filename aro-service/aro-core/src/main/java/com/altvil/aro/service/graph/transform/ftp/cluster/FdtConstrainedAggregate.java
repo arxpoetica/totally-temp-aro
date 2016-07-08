@@ -112,11 +112,11 @@ public class FdtConstrainedAggregate implements LocationCluster {
 			throw new RuntimeException("Undefined Pin") ;
 		}
 		
-		if( li.getDemand() == 0 ) {
+		if( li.getAtomicUnits() == 0 ) {
 			throw new RuntimeException("Grrrr") ;
 		}
 		
-		coverage += li.getDemand() ;
+		coverage += li.getAtomicUnits() ;
 		locationIntersections.add(li);
 		return thresholds.getMaxlocationPerFDT() - coverage  ;
 

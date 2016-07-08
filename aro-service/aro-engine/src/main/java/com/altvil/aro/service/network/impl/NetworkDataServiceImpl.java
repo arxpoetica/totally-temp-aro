@@ -23,6 +23,7 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.impl.EntityFactory;
+import com.altvil.aro.service.entity.mapping.LocationEntityTypeMapping;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
@@ -188,19 +189,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	}
 
 	private LocationEntityType toLocationEntityType(int entityTypeCode) {
-		switch (entityTypeCode) {
-		case 1:
-			return LocationEntityType.Business;
-		case 2:
-			return LocationEntityType.Business;
-		case 3:
-			return LocationEntityType.Business;
-		case 4:
-			return LocationEntityType.Household;
-		case 5:
-		default:
-			return LocationEntityType.CellTower;
-		}
+		return LocationEntityTypeMapping.MAPPING
+				.toLocationEntityType(entityTypeCode);
 	}
 
 	private Map<Long, LocationDemandMapping> assembleMapping(
@@ -240,8 +230,6 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				.queryAllFiberDemand(planId, year));
 
 	}
-
-	
 
 	// private Long getWirecenterIdByPlanId(long planId) {
 	// return planRepository.queryWirecenterIdForPlanId(planId);
@@ -455,6 +443,5 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		}
 
 	}
-
 
 }

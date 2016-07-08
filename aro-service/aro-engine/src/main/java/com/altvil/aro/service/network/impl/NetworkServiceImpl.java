@@ -143,7 +143,7 @@ public class NetworkServiceImpl implements NetworkService {
 					Long locationId = result;
 
 					LocationDemand ldm = demandByLocationIdMap.get(locationId);
-					if (ldm == null || ldm.getDemand() == 0) {
+					if (ldm == null || ldm.getAtomicUnits() == 0) {
 						// No Demand no location mapped in for fiber Linking
 						return null;
 					}
@@ -272,7 +272,7 @@ public class NetworkServiceImpl implements NetworkService {
 													result.getDouble(LoctationDemandMap.household_fiber),
 													result.getDouble(LoctationDemandMap.household_spend) * 0.3)
 											.addWithRevenue(
-													LocationEntityType.Business,
+													LocationEntityType.LargeBusiness,
 													result.getDouble(LoctationDemandMap.business_fiber),
 													result.getDouble(LoctationDemandMap.bussiness_spend) * 0.3)
 											.addWithRevenue(

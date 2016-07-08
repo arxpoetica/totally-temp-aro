@@ -67,3 +67,5 @@ ${PSQL} -a -f $DIR/create_city_spend_mapping.sql
 
 # Create boundaries
 ${PSQL} -a -f $DIR/create_client_selected_regions.sql
+
+${PSQL} -a -f $DIR/create_client_demand.views.sql
