@@ -124,25 +124,6 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		return demands.get(type);
 	}
 
-	@Override
-	public LocationDemand add(LocationDemand other) {
-
-		EnumMap<LocationEntityType, DemandStatistic> result = new EnumMap<>(
-				LocationEntityType.class);
-
-		for (LocationEntityType t : LocationEntityType.values()) {
-
-			result.put(
-					t,
-					DefaultDemandStatistic.sum(getLocationDemand(t),
-							other.getLocationDemand(t)));
-		}
-
-		return create(result, sum(result.values()));
-	}
-
-	
-
 	private static Pair<DemandStatistic> split(DemandStatistic ds, double atomicUnitRemainder) {
 
 		if (atomicUnitRemainder == ds.getAtomicUnits()) {

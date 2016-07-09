@@ -9,8 +9,6 @@ public interface LocationDemand extends DemandStatistic, Serializable {
 	
 	Pair<LocationDemand> splitDemand(double demand) ;
 	
-    LocationDemand add(LocationDemand coverageStatic) ;
-    
     
 }
 
