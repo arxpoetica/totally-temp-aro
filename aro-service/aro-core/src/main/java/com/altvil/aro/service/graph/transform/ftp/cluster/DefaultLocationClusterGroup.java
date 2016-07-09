@@ -201,12 +201,12 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 			List<PinnedAssignedEntityDemand> result = new ArrayList<>();
 
-			Pair<PinnedAssignedEntityDemand> pair = d.split(remainder);
+			Pair<PinnedAssignedEntityDemand> pair = d.split(d.getLocationDemand().splitDemand(remainder));
 			result.add(pair.getHead());
 			d = pair.getTail();
 
 			while (d.getAtomicUnits() > maxDemand) {
-				pair = d.split(maxDemand);
+				pair = d.split(d.getLocationDemand().splitDemand(maxDemand)) ;
 				result.add(pair.getHead());
 				d = pair.getTail();
 			}
@@ -230,7 +230,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				if (index++ > 0) {
 					sb.append(", ");
 				}
-				sb.append(pd.getDemand());
+				sb.append(pd.getAtomicUnits());
 			}
 
 			return sb.toString();

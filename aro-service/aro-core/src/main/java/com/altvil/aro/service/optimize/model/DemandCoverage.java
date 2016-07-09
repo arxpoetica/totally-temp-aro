@@ -10,8 +10,9 @@ import com.altvil.aro.service.entity.LocationEntity;
 
 public interface DemandCoverage extends DemandStatistic {
 	
-	double getRequiredFiberStrands(FiberType fiberType) ;
 	LocationDemand getLocationDemand() ;
+	
+	double getRequiredFiberStrands(FiberType fiberType) ;
 	Collection<AssignedEntityDemand> getAssignedEntityDemands();
 	Collection<LocationEntity> getLocations() ;
 }

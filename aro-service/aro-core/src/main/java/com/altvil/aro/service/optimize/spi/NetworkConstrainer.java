@@ -81,7 +81,7 @@ public class NetworkConstrainer {
 					log.trace("Analysis Node: {} {} {} {}", analysisNode
 							.getFiberCoverage().getAtomicUnits(), analysisNode
 							.getCapex(), analysisNode.getSuccessBasedCapex(),
-							analysisNode.getFiberCoverage().getRawCoverage());
+							analysisNode.getFiberCoverage().getAtomicUnits());
 
 					boolean isAnalysisEmpty = analysisNode.getFiberCoverage()
 							.getLocations().isEmpty();

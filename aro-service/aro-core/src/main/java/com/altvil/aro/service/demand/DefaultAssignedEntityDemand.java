@@ -2,13 +2,12 @@ package com.altvil.aro.service.demand;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 
-public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssignedEntityDemand {
+public class DefaultAssignedEntityDemand implements PinnedAssignedEntityDemand {
 
 	private PinnedLocation pinnedLocation;
 
@@ -29,21 +28,12 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 	}
 	
 	
-	@Override
-	public DemandStatistic ratio(double ratio) {
-		 return new DefaultAssignedEntityDemand(getLocationEntity(), this.pinnedLocation, (LocationDemand) locationDemand.ratio(ratio));
-	}
-
-	@Override
-	public double getRawCoverage() {
-		return locationDemand.getRawCoverage() ;
-	}
-
-	@Override
-	public double getDemand() {
-		return locationDemand.getDemand() ;
-	}
-	
+//	private DemandStatistic ratio(double ratio) {
+//		
+//		LocationDemand ld = (LocationDemand) locationDemand.ratio(ratio) ;
+//		
+//		 return new DefaultAssignedEntityDemand(getLocationEntity(), this.pinnedLocation, (LocationDemand) locationDemand.ratio(ratio));
+//	}
 	
 
 	@Override
@@ -51,10 +41,7 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 		return locationDemand.getAtomicUnits() ;
 	}
 
-	@Override
-	public double getMonthlyRevenueImpact() {
-		return locationDemand.getMonthlyRevenueImpact() ;
-	}
+	
 
 	@Override
 	public LocationDemand getLocationDemand(){
@@ -80,20 +67,16 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 	public LocationEntity getLocationEntity() {
 		return locationEntity;
 	}
-
-	/* (non-Javadoc)
-	 * @see com.altvil.aro.service.demand.AssignedAssignedEntityDemand#split(double)
-	 */
+	
+	
 	@Override
-	public Pair<PinnedAssignedEntityDemand> split(double demand) {
-
-		Pair<LocationDemand> pair = locationDemand.splitDemand(demand);
+	public Pair<PinnedAssignedEntityDemand> split(Pair<LocationDemand> pair) {
 		return new Pair<PinnedAssignedEntityDemand>(new DefaultAssignedEntityDemand(
 				locationEntity, pinnedLocation, pair.getHead()),
 				new DefaultAssignedEntityDemand(locationEntity, pinnedLocation, pair
 						.getTail()));
-
 	}
+	
 	
 	public String toString() {
 		return new ToStringBuilder(this)

@@ -36,11 +36,11 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		this.locationEntities = locationEntities;
 	}
 
-	@Override
-	public DemandStatistic ratio(double ratio) {
-		return new DefaultFiberCoverage((LocationDemand) coverage.ratio(ratio),
-				locationEntities);
-	}
+//	@Override
+//	public DemandStatistic ratio(double ratio) {
+//		return new DefaultFiberCoverage((LocationDemand) coverage.ratio(ratio),
+//				locationEntities);
+//	}
 
 	@Override
 	public double getRequiredFiberStrands(FiberType fiberType) {
@@ -58,9 +58,10 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		}
 	}
 
+	
 	@Override
 	public double getRawCoverage() {
-		return coverage.getRawCoverage();
+		return coverage.getRawCoverage() ;
 	}
 
 	@Override

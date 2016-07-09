@@ -48,12 +48,12 @@ public class DefaultDemandStatistic implements DemandStatistic {
 		this.revenue = revenue;
 	}
 
-	@Override
-	public DemandStatistic ratio(double ratio) {
-		return new DefaultDemandStatistic(ratio * getRawCoverage(),
-				ratio * atomicUnits, ratio
-				* getDemand(), ratio * getMonthlyRevenueImpact());
-	}
+//	@Override
+//	public DemandStatistic ratio(double ratio) {
+//		return new DefaultDemandStatistic(ratio * getRawCoverage(),
+//				ratio * atomicUnits, ratio
+//				* getDemand(), ratio * getMonthlyRevenueImpact());
+//	}
 
 	public DefaultDemandStatistic() {
 		this(0, 0, 0, 0);
@@ -135,13 +135,13 @@ public class DefaultDemandStatistic implements DemandStatistic {
 			return revenue;
 		}
 
-		@Override
-		public DemandStatistic ratio(double ratio) {
-			return new DefaultDemandStatistic(this.getRawCoverage() * ratio,
-					ratio * atomicUnits,
-					this.getDemand() * ratio, this.getMonthlyRevenueImpact()
-							* ratio);
-		}
+//		@Override
+//		public DemandStatistic ratio(double ratio) {
+//			return new DefaultDemandStatistic(this.getRawCoverage() * ratio,
+//					ratio * atomicUnits,
+//					this.getDemand() * ratio, this.getMonthlyRevenueImpact()
+//							* ratio);
+//		}
 
 	}
 	
