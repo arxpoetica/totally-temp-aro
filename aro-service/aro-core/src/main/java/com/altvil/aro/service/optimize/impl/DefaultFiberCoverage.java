@@ -36,12 +36,6 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		this.locationEntities = locationEntities;
 	}
 
-//	@Override
-//	public DemandStatistic ratio(double ratio) {
-//		return new DefaultFiberCoverage((LocationDemand) coverage.ratio(ratio),
-//				locationEntities);
-//	}
-
 	@Override
 	public double getRequiredFiberStrands(FiberType fiberType) {
 		switch (fiberType) {
@@ -114,7 +108,6 @@ public class DefaultFiberCoverage implements DemandCoverage {
 
 		public void add(AssignedEntityDemand assignedEntityDemand) {
 			assert !locationEntities.contains(assignedEntityDemand);
-
 			if (!locationEntities.contains(assignedEntityDemand)) {
 
 				for (LocationEntityType t : LocationEntityType.values()) {
@@ -124,9 +117,7 @@ public class DefaultFiberCoverage implements DemandCoverage {
 				}
 
 				locationEntities.add(assignedEntityDemand);
-			} else {
-				System.out.println("WTF");
-			}
+			} 
 		}
 
 		public void add(Collection<DemandCoverage> stats) {
