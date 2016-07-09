@@ -3,7 +3,6 @@ package com.altvil.aro.service.conversion.impl;
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.utils.func.Aggregator;
 
 public class NetworkNodeAssembler {

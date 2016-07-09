@@ -141,7 +141,7 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			DefaultLocationDemand.Builder builder = DefaultLocationDemand
 					.build();
 			for (LocationEntityType type : LocationEntityType.values()) {
-				DemandStatistic ds = demands.get(type);
+				DemandStatistic ds = demands.get(type).apply();
 				builder.add(type,
 						ds == null ? DefaultDemandStatistic.ZERO_DEMAND : ds);
 			}

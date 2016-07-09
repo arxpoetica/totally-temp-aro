@@ -31,7 +31,7 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 	public void save(WirecenterNetworkPlan plan) {
 		networkNodeRepository.save(plan.getNetworkNodes());
 		fiberRouteRepository.save(plan.getFiberRoutes());
-		costService.updateWireCenterCosts(plan.getPlanId()) ;
+		costService.updateWireCenterCosts(plan) ;
 	}
 
 

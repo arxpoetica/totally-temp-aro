@@ -233,10 +233,10 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		public static class Builder {
 			private LocationEntityType locationEntityType;
 			private Collection<SpiProductDemand> demands;
-			private ArpuMapping arpuMapping;
+			//private ArpuMapping arpuMapping;
 
 			public Builder setArpuMapping(ArpuMapping mapping) {
-				this.arpuMapping = mapping;
+				//this.arpuMapping = mapping;
 				return this;
 			}
 
