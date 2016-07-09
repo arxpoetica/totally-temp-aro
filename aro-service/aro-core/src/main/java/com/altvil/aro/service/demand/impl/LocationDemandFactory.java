@@ -16,9 +16,6 @@ public class LocationDemandFactory {
 	private LocationDemandFactory() {
 	}
 
-
-	
-
 	public Builder build(Set<LocationEntityType> mask) {
 		return new Builder(LocationTypeMask.MASK.toMask(mask));
 	}

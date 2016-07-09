@@ -22,18 +22,6 @@ public class DefaultAssignedEntityDemand implements PinnedAssignedEntityDemand {
 		this.locationDemand = locationDemand;
 	}
 	
-	public DefaultAssignedEntityDemand(LocationEntity locationEntity,
-			PinnedLocation pinnedLocation) {
-		this(locationEntity, pinnedLocation, locationEntity.getLocationDemand());
-	}
-	
-	
-//	private DemandStatistic ratio(double ratio) {
-//		
-//		LocationDemand ld = (LocationDemand) locationDemand.ratio(ratio) ;
-//		
-//		 return new DefaultAssignedEntityDemand(getLocationEntity(), this.pinnedLocation, (LocationDemand) locationDemand.ratio(ratio));
-//	}
 	
 
 	@Override

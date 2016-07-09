@@ -3,7 +3,6 @@ package com.altvil.netop.optimize;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.plan.SelectedRegion;
@@ -17,7 +16,7 @@ public class AroOptimizationPlan {
 
 	private FinancialConstraints financialConstraints;
 	private FiberNetworkConstraints fiberNetworkConstraints;
-	private List<LocationEntityType> locationTypes = new ArrayList<>();
+	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
 	private List<SelectedRegion> selectedRegions = new ArrayList<>();
 
 
@@ -64,11 +63,11 @@ public class AroOptimizationPlan {
 		this.threshold = threshold;
 	}
 
-	public List<LocationEntityType> getLocationTypes() {
+	public List<AroLocationEntityType> getLocationTypes() {
 		return locationTypes;
 	}
 
-	public void setLocationTypes(List<LocationEntityType> locationTypes) {
+	public void setLocationTypes(List<AroLocationEntityType> locationTypes) {
 		this.locationTypes = locationTypes;
 	}
 

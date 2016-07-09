@@ -62,7 +62,7 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 
 			if (totalDemand != 0) {
 				
-				DefaultAssignedEntityDemand ad = new DefaultAssignedEntityDemand(entity, pl);
+				DefaultAssignedEntityDemand ad = new DefaultAssignedEntityDemand(entity, pl, entity.getLocationDemand());
 
 				if (totalDemand >= bulkFiberThreshold) {
 					builder.addBulkDemand(ad);

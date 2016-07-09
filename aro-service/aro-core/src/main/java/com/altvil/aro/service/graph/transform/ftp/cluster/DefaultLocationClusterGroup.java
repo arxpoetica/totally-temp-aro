@@ -100,7 +100,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				for (PinnedAssignedEntityDemand a : cluster.getLocations()) {
 					DefaultAssignedEntityDemand ald = new DefaultAssignedEntityDemand(
 							a.getLocationEntity(), gs.proxyPin(0.0,
-									a.getPinnedLocation()));
+									a.getPinnedLocation()), a.getLocationDemand());
 					locations.add(ald);
 				}
 			}

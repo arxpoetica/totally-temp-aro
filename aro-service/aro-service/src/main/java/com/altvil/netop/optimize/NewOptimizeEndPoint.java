@@ -78,8 +78,8 @@ public class NewOptimizeEndPoint {
 			AroOptimizationPlan plan) {
 
 		FinancialConstraints financials = plan.getFinancialConstraints();
-		if( financials == null ) {
-			financials = new FinancialConstraints() ;
+		if (financials == null) {
+			financials = new FinancialConstraints();
 		}
 
 		switch (plan.getAlgorithm()) {
@@ -134,8 +134,19 @@ public class NewOptimizeEndPoint {
 
 	}
 
-	private Set<LocationEntityType> toMask(Collection<LocationEntityType> mask) {
-		return LocationTypeMask.MASK.toMask(mask);
+	private Set<LocationEntityType> toEntityTypes(
+			Collection<AroLocationEntityType> mask) {
+		if (mask == null) {
+			return null;
+		}
+
+		return mask.stream().flatMap(c -> c.getMappedTypes().stream())
+				.collect(Collectors.toSet());
+	}
+
+	private Set<LocationEntityType> toMask(
+			Collection<AroLocationEntityType> mask) {
+		return LocationTypeMask.MASK.toMask(toEntityTypes(mask));
 	}
 
 }
