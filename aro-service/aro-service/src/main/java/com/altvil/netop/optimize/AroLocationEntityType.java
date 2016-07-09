@@ -16,17 +16,16 @@ public enum AroLocationEntityType {
 			LocationEntityType.MediumBusiness, LocationEntityType.LargeBusiness);
 	;
 
-	private Set<LocationEntityType> mappedTypes;
+	private Set<LocationEntityType> mappedTypes = EnumSet
+	.noneOf(LocationEntityType.class);;
 
 	public Set<LocationEntityType> getMappedTypes() {
 		return mappedTypes;
 	}
 
 	private AroLocationEntityType(LocationEntityType... types) {
-		Set<LocationEntityType> mappedTtpes = EnumSet
-				.noneOf(LocationEntityType.class);
 		for (LocationEntityType t : types) {
-			mappedTtpes.add(t);
+			mappedTypes.add(t);
 		}
 	}
 

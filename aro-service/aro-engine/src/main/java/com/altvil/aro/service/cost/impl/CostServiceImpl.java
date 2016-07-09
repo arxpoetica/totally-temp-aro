@@ -217,16 +217,8 @@ public class CostServiceImpl implements CostService {
 	}
 
 	private enum LineItemTypeEnum {
-		cost("cost"), irr("irr"), npv("npv"), revenue("revenue"), household_count(
-				"household.count"), household_fairshare("household.fairshare"), celltower_count(
-				"celltower.count"), celltower_fairshare("celltower.fairshare"), small_business_count(
-				"small_business.count"), small_business_fairshare(
-				"small_business.fairshare"), medium_business_count(
-				"medium_business.count"), medium_business_fairshare(
-				"medium_business.fairshare"), large_business_count(
-				"large_business.count"), large_fairshare("large.fairshare"),
-
-		;
+		cost("cost"), irr("irr"), npv("npv") ;
+		
 
 		private String code;
 
@@ -261,22 +253,9 @@ public class CostServiceImpl implements CostService {
 		}
 
 		private void init() {
-			add(LineItemTypeEnum.revenue, (ws) -> 0.0);
 			add(LineItemTypeEnum.irr, (ws) -> 0.0);
 			add(LineItemTypeEnum.npv, (ws) -> 0.0);
-
-			add(LineItemTypeEnum.household_count, (ws) -> 0.0);
-			add(LineItemTypeEnum.household_fairshare, (ws) -> 0.0);
-
-			add(LineItemTypeEnum.small_business_count, (ws) -> 0.0);
-			add(LineItemTypeEnum.small_business_fairshare, (ws) -> 0.0);
-
-			add(LineItemTypeEnum.medium_business_count, (ws) -> 0.0);
-			add(LineItemTypeEnum.medium_business_fairshare, (ws) -> 0.0);
-
-			add(LineItemTypeEnum.large_business_count, (ws) -> 0.0);
-			add(LineItemTypeEnum.large_fairshare, (ws) -> 0.0);
-
+			
 		}
 
 		public Collection<LineItem> generateReport(NetworkReport report,
