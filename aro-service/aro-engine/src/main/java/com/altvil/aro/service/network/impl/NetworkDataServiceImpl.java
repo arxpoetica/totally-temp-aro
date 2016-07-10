@@ -108,6 +108,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							request.getLocationEntities(), locationId,
+							ldm.getBlockId(),
 							locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
@@ -150,7 +151,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							networkConfiguration.getLocationEntities(),
-							locationId, locationDemand);
+							locationId, ldm.getBlockId(), locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));

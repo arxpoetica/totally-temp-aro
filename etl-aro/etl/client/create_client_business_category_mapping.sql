@@ -14,7 +14,7 @@ INSERT INTO client.business_category_mappings(business_id, business_category_id)
 		(CASE
 			WHEN number_of_employees > 0 AND number_of_employees < 20 THEN
 				(SELECT client.business_categories.id FROM client.business_categories WHERE name = 'small' LIMIT 1)::int
-			WHEN number_of_employees > 20 and number_of_employees < 1000 THEN
+			WHEN number_of_employees >= 20 and number_of_employees < 1000 THEN
 				(SELECT client.business_categories.id FROM client.business_categories WHERE name = 'medium' LIMIT 1)::int
 			WHEN number_of_employees >= 1000 THEN
 				(SELECT client.business_categories.id FROM client.business_categories WHERE name = 'large' LIMIT 1)::int

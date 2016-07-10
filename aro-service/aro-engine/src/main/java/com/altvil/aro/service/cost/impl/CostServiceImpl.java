@@ -31,6 +31,9 @@ import com.altvil.aro.persistence.repository.LineItemRepository;
 import com.altvil.aro.persistence.repository.LineItemTypeRepository;
 import com.altvil.aro.persistence.repository.NetworkReportRepository;
 import com.altvil.aro.service.cost.CostService;
+import com.altvil.aro.service.entity.DemandStatistic;
+import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.utils.StreamUtil;
 
@@ -263,7 +266,24 @@ public class CostServiceImpl implements CostService {
 			return StreamUtil.map(lineItemGenerators,
 					g -> g.generate(report, plan));
 		}
-
+		
 	}
+	
+	
+	
+	
+	private static class DemandAnalyizer {
+	
+		
+		public DemandStatistic getDemandStatistic(LocationEntityType type) {
+			return null ;
+		}
+		
+		private void analyize(DemandCoverage demandCoverage) {
+			demandCoverage.getAssignedEntityDemands() ;
+		}
+		
+	}
+
 
 }

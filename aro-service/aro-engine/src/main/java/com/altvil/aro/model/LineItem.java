@@ -3,6 +3,8 @@ package com.altvil.aro.model;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -10,6 +12,7 @@ import javax.persistence.Table;
 public class LineItem {
 
 	private LineItemKey id;
+	private NetworkReportSummary networkReportSummary ;
 	private Double doubleValue;
 
 	@EmbeddedId
@@ -20,6 +23,18 @@ public class LineItem {
 	public void setId(LineItemKey id) {
 		this.id = id;
 	}
+	
+	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
+	@ManyToOne(optional = false)
+	public NetworkReportSummary getNetworkReportSummary() {
+		return networkReportSummary;
+	}
+
+	public void setNetworkReportSummary(
+			NetworkReportSummary networkReportSummary) {
+		this.networkReportSummary = networkReportSummary;
+	}
+
 
 	@Column(name = "value")
 	public Double getDoubleValue() {

@@ -1,55 +1,44 @@
 package com.altvil.aro.model;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 
 @Entity
 @Table(name = "fiber_summary_cost", schema = "financial")
 public class FiberSummaryCost {
 
-	private Long id;
-	private int costCode;
-	private long  networkReportId ;
+	private FiberSummaryCostKey id;
+
+	private NetworkReportSummary networkReportSummary;
 	
-	double lengthMeters ;
+	double lengthMeters;
 	double costPerMeter;
-	double totalCost ;	
-	
-	@Id
-	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Long getId() {
+	double totalCost;
+
+	@EmbeddedId
+	public FiberSummaryCostKey getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(FiberSummaryCostKey id) {
 		this.id = id;
 	}
-
-	@Column(name = "network_cost_code_id")
-	public int getCostCode() {
-		return costCode;
-	}
-
-	public void setCostCode(int costCode) {
-		this.costCode = costCode;
-	}
-
-	@Column(name = "network_report_id")
-	public long getNetworkReportId() {
-		return networkReportId;
-	}
-
-	public void setNetworkReportId(long networkReportId) {
-		this.networkReportId = networkReportId;
-	}
 	
-	
+	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
+	@ManyToOne(optional = false)
+	public NetworkReportSummary getNetworkReportSummary() {
+		return networkReportSummary;
+	}
+
+	public void setNetworkReportSummary(
+			NetworkReportSummary networkReportSummary) {
+		this.networkReportSummary = networkReportSummary;
+	}
+
 	@Column(name = "length_meters")
 	public double getLengthMeters() {
 		return lengthMeters;
@@ -72,7 +61,7 @@ public class FiberSummaryCost {
 	public double getTotalCost() {
 		return totalCost;
 	}
-	
+
 	public void setTotalCost(double totalCost) {
 		this.totalCost = totalCost;
 	}

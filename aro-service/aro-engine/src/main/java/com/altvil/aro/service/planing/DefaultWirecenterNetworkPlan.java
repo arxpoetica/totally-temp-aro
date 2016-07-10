@@ -6,28 +6,32 @@ import java.util.Map;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
-import com.altvil.aro.service.demand.impl.LocationDemandFactory;
+import com.altvil.aro.service.conversion.EquipmentLocationMapping;
 import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.entity.LocationDemand;
+import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage;
+import com.altvil.aro.service.optimize.model.DemandCoverage;
 
 public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 
 	private long planId;
 	private Collection<NetworkNode> networkNodes;
 	private Collection<FiberRoute> fiberRoutes;
-	private LocationDemand locationDemand ;
+	private DemandCoverage demandCoverage ;
 	private Map<FiberType, Double> fiberLengthMap ;
+	private Collection<EquipmentLocationMapping> equipmentLocationMappings ;
 
 	public DefaultWirecenterNetworkPlan(long planId,
 			Collection<NetworkNode> networkNodes,
 			Collection<FiberRoute> fiberRoutes,
-			LocationDemand locationDemand,
+			DemandCoverage demandCoverage,
+			Collection<EquipmentLocationMapping> equipmentLocationMappings,
 			Map<FiberType, Double> fiberLengthMap) {
 		super();
 		this.planId = planId;
 		this.networkNodes = networkNodes;
 		this.fiberRoutes = fiberRoutes;
-		this.locationDemand = locationDemand == null ? LocationDemandFactory.FACTORY.new Builder(Collections.emptySet()).build() : locationDemand;
+		this.demandCoverage = demandCoverage == null ? DefaultFiberCoverage.accumulate().getResult() : demandCoverage;
+		this.equipmentLocationMappings =equipmentLocationMappings ;
 		this.fiberLengthMap = fiberLengthMap == null ? Collections.emptyMap() : fiberLengthMap ;
 	}
 	
@@ -53,11 +57,14 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 	}
 
 	@Override
-	public LocationDemand getTotalDemand() {
-		return locationDemand ;
+	public DemandCoverage getDemandCoverage() {
+		return demandCoverage ;
 	}
 
-	
+	@Override
+	public Collection<EquipmentLocationMapping> getEquipmentLocationMappings() {
+		return equipmentLocationMappings ;
+	}	
 	
 
 }

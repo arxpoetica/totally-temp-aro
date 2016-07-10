@@ -16,18 +16,19 @@ import com.altvil.enumerations.FiberPlanAlgorithm;
 @FiberPlanStrategy(type = GlobalConstraintBuilder.class, algorithms = FiberPlanAlgorithm.NPV)
 public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 	private class NpvBudgetConstraint implements GlobalConstraint {
-		private double		 bestNpv				  = Double.NEGATIVE_INFINITY;
-		private double		 bestNpvParametric		  = 0;
-		private double		 bestOverBudget			  = Double.POSITIVE_INFINITY;
-		private double		 bestOverBudgetParametric = 0;
+		private double bestNpv = Double.NEGATIVE_INFINITY;
+		private double bestNpvParametric = 0;
+		private double bestOverBudget = Double.POSITIVE_INFINITY;
+		private double bestOverBudgetParametric = 0;
 		private final double budget;
-		private double		 increment				  = 0;
-		private final Logger log					  = LoggerFactory.getLogger(NpvBudgetConstraint.class);
-		private int			 maxSteps				  = 0;
-		private boolean		 once					  = true;
-		private double		 parametric				  = 1;
-		private int			 planIndex				  = 0;
-		private int			 step					  = 0;
+		private double increment = 0;
+		private final Logger log = LoggerFactory
+				.getLogger(NpvBudgetConstraint.class);
+		private int maxSteps = 0;
+		private boolean once = true;
+		private double parametric = 1;
+		private int planIndex = 0;
+		private int step = 0;
 		private double discountRate;
 		private int years;
 
@@ -40,18 +41,21 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 		@Override
 		public boolean isConverging(Object object) {
 			WirecenterNetworkPlan plan = (WirecenterNetworkPlan) object;
-			
-			double fiberLength = 0 ;
-			fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER) ;
-			fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION) ;
 
-			SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan.getTotalDemand(), fiberLength, discountRate, years) ;
+			double fiberLength = 0;
+			fiberLength += plan.getFiberLengthInMeters(FiberType.FEEDER);
+			fiberLength += plan.getFiberLengthInMeters(FiberType.DISTRIBUTION);
+
+			SimpleNetworkFinancials f = new SimpleNetworkFinancials(plan
+					.getDemandCoverage().getLocationDemand(), fiberLength,
+					discountRate, years);
 			final double npv = f.getNpv();
-			
-			log.debug("{}, {}, {}, {}, {}, {}, {}, {}, {}", budget, parametric, f.getTotalCost(),
-					f.getRevenue(), f.getFiberCost(), f.getEquipmentCost(),
-					f.getFiberLength(), f.getLocationDemand().getRawCoverage(), npv);
-			
+
+			log.debug("{}, {}, {}, {}, {}, {}, {}, {}, {}", budget, parametric,
+					f.getTotalCost(), f.getRevenue(), f.getFiberCost(), f
+							.getEquipmentCost(), f.getFiberLength(), f
+							.getLocationDemand().getRawCoverage(), npv);
+
 			if (f.getTotalCost() < budget) {
 				if (npv > bestNpv) {
 					bestNpv = npv;
@@ -73,14 +77,17 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 				parametric -= increment;
 			} else if (planIndex < SEARCH_PLAN.length) {
 				SearchPlan searchPlan = SEARCH_PLAN[planIndex++];
-				increment = (parametric - searchPlan.lowerCutoff) / (searchPlan.numProbs - 1);
+				increment = (parametric - searchPlan.lowerCutoff)
+						/ (searchPlan.numProbs - 1);
 				step = 0;
 				maxSteps = searchPlan.numProbs;
 				parametric -= increment;
-			} else if (bestNpv > Double.NEGATIVE_INFINITY && bestNpvParametric == parametric) {
+			} else if (bestNpv > Double.NEGATIVE_INFINITY
+					&& bestNpvParametric == parametric) {
 				log.debug("Solved: Best NPV under budget");
 				return false;
-			} else if (bestOverBudget > Double.NEGATIVE_INFINITY && bestOverBudgetParametric == parametric) {
+			} else if (bestOverBudget > Double.NEGATIVE_INFINITY
+					&& bestOverBudgetParametric == parametric) {
 				log.debug("Solved: Least over budget");
 				return false;
 			} else if (bestNpv > Double.NEGATIVE_INFINITY) {
@@ -88,7 +95,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 			} else {
 				parametric = bestOverBudgetParametric;
 			}
-			
+
 			log.debug("parametric = " + parametric);
 
 			return true;
@@ -102,7 +109,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 
 	private static class SearchPlan {
 		final double lowerCutoff;
-		final int	 numProbs;
+		final int numProbs;
 
 		SearchPlan(int numProbs, double lowerCutoff) {
 			this.numProbs = numProbs;
@@ -110,8 +117,8 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 		}
 	}
 
-	private static final SearchPlan[] SEARCH_PLAN			 = { new SearchPlan(100, 0.3), new SearchPlan(200, 0.2),
-			new SearchPlan(600, 0.0) };
+	private static final SearchPlan[] SEARCH_PLAN = { new SearchPlan(100, 0.3),
+			new SearchPlan(200, 0.2), new SearchPlan(600, 0.0) };
 
 	@Override
 	public GlobalConstraint build(FiberPlan fiberPlan) {
@@ -121,6 +128,7 @@ public class GlobalConstraintNpvBuilder implements GlobalConstraintBuilder {
 			return null;
 		}
 
-		return new NpvBudgetConstraint(nfp.getBudget(), nfp.getDiscountRate(), nfp.getYears());
+		return new NpvBudgetConstraint(nfp.getBudget(), nfp.getDiscountRate(),
+				nfp.getYears());
 	}
 }

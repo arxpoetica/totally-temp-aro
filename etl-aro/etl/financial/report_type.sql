@@ -20,7 +20,5 @@ insert into financial.report_type (name, description)
 	values('summary_fiber','Summary Fiber Report') ;
 
 insert into financial.report_type (name, description) 
-	values('wirecenter_report','Wirecenter Report') ;
+	values('plan_summary','Wirecenter Report') ;
 	
-insert into financial.report_type (name, description) 
-	values('master_report','Master Plan Report') ;

@@ -92,6 +92,15 @@ public class DefaultFiberCoverage implements DemandCoverage {
 		return StreamUtil.map(locationEntities,
 				AssignedEntityDemand::getLocationEntity);
 	}
+	
+	
+
+	@Override
+	public double getFairShare() {
+		return coverage.getFairShare() ;
+	}
+
+
 
 	public static class Accumulator {
 

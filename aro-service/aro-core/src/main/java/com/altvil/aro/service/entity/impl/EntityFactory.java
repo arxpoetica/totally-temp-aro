@@ -41,8 +41,9 @@ public class EntityFactory {
 
 	public LocationEntity createLocationEntity(
 			Set<LocationEntityType> entityMask, long locationId,
+			int censusBlockId,
 			LocationDemand coverageAggregateStatistic) {
-		return new LocationEntityImpl(locationId, coverageAggregateStatistic);
+		return new LocationEntityImpl(locationId, censusBlockId, coverageAggregateStatistic);
 	}
 
 	public BulkFiberTerminal createBulkFiberTerminal(
@@ -423,16 +424,26 @@ public class EntityFactory {
 		 */
 		private static final long serialVersionUID = 1L;
 		private LocationDemand coverageAggregateStatistic;
+		private int censusBlockId ;
 
 		public LocationEntityImpl(Long id,
+				int censusBlockId ,
 				LocationDemand coverageAggregateStatistic) {
 			super(id);
+			this.censusBlockId = censusBlockId;
 			this.coverageAggregateStatistic = coverageAggregateStatistic;
 		}
 
 		@Override
 		public Class<? extends AroEntity> getType() {
 			return LocationEntity.class;
+		}
+
+		
+		
+		@Override
+		public int getCensusBlockId() {
+			return censusBlockId;
 		}
 
 		@Override

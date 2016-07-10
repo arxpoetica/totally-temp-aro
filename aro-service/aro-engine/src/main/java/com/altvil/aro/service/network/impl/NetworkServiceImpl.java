@@ -139,7 +139,7 @@ public class NetworkServiceImpl implements NetworkService {
 
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							networkConfiguration.getLocationEntityTypes(),
-							locationId, ldm);
+							locationId, 0, ldm);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));

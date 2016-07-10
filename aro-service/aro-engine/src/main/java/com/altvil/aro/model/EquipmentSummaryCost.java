@@ -1,51 +1,43 @@
 package com.altvil.aro.model;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "equipment_summary_cost", schema = "financial")
 public class EquipmentSummaryCost {
 
-	private Long id;
-	private int costCode;
-	private long  networkReportId ;
+	private EquipmentSummaryCostKey id;
+
+	private NetworkReportSummary networkReportSummary;
+
 	private double atomicCount;
 	private double quantity;
 	private double price;
 	private double totalCost;
 
-	@Id
-	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Long getId() {
+	@EmbeddedId
+	public EquipmentSummaryCostKey getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(EquipmentSummaryCostKey id) {
 		this.id = id;
 	}
 
-	@Column(name = "network_cost_code_id")
-	public int getCostCode() {
-		return costCode;
+	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
+	@ManyToOne(optional = false)
+	public NetworkReportSummary getNetworkReportSummary() {
+		return networkReportSummary;
 	}
 
-	public void setCostCode(int costCode) {
-		this.costCode = costCode;
-	}
-
-	@Column(name = "network_report_id")
-	public long getNetworkReportId() {
-		return networkReportId;
-	}
-
-	public void setNetworkReportId(long networkReportId) {
-		this.networkReportId = networkReportId;
+	public void setNetworkReportSummary(
+			NetworkReportSummary networkReportSummary) {
+		this.networkReportSummary = networkReportSummary;
 	}
 
 	@Column(name = "atomic_count")
@@ -79,7 +71,7 @@ public class EquipmentSummaryCost {
 	public double getTotalCost() {
 		return totalCost;
 	}
-	
+
 	public void setTotalCost(double totalCost) {
 		this.totalCost = totalCost;
 	}

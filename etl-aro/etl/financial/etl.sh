@@ -33,3 +33,5 @@ ${PSQL} -a -f $DIR/line_item_type.sql
 
 ${PSQL} -a -f $DIR/line_item.sql
 
+${PSQL} -a -f $DIR/plan_demand.sql
+

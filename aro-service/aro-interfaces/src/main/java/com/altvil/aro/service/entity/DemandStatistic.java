@@ -10,7 +10,7 @@ public interface DemandStatistic {
 	
 	double getMonthlyRevenueImpact() ; //Revenue Impact
 	
-	//DemandStatistic ratio(double ratio) ;
+	double getFairShare() ; //AKA as penetration
 	
 
 }
