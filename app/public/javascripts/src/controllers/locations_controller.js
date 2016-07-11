@@ -1,6 +1,7 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart */
 // Locations Controller
 app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
+  $scope.ARO_CLIENT = config.ARO_CLIENT
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [

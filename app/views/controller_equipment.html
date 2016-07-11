@@ -78,6 +78,7 @@
     </div>
     <div class="col-md-10">
       <div ng-repeat="node_type in view_node_types">
+        <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png" style="width:16px"></div>
         <div class="checkbox" ng-class="{disabled: !vztfttp}">
           <label>
             <input type="checkbox" ng-model="node_type.visible" ng-change="change_node_types_visibility()" ng-disabled="!vztfttp"> {{node_type.description}}
@@ -85,8 +86,9 @@
         </div>
       </div>
 
-      <div ng-repeat="(key, layer) in equipment_layers">
-        <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-hide="layer.hide_in_ui" ng-class="{disabled: !vztfttp}">
+      <div ng-repeat="(key, layer) in equipment_layers" ng-hide="layer.hide_in_ui">
+        <div class="pull-right"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
+        <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-class="{disabled: !vztfttp}">
           <label>
             <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible" ng-disabled="!vztfttp"> {{layer.name}}
           </label>
@@ -94,6 +96,7 @@
       </div>
 
       <div>
+        <div class="pull-right"><span style="background-color:blue; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
         <div class="checkbox" ng-class="{disabled: !vztfttp}">
           <label>
             <input type="checkbox" ng-model="showFeederFiber" ng-change="changedFiberVisibility()" ng-disabled="!vztfttp"> Feeder fiber
@@ -102,6 +105,7 @@
       </div>
 
       <div>
+        <div class="pull-right"><span style="background-color:red; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
         <div class="checkbox" ng-class="{disabled: !vztfttp}">
           <label>
             <input type="checkbox" ng-model="showDistributionFiber" ng-change="changedFiberVisibility()" ng-disabled="!vztfttp"> Distribution fiber

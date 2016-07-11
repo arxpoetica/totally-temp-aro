@@ -73,7 +73,6 @@ module.exports = class Location {
       )`)
     }
     var sql = parts.join(' UNION ALL ')
-    console.log('sql', sql)
     return database.points(sql, params, true, viewport)
   }
 
