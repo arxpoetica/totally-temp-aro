@@ -12,7 +12,7 @@ import com.altvil.aro.model.EquipmentSummaryCost;
 @Repository
 public interface EquipmentSummaryCostRepository extends JpaRepository<EquipmentSummaryCost, Long> {
 	
-	@Query(value = "select c from EquipmentSummaryCost c where c.networkReportId = :networkReportId")
+	@Query(value = "select c from EquipmentSummaryCost c where c.id.networkReportId = :networkReportId")
 	public List<EquipmentSummaryCost> findEquipmentSummaryCost(
 			@Param("networkReportId") long networkReportId);
 	

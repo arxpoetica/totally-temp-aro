@@ -27,8 +27,9 @@ public class FiberSummaryCost {
 		this.id = id ;
 	}
 	
-	public FiberSummaryCost(int costCode, long networkReportId) {
-		this(new FiberSummaryCostKey()) ;
+	public FiberSummaryCost(int costCode, NetworkReportSummary networkReportSummary) {
+		this(new FiberSummaryCostKey(costCode, networkReportSummary.getId())) ;
+		this.networkReportSummary = networkReportSummary ;
 	}
 	
 	@EmbeddedId
@@ -40,7 +41,7 @@ public class FiberSummaryCost {
 		this.id = id;
 	}
 
-	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
+	@JoinColumn(name = "network_report_id", referencedColumnName="id", insertable = false, updatable = false)
 	@ManyToOne(optional = false)
 	public NetworkReportSummary getNetworkReportSummary() {
 		return networkReportSummary;

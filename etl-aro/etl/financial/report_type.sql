@@ -11,11 +11,14 @@ ALTER TABLE "financial"."report_type" OWNER TO "aro";
 -- Basic Report Types
 
 insert into financial.report_type (code, name, description) 
-	values('S', 'equipment_summary', 'Equipment Summary Report') ;
+	values('P', 'plan_summary', 'Plan Summary Report') ;
 
 insert into financial.report_type (code, name, description) 
 	values('D', 'equipment_detail', 'Equipment Detail Report') ;
 
 insert into financial.report_type (code, name, description) 
-	values('P', 'plan_summary', 'Plan Summary Report') ;
+	values('S', 'equipment_summary', 'Equipment Summary Report') ;
+
+
+
 	

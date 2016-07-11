@@ -15,7 +15,7 @@ create table financial.plan_demand (
 
 	fiber_count double precision not null,
 	
-	PRIMARY KEY(network_report_id, element_type)
+	PRIMARY KEY(network_report_id, entity_type)
 	
 )
 WITH (OIDS=FALSE);

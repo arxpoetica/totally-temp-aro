@@ -120,7 +120,7 @@ public class RoicServiceImpl implements RoicService {
 	private double getLocationDemand(long planId) {
 
 		NetworkNode node = networkNodeRepository.findEquipment(
-				NetworkNodeType.central_office.getId(), planId).get(0);
+				NetworkNodeType.central_office, planId).get(0);
 
 		return node.getHouseHoldCount();
 	}

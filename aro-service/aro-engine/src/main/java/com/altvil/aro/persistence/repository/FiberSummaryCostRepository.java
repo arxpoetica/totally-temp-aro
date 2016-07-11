@@ -13,7 +13,7 @@ import com.altvil.aro.model.FiberSummaryCost;
 public interface FiberSummaryCostRepository extends
 		JpaRepository<FiberSummaryCost, Long> {
 	
-	@Query(value = "select c from FiberSummaryCost c where c.networkReportId = :networkReportId")
+	@Query(value = "select c from FiberSummaryCost c where c.id.networkReportId = :networkReportId")
 	public List<FiberSummaryCost> findEquipmentSummaryCosts(
 			@Param("networkReportId") long networkReportId);
 }

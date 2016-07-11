@@ -22,8 +22,9 @@ public class LineItem {
 		this.id = id ;
 	}
 	
-	public LineItem(int lineItemType, long networkReportId) {
-		this(new LineItemKey(lineItemType, networkReportId)) ;
+	public LineItem(int lineItemType, NetworkReportSummary networkReportSummary) {
+		this(new LineItemKey(lineItemType, networkReportSummary.getId())) ;
+		this.networkReportSummary = networkReportSummary ;
 	}
 
 	@EmbeddedId
@@ -35,7 +36,7 @@ public class LineItem {
 		this.id = id;
 	}
 	
-	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
+	@JoinColumn(name = "network_report_id", referencedColumnName="id", insertable = false, updatable = false)
 	@ManyToOne(optional = false)
 	public NetworkReportSummary getNetworkReportSummary() {
 		return networkReportSummary;

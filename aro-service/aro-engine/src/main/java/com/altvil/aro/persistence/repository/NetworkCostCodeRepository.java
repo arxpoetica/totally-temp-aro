@@ -17,7 +17,7 @@ public interface NetworkCostCodeRepository extends
 	@Transactional
 	List<Object[]> queryCostCodeToNetworkNodeTypeOrdinal();
 	
-	@Query(value = "select network_code_id, fiber_route_type_id from financial.network_code_fiber_type", nativeQuery = true)
+	@Query(value = "select network_cost_code_id, fiber_route_type_id from financial.network_code_fiber_type", nativeQuery = true)
 	@Transactional
 	List<Object[]> queryCostCodeToFiberTypeOrdinal();
 

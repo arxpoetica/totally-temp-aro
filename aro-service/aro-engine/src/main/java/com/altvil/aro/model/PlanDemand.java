@@ -32,8 +32,9 @@ public class PlanDemand {
 		this.id = id;
 	}
 
-	public PlanDemand(int entityType, long networkReportId) {
-		this(new PlanDemandKey(entityType, networkReportId));
+	public PlanDemand(int entityType, NetworkReportSummary networkReportSummary) {
+		this(new PlanDemandKey(entityType, networkReportSummary.getId()));
+		this.networkReportSummary = networkReportSummary ;
 	}
 
 	@EmbeddedId
@@ -45,7 +46,7 @@ public class PlanDemand {
 		id = planDemandKey;
 	}
 
-	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
+	@JoinColumn(name = "network_report_id", referencedColumnName="id", insertable = false, updatable = false)
 	@ManyToOne(optional = false)
 	public NetworkReportSummary getNetworkReportSummary() {
 		return networkReportSummary;

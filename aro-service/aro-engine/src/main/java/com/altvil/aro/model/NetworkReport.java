@@ -20,7 +20,7 @@ import org.hibernate.annotations.DiscriminatorOptions;
 
 @Entity
 @Inheritance
-@DiscriminatorColumn(name="code",  discriminatorType=DiscriminatorType.CHAR)
+@DiscriminatorColumn(name="code",  discriminatorType=DiscriminatorType.STRING)
 @DiscriminatorOptions(force=true)
 @Table(name = "network_report", schema = "financial")
 public abstract class NetworkReport {

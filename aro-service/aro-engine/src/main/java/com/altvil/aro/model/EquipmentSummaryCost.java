@@ -28,8 +28,9 @@ public class EquipmentSummaryCost {
 		this.id = id ;
 	}
 	
-	public EquipmentSummaryCost(int costCode, long networkReportId) {
-		this(new EquipmentSummaryCostKey(costCode, networkReportId)) ;
+	public EquipmentSummaryCost(int costCode, NetworkReportSummary networkReportSummary) {
+		this(new EquipmentSummaryCostKey(costCode, networkReportSummary.getId())) ;
+		this.equipmentReportSummary = networkReportSummary ;
 	}
 	
 
@@ -42,7 +43,7 @@ public class EquipmentSummaryCost {
 		this.id = id;
 	}
 
-	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
+	@JoinColumn(name = "network_report_id", referencedColumnName="id", insertable = false, updatable = false)
 	@ManyToOne(optional = false)
 	public NetworkReportSummary getEquipmentReportSummary() {
 		return equipmentReportSummary;

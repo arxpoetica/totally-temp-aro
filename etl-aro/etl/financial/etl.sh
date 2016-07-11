@@ -21,6 +21,8 @@ ${PSQL} -a -f $DIR/report_type.sql
 
 ${PSQL} -a -f $DIR/network_report.sql
 
+${PSQL} -a -f $DIR/plan_demand.sql
+
 ${PSQL} -a -f $DIR/equipment_item_cost.sql
 
 ${PSQL} -a -f $DIR/equipment_summary_cost.sql
@@ -33,5 +35,4 @@ ${PSQL} -a -f $DIR/line_item_type.sql
 
 ${PSQL} -a -f $DIR/line_item.sql
 
-${PSQL} -a -f $DIR/plan_demand.sql
 

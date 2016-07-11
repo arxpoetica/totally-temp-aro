@@ -8,7 +8,6 @@ import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
-import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
 @Service
 public class WirecenterPlanningServiceImpl implements WirecenterPlanningService {

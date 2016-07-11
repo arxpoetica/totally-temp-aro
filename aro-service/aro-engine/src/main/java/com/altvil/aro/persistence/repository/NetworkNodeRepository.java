@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.model.NetworkNodeType;
 
 @Repository("networkNodeRepository")
 public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Integer>  {
@@ -42,8 +43,8 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 	
 	
 	@Transactional
-	@Query(value = "select n from NetworkNode n where n.routeId =:planId and n.nodeTypeId=:nodeTypeId")
-	public List<NetworkNode> findEquipment(@Param("nodeTypeId") int nodeTypeId, @Param("planId") long planId) ;
+	@Query(value = "select n from NetworkNode n where n.routeId =:planId and n.networkNodeType=:nodeType")
+	public List<NetworkNode> findEquipment(@Param("nodeType") NetworkNodeType nodeType, @Param("planId") long planId) ;
 	
 	
 	

@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,6 @@ import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.model.NetworkReport;
 import com.altvil.aro.model.NetworkReportSummary;
 import com.altvil.aro.model.PlanDemand;
-import com.altvil.aro.model.ReportType;
 import com.altvil.aro.persistence.repository.EquipmentSummaryCostRepository;
 import com.altvil.aro.persistence.repository.FiberSummaryCostRepository;
 import com.altvil.aro.persistence.repository.LineItemTypeRepository;
@@ -63,17 +63,26 @@ public class CostServiceImpl implements CostService {
 	private static final Logger log = LoggerFactory
 			.getLogger(CostServiceImpl.class.getName());
 
+	@Autowired
 	private PricingService pricingService;
+	@Autowired
 	private NetworkReportRepository networkReportRepository;
+	@Autowired
 	private EquipmentSummaryCostRepository equipmentSummaryCostRepository;
+	@Autowired
 	private FiberSummaryCostRepository fiberSummaryCostRepository;
+	@Autowired
 	private LineItemTypeRepository lineItemTypeRepository;
+	@Autowired
 	private NetworkReportSummaryRepository networkReportSummaryRepository;
+	@Autowired
 	private NetworkCostCodeRepository networkCostCodeRepository;
 
 	private ReportBuilderContext reportBuilderContext;
 	private ReportGenerator reportGenerator;
 
+	
+	//TODO Fix this being called 2 times (Should only be called once)
 	@PostConstruct
 	void PostConstruct() {
 		this.reportGenerator = new ReportGenerator();
@@ -167,8 +176,7 @@ public class CostServiceImpl implements CostService {
 
 	@Override
 	public List<FiberSummaryCost> getFiberReport(long planId) {
-		NetworkReport report = networkReportRepository.findReport(planId,
-				ReportType.summary_fiber);
+		NetworkReportSummary report = networkReportSummaryRepository.findOne(planId) ;
 		if (report == null) {
 			return Collections.emptyList();
 		}
@@ -178,8 +186,7 @@ public class CostServiceImpl implements CostService {
 
 	@Override
 	public List<EquipmentSummaryCost> getEquipmentReport(long planId) {
-		NetworkReport report = networkReportRepository.findReport(planId,
-				ReportType.summary_equipment);
+		NetworkReportSummary report = networkReportSummaryRepository.findOne(planId);
 
 		if (report == null) {
 			return Collections.emptyList();
@@ -347,15 +354,15 @@ public class CostServiceImpl implements CostService {
 
 		private MappedCodes<NetworkStatisticType, LineItemType> createLineItemMapping() {
 
-			Map<Integer, LineItemType> map = StreamUtil.hash(
-					lineItemTypeRepository.findAll(), LineItemType::getId);
+			Map<String, LineItemType> map = StreamUtil.hash(
+					lineItemTypeRepository.findAll(), LineItemType::getName);
 
 			Map<NetworkStatisticType, LineItemType> result = new EnumMap<>(
 					NetworkStatisticType.class);
 
 			for (NetworkStatisticType t : NetworkStatisticType.values()) {
 
-				LineItemType type = map.get(t.ordinal());
+				LineItemType type = map.get(t.getCode());
 				if (type == null) {
 					throw new RuntimeException("Failed to map " + t);
 				}
@@ -401,7 +408,7 @@ public class CostServiceImpl implements CostService {
 
 			EquipmentSummaryCost es = new EquipmentSummaryCost(
 					ctx.getNetworkCostCode(cost.getNodeType()),
-					reportSummary.getId());
+					reportSummary);
 
 			es.setAtomicCount(cost.getAtomicUnits());
 			es.setPrice(cost.getPrice());
@@ -415,10 +422,9 @@ public class CostServiceImpl implements CostService {
 
 			FiberSummaryCost fc = new FiberSummaryCost(
 					ctx.getNetworkCostCode(fiberCost.getFiberType()),
-					reportSummary.getId());
+					reportSummary);
 
 			fc.setCostPerMeter(fiberCost.getCostPerMeter());
-			fc.setNetworkReportSummary(reportSummary);
 			fc.setLengthMeters(fiberCost.getLengthMeters());
 			fc.setTotalCost(fc.getTotalCost());
 
@@ -429,14 +435,13 @@ public class CostServiceImpl implements CostService {
 				DemandStatistic ds) {
 
 			PlanDemand pd = new PlanDemand(entityTypeCode,
-					reportSummary.getId());
+					reportSummary);
 
 			pd.setMaxPremises(0); // TODO
 			pd.setMaxRevenue(0); // TODO
 
 			pd.setFairShareDemand(ds.getPenetration());
 			pd.setFiberCount(ds.getAtomicUnits());
-			pd.setNetworkReportSummary(reportSummary);
 			pd.setFairShareDemand(ds.getFairShareDemand());
 			pd.setPenetration(ds.getPenetration());
 			pd.setPlanPremises(ds.getRawCoverage());
@@ -448,7 +453,7 @@ public class CostServiceImpl implements CostService {
 		private LineItem createLineItem(NetworkStatistic networkStat) {
 
 			LineItem lineItem = new LineItem(ctx.getLineItemCode(networkStat
-					.getNetworkStatisticType()), reportSummary.getId());
+					.getNetworkStatisticType()), reportSummary);
 
 			lineItem.setDoubleValue(networkStat.getValue());
 

@@ -22,16 +22,17 @@ public class PlanDemandKey implements Serializable {
 		this.networkReportId = networkReportId;
 	}
 
-
-	@Column(name = "network_report_id")
+	
+	@Column(name = "entity_type")
 	public int getEntityType() {
 		return entityType;
 	}
 
+	@Column(name = "network_report_id")
 	public long getNetworkReportId() {
 		return networkReportId;
 	}
-
+	
 	public void setNetworkReportId(long networkReporId) {
 		this.networkReportId = networkReporId;
 	}

@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS "financial"."network_report" cascade ;
 create table financial.network_report (
 	
 	id bigserial primary key,
-	code varchar(1) not null references financial.report_type,
+	code varchar(4) not null references financial.report_type,
 	
 	plan_id int8 not null references client.plan on delete cascade,
 	
