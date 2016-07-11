@@ -1,8 +1,9 @@
 <div id="fiber_plant_controller">
   <div>
     <div class="checkbox">
-      <label>
+      <label class="eye-control">
         <input type="checkbox" ng-change="toggle_all_competitors()" ng-model="show_all_competitors" ng-disabled="overlay !== 'none'"> All competitors
+        <div class="eye-indicator"></div>
       </label>
     </div>
     <input class="form-control" ng-model="selected_carriers" ng-change="carriers_changed()"></input>

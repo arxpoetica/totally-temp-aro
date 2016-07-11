@@ -7,6 +7,7 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "ui": {
+    "eye_checkboxes": true,
     "layout": "accordion",
     "map_tools": {
       "locations": {

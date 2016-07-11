@@ -58,22 +58,24 @@
     </li>
   </ul>
 
+  <% if (!config.ui.eye_checkboxes) { %>
   <p><strong>Customers to Optimize For</strong></p>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="coverHouseholds"> Households
+      <input type="checkbox" ng-model="optimizeHouseholds"> Households
     </label>
   </div>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="coverBusinesses"> Businesses
+      <input type="checkbox" ng-model="optimizeBusinesses"> Businesses
     </label>
   </div>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="coverTowers"> Towers
+      <input type="checkbox" ng-model="optimizeTowers"> Towers
     </label>
   </div>
+  <% } %>
 
   <p><strong>Technology</strong></p>
   <form>

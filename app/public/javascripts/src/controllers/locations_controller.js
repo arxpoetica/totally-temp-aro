@@ -38,6 +38,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.industries = []
   $scope.business_categories_selected = []
   $scope.household_categories_selected = []
+  $scope.optimizeBusinesses = true
+  $scope.optimizeHouseholds = true
+  $scope.optimizeTowers = true
 
   var locationStyles = {
     normal: {
@@ -389,5 +392,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     } else {
       locationsLayer.setThreshold(15)
     }
+  }
+
+  $scope.changeOptimization = () => {
+    $rootScope.optimizeBusinesses = $scope.optimizeBusinesses
+    $rootScope.optimizeHouseholds = $scope.optimizeHouseholds
+    $rootScope.optimizeTowers = $scope.optimizeTowers
   }
 }])

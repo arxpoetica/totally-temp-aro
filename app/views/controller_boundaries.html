@@ -7,8 +7,9 @@
           <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
         </div>
         -->
-        <label>
+        <label class="eye-control">
           <input type="checkbox" ng-click="layer.toggleVisibility()" ng-disabled="layer.disabled"> {{layer.name}}
+          <div class="eye-indicator"></div>
         </label>
       </div>
     </div>
@@ -41,8 +42,9 @@
           </a>
           <% } %>
         </div>
-        <label>
+        <label class="eye-control">
           <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
+          <div class="eye-indicator"></div>
         </label>
       </div>
     </div>

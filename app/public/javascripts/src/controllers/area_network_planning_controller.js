@@ -1,4 +1,4 @@
-/* global app swal $ google map */
+/* global app swal $ google map config */
 // Search Controller
 app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', ($scope, $rootScope, $http, $q, map_tools) => {
   // Controller instance variables
@@ -7,9 +7,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.selectedGeographies = []
   $scope.calculating = false
 
-  $scope.coverHouseholds = true
-  $scope.coverBusinesses = true
-  $scope.coverTowers = true
+  $scope.optimizeHouseholds = true
+  $scope.optimizeBusinesses = true
+  $scope.optimizeTowers = true
 
   $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = $scope.irrThresholdRange = 10
@@ -185,9 +185,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.run = () => {
     var locationTypes = []
-    if ($scope.coverHouseholds) locationTypes.push('households')
-    if ($scope.coverBusinesses) locationTypes.push('businesses')
-    if ($scope.coverTowers) locationTypes.push('towers')
+    var scope = config.ui.eye_checkboxes ? $rootScope : $scope
+    if (scope.optimizeHouseholds) locationTypes.push('households')
+    if (scope.optimizeBusinesses) locationTypes.push('businesses')
+    if (scope.optimizeTowers) locationTypes.push('towers')
+
     var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
@@ -210,7 +212,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
     canceler = $q.defer()
     var url = '/network_plan/' + $scope.plan.id + '/edit'
-    var config = {
+    var options = {
       url: url,
       method: 'post',
       saving_plan: true,
@@ -218,7 +220,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       timeout: canceler.promise
     }
     $scope.calculating = true
-    $http(config)
+    $http(options)
       .success((response) => {
         $scope.calculating = false
         $rootScope.$broadcast('route_planning_changed', response)
