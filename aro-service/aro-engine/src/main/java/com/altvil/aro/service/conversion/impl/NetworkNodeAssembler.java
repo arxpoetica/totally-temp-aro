@@ -42,12 +42,13 @@ public class NetworkNodeAssembler {
 	public NetworkNodeAssembler setParent(NetworkNodeAssembler parent,
 			EquipmentLocationMapping mappedLocations) {
 		this.mappedLocations = mappedLocations;
+		addChildDemand(mappedLocations.getDemandStatistic());
 		return setParent(parent);
 	}
 
 	public NetworkNodeAssembler setParent(NetworkNodeAssembler parent) {
 		// TODO When Generalized track parent relationship ;
-		parent.addChildDemand(this.mappedLocations.getDemandStatistic());
+		parent.addChildDemand(this.aggregator.apply());
 		return this;
 	}
 

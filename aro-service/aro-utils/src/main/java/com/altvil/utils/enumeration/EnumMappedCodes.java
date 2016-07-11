@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.altvil.utils.StreamUtil;
@@ -117,6 +118,11 @@ public class EnumMappedCodes<S extends Enum<S>, D> implements MappedCodes<S, D> 
 		this.domainToSourceMap = domainToSourceMap;
 	}
 
+	@Override
+	public Set<S> getSourceCodes() {
+		return sourceToDomainMap.keySet() ;
+	}
+	
 	public Map<S, D> getSourceToDomainMap() {
 		return sourceToDomainMap;
 	}

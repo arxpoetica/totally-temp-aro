@@ -32,6 +32,7 @@ public class PricingEngineImpl implements PricingEngine {
 			.add(NetworkNodeType.fiber_distribution_terminal, MaterialType.FDT)
 			.add(NetworkNodeType.bulk_distrubution_terminal, MaterialType.BFT)
 			.build();
+	
 
 	@Override
 	public PriceModelBuilder createPriceModelBuilder(PricingModel pricingModel) {
@@ -58,7 +59,7 @@ public class PricingEngineImpl implements PricingEngine {
 		}
 
 		private void init() {
-			for (NetworkNodeType nt : NetworkNodeType.values()) {
+			for (NetworkNodeType nt : equipmentCodeMapping.getSourceCodes()) {
 				equipmentMap.put(nt,
 						EquipmentCost.aggregator(nt, pricingModel
 								.getMaterialCost(typeMapping.getDomain(nt))));

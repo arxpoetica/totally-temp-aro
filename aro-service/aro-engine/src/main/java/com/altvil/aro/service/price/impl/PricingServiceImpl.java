@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.jetty.util.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
+import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
@@ -23,6 +27,10 @@ import com.altvil.utils.reference.VolatileReference;
 
 @Service
 public class PricingServiceImpl implements PricingService {
+	
+	private static final Logger log = LoggerFactory
+			.getLogger(PricingServiceImpl.class.getName());
+
 
 	private NetworkPlanRepository priceRepository;
 	private VolatileReference<PricingModel> modelRef;
@@ -301,7 +309,15 @@ public class PricingServiceImpl implements PricingService {
 
 		@Override
 		public double getMaterialCost(MaterialType type, double atomicUnit) {
-			return priceMappng.get(type).price(atomicUnit);
+			
+			NetworkPricing networkPricing =  priceMappng.get(type) ;
+			
+			if( networkPricing == null ) {
+				log.error("Failed to Map MaterialType return 0 price " + type);
+				return 0 ;
+			}
+			
+			return networkPricing.price(atomicUnit);
 		}
 
 		@Override

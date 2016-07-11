@@ -9,7 +9,8 @@ CREATE TABLE client.entity_category
 );
 
 
-INSERT INTO client.entity_category(name, description) VALUES('small', ' Business SMB');
+INSERT INTO client.entity_category(id, name, description) VALUES(0, 'total', 'All Categories');
+INSERT INTO client.entity_category(name, description) VALUES('small', 'Business SMB');
 INSERT INTO client.entity_category(name, description) VALUES('medium', 'Business Mid-Size');
 INSERT INTO client.entity_category(name, description) VALUES('large', 'Business Enterprise');
 INSERT INTO client.entity_category(name, description) VALUES('household', 'Residential Household');

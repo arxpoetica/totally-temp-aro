@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +82,7 @@ public class CostServiceImpl implements CostService {
 	private ReportBuilderContext reportBuilderContext;
 	private ReportGenerator reportGenerator;
 
-	
-	//TODO Fix this being called 2 times (Should only be called once)
+	// TODO Fix this being called 2 times (Should only be called once)
 	@PostConstruct
 	void PostConstruct() {
 		this.reportGenerator = new ReportGenerator();
@@ -176,7 +176,8 @@ public class CostServiceImpl implements CostService {
 
 	@Override
 	public List<FiberSummaryCost> getFiberReport(long planId) {
-		NetworkReportSummary report = networkReportSummaryRepository.findOne(planId) ;
+		NetworkReportSummary report = networkReportSummaryRepository
+				.findOne(planId);
 		if (report == null) {
 			return Collections.emptyList();
 		}
@@ -186,7 +187,8 @@ public class CostServiceImpl implements CostService {
 
 	@Override
 	public List<EquipmentSummaryCost> getEquipmentReport(long planId) {
-		NetworkReportSummary report = networkReportSummaryRepository.findOne(planId);
+		NetworkReportSummary report = networkReportSummaryRepository
+				.findOne(planId);
 
 		if (report == null) {
 			return Collections.emptyList();
@@ -288,6 +290,8 @@ public class CostServiceImpl implements CostService {
 		private MappedCodes<NetworkNodeType, NetworkCostCode> networkTypeToCostCodeMap;
 		private MappedCodes<FiberType, NetworkCostCode> fiberTypeToCostCodeMap;
 		private MappedCodes<NetworkStatisticType, LineItemType> networkStatisticToLineItem;
+		private Set<FiberType> wellKnowFiber = EnumSet.of(
+				FiberType.DISTRIBUTION, FiberType.FEEDER);
 
 		private ReportBuilderContext init() {
 
@@ -381,6 +385,13 @@ public class CostServiceImpl implements CostService {
 			return fiberTypeToCostCodeMap.getDomain(fiberType).getId();
 		}
 
+		public boolean isValid(FiberCost fiberCost) {
+			return fiberTypeToCostCodeMap.getSourceCodes().contains(
+					fiberCost.getFiberType())
+					&& (fiberCost.getTotalCost() > 0 || wellKnowFiber
+							.contains(fiberCost.getFiberType()));
+		}
+
 		public int getLineItemCode(NetworkStatisticType type) {
 			return networkStatisticToLineItem.getDomain(type).getId();
 		}
@@ -407,8 +418,7 @@ public class CostServiceImpl implements CostService {
 				EquipmentCost cost) {
 
 			EquipmentSummaryCost es = new EquipmentSummaryCost(
-					ctx.getNetworkCostCode(cost.getNodeType()),
-					reportSummary);
+					ctx.getNetworkCostCode(cost.getNodeType()), reportSummary);
 
 			es.setAtomicCount(cost.getAtomicUnits());
 			es.setPrice(cost.getPrice());
@@ -434,8 +444,7 @@ public class CostServiceImpl implements CostService {
 		private PlanDemand createPlanDemand(int entityTypeCode,
 				DemandStatistic ds) {
 
-			PlanDemand pd = new PlanDemand(entityTypeCode,
-					reportSummary);
+			PlanDemand pd = new PlanDemand(entityTypeCode, reportSummary);
 
 			pd.setMaxPremises(0); // TODO
 			pd.setMaxRevenue(0); // TODO
@@ -467,7 +476,7 @@ public class CostServiceImpl implements CostService {
 					.collect(Collectors.toSet()));
 
 			reportSummary.setFiberCosts(priceModel.getFiberCosts().stream()
-					.map(this::createFiberSummaryCost)
+					.filter(ctx::isValid).map(this::createFiberSummaryCost)
 					.collect(Collectors.toSet()));
 
 			return this;

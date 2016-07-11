@@ -3,6 +3,7 @@ package com.altvil.utils.enumeration;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class DefaultMappedCodes<S, D> implements MappedCodes<S, D> {
 
@@ -47,6 +48,13 @@ public class DefaultMappedCodes<S, D> implements MappedCodes<S, D> {
 		super();
 		this.sourceToDomainMap = sourceToDomainMap;
 		this.domainToSourceMap = domainToSourceMap;
+	}
+	
+	
+
+	@Override
+	public Set<S> getSourceCodes() {
+		return sourceToDomainMap.keySet() ;
 	}
 
 	@Override
