@@ -44,7 +44,7 @@ pull_redeploy: uninstall pull run
 # dev Deployment Tools
 ###############################
 
-dev_redeploy: uninstall install	
+dev_redeploy: uninstall install	DEPLOY_TARGET=vagrant
 
 
 ###############################

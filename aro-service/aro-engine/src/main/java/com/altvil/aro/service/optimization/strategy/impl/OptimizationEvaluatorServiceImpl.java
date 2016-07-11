@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
-import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
-import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
@@ -31,21 +31,21 @@ import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.enumerations.OptimizationType;
 
-@Service
-public class OptimizationStrategyServiceImpl implements
-		OptimizationStrategyService {
+//@Service
+public class OptimizationEvaluatorServiceImpl implements
+		OptimizationEvaluatorService {
 
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
-			.getLogger(OptimizationStrategyServiceImpl.class);
+			.getLogger(OptimizationEvaluatorServiceImpl.class);
 
-	private Map<OptimizationType, OptimizationStrategyFactory<?>> strategyMap = new EnumMap<OptimizationType, OptimizationStrategyServiceImpl.OptimizationStrategyFactory<?>>(
+	private Map<OptimizationType, OptimizationStrategyFactory<?>> strategyMap = new EnumMap<OptimizationType, OptimizationEvaluatorServiceImpl.OptimizationStrategyFactory<?>>(
 			OptimizationType.class);
 
 	private PlanAnalysisService planAnalysisService;
 
 	@Autowired
-	public OptimizationStrategyServiceImpl(
+	public OptimizationEvaluatorServiceImpl(
 			PlanAnalysisService planAnalysisService) {
 		super();
 		this.planAnalysisService = planAnalysisService;
@@ -63,32 +63,20 @@ public class OptimizationStrategyServiceImpl implements
 				.getOptimizationType());
 	}
 
-	private <T extends OptimizationConstraints> SpiOptimizationStrategy createSpiOptimizationStrategy(
+	private <T extends OptimizationConstraints> SpiOptimizationEvaluator createSpiOptimizationStrategy(
 			T constraints) {
 		return getFactory(constraints).createOptimizationStrategy(constraints);
 	}
 
 	@Override
-	public OptimizationStrategy getOptimizationStrategy(
+	public OptimizationEvaluator getOptimizationEvaluator(
 			OptimizationConstraints constraints) {
 		return createSpiOptimizationStrategy(constraints);
 	}
 
-	@Override
-	public PruningStrategy getPruningStrategy(
-			OptimizationConstraints constraints) {
-		return new DefaultPruningStrategy(
-				createSpiOptimizationStrategy(constraints));
-	}
 
-	@Override
-	public ScoringStrategy getScoringStrategy(
-			OptimizationConstraints constraints) {
-		return ScoringStrategyFactory.FACTORY.getScoringStrategy(constraints
-				.getOptimizationType());
-	}
 
-	private interface SpiOptimizationStrategy extends OptimizationStrategy {
+	private interface SpiOptimizationEvaluator extends OptimizationEvaluator {
 		public boolean isValid(OptimizedNetwork network);
 	}
 
@@ -127,10 +115,10 @@ public class OptimizationStrategyServiceImpl implements
 
 	private class DefaultPruningStrategy implements PruningStrategy {
 
-		private SpiOptimizationStrategy spiOptimizationStrategy;
+		private SpiOptimizationEvaluator spiOptimizationStrategy;
 
 		public DefaultPruningStrategy(
-				SpiOptimizationStrategy spiOptimizationStrategy) {
+				SpiOptimizationEvaluator spiOptimizationStrategy) {
 			super();
 			this.spiOptimizationStrategy = spiOptimizationStrategy;
 		}
@@ -153,7 +141,7 @@ public class OptimizationStrategyServiceImpl implements
 	}
 
 	private interface OptimizationStrategyFactory<T extends OptimizationConstraints> {
-		SpiOptimizationStrategy createOptimizationStrategy(T constraints);
+		SpiOptimizationEvaluator createOptimizationStrategy(T constraints);
 	}
 
 	private class ThresholdOptizationFactory<T extends ThresholdBudgetConstraint>
@@ -167,7 +155,7 @@ public class OptimizationStrategyServiceImpl implements
 		}
 
 		@Override
-		public SpiOptimizationStrategy createOptimizationStrategy(T constraints) {
+		public SpiOptimizationEvaluator createOptimizationStrategy(T constraints) {
 
 			boolean thresholdActive = !Double
 					.isNaN(constraints.getThreshhold());
@@ -189,26 +177,26 @@ public class OptimizationStrategyServiceImpl implements
 			return createMaxStrategy(constraints);
 		}
 
-		protected SpiOptimizationStrategy createBudgetThresholdStrategy(
+		protected SpiOptimizationEvaluator createBudgetThresholdStrategy(
 				T constraints) {
-			return new BudgetThresholdStrategy<ThresholdBudgetConstraint>(
+			return new BudgetThresholdEvaluator<ThresholdBudgetConstraint>(
 					constraints, createPlanAnalysisFunctor(constraints),
 					thresholdFunction);
 		}
 
-		protected SpiOptimizationStrategy createBudgetStrategy(T constraints) {
-			return new BudgetStrategy<ThresholdBudgetConstraint>(constraints,
+		protected SpiOptimizationEvaluator createBudgetStrategy(T constraints) {
+			return new BudgetEvaluator<ThresholdBudgetConstraint>(constraints,
 					createPlanAnalysisFunctor(constraints), thresholdFunction);
 		}
 
-		protected SpiOptimizationStrategy createThresholdStrategy(T constraints) {
-			return new ThreshholdStrategy<ThresholdBudgetConstraint>(
+		protected SpiOptimizationEvaluator createThresholdStrategy(T constraints) {
+			return new ThreshholdEvaluator<ThresholdBudgetConstraint>(
 					constraints, createPlanAnalysisFunctor(constraints),
 					thresholdFunction);
 		}
 
-		protected SpiOptimizationStrategy createMaxStrategy(T constraints) {
-			return new MaxStrategy<>(constraints,
+		protected SpiOptimizationEvaluator createMaxStrategy(T constraints) {
+			return new MaxEvaluator<>(constraints,
 					createPlanAnalysisFunctor(constraints), thresholdFunction);
 		}
 	}
@@ -217,14 +205,14 @@ public class OptimizationStrategyServiceImpl implements
 		double getValue(PlanAnalysis planAnalysis);
 	}
 
-	private abstract class AbstractOptimizationStrategy<T extends OptimizationConstraints>
-			implements OptimizationStrategy, SpiOptimizationStrategy {
+	private abstract class AbstractOptimizationEvaluator<T extends OptimizationConstraints>
+			implements OptimizationEvaluator, SpiOptimizationEvaluator {
 
 		protected T optimizationConstraints;
 		private Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor;
 
-		public AbstractOptimizationStrategy(T optimizationConstraints,
-				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor) {
+		public AbstractOptimizationEvaluator(T optimizationConstraints,
+											 Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor) {
 			super();
 			this.optimizationConstraints = optimizationConstraints;
 			this.planAnalysisFunctor = planAnalysisFunctor;
@@ -266,7 +254,6 @@ public class OptimizationStrategyServiceImpl implements
 
 		}
 
-		@Override
 		public Optional<PlannedNetwork> evaluateNetwork(
 				PrunedNetwork prunedNetwork) {
 
@@ -279,19 +266,28 @@ public class OptimizationStrategyServiceImpl implements
 					selectPlan(plans));
 
 		}
+		@Override
+		public PruningStrategy getPruningStrategy() {
+			return new DefaultPruningStrategy(
+					createSpiOptimizationStrategy(optimizationConstraints));
+		}
 
+		@Override
+		public ScoringStrategy getScoringStrategy() {
+			return ScoringStrategyFactory.FACTORY.getScoringStrategy(optimizationConstraints.getOptimizationType());
+		}
 		protected abstract Optional<PlanAnalysis> selectPlan(
 				Collection<PlanAnalysis> plans);
 	}
 
-	private class MaxStrategy<T extends ThresholdBudgetConstraint> extends
-			AbstractOptimizationStrategy<T> {
+	private class MaxEvaluator<T extends ThresholdBudgetConstraint> extends
+			AbstractOptimizationEvaluator<T> {
 
 		private ThesholdFunction thresholdFunction;
 
-		public MaxStrategy(T optimizationConstraints,
-				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
-				ThesholdFunction thresholdFunction) {
+		public MaxEvaluator(T optimizationConstraints,
+							Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
+							ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
 			this.thresholdFunction = thresholdFunction;
 		}
@@ -303,16 +299,17 @@ public class OptimizationStrategyServiceImpl implements
 					(c1, c2) -> Double.compare(thresholdFunction.getValue(c1),
 							thresholdFunction.getValue(c2)));
 		}
+
 	}
 
-	private class BudgetStrategy<T extends ThresholdBudgetConstraint> extends
-			AbstractOptimizationStrategy<T> {
+	private class BudgetEvaluator<T extends ThresholdBudgetConstraint> extends
+			AbstractOptimizationEvaluator<T> {
 
 		// private ThesholdFunction thresholdFunction;
 
-		public BudgetStrategy(T optimizationConstraints,
-				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
-				ThesholdFunction thresholdFunction) {
+		public BudgetEvaluator(T optimizationConstraints,
+							   Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
+							   ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
 			// this.thresholdFunction = thresholdFunction;
 		}
@@ -330,21 +327,20 @@ public class OptimizationStrategyServiceImpl implements
 			return plans
 					.stream()
 					.filter(this::isValid)
-					.sorted((c1, c2) -> Double.compare(c1.getBudget(),
-							c2.getBudget())
-							* -1).findFirst();
+					.max((c1, c2) -> Double.compare(c1.getBudget(),
+							c2.getBudget()));
 
 		}
 	}
 
-	private class ThreshholdStrategy<T extends ThresholdBudgetConstraint>
-			extends AbstractOptimizationStrategy<T> {
+	private class ThreshholdEvaluator<T extends ThresholdBudgetConstraint>
+			extends AbstractOptimizationEvaluator<T> {
 
 		private ThesholdFunction thresholdFunction;
 
-		public ThreshholdStrategy(T optimizationConstraints,
-				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
-				ThesholdFunction thresholdFunction) {
+		public ThreshholdEvaluator(T optimizationConstraints,
+								   Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
+								   ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
 			this.thresholdFunction = thresholdFunction;
 		}
@@ -370,14 +366,14 @@ public class OptimizationStrategyServiceImpl implements
 		}
 	}
 
-	private class BudgetThresholdStrategy<T extends ThresholdBudgetConstraint>
-			extends AbstractOptimizationStrategy<T> {
+	private class BudgetThresholdEvaluator<T extends ThresholdBudgetConstraint>
+			extends AbstractOptimizationEvaluator<T> {
 
 		private ThesholdFunction thresholdFunction;
 
-		public BudgetThresholdStrategy(T optimizationConstraints,
-				Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
-				ThesholdFunction thresholdFunction) {
+		public BudgetThresholdEvaluator(T optimizationConstraints,
+										Function<OptimizedNetwork, PlanAnalysis> planAnalysisFunctor,
+										ThesholdFunction thresholdFunction) {
 			super(optimizationConstraints, planAnalysisFunctor);
 			this.thresholdFunction = thresholdFunction;
 		}
