@@ -17,24 +17,24 @@ module.exports = class Location {
     var parts = []
     var join
     if (!type || type === 'households') {
-      join = `
-        JOIN households h ON h.location_id = locations.id
-        JOIN client.household_category_mappings hcm ON h.id = hcm.household_id
-        JOIN client.household_categories hc ON hc.id = hcm.household_category_id
-      `
+      join = ''
       if (filters.household_categories.length > 0) {
         params.push(filters.household_categories)
-        join += `AND hc.id IN ($${params.length})`
+        join = `
+          JOIN households h ON h.location_id = locations.id
+          JOIN client.household_category_mappings hcm ON h.id = hcm.household_id
+          JOIN client.household_categories hc ON hc.id = hcm.household_category_id AND hc.id IN ($${params.length})
+        `
       }
       parts.push(`(
         -- households
-        SELECT locations.id, locations.geom, total_businesses, total_households, MAX(hc.id) AS largest_type
+        SELECT locations.id, locations.geom, total_businesses, total_households, dn_largest_household_category AS largest_type
           FROM locations
                ${join}
          WHERE locations.total_households > 0
          GROUP BY locations.id
         EXCEPT
-        SELECT locations.id, locations.geom, total_businesses, total_households, MAX(hc.id) AS largest_type
+        SELECT locations.id, locations.geom, total_businesses, total_households, dn_largest_household_category AS largest_type
           FROM locations
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
@@ -45,24 +45,24 @@ module.exports = class Location {
       )`)
     }
     if (!type || type === 'businesses') {
-      join = `
-        JOIN businesses b ON b.location_id = locations.id
-        JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
-        JOIN client.business_categories bc ON bc.id = bcm.business_category_id
-      `
+      join = ''
       if (filters.business_categories.length > 0) {
         params.push(filters.business_categories)
-        join += `AND bc.id IN ($${params.length})`
+        join = `
+          JOIN businesses b ON b.location_id = locations.id
+          JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
+          JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($${params.length})
+        `
       }
       parts.push(`(
         -- businesses
-        SELECT locations.id, locations.geom, total_businesses, total_households, MAX(bc.id) AS largest_type
+        SELECT locations.id, locations.geom, total_businesses, total_households, dn_largest_business_category AS largest_type
           FROM locations
                ${join}
          WHERE locations.total_businesses > 0
          GROUP BY locations.id
         EXCEPT
-        SELECT locations.id, locations.geom, total_businesses, total_households, MAX(bc.id) AS largest_type
+        SELECT locations.id, locations.geom, total_businesses, total_households, dn_largest_business_category AS largest_type
           FROM locations
           JOIN client.plan_targets
             ON plan_targets.plan_id = $1
@@ -96,26 +96,22 @@ module.exports = class Location {
   */
   static findSelected (plan_id, viewport) {
     var sql = `
-      SELECT locations.id, locations.geom AS geom, true AS selected, total_businesses, total_households, MAX(hc.id) AS largest_type
+      SELECT locations.id, locations.geom AS geom, true AS selected, total_businesses, total_households, dn_largest_household_category AS largest_type
         FROM aro.locations
         JOIN households h ON h.location_id = locations.id
         JOIN client.plan_targets
           ON plan_targets.plan_id = $1
          AND plan_targets.location_id = locations.id
-        JOIN client.household_category_mappings hcm ON h.id = hcm.household_id
-        JOIN client.household_categories hc ON hc.id = hcm.household_category_id
       GROUP BY locations.id
 
       UNION
 
-      SELECT locations.id, locations.geom AS geom, true AS selected, total_businesses, total_households, MAX(bc.id) AS largest_type
+      SELECT locations.id, locations.geom AS geom, true AS selected, total_businesses, total_households, dn_largest_business_category AS largest_type
         FROM aro.locations
         JOIN businesses b ON b.location_id = locations.id
         JOIN client.plan_targets
           ON plan_targets.plan_id = $1
          AND plan_targets.location_id = locations.id
-        JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
-        JOIN client.business_categories bc ON bc.id = bcm.business_category_id
       GROUP BY locations.id
     `
     return database.points(sql, [plan_id], true, viewport)
