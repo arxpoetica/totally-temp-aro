@@ -6,6 +6,7 @@ var request = pify(require('request'), { multiArgs: true })
 module.exports = class AROService {
 
   static request (req) {
+    req.timeout = req.timeout || 30 * 60 * 1000 // 30min
     console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
     return request(req).then((result) => {
       var res = result[0]
