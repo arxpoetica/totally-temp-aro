@@ -4,13 +4,15 @@ import java.util.List;
 
 import com.altvil.aro.model.EquipmentSummaryCost;
 import com.altvil.aro.model.FiberSummaryCost;
-import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.optimization.OptimizedPlan;
 
 public interface CostService {
 	
 	public Double getTotalPlanCost(long planId) ;
 	
-	void updateWireCenterCosts(WirecenterNetworkPlan planId) ;
+	PlanAnalysisReport createPlanAnalysisReport(OptimizedPlan network) ;
+	PlanAnalysisReport updateWireCenterCosts(OptimizedPlan optimizedPlan) ;
+	
 	void updateMasterPlanCosts(long planId) ;
 	
 	List<FiberSummaryCost> getFiberReport(long planId) ;

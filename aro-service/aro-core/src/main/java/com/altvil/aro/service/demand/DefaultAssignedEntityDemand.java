@@ -41,7 +41,7 @@ public class DefaultAssignedEntityDemand implements PinnedAssignedEntityDemand {
 	}
 
 	public double getTotalDemand() {
-		return locationDemand.getDemand();
+		return locationDemand.getFairShareDemand();
 	}
 	
 	public PinnedLocation getPinnedLocation() {

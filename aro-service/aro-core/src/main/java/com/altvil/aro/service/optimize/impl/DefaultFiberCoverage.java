@@ -64,8 +64,8 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	}
 
 	@Override
-	public double getDemand() {
-		return coverage.getDemand();
+	public double getFairShareDemand() {
+		return coverage.getFairShareDemand();
 	}
 
 	@Override
@@ -96,8 +96,8 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	
 
 	@Override
-	public double getFairShare() {
-		return coverage.getFairShare() ;
+	public double getPenetration() {
+		return coverage.getPenetration() ;
 	}
 
 

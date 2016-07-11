@@ -14,6 +14,17 @@ public class LineItem {
 	private LineItemKey id;
 	private NetworkReportSummary networkReportSummary ;
 	private Double doubleValue;
+	
+	public LineItem() {
+	}
+	
+	public LineItem(LineItemKey id) {
+		this.id = id ;
+	}
+	
+	public LineItem(int lineItemType, long networkReportId) {
+		this(new LineItemKey(lineItemType, networkReportId)) ;
+	}
 
 	@EmbeddedId
 	public LineItemKey getId() {

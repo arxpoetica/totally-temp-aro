@@ -6,8 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,14 +20,12 @@ import org.hibernate.annotations.DiscriminatorOptions;
 
 @Entity
 @Inheritance
-@DiscriminatorColumn(name="report_type_id",  discriminatorType=DiscriminatorType.INTEGER)
+@DiscriminatorColumn(name="code",  discriminatorType=DiscriminatorType.CHAR)
 @DiscriminatorOptions(force=true)
 @Table(name = "network_report", schema = "financial")
-public class NetworkReport {
+public abstract class NetworkReport {
 
 	private long id;
-
-	private ReportType reportType;
 	private long planId;
 
 	private String state = "*";
@@ -46,15 +42,9 @@ public class NetworkReport {
 		this.id = id;
 	}
 
-	@Column(name = "report_type_id")
-	@Enumerated(EnumType.ORDINAL)
-	public ReportType getReportType() {
-		return reportType;
-	}
-
-	public void setReportType(ReportType reportType) {
-		this.reportType = reportType;
-	}
+//	@Column(name = "report_type_id")
+//	@Enumerated(EnumType.ORDINAL)
+	
 
 	@Column(name = "plan_id")
 	public long getPlanId() {

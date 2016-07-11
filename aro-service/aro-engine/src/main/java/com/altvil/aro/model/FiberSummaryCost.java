@@ -14,11 +14,23 @@ public class FiberSummaryCost {
 	private FiberSummaryCostKey id;
 
 	private NetworkReportSummary networkReportSummary;
-	
+
 	double lengthMeters;
 	double costPerMeter;
 	double totalCost;
+	
+	
+	public FiberSummaryCost() {
+	}
 
+	public FiberSummaryCost(FiberSummaryCostKey id) {
+		this.id = id ;
+	}
+	
+	public FiberSummaryCost(int costCode, long networkReportId) {
+		this(new FiberSummaryCostKey()) ;
+	}
+	
 	@EmbeddedId
 	public FiberSummaryCostKey getId() {
 		return id;
@@ -27,7 +39,7 @@ public class FiberSummaryCost {
 	public void setId(FiberSummaryCostKey id) {
 		this.id = id;
 	}
-	
+
 	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
 	@ManyToOne(optional = false)
 	public NetworkReportSummary getNetworkReportSummary() {

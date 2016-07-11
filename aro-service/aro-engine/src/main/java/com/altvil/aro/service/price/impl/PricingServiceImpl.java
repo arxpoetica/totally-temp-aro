@@ -16,6 +16,8 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
+import com.altvil.aro.service.price.engine.PriceModelBuilder;
+import com.altvil.aro.service.price.engine.PricingEngine;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.reference.VolatileReference;
 
@@ -24,15 +26,24 @@ public class PricingServiceImpl implements PricingService {
 
 	private NetworkPlanRepository priceRepository;
 	private VolatileReference<PricingModel> modelRef;
+	private PricingEngine pricingEngine;
 
 	@Autowired
-	public PricingServiceImpl(NetworkPlanRepository priceRepository) {
+	public PricingServiceImpl(NetworkPlanRepository priceRepository,
+			PricingEngine pricingEngine) {
 		super();
 		this.priceRepository = priceRepository;
+		this.pricingEngine = pricingEngine;
 
 		// TODO version Tracking on price Model
 		modelRef = new VolatileReference<PricingModel>(
 				() -> loadPricingModel(), 1000L * 60L * 5L);
+	}
+
+	@Override
+	public PriceModelBuilder createBuilder(String state, Date date) {
+		return pricingEngine.createPriceModelBuilder(getPricingModel(state,
+				date));
 	}
 
 	@Override

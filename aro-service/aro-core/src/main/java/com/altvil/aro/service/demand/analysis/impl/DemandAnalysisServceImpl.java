@@ -552,7 +552,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			BasicDemand basicDemand = new BasicDemand();
 			for (DemandFunction f : demandFunctions) {
 				DemandStatistic stat = f.apply(mapping).getDemandStatistic();
-				basicDemand.add(stat.getDemand(),
+				basicDemand.add(stat.getFairShareDemand(),
 						stat.getAtomicUnits(),
 						stat.getMonthlyRevenueImpact());
 			}

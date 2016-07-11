@@ -9,8 +9,19 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class PlanDemandKey implements Serializable {
 
-	private long networkReportId;
 	private int entityType;
+	private long networkReportId;
+	
+	public PlanDemandKey() {
+	}
+	
+	
+	public PlanDemandKey(int entityType, long networkReportId) {
+		super();
+		this.entityType = entityType;
+		this.networkReportId = networkReportId;
+	}
+
 
 	@Column(name = "network_report_id")
 	public int getEntityType() {

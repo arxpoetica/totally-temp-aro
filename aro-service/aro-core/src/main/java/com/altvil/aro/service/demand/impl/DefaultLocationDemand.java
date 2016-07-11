@@ -107,7 +107,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	private DefaultLocationDemand(
 			Map<LocationEntityType, DemandStatistic> demands,
 			DemandStatistic stat) {
-		super(stat.getRawCoverage(), stat.getAtomicUnits(), stat.getDemand(), stat
+		super(stat.getRawCoverage(), stat.getAtomicUnits(), stat.getFairShareDemand(), stat
 				.getMonthlyRevenueImpact());
 		this.demands = demands;
 	}
@@ -139,9 +139,9 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		double tailAtomicUnits = ds.getAtomicUnits() - atomicUnitRemainder;
 
 		return new Pair<>(new DefaultDemandStatistic(ds.getRawCoverage()
-				* ratio, headAtomicUnits, ds.getDemand() * ratio, ds.getMonthlyRevenueImpact() * ratio),
+				* ratio, headAtomicUnits, ds.getFairShareDemand() * ratio, ds.getMonthlyRevenueImpact() * ratio),
 				new DefaultDemandStatistic(ds.getRawCoverage() * tailRatio,
-						tailAtomicUnits, ds.getDemand() * tailRatio, ds.getMonthlyRevenueImpact() * tailRatio));
+						tailAtomicUnits, ds.getFairShareDemand() * tailRatio, ds.getMonthlyRevenueImpact() * tailRatio));
 
 	}
 
@@ -166,7 +166,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 				head.put(lt, pair.getHead());
 				tail.put(lt, pair.getTail());
 
-				remainingDemand -= pair.getHead().getDemand();
+				remainingDemand -= pair.getHead().getFairShareDemand();
 			}
 		}
 
@@ -182,7 +182,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	
 	@Override
 	public Pair<LocationDemand> splitDemand(double demand) {
-		return splitDemand(Math.min(getDemand(), demand), reduceTypes);
+		return splitDemand(Math.min(getFairShareDemand(), demand), reduceTypes);
 	}
 
 }

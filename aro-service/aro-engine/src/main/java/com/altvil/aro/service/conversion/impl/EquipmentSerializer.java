@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.altvil.aro.model.NetworkNode;
-import com.altvil.aro.model.NetworkNodeTypeEnum;
+import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.service.analysis.GraphMappingSerializer;
 import com.altvil.aro.service.conversion.EquipmentLocationMapping;
 import com.altvil.aro.service.conversion.MappedBftAssignment;
@@ -63,7 +63,7 @@ public class EquipmentSerializer extends
 
 		NetworkNodeAssembler node = createNetworkNode(graphMapping
 				.getGraphAssignment().getPoint(),
-				NetworkNodeTypeEnum.fiber_distribution_hub);
+				NetworkNodeType.fiber_distribution_hub);
 
 		serialize(register(graphMapping.getGraphAssignment(), node),
 				graphMapping.getChildren());
@@ -80,7 +80,7 @@ public class EquipmentSerializer extends
 
 		NetworkNodeAssembler node = createNetworkNode(graphMapping
 				.getGraphAssignment().getPoint(),
-				NetworkNodeTypeEnum.bulk_distrubution_terminal);
+				NetworkNodeType.bulk_distrubution_terminal);
 
 		serialize(register(graphMapping.getGraphAssignment(), node),
 				graphMapping.getChildren());
@@ -94,7 +94,7 @@ public class EquipmentSerializer extends
 
 		NetworkNodeAssembler node = createNetworkNode(graphMapping
 				.getGraphAssignment().getPoint(),
-				NetworkNodeTypeEnum.fiber_distribution_terminal);
+				NetworkNodeType.fiber_distribution_terminal);
 
 		register(graphMapping.getGraphAssignment(), node);
 
@@ -104,14 +104,14 @@ public class EquipmentSerializer extends
 	}
 
 	protected NetworkNodeAssembler createNetworkNode(Point point,
-			NetworkNodeTypeEnum type) {
+			NetworkNodeType type) {
 		NetworkNode node = new NetworkNode();
 
 		node.setGeogPoint(point);
 		node.setLongitude(point.getX());
 		node.setLattitude(point.getY());
 		node.setPoint(point);
-		node.setNodeTypeId(type.getId());
+		node.setNetworkNodeType(type);
 		node.setGeogPoint(point);
 		node.setRouteId(planId);
 

@@ -19,6 +19,8 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
+import com.altvil.aro.service.optimization.OptimizedPlan;
+import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.master.MasterOptimizationAnalysis;
 import com.altvil.aro.service.optimization.master.MasterOptimizationPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
@@ -116,7 +118,8 @@ public class OptimizationPlannerServiceImpl implements
 
 			Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
 
-			Collection<WirecenterNetworkPlan> optimizedNetworks = updateNetworks(plannedNetworks);
+			Collection<WirecenterNetworkPlan> optimizedNetworks = updateNetworks(
+					request.getOptimizationConstraints(), plannedNetworks);
 
 			return masterPlanningService.save(new MasterOptimizationPlan(
 					request, optimizedNetworks));
@@ -126,20 +129,23 @@ public class OptimizationPlannerServiceImpl implements
 		protected abstract Collection<PlannedNetwork> planNetworks(
 				Collection<WirecenterOptimizationRequest> wirecenters);
 
-		protected WirecenterNetworkPlan reify(PlannedNetwork plan) {
+		protected WirecenterNetworkPlan reify(
+				OptimizationConstraints constraints, PlannedNetwork plan) {
 
 			WirecenterNetworkPlan reifiedPlan = conversionService.convert(
 					plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
 
-			wirecenterPlanningService.save(reifiedPlan);
+			wirecenterPlanningService.save(new OptimizedPlanIml(constraints,
+					reifiedPlan));
 
 			return reifiedPlan;
 		}
 
 		protected Collection<WirecenterNetworkPlan> updateNetworks(
+				OptimizationConstraints constraints,
 				Collection<PlannedNetwork> plannedNetworks) {
 
-			return plannedNetworks.stream().map(this::reify)
+			return plannedNetworks.stream().map(p -> reify(constraints, p))
 					.collect(Collectors.toList());
 
 		}
@@ -260,6 +266,30 @@ public class OptimizationPlannerServiceImpl implements
 				}).filter(o -> !o.isInError())
 				.map(WirecenterOptimization::getResult).filter(validPredicate)
 				.collect(Collectors.toList());
+
+	}
+
+	private static class OptimizedPlanIml implements OptimizedPlan {
+
+		private OptimizationConstraints constraints;
+		private WirecenterNetworkPlan networkPlan;
+
+		public OptimizedPlanIml(OptimizationConstraints constraints,
+				WirecenterNetworkPlan networkPlan) {
+			super();
+			this.constraints = constraints;
+			this.networkPlan = networkPlan;
+		}
+
+		@Override
+		public OptimizationConstraints getOptimizationConstraints() {
+			return constraints;
+		}
+
+		@Override
+		public WirecenterNetworkPlan getWirecenterNetworkPlan() {
+			return networkPlan;
+		}
 
 	}
 

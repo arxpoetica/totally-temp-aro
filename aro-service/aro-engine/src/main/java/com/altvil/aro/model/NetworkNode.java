@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,35 +17,39 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.Point;
 
 @Entity
-@Table(name = "network_nodes", schema="client")
+@Table(name = "network_nodes", schema = "client")
 public class NetworkNode extends ComparableModel {
 
 	private Long id;
-	//private String stateCode; //Create a Logical Partition 
+	// private String stateCode; //Create a Logical Partition
 	private Double lattitude;
 	private Double longitude;
-	private int node_type_id;
+	private NetworkNodeType networkNodeType;
 	private Point point;
 	private Point geogPoint;
-	
-	private double houseHoldCount ;
-	private double businessCount ;
-	private double cellTowerCount ;
-	private double atomicUnit ;
-	
+
+	private double houseHoldCount;
+	private double businessCount;
+	private double cellTowerCount;
+	private double atomicUnit;
+
 	private long routeId;
-	
+
 	@Transient
 	@Override
 	protected Serializable getIdKey() {
-		return id ;
+		return id;
 	}
 
 	@Id
 	@Column(name = "id")
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	//@TableGenerator(schema = "vz", table = "id_table", name = "gen_id_network_node", allocationSize = 1000, initialValue = 0, pkColumnName = "name", valueColumnName = "int_value", pkColumnValue = "network_node")
-	//@GeneratedValue(strategy = GenerationType.TABLE, generator = "gen_id_network_node")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	// @TableGenerator(schema = "vz", table = "id_table", name =
+	// "gen_id_network_node", allocationSize = 1000, initialValue = 0,
+	// pkColumnName = "name", valueColumnName = "int_value", pkColumnValue =
+	// "network_node")
+	// @GeneratedValue(strategy = GenerationType.TABLE, generator =
+	// "gen_id_network_node")
 	public Long getId() {
 		return id;
 	}
@@ -71,12 +77,13 @@ public class NetworkNode extends ComparableModel {
 	}
 
 	@Column(name = "node_type_id")
-	public int getNodeTypeId() {
-		return node_type_id;
+	@Enumerated(EnumType.ORDINAL)
+	public NetworkNodeType getNetworkNodeType() {
+		return networkNodeType;
 	}
 
-	public void setNodeTypeId(int node_type_id) {
-		this.node_type_id = node_type_id;
+	public void setNetworkNodeType(NetworkNodeType networkNodeType) {
+		this.networkNodeType = networkNodeType;
 	}
 
 	@Column(name = "geom")
@@ -98,8 +105,7 @@ public class NetworkNode extends ComparableModel {
 	public void setGeogPoint(Point geogPoint) {
 		this.geogPoint = geogPoint;
 	}
-	
-	
+
 	@Column(name = "atomic_count")
 	public Double getAtomicUnit() {
 		return atomicUnit;
@@ -108,7 +114,7 @@ public class NetworkNode extends ComparableModel {
 	public void setAtomicUnit(Double atomicUnit) {
 		this.atomicUnit = atomicUnit;
 	}
-	
+
 	@Column(name = "household_count")
 	public double getHouseHoldCount() {
 		return houseHoldCount;
@@ -137,7 +143,7 @@ public class NetworkNode extends ComparableModel {
 	}
 
 	@Column(name = "plan_id")
-//	@Convert(converter = PlanIdConverter.class)
+	// @Convert(converter = PlanIdConverter.class)
 	public long getRouteId() {
 		return routeId;
 	}
@@ -146,13 +152,13 @@ public class NetworkNode extends ComparableModel {
 		this.routeId = routeId;
 	}
 
-//	@Column(name = "state_fips_code")
-//	public String getStateCode() {
-//		return stateCode;
-//	}
-//
-//	public void setStateCode(String stateCode) {
-//		this.stateCode = stateCode;
-//	}
+	// @Column(name = "state_fips_code")
+	// public String getStateCode() {
+	// return stateCode;
+	// }
+	//
+	// public void setStateCode(String stateCode) {
+	// this.stateCode = stateCode;
+	// }
 
 }

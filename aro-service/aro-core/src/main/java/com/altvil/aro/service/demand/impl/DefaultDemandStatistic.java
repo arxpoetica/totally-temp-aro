@@ -19,7 +19,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 
 		@Override
 		public void add(DemandStatistic other) {
-			result.demand += other.getDemand();
+			result.demand += other.getFairShareDemand();
 			result.atomicUnits += other.getAtomicUnits();
 			result.rawCoverage += other.getRawCoverage();
 			result.revenue += other.getMonthlyRevenueImpact();
@@ -63,7 +63,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 	}
 
 	@Override
-	public double getDemand() {
+	public double getFairShareDemand() {
 		return demand;
 	}
 
@@ -82,7 +82,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 	//
 
 	@Override
-	public double getFairShare() {
+	public double getPenetration() {
 		return rawCoverage == 0 ? 0 : demand /rawCoverage ;
 	}
 
@@ -111,7 +111,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 		public void add(DemandStatistic value) {
 			rawCoverage += value.getRawCoverage();
 			atomicUnits += value.getAtomicUnits();
-			demand += value.getDemand();
+			demand += value.getFairShareDemand();
 			revenue += value.getMonthlyRevenueImpact();
 		}
 
@@ -126,7 +126,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 		}
 
 		@Override
-		public double getDemand() {
+		public double getFairShareDemand() {
 			return demand;
 		}
 
@@ -136,7 +136,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 		}
 
 		@Override
-		public double getFairShare() {
+		public double getPenetration() {
 			return rawCoverage == 0 ? 0 : demand / rawCoverage;
 		}
 

@@ -5,37 +5,57 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.model.EquipmentSummaryCost;
 import com.altvil.aro.model.FiberSummaryCost;
 import com.altvil.aro.model.LineItem;
-import com.altvil.aro.model.LineItemKey;
 import com.altvil.aro.model.LineItemType;
+import com.altvil.aro.model.NetworkCostCode;
+import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.model.NetworkReport;
+import com.altvil.aro.model.NetworkReportSummary;
+import com.altvil.aro.model.PlanDemand;
 import com.altvil.aro.model.ReportType;
 import com.altvil.aro.persistence.repository.EquipmentSummaryCostRepository;
 import com.altvil.aro.persistence.repository.FiberSummaryCostRepository;
-import com.altvil.aro.persistence.repository.LineItemRepository;
 import com.altvil.aro.persistence.repository.LineItemTypeRepository;
+import com.altvil.aro.persistence.repository.NetworkCostCodeRepository;
 import com.altvil.aro.persistence.repository.NetworkReportRepository;
+import com.altvil.aro.persistence.repository.NetworkReportSummaryRepository;
 import com.altvil.aro.service.cost.CostService;
+import com.altvil.aro.service.cost.NetworkStatistic;
+import com.altvil.aro.service.cost.NetworkStatisticType;
+import com.altvil.aro.service.cost.PlanAnalysisReport;
 import com.altvil.aro.service.entity.DemandStatistic;
+import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.price.PricingService;
+import com.altvil.aro.service.price.engine.EquipmentCost;
+import com.altvil.aro.service.price.engine.FiberCost;
+import com.altvil.aro.service.price.engine.PriceModel;
+import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.utils.StreamUtil;
+import com.altvil.utils.enumeration.EnumMappedCodes;
+import com.altvil.utils.enumeration.MappedCodes;
 
 @Service
 public class CostServiceImpl implements CostService {
@@ -43,50 +63,51 @@ public class CostServiceImpl implements CostService {
 	private static final Logger log = LoggerFactory
 			.getLogger(CostServiceImpl.class.getName());
 
+	private PricingService pricingService;
 	private NetworkReportRepository networkReportRepository;
 	private EquipmentSummaryCostRepository equipmentSummaryCostRepository;
 	private FiberSummaryCostRepository fiberSummaryCostRepository;
-	private LineItemRepository lineItemRepository;
 	private LineItemTypeRepository lineItemTypeRepository;
+	private NetworkReportSummaryRepository networkReportSummaryRepository;
+	private NetworkCostCodeRepository networkCostCodeRepository;
 
+	private ReportBuilderContext reportBuilderContext;
 	private ReportGenerator reportGenerator;
-
-	@Autowired
-	public CostServiceImpl(NetworkReportRepository networkReportRepository,
-			EquipmentSummaryCostRepository equipmentSummaryCostRepository,
-			FiberSummaryCostRepository fiberSummaryCostRepository,
-			LineItemRepository lineItemRepository,
-			LineItemTypeRepository lineItemTypeRepository) {
-		super();
-		this.networkReportRepository = networkReportRepository;
-		this.equipmentSummaryCostRepository = equipmentSummaryCostRepository;
-		this.fiberSummaryCostRepository = fiberSummaryCostRepository;
-		this.lineItemRepository = lineItemRepository;
-		this.lineItemTypeRepository = lineItemTypeRepository;
-	}
 
 	@PostConstruct
 	void PostConstruct() {
-		this.reportGenerator =new ReportGenerator(createLineItemMapping()) ;
+		this.reportGenerator = new ReportGenerator();
+		reportBuilderContext = new ReportBuilderContext().init();
 	}
 
-	private Map<LineItemTypeEnum, LineItemType> createLineItemMapping() {
+	@Override
+	public PlanAnalysisReport updateWireCenterCosts(OptimizedPlan optimizedPlan) {
+		PlanAnalysisReport report = createPlanAnalysisReport(optimizedPlan);
+		save(optimizedPlan, createPlanAnalysisReport(optimizedPlan));
+		return report;
+	}
 
-		Map<String, LineItemType> nameMap = StreamUtil.hash(
-				lineItemTypeRepository.findAll(), LineItemType::getName);
-		Map<LineItemTypeEnum, LineItemType> result = new EnumMap<>(
-				LineItemTypeEnum.class);
-		for (LineItemTypeEnum t : LineItemTypeEnum.values()) {
-			LineItemType lit = nameMap.get(t.getCode());
-			if (lit == null) {
-				log.warn("Failed to match enum " + t);
-			} else {
-				result.put(t, lit);
-			}
-		}
+	private ReportBuilder createReportBuilder(NetworkReportSummary summaryReport) {
+		return new ReportBuilder(reportBuilderContext, summaryReport);
+	}
 
-		return result;
+	@Transactional
+	@Modifying
+	private NetworkReportSummary save(OptimizedPlan plan,
+			PlanAnalysisReport report) {
 
+		NetworkReportSummary planReport =
+
+		createReportBuilder(
+				createReport(plan.getWirecenterNetworkPlan().getPlanId(),
+						new NetworkReportSummary()))
+				.setPriceModel(report.getPriceModel())
+				.setLineItems(report.getNetworkStatistics())
+				.setDemand(report.getLocationDemand()).build();
+
+		networkReportSummaryRepository.save(planReport);
+
+		return planReport;
 	}
 
 	@Override
@@ -94,59 +115,52 @@ public class CostServiceImpl implements CostService {
 		return networkReportRepository.getTotalPlanCost(planId);
 	}
 
-	@Override
-	public void updateWireCenterCosts(WirecenterNetworkPlan plan) {
+	private PriceModel createPriceModel(WirecenterNetworkPlan plan) {
+		PriceModelBuilder b = pricingService.createBuilder("*", new Date());
+		plan.getNetworkNodes().forEach(
+				n -> b.add(n.getNetworkNodeType(), 1, n.getAtomicUnit()));
+		for (FiberType ft : FiberType.values()) {
+			b.add(ft, plan.getFiberLengthInMeters(ft));
+		}
 
-		long planId = plan.getPlanId();
-
-		networkReportRepository.deleteReportsForPlan(planId);
-
-		update(planId, ReportType.detail_equipment,
-				(report) -> networkReportRepository
-						.updateWireCenterEquipmentCost(report.getId()));
-
-		update(planId, ReportType.summary_equipment,
-				(report) -> networkReportRepository
-						.updateWireCenterEquipmentSummary(report.getId()));
-
-		update(planId, ReportType.summary_fiber,
-				(report) -> networkReportRepository
-						.updateWireCenterFiberSummary(report.getId()));
-
-		updateWirecenterFinancials(plan);
+		return b.build();
 
 	}
 
-	private void updateWirecenterFinancials(WirecenterNetworkPlan plan) {
-		NetworkReport report = createReport(plan.getPlanId(),
-				ReportType.wirecenter_report);
-		lineItemRepository.save(reportGenerator.generateReport(report, plan));
+	@Override
+	public PlanAnalysisReport createPlanAnalysisReport(OptimizedPlan network) {
+
+		PriceModel priceModel = createPriceModel(network
+				.getWirecenterNetworkPlan());
+
+		DemandCoverage dc = network.getWirecenterNetworkPlan()
+				.getDemandCoverage();
+
+		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
+				reportGenerator.generateNetworkStatistics(network),
+				NetworkStatistic::getNetworkStatisticType);
+
+		return new PlanAnalyisReportImpl(priceModel, dc, map);
 	}
 
 	@Override
 	public void updateMasterPlanCosts(long planId) {
 
 		networkReportRepository.deleteReportsForPlan(planId);
-
-		update(planId, ReportType.summary_equipment,
-				(report) -> networkReportRepository
-						.updateMasterPlanEquipmentSummary(report.getId()));
-
-		update(planId, ReportType.summary_fiber,
-				(report) -> networkReportRepository
-						.updateMasterPlanFiberSummary(report.getId()));
-	}
-
-	private void update(long planId, ReportType rt,
-			Consumer<NetworkReport> action) {
-		NetworkReport report = createNetworkReport(planId, rt);
-		networkReportRepository.save(report);
-		action.accept(report);
+		//
+		// update(planId, ReportType.summary_equipment,
+		// (report) -> networkReportRepository
+		// .updateMasterPlanEquipmentSummary(report.getId()));
+		//
+		// update(planId, ReportType.summary_fiber,
+		// (report) -> networkReportRepository
+		// .updateMasterPlanFiberSummary(report.getId()));
 	}
 
 	@Transactional
-	private NetworkReport createReport(long planId, ReportType rt) {
-		NetworkReport report = createNetworkReport(planId, rt);
+	private <T extends NetworkReport> T createReport(long planId, T report) {
+		report.setPlanId(planId);
+		report.setDate(new Date());
 		networkReportRepository.save(report);
 		return report;
 	}
@@ -175,115 +189,351 @@ public class CostServiceImpl implements CostService {
 				.getId());
 	}
 
-	private NetworkReport createNetworkReport(long planId, ReportType type) {
-		NetworkReport report = new NetworkReport();
-		report.setPlanId(planId);
-		report.setDate(new Date());
-		report.setReportType(type);
-		return report;
+	private interface NetworkStatisticGenerator {
+		NetworkStatistic generate(OptimizedPlan plan);
 	}
 
-	private interface LineItemGenerator {
-		LineItem generate(NetworkReport report, WirecenterNetworkPlan plan);
-	}
+	private static class NetworkStatisticGeneratorDefault implements
+			NetworkStatisticGenerator {
 
-	private static class LineItemGeneratorDefault implements LineItemGenerator {
+		private NetworkStatisticType type;
+		private Function<OptimizedPlan, Double> f;
 
-		private LineItemType lineItemType;
-		private Function<WirecenterNetworkPlan, Double> f;
-
-		public LineItemGeneratorDefault(LineItemType lineItemType,
-				Function<WirecenterNetworkPlan, Double> f) {
+		public NetworkStatisticGeneratorDefault(NetworkStatisticType type,
+				Function<OptimizedPlan, Double> f) {
 			super();
-			this.lineItemType = lineItemType;
+			this.type = type;
 			this.f = f;
 		}
 
 		@Override
-		public LineItem generate(NetworkReport report,
-				WirecenterNetworkPlan plan) {
-			LineItem lineItem = new LineItem();
-
-			Double val = Double.NaN;
-			try {
-				val = f.apply(plan);
-			} catch (Throwable err) {
-				log.error(err.getMessage(), err);
-			}
-
-			lineItem.setDoubleValue(val);
-			lineItem.setId(new LineItemKey(lineItemType.getId(), report.getId()));
-
-			return lineItem;
-		}
-
-	}
-
-	private enum LineItemTypeEnum {
-		cost("cost"), irr("irr"), npv("npv") ;
-		
-
-		private String code;
-
-		private LineItemTypeEnum(String code) {
-			this.code = code;
-		}
-
-		public String getCode() {
-			return code;
+		public NetworkStatistic generate(OptimizedPlan plan) {
+			return new LazyNetworkStatistic(type, () -> f.apply(plan));
 		}
 
 	}
 
 	private class ReportGenerator {
 
-		private Map<LineItemTypeEnum, LineItemType> mapping;
-		private Collection<LineItemGenerator> lineItemGenerators = new ArrayList<>();
+		private Collection<NetworkStatisticGenerator> lineItemGenerators = new ArrayList<>();
 
-		public ReportGenerator(Map<LineItemTypeEnum, LineItemType> mapping) {
+		public ReportGenerator() {
 			super();
-			this.mapping = mapping;
 			init();
 		}
 
-		private void add(LineItemGenerator lineItemGenerator) {
+		private void add(NetworkStatisticGenerator lineItemGenerator) {
 			lineItemGenerators.add(lineItemGenerator);
 		}
 
-		private void add(LineItemTypeEnum type,
-				Function<WirecenterNetworkPlan, Double> f) {
-			add(new LineItemGeneratorDefault(mapping.get(type), f));
+		private void add(NetworkStatisticType type,
+				Function<OptimizedPlan, Double> f) {
+			add(new NetworkStatisticGeneratorDefault(type, f));
 		}
 
 		private void init() {
-			add(LineItemTypeEnum.irr, (ws) -> 0.0);
-			add(LineItemTypeEnum.npv, (ws) -> 0.0);
-			
+			add(NetworkStatisticType.irr, (ws) -> 0.0);
+			add(NetworkStatisticType.npv, (ws) -> 0.0);
+
 		}
 
-		public Collection<LineItem> generateReport(NetworkReport report,
-				WirecenterNetworkPlan plan) {
-			return StreamUtil.map(lineItemGenerators,
-					g -> g.generate(report, plan));
+		public Collection<NetworkStatistic> generateNetworkStatistics(
+				OptimizedPlan plan) {
+			return StreamUtil.map(lineItemGenerators, g -> g.generate(plan));
 		}
-		
-	}
-	
-	
-	
-	
-	private static class DemandAnalyizer {
-	
-		
-		public DemandStatistic getDemandStatistic(LocationEntityType type) {
-			return null ;
-		}
-		
-		private void analyize(DemandCoverage demandCoverage) {
-			demandCoverage.getAssignedEntityDemands() ;
-		}
-		
+
 	}
 
+	private static class PlanAnalyisReportImpl implements PlanAnalysisReport {
+
+		private PriceModel priceModel;
+		private DemandCoverage demandCoverage;
+		private Map<NetworkStatisticType, NetworkStatistic> map;
+
+		public PlanAnalyisReportImpl(PriceModel priceModel,
+				DemandCoverage demandCoverage,
+				Map<NetworkStatisticType, NetworkStatistic> map) {
+			super();
+			this.priceModel = priceModel;
+			this.demandCoverage = demandCoverage;
+			this.map = map;
+		}
+
+		@Override
+		public PriceModel getPriceModel() {
+			return priceModel;
+		}
+
+		@Override
+		public LocationDemand getLocationDemand() {
+			return demandCoverage.getLocationDemand();
+		}
+
+		@Override
+		public Collection<NetworkStatistic> getNetworkStatistics() {
+			return map.values();
+		}
+
+	}
+
+	private class ReportBuilderContext {
+
+		private MappedCodes<NetworkNodeType, NetworkCostCode> networkTypeToCostCodeMap;
+		private MappedCodes<FiberType, NetworkCostCode> fiberTypeToCostCodeMap;
+		private MappedCodes<NetworkStatisticType, LineItemType> networkStatisticToLineItem;
+
+		private ReportBuilderContext init() {
+
+			Map<Integer, NetworkCostCode> codeMap = StreamUtil
+					.hash(networkCostCodeRepository.findAll(),
+							NetworkCostCode::getId);
+
+			networkTypeToCostCodeMap = createNodeMapping(codeMap);
+			fiberTypeToCostCodeMap = createFiberMapping(codeMap);
+			networkStatisticToLineItem = createLineItemMapping();
+
+			return this;
+
+		}
+
+		private <S extends Enum<S>, D> Map<S, D> createAssociationMap(
+				Collection<Object[]> rows, Map<Integer, D> codeMap,
+				Class<S> enumType) {
+
+			Map<Integer, S> srcMap = StreamUtil.hash(
+					enumType.getEnumConstants(), e -> e.ordinal());
+
+			Map<S, D> result = new EnumMap<>(enumType);
+
+			for (Object[] row : rows) {
+				int codeId = ((Number) row[0]).intValue();
+				int enumId = ((Number) row[1]).intValue();
+
+				D d = codeMap.get(codeId);
+				S s = srcMap.get(enumId);
+
+				if (s == null || d == null) {
+					log.warn("Failed to map assoication " + codeId + " "
+							+ enumId);
+				} else {
+					result.put(s, d);
+				}
+
+			}
+
+			return result;
+
+		}
+
+		private MappedCodes<NetworkNodeType, NetworkCostCode> createNodeMapping(
+				Map<Integer, NetworkCostCode> codeMap) {
+
+			return EnumMappedCodes.create(createAssociationMap(
+					networkCostCodeRepository
+							.queryCostCodeToNetworkNodeTypeOrdinal(), codeMap,
+					NetworkNodeType.class));
+
+		}
+
+		private MappedCodes<FiberType, NetworkCostCode> createFiberMapping(
+				Map<Integer, NetworkCostCode> codeMap) {
+
+			return EnumMappedCodes
+					.create(createAssociationMap(networkCostCodeRepository
+							.queryCostCodeToFiberTypeOrdinal(), codeMap,
+							FiberType.class));
+
+		}
+
+		private MappedCodes<NetworkStatisticType, LineItemType> createLineItemMapping() {
+
+			Map<Integer, LineItemType> map = StreamUtil.hash(
+					lineItemTypeRepository.findAll(), LineItemType::getId);
+
+			Map<NetworkStatisticType, LineItemType> result = new EnumMap<>(
+					NetworkStatisticType.class);
+
+			for (NetworkStatisticType t : NetworkStatisticType.values()) {
+
+				LineItemType type = map.get(t.ordinal());
+				if (type == null) {
+					throw new RuntimeException("Failed to map " + t);
+				}
+				result.put(t, type);
+			}
+
+			return EnumMappedCodes.create(result);
+
+		}
+
+		public int getNetworkCostCode(NetworkNodeType networkType) {
+			return networkTypeToCostCodeMap.getDomain(networkType).getId();
+		}
+
+		public int getNetworkCostCode(FiberType fiberType) {
+			return fiberTypeToCostCodeMap.getDomain(fiberType).getId();
+		}
+
+		public int getLineItemCode(NetworkStatisticType type) {
+			return networkStatisticToLineItem.getDomain(type).getId();
+		}
+
+		public int getEntityTypeCode(LocationEntityType type) {
+			return type.getTypeCode();
+		}
+
+	}
+
+	private class ReportBuilder {
+
+		private ReportBuilderContext ctx;
+		private NetworkReportSummary reportSummary;
+
+		public ReportBuilder(ReportBuilderContext ctx,
+				NetworkReportSummary reportSummary) {
+			super();
+			this.ctx = ctx;
+			this.reportSummary = reportSummary;
+		}
+
+		private EquipmentSummaryCost createEquipmentSummaryCost(
+				EquipmentCost cost) {
+
+			EquipmentSummaryCost es = new EquipmentSummaryCost(
+					ctx.getNetworkCostCode(cost.getNodeType()),
+					reportSummary.getId());
+
+			es.setAtomicCount(cost.getAtomicUnits());
+			es.setPrice(cost.getPrice());
+			es.setQuantity(cost.getQuantity());
+			es.setTotalCost(cost.getTotal());
+
+			return es;
+		}
+
+		private FiberSummaryCost createFiberSummaryCost(FiberCost fiberCost) {
+
+			FiberSummaryCost fc = new FiberSummaryCost(
+					ctx.getNetworkCostCode(fiberCost.getFiberType()),
+					reportSummary.getId());
+
+			fc.setCostPerMeter(fiberCost.getCostPerMeter());
+			fc.setNetworkReportSummary(reportSummary);
+			fc.setLengthMeters(fiberCost.getLengthMeters());
+			fc.setTotalCost(fc.getTotalCost());
+
+			return fc;
+		}
+
+		private PlanDemand createPlanDemand(int entityTypeCode,
+				DemandStatistic ds) {
+
+			PlanDemand pd = new PlanDemand(entityTypeCode,
+					reportSummary.getId());
+
+			pd.setMaxPremises(0); // TODO
+			pd.setMaxRevenue(0); // TODO
+
+			pd.setFairShareDemand(ds.getPenetration());
+			pd.setFiberCount(ds.getAtomicUnits());
+			pd.setNetworkReportSummary(reportSummary);
+			pd.setFairShareDemand(ds.getFairShareDemand());
+			pd.setPenetration(ds.getPenetration());
+			pd.setPlanPremises(ds.getRawCoverage());
+			pd.setPlanRevenue(ds.getMonthlyRevenueImpact());
+
+			return pd;
+		}
+
+		private LineItem createLineItem(NetworkStatistic networkStat) {
+
+			LineItem lineItem = new LineItem(ctx.getLineItemCode(networkStat
+					.getNetworkStatisticType()), reportSummary.getId());
+
+			lineItem.setDoubleValue(networkStat.getValue());
+
+			return lineItem;
+		}
+
+		public ReportBuilder setPriceModel(PriceModel priceModel) {
+
+			reportSummary.setEquipmentCosts(priceModel.getEquipmentCosts()
+					.stream().map(this::createEquipmentSummaryCost)
+					.collect(Collectors.toSet()));
+
+			reportSummary.setFiberCosts(priceModel.getFiberCosts().stream()
+					.map(this::createFiberSummaryCost)
+					.collect(Collectors.toSet()));
+
+			return this;
+
+		}
+
+		public ReportBuilder setDemand(LocationDemand ld) {
+
+			Set<PlanDemand> planDemands = new HashSet<>();
+
+			planDemands.addAll(StreamUtil.map(
+					LocationEntityType.values(),
+					t -> createPlanDemand(ctx.getEntityTypeCode(t),
+							ld.getLocationDemand(t))));
+
+			planDemands.add(createPlanDemand(0, ld));
+
+			reportSummary.setPlanDemands(planDemands);
+
+			return this;
+
+		}
+
+		public ReportBuilder setLineItems(
+				Collection<NetworkStatistic> networkStats) {
+
+			reportSummary.setLineItems(networkStats.stream()
+					.map(this::createLineItem).collect(Collectors.toSet()));
+			return this;
+		}
+
+		public NetworkReportSummary build() {
+			return reportSummary;
+		}
+
+	}
+
+	private static class LazyNetworkStatistic implements NetworkStatistic {
+
+		private NetworkStatisticType type;
+		private Supplier<Double> supplier;
+
+		private double val;
+		private boolean inited = false;
+
+		public LazyNetworkStatistic(NetworkStatisticType type,
+				Supplier<Double> supplier) {
+			super();
+			this.type = type;
+			this.supplier = supplier;
+		}
+
+		@Override
+		public NetworkStatisticType getNetworkStatisticType() {
+			return type;
+		}
+
+		@Override
+		public double getValue() {
+			if (!inited) {
+				try {
+					val = supplier.get();
+				} catch (Throwable err) {
+					log.error(err.getMessage(), err);
+					val = Double.NaN;
+				}
+				inited = true;
+			}
+			return val;
+		}
+
+	}
 
 }

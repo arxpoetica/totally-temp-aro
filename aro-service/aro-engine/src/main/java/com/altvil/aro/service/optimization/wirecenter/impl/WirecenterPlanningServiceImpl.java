@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.persistence.repository.FiberRouteRepository;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.service.cost.CostService;
+import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
@@ -28,9 +29,9 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 	}
 
 	@Override
-	public void save(WirecenterNetworkPlan plan) {
-		networkNodeRepository.save(plan.getNetworkNodes());
-		fiberRouteRepository.save(plan.getFiberRoutes());
+	public void save(OptimizedPlan plan) {
+		networkNodeRepository.save(plan.getWirecenterNetworkPlan().getNetworkNodes());
+		fiberRouteRepository.save(plan.getWirecenterNetworkPlan().getFiberRoutes());
 		costService.updateWireCenterCosts(plan) ;
 	}
 

@@ -67,7 +67,7 @@ public interface NetworkReportRepository extends
 			"select h.id, dh.id as detail_id, h.plan_id\n" + 
 			"from financial.network_report h\n" + 
 			"join financial.network_report dh on dh.plan_id = h.plan_id\n" + 
-			"join financial.report_type rt on rt.id = dh.report_type_id and rt.\"name\" = 'detail_equipment'\n" + 
+			"join financial.report_type rt on rt.code = dh.code and rt.code = 'D'\n" + 
 			"where h.id = :reportId\n" + 
 			")\n" + 
 			"insert into financial.equipment_summary_cost (network_cost_code_id, network_report_id, atomic_count, quantity, price, total_cost)\n" + 
@@ -101,7 +101,7 @@ public interface NetworkReportRepository extends
 			" from hdr h\n" + 
 			" join client.plan p on p.parent_plan_id = h.plan_id\n" + 
 			" join financial.network_report dh on dh.plan_id = p.id\n" + 
-			" join financial.report_type rt on rt.id = dh.report_type_id and rt.name = 'summary_equipment'\n" + 
+			" join financial.report_type rt on rt.code = dh.code and rt.code = 'S'\n" + 
 			")\n" + 
 			"insert into financial.equipment_summary_cost (network_cost_code_id, network_report_id, atomic_count, quantity, price, total_cost)\n" + 
 			"select c.network_cost_code_id, h.id, sum(c.atomic_count), sum(c.quantity), avg(c.price),  sum(c.total_cost) \n" + 

@@ -5,6 +5,6 @@ import javax.persistence.Entity;
 
 
 @Entity
-@DiscriminatorValue("0")
-public class NetworkReportDetail extends NetworkReport{
+@DiscriminatorValue("D")
+public class EquipmentDetailReport extends NetworkReport {
 }

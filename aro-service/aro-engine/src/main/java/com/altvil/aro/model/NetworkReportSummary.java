@@ -9,14 +9,15 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 @Entity
-@DiscriminatorValue("0")
+@DiscriminatorValue("P")
 public class NetworkReportSummary extends NetworkReport {
 
 	private Set<PlanDemand> planDemands = new HashSet<>();
 	private Set<LineItem> lineItems = new HashSet<>();
+	
 	private Set<EquipmentSummaryCost> equipmentCosts = new HashSet<>();
 	private Set<FiberSummaryCost> fiberCosts = new HashSet<>();
-
+	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "networkReportSummary")
 	public Set<PlanDemand> getPlanDemands() {
 		return planDemands;
@@ -26,14 +27,17 @@ public class NetworkReportSummary extends NetworkReport {
 		this.planDemands = planDemands;
 	}
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "networkReportSummary")
 	public Set<LineItem> getLineItems() {
 		return lineItems;
 	}
 
+	
 	public void setLineItems(Set<LineItem> lineItems) {
 		this.lineItems = lineItems;
 	}
-
+	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "equipmentReportSummary")
 	public Set<EquipmentSummaryCost> getEquipmentCosts() {
 		return equipmentCosts;
 	}
@@ -42,6 +46,7 @@ public class NetworkReportSummary extends NetworkReport {
 		this.equipmentCosts = equipmentCosts;
 	}
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "networkReportSummary")
 	public Set<FiberSummaryCost> getFiberCosts() {
 		return fiberCosts;
 	}
@@ -49,5 +54,7 @@ public class NetworkReportSummary extends NetworkReport {
 	public void setFiberCosts(Set<FiberSummaryCost> fiberCosts) {
 		this.fiberCosts = fiberCosts;
 	}
+	
+
 
 }

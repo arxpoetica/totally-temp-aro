@@ -13,12 +13,25 @@ public class EquipmentSummaryCost {
 
 	private EquipmentSummaryCostKey id;
 
-	private NetworkReportSummary networkReportSummary;
+	private NetworkReportSummary equipmentReportSummary;
 
 	private double atomicCount;
 	private double quantity;
 	private double price;
 	private double totalCost;
+	
+	
+	public EquipmentSummaryCost() {
+	}
+	
+	public EquipmentSummaryCost(EquipmentSummaryCostKey id) {
+		this.id = id ;
+	}
+	
+	public EquipmentSummaryCost(int costCode, long networkReportId) {
+		this(new EquipmentSummaryCostKey(costCode, networkReportId)) ;
+	}
+	
 
 	@EmbeddedId
 	public EquipmentSummaryCostKey getId() {
@@ -31,13 +44,13 @@ public class EquipmentSummaryCost {
 
 	@JoinColumn(referencedColumnName = "network_report_id", insertable = false, updatable = false)
 	@ManyToOne(optional = false)
-	public NetworkReportSummary getNetworkReportSummary() {
-		return networkReportSummary;
+	public NetworkReportSummary getEquipmentReportSummary() {
+		return equipmentReportSummary;
 	}
 
-	public void setNetworkReportSummary(
-			NetworkReportSummary networkReportSummary) {
-		this.networkReportSummary = networkReportSummary;
+	public void setEquipmentReportSummary(
+			NetworkReportSummary equipmentReportSummary) {
+		this.equipmentReportSummary = equipmentReportSummary;
 	}
 
 	@Column(name = "atomic_count")

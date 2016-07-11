@@ -25,6 +25,17 @@ public class PlanDemand {
 
 	private double fiberCount;
 
+	public PlanDemand() {
+	}
+
+	public PlanDemand(PlanDemandKey id) {
+		this.id = id;
+	}
+
+	public PlanDemand(int entityType, long networkReportId) {
+		this(new PlanDemandKey(entityType, networkReportId));
+	}
+
 	@EmbeddedId
 	public PlanDemandKey getId() {
 		return id;
