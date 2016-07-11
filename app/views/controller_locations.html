@@ -75,7 +75,7 @@
       </div>
       <div style="margin-left: 20px">
         <div class="checkbox" ng-repeat="category in business_categories">
-          <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/business_{{category.name}}_default.png" style="width:16px"></div>
+          <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_{{category.name}}_default.png" style="width:16px"></div>
           <label>
             <input type="checkbox" ng-model="business_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_businesses"> {{category.description}}
           </label>
@@ -88,7 +88,7 @@
       </div>
       <div style="margin-left: 20px">
         <div class="checkbox" ng-repeat="category in household_categories">
-          <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/household_{{category.name}}_default.png" style="width:16px"></div>
+          <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px"></div>
           <label>
             <input type="checkbox" ng-model="household_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_households"> {{category.description}}
           </label>
