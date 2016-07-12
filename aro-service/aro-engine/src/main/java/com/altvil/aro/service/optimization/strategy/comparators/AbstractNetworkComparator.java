@@ -6,8 +6,8 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 public abstract class AbstractNetworkComparator implements OptimizationNetworkComparator {
 
     @Override
-    public OptimizationImprovement calculateImprovement(OptimizedNetwork base, OptimizedNetwork compared) {
-        return new OptimizationImprovement(base, compared, getScore(base, compared), getIncrementalBenefit(base, compared), getIncrementalCost(base, compared));
+    public OptimizationImprovement calculateImprovement(OptimizedNetwork base, OptimizedNetwork compared, long planId) {
+        return new OptimizationImprovement(base, compared, getScore(base, compared), getIncrementalBenefit(base, compared), getIncrementalCost(base, compared), planId);
 
     }
 

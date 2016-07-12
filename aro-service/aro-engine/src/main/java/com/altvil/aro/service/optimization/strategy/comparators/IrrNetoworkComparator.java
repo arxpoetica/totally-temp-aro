@@ -15,9 +15,8 @@ public class IrrNetoworkComparator extends AbstractNetworkComparator {
 
     @Override
     protected double getIncrementalBenefit(OptimizedNetwork base, OptimizedNetwork compared) {
-        //sum of cashflows
-        return analysisYears * 12 * (compared.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - base.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact())
-                -getIncrementalCost(base,compared);
+
+        return  compared.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - base.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact();
 
     }
 

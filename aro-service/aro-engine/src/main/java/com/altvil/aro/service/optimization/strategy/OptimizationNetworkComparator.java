@@ -4,5 +4,5 @@ import com.altvil.aro.service.optimization.strategy.comparators.OptimizationImpr
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 
 public interface OptimizationNetworkComparator {
-    OptimizationImprovement calculateImprovement(OptimizedNetwork base, OptimizedNetwork compared);
+    OptimizationImprovement calculateImprovement(OptimizedNetwork base, OptimizedNetwork compared, long planId);
 }

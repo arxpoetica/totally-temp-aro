@@ -1,10 +1,10 @@
 package com.altvil.aro.service.optimization.strategy;
 
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
-import com.altvil.aro.service.optimization.strategy.OptimizationTargetEvaluator;
+import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 
 public interface TargetEvaluatorFactory {
 
-    OptimizationTargetEvaluator getTargetEvaluator(OptimizationConstraints constraints);
+    OptimizationTargetEvaluator getTargetEvaluator(ThresholdBudgetConstraint constraints);
 
 }

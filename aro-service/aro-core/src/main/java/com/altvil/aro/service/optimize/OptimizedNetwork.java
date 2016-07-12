@@ -11,7 +11,6 @@ import com.altvil.interfaces.NetworkAssignment;
 
 public interface OptimizedNetwork {
 
-	long getWirecenterId();
 	public FtthThreshholds getFiberNetworkConstraints() ;
 	public Collection<NetworkAssignment> getSouceNetworkAssignments() ;
 	public boolean matches(OptimizedNetwork  other) ;

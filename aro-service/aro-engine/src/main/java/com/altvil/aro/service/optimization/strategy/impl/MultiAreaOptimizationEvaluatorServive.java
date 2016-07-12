@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimization.strategy.impl;
 
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
+import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 import com.altvil.aro.service.optimization.strategy.*;
 import com.altvil.aro.service.optimization.strategy.comparators.CapexNetworkComparator;
 import com.altvil.aro.service.optimization.strategy.comparators.IrrNetoworkComparator;
@@ -19,13 +20,13 @@ public class MultiAreaOptimizationEvaluatorServive implements OptimizationEvalua
     }
 
     @Override
-    public OptimizationEvaluator getOptimizationEvaluator(OptimizationConstraints constraints) {
+    public OptimizationEvaluator getOptimizationEvaluator(ThresholdBudgetConstraint constraints) {
         OptimizationNetworkComparator comparator=(constraints.getOptimizationType() == OptimizationType.IRR)
                 ?new IrrNetoworkComparator(constraints.getYears())
                 :new CapexNetworkComparator();
 
 
-        return new MultiAreaEvaluator(comparator, targetEvaluatorFactory.getTargetEvaluator(constraints));
+        return new MultiAreaEvaluator(comparator, () -> targetEvaluatorFactory.getTargetEvaluator(constraints), constraints.getOptimizationType());
     }
 
 

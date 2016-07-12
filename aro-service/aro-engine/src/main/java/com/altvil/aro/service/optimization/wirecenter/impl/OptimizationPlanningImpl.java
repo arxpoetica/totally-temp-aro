@@ -3,6 +3,7 @@ package com.altvil.aro.service.optimization.wirecenter.impl;
 import java.util.Date;
 import java.util.Optional;
 
+import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
 
-		OptimizationEvaluator evaluator = optimizationEvaluatorService.getOptimizationEvaluator(request
+		OptimizationEvaluator evaluator = optimizationEvaluatorService.getOptimizationEvaluator((ThresholdBudgetConstraint)request
 				.getOptimizationConstraints());
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
 				networkData, evaluator.getPruningStrategy(),

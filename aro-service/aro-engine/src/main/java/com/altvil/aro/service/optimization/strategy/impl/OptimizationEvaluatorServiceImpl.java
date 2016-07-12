@@ -70,7 +70,7 @@ public class OptimizationEvaluatorServiceImpl implements
 
 	@Override
 	public OptimizationEvaluator getOptimizationEvaluator(
-			OptimizationConstraints constraints) {
+			ThresholdBudgetConstraint constraints) {
 		return createSpiOptimizationStrategy(constraints);
 	}
 

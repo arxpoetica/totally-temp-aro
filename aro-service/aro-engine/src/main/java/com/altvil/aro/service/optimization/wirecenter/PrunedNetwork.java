@@ -9,7 +9,7 @@ public interface PrunedNetwork {
 
 	long getPlanId() ;
 	boolean isEmpty() ;
-	long getWirecenterId();
+
 	Collection<OptimizedNetwork> getOptimizedNetworks();
 
 }

@@ -7,81 +7,92 @@ import com.altvil.aro.service.optimization.strategy.OptimizationTargetEvaluator;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
+import com.altvil.aro.service.optimize.model.GeneratingNode;
+import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
+import com.altvil.enumerations.OptimizationType;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.function.Function;
+import java.util.*;
+import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.*;
 
 public class MultiAreaEvaluator implements OptimizationEvaluator {
 
     OptimizationNetworkComparator comparator;
-    OptimizationTargetEvaluator targetEvaluator;
+    Supplier<OptimizationTargetEvaluator> targetEvaluatorSupplier;
+    private OptimizationType optimizationType;
 
-    public MultiAreaEvaluator(OptimizationNetworkComparator comparator, OptimizationTargetEvaluator targetEvaluator) {
+    public MultiAreaEvaluator(OptimizationNetworkComparator comparator, Supplier<OptimizationTargetEvaluator> targetEvaluatorSupplier, OptimizationType optimizationType) {
         this.comparator = comparator;
-        this.targetEvaluator = targetEvaluator;
+        this.targetEvaluatorSupplier = targetEvaluatorSupplier;
+        this.optimizationType = optimizationType;
     }
+
+
+
+    private class NetworkOptimizationIterator implements Comparable<NetworkOptimizationIterator>, Iterator<OptimizationImprovement>{
+        OptimizedNetwork currentNetwork;
+        Optional<OptimizationImprovement> currentBestImprovement;
+        PrunedNetwork prunedNetwork;
+
+        public NetworkOptimizationIterator(PrunedNetwork prunedNetwork) {
+            this.prunedNetwork = prunedNetwork;
+            this.currentNetwork = prunedNetwork.getOptimizedNetworks().stream()
+                    .filter(optimizedNetwork -> optimizedNetwork.getAnalysisNode().getFiberCoverage().getRawCoverage() == 0)
+                    .findFirst()
+                    .get();
+            this.currentBestImprovement = getBestImprovement(prunedNetwork, currentNetwork);
+
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currentBestImprovement.isPresent();
+        }
+
+        @Override
+        public OptimizationImprovement next() {
+            OptimizationImprovement prevBestImprovement = currentBestImprovement.get();
+            this.currentBestImprovement = getBestImprovement(prunedNetwork, currentNetwork);
+            return prevBestImprovement;
+        }
+
+        @Override
+        public int compareTo(@NotNull NetworkOptimizationIterator o) {
+            return Double.compare(currentBestImprovement.get().getScore(), o.currentBestImprovement.get().getScore());
+        }
+
+        private Optional<OptimizationImprovement> getBestImprovement(PrunedNetwork prunedNetwork, OptimizedNetwork base) {
+                return prunedNetwork.getOptimizedNetworks().stream()
+                        .filter(optimizedNetwork -> getRawCoverage(optimizedNetwork) > getRawCoverage(base))
+                        .map(network -> comparator.calculateImprovement(base, network, prunedNetwork.getPlanId()))
+                        .max((o1, o2) -> Double.compare(o1.getScore(), o2.getScore()));
+        }
+    }
+
 
     @Override
     public Collection<PlannedNetwork> evaluateNetworks(Collection<PrunedNetwork> analysis) {
-
-        Map<Long, PrunedNetwork> id2prunedNetwork = analysis.stream().collect(toMap(PrunedNetwork::getWirecenterId, Function.identity()));
-
-        Map<Long, Optional<OptimizedNetwork>> resultNetworks = analysis.stream().collect(toMap(PrunedNetwork::getWirecenterId,
-                prunedNetwork -> prunedNetwork.getOptimizedNetworks().stream()
-                .filter(optimizedNetwork -> optimizedNetwork.getAnalysisNode().getFiberCoverage().getRawCoverage() == 0).findFirst()));
-
-        PriorityQueue<OptimizationImprovement> improvementsPriorityQueue = analysis.stream().map(prunedNetwork -> getBestImprovement(prunedNetwork, resultNetworks.get(prunedNetwork.getWirecenterId()))).collect(toCollection(PriorityQueue::new));
-
-        while(! isTargetMet(resultNetworks) && !improvementsPriorityQueue.isEmpty()){
-            OptimizedNetwork improvedNetwork = improvementsPriorityQueue.poll().getImproved();
-            resultNetworks.put(
-                    improvedNetwork.getWirecenterId(),
-                    Optional.of(improvedNetwork));
-            improvementsPriorityQueue.add(getBestImprovement(id2prunedNetwork.get(improvedNetwork.getWirecenterId()),Optional.of(improvedNetwork)).get());
-        }
-
-        return resultNetworks.values()
+        PriorityQueue<NetworkOptimizationIterator> improvementIterators = analysis
                 .stream()
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(this::toPlannedNetwork)
-                .collect(toList());
+                .map(NetworkOptimizationIterator::new)
+                .filter(NetworkOptimizationIterator::hasNext)
+                .collect(toCollection(PriorityQueue::new));
+        if(improvementIterators.isEmpty())
+            return Collections.emptyList();
+        OptimizationTargetEvaluator evaluator = targetEvaluatorSupplier.get();
+        OptimizationImprovement improvement;
+        do {
+            NetworkOptimizationIterator iterator = improvementIterators.poll();
+            improvement = iterator.next();
+            if (iterator.hasNext())
+                improvementIterators.add(iterator);
+        } while (evaluator.addNetwork(improvement) && !improvementIterators.isEmpty());
 
-
-    }
-
-    private PlannedNetwork toPlannedNetwork(OptimizedNetwork optimizedNetwork) {
-        //todo get it from single area evaluator
-        throw new UnsupportedOperationException();
-    }
-
-    private boolean isTargetMet(Map<Long, Optional<OptimizedNetwork>> resultNetworks) {
-        return targetEvaluator.isTargetMet(
-                resultNetworks.values()
-                        .stream()
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(toList()));
-    }
-
-    private Optional<OptimizationImprovement> getBestImprovement(PrunedNetwork prunedNetwork, Optional<OptimizedNetwork> baseOptional) {
-        if(baseOptional.isPresent()){
-            OptimizedNetwork base = baseOptional.get();
-            return prunedNetwork.getOptimizedNetworks().stream()
-                    .filter(optimizedNetwork -> getRawCoverage(optimizedNetwork) > getRawCoverage(base))
-                    .map(network -> comparator.calculateImprovement(base, network))
-                    .max((o1, o2) -> Double.compare(o1.getScore(), o2.getScore()));
-        }
-        else {
-            return Optional.empty();
-        }
+        return evaluator.getEvaluatedNetworks();
 
 
     }
@@ -93,11 +104,34 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
 
     @Override
     public PruningStrategy getPruningStrategy() {
-        return null;
+        return new PruningStrategy() {
+            @Override
+            public boolean isGeneratingNodeValid(GeneratingNode node) {
+                return true;
+            }
+
+            @Override
+            public boolean isConstraintSatisfied(NetworkAnalysis node) {
+                return false;
+            }
+
+            @Override
+            public boolean isCandidatePlan(OptimizedNetwork network) {
+                return true;
+            }
+        };
     }
 
     @Override
     public ScoringStrategy getScoringStrategy() {
-        return null;
+        if(optimizationType == OptimizationType.IRR){
+            return (generatingNode) ->  generatingNode.getFiberCoverage().getMonthlyRevenueImpact() == 0?
+                    0
+                    : -generatingNode.getCapex()/generatingNode.getFiberCoverage().getMonthlyRevenueImpact();
+        }else{
+            return (generatingNode) -> generatingNode.getFiberCoverage().getRawCoverage() == 0?
+                    0
+                    : -generatingNode.getCapex()/generatingNode.getFiberCoverage().getRawCoverage();
+        }
     }
 }
