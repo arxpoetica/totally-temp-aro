@@ -128,7 +128,9 @@
                   {{ plan.metadata.customers_towers_total | number }} towers
                   covered
               </span>
+              -->
 
+              <% if (config.ui.layout === 'default') { %>
               <span data-toggle="modal" ng-click="openMarketProfile()" style="cursor:pointer" ng-show="show_market_profile">
                 <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
                 <span ng-show="market_profile_current_year.total">
@@ -142,7 +144,7 @@
                   <span class="label label-info"><span>Market Share</span>{{ market_profile_share*100 | number:2 }}%</span>
                 </span>
               </span>
-              -->
+              <% } %>
             </p>
 
           </div>
