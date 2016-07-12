@@ -233,10 +233,11 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		public static class Builder {
 			private LocationEntityType locationEntityType;
 			private Collection<SpiProductDemand> demands;
-			//private ArpuMapping arpuMapping;
+
+			// private ArpuMapping arpuMapping;
 
 			public Builder setArpuMapping(ArpuMapping mapping) {
-				//this.arpuMapping = mapping;
+				// this.arpuMapping = mapping;
 				return this;
 			}
 
@@ -298,7 +299,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		private NetworkType networkType;
 		private ArpuMapping arpuMapping;
 		private FairShareModel fairShareModel;
-		protected double atomicUnitCounts ;
+		protected double atomicUnitCounts;
 		protected double demand;
 
 		public ProductDemandImpl(LocationEntityType entityType,
@@ -309,7 +310,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			this.networkType = networkType;
 			this.arpuMapping = arpuMapping;
 			this.fairShareModel = fairShareModel;
-			this.atomicUnitCounts = atomicUnitCounts ;
+			this.atomicUnitCounts = atomicUnitCounts;
 			this.demand = fairShareModel.getShare(networkType);
 
 			if (entityType == null || networkType == null
@@ -338,7 +339,8 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 			double arpu = getArpu();
 			if (isValidArpu(arpu)) {
-				assembler.addConstantRevenue(this, atomicUnitCounts, demand, demand * arpu);
+				assembler.addConstantRevenue(this, atomicUnitCounts, arpu,
+						demand * arpu);
 			}
 
 		}
@@ -364,20 +366,20 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		public BusinessProduct(LocationEntityType entityType,
 				NetworkType networkType, ArpuMapping arpuMapping,
 				FairShareModel fairShareModel, double atomicUnitCounts) {
-			super(entityType, networkType, arpuMapping, fairShareModel, atomicUnitCounts);
+			super(entityType, networkType, arpuMapping, fairShareModel,
+					atomicUnitCounts);
 		}
 
 		private DemandStatistic toDemandStatistic(EntityDemandMapping mapping) {
 			double revenue = mapping.getMappedRevenue();
-			
+
 			if (revenue == 0) {
 				return DefaultDemandStatistic.ZERO_DEMAND;
 			}
 
 			double atomicCount = mapping.getMappedDemand() * atomicUnitCounts;
 			return new DefaultDemandStatistic(mapping.getMappedDemand(),
-					atomicCount, demand * mapping.getMappedDemand(), revenue
-							* demand);
+					atomicCount, revenue, revenue * demand, demand);
 
 		}
 
@@ -460,37 +462,45 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 
 	private static class BasicDemand {
 		private double atomicUnits = 0;
-		private double demand = 0;
 		private double revenue = 0;
+		private double totalRevenue = 0;
 
-		public void add(double demand, double atomicUnits, double revenue) {
-			this.demand += demand;
-			this.atomicUnits = Math.max(atomicUnits, this.atomicUnits) ;
+		public void add(double atomicUnits, double totalRevenue, double revenue) {
+			this.atomicUnits = Math.max(atomicUnits, this.atomicUnits);
 			this.revenue += revenue;
+			this.totalRevenue += totalRevenue;
 		}
 
 		public boolean hasDemand() {
-			return revenue > 0;
+			return totalRevenue > 0;
+		}
+		
+		private double calcPenetration() {
+			return totalRevenue == 0 ? 0 : revenue / totalRevenue ;
 		}
 
-		private static DemandFunction asDemandFunction(double atomicUnitRatio,
-				double demand, double revenue) {
+		private static DemandFunction asDemandFunction(double atomicUnits,
+				double totalRevenue, double penetration) {
 			return (demandMapping) -> {
 				double rawDemand = demandMapping.getMappedDemand();
+				double adjustedRevenue = rawDemand * totalRevenue ;
 				return new FairShareDemandImpl(new DefaultDemandStatistic(
-						rawDemand, rawDemand * atomicUnitRatio, rawDemand
-								* demand, rawDemand * revenue));
+						rawDemand, rawDemand * atomicUnits, adjustedRevenue, adjustedRevenue * penetration,
+						penetration));
 			};
 		}
 
 		public DemandStatistic toDemandStatistic(EntityDemandMapping mapping) {
 			double rawDemand = mapping.getMappedDemand();
+			double penetration = calcPenetration() ;
+			
 			return new DefaultDemandStatistic(rawDemand, rawDemand
-					* atomicUnits, rawDemand * demand, rawDemand * revenue);
+					* atomicUnits, rawDemand * totalRevenue, rawDemand * revenue, penetration);
 		}
 
 		public DemandFunction asDemandFunction() {
-			return asDemandFunction(atomicUnits, demand, revenue);
+			
+			return asDemandFunction(atomicUnits, totalRevenue, calcPenetration());
 		}
 
 	}
@@ -514,8 +524,8 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		}
 
 		public void addConstantRevenue(SpiProductDemand productDemand,
-				double demand, double atomicUnits, double revenue) {
-			basicDemand.add(demand, atomicUnits, revenue);
+				double atomicUnits, double totalRevenue, double revenue) {
+			basicDemand.add(atomicUnits, totalRevenue, revenue);
 		}
 
 		public DemandFunction assembleDemandFunction() {
@@ -553,8 +563,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			for (DemandFunction f : demandFunctions) {
 				DemandStatistic stat = f.apply(mapping).getDemandStatistic();
 				basicDemand.add(stat.getFairShareDemand(),
-						stat.getAtomicUnits(),
-						stat.getMonthlyRevenueImpact());
+						stat.getAtomicUnits(), stat.getMonthlyRevenueImpact());
 			}
 			return new FairShareDemandImpl(
 					basicDemand.toDemandStatistic(mapping));

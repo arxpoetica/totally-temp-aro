@@ -72,7 +72,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 	 */
 	@Override
 	public boolean canAdd(DefaultAssignedEntityDemand li) {
-		double testedDemand = li.getTotalDemand() ;
+		double testedDemand = li.getAtomicUnits() ;
 		return (getLocationCount() + testedDemand) <= thresholds
 				.getMaxlocationPerFDT();
 
@@ -116,6 +116,10 @@ public class FdtConstrainedAggregate implements LocationCluster {
 			throw new RuntimeException("Grrrr") ;
 		}
 		
+		if( coverage + li.getAtomicUnits() >  thresholds.getMaxlocationPerFDT() ) {
+			throw new RuntimeException("Inavlid coverage assignment") ;
+		}
+		
 		coverage += li.getAtomicUnits() ;
 		locationIntersections.add(li);
 		return thresholds.getMaxlocationPerFDT() - coverage  ;
@@ -128,7 +132,7 @@ public class FdtConstrainedAggregate implements LocationCluster {
 		if (!canAdd(li) || !assignConstraint(li.getPinnedLocation())) {
 			return false;
 		}
-		coverage += li.getTotalDemand() ;
+		coverage += li.getAtomicUnits() ;
 		locationIntersections.add(li);
 		return true;
 

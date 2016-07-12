@@ -36,13 +36,13 @@ public class DefaultAssignedEntityDemand implements PinnedAssignedEntityDemand {
 		return locationDemand ;
 	}
 
-	public double getHouseholdFiberDemandValue() {
-		return locationDemand.getAtomicUnits();
-	}
+//	public double getHouseholdFiberDemandValue() {
+//		return locationDemand.getAtomicUnits();
+//	}
 
-	public double getTotalDemand() {
-		return locationDemand.getFairShareDemand();
-	}
+//	public double getAtomicUnits() {
+//		return locationDemand.getAtomicUnits();
+//	}
 	
 	public PinnedLocation getPinnedLocation() {
 		return pinnedLocation;

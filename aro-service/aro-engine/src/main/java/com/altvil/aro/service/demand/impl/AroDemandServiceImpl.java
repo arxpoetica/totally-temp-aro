@@ -35,6 +35,7 @@ public class AroDemandServiceImpl implements AroDemandService {
 	private DemandAnalysisService demandAnalysisService;
 	private ArpuService arpuService;
 	private NetworkPlanRepository networkPlanRepository;
+	private FairShareLocationDemand fairShareLocationDemand;
 
 	private Map<LocationEntityType, DemandProfile> defaultDemandProfileMap = new EnumMap<>(
 			LocationEntityType.class);
@@ -53,6 +54,7 @@ public class AroDemandServiceImpl implements AroDemandService {
 	@PostConstruct
 	void postConstruct() {
 		initDemandProfiles();
+		fairShareLocationDemand = loadEffectiveLocationDemand(SpeedCategory.cat7);
 	}
 
 	private void initDemandProfiles() {
@@ -79,6 +81,11 @@ public class AroDemandServiceImpl implements AroDemandService {
 		return getEffectiveLocationDemand(censusBlockId).createLocationDemand(
 				demandMapping);
 
+	}
+
+	@Override
+	public LocationDemand createFullShareDemand(DemandMapping mapping) {
+		return fairShareLocationDemand.createLocationDemand(mapping);
 	}
 
 	private DemandProfile getDemandProfile(LocationEntityType type) {
@@ -151,8 +158,10 @@ public class AroDemandServiceImpl implements AroDemandService {
 		FairShareLocationDemand demand = demandMap.get(block);
 
 		if (demand == null) {
-			demandMap.put(block,
-					demand = loadEffectiveLocationDemand(block, SpeedCategory.cat7));
+			demandMap.put(
+					block,
+					demand = loadEffectiveLocationDemand(block,
+							SpeedCategory.cat7));
 		}
 
 		return demand;
@@ -163,6 +172,18 @@ public class AroDemandServiceImpl implements AroDemandService {
 			int censusBlock, SpeedCategory speedCategory) {
 
 		RawCapacityMapping mapping = createRawCapacityMapping(censusBlock);
+
+		return demandAnalysisService
+				.createFairShareLocationDemand(createNetworkCapacityProfile(
+						mapping, speedCategory, 1.0));
+
+	}
+
+	private FairShareLocationDemand loadEffectiveLocationDemand(
+			SpeedCategory speedCategory) {
+
+		RawCapacityMapping mapping = new RawCapacityMapping(
+				new ArrayList<NetworkCapacity>());
 
 		return demandAnalysisService
 				.createFairShareLocationDemand(createNetworkCapacityProfile(
@@ -216,8 +237,10 @@ public class AroDemandServiceImpl implements AroDemandService {
 		}
 
 		public static class Builder {
-			private Map<NetworkType, Map<SpeedCategory, Double>> map = new EnumMap<>(NetworkType.class);
-			private Map<NetworkType, Double> penetrationType = new EnumMap<>(NetworkType.class);
+			private Map<NetworkType, Map<SpeedCategory, Double>> map = new EnumMap<>(
+					NetworkType.class);
+			private Map<NetworkType, Double> penetrationType = new EnumMap<>(
+					NetworkType.class);
 
 			public Builder addPenetration(NetworkType type, Double penetration) {
 				penetrationType.put(type, penetration);
@@ -233,8 +256,8 @@ public class AroDemandServiceImpl implements AroDemandService {
 				if (m == null) {
 					map.put(type, m = new EnumMap<>(SpeedCategory.class));
 				}
-				
-				m.put(category, weight) ;
+
+				m.put(category, weight);
 
 				return this;
 			}

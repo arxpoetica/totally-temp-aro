@@ -15,7 +15,7 @@ public interface WirecenterNetworkPlan {
 	Collection<NetworkNode> getNetworkNodes();
 
 	Collection<FiberRoute> getFiberRoutes();
-
+		
 	DemandCoverage getDemandCoverage();
 
 	Collection<EquipmentLocationMapping> getEquipmentLocationMappings() ;

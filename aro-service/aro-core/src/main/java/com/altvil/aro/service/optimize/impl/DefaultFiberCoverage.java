@@ -51,8 +51,12 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			return getAtomicUnits();
 		}
 	}
-
 	
+	@Override
+	public double getTotalRevenue() {
+		return coverage.getTotalRevenue() ;
+	}
+
 	@Override
 	public double getRawCoverage() {
 		return coverage.getRawCoverage() ;

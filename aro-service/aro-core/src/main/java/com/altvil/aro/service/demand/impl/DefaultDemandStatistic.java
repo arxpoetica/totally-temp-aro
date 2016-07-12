@@ -19,10 +19,14 @@ public class DefaultDemandStatistic implements DemandStatistic {
 
 		@Override
 		public void add(DemandStatistic other) {
-			result.demand += other.getFairShareDemand();
 			result.atomicUnits += other.getAtomicUnits();
 			result.rawCoverage += other.getRawCoverage();
+			result.totalRevenue += other.getTotalRevenue();
 			result.revenue += other.getMonthlyRevenueImpact();
+
+			result.penetration = result.totalRevenue == 0 ? 0 : result.revenue
+					/ result.totalRevenue;
+
 		}
 
 		@Override
@@ -34,27 +38,33 @@ public class DefaultDemandStatistic implements DemandStatistic {
 
 	private double rawCoverage;
 	private double atomicUnits;
-	private double demand;
+	private double totalRevenue;
 	private double revenue;
 
+	private double penetration;
+
 	public DefaultDemandStatistic(double rawCoverage, double atomicUnits,
-			double demand, double revenue) {
+			double totalRevenue, double revenue, double penetration) {
 		super();
 		this.rawCoverage = rawCoverage;
 		this.atomicUnits = atomicUnits;
-		this.demand = demand;
+		this.totalRevenue = totalRevenue;
 		this.revenue = revenue;
+
+		this.penetration = penetration;
+		
+		if( penetration > 1.0 ) {
+			throw new RuntimeException("Invalid Penetration") ;
+		}
+		
+		if( totalRevenue < 0 || revenue < 0) {
+			throw new RuntimeException("Inavlid revenue") ;
+		}
+
 	}
 
-	// @Override
-	// public DemandStatistic ratio(double ratio) {
-	// return new DefaultDemandStatistic(ratio * getRawCoverage(),
-	// ratio * atomicUnits, ratio
-	// * getDemand(), ratio * getMonthlyRevenueImpact());
-	// }
-
 	public DefaultDemandStatistic() {
-		this(0, 0, 0, 0);
+		this(0, 0, 0, 0, 0);
 	}
 
 	@Override
@@ -64,7 +74,7 @@ public class DefaultDemandStatistic implements DemandStatistic {
 
 	@Override
 	public double getFairShareDemand() {
-		return demand;
+		return penetration * rawCoverage;
 	}
 
 	@Override
@@ -76,82 +86,39 @@ public class DefaultDemandStatistic implements DemandStatistic {
 	public double getMonthlyRevenueImpact() {
 		return revenue;
 	}
-	
+
 	//
 	//
 	//
+	@Override
+	public double getTotalRevenue() {
+		return totalRevenue;
+	}
 
 	@Override
 	public double getPenetration() {
-		return rawCoverage == 0 ? 0 : demand /rawCoverage ;
+		return penetration;
 	}
 
 	public static DemandStatistic sum(Iterable<DemandStatistic> stats) {
-		DemandSummer demandSummer = new DemandSummer();
-		for (DemandStatistic s : stats) {
-			demandSummer.add(s);
-		}
-		return demandSummer;
+		
+		Aggregator<DemandStatistic> aggregator = aggregate() ;
+		stats.forEach(aggregator::add);
+		return aggregator.apply() ;
+	
 	}
 
 	public static DemandStatistic sum(DemandStatistic... stats) {
-		DemandSummer demandSummer = new DemandSummer();
+		Aggregator<DemandStatistic> aggregator = aggregate() ;
 		for (DemandStatistic s : stats) {
-			demandSummer.add(s);
+			aggregator.add(s);
 		}
-		return demandSummer;
+		return aggregator.apply();
 	}
 
-	public static class DemandSummer implements DemandStatistic {
-		private double rawCoverage = 0;
-		private double atomicUnits = 0;
-		private double demand = 0;
-		private double revenue = 0;
-
-		public void add(DemandStatistic value) {
-			rawCoverage += value.getRawCoverage();
-			atomicUnits += value.getAtomicUnits();
-			demand += value.getFairShareDemand();
-			revenue += value.getMonthlyRevenueImpact();
-		}
-
-		@Override
-		public double getAtomicUnits() {
-			return atomicUnits;
-		}
-
-		@Override
-		public double getRawCoverage() {
-			return rawCoverage;
-		}
-
-		@Override
-		public double getFairShareDemand() {
-			return demand;
-		}
-
-		@Override
-		public double getMonthlyRevenueImpact() {
-			return revenue;
-		}
-
-		@Override
-		public double getPenetration() {
-			return rawCoverage == 0 ? 0 : demand / rawCoverage;
-		}
-
-		// @Override
-		// public DemandStatistic ratio(double ratio) {
-		// return new DefaultDemandStatistic(this.getRawCoverage() * ratio,
-		// ratio * atomicUnits,
-		// this.getDemand() * ratio, this.getMonthlyRevenueImpact()
-		// * ratio);
-		// }
-
-	}
 
 	public String toString() {
-		return new ToStringBuilder(this).append("demand", demand)
+		return new ToStringBuilder(this).append("demand", getFairShareDemand())
 				.append("rawCoverage", rawCoverage).append("revenue", revenue)
 				.toString();
 	}

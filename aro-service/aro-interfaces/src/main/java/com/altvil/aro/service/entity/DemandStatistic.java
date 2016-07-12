@@ -6,11 +6,13 @@ public interface DemandStatistic {
 
 	double getAtomicUnits() ; //Fiber Units Consumed network
 	
-	double getFairShareDemand(); //Demand Modified by penetration
-	
+	double getTotalRevenue() ;
 	double getMonthlyRevenueImpact() ; //Revenue Impact
 	
+	//penetration = raw / coverage 
 	double getPenetration() ; // penetration
+	double getFairShareDemand(); //Demand Modified by penetration
+	
 	
 
 }

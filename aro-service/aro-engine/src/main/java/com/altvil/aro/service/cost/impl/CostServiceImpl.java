@@ -112,7 +112,8 @@ public class CostServiceImpl implements CostService {
 						new NetworkReportSummary()))
 				.setPriceModel(report.getPriceModel())
 				.setLineItems(report.getNetworkStatistics())
-				.setDemand(report.getLocationDemand()).build();
+				.setDemand(report.getLocationDemand(), plan.getGlobalDemand())
+				.build();
 
 		networkReportSummaryRepository.save(planReport);
 
@@ -149,7 +150,8 @@ public class CostServiceImpl implements CostService {
 				reportGenerator.generateNetworkStatistics(network),
 				NetworkStatistic::getNetworkStatisticType);
 
-		return new PlanAnalyisReportImpl(priceModel, dc, map);
+		return new PlanAnalyisReportImpl(priceModel, dc,
+				network.getGlobalDemand(), map);
 	}
 
 	@Override
@@ -257,15 +259,22 @@ public class CostServiceImpl implements CostService {
 
 		private PriceModel priceModel;
 		private DemandCoverage demandCoverage;
+		private LocationDemand globalDemand;
 		private Map<NetworkStatisticType, NetworkStatistic> map;
 
 		public PlanAnalyisReportImpl(PriceModel priceModel,
-				DemandCoverage demandCoverage,
+				DemandCoverage demandCoverage, LocationDemand globalDemand,
 				Map<NetworkStatisticType, NetworkStatistic> map) {
 			super();
 			this.priceModel = priceModel;
 			this.demandCoverage = demandCoverage;
+			this.globalDemand = globalDemand;
 			this.map = map;
+		}
+
+		@Override
+		public LocationDemand getGlobalLocationDemand() {
+			return globalDemand;
 		}
 
 		@Override
@@ -442,12 +451,12 @@ public class CostServiceImpl implements CostService {
 		}
 
 		private PlanDemand createPlanDemand(int entityTypeCode,
-				DemandStatistic ds) {
+				DemandStatistic ds, DemandStatistic globalDemand) {
 
 			PlanDemand pd = new PlanDemand(entityTypeCode, reportSummary);
 
-			pd.setMaxPremises(0); // TODO
-			pd.setMaxRevenue(0); // TODO
+			pd.setMaxPremises(globalDemand.getRawCoverage());
+			pd.setMaxRevenue(globalDemand.getMonthlyRevenueImpact());
 
 			pd.setFairShareDemand(ds.getPenetration());
 			pd.setFiberCount(ds.getAtomicUnits());
@@ -483,16 +492,18 @@ public class CostServiceImpl implements CostService {
 
 		}
 
-		public ReportBuilder setDemand(LocationDemand ld) {
+		public ReportBuilder setDemand(LocationDemand ld,
+				LocationDemand globalDemand) {
 
 			Set<PlanDemand> planDemands = new HashSet<>();
 
 			planDemands.addAll(StreamUtil.map(
 					LocationEntityType.values(),
 					t -> createPlanDemand(ctx.getEntityTypeCode(t),
-							ld.getLocationDemand(t))));
+							ld.getLocationDemand(t),
+							globalDemand.getLocationDemand(t))));
 
-			planDemands.add(createPlanDemand(0, ld));
+			planDemands.add(createPlanDemand(0, ld, globalDemand));
 
 			reportSummary.setPlanDemands(planDemands);
 

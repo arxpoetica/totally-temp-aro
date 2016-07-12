@@ -34,6 +34,7 @@ import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
 import com.altvil.utils.conversion.OrdinalEntityFactory;
+import com.altvil.utils.func.Aggregator;
 
 @Service
 public class NetworkDataServiceImpl implements NetworkDataService {
@@ -54,9 +55,17 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		NetworkData networkData = new NetworkData();
 
+		Map<Long, LocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
+
+		networkData.setGlobalDemand(toFullShare(aggregate(demandByLocationIdMap
+				.values())));
+
 		// TODO Simplify Locations
-		Collection<NetworkAssignment> roadLocations = getNetworkLocations(request);
+		Collection<NetworkAssignment> roadLocations = getNetworkLocations(
+				request, demandByLocationIdMap);
+
 		networkData.setRoadLocations(roadLocations);
+
 		networkData
 				.setSelectedRoadLocationIds(toSelectedRoadLocationIds(roadLocations));
 
@@ -66,21 +75,34 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		return networkData;
 	}
 
+	private LocationDemandMapping aggregate(
+			Collection<LocationDemandMapping> demandMapping) {
+
+		Aggregator<LocationDemandMapping> aggreagtor = LocationDemandMapping
+				.aggregate();
+		demandMapping.forEach(aggreagtor::add);
+		return aggreagtor.apply();
+
+	}
+
+	private LocationDemand toFullShare(LocationDemandMapping mapping) {
+		return aroDemandService.createFullShareDemand(mapping);
+	}
+
 	private Collection<Long> toSelectedRoadLocationIds(
 			Collection<NetworkAssignment> locations) {
 		return StreamUtil.map(locations, l -> l.getSource().getObjectId());
 	}
 
-	@Override
-	public Collection<NetworkAssignment> getFiberSources(
-			NetworkDataRequest request) {
-		return getFiberSourceNetworkAssignments(request);
-	}
+	// private Collection<NetworkAssignment> getFiberSources(
+	// NetworkDataRequest request) {
+	// return getFiberSourceNetworkAssignments(request);
+	// }
 
-	@Override
-	public Collection<NetworkAssignment> getNetworkLocations(
-			NetworkDataRequest request) {
-		Map<Long, LocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
+	private Collection<NetworkAssignment> getNetworkLocations(
+			NetworkDataRequest request,
+			Map<Long, LocationDemandMapping> demandByLocationIdMap) {
+
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request);
 		List<Long> selectedRoadLocations = selectedRoadLocationIds(
 				request.getPlanId(), roadLocationByLocationIdMap);
@@ -108,8 +130,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							request.getLocationEntities(), locationId,
-							ldm.getBlockId(),
-							locationDemand);
+							ldm.getBlockId(), locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
@@ -386,6 +407,29 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private static class EntityDemandMappingImpl implements EntityDemandMapping {
 
+		public static Aggregator<EntityDemandMapping> aggregate() {
+			return new EntityDemandMappingAggreagor();
+		}
+
+		public static class EntityDemandMappingAggreagor implements
+				Aggregator<EntityDemandMapping> {
+
+			private EntityDemandMappingImpl demandMapping = new EntityDemandMappingImpl(
+					0, 0);
+
+			@Override
+			public void add(EntityDemandMapping val) {
+				demandMapping.demand += val.getMappedDemand();
+				demandMapping.revenue += val.getMappedRevenue();
+			}
+
+			@Override
+			public EntityDemandMapping apply() {
+				return demandMapping;
+			}
+
+		}
+
 		private double demand;
 		private double revenue;
 
@@ -408,6 +452,44 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	}
 
 	private static class LocationDemandMapping implements DemandMapping {
+
+		public static Aggregator<LocationDemandMapping> aggregate() {
+			return new DemandMappingAggregator();
+		}
+
+		private static class DemandMappingAggregator implements
+				Aggregator<LocationDemandMapping> {
+
+			private Map<LocationEntityType, Aggregator<EntityDemandMapping>> map = new EnumMap<>(
+					LocationEntityType.class);
+
+			public DemandMappingAggregator() {
+				for (LocationEntityType type : LocationEntityType.values()) {
+					map.put(type, EntityDemandMappingImpl.aggregate());
+				}
+			}
+
+			@Override
+			public void add(LocationDemandMapping val) {
+				for (LocationEntityType type : LocationEntityType.values()) {
+					map.get(type).add(val.getEntityDemandMapping(type));
+				}
+			}
+
+			@Override
+			public LocationDemandMapping apply() {
+				Map<LocationEntityType, EntityDemandMapping> result = new EnumMap<>(
+						LocationEntityType.class);
+
+				for (LocationEntityType t : LocationEntityType.values()) {
+					result.put(t, map.get(t).apply());
+				}
+
+				return new LocationDemandMapping(0, result);
+			}
+
+		}
+
 		private int blockId;
 
 		private Map<LocationEntityType, EntityDemandMapping> map = new EnumMap<>(
@@ -418,6 +500,12 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		public LocationDemandMapping(int blockId) {
 			super();
 			this.blockId = blockId;
+		}
+
+		public LocationDemandMapping(int blockId,
+				Map<LocationEntityType, EntityDemandMapping> map) {
+			this.blockId = blockId;
+			this.map = map;
 		}
 
 		public boolean isEmpty() {

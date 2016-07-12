@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.OptimizedPlan;
@@ -136,7 +137,7 @@ public class OptimizationPlannerServiceImpl implements
 					plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
 
 			wirecenterPlanningService.save(new OptimizedPlanIml(constraints,
-					reifiedPlan));
+					reifiedPlan, plan.getGlobalDemand()));
 
 			return reifiedPlan;
 		}
@@ -273,12 +274,20 @@ public class OptimizationPlannerServiceImpl implements
 
 		private OptimizationConstraints constraints;
 		private WirecenterNetworkPlan networkPlan;
+		private LocationDemand locationDemand;
 
 		public OptimizedPlanIml(OptimizationConstraints constraints,
-				WirecenterNetworkPlan networkPlan) {
+				WirecenterNetworkPlan networkPlan,
+				LocationDemand locationDemand) {
 			super();
 			this.constraints = constraints;
 			this.networkPlan = networkPlan;
+			this.locationDemand = locationDemand ;
+		}
+
+		@Override
+		public LocationDemand getGlobalDemand() {
+			return locationDemand ;
 		}
 
 		@Override

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;

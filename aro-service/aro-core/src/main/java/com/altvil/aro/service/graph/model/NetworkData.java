@@ -6,17 +6,19 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
-
 
 public class NetworkData {
 
 	public Collection<NetworkAssignment> roadLocations;
 
-	//public Map<RoadLocation, CoverageAggregateStatistic> roadLocationsProperties;
+	// public Map<RoadLocation, CoverageAggregateStatistic>
+	// roadLocationsProperties;
 
-	private Collection<NetworkAssignment> fiberSources ;
+	private LocationDemand globalDemand;
+	private Collection<NetworkAssignment> fiberSources;
 	private Collection<RoadEdge> roadEdges;
 	private Collection<Long> selectedRoadLocationIds;
 
@@ -52,23 +54,38 @@ public class NetworkData {
 		return selectedRoadLocationIds;
 	}
 
-	public void setSelectedRoadLocationIds(Collection<Long> selectedRoadLocationIds) {
+	public void setSelectedRoadLocationIds(
+			Collection<Long> selectedRoadLocationIds) {
 		this.selectedRoadLocationIds = selectedRoadLocationIds;
 	}
 
+	
+
+	public LocationDemand getGlobalDemand() {
+		return globalDemand;
+	}
+
+	public void setGlobalDemand(LocationDemand globalDemand) {
+		this.globalDemand = globalDemand;
+	}
+
 	public Collection<NetworkAssignment> getSelectedRoadLocations() {
-		if (selectedRoadLocationIds == null || selectedRoadLocationIds.isEmpty() || roadLocations == null) {
+		if (selectedRoadLocationIds == null
+				|| selectedRoadLocationIds.isEmpty() || roadLocations == null) {
 			return Collections.emptyList();
 		}
-		
-		return roadLocations.stream().filter((rl) -> selectedRoadLocationIds.contains(rl.getSource().getObjectId())).collect(Collectors.toList());
+
+		return roadLocations
+				.stream()
+				.filter((rl) -> selectedRoadLocationIds.contains(rl.getSource()
+						.getObjectId())).collect(Collectors.toList());
 	}
-	
+
 	public String toString() {
 		return new ToStringBuilder(this).append("fiberSources", fiberSources)
-		.append("roadEdges", roadEdges)
-		.append("roadLocations", roadLocations)
-		.append("selectedRoadLocationIds", selectedRoadLocationIds)
-		.toString();
+				.append("roadEdges", roadEdges)
+				.append("roadLocations", roadLocations)
+				.append("selectedRoadLocationIds", selectedRoadLocationIds)
+				.toString();
 	}
 }

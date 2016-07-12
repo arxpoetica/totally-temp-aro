@@ -61,7 +61,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 
 		return StreamUtil.map(planService.computeNetworkModel(networkData,
 				FiberConstraintUtils.build(request.getConstraints())),
-				n -> new DefaultPlannedNetwork(request.getPlanId(), n));
+				n -> new DefaultPlannedNetwork(request.getPlanId(), n, networkData.getGlobalDemand()));
 
 	}
 
@@ -80,7 +80,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				createOptimizerContext(request));
 
 		return new PrunedNetworkImpl(request.getPlanId(),
-				planner.getOptimizedPlans());
+				planner.getOptimizedPlans(), networkData.getGlobalDemand());
 
 		// Collection<OptimizedNetwork> optimizedPlans = planner
 		// .getOptimizedPlans();

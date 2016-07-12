@@ -8,6 +8,7 @@ import com.altvil.aro.service.price.engine.PriceModel;
 public interface PlanAnalysisReport {
 
 	PriceModel getPriceModel() ;
+	LocationDemand getGlobalLocationDemand() ;
 	LocationDemand getLocationDemand() ;
 	Collection<NetworkStatistic> getNetworkStatistics() ;
 	
