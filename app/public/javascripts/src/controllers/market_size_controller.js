@@ -11,6 +11,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   $scope.industry = null
   $scope.product = null
   $scope.employees_range = null
+  $scope.entityType = 'businesses'
 
   var geo_json
 
@@ -47,7 +48,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       $scope.market_size_existing = market_profile.market_size_existing
       $scope.fair_share = market_profile.fair_share
       $scope.share = market_profile.share
-      destroy_charts()
+      destroyCharts()
     } else {
       $scope.calculateMarketSize()
     }
@@ -56,7 +57,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   $('#market-size').on('shown.bs.modal', () => {
     if ($scope.market_size) {
-      show_chart()
+      showChart()
     }
   })
 
@@ -66,7 +67,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   })
 
   var canceller = null
-  $scope.calculateMarketSize = () => {
+  $scope.calculateMarketSize = (onlyFairShare) => {
     $scope.market_size = null
     $scope.fair_share = null
     var bounds = map.getBounds()
@@ -82,7 +83,8 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       swlat: bounds.getSouthWest().lat(),
       swlon: bounds.getSouthWest().lng(),
       zoom: map.getZoom(),
-      threshold: 0
+      threshold: 0,
+      entity_type: $scope.entityType
     }
     tracker.track('Market profile calculation', params)
     if (canceller) canceller.resolve()
@@ -93,14 +95,21 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       customErrorHandling: true
     }
     $scope.loading = true
-    destroy_charts()
-    $http.get('/market_size/plan/' + $scope.plan.id + '/calculate', args).success((market_profile) => {
+    destroyCharts()
+    var endpoint = onlyFairShare ? '/fair_share' : '/calculate'
+    $http.get('/market_size/plan/' + $scope.plan.id + endpoint, args).success((market_profile) => {
       $scope.loading = false
-      $scope.market_size = market_profile.market_size
-      $scope.fair_share = market_profile.fair_share
-      $scope.share = market_profile.share
-      destroy_charts()
-      show_chart()
+      if (onlyFairShare) {
+        $scope.fair_share = market_profile
+        destroyFairShareChart()
+        showFairShareChart()
+      } else {
+        $scope.market_size = market_profile.market_size
+        $scope.fair_share = market_profile.fair_share
+        $scope.share = market_profile.share
+        destroyCharts()
+        showChart()
+      }
     }).error(() => {
       $scope.loading = false
     })
@@ -122,9 +131,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   $('#market-size .nav-tabs').on('shown.bs.tab', (e) => {
     var href = $(e.target).attr('href')
     if (href === '#market_profile_fair_share') { //  && !fair_share_chart
-      show_fair_share_chart()
+      showFairShareChart()
     } else if (href === '#market_profile_market_size') {
-      show_market_size_chart()
+      showMarketSizeChart()
     }
   })
 
@@ -163,28 +172,28 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     })
   }
 
-  function destroy_market_size_chart () {
+  function destroyMarketSizeChart () {
     market_size_chart && market_size_chart.destroy()
     $('#market_profile_market_size_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
-  function destroy_fair_share_chart () {
+  function destroyFairShareChart () {
     fair_share_chart && fair_share_chart.destroy()
     $('#market_profile_fair_share_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
-  function destroy_charts () {
-    destroy_market_size_chart()
-    destroy_fair_share_chart()
+  function destroyCharts () {
+    destroyMarketSizeChart()
+    destroyFairShareChart()
   }
 
-  function show_chart () {
+  function showChart () {
     $('#market-size .nav-tabs a:first').tab('show')
-    show_market_size_chart()
+    showMarketSizeChart()
   }
 
   var fair_share_chart = null
-  function show_fair_share_chart () {
+  function showFairShareChart () {
     $scope.fair_share = $scope.fair_share || []
 
     var total = $scope.fair_share.reduce((total, carrier) => total + carrier.value, 0)
@@ -210,13 +219,13 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       `
     }
     var ctx = document.getElementById('market_profile_fair_share_chart').getContext('2d')
-    destroy_fair_share_chart()
+    destroyFairShareChart()
     fair_share_chart = new Chart(ctx).Pie(data, options)
     document.getElementById('market_profile_fair_share_chart_legend').innerHTML = fair_share_chart.generateLegend()
   }
 
   var market_size_chart = null
-  function show_market_size_chart () {
+  function showMarketSizeChart () {
     var dataset = {
       label: 'Market size',
       fillColor: 'rgba(151,187,205,0.2)',
@@ -280,7 +289,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       `
     }
     var ctx = document.getElementById('market_profile_market_size_chart').getContext('2d')
-    destroy_market_size_chart()
+    destroyMarketSizeChart()
     market_size_chart = new Chart(ctx).Line(data, options)
     document.getElementById('market_profile_market_size_chart_legend').innerHTML = market_size_chart.generateLegend()
   }

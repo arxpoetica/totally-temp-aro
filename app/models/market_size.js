@@ -300,23 +300,10 @@ module.exports = class MarketSize {
       })
       .then((market_size) => {
         output.market_size = market_size
-
-        var params = []
-        var sql = this._prepareMarketSizeQuery(plan_id, type, options, params)
-        sql += `
-          SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM biz
-          JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
-          JOIN carriers c ON lc.carrier_id = c.id
-          JOIN locations l
-            ON l.id = lc.location_id
-            ${database.intersects(options.viewport, 'l.geom', 'WHERE')}
-            GROUP BY c.id ORDER BY c.name
-        `
-        return database.query(sql, params)
+        return MarketSize.fairShare(plan_id, type, options)
       })
-      .then((fair_share) => {
-        this._sortFairShare(fair_share)
-        output.fair_share = fair_share
+      .then((fairShare) => {
+        output.fair_share = fairShare
         output.market_size_existing = [] // TODO
 
         var current_carrier
@@ -328,6 +315,35 @@ module.exports = class MarketSize {
         }, 0)
         output.share = current_carrier / total
         return output
+      })
+  }
+
+  static fairShare (plan_id, type, options) {
+    var filters = options.filters
+    var params = []
+    var sql = this._prepareMarketSizeQuery(plan_id, type, options, params)
+    sql += `
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
+      CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
+      ELSE '#' ||
+        to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
+        to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
+      END AS color
+      FROM biz
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id
+      JOIN locations l
+        ON l.id = lc.location_id
+        ${database.intersects(options.viewport, 'l.geom', 'WHERE')}
+        ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
+        ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
+        GROUP BY c.id ORDER BY c.name
+    `
+    console.log('sql', sql)
+    return database.query(sql, params)
+      .then((fairShare) => {
+        this._sortFairShare(fairShare)
+        return fairShare
       })
   }
 
