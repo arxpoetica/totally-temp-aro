@@ -8,6 +8,9 @@ var _ = require('underscore')
 var config = helpers.config
 var models = require('./')
 var pync = require('pync')
+var fs = require('fs')
+var parse = require('csv-parse')
+var transform = require('stream-transform')
 
 module.exports = class Network {
 
@@ -307,6 +310,55 @@ module.exports = class Network {
       LIMIT 100
     `
     return database.query(sql, [`%${text}%`])
+  }
+
+  static importLocations (plan_id, file) {
+    return new Promise((resolve, reject) => {
+      var found = 0
+      var notFound = 0
+      var errors = 0
+
+      var parser = parse()
+      var input = fs.createReadStream(file)
+      var transformer = transform((record, callback) => {
+        var empty = record.every((item) => item === '')
+        if (empty) return callback()
+
+        var lat = +record[0]
+        var lon = +record[1]
+        if (!lat || !lon) { // we don't accept zeros, either
+          errors++
+          return callback()
+        }
+        var sql = `
+          WITH locations AS (
+            SELECT id AS location_id, $1::bigint as plan_id
+            FROM locations WHERE ST_MakePoint($3::float8, $2::float8) = geog LIMIT 1
+          ),
+
+          deleted AS (
+            DELETE FROM client.plan_targets WHERE location_id IN (SELECT location_id FROM locations) AND plan_id=$1
+          )
+
+          INSERT INTO client.plan_targets (location_id, plan_id) (SELECT location_id, plan_id FROM locations)
+        `
+        database.execute(sql, [plan_id, lat, lon])
+          .then((rows) => {
+            if (rows === 0) notFound++
+            else found++
+            return callback()
+          })
+          .catch((err) => {
+            console.log('err', err)
+            errors++
+            return callback()
+          })
+      }, { parallel: 1 }, () => {
+        resolve({ found: found, notFound: notFound, errors: errors })
+      })
+      input.pipe(parser).pipe(transformer)
+      transformer.on('error', reject)
+    })
   }
 
 }

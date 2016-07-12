@@ -1,4 +1,8 @@
 var models = require('../models')
+var Busboy = require('busboy')
+var path = require('path')
+var os = require('os')
+var fs = require('fs')
 
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission
@@ -67,6 +71,22 @@ exports.configure = (api, middleware) => {
     models.Network.editNetworkNodes(plan_id, changes)
       .then(jsonSuccess(response, next))
       .catch(next)
+  })
+
+  api.post('/network/nodes/:plan_id/csv', check_owner_permission, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var busboy = new Busboy({ headers: request.headers })
+    var fullpath
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      file.pipe(fs.createWriteStream(fullpath))
+    })
+    busboy.on('finish', () => {
+      models.Network.importLocations(plan_id, fullpath)
+        .then(jsonSuccess(response, next))
+        .catch(next)
+    })
+    request.pipe(busboy)
   })
 
   // Clear network nodes in a route
