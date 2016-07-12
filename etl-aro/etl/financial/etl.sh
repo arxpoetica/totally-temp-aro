@@ -23,6 +23,10 @@ ${PSQL} -a -f $DIR/network_report.sql
 
 ${PSQL} -a -f $DIR/plan_demand.sql
 
+${PSQL} -a -f $DIR/plan_product_demand.sql
+
+${PSQL} -a -f $DIR/plan_entity_demand.sql
+
 ${PSQL} -a -f $DIR/equipment_item_cost.sql
 
 ${PSQL} -a -f $DIR/equipment_summary_cost.sql

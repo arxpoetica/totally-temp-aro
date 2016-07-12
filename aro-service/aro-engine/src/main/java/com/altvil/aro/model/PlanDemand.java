@@ -1,55 +1,64 @@
 package com.altvil.aro.model;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "plan_demand", schema = "financial")
-public class PlanDemand {
+public class PlanDemand extends ComparableModel {
 
-	private PlanDemandKey id;
+	private Long id;
 	private NetworkReportSummary networkReportSummary;
 
-	private double maxPremises;
-	private double maxRevenue;
+	private double selectedLocations;
+	private double totalRevenue;
+	private double shareRevenue;
+	private double marketPenetration;
 
-	private double planPremises;
-	private double planRevenue;
+	private Set<PlanProductDemand> planProductDemands = new HashSet<>();
 
-	private double fairShareDemand;
-	private double penetration;
-
-	private double fiberCount;
-
-	public PlanDemand() {
-	}
-
-	public PlanDemand(PlanDemandKey id) {
-		this.id = id;
-	}
-
-	public PlanDemand(int entityType, NetworkReportSummary networkReportSummary) {
-		this(new PlanDemandKey(entityType, networkReportSummary.getId()));
-		this.networkReportSummary = networkReportSummary ;
-	}
-
-	@EmbeddedId
-	public PlanDemandKey getId() {
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(PlanDemandKey planDemandKey) {
-		id = planDemandKey;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	@JoinColumn(name = "network_report_id", referencedColumnName="id", insertable = false, updatable = false)
-	@ManyToOne(optional = false)
+	@Override
+	protected Serializable getIdKey() {
+		return id;
+	}
+
+	@ManyToOne
+	@JoinColumn(name = "network_report_id", nullable = false)
 	public NetworkReportSummary getNetworkReportSummary() {
 		return networkReportSummary;
+	}
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "planDemand", orphanRemoval = true, cascade = { CascadeType.ALL })
+	public Set<PlanProductDemand> getPlanProductDemands() {
+		return planProductDemands;
+	}
+
+	public void setPlanProductDemands(Set<PlanProductDemand> planProductDemands) {
+		this.planProductDemands = planProductDemands;
 	}
 
 	public void setNetworkReportSummary(
@@ -57,67 +66,40 @@ public class PlanDemand {
 		this.networkReportSummary = networkReportSummary;
 	}
 
-	@Column(name = "max_premises")
-	public double getMaxPremises() {
-		return maxPremises;
+	@Column(name = "selected_locations")
+	public double getSelectedLocations() {
+		return selectedLocations;
 	}
 
-	public void setMaxPremises(double maxPremisies) {
-		this.maxPremises = maxPremisies;
+	public void setSelectedLocations(double selectedLocations) {
+		this.selectedLocations = selectedLocations;
 	}
 
-	@Column(name = "max_revenue")
-	public double getMaxRevenue() {
-		return maxRevenue;
+	@Column(name = "total_revenue")
+	public double getTotalRevenue() {
+		return totalRevenue;
 	}
 
-	public void setMaxRevenue(double maxRevenue) {
-		this.maxRevenue = maxRevenue;
+	public void setTotalRevenue(double totalRevenue) {
+		this.totalRevenue = totalRevenue;
 	}
 
-	@Column(name = "plan_premises")
-	public double getPlanPremises() {
-		return planPremises;
+	@Column(name = "share_revenue")
+	public double getShareRevenue() {
+		return shareRevenue;
 	}
 
-	public void setPlanPremises(double planPremises) {
-		this.planPremises = planPremises;
+	public void setShareRevenue(double shareRevenue) {
+		this.shareRevenue = shareRevenue;
 	}
 
-	@Column(name = "plan_revenue")
-	public double getPlanRevenue() {
-		return planRevenue;
+	@Column(name = "market_penetration")
+	public double getMarketPenetration() {
+		return marketPenetration;
 	}
 
-	public void setPlanRevenue(double planRevenue) {
-		this.planRevenue = planRevenue;
-	}
-
-	@Column(name = "fair_share_demand")
-	public double getFairShareDemand() {
-		return fairShareDemand;
-	}
-
-	public void setFairShareDemand(double fairShareDemand) {
-		this.fairShareDemand = fairShareDemand;
-	}
-
-	@Column(name = "penetration")
-	public double getPenetration() {
-		return penetration;
-	}
-
-	public void setPenetration(double penetration) {
-		this.penetration = penetration;
-	}
-
-	@Column(name = "fiber_count")
-	public double getFiberCount() {
-		return fiberCount;
-	}
-
-	public void setFiberCount(double fiberCount) {
-		this.fiberCount = fiberCount;
+	public void setMarketPenetration(double marketPenetration) {
+		this.marketPenetration = marketPenetration;
 	}
 
 }

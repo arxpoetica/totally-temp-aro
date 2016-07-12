@@ -32,6 +32,8 @@ import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.model.NetworkReport;
 import com.altvil.aro.model.NetworkReportSummary;
 import com.altvil.aro.model.PlanDemand;
+import com.altvil.aro.model.PlanEntityDemand;
+import com.altvil.aro.model.PlanProductDemand;
 import com.altvil.aro.persistence.repository.EquipmentSummaryCostRepository;
 import com.altvil.aro.persistence.repository.FiberSummaryCostRepository;
 import com.altvil.aro.persistence.repository.LineItemTypeRepository;
@@ -450,22 +452,11 @@ public class CostServiceImpl implements CostService {
 			return fc;
 		}
 
-		private PlanDemand createPlanDemand(int entityTypeCode,
-				DemandStatistic ds, DemandStatistic globalDemand) {
+		private PlanDemand createPlanDemand(LocationDemand ds,
+				LocationDemand globalDemand) {
 
-			PlanDemand pd = new PlanDemand(entityTypeCode, reportSummary);
-
-			pd.setMaxPremises(globalDemand.getRawCoverage());
-			pd.setMaxRevenue(globalDemand.getMonthlyRevenueImpact());
-
-			pd.setFairShareDemand(ds.getPenetration());
-			pd.setFiberCount(ds.getAtomicUnits());
-			pd.setFairShareDemand(ds.getFairShareDemand());
-			pd.setPenetration(ds.getPenetration());
-			pd.setPlanPremises(ds.getRawCoverage());
-			pd.setPlanRevenue(ds.getMonthlyRevenueImpact());
-
-			return pd;
+			return new PlanDemandAssembler(ds, globalDemand)
+					.assemblePlanDemand(reportSummary);
 		}
 
 		private LineItem createLineItem(NetworkStatistic networkStat) {
@@ -496,15 +487,7 @@ public class CostServiceImpl implements CostService {
 				LocationDemand globalDemand) {
 
 			Set<PlanDemand> planDemands = new HashSet<>();
-
-			planDemands.addAll(StreamUtil.map(
-					LocationEntityType.values(),
-					t -> createPlanDemand(ctx.getEntityTypeCode(t),
-							ld.getLocationDemand(t),
-							globalDemand.getLocationDemand(t))));
-
-			planDemands.add(createPlanDemand(0, ld, globalDemand));
-
+			planDemands.add(createPlanDemand(ld, globalDemand));
 			reportSummary.setPlanDemands(planDemands);
 
 			return this;
@@ -521,6 +504,104 @@ public class CostServiceImpl implements CostService {
 
 		public NetworkReportSummary build() {
 			return reportSummary;
+		}
+
+	}
+
+	private class PlanDemandAssembler {
+
+		private LocationDemand planStatistic;
+		private LocationDemand selectedStatistic;
+
+		public PlanDemandAssembler(LocationDemand planStatistic,
+				LocationDemand selectedStatistic) {
+			super();
+			this.planStatistic = planStatistic;
+			this.selectedStatistic = selectedStatistic;
+		}
+
+		private PlanEntityDemand createPlanEntityDemand(
+				LocationEntityType type, PlanProductDemand planProductDemand) {
+
+			PlanEntityDemand ped = new PlanEntityDemand();
+			ped.setEntityType(type.getTypeCode());
+
+			DemandStatistic pStat = planStatistic.getLocationDemand(type);
+			DemandStatistic sStat = selectedStatistic.getLocationDemand(type);
+
+			ped.setSelectedFiberCount(sStat.getAtomicUnits());
+			ped.setSelectedPremises(sStat.getRawCoverage());
+			ped.setSelectedTotalRevenue(sStat.getTotalRevenue());
+
+			ped.setPlanFiberCount(pStat.getAtomicUnits());
+			ped.setPlanPremises(pStat.getRawCoverage());
+			ped.setPlanShareRevenue(pStat.getMonthlyRevenueImpact()); // TODO
+																		// Fix
+																		// Up
+			ped.setPlanTotalRevenue(pStat.getTotalRevenue());
+			ped.setProductPenetration(pStat.getPenetration());
+
+			return ped;
+		}
+
+		private Set<PlanEntityDemand> createPlannedEntityDemands(
+				PlanProductDemand prodDemand) {
+			Set<PlanEntityDemand> entityDemands = new HashSet<>();
+
+			for (LocationEntityType t : LocationEntityType.values()) {
+				entityDemands.add(createPlanEntityDemand(t, prodDemand));
+			}
+
+			return entityDemands;
+		}
+
+		private PlanProductDemand createProductDemand(int productType,
+				PlanDemand planDemand) {
+
+			PlanProductDemand ppd = new PlanProductDemand();
+			ppd.setPlanDemand(planDemand);
+
+			double marketShare = 1.0;
+
+			ppd.setProductType(productType);
+			ppd.setMarketPenetration(marketShare);
+
+			ppd.setSelectedFiberCount(selectedStatistic.getAtomicUnits());
+			ppd.setSelectedTotalRevenue(selectedStatistic.getTotalRevenue());
+
+			ppd.setPlanFiberCount(planStatistic.getAtomicUnits());
+			ppd.setPlanTotalRevenue(planStatistic.getTotalRevenue());
+			ppd.setPlanShareRevenue(planStatistic.getFairShareDemand());
+
+			ppd.setMarketPenetration(planStatistic.getPenetration());
+			ppd.setProductPenetration(planStatistic.getPenetration()
+					/ marketShare);
+			
+			ppd.setPlanEntityDemands(createPlannedEntityDemands(ppd)) ;
+
+			return ppd;
+		}
+
+		private Set<PlanProductDemand> createProductDemands(
+				PlanDemand planDemand) {
+			Set<PlanProductDemand> result = new HashSet<>();
+			result.add(createProductDemand(1, planDemand));
+			return result;
+		}
+
+		public PlanDemand assemblePlanDemand(
+				NetworkReportSummary networkReportSummary) {
+
+			PlanDemand pd = new PlanDemand();
+			pd.setNetworkReportSummary(networkReportSummary);
+
+			pd.setShareRevenue(planStatistic.getMonthlyRevenueImpact());
+			pd.setTotalRevenue(selectedStatistic.getTotalRevenue());
+			pd.setSelectedLocations(0);
+			pd.setMarketPenetration(planStatistic.getPenetration());
+			pd.setPlanProductDemands(createProductDemands(pd));
+
+			return pd;
 		}
 
 	}
