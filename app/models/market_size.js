@@ -613,6 +613,7 @@ module.exports = class MarketSize {
           JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
           JOIN carriers c ON lc.carrier_id = c.id
             ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
+            ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
           GROUP BY c.id ORDER BY c.name
         `
         return database.query(sql, params)
