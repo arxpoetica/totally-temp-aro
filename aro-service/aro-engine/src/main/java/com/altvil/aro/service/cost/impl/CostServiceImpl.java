@@ -40,6 +40,7 @@ import com.altvil.aro.persistence.repository.LineItemTypeRepository;
 import com.altvil.aro.persistence.repository.NetworkCostCodeRepository;
 import com.altvil.aro.persistence.repository.NetworkReportRepository;
 import com.altvil.aro.persistence.repository.NetworkReportSummaryRepository;
+import com.altvil.aro.persistence.repository.PlanDemandRepository;
 import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.cost.NetworkStatistic;
 import com.altvil.aro.service.cost.NetworkStatisticType;
@@ -80,6 +81,9 @@ public class CostServiceImpl implements CostService {
 	private NetworkReportSummaryRepository networkReportSummaryRepository;
 	@Autowired
 	private NetworkCostCodeRepository networkCostCodeRepository;
+	
+	@Autowired
+	private PlanDemandRepository planDemandRepository ;
 
 	private ReportBuilderContext reportBuilderContext;
 	private ReportGenerator reportGenerator;
@@ -455,8 +459,13 @@ public class CostServiceImpl implements CostService {
 		private PlanDemand createPlanDemand(LocationDemand ds,
 				LocationDemand globalDemand) {
 
-			return new PlanDemandAssembler(ds, globalDemand)
+			PlanDemand planDemand = new PlanDemandAssembler(ds, globalDemand)
 					.assemblePlanDemand(reportSummary);
+			
+			planDemandRepository.save(planDemand) ;
+			
+			return planDemand ;
+			
 		}
 
 		private LineItem createLineItem(NetworkStatistic networkStat) {
@@ -524,6 +533,8 @@ public class CostServiceImpl implements CostService {
 				LocationEntityType type, PlanProductDemand planProductDemand) {
 
 			PlanEntityDemand ped = new PlanEntityDemand();
+			
+			ped.setPlanProductDemand(planProductDemand);
 			ped.setEntityType(type.getTypeCode());
 
 			DemandStatistic pStat = planStatistic.getLocationDemand(type);
