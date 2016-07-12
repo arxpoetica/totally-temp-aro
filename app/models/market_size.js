@@ -339,7 +339,6 @@ module.exports = class MarketSize {
         ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
         GROUP BY c.id ORDER BY c.name
     `
-    console.log('sql', sql)
     return database.query(sql, params)
       .then((fairShare) => {
         this._sortFairShare(fairShare)

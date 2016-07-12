@@ -317,6 +317,9 @@ module.exports = class Network {
       var found = 0
       var notFound = 0
       var errors = 0
+      var headers = false
+      var latColumn = -1
+      var lonColumn = -1
 
       var parser = parse()
       var input = fs.createReadStream(file)
@@ -324,8 +327,23 @@ module.exports = class Network {
         var empty = record.every((item) => item === '')
         if (empty) return callback()
 
-        var lat = +record[0]
-        var lon = +record[1]
+        if (!headers) {
+          record.forEach((value, i) => {
+            value = value.toLowerCase().trim()
+            if (value === 'lat' || value === 'latitude') {
+              latColumn = i
+            } else if (value === 'lon' || value === 'lng' || value === 'longitude') {
+              lonColumn = i
+            }
+            if (latColumn >= 0 && lonColumn >= 0) {
+              headers = true
+            }
+          })
+          return callback()
+        }
+
+        var lat = +record[latColumn]
+        var lon = +record[lonColumn]
         if (!lat || !lon) { // we don't accept zeros, either
           errors++
           return callback()
@@ -353,7 +371,7 @@ module.exports = class Network {
             errors++
             return callback()
           })
-      }, { parallel: 1 }, () => {
+      }, { parallel: 10 }, () => {
         resolve({ found: found, notFound: notFound, errors: errors })
       })
       input.pipe(parser).pipe(transformer)
