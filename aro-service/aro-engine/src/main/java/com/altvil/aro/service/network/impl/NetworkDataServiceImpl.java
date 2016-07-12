@@ -215,8 +215,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				.toLocationEntityType(entityTypeCode);
 	}
 
+	
+	//private static EntityDe
 	private Map<Long, LocationDemandMapping> assembleMapping(
-			List<Object[]> entityDemands) {
+			List<Object[]> entityDemands, Set<LocationEntityType> selectedTypes) {
 		Map<Long, LocationDemandMapping> map = new HashMap<>();
 
 		entityDemands
@@ -232,11 +234,15 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 										ldm = new LocationDemandMapping(
 												d.getInteger(EntityDemandMap.block_id)));
 							}
+							
+							LocationEntityType lt =  toLocationEntityType(d
+									.getInteger(EntityDemandMap.entity_type)) ;
 
-							ldm.add(toLocationEntityType(d
-									.getInteger(EntityDemandMap.entity_type)),
-									d.getDouble(EntityDemandMap.count),
-									d.getDouble(EntityDemandMap.monthly_spend));
+							if( selectedTypes.contains(lt) ) {
+								ldm.add(lt,
+										d.getDouble(EntityDemandMap.count),
+										d.getDouble(EntityDemandMap.monthly_spend));
+							}
 
 						});
 
@@ -245,11 +251,11 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private Map<Long, LocationDemandMapping> queryLocationDemand(
 			boolean isFilteringRoadLocationDemandsBySelection,
-			Set<LocationEntityType> type, long planId, int year) {
+			Set<LocationEntityType> selectedTypes, long planId, int year) {
 
-		return assembleMapping(isFilteringRoadLocationDemandsBySelection ? planRepository
+		return assembleMapping((isFilteringRoadLocationDemandsBySelection ? planRepository
 				.queryFiberDemand(planId, year) : planRepository
-				.queryAllFiberDemand(planId, year));
+				.queryAllFiberDemand(planId, year)), selectedTypes);
 
 	}
 
@@ -520,6 +526,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 			map.put(type, mapping);
 		}
 
+		public void addZeroDemand(LocationEntityType type) {
+			add(type, zeroDemand) ;
+		}
+		
 		public void add(LocationEntityType type, double demand, double revenue) {
 			add(type, new EntityDemandMappingImpl(demand, revenue));
 		}

@@ -29,7 +29,7 @@ public class WireCenter extends ComparableModel {
 
 	@Transient
 	@Override
-	protected Serializable getIdKey() {
+	protected Serializable idKey() {
 		return id;
 	}
 

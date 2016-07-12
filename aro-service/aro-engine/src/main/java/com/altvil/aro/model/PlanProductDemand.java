@@ -25,11 +25,13 @@ public class PlanProductDemand extends ComparableModel {
 	private PlanDemand planDemand;
 	private int productType;
 
-	private double selectedTotalRevenue;
+	private double marketShare  ;
+	
+	private double selectedRevenueTotal;
 	private double selectedFiberCount;
 
-	private double planTotalRevenue;
-	private double planShareRevenue;
+	private double planRevenueTotal;
+	private double planRevenueShare;
 	private double planFiberCount;
 
 	private double marketPenetration;
@@ -49,7 +51,7 @@ public class PlanProductDemand extends ComparableModel {
 	}
 
 	@Override
-	protected Serializable getIdKey() {
+	protected Serializable idKey() {
 		return id;
 	}
 
@@ -80,22 +82,21 @@ public class PlanProductDemand extends ComparableModel {
 	public void setPlanEntityDemands(Set<PlanEntityDemand> planEntityDemands) {
 		this.planEntityDemands = planEntityDemands;
 	}
-	
+
 	//
 	// Facts
 	//
 
-
-	@Column(name="selected_total_revenue")
-	public double getSelectedTotalRevenue() {
-		return selectedTotalRevenue;
+	@Column(name = "selected_revenue_total")
+	public double getSelectedRevenueTotal() {
+		return selectedRevenueTotal;
 	}
 
-	public void setSelectedTotalRevenue(double selectedTotalRevenue) {
-		this.selectedTotalRevenue = selectedTotalRevenue;
+	public void setSelectedRevenueTotal(double selectedRevenueTotal) {
+		this.selectedRevenueTotal = selectedRevenueTotal;
 	}
 
-	@Column(name="selected_fiber_count")
+	@Column(name = "selected_fiber_count")
 	public double getSelectedFiberCount() {
 		return selectedFiberCount;
 	}
@@ -104,25 +105,28 @@ public class PlanProductDemand extends ComparableModel {
 		this.selectedFiberCount = selectedFiberCount;
 	}
 
-	@Column(name="plan_total_revenue")
-	public double getPlanTotalRevenue() {
-		return planTotalRevenue;
+	
+	@Column(name = "plan_revenue_total")
+	public double getPlanRevenueTotal() {
+		return planRevenueTotal;
 	}
 
-	public void setPlanTotalRevenue(double planTotalRevenue) {
-		this.planTotalRevenue = planTotalRevenue;
+	public void setPlanRevenueTotal(double planRevenueTotal) {
+		this.planRevenueTotal = planRevenueTotal;
 	}
 
-	@Column(name="plan_revenue_share")
-	public double getPlanShareRevenue() {
-		return planShareRevenue;
+	@Column(name = "plan_revenue_share")
+	public double getPlanRevenueShare() {
+		return planRevenueShare;
 	}
 
-	public void setPlanShareRevenue(double planShareRevenue) {
-		this.planShareRevenue = planShareRevenue;
+	public void setPlanRevenueShare(double planRevenueShare) {
+		this.planRevenueShare = planRevenueShare;
 	}
 
-	@Column(name="plan_fiber_count")
+
+
+	@Column(name = "plan_fiber_count")
 	public double getPlanFiberCount() {
 		return planFiberCount;
 	}
@@ -131,7 +135,7 @@ public class PlanProductDemand extends ComparableModel {
 		this.planFiberCount = planFiberCount;
 	}
 
-	@Column(name="market_penetration")
+	@Column(name = "market_penetration")
 	public double getMarketPenetration() {
 		return marketPenetration;
 	}
@@ -140,7 +144,7 @@ public class PlanProductDemand extends ComparableModel {
 		this.marketPenetration = marketPenetration;
 	}
 
-	@Column(name="product_penetration")
+	@Column(name = "product_penetration")
 	public double getProductPenetration() {
 		return productPenetration;
 	}
@@ -149,5 +153,14 @@ public class PlanProductDemand extends ComparableModel {
 		this.productPenetration = productPenetration;
 	}
 
+	@Column(name="market_share")
+	public double getMarketShare() {
+		return marketShare;
+	}
 
+	public void setMarketShare(double marketShare) {
+		this.marketShare = marketShare;
+	}
+	
+	
 }

@@ -24,8 +24,8 @@ public class PlanDemand extends ComparableModel {
 	private NetworkReportSummary networkReportSummary;
 
 	private double selectedLocations;
-	private double totalRevenue;
-	private double shareRevenue;
+	private double revenueTotal;
+	private double revenueShare;
 	private double marketPenetration;
 
 	private Set<PlanProductDemand> planProductDemands = new HashSet<>();
@@ -42,7 +42,7 @@ public class PlanDemand extends ComparableModel {
 	}
 
 	@Override
-	protected Serializable getIdKey() {
+	protected Serializable idKey() {
 		return id;
 	}
 
@@ -75,22 +75,22 @@ public class PlanDemand extends ComparableModel {
 		this.selectedLocations = selectedLocations;
 	}
 
-	@Column(name = "total_revenue")
-	public double getTotalRevenue() {
-		return totalRevenue;
+	@Column(name="revenue_total")
+	public double getRevenueTotal() {
+		return revenueTotal;
 	}
 
-	public void setTotalRevenue(double totalRevenue) {
-		this.totalRevenue = totalRevenue;
+	public void setRevenueTotal(double revenueTotal) {
+		this.revenueTotal = revenueTotal;
 	}
 
-	@Column(name = "share_revenue")
-	public double getShareRevenue() {
-		return shareRevenue;
+	@Column(name="revenue_share")
+	public double getRevenueShare() {
+		return revenueShare;
 	}
 
-	public void setShareRevenue(double shareRevenue) {
-		this.shareRevenue = shareRevenue;
+	public void setRevenueShare(double revenueShare) {
+		this.revenueShare = revenueShare;
 	}
 
 	@Column(name = "market_penetration")

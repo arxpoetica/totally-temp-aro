@@ -37,7 +37,7 @@ public class NetworkNode extends ComparableModel {
 
 	@Transient
 	@Override
-	protected Serializable getIdKey() {
+	protected Serializable idKey() {
 		return id;
 	}
 

@@ -9,12 +9,12 @@ create table financial.plan_entity_demand (
 	
 	selected_premises double precision not null,
 	selected_fiber_count double precision not null,
-	selected_total_revenue double precision not null,
+	selected_revenue_total double precision not null,
 	
 	plan_premises double precision not null,
 	plan_fiber_count double precision not null,
-	plan_total_revenue  double precision not null,
-	plan_share_revenue double precision not null,
+	plan_revenue_total  double precision not null,
+	plan_revenue_share double precision not null,
 	
 	market_penetration double precision not null,
 	product_penetration double precision not null,

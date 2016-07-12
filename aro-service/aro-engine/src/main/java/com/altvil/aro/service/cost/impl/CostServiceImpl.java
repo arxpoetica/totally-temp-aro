@@ -531,14 +531,14 @@ public class CostServiceImpl implements CostService {
 
 			ped.setSelectedFiberCount(sStat.getAtomicUnits());
 			ped.setSelectedPremises(sStat.getRawCoverage());
-			ped.setSelectedTotalRevenue(sStat.getTotalRevenue());
+			ped.setSelectedRevenueTotal(sStat.getTotalRevenue());
 
 			ped.setPlanFiberCount(pStat.getAtomicUnits());
 			ped.setPlanPremises(pStat.getRawCoverage());
-			ped.setPlanShareRevenue(pStat.getMonthlyRevenueImpact()); // TODO
+			ped.setPlanRevenueShare(pStat.getMonthlyRevenueImpact()); // TODO
 																		// Fix
 																		// Up
-			ped.setPlanTotalRevenue(pStat.getTotalRevenue());
+			ped.setPlanRevenueTotal(pStat.getTotalRevenue());
 			ped.setProductPenetration(pStat.getPenetration());
 
 			return ped;
@@ -564,14 +564,14 @@ public class CostServiceImpl implements CostService {
 			double marketShare = 1.0;
 
 			ppd.setProductType(productType);
-			ppd.setMarketPenetration(marketShare);
+			ppd.setMarketShare(marketShare);
 
 			ppd.setSelectedFiberCount(selectedStatistic.getAtomicUnits());
-			ppd.setSelectedTotalRevenue(selectedStatistic.getTotalRevenue());
+			ppd.setSelectedRevenueTotal(selectedStatistic.getTotalRevenue());
 
 			ppd.setPlanFiberCount(planStatistic.getAtomicUnits());
-			ppd.setPlanTotalRevenue(planStatistic.getTotalRevenue());
-			ppd.setPlanShareRevenue(planStatistic.getFairShareDemand());
+			ppd.setPlanRevenueTotal(planStatistic.getTotalRevenue());
+			ppd.setPlanRevenueShare(planStatistic.getFairShareDemand());
 
 			ppd.setMarketPenetration(planStatistic.getPenetration());
 			ppd.setProductPenetration(planStatistic.getPenetration()
@@ -595,8 +595,8 @@ public class CostServiceImpl implements CostService {
 			PlanDemand pd = new PlanDemand();
 			pd.setNetworkReportSummary(networkReportSummary);
 
-			pd.setShareRevenue(planStatistic.getMonthlyRevenueImpact());
-			pd.setTotalRevenue(selectedStatistic.getTotalRevenue());
+			pd.setRevenueShare(planStatistic.getMonthlyRevenueImpact());
+			pd.setRevenueTotal(selectedStatistic.getTotalRevenue());
 			pd.setSelectedLocations(0);
 			pd.setMarketPenetration(planStatistic.getPenetration());
 			pd.setPlanProductDemands(createProductDemands(pd));
