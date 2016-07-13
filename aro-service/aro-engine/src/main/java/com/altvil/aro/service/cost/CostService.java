@@ -1,5 +1,6 @@
 package com.altvil.aro.service.cost;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.altvil.aro.model.EquipmentSummaryCost;
@@ -13,7 +14,7 @@ public interface CostService {
 	PlanAnalysisReport createPlanAnalysisReport(OptimizedPlan network) ;
 	PlanAnalysisReport updateWireCenterCosts(OptimizedPlan optimizedPlan) ;
 	
-	void updateMasterPlanCosts(long planId) ;
+	void updateMasterPlanCosts(long planId, Collection<PlanAnalysisReport> updates) ;
 	
 	List<FiberSummaryCost> getFiberReport(long planId) ;
 	List<EquipmentSummaryCost> getEquipmentReport(long planId) ;
