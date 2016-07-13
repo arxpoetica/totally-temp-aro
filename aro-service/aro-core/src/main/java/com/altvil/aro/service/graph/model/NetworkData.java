@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 
@@ -17,7 +16,8 @@ public class NetworkData {
 	// public Map<RoadLocation, CoverageAggregateStatistic>
 	// roadLocationsProperties;
 
-	private LocationDemand globalDemand;
+	private LocationDemandAnalysis demandAnalysis;
+
 	private Collection<NetworkAssignment> fiberSources;
 	private Collection<RoadEdge> roadEdges;
 	private Collection<Long> selectedRoadLocationIds;
@@ -59,14 +59,12 @@ public class NetworkData {
 		this.selectedRoadLocationIds = selectedRoadLocationIds;
 	}
 
-	
-
-	public LocationDemand getGlobalDemand() {
-		return globalDemand;
+	public LocationDemandAnalysis getDemandAnalysis() {
+		return demandAnalysis;
 	}
 
-	public void setGlobalDemand(LocationDemand globalDemand) {
-		this.globalDemand = globalDemand;
+	public void setDemandAnalysis(LocationDemandAnalysis demandAnalysis) {
+		this.demandAnalysis = demandAnalysis;
 	}
 
 	public Collection<NetworkAssignment> getSelectedRoadLocations() {

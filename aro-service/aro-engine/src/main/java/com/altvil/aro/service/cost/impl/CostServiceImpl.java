@@ -51,7 +51,8 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.optimization.OptimizedPlan;
-import com.altvil.aro.service.optimize.model.DemandCoverage;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.price.engine.EquipmentCost;
@@ -119,8 +120,7 @@ public class CostServiceImpl implements CostService {
 						new NetworkReportSummary()))
 				.setPriceModel(report.getPriceModel())
 				.setLineItems(report.getNetworkStatistics())
-				.setDemand(report.getLocationDemand(), plan.getGlobalDemand())
-				.build();
+				.addDemand(report.getDemandSummary()).build();
 
 		networkReportSummaryRepository.save(planReport);
 
@@ -150,15 +150,15 @@ public class CostServiceImpl implements CostService {
 		PriceModel priceModel = createPriceModel(network
 				.getWirecenterNetworkPlan());
 
-		DemandCoverage dc = network.getWirecenterNetworkPlan()
-				.getDemandCoverage();
+//		DemandCoverage dc = network.getWirecenterNetworkPlan()
+//				.getDemandCoverage();
 
 		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
 				reportGenerator.generateNetworkStatistics(network),
 				NetworkStatistic::getNetworkStatisticType);
 
-		return new PlanAnalyisReportImpl(priceModel, dc,
-				network.getGlobalDemand(), map);
+		return new PlanAnalyisReportImpl(priceModel,
+				network.getDemandSummary(), map);
 	}
 
 	@Override
@@ -265,33 +265,26 @@ public class CostServiceImpl implements CostService {
 	private static class PlanAnalyisReportImpl implements PlanAnalysisReport {
 
 		private PriceModel priceModel;
-		private DemandCoverage demandCoverage;
-		private LocationDemand globalDemand;
+		private NetworkDemandSummary demandSummary;
 		private Map<NetworkStatisticType, NetworkStatistic> map;
 
 		public PlanAnalyisReportImpl(PriceModel priceModel,
-				DemandCoverage demandCoverage, LocationDemand globalDemand,
+				NetworkDemandSummary demandSummary,
 				Map<NetworkStatisticType, NetworkStatistic> map) {
 			super();
 			this.priceModel = priceModel;
-			this.demandCoverage = demandCoverage;
-			this.globalDemand = globalDemand;
+			this.demandSummary = demandSummary;
 			this.map = map;
 		}
 
 		@Override
-		public LocationDemand getGlobalLocationDemand() {
-			return globalDemand;
+		public NetworkDemandSummary getDemandSummary() {
+			return demandSummary;
 		}
 
 		@Override
 		public PriceModel getPriceModel() {
 			return priceModel;
-		}
-
-		@Override
-		public LocationDemand getLocationDemand() {
-			return demandCoverage.getLocationDemand();
 		}
 
 		@Override
@@ -412,9 +405,9 @@ public class CostServiceImpl implements CostService {
 			return networkStatisticToLineItem.getDomain(type).getId();
 		}
 
-		public int getEntityTypeCode(LocationEntityType type) {
-			return type.getTypeCode();
-		}
+//		public int getEntityTypeCode(LocationEntityType type) {
+//			return type.getTypeCode();
+//		}
 
 	}
 
@@ -457,10 +450,10 @@ public class CostServiceImpl implements CostService {
 			return fc;
 		}
 
-		private Set<PlanDemand> createPlanDemand(LocationDemand ds,
-				LocationDemand globalDemand) {
+		private Set<PlanDemand> createPlanDemand(
+				NetworkDemandSummary demandSummary) {
 
-			return new PlanDemandAssembler(ds, globalDemand)
+			return new PlanDemandAssembler(demandSummary)
 					.assemblePlanDemand(reportSummary);
 
 		}
@@ -489,11 +482,9 @@ public class CostServiceImpl implements CostService {
 
 		}
 
-		public ReportBuilder setDemand(LocationDemand ld,
-				LocationDemand globalDemand) {
-			reportSummary.setPlanDemands(createPlanDemand(ld, globalDemand));
+		public ReportBuilder addDemand(NetworkDemandSummary demandSummary) {
+			reportSummary.setPlanDemands(createPlanDemand(demandSummary));
 			return this;
-
 		}
 
 		public ReportBuilder setLineItems(
@@ -512,14 +503,11 @@ public class CostServiceImpl implements CostService {
 
 	private class PlanDemandAssembler {
 
-		private LocationDemand planStatistic;
-		private LocationDemand selectedStatistic;
+		private NetworkDemandSummary demandSummary;
 
-		public PlanDemandAssembler(LocationDemand planStatistic,
-				LocationDemand selectedStatistic) {
+		public PlanDemandAssembler(NetworkDemandSummary demandSummary) {
 			super();
-			this.planStatistic = planStatistic;
-			this.selectedStatistic = selectedStatistic;
+			this.demandSummary = demandSummary;
 		}
 
 		private PlanEntityDemand createPlanEntityDemand(PlanDemand planDemand,
@@ -567,7 +555,7 @@ public class CostServiceImpl implements CostService {
 
 			pd.setPlanEntityDemands(createPlannedEntityDemands(pd, demand));
 
-			return pd ;
+			return pd;
 		}
 
 		public Set<PlanDemand> assemblePlanDemand(
@@ -575,17 +563,12 @@ public class CostServiceImpl implements CostService {
 
 			Set<PlanDemand> demands = new HashSet<>();
 
-			demands.add(createPlanDemand(networkReportSummary,
-					DemandTypeEnum.new_demand, SpeedCategory.cat7, 1,
-					this.selectedStatistic));
+			for (DemandTypeEnum t : demandSummary.getDemandTypes()) {
+				NetworkDemand nd = demandSummary.getNetworkDemand(t);
+				demands.add(createPlanDemand(networkReportSummary, t,
+						nd.getSpeedCategory(), 1, nd.getLocationDemand()));
 
-			demands.add(createPlanDemand(networkReportSummary,
-					DemandTypeEnum.planned_demand, SpeedCategory.cat7, 1,
-					this.planStatistic));
-
-			demands.add(createPlanDemand(networkReportSummary,
-					DemandTypeEnum.original_demand, SpeedCategory.cat3, 1,
-					this.selectedStatistic));
+			}
 
 			return demands;
 

@@ -14,13 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
@@ -250,7 +250,7 @@ public class OptimizationStrategyServiceImpl implements
 		}
 
 		protected Optional<PlannedNetwork> toPlannedNetwork(long planId,
-				Optional<PlanAnalysis> plan, LocationDemand globalDemand) {
+				Optional<PlanAnalysis> plan, Collection<NetworkDemand> networkDemands) {
 
 			if (!plan.isPresent()) {
 				return Optional.empty();
@@ -263,7 +263,8 @@ public class OptimizationStrategyServiceImpl implements
 			}
 
 			return Optional.of(new DefaultPlannedNetwork(planId, plan.get()
-					.getOptimizedNetwork().getNetworkPlan().get(), globalDemand));
+					.getOptimizedNetwork().getNetworkPlan().get(),
+					networkDemands));
 
 		}
 
@@ -277,7 +278,7 @@ public class OptimizationStrategyServiceImpl implements
 					.filter(PlanAnalysis::isValid).collect(Collectors.toList());
 
 			return toPlannedNetwork(prunedNetwork.getPlanId(),
-					selectPlan(plans), prunedNetwork.getGlobalDemand());
+					selectPlan(plans), prunedNetwork.getNetworkDemands());
 
 		}
 

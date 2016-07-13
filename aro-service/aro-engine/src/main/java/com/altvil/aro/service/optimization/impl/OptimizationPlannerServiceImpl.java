@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
-import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.OptimizedPlan;
@@ -33,6 +32,7 @@ import com.altvil.aro.service.optimization.spi.OptimizationExecutorService.Execu
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
@@ -136,8 +136,12 @@ public class OptimizationPlannerServiceImpl implements
 			WirecenterNetworkPlan reifiedPlan = conversionService.convert(
 					plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
 
+			NetworkDemandSummary demandSummary = NetworkDemandSummaryImpl
+					.build().add(plan.getNetworkDemands())
+					.setDemandCoverage(reifiedPlan.getDemandCoverage()).build();
+
 			wirecenterPlanningService.save(new OptimizedPlanIml(constraints,
-					reifiedPlan, plan.getGlobalDemand()));
+					reifiedPlan, demandSummary));
 
 			return reifiedPlan;
 		}
@@ -274,20 +278,20 @@ public class OptimizationPlannerServiceImpl implements
 
 		private OptimizationConstraints constraints;
 		private WirecenterNetworkPlan networkPlan;
-		private LocationDemand locationDemand;
+		private NetworkDemandSummary demandSummary;
 
 		public OptimizedPlanIml(OptimizationConstraints constraints,
 				WirecenterNetworkPlan networkPlan,
-				LocationDemand locationDemand) {
+				NetworkDemandSummary demandSummary) {
 			super();
 			this.constraints = constraints;
 			this.networkPlan = networkPlan;
-			this.locationDemand = locationDemand ;
+			this.demandSummary = demandSummary;
 		}
 
 		@Override
-		public LocationDemand getGlobalDemand() {
-			return locationDemand ;
+		public NetworkDemandSummary getDemandSummary() {
+			return demandSummary;
 		}
 
 		@Override

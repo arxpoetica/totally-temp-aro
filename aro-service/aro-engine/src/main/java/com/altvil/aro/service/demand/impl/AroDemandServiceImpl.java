@@ -2,6 +2,7 @@ package com.altvil.aro.service.demand.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class AroDemandServiceImpl implements AroDemandService {
 	private Map<LocationEntityType, DemandProfile> defaultDemandProfileMap = new EnumMap<>(
 			LocationEntityType.class);
 
-	private Map<Integer, FairShareLocationDemand> demandMap = new ConcurrentHashMap<>();
+	private Map<Integer, FairShareDemandMapping> demandMap = new ConcurrentHashMap<>();
 
 	@Autowired
 	public AroDemandServiceImpl(DemandAnalysisService demandAnalysisService,
@@ -75,12 +76,10 @@ public class AroDemandServiceImpl implements AroDemandService {
 	}
 
 	@Override
-	public LocationDemand createDemandByCensusBlock(int censusBlockId,
-			DemandMapping demandMapping) {
-
-		return getEffectiveLocationDemand(censusBlockId).createLocationDemand(
-				demandMapping);
-
+	public LocationDemand createDemandByCensusBlock(int blockId,
+			DemandMapping mapping, SpeedCategory speedCategory) {
+		return getEffectiveLocationDemand(blockId).getFairShareLocationDemand(
+				speedCategory).createLocationDemand(mapping);
 	}
 
 	@Override
@@ -154,28 +153,15 @@ public class AroDemandServiceImpl implements AroDemandService {
 		return new RawCapacityMapping(competition);
 	}
 
-	private FairShareLocationDemand getEffectiveLocationDemand(int block) {
-		FairShareLocationDemand demand = demandMap.get(block);
+	private FairShareDemandMapping getEffectiveLocationDemand(int block) {
+		FairShareDemandMapping demand = demandMap.get(block);
 
 		if (demand == null) {
-			demandMap.put(
-					block,
-					demand = loadEffectiveLocationDemand(block,
-							SpeedCategory.cat7));
+			demandMap.put(block, demand = new FairShareDemandMapping(
+					createRawCapacityMapping(block)));
 		}
 
 		return demand;
-
-	}
-
-	private FairShareLocationDemand loadEffectiveLocationDemand(
-			int censusBlock, SpeedCategory speedCategory) {
-
-		RawCapacityMapping mapping = createRawCapacityMapping(censusBlock);
-
-		return demandAnalysisService
-				.createFairShareLocationDemand(createNetworkCapacityProfile(
-						mapping, speedCategory, 1.0));
 
 	}
 
@@ -291,6 +277,32 @@ public class AroDemandServiceImpl implements AroDemandService {
 		public double getWeight(NetworkType networkType, SpeedCategory category) {
 			return map.get(networkType).get(category);
 		}
+	}
+
+	private class FairShareDemandMapping {
+		private RawCapacityMapping rawCapacityMapping;
+		private Map<SpeedCategory, FairShareLocationDemand> demandMap = Collections
+				.synchronizedMap(new EnumMap<>(SpeedCategory.class));
+
+		public FairShareDemandMapping(RawCapacityMapping rawCapacityMapping) {
+			super();
+			this.rawCapacityMapping = rawCapacityMapping;
+		}
+
+		public FairShareLocationDemand getFairShareLocationDemand(
+				SpeedCategory speedCategory) {
+			FairShareLocationDemand ld = demandMap.get(speedCategory);
+			if (ld == null) {
+				ld = demandAnalysisService
+						.createFairShareLocationDemand(createNetworkCapacityProfile(
+								rawCapacityMapping, speedCategory, 1.0));
+				demandMap.put(speedCategory, ld);
+			}
+
+			return ld;
+
+		}
+
 	}
 
 }
