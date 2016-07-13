@@ -80,27 +80,31 @@ public interface NetworkPlanRepository extends
 	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
 
 	
-	@Query(value = "\n" + 
-			"with selected_locations as (\n" + 
+	@Query(value = "with selected_locations as (\n" + 
 			"select location_id as id, b.gid as block_id\n" + 
 			"	from client.plan_targets t\n" + 
 			"	join aro.locations l on l.id = t.location_id\n" + 
 			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
 			"	where plan_id = :planId\n" + 
 			"),\n" + 
-			"bs as (\n" + 
-			"  select l.id, l.block_id, entity_type, e.count, e.monthly_spend \n" + 
+			"locs as (\n" + 
+			" select l.id, l.block_id, 2 as entity_type, case when entity_type = 1 or entity_type =2 then 10 * count else 1000 * count end as count, e.monthly_spend \n" + 
 			"  from selected_locations l\n" + 
 			"  join client.business_summary e on e.location_id = l.id\n" + 
-			"   where year = :year and city_id = 1\n" + 
+			"  where year = :year and city_id = 1\n" + 
+			"),\n" + 
+			"bs as (\n" + 
+			"  select l.id, l.block_id, entity_type, sum(l.count) as count, sum(l.monthly_spend) as monthly_spend\n" + 
+			"  from locs l\n" + 
+			"  group by l.id, l.block_id, entity_type\n" + 
 			"),\n" + 
 			"hs as (\n" + 
-			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend \n" + 
+			"  select l.id, l.block_id, 1 as entity_type, e.count, e.count*60 as monthly_spend \n" + 
 			"  from selected_locations l\n" + 
 			"  join client.households_summary e on e.location_id = l.id\n" + 
 			"),\n" + 
 			"ct as (\n" + 
-			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend \n" + 
+			"  select l.id, l.block_id, 3 as entity_type, e.count, e.count*500 as monthly_spend \n" + 
 			"  from selected_locations l\n" + 
 			"  join client.celltower_summary e on e.location_id = l.id\n" + 
 			")\n" + 
@@ -109,7 +113,7 @@ public interface NetworkPlanRepository extends
 			"select * from  hs\n" + 
 			"UNION\n" + 
 			"select * from ct\n" + 
-			"limit 60000\n", 
+			"limit 60000", 
 			nativeQuery = true)
 	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year);
 	
@@ -121,19 +125,24 @@ public interface NetworkPlanRepository extends
 			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
 			"	where p.id =  :planId\n" + 
 			"),\n" + 
-			"bs as (\n" + 
-			"  select l.id, l.block_id, entity_type, e.count, e.monthly_spend \n" + 
+			"locs as (\n" + 
+			" select l.id, l.block_id, 2 as entity_type, case when entity_type = 1 or entity_type =2 then 10 * count else 1000 * count end as count, e.monthly_spend \n" + 
 			"  from selected_locations l\n" + 
 			"  join client.business_summary e on e.location_id = l.id\n" + 
-			"   where year = :year and city_id = 1\n" + 
+			"  where year = :year and city_id = 1\n" + 
+			"),\n" + 
+			"bs as (\n" + 
+			"  select l.id, l.block_id, entity_type, sum(l.count) as count, sum(l.monthly_spend) as monthly_spend\n" + 
+			"  from locs l\n" + 
+			"  group by l.id, l.block_id, entity_type\n" + 
 			"),\n" + 
 			"hs as (\n" + 
-			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend \n" + 
+			"  select l.id, l.block_id, 1 as entity_type, e.count, e.count*60 as monthly_spend \n" + 
 			"  from selected_locations l\n" + 
 			"  join client.households_summary e on e.location_id = l.id\n" + 
 			"),\n" + 
 			"ct as (\n" + 
-			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend \n" + 
+			"  select l.id, l.block_id, 3 as entity_type, e.count, e.count*500 as monthly_spend \n" + 
 			"  from selected_locations l\n" + 
 			"  join client.celltower_summary e on e.location_id = l.id\n" + 
 			")\n" + 

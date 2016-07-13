@@ -190,16 +190,13 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private LocationEntityType toLocationEntityType(int entityTypeCode) {
 		switch (entityTypeCode) {
 		case 1:
-			return LocationEntityType.Business;
+			return LocationEntityType.Household;
 		case 2:
 			return LocationEntityType.Business;
 		case 3:
-			return LocationEntityType.Business;
-		case 4:
-			return LocationEntityType.Household;
-		case 5:
-		default:
 			return LocationEntityType.CellTower;
+		default:
+			return LocationEntityType.Household ;
 		}
 	}
 
