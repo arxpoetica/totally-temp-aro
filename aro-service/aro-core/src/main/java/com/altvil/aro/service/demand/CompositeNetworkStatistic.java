@@ -26,23 +26,18 @@ public interface CompositeNetworkStatistic extends DemandStatistic {
 	ProductDemandStatistic getPrimaryProductDemand() ;
 	
 	
+	
+	/////////////// OPTIMIZED
+	
+	double getCashFlow() ; // MonthlyRevenue - Cost (%Revenue)
+	
+	
+	
 	//  ORGINAL cat 3
 	//
 	// cat 3  (Revenue) 
 	//
 	ProductDemandStatistic getIntersectedDemand() ; 
-	
-	
-	
-
-	//  Original cat3 -> S1
-	//
-	// cat 3  (Revenue) 
-	//
-	ProductDemandStatistic getOriginalProductDemand() ; 
-	
-	
-	
 	
 
 	

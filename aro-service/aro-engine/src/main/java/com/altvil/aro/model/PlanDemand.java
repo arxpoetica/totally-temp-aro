@@ -26,12 +26,10 @@ public class PlanDemand extends ComparableModel {
 
 	private Long id;
 	private NetworkReportSummary networkReportSummary;
-	
-	private SpeedCategory speedType ;
-	private int productType ;
-	private DemandTypeEnum demandType ;
-	
-	private double marketPenetration;
+
+	private SpeedCategory speedType;
+	private int productType;
+	private DemandTypeEnum demandType;
 
 	private Set<PlanEntityDemand> planEntityDemands = new HashSet<>();
 
@@ -56,7 +54,7 @@ public class PlanDemand extends ComparableModel {
 	public NetworkReportSummary getNetworkReportSummary() {
 		return networkReportSummary;
 	}
-	
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "planDemand", orphanRemoval = true, cascade = { CascadeType.ALL })
 	public Set<PlanEntityDemand> getPlanEntityDemands() {
 		return planEntityDemands;
@@ -66,25 +64,13 @@ public class PlanDemand extends ComparableModel {
 		this.planEntityDemands = planEntityDemands;
 	}
 
-	
-
 	public void setNetworkReportSummary(
 			NetworkReportSummary networkReportSummary) {
 		this.networkReportSummary = networkReportSummary;
 	}
 
-	
-	@Column(name = "market_penetration")
-	public double getMarketPenetration() {
-		return marketPenetration;
-	}
-
-	public void setMarketPenetration(double marketPenetration) {
-		this.marketPenetration = marketPenetration;
-	}
-
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name="speed_type")
+	@Column(name = "speed_type")
 	public SpeedCategory getSpeedType() {
 		return speedType;
 	}
@@ -93,7 +79,7 @@ public class PlanDemand extends ComparableModel {
 		this.speedType = speedType;
 	}
 
-	@Column(name="product_type")
+	@Column(name = "product_type")
 	public int getProductType() {
 		return productType;
 	}
@@ -103,7 +89,7 @@ public class PlanDemand extends ComparableModel {
 	}
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name="demand_type")
+	@Column(name = "demand_type")
 	public DemandTypeEnum getDemandType() {
 		return demandType;
 	}
@@ -111,7 +97,5 @@ public class PlanDemand extends ComparableModel {
 	public void setDemandType(DemandTypeEnum demandType) {
 		this.demandType = demandType;
 	}
-	
-	
 
 }

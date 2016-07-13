@@ -62,6 +62,7 @@ public class PlanEntityDemand extends ComparableModel {
 		this.entityType = entityType;
 	}
 
+	@Column(name = "premises")
 	public double getPremises() {
 		return premises;
 	}
@@ -70,6 +71,7 @@ public class PlanEntityDemand extends ComparableModel {
 		this.premises = premises;
 	}
 
+	@Column(name = "fiber_count")
 	public double getFiberCount() {
 		return fiberCount;
 	}
@@ -78,6 +80,7 @@ public class PlanEntityDemand extends ComparableModel {
 		this.fiberCount = fiberCount;
 	}
 
+	@Column(name = "revenue_total")
 	public double getRevenueTotal() {
 		return revenueTotal;
 	}
@@ -86,6 +89,7 @@ public class PlanEntityDemand extends ComparableModel {
 		this.revenueTotal = revenueTotal;
 	}
 
+	@Column(name = "revenue_share")
 	public double getRevenueShare() {
 		return revenueShare;
 	}
@@ -94,6 +98,7 @@ public class PlanEntityDemand extends ComparableModel {
 		this.revenueShare = revenueShare;
 	}
 
+	@Column(name = "penetration")
 	public double getPenetration() {
 		return penetration;
 	}
@@ -102,6 +107,7 @@ public class PlanEntityDemand extends ComparableModel {
 		this.penetration = penetration;
 	}
 
+	@Column(name = "share_premises")
 	public double getSharePremises() {
 		return sharePremises;
 	}

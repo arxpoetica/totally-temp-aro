@@ -436,7 +436,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 						.getEntityDemandMapping(type);
 
 				DemandStatistic demandStatic = analysis == null
-						|| entityMapping == null ? DefaultDemandStatistic.ZERO_DEMAND
+						|| entityMapping == null || entityMapping.getMappedDemand() == 0 ? DefaultDemandStatistic.ZERO_DEMAND
 						: analysis.createFairShareDemand(entityMapping)
 								.getDemandStatistic();
 

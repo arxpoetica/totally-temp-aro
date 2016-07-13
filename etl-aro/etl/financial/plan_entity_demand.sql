@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS financial.plan_entity_demand cascade ;
 create table financial.plan_entity_demand (
 	
@@ -16,7 +15,7 @@ create table financial.plan_entity_demand (
 	
 	share_premises double precision not null,
 	
-	UNIQUE(plan_product_demand_id, entity_type)
+	UNIQUE(plan_demand_id, entity_type)
 	
 )
 WITH (OIDS=FALSE);

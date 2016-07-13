@@ -7,6 +7,6 @@ CREATE TABLE financial.plan_demand (
 	
 	speed_type int4  not null references client.speed_type,
 	product_type int4 not null references client.product_type,
-	demand_type int4 not null references client.demand_type,
+	demand_type int4 not null references client.demand_type
 
 )
