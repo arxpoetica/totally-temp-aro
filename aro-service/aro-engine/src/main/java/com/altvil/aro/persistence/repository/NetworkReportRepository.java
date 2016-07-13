@@ -45,6 +45,26 @@ public interface NetworkReportRepository extends
 	@Transactional
 	Double getTotalPlanCost(@Param("planId") long planId) ;
 	
+	@Query(value = "select id\n" + 
+			"from aro.wirecenters where wirecenter = :clii\n" + 
+			"", nativeQuery = true) 
+	@Transactional
+	Integer getWireCenterId(@Param("clii") String clii) ;
+	
+	
+	@Query(value = "with plans as (\n" + 
+			"insert into client.plan (name, plan_type, wirecenter_id,area_name, area_centroid, area_bounds, created_at, updated_at)\n" + 
+			"select wirecenter, 'M', id, wirecenter, st_centroid(w.geom), w.geom, now(), now()\n" + 
+			"from aro.wirecenters  w\n" + 
+			"where w.id = -1\n" + 
+			"returning id\n" + 
+			")\n" + 
+			"select * from plans", nativeQuery = true) 
+	@Transactional
+	Long createMasterPlan(@Param("wirecenterId") int id) ;
+	
+	
+	
 	
 	
 	@Query(value = "delete from financial.network_report  r where r.plan_id = :planId", nativeQuery = true)

@@ -2,6 +2,7 @@ package com.altvil.netop.optimize;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -35,6 +36,38 @@ public class NewOptimizeEndPoint {
 
 	@Autowired
 	private OptimizationPlannerService optimizationPlannerService;
+
+	public static class BulkRequest {
+		private AroOptimizationPlan plan;
+		private List<String> wirecenterIds;
+
+		public AroOptimizationPlan getPlan() {
+			return plan;
+		}
+
+		public void setPlan(AroOptimizationPlan plan) {
+			this.plan = plan;
+		}
+
+		public List<String> getWirecenterIds() {
+			return wirecenterIds;
+		}
+
+		public void setWirecenterIds(List<String> wirecenterIds) {
+			this.wirecenterIds = wirecenterIds;
+		}
+
+	}
+
+	@RequestMapping(value = "/optimize/bulk/masterplan", method = RequestMethod.POST)
+	public @ResponseBody String postRecalcMasterPlans(
+			@RequestBody BulkRequest bulkRequest)
+			throws InterruptedException, ExecutionException, NoSuchStrategy {
+		
+		return optimizationPlannerService.bulkOptimize(bulkRequest.getWirecenterIds(), 
+				toOptimizationPlan(bulkRequest.getPlan())).get() ;
+		
+	}
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
 	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(
@@ -78,8 +111,8 @@ public class NewOptimizeEndPoint {
 			AroOptimizationPlan plan) {
 
 		FinancialConstraints financials = plan.getFinancialConstraints();
-		if( financials == null ) {
-			financials = new FinancialConstraints() ;
+		if (financials == null) {
+			financials = new FinancialConstraints();
 		}
 
 		switch (plan.getAlgorithm()) {

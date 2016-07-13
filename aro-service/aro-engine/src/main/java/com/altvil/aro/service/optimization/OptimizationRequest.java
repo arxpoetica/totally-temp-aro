@@ -6,9 +6,9 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 
 public class OptimizationRequest {
 
-	private OptimizationConstraints optimizationConstraints;
-	private FiberNetworkConstraints constraints;
-	private NetworkDataRequest networkDataRequest;
+	protected OptimizationConstraints optimizationConstraints;
+	protected FiberNetworkConstraints constraints;
+	protected NetworkDataRequest networkDataRequest;
 	
 	public OptimizationRequest(OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints,

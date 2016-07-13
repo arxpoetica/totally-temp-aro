@@ -3,6 +3,8 @@ package com.altvil.aro.service.optimization.impl;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -77,6 +79,25 @@ public class OptimizationPlannerServiceImpl implements
 		this.optimizationExecutorService = optimizationExecutorService;
 		this.masterPlanningService = masterPlanningService;
 		this.conversionService = conversionService;
+	}
+
+	@Override
+	public Future<String> bulkOptimize(Collection<String> wireCenterCodes,
+			MasterOptimizationRequest request) {
+
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+
+		wireCenterCodes
+				.forEach(c -> {
+					int wireCenterId = networkPlanRepository.getWireCenterId(c);
+					long planId = networkPlanRepository
+							.createMasterPlan(wireCenterId);
+					executor.submit(() -> optimize(
+							request.create(planId, wireCenterId)).get());
+				});
+
+		return executor.submit(() -> "Finished) ");
+
 	}
 
 	@PostConstruct

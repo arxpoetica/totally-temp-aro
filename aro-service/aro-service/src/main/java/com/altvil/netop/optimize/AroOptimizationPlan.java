@@ -10,7 +10,7 @@ import com.altvil.netop.plan.SelectedRegion;
 
 public class AroOptimizationPlan {
 
-	private long planId;
+	private long planId = 0 ;
 
 	private OptimizationType algorithm;
 	private Double threshold;
