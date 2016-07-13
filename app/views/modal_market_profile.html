@@ -19,12 +19,13 @@
           <div role="tabpanel" class="tab-pane active" id="market_profile_market_size">
 
             <form class="form-horizontal">
-              <div class="form-group form-group-sm" ng-hide="market_type === 'route'">
+              <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Market type</label>
                 <div class="col-sm-9">
                   <select class="form-control" ng-model="market_type" ng-change="calculateMarketSize()">
-                    <option value="boundary">All</option>
-                    <option value="addressable">Addressable</option>
+                    <option value="all">All visible</option>
+                    <option value="existing">Existing visible</option>
+                    <option value="plan">Plan</option>
                   </select>
                 </div>
               </div>

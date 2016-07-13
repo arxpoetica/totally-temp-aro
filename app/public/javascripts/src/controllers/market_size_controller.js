@@ -30,7 +30,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     if (type !== 'market_size') return
 
     geo_json = json
-    $scope.market_type = 'boundary'
+    $scope.market_type = 'all'
     $scope.calculateMarketSize()
     $('#market-size .modal-title').text('Market profile · ' + title)
     $('#market-size').modal('show')
@@ -38,7 +38,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   $rootScope.$on('market_profile_selected', (e, market_profile) => {
     geo_json = null
-    $scope.market_type = 'route'
+    $scope.market_type = 'all'
     $('#market-size .modal-title').text('Market profile')
 
     if (market_profile) {

@@ -128,7 +128,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       var bounds = map.getBounds()
       var args = {
         params: {
-          type: 'route',
+          type: 'all',
           nelat: bounds.getNorthEast().lat(),
           nelon: bounds.getNorthEast().lng(),
           swlat: bounds.getSouthWest().lat(),

@@ -351,7 +351,7 @@ module.exports = class Network {
         var sql = `
           WITH locations AS (
             SELECT id AS location_id, $1::bigint as plan_id
-            FROM locations WHERE ST_MakePoint($3::float8, $2::float8) = geog LIMIT 1
+            FROM locations WHERE ST_Equals(ST_SetSRID(ST_MakePoint($3::float8, $2::float8), 4326), geom) LIMIT 1
           ),
 
           deleted AS (

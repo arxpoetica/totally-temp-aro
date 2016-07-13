@@ -24,7 +24,6 @@ module.exports = class MarketSize {
 
   static _prepareMarketSizeQuery (plan_id, type, options, params) {
     var filters = options.filters
-    var sql = ''
 
     var customerTypeFilter = () => {
       if (!filters || !filters.customer_type) return ''
@@ -36,52 +35,51 @@ module.exports = class MarketSize {
        `
     }
 
-    if (type === 'route' || type === 'addressable') {
-      if (false && config.route_planning.length > 0) {
-        params.push(plan_id)
-        sql += `
-          WITH biz AS (
-          SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
-          FROM businesses b
-          JOIN client.fiber_route
-            ON fiber_route.plan_id=$${params.length}
-           AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
-           ${customerTypeFilter()}
-        `
-      } else {
-        params.push(config.client_carrier_name)
-        sql += `
-          WITH biz AS
-          (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
-            FROM businesses b
-            JOIN carriers ON carriers.name = $${params.length}
-            JOIN aro.fiber_plant
-              ON fiber_plant.carrier_id = carriers.id
-             AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
-                 ${database.intersects(options.viewport, 'b.geom', 'AND')}
-               ${customerTypeFilter()}
-        `
-      }
-
-      if (type === 'addressable') {
+    var boundaryConstraint = (op) => {
+      if (options.boundary) {
         params.push(options.boundary)
-        sql += ` AND ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom) GROUP BY b.id)`
-      } else {
-        sql += ' GROUP BY b.id)'
+        return 'ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)) -- foo\n'
+      } else if (options.viewport) {
+        return database.intersects(options.viewport, 'b.geom', '')
       }
-    } else {
-      params.push(options.boundary)
-      var length = params.length
-      sql += `
+    }
+
+    type = type || 'all'
+
+    if (type === 'all') {
+      return `
         WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
-          ${customerTypeFilter()}
-          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${length})::geometry, 4326), b.geom)
+          ${customerTypeFilter()} WHERE ${boundaryConstraint()}
+        )
+      `
+    } else if (type === 'existing') {
+      params.push(config.client_carrier_name)
+      return `
+        WITH biz AS
+        (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
+          FROM businesses b
+          JOIN carriers ON carriers.name = $${params.length}
+          JOIN aro.fiber_plant
+            ON fiber_plant.carrier_id = carriers.id
+           AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
+               ${customerTypeFilter()} WHERE ${boundaryConstraint()}
+        )
+      `
+    } else if (type === 'plan') {
+      params.push(plan_id)
+      return `
+        WITH biz AS (
+          SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
+          FROM businesses b
+          JOIN locations l ON b.location_id = l.id
+          JOIN client.plan_targets pt ON pt.location_id = l.id AND pt.plan_id = $${params.length}
+          ${customerTypeFilter()} WHERE ${boundaryConstraint()}
         )
       `
     }
-    return sql
+    return null
   }
 
   static _createBusinessesCsv (plan_id, user, rows, filters, carriers) {
