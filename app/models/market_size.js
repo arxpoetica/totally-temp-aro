@@ -38,7 +38,7 @@ module.exports = class MarketSize {
     var boundaryConstraint = (op) => {
       if (options.boundary) {
         params.push(options.boundary)
-        return 'ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)) -- foo\n'
+        return `ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)`
       } else if (options.viewport) {
         return database.intersects(options.viewport, 'b.geom', '')
       }
