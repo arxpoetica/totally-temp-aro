@@ -91,9 +91,10 @@ public class OptimizationPlannerServiceImpl implements
 				.forEach(c -> {
 					int wireCenterId = networkPlanRepository.getWireCenterId(c);
 					long planId = networkPlanRepository
-							.createMasterPlan(wireCenterId);
+							.createMasterPlan(wireCenterId).get(0).longValue() ;
+					
 					executor.submit(() -> optimize(
-							request.create(planId, wireCenterId)).get());
+							request.create(planId, wireCenterId)));
 				});
 
 		return executor.submit(() -> "Finished) ");

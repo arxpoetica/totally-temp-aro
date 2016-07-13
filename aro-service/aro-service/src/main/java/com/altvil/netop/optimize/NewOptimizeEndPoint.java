@@ -39,7 +39,7 @@ public class NewOptimizeEndPoint {
 
 	public static class BulkRequest {
 		private AroOptimizationPlan plan;
-		private List<String> wirecenterIds;
+		private List<String> wirecenterCodes;
 
 		public AroOptimizationPlan getPlan() {
 			return plan;
@@ -49,12 +49,12 @@ public class NewOptimizeEndPoint {
 			this.plan = plan;
 		}
 
-		public List<String> getWirecenterIds() {
-			return wirecenterIds;
+		public List<String> getWirecenterCodes() {
+			return wirecenterCodes;
 		}
 
-		public void setWirecenterIds(List<String> wirecenterIds) {
-			this.wirecenterIds = wirecenterIds;
+		public void setWirecenterCodes(List<String> wirecenterCodes) {
+			this.wirecenterCodes = wirecenterCodes;
 		}
 
 	}
@@ -64,7 +64,7 @@ public class NewOptimizeEndPoint {
 			@RequestBody BulkRequest bulkRequest)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
 		
-		return optimizationPlannerService.bulkOptimize(bulkRequest.getWirecenterIds(), 
+		return optimizationPlannerService.bulkOptimize(bulkRequest.getWirecenterCodes(), 
 				toOptimizationPlan(bulkRequest.getPlan())).get() ;
 		
 	}

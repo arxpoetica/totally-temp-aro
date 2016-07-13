@@ -30,13 +30,13 @@ public interface NetworkPlanRepository extends
 			"insert into client.plan (name, plan_type, wirecenter_id,area_name, area_centroid, area_bounds, created_at, updated_at)\n" + 
 			"select wirecenter, 'M', id, wirecenter, st_centroid(w.geom), w.geom, now(), now()\n" + 
 			"from aro.wirecenters  w\n" + 
-			"where w.id = -1\n" + 
+			"where w.id = :wirecenterId\n" + 
 			"returning id\n" + 
 			")\n" + 
 			"select * from plans", nativeQuery = true) 
 	@Transactional
 	@Modifying
-	Long createMasterPlan(@Param("wirecenterId") int id) ;
+	List<Number> createMasterPlan(@Param("wirecenterId") int id) ;
 	
 	
 	
