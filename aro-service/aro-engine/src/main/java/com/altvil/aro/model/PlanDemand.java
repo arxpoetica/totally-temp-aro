@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,19 +18,22 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.altvil.aro.service.demand.analysis.SpeedCategory;
+
 @Entity
 @Table(name = "plan_demand", schema = "financial")
 public class PlanDemand extends ComparableModel {
 
 	private Long id;
 	private NetworkReportSummary networkReportSummary;
-
-	private double selectedLocations;
-	private double revenueTotal;
-	private double revenueShare;
+	
+	private SpeedCategory speedType ;
+	private int productType ;
+	private DemandTypeEnum demandType ;
+	
 	private double marketPenetration;
 
-	private Set<PlanProductDemand> planProductDemands = new HashSet<>();
+	private Set<PlanEntityDemand> planEntityDemands = new HashSet<>();
 
 	@Id
 	@Column(name = "id")
@@ -51,48 +56,24 @@ public class PlanDemand extends ComparableModel {
 	public NetworkReportSummary getNetworkReportSummary() {
 		return networkReportSummary;
 	}
-
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "planDemand", orphanRemoval = true, cascade = { CascadeType.ALL })
-	public Set<PlanProductDemand> getPlanProductDemands() {
-		return planProductDemands;
+	public Set<PlanEntityDemand> getPlanEntityDemands() {
+		return planEntityDemands;
 	}
 
-	public void setPlanProductDemands(Set<PlanProductDemand> planProductDemands) {
-		this.planProductDemands = planProductDemands;
+	public void setPlanEntityDemands(Set<PlanEntityDemand> planEntityDemands) {
+		this.planEntityDemands = planEntityDemands;
 	}
+
+	
 
 	public void setNetworkReportSummary(
 			NetworkReportSummary networkReportSummary) {
 		this.networkReportSummary = networkReportSummary;
 	}
 
-	@Column(name = "selected_locations")
-	public double getSelectedLocations() {
-		return selectedLocations;
-	}
-
-	public void setSelectedLocations(double selectedLocations) {
-		this.selectedLocations = selectedLocations;
-	}
-
-	@Column(name="revenue_total")
-	public double getRevenueTotal() {
-		return revenueTotal;
-	}
-
-	public void setRevenueTotal(double revenueTotal) {
-		this.revenueTotal = revenueTotal;
-	}
-
-	@Column(name="revenue_share")
-	public double getRevenueShare() {
-		return revenueShare;
-	}
-
-	public void setRevenueShare(double revenueShare) {
-		this.revenueShare = revenueShare;
-	}
-
+	
 	@Column(name = "market_penetration")
 	public double getMarketPenetration() {
 		return marketPenetration;
@@ -101,5 +82,36 @@ public class PlanDemand extends ComparableModel {
 	public void setMarketPenetration(double marketPenetration) {
 		this.marketPenetration = marketPenetration;
 	}
+
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name="speed_type")
+	public SpeedCategory getSpeedType() {
+		return speedType;
+	}
+
+	public void setSpeedType(SpeedCategory speedType) {
+		this.speedType = speedType;
+	}
+
+	@Column(name="product_type")
+	public int getProductType() {
+		return productType;
+	}
+
+	public void setProductType(int productType) {
+		this.productType = productType;
+	}
+
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name="demand_type")
+	public DemandTypeEnum getDemandType() {
+		return demandType;
+	}
+
+	public void setDemandType(DemandTypeEnum demandType) {
+		this.demandType = demandType;
+	}
+	
+	
 
 }

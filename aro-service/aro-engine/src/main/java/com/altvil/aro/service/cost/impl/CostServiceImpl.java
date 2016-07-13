@@ -23,6 +23,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.model.EquipmentSummaryCost;
 import com.altvil.aro.model.FiberSummaryCost;
 import com.altvil.aro.model.LineItem;
@@ -33,7 +34,6 @@ import com.altvil.aro.model.NetworkReport;
 import com.altvil.aro.model.NetworkReportSummary;
 import com.altvil.aro.model.PlanDemand;
 import com.altvil.aro.model.PlanEntityDemand;
-import com.altvil.aro.model.PlanProductDemand;
 import com.altvil.aro.persistence.repository.EquipmentSummaryCostRepository;
 import com.altvil.aro.persistence.repository.FiberSummaryCostRepository;
 import com.altvil.aro.persistence.repository.LineItemTypeRepository;
@@ -45,6 +45,7 @@ import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.cost.NetworkStatistic;
 import com.altvil.aro.service.cost.NetworkStatisticType;
 import com.altvil.aro.service.cost.PlanAnalysisReport;
+import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
@@ -81,9 +82,9 @@ public class CostServiceImpl implements CostService {
 	private NetworkReportSummaryRepository networkReportSummaryRepository;
 	@Autowired
 	private NetworkCostCodeRepository networkCostCodeRepository;
-	
+
 	@Autowired
-	private PlanDemandRepository planDemandRepository ;
+	private PlanDemandRepository planDemandRepository;
 
 	private ReportBuilderContext reportBuilderContext;
 	private ReportGenerator reportGenerator;
@@ -456,16 +457,12 @@ public class CostServiceImpl implements CostService {
 			return fc;
 		}
 
-		private PlanDemand createPlanDemand(LocationDemand ds,
+		private Set<PlanDemand> createPlanDemand(LocationDemand ds,
 				LocationDemand globalDemand) {
 
-			PlanDemand planDemand = new PlanDemandAssembler(ds, globalDemand)
+			return new PlanDemandAssembler(ds, globalDemand)
 					.assemblePlanDemand(reportSummary);
-			
-			planDemandRepository.save(planDemand) ;
-			
-			return planDemand ;
-			
+
 		}
 
 		private LineItem createLineItem(NetworkStatistic networkStat) {
@@ -494,11 +491,7 @@ public class CostServiceImpl implements CostService {
 
 		public ReportBuilder setDemand(LocationDemand ld,
 				LocationDemand globalDemand) {
-
-			Set<PlanDemand> planDemands = new HashSet<>();
-			planDemands.add(createPlanDemand(ld, globalDemand));
-			reportSummary.setPlanDemands(planDemands);
-
+			reportSummary.setPlanDemands(createPlanDemand(ld, globalDemand));
 			return this;
 
 		}
@@ -529,90 +522,73 @@ public class CostServiceImpl implements CostService {
 			this.selectedStatistic = selectedStatistic;
 		}
 
-		private PlanEntityDemand createPlanEntityDemand(
-				LocationEntityType type, PlanProductDemand planProductDemand) {
+		private PlanEntityDemand createPlanEntityDemand(PlanDemand planDemand,
+				LocationEntityType type, DemandStatistic stat) {
 
 			PlanEntityDemand ped = new PlanEntityDemand();
-			
-			ped.setPlanProductDemand(planProductDemand);
+
+			ped.setPlanDemand(planDemand);
 			ped.setEntityType(type.getTypeCode());
 
-			DemandStatistic pStat = planStatistic.getLocationDemand(type);
-			DemandStatistic sStat = selectedStatistic.getLocationDemand(type);
+			ped.setFiberCount(stat.getAtomicUnits());
+			ped.setPremises(stat.getRawCoverage());
+			ped.setRevenueTotal(stat.getTotalRevenue());
+			ped.setRevenueShare(stat.getMonthlyRevenueImpact());
+			ped.setPenetration(stat.getPenetration());
 
-			ped.setSelectedFiberCount(sStat.getAtomicUnits());
-			ped.setSelectedPremises(sStat.getRawCoverage());
-			ped.setSelectedRevenueTotal(sStat.getTotalRevenue());
-
-			ped.setPlanFiberCount(pStat.getAtomicUnits());
-			ped.setPlanPremises(pStat.getRawCoverage());
-			ped.setPlanRevenueShare(pStat.getMonthlyRevenueImpact()); // TODO
-																		// Fix
-																		// Up
-			ped.setPlanRevenueTotal(pStat.getTotalRevenue());
-			ped.setProductPenetration(pStat.getPenetration());
+			ped.setSharePremises(stat.getFairShareDemand());
 
 			return ped;
 		}
 
 		private Set<PlanEntityDemand> createPlannedEntityDemands(
-				PlanProductDemand prodDemand) {
+				PlanDemand prodDemand, LocationDemand demand) {
 			Set<PlanEntityDemand> entityDemands = new HashSet<>();
 
 			for (LocationEntityType t : LocationEntityType.values()) {
-				entityDemands.add(createPlanEntityDemand(t, prodDemand));
+				entityDemands.add(createPlanEntityDemand(prodDemand, t,
+						demand.getLocationDemand(t)));
 			}
 
 			return entityDemands;
 		}
 
-		private PlanProductDemand createProductDemand(int productType,
-				PlanDemand planDemand) {
-
-			PlanProductDemand ppd = new PlanProductDemand();
-			ppd.setPlanDemand(planDemand);
-
-			double marketShare = 1.0;
-
-			ppd.setProductType(productType);
-			ppd.setMarketShare(marketShare);
-
-			ppd.setSelectedFiberCount(selectedStatistic.getAtomicUnits());
-			ppd.setSelectedRevenueTotal(selectedStatistic.getTotalRevenue());
-
-			ppd.setPlanFiberCount(planStatistic.getAtomicUnits());
-			ppd.setPlanRevenueTotal(planStatistic.getTotalRevenue());
-			ppd.setPlanRevenueShare(planStatistic.getFairShareDemand());
-
-			ppd.setMarketPenetration(planStatistic.getPenetration());
-			ppd.setProductPenetration(planStatistic.getPenetration()
-					/ marketShare);
-			
-			ppd.setPlanEntityDemands(createPlannedEntityDemands(ppd)) ;
-
-			return ppd;
-		}
-
-		private Set<PlanProductDemand> createProductDemands(
-				PlanDemand planDemand) {
-			Set<PlanProductDemand> result = new HashSet<>();
-			result.add(createProductDemand(1, planDemand));
-			return result;
-		}
-
-		public PlanDemand assemblePlanDemand(
-				NetworkReportSummary networkReportSummary) {
+		private PlanDemand createPlanDemand(NetworkReportSummary reportSummary,
+				DemandTypeEnum demandType, SpeedCategory speedType,
+				int productType, LocationDemand demand) {
 
 			PlanDemand pd = new PlanDemand();
-			pd.setNetworkReportSummary(networkReportSummary);
 
-			pd.setRevenueShare(planStatistic.getMonthlyRevenueImpact());
-			pd.setRevenueTotal(selectedStatistic.getTotalRevenue());
-			pd.setSelectedLocations(0);
-			pd.setMarketPenetration(planStatistic.getPenetration());
-			pd.setPlanProductDemands(createProductDemands(pd));
+			pd.setNetworkReportSummary(reportSummary);
 
-			return pd;
+			pd.setProductType(productType);
+			pd.setSpeedType(speedType);
+			pd.setDemandType(demandType);
+
+			pd.setPlanEntityDemands(createPlannedEntityDemands(pd, demand));
+
+			return pd ;
+		}
+
+		public Set<PlanDemand> assemblePlanDemand(
+				NetworkReportSummary networkReportSummary) {
+
+			Set<PlanDemand> demands = new HashSet<>();
+
+			demands.add(createPlanDemand(networkReportSummary,
+					DemandTypeEnum.new_demand, SpeedCategory.cat7, 1,
+					this.selectedStatistic));
+
+			demands.add(createPlanDemand(networkReportSummary,
+					DemandTypeEnum.planned_demand, SpeedCategory.cat7, 1,
+					this.planStatistic));
+
+			demands.add(createPlanDemand(networkReportSummary,
+					DemandTypeEnum.original_demand, SpeedCategory.cat3, 1,
+					this.selectedStatistic));
+
+			return demands;
+
 		}
 
 	}

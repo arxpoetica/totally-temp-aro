@@ -4,8 +4,14 @@ PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-# Create and poulate product types
+# Create and populate product types
 ${PSQL} -a -f $DIR/create_client_product_type.sql
+
+# Create and populate speed types
+${PSQL} -a -f $DIR/create_client_speed_type.sql
+
+# Create and populate demand types
+${PSQL} -a -f $DIR/create_client_demand_type.sql
 
 # Map carriers to locations to determine service coverage
 ${PSQL} -a -f $DIR/create_client_carrier_location_mapping.sql

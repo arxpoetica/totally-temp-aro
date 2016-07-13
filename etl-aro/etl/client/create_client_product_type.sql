@@ -8,5 +8,5 @@ CREATE TABLE client.product_type
 	CONSTRAINT product_type_pkey PRIMARY KEY (id)
 );
 
-INSERT INTO client.product_type(name, description) VALUES('fiber', 'broadband');
-INSERT INTO client.product_type(name, description) VALUES('dsl', 'DSL 10 mbs');
+INSERT INTO client.product_type(name, description) VALUES('broadband', 'broadband');
+

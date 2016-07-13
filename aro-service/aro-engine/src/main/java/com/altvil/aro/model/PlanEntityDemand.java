@@ -17,21 +17,14 @@ public class PlanEntityDemand extends ComparableModel {
 
 	private Long id;
 
-	private PlanProductDemand planProductDemand;
+	private PlanDemand planDemand;
 	private int entityType;
 
-	private double selectedPremises;
-	private double selectedFiberCount;
-	private double selectedRevenueTotal;
-
-	private double planPremises;
-	private double planFiberCount;
-	private double planRevenueTotal;
-	private double planRevenueShare;
-
-	private double marketPenetration;
-	private double productPenetration;
-
+	private double premises;
+	private double fiberCount;
+	private double revenueTotal;
+	private double revenueShare;
+	private double penetration;
 	private double sharePremises;
 
 	@Id
@@ -51,13 +44,13 @@ public class PlanEntityDemand extends ComparableModel {
 	}
 
 	@ManyToOne
-	@JoinColumn(name = "plan_product_demand_id", nullable = false)
-	public PlanProductDemand getPlanProductDemand() {
-		return planProductDemand;
+	@JoinColumn(name = "plan_demand_id", nullable = false)
+	public PlanDemand getPlanDemand() {
+		return planDemand;
 	}
 
-	public void setPlanProductDemand(PlanProductDemand planDemand) {
-		this.planProductDemand = planDemand;
+	public void setPlanDemand(PlanDemand planDemand) {
+		this.planDemand = planDemand;
 	}
 
 	@Column(name = "entity_type")
@@ -69,88 +62,46 @@ public class PlanEntityDemand extends ComparableModel {
 		this.entityType = entityType;
 	}
 
-	@Column(name = "selected_premises")
-	public double getSelectedPremises() {
-		return selectedPremises;
+	public double getPremises() {
+		return premises;
 	}
 
-	public void setSelectedPremises(double selectedPremises) {
-		this.selectedPremises = selectedPremises;
+	public void setPremises(double premises) {
+		this.premises = premises;
 	}
 
-	@Column(name = "selected_fiber_count")
-	public double getSelectedFiberCount() {
-		return selectedFiberCount;
+	public double getFiberCount() {
+		return fiberCount;
 	}
 
-	public void setSelectedFiberCount(double selectedFiberCount) {
-		this.selectedFiberCount = selectedFiberCount;
-	}
-	
-	@Column(name="selected_revenue_total")
-	public double getSelectedRevenueTotal() {
-		return selectedRevenueTotal;
+	public void setFiberCount(double fiberCount) {
+		this.fiberCount = fiberCount;
 	}
 
-	public void setSelectedRevenueTotal(double selectedRevenueTotal) {
-		this.selectedRevenueTotal = selectedRevenueTotal;
+	public double getRevenueTotal() {
+		return revenueTotal;
 	}
 
-	@Column(name = "plan_premises")
-	public double getPlanPremises() {
-		return planPremises;
+	public void setRevenueTotal(double revenueTotal) {
+		this.revenueTotal = revenueTotal;
 	}
 
-	public void setPlanPremises(double planPremises) {
-		this.planPremises = planPremises;
+	public double getRevenueShare() {
+		return revenueShare;
 	}
 
-	@Column(name = "plan_fiber_count")
-	public double getPlanFiberCount() {
-		return planFiberCount;
+	public void setRevenueShare(double revenueShare) {
+		this.revenueShare = revenueShare;
 	}
 
-	public void setPlanFiberCount(double planFiberCount) {
-		this.planFiberCount = planFiberCount;
+	public double getPenetration() {
+		return penetration;
 	}
 
-	@Column(name = "plan_revenue_total")
-	public double getPlanRevenueTotal() {
-		return planRevenueTotal;
+	public void setPenetration(double penetration) {
+		this.penetration = penetration;
 	}
 
-	public void setPlanRevenueTotal(double planRevenueTotal) {
-		this.planRevenueTotal = planRevenueTotal;
-	}
-
-	@Column(name="plan_revenue_share")
-	public double getPlanRevenueShare() {
-		return planRevenueShare;
-	}
-
-	public void setPlanRevenueShare(double planRevenueShare) {
-		this.planRevenueShare = planRevenueShare;
-	}
-
-	@Column(name = "market_penetration")
-	public double getMarketPenetration() {
-		return marketPenetration;
-	}
-
-	public void setMarketPenetration(double marketPenetration) {
-		this.marketPenetration = marketPenetration;
-	}
-
-	@Column(name = "product_penetration")
-	public double getProductPenetration() {
-		return productPenetration;
-	}
-
-	public void setProductPenetration(double productPenetration) {
-		this.productPenetration = productPenetration;
-	}
-
-	@Column(name = "share_premises")
 	public double getSharePremises() {
 		return sharePremises;
 	}
