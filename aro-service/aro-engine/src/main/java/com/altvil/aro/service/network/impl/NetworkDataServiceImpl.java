@@ -2,6 +2,7 @@ package com.altvil.aro.service.network.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +16,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
-import com.altvil.aro.service.demand.impl.LocationDemandFactory;
+import com.altvil.aro.service.demand.AroDemandService;
+import com.altvil.aro.service.demand.DemandMapping;
+import com.altvil.aro.service.demand.analysis.SpeedCategory;
+import com.altvil.aro.service.demand.analysis.spi.EntityDemandMapping;
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.impl.EntityFactory;
+import com.altvil.aro.service.entity.mapping.LocationEntityTypeMapping;
+import com.altvil.aro.service.graph.model.LocationDemandAnalysis;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
@@ -30,6 +37,7 @@ import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
 import com.altvil.utils.conversion.OrdinalEntityFactory;
+import com.altvil.utils.func.Aggregator;
 
 @Service
 public class NetworkDataServiceImpl implements NetworkDataService {
@@ -40,6 +48,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	@Autowired
 	private NetworkPlanRepository planRepository;
 
+	@Autowired
+	private AroDemandService aroDemandService;
+
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
 
 	@Override
@@ -47,38 +58,55 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		NetworkData networkData = new NetworkData();
 
-		//TODO Simplify Locations
-		Collection<NetworkAssignment> roadLocations = getNetworkLocations(request) ;
+		Map<Long, LocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
+
+		networkData.setDemandAnalysis(new LocationDemandAnalysisImpl(
+				demandByLocationIdMap,
+				toFullShare(aggregate(demandByLocationIdMap.values()))));
+
+		// TODO Simplify Locations
+		Collection<NetworkAssignment> roadLocations = getNetworkLocations(
+				request, demandByLocationIdMap);
+
 		networkData.setRoadLocations(roadLocations);
-		networkData.setSelectedRoadLocationIds(toSelectedRoadLocationIds(roadLocations));
+
+		networkData
+				.setSelectedRoadLocationIds(toSelectedRoadLocationIds(roadLocations));
 
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
 		networkData.setRoadEdges(getRoadEdges(request));
-		
+
 		return networkData;
 	}
-	
-	private Collection<Long> toSelectedRoadLocationIds(Collection<NetworkAssignment> locations) {
-		return StreamUtil.map(locations, l -> l.getSource().getObjectId()) ;
+
+	private LocationDemandMapping aggregate(
+			Collection<LocationDemandMapping> demandMapping) {
+
+		Aggregator<LocationDemandMapping> aggreagtor = LocationDemandMapping
+				.aggregate();
+		demandMapping.forEach(aggreagtor::add);
+		return aggreagtor.apply();
+
 	}
-	
 
-	@Override
-	public Collection<NetworkAssignment> getFiberSources(
-			NetworkDataRequest request) {
-		return getFiberSourceNetworkAssignments(request) ;
+	private LocationDemand toFullShare(LocationDemandMapping mapping) {
+		return aroDemandService.createFullShareDemand(mapping);
 	}
 
+	private Collection<Long> toSelectedRoadLocationIds(
+			Collection<NetworkAssignment> locations) {
+		return StreamUtil.map(locations, l -> l.getSource().getObjectId());
+	}
 
-	@Override
-	public Collection<NetworkAssignment> getNetworkLocations(
-			NetworkDataRequest request) {
-		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(request);
+	private Collection<NetworkAssignment> getNetworkLocations(
+			NetworkDataRequest request,
+			Map<Long, LocationDemandMapping> demandByLocationIdMap) {
+
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request);
+
 		List<Long> selectedRoadLocations = selectedRoadLocationIds(
 				request.getPlanId(), roadLocationByLocationIdMap);
 
-		
 		if (request.getSelectionMode() == LocationSelectionMode.SELECTED_LOCATIONS) {
 			roadLocationByLocationIdMap.keySet().retainAll(
 					selectedRoadLocations);
@@ -90,33 +118,35 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				.map(result -> {
 					Long locationId = result;
 
-					LocationDemand ldm = demandByLocationIdMap.get(locationId);
-					if (ldm == null || ldm.getDemand() == 0) {
+					LocationDemandMapping ldm = demandByLocationIdMap
+							.get(locationId);
+					if (ldm == null || ldm.isEmpty()) {
 						// No Demand no location mapped in for fiber Linking
 						return null;
 					}
 
+					LocationDemand locationDemand = aroDemandService
+							.createDemandByCensusBlock(ldm.getBlockId(), ldm,
+									SpeedCategory.cat7);
+
 					AroEntity aroEntity = entityFactory.createLocationEntity(
-							request.getLocationEntities(), locationId, ldm);
+							request.getLocationEntities(), locationId,
+							ldm.getBlockId(), locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
 				}));
 	}
 
-
-
-
 	public NetworkData _getNetworkData(NetworkDataRequest networkConfiguration) {
 		// final long planId = networkConfiguration.getPlanId();
 		NetworkData networkData = new NetworkData();
 
-		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkConfiguration);
+		Map<Long, LocationDemandMapping> demandByLocationIdMap = getLocationDemand(networkConfiguration);
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkConfiguration);
 		List<Long> selectedRoadLocations = selectedRoadLocationIds(
 				networkConfiguration.getPlanId(), roadLocationByLocationIdMap);
 
-		// TODO MEDIUM Compare performance
 		networkData
 				.setFiberSources(getFiberSourceNetworkAssignments(networkConfiguration));
 
@@ -131,15 +161,20 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				.map(result -> {
 					Long locationId = result;
 
-					LocationDemand ldm = demandByLocationIdMap.get(locationId);
-					if (ldm == null || ldm.getDemand() == 0) {
+					LocationDemandMapping ldm = demandByLocationIdMap
+							.get(locationId);
+					if (ldm == null || ldm.isEmpty()) {
 						// No Demand no location mapped in for fiber Linking
 						return null;
 					}
 
+					LocationDemand locationDemand = aroDemandService
+							.createDemandByCensusBlock(ldm.getBlockId(), ldm,
+									SpeedCategory.cat7);
+
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							networkConfiguration.getLocationEntities(),
-							locationId, ldm);
+							locationId, ldm.getBlockId(), locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
@@ -162,11 +197,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		id, gid, tlid, point, ratio, intersect_point, distance
 	}
 
-	private enum LoctationDemandMap implements OrdinalAccessor {
-		location_id, business_fiber, bussiness_spend, tower_fiber, tower_spend, household_fiber, household_spend
-	}
-
-	private Map<Long, LocationDemand> getLocationDemand(
+	private Map<Long, LocationDemandMapping> getLocationDemand(
 			NetworkDataRequest networkConfiguration) {
 
 		return queryLocationDemand(
@@ -177,41 +208,57 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	}
 
-	private Map<Long, LocationDemand> queryLocationDemand(
-			boolean isFilteringRoadLocationDemandsBySelection,
-			Set<LocationEntityType> type, long planId, int year) {
+	private enum EntityDemandMap implements OrdinalAccessor {
+		location_id, block_id, entity_type, count, monthly_spend
+	}
 
-		List<Object[]> demands = isFilteringRoadLocationDemandsBySelection ? planRepository
-				.queryFiberDemand(planId, year) : planRepository
-				.queryAllFiberDemand(planId, year);
+	private LocationEntityType toLocationEntityType(int entityTypeCode) {
+		return LocationEntityTypeMapping.MAPPING
+				.toLocationEntityType(entityTypeCode);
+	}
 
-		Map<Long, LocationDemand> map = new HashMap<>();
-		demands.stream()
+	// private static EntityDe
+	private Map<Long, LocationDemandMapping> assembleMapping(
+			List<Object[]> entityDemands, Set<LocationEntityType> selectedTypes) {
+		Map<Long, LocationDemandMapping> map = new HashMap<>();
+
+		entityDemands
+				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
-						result -> {
-							map.put(result
-									.getLong(LoctationDemandMap.location_id),
+						d -> {
+							Long locationId = d
+									.getLong(EntityDemandMap.location_id);
+							LocationDemandMapping ldm = map.get(locationId);
+							if (ldm == null) {
+								map.put(locationId,
+										ldm = new LocationDemandMapping(
+												d.getInteger(EntityDemandMap.block_id)));
+							}
 
-									LocationDemandFactory.FACTORY
-											.build(type)
-											.addWithRevenue(
-													LocationEntityType.Household,
-													result.getDouble(LoctationDemandMap.household_fiber),
-													result.getDouble(LoctationDemandMap.household_spend) * 0.3)
-											.addWithRevenue(
-													LocationEntityType.Business,
-													result.getDouble(LoctationDemandMap.business_fiber),
-													result.getDouble(LoctationDemandMap.bussiness_spend) * 0.3)
-											.addWithRevenue(
-													LocationEntityType.CellTower,
-													result.getDouble(LoctationDemandMap.tower_fiber),
-													result.getDouble(LoctationDemandMap.tower_spend) * 0.3)
-											.build());
+							LocationEntityType lt = toLocationEntityType(d
+									.getInteger(EntityDemandMap.entity_type));
+
+							if (selectedTypes.contains(lt)) {
+								ldm.add(lt,
+										d.getDouble(EntityDemandMap.count),
+										d.getDouble(EntityDemandMap.monthly_spend));
+							}
 
 						});
 
 		return map;
+	}
+
+	private Map<Long, LocationDemandMapping> queryLocationDemand(
+			boolean isFilteringRoadLocationDemandsBySelection,
+			Set<LocationEntityType> selectedTypes, long planId, int year) {
+
+		return assembleMapping(
+				(isFilteringRoadLocationDemandsBySelection ? planRepository.queryFiberDemand(
+						planId, year)
+						: planRepository.queryAllFiberDemand(planId, year)),
+				selectedTypes);
 
 	}
 
@@ -365,6 +412,190 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private Collection<RoadEdge> getRoadEdges(
 			NetworkDataRequest networkConfiguration) {
 		return queryRoadEdges(networkConfiguration.getPlanId());
+	}
+
+	private static class EntityDemandMappingImpl implements EntityDemandMapping {
+
+		public static Aggregator<EntityDemandMapping> aggregate() {
+			return new EntityDemandMappingAggreagor();
+		}
+
+		public static class EntityDemandMappingAggreagor implements
+				Aggregator<EntityDemandMapping> {
+
+			private EntityDemandMappingImpl demandMapping = new EntityDemandMappingImpl(
+					0, 0);
+
+			@Override
+			public void add(EntityDemandMapping val) {
+				demandMapping.demand += val.getMappedDemand();
+				demandMapping.revenue += val.getMappedRevenue();
+			}
+
+			@Override
+			public EntityDemandMapping apply() {
+				return demandMapping;
+			}
+
+		}
+
+		private double demand;
+		private double revenue;
+
+		public EntityDemandMappingImpl(double demand, double revenue) {
+			super();
+			this.demand = demand;
+			this.revenue = revenue;
+		}
+
+		@Override
+		public double getMappedDemand() {
+			return demand;
+		}
+
+		@Override
+		public double getMappedRevenue() {
+			return revenue;
+		}
+
+	}
+
+	private static class LocationDemandMapping implements DemandMapping {
+
+		public static Aggregator<LocationDemandMapping> aggregate() {
+			return new DemandMappingAggregator();
+		}
+
+		private static class DemandMappingAggregator implements
+				Aggregator<LocationDemandMapping> {
+
+			private Map<LocationEntityType, Aggregator<EntityDemandMapping>> map = new EnumMap<>(
+					LocationEntityType.class);
+
+			public DemandMappingAggregator() {
+				for (LocationEntityType type : LocationEntityType.values()) {
+					map.put(type, EntityDemandMappingImpl.aggregate());
+				}
+			}
+
+			@Override
+			public void add(LocationDemandMapping val) {
+				for (LocationEntityType type : LocationEntityType.values()) {
+					map.get(type).add(val.getEntityDemandMapping(type));
+				}
+			}
+
+			@Override
+			public LocationDemandMapping apply() {
+				Map<LocationEntityType, EntityDemandMapping> result = new EnumMap<>(
+						LocationEntityType.class);
+
+				for (LocationEntityType t : LocationEntityType.values()) {
+					result.put(t, map.get(t).apply());
+				}
+
+				return new LocationDemandMapping(0, result);
+			}
+
+		}
+
+		private int blockId;
+
+		private Map<LocationEntityType, EntityDemandMapping> map = new EnumMap<>(
+				LocationEntityType.class);
+		private static final EntityDemandMapping zeroDemand = new EntityDemandMappingImpl(
+				0, 0);
+
+		public LocationDemandMapping(int blockId) {
+			super();
+			this.blockId = blockId;
+		}
+
+		public LocationDemandMapping(int blockId,
+				Map<LocationEntityType, EntityDemandMapping> map) {
+			this.blockId = blockId;
+			this.map = map;
+		}
+
+		public boolean isEmpty() {
+			return map.size() == 0;
+		}
+
+		public int getBlockId() {
+			return blockId;
+		}
+
+		public void add(LocationEntityType type, EntityDemandMapping mapping) {
+			map.put(type, mapping);
+		}
+
+//		public void addZeroDemand(LocationEntityType type) {
+//			add(type, zeroDemand);
+//		}
+
+		public void add(LocationEntityType type, double demand, double revenue) {
+			add(type, new EntityDemandMappingImpl(demand, revenue));
+		}
+
+		@Override
+		public EntityDemandMapping getEntityDemandMapping(
+				LocationEntityType type) {
+			EntityDemandMapping edm = map.get(type);
+			return edm == null ? zeroDemand : edm;
+		}
+
+	}
+
+	private class LocationDemandAnalysisImpl implements LocationDemandAnalysis {
+
+		private Map<Long, LocationDemandMapping> locationDemandMappingMap;
+		private LocationDemand selectedDemand;
+
+		private Map<SpeedCategory, LocationDemand> locationDemandMap = new EnumMap<>(
+				SpeedCategory.class);
+
+		public LocationDemandAnalysisImpl(
+				Map<Long, LocationDemandMapping> locationDemandMappingMap,
+				LocationDemand selectedDemand) {
+			super();
+			this.locationDemandMappingMap = locationDemandMappingMap;
+			this.selectedDemand = selectedDemand;
+		}
+
+		@Override
+		public LocationDemand getSelectedDemand() {
+			return selectedDemand;
+		}
+
+		@Override
+		public LocationDemand getLocationDemand(SpeedCategory speedCategory) {
+			LocationDemand ld = locationDemandMap.get(speedCategory);
+			if (ld == null) {
+				locationDemandMap.put(speedCategory,
+						ld = aggregateDemandForSpeedCategory(speedCategory));
+			}
+			return ld;
+		}
+
+		private LocationDemand aggregateDemandForSpeedCategory(
+				SpeedCategory speedCategory) {
+
+			Aggregator<LocationDemand> aggregator = DefaultLocationDemand
+					.demandAggregate();
+
+			locationDemandMappingMap
+					.values()
+					.stream()
+					.map(ldm -> aroDemandService.createDemandByCensusBlock(
+							ldm.getBlockId(), ldm, speedCategory))
+					.forEach(ld -> {
+						aggregator.add(ld);
+					});
+
+			return aggregator.apply();
+
+		}
+
 	}
 
 }

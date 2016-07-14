@@ -59,10 +59,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     var totalBusinesses = feature.getProperty('total_businesses') || 0
     var totalHouseholds = feature.getProperty('total_households') || 0
     var selected = feature.getProperty('selected') ? 'selected' : 'default'
+    var largestType = feature.getProperty('largest_type')
     var type = (totalBusinesses && totalHouseholds)
       ? 'composite_location'
       : totalBusinesses ? 'businesses' : 'households'
-    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${selected}.png`
+    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestType}_${selected}.png`
   }
 
   var locationsLayer = $scope.locations_layer = new MapLayer({

@@ -30,8 +30,8 @@ public class NetworkPlanSerializer<T> {
 							equipmentSerializer.serialize(model
 									.getFiberSourceMapping());
 							equipmentSerializer.commit(a -> planMods.addEquipment(a.assemble(planId, equipmentResolver)));
-							planMods.setLocationDemand(equipmentSerializer.getLocationDemand()) ;
-
+							planMods.setEquipmentLocationMappings(equipmentSerializer.getEquipmentLocationMappings()) ;
+							planMods.setDemandCoverage(equipmentSerializer.getDemandCoverage()) ;
 							FiberRouteSerializer fibererSerializer = new FiberRouteSerializer(
 									planId, model, equipmentSerializer
 											.getMapping());

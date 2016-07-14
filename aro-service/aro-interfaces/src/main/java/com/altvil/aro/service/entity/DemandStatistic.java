@@ -2,13 +2,17 @@ package com.altvil.aro.service.entity;
 
 public interface DemandStatistic {
 	
-	double getRawCoverage();
+	double getRawCoverage(); //Counts of entities A.K.A Premises Passed
 
-	double getDemand();
+	double getAtomicUnits() ; //Fiber Units Consumed network
 	
-	double getMonthlyRevenueImpact() ;
+	double getTotalRevenue() ;
+	double getMonthlyRevenueImpact() ; //Revenue Impact
 	
-	DemandStatistic ratio(double ratio) ;
+	//penetration = raw / coverage 
+	double getPenetration() ; // penetration
+	double getFairShareDemand(); //Demand Modified by penetration
+	
 	
 
 }

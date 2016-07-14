@@ -20,6 +20,8 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
+import com.altvil.aro.service.optimization.OptimizedPlan;
+import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.master.MasterOptimizationAnalysis;
 import com.altvil.aro.service.optimization.master.MasterOptimizationPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
@@ -31,6 +33,7 @@ import com.altvil.aro.service.optimization.spi.OptimizationExecutorService.Execu
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
@@ -117,7 +120,8 @@ public class OptimizationPlannerServiceImpl implements
 
 			Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
 
-			Collection<WirecenterNetworkPlan> optimizedNetworks = updateNetworks(plannedNetworks);
+			Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
+					request.getOptimizationConstraints(), plannedNetworks);
 
 			return masterPlanningService.save(new MasterOptimizationPlan(
 					request, optimizedNetworks));
@@ -127,20 +131,30 @@ public class OptimizationPlannerServiceImpl implements
 		protected abstract Collection<PlannedNetwork> planNetworks(
 				Collection<WirecenterOptimizationRequest> wirecenters);
 
-		protected WirecenterNetworkPlan reify(PlannedNetwork plan) {
+		protected OptimizedPlan reify(
+				OptimizationConstraints constraints, PlannedNetwork plan) {
 
 			WirecenterNetworkPlan reifiedPlan = conversionService.convert(
 					plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
 
-			wirecenterPlanningService.save(reifiedPlan);
+			NetworkDemandSummary demandSummary = NetworkDemandSummaryImpl
+					.build().add(plan.getNetworkDemands())
+					.setDemandCoverage(reifiedPlan.getDemandCoverage()).build();
 
-			return reifiedPlan;
+			OptimizedPlan optimizedPlan = new OptimizedPlanIml(constraints,
+					reifiedPlan, demandSummary) ;
+			
+			wirecenterPlanningService.save(new OptimizedPlanIml(constraints,
+					reifiedPlan, demandSummary));
+
+			return optimizedPlan;
 		}
 
-		protected Collection<WirecenterNetworkPlan> updateNetworks(
+		protected Collection<OptimizedPlan> updateNetworks(
+				OptimizationConstraints constraints,
 				Collection<PlannedNetwork> plannedNetworks) {
 
-			return plannedNetworks.stream().map(this::reify)
+			return plannedNetworks.stream().map(p -> reify(constraints, p))
 					.collect(Collectors.toList());
 
 		}
@@ -261,6 +275,38 @@ public class OptimizationPlannerServiceImpl implements
 				}).filter(o -> !o.isInError())
 				.map(WirecenterOptimization::getResult).filter(validPredicate)
 				.collect(Collectors.toList());
+
+	}
+
+	private static class OptimizedPlanIml implements OptimizedPlan {
+
+		private OptimizationConstraints constraints;
+		private WirecenterNetworkPlan networkPlan;
+		private NetworkDemandSummary demandSummary;
+
+		public OptimizedPlanIml(OptimizationConstraints constraints,
+				WirecenterNetworkPlan networkPlan,
+				NetworkDemandSummary demandSummary) {
+			super();
+			this.constraints = constraints;
+			this.networkPlan = networkPlan;
+			this.demandSummary = demandSummary;
+		}
+
+		@Override
+		public NetworkDemandSummary getDemandSummary() {
+			return demandSummary;
+		}
+
+		@Override
+		public OptimizationConstraints getOptimizationConstraints() {
+			return constraints;
+		}
+
+		@Override
+		public WirecenterNetworkPlan getWirecenterNetworkPlan() {
+			return networkPlan;
+		}
 
 	}
 

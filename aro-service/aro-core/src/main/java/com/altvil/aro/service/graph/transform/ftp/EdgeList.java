@@ -42,7 +42,7 @@ public class EdgeList {
 		
 		int index = 0 ;
 		for(DefaultAssignedEntityDemand a : assignments) {
-			totalDemand += a.getHouseholdFiberDemandValue() ;
+			totalDemand += a.getAtomicUnits() ;
 			cumlativeDemand[index++] = totalDemand ;
 		}
 		

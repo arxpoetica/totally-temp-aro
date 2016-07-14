@@ -1,13 +1,13 @@
-DROP TABLE IF EXISTS client.business_categories;
+/*
 
-CREATE TABLE client.business_categories
-(
-	id serial,
-	name varchar, -- "Standard" name for the category
-	description varchar, -- Client-provided name to display in the app
-	CONSTRAINT client_business_categories_pkey PRIMARY KEY (id)
-);
+Delta script DROP TABLE IF EXISTS client.business_categories ;
+*/
 
-INSERT INTO client.business_categories(name, description) VALUES('small', 'SMB');
-INSERT INTO client.business_categories(name, description) VALUES('medium', 'Mid-Size');
-INSERT INTO client.business_categories(name, description) VALUES('large', 'Enterprise');
+-- Create a View on business Categories to maintain existing code
+-- NOTE : Business categories extends entity_category which is a more general concept
+
+DROP VIEW IF EXISTS client.business_categories ;
+CREATE VIEW client.business_categories AS
+select e.id, e.name, e.description, b.min_value, b.max_value
+from client.business_category b
+join client.entity_category e on e.id = b.id ;

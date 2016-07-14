@@ -1,67 +1,67 @@
 package com.altvil.aro.service.conversion.impl;
 
 import com.altvil.aro.model.NetworkNode;
-import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
-import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.conversion.EquipmentLocationMapping;
+import com.altvil.aro.service.demand.impl.DefaultDemandStatistic;
+import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.utils.func.Aggregator;
 
 public class NetworkNodeAssembler {
-	
-	
+
+	private Aggregator<DemandStatistic> aggregator = DefaultDemandStatistic
+			.aggregate();
+
 	public interface EquipmentResolver {
-		NetworkNode getCentralOffice(long planId) ;
+		NetworkNode getCentralOffice(long planId);
 	}
-	
-	private NetworkNode networkNode ;
-	
-	private Aggregator<LocationDemand> aggregator = DefaultLocationDemand.demandAggregate() ;
-	
+
+	private NetworkNode networkNode;
+	// private NetworkNode parentNode ;
+
+	private EquipmentLocationMapping mappedLocations;
+
 	public NetworkNodeAssembler(NetworkNode networkNode) {
-		this.networkNode = networkNode ;
+		this.networkNode = networkNode;
 	}
-	
-	public Aggregator<LocationDemand> getAggregator() {
-		return aggregator ;
-	}
-	
+
 	public NetworkNode assemble(long planId, EquipmentResolver resolver) {
-		if( networkNode == null ) {
-			networkNode = resolver.getCentralOffice(planId) ;
+		if (networkNode == null) {
+			networkNode = resolver.getCentralOffice(planId);
 		}
-		
-		LocationDemand ld = aggregator.apply() ;
-		
-		networkNode.setHouseHoldCount(ld.getLocationDemand(LocationEntityType.Household).getDemand()) ;
-		networkNode.setBusinessCount(ld.getLocationDemand(LocationEntityType.Business).getDemand()) ;
-		networkNode.setCellTowerCount(ld.getLocationDemand(LocationEntityType.CellTower).getDemand()) ;
-		networkNode.setAtomicUnit(ld.getDemand()) ;
-		return networkNode ;
-		
+
+		DemandStatistic ld = aggregator.apply();
+		networkNode.setAtomicUnit(ld.getAtomicUnits());
+		return networkNode;
+
 	}
-	
-	
+
 	public NetworkNode getNetworkNode() {
-		return networkNode ;
+		return networkNode;
 	}
-	
-	
-	private void addChildDemand(LocationDemand demand) {
-		 aggregator.add(demand) ;
+
+	public NetworkNodeAssembler setParent(NetworkNodeAssembler parent,
+			EquipmentLocationMapping mappedLocations) {
+		this.mappedLocations = mappedLocations;
+		addChildDemand(mappedLocations.getDemandStatistic());
+		return setParent(parent);
 	}
-	
-	public NetworkNodeAssembler setParent(NetworkNodeAssembler parent, LocationDemand ld) {
-		addChildDemand(ld) ;
-		return setParent(parent) ;
-	}
-	
+
 	public NetworkNodeAssembler setParent(NetworkNodeAssembler parent) {
-		parent.addChildDemand(this.getLocationDemand()) ;
-		return this ;
+		// TODO When Generalized track parent relationship ;
+		parent.addChildDemand(this.aggregator.apply());
+		return this;
 	}
-	
-	public LocationDemand getLocationDemand() {
-		return aggregator.apply() ;
+
+	private void addChildDemand(DemandStatistic demand) {
+		aggregator.add(demand);
 	}
-	
+
+	public EquipmentLocationMapping getEquipmentLocationMapping() {
+		return mappedLocations;
+	}
+
+	public DemandStatistic getLocationDemand() {
+		return aggregator.apply();
+	}
+
 }

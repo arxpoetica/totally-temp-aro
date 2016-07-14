@@ -6,6 +6,8 @@ public enum ReportType {
 	detail_equipment,
 	summary_equipment,
 	detail_fiber,
-	summary_fiber
+	summary_fiber,
+	wirecenter_report,
+	master_report
 
 }

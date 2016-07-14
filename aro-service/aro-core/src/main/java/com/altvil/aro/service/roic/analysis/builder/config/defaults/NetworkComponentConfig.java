@@ -29,7 +29,8 @@ public class NetworkComponentConfig extends AbstractConfig<RoicInputs> {
 	}
 
 	@Override
-	protected CurveRegistry<RoicInputs> assemble(CurveRegistry<RoicInputs> assembler) {
+	protected CurveRegistry<RoicInputs> assemble(
+			CurveRegistry<RoicInputs> assembler) {
 		super.assemble(assembler);
 
 		assembler.add(AnalysisCode.cost,
@@ -63,9 +64,10 @@ public class NetworkComponentConfig extends AbstractConfig<RoicInputs> {
 				.add(AnalysisCode.new_connections_count)
 				.add(AnalysisCode.new_connections_cost)
 				.add(AnalysisCode.houseHolds_global_count)
-				.add(AnalysisCode.cost);
+				.add(AnalysisCode.cost)
+
+				.add(AnalysisCode.cashflow);
 
 		return registry;
 	}
-
 }

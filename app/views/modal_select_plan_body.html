@@ -11,34 +11,83 @@
   No plans found
 </p>
 <div ng-show="plans.length > 0">
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>
-          Name
-          <a href="javascript:void(0)" ng-click="sort_by('name', true)">↓</a>
-          <a href="javascript:void(0)" ng-click="sort_by('name', false)">↑</a>
-        </th>
-        <th>
-          Created at
-          <a href="javascript:void(0)" ng-click="sort_by('created_at', true)">↓</a>
-          <a href="javascript:void(0)" ng-click="sort_by('created_at', false)">↑</a>
-        </th>
-        <th>
-          Updated at
-          <a href="javascript:void(0)" ng-click="sort_by('updated_at', true)">↓</a>
-          <a href="javascript:void(0)" ng-click="sort_by('updated_at', false)">↑</a>
-        </th>
-        <th>Owner</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="plan in plans">
-        <td><a href="javascript:void(0)" ng-click="selectPlan(plan)">{{plan.name}}</a></th>
-        <td>{{plan.updated_at | date:'shortDate'}}</th>
-        <td>{{plan.created_at | date:'shortDate'}}</th>
-        <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</th>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>
+            Name
+            <a href="javascript:void(0)" ng-click="sortBy('name', true)">↓</a>
+            <a href="javascript:void(0)" ng-click="sortBy('name', false)">↑</a>
+          </th>
+          <th>
+            Created at
+            <a href="javascript:void(0)" ng-click="sortBy('created_at', true)">↓</a>
+            <a href="javascript:void(0)" ng-click="sortBy('created_at', false)">↑</a>
+          </th>
+          <th>
+            Updated at
+            <a href="javascript:void(0)" ng-click="sortBy('updated_at', true)">↓</a>
+            <a href="javascript:void(0)" ng-click="sortBy('updated_at', false)">↑</a>
+          </th>
+          <th>Owner</th>
+          <th>Total Cost</th>
+          <th>Total Revenue</th>
+          <th>Incremental IRR</th>
+          <th>Incremental NPV</th>
+          <th>Premises enabled</th>
+          <th>Fiber Miles Aug</th>
+          <th>Fiber Miles New</th>
+          <th>Prem Ct 4G LTE</th>
+          <th>Prem Ct 5G</th>
+          <th>Prem Ct FiOS</th>
+          <th>Prem Ct Core</th>
+          <th>Cost/Prem 4G LTE</th>
+          <th>Cost/Prem 5G</th>
+          <th>Cost/Prem FiOS</th>
+          <th>Cost/Prem Core</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="plan in plans">
+          <td><a href="javascript:void(0)" ng-click="selectPlan(plan)">{{plan.name}}</a></td>
+          <td>{{plan.updated_at | date:'shortDate'}}</td>
+          <td>{{plan.created_at | date:'shortDate'}}</td>
+          <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
+          <td class="text-right">{{plan.total_cost | currency}}</td>
+          <td class="text-right">{{plan.total_revenue | currency}}</td>
+          <td class="text-right">{{plan.irr * 100 | number: 1}}%</td>
+          <td class="text-right">{{plan.npv / 1000 | currency:"$":1}}K</td>
+          <td class="text-right">{{plan.total_count | number}}</td>
+          <td class="text-right"></td>
+          <td class="text-right">{{plan.fiber_length | number: 0}} mi</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="text-right">{{plan.total_count | number}}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <nav class="text-center">
+    <ul class="pagination">
+      <li ng-class="{ disabled: currentPage === 1 }">
+        <a href="javascript:void(0)" aria-label="Previous" ng-click="loadPlans(currentPage - 1)">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <li ng-repeat="page in pages" ng-class="{ active: page === currentPage }">
+        <a href="javascript:void(0)" ng-click="loadPlans(page)">{{ page }}</a>
+      </li>
+      <li ng-class="{ disabled: currentPage === pages[pages.length - 1] }">
+        <a href="javascript:void(0)" aria-label="Next" ng-click="loadPlans(pages[pages.length - 1])">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
 </div>

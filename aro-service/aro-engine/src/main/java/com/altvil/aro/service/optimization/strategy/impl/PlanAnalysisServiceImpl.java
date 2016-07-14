@@ -85,7 +85,7 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 				return false;
 			}
 
-			if (network.getAnalysisNode().getFiberCoverage().getDemand() <= 0) {
+			if (network.getAnalysisNode().getFiberCoverage().getAtomicUnits() <= 0) {
 				return false;
 			}
 

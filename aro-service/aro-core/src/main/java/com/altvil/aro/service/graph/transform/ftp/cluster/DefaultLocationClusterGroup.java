@@ -100,7 +100,7 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 				for (PinnedAssignedEntityDemand a : cluster.getLocations()) {
 					DefaultAssignedEntityDemand ald = new DefaultAssignedEntityDemand(
 							a.getLocationEntity(), gs.proxyPin(0.0,
-									a.getPinnedLocation()));
+									a.getPinnedLocation()), a.getLocationDemand());
 					locations.add(ald);
 				}
 			}
@@ -195,23 +195,23 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 
 		private Collection<PinnedAssignedEntityDemand> split(double maxDemand,
 				double remainder, PinnedAssignedEntityDemand d) {
-			if (d.getDemand() < remainder) {
+			if (d.getAtomicUnits() < remainder) {
 				return Collections.singleton(d);
 			}
 
 			List<PinnedAssignedEntityDemand> result = new ArrayList<>();
 
-			Pair<PinnedAssignedEntityDemand> pair = d.split(remainder);
+			Pair<PinnedAssignedEntityDemand> pair = d.split(d.getLocationDemand().splitDemand(remainder));
 			result.add(pair.getHead());
 			d = pair.getTail();
 
-			while (d.getDemand() > maxDemand) {
-				pair = d.split(maxDemand);
+			while (d.getAtomicUnits() > maxDemand) {
+				pair = d.split(d.getLocationDemand().splitDemand(maxDemand)) ;
 				result.add(pair.getHead());
 				d = pair.getTail();
 			}
 
-			if (d.getDemand() > 0) {
+			if (d.getAtomicUnits() > 0) {
 				result.add(d);
 			}
 
@@ -223,14 +223,14 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			StringBuffer sb = new StringBuffer();
 
 			sb.append("Summed Demand = ");
-			sb.append(demands.stream().mapToDouble(d -> d.getDemand()).sum());
+			sb.append(demands.stream().mapToDouble(d -> d.getAtomicUnits()).sum());
 			int index = 0;
 			sb.append(" => ");
 			for (PinnedAssignedEntityDemand pd : demands) {
 				if (index++ > 0) {
 					sb.append(", ");
 				}
-				sb.append(pd.getDemand());
+				sb.append(pd.getAtomicUnits());
 			}
 
 			return sb.toString();
@@ -247,12 +247,12 @@ public class DefaultLocationClusterGroup implements LocationClusterGroup {
 			}
 			
 
-			if (d.getDemand() > currentCluster.getRemainingDemand()) {
+			if (d.getAtomicUnits() > currentCluster.getRemainingDemand()) {
 				Collection<PinnedAssignedEntityDemand> demands = split(
 						thresholds.getMaxlocationPerFDT(),
 						currentCluster.getRemainingDemand(), d);
 				if (log.isTraceEnabled()) {
-					log.trace("Overflowed Demand " + d.getDemand()
+					log.trace("Overflowed Demand " + d.getAtomicUnits()
 							+ " remainder =  "
 							+ currentCluster.getRemainingDemand() + " .... "
 							+ toDebugInfo(demands));

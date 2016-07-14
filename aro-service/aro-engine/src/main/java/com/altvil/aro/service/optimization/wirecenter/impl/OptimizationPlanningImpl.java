@@ -1,6 +1,9 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
@@ -10,9 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.model.DemandTypeEnum;
+import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
+import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
@@ -54,6 +61,21 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				.getConstraints()));
 	}
 
+	private Collection<NetworkDemand> toNetworkDemands(NetworkData networkData) {
+
+		List<NetworkDemand> demands = new ArrayList<>();
+
+		demands.add(new NetworkDemand(DemandTypeEnum.new_demand,
+				SpeedCategory.cat7, networkData.getDemandAnalysis()
+						.getSelectedDemand()));
+
+		demands.add(new NetworkDemand(DemandTypeEnum.original_demand,
+				SpeedCategory.cat3, networkData.getDemandAnalysis()
+						.getLocationDemand(SpeedCategory.cat3)));
+
+		return demands;
+	}
+
 	@Override
 	public Optional<PlannedNetwork> planNetwork(
 			WirecenterOptimizationRequest request) {
@@ -63,7 +85,8 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 
 		return StreamUtil.map(planService.computeNetworkModel(networkData,
 				FiberConstraintUtils.build(request.getConstraints())),
-				n -> new DefaultPlannedNetwork(request.getPlanId(), n));
+				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
+						toNetworkDemands(networkData)));
 
 	}
 
@@ -81,29 +104,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				createOptimizerContext(request));
 
 		return new PrunedNetworkImpl(request.getPlanId(),
-				planner.getOptimizedPlans());
-
-		// Collection<OptimizedNetwork> optimizedPlans = planner
-		// .getOptimizedPlans();
-		//
-		// Optional<OptimizedNetwork> model = strategy
-		// .selectOptimization(optimizedPlans);
-		//
-		// if (model.isPresent()) {
-		// WirecenterNetworkPlan plan = conversionService.convert(
-		// request.getPlanId(), model.get().getNetworkPlan());
-		//
-		// if (!plan.getNetworkNodes().isEmpty()) {
-		// saveUpdate(plan);
-		// }
-		// costService.updateWireCenterCosts(plan.getPlanId());
-		// //return plan;
-		//
-		//
-		// }
-		//
-		// return null ;
-
+				planner.getOptimizedPlans(), toNetworkDemands(networkData));
 	}
 
 }

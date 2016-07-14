@@ -8,7 +8,7 @@ public abstract class ComparableModel {
 
 	@Override
 	public int hashCode() {
-		Serializable key = getIdKey();
+		Serializable key = idKey();
 		return key == null ? System.identityHashCode(this) : key.hashCode();
 	}
 
@@ -27,7 +27,7 @@ public abstract class ComparableModel {
 			return false ;
 		}
 		
-		return isEqual(this.getIdKey(), ((ComparableModel) obj).getIdKey());
+		return isEqual(this.idKey(), ((ComparableModel) obj).idKey());
 	}
 	
 	protected boolean isEqual(Serializable a, Serializable b) {
@@ -39,6 +39,6 @@ public abstract class ComparableModel {
 	}
 
 	@Transient
-	protected abstract Serializable getIdKey();
+	protected abstract Serializable idKey();
 
 }

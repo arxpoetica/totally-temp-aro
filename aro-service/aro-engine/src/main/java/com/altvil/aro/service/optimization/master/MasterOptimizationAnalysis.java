@@ -2,7 +2,7 @@ package com.altvil.aro.service.optimization.master;
 
 import java.util.Collection;
 
-import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.optimization.OptimizedPlan;
 
 public class MasterOptimizationAnalysis {
 
@@ -19,7 +19,7 @@ public class MasterOptimizationAnalysis {
 	}
 	
 	
-	public Collection<WirecenterNetworkPlan> getWirecenters() {
+	public Collection<OptimizedPlan> getWirecenters() {
 		return plan.getUpdates();
 	}
 	

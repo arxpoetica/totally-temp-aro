@@ -58,11 +58,11 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 			PinnedLocation pl = locationAssignment.getPinnedLocation();
 			LocationDemand locationDemand = entity.getLocationDemand();
 
-			double totalDemand = locationDemand.getDemand();
+			double totalDemand = locationDemand.getAtomicUnits();
 
 			if (totalDemand != 0) {
 				
-				DefaultAssignedEntityDemand ad = new DefaultAssignedEntityDemand(entity, pl);
+				DefaultAssignedEntityDemand ad = new DefaultAssignedEntityDemand(entity, pl, entity.getLocationDemand());
 
 				if (totalDemand >= bulkFiberThreshold) {
 					builder.addBulkDemand(ad);

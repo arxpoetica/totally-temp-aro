@@ -19,6 +19,16 @@ public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
 	
+	
+	//TODO Create SpeedCategory Repository
+	@Query(value = "select s.provname, s.speed_category, s.stateabbr, b.brand_strength\n" + 
+			"from nbm.competitor_speed_category s\n" + 
+			"join nbm.brand_strength b on b.provname = s.provname \n" + 
+			"where gid = :censusBlockId", nativeQuery = true)
+	@Transactional
+	List<Object[]> querySpeedCategoriesElements(@Param("censusBlockId") int cenusBlock);
+	
+	
 	//TODO Create Price Repository
 	@Query(value = "select name, uom_name, price from financial.network_price", nativeQuery = true)
 	List<Object[]> queryPriceModelElements();
@@ -70,128 +80,68 @@ public interface NetworkPlanRepository extends
 	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
 
 	
-	@Query(value = "with location_ids as (\n" + 
-			"select location_id as id\n" + 
-			"from client.plan_targets\n" + 
-			"where plan_id = :planId	\n" + 
+	@Query(value = "with selected_locations as (\n" + 
+			"select location_id as id, b.gid as block_id\n" + 
+			"	from client.plan_targets t\n" + 
+			"	join aro.locations l on l.id = t.location_id\n" + 
+			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
+			"	where plan_id = :planId\n" + 
+			"),\n" + 
+			"bs as (\n" + 
+			"  select l.id, l.block_id, entity_type, e.count, e.monthly_spend \n" + 
+			"  from selected_locations l\n" + 
+			"  join client.business_summary e on e.location_id = l.id\n" + 
+			"   where year = :year and city_id = 1\n" + 
+			"),\n" + 
+			"hs as (\n" + 
+			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend \n" + 
+			"  from selected_locations l\n" + 
+			"  join client.households_summary e on e.location_id = l.id\n" + 
+			"),\n" + 
+			"ct as (\n" + 
+			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend \n" + 
+			"  from selected_locations l\n" + 
+			"  join client.celltower_summary e on e.location_id = l.id\n" + 
 			")\n" + 
-			",\n" + 
-			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend\n" + 
-			"	from client.spend s\n" + 
-			"	where city_id = 1 and year = :year\n" + 
-			"	group by industry_id, employees_by_location_id\n" + 
-			"	order by industry_id, employees_by_location_id\n" + 
-			")\n" + 
-			",\n" + 
-			"business_fiber as (\n" + 
-			"	select l.id,\n" + 
-			"	(case when sum(b.number_of_employees) >= 1000 then 32 else 1 end)  as fiber_count,\n" + 
-			"	sum(f.monthly_spend) as monthly_spend\n" + 
-			"	from location_ids l \n" + 
-			"	join aro.businesses b on b.location_id = l.id \n" + 
-			"	join client.employees_by_location e on (b.number_of_employees >= e.min_value) and  (b.number_of_employees <= e.max_value) \n" + 
-			"	join client.industry_mapping m on m.sic4 = b.industry_id\n" + 
-			"	join fiber_model f on f.industry_id = m.industry_id and f.employees_by_location_id = e.id \n" + 
-			"	group by l.id\n" + 
-			")\n" + 
-			",\n" + 
-			"celltower_fiber as (\n" + 
-			"	select l.id,\n" + 
-			"	sum(1) * 64 as fiber_count,\n" + 
-			"	sum(1) * 500 as monthly_spend\n" + 
-			"	from aro.towers t\n" + 
-			"	join location_ids l on l.id = t.location_id\n" + 
-			"	group by l.id\n" + 
-			")\n" + 
-			",\n" + 
-			"household_fiber as (\n" + 
-			"	select l.id, sum(case when h.number_of_households is null then 1 else h.number_of_households end) as fiber_count, \n" + 
-			"	sum(case when h.number_of_households is null then 1 else h.number_of_households end) * 60 as monthly_spend\n" + 
-			"	from aro.households h\n" + 
-			"	join location_ids l on l.id = h.location_id\n" + 
-			"	group by l.id\n" + 
-			")\n" + 
-			"select \n" + 
-			"l.id,\n" + 
-			"case when b.fiber_count is null then 0 else b.fiber_count end as business_fiber,\n" + 
-			"case when b.fiber_count is null then 0 else b.monthly_spend end as business_spend,\n" + 
-			"\n" + 
-			"case when t.fiber_count is null then 0 else t.fiber_count end as celltower_fiber,\n" + 
-			"case when t.fiber_count is null then 0 else t.monthly_spend end as celltower_spend,\n" + 
-			"\n" + 
-			"case when h.fiber_count is null then 0 else h.fiber_count end as household_fiber,\n" + 
-			"case when h.fiber_count is null then 0 else h.monthly_spend end as household_spend\n" + 
-			"\n" + 
-			"from location_ids l\n" + 
-			"left join business_fiber b on b.id = l.id\n" + 
-			"left join celltower_fiber t on t.id = l.id\n" + 
-			"left join household_fiber h on h.id = l.id\n" + 
-			"limit 40000\n", 
+			"select * from  bs\n" + 
+			"UNION\n" + 
+			"select * from  hs\n" + 
+			"UNION\n" + 
+			"select * from ct\n" +
+			"limit 60000\n", 
 			nativeQuery = true)
 	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year);
 	
-	@Query(value = "with location_ids as (\n" + 
-			"	select l.id as id\n" + 
+	@Query(value = "with selected_locations as (\n" + 
+			"select l.id, b.gid as block_id\n" + 
 			"	from client.plan p \n" + 
 			"	join aro.wirecenters w on w.id = p.wirecenter_id\n" + 
 			"	join aro.locations l on st_contains(w.geom, l.geom)\n" + 
-			"	where p.id = :planId\n" + 
+			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
+			"	where p.id =  :planId\n" + 
+			"),\n" + 
+			"bs as (\n" + 
+			"  select l.id, l.block_id, entity_type, e.count, e.monthly_spend \n" + 
+			"  from selected_locations l\n" + 
+			"  join client.business_summary e on e.location_id = l.id\n" + 
+			"   where year = :year and city_id = 1\n" + 
+			"),\n" + 
+			"hs as (\n" + 
+			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend \n" + 
+			"  from selected_locations l\n" + 
+			"  join client.households_summary e on e.location_id = l.id\n" + 
+			"),\n" + 
+			"ct as (\n" + 
+			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend \n" + 
+			"  from selected_locations l\n" + 
+			"  join client.celltower_summary e on e.location_id = l.id\n" + 
 			")\n" + 
-			",\n" + 
-			"fiber_model as (\n" + 
-			"	select s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend\n" + 
-			"	from client.spend s\n" + 
-			"	where city_id = 1 and year = :year\n" + 
-			"	group by industry_id, employees_by_location_id\n" + 
-			"	order by industry_id, employees_by_location_id\n" + 
-			")\n" + 
-			",\n" + 
-			"business_fiber as (\n" + 
-			"	select l.id,\n" + 
-			"	(case when sum(b.number_of_employees) >= 1000 then 32 else 1 end)  as fiber_count,\n" + 
-			"	sum(f.monthly_spend) as monthly_spend\n" + 
-			"	from location_ids l \n" + 
-			"	join aro.businesses b on b.location_id = l.id \n" + 
-			"	join client.employees_by_location e on (b.number_of_employees >= e.min_value) and  (b.number_of_employees <= e.max_value) \n" + 
-			"	join client.industry_mapping m on m.sic4 = b.industry_id\n" + 
-			"	join fiber_model f on f.industry_id = m.industry_id and f.employees_by_location_id = e.id \n" + 
-			"	group by l.id\n" + 
-			")\n" + 
-			",\n" + 
-			"celltower_fiber as (\n" + 
-			"	select l.id,\n" + 
-			"	sum(1) * 64  as fiber_count,\n" + 
-			"	sum(1) * 500 as monthly_spend\n" + 
-			"	from aro.towers t\n" + 
-			"	join location_ids l on l.id = t.location_id\n" + 
-			"	group by l.id\n" + 
-			")\n" + 
-			",\n" + 
-			"household_fiber as (\n" + 
-			"	select l.id, sum(case when h.number_of_households is null then 1 else h.number_of_households end) as fiber_count, \n" + 
-			"	sum(case when h.number_of_households is null then 1 else h.number_of_households end) * 60 as monthly_spend\n" + 
-			"	from aro.households h\n" + 
-			"	join location_ids l on l.id = h.location_id\n" + 
-			"	group by l.id\n" + 
-			")\n" + 
-			"select \n" + 
-			"l.id,\n" + 
-			"case when b.fiber_count is null then 0 else b.fiber_count end as business_fiber,\n" + 
-			"case when b.fiber_count is null then 0 else b.monthly_spend end as business_spend,\n" + 
-			"\n" + 
-			"case when t.fiber_count is null then 0 else t.fiber_count end as celltower_fiber,\n" + 
-			"case when t.fiber_count is null then 0 else t.monthly_spend end as celltower_spend,\n" + 
-			"\n" + 
-			"case when h.fiber_count is null then 0 else h.fiber_count end as household_fiber,\n" + 
-			"case when h.fiber_count is null then 0 else h.monthly_spend end as household_spend\n" + 
-			"\n" + 
-			"from location_ids l\n" + 
-			"left join business_fiber b on b.id = l.id\n" + 
-			"left join celltower_fiber t on t.id = l.id\n" + 
-			"left join household_fiber h on h.id = l.id\n" + 
-			"limit 40000\n" + 
-			"\n", nativeQuery = true)
+			"select * from  bs\n" + 
+			"UNION\n" + 
+			"select * from  hs\n" + 
+			"UNION\n" + 
+			"select * from ct\n" +
+			"limit 60000", nativeQuery = true)
 	List<Object[]> queryAllFiberDemand(@Param("planId") long planId, @Param("year") int year);
 
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +

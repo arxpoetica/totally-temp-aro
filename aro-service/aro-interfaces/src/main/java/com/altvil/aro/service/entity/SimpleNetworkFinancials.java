@@ -37,7 +37,7 @@ public class SimpleNetworkFinancials {
 		this.fiberLength = fiberLength;
 
 		this.fiberCost = this.fiberLength * costPerMeter;
-		this.equipmentCost = locationDemand.getDemand() * costPerAtomicUnit;
+		this.equipmentCost = locationDemand.getAtomicUnits() * costPerAtomicUnit;
 		this.totalCost = equipmentCost + fiberCost;
 
 		this.coCost = equipmentCost * coRatio;

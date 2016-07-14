@@ -9,6 +9,9 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.new_plan_area_bounds
   $scope.edit_plan_name
 
+  $scope.currentPage = 1
+  $scope.pages = [1]
+
   if (config.route_planning.length > 0) {
     $scope.market_size_scale_n = 1000000
     $scope.market_size_scale_s = 'M'
@@ -184,16 +187,20 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  $scope.loadPlans = (callback) => {
+  $scope.loadPlans = function (page, callback) {
+    page = page || 1
+    $scope.currentPage = page
     var options = {
       url: '/network_plan/find_all',
       method: 'GET',
       params: {
-        text: $scope.search_text
+        text: $scope.search_text,
+        page: page || 1
       }
     }
     $http(options).success((response) => {
-      $scope.plans = response
+      $scope.plans = response.plans
+      $scope.pages = response.pages
       callback && callback()
     })
   }
@@ -208,27 +215,27 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $scope.showPlans = () => {
-    $scope.loadPlans(() => {
+    $scope.loadPlans(1, () => {
       $('#select-plan').modal('show')
       tracker.track('Open Analysis')
     })
   }
 
   $scope.showCombo = () => {
-    $scope.loadPlans(() => {
+    $scope.loadPlans(1, () => {
       $('#plan-combo').modal('show')
       tracker.track('Open Analysis')
     })
   }
 
   $scope.manageNetworkPlans = () => {
-    $scope.loadPlans(() => {
+    $scope.loadPlans(1, () => {
       $('#manage-network-plans').modal('show')
       tracker.track('Manage Analyses')
     })
   }
 
-  $scope.sort_by = (key, descending) => {
+  $scope.sortBy = (key, descending) => {
     $scope.plans = _.sortBy($scope.plans, (plan) => plan[key])
     if (descending) {
       $scope.plans = $scope.plans.reverse()

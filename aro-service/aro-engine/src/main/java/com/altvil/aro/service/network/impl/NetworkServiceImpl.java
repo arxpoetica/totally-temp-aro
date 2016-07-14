@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
-import com.altvil.aro.service.demand.impl.LocationDemandFactory;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -35,36 +34,24 @@ import com.altvil.utils.conversion.OrdinalEntityFactory;
 
 @Service("networkService")
 public class NetworkServiceImpl implements NetworkService {
-	
+
 	/*
-	private static class PlanYearKey implements Serializable {
-		private static final long serialVersionUID = 8958771852996243034L;
-
-		protected PlanYearKey(long planId, int year) {
-			this.planId = planId;
-			this.year = year;
-		}
-
-		private final long planId;
-		private final int year;
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + (int) (planId ^ (planId >>> 32));
-			result = prime * result + year;
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null)
-				return false;
-			PlanYearKey other = (PlanYearKey) obj;
-			return planId == other.planId && year == other.year;
-		}
-	}*/
+	 * private static class PlanYearKey implements Serializable { private static
+	 * final long serialVersionUID = 8958771852996243034L;
+	 * 
+	 * protected PlanYearKey(long planId, int year) { this.planId = planId;
+	 * this.year = year; }
+	 * 
+	 * private final long planId; private final int year;
+	 * 
+	 * @Override public int hashCode() { final int prime = 31; int result = 1;
+	 * result = prime * result + (int) (planId ^ (planId >>> 32)); result =
+	 * prime * result + year; return result; }
+	 * 
+	 * @Override public boolean equals(Object obj) { if (obj == null) return
+	 * false; PlanYearKey other = (PlanYearKey) obj; return planId ==
+	 * other.planId && year == other.year; } }
+	 */
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(NetworkServiceImpl.class.getName());
@@ -121,40 +108,42 @@ public class NetworkServiceImpl implements NetworkService {
 
 	@Override
 	public NetworkData getNetworkData(NetworkConfiguration networkConfiguration) {
-		//final long planId = networkConfiguration.getPlanId();
+		// final long planId = networkConfiguration.getPlanId();
 		NetworkData networkData = new NetworkData();
 
 		Map<Long, LocationDemand> demandByLocationIdMap = getLocationDemand(networkConfiguration);
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkConfiguration);
-		List<Long> selectedRoadLocations = selectedRoadLocationIds(networkConfiguration.getPlanId(), roadLocationByLocationIdMap);
+		List<Long> selectedRoadLocations = selectedRoadLocationIds(
+				networkConfiguration.getPlanId(), roadLocationByLocationIdMap);
 
 		// TODO MEDIUM Compare performance
 		networkData
 				.setFiberSources(getFiberSourceNetworkAssignments(networkConfiguration));
 
 		if (networkConfiguration.isFilteringRoadLocationsBySelection()) {
-			roadLocationByLocationIdMap.keySet().retainAll(selectedRoadLocations);
+			roadLocationByLocationIdMap.keySet().retainAll(
+					selectedRoadLocations);
 		}
 
-		Collection<NetworkAssignment> roadLocations =  toValidAssignments(roadLocationByLocationIdMap
+		Collection<NetworkAssignment> roadLocations = toValidAssignments(roadLocationByLocationIdMap
 				.keySet()
 				.stream()
 				.map(result -> {
 					Long locationId = result;
 
 					LocationDemand ldm = demandByLocationIdMap.get(locationId);
-					if (ldm == null || ldm.getDemand() == 0) {
+					if (ldm == null || ldm.getAtomicUnits() == 0) {
 						// No Demand no location mapped in for fiber Linking
 						return null;
 					}
 
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							networkConfiguration.getLocationEntityTypes(),
-							locationId, ldm);
+							locationId, 0, ldm);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
-				}));			
+				}));
 
 		networkData.setRoadLocations(roadLocations);
 
@@ -173,9 +162,9 @@ public class NetworkServiceImpl implements NetworkService {
 		id, gid, tlid, point, ratio, intersect_point, distance
 	}
 
-	private enum LoctationDemandMap implements OrdinalAccessor {
-		location_id, business_fiber, bussiness_spend, tower_fiber, tower_spend, household_fiber, household_spend
-	}
+//	private enum LoctationDemandMap implements OrdinalAccessor {
+//		location_id, business_fiber, bussiness_spend, tower_fiber, tower_spend, household_fiber, household_spend
+//	}
 
 	private Map<Long, LocationDemand> getLocationDemand(
 			NetworkConfiguration networkConfiguration) {
@@ -253,37 +242,41 @@ public class NetworkServiceImpl implements NetworkService {
 			boolean isFilteringRoadLocationDemandsBySelection,
 			Set<LocationEntityType> type, long planId, int year) {
 
-		List<Object[]> demands = isFilteringRoadLocationDemandsBySelection ? planRepository
-				.queryFiberDemand(planId, year) : planRepository
-				.queryAllFiberDemand(planId, year);
+//		List<Object[]> demands = isFilteringRoadLocationDemandsBySelection ? planRepository
+//				.queryFiberDemand(planId, year) : planRepository
+//				.queryAllFiberDemand(planId, year);
+		
+		
+		return null ;
 
-		Map<Long, LocationDemand> map = new HashMap<>();
-		demands.stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-				.forEach(
-						result -> {
-							map.put(result
-									.getLong(LoctationDemandMap.location_id),
+		// Map<Long, LocationDemand> map = new HashMap<>();
+		// demands.stream()
+		// .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+		// .forEach(
+		// result -> {
+		// map.put(result
+		// .getLong(LoctationDemandMap.location_id),
+		//
+		// LocationDemandFactory.FACTORY
+		// .build(type)
+		// .addWithRevenue(
+		// LocationEntityType.Household,
+		// result.getDouble(LoctationDemandMap.household_fiber),
+		// result.getDouble(LoctationDemandMap.household_spend) * 0.3)
+		// .addWithRevenue(
+		// LocationEntityType.LargeBusiness,
+		// result.getDouble(LoctationDemandMap.business_fiber),
+		// result.getDouble(LoctationDemandMap.bussiness_spend) * 0.3)
+		// .addWithRevenue(
+		// LocationEntityType.CellTower,
+		// result.getDouble(LoctationDemandMap.tower_fiber),
+		// result.getDouble(LoctationDemandMap.tower_spend) * 0.3)
+		// .build());
+		//
+		// });
+		//
+		// return map;
 
-									LocationDemandFactory.FACTORY
-											.build(type)
-											.addWithRevenue(
-													LocationEntityType.Household,
-													result.getDouble(LoctationDemandMap.household_fiber),
-													result.getDouble(LoctationDemandMap.household_spend) * 0.3)
-											.addWithRevenue(
-													LocationEntityType.Business,
-													result.getDouble(LoctationDemandMap.business_fiber),
-													result.getDouble(LoctationDemandMap.bussiness_spend) * 0.3)
-											.addWithRevenue(
-													LocationEntityType.CellTower,
-													result.getDouble(LoctationDemandMap.tower_fiber),
-													result.getDouble(LoctationDemandMap.tower_spend) * 0.3)
-											.build());
-
-						});
-
-		return map;
 
 	}
 
@@ -354,19 +347,24 @@ public class NetworkServiceImpl implements NetworkService {
 		return roadLocations;
 	}
 
-	private List<Long> selectedRoadLocationIds(long planId, Map<Long, RoadLocation> roadLocationByLocationIdMap) {
-		List<Long> selectedRoadLocations = planRepository.querySelectedLocationsByPlanId(planId).stream()
+	private List<Long> selectedRoadLocationIds(long planId,
+			Map<Long, RoadLocation> roadLocationByLocationIdMap) {
+		List<Long> selectedRoadLocations = planRepository
+				.querySelectedLocationsByPlanId(planId).stream()
 				.mapToLong(bi -> bi.longValue()).boxed()
 				.collect(Collectors.toList());
-		
-		// KJG Refactor RecalcEndpoint to convert the selection element into a set of location Ids which are provided here via the configuration instance.
-		
+
+		// KJG Refactor RecalcEndpoint to convert the selection element into a
+		// set of location Ids which are provided here via the configuration
+		// instance.
+
 		if (selectedRoadLocations.isEmpty()) {
-			selectedRoadLocations = new ArrayList<>(roadLocationByLocationIdMap.size());
-						
+			selectedRoadLocations = new ArrayList<>(
+					roadLocationByLocationIdMap.size());
+
 			selectedRoadLocations.addAll(roadLocationByLocationIdMap.keySet());
 		}
-		
+
 		return selectedRoadLocations;
 	}
 

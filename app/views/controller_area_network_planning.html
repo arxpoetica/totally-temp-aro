@@ -1,5 +1,5 @@
 <div id="area_network_planning_controller">
-  <p><strong>Select Tool</strong></p>
+  <p><strong>Optimization Type</strong></p>
   <select ng-model="optimizationType" class="form-control">
     <option value="CAPEX">Full Coverage</option>
     <option value="MAX_IRR">Maximum IRR</option>
@@ -28,7 +28,7 @@
   </div>
   <div ng-show="optimizationType === 'BUDGET_IRR' || optimizationType === 'IRR'">
     <br>
-    <p><strong>Budget</strong></p>
+    <p><strong>Target Capital</strong></p>
     <div class="row">
       <div class="col-md-12">
         <div class="form-group form-group-sm">
@@ -47,7 +47,7 @@
     <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
   </div>
 
-  <p><strong>Selected Geographies</strong></p>
+  <!-- <p><strong>Selected Geographies</strong></p> -->
   <p ng-hide="selectedGeographies.length > 0"><em>No geographies selected</em></p>
   <ul ng-show="selectedGeographies.length > 0" style="list-style-type:none; padding:0">
     <li ng-repeat="geography in selectedGeographies">
@@ -57,21 +57,58 @@
       {{ geography.name }}
     </li>
   </ul>
-  <p><strong>Customers</strong></p>
+
+  <p><strong>Customers to Optimize For</strong></p>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="coverHouseholds"> Households
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="coverBusinesses"> Businesses
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="coverTowers"> Towers
+    </label>
+  </div>
+
+  <p><strong>Technology<strong></p>
   <form>
-    <div class="checkbox">
+    <div class="radio">
       <label>
-        <input type="checkbox" ng-model="coverHouseholds"> Households
+        <input type="radio" name="technology" checked> ODN 1.0
       </label>
     </div>
-    <div class="checkbox">
+    <div class="radio disabled">
       <label>
-        <input type="checkbox" ng-model="coverBusinesses"> Businesses
+        <input type="radio" name="technology" disabled> ODN 2.0
       </label>
     </div>
-    <div class="checkbox">
+  </form>
+
+  <p><strong>Product<strong></p>
+  <form>
+    <div class="radio disabled">
       <label>
-        <input type="checkbox" ng-model="coverTowers"> Towers
+        <input type="radio" name="product" disabled> 4G LTE
+      </label>
+    </div>
+    <div class="radio disabled">
+      <label>
+        <input type="radio" name="product" disabled> 5G
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="product" checked> FiOS
+      </label>
+    </div>
+    <div class="radio disabled">
+      <label>
+        <input type="radio" name="product" disabled> Core
       </label>
     </div>
   </form>

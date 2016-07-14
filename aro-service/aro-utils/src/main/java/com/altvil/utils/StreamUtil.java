@@ -69,6 +69,17 @@ public class StreamUtil {
 
 		return result;
 	}
+	
+	public static <K, V> Map<K, V> hash(V[] src,
+			Function<V, K> f) {
+		HashMap<K, V> result = new HashMap<K, V>(src.length);
+
+		for (V v : src) {
+			result.put(f.apply(v), v);
+		}
+
+		return result;
+	}
 
 	public static <T> List<T> toList(T[] values) {
 		List<T> result = new ArrayList<T>(values.length);

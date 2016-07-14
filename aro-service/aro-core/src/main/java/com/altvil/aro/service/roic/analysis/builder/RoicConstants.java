@@ -13,8 +13,6 @@ public class RoicConstants {
 	public static final RoicInputs CopperInputs = initCopper() ;
 	public static final RoicInputs FiberConstants = initFiber() ;
 	
-	
-	
 	private static  RoicInputs initCopper() {
 
 		RoicInputs ri = new RoicInputs();

@@ -23,7 +23,7 @@ public class MasterPlanningServiceImpl implements MasterPlanningService {
 	
 	@Override
 	public MasterOptimizationAnalysis save(MasterOptimizationPlan plan) {
-		costService.updateMasterPlanCosts(plan.getPlanId());
+		costService.updateMasterPlanCosts(plan);
 		return new MasterOptimizationAnalysis(plan);
 	}
 

@@ -20,6 +20,7 @@ import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
@@ -237,7 +238,7 @@ public class OptimizationEvaluatorServiceImpl implements
 		}
 
 		protected Optional<PlannedNetwork> toPlannedNetwork(long planId,
-				Optional<PlanAnalysis> plan) {
+				Optional<PlanAnalysis> plan, Collection<NetworkDemand> networkDemands) {
 
 			if (!plan.isPresent()) {
 				return Optional.empty();
@@ -250,7 +251,8 @@ public class OptimizationEvaluatorServiceImpl implements
 			}
 
 			return Optional.of(new DefaultPlannedNetwork(planId, plan.get()
-					.getOptimizedNetwork().getNetworkPlan().get()));
+					.getOptimizedNetwork().getNetworkPlan().get(),
+					networkDemands));
 
 		}
 
@@ -263,7 +265,7 @@ public class OptimizationEvaluatorServiceImpl implements
 					.filter(PlanAnalysis::isValid).collect(Collectors.toList());
 
 			return toPlannedNetwork(prunedNetwork.getPlanId(),
-					selectPlan(plans));
+					selectPlan(plans), prunedNetwork.getNetworkDemands());
 
 		}
 		@Override
@@ -429,10 +431,10 @@ public class OptimizationEvaluatorServiceImpl implements
 
 			map.put(OptimizationType.CAPEX,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
-							.getRawCoverage())));
+							.getFairShareDemand())));
 			map.put(OptimizationType.PRUNNING_NPV,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
-							.getRawCoverage())));
+							.getFairShareDemand())));
 			map.put(OptimizationType.COVERAGE,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getMonthlyRevenueImpact())));

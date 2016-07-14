@@ -26,7 +26,8 @@ CREATE TABLE client.plan
   "fdt_cost" float8,
   "total_count" float8,
   "npv" float8,
+  "irr" float8,
+  "fiber_length" float8,
 
   CONSTRAINT client_plan_pkey PRIMARY KEY (id)
 );
-

@@ -168,7 +168,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		if( log.isTraceEnabled() ) {
 			log.trace("Capex " + nodeCapex + " => "
 				+ (nodeCapex + childrenCapex) + " coverage = "
-							+ coverage.getDemand() + " fc="
+							+ coverage.getAtomicUnits() + " fc="
 							+ fiberProducer.getFiberCount());
 		}
 

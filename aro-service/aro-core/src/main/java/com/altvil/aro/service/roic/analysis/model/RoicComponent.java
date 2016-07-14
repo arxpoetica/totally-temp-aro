@@ -13,7 +13,9 @@ public interface RoicComponent extends RoicAnalysis {
 	public enum ComponentType {
 		undefined,
 		household,
-		business,
+		smallBusiness,
+		mediumBusiness,
+		largeBusiness,
 		cellTower,
 		network,
 		

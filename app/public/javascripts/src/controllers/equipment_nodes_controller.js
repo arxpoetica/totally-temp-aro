@@ -9,6 +9,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.showDistributionFiber = true
 
   $scope.selected_tool = null
+  $scope.vztfttp = true
 
   var network_nodes_layer = new MapLayer({
     type: 'network_nodes',
@@ -237,5 +238,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
       routeLayer.show()
     }
+  }
+
+  $scope.vztfttpChanged = () => {
+    Object.keys($scope.equipment_layers).forEach((key) => {
+      var layer = $scope.equipment_layers[key]
+      layer.setVisible($scope.vztfttp)
+    })
   }
 }])

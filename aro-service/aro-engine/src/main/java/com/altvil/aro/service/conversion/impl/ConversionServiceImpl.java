@@ -32,7 +32,7 @@ public class ConversionServiceImpl implements SerializationService {
 		return new EquipmentResolver() {
 			@Override
 			public NetworkNode getCentralOffice(long planId) {
-				List<NetworkNode> result = networkNodeRepository.findEquipment(NetworkNodeType.central_office.getId(), planId) ;
+				List<NetworkNode> result = networkNodeRepository.findEquipment(NetworkNodeType.central_office, planId) ;
 				return result.size() == 0 ? null : result.get(0);
 			}
 		};

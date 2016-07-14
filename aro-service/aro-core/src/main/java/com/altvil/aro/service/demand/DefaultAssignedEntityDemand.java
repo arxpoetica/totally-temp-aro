@@ -2,13 +2,12 @@ package com.altvil.aro.service.demand;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.Pair;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 
-public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssignedEntityDemand {
+public class DefaultAssignedEntityDemand implements PinnedAssignedEntityDemand {
 
 	private PinnedLocation pinnedLocation;
 
@@ -23,44 +22,27 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 		this.locationDemand = locationDemand;
 	}
 	
-	public DefaultAssignedEntityDemand(LocationEntity locationEntity,
-			PinnedLocation pinnedLocation) {
-		this(locationEntity, pinnedLocation, locationEntity.getLocationDemand());
-	}
 	
+
+	@Override
+	public double getAtomicUnits() {
+		return locationDemand.getAtomicUnits() ;
+	}
+
 	
-	@Override
-	public DemandStatistic ratio(double ratio) {
-		 return new DefaultAssignedEntityDemand(getLocationEntity(), this.pinnedLocation, (LocationDemand) locationDemand.ratio(ratio));
-	}
-
-	@Override
-	public double getRawCoverage() {
-		return locationDemand.getRawCoverage() ;
-	}
-
-	@Override
-	public double getDemand() {
-		return locationDemand.getDemand() ;
-	}
-
-	@Override
-	public double getMonthlyRevenueImpact() {
-		return locationDemand.getMonthlyRevenueImpact() ;
-	}
 
 	@Override
 	public LocationDemand getLocationDemand(){
 		return locationDemand ;
 	}
 
-	public double getHouseholdFiberDemandValue() {
-		return locationDemand.getDemand();
-	}
+//	public double getHouseholdFiberDemandValue() {
+//		return locationDemand.getAtomicUnits();
+//	}
 
-	public double getTotalDemand() {
-		return locationDemand.getDemand();
-	}
+//	public double getAtomicUnits() {
+//		return locationDemand.getAtomicUnits();
+//	}
 	
 	public PinnedLocation getPinnedLocation() {
 		return pinnedLocation;
@@ -73,20 +55,16 @@ public class DefaultAssignedEntityDemand implements DemandStatistic, PinnedAssig
 	public LocationEntity getLocationEntity() {
 		return locationEntity;
 	}
-
-	/* (non-Javadoc)
-	 * @see com.altvil.aro.service.demand.AssignedAssignedEntityDemand#split(double)
-	 */
+	
+	
 	@Override
-	public Pair<PinnedAssignedEntityDemand> split(double demand) {
-
-		Pair<LocationDemand> pair = locationDemand.splitDemand(demand);
+	public Pair<PinnedAssignedEntityDemand> split(Pair<LocationDemand> pair) {
 		return new Pair<PinnedAssignedEntityDemand>(new DefaultAssignedEntityDemand(
 				locationEntity, pinnedLocation, pair.getHead()),
 				new DefaultAssignedEntityDemand(locationEntity, pinnedLocation, pair
 						.getTail()));
-
 	}
+	
 	
 	public String toString() {
 		return new ToStringBuilder(this)

@@ -70,7 +70,9 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 				super.assembleComponents(registry);
 
 				specialize(registry, ComponentType.household);
-				specialize(registry, ComponentType.business);
+				specialize(registry, ComponentType.smallBusiness);
+				specialize(registry, ComponentType.mediumBusiness);
+				specialize(registry, ComponentType.largeBusiness);
 				specialize(registry, ComponentType.cellTower);
 
 				return registry;

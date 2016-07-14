@@ -4,8 +4,9 @@ import java.util.Collection;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.service.conversion.EquipmentLocationMapping;
 import com.altvil.aro.service.entity.FiberType;
-import com.altvil.aro.service.entity.LocationDemand;
+import com.altvil.aro.service.optimize.model.DemandCoverage;
 
 public interface WirecenterNetworkPlan {
 
@@ -14,9 +15,11 @@ public interface WirecenterNetworkPlan {
 	Collection<NetworkNode> getNetworkNodes();
 
 	Collection<FiberRoute> getFiberRoutes();
+		
+	DemandCoverage getDemandCoverage();
 
-	LocationDemand getTotalDemand();
-
+	Collection<EquipmentLocationMapping> getEquipmentLocationMappings() ;
+	
 	Double getFiberLengthInMeters(FiberType fiberType);
 
 }

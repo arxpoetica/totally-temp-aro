@@ -1,39 +1,38 @@
 package com.altvil.aro.service.conversion.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import com.altvil.aro.model.NetworkNode;
-import com.altvil.aro.model.NetworkNodeTypeEnum;
+import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.service.analysis.GraphMappingSerializer;
-import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
+import com.altvil.aro.service.conversion.EquipmentLocationMapping;
+import com.altvil.aro.service.conversion.MappedBftAssignment;
+import com.altvil.aro.service.conversion.MappedFdtLocations;
+import com.altvil.aro.service.demand.impl.DefaultDemandStatistic;
+import com.altvil.aro.service.entity.AssignedEntityDemand;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
-import com.altvil.aro.service.entity.LocationDemand;
+import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDropAssignment;
-import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
+import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage;
+import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.utils.func.Aggregator;
 import com.vividsolutions.jts.geom.Point;
 
 public class EquipmentSerializer extends
 		GraphMappingSerializer<NetworkNodeAssembler> {
 
-	private Aggregator<LocationDemand> demandAggregator = DefaultLocationDemand
-			.demandAggregate();
-	private Set<LocationEntity> seenLocations = new HashSet<>();
+	private DefaultFiberCoverage.Accumulator demandAggregator = DefaultFiberCoverage
+			.accumulate();
+
+	private Collection<EquipmentLocationMapping> mappedLocations = new ArrayList<>();
+	private DemandCoverage demandCoverage;
 
 	public EquipmentSerializer(long planId) {
 		super(planId);
-	}
-
-
-	protected void add(LocationEntity entity) {
-		if (!seenLocations.contains(entity)) {
-			seenLocations.add(entity);
-			demandAggregator.add(entity.getLocationDemand());
-		}
 	}
 
 	protected void serializeCentralOffice(NetworkNodeAssembler parent,
@@ -64,7 +63,7 @@ public class EquipmentSerializer extends
 
 		NetworkNodeAssembler node = createNetworkNode(graphMapping
 				.getGraphAssignment().getPoint(),
-				NetworkNodeTypeEnum.fiber_distribution_hub);
+				NetworkNodeType.fiber_distribution_hub);
 
 		serialize(register(graphMapping.getGraphAssignment(), node),
 				graphMapping.getChildren());
@@ -78,72 +77,85 @@ public class EquipmentSerializer extends
 			GraphMapping graphMapping) {
 
 		BulkFiberTerminal bft = (BulkFiberTerminal) graphMapping.getAroEntity();
-		
-		NetworkNodeAssembler node = createNetworkNode(graphMapping.getGraphAssignment()
-				.getPoint(),
-				NetworkNodeTypeEnum.bulk_distrubution_terminal) ;
 
-		add(bft.getLocationEntity());
-		
-		serialize(
-				register(
-						graphMapping.getGraphAssignment(),
-						node),
+		NetworkNodeAssembler node = createNetworkNode(graphMapping
+				.getGraphAssignment().getPoint(),
+				NetworkNodeType.bulk_distrubution_terminal);
+
+		serialize(register(graphMapping.getGraphAssignment(), node),
 				graphMapping.getChildren());
-		
-		node.setParent(parent, bft.getAssignedEntityDemand().getLocationDemand()) ;
+
+		node.setParent(parent,
+				serializeBftLocations(node, bft.getAssignedEntityDemand()));
 	}
-	
-	
-	
 
 	protected void serializeFdt(NetworkNodeAssembler parent,
 			GraphMapping graphMapping) {
 
 		NetworkNodeAssembler node = createNetworkNode(graphMapping
 				.getGraphAssignment().getPoint(),
-				NetworkNodeTypeEnum.fiber_distribution_terminal);
+				NetworkNodeType.fiber_distribution_terminal);
 
-		register(graphMapping.getGraphAssignment(), node) ;
-		
-		node.setParent(parent, serializeLocations(graphMapping.getChildAssignments()));
+		register(graphMapping.getGraphAssignment(), node);
+
+		node.setParent(parent,
+				serializeFdtLocations(node, graphMapping.getChildAssignments()));
 
 	}
 
 	protected NetworkNodeAssembler createNetworkNode(Point point,
-			NetworkNodeTypeEnum type) {
+			NetworkNodeType type) {
 		NetworkNode node = new NetworkNode();
 
 		node.setGeogPoint(point);
 		node.setLongitude(point.getX());
 		node.setLattitude(point.getY());
 		node.setPoint(point);
-		node.setNodeTypeId(type.getId());
+		node.setNetworkNodeType(type);
 		node.setGeogPoint(point);
 		node.setRouteId(planId);
 
 		return new NetworkNodeAssembler(node);
 	}
 
-	protected LocationDemand serializeLocations(
-			Collection<GraphEdgeAssignment> edgeAssignments) {
-
-		Aggregator<LocationDemand> aggregator = DefaultLocationDemand
-				.demandAggregate();
-
-		edgeAssignments.forEach(e -> {
-			LocationDropAssignment lds = (LocationDropAssignment) e
-					.getAroEntity();
-
-			aggregator.add(lds.getAssignedEntityDemand().getLocationDemand());
-			add(lds.getLocationEntity());
-		});
-
-		return aggregator.apply();
-
+	protected <T extends EquipmentLocationMapping> T add(T ml) {
+		this.mappedLocations.add(ml);
+		ml.getAssignedEntityDemands().forEach(demandAggregator::add);
+		return ml;
 	}
 
-	public LocationDemand getLocationDemand() {
-		return demandAggregator.apply();
+	protected MappedFdtLocations serializeFdtLocations(
+			NetworkNodeAssembler fdt,
+			Collection<GraphEdgeAssignment> edgeAssignments) {
+
+		List<LocationDropAssignment> dropAssigments = new ArrayList<>(edgeAssignments.size());
+		Aggregator<DemandStatistic> aggregator = DefaultDemandStatistic
+				.aggregate();
+
+		edgeAssignments.stream()
+				.map(e -> (LocationDropAssignment) e.getAroEntity())
+				.forEach(lds -> {
+					dropAssigments.add(lds) ;
+					aggregator.add(lds.getAssignedEntityDemand().getLocationDemand());
+				});
+
+		return add(new MappedFdtLocations(fdt, dropAssigments,
+				aggregator.apply()));
+	}
+
+	protected MappedBftAssignment serializeBftLocations(
+			NetworkNodeAssembler bft, AssignedEntityDemand assignment) {
+		return add(new MappedBftAssignment(bft, assignment));
+	}
+
+	public Collection<EquipmentLocationMapping> getEquipmentLocationMappings() {
+		return mappedLocations;
+	}
+
+	public DemandCoverage getDemandCoverage() {
+		if (demandCoverage == null) {
+			demandCoverage = this.demandAggregator.getResult();
+		}
+		return demandCoverage;
 	}
 }
