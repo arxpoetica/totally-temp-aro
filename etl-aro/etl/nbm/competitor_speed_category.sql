@@ -17,7 +17,7 @@ case when maxaddown = 2 then 1
 	else 10
 	end) as speed_category
 from nbm.blocks n 
-join aro.census_blocks b on b.tabblock_id = n.fullfipsid
+join tiger.tabblock b on b.tabblock_id = n.fullfipsid
 where name not like '%Verizon%'
 group by b.gid, provname, stateabbr;
 
