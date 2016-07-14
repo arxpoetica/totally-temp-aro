@@ -6,6 +6,8 @@ import com.altvil.aro.service.entity.MaterialType;
 
 public interface PriceModelBuilder {
 
+	PriceModelBuilder add(EquipmentCost equipmentCost);
+	PriceModelBuilder add(FiberCost equipmentCost);
 	PriceModelBuilder add(MaterialType type, double quantity, double atomicUnits);
 	PriceModelBuilder add(NetworkNodeType type, double quantity, double atomicUnits);
 	PriceModelBuilder add(FiberType type, double lengthInMeteres) ;

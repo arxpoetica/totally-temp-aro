@@ -63,6 +63,7 @@ import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.enumeration.EnumMappedCodes;
 import com.altvil.utils.enumeration.MappedCodes;
+import com.altvil.utils.func.Aggregator;
 
 @Service
 public class CostServiceImpl implements CostService {
@@ -151,8 +152,8 @@ public class CostServiceImpl implements CostService {
 		PriceModel priceModel = createPriceModel(network
 				.getWirecenterNetworkPlan());
 
-//		DemandCoverage dc = network.getWirecenterNetworkPlan()
-//				.getDemandCoverage();
+		// DemandCoverage dc = network.getWirecenterNetworkPlan()
+		// .getDemandCoverage();
 
 		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
 				reportGenerator.generateNetworkStatistics(network),
@@ -161,13 +162,12 @@ public class CostServiceImpl implements CostService {
 		return new PlanAnalyisReportImpl(priceModel,
 				network.getDemandSummary(), map);
 	}
-	
-	
 
 	@Override
 	public void updateMasterPlanCosts(MasterOptimizationPlan optimizedMasterPlan) {
-		networkReportRepository.deleteReportsForPlan(optimizedMasterPlan.getPlanId());
-		
+		networkReportRepository.deleteReportsForPlan(optimizedMasterPlan
+				.getPlanId());
+
 		//
 		// update(planId, ReportType.summary_equipment,
 		// (report) -> networkReportRepository
@@ -176,7 +176,7 @@ public class CostServiceImpl implements CostService {
 		// update(planId, ReportType.summary_fiber,
 		// (report) -> networkReportRepository
 		// .updateMasterPlanFiberSummary(report.getId()));
-		
+
 	}
 
 	@Transactional
@@ -263,6 +263,25 @@ public class CostServiceImpl implements CostService {
 				OptimizedPlan plan) {
 			return StreamUtil.map(lineItemGenerators, g -> g.generate(plan));
 		}
+
+	}
+
+	private class PlanAnalysisReportAggreagtor implements
+			Aggregator<PlanAnalysisReport> {
+		
+		private Aggregator<PriceModel> priceModelAggregator ;
+
+		@Override
+		public void add(PlanAnalysisReport val) {
+			
+		}
+
+		@Override
+		public PlanAnalysisReport apply() {
+			return null;
+		}
+		
+		
 
 	}
 
@@ -409,9 +428,9 @@ public class CostServiceImpl implements CostService {
 			return networkStatisticToLineItem.getDomain(type).getId();
 		}
 
-//		public int getEntityTypeCode(LocationEntityType type) {
-//			return type.getTypeCode();
-//		}
+		// public int getEntityTypeCode(LocationEntityType type) {
+		// return type.getTypeCode();
+		// }
 
 	}
 

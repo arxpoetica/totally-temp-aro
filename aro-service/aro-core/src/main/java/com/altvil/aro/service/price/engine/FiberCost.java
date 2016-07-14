@@ -24,7 +24,8 @@ public class FiberCost {
 
 		@Override
 		public void add(FiberCost val) {
-			add(val.getLengthMeters());
+			fiberCost.lengthMeters += val.getLengthMeters();
+			//fiberCost.totalCost += val.getTotalCost();
 		}
 
 		@Override

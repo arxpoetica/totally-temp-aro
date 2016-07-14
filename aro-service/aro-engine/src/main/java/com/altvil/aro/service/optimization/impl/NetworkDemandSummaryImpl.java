@@ -10,11 +10,32 @@ import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
+import com.altvil.utils.func.Aggregator;
 
 public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 
 	public static Builder build() {
 		return new Builder();
+	}
+	
+	
+	private static class NetworkDemandSummaryAggreagtor implements Aggregator<NetworkDemandSummary> {
+
+		private Map<DemandTypeEnum, Aggregator<LocationDemand>> demandAggregators ;
+		
+		@Override
+		public void add(NetworkDemandSummary val) {
+			val.getDemandTypes().forEach(dt -> {
+				
+			});
+			demandAggregators.get(val.getDemandTypes()).add(val) ;
+		}
+
+		@Override
+		public NetworkDemandSummary apply() {
+			return null;
+		}
+		
 	}
 
 	public static class Builder {
