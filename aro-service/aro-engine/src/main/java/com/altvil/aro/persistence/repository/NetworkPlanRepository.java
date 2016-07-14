@@ -19,6 +19,24 @@ public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
 	
+	/*
+	 * 
+	 * insert into auth.permissions (plan_id, user_id, rol)
+select p.id, u.id, 'owner' 
+from  auth.users u, client.plan p 
+where p.id = -1 ;
+	 * 
+	 */
+	
+	@Query(value = "insert into auth.permissions (plan_id, user_id, rol)\n" + 
+			"select p.id, u.id, 'owner' \n" + 
+			"from  auth.users u, client.plan p \n" + 
+			"where p.id = :planId", nativeQuery = true) 
+	@Transactional
+	@Modifying
+	Integer updatePermissionsForPlan(@Param("planId") long planId) ;
+	
+	
 	@Query(value = "select id\n" + 
 			"from aro.wirecenters where wirecenter = :clii\n" + 
 			"", nativeQuery = true) 

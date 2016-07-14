@@ -90,8 +90,10 @@ public class OptimizationPlannerServiceImpl implements
 		wireCenterCodes
 				.forEach(c -> {
 					int wireCenterId = networkPlanRepository.getWireCenterId(c);
+					
 					long planId = networkPlanRepository
 							.createMasterPlan(wireCenterId).get(0).longValue() ;
+					networkPlanRepository.updatePermissionsForPlan(planId) ;
 					
 					executor.submit(() -> optimize(
 							request.create(planId, wireCenterId)));
