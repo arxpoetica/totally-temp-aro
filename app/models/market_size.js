@@ -38,9 +38,11 @@ module.exports = class MarketSize {
     var boundaryConstraint = (op) => {
       if (options.boundary) {
         params.push(options.boundary)
-        return `ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)`
+        return ` WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)`
       } else if (options.viewport) {
-        return database.intersects(options.viewport, 'b.geom', '')
+        return ' WHERE ' + database.intersects(options.viewport, 'b.geom', '')
+      } else {
+        return ''
       }
     }
 
@@ -51,7 +53,7 @@ module.exports = class MarketSize {
         WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
-          ${customerTypeFilter()} WHERE ${boundaryConstraint()}
+          ${customerTypeFilter()} ${boundaryConstraint()}
         )
       `
     } else if (type === 'existing') {
@@ -64,7 +66,7 @@ module.exports = class MarketSize {
           JOIN aro.fiber_plant
             ON fiber_plant.carrier_id = carriers.id
            AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
-               ${customerTypeFilter()} WHERE ${boundaryConstraint()}
+               ${customerTypeFilter()} ${boundaryConstraint()}
         )
       `
     } else if (type === 'plan') {
@@ -75,7 +77,7 @@ module.exports = class MarketSize {
           FROM businesses b
           JOIN locations l ON b.location_id = l.id
           JOIN client.plan_targets pt ON pt.location_id = l.id AND pt.plan_id = $${params.length}
-          ${customerTypeFilter()} WHERE ${boundaryConstraint()}
+          ${customerTypeFilter()} ${boundaryConstraint()}
         )
       `
     }

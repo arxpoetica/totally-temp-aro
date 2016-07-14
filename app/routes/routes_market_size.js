@@ -108,7 +108,7 @@ exports.configure = (api, middleware) => {
   })
 
   // Export businesses involved in market size calculation
-  api.get('/market_size/plan/:plan_id/export', (request, response, next) => {
+  api.get('/market_size/plan/:plan_id/export', middleware.viewport, (request, response, next) => {
     var plan_id = +request.params.plan_id
     var type = request.query.type
     var options = {
@@ -118,7 +118,8 @@ exports.configure = (api, middleware) => {
         employees_range: arr(request.query.employees_range),
         product: arr(request.query.product),
         customer_type: request.query.customer_type
-      }
+      },
+      viewport: request.viewport
     }
     models.MarketSize.exportBusinesses(plan_id, type, options, request.user)
       .then(exportHandler(request, response, next))

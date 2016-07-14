@@ -151,6 +151,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       inputPlaceholder: 'export'
     }, (name) => {
       if (!name) return false
+      var bounds = map.getBounds()
       var params = {
         boundary: geo_json && JSON.stringify(geo_json),
         type: $scope.market_type,
@@ -158,7 +159,13 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
         employees_range: arr($scope.employees_range),
         product: arr($scope.product),
         customer_type: $scope.customer_type && $scope.customer_type.id,
-        filename: name
+        filename: name,
+        nelat: bounds.getNorthEast().lat(),
+        nelon: bounds.getNorthEast().lng(),
+        swlat: bounds.getSouthWest().lat(),
+        swlon: bounds.getSouthWest().lng(),
+        zoom: map.getZoom(),
+        threshold: 0
       }
       $http({
         url: '/market_size/plan/' + $scope.plan.id + '/export',
