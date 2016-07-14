@@ -51,6 +51,7 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.optimization.OptimizedPlan;
+import com.altvil.aro.service.optimization.master.MasterOptimizationPlan;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
@@ -160,11 +161,13 @@ public class CostServiceImpl implements CostService {
 		return new PlanAnalyisReportImpl(priceModel,
 				network.getDemandSummary(), map);
 	}
+	
+	
 
 	@Override
-	public void updateMasterPlanCosts(long planId) {
-
-		networkReportRepository.deleteReportsForPlan(planId);
+	public void updateMasterPlanCosts(MasterOptimizationPlan optimizedMasterPlan) {
+		networkReportRepository.deleteReportsForPlan(optimizedMasterPlan.getPlanId());
+		
 		//
 		// update(planId, ReportType.summary_equipment,
 		// (report) -> networkReportRepository
@@ -173,6 +176,7 @@ public class CostServiceImpl implements CostService {
 		// update(planId, ReportType.summary_fiber,
 		// (report) -> networkReportRepository
 		// .updateMasterPlanFiberSummary(report.getId()));
+		
 	}
 
 	@Transactional

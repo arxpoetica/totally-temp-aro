@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
-import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
 public class MasterOptimizationPlan {
 

@@ -119,7 +119,7 @@ public class OptimizationPlannerServiceImpl implements
 
 			Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
 
-			Collection<WirecenterNetworkPlan> optimizedNetworks = updateNetworks(
+			Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
 					request.getOptimizationConstraints(), plannedNetworks);
 
 			return masterPlanningService.save(new MasterOptimizationPlan(
@@ -130,7 +130,7 @@ public class OptimizationPlannerServiceImpl implements
 		protected abstract Collection<PlannedNetwork> planNetworks(
 				Collection<WirecenterOptimizationRequest> wirecenters);
 
-		protected WirecenterNetworkPlan reify(
+		protected OptimizedPlan reify(
 				OptimizationConstraints constraints, PlannedNetwork plan) {
 
 			WirecenterNetworkPlan reifiedPlan = conversionService.convert(
@@ -140,13 +140,16 @@ public class OptimizationPlannerServiceImpl implements
 					.build().add(plan.getNetworkDemands())
 					.setDemandCoverage(reifiedPlan.getDemandCoverage()).build();
 
+			OptimizedPlan optimizedPlan = new OptimizedPlanIml(constraints,
+					reifiedPlan, demandSummary) ;
+			
 			wirecenterPlanningService.save(new OptimizedPlanIml(constraints,
 					reifiedPlan, demandSummary));
 
-			return reifiedPlan;
+			return optimizedPlan;
 		}
 
-		protected Collection<WirecenterNetworkPlan> updateNetworks(
+		protected Collection<OptimizedPlan> updateNetworks(
 				OptimizationConstraints constraints,
 				Collection<PlannedNetwork> plannedNetworks) {
 
