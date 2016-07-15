@@ -20,12 +20,13 @@ public class FiberCost {
 
 		public void add(double length) {
 			fiberCost.lengthMeters += length;
+			fiberCost.totalCost += (length * fiberCost.costPerMeter) ;
 		}
 
 		@Override
 		public void add(FiberCost val) {
 			fiberCost.lengthMeters += val.getLengthMeters();
-			//fiberCost.totalCost += val.getTotalCost();
+			fiberCost.totalCost += val.getTotalCost();
 		}
 
 		@Override
