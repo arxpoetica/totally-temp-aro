@@ -9,6 +9,8 @@ import java.util.OptionalDouble;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +20,19 @@ import com.altvil.aro.service.cost.NetworkStatisticsService;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.utils.func.Aggregator;
 
-public class NetworkStatisticsImpl implements NetworkStatisticsService {
+public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
-	private class Builder {
+	private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators;
+
+	@PostConstruct
+	void postConstuct() {
+		lineItemGenerators = new Builder()
+				.add(NetworkStatisticType.irr, (ctx, plan) -> 0.0)
+				.add(NetworkStatisticType.npv, (ctx, plan) -> 0.0).build();
+
+	}
+
+	private static class Builder {
 
 		private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators = new EnumMap<>(
 				NetworkStatisticType.class);
@@ -28,7 +40,20 @@ public class NetworkStatisticsImpl implements NetworkStatisticsService {
 		public Builder add(NetworkStatisticType type,
 				GeneratorFunc<OptimizedPlan> scalarFunc,
 				GeneratorFunc<List<NetworkStatistic>> aggragteFunc) {
+
+			lineItemGenerators.put(type, new NetworkStatisticGenerator(type,
+					scalarFunc, aggragteFunc));
+
 			return this;
+		}
+
+		public Builder add(NetworkStatisticType type,
+				GeneratorFunc<OptimizedPlan> scalarFunc) {
+			return add(type, scalarFunc, Average.FUNC);
+		}
+
+		public Map<NetworkStatisticType, NetworkStatisticGenerator> build() {
+			return lineItemGenerators;
 		}
 
 	}
@@ -60,10 +85,33 @@ public class NetworkStatisticsImpl implements NetworkStatisticsService {
 	private static final Logger log = LoggerFactory
 			.getLogger(ReportGenerator.class.getName());
 
-	private interface NetworkStatisticGenerator {
-		GeneratorFunc<OptimizedPlan> getScalarFunc();
+	private static class NetworkStatisticGenerator {
 
-		GeneratorFunc<List<NetworkStatistic>> getAggregateFunc();
+		private NetworkStatisticType type;
+		private GeneratorFunc<OptimizedPlan> scalarFunc;
+		private GeneratorFunc<List<NetworkStatistic>> aggregateFunc;
+
+		public NetworkStatisticGenerator(NetworkStatisticType type,
+				GeneratorFunc<OptimizedPlan> scalarFunc,
+				GeneratorFunc<List<NetworkStatistic>> aggregateFunc) {
+			super();
+			this.type = type;
+			this.scalarFunc = scalarFunc;
+			this.aggregateFunc = aggregateFunc;
+		}
+
+		public NetworkStatisticType getType() {
+			return type;
+		}
+
+		public GeneratorFunc<OptimizedPlan> getScalarFunc() {
+			return scalarFunc;
+		}
+
+		public GeneratorFunc<List<NetworkStatistic>> getAggregateFunc() {
+			return aggregateFunc;
+		}
+
 	}
 
 	private interface GeneratorFunc<T> {
