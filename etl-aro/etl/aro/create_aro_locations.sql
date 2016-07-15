@@ -20,6 +20,11 @@ CREATE TABLE aro.locations
 
 SELECT AddGeometryColumn('aro', 'locations', 'geom', 4326, 'POINT', 2);
 
+
+
+
+
+
 -- SELECT setval('aro.locations_id_seq', COALESCE((SELECT MAX(id)+1 FROM locations), 1));
 
 -- Make locations out of InfoUSA businesses (infousa.businesses)
@@ -38,44 +43,18 @@ INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geog, geom)
 
 -- Make locations out of InfoGroup households (temp_hh.households)
 INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
-    SELECT DISTINCT ST_AsText(hh.geog)
+    SELECT DISTINCT ST_AsText(hh.geom)
         address,
         city,
         hh.state,
         zip5 AS zipcode,
         lat,
         lon,
-        hh.geog::geometry as geom,
+        hh.geom,
         hh.geog
     FROM temp_hh.households hh
     JOIN aro.wirecenters wc
-        ON ST_Within(hh.geog::geometry, wc.geom)
-    WHERE
-        wc.wirecenter = 'NYCMNY79'
-        OR
-        wc.wirecenter = 'SYRCNYGS'
-        OR
-        wc.wirecenter = 'SYRCNYSU'
-        OR
-        wc.wirecenter = 'SYRCNYJS'
-        OR
-        wc.wirecenter = 'SYRCNYSA'
-        OR
-        wc.wirecenter = 'ADCTNYXA'
-        OR
-        wc.wirecenter = 'LOWVNYXA'
-        OR
-        wc.wirecenter = 'BFLONYHE'
-        OR
-        wc.wirecenter = 'BFLONYMA'
-        OR
-        wc.wirecenter = 'BFLONYEL'
-        OR
-        wc.wirecenter = 'BFLONYBA'
-        OR
-        wc.wirecenter = 'BFLONYSP'
-        OR
-        wc.wirecenter = 'BFLONYFR';
+        ON ST_Within(hh.geom, wc.geom);
 
 
 CREATE INDEX aro_locations_geog_gist

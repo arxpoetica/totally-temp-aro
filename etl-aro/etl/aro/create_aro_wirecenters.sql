@@ -38,4 +38,15 @@ INSERT INTO aro.wirecenters (gid, state, wirecenter, aocn, aocn_name, geog, geom
 		ST_Force_2D(the_geom) AS geom, -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
 		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
 		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)  
-	FROM geotel.wirecenters;
+	FROM geotel.wirecenters
+	WHERE 
+		wirecenter != 'TACMWAGF'
+		AND wirecenter != 'BYLKWA01'
+		AND wirecenter != 'KENTWAME'
+		AND wirecenter != 'BLLVWASH'
+		AND wirecenter != 'RDMDWAXA'
+		AND wirecenter != 'KRLDWAXX' 
+		AND wirecenter != 'JUNTWAXA' 
+		AND wirecenter != 'CLVWWAXA'
+		AND wirecenter != 'SNHSWAXX'
+		AND wirecenter != 'EVRTWAXC';

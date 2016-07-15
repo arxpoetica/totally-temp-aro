@@ -13,12 +13,11 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 cd $GISROOT;
 rm -f ${TMPDIR}/*.*
-wget https://s3.amazonaws.com/public.aro/geotel/geotel_fiber_ny.zip -nd -nc
-wget https://s3.amazonaws.com/public.aro/geotel/geotel_wirecenters_ny.zip -nd -nc
-for z in geotel_*_ny.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
+wget https://s3.amazonaws.com/public.aro/geotel/cran_brdy_wcs_seattle.zip -nd -nc
+unzip geotel_wirecenters.zip -d ${TMPDIR}
 cd $TMPDIR;
 
 # Create and load geotel.fiber_plant table
-${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" geotel_fiber_ny.dbf geotel.fiber_plant | ${PSQL}
+#${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" geotel_fiber_ny.dbf geotel.fiber_plant | ${PSQL}
 
-${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" geotel_wirecenters_ny.dbf geotel.wirecenters | ${PSQL}
+${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" SeattleWA_WirecentersGeotel2016_SHP.dbf geotel.wirecenters | ${PSQL}
