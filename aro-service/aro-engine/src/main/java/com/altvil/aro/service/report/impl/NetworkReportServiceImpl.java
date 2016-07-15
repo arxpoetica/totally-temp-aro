@@ -278,9 +278,8 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	}
 
 	private class PlanAnalysisReportBuilder {
-		
-		
-		private ReportBuilderContext ctx ;
+
+		private ReportBuilderContext ctx;
 
 		private NetworkDemandSummary assembleDemandSummary(
 				Set<PlanDemand> plandDemands) {
@@ -299,11 +298,11 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 			StreamUtil.map(equipmentCosts, e -> EquipmentCost
 					.createEquipmentCost(null, e.getPrice(), e.getQuantity(),
 							e.getTotalCost(), e.getAtomicCount()));
-			
-			
-//			StreamUtil.map(fiberCosts, e -> FiberCost
-//					.createEquipmentCost(null, e.getPrice(), e.getQuantity(),
-//							e.getTotalCost(), e.getAtomicCount()));
+
+			StreamUtil.map(
+					fiberCosts,
+					f -> FiberCost.createFiberCost(null, f.getCostPerMeter(),
+							f.getLengthMeters(), f.getTotalCost()));
 
 			return null;
 		}

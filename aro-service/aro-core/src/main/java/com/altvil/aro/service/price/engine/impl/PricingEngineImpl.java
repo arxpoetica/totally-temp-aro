@@ -55,6 +55,16 @@ public class PricingEngineImpl implements PricingEngine {
 
 	}
 
+	public PriceModel createPriceModel(
+			Collection<EquipmentCost> equipmentCosts,
+			Collection<FiberCost> fiberCosts) {
+
+		return new PriceModelIml(equipmentCosts.stream()
+				.mapToDouble(EquipmentCost::getTotal).sum()
+				+ fiberCosts.stream().mapToDouble(FiberCost::getTotalCost)
+						.sum(), equipmentCosts, fiberCosts);
+	}
+
 	private class PriceModelBuilderImpl implements PriceModelBuilder {
 
 		private PricingModel pricingModel;

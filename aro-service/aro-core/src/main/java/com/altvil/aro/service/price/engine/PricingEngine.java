@@ -1,11 +1,17 @@
 package com.altvil.aro.service.price.engine;
 
+import java.util.Collection;
+
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.utils.func.Aggregator;
 
 public interface PricingEngine {
-	
-	PriceModelBuilder createPriceModelBuilder(PricingModel pricingModel) ;
-	Aggregator<PriceModel> createAggregator(PricingModel pricingModel) ;
+
+	PriceModel createPriceModel(Collection<EquipmentCost> equipmentCosts,
+			Collection<FiberCost> fiberCosts);
+
+	PriceModelBuilder createPriceModelBuilder(PricingModel pricingModel);
+
+	Aggregator<PriceModel> createAggregator(PricingModel pricingModel);
 
 }
