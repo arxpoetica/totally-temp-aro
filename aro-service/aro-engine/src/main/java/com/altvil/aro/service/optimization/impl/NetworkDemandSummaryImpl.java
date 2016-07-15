@@ -10,6 +10,7 @@ import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
+import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
 public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
@@ -17,25 +18,34 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 	public static Builder build() {
 		return new Builder();
 	}
-	
-	
-	private static class NetworkDemandSummaryAggreagtor implements Aggregator<NetworkDemandSummary> {
 
-		private Map<DemandTypeEnum, Aggregator<LocationDemand>> demandAggregators ;
-		
+	public static Aggregator<NetworkDemandSummary> aggregate() {
+		return new NetworkDemandSummaryAggreagtor();
+	}
+
+	private static class NetworkDemandSummaryAggreagtor implements
+			Aggregator<NetworkDemandSummary> {
+
+		private Map<DemandTypeEnum, Aggregator<NetworkDemand>> demandAggregators;
+
+		public NetworkDemandSummaryAggreagtor() {
+			demandAggregators = StreamUtil.createAggregator(
+					DemandTypeEnum.class, () -> NetworkDemand.aggregate());
+		}
+
 		@Override
 		public void add(NetworkDemandSummary val) {
 			val.getDemandTypes().forEach(dt -> {
-				
+				demandAggregators.get(dt).add(val.getNetworkDemand(dt));
 			});
-			demandAggregators.get(val.getDemandTypes()).add(val) ;
 		}
 
 		@Override
 		public NetworkDemandSummary apply() {
-			return null;
+			return new NetworkDemandSummaryImpl(StreamUtil.apply(
+					DemandTypeEnum.class, demandAggregators));
 		}
-		
+
 	}
 
 	public static class Builder {
@@ -54,25 +64,20 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 			return this;
 		}
 
-		public Builder setDemandCoverage(DemandCoverage dc) {
-			add(DemandTypeEnum.planned_demand, SpeedCategory.cat7,
-					dc.getLocationDemand());
-			demand.demandCoverage = dc;
-			return this;
-		}
-
 		public NetworkDemandSummary build() {
 			return demand;
 		}
 	}
 
-	private Map<DemandTypeEnum, NetworkDemand> demandMap = new EnumMap<>(
-			DemandTypeEnum.class);
+	private Map<DemandTypeEnum, NetworkDemand> demandMap;
 
-	private DemandCoverage demandCoverage;
+	private NetworkDemandSummaryImpl(
+			Map<DemandTypeEnum, NetworkDemand> demandMap) {
+		this.demandMap = demandMap;
+	}
 
-	public NetworkDemandSummaryImpl() {
-		super();
+	private NetworkDemandSummaryImpl() {
+		this(new EnumMap<>(DemandTypeEnum.class));
 	}
 
 	@Override
@@ -85,8 +90,4 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 		return demandMap.get(type);
 	}
 
-	@Override
-	public DemandCoverage getDemandCoverage() {
-		return demandCoverage;
-	}
 }

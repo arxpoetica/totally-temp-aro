@@ -45,6 +45,7 @@ import com.altvil.aro.service.cost.CostService;
 import com.altvil.aro.service.cost.NetworkStatistic;
 import com.altvil.aro.service.cost.NetworkStatisticType;
 import com.altvil.aro.service.cost.PlanAnalysisReport;
+import com.altvil.aro.service.cost.impl.CostServiceImpl.ScalarReducer;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.FiberType;
@@ -211,33 +212,152 @@ public class CostServiceImpl implements CostService {
 				.getId());
 	}
 
+	private interface GeneratorFunc<T> {
+		Double generate(ReducerContext ctx, T value);
+	}
+
 	private interface NetworkStatisticGenerator {
-		NetworkStatistic generate(OptimizedPlan plan);
+		GeneratorFunc<OptimizedPlan> getScalarFunc();
+
+		GeneratorFunc<List<NetworkStatistic>> getAggregateFunc();
 	}
 
 	private static class NetworkStatisticGeneratorDefault implements
 			NetworkStatisticGenerator {
 
 		private NetworkStatisticType type;
-		private Function<OptimizedPlan, Double> f;
+
+		// private GeneratorFunc<OptimizedPlan> scalarFunc;
+		// private GeneratorFunc<List<NetworkStatistic>e> aggregateFunc;
 
 		public NetworkStatisticGeneratorDefault(NetworkStatisticType type,
-				Function<OptimizedPlan, Double> f) {
+				Function<ScalarReducer, Double> scalarFunc,
+				Function<AggregateReducer, Double> aggregateFunc) {
 			super();
 			this.type = type;
-			this.f = f;
 		}
 
 		@Override
-		public NetworkStatistic generate(OptimizedPlan plan) {
-			return new LazyNetworkStatistic(type, () -> f.apply(plan));
+		public GeneratorFunc<OptimizedPlan> getScalarFunc() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public GeneratorFunc<List<NetworkStatistic>> getAggregateFunc() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		// @Override
+		// public NetworkStatistic generate(ScalarReducer reducer) {
+		// return new LazyNetworkStatistic(type,
+		// () -> scalarFunc.apply(reducer));
+		// }
+		//
+		// @Override
+		// public NetworkStatistic generate(AggregateReducer reducer) {
+		// return new LazyNetworkStatistic(type,
+		// () -> aggregateFunc.apply(reducer));
+		//
+		// }
+
+	}
+
+	private static class ReducerContext {
+		private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap;
+
+		private Map<NetworkStatisticType, NetworkStatistic> map = new EnumMap<>(
+				NetworkStatisticType.class);
+
+		public ReducerContext(
+				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap) {
+			super();
+			this.lineItemGeneratorsMap = lineItemGeneratorsMap;
+		}
+
+		protected NetworkStatisticGenerator getGenerator(
+				NetworkStatisticType type) {
+			return lineItemGeneratorsMap.get(type);
+		}
+
+		protected NetworkStatistic reduce(NetworkStatisticType type) {
+			return null;
+		}
+
+		public NetworkStatistic getNetworkStatistic(NetworkStatisticType type) {
+			if (!map.containsKey(type)) {
+				map.put(type, reduce(type));
+			}
+			return map.get(type);
+		}
+
+		public Collection<NetworkStatistic> generate() {
+			lineItemGeneratorsMap.keySet().forEach(this::getNetworkStatistic);
+			return map.values();
+		}
+	}
+
+	private static class AggregateReducer extends ReducerContext {
+
+		private Map<NetworkStatisticType, List<NetworkStatistic>> srcData;
+
+		public AggregateReducer(
+				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap,
+				Map<NetworkStatisticType, List<NetworkStatistic>> srcData) {
+			super(lineItemGeneratorsMap);
+			this.srcData = srcData;
+		}
+
+		@Override
+		protected NetworkStatistic reduce(NetworkStatisticType type) {
+			getGenerator(type).getAggregateFunc().generate(this,
+					srcData.get(type));
+			return null;
+		}
+
+	}
+
+	private static class ScalarReducer extends ReducerContext {
+		private OptimizedPlan plan;
+
+		public ScalarReducer(
+				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap,
+				OptimizedPlan plan) {
+			super(lineItemGeneratorsMap);
+			this.plan = plan;
+		}
+
+		@Override
+		protected NetworkStatistic reduce(NetworkStatisticType type) {
+
+			getGenerator(type).getScalarFunc().generate(this, plan);
+		}
+
+		public OptimizedPlan getOptimizedPlan() {
+			return plan;
 		}
 
 	}
 
 	private class ReportGenerator {
 
+		private NetworkStatisticType type;
+		private Function<OptimizedPlan, Double> f;
+
 		private Collection<NetworkStatisticGenerator> lineItemGenerators = new ArrayList<>();
+
+		private class Builder {
+			
+			public NetworkStatisticGenerator build() {
+				return null ;
+			}
+
+			public Builder add(NetworkStatisticType type,
+					Function<OptimizedPlan, Double> f) {
+				return this;
+			}
+		}
 
 		public ReportGenerator() {
 			super();
@@ -248,9 +368,15 @@ public class CostServiceImpl implements CostService {
 			lineItemGenerators.add(lineItemGenerator);
 		}
 
+		public Collection<NetworkStatistic> reduce(
+				Map<NetworkStatisticType, List<NetworkStatistic>> map) {
+
+			return null;
+		}
+
 		private void add(NetworkStatisticType type,
 				Function<OptimizedPlan, Double> f) {
-			add(new NetworkStatisticGeneratorDefault(type, f));
+			// add(new NetworkStatisticGeneratorDefault(type, f));
 		}
 
 		private void init() {
@@ -261,27 +387,27 @@ public class CostServiceImpl implements CostService {
 
 		public Collection<NetworkStatistic> generateNetworkStatistics(
 				OptimizedPlan plan) {
-			return StreamUtil.map(lineItemGenerators, g -> g.generate(plan));
+			// return StreamUtil.map(lineItemGenerators, g -> g.generate(plan));
+			return null;
 		}
 
 	}
 
 	private class PlanAnalysisReportAggreagtor implements
 			Aggregator<PlanAnalysisReport> {
-		
-		private Aggregator<PriceModel> priceModelAggregator ;
+
+		private Aggregator<PriceModel> priceModelAggregator;
+		private Aggregator<NetworkDemandSummary> demandAggregator;
 
 		@Override
 		public void add(PlanAnalysisReport val) {
-			
+
 		}
 
 		@Override
 		public PlanAnalysisReport apply() {
 			return null;
 		}
-		
-		
 
 	}
 

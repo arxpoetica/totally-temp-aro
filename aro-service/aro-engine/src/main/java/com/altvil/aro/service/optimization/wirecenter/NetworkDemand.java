@@ -2,12 +2,43 @@ package com.altvil.aro.service.optimization.wirecenter;
 
 import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
+import com.altvil.utils.func.Aggregator;
 
 public class NetworkDemand {
 
+	public static Aggregator<NetworkDemand> aggregate() {
+		return new NetworkDemandAggregator() ;
+	}
+	
+	public static class NetworkDemandAggregator implements
+			Aggregator<NetworkDemand> {
+
+		private Aggregator<LocationDemand> demandAggregator = DefaultLocationDemand.demandAggregate() ;
+		private DemandTypeEnum demandType = DemandTypeEnum.undefined ;
+		private SpeedCategory speedCategory= SpeedCategory.cat2 ;
+
+		@Override
+		public void add(NetworkDemand val) {
+			// These 2 are really a composite key. TODO fix up
+			this.demandType = val.getDemandType();
+			this.speedCategory = val.getSpeedCategory();
+
+			demandAggregator.add(val.getLocationDemand());
+		}
+
+		@Override
+		public NetworkDemand apply() {
+			return new NetworkDemand(demandType, speedCategory,
+					demandAggregator.apply());
+		}
+
+	}
+
 	private DemandTypeEnum demandType;
 	private SpeedCategory speedCategory;
+
 	private LocationDemand locationDemand;
 
 	public NetworkDemand(DemandTypeEnum demandType,
