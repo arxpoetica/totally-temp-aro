@@ -117,39 +117,6 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 							NetworkStatistic::getNetworkStatisticType));
 		}
 
-	}
-
-	private static class PlanAnalysisReportImpl implements PlanAnalysisReport {
-
-		private PriceModel priceModel;
-		private NetworkDemandSummary demandSummary;
-		private Map<NetworkStatisticType, NetworkStatistic> map;
-
-		public PlanAnalysisReportImpl(PriceModel priceModel,
-				NetworkDemandSummary demandSummary,
-				Map<NetworkStatisticType, NetworkStatistic> map) {
-			super();
-			this.priceModel = priceModel;
-			this.demandSummary = demandSummary;
-			this.map = map;
-		}
-
-		@Override
-		public NetworkDemandSummary getDemandSummary() {
-			return demandSummary;
-		}
-
-		@Override
-		public PriceModel getPriceModel() {
-			return priceModel;
-		}
-
-		@Override
-		public Collection<NetworkStatistic> getNetworkStatistics() {
-			return map.values();
-		}
-
-	}
-
+	}	
 	
 }

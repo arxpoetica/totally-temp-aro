@@ -10,6 +10,11 @@ public class FiberCost {
 		return new FiberCostAggregator(fiberType, costPerMeter);
 	}
 
+	public static FiberCost createFiberCost(FiberType fiberType,
+			double costPerMeter, double lengthMeters, double totalCost) {
+		return new FiberCost(fiberType, costPerMeter, lengthMeters, totalCost);
+	}
+
 	public static class FiberCostAggregator implements Aggregator<FiberCost> {
 
 		private FiberCost fiberCost;
@@ -20,7 +25,7 @@ public class FiberCost {
 
 		public void add(double length) {
 			fiberCost.lengthMeters += length;
-			fiberCost.totalCost += (length * fiberCost.costPerMeter) ;
+			fiberCost.totalCost += (length * fiberCost.costPerMeter);
 		}
 
 		@Override
@@ -47,6 +52,15 @@ public class FiberCost {
 		super();
 		this.fiberType = fiberType;
 		this.costPerMeter = costPerMeter;
+	}
+
+	private FiberCost(FiberType fiberType, double costPerMeter,
+			double lengthMeters, double totalCost) {
+		super();
+		this.fiberType = fiberType;
+		this.costPerMeter = costPerMeter;
+		this.lengthMeters = lengthMeters;
+		this.totalCost = totalCost;
 	}
 
 	public FiberType getFiberType() {

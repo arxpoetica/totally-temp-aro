@@ -98,6 +98,12 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	}
 
 	@Override
+	public SummarizedPlan loadSummarizedPlan(long planId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public NetworkReportSummary getNetworkReportSummary(long planId) {
 		return networkReportSummaryRepository.getOne(planId);
 	}
@@ -271,6 +277,43 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 	}
 
+	private class PlanAnalysisReportBuilder {
+		
+		
+		private ReportBuilderContext ctx ;
+
+		private NetworkDemandSummary assembleDemandSummary(
+				Set<PlanDemand> plandDemands) {
+			return null;
+		}
+
+		private Collection<NetworkStatistic> assembleNetworkStatistics(
+				Set<LineItem> lineItems) {
+			return null;
+		}
+
+		private PriceModel assemblePriceModel(
+				Set<EquipmentSummaryCost> equipmentCosts,
+				Set<FiberSummaryCost> fiberCosts) {
+
+			StreamUtil.map(equipmentCosts, e -> EquipmentCost
+					.createEquipmentCost(null, e.getPrice(), e.getQuantity(),
+							e.getTotalCost(), e.getAtomicCount()));
+			
+			
+//			StreamUtil.map(fiberCosts, e -> FiberCost
+//					.createEquipmentCost(null, e.getPrice(), e.getQuantity(),
+//							e.getTotalCost(), e.getAtomicCount()));
+
+			return null;
+		}
+
+		public PlanAnalysisReport assemble(NetworkReportSummary reportSummary) {
+			return null;
+		}
+
+	}
+
 	private class ReportBuilder {
 
 		private ReportBuilderContext ctx;
@@ -424,8 +467,9 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 			Set<PlanDemand> demands = new HashSet<>();
 
 			for (NetworkDemand d : demandSummary.getNetworkDemands()) {
-				demands.add(createPlanDemand(networkReportSummary, d.getDemandType(),
-						d.getSpeedCategory(), 1, d.getLocationDemand()));
+				demands.add(createPlanDemand(networkReportSummary,
+						d.getDemandType(), d.getSpeedCategory(), 1,
+						d.getLocationDemand()));
 
 			}
 

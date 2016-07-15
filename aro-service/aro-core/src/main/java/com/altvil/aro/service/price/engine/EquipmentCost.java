@@ -6,10 +6,16 @@ import com.altvil.utils.func.Aggregator;
 public class EquipmentCost {
 
 	public static EquipmentAggregator aggregator(NetworkNodeType nodeType) {
-		return aggregator(nodeType,0) ;
+		return aggregator(nodeType, 0);
 	}
-	
-	public static EquipmentAggregator aggregator(NetworkNodeType nodeType, double price) {
+
+	public static EquipmentCost createEquipmentCost(NetworkNodeType nodeType,
+			double price, double quantity, double total, double atomicUnits) {
+		return new EquipmentCost(nodeType, price, quantity, total, atomicUnits);
+	}
+
+	public static EquipmentAggregator aggregator(NetworkNodeType nodeType,
+			double price) {
 		return new EquipmentAggregator(nodeType, price);
 	}
 
@@ -52,7 +58,17 @@ public class EquipmentCost {
 	private EquipmentCost(NetworkNodeType nodeType, double price) {
 		super();
 		this.nodeType = nodeType;
-		this.price = price ;
+		this.price = price;
+	}
+
+	private EquipmentCost(NetworkNodeType nodeType, double price,
+			double quantity, double total, double atomicUnits) {
+		super();
+		this.nodeType = nodeType;
+		this.price = price;
+		this.quantity = quantity;
+		this.total = total;
+		this.atomicUnits = atomicUnits;
 	}
 
 	public NetworkNodeType getNodeType() {
