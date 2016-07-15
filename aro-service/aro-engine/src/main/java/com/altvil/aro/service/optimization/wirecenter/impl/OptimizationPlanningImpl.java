@@ -11,6 +11,7 @@ import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.model.DemandTypeEnum;
@@ -18,7 +19,6 @@ import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
-import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
@@ -40,6 +40,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 			.getLogger(OptimizationPlanningImpl.class.getName());
 
 	@Autowired
+	@Qualifier("singleEvaluator")
 	private OptimizationEvaluatorService optimizationEvaluatorService;
 
 	@Autowired
@@ -95,7 +96,6 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
-
 		OptimizationEvaluator evaluator = optimizationEvaluatorService.getOptimizationEvaluator((ThresholdBudgetConstraint)request
 				.getOptimizationConstraints());
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(

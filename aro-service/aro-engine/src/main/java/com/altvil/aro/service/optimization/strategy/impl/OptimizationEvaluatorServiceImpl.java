@@ -32,7 +32,7 @@ import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.enumerations.OptimizationType;
 
-//@Service
+@Service("singleEvaluator")
 public class OptimizationEvaluatorServiceImpl implements
 		OptimizationEvaluatorService {
 

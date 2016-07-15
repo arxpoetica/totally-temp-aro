@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class OptimizationPlannerServiceImpl implements
 			.getLogger(OptimizationPlannerServiceImpl.class.getName());
 
 	private NetworkPlanRepository networkPlanRepository;
-	private OptimizationEvaluatorService strategyService;
+	private OptimizationEvaluatorFactory strategyService;
 	private WirecenterOptimizationService wirecenterOptimizationService;
 	private WirecenterPlanningService wirecenterPlanningService;
 	private OptimizationExecutorService optimizationExecutorService;
@@ -70,7 +71,7 @@ public class OptimizationPlannerServiceImpl implements
 	@Autowired
 	public OptimizationPlannerServiceImpl(
 			NetworkPlanRepository networkPlanRepository,
-			OptimizationEvaluatorService strategyService,
+			OptimizationEvaluatorFactory strategyService,
 			WirecenterOptimizationService wirecenterOptimizationService,
 			WirecenterPlanningService wirecenterPlanningService,
 			OptimizationExecutorService optimizationExecutorService,
@@ -113,7 +114,7 @@ public class OptimizationPlannerServiceImpl implements
 
 		return new PruningOptimizer(
 				strategyService.getOptimizationEvaluator((ThresholdBudgetConstraint)request
-						.getOptimizationConstraints()));
+						.getOptimizationConstraints(), request.getOptimizationMode()) );
 
 	}
 

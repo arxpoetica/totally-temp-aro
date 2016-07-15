@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.enumerations.OptimizationMode;
 import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.plan.SelectedRegion;
 
@@ -12,6 +13,7 @@ public class AroOptimizationPlan {
 	private long planId;
 
 	private OptimizationType algorithm;
+	private OptimizationMode optimizationMode = OptimizationMode.INTRA_WIRECENTER;
 	private Double threshold;
 
 	private FinancialConstraints financialConstraints;
@@ -79,6 +81,11 @@ public class AroOptimizationPlan {
 		this.selectedRegions = selectedRegions;
 	}
 
-	
+	public OptimizationMode getOptimizationMode() {
+		return optimizationMode;
+	}
 
+	public void setOptimizationMode(OptimizationMode optimizationMode) {
+		this.optimizationMode = optimizationMode;
+	}
 }
