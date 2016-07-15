@@ -211,14 +211,10 @@ module.exports = class Network {
             ) VALUES ($1, $2, $3, $4, ST_GeomFromGeoJSON($5))
           `, [plan_id, geography.name, id, type, geog])
             .then(() => {
-              return database.findValue('SELECT ST_AsText(ST_GeomFromGeoJSON($1)) AS wkt', [geog], 'wkt')
-                .then((wkt) => {
-                  body.selectedRegions.push({
-                    regionType: type.toUpperCase(),
-                    id: id,
-                    wkt: wkt
-                  })
-                })
+              body.selectedRegions.push({
+                regionType: type.toUpperCase(),
+                id: id
+              })
             })
         })
         return Promise.all(promises)
