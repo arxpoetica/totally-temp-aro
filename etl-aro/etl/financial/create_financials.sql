@@ -282,9 +282,6 @@ insert into financial.network_cost_code_node_type (network_code_id, network_node
 	values ((select id from financial.network_cost_code where name = 'bulk_distribution_hub'), 
 			(select id from client.network_node_types where name = 'bulk_distrubution_terminal')) ;
 
-insert into financial.network_cost_code_node_type (network_code_id, network_node_type_id)
-	values ((select id from financial.network_cost_code where name = 'fiber_distribution_terminal'), 
-			(select id from client.network_node_types where name = 'bulk_distribution_consumer')) ;
 
 
 DROP TABLE IF EXISTS "financial"."network_code_fiber_type";
