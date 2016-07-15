@@ -1,4 +1,4 @@
-package com.altvil.aro.service.cost;
+package com.altvil.aro.service.report;
 
 public interface NetworkStatistic {
 	

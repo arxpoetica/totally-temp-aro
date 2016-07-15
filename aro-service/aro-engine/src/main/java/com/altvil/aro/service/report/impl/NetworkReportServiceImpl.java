@@ -1,6 +1,5 @@
-package com.altvil.aro.service.cost.impl;
+package com.altvil.aro.service.report.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -10,8 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -41,37 +38,32 @@ import com.altvil.aro.persistence.repository.NetworkCostCodeRepository;
 import com.altvil.aro.persistence.repository.NetworkReportRepository;
 import com.altvil.aro.persistence.repository.NetworkReportSummaryRepository;
 import com.altvil.aro.persistence.repository.PlanDemandRepository;
-import com.altvil.aro.service.cost.CostService;
-import com.altvil.aro.service.cost.NetworkStatistic;
-import com.altvil.aro.service.cost.NetworkStatisticType;
-import com.altvil.aro.service.cost.PlanAnalysisReport;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
-import com.altvil.aro.service.optimization.OptimizedPlan;
-import com.altvil.aro.service.optimization.master.MasterOptimizationPlan;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
-import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.price.engine.EquipmentCost;
 import com.altvil.aro.service.price.engine.FiberCost;
 import com.altvil.aro.service.price.engine.PriceModel;
-import com.altvil.aro.service.price.engine.PriceModelBuilder;
+import com.altvil.aro.service.report.NetworkReportService;
+import com.altvil.aro.service.report.NetworkStatistic;
+import com.altvil.aro.service.report.NetworkStatisticType;
+import com.altvil.aro.service.report.PlanAnalysisReport;
+import com.altvil.aro.service.report.PlanAnalysisReportService;
+import com.altvil.aro.service.report.SummarizedPlan;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.enumeration.EnumMappedCodes;
 import com.altvil.utils.enumeration.MappedCodes;
 
 @Service
-public class CostServiceImpl implements CostService {
+public class NetworkReportServiceImpl implements NetworkReportService {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(CostServiceImpl.class.getName());
+			.getLogger(NetworkReportServiceImpl.class.getName());
 
-	@Autowired
-	private PricingService pricingService;
 	@Autowired
 	private NetworkReportRepository networkReportRepository;
 	@Autowired
@@ -88,21 +80,26 @@ public class CostServiceImpl implements CostService {
 	@Autowired
 	private PlanDemandRepository planDemandRepository;
 
+	@Autowired
+	private PlanAnalysisReportService planAnalysisReportService;
+
 	private ReportBuilderContext reportBuilderContext;
-	private ReportGenerator reportGenerator;
 
 	// TODO Fix this being called 2 times (Should only be called once)
 	@PostConstruct
 	void PostConstruct() {
-		this.reportGenerator = new ReportGenerator();
 		reportBuilderContext = new ReportBuilderContext().init();
 	}
 
 	@Override
-	public PlanAnalysisReport updateWireCenterCosts(OptimizedPlan optimizedPlan) {
-		PlanAnalysisReport report = createPlanAnalysisReport(optimizedPlan);
-		save(optimizedPlan, createPlanAnalysisReport(optimizedPlan));
-		return report;
+	public NetworkReportSummary saveNetworkReport(SummarizedPlan plan) {
+		networkReportRepository.deleteReportsForPlan(plan.getPlanId());
+		return save(plan.getPlanId(), plan.getPlanAnalysisReport());
+	}
+
+	@Override
+	public NetworkReportSummary getNetworkReportSummary(long planId) {
+		return networkReportSummaryRepository.getOne(planId);
 	}
 
 	private ReportBuilder createReportBuilder(NetworkReportSummary summaryReport) {
@@ -111,14 +108,10 @@ public class CostServiceImpl implements CostService {
 
 	@Transactional
 	@Modifying
-	private NetworkReportSummary save(OptimizedPlan plan,
-			PlanAnalysisReport report) {
+	private NetworkReportSummary save(long planId, PlanAnalysisReport report) {
 
-		NetworkReportSummary planReport =
-
-		createReportBuilder(
-				createReport(plan.getWirecenterNetworkPlan().getPlanId(),
-						new NetworkReportSummary()))
+		NetworkReportSummary planReport = createReportBuilder(
+				createReport(planId, new NetworkReportSummary()))
 				.setPriceModel(report.getPriceModel())
 				.setLineItems(report.getNetworkStatistics())
 				.addDemand(report.getDemandSummary()).build();
@@ -131,52 +124,6 @@ public class CostServiceImpl implements CostService {
 	@Override
 	public Double getTotalPlanCost(long planId) {
 		return networkReportRepository.getTotalPlanCost(planId);
-	}
-
-	private PriceModel createPriceModel(WirecenterNetworkPlan plan) {
-		PriceModelBuilder b = pricingService.createBuilder("*", new Date());
-		plan.getNetworkNodes().forEach(
-				n -> b.add(n.getNetworkNodeType(), 1, n.getAtomicUnit()));
-		for (FiberType ft : FiberType.values()) {
-			b.add(ft, plan.getFiberLengthInMeters(ft));
-		}
-
-		return b.build();
-
-	}
-
-	@Override
-	public PlanAnalysisReport createPlanAnalysisReport(OptimizedPlan network) {
-
-		PriceModel priceModel = createPriceModel(network
-				.getWirecenterNetworkPlan());
-
-//		DemandCoverage dc = network.getWirecenterNetworkPlan()
-//				.getDemandCoverage();
-
-		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
-				reportGenerator.generateNetworkStatistics(network),
-				NetworkStatistic::getNetworkStatisticType);
-
-		return new PlanAnalyisReportImpl(priceModel,
-				network.getDemandSummary(), map);
-	}
-	
-	
-
-	@Override
-	public void updateMasterPlanCosts(MasterOptimizationPlan optimizedMasterPlan) {
-		networkReportRepository.deleteReportsForPlan(optimizedMasterPlan.getPlanId());
-		
-		//
-		// update(planId, ReportType.summary_equipment,
-		// (report) -> networkReportRepository
-		// .updateMasterPlanEquipmentSummary(report.getId()));
-		//
-		// update(planId, ReportType.summary_fiber,
-		// (report) -> networkReportRepository
-		// .updateMasterPlanFiberSummary(report.getId()));
-		
 	}
 
 	@Transactional
@@ -209,93 +156,6 @@ public class CostServiceImpl implements CostService {
 
 		return equipmentSummaryCostRepository.findEquipmentSummaryCost(report
 				.getId());
-	}
-
-	private interface NetworkStatisticGenerator {
-		NetworkStatistic generate(OptimizedPlan plan);
-	}
-
-	private static class NetworkStatisticGeneratorDefault implements
-			NetworkStatisticGenerator {
-
-		private NetworkStatisticType type;
-		private Function<OptimizedPlan, Double> f;
-
-		public NetworkStatisticGeneratorDefault(NetworkStatisticType type,
-				Function<OptimizedPlan, Double> f) {
-			super();
-			this.type = type;
-			this.f = f;
-		}
-
-		@Override
-		public NetworkStatistic generate(OptimizedPlan plan) {
-			return new LazyNetworkStatistic(type, () -> f.apply(plan));
-		}
-
-	}
-
-	private class ReportGenerator {
-
-		private Collection<NetworkStatisticGenerator> lineItemGenerators = new ArrayList<>();
-
-		public ReportGenerator() {
-			super();
-			init();
-		}
-
-		private void add(NetworkStatisticGenerator lineItemGenerator) {
-			lineItemGenerators.add(lineItemGenerator);
-		}
-
-		private void add(NetworkStatisticType type,
-				Function<OptimizedPlan, Double> f) {
-			add(new NetworkStatisticGeneratorDefault(type, f));
-		}
-
-		private void init() {
-			add(NetworkStatisticType.irr, (ws) -> 0.0);
-			add(NetworkStatisticType.npv, (ws) -> 0.0);
-
-		}
-
-		public Collection<NetworkStatistic> generateNetworkStatistics(
-				OptimizedPlan plan) {
-			return StreamUtil.map(lineItemGenerators, g -> g.generate(plan));
-		}
-
-	}
-
-	private static class PlanAnalyisReportImpl implements PlanAnalysisReport {
-
-		private PriceModel priceModel;
-		private NetworkDemandSummary demandSummary;
-		private Map<NetworkStatisticType, NetworkStatistic> map;
-
-		public PlanAnalyisReportImpl(PriceModel priceModel,
-				NetworkDemandSummary demandSummary,
-				Map<NetworkStatisticType, NetworkStatistic> map) {
-			super();
-			this.priceModel = priceModel;
-			this.demandSummary = demandSummary;
-			this.map = map;
-		}
-
-		@Override
-		public NetworkDemandSummary getDemandSummary() {
-			return demandSummary;
-		}
-
-		@Override
-		public PriceModel getPriceModel() {
-			return priceModel;
-		}
-
-		@Override
-		public Collection<NetworkStatistic> getNetworkStatistics() {
-			return map.values();
-		}
-
 	}
 
 	private class ReportBuilderContext {
@@ -408,10 +268,6 @@ public class CostServiceImpl implements CostService {
 		public int getLineItemCode(NetworkStatisticType type) {
 			return networkStatisticToLineItem.getDomain(type).getId();
 		}
-
-//		public int getEntityTypeCode(LocationEntityType type) {
-//			return type.getTypeCode();
-//		}
 
 	}
 
@@ -576,42 +432,6 @@ public class CostServiceImpl implements CostService {
 
 			return demands;
 
-		}
-
-	}
-
-	private static class LazyNetworkStatistic implements NetworkStatistic {
-
-		private NetworkStatisticType type;
-		private Supplier<Double> supplier;
-
-		private double val;
-		private boolean inited = false;
-
-		public LazyNetworkStatistic(NetworkStatisticType type,
-				Supplier<Double> supplier) {
-			super();
-			this.type = type;
-			this.supplier = supplier;
-		}
-
-		@Override
-		public NetworkStatisticType getNetworkStatisticType() {
-			return type;
-		}
-
-		@Override
-		public double getValue() {
-			if (!inited) {
-				try {
-					val = supplier.get();
-				} catch (Throwable err) {
-					log.error(err.getMessage(), err);
-					val = Double.NaN;
-				}
-				inited = true;
-			}
-			return val;
 		}
 
 	}

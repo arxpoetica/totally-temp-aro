@@ -1,14 +1,13 @@
 package com.altvil.netop.plan;
 
-import java.util.List;
-
 import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
+import com.altvil.aro.service.report.PlanAnalysisReport;
 
 public class MasterPlanJobResponse {
 
 	private Job<MasterPlanUpdate> job;
-	private List<Long> wireCenterids;
+	private PlanAnalysisReport planAnalysisReport ;
 
 	public Job<MasterPlanUpdate> getJob() {
 		return job;
@@ -18,12 +17,14 @@ public class MasterPlanJobResponse {
 		this.job = job;
 	}
 
-	public List<Long> getWireCenterids() {
-		return wireCenterids;
+	public PlanAnalysisReport getPlanAnalysisReport() {
+		return planAnalysisReport;
 	}
 
-	public void setWireCenterids(List<Long> wireCenterids) {
-		this.wireCenterids = wireCenterids;
+	public void setPlanAnalysisReport(PlanAnalysisReport planAnalysisReport) {
+		this.planAnalysisReport = planAnalysisReport;
 	}
+
+	
 
 }

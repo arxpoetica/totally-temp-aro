@@ -1,15 +1,10 @@
 package com.altvil.aro.service.optimization;
 
-import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
-import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
-import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.report.GeneratedPlan;
+import com.altvil.aro.service.report.SummarizedPlan;
 
-public interface OptimizedPlan {
+public interface OptimizedPlan extends SummarizedPlan {
 
-	NetworkDemandSummary getDemandSummary() ;
-
-	OptimizationConstraints getOptimizationConstraints();
-
-	WirecenterNetworkPlan getWirecenterNetworkPlan();
+	GeneratedPlan getGeneratedPlan() ;
 
 }

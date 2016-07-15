@@ -84,3 +84,9 @@ ${PSQL} -a -f $DIR/create_city_spend_mapping.sql
 ${PSQL} -a -f $DIR/create_client_selected_regions.sql
 
 ${PSQL} -a -f $DIR/create_client_demand.views.sql
+
+${PSQL} -a -f $DIR/create_client_location_comptitors.view.sql
+
+${PSQL} -a -f $DIR/create_client_business_competitors_strength.view.sql
+
+

@@ -18,9 +18,11 @@ import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
+import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.aro.service.price.engine.PricingEngine;
 import com.altvil.utils.StreamUtil;
+import com.altvil.utils.func.Aggregator;
 import com.altvil.utils.reference.VolatileReference;
 
 @Service
@@ -45,6 +47,15 @@ public class PricingServiceImpl implements PricingService {
 		modelRef = new VolatileReference<PricingModel>(
 				() -> loadPricingModel(), 1000L * 60L * 5L);
 	}
+	
+	
+
+	@Override
+	public Aggregator<PriceModel> aggregate() {
+		return pricingEngine.createAggregator(getPricingModel("*", new Date()));
+	}
+
+
 
 	@Override
 	public PriceModelBuilder createBuilder(String state, Date date) {

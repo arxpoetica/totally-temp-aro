@@ -22,3 +22,12 @@ cd $TMPDIR;
 ${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" geotel_fiber_ny.dbf geotel.fiber_plant | ${PSQL}
 
 ${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" geotel_wirecenters_ny.dbf geotel.wirecenters | ${PSQL}
+
+# create a basic Carriers table
+${PSQL} -a -f $DIR/geotel.carrier.sql
+
+# create a alias table (This will be moved at some point)
+${PSQL} -a -f $DIR/geotel.carrier_alias.sql
+
+# Buffer Geotel routes and index into carrier table
+${PSQL} -a -f $DIR/buffered_routes.sql

@@ -20,7 +20,7 @@ import com.altvil.aro.service.price.engine.PricingEngine;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.enumeration.DefaultMappedCodes;
 import com.altvil.utils.enumeration.MappedCodes;
-
+import com.altvil.utils.func.Aggregator;
 
 @Service
 public class PricingEngineImpl implements PricingEngine {
@@ -32,11 +32,27 @@ public class PricingEngineImpl implements PricingEngine {
 			.add(NetworkNodeType.fiber_distribution_terminal, MaterialType.FDT)
 			.add(NetworkNodeType.bulk_distrubution_terminal, MaterialType.BFT)
 			.build();
-	
 
 	@Override
 	public PriceModelBuilder createPriceModelBuilder(PricingModel pricingModel) {
 		return new PriceModelBuilderImpl(pricingModel, equipmentCodeMapping);
+	}
+
+	public Aggregator<PriceModel> createAggregator(PricingModel pricingModel) {
+		PriceModelBuilder builder = createPriceModelBuilder(pricingModel);
+		return new Aggregator<PriceModel>() {
+			@Override
+			public void add(PriceModel val) {
+				val.getEquipmentCosts().forEach(builder::add);
+				val.getFiberCosts().forEach(builder::add);
+			}
+
+			@Override
+			public PriceModel apply() {
+				return builder.build();
+			}
+		};
+
 	}
 
 	private class PriceModelBuilderImpl implements PriceModelBuilder {
@@ -54,8 +70,8 @@ public class PricingEngineImpl implements PricingEngine {
 			super();
 			this.pricingModel = pricingModel;
 			this.typeMapping = typeMapping;
-			
-			init() ;
+
+			init();
 		}
 
 		private void init() {
@@ -71,6 +87,18 @@ public class PricingEngineImpl implements PricingEngine {
 						FiberCost.aggregate(ft,
 								pricingModel.getFiberCostPerMeter(ft, 1)));
 			}
+		}
+
+		@Override
+		public PriceModelBuilder add(EquipmentCost equipmentCost) {
+			equipmentMap.get(equipmentCost.getNodeType()).add(equipmentCost);
+			return this;
+		}
+
+		@Override
+		public PriceModelBuilder add(FiberCost fiberCost) {
+			fiberCostMap.get(fiberCost.getFiberType()).add(fiberCost);
+			return this;
 		}
 
 		@Override

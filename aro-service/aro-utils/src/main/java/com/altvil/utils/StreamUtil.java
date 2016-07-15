@@ -2,6 +2,7 @@ package com.altvil.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,9 +15,12 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import com.altvil.utils.func.Aggregator;
 
 public class StreamUtil {
 
@@ -31,6 +35,39 @@ public class StreamUtil {
 		return StreamSupport.stream(
 				Spliterators.spliteratorUnknownSize(itr, Spliterator.ORDERED),
 				false);
+	}
+	
+	
+	public static <K extends Enum<K>, T> Map<K,Aggregator<T>> createAggregator(Class<K>  clz, Collection<K> keys, Supplier<Aggregator<T>>  s) {
+		Map<K,Aggregator<T>> result = new EnumMap<>(clz) ;
+		for(K k : keys) {
+			result.put(k, s.get()) ;
+		}
+		return result ;
+	}
+	
+	public static <K extends Enum<K>, T> Map<K,Aggregator<T>> createAggregator(Class<K>  clz, Supplier<Aggregator<T>>  s) {
+		Map<K,Aggregator<T>> result = new EnumMap<>(clz) ;
+		for(K k : clz.getEnumConstants()) {
+			result.put(k, s.get()) ;
+		}
+		return result ;
+	}
+	
+	public static <K extends Enum<K>,T> Map<K,T> apply(Class<K> clz, Map<K, Aggregator<T>> aggragtorMap) {
+		Map<K,T> result = new EnumMap<>(clz) ;
+		aggragtorMap.entrySet().forEach(e -> {
+			result.put(e.getKey(), e.getValue().apply()) ;
+		});
+		return result ;
+	}
+	
+	public static <K,T> Map<K,T> apply(Map<K, Aggregator<T>> aggragtorMap) {
+		Map<K,T> result = new HashMap<K, T>(aggragtorMap.size()) ;
+		aggragtorMap.entrySet().forEach(e -> {
+			result.put(e.getKey(), e.getValue().apply()) ;
+		});
+		return result ;
 	}
 
 	public static <T> void forEach(Iterable<T> iterable,
