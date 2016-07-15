@@ -423,10 +423,9 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 			Set<PlanDemand> demands = new HashSet<>();
 
-			for (DemandTypeEnum t : demandSummary.getDemandTypes()) {
-				NetworkDemand nd = demandSummary.getNetworkDemand(t);
-				demands.add(createPlanDemand(networkReportSummary, t,
-						nd.getSpeedCategory(), 1, nd.getLocationDemand()));
+			for (NetworkDemand d : demandSummary.getNetworkDemands()) {
+				demands.add(createPlanDemand(networkReportSummary, d.getDemandType(),
+						d.getSpeedCategory(), 1, d.getLocationDemand()));
 
 			}
 
