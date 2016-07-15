@@ -8,21 +8,24 @@ UNZIPTOOL=unzip
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-if [ ! -f "${GISROOT}/SITA_DATA_TOWER_13MAR10.zip" ];
-    then aws s3 --region us-east-1 cp s3://public.aro/sita/SITA_DATA_TOWER_13MAR10.zip $GISROOT/SITA_DATA_TOWER_13MAR10.zip;
-fi
-
 cd $GISROOT;
 rm -f ${TMPDIR}/*.*
-
-for z in SITA_*.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
-cd $TMPDIR;
+wget https://s3.amazonaws.com/public.aro/sita/seattle_towers.csv.zip -nd -nc
+unzip seattle_towers.csv.zip -d ${TMPDIR}
 
 # Create and load sita_towers table
 ${PSQL} -a -f $DIR/create_sita_towers.sql
 
 # Remove the header from the text file, since you can't ignore a header in the COPY command
 # TODO: make this (all) able to apply to multiple files
-tail -n +2 /$TMPDIR/SITA_DATA_TOWER_13MAR10.txt > /$TMPDIR/sita_towers.txt
 
-cat /$TMPDIR/sita_towers.txt | ${PSQL} -a -c "COPY sita.towers FROM stdin WITH (DELIMITER E'\t', ENCODING 'Latin1', NULL '""');"
+# Create and load vz seattle table
+${PSQL} -a -f $DIR/create_vz_wa_towers.sql
+
+cat /$TMPDIR/seattle_towers.csv | ${PSQL} -a -c "COPY sita.vz_wa_towers FROM STDIN DELIMITER ',' CSV HEADER ENCODING 'Latin1';"
+
+# Create and load vz columbus table
+${PSQL} -a -f $DIR/create_vz_oh_towers.sql
+
+
+

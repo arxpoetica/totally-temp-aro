@@ -12,13 +12,12 @@ ${PSQL} -a -f $DIR/create_nbm_blocks.sql
 # Replace with S3 step...
 cd $GISROOT;
 rm -f ${TMPDIR}/*.*
-wget https://s3.amazonaws.com/public.aro/nbm/NY-NBM-CBLOCK-CSV-JUN-2014.zip -nd -nc
-#unzip NY-NBM-CBLOCK-CSV-JUN-2014.zip -d ${TMPDIR}
+wget https://s3.amazonaws.com/public.aro/nbm/WA-NBM-CBLOCK-CSV-JUN-2014.zip -nd -nc
 
-unzip -p NY-NBM-CBLOCK-CSV-JUN-2014.zip | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;" 
+unzip -p WA-NBM-CBLOCK-CSV-JUN-2014.zip | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;" 
 
 ${PSQL} -a -f $DIR/optimize_nbm_blocks.sql
 
-${PSQL} -a -f $DIR/competitor_speed_category.sql
+# ${PSQL} -a -f $DIR/competitor_speed_category.sql
 
-${PSQL} -a -f $DIR/brand_strength.sql
+# ${PSQL} -a -f $DIR/brand_strength.sql
