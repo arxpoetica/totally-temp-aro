@@ -89,15 +89,10 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			return new ScalarReducer(lineItemGenerators, plan).generate();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * com.altvil.aro.service.cost.impl.ReportGenerator#createAggregator()
-		 */
+		
 		@Override
 		public Aggregator<Collection<NetworkStatistic>> createAggregator() {
-			return new StatisticAggregator();
+			return new StatisticAggregator(this);
 		}
 
 		private Collection<NetworkStatistic> generateNetworkStatistics(
@@ -230,6 +225,11 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		private List<NetworkStatistic> networkStats = new ArrayList<>();
 		private ReportGeneratorSpi reportGenerator;
+
+		public StatisticAggregator(ReportGeneratorSpi reportGenerator) {
+			super();
+			this.reportGenerator = reportGenerator;
+		}
 
 		@Override
 		public void add(Collection<NetworkStatistic> val) {

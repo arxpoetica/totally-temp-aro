@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.price.PricingService;
@@ -94,6 +95,12 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 		private Aggregator<PriceModel> priceModelAggregator;
 		private Aggregator<NetworkDemandSummary> demandAggregator;
 		private Aggregator<Collection<NetworkStatistic>> statAggregator;
+		
+		public PlanAnalysisReportAggregator() {
+			priceModelAggregator = pricingService.aggregate() ;
+			demandAggregator = NetworkDemandSummaryImpl.aggregate() ;
+			statAggregator = reportGenerator.createAggregator() ;
+		}
 
 		@Override
 		public void add(PlanAnalysisReport val) {

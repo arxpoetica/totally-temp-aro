@@ -6,9 +6,9 @@ import com.altvil.utils.func.Aggregator;
 
 public interface ReportGenerator {
 
-	public abstract Collection<NetworkStatistic> generateNetworkStatistics(
+	public  Collection<NetworkStatistic> generateNetworkStatistics(
 			GeneratedPlan plan);
 
-	public abstract Aggregator<Collection<NetworkStatistic>> createAggregator();
+	public  Aggregator<Collection<NetworkStatistic>> createAggregator();
 
 }

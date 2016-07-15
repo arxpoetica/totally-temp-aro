@@ -23,12 +23,16 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 	public WirecenterPlanningServiceImpl(
 			NetworkNodeRepository networkNodeRepository,
 			FiberRouteRepository fiberRouteRepository,
-			NetworkReportService networkReportService) {
+			NetworkReportService networkReportService,
+			PlanAnalysisReportService planAnalysisReportService) {
 		super();
 		this.networkNodeRepository = networkNodeRepository;
 		this.fiberRouteRepository = fiberRouteRepository;
 		this.networkReportService = networkReportService;
+		this.planAnalysisReportService = planAnalysisReportService;
 	}
+
+
 
 	@Override
 	public OptimizedPlan save(GeneratedPlan plan) {

@@ -19,9 +19,11 @@ public class MasterPlanningServiceImpl implements MasterPlanningService {
 	private PlanAnalysisReportService planAnalysisReportService;
 
 	@Autowired
-	public MasterPlanningServiceImpl(NetworkReportService networkReportService) {
+	public MasterPlanningServiceImpl(NetworkReportService networkReportService,
+			PlanAnalysisReportService planAnalysisReportService) {
 		super();
 		this.networkReportService = networkReportService;
+		this.planAnalysisReportService = planAnalysisReportService;
 	}
 
 	public OptimizedMasterPlan createOptimizedMasterPlan(

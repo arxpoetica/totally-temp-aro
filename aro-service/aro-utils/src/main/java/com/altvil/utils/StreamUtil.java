@@ -37,6 +37,15 @@ public class StreamUtil {
 				false);
 	}
 	
+	
+	public static <K extends Enum<K>, T> Map<K,Aggregator<T>> createAggregator(Class<K>  clz, Collection<K> keys, Supplier<Aggregator<T>>  s) {
+		Map<K,Aggregator<T>> result = new EnumMap<>(clz) ;
+		for(K k : keys) {
+			result.put(k, s.get()) ;
+		}
+		return result ;
+	}
+	
 	public static <K extends Enum<K>, T> Map<K,Aggregator<T>> createAggregator(Class<K>  clz, Supplier<Aggregator<T>>  s) {
 		Map<K,Aggregator<T>> result = new EnumMap<>(clz) ;
 		for(K k : clz.getEnumConstants()) {

@@ -2,18 +2,23 @@ package com.altvil.aro.service.optimization.impl;
 
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
-import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
 public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
+
+	private static final Set<DemandTypeEnum> validDemands = EnumSet.of(
+			DemandTypeEnum.new_demand, DemandTypeEnum.original_demand,
+			DemandTypeEnum.planned_demand);;
 
 	public static Builder build() {
 		return new Builder();
@@ -30,7 +35,7 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 
 		public NetworkDemandSummaryAggreagtor() {
 			demandAggregators = StreamUtil.createAggregator(
-					DemandTypeEnum.class, () -> NetworkDemand.aggregate());
+					DemandTypeEnum.class, validDemands, () -> NetworkDemand.aggregate());
 		}
 
 		@Override
