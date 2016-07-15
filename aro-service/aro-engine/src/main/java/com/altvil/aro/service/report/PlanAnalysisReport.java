@@ -1,4 +1,4 @@
-package com.altvil.aro.service.cost;
+package com.altvil.aro.service.report;
 
 import java.util.Collection;
 

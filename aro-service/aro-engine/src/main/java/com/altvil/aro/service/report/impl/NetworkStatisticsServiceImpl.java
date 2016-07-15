@@ -1,4 +1,4 @@
-package com.altvil.aro.service.cost.impl;
+package com.altvil.aro.service.report.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,19 +13,27 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.cost.NetworkStatistic;
-import com.altvil.aro.service.cost.NetworkStatisticType;
-import com.altvil.aro.service.cost.NetworkStatisticsService;
-import com.altvil.aro.service.optimization.OptimizedPlan;
+import com.altvil.aro.service.report.GeneratedPlan;
+import com.altvil.aro.service.report.NetworkStatistic;
+import com.altvil.aro.service.report.NetworkStatisticType;
+import com.altvil.aro.service.report.NetworkStatisticsService;
+import com.altvil.aro.service.report.ReportGenerator;
 import com.altvil.utils.func.Aggregator;
 
+@Service
 public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 	private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators;
 
+	@Override
+	public ReportGenerator createReportGenerator() {
+		return new ReportGeneratorSpi(lineItemGenerators);
+	}
+
 	@PostConstruct
-	void postConstuct() {
+	void postConstruct() {
 		lineItemGenerators = new Builder()
 				.add(NetworkStatisticType.irr, (ctx, plan) -> 0.0)
 				.add(NetworkStatisticType.npv, (ctx, plan) -> 0.0).build();
@@ -38,7 +46,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 				NetworkStatisticType.class);
 
 		public Builder add(NetworkStatisticType type,
-				GeneratorFunc<OptimizedPlan> scalarFunc,
+				GeneratorFunc<GeneratedPlan> scalarFunc,
 				GeneratorFunc<List<NetworkStatistic>> aggragteFunc) {
 
 			lineItemGenerators.put(type, new NetworkStatisticGenerator(type,
@@ -48,7 +56,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 		}
 
 		public Builder add(NetworkStatisticType type,
-				GeneratorFunc<OptimizedPlan> scalarFunc) {
+				GeneratorFunc<GeneratedPlan> scalarFunc) {
 			return add(type, scalarFunc, Average.FUNC);
 		}
 
@@ -58,14 +66,38 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 	}
 
-	public class ReportGenerator {
+	public class ReportGeneratorSpi implements ReportGenerator {
 
-		private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators = new EnumMap<>(
-				NetworkStatisticType.class);
+		private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators;
 
+		public ReportGeneratorSpi(
+				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators) {
+			super();
+			this.lineItemGenerators = lineItemGenerators;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.altvil.aro.service.cost.impl.ReportGenerator#
+		 * generateNetworkStatistics
+		 * (com.altvil.aro.service.optimization.OptimizedPlan)
+		 */
+		@Override
 		public Collection<NetworkStatistic> generateNetworkStatistics(
-				OptimizedPlan plan) {
+				GeneratedPlan plan) {
 			return new ScalarReducer(lineItemGenerators, plan).generate();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * com.altvil.aro.service.cost.impl.ReportGenerator#createAggregator()
+		 */
+		@Override
+		public Aggregator<Collection<NetworkStatistic>> createAggregator() {
+			return new StatisticAggregator();
 		}
 
 		private Collection<NetworkStatistic> generateNetworkStatistics(
@@ -83,16 +115,16 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 	}
 
 	private static final Logger log = LoggerFactory
-			.getLogger(ReportGenerator.class.getName());
+			.getLogger(ReportGeneratorSpi.class.getName());
 
 	private static class NetworkStatisticGenerator {
 
 		private NetworkStatisticType type;
-		private GeneratorFunc<OptimizedPlan> scalarFunc;
+		private GeneratorFunc<GeneratedPlan> scalarFunc;
 		private GeneratorFunc<List<NetworkStatistic>> aggregateFunc;
 
 		public NetworkStatisticGenerator(NetworkStatisticType type,
-				GeneratorFunc<OptimizedPlan> scalarFunc,
+				GeneratorFunc<GeneratedPlan> scalarFunc,
 				GeneratorFunc<List<NetworkStatistic>> aggregateFunc) {
 			super();
 			this.type = type;
@@ -100,11 +132,12 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			this.aggregateFunc = aggregateFunc;
 		}
 
+		@SuppressWarnings("unused")
 		public NetworkStatisticType getType() {
 			return type;
 		}
 
-		public GeneratorFunc<OptimizedPlan> getScalarFunc() {
+		public GeneratorFunc<GeneratedPlan> getScalarFunc() {
 			return scalarFunc;
 		}
 
@@ -172,11 +205,11 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 	}
 
 	private static class ScalarReducer extends ReducerContext {
-		private OptimizedPlan plan;
+		private GeneratedPlan plan;
 
 		public ScalarReducer(
 				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap,
-				OptimizedPlan plan) {
+				GeneratedPlan plan) {
 			super(lineItemGeneratorsMap);
 			this.plan = plan;
 		}
@@ -196,7 +229,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			Aggregator<Collection<NetworkStatistic>> {
 
 		private List<NetworkStatistic> networkStats = new ArrayList<>();
-		private ReportGenerator reportGenerator;
+		private ReportGeneratorSpi reportGenerator;
 
 		@Override
 		public void add(Collection<NetworkStatistic> val) {

@@ -1,9 +1,10 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
 import com.altvil.aro.service.optimization.OptimizedPlan;
+import com.altvil.aro.service.report.GeneratedPlan;
 
 public interface WirecenterPlanningService {
 	
-	void save(OptimizedPlan plan) ;
+	OptimizedPlan save(GeneratedPlan generatedPlan) ;
 
 }
