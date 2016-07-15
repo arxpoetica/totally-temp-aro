@@ -7,7 +7,7 @@ PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # Set array of states and FIPS codes to iterate through
-declare -A STATE_FIPS_ARRAY=( WA]=53 )
+declare -A STATE_FIPS_ARRAY=( [WA]=53 )
 
 
 for STATE in "${!STATE_FIPS_ARRAY[@]}"
