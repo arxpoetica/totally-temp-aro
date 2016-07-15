@@ -40,8 +40,8 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 
 		@Override
 		public void add(NetworkDemandSummary val) {
-			val.getDemandTypes().forEach(dt -> {
-				demandAggregators.get(dt).add(val.getNetworkDemand(dt));
+			val.getNetworkDemands().forEach(d -> {
+				demandAggregators.get(d.getDemandType()).add(d);
 			});
 		}
 
@@ -84,10 +84,11 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 	private NetworkDemandSummaryImpl() {
 		this(new EnumMap<>(DemandTypeEnum.class));
 	}
+	
 
 	@Override
-	public Collection<DemandTypeEnum> getDemandTypes() {
-		return demandMap.keySet();
+	public Collection<NetworkDemand> getNetworkDemands() {
+		return demandMap.values();
 	}
 
 	@Override

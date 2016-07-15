@@ -9,6 +9,8 @@ import com.altvil.aro.model.NetworkReportSummary;
 public interface NetworkReportService {
 	
 	NetworkReportSummary saveNetworkReport(SummarizedPlan plan) ;
+	SummarizedPlan loadSummarizedPlan(long planId) ;
+	
 	NetworkReportSummary getNetworkReportSummary(long planId) ;
 	
 	Double getTotalPlanCost(long planId) ;

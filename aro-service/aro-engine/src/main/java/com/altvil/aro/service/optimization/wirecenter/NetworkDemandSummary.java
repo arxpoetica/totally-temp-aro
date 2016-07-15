@@ -6,8 +6,7 @@ import com.altvil.aro.model.DemandTypeEnum;
 
 
 public interface NetworkDemandSummary {
-	
-	Collection<DemandTypeEnum> getDemandTypes() ;
+	Collection<NetworkDemand> getNetworkDemands() ;
 	NetworkDemand getNetworkDemand(DemandTypeEnum type) ;
 	
 }
