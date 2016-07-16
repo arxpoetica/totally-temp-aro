@@ -113,6 +113,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	}
 
 	@Override
+	@Transactional
 	public SummarizedPlan loadSummarizedPlan(long planId) {
 		return new SummarizedPlanImpl(planId, transformNetworkReportSummary(
 				planId, planAnalysisReportBuilder::toAnalysisReport));
@@ -122,7 +123,8 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	@Transactional
 	public <T> T transformNetworkReportSummary(long planId,
 			Function<NetworkReportSummary, T> transform) {
-		return transform.apply(networkReportSummaryRepository.getOne(planId));
+		return transform.apply(networkReportSummaryRepository
+				.queryReportByPlanId(planId));
 	}
 
 	private ReportBuilder createReportBuilder(NetworkReportSummary summaryReport) {
@@ -183,8 +185,10 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 	private class ReportBuilderContext {
 
-		private Map<Class<?>, Map<Integer, ?>> codeToTypeMapping = new HashMap<>();
-		private Map<Class<?>, Function<?, Integer>> typeToCodeMapping = new HashMap<>();
+		private Map<Class<?>, Map<Integer, ?>> costCodeToTypeMapping = new HashMap<>();
+		private Map<Class<?>, Function<?, Integer>> costCodeToIdMapping = new HashMap<>();
+
+		private Map<Class<?>, Map<Integer, ?>> enumCodeMapping = new HashMap<>();
 
 		private MappedCodes<NetworkNodeType, NetworkCostCode> networkTypeToCostCodeMap;
 		private MappedCodes<FiberType, NetworkCostCode> fiberTypeToCostCodeMap;
@@ -210,31 +214,39 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		private void initCodes() {
 
-			codeToTypeMapping.put(LocationEntityType.class,
-					StreamUtil.hashEnum((LocationEntityType.class)));
-
-			codeToTypeMapping.put(NetworkStatisticType.class,
-					StreamUtil.hashEnum((NetworkStatisticType.class)));
-
-			codeToTypeMapping.put(
-					NetworkCostCode.class,
+			costCodeToTypeMapping.put(
+					NetworkNodeType.class,
 					indexDomain(networkTypeToCostCodeMap,
 							(costCode) -> costCode.getId()));
 
-			codeToTypeMapping.put(
+			costCodeToTypeMapping.put(
 					FiberType.class,
 					indexDomain(fiberTypeToCostCodeMap,
 							(costCode) -> costCode.getId()));
 
-			typeToCodeMapping.put(
-					NetworkStatisticType.class,
+			costCodeToIdMapping.put(
+					NetworkNodeType.class,
 					createCodeMapping(networkTypeToCostCodeMap,
 							(code) -> code.getId()));
-			
-			typeToCodeMapping.put(
+
+			costCodeToIdMapping.put(
 					FiberType.class,
 					createCodeMapping(fiberTypeToCostCodeMap,
 							(code) -> code.getId()));
+		
+			enumCodeMapping.put(
+					LocationEntityType.class,
+					StreamUtil.hashEnum(LocationEntityType.class,
+							(e) -> e.getTypeCode()));
+
+			enumCodeMapping.put(NetworkNodeType.class,
+					StreamUtil.hashEnum(NetworkNodeType.class));
+
+			enumCodeMapping.put(FiberType.class,
+					StreamUtil.hashEnum(FiberType.class));
+
+			enumCodeMapping.put(NetworkStatisticType.class,
+					indexDomain(networkStatisticToLineItem, l -> l.getId()));
 
 		}
 
@@ -250,18 +262,45 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 			return result;
 
 		}
-		
+
 		@SuppressWarnings("rawtypes")
 		public <T> Integer getTypeId(T code) {
 			@SuppressWarnings("unchecked")
-			Function<T,Integer> f = (Function) typeToCodeMapping.get(code.getClass()) ;
-			return f.apply(code) ;
+			Function<T, Integer> f = (Function) costCodeToIdMapping.get(code
+					.getClass());
+			if (f == null) {
+				throw new RuntimeException("Failed to map " + code);
+			}
+			return f.apply(code);
 		}
 
 		@SuppressWarnings("rawtypes")
-		public <T> T getType(Class<T> clz, Integer id) {
+		public <T> T getEnumCode(Class<T> clz, Integer id) {
 			@SuppressWarnings("unchecked")
-			Map<Integer, T> encodedMap = ((Map) codeToTypeMapping.get(clz));
+			Map<Integer, T> encodedMap = ((Map) enumCodeMapping.get(clz));
+			if (encodedMap == null) {
+				throw new RuntimeException("Failed to map code for type " + clz);
+			}
+			T code = encodedMap.get(id);
+			if (code == null) {
+				throw new RuntimeException("Failed to map id " + id
+						+ " for type  " + clz);
+			}
+			return encodedMap.get(id);
+		}
+
+		@SuppressWarnings("rawtypes")
+		public <T> T getCostCode(Class<T> clz, Integer id) {
+			@SuppressWarnings("unchecked")
+			Map<Integer, T> encodedMap = ((Map) costCodeToTypeMapping.get(clz));
+			if (encodedMap == null) {
+				throw new RuntimeException("Failed to map code for type " + clz);
+			}
+			T code = encodedMap.get(id);
+			if (code == null) {
+				throw new RuntimeException("Failed to map id " + id
+						+ " for type  " + clz);
+			}
 			return encodedMap.get(id);
 		}
 
@@ -339,7 +378,6 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 				MappedCodes<S, D> codeMapping, Function<D, Integer> f) {
 			return (s) -> f.apply(codeMapping.getDomain(s));
 		}
-		
 
 		public boolean isValid(FiberCost fiberCost) {
 			return fiberTypeToCostCodeMap.getSourceCodes().contains(
@@ -371,7 +409,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 			demand.getPlanEntityDemands().forEach(
 					ed -> {
 						builder.add(
-								ctx.getType(LocationEntityType.class,
+								ctx.getEnumCode(LocationEntityType.class,
 										ed.getEntityType()), ed.getPremises(),
 								ed.getFiberCount(), ed.getRevenueTotal(),
 								ed.getRevenueShare(), ed.getPenetration());
@@ -391,9 +429,9 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		private NetworkStatistic toNetworkStatistic(LineItem li) {
 
-			return networkStatisticsService.createNetworkStatistic(ctx.getType(
-					NetworkStatisticType.class, li.getId().getLineItemType()),
-					li.getDoubleValue());
+			return networkStatisticsService.createNetworkStatistic(ctx
+					.getEnumCode(NetworkStatisticType.class, li.getId()
+							.getLineItemType()), li.getDoubleValue());
 		}
 
 		private Collection<NetworkStatistic> toNetworkStatistics(
@@ -402,16 +440,15 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		}
 
 		private EquipmentCost toEquipmentCost(EquipmentSummaryCost e) {
-			return EquipmentCost
-					.createEquipmentCost(ctx.getType(NetworkNodeType.class, e
-							.getId().getCostCode()), e.getPrice(), e
-							.getQuantity(), e.getTotalCost(), e
-							.getAtomicCount());
+			return EquipmentCost.createEquipmentCost(ctx.getCostCode(
+					NetworkNodeType.class, e.getId().getCostCode()), e
+					.getPrice(), e.getQuantity(), e.getTotalCost(), e
+					.getAtomicCount());
 		}
 
 		private FiberCost toFiberCost(FiberSummaryCost f) {
 			return FiberCost.createFiberCost(
-					ctx.getType(FiberType.class, f.getId().getCostCode()),
+					ctx.getCostCode(FiberType.class, f.getId().getCostCode()),
 					f.getCostPerMeter(), f.getLengthMeters(), f.getTotalCost());
 		}
 
@@ -425,6 +462,10 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		public PlanAnalysisReport toAnalysisReport(
 				NetworkReportSummary reportSummary) {
+
+			if (reportSummary == null) {
+				planAnalysisReportService.createPlanAnalysisReport();
+			}
 
 			return PlanAnalysisReportImpl.create(
 					toPriceModel(reportSummary.getEquipmentCosts(),
@@ -464,9 +505,8 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		private FiberSummaryCost createFiberSummaryCost(FiberCost fiberCost) {
 
-			FiberSummaryCost fc = new FiberSummaryCost(
-					ctx.getTypeId(fiberCost.getFiberType()),
-					reportSummary);
+			FiberSummaryCost fc = new FiberSummaryCost(ctx.getTypeId(fiberCost
+					.getFiberType()), reportSummary);
 
 			fc.setCostPerMeter(fiberCost.getCostPerMeter());
 			fc.setLengthMeters(fiberCost.getLengthMeters());

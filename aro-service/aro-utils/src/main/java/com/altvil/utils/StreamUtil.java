@@ -36,8 +36,8 @@ public class StreamUtil {
 				Spliterators.spliteratorUnknownSize(itr, Spliterator.ORDERED),
 				false);
 	}
-
-	public static <T extends Enum<T>> Map<Integer, T> hashEnum(Class<T> clz) {
+	
+	public static <T extends Enum<T>> Map<Integer, T> hashEnum(Class<T> clz, Function<T, Integer> f) {
 		Map<Integer, T> map = new HashMap<>();
 
 		for (T e : clz.getEnumConstants()) {
@@ -45,6 +45,10 @@ public class StreamUtil {
 		}
 
 		return map;
+	}
+
+	public static <T extends Enum<T>> Map<Integer, T> hashEnum(Class<T> clz) {
+		return hashEnum(clz, (e) -> e.ordinal()) ;
 	}
 
 	public static <K extends Enum<K>, T> Map<K, Aggregator<T>> createAggregator(
