@@ -8,8 +8,19 @@ import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.report.NetworkStatistic;
 import com.altvil.aro.service.report.NetworkStatisticType;
 import com.altvil.aro.service.report.PlanAnalysisReport;
+import com.altvil.utils.StreamUtil;
 
 public class PlanAnalysisReportImpl implements PlanAnalysisReport {
+
+	public static PlanAnalysisReport create(PriceModel priceModel,
+			NetworkDemandSummary demandSummary,
+			Collection<NetworkStatistic> stats) {
+
+		return new PlanAnalysisReportImpl(priceModel, demandSummary,
+				StreamUtil.hash(stats,
+						NetworkStatistic::getNetworkStatisticType));
+
+	}
 
 	private PriceModel priceModel;
 	private NetworkDemandSummary demandSummary;
@@ -40,4 +51,3 @@ public class PlanAnalysisReportImpl implements PlanAnalysisReport {
 	}
 
 }
-

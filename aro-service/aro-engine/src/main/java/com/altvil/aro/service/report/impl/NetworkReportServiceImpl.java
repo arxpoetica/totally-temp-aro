@@ -5,10 +5,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -39,18 +41,22 @@ import com.altvil.aro.persistence.repository.NetworkReportRepository;
 import com.altvil.aro.persistence.repository.NetworkReportSummaryRepository;
 import com.altvil.aro.persistence.repository.PlanDemandRepository;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.price.engine.EquipmentCost;
 import com.altvil.aro.service.price.engine.FiberCost;
 import com.altvil.aro.service.price.engine.PriceModel;
+import com.altvil.aro.service.price.engine.PricingEngine;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.NetworkStatistic;
 import com.altvil.aro.service.report.NetworkStatisticType;
+import com.altvil.aro.service.report.NetworkStatisticsService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.aro.service.report.SummarizedPlan;
@@ -81,14 +87,23 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	private PlanDemandRepository planDemandRepository;
 
 	@Autowired
+	private PricingEngine pricingEngine;
+
+	@Autowired
 	private PlanAnalysisReportService planAnalysisReportService;
 
+	@Autowired
+	private NetworkStatisticsService networkStatisticsService;
+
 	private ReportBuilderContext reportBuilderContext;
+	private PlanAnalysisReportBuilder planAnalysisReportBuilder;
 
 	// TODO Fix this being called 2 times (Should only be called once)
 	@PostConstruct
 	void PostConstruct() {
 		reportBuilderContext = new ReportBuilderContext().init();
+		planAnalysisReportBuilder = new PlanAnalysisReportBuilder(
+				reportBuilderContext);
 	}
 
 	@Override
@@ -99,13 +114,15 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 	@Override
 	public SummarizedPlan loadSummarizedPlan(long planId) {
-		// TODO Auto-generated method stub
-		return null;
+		return new SummarizedPlanImpl(planId, transformNetworkReportSummary(
+				planId, planAnalysisReportBuilder::toAnalysisReport));
 	}
 
 	@Override
-	public NetworkReportSummary getNetworkReportSummary(long planId) {
-		return networkReportSummaryRepository.getOne(planId);
+	@Transactional
+	public <T> T transformNetworkReportSummary(long planId,
+			Function<NetworkReportSummary, T> transform) {
+		return transform.apply(networkReportSummaryRepository.getOne(planId));
 	}
 
 	private ReportBuilder createReportBuilder(NetworkReportSummary summaryReport) {
@@ -166,6 +183,9 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 	private class ReportBuilderContext {
 
+		private Map<Class<?>, Map<Integer, ?>> codeToTypeMapping = new HashMap<>();
+		private Map<Class<?>, Function<?, Integer>> typeToCodeMapping = new HashMap<>();
+
 		private MappedCodes<NetworkNodeType, NetworkCostCode> networkTypeToCostCodeMap;
 		private MappedCodes<FiberType, NetworkCostCode> fiberTypeToCostCodeMap;
 		private MappedCodes<NetworkStatisticType, LineItemType> networkStatisticToLineItem;
@@ -182,8 +202,67 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 			fiberTypeToCostCodeMap = createFiberMapping(codeMap);
 			networkStatisticToLineItem = createLineItemMapping();
 
+			initCodes();
+
 			return this;
 
+		}
+
+		private void initCodes() {
+
+			codeToTypeMapping.put(LocationEntityType.class,
+					StreamUtil.hashEnum((LocationEntityType.class)));
+
+			codeToTypeMapping.put(NetworkStatisticType.class,
+					StreamUtil.hashEnum((NetworkStatisticType.class)));
+
+			codeToTypeMapping.put(
+					NetworkCostCode.class,
+					indexDomain(networkTypeToCostCodeMap,
+							(costCode) -> costCode.getId()));
+
+			codeToTypeMapping.put(
+					FiberType.class,
+					indexDomain(fiberTypeToCostCodeMap,
+							(costCode) -> costCode.getId()));
+
+			typeToCodeMapping.put(
+					NetworkStatisticType.class,
+					createCodeMapping(networkTypeToCostCodeMap,
+							(code) -> code.getId()));
+			
+			typeToCodeMapping.put(
+					FiberType.class,
+					createCodeMapping(fiberTypeToCostCodeMap,
+							(code) -> code.getId()));
+
+		}
+
+		private <K, S, D> Map<K, S> indexDomain(MappedCodes<S, D> mapping,
+				Function<D, K> f) {
+
+			Map<K, S> result = new HashMap<>();
+
+			for (S s : mapping.getSourceCodes()) {
+				result.put(f.apply(mapping.getDomain(s)), s);
+			}
+
+			return result;
+
+		}
+		
+		@SuppressWarnings("rawtypes")
+		public <T> Integer getTypeId(T code) {
+			@SuppressWarnings("unchecked")
+			Function<T,Integer> f = (Function) typeToCodeMapping.get(code.getClass()) ;
+			return f.apply(code) ;
+		}
+
+		@SuppressWarnings("rawtypes")
+		public <T> T getType(Class<T> clz, Integer id) {
+			@SuppressWarnings("unchecked")
+			Map<Integer, T> encodedMap = ((Map) codeToTypeMapping.get(clz));
+			return encodedMap.get(id);
 		}
 
 		private <S extends Enum<S>, D> Map<S, D> createAssociationMap(
@@ -256,13 +335,11 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		}
 
-		public int getNetworkCostCode(NetworkNodeType networkType) {
-			return networkTypeToCostCodeMap.getDomain(networkType).getId();
+		private <S, D> Function<S, Integer> createCodeMapping(
+				MappedCodes<S, D> codeMapping, Function<D, Integer> f) {
+			return (s) -> f.apply(codeMapping.getDomain(s));
 		}
-
-		public int getNetworkCostCode(FiberType fiberType) {
-			return fiberTypeToCostCodeMap.getDomain(fiberType).getId();
-		}
+		
 
 		public boolean isValid(FiberCost fiberCost) {
 			return fiberTypeToCostCodeMap.getSourceCodes().contains(
@@ -281,34 +358,80 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		private ReportBuilderContext ctx;
 
-		private NetworkDemandSummary assembleDemandSummary(
+		public PlanAnalysisReportBuilder(ReportBuilderContext ctx) {
+			super();
+			this.ctx = ctx;
+		}
+
+		private NetworkDemand toNetworkDemand(PlanDemand demand) {
+
+			DefaultLocationDemand.Builder builder = DefaultLocationDemand
+					.build();
+
+			demand.getPlanEntityDemands().forEach(
+					ed -> {
+						builder.add(
+								ctx.getType(LocationEntityType.class,
+										ed.getEntityType()), ed.getPremises(),
+								ed.getFiberCount(), ed.getRevenueTotal(),
+								ed.getRevenueShare(), ed.getPenetration());
+					});
+
+			return new NetworkDemand(demand.getDemandType(),
+					demand.getSpeedType(), builder.build());
+
+		}
+
+		private NetworkDemandSummary toNetworkDemandSummary(
 				Set<PlanDemand> plandDemands) {
-			return null;
+			return NetworkDemandSummaryImpl
+					.createNetworkDemandSummary(StreamUtil.map(plandDemands,
+							this::toNetworkDemand));
 		}
 
-		private Collection<NetworkStatistic> assembleNetworkStatistics(
+		private NetworkStatistic toNetworkStatistic(LineItem li) {
+
+			return networkStatisticsService.createNetworkStatistic(ctx.getType(
+					NetworkStatisticType.class, li.getId().getLineItemType()),
+					li.getDoubleValue());
+		}
+
+		private Collection<NetworkStatistic> toNetworkStatistics(
 				Set<LineItem> lineItems) {
-			return null;
+			return StreamUtil.map(lineItems, this::toNetworkStatistic);
 		}
 
-		private PriceModel assemblePriceModel(
+		private EquipmentCost toEquipmentCost(EquipmentSummaryCost e) {
+			return EquipmentCost
+					.createEquipmentCost(ctx.getType(NetworkNodeType.class, e
+							.getId().getCostCode()), e.getPrice(), e
+							.getQuantity(), e.getTotalCost(), e
+							.getAtomicCount());
+		}
+
+		private FiberCost toFiberCost(FiberSummaryCost f) {
+			return FiberCost.createFiberCost(
+					ctx.getType(FiberType.class, f.getId().getCostCode()),
+					f.getCostPerMeter(), f.getLengthMeters(), f.getTotalCost());
+		}
+
+		private PriceModel toPriceModel(
 				Set<EquipmentSummaryCost> equipmentCosts,
 				Set<FiberSummaryCost> fiberCosts) {
-
-			StreamUtil.map(equipmentCosts, e -> EquipmentCost
-					.createEquipmentCost(null, e.getPrice(), e.getQuantity(),
-							e.getTotalCost(), e.getAtomicCount()));
-
-			StreamUtil.map(
-					fiberCosts,
-					f -> FiberCost.createFiberCost(null, f.getCostPerMeter(),
-							f.getLengthMeters(), f.getTotalCost()));
-
-			return null;
+			return pricingEngine.createPriceModel(
+					StreamUtil.map(equipmentCosts, this::toEquipmentCost),
+					StreamUtil.map(fiberCosts, this::toFiberCost));
 		}
 
-		public PlanAnalysisReport assemble(NetworkReportSummary reportSummary) {
-			return null;
+		public PlanAnalysisReport toAnalysisReport(
+				NetworkReportSummary reportSummary) {
+
+			return PlanAnalysisReportImpl.create(
+					toPriceModel(reportSummary.getEquipmentCosts(),
+							reportSummary.getFiberCosts()),
+					toNetworkDemandSummary(reportSummary.getPlanDemands()),
+					toNetworkStatistics(reportSummary.getLineItems()));
+
 		}
 
 	}
@@ -329,7 +452,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 				EquipmentCost cost) {
 
 			EquipmentSummaryCost es = new EquipmentSummaryCost(
-					ctx.getNetworkCostCode(cost.getNodeType()), reportSummary);
+					ctx.getTypeId(cost.getNodeType()), reportSummary);
 
 			es.setAtomicCount(cost.getAtomicUnits());
 			es.setPrice(cost.getPrice());
@@ -342,7 +465,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		private FiberSummaryCost createFiberSummaryCost(FiberCost fiberCost) {
 
 			FiberSummaryCost fc = new FiberSummaryCost(
-					ctx.getNetworkCostCode(fiberCost.getFiberType()),
+					ctx.getTypeId(fiberCost.getFiberType()),
 					reportSummary);
 
 			fc.setCostPerMeter(fiberCost.getCostPerMeter());
@@ -474,6 +597,30 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 			return demands;
 
+		}
+
+	}
+
+	private static class SummarizedPlanImpl implements SummarizedPlan {
+
+		private long planId;
+		private PlanAnalysisReport planAnalysisReport;
+
+		public SummarizedPlanImpl(long planId,
+				PlanAnalysisReport planAnalysisReport) {
+			super();
+			this.planId = planId;
+			this.planAnalysisReport = planAnalysisReport;
+		}
+
+		@Override
+		public long getPlanId() {
+			return planId;
+		}
+
+		@Override
+		public PlanAnalysisReport getPlanAnalysisReport() {
+			return planAnalysisReport;
 		}
 
 	}

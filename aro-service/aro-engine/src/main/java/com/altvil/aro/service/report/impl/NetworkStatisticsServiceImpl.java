@@ -40,6 +40,12 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 	}
 
+	@Override
+	public NetworkStatistic createNetworkStatistic(NetworkStatisticType type,
+			double value) {
+		return new DefaultNetworkStatistic(type, value) ;
+	}
+
 	private static class Builder {
 
 		private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators = new EnumMap<>(
@@ -89,7 +95,6 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			return new ScalarReducer(lineItemGenerators, plan).generate();
 		}
 
-		
 		@Override
 		public Aggregator<Collection<NetworkStatistic>> createAggregator() {
 			return new StatisticAggregator(this);
@@ -248,6 +253,11 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 		public static NetworkStatistic create(NetworkStatisticType type,
 				Supplier<Double> supplier) {
 			return new DefaultNetworkStatistic(type, eval(supplier));
+		}
+		
+		public static NetworkStatistic create(NetworkStatisticType type,
+				double val) {
+			return new DefaultNetworkStatistic(type, val);
 		}
 
 		private static double eval(Supplier<Double> supplier) {
