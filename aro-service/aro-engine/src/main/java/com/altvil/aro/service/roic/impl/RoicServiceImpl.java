@@ -46,7 +46,8 @@ public class RoicServiceImpl implements RoicService {
 	@Autowired
 	public RoicServiceImpl(RoicBuilderService roicBuilderService,
 			NetworkPlanRepository planRepostory,
-			NetworkNodeRepository networkNodeRepository, CostService costService) {
+			NetworkNodeRepository networkNodeRepository,
+			CostService costService) {
 		super();
 		this.roicBuilderService = roicBuilderService;
 		this.planRepostory = planRepostory;
@@ -130,7 +131,6 @@ public class RoicServiceImpl implements RoicService {
 	}
 
 	private double getLocationDemand(long planId) {
-
 		NetworkNode node = networkNodeRepository.findEquipment(
 				NetworkNodeType.central_office.getId(), planId).get(0);
 
