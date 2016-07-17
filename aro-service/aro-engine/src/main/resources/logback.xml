@@ -28,7 +28,7 @@
   <logger name="com.altvil.aro.service" level="DEBUG"/>
   <logger name="com.altvil.netop" level="INFO"/>
   <logger name="springfox" level="WARN"/>
-  <logger name="org.springframework.web.filter" level="DEBUG"/>
+  <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG"/>
   <logger name="org.apache.ignite" level="INFO"/>
   <logger name="org.apache.ignite.internal" level="WARN"/>
  
