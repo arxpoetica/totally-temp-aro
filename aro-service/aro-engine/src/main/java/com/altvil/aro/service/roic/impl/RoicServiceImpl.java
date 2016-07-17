@@ -10,6 +10,8 @@ import java.util.TimerTask;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,9 @@ import com.altvil.aro.service.roic.analysis.model.RoicModel;
 @Service
 public class RoicServiceImpl implements RoicService {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(RoicServiceImpl.class.getName());
+	
 	private RoicBuilderService roicBuilderService;
 	private NetworkPlanRepository planRepostory;
 	private NetworkNodeRepository networkNodeRepository;
@@ -91,6 +96,7 @@ public class RoicServiceImpl implements RoicService {
 
 		Collection<RoicModel> models = planRepostory
 				.queryChildPlans(plan.getId()).stream().map(this::loadRoic)
+				.filter(r -> r !=null)
 				.collect(Collectors.toList());
 
 		if (models.size() == 0) {
@@ -102,18 +108,24 @@ public class RoicServiceImpl implements RoicService {
 
 	private RoicModel loadRoic(WirecenterPlan plan) {
 
-		long planId = plan.getId();
-
-		RoicInputs copperInputs = RoicInputs.updateInputs(
-				RoicConstants.CopperInputs, getTotalDemand(planId), 0);
-
-		RoicInputs fiberInputs = RoicInputs.updateInputs(
-				RoicConstants.FiberConstants, getLocationDemand(planId),
-				getCapex(planId));
-
-		return roicBuilderService.buildModel()
-				.setAnalysisPeriod(new AnalysisPeriod(2016, 15))
-				.addRoicInputs(copperInputs).addRoicInputs(fiberInputs).build();
+		try {
+		
+			long planId = plan.getId();
+	
+			RoicInputs copperInputs = RoicInputs.updateInputs(
+					RoicConstants.CopperInputs, getTotalDemand(planId), 0);
+	
+			RoicInputs fiberInputs = RoicInputs.updateInputs(
+					RoicConstants.FiberConstants, getLocationDemand(planId),
+					getCapex(planId));
+	
+			return roicBuilderService.buildModel()
+					.setAnalysisPeriod(new AnalysisPeriod(2016, 15))
+					.addRoicInputs(copperInputs).addRoicInputs(fiberInputs).build();
+		} catch( Throwable err ) {
+			log.error(err.getMessage(), err) ;
+			return null ;
+		}
 
 	}
 
