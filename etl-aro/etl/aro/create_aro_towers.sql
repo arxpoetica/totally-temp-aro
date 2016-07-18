@@ -19,7 +19,7 @@ SELECT AddGeometryColumn('aro', 'towers', 'geom', 4326, 'POINT', 2);
 with unique_wa_towers as
 (
     select
-        distinct ST_SetSRID(ST_MakePoint(lon, lat), 4326) as geom,
+        ST_SetSRID(ST_MakePoint(lon, lat), 4326) as geom,
         city,
         lat,
         lon,
