@@ -1,6 +1,7 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart */
 // Locations Controller
 app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
+  $scope.ARO_CLIENT = config.ARO_CLIENT
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [
@@ -37,6 +38,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.industries = []
   $scope.business_categories_selected = []
   $scope.household_categories_selected = []
+  $scope.optimizeBusinesses = true
+  $scope.optimizeHouseholds = true
+  $scope.optimizeTowers = true
 
   var locationStyles = {
     normal: {
@@ -388,5 +392,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     } else {
       locationsLayer.setThreshold(15)
     }
+  }
+
+  $scope.changeOptimization = () => {
+    $rootScope.optimizeBusinesses = $scope.optimizeBusinesses
+    $rootScope.optimizeHouseholds = $scope.optimizeHouseholds
+    $rootScope.optimizeTowers = $scope.optimizeTowers
   }
 }])

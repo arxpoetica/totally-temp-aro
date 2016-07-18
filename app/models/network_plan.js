@@ -189,7 +189,7 @@ module.exports = class NetworkPlan {
           },
           {
             name: 'Towers',
-            value: row.tower_count
+            value: row.tower_count / 64
           }
         ]
         output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)

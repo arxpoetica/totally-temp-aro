@@ -44,15 +44,15 @@ pull_redeploy: uninstall pull run
 # dev Deployment Tools
 ###############################
 
-dev_redeploy: uninstall install	
-
+dev_deploy: install	tail DEPLOY_TARGET=vagrant
+dev_redeploy: uninstall install	tail DEPLOY_TARGET=vagrant
 
 ###############################
 # Compile targets
 ###############################
 
 compile_war:
-	(mvn package -Dmaven.test.skip=true)
+	(mvn clean package -Dmaven.test.skip=true)
 
 deploy_war:
 	(cp ./aro-service/target/aro-service-1.0-SNAPSHOT.war ./docker/aro-service.war)

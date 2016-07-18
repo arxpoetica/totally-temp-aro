@@ -20,6 +20,10 @@ public class NetworkDataRequest {
 		this.selectionMode = selectionMode;
 		this.locationEntities = locationEntities;
 	}
+	
+	public NetworkDataRequest create(long planId) {
+		return new NetworkDataRequest(planId, year, selectionMode, locationEntities) ;
+	}
 
 	public long getPlanId() {
 		return planId;

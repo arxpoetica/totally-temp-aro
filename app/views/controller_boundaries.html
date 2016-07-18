@@ -1,6 +1,5 @@
 <div>
   <div ng-show="number_of_area_layers() > 0 || boundaries.length > 0">
-    <h2>View</h2>
     <div ng-repeat="(key, layer) in area_layers">
       <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-class="{ 'disabled': layer.disabled }">
         <!--
@@ -8,8 +7,9 @@
           <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
         </div>
         -->
-        <label>
+        <label class="eye-control">
           <input type="checkbox" ng-click="layer.toggleVisibility()" ng-disabled="layer.disabled"> {{layer.name}}
+          <div class="eye-indicator"></div>
         </label>
       </div>
     </div>
@@ -42,8 +42,9 @@
           </a>
           <% } %>
         </div>
-        <label>
+        <label class="eye-control">
           <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
+          <div class="eye-indicator"></div>
         </label>
       </div>
     </div>

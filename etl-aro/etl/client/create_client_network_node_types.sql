@@ -14,3 +14,4 @@ insert into client.network_node_types (name, description) values('fiber_distribu
 insert into client.network_node_types (name, description) values('fiber_distribution_terminal','Fiber Distribution Terminal') ;
 insert into client.network_node_types (name, description) values('bulk_distrubution_terminal','Feeder Distribution Terminal') ;
 insert into client.network_node_types (name, description) values('bulk_distribution_consumer','Feeder Distribution Consumer') ;
+

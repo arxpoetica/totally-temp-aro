@@ -13,6 +13,8 @@ CREATE TABLE aro.locations
     lon double precision,
     geog geography(POINT, 4326),
     wirecenter_id varchar,
+    dn_largest_business_category varchar,
+    dn_largest_household_category varchar,
     CONSTRAINT aro_locations_pkey PRIMARY KEY (id)
 );
 
