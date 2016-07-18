@@ -64,34 +64,13 @@ elif [ ${wirecenter_state_array_len} > 1 ]; then
 	done
 fi
 
+# create a basic Carriers table
+${PSQL} -a -f $DIR/geotel.carrier.sql
 
+# create a alias table (This will be moved at some point)
+${PSQL} -a -f $DIR/geotel.carrier_alias.sql
 
+# Buffer Geotel routes and index into carrier table
+${PSQL} -a -f $DIR/buffered_routes.sql
 
-
-
-
-
-
-# rm -f ${TMPDIR}/*.*
-# wget https://s3.amazonaws.com/public.aro/geotel/cran_brdy_wcs_seattle.zip -nd -nc
-# unzip geotel_wirecenters.zip -d ${TMPDIR}
-# wget https://s3.amazonaws.com/public.aro/geotel/geotel_fiber_ny.zip -nd -nc
-# unzip geotel_wirecenters.zip -d ${TMPDIR}
-# cd $TMPDIR;
-
-# # Create and load geotel.fiber_plant table
-# ${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" geotel_fiber_ny.dbf geotel.fiber_plant | ${PSQL}
-
-# ${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" geotel_wirecenters_ny.dbf geotel.wirecenters | ${PSQL}
-
-# # create a basic Carriers table
-# ${PSQL} -a -f $DIR/geotel.carrier.sql
-
-# # create a alias table (This will be moved at some point)
-# ${PSQL} -a -f $DIR/geotel.carrier_alias.sql
-
-# # Buffer Geotel routes and index into carrier table
-# ${PSQL} -a -f $DIR/buffered_routes.sql
-
-# ${SHP2PGSQL} -c -s 4326 -g the_geom -W "latin1" SeattleWA_WirecentersGeotel2016_SHP.dbf geotel.wirecenters | ${PSQL}
 
