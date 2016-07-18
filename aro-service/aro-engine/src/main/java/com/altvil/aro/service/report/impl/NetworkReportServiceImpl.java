@@ -39,7 +39,6 @@ import com.altvil.aro.persistence.repository.LineItemTypeRepository;
 import com.altvil.aro.persistence.repository.NetworkCostCodeRepository;
 import com.altvil.aro.persistence.repository.NetworkReportRepository;
 import com.altvil.aro.persistence.repository.NetworkReportSummaryRepository;
-import com.altvil.aro.persistence.repository.PlanDemandRepository;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.DemandStatistic;
@@ -70,37 +69,46 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkReportServiceImpl.class.getName());
 
-	@Autowired
 	private NetworkReportRepository networkReportRepository;
-	@Autowired
 	private EquipmentSummaryCostRepository equipmentSummaryCostRepository;
-	@Autowired
 	private FiberSummaryCostRepository fiberSummaryCostRepository;
-	@Autowired
 	private LineItemTypeRepository lineItemTypeRepository;
-	@Autowired
 	private NetworkReportSummaryRepository networkReportSummaryRepository;
-	@Autowired
 	private NetworkCostCodeRepository networkCostCodeRepository;
-
-	@Autowired
-	private PlanDemandRepository planDemandRepository;
-
-	@Autowired
 	private PricingEngine pricingEngine;
-
-	@Autowired
 	private PlanAnalysisReportService planAnalysisReportService;
-
-	@Autowired
 	private NetworkStatisticsService networkStatisticsService;
-
+	
 	private ReportBuilderContext reportBuilderContext;
 	private PlanAnalysisReportBuilder planAnalysisReportBuilder;
+	
+	
+	@Autowired
+	public NetworkReportServiceImpl(
+			NetworkReportRepository networkReportRepository,
+			EquipmentSummaryCostRepository equipmentSummaryCostRepository,
+			FiberSummaryCostRepository fiberSummaryCostRepository,
+			LineItemTypeRepository lineItemTypeRepository,
+			NetworkReportSummaryRepository networkReportSummaryRepository,
+			NetworkCostCodeRepository networkCostCodeRepository,
+			PricingEngine pricingEngine,
+			PlanAnalysisReportService planAnalysisReportService,
+			NetworkStatisticsService networkStatisticsService) {
+		super();
+		this.networkReportRepository = networkReportRepository;
+		this.equipmentSummaryCostRepository = equipmentSummaryCostRepository;
+		this.fiberSummaryCostRepository = fiberSummaryCostRepository;
+		this.lineItemTypeRepository = lineItemTypeRepository;
+		this.networkReportSummaryRepository = networkReportSummaryRepository;
+		this.networkCostCodeRepository = networkCostCodeRepository;
+		this.pricingEngine = pricingEngine;
+		this.planAnalysisReportService = planAnalysisReportService;
+		this.networkStatisticsService = networkStatisticsService;
+	}
 
 	// TODO Fix this being called 2 times (Should only be called once)
 	@PostConstruct
-	void PostConstruct() {
+	private void postConstruct() {
 		reportBuilderContext = new ReportBuilderContext().init();
 		planAnalysisReportBuilder = new PlanAnalysisReportBuilder(
 				reportBuilderContext);
@@ -263,7 +271,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		@SuppressWarnings("rawtypes")
 		public <T> Integer getTypeCode(T typeCode) {
 			@SuppressWarnings("unchecked")
-			MappedCodes<T, Integer> encodedMap = ((MappedCodes) codeToEnumMapping
+			MappedCodes<T, Integer> encodedMap = ((MappedCodes) enumToCodeMapping
 					.get(typeCode.getClass()));
 			if (encodedMap == null) {
 				throw new RuntimeException("Failed to map code for type "

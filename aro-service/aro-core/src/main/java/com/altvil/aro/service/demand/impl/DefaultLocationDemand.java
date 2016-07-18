@@ -174,8 +174,8 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	}
 
 	@Override
-	public Collection<DemandStatistic> getEntityDemands() {
-		return demands.values();
+	public Map<LocationEntityType, DemandStatistic> getEntityDemands() {
+		return demands;
 	}
 
 	private Pair<LocationDemand> splitDemand(double demand,
