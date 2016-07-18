@@ -61,8 +61,8 @@ import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.aro.service.report.SummarizedPlan;
 import com.altvil.utils.StreamUtil;
-import com.altvil.utils.enumeration.EnumMappedCodes;
-import com.altvil.utils.enumeration.MappedCodes;
+import com.altvil.utils.reflexive.DefaultMappedCodes;
+import com.altvil.utils.reflexive.MappedCodes;
 
 @Service
 public class NetworkReportServiceImpl implements NetworkReportService {
@@ -185,123 +185,127 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 	private class ReportBuilderContext {
 
-		private Map<Class<?>, Map<Integer, ?>> costCodeToTypeMapping = new HashMap<>();
-		private Map<Class<?>, Function<?, Integer>> costCodeToIdMapping = new HashMap<>();
+		private Map<Class<?>, MappedCodes<Integer, ?>> costCodeIdToCodeMapping = new HashMap<>();
+		private Map<Class<?>, MappedCodes<?, Integer>> costCodeToIdMapping = new HashMap<>();
 
-		private Map<Class<?>, Map<Integer, ?>> enumCodeMapping = new HashMap<>();
+		private Map<Class<?>, MappedCodes<?, Integer>> enumToCodeMapping = new HashMap<>();
+		private Map<Class<?>, MappedCodes<Integer, ?>> codeToEnumMapping = new HashMap<>();
 
-		private MappedCodes<NetworkNodeType, NetworkCostCode> networkTypeToCostCodeMap;
-		private MappedCodes<FiberType, NetworkCostCode> fiberTypeToCostCodeMap;
-		private MappedCodes<NetworkStatisticType, LineItemType> networkStatisticToLineItem;
 		private Set<FiberType> wellKnowFiber = EnumSet.of(
 				FiberType.DISTRIBUTION, FiberType.FEEDER);
 
 		private ReportBuilderContext init() {
 
-			Map<Integer, NetworkCostCode> codeMap = StreamUtil
-					.hash(networkCostCodeRepository.findAll(),
-							NetworkCostCode::getId);
-
-			networkTypeToCostCodeMap = createNodeMapping(codeMap);
-			fiberTypeToCostCodeMap = createFiberMapping(codeMap);
-			networkStatisticToLineItem = createLineItemMapping();
-
-			initCodes();
+			initCostCodes();
+			initEnumMapping();
 
 			return this;
 
 		}
 
-		private void initCodes() {
-
-			costCodeToTypeMapping.put(
-					NetworkNodeType.class,
-					indexDomain(networkTypeToCostCodeMap,
-							(costCode) -> costCode.getId()));
-
-			costCodeToTypeMapping.put(
-					FiberType.class,
-					indexDomain(fiberTypeToCostCodeMap,
-							(costCode) -> costCode.getId()));
-
-			costCodeToIdMapping.put(
-					NetworkNodeType.class,
-					createCodeMapping(networkTypeToCostCodeMap,
-							(code) -> code.getId()));
-
-			costCodeToIdMapping.put(
-					FiberType.class,
-					createCodeMapping(fiberTypeToCostCodeMap,
-							(code) -> code.getId()));
-		
-			enumCodeMapping.put(
-					LocationEntityType.class,
-					StreamUtil.hashEnum(LocationEntityType.class,
-							(e) -> e.getTypeCode()));
-
-			enumCodeMapping.put(NetworkNodeType.class,
-					StreamUtil.hashEnum(NetworkNodeType.class));
-
-			enumCodeMapping.put(FiberType.class,
-					StreamUtil.hashEnum(FiberType.class));
-
-			enumCodeMapping.put(NetworkStatisticType.class,
-					indexDomain(networkStatisticToLineItem, l -> l.getId()));
-
+		private <S> void registerCostCodes(Class<S> clz,
+				MappedCodes<S, Integer> mc) {
+			costCodeToIdMapping.put(clz, mc);
+			costCodeIdToCodeMapping.put(clz, mc.flip());
 		}
 
-		private <K, S, D> Map<K, S> indexDomain(MappedCodes<S, D> mapping,
-				Function<D, K> f) {
+		private void initCostCodes() {
 
-			Map<K, S> result = new HashMap<>();
+			Map<Integer, NetworkCostCode> codeMap = StreamUtil
+					.hash(networkCostCodeRepository.findAll(),
+							NetworkCostCode::getId);
 
-			for (S s : mapping.getSourceCodes()) {
-				result.put(f.apply(mapping.getDomain(s)), s);
-			}
+			registerCostCodes(NetworkNodeType.class, createNodeMapping(codeMap)
+					.reindexDomain(NetworkCostCode::getId));
+			registerCostCodes(FiberType.class, createFiberMapping(codeMap)
+					.reindexDomain(NetworkCostCode::getId));
+		}
 
-			return result;
+		private <S> void registerEnumMapping(Class<S> clz,
+				MappedCodes<S, Integer> mc) {
+			enumToCodeMapping.put(clz, mc);
+			codeToEnumMapping.put(clz, mc.flip());
+		}
+
+		private void initEnumMapping() {
+
+			registerEnumMapping(LocationEntityType.class,
+					DefaultMappedCodes.createEnumMapping(
+							LocationEntityType.class, e -> e.getTypeCode()));
+
+			registerEnumMapping(NetworkNodeType.class,
+					DefaultMappedCodes.createEnumMapping(NetworkNodeType.class));
+
+			registerEnumMapping(FiberType.class,
+					DefaultMappedCodes.createEnumMapping(FiberType.class));
+
+			registerEnumMapping(NetworkStatisticType.class,
+					createLineItemMapping().reindexDomain(LineItemType::getId));
 
 		}
 
 		@SuppressWarnings("rawtypes")
-		public <T> Integer getTypeId(T code) {
+		public <T> T getTypeCode(Class<T> clz, Integer id) {
 			@SuppressWarnings("unchecked")
-			Function<T, Integer> f = (Function) costCodeToIdMapping.get(code
-					.getClass());
-			if (f == null) {
-				throw new RuntimeException("Failed to map " + code);
-			}
-			return f.apply(code);
-		}
-
-		@SuppressWarnings("rawtypes")
-		public <T> T getEnumCode(Class<T> clz, Integer id) {
-			@SuppressWarnings("unchecked")
-			Map<Integer, T> encodedMap = ((Map) enumCodeMapping.get(clz));
+			MappedCodes<Integer, T> encodedMap = ((MappedCodes) codeToEnumMapping
+					.get(clz));
 			if (encodedMap == null) {
 				throw new RuntimeException("Failed to map code for type " + clz);
 			}
-			T code = encodedMap.get(id);
+			T code = encodedMap.getDomain(id);
 			if (code == null) {
 				throw new RuntimeException("Failed to map id " + id
 						+ " for type  " + clz);
 			}
-			return encodedMap.get(id);
+			return code;
+		}
+
+		@SuppressWarnings("rawtypes")
+		public <T> Integer getTypeCode(T typeCode) {
+			@SuppressWarnings("unchecked")
+			MappedCodes<T, Integer> encodedMap = ((MappedCodes) codeToEnumMapping
+					.get(typeCode.getClass()));
+			if (encodedMap == null) {
+				throw new RuntimeException("Failed to map code for type "
+						+ typeCode);
+			}
+			Integer code = encodedMap.getDomain(typeCode);
+			if (code == null) {
+				throw new RuntimeException("Failed to map code " + typeCode);
+			}
+			return code;
 		}
 
 		@SuppressWarnings("rawtypes")
 		public <T> T getCostCode(Class<T> clz, Integer id) {
 			@SuppressWarnings("unchecked")
-			Map<Integer, T> encodedMap = ((Map) costCodeToTypeMapping.get(clz));
+			MappedCodes<Integer, T> encodedMap = ((MappedCodes) costCodeIdToCodeMapping
+					.get(clz));
 			if (encodedMap == null) {
 				throw new RuntimeException("Failed to map code for type " + clz);
 			}
-			T code = encodedMap.get(id);
+			T code = encodedMap.getDomain(id);
 			if (code == null) {
 				throw new RuntimeException("Failed to map id " + id
 						+ " for type  " + clz);
 			}
-			return encodedMap.get(id);
+			return code;
+		}
+
+		@SuppressWarnings("rawtypes")
+		public <T> Integer getCostCode(T type) {
+			@SuppressWarnings("unchecked")
+			MappedCodes<T, Integer> encodedMap = ((MappedCodes) costCodeToIdMapping
+					.get(type.getClass()));
+			if (encodedMap == null) {
+				throw new RuntimeException("Failed to map code for type "
+						+ type);
+			}
+			Integer code = encodedMap.getDomain(type);
+			if (code == null) {
+				throw new RuntimeException("Failed to map code " + type);
+			}
+			return code;
 		}
 
 		private <S extends Enum<S>, D> Map<S, D> createAssociationMap(
@@ -336,7 +340,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		private MappedCodes<NetworkNodeType, NetworkCostCode> createNodeMapping(
 				Map<Integer, NetworkCostCode> codeMap) {
 
-			return EnumMappedCodes.create(createAssociationMap(
+			return DefaultMappedCodes.create(createAssociationMap(
 					networkCostCodeRepository
 							.queryCostCodeToNetworkNodeTypeOrdinal(), codeMap,
 					NetworkNodeType.class));
@@ -346,7 +350,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		private MappedCodes<FiberType, NetworkCostCode> createFiberMapping(
 				Map<Integer, NetworkCostCode> codeMap) {
 
-			return EnumMappedCodes
+			return DefaultMappedCodes
 					.create(createAssociationMap(networkCostCodeRepository
 							.queryCostCodeToFiberTypeOrdinal(), codeMap,
 							FiberType.class));
@@ -370,24 +374,14 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 				result.put(t, type);
 			}
 
-			return EnumMappedCodes.create(result);
+			return DefaultMappedCodes.create(result);
 
-		}
-
-		private <S, D> Function<S, Integer> createCodeMapping(
-				MappedCodes<S, D> codeMapping, Function<D, Integer> f) {
-			return (s) -> f.apply(codeMapping.getDomain(s));
 		}
 
 		public boolean isValid(FiberCost fiberCost) {
-			return fiberTypeToCostCodeMap.getSourceCodes().contains(
-					fiberCost.getFiberType())
-					&& (fiberCost.getTotalCost() > 0 || wellKnowFiber
-							.contains(fiberCost.getFiberType()));
-		}
-
-		public int getLineItemCode(NetworkStatisticType type) {
-			return networkStatisticToLineItem.getDomain(type).getId();
+			return (fiberCost.getFiberType() != null
+					&& fiberCost.getTotalCost() > 0 && wellKnowFiber
+						.contains(fiberCost.getFiberType()));
 		}
 
 	}
@@ -409,7 +403,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 			demand.getPlanEntityDemands().forEach(
 					ed -> {
 						builder.add(
-								ctx.getEnumCode(LocationEntityType.class,
+								ctx.getTypeCode(LocationEntityType.class,
 										ed.getEntityType()), ed.getPremises(),
 								ed.getFiberCount(), ed.getRevenueTotal(),
 								ed.getRevenueShare(), ed.getPenetration());
@@ -430,7 +424,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		private NetworkStatistic toNetworkStatistic(LineItem li) {
 
 			return networkStatisticsService.createNetworkStatistic(ctx
-					.getEnumCode(NetworkStatisticType.class, li.getId()
+					.getTypeCode(NetworkStatisticType.class, li.getId()
 							.getLineItemType()), li.getDoubleValue());
 		}
 
@@ -493,7 +487,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 				EquipmentCost cost) {
 
 			EquipmentSummaryCost es = new EquipmentSummaryCost(
-					ctx.getTypeId(cost.getNodeType()), reportSummary);
+					ctx.getCostCode(cost.getNodeType()), reportSummary);
 
 			es.setAtomicCount(cost.getAtomicUnits());
 			es.setPrice(cost.getPrice());
@@ -505,8 +499,8 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		private FiberSummaryCost createFiberSummaryCost(FiberCost fiberCost) {
 
-			FiberSummaryCost fc = new FiberSummaryCost(ctx.getTypeId(fiberCost
-					.getFiberType()), reportSummary);
+			FiberSummaryCost fc = new FiberSummaryCost(
+					ctx.getCostCode(fiberCost.getFiberType()), reportSummary);
 
 			fc.setCostPerMeter(fiberCost.getCostPerMeter());
 			fc.setLengthMeters(fiberCost.getLengthMeters());
@@ -525,7 +519,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		private LineItem createLineItem(NetworkStatistic networkStat) {
 
-			LineItem lineItem = new LineItem(ctx.getLineItemCode(networkStat
+			LineItem lineItem = new LineItem(ctx.getTypeCode(networkStat
 					.getNetworkStatisticType()), reportSummary);
 
 			lineItem.setDoubleValue(networkStat.getValue());

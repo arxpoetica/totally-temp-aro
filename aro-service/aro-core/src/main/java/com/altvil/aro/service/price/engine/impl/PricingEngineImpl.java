@@ -18,9 +18,9 @@ import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.aro.service.price.engine.PricingEngine;
 import com.altvil.utils.StreamUtil;
-import com.altvil.utils.enumeration.DefaultMappedCodes;
-import com.altvil.utils.enumeration.MappedCodes;
 import com.altvil.utils.func.Aggregator;
+import com.altvil.utils.reflexive.DefaultMappedCodes;
+import com.altvil.utils.reflexive.MappedCodes;
 
 @Service
 public class PricingEngineImpl implements PricingEngine {
