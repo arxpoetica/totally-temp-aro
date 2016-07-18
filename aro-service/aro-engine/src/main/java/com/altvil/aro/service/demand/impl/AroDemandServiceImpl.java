@@ -358,6 +358,8 @@ public class AroDemandServiceImpl implements AroDemandService {
 
 			overrrideMapping.put(LocationEntityType.LargeBusiness,
 					strengthFairShare);
+			overrrideMapping.put(LocationEntityType.CellTower,
+					strengthFairShare);
 
 			return new CompositeFairShareDemandMapping(cbFairShare,
 					overrrideMapping);
