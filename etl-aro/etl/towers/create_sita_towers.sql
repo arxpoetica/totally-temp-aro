@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS sita.towers;
+DROP TABLE IF EXISTS towers.sita_towers;
 
-CREATE TABLE sita.towers
+CREATE TABLE towers.sita_towers
 (
 	sita_number varchar,
 	latitude double precision,
