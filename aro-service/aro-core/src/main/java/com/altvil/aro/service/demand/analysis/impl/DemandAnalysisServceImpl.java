@@ -422,6 +422,19 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 				LocationEntityType type) {
 			return demandMap.get(type);
 		}
+		
+		public DemandStatistic createDemandStatistic(DemandMapping demandMapping,
+				LocationEntityType type) {
+			FairShareDemandAnalysis analysis = demandMap.get(type);
+
+			EntityDemandMapping entityMapping = demandMapping
+					.getEntityDemandMapping(type);
+
+			return analysis == null
+					|| entityMapping == null || entityMapping.getMappedDemand() == 0 ? DefaultDemandStatistic.ZERO_DEMAND
+					: analysis.createFairShareDemand(entityMapping)
+							.getDemandStatistic();
+		}
 
 		@Override
 		public LocationDemand createLocationDemand(DemandMapping demandMapping) {
@@ -430,17 +443,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 					.build();
 
 			for (LocationEntityType type : LocationEntityType.values()) {
-				FairShareDemandAnalysis analysis = demandMap.get(type);
-
-				EntityDemandMapping entityMapping = demandMapping
-						.getEntityDemandMapping(type);
-
-				DemandStatistic demandStatic = analysis == null
-						|| entityMapping == null || entityMapping.getMappedDemand() == 0 ? DefaultDemandStatistic.ZERO_DEMAND
-						: analysis.createFairShareDemand(entityMapping)
-								.getDemandStatistic();
-
-				builder.add(type, demandStatic);
+				builder.add(type, createDemandStatistic(demandMapping, type));
 			}
 
 			return builder.build();

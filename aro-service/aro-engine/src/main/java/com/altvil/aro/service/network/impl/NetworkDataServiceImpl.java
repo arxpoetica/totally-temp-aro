@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.demand.AroDemandService;
+import com.altvil.aro.service.demand.CompetitiveMapping;
 import com.altvil.aro.service.demand.DemandMapping;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.analysis.spi.EntityDemandMapping;
@@ -126,12 +127,16 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 					}
 
 					LocationDemand locationDemand = aroDemandService
-							.createDemandByCensusBlock(ldm.getBlockId(), ldm,
-									SpeedCategory.cat7);
+							.createFairShareDemandMapping(ldm)
+							.getFairShareLocationDemand(SpeedCategory.cat7)
+							.createLocationDemand(ldm);
+
+					// SpeedCategory.cat7);
 
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							request.getLocationEntities(), locationId,
-							ldm.getBlockId(), locationDemand);
+							ldm.getBlockId(), ldm.getCompetitiveStrength(),
+							locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
@@ -169,12 +174,16 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 					}
 
 					LocationDemand locationDemand = aroDemandService
-							.createDemandByCensusBlock(ldm.getBlockId(), ldm,
-									SpeedCategory.cat7);
+							.createFairShareDemandMapping(ldm)
+							.getFairShareLocationDemand(SpeedCategory.cat7)
+							.createLocationDemand(ldm);
+					// .createDemandByCensusBlock(ldm.getBlockId(),
+					// ldm.getldm, SpeedCategory.cat7);
 
 					AroEntity aroEntity = entityFactory.createLocationEntity(
 							networkConfiguration.getLocationEntities(),
-							locationId, ldm.getBlockId(), locationDemand);
+							locationId, ldm.getBlockId(),
+							ldm.getCompetitiveStrength(), locationDemand);
 
 					return new DefaultNetworkAssignment(aroEntity,
 							roadLocationByLocationIdMap.get(locationId));
@@ -209,7 +218,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	}
 
 	private enum EntityDemandMap implements OrdinalAccessor {
-		location_id, block_id, entity_type, count, monthly_spend
+		location_id, block_id, entity_type, count, monthly_spend, competitive_strength
 	}
 
 	private LocationEntityType toLocationEntityType(int entityTypeCode) {
@@ -227,13 +236,16 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.forEach(
 						d -> {
+
 							Long locationId = d
 									.getLong(EntityDemandMap.location_id);
+
 							LocationDemandMapping ldm = map.get(locationId);
 							if (ldm == null) {
 								map.put(locationId,
 										ldm = new LocationDemandMapping(
-												d.getInteger(EntityDemandMap.block_id)));
+												d.getInteger(EntityDemandMap.block_id),
+												d.getDouble(EntityDemandMap.competitive_strength)));
 							}
 
 							LocationEntityType lt = toLocationEntityType(d
@@ -460,7 +472,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	}
 
-	private static class LocationDemandMapping implements DemandMapping {
+	private static class LocationDemandMapping implements DemandMapping,
+			CompetitiveMapping {
 
 		public static Aggregator<LocationDemandMapping> aggregate() {
 			return new DemandMappingAggregator();
@@ -494,27 +507,41 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 					result.put(t, map.get(t).apply());
 				}
 
-				return new LocationDemandMapping(0, result);
+				// TODO Average Strength (Maybe)
+				return new LocationDemandMapping(0, 0, result);
 			}
 
 		}
 
 		private int blockId;
+		private double competitiveStrength;
 
 		private Map<LocationEntityType, EntityDemandMapping> map = new EnumMap<>(
 				LocationEntityType.class);
+
 		private static final EntityDemandMapping zeroDemand = new EntityDemandMappingImpl(
 				0, 0);
 
-		public LocationDemandMapping(int blockId) {
+		public LocationDemandMapping(int blockId, double competitiveStrength) {
 			super();
 			this.blockId = blockId;
+			this.competitiveStrength = competitiveStrength;
 		}
 
-		public LocationDemandMapping(int blockId,
+		@Override
+		public int getCensusBlockId() {
+			return blockId;
+		}
+
+		public LocationDemandMapping(int blockId, double competitiveStrength,
 				Map<LocationEntityType, EntityDemandMapping> map) {
 			this.blockId = blockId;
+			this.competitiveStrength = competitiveStrength;
 			this.map = map;
+		}
+
+		public double getCompetitiveStrength() {
+			return competitiveStrength;
 		}
 
 		public boolean isEmpty() {
@@ -529,9 +556,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 			map.put(type, mapping);
 		}
 
-//		public void addZeroDemand(LocationEntityType type) {
-//			add(type, zeroDemand);
-//		}
+		// public void addZeroDemand(LocationEntityType type) {
+		// add(type, zeroDemand);
+		// }
 
 		public void add(LocationEntityType type, double demand, double revenue) {
 			add(type, new EntityDemandMappingImpl(demand, revenue));
@@ -586,9 +613,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 			locationDemandMappingMap
 					.values()
 					.stream()
-					.map(ldm -> aroDemandService.createDemandByCensusBlock(
-							ldm.getBlockId(), ldm, speedCategory))
-					.forEach(ld -> {
+					.map(ldm -> aroDemandService
+							.createFairShareDemandMapping(ldm)
+							.getFairShareLocationDemand(speedCategory)
+							.createLocationDemand(ldm)).forEach(ld -> {
 						aggregator.add(ld);
 					});
 

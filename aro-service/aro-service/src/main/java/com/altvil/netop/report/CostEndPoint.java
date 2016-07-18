@@ -21,7 +21,6 @@ public class CostEndPoint {
 	@Autowired
 	private NetworkReportService costService ;
 	
-	
 	@RequestMapping(value = "/report/plan/{id}", method = RequestMethod.GET)
 	public @ResponseBody PlanAnalysisReport getReportSummary(
 			@PathVariable("id") long planId)
