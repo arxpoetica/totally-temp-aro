@@ -255,10 +255,10 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			return new DefaultNetworkStatistic(type, eval(supplier));
 		}
 		
-		public static NetworkStatistic create(NetworkStatisticType type,
-				double val) {
-			return new DefaultNetworkStatistic(type, val);
-		}
+//		public static NetworkStatistic create(NetworkStatisticType type,
+//				double val) {
+//			return new DefaultNetworkStatistic(type, val);
+//		}
 
 		private static double eval(Supplier<Double> supplier) {
 			try {

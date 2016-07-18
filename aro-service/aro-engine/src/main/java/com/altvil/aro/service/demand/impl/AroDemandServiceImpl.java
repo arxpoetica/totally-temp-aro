@@ -26,6 +26,7 @@ import com.altvil.aro.service.demand.analysis.EntityNetworkProfile;
 import com.altvil.aro.service.demand.analysis.NetworkCapacity;
 import com.altvil.aro.service.demand.analysis.NetworkCapacityProfile;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
+import com.altvil.aro.service.demand.analysis.model.FairShareDemandAnalysis;
 import com.altvil.aro.service.demand.analysis.model.FairShareLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -88,19 +89,12 @@ public class AroDemandServiceImpl implements AroDemandService {
 			return fsd;
 		}
 
-		FairShareDemandMapping strengthFaireShare = getEffectiveLocationDemandByStrength(competiveMapping
+		FairShareDemandMapping strengthFairShare = getEffectiveLocationDemandByStrength(competiveMapping
 				.getCompetitiveStrength());
 
-		return CompositeFairshareDemandMapping.create(fsd, strengthFaireShare);
+		return CompositeFairShareDemandMapping.create(fsd, strengthFairShare);
 
 	}
-
-//	@Override
-//	public LocationDemand createDemandByCensusBlock(int blockId,
-//			DemandMapping mapping, SpeedCategory speedCategory) {
-//		return getEffectiveLocationDemand(blockId).getFairShareLocationDemand(
-//				speedCategory).createLocationDemand(mapping);
-//	}
 
 	@Override
 	public LocationDemand createFullShareDemand(DemandMapping mapping) {
@@ -352,40 +346,69 @@ public class AroDemandServiceImpl implements AroDemandService {
 
 	}
 
-	private static class CompositeFairshareDemandMapping implements
+	private static class CompositeFairShareDemandMapping implements
 			FairShareDemandMapping {
 
 		public static FairShareDemandMapping create(
 				FairShareDemandMapping cbFairShare,
 				FairShareDemandMapping strengthFairShare) {
 
-			Map<LocationEntityType, FairShareDemandMapping> map = new EnumMap<>(
+			Map<LocationEntityType, FairShareDemandMapping> overrrideMapping = new EnumMap<>(
 					LocationEntityType.class);
 
-			for (LocationEntityType t : LocationEntityType.values()) {
-				if (t != LocationEntityType.LargeBusiness) {
-					map.put(t, cbFairShare);
-				} else {
-					map.put(LocationEntityType.LargeBusiness, strengthFairShare);
-				}
-			}
+			overrrideMapping.put(LocationEntityType.LargeBusiness,
+					strengthFairShare);
 
-			return new CompositeFairshareDemandMapping(map);
+			return new CompositeFairShareDemandMapping(cbFairShare,
+					overrrideMapping);
 
 		}
 
-		private Map<LocationEntityType, FairShareDemandMapping> map;
+		private final FairShareDemandMapping primaryMapping;
+		private final Map<LocationEntityType, FairShareDemandMapping> overrideMap;
 
-		public CompositeFairshareDemandMapping(
-				Map<LocationEntityType, FairShareDemandMapping> map) {
-			this.map = map;
+		private Map<SpeedCategory, FairShareLocationDemand> demandMap = new EnumMap<>(
+				SpeedCategory.class);
+
+		public CompositeFairShareDemandMapping(
+				FairShareDemandMapping primaryMapping,
+				Map<LocationEntityType, FairShareDemandMapping> overrideMap) {
+			super();
+			this.primaryMapping = primaryMapping;
+			this.overrideMap = overrideMap;
+		}
+
+		private Map<LocationEntityType, FairShareDemandAnalysis> createOverrides(
+				SpeedCategory speedCategory) {
+			Map<LocationEntityType, FairShareDemandAnalysis> overrides = new EnumMap<>(
+					LocationEntityType.class);
+
+			for (Map.Entry<LocationEntityType, FairShareDemandMapping> e : overrideMap
+					.entrySet()) {
+				overrides.put(e.getKey(), e.getValue()
+						.getFairShareLocationDemand(speedCategory)
+						.getEffectiveNetworkDemand(e.getKey()));
+			}
+			return overrides;
+		}
+
+		private FairShareLocationDemand create(SpeedCategory speedCategory) {
+			return primaryMapping.getFairShareLocationDemand(speedCategory)
+					.merge(createOverrides(speedCategory));
 		}
 
 		@Override
 		public FairShareLocationDemand getFairShareLocationDemand(
 				SpeedCategory speedCategory) {
-			return map.get(LocationEntityType.LargeBusiness)
-					.getFairShareLocationDemand(speedCategory);
+
+			FairShareLocationDemand fsd = demandMap.get(speedCategory);
+
+			if (fsd == null) {
+				demandMap.put(speedCategory, fsd = create(speedCategory));
+			}
+
+			return fsd;
+
 		}
 
 	}
