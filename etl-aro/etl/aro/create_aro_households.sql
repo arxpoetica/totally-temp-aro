@@ -22,4 +22,7 @@ INSERT INTO aro.households (location_id, number_of_households)
 		ON l.id = hh.location_id
 	GROUP BY l.id;
 
+-- Drop the reference table - not needed anymore
+DROP TABLE aro.temp_households;
+
 
