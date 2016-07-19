@@ -40,4 +40,6 @@ ${PSQL} -a -f $DIR/line_item_type.sql
 
 ${PSQL} -a -f $DIR/line_item.sql
 
+${PSQL} -a -f $DIR/roic_component_input.sql
+
 
