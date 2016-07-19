@@ -1,29 +1,105 @@
-DROP TABLE IF EXISTS "financial"."component_input";
-CREATE TABLE "financial"."component_input" (
+-- COST_CODE BOMs are defined by "cost codes"
+
+DROP TABLE IF EXISTS "financial"."cost_code";
+CREATE TABLE "financial"."cost_code" (
 	"id" serial PRIMARY KEY,
-	speed_type_id int4 references client.speed_type,
-	entity_category_id int4 references client.entity_category,
-	
-	penetration_start double precision,
-	penetration_end double precision,
-	penetration_rate double precision,
-
-	entity_growth double precision,
-	churn_rate double precision,
-	churn_rate_decrease double precision,
-	opex_percent double precision,
-	maintenance_expenses double precision,
-	connection_cost double precision
-
-	--arpu, premisies count, 
-
+	 cost_code_type_id int4 references financial.cost_code_type,
+	"unit_of_measure_id" int4  not null references aro.uom,
+	"name" varchar(64) UNIQUE,
+	"description" varchar(256)
 )
 WITH (OIDS=FALSE);
-ALTER TABLE "financial"."component_input" OWNER TO "aro";
+ALTER TABLE "financial"."cost_code" OWNER TO "aro";
 
 
-insert into financial.cost_code (speed_type_id, entity_category_id, penetration_start, entity_growth, churn_rate, churn_rate_decrease, opex_percent, maintenance_expenses, connection_cost)
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
 	values (
-	(select id from client.speed_type where name = 'cat3'),
-	(select id from client.entity_category where name = 'small')
+	(select id from financial.cost_code_type where name = 'material'),
+	(select id from aro.uom where name = 'unit_cost')
 	,'co_port', 'Central Office Port Equipment' ) ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+	(select id from financial.cost_code_type where name = 'labor'),
+	(select id from aro.uom where name = 'unit_cost')
+	,'install_co_port', 'Install Central Office Port' ) ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_cost')
+	, 'fdh_equipment', 'FDH Equipment') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'labor'),
+		(select id from aro.uom where name = 'unit_per_hour')
+	, 'install_fdh_equipment', 'Install FDH') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+	(select id from financial.cost_code_type where name = 'material'),
+	(select id from aro.uom where name = 'unit_cost')
+	, 'optical_splitter_32', '32 Port Optical Splitter' ) ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+	(select id from financial.cost_code_type where name = 'material'),
+	(select id from aro.uom where name = 'unit_cost')
+	, 'fdt_equipment', 'FDT Equipment') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'labor'),
+		(select id from aro.uom where name = 'unit_per_hour')
+	, 'install_fdt_equipment', 'Install FDT') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+	(select id from financial.cost_code_type where name = 'material'),
+	(select id from aro.uom where name = 'unit_cost')
+	,'drop cable', 'Drop Cable') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id,  name, description)
+	values (
+	(select id from financial.cost_code_type where name = 'material'),
+	(select id from aro.uom where name = 'unit_cost')
+	, 'splice_point', 'Splice Point Equipment') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'labor'),
+		(select id from aro.uom where name = 'unit_per_hour')
+	, 'install_splice_equipment', 'Install Splice Point') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_cost')
+		, 'optical_model', 'Optical Modem') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_cost')
+		, 'feeder_fiber', 'Feeder Fiber') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_cost')
+	, 'distribution_fiber', 'Distribution Fiber') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'labor'),
+		(select id from aro.uom where name = 'unit_per_hour')
+	, 'install_fiber', 'Install Fiber') ;
+
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id,  name, description)
+	values (
+	(select id from financial.cost_code_type where name = 'material'),
+	(select id from aro.uom where name = 'unit_cost')
+	, 'bulk_distribution_terminal', 'Bulk Distribution Terminal Equipment') ;
+
