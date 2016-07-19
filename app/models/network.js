@@ -203,12 +203,22 @@ module.exports = class Network {
         var promises = options.geographies.map((geography) => {
           var type = geography.type
           var id = geography.id
-          var geog = JSON.stringify(geography.geog)
+          var params = [plan_id, geography.name, id, type]
+          var queries = {
+            'wirecenter': '(SELECT geom FROM wirecenters WHERE id=$3::bigint)',
+            'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
+            'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)'
+          }
+          var query = queries[type]
+          if (!query) {
+            params.push(JSON.stringify(geography.geog))
+            query = `ST_GeomFromGeoJSON($${params.length})`
+          }
           return database.execute(`
             INSERT INTO client.selected_regions (
               plan_id, region_name, region_id, region_type, geom
-            ) VALUES ($1, $2, $3, $4, ST_GeomFromGeoJSON($5))
-          `, [plan_id, geography.name, id, type, geog])
+            ) VALUES ($1, $2, $3, $4, ${query})
+          `, params)
             .then(() => {
               body.selectedRegions.push({
                 regionType: type.toUpperCase(),
