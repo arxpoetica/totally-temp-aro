@@ -1,6 +1,8 @@
 package com.altvil.aro.service.demand.analysis.spi;
 
-public interface EntityDemandMapping {
+import java.io.Serializable;
+
+public interface EntityDemandMapping extends Serializable {
 
 	
 	double getMappedDemand() ;

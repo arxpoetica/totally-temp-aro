@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.ArpuService;
-import com.altvil.aro.service.demand.CompetitiveMapping;
 import com.altvil.aro.service.demand.DemandMapping;
 import com.altvil.aro.service.demand.analysis.ArpuMapping;
 import com.altvil.aro.service.demand.analysis.DemandAnalysisService;
@@ -28,9 +27,12 @@ import com.altvil.aro.service.demand.analysis.NetworkCapacityProfile;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.analysis.model.FairShareDemandAnalysis;
 import com.altvil.aro.service.demand.analysis.model.FairShareLocationDemand;
+import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
+import com.altvil.aro.service.demand.mapping.CompetitiveMapping;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.roic.model.NetworkType;
+import com.altvil.utils.func.Aggregator;
 
 @Service
 public class AroDemandServiceImpl implements AroDemandService {
@@ -76,6 +78,26 @@ public class AroDemandServiceImpl implements AroDemandService {
 				.add(NetworkType.Fiber, SpeedCategory.cat6, 4.0)
 				.add(NetworkType.Fiber, SpeedCategory.cat7, 5.0)
 				.add(NetworkType.Fiber, SpeedCategory.cat10, 5.0).build();
+	}
+
+	@Override
+	public LocationDemand aggregateDemandForSpeedCategory(
+			Collection<CompetitiveLocationDemandMapping> demandMapping,
+			SpeedCategory speedCategory) {
+
+		Aggregator<LocationDemand> aggregator = DefaultLocationDemand
+				.demandAggregate();
+
+		demandMapping
+				.stream()
+				.map(ldm -> this.createFairShareDemandMapping(ldm)
+						.getFairShareLocationDemand(speedCategory)
+						.createLocationDemand(ldm)).forEach(ld -> {
+					aggregator.add(ld);
+				});
+
+		return aggregator.apply();
+
 	}
 
 	@Override

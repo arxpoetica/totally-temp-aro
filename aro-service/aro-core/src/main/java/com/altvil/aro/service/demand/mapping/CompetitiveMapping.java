@@ -1,4 +1,4 @@
-package com.altvil.aro.service.demand;
+package com.altvil.aro.service.demand.mapping;
 
 public interface CompetitiveMapping {
 	

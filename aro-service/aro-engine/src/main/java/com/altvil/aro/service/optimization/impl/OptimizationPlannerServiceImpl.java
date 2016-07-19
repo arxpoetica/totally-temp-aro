@@ -18,7 +18,10 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
+import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
+import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.OptimizedPlan;
@@ -42,6 +45,7 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequ
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultOptimizationResult;
+import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.enumerations.OptimizationType;
@@ -59,9 +63,10 @@ public class OptimizationPlannerServiceImpl implements
 	private WirecenterOptimizationService wirecenterOptimizationService;
 	private WirecenterPlanningService wirecenterPlanningService;
 	private OptimizationExecutorService optimizationExecutorService;
-	
+
 	private MasterPlanningService masterPlanningService;
 	private SerializationService conversionService;
+	private AroDemandService aroDemandService;
 
 	private OptimizationExecutor wirecenterExecutor;
 	private OptimizationExecutor masterPlanExecutor;
@@ -74,7 +79,8 @@ public class OptimizationPlannerServiceImpl implements
 			WirecenterPlanningService wirecenterPlanningService,
 			OptimizationExecutorService optimizationExecutorService,
 			MasterPlanningService masterPlanningService,
-			SerializationService conversionService) {
+			SerializationService conversionService,
+			AroDemandService aroDemandService) {
 		super();
 		this.networkPlanRepository = networkPlanRepository;
 		this.strategyService = strategyService;
@@ -83,6 +89,7 @@ public class OptimizationPlannerServiceImpl implements
 		this.optimizationExecutorService = optimizationExecutorService;
 		this.masterPlanningService = masterPlanningService;
 		this.conversionService = conversionService;
+		this.aroDemandService = aroDemandService;
 	}
 
 	@PostConstruct
@@ -133,18 +140,42 @@ public class OptimizationPlannerServiceImpl implements
 		protected abstract Collection<PlannedNetwork> planNetworks(
 				Collection<WirecenterOptimizationRequest> wirecenters);
 
+		protected NetworkDemandSummary toNetworkDemandSummary(
+				DemandCoverage dc, CompetitiveDemandMapping mapping) {
+
+			Collection<CompetitiveLocationDemandMapping> plannedDemand = dc
+					.getLocations()
+					.stream()
+					.map(l -> mapping.getLocationDemandMapping(l.getObjectId()))
+					.collect(Collectors.toList());
+
+			return NetworkDemandSummaryImpl
+					.build()
+					.add(DemandTypeEnum.planned_demand, SpeedCategory.cat7,
+							dc.getLocationDemand())
+					.add(DemandTypeEnum.new_demand,
+							SpeedCategory.cat7,
+							aroDemandService.aggregateDemandForSpeedCategory(
+									mapping.getAllDemandMapping(),
+									SpeedCategory.cat7))
+					.add(DemandTypeEnum.original_demand,
+							SpeedCategory.cat7,
+							aroDemandService.aggregateDemandForSpeedCategory(
+									plannedDemand, SpeedCategory.cat3))
+
+					.build();
+
+		}
+
 		protected OptimizedPlan reify(OptimizationConstraints constraints,
 				PlannedNetwork plan) {
 
 			WirecenterNetworkPlan reifiedPlan = conversionService.convert(
 					plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
 
-			NetworkDemandSummary demandSummary = NetworkDemandSummaryImpl
-					.build()
-					.add(plan.getNetworkDemands())
-					.add(DemandTypeEnum.planned_demand, SpeedCategory.cat7,
-							reifiedPlan.getDemandCoverage().getLocationDemand())
-					.build();
+			NetworkDemandSummary demandSummary = toNetworkDemandSummary(
+					reifiedPlan.getDemandCoverage(),
+					plan.getCompetitiveDemandMapping());
 
 			return wirecenterPlanningService.save(new GeneratedPlanImpl(
 					demandSummary, constraints, reifiedPlan));

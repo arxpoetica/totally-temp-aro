@@ -89,8 +89,8 @@ public class ComponentInput {
 	private double churnRateDecrease = 0;
 	private double opexPercent;
 	private double maintenanceExpenses ;
-	private double arpu;
-	private double premisesCount;
+	private double arpu; //=f(plan*)
+	private double premisesCount; //=f(plan)
 	private double connectionCost ;
 
 	public ComponentType getComponentType() {

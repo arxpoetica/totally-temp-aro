@@ -1,8 +1,6 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
-import java.util.Collection;
-
-import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
+import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 
@@ -10,22 +8,23 @@ public class DefaultPlannedNetwork implements PlannedNetwork {
 
 	private long planId;
 	private CompositeNetworkModel plannedNetwork;
-	private Collection<NetworkDemand> demands;
+	private CompetitiveDemandMapping competitiveDemandMapping;
 
 	public DefaultPlannedNetwork(long planId,
 			CompositeNetworkModel plannedNetwork,
-			Collection<NetworkDemand> demands) {
+			CompetitiveDemandMapping competitiveDemandMapping) {
 		super();
 		this.planId = planId;
 		this.plannedNetwork = plannedNetwork;
-		this.demands = demands;
+		this.competitiveDemandMapping = competitiveDemandMapping;
 	}
 
 	@Override
-	public Collection<NetworkDemand> getNetworkDemands() {
-		return demands;
+	public CompetitiveDemandMapping getCompetitiveDemandMapping() {
+		return competitiveDemandMapping;
 	}
 
+	
 	@Override
 	public long getPlanId() {
 		return planId;

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 
@@ -16,7 +17,7 @@ public class NetworkData {
 	// public Map<RoadLocation, CoverageAggregateStatistic>
 	// roadLocationsProperties;
 
-	private LocationDemandAnalysis demandAnalysis;
+	private CompetitiveDemandMapping competitiveDemandMapping ;
 
 	private Collection<NetworkAssignment> fiberSources;
 	private Collection<RoadEdge> roadEdges;
@@ -58,13 +59,15 @@ public class NetworkData {
 			Collection<Long> selectedRoadLocationIds) {
 		this.selectedRoadLocationIds = selectedRoadLocationIds;
 	}
+	
 
-	public LocationDemandAnalysis getDemandAnalysis() {
-		return demandAnalysis;
+	public CompetitiveDemandMapping getCompetitiveDemandMapping() {
+		return competitiveDemandMapping;
 	}
 
-	public void setDemandAnalysis(LocationDemandAnalysis demandAnalysis) {
-		this.demandAnalysis = demandAnalysis;
+	public void setCompetitiveDemandMapping(
+			CompetitiveDemandMapping competitiveDemandMapping) {
+		this.competitiveDemandMapping = competitiveDemandMapping;
 	}
 
 	public Collection<NetworkAssignment> getSelectedRoadLocations() {
