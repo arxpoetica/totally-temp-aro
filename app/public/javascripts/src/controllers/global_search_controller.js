@@ -34,7 +34,6 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
     if (selected) {
       var centroid = selected.centroid.coordinates
       map.setCenter({ lat: centroid[1], lng: centroid[0] })
-      console.log('...', centroid)
     }
   })
 }])

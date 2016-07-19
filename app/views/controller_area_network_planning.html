@@ -71,9 +71,9 @@
   </div>
 
   <!-- <p><strong>Selected Geographies</strong></p> -->
-  <p ng-hide="selectedGeographies.length > 0"><em>No geographies selected</em></p>
-  <ul ng-show="selectedGeographies.length > 0" style="list-style-type:none; padding:0">
-    <li ng-repeat="geography in selectedGeographies">
+  <p ng-hide="selectedRegions.length > 0"><em>No geographies selected</em></p>
+  <ul ng-show="selectedRegions.length > 0" style="list-style-type:none; padding:0">
+    <li ng-repeat="geography in selectedRegions">
       <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
         <span class="fa fa-trash-o"></span>
       </a>
@@ -144,7 +144,7 @@
       <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
     </p>
     <!--
-    <div class="row" ng-repeat="geography in selectedGeographies">
+    <div class="row" ng-repeat="geography in selectedRegions">
       <div class="col-md-4">
         {{geography.name}}
       </div>
