@@ -39,7 +39,7 @@ fi
 
 # 2. Load Wirecenters
 
-declare -a WIRECENTER_STATE_ARRAY=( 'wa' 'oh' )
+declare -a WIRECENTER_STATE_ARRAY=( 'wa' )
 wirecenter_state_array_len=${#WIRECENTER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table

@@ -21,8 +21,6 @@ WHERE
         (mtfcc = 'S1640'
         OR
         mtfcc = 'S1400'
-        -- OR
-        -- mtfcc = 'S1630'
         OR
         mtfcc = 'S1200');
 
