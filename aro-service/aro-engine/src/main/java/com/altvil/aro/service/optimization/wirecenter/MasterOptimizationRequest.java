@@ -107,7 +107,9 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 		return new MasterOptimizationRequest(optimizationConstraints,
 				constraints, networkDataRequest.create(planId),
-				Collections.singleton(new Integer(wireCenterId)));
+				Collections.singleton(new Integer(wireCenterId)),
+				getOptimizationMode()
+		);
 	}
 
 	public OptimizationMode getOptimizationMode() {
