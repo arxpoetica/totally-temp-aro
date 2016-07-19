@@ -5,12 +5,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.map_tools = map_tools
   $scope.regions = regions
 
+  // selected regions
   $scope.selectedRegions = []
-
   $rootScope.$on('regions_changed', () => {
     $scope.selectedRegions = regions.selectedRegions.slice(0)
-    // if (!$scope.$$phase) { $scope.$apply() } // refresh button state
   })
+  $scope.removeGeography = (geography) => {
+    regions.removeGeography(geography)
+  }
+  // --
 
   $scope.calculating = false
 
@@ -35,10 +38,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   budgetInput.on('blur', () => {
     budgetInput.val(parseBudget().toLocaleString())
   })
-
-  $scope.removeGeography = (geography) => {
-    regions.removeGeography(geography)
-  }
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {

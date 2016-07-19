@@ -65,6 +65,7 @@
   </div>
 
   <br>
+  <% if (config.ARO_CLIENT !== 'verizon') { %>
   <p><strong>Search or Click Geographies</strong></p>
   <div class="form-group form-group-sm">
     <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
@@ -80,6 +81,7 @@
       {{ geography.name }}
     </li>
   </ul>
+  <% } %>
 
   <% if (!config.ui.eye_checkboxes) { %>
   <p><strong>Customers to Optimize For</strong></p>

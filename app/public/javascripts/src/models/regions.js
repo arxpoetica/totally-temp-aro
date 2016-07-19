@@ -1,6 +1,7 @@
-/* global app map google $ */
+/* global app map google $ config */
 app.service('regions', ($rootScope, $timeout, map_tools) => {
   var regions = { selectedRegions: [] }
+  var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
 
   var selectionLayer
   function initSelectionLayer () {
@@ -9,7 +10,7 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     selectionLayer.setStyle({
       fillColor: 'green'
     })
-    selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
+    selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
   }
 
   $(document).ready(() => {
@@ -39,7 +40,7 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
   })
 
   $rootScope.$on('map_tool_changed_visibility', () => {
-    selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
+    selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
   })
 
   regions.removeGeography = (geography) => {
@@ -115,7 +116,7 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
   }
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
-    if (!map_tools.is_visible('area_network_planning')) return
+    if (!map_tools.is_visible(tool)) return
 
     var feature = event.feature
     var name = feature.getProperty('name')
