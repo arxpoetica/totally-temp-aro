@@ -5,7 +5,7 @@ import com.altvil.aro.service.optimize.OptimizedNetwork;
 public class CapexNetworkComparator extends AbstractNetworkComparator{
     @Override
     protected double getIncrementalBenefit(OptimizedNetwork base, OptimizedNetwork compared) {
-        return compared.getAnalysisNode().getFiberCoverage().getRawCoverage() - base.getAnalysisNode().getFiberCoverage().getRawCoverage();
+        return compared.getAnalysisNode().getFiberCoverage().getRawCoverage() - (base != null?base.getAnalysisNode().getFiberCoverage().getRawCoverage():0);
     }
 
     @Override

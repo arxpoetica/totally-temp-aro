@@ -13,6 +13,8 @@ import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.enumerations.OptimizationType;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -24,6 +26,8 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
     OptimizationNetworkComparator comparator;
     Supplier<OptimizationTargetEvaluator> targetEvaluatorSupplier;
     private OptimizationType optimizationType;
+
+    private final Logger log			 = LoggerFactory.getLogger(this.getClass());
 
     public MultiAreaEvaluator(OptimizationNetworkComparator comparator, Supplier<OptimizationTargetEvaluator> targetEvaluatorSupplier, OptimizationType optimizationType) {
         this.comparator = comparator;
@@ -40,10 +44,7 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
 
         public NetworkOptimizationIterator(PrunedNetwork prunedNetwork) {
             this.prunedNetwork = prunedNetwork;
-            this.currentNetwork = prunedNetwork.getOptimizedNetworks().stream()
-                    .filter(optimizedNetwork -> optimizedNetwork.getAnalysisNode().getFiberCoverage().getRawCoverage() == 0)
-                    .findFirst()
-                    .get();
+            this.currentNetwork = null;
             this.currentBestImprovement = getBestImprovement(prunedNetwork, currentNetwork);
 
         }
@@ -67,7 +68,7 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
 
         private Optional<OptimizationImprovement> getBestImprovement(PrunedNetwork prunedNetwork, OptimizedNetwork base) {
                 return prunedNetwork.getOptimizedNetworks().stream()
-                        .filter(optimizedNetwork -> getRawCoverage(optimizedNetwork) > getRawCoverage(base))
+                        .filter(optimizedNetwork -> base == null || getRawCoverage(optimizedNetwork) > getRawCoverage(base))
                         .map(network -> comparator.calculateImprovement(base, network, prunedNetwork.getPlanId()))
                         .max((o1, o2) -> Double.compare(o1.getScore(), o2.getScore()));
         }
@@ -76,24 +77,29 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
 
     @Override
     public Collection<PlannedNetwork> evaluateNetworks(Collection<PrunedNetwork> analysis) {
-        PriorityQueue<NetworkOptimizationIterator> improvementIterators = analysis
-                .stream()
-                .map(NetworkOptimizationIterator::new)
-                .filter(NetworkOptimizationIterator::hasNext)
-                .collect(toCollection(PriorityQueue::new));
-        if(improvementIterators.isEmpty())
-            return Collections.emptyList();
-        OptimizationTargetEvaluator evaluator = targetEvaluatorSupplier.get();
-        OptimizationImprovement improvement;
-        do {
-            NetworkOptimizationIterator iterator = improvementIterators.poll();
-            improvement = iterator.next();
-            if (iterator.hasNext())
-                improvementIterators.add(iterator);
-        } while (evaluator.addNetwork(improvement) && !improvementIterators.isEmpty());
+        try {
+            PriorityQueue<NetworkOptimizationIterator> improvementIterators = analysis
+                    .stream()
+                    .map(NetworkOptimizationIterator::new)
+                    .filter(NetworkOptimizationIterator::hasNext)
+                    .collect(toCollection(PriorityQueue::new));
+            if (improvementIterators.isEmpty())
+                return Collections.emptyList();
+            OptimizationTargetEvaluator evaluator = targetEvaluatorSupplier.get();
+            OptimizationImprovement improvement;
+            do {
+                NetworkOptimizationIterator iterator = improvementIterators.poll();
+                improvement = iterator.next();
+                if (iterator.hasNext())
+                    improvementIterators.add(iterator);
+            } while (evaluator.addNetwork(improvement) && !improvementIterators.isEmpty());
 
-        return evaluator.getEvaluatedNetworks();
-
+            Collection<PlannedNetwork> evaluatedNetworks = evaluator.getEvaluatedNetworks();
+            return evaluatedNetworks;
+        }catch (Throwable throwable){
+            log.error(throwable.getLocalizedMessage(), throwable);
+            throw throwable;
+        }
 
     }
 

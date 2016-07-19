@@ -20,7 +20,7 @@ public class OptimizationEvaluatorFactory {
     public OptimizationEvaluator getOptimizationEvaluator(ThresholdBudgetConstraint optimizationConstraints, OptimizationMode optimizationMode) {
         switch (optimizationMode){
             case INTER_WIRECENTER:
-                multiEvaluator.getOptimizationEvaluator(optimizationConstraints);
+                return multiEvaluator.getOptimizationEvaluator(optimizationConstraints);
             case INTRA_WIRECENTER:
                 return single.getOptimizationEvaluator(optimizationConstraints);
                 default:

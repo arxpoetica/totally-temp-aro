@@ -16,7 +16,7 @@ public class IrrNetoworkComparator extends AbstractNetworkComparator {
     @Override
     protected double getIncrementalBenefit(OptimizedNetwork base, OptimizedNetwork compared) {
 
-        return  compared.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - base.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact();
+        return  compared.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - (base != null? base.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact():0);
 
     }
 
@@ -24,7 +24,7 @@ public class IrrNetoworkComparator extends AbstractNetworkComparator {
     protected double getScore(OptimizedNetwork base, OptimizedNetwork compared) {
         // negated IRR of a cashflows difference
         return - Irr.irr(getCashFlows(getIncrementalCost(base,compared),
-                compared.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - base.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact()));
+                compared.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - (base != null?base.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact():0)));
 
     }
 

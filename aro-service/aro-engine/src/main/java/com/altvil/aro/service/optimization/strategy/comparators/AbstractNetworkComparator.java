@@ -12,7 +12,7 @@ public abstract class AbstractNetworkComparator implements OptimizationNetworkCo
     }
 
     protected double getIncrementalCost(OptimizedNetwork base, OptimizedNetwork compared){
-        return compared.getAnalysisNode().getCapex() - base.getAnalysisNode().getCapex();
+        return compared.getAnalysisNode().getCapex() - ((base != null )? base.getAnalysisNode().getCapex():0);
     }
 
     protected abstract double getIncrementalBenefit(OptimizedNetwork base, OptimizedNetwork compared);
