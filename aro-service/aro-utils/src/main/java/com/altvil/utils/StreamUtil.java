@@ -37,37 +37,53 @@ public class StreamUtil {
 				false);
 	}
 	
-	
-	public static <K extends Enum<K>, T> Map<K,Aggregator<T>> createAggregator(Class<K>  clz, Collection<K> keys, Supplier<Aggregator<T>>  s) {
-		Map<K,Aggregator<T>> result = new EnumMap<>(clz) ;
-		for(K k : keys) {
-			result.put(k, s.get()) ;
+	public static <T extends Enum<T>> Map<Integer, T> hashEnum(Class<T> clz, Function<T, Integer> f) {
+		Map<Integer, T> map = new HashMap<>();
+
+		for (T e : clz.getEnumConstants()) {
+			map.put(e.ordinal(), e);
 		}
-		return result ;
+
+		return map;
 	}
-	
-	public static <K extends Enum<K>, T> Map<K,Aggregator<T>> createAggregator(Class<K>  clz, Supplier<Aggregator<T>>  s) {
-		Map<K,Aggregator<T>> result = new EnumMap<>(clz) ;
-		for(K k : clz.getEnumConstants()) {
-			result.put(k, s.get()) ;
+
+	public static <T extends Enum<T>> Map<Integer, T> hashEnum(Class<T> clz) {
+		return hashEnum(clz, (e) -> e.ordinal()) ;
+	}
+
+	public static <K extends Enum<K>, T> Map<K, Aggregator<T>> createAggregator(
+			Class<K> clz, Collection<K> keys, Supplier<Aggregator<T>> s) {
+		Map<K, Aggregator<T>> result = new EnumMap<>(clz);
+		for (K k : keys) {
+			result.put(k, s.get());
 		}
-		return result ;
+		return result;
 	}
-	
-	public static <K extends Enum<K>,T> Map<K,T> apply(Class<K> clz, Map<K, Aggregator<T>> aggragtorMap) {
-		Map<K,T> result = new EnumMap<>(clz) ;
-		aggragtorMap.entrySet().forEach(e -> {
-			result.put(e.getKey(), e.getValue().apply()) ;
-		});
-		return result ;
+
+	public static <K extends Enum<K>, T> Map<K, Aggregator<T>> createAggregator(
+			Class<K> clz, Supplier<Aggregator<T>> s) {
+		Map<K, Aggregator<T>> result = new EnumMap<>(clz);
+		for (K k : clz.getEnumConstants()) {
+			result.put(k, s.get());
+		}
+		return result;
 	}
-	
-	public static <K,T> Map<K,T> apply(Map<K, Aggregator<T>> aggragtorMap) {
-		Map<K,T> result = new HashMap<K, T>(aggragtorMap.size()) ;
+
+	public static <K extends Enum<K>, T> Map<K, T> apply(Class<K> clz,
+			Map<K, Aggregator<T>> aggragtorMap) {
+		Map<K, T> result = new EnumMap<>(clz);
 		aggragtorMap.entrySet().forEach(e -> {
-			result.put(e.getKey(), e.getValue().apply()) ;
+			result.put(e.getKey(), e.getValue().apply());
 		});
-		return result ;
+		return result;
+	}
+
+	public static <K, T> Map<K, T> apply(Map<K, Aggregator<T>> aggragtorMap) {
+		Map<K, T> result = new HashMap<K, T>(aggragtorMap.size());
+		aggragtorMap.entrySet().forEach(e -> {
+			result.put(e.getKey(), e.getValue().apply());
+		});
+		return result;
 	}
 
 	public static <T> void forEach(Iterable<T> iterable,
@@ -106,9 +122,8 @@ public class StreamUtil {
 
 		return result;
 	}
-	
-	public static <K, V> Map<K, V> hash(V[] src,
-			Function<V, K> f) {
+
+	public static <K, V> Map<K, V> hash(V[] src, Function<V, K> f) {
 		HashMap<K, V> result = new HashMap<K, V>(src.length);
 
 		for (V v : src) {

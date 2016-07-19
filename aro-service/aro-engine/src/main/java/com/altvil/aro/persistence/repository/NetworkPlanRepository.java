@@ -81,25 +81,26 @@ public interface NetworkPlanRepository extends
 
 	
 	@Query(value = "with selected_locations as (\n" + 
-			"select location_id as id, b.gid as block_id\n" + 
+			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength	\n" + 
 			"	from client.plan_targets t\n" + 
 			"	join aro.locations l on l.id = t.location_id\n" + 
 			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
+			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3\n" + 
 			"	where plan_id = :planId\n" + 
 			"),\n" + 
 			"bs as (\n" + 
-			"  select l.id, l.block_id, entity_type, e.count, e.monthly_spend \n" + 
+			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
 			"  join client.business_summary e on e.location_id = l.id\n" + 
 			"   where year = :year and city_id = 1\n" + 
 			"),\n" + 
 			"hs as (\n" + 
-			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend \n" + 
+			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
 			"  join client.households_summary e on e.location_id = l.id\n" + 
 			"),\n" + 
 			"ct as (\n" + 
-			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend \n" + 
+			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
 			"  join client.celltower_summary e on e.location_id = l.id\n" + 
 			")\n" + 
@@ -107,41 +108,43 @@ public interface NetworkPlanRepository extends
 			"UNION\n" + 
 			"select * from  hs\n" + 
 			"UNION\n" + 
-			"select * from ct\n" +
-			"limit 60000\n", 
+			"select * from ct\n" + 
+			"limit 200000", 
 			nativeQuery = true)
 	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year);
 	
-	@Query(value = "with selected_locations as (\n" + 
-			"select l.id, b.gid as block_id\n" + 
+	@Query(value = 
+			"with selected_locations as (\n" + 
+			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength\n" + 
 			"	from client.plan p \n" + 
 			"	join aro.wirecenters w on w.id = p.wirecenter_id\n" + 
 			"	join aro.locations l on st_contains(w.geom, l.geom)\n" + 
 			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
+			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3\n" + 
 			"	where p.id =  :planId\n" + 
 			"),\n" + 
 			"bs as (\n" + 
-			"  select l.id, l.block_id, entity_type, e.count, e.monthly_spend \n" + 
+			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
 			"  join client.business_summary e on e.location_id = l.id\n" + 
 			"   where year = :year and city_id = 1\n" + 
 			"),\n" + 
 			"hs as (\n" + 
-			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend \n" + 
+			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
 			"  join client.households_summary e on e.location_id = l.id\n" + 
 			"),\n" + 
 			"ct as (\n" + 
-			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend \n" + 
+			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
 			"  join client.celltower_summary e on e.location_id = l.id\n" + 
 			")\n" + 
 			"select * from  bs\n" + 
 			"UNION\n" + 
 			"select * from  hs\n" + 
-			"UNION\n" + 
+			"UNION\n" +
 			"select * from ct\n" +
-			"limit 60000", nativeQuery = true)
+			"limit 200000", nativeQuery = true)
 	List<Object[]> queryAllFiberDemand(@Param("planId") long planId, @Param("year") int year);
 
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +

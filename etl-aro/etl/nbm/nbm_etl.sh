@@ -9,16 +9,16 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 ${PSQL} -a -f $DIR/create_nbm_blocks.sql
 
-# Replace with S3 step...
-cd $GISROOT;
-rm -f ${TMPDIR}/*.*
-wget https://s3.amazonaws.com/public.aro/nbm/NY-NBM-CBLOCK-CSV-JUN-2014.zip -nd -nc
-#unzip NY-NBM-CBLOCK-CSV-JUN-2014.zip -d ${TMPDIR}
+# Use upper case state names. FIPS codes unnecessary here as well.
+declare -a STATE_ARRAY=( 'WA' )
 
-unzip -p NY-NBM-CBLOCK-CSV-JUN-2014.zip | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;" 
+cd $GISROOT;
+for STATE in "${STATE_ARRAY[@]}"
+do
+	rm -f ${TMPDIR}/*.*
+	wget https://s3.amazonaws.com/public.aro/nbm/${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip -nd -nc	
+	$UNZIPTOOL -p ${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;" 
+done
 
 ${PSQL} -a -f $DIR/optimize_nbm_blocks.sql
 
-${PSQL} -a -f $DIR/competitor_speed_category.sql
-
-${PSQL} -a -f $DIR/brand_strength.sql

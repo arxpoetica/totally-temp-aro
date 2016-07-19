@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -16,8 +17,9 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 	private Collection<Integer> wireCenters;
 	private final OptimizationMode optimizationMode;
 
+
 	public static Builder build() {
-		return new Builder() ;
+		return new Builder();
 	}
 
 	public static class Builder {
@@ -46,8 +48,8 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 		public Builder setWirecenters(Set<Integer> wireCenters) {
 			this.wireCenters = wireCenters;
-			if( this.wireCenters != null && this.wireCenters.size() > 0 ) {
-				this.locationSelectionMode = LocationSelectionMode.ALL_LOCATIONS ;
+			if (this.wireCenters != null && this.wireCenters.size() > 0) {
+				this.locationSelectionMode = LocationSelectionMode.ALL_LOCATIONS;
 			}
 			return this;
 		}
@@ -64,9 +66,10 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 			return this;
 		}
 
-		public Builder setLocationEntities(Set<LocationEntityType> locationEntities) {
+		public Builder setLocationEntities(
+				Set<LocationEntityType> locationEntities) {
 			this.locationEntities = locationEntities;
-			return this ;
+			return this;
 		}
 
 		private NetworkDataRequest createDataRequest() {
@@ -98,6 +101,13 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 	public Collection<Integer> getWireCenters() {
 		return wireCenters;
+	}
+
+	public MasterOptimizationRequest create(long planId, int wireCenterId) {
+
+		return new MasterOptimizationRequest(optimizationConstraints,
+				constraints, networkDataRequest.create(planId),
+				Collections.singleton(new Integer(wireCenterId)));
 	}
 
 	public OptimizationMode getOptimizationMode() {

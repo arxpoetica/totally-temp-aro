@@ -58,38 +58,40 @@
     </li>
   </ul>
 
+  <% if (!config.ui.eye_checkboxes) { %>
   <p><strong>Customers to Optimize For</strong></p>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="coverHouseholds"> Households
+      <input type="checkbox" ng-model="optimizeHouseholds"> Households
     </label>
   </div>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="coverBusinesses"> Businesses
+      <input type="checkbox" ng-model="optimizeBusinesses"> Businesses
     </label>
   </div>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="coverTowers"> Towers
+      <input type="checkbox" ng-model="optimizeTowers"> Towers
     </label>
   </div>
+  <% } %>
 
-  <p><strong>Technology<strong></p>
+  <p><strong>Technology</strong></p>
   <form>
     <div class="radio">
       <label>
-        <input type="radio" name="technology" checked> ODN 1.0
+        <input type="radio" name="technology" checked> ODN 1.0 (Centralized Split)
       </label>
     </div>
     <div class="radio disabled">
       <label>
-        <input type="radio" name="technology" disabled> ODN 2.0
+        <input type="radio" name="technology" disabled> ODN 2.0 (Distributed Split)
       </label>
     </div>
   </form>
 
-  <p><strong>Product<strong></p>
+  <p><strong>Product</strong></p>
   <form>
     <div class="radio disabled">
       <label>

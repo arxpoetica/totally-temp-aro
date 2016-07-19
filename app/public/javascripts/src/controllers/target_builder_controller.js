@@ -1,4 +1,4 @@
-/* global app user_id google $ map */
+/* global app user_id google $ map FormData XMLHttpRequest swal */
 // Search Controller
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', ($scope, $rootScope, $http, map_tools, map_layers) => {
   // Controller instance variables
@@ -158,6 +158,31 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 
   // $rootScope.$on('locations_layer_changed', () => postChanges({}))
   // $rootScope.$on('towers_layer_changed', () => postChanges({}))
+
+  $('#target-builder-upload input').change(() => {
+    var form = $('#target-builder-upload').get(0)
+    var formData = new FormData(form)
+    var xhr = new XMLHttpRequest()
+    xhr.open('POST', `/network/nodes/${$scope.plan.id}/csv`, true)
+    xhr.addEventListener('error', (err) => {
+      form.reset()
+      console.log('error', err)
+      swal('Error', err.message, 'error')
+    })
+    xhr.addEventListener('load', function (e) {
+      form.reset()
+      try {
+        var data = JSON.parse(this.responseText)
+      } catch (e) {
+        console.log(e, e)
+        return swal('Error', 'Unexpected response from server', 'error')
+      }
+      swal('File processed', `Locations selected: ${data.found}, not found: ${data.notFound}, errors: ${data.errors}`, 'info')
+      map_layers.getFeatureLayer('locations').reloadData()
+      map_layers.getFeatureLayer('selected_locations').reloadData()
+    })
+    xhr.send(formData)
+  })
 
   // TODO: hide this tool if not config.route_planning
 }])

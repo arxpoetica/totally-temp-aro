@@ -2,6 +2,7 @@ package com.altvil.aro.service.report.impl;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -41,7 +42,6 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	@Autowired
 	private NetworkStatisticsService networkStatisticGenerator;
 
-
 	private ReportGenerator reportGenerator;
 
 	// TODO Fix this being called 2 times (Should only be called once)
@@ -62,13 +62,26 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 		return b.build();
 
 	}
-	
+
+	private PriceModel createPriceModel() {
+		return pricingService.createBuilder("*", new Date()).build();
+	}
 
 	@Override
 	public PlanAnalysisReport aggregate(Collection<PlanAnalysisReport> plans) {
-		Aggregator<PlanAnalysisReport> aggreagtor = createAggregator() ;
+		Aggregator<PlanAnalysisReport> aggreagtor = createAggregator();
 		plans.forEach(aggreagtor::add);
-		return aggreagtor.apply() ;
+		return aggreagtor.apply();
+	}
+
+	@Override
+	public PlanAnalysisReport createPlanAnalysisReport() {
+		PriceModel priceModel = createPriceModel();
+		Map<NetworkStatisticType, NetworkStatistic> map = new HashMap<>();
+		NetworkDemandSummaryImpl.build().build() ;
+		return new PlanAnalysisReportImpl(priceModel,
+				NetworkDemandSummaryImpl.build().build(), map);
+		
 	}
 
 	@Override
@@ -76,7 +89,7 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 
 		PriceModel priceModel = createPriceModel(network
 				.getWirecenterNetworkPlan());
-		
+
 		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
 				reportGenerator.generateNetworkStatistics(network),
 				NetworkStatistic::getNetworkStatisticType);
@@ -95,11 +108,11 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 		private Aggregator<PriceModel> priceModelAggregator;
 		private Aggregator<NetworkDemandSummary> demandAggregator;
 		private Aggregator<Collection<NetworkStatistic>> statAggregator;
-		
+
 		public PlanAnalysisReportAggregator() {
-			priceModelAggregator = pricingService.aggregate() ;
-			demandAggregator = NetworkDemandSummaryImpl.aggregate() ;
-			statAggregator = reportGenerator.createAggregator() ;
+			priceModelAggregator = pricingService.aggregate();
+			demandAggregator = NetworkDemandSummaryImpl.aggregate();
+			statAggregator = reportGenerator.createAggregator();
 		}
 
 		@Override
@@ -117,6 +130,6 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 							NetworkStatistic::getNetworkStatisticType));
 		}
 
-	}	
-	
+	}
+
 }

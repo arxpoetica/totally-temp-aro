@@ -20,6 +20,11 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 			DemandTypeEnum.new_demand, DemandTypeEnum.original_demand,
 			DemandTypeEnum.planned_demand);;
 
+	public static NetworkDemandSummary createNetworkDemandSummary(
+			Collection<NetworkDemand> demands) {
+		return build().add(demands).build();
+	}
+
 	public static Builder build() {
 		return new Builder();
 	}
@@ -35,7 +40,8 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 
 		public NetworkDemandSummaryAggreagtor() {
 			demandAggregators = StreamUtil.createAggregator(
-					DemandTypeEnum.class, validDemands, () -> NetworkDemand.aggregate());
+					DemandTypeEnum.class, validDemands,
+					() -> NetworkDemand.aggregate());
 		}
 
 		@Override
@@ -84,7 +90,6 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 	private NetworkDemandSummaryImpl() {
 		this(new EnumMap<>(DemandTypeEnum.class));
 	}
-	
 
 	@Override
 	public Collection<NetworkDemand> getNetworkDemands() {

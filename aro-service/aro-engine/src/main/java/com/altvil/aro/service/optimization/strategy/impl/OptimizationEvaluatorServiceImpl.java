@@ -14,13 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
-import com.altvil.aro.service.optimization.wirecenter.NetworkDemand;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
@@ -238,7 +238,8 @@ public class OptimizationEvaluatorServiceImpl implements
 		}
 
 		protected Optional<PlannedNetwork> toPlannedNetwork(long planId,
-				Optional<PlanAnalysis> plan, Collection<NetworkDemand> networkDemands) {
+				Optional<PlanAnalysis> plan,
+				CompetitiveDemandMapping demandMapping) {
 
 			if (!plan.isPresent()) {
 				return Optional.empty();
@@ -252,7 +253,7 @@ public class OptimizationEvaluatorServiceImpl implements
 
 			return Optional.of(new DefaultPlannedNetwork(planId, plan.get()
 					.getOptimizedNetwork().getNetworkPlan().get(),
-					networkDemands));
+					demandMapping));
 
 		}
 
@@ -265,7 +266,8 @@ public class OptimizationEvaluatorServiceImpl implements
 					.filter(PlanAnalysis::isValid).collect(Collectors.toList());
 
 			return toPlannedNetwork(prunedNetwork.getPlanId(),
-					selectPlan(plans), prunedNetwork.getNetworkDemands());
+					selectPlan(plans),
+					prunedNetwork.getCompetitiveDemandMapping());
 
 		}
 		@Override

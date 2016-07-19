@@ -19,12 +19,13 @@
           <div role="tabpanel" class="tab-pane active" id="market_profile_market_size">
 
             <form class="form-horizontal">
-              <div class="form-group form-group-sm" ng-hide="market_type === 'route'">
+              <div class="form-group form-group-sm">
                 <label class="col-sm-3 control-label">Market type</label>
                 <div class="col-sm-9">
                   <select class="form-control" ng-model="market_type" ng-change="calculateMarketSize()">
-                    <option value="boundary">All</option>
-                    <option value="addressable">Addressable</option>
+                    <option value="all">All visible</option>
+                    <option value="existing">Existing visible</option>
+                    <option value="plan">Plan</option>
                   </select>
                 </div>
               </div>
@@ -71,6 +72,18 @@
           <div role="tabpanel" class="tab-pane" id="market_profile_fair_share">
             <div class="row">
               <div class="col-md-8">
+                <form class="form-horizontal" style="margin-top: 30px">
+                  <div class="form-group form-group-sm">
+                    <label class="col-sm-3 control-label">Entity Type</label>
+                    <div class="col-sm-9">
+                      <select ng-model="entityType" ng-change="calculateMarketSize(true)" class="form-control">
+                        <option value="businesses">Businesses</option>
+                        <option value="households">Households</option>
+                        <option value="towers">Towers</option>
+                      </select>
+                    </div>
+                  </div>
+                </form>
                 <p class="form-control-static" ng-show="!loading && fair_share && fair_share.length === 0">No data available in this area with the selected filters</p>
                 <canvas id="market_profile_fair_share_chart" style="width:100%; height:200px"></canvas>
               </div>

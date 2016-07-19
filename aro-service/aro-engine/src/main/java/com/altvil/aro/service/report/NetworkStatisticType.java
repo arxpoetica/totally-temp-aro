@@ -1,7 +1,8 @@
 package com.altvil.aro.service.report;
 
 public enum NetworkStatisticType {
-	irr("irr"), npv("npv");
+	irr("irr"), 
+	npv("npv");
 
 	private String code;
 

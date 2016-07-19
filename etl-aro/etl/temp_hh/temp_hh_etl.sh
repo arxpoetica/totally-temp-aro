@@ -9,14 +9,19 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 ${PSQL} -a -f $DIR/create_temp_hhs.sql
 
-# Get infousa-households source file from S3
-cd $GISROOT;
-rm -f ${TMPDIR}/*.*
-wget https://s3.amazonaws.com/public.aro/infousa/ny_households.zip -nd -nc
-unzip ny_households.zip -d ${TMPDIR}
+# Use lower case state names. FIPS codes unnecessary here as well.
+declare -a STATE_ARRAY=( 'wa' )
 
-# Placing this CSV file here because eventually this should download from S3 and get deleted after it loads into the db
-${PSQL} -a -c "COPY temp_hh.households (address, city, state, zip5, lat, lon, geog) FROM STDIN DELIMITER ',' CSV HEADER;" </$TMPDIR/ny_housholds.csv
+cd $GISROOT;
+
+for STATE in "${STATE_ARRAY[@]}"
+do
+	rm -f ${TMPDIR}/*.*
+	wget https://s3.amazonaws.com/public.aro/infousa/households_${STATE}.zip -nd -nc
+	$UNZIPTOOL households_${STATE}.zip -d ${TMPDIR}
+	cd $TMPDIR;
+	${PSQL} -a -c "COPY temp_hh.households (address, city, state, zip5, lon, lat, geog) FROM STDIN DELIMITER ',' CSV HEADER;" </$TMPDIR/households_${STATE}.csv
+done
 
 ${PSQL} -a -f $DIR/optimize_temp_hh.sql
 

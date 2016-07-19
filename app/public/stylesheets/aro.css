@@ -241,6 +241,7 @@ footer nav {
   top: 0;
   left: 0;
   z-index: 2;
+  background-color: black;
   background: url(/images/backgrounds/fiber_1_reverse.jpg);
   background-position: center;
   background-repeat: no-repeat;
@@ -502,4 +503,13 @@ height:100px;
 .table-responsive > .table-bordered > tbody > tr:last-child > td,
 .table-responsive > .table-bordered > tfoot > tr:last-child > td {
   border-bottom: 0;
+}
+
+
+#global-search {
+  position: absolute;
+  left: 76px;
+  width: 319px;
+  top: 53px;
+  z-index: 1;
 }

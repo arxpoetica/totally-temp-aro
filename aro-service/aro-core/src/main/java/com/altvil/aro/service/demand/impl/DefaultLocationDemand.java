@@ -61,6 +61,14 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		Map<LocationEntityType, DemandStatistic> demands = new EnumMap<>(
 				LocationEntityType.class);
 
+		public Builder add(LocationEntityType lt, double rawCoverage,
+				double atomicUnits, double totalRevenue, double revenue,
+				double penetration) {
+			add(lt, new DefaultDemandStatistic(rawCoverage, atomicUnits,
+					totalRevenue, revenue, penetration));
+			return this ;
+		}
+
 		public Builder add(LocationEntityType type,
 				DemandStatistic demandStatistic) {
 			demands.put(type, demandStatistic);
@@ -68,6 +76,11 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		}
 
 		public LocationDemand build() {
+			for(LocationEntityType lt : LocationEntityType.values()) {
+				if( demands.get(lt) == null) {
+					demands.put(lt, ZERO_DEMAND) ;
+				}
+			}
 			return DefaultLocationDemand.create(demands);
 		}
 	}
@@ -132,14 +145,15 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 			return new Pair<>(ds, DefaultDemandStatistic.ZERO_DEMAND);
 		}
 
-		double atomicUnitRemainderFloored = Math
-				.min(atomicUnitRemainder, ds.getAtomicUnits());
+		double atomicUnitRemainderFloored = Math.min(atomicUnitRemainder,
+				ds.getAtomicUnits());
 
 		double ratio = atomicUnitRemainderFloored / ds.getAtomicUnits();
 		double tailRatio = Math.max(0.0, 1 - ratio);
 
 		double headAtomicUnits = atomicUnitRemainderFloored;
-		double tailAtomicUnits = ds.getAtomicUnits() - atomicUnitRemainderFloored;
+		double tailAtomicUnits = ds.getAtomicUnits()
+				- atomicUnitRemainderFloored;
 
 		return new Pair<>(createDemandStat(ratio, headAtomicUnits, ds),
 				createDemandStat(tailRatio, tailAtomicUnits, ds));
@@ -156,6 +170,11 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		return new DefaultDemandStatistic(rawCoverage, atomicUnits,
 				totalRevenue, revenue, original.getPenetration());
 
+	}
+
+	@Override
+	public Map<LocationEntityType, DemandStatistic> getEntityDemands() {
+		return demands;
 	}
 
 	private Pair<LocationDemand> splitDemand(double demand,
@@ -180,7 +199,7 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 				head.put(lt, pair.getHead());
 				tail.put(lt, pair.getTail());
 
-				remainingDemand -= pair.getHead().getAtomicUnits() ;
+				remainingDemand -= pair.getHead().getAtomicUnits();
 			}
 		}
 

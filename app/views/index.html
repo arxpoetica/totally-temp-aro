@@ -13,6 +13,7 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/layout_<%= config.ui.layout %>.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/client_<%= config.ARO_CLIENT %>.css">
   </head>
   <body>
 
@@ -127,7 +128,9 @@
                   {{ plan.metadata.customers_towers_total | number }} towers
                   covered
               </span>
+              -->
 
+              <% if (config.ui.layout === 'default') { %>
               <span data-toggle="modal" ng-click="openMarketProfile()" style="cursor:pointer" ng-show="show_market_profile">
                 <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
                 <span ng-show="market_profile_current_year.total">
@@ -141,7 +144,7 @@
                   <span class="label label-info"><span>Market Share</span>{{ market_profile_share*100 | number:2 }}%</span>
                 </span>
               </span>
-              -->
+              <% } %>
             </p>
 
           </div>
@@ -216,6 +219,12 @@
       </div>
     </div>
 
+    <% if (config.ui.layout === 'default') { %>
+      <div id="global-search">
+        <% include controller_global_search.html %>
+      </div>
+    <% } %>
+
     <div ng-controller="selected_location_controller">
 
       <% if (env_is_test) { %>
@@ -249,8 +258,11 @@
       <div class="map-tool panel panel-primary">
         <div ng-show="expanded" style="padding: 10px">
           <p><strong>Locations</strong></p>
-          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_default.png" style="width:16px"> = Business</p>
-          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_default.png" style="width:16px"> = Household</p>
+          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px"> = Commercial SMB</p>
+          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_medium_default.png" style="width:16px"> = Commercial Mid-Size</p>
+          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_large_default.png" style="width:16px"> = Commercial Enterprise</p>
+          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_small_default.png" style="width:16px"> = Residential SFU</p>
+          <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_medium_default.png" style="width:16px"> = Residential MDU</p>
           <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="height:16px"> = Tower</p>
           <hr>
           <p><strong>Network</strong></p>

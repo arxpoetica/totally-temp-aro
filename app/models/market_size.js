@@ -24,7 +24,6 @@ module.exports = class MarketSize {
 
   static _prepareMarketSizeQuery (plan_id, type, options, params) {
     var filters = options.filters
-    var sql = ''
 
     var customerTypeFilter = () => {
       if (!filters || !filters.customer_type) return ''
@@ -36,52 +35,53 @@ module.exports = class MarketSize {
        `
     }
 
-    if (type === 'route' || type === 'addressable') {
-      if (false && config.route_planning.length > 0) {
-        params.push(plan_id)
-        sql += `
-          WITH biz AS (
-          SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
-          FROM businesses b
-          JOIN client.fiber_route
-            ON fiber_route.plan_id=$${params.length}
-           AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
-           ${customerTypeFilter()}
-        `
-      } else {
-        params.push(config.client_carrier_name)
-        sql += `
-          WITH biz AS
-          (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
-            FROM businesses b
-            JOIN carriers ON carriers.name = $${params.length}
-            JOIN aro.fiber_plant
-              ON fiber_plant.carrier_id = carriers.id
-             AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
-                 ${database.intersects(options.viewport, 'b.geom', 'AND')}
-               ${customerTypeFilter()}
-        `
-      }
-
-      if (type === 'addressable') {
+    var boundaryConstraint = (op) => {
+      if (options.boundary) {
         params.push(options.boundary)
-        sql += ` AND ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom) GROUP BY b.id)`
+        return ` WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${params.length})::geometry, 4326), b.geom)`
+      } else if (options.viewport) {
+        return ' WHERE ' + database.intersects(options.viewport, 'b.geom', '')
       } else {
-        sql += ' GROUP BY b.id)'
+        return ''
       }
-    } else {
-      params.push(options.boundary)
-      var length = params.length
-      sql += `
+    }
+
+    type = type || 'all'
+
+    if (type === 'all') {
+      return `
         WITH biz AS (
           SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
-          ${customerTypeFilter()}
-          WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON($${length})::geometry, 4326), b.geom)
+          ${customerTypeFilter()} ${boundaryConstraint()}
+        )
+      `
+    } else if (type === 'existing') {
+      params.push(config.client_carrier_name)
+      return `
+        WITH biz AS
+        (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
+          FROM businesses b
+          JOIN carriers ON carriers.name = $${params.length}
+          JOIN aro.fiber_plant
+            ON fiber_plant.carrier_id = carriers.id
+           AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
+               ${customerTypeFilter()} ${boundaryConstraint()}
+        )
+      `
+    } else if (type === 'plan') {
+      params.push(plan_id)
+      return `
+        WITH biz AS (
+          SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
+          FROM businesses b
+          JOIN locations l ON b.location_id = l.id
+          JOIN client.plan_targets pt ON pt.location_id = l.id AND pt.plan_id = $${params.length}
+          ${customerTypeFilter()} ${boundaryConstraint()}
         )
       `
     }
-    return sql
+    return null
   }
 
   static _createBusinessesCsv (plan_id, user, rows, filters, carriers) {
@@ -300,23 +300,10 @@ module.exports = class MarketSize {
       })
       .then((market_size) => {
         output.market_size = market_size
-
-        var params = []
-        var sql = this._prepareMarketSizeQuery(plan_id, type, options, params)
-        sql += `
-          SELECT MAX(c.name) AS name, COUNT(*)::integer AS value, MAX(c.color) AS color FROM biz
-          JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
-          JOIN carriers c ON lc.carrier_id = c.id
-          JOIN locations l
-            ON l.id = lc.location_id
-            ${database.intersects(options.viewport, 'l.geom', 'WHERE')}
-            GROUP BY c.id ORDER BY c.name
-        `
-        return database.query(sql, params)
+        return MarketSize.fairShare(plan_id, type, options)
       })
-      .then((fair_share) => {
-        this._sortFairShare(fair_share)
-        output.fair_share = fair_share
+      .then((fairShare) => {
+        output.fair_share = fairShare
         output.market_size_existing = [] // TODO
 
         var current_carrier
@@ -328,6 +315,34 @@ module.exports = class MarketSize {
         }, 0)
         output.share = current_carrier / total
         return output
+      })
+  }
+
+  static fairShare (plan_id, type, options) {
+    var filters = options.filters
+    var params = []
+    var sql = this._prepareMarketSizeQuery(plan_id, type, options, params)
+    sql += `
+      SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
+      CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
+      ELSE '#' ||
+        to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
+        to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
+      END AS color
+      FROM biz
+      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+      JOIN carriers c ON lc.carrier_id = c.id
+      JOIN locations l
+        ON l.id = lc.location_id
+        ${database.intersects(options.viewport, 'l.geom', 'WHERE')}
+        ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
+        ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
+        GROUP BY c.id ORDER BY c.name
+    `
+    return database.query(sql, params)
+      .then((fairShare) => {
+        this._sortFairShare(fairShare)
+        return fairShare
       })
   }
 
@@ -613,6 +628,7 @@ module.exports = class MarketSize {
           JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
           JOIN carriers c ON lc.carrier_id = c.id
             ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
+            ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
           GROUP BY c.id ORDER BY c.name
         `
         return database.query(sql, params)

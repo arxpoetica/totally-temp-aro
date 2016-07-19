@@ -42,8 +42,9 @@ public class EntityFactory {
 	public LocationEntity createLocationEntity(
 			Set<LocationEntityType> entityMask, long locationId,
 			int censusBlockId,
+			double strength,
 			LocationDemand coverageAggregateStatistic) {
-		return new LocationEntityImpl(locationId, censusBlockId, coverageAggregateStatistic);
+		return new LocationEntityImpl(locationId, censusBlockId, strength, coverageAggregateStatistic);
 	}
 
 	public BulkFiberTerminal createBulkFiberTerminal(
@@ -425,14 +426,30 @@ public class EntityFactory {
 		private static final long serialVersionUID = 1L;
 		private LocationDemand coverageAggregateStatistic;
 		private int censusBlockId ;
+		private double strength ;
 
 		public LocationEntityImpl(Long id,
 				int censusBlockId ,
+				double strength,
 				LocationDemand coverageAggregateStatistic) {
 			super(id);
+			this.strength = strength ;
 			this.censusBlockId = censusBlockId;
 			this.coverageAggregateStatistic = coverageAggregateStatistic;
 		}
+		
+		
+
+		
+
+		@Override
+		public double getCompetitiveStrength() {
+			return strength ;
+		}
+
+
+
+
 
 		@Override
 		public Class<? extends AroEntity> getType() {
