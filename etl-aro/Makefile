@@ -31,6 +31,8 @@ etl_tiger_census_blocks:
 reset_towers:
 	etl/reset_towers_data.sh
 
+etl_towers: etl_sita etl_client_towers
+
 # Load SITA towers
 etl_sita:
 	etl/towers/sita_etl.sh
