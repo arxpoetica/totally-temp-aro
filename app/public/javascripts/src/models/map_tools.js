@@ -30,12 +30,12 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     }
   }
 
-  tools.is_enabled = (name) => {
+  tools.isEnabled = (name) => {
     return disabled.indexOf(name) === -1
   }
 
   tools.is_visible = (name) => {
-    return visible.indexOf(name) >= 0 && tools.is_enabled(name)
+    return visible.indexOf(name) >= 0 && tools.isEnabled(name)
   }
 
   tools.show = (name) => {
