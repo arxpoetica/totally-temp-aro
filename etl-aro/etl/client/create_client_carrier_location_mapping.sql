@@ -89,3 +89,20 @@ ALTER TABLE client.census_bocks_carriers ADD PRIMARY KEY (census_block_gid, carr
 
 ALTER TABLE client.census_bocks_carriers ADD
 	FOREIGN KEY (carrier_id) REFERENCES aro.carriers (id) ON DELETE CASCADE;
+
+
+DROP TABLE IF EXISTS client.speeds;
+
+CREATE TABLE client.speeds (code integer PRIMARY KEY, description character varying);
+
+INSERT INTO client.speeds (code, description) VALUES
+	(2, '200 kbps - 768 kbps'),
+	(3, '768 kbps - 1.5 mbps'),
+	(4, '1.5 mbps - 3 mbps'),
+	(5, '3 mbps - 6 mbps'),
+	(6, '6 mbps - 10 mbps'),
+	(7, '10 mbps - 25 mbps'),
+	(8, '25 mbps - 50 mbps'),
+	(9, '50 mbps - 100 mbps'),
+	(10, '100 mbps - 1 gbps'),
+	(11, '+1 gbps');

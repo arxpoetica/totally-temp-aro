@@ -302,6 +302,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
             }
             this.metadata = data.metadata
             this.data_loaded = true
+            this.onDataLoaded && this.onDataLoaded(this)
             $rootScope.$broadcast('map_layer_loaded_data', this)
             this.configureFeatureStyles()
             // set the layer visible or not again
