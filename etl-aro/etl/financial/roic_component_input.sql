@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS "financial"."roic_component_input";
 CREATE TABLE "financial"."roic_component_input" (
-	"id" serial PRIMARY KEY,
+	"id" bigserial PRIMARY KEY,
 	speed_type_id int4 references client.speed_type,
 	entity_category_id int4 references client.entity_category,
 	

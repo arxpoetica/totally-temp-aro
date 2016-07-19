@@ -2,10 +2,13 @@ package com.altvil.aro.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 
 @Entity
 @Table(name = "roic_component_input", schema = "financial")
@@ -28,7 +31,7 @@ public class RoicComponentInputModel {
 
 	private Long id;
 	private int speedCategory;
-	private int entityType;
+	private ComponentType entityType;
 
 	private double arpu;
 	private double penetrationStart;
@@ -53,7 +56,7 @@ public class RoicComponentInputModel {
 		this.id = id;
 	}
 
-	@Column(name="speed_category")
+	@Column(name="speed_type_id")
 	public int getSpeedCategory() {
 		return speedCategory;
 	}
@@ -62,12 +65,14 @@ public class RoicComponentInputModel {
 		this.speedCategory = speedCategory;
 	}
 
-	@Column(name="entity_type")
-	public int getEntityType() {
+	
+	@Enumerated
+	@Column(name="entity_category_id")
+	public ComponentType getEntityType() {
 		return entityType;
 	}
 
-	public void setEntityType(int entityType) {
+	public void setEntityType(ComponentType entityType) {
 		this.entityType = entityType;
 	}
 
