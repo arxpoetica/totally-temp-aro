@@ -408,8 +408,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 	private static class FairShareLocationDemandImpl implements
 			FairShareLocationDemand {
 
-		private Map<LocationEntityType, FairShareDemandAnalysis> demandMap = new EnumMap<>(
-				LocationEntityType.class);
+		private final Map<LocationEntityType, FairShareDemandAnalysis> demandMap;
 
 		public FairShareLocationDemandImpl(
 				Map<LocationEntityType, FairShareDemandAnalysis> demandMap) {
@@ -418,20 +417,39 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		}
 
 		@Override
+		public FairShareLocationDemand merge(
+				Map<LocationEntityType, FairShareDemandAnalysis> map) {
+			
+			Map<LocationEntityType, FairShareDemandAnalysis> resultMap = new EnumMap<>(
+					LocationEntityType.class);
+			
+			for(LocationEntityType t : demandMap.keySet()) {
+				if( map.containsKey(t) ) {
+					resultMap.put(t, map.get(t)) ;
+				} else {
+					resultMap.put(t, demandMap.get(t)) ;
+				}
+			}
+			
+			return new FairShareLocationDemandImpl(resultMap) ;
+		}
+
+		@Override
 		public FairShareDemandAnalysis getEffectiveNetworkDemand(
 				LocationEntityType type) {
 			return demandMap.get(type);
 		}
-		
-		public DemandStatistic createDemandStatistic(DemandMapping demandMapping,
-				LocationEntityType type) {
+
+		@Override
+		public DemandStatistic createDemandStatistic(
+				DemandMapping demandMapping, LocationEntityType type) {
 			FairShareDemandAnalysis analysis = demandMap.get(type);
 
 			EntityDemandMapping entityMapping = demandMapping
 					.getEntityDemandMapping(type);
 
-			return analysis == null
-					|| entityMapping == null || entityMapping.getMappedDemand() == 0 ? DefaultDemandStatistic.ZERO_DEMAND
+			return analysis == null || entityMapping == null
+					|| entityMapping.getMappedDemand() == 0 ? DefaultDemandStatistic.ZERO_DEMAND
 					: analysis.createFairShareDemand(entityMapping)
 							.getDemandStatistic();
 		}
@@ -477,33 +495,35 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		public boolean hasDemand() {
 			return totalRevenue > 0;
 		}
-		
+
 		private double calcPenetration() {
-			return totalRevenue == 0 ? 0 : revenue / totalRevenue ;
+			return totalRevenue == 0 ? 0 : revenue / totalRevenue;
 		}
 
 		private static DemandFunction asDemandFunction(double atomicUnits,
 				double totalRevenue, double penetration) {
 			return (demandMapping) -> {
 				double rawDemand = demandMapping.getMappedDemand();
-				double adjustedRevenue = rawDemand * totalRevenue ;
+				double adjustedRevenue = rawDemand * totalRevenue;
 				return new FairShareDemandImpl(new DefaultDemandStatistic(
-						rawDemand, rawDemand * atomicUnits, adjustedRevenue, adjustedRevenue * penetration,
-						penetration));
+						rawDemand, rawDemand * atomicUnits, adjustedRevenue,
+						adjustedRevenue * penetration, penetration));
 			};
 		}
 
 		public DemandStatistic toDemandStatistic(EntityDemandMapping mapping) {
 			double rawDemand = mapping.getMappedDemand();
-			double penetration = calcPenetration() ;
-			
+			double penetration = calcPenetration();
+
 			return new DefaultDemandStatistic(rawDemand, rawDemand
-					* atomicUnits, rawDemand * totalRevenue, rawDemand * revenue, penetration);
+					* atomicUnits, rawDemand * totalRevenue, rawDemand
+					* revenue, penetration);
 		}
 
 		public DemandFunction asDemandFunction() {
-			
-			return asDemandFunction(atomicUnits, totalRevenue, calcPenetration());
+
+			return asDemandFunction(atomicUnits, totalRevenue,
+					calcPenetration());
 		}
 
 	}
@@ -588,6 +608,6 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 			return demandStatistic;
 		}
 
-	}
+	}	
 
 }

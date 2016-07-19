@@ -8,9 +8,6 @@ public interface AroDemandService {
 	FairShareDemandMapping createFairShareDemandMapping(
 			CompetitiveMapping competiveMapping);
 
-//	LocationDemand createDemandByCensusBlock(int blockId,
-//			DemandMapping mapping, SpeedCategory speetCategory);
-
 	LocationDemand createFullShareDemand(DemandMapping mapping);
 
 }
