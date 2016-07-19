@@ -9,6 +9,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.optimizeHouseholds = true
   $scope.optimizeBusinesses = true
+  $scope.optimizeSMB = true // special case
   $scope.optimizeTowers = true
 
   $scope.optimizationType = 'CAPEX'
@@ -188,6 +189,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
     if (scope.optimizeHouseholds) locationTypes.push('households')
     if (scope.optimizeBusinesses) locationTypes.push('businesses')
+    if (scope.optimizeSMB) locationTypes.push('smb')
     if (scope.optimizeTowers) locationTypes.push('towers')
 
     var algorithm = $scope.optimizationType

@@ -75,19 +75,35 @@
         </label>
         <% } %>
         <label class="eye-control">
-          <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Commercial
+          <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'"> Enterprise
           <div class="eye-indicator"></div>
         </label>
       </div>
       <div style="margin-left: 20px">
-        <div class="checkbox" ng-repeat="category in business_categories">
+        <div class="checkbox" ng-repeat="category in business_categories" ng-if="category.name !== 'small'">
           <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_{{category.name}}_default.png" style="width:16px"></div>
           <label class="eye-control">
-            <input type="checkbox" ng-model="business_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_businesses"> {{category.description}}
+            <input type="checkbox" ng-model="business_categories_selected[category.id]" ng-change="changeLocationsLayer()" ng-disabled="!show_businesses"> {{category.description}}
             <div class="eye-indicator"></div>
           </label>
         </div>
       </div>
+
+      <!-- Special case -->
+      <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
+        <% if (config.ui.eye_checkboxes) { %>
+        <label class="eye-combo">
+          <input type="checkbox" ng-model="optimizeSMB" ng-change="changeOptimization()">
+        </label>
+        <% } %>
+        <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px"></div>
+        <label class="eye-control" style="padding-left:0">
+          <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()" ng-disabled="!show_businesses"> SMB
+          <div class="eye-indicator"></div>
+        </label>
+      </div>
+      <!-- / Special case -->
+
       <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
         <% if (config.ui.eye_checkboxes) { %>
         <label class="eye-combo">
@@ -95,7 +111,7 @@
         </label>
         <% } %>
         <label class="eye-control">
-          <input type="checkbox" ng-model="show_households" value="households" ng-change="change_locations_layer()" ng-disabled="overlay !== 'none'"> Residential
+          <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'"> Residential
           <div class="eye-indicator"></div>
         </label>
       </div>
@@ -103,7 +119,7 @@
         <div class="checkbox" ng-repeat="category in household_categories">
           <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px"></div>
           <label class="eye-control">
-            <input type="checkbox" ng-model="household_categories_selected[category.id]" ng-change="change_locations_layer()" ng-disabled="!show_households"> {{category.description}}
+            <input type="checkbox" ng-model="household_categories_selected[category.id]" ng-change="changeLocationsLayer()" ng-disabled="!show_households"> {{category.description}}
             <div class="eye-indicator"></div>
           </label>
         </div>
@@ -114,7 +130,8 @@
           <input type="checkbox" ng-model="optimizeTowers" ng-change="changeOptimization()">
         </label>
         <% } %>
-        <label class="eye-control">
+        <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px"></div>
+        <label class="eye-control" style="padding-left:0">
           <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
           <div class="eye-indicator"></div>
         </label>
@@ -133,7 +150,7 @@
     <div>
       <h2>Overlay</h2>
       <div class="form-group">
-        <select class="form-control" ng-model="overlay" ng-change="change_locations_layer()">
+        <select class="form-control" ng-model="overlay" ng-change="changeLocationsLayer()">
           <option value="none">None</option>
           <option value="customer_profile">Prospect Density</option>
         </select>

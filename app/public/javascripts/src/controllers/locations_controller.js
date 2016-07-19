@@ -39,6 +39,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.business_categories_selected = []
   $scope.household_categories_selected = []
   $scope.optimizeBusinesses = true
+  $scope.optimizeSMB = true // special case: optimize smlal businesses
   $scope.optimizeHouseholds = true
   $scope.optimizeTowers = true
 
@@ -153,6 +154,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.business_categories.forEach((category) => {
       $scope.business_categories_selected[category.id] = true
     })
+    $scope.business_categories_selected['small'] = true
 
     $scope.household_categories_selected = []
     $scope.household_categories.forEach((category) => {
@@ -201,7 +203,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $rootScope.$broadcast('towers_layer_changed')
   }
 
-  $scope.change_locations_layer = () => {
+  $scope.changeLocationsLayer = () => {
     tracker.track('Locations / ' + $scope.overlay)
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
@@ -254,7 +256,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (tool === 'locations') {
-      $scope.change_locations_layer()
+      $scope.changeLocationsLayer()
       if (!map_tools.is_visible('locations')) {
         $scope.selected_tool = null
         map.setOptions({ draggableCursor: null })
@@ -396,6 +398,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $scope.changeOptimization = () => {
     $rootScope.optimizeBusinesses = $scope.optimizeBusinesses
+    $rootScope.optimizeSMB = $scope.optimizeSMB
     $rootScope.optimizeHouseholds = $scope.optimizeHouseholds
     $rootScope.optimizeTowers = $scope.optimizeTowers
   }
