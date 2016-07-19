@@ -33,10 +33,12 @@ import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
+import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.aro.service.roic.RoicService;
 import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.builder.RoicConstants;
 import com.altvil.aro.service.roic.analysis.builder.component.ComponentInput;
+import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilder;
 import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilderService;
 import com.altvil.aro.service.roic.analysis.builder.network.RoicInputs;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
@@ -44,6 +46,8 @@ import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
+import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
+import com.altvil.utils.reference.VolatileReference;
 import com.altvil.utils.reflexive.DefaultMappedCodes;
 import com.altvil.utils.reflexive.MappedCodes;
 
@@ -59,8 +63,10 @@ public class RoicServiceImpl implements RoicService {
 	private NetworkReportService costService;
 	private RoicComponentInputModelRepository roicComponentInputModelRepository;
 	private ArpuService arpuService;
+	private NetworkReportService networkReportService;
 
 	private SuperSimpleCache cache;
+	VolatileReference<Collection<RoicComponentInputModel>> roicInputRef;
 
 	@Autowired
 	public RoicServiceImpl(
@@ -69,7 +75,7 @@ public class RoicServiceImpl implements RoicService {
 			NetworkNodeRepository networkNodeRepository,
 			NetworkReportService costService,
 			RoicComponentInputModelRepository roicComponentInputModelRepository,
-			ArpuService arpuService) {
+			ArpuService arpuService, NetworkReportService networkReportService) {
 		super();
 		this.roicBuilderService = roicBuilderService;
 		this.planRepostory = planRepostory;
@@ -77,8 +83,16 @@ public class RoicServiceImpl implements RoicService {
 		this.costService = costService;
 		this.roicComponentInputModelRepository = roicComponentInputModelRepository;
 		this.arpuService = arpuService;
+		this.networkReportService = networkReportService;
 
 		cache = new SuperSimpleCache();
+		roicInputRef = createComponentInputs();
+	}
+
+	private VolatileReference<Collection<RoicComponentInputModel>> createComponentInputs() {
+		return new VolatileReference<Collection<RoicComponentInputModel>>(
+				() -> roicComponentInputModelRepository.findAll(),
+				1000L * 50L * 5L);
 	}
 
 	@Override
@@ -136,17 +150,25 @@ public class RoicServiceImpl implements RoicService {
 
 			long planId = plan.getId();
 
-			RoicInputs copperInputs = RoicInputs.updateInputs(
-					RoicConstants.CopperInputs, getTotalDemand(planId), 0);
+			PlanAnalysisReport report = networkReportService
+					.loadSummarizedPlan(planId).getPlanAnalysisReport();
 
-			RoicInputs fiberInputs = RoicInputs.updateInputs(
-					RoicConstants.FiberConstants, getLocationDemand(planId),
-					getCapex(planId));
+			// RoicInputs copperInputs = RoicInputs.updateInputs(
+			// RoicConstants.CopperInputs, getTotalDemand(planId), 0);
+			//
+			// RoicInputs fiberInputs = RoicInputs.updateInputs(
+			// RoicConstants.FiberConstants, getLocationDemand(planId),
+			// getCapex(planId));
+			//
+			// return roicBuilderService.buildModel()
+			// .setAnalysisPeriod(new AnalysisPeriod(2016, 15))
+			// .addRoicInputs(copperInputs).addRoicInputs(fiberInputs)
+			// .build();
 
-			return roicBuilderService.buildModel()
-					.setAnalysisPeriod(new AnalysisPeriod(2016, 15))
-					.addRoicInputs(copperInputs).addRoicInputs(fiberInputs)
-					.build();
+			return new RoicInputAssembler(report)
+					.assembleRoicModel(roicInputRef.get())
+					.setAnalysisPeriod(new AnalysisPeriod(2016, 15)).build();
+
 		} catch (Throwable err) {
 			log.error(err.getMessage(), err);
 			return null;
@@ -209,6 +231,9 @@ public class RoicServiceImpl implements RoicService {
 			.createEnumMapping(LocationEntityType.class, s -> s.ordinal() + 1)
 			.flip();
 
+	private MappedCodes<Integer, ComponentType> componentTypeMappedCodes = DefaultMappedCodes
+			.createEnumMapping(ComponentType.class).flip();
+
 	//
 	//
 	//
@@ -238,11 +263,21 @@ public class RoicServiceImpl implements RoicService {
 		}
 
 		private void init() {
+
 			DemandStatistic ds = computeLocationDemand(speedCategory, type);
+
+			if (ds == null) {
+				throw new RuntimeException("Failed to mape DemandStatistic ");
+			}
+
 			demand = ds.getRawCoverage();
 			totalRevenue = ds.getTotalRevenue() * 12;
 			arpu = computeArpu(demand, totalRevenue);
 			computeNetworkCost(speedCategory);
+			
+			if( arpu == Double.NaN ) {
+				throw new RuntimeException("Inbvalid ARPU") ;
+			}
 		}
 
 		public LocationEntityType getType() {
@@ -311,8 +346,29 @@ public class RoicServiceImpl implements RoicService {
 			}
 		}
 
+		private double getPenetration(DemandTypeEnum demandType) {
+			return planAnalysisReport.getDemandSummary()
+					.getNetworkDemand(demandType).getLocationDemand()
+					.getLocationDemand(type).getPenetration();
+
+		}
+
 		public NetworkPenetration getNetworkPenetration() {
-			return null ;
+
+			switch (speedCategory) {
+			case cat3:
+				return new DefaultNetworkPenetration(
+						inputModel.getPenetrationStart(),
+						getPenetration(DemandTypeEnum.original_demand),
+						inputModel.getPenetrationRate());
+
+			default:
+				return new DefaultNetworkPenetration(
+						inputModel.getPenetrationStart(),
+						getPenetration(DemandTypeEnum.planned_demand),
+						inputModel.getPenetrationRate());
+
+			}
 		}
 
 		private DemandStatistic computeLocationDemand(
@@ -338,12 +394,25 @@ public class RoicServiceImpl implements RoicService {
 
 		private PlanAnalysisReport planAnalysisReport;
 
-		public void assemble(PlanAnalysisReport planAnalysis) {
-
+		public RoicInputAssembler(PlanAnalysisReport planAnalysisReport) {
+			super();
+			this.planAnalysisReport = planAnalysisReport;
 		}
 
-		private SpeedCategory toSpeedCategory(int speedCategory) {
-			return speedCategoryMappedCodes.getDomain(speedCategory);
+		public RoicBuilder assembleRoicModel(
+				Collection<RoicComponentInputModel> inputs) {
+			Map<SpeedCategory, List<ComponentInput>> map = toMappedComponents(inputs);
+
+			RoicBuilder builder = roicBuilderService.buildModel();
+
+			map.entrySet().stream()
+					.map(e -> toRoicInputs(e.getKey(), e.getValue()))
+					.forEach(ri -> {
+						builder.addRoicInputs(ri);
+					});
+
+			return builder;
+
 		}
 
 		private double getNetworkCost(SpeedCategory speedCategory) {
@@ -371,7 +440,6 @@ public class RoicServiceImpl implements RoicService {
 			RoicInputs ri = new RoicInputs();
 			ri.setComponentInputs(inputs);
 			ri.setFixedCost(getNetworkCost(speedCategory));
-
 			ri.setType(toNetworkAnalysisType(speedCategory));
 
 			return ri;
@@ -384,16 +452,14 @@ public class RoicServiceImpl implements RoicService {
 					SpeedCategory.class);
 
 			inputs.forEach(input -> {
-				SpeedCategory speedCategory = toSpeedCategory(input
-						.getSpeedCategory());
-				List<ComponentInput> list = result.get(speedCategory);
+				RoicNetworkStats stats = createNetworkStats(input);
+				List<ComponentInput> list = result.get(stats.getSpeedCategory());
 				if (list == null) {
-					result.put(speedCategory, list = new ArrayList<>());
+					result.put(stats.getSpeedCategory(),
+							list = new ArrayList<>());
 				}
 
-				RoicNetworkStats stats = createNetworkStats(input);
-
-				// list.add(toComponentInput(speedCategory, input));
+				list.add(toComponentInput(stats));
 
 			});
 
@@ -405,8 +471,8 @@ public class RoicServiceImpl implements RoicService {
 				RoicComponentInputModel inputModel) {
 
 			return new RoicNetworkStats(planAnalysisReport,
-					entityTypeMappedCodes.getDomain(inputModel
-							.getSpeedCategory()),
+					entityTypeMappedCodes.getDomain(inputModel.getEntityType()
+							.ordinal()),
 					speedCategoryMappedCodes.getDomain(inputModel
 							.getSpeedCategory()), inputModel);
 
@@ -416,9 +482,11 @@ public class RoicServiceImpl implements RoicService {
 
 			RoicComponentInputModel model = stats.getInputModel();
 
-			ComponentType ct = null ; //stats.getType();
 			
-			return ComponentInput.build().setComponentType(ct)
+			System.out.println(stats.getType() + " " + stats.getArpu()) ;
+			
+			return ComponentInput.build()
+					.setComponentType(model.getEntityType())
 					.setEntityCount(stats.getDemand()).setArpu(stats.getArpu())
 					.setNetworkPenetration(stats.getNetworkPenetration())
 					.setChurnRate(model.getChurnRate())
