@@ -1,9 +1,25 @@
 <form>
-  <div class="input-group">
-    <input type="text" class="form-control" placeholder="Search Plans by Name" ng-model="search_text" ng-change="loadPlans()">
-    <span class="input-group-addon">
-      <span class="glyphicon glyphicon-search"></span>
-    </span>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search Plans by Name" ng-model="search_text" ng-change="loadPlans()">
+        <span class="input-group-addon">
+          <span class="glyphicon glyphicon-search"></span>
+        </span>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="input-group">
+        <span class="input-group-addon">$</span>
+        <input type="text" class="form-control" placeholder="Minimum cost" ng-model="minimumCost" ng-change="loadPlans()">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="input-group">
+        <span class="input-group-addon">$</span>
+        <input type="text" class="form-control" placeholder="Maximum cost" ng-model="maximumCost" ng-change="loadPlans()">
+      </div>
+    </div>
   </div>
   <hr>
 </form>
@@ -31,13 +47,33 @@
             <a href="javascript:void(0)" ng-click="sortBy('updated_at', false)">↑</a>
           </th>
           <th>Owner</th>
-          <th>Total Cost</th>
-          <th>Total Revenue</th>
-          <th>Incremental IRR</th>
-          <th>Incremental NPV</th>
+          <th>
+            Total Cost
+            <a href="javascript:void(0)" ng-click="sortBy('total_cost', true)">↓</a>
+            <a href="javascript:void(0)" ng-click="sortBy('total_cost', false)">↑</a>
+          </th>
+          <th>
+            Total Revenue
+            <a href="javascript:void(0)" ng-click="sortBy('total_revenue', true)">↓</a>
+            <a href="javascript:void(0)" ng-click="sortBy('total_revenue', false)">↑</a>
+          </th>
+          <th>
+            Incremental IRR
+            <a href="javascript:void(0)" ng-click="sortBy('irr', true)">↓</a>
+            <a href="javascript:void(0)" ng-click="sortBy('irr', false)">↑</a>
+          </th>
+          <th>
+            Incremental NPV
+            <a href="javascript:void(0)" ng-click="sortBy('npv', true)">↓</a>
+            <a href="javascript:void(0)" ng-click="sortBy('npv', false)">↑</a>
+          </th>
           <th>Premises enabled</th>
           <th>Fiber Miles Aug</th>
-          <th>Fiber Miles New</th>
+          <th>
+            Fiber Miles New
+            <a href="javascript:void(0)" ng-click="sortBy('fiber_length', true)">↓</a>
+            <a href="javascript:void(0)" ng-click="sortBy('fiber_length', false)">↑</a>
+          </th>
           <th>Prem Ct 4G LTE</th>
           <th>Prem Ct 5G</th>
           <th>Prem Ct FiOS</th>

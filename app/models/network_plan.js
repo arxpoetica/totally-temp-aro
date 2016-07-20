@@ -241,11 +241,27 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static findAll (user, text, page) {
+  static findAll (user, options) {
+    var text = options.text
+    var sortField = options.sortField
+    var sortOrder = options.sortOrder
+    var page = options.page || 1
+    var minimumCost = options.minimumCost
+    var maximumCost = options.maximumCost
+
+    console.log('arguments', arguments)
     var num = 20
+    var sortFields = [
+      'name', 'created_at', 'updated_at',
+      'total_cost', 'total_revenue', 'irr', 'npv', 'fiber_length'
+    ]
+    var sortOrders = ['ASC', 'DESC']
+    if (sortFields.indexOf(sortField) === -1) sortField = sortFields[0]
+    if (sortOrders.indexOf(sortOrder) === -1) sortOrder = sortOrders[0]
+    sortField = 'plan.' + sortField
+
     return Promise.resolve()
       .then(() => {
-        page = page || 1
         var sql = `
           SELECT
             plan.*,
@@ -259,14 +275,33 @@ module.exports = class NetworkPlan {
         `
         var params = [config.client_carrier_name]
         if (user) {
-          sql += ' WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$2)'
           params.push(user.id)
+          sql += ` WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$${params.length})`
         }
         if (text) {
-          sql += ' AND lower(name) LIKE lower($3)'
           params.push(`%${text}%`)
+          sql += ` AND (
+            lower(name) LIKE lower($${params.length})
+            OR lower(users.first_name) LIKE lower($${params.length})
+            OR lower(users.last_name) LIKE lower($${params.length})
+            OR plan.id IN (
+              SELECT plan.id
+                FROM client.plan
+                JOIN client.selected_regions sr
+                  ON sr.plan_id = plan.id
+                 AND lower(sr.region_name) LIKE lower($${params.length})
+            )
+          )`
         }
-        sql += ` LIMIT ${num} OFFSET ${(page - 1) * num}`
+        if (minimumCost || minimumCost === 0) {
+          params.push(minimumCost)
+          sql += ` AND total_cost >= $${params.length}`
+        }
+        if (maximumCost || maximumCost === 0) {
+          params.push(maximumCost)
+          sql += ` AND total_cost <= $${params.length}`
+        }
+        sql += ` ORDER BY ${sortField} ${sortOrder} LIMIT ${num} OFFSET ${(page - 1) * num}`
         return database.query(sql, params)
       })
       .then((plans) => {

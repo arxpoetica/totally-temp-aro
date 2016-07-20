@@ -1,4 +1,4 @@
-/* global app map config $ user_id google _ swal location noUiSlider */
+/* global app map config $ user_id google _ swal location */
 // Navigation Menu Controller
 app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state', ($scope, $rootScope, $http, map_tools, tracker, $location, state) => {
   // Controller instance variables
@@ -70,23 +70,23 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   var newPlanMap
 
-  function initMap () {
-    if (newPlanMap) return
-
-    var styles = [{
-      featureType: 'poi',
-      elementType: 'labels',
-      stylers: [ { visibility: 'off' } ]
-    }]
-
-    newPlanMap = new google.maps.Map(document.getElementById('newPlanMap_canvas'), {
-      zoom: 12,
-      center: {lat: -34.397, lng: 150.644},
-      styles: styles,
-      disableDefaultUI: true,
-      draggable: false
-    })
-  }
+  // function initMap () {
+  //   if (newPlanMap) return
+  //
+  //   var styles = [{
+  //     featureType: 'poi',
+  //     elementType: 'labels',
+  //     stylers: [ { visibility: 'off' } ]
+  //   }]
+  //
+  //   newPlanMap = new google.maps.Map(document.getElementById('newPlanMap_canvas'), {
+  //     zoom: 12,
+  //     center: {lat: -34.397, lng: 150.644},
+  //     styles: styles,
+  //     disableDefaultUI: true,
+  //     draggable: false
+  //   })
+  // }
 
   $scope.selectPlan = function (plan) {
     $scope.plan = plan
@@ -195,7 +195,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       method: 'GET',
       params: {
         text: $scope.search_text,
-        page: page || 1
+        page: page || 1,
+        sortField: $scope.sortField,
+        sortOrder: $scope.sortOrder,
+        minimumCost: $scope.minimumCost,
+        maximumCost: $scope.maximumCost
       }
     }
     $http(options).success((response) => {
@@ -236,10 +240,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $scope.sortBy = (key, descending) => {
-    $scope.plans = _.sortBy($scope.plans, (plan) => plan[key])
-    if (descending) {
-      $scope.plans = $scope.plans.reverse()
-    }
+    $scope.sortField = key
+    $scope.sortOrder = descending ? 'DESC' : 'ASC'
+
+    $scope.loadPlans()
   }
 
   $scope.new_plan = () => {
