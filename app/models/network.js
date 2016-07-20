@@ -228,6 +228,14 @@ module.exports = class Network {
     .then(() => ({}))
   }
 
+  static planSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}`,
+      json: true
+    }
+    return this._callService(req)
+  }
+
   static equipmentSummary (plan_id) {
     var req = {
       url: config.aro_service_url + `/rest/report/plan/${plan_id}/equipment_summary`,
