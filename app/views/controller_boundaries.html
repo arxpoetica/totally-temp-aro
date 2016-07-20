@@ -50,6 +50,26 @@
     </div>
     <hr>
   </div>
+
+  <% if (config.ARO_CLIENT === 'verizon') { %>
+  <p><strong>Search or Click Geographies</strong></p>
+  <div class="form-group form-group-sm">
+    <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
+  </div>
+
+  <!-- <p><strong>Selected Geographies</strong></p> -->
+  <p ng-hide="selectedRegions.length > 0"><em>No geographies selected</em></p>
+  <ul ng-show="selectedRegions.length > 0" style="list-style-type:none; padding:0">
+    <li ng-repeat="geography in selectedRegions">
+      <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
+        <span class="fa fa-trash-o"></span>
+      </a>
+      {{ geography.name }}
+    </li>
+  </ul>
+  <hr>
+  <% } %>
+
   <div ng-show="plan.owner_id === user_id">
     <h2>Build</h2>
     <p>

@@ -1,11 +1,21 @@
 /* global $ app user_id swal _ google map config */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
   $scope.selected_tool = false
   $scope.boundaries = []
+
+  // selected regions
+  $scope.selectedRegions = []
+  $rootScope.$on('regions_changed', () => {
+    $scope.selectedRegions = regions.selectedRegions.slice(0)
+  })
+  $scope.removeGeography = (geography) => {
+    regions.removeGeography(geography)
+  }
+  // --
 
   var area_layers = $scope.area_layers = {}
 

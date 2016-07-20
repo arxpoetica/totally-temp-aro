@@ -172,7 +172,8 @@ module.exports = class Network {
     var locationTypes = {
       households: 'Household',
       businesses: 'Business',
-      towers: 'CellTower'
+      towers: 'CellTower',
+      smb: 'SMB'
     }
     var algorithms = {
       'MAX_IRR': 'IRR',
