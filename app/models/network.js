@@ -170,10 +170,10 @@ module.exports = class Network {
 
   static recalculateNodes (plan_id, options) {
     var locationTypes = {
-      households: 'Household',
-      businesses: 'Business',
-      towers: 'CellTower',
-      smb: 'SMB'
+      households: 'household',
+      businesses: 'business',
+      towers: 'celltower',
+      smb: 'small'
     }
     var algorithms = {
       'MAX_IRR': 'IRR',
