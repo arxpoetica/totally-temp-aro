@@ -45,8 +45,8 @@ module.exports = class Network {
     return database.density(sql, [config.client_carrier_name], true, viewport, density)
   }
 
-  static carriers (plan_id) {
-    return models.MarketSize.carriersByCityOfPlan(plan_id, true)
+  static carriers (plan_id, fiberType) {
+    return models.MarketSize.carriersByCityOfPlan(plan_id, fiberType)
   }
 
   // View the user client's network nodes

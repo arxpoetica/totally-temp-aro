@@ -1,6 +1,6 @@
-/* global app config $ _ */
+/* global app config $ _ google */
 // Fiber Plant Controller
-app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', 'tracker', ($scope, $rootScope, $http, map_tools, MapLayer, tracker) => {
+app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', 'tracker', 'map_utils', ($scope, $rootScope, $http, map_tools, MapLayer, tracker, map_utils) => {
   $scope.map_tools = map_tools
   $scope.carriers = []
   $scope.overlay = 'none'
@@ -47,7 +47,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
   })
 
   var layers = {}
-  var select = $('[ng-controller="fiber_plant_controller"] [ng-change="carriers_changed()"]')
+  var select = $('[ng-controller="fiber_plant_controller"] [ng-change="carriersChanged()"]')
 
   $rootScope.$on('plan_selected', (e, plan) => {
     Object.keys(layers).forEach((key) => {
@@ -55,6 +55,18 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     })
     layers = {}
     if (!plan) return
+
+    $http.get('/network/carriers/' + plan.id + '?fiberType=ilec').success((carriers) => {
+      $scope.nbmCarriers = carriers.map((carrier) => {
+        return {
+          id: carrier.id,
+          name: carrier.name,
+          color: carrier.color
+        }
+      }).filter((carrier) => {
+        return carrier.name !== config.client_carrier_name
+      })
+    })
 
     $http.get('/network/carriers/' + plan.id).success((carriers) => {
       $scope.carriers = carriers.map((carrier) => {
@@ -99,8 +111,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     })
   })
 
-  $scope.toggle_all_competitors = () => {
-    if ($scope.show_all_competitors) {
+  $scope.toggleAllCompetitors = () => {
+    if ($scope.showAllCompetitors) {
       $scope.competitors_fiber.show()
 
       select.select2('val', [], true)
@@ -118,10 +130,10 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     return 'fiber_plant_' + encodeURIComponent(carrier)
   }
 
-  $scope.carriers_changed = () => {
+  $scope.carriersChanged = () => {
     var selected = select.select2('val')
     if (selected.length > 0) {
-      $scope.show_all_competitors = false
+      $scope.showAllCompetitors = false
       $scope.competitors_fiber.hide()
       $scope.competitors_fairshare.hide()
     }
@@ -136,11 +148,11 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     })
   }
 
-  $scope.overlay_changed = () => {
+  $scope.overlayChanged = () => {
     if ($scope.overlay === 'none') {
       select.prop('disabled', false)
     } else {
-      $scope.show_all_competitors = false
+      $scope.showAllCompetitors = false
       select.select2('val', [], true)
       select.prop('disabled', true)
     }
@@ -151,5 +163,44 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
 
   $scope.overlay_is_loading = () => {
     return $scope.competitors_fairshare.is_loading || $scope.competitors_density.is_loading
+  }
+
+  $scope.nbmCarrierChanged = () => {
+    var layer = $scope.nbmLayer
+    if (layer && !$scope.nbmCarrier) {
+      return layer.hide()
+    }
+    var endpoint = `/census_blocks/${$scope.nbmCarrier.id}`
+    if (!layer) {
+      layer = $scope.nbmLayer = new MapLayer({
+        api_endpoint: endpoint,
+        style_options: {
+          normal: {
+            strokeColor: 'blue',
+            strokeWeight: 2,
+            fillColor: 'blue'
+          }
+        },
+        threshold: 13,
+        reload: 'always',
+        declarativeStyles: (feature, styles) => {
+          var speed = feature.getProperty('download_speed')
+          var h = 120 - speed * 10
+          styles.fillColor = 'hsl(' + h + ',100%,50%)'
+        }
+      })
+      layer.onDataLoaded = () => {
+        var dataLayer = layer.data_layer
+        dataLayer.forEach((feature) => {
+          var p = feature.getProperty('centroid').coordinates
+          var centroid = new google.maps.LatLng(p[1], p[0])
+          var marker = map_utils.createCenteredMarker(dataLayer, feature, centroid, {})
+          marker.setIcon('https://chart.googleapis.com/chart?chst=d_text_outline&chld=000000|16|h|FFFFFF|_|' + encodeURIComponent(feature.getProperty('speed')))
+        })
+      }
+    } else {
+      layer.setApiEndpoint(endpoint)
+    }
+    layer.show()
   }
 }])

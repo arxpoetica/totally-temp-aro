@@ -213,8 +213,9 @@ module.exports = class MarketSize {
       })
   }
 
-  static carriersByCityOfPlan (plan_id, only_with_fiber) {
+  static carriersByCityOfPlan (plan_id, fiberType) {
     var params = [plan_id]
+    if (fiberType) params.push(fiberType)
     var sql = `
       SELECT carriers.id, carriers.name, carriers.color FROM carriers
         JOIN client.locations_carriers lc
@@ -224,8 +225,9 @@ module.exports = class MarketSize {
         JOIN cities c
           ON c.buffer_geog && l.geog
          AND c.id = (SELECT cities.id FROM cities JOIN client.plan r ON r.id = $1 ORDER BY r.area_centroid <#> cities.buffer_geog::geometry LIMIT 1)
-         ${only_with_fiber ? " WHERE carriers.route_type='fiber'" : ''}
+         ${fiberType ? ' WHERE carriers.route_type=$2' : ''}
        GROUP BY carriers.id
+       ORDER BY carriers.name ASC
     `
     return database.query(sql, params)
   }
@@ -350,7 +352,7 @@ module.exports = class MarketSize {
     var filters = options.filters
     var output = {}
 
-    return MarketSize.carriersByCityOfPlan(plan_id, true)
+    return MarketSize.carriersByCityOfPlan(plan_id, 'fiber')
       .then((carriers) => {
         output.carriers = carriers
 
@@ -452,7 +454,7 @@ module.exports = class MarketSize {
     var filters = options.filters
     var output = {}
 
-    return MarketSize.carriersByCityOfPlan(plan_id, true)
+    return MarketSize.carriersByCityOfPlan(plan_id, 'fiber')
       .then((carriers) => {
         output.carriers = carriers
 
