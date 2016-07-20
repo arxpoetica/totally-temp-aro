@@ -151,7 +151,7 @@ module.exports = class NetworkPlan {
         })
 
         output.metadata.fiber_summary = summary.priceModel.fiberCosts.map((item) => {
-          var fiberType = fiberTypes.find((i) => i.name.toUpperCase() === item.fiberType)
+          var fiberType = fiberTypes.find((i) => i.name === item.fiberType)
           return {
             lengthMeters: item.lengthMeters,
             totalCost: item.costPerMeter * item.lengthMeters,
