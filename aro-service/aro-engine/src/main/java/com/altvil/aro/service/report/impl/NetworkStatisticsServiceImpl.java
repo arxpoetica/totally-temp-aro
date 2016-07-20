@@ -13,19 +13,34 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.model.DemandTypeEnum;
+import com.altvil.aro.service.optimization.strategy.impl.DefaultNetworkFinancialInput;
+import com.altvil.aro.service.optimization.strategy.spi.FinancialAnalysis;
+import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
+import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.aro.service.report.NetworkStatistic;
 import com.altvil.aro.service.report.NetworkStatisticType;
 import com.altvil.aro.service.report.NetworkStatisticsService;
 import com.altvil.aro.service.report.ReportGenerator;
+import com.altvil.aro.service.roic.NetworkFinancialInput;
 import com.altvil.utils.func.Aggregator;
 
 @Service
 public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
+	private PlanAnalysisService planAnalysisService;
+	
 	private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators;
+
+	@Autowired
+	public NetworkStatisticsServiceImpl(PlanAnalysisService planAnalysisService) {
+		super();
+		this.planAnalysisService = planAnalysisService;
+	}
 
 	@Override
 	public ReportGenerator createReportGenerator() {
@@ -35,15 +50,18 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 	@PostConstruct
 	void postConstruct() {
 		lineItemGenerators = new Builder()
-				.add(NetworkStatisticType.irr, (ctx, plan) -> 0.0)
-				.add(NetworkStatisticType.npv, (ctx, plan) -> 0.0).build();
+				.add(NetworkStatisticType.irr,
+						(ctx, plan) -> ctx.getFinancialAnalysis().getIrr())
+				.add(NetworkStatisticType.npv,
+						(ctx, plan) -> ctx.getFinancialAnalysis().getNpv())
+				.build();
 
 	}
 
 	@Override
 	public NetworkStatistic createNetworkStatistic(NetworkStatisticType type,
 			double value) {
-		return new DefaultNetworkStatistic(type, value) ;
+		return new DefaultNetworkStatistic(type, value);
 	}
 
 	private static class Builder {
@@ -82,17 +100,24 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			this.lineItemGenerators = lineItemGenerators;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see com.altvil.aro.service.cost.impl.ReportGenerator#
-		 * generateNetworkStatistics
-		 * (com.altvil.aro.service.optimization.OptimizedPlan)
-		 */
+		private NetworkFinancialInput toNetworkFinancialInput(
+				GeneratedPlan plan, PriceModel priceModel) {
+			return new DefaultNetworkFinancialInput(true,
+					priceModel.getTotalCost(), plan.getDemandSummary()
+							.getNetworkDemand(DemandTypeEnum.planned_demand)
+							.getLocationDemand());
+		}
+
 		@Override
 		public Collection<NetworkStatistic> generateNetworkStatistics(
-				GeneratedPlan plan) {
-			return new ScalarReducer(lineItemGenerators, plan).generate();
+				GeneratedPlan plan, PriceModel priceModel) {
+
+			FinancialAnalysis fa = planAnalysisService.createFinancialAnalysis(
+					plan.getOptimizationConstraints().getYears(),
+					plan.getOptimizationConstraints().getDiscountRate()).apply(
+					toNetworkFinancialInput(plan, priceModel));
+
+			return new ScalarReducer(lineItemGenerators, plan, fa).generate();
 		}
 
 		@Override
@@ -153,14 +178,21 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 	private abstract static class ReducerContext {
 		private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap;
+		private FinancialAnalysis financialAnalysis;
 
 		private Map<NetworkStatisticType, NetworkStatistic> map = new EnumMap<>(
 				NetworkStatisticType.class);
 
 		public ReducerContext(
-				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap) {
+				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap,
+				FinancialAnalysis financialAnalysis) {
 			super();
 			this.lineItemGeneratorsMap = lineItemGeneratorsMap;
+			this.financialAnalysis = financialAnalysis;
+		}
+
+		public FinancialAnalysis getFinancialAnalysis() {
+			return financialAnalysis;
 		}
 
 		protected NetworkStatisticGenerator getGenerator(
@@ -190,7 +222,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 		public AggregateReducer(
 				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap,
 				Map<NetworkStatisticType, List<NetworkStatistic>> srcData) {
-			super(lineItemGeneratorsMap);
+			super(lineItemGeneratorsMap, null);
 			this.srcData = srcData;
 		}
 
@@ -209,8 +241,8 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		public ScalarReducer(
 				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap,
-				GeneratedPlan plan) {
-			super(lineItemGeneratorsMap);
+				GeneratedPlan plan, FinancialAnalysis financialAnalysis) {
+			super(lineItemGeneratorsMap, financialAnalysis);
 			this.plan = plan;
 		}
 
@@ -254,11 +286,11 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 				Supplier<Double> supplier) {
 			return new DefaultNetworkStatistic(type, eval(supplier));
 		}
-		
-//		public static NetworkStatistic create(NetworkStatisticType type,
-//				double val) {
-//			return new DefaultNetworkStatistic(type, val);
-//		}
+
+		// public static NetworkStatistic create(NetworkStatisticType type,
+		// double val) {
+		// return new DefaultNetworkStatistic(type, val);
+		// }
 
 		private static double eval(Supplier<Double> supplier) {
 			try {
@@ -277,7 +309,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			this.type = type;
 			this.val = val;
 		}
-
+		
 		@Override
 		public NetworkStatisticType getNetworkStatisticType() {
 			return type;

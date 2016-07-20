@@ -91,7 +91,7 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 				.getWirecenterNetworkPlan());
 
 		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
-				reportGenerator.generateNetworkStatistics(network),
+				reportGenerator.generateNetworkStatistics(network, priceModel),
 				NetworkStatistic::getNetworkStatisticType);
 
 		return new PlanAnalysisReportImpl(priceModel,

@@ -14,3 +14,6 @@ insert into financial.line_item_type (name, description)
 insert into financial.line_item_type (name, description) 
 	values('npv','Net Present Value') ;
 
+insert into financial.line_item_type (name, description) 
+	values('cashflow','Planned Cashflows') ;
+
