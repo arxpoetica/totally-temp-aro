@@ -166,10 +166,13 @@ module.exports = class NetworkPlan {
 
         var demand = summary.demandSummary.networkDemands.find((item) => item.demandType === 'planned_demand')
         var entityDemands = demand.locationDemand.entityDemands
-        output.metadata.premises = Object.keys(entityDemands).map((key) => ({
-          name: key,
-          value: entityDemands[key].atomicUnits
-        }))
+        output.metadata.premises = Object.keys(entityDemands).map((key) => {
+          var entityName = entityNames.find((i) => i.name === key)
+          return {
+            name: (entityName && entityName.description) || key,
+            value: entityDemands[key].atomicUnits
+          }
+        })
         // plan.total_revenue = demand.locationDemand.totalRevenue
 
         output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
@@ -595,4 +598,7 @@ var financialCosts = []
 database.query('SELECT * FROM financial.network_cost_code').then((rows) => { financialCosts = rows })
 
 var fiberTypes = []
-database.query('SELECT * FROM client.fiber_route_type LIMIT 100').then((rows) => { fiberTypes = rows })
+database.query('SELECT * FROM client.fiber_route_type').then((rows) => { fiberTypes = rows })
+
+var entityNames = []
+database.query('SELECT * FROM client.entity_category').then((rows) => { entityNames = rows })
