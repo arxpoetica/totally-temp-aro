@@ -21,13 +21,18 @@ import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.report.PlanAnalysisReport;
-import com.altvil.aro.service.roic.NetworkRunningCosts;
+import com.altvil.aro.service.roic.CashFlows;
+import com.altvil.aro.service.roic.NetworkFinancialInput;
 import com.altvil.aro.service.roic.RoicInputService;
 import com.altvil.aro.service.roic.analysis.builder.component.ComponentInput;
 import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilder;
 import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilderService;
 import com.altvil.aro.service.roic.analysis.builder.network.RoicInputs;
+import com.altvil.aro.service.roic.analysis.calc.CalcContext;
+import com.altvil.aro.service.roic.analysis.calc.ResultStream;
+import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
+import com.altvil.aro.service.roic.analysis.op.AnalysisCurve;
 import com.altvil.aro.service.roic.model.NetworkType;
 import com.altvil.aro.service.roic.penetration.NetworkPenetration;
 import com.altvil.aro.service.roic.penetration.impl.DefaultNetworkPenetration;
@@ -91,12 +96,12 @@ public class RoicInputServiceImpl implements RoicInputService {
 	}
 
 	@Override
-	public NetworkRunningCosts getNetworkRunningCosts(
-			LocationDemand locationDemand, SpeedCategory speedCategory) {
+	public CashFlows createCashFlows(SpeedCategory speedCategory,
+			NetworkFinancialInput finacialInputs, int years) {
 
 		return roicInputRef.get().getMap()
 				.get(normalizeSpeedCategory(speedCategory))
-				.computeRunningCosts(locationDemand);
+				.computeCashFlow(finacialInputs, years);
 	}
 
 	private class CacheInputData {
@@ -164,28 +169,132 @@ public class RoicInputServiceImpl implements RoicInputService {
 			return speedCategory;
 		}
 
-		public NetworkRunningCosts computeRunningCosts(
-				LocationDemand locationDemand) {
+		private double getStartingFairShare(LocationEntityType type) {
+			return map.get(type).getPenetrationStart();
+		}
+
+		private Map<LocationEntityType, StreamFunction> createPenetrationCurveMap(
+				LocationDemand ld) {
+
+			Map<LocationEntityType, StreamFunction> result = new EnumMap<>(
+					LocationEntityType.class);
+
+			for (LocationEntityType t : ld.getEntityDemands().keySet()) {
+				result.put(t, new AnalysisCurve(new DefaultNetworkPenetration(
+						getStartingFairShare(t), ld.getPenetration(), map
+								.get(t).getPenetrationRate())));
+			}
+
+			return result;
+		}
+
+		public CashFlows computeCashFlow(NetworkFinancialInput finacialInputs,
+				int periods) {
+			Map<LocationEntityType, StreamFunction> penetrationMap = createPenetrationCurveMap(finacialInputs
+					.getLocationDemand());
+
+			return new CashFlowGenerator(map, penetrationMap,
+					finacialInputs.getLocationDemand(),
+					finacialInputs.getFixedCosts()).createCashFlow(periods);
+
+		}
+
+	}
+
+	private static class SimpleCalcContext implements CalcContext {
+
+		private int startYear;
+		private int period;
+
+		public SimpleCalcContext(int startYear, int period) {
+			super();
+			this.startYear = startYear;
+			this.period = period;
+		}
+
+		public void inc() {
+			period++;
+		}
+
+		@Override
+		public int getPeriod() {
+			return period;
+		}
+
+		@Override
+		public int getCurrentYear() {
+			return startYear + period;
+		}
+
+		@Override
+		public ResultStream getResultStream() {
+			throw new RuntimeException("Operation not supported");
+		}
+
+	}
+
+	private static class CashFlowGenerator {
+
+		private Map<LocationEntityType, RoicComponentInputModel> map;
+		private Map<LocationEntityType, StreamFunction> penetrationMap;
+		private LocationDemand locationDemand;
+		private double capex;
+
+		private double previousConnectionCost = 0;
+
+		public CashFlowGenerator(
+				Map<LocationEntityType, RoicComponentInputModel> map,
+				Map<LocationEntityType, StreamFunction> penetrationMap,
+				LocationDemand locationDemand, double capex) {
+			super();
+			this.map = map;
+			this.penetrationMap = penetrationMap;
+			this.locationDemand = locationDemand;
+			this.capex = capex;
+		}
+
+		public CashFlows createCashFlow(int periods) {
+			int x = 10 ;
+			SimpleCalcContext ctx = new SimpleCalcContext(2016, periods);
+			double[] result = new double[periods];
+			for (int i = 0; i < periods; i++) {
+				double cashFlow = computeCashFlow(ctx);
+				if (i == 0) {
+					cashFlow -= capex;
+				}
+				result[i] = cashFlow;
+				ctx.inc(); 
+
+			}
+			return new CashFlowsImpl(result);
+		}
+
+		private double computeCashFlow(CalcContext ctx) {
 
 			double totalRevenue = 0;
 			double runningCosts = 0;
-			double connectionCosts = 0;
+			double deltaConnectionCosts = 0;
 
 			for (LocationEntityType t : locationDemand.getEntityDemands()
 					.keySet()) {
+
 				DemandStatistic ds = locationDemand.getLocationDemand(t);
 				RoicComponentInputModel model = map.get(t);
-				double revenue = ds.getMonthlyRevenueImpact();
-				totalRevenue += revenue;
+
+				double currentPenetration = penetrationMap.get(t).calc(ctx);
+				double revenue = ds.getTotalRevenue() * currentPenetration;
+				totalRevenue += revenue ;
 				runningCosts += (revenue * (model.getOpexPercent() + model
 						.getMaintenanceExpenses()));
 
-				connectionCosts += model.getConnectionCost()
-						* ds.getFairShareDemand();
+				double currentConnectionCosts = (model.getConnectionCost() * ds
+						.getFairShareDemand());
+				deltaConnectionCosts += (currentConnectionCosts - previousConnectionCost);
+				this.previousConnectionCost = currentConnectionCosts;
+
 			}
 
-			return new NetworkRunningCostsImpl(connectionCosts, runningCosts,
-					totalRevenue == 0 ? 0 : runningCosts / totalRevenue);
+			return totalRevenue - runningCosts - deltaConnectionCosts;
 
 		}
 
@@ -443,36 +552,28 @@ public class RoicInputServiceImpl implements RoicInputService {
 
 	}
 
-	private static class NetworkRunningCostsImpl implements NetworkRunningCosts {
+	private static class CashFlowsImpl implements CashFlows {
 
-		private double totalConnectionCosts;
-		private double totalRunningCosts;
-		private double runningCostAsPercent;
+		private double[] cashFlows;
 
-		public NetworkRunningCostsImpl(double totalConnectionCosts,
-				double totalRunningCosts, double runningCostAsPercent) {
+		public CashFlowsImpl(double[] cashFlows) {
 			super();
-			this.totalConnectionCosts = totalConnectionCosts;
-			this.totalRunningCosts = totalRunningCosts;
-			this.runningCostAsPercent = runningCostAsPercent;
+			this.cashFlows = cashFlows;
 		}
 
 		@Override
-		public double getTotalConnectionCosts() {
-			// TODO Auto-generated method stub
-			return 0;
+		public int getPeriods() {
+			return cashFlows.length;
 		}
 
 		@Override
-		public double getTotalRunningCosts() {
-			// TODO Auto-generated method stub
-			return 0;
+		public double[] getAsRawData() {
+			return cashFlows;
 		}
 
 		@Override
-		public double getRunningCostAsPercent() {
-			// TODO Auto-generated method stub
-			return 0;
+		public double getCashFlow(int period) {
+			return cashFlows[period];
 		}
 
 	}
