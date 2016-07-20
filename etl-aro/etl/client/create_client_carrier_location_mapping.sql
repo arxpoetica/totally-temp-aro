@@ -75,7 +75,7 @@ CREATE TABLE client.census_blocks_carriers AS (
 		cb.gid AS census_block_gid,
 		c.id AS carrier_id,
 		MAX(blks.maxaddown) AS download_speed,
-		MAX(blks.maxadup) AS upload_speed,
+		MAX(blks.maxadup) AS upload_speed
 	FROM aro.census_blocks cb
 	JOIN nbm.blocks blks
 	ON cb.tabblock_id = blks.fullfipsid
