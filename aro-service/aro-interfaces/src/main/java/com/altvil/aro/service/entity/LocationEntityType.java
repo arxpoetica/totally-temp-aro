@@ -2,7 +2,7 @@ package com.altvil.aro.service.entity;
 
 public enum LocationEntityType {
 
-	SmallBusiness(1), MediumBusiness(2), LargeBusiness(3), Household(4), CellTower(5),
+	small(1), medium(2), large(3), household(4), celltower(5),
 
 	;
 

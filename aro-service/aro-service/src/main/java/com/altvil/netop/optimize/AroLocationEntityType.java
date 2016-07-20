@@ -7,17 +7,15 @@ import com.altvil.aro.service.entity.LocationEntityType;
 
 public enum AroLocationEntityType {
 
-	SmallBusiness(LocationEntityType.SmallBusiness), MediumBusiness(
-			LocationEntityType.MediumBusiness), LargeBusiness(
-			LocationEntityType.LargeBusiness), Household(
-			LocationEntityType.Household), CellTower(
-			LocationEntityType.CellTower), Business(
-			LocationEntityType.SmallBusiness,
-			LocationEntityType.MediumBusiness, LocationEntityType.LargeBusiness);
+	small(LocationEntityType.small), medium(LocationEntityType.medium), large(
+			LocationEntityType.large), houshole(LocationEntityType.household), celltower(
+			LocationEntityType.celltower), Business(LocationEntityType.small,
+			LocationEntityType.medium, LocationEntityType.large);
+
 	;
 
 	private Set<LocationEntityType> mappedTypes = EnumSet
-	.noneOf(LocationEntityType.class);;
+			.noneOf(LocationEntityType.class);;
 
 	public Set<LocationEntityType> getMappedTypes() {
 		return mappedTypes;

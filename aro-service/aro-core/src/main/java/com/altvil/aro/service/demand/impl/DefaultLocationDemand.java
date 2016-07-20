@@ -208,9 +208,9 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	}
 
 	private static final LocationEntityType[] reduceTypes = new LocationEntityType[] {
-			LocationEntityType.Household, LocationEntityType.SmallBusiness,
-			LocationEntityType.MediumBusiness,
-			LocationEntityType.LargeBusiness, LocationEntityType.CellTower };
+			LocationEntityType.household, LocationEntityType.small,
+			LocationEntityType.medium,
+			LocationEntityType.large, LocationEntityType.celltower };
 
 	@Override
 	public Pair<LocationDemand> splitDemand(double demand) {

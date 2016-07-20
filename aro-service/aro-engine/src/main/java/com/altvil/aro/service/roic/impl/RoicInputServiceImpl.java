@@ -383,8 +383,8 @@ public class RoicInputServiceImpl implements RoicInputService {
 
 		private double computeArpu(double demand, double revenue) {
 			switch (type) {
-			case MediumBusiness:
-			case LargeBusiness:
+			case medium:
+			case large:
 				return demand == 0 ? 0 : revenue / demand;
 			default:
 				return arpuService.getArpuMapping(type).getArpu(
