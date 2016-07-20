@@ -28,7 +28,7 @@ module.exports = class CensusBlock {
         s.description AS speed,
         ST_AsGeoJSON(ST_Centroid(cb.geom))::json as centroid
       FROM aro.census_blocks cb
-      JOIN client.census_bocks_carriers cbc
+      JOIN client.census_blocks_carriers cbc
         ON cbc.census_block_gid = cb.gid
       JOIN aro.carriers c
         ON cbc.carrier_id = c.id

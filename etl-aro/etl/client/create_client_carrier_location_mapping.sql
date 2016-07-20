@@ -68,9 +68,9 @@ INSERT INTO client.locations_distance_to_carrier (location_id, carrier_id, dista
     GROUP BY locations.id, carriers.id;
 
 
-DROP TABLE IF EXISTS client.census_bocks_carriers;
+DROP TABLE IF EXISTS client.census_blocks_carriers;
 
-CREATE TABLE client.census_bocks_carriers AS (
+CREATE TABLE client.census_blocks_carriers AS (
 	SELECT
 		cb.gid AS census_block_gid,
 		c.id AS carrier_id,
@@ -85,9 +85,9 @@ CREATE TABLE client.census_bocks_carriers AS (
 	GROUP BY census_block_gid, carrier_id
 );
 
-ALTER TABLE client.census_bocks_carriers ADD PRIMARY KEY (census_block_gid, carrier_id);
+ALTER TABLE client.census_blocks_carriers ADD PRIMARY KEY (census_block_gid, carrier_id);
 
-ALTER TABLE client.census_bocks_carriers ADD
+ALTER TABLE client.census_blocks_carriers ADD
 	FOREIGN KEY (carrier_id) REFERENCES aro.carriers (id) ON DELETE CASCADE;
 
 
