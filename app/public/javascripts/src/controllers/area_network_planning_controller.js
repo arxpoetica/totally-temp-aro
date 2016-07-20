@@ -80,7 +80,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
-      geographies: $scope.selectedGeographies.map((i) => {
+      geographies: regions.selectedRegions.map((i) => {
         var info = { name: i.name, id: i.id, type: i.type }
         // geography information may be too large so we avoid to send it for known region types
         if (['wirecenter', 'census_blocks', 'county_subdivisions'].indexOf(i.type) === -1) {
