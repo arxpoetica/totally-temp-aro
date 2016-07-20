@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.optimization.strategy.StrategyUtils;
 import com.altvil.aro.service.optimization.strategy.spi.ComputedField;
+import com.altvil.aro.service.optimization.strategy.spi.FinancialAnalysis;
+import com.altvil.aro.service.optimization.strategy.spi.NetworkFinancials;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
@@ -18,89 +20,88 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 	public Function<OptimizedNetwork, PlanAnalysis> createPlanAnalysis(
 			int years, double discountRate) {
 
-		Function<AnalysisNode, Double> irrFunc = createIrrAnalysis(years);
-		Function<AnalysisNode, Double> npvFunc = createNpvAnalysis(years,
-				discountRate);
-
-		return (optimizedNetwork) -> {
-			AnalysisNode analysisNode = optimizedNetwork.getAnalysisNode();
-			return new DefaultPlanAnalysis(optimizedNetwork,
-					new DefaultComputedField<AnalysisNode, Double>(
-							analysisNode, irrFunc),
-					new DefaultComputedField<AnalysisNode, Double>(
-							analysisNode, npvFunc));
-		};
+		return null;
 
 	}
 
-	private Function<AnalysisNode, Double> createIrrAnalysis(int years) {
+	@Override
+	public Function<NetworkFinancials, FinancialAnalysis> createFinancialAnalysis(
+			int years, double discountRate) {
+		Function<NetworkFinancials, Double> irrFunc = createIrrAnalysis(years);
+		Function<NetworkFinancials, Double> npvFunc = createNpvAnalysis(years,
+				discountRate);
+
+		return (networkFinancials) -> {
+			return new DefaultFinancialAnalysis(networkFinancials,
+					new DefaultComputedField<NetworkFinancials, Double>(
+							networkFinancials, irrFunc),
+					new DefaultComputedField<NetworkFinancials, Double>(
+							networkFinancials, npvFunc));
+		};
+	}
+
+	private Function<NetworkFinancials, Double> createIrrAnalysis(int years) {
 		return (analysisNode) -> {
-			double capex = analysisNode.getCapex();
-			double annualRevenue = 12 * analysisNode.getFiberCoverage()
-					.getMonthlyRevenueImpact();
+			double capex = analysisNode.getFixedCosts();
+			double annualRevenue = analysisNode.getAnnualRevenue();
 			return StrategyUtils.calculateIrr(capex, annualRevenue, years);
 		};
 	}
 
-	private Function<AnalysisNode, Double> createNpvAnalysis(int years,
+	private Function<NetworkFinancials, Double> createNpvAnalysis(int years,
 			double discountRate) {
 		return (analysisNode) -> {
-			double capex = analysisNode.getCapex();
-			double annualRevenue = 12 * analysisNode.getFiberCoverage()
-					.getMonthlyRevenueImpact();
+			double capex = analysisNode.getFixedCosts();
+			double annualRevenue = analysisNode.getAnnualRevenue();
 			return StrategyUtils.npv(capex, annualRevenue, discountRate, years);
 		};
 	}
 
-	private static class DefaultPlanAnalysis implements PlanAnalysis {
-		private OptimizedNetwork optimizedNetwork;
+	private static class DefaultFinancialAnalysis implements FinancialAnalysis {
+		private NetworkFinancials networkFiancials;
 
 		private ComputedField<Double> irr;
 		private ComputedField<Double> npv;
-
-		private boolean valid;
-
-		public DefaultPlanAnalysis(OptimizedNetwork optimizedNetwork,
+		
+		public DefaultFinancialAnalysis(NetworkFinancials networkFiancials,
 				ComputedField<Double> irr, ComputedField<Double> npv) {
 			super();
-			this.optimizedNetwork = optimizedNetwork;
+			this.networkFiancials = networkFiancials;
 			this.irr = irr;
 			this.npv = npv;
-			
-			this.valid = evalValid(optimizedNetwork) ;
 
 		}
-		
+
 		@Override
 		public double getCoverage() {
-			throw new RuntimeException("Implement this. Requires initial state of all locations");
+			throw new RuntimeException(
+					"Implement this. Requires initial state of all locations");
 		}
 
-		private static boolean evalValid(OptimizedNetwork network) {
-			if (network == null || network.isEmpty()) {
-				return false;
-			}
-
-			if (network.getAnalysisNode().getCapex() <= 0) {
-				return false;
-			}
-
-			if (network.getAnalysisNode().getFiberCoverage().getAtomicUnits() <= 0) {
-				return false;
-			}
-
-			return true;
-
-		}
+//		private static boolean evalValid(NetworkFinancials network) {
+//
+//			return network.isValid();
+//
+//			// if (network == null || network.isEmpty()) {
+//			// return false;
+//			// }
+//			//
+//			// if (network.getAnalysisNode().getCapex() <= 0) {
+//			// return false;
+//			// }
+//			//
+//			// if (network.getAnalysisNode().getFiberCoverage().getAtomicUnits()
+//			// <= 0) {
+//			// return false;
+//			// }
+//
+//			return true;
+//
+//		}
 
 		@Override
 		public boolean isValid() {
-			return valid;
-		}
-
-		@Override
-		public OptimizedNetwork getOptimizedNetwork() {
-			return optimizedNetwork;
+			return networkFiancials.isValid() ;
 		}
 
 		public double getIrr() {
@@ -111,14 +112,47 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 			return npv.get();
 		}
 
-		public double getScore() {
-			return optimizedNetwork.getAnalysisNode().getScore();
-		}
-
 		public double getBudget() {
-			return optimizedNetwork.getAnalysisNode().getCapex();
+			return networkFiancials.getFixedCosts();
 		}
 
+	}
+	
+	private static class DefaultPlanAnalysis implements PlanAnalysis {
+		
+		private NetworkFinancials networkFinancials ;
+		private OptimizedNetwork optimizedNetwork ;
+		private FinancialAnalysis financialAnalysis ;
+		
+		
+		public DefaultPlanAnalysis(NetworkFinancials networkFinancials,
+				OptimizedNetwork optimizedNetwork,
+				FinancialAnalysis financialAnalysis) {
+			super();
+			this.networkFinancials = networkFinancials;
+			this.optimizedNetwork = optimizedNetwork;
+			this.financialAnalysis = financialAnalysis;
+		}
+
+
+		@Override
+		public FinancialAnalysis getFinancialAnalysis() {
+			return financialAnalysis ;
+		}
+		
+
+		@Override
+		public NetworkFinancials getNetworkFinancials() {
+			return networkFinancials;
+		}
+
+
+
+		@Override
+		public OptimizedNetwork getOptimizedNetwork() {
+			return optimizedNetwork ;;
+		}
+		
 	}
 
 	private static class DefaultComputedField<S, D> implements ComputedField<D> {
@@ -144,5 +178,7 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 			return value;
 		}
 	}
+	
+	
 
 }
