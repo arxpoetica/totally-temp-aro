@@ -170,7 +170,7 @@ module.exports = class NetworkPlan {
           var entityName = entityNames.find((i) => i.name === key)
           return {
             name: (entityName && entityName.description) || key,
-            value: entityDemands[key].atomicUnits
+            value: entityDemands[key].rawCoverage
           }
         })
         // plan.total_revenue = demand.locationDemand.totalRevenue
