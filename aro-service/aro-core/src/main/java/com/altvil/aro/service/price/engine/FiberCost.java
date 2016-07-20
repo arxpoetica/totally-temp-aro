@@ -23,9 +23,9 @@ public class FiberCost {
 			fiberCost = new FiberCost(fiberType, costPerMeter);
 		}
 
-		public void add(double length) {
+		public void add(double length, double cost) {
 			fiberCost.lengthMeters += length;
-			fiberCost.totalCost += (length * fiberCost.costPerMeter);
+			fiberCost.totalCost += cost ;
 		}
 
 		@Override
@@ -36,7 +36,9 @@ public class FiberCost {
 
 		@Override
 		public FiberCost apply() {
-			fiberCost.totalCost = fiberCost.totalCost * fiberCost.costPerMeter;
+			if( fiberCost.getLengthMeters() > 0 ) {
+				fiberCost.costPerMeter = fiberCost.totalCost / fiberCost.lengthMeters ;
+			}
 			return fiberCost;
 		}
 

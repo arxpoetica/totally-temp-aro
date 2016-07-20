@@ -489,7 +489,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 				NetworkReportSummary reportSummary) {
 
 			if (reportSummary == null) {
-				planAnalysisReportService.createPlanAnalysisReport();
+				return planAnalysisReportService.createPlanAnalysisReport();
 			}
 
 			return PlanAnalysisReportImpl.create(
@@ -535,8 +535,8 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 			fc.setCostPerMeter(fiberCost.getCostPerMeter());
 			fc.setLengthMeters(fiberCost.getLengthMeters());
-			fc.setTotalCost(fc.getTotalCost());
-
+			fc.setTotalCost(fiberCost.getTotalCost());
+			
 			return fc;
 		}
 
