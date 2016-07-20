@@ -522,6 +522,23 @@ module.exports = class NetworkPlan {
         sources.forEach((source) => {
           kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${source.geom}</Placemark>\n`
         })
+
+        var sql = `
+          SELECT ST_AsKML(geom) AS geom
+          FROM client.network_nodes
+          WHERE plan_id IN (
+            SELECT id FROM client.plan WHERE parent_plan_id=$1
+            UNION ALL
+            SELECT $1
+          )
+        `
+        return database.query(sql, [plan_id])
+      })
+      .then((nodes) => {
+        nodes.forEach((source) => {
+          kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${source.geom}</Placemark>\n`
+        })
+
         kml_output += '</Document></kml>'
         return kml_output
       })
