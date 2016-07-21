@@ -13,7 +13,7 @@ public class AroOptimizationPlan {
 	private long planId = 0 ;
 
 	private OptimizationType algorithm;
-	private OptimizationMode optimizationMode = OptimizationMode.INTRA_WIRECENTER;
+	private OptimizationMode optimizationMode = OptimizationMode.INTER_WIRECENTER;
 	private Double threshold;
 
 	private FinancialConstraints financialConstraints;

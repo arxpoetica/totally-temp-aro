@@ -38,14 +38,13 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
 
 
     private class NetworkOptimizationIterator implements Comparable<NetworkOptimizationIterator>, Iterator<OptimizationImprovement>{
-        OptimizedNetwork currentNetwork;
-        Optional<OptimizationImprovement> currentBestImprovement;
+        Optional<OptimizationImprovement> currentBestImprovement = Optional.empty();
         PrunedNetwork prunedNetwork;
 
         public NetworkOptimizationIterator(PrunedNetwork prunedNetwork) {
             this.prunedNetwork = prunedNetwork;
-            this.currentNetwork = null;
-            this.currentBestImprovement = getBestImprovement(prunedNetwork, currentNetwork);
+
+            this.currentBestImprovement = getBestImprovement(prunedNetwork, currentBestImprovement);
 
         }
 
@@ -57,7 +56,7 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
         @Override
         public OptimizationImprovement next() {
             OptimizationImprovement prevBestImprovement = currentBestImprovement.get();
-            this.currentBestImprovement = getBestImprovement(prunedNetwork, currentNetwork);
+            this.currentBestImprovement = getBestImprovement(prunedNetwork, currentBestImprovement);
             return prevBestImprovement;
         }
 
@@ -66,11 +65,12 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
             return Double.compare(currentBestImprovement.get().getScore(), o.currentBestImprovement.get().getScore());
         }
 
-        private Optional<OptimizationImprovement> getBestImprovement(PrunedNetwork prunedNetwork, OptimizedNetwork base) {
+        private Optional<OptimizationImprovement> getBestImprovement(PrunedNetwork prunedNetwork, Optional<OptimizationImprovement> baseImprovement) {
+            OptimizedNetwork base = baseImprovement.isPresent()? baseImprovement.get().getImproved(): null;
                 return prunedNetwork.getOptimizedNetworks().stream()
                         .filter(optimizedNetwork -> base == null || getRawCoverage(optimizedNetwork) > getRawCoverage(base))
                         .map(network -> comparator.calculateImprovement(base, network, prunedNetwork))
-                        .max((o1, o2) -> Double.compare(o1.getScore(), o2.getScore()));
+                        .min((o1, o2) -> Double.compare(o1.getScore(), o2.getScore()));
         }
     }
 
