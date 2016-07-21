@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimize.model;
 
 import java.util.Collection;
+import java.util.Set;
 
 import com.altvil.aro.service.entity.AssignedEntityDemand;
 import com.altvil.aro.service.entity.DemandStatistic;
@@ -14,5 +15,5 @@ public interface DemandCoverage extends DemandStatistic {
 	
 	double getRequiredFiberStrands(FiberType fiberType) ;
 	Collection<AssignedEntityDemand> getAssignedEntityDemands();
-	Collection<LocationEntity> getLocations() ;
+	Set<LocationEntity> getLocations() ;
 }

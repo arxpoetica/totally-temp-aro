@@ -153,13 +153,16 @@ public class OptimizationPlannerServiceImpl implements
 					.build()
 					.add(DemandTypeEnum.planned_demand, SpeedCategory.cat7,
 							dc.getLocationDemand())
+							
+							
 					.add(DemandTypeEnum.new_demand,
 							SpeedCategory.cat7,
 							aroDemandService.aggregateDemandForSpeedCategory(
 									mapping.getAllDemandMapping(),
 									SpeedCategory.cat7))
+									
 					.add(DemandTypeEnum.original_demand,
-							SpeedCategory.cat7,
+							SpeedCategory.cat3,
 							aroDemandService.aggregateDemandForSpeedCategory(
 									plannedDemand, SpeedCategory.cat3))
 
@@ -176,6 +179,9 @@ public class OptimizationPlannerServiceImpl implements
 			NetworkDemandSummary demandSummary = toNetworkDemandSummary(
 					reifiedPlan.getDemandCoverage(),
 					plan.getCompetitiveDemandMapping());
+			
+			log.debug("ds ====>" + demandSummary.toString());
+			
 
 			return wirecenterPlanningService.save(new GeneratedPlanImpl(
 					demandSummary, constraints, reifiedPlan));
