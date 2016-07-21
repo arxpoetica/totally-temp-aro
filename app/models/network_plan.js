@@ -128,28 +128,54 @@ module.exports = class NetworkPlan {
         WHERE plan.id=$1
       `, [plan_id, config.client_carrier_name])
       .then((_plan) => {
+        if (!_plan) return Promise.reject(new Error('Plan not found'))
+
         plan = _plan
         Object.keys(plan).forEach((key) => {
           output[key] = plan[key]
         })
 
-        return Promise.all([
-          models.Network.equipmentSummary(plan_id),
-          models.Network.fiberSummary(plan_id),
-          models.Network.irrAndNpv(plan_id)
-        ])
+        return models.Network.planSummary(plan_id)
       })
-      .then((results) => {
-        output.metadata.npv = results[2].npv
-        output.metadata.irr = results[2].irr
+      .then((summary) => {
+        output.metadata.npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'npv').value
+        output.metadata.irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'irr').value
 
-        output.metadata.equipment_summary = attachCostDescription(results[0])
-        output.metadata.fiber_summary = attachCostDescription(results[1])
+        output.metadata.equipment_summary = summary.priceModel.equipmentCosts.map((item) => {
+          var cost = financialCosts.find((i) => i.name === item.nodeType)
+          return {
+            totalCost: item.total,
+            description: (cost && cost.description) || item.nodeType,
+            quantity: item.quantity
+          }
+        })
 
-        output.metadata.equipment_cost = results[0].reduce((total, item) => item.totalCost + total, 0)
-        output.metadata.fiber_cost = results[1].reduce((total, item) => item.totalCost + total, 0)
+        output.metadata.fiber_summary = summary.priceModel.fiberCosts.map((item) => {
+          var fiberType = fiberTypes.find((i) => i.name === item.fiberType)
+          return {
+            lengthMeters: item.lengthMeters,
+            totalCost: item.costPerMeter * item.lengthMeters,
+            description: (fiberType && fiberType.description) || item.fiberType
+          }
+        })
+
+        output.metadata.equipment_cost = output.metadata.equipment_summary.reduce((total, item) => item.totalCost + total, 0)
+        output.metadata.fiber_cost = output.metadata.fiber_summary.reduce((total, item) => item.totalCost + total, 0)
 
         plan.total_cost = output.metadata.equipment_cost + output.metadata.fiber_cost
+
+        var demand = summary.demandSummary.networkDemands.find((item) => item.demandType === 'planned_demand')
+        var entityDemands = demand.locationDemand.entityDemands
+        output.metadata.premises = Object.keys(entityDemands).map((key) => {
+          var entityName = entityNames.find((i) => i.name === key)
+          return {
+            name: (entityName && entityName.description) || key,
+            value: entityDemands[key].rawCoverage
+          }
+        })
+        // plan.total_revenue = demand.locationDemand.totalRevenue
+
+        output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
 
         return NetworkPlan.findEdges(plan_id)
       })
@@ -161,38 +187,6 @@ module.exports = class NetworkPlan {
             'fiber_type': edge.fiber_type
           }
         }))
-
-        var sql = `
-          SELECT
-            SUM(household_count) AS household_count,
-            SUM(business_count) AS business_count,
-            SUM(celltower_count) AS tower_count
-          FROM client.network_nodes n
-          WHERE plan_id IN (
-            SELECT id FROM client.plan WHERE parent_plan_id=$1
-            UNION ALL
-            SELECT $1
-          )
-          AND n.node_type_id = 1
-        `
-        return database.findOne(sql, [plan_id])
-      })
-      .then((row) => {
-        output.metadata.premises = [
-          {
-            name: 'Households',
-            value: row.household_count
-          },
-          {
-            name: 'Businesses',
-            value: row.business_count
-          },
-          {
-            name: 'Towers',
-            value: row.tower_count / 64
-          }
-        ]
-        output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
 
         return database.query(`
           SELECT
@@ -241,11 +235,27 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static findAll (user, text, page) {
+  static findAll (user, options) {
+    var text = options.text
+    var sortField = options.sortField
+    var sortOrder = options.sortOrder
+    var page = options.page || 1
+    var minimumCost = options.minimumCost
+    var maximumCost = options.maximumCost
+
+    console.log('arguments', arguments)
     var num = 20
+    var sortFields = [
+      'name', 'created_at', 'updated_at',
+      'total_cost', 'total_revenue', 'irr', 'npv', 'fiber_length'
+    ]
+    var sortOrders = ['ASC', 'DESC']
+    if (sortFields.indexOf(sortField) === -1) sortField = sortFields[0]
+    if (sortOrders.indexOf(sortOrder) === -1) sortOrder = sortOrders[0]
+    sortField = 'plan.' + sortField
+
     return Promise.resolve()
       .then(() => {
-        page = page || 1
         var sql = `
           SELECT
             plan.*,
@@ -259,14 +269,33 @@ module.exports = class NetworkPlan {
         `
         var params = [config.client_carrier_name]
         if (user) {
-          sql += ' WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$2)'
           params.push(user.id)
+          sql += ` WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$${params.length})`
         }
         if (text) {
-          sql += ' AND lower(name) LIKE lower($3)'
           params.push(`%${text}%`)
+          sql += ` AND (
+            lower(name) LIKE lower($${params.length})
+            OR lower(users.first_name) LIKE lower($${params.length})
+            OR lower(users.last_name) LIKE lower($${params.length})
+            OR plan.id IN (
+              SELECT plan.id
+                FROM client.plan
+                JOIN client.selected_regions sr
+                  ON sr.plan_id = plan.id
+                 AND lower(sr.region_name) LIKE lower($${params.length})
+            )
+          )`
         }
-        sql += ` LIMIT ${num} OFFSET ${(page - 1) * num}`
+        if (minimumCost || minimumCost === 0) {
+          params.push(minimumCost)
+          sql += ` AND total_cost >= $${params.length}`
+        }
+        if (maximumCost || maximumCost === 0) {
+          params.push(maximumCost)
+          sql += ` AND total_cost <= $${params.length}`
+        }
+        sql += ` ORDER BY ${sortField} ${sortOrder} LIMIT ${num} OFFSET ${(page - 1) * num}`
         return database.query(sql, params)
       })
       .then((plans) => {
@@ -487,6 +516,23 @@ module.exports = class NetworkPlan {
         sources.forEach((source) => {
           kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${source.geom}</Placemark>\n`
         })
+
+        var sql = `
+          SELECT ST_AsKML(geom) AS geom
+          FROM client.network_nodes
+          WHERE plan_id IN (
+            SELECT id FROM client.plan WHERE parent_plan_id=$1
+            UNION ALL
+            SELECT $1
+          )
+        `
+        return database.query(sql, [plan_id])
+      })
+      .then((nodes) => {
+        nodes.forEach((source) => {
+          kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${source.geom}</Placemark>\n`
+        })
+
         kml_output += '</Document></kml>'
         return kml_output
       })
@@ -551,13 +597,8 @@ module.exports = class NetworkPlan {
 var financialCosts = []
 database.query('SELECT * FROM financial.network_cost_code').then((rows) => { financialCosts = rows })
 
-const attachCostDescription = (arr) => {
-  arr.forEach((item) => {
-    var code = item.costCode
-    var cost = financialCosts.find((item) => item.id === code)
-    if (cost) {
-      item.description = cost.description
-    }
-  })
-  return arr
-}
+var fiberTypes = []
+database.query('SELECT * FROM client.fiber_route_type').then((rows) => { fiberTypes = rows })
+
+var entityNames = []
+database.query('SELECT * FROM client.entity_category').then((rows) => { entityNames = rows })

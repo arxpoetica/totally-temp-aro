@@ -165,7 +165,8 @@ public class RoicModelAssembler {
 				NetworkAnalysisType type) {
 
 			RoicNetworkModel model = networkBuilderService.build(type)
-					.setAnalysisPeriod(analysisPeriod).set(inputs).build();
+					.setAnalysisPeriod(analysisPeriod).set(inputs)
+					.build();
 
 			addModel(model);
 			return model;

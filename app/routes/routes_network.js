@@ -40,7 +40,8 @@ exports.configure = (api, middleware) => {
 
   api.get('/network/carriers/:plan_id', (request, response, next) => {
     var plan_id = request.params.plan_id
-    models.Network.carriers(plan_id)
+    var fiberType = request.query.fiberType || 'fiber'
+    models.Network.carriers(plan_id, fiberType)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

@@ -1,6 +1,7 @@
 package com.altvil.aro.model;
 
 public enum NetworkNodeType {
+
 	
 	undefined(0),
 	central_office(1),

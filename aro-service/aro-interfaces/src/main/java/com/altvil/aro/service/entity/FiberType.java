@@ -10,7 +10,7 @@ public enum FiberType {
 	5,drop,Drop Cable
 */
 	
-	 ROOT("root"), UNKNOWN("unknown"), BACKBONE("backbone"), FEEDER("feed"), DISTRIBUTION("dist"), DROP("drop")
+	 ROOT("root"), UNKNOWN("unknown"), BACKBONE("backbone"), FEEDER("feeder"), DISTRIBUTION("distribution"), DROP("drop")
 
 ;
 	private String code;
@@ -18,7 +18,7 @@ public enum FiberType {
 	private FiberType(String code) {
 		this.code = code;
 	}
-
+	
 	public String getCode() {
 		return code;
 	}

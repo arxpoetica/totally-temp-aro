@@ -5,10 +5,18 @@ import java.util.function.Function;
 
 import com.altvil.aro.model.EquipmentSummaryCost;
 import com.altvil.aro.model.FiberSummaryCost;
+import com.altvil.aro.model.NetworkCostCode;
+import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.model.NetworkReportSummary;
+import com.altvil.aro.service.entity.FiberType;
 
 public interface NetworkReportService {
 
+	
+	NetworkCostCode getCostCode(NetworkNodeType nt);
+	NetworkCostCode getCostCode(FiberType nt);
+
+	
 	NetworkReportSummary saveNetworkReport(SummarizedPlan plan);
 
 	SummarizedPlan loadSummarizedPlan(long planId);

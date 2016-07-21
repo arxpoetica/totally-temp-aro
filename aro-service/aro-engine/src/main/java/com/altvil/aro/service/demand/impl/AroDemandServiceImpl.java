@@ -378,9 +378,9 @@ public class AroDemandServiceImpl implements AroDemandService {
 			Map<LocationEntityType, FairShareDemandMapping> overrrideMapping = new EnumMap<>(
 					LocationEntityType.class);
 
-			overrrideMapping.put(LocationEntityType.LargeBusiness,
+			overrrideMapping.put(LocationEntityType.large,
 					strengthFairShare);
-			overrrideMapping.put(LocationEntityType.CellTower,
+			overrrideMapping.put(LocationEntityType.celltower,
 					strengthFairShare);
 
 			return new CompositeFairShareDemandMapping(cbFairShare,

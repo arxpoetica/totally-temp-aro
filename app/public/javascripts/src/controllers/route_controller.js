@@ -17,7 +17,7 @@ app.controller('route_controller', ['$scope', '$rootScope', '$http', 'selection'
 
     $http.get('/network_plan/' + plan.id).success((response) => {
       redrawRoute(response)
-      selection.set_enabled(plan.owner_id === user_id)
+      selection.setEnabled(plan.owner_id === user_id)
       if ((response.metadata.sources || []).length > 0) {
         map_layers.getEquipmentLayer('network_nodes').show()
       }

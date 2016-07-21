@@ -45,8 +45,8 @@ module.exports = class Network {
     return database.density(sql, [config.client_carrier_name], true, viewport, density)
   }
 
-  static carriers (plan_id) {
-    return models.MarketSize.carriersByCityOfPlan(plan_id, true)
+  static carriers (plan_id, fiberType) {
+    return models.MarketSize.carriersByCityOfPlan(plan_id, fiberType)
   }
 
   // View the user client's network nodes
@@ -170,9 +170,10 @@ module.exports = class Network {
 
   static recalculateNodes (plan_id, options) {
     var locationTypes = {
-      households: 'Household',
-      businesses: 'Business',
-      towers: 'CellTower'
+      households: 'household',
+      businesses: 'business',
+      towers: 'celltower',
+      smb: 'small'
     }
     var algorithms = {
       'MAX_IRR': 'IRR',
@@ -231,6 +232,14 @@ module.exports = class Network {
     })
     .then(() => this._callService(req))
     .then(() => ({}))
+  }
+
+  static planSummary (plan_id) {
+    var req = {
+      url: config.aro_service_url + `/rest/report/plan/${plan_id}`,
+      json: true
+    }
+    return this._callService(req)
   }
 
   static equipmentSummary (plan_id) {

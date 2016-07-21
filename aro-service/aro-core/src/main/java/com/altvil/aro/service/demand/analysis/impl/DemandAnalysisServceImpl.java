@@ -187,18 +187,21 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 				NetworkType type) {
 
 			switch (locationEntityType) {
-			case CellTower:
+			case celltower:
 				return new CellTowerProduct(type, arpuMapping, model, 64);
-			case SmallBusiness:
+			case small:
 				return new ProductDemandImpl(locationEntityType, type,
 						arpuMapping, model, 1);
-			case MediumBusiness:
-				return new ProductDemandImpl(locationEntityType, type,
-						arpuMapping, model, 4);
-			case LargeBusiness:
-				return new BusinessProduct(LocationEntityType.LargeBusiness,
+//			case medium:
+//				return new ProductDemandImpl(locationEntityType, type,
+//						arpuMapping, model, 4);
+			case medium:
+				return new BusinessProduct(LocationEntityType.large,
+						type, arpuMapping, model, 4);
+			case large:
+				return new BusinessProduct(LocationEntityType.large,
 						type, arpuMapping, model, 32);
-			case Household:
+			case household:
 			default:
 				return new ProductDemandImpl(locationEntityType, type,
 						arpuMapping, model, 1);
@@ -399,7 +402,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 		public CellTowerProduct(NetworkType networkType,
 				ArpuMapping arpuMapping, FairShareModel fairShareModel,
 				double atomicUnitCounts) {
-			super(LocationEntityType.CellTower, networkType, arpuMapping,
+			super(LocationEntityType.celltower, networkType, arpuMapping,
 					fairShareModel, atomicUnitCounts);
 		}
 

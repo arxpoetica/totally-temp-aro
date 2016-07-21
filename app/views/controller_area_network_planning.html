@@ -39,24 +39,49 @@
         </div>
       </div>
     </div>
+    <p><strong>Budget Allocation</strong></p>
+    <div class="clearfix">
+      <div style="float:left; width:20%">
+        <label class="text-right" style="display:block">Year 1</label>
+        <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="100%">
+      </div>
+      <div style="float:left; width:20%">
+        <label class="text-right" style="display:block">Year 2</label>
+        <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+      </div>
+      <div style="float:left; width:20%">
+        <label class="text-right" style="display:block">Year 3</label>
+        <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+      </div>
+      <div style="float:left; width:20%">
+        <label class="text-right" style="display:block">Year 4</label>
+        <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+      </div>
+      <div style="float:left; width:20%">
+        <label class="text-right" style="display:block">Year 5</label>
+        <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+      </div>
+    </div>
   </div>
 
   <br>
+  <% if (config.ARO_CLIENT !== 'verizon') { %>
   <p><strong>Search or Click Geographies</strong></p>
   <div class="form-group form-group-sm">
     <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
   </div>
 
   <!-- <p><strong>Selected Geographies</strong></p> -->
-  <p ng-hide="selectedGeographies.length > 0"><em>No geographies selected</em></p>
-  <ul ng-show="selectedGeographies.length > 0" style="list-style-type:none; padding:0">
-    <li ng-repeat="geography in selectedGeographies">
+  <p ng-hide="selectedRegions.length > 0"><em>No geographies selected</em></p>
+  <ul ng-show="selectedRegions.length > 0" style="list-style-type:none; padding:0">
+    <li ng-repeat="geography in selectedRegions">
       <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
         <span class="fa fa-trash-o"></span>
       </a>
       {{ geography.name }}
     </li>
   </ul>
+  <% } %>
 
   <% if (!config.ui.eye_checkboxes) { %>
   <p><strong>Customers to Optimize For</strong></p>
@@ -121,7 +146,7 @@
       <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
     </p>
     <!--
-    <div class="row" ng-repeat="geography in selectedGeographies">
+    <div class="row" ng-repeat="geography in selectedRegions">
       <div class="col-md-4">
         {{geography.name}}
       </div>

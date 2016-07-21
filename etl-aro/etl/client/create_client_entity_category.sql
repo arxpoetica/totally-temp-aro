@@ -9,8 +9,8 @@ CREATE TABLE client.entity_category
 );
 
 
-INSERT INTO client.entity_category(name, description) VALUES('small', 'Business SMB');
-INSERT INTO client.entity_category(name, description) VALUES('medium', 'Business Mid-Size');
-INSERT INTO client.entity_category(name, description) VALUES('large', 'Business Enterprise');
-INSERT INTO client.entity_category(name, description) VALUES('household', 'Residential Household');
-INSERT INTO client.entity_category(name, description) VALUES('celltower', 'Celltower');
+INSERT INTO client.entity_category(name, description) VALUES('small', 'SMB');
+INSERT INTO client.entity_category(name, description) VALUES('medium', 'Mid-tier');
+INSERT INTO client.entity_category(name, description) VALUES('large', 'Large Enterprise');
+INSERT INTO client.entity_category(name, description) VALUES('household', 'Household');
+INSERT INTO client.entity_category(name, description) VALUES('celltower', 'Tower');

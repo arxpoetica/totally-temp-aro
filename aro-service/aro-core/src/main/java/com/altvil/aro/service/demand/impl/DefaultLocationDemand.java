@@ -112,7 +112,29 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 		for (LocationEntityType t : LocationEntityType.values()) {
 			map.put(t, DefaultDemandStatistic.ZERO_DEMAND);
 		}
-
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder() ;
+		
+		sb.append(super.toString()) ;
+		sb.append(" = [") ;
+		int index = 0 ;
+		for(Map.Entry<LocationEntityType, DemandStatistic> e : demands.entrySet()) {
+			if( index++ > 0 ) {
+				sb.append(", ") ;
+			}
+			sb.append(e.getKey().toString()) ;
+			sb.append(" : {") ;
+			sb.append(e.getValue().toString()) ;
+			sb.append("}") ;
+		}
+		
+		sb.append("]") ;
+		
+		return sb.toString() ;
+		
 	}
 
 	private DefaultLocationDemand(
@@ -208,9 +230,9 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 	}
 
 	private static final LocationEntityType[] reduceTypes = new LocationEntityType[] {
-			LocationEntityType.Household, LocationEntityType.SmallBusiness,
-			LocationEntityType.MediumBusiness,
-			LocationEntityType.LargeBusiness, LocationEntityType.CellTower };
+			LocationEntityType.household, LocationEntityType.small,
+			LocationEntityType.medium,
+			LocationEntityType.large, LocationEntityType.celltower };
 
 	@Override
 	public Pair<LocationDemand> splitDemand(double demand) {

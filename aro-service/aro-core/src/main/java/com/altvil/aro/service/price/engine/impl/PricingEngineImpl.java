@@ -75,6 +75,9 @@ public class PricingEngineImpl implements PricingEngine {
 		private Map<NetworkNodeType, EquipmentAggregator> equipmentMap = new EnumMap<>(
 				NetworkNodeType.class);
 
+		private Map<FiberType, Double> fiberCostPerMeterMap = new EnumMap<>(
+				FiberType.class);
+
 		public PriceModelBuilderImpl(PricingModel pricingModel,
 				MappedCodes<NetworkNodeType, MaterialType> typeMapping) {
 			super();
@@ -92,6 +95,10 @@ public class PricingEngineImpl implements PricingEngine {
 			}
 
 			for (FiberType ft : FiberType.values()) {
+
+				fiberCostPerMeterMap.put(ft,
+						pricingModel.getFiberCostPerMeter(ft, 1));
+
 				fiberCostMap.put(
 						ft,
 						FiberCost.aggregate(ft,
@@ -132,7 +139,8 @@ public class PricingEngineImpl implements PricingEngine {
 
 		@Override
 		public PriceModelBuilder add(FiberType type, double lengthInMeteres) {
-			fiberCostMap.get(type).add(lengthInMeteres);
+			fiberCostMap.get(type).add(lengthInMeteres,
+					fiberCostPerMeterMap.get(type) * lengthInMeteres);
 			return this;
 		}
 

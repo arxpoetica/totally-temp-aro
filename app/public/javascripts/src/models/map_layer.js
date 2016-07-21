@@ -42,7 +42,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
 
       data_layer.addListener('click', (event) => {
         $rootScope.$broadcast('map_layer_clicked_feature', event, this)
-        if (!selection.is_enabled()) return
+        if (!selection.isEnabled()) return
         var changes
         if (this.single_selection) {
           changes = this.createEmptyChanges()
@@ -302,6 +302,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
             }
             this.metadata = data.metadata
             this.data_loaded = true
+            this.onDataLoaded && this.onDataLoaded(this)
             $rootScope.$broadcast('map_layer_loaded_data', this)
             this.configureFeatureStyles()
             // set the layer visible or not again

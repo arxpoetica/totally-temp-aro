@@ -13,11 +13,11 @@ public interface RoicComponent extends RoicAnalysis {
 	
 	public enum ComponentType {
 		undefined(null),
-		smallBusiness(LocationEntityType.SmallBusiness),
-		mediumBusiness(LocationEntityType.MediumBusiness),
-		largeBusiness(LocationEntityType.LargeBusiness),
-		household(LocationEntityType.Household),
-		cellTower(LocationEntityType.CellTower),
+		smallBusiness(LocationEntityType.small),
+		mediumBusiness(LocationEntityType.medium),
+		largeBusiness(LocationEntityType.large),
+		household(LocationEntityType.household),
+		cellTower(LocationEntityType.celltower),
 		network(null),
 		
 		;

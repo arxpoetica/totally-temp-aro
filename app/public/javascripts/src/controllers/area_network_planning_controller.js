@@ -1,14 +1,25 @@
-/* global app swal $ google map config */
+/* global app swal $ config */
 // Search Controller
-app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', ($scope, $rootScope, $http, $q, map_tools) => {
+app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', ($scope, $rootScope, $http, $q, map_tools, regions) => {
   // Controller instance variables
   $scope.map_tools = map_tools
+  $scope.regions = regions
 
-  $scope.selectedGeographies = []
+  // selected regions
+  $scope.selectedRegions = []
+  $rootScope.$on('regions_changed', () => {
+    $scope.selectedRegions = regions.selectedRegions.slice(0)
+  })
+  $scope.removeGeography = (geography) => {
+    regions.removeGeography(geography)
+  }
+  // --
+
   $scope.calculating = false
 
   $scope.optimizeHouseholds = true
   $scope.optimizeBusinesses = true
+  $scope.optimizeSMB = true // special case
   $scope.optimizeTowers = true
 
   $scope.optimizationType = 'CAPEX'
@@ -26,131 +37,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   budgetInput.on('blur', () => {
     budgetInput.val(parseBudget().toLocaleString())
-  })
-
-  var selectionLayer
-  function initSelectionLayer () {
-    selectionLayer && selectionLayer.setMap(null)
-    selectionLayer = new google.maps.Data()
-    selectionLayer.setStyle({
-      fillColor: 'green'
-    })
-    selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
-  }
-
-  $(document).ready(() => {
-    initSelectionLayer()
-  })
-
-  $rootScope.$on('plan_selected', (e, plan) => {
-    initSelectionLayer()
-    $scope.selectedGeographies = []
-  })
-
-  $rootScope.$on('plan_changed_metadata', (e, plan) => {
-    initSelectionLayer()
-    $scope.selectedGeographies = plan.metadata.selectedRegions
-    $scope.selectedGeographies.forEach((geography) => {
-      geography.features = selectionLayer.addGeoJson({
-        type: 'Feature',
-        geometry: geography.geog,
-        properties: {
-          id: geography.id
-        }
-      })
-    })
-  })
-
-  $rootScope.$on('map_tool_changed_visibility', () => {
-    selectionLayer.setMap(map_tools.is_visible('area_network_planning') ? map : null)
-  })
-
-  $scope.removeGeography = (geography) => {
-    var index = $scope.selectedGeographies.indexOf(geography)
-    if (index >= 0) {
-      $scope.selectedGeographies.splice(index, 1)[0]
-      geography.features.forEach((feature) => {
-        selectionLayer.remove(feature)
-      })
-    }
-  }
-
-  $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
-    if (!map_tools.is_visible('area_network_planning')) return
-
-    var feature = event.feature
-    var name = feature.getProperty('name')
-    if (feature.getGeometry().getType() === 'MultiPolygon') {
-      feature.toGeoJson((obj) => {
-        selectGeography({
-          id: feature.getProperty('id'),
-          name: name,
-          geog: obj.geometry,
-          type: layer.type
-        })
-        $scope.$apply()
-      })
-    }
-  })
-
-  function selectGeography (geography) {
-    geography.id = String(geography.id)
-    if ($scope.selectedGeographies.find((geog) => geog.id === geography.id && geog.type === geography.type)) return
-    $scope.selectedGeographies.push(geography)
-
-    geography.features = selectionLayer.addGeoJson({
-      type: 'Feature',
-      geometry: geography.geog,
-      properties: {
-        id: geography.id,
-        type: geography.type
-      }
-    })
-  }
-
-  var search = $('#area-network-planning-search')
-  search.select2({
-    ajax: {
-      url: '/search/boundaries',
-      dataType: 'json',
-      delay: 250,
-      data: (term) => ({ text: term }),
-      results: (data, params) => {
-        var items = data.map((boundary) => {
-          return {
-            id: String(boundary.id),
-            text: boundary.name,
-            geog: boundary.geog
-          }
-        })
-        $scope.searchResults = items
-
-        return {
-          results: items,
-          pagination: {
-            more: false
-          }
-        }
-      },
-      cache: true
-    }
-  })
-
-  search.on('change', () => {
-    var value = search.select2('val')
-    var boundary = $scope.searchResults.find((boundary) => boundary.id === value)
-    var n = boundary.id.indexOf(':')
-    var type = boundary.id.substring(0, n)
-    var id = boundary.id.substring(n + 1)
-
-    selectGeography({
-      id: id,
-      name: boundary.text,
-      geog: boundary.geog,
-      type: type
-    })
-    search.select2('val', '')
-    $scope.$apply()
   })
 
   $scope.plan = null
@@ -188,12 +74,13 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
     if (scope.optimizeHouseholds) locationTypes.push('households')
     if (scope.optimizeBusinesses) locationTypes.push('businesses')
+    if (scope.optimizeSMB) locationTypes.push('smb')
     if (scope.optimizeTowers) locationTypes.push('towers')
 
     var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
-      geographies: $scope.selectedGeographies.map((i) => {
+      geographies: regions.selectedRegions.map((i) => {
         var info = { name: i.name, id: i.id, type: i.type }
         // geography information may be too large so we avoid to send it for known region types
         if (['wirecenter', 'census_blocks', 'county_subdivisions'].indexOf(i.type) === -1) {

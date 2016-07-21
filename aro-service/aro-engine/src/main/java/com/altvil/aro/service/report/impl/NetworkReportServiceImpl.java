@@ -78,11 +78,10 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	private PricingEngine pricingEngine;
 	private PlanAnalysisReportService planAnalysisReportService;
 	private NetworkStatisticsService networkStatisticsService;
-	
+
 	private ReportBuilderContext reportBuilderContext;
 	private PlanAnalysisReportBuilder planAnalysisReportBuilder;
-	
-	
+
 	@Autowired
 	public NetworkReportServiceImpl(
 			NetworkReportRepository networkReportRepository,
@@ -112,6 +111,16 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		reportBuilderContext = new ReportBuilderContext().init();
 		planAnalysisReportBuilder = new PlanAnalysisReportBuilder(
 				reportBuilderContext);
+	}
+
+	@Override
+	public NetworkCostCode getCostCode(NetworkNodeType nt) {
+		return reportBuilderContext._getCostCode(nt);
+	}
+
+	@Override
+	public NetworkCostCode getCostCode(FiberType ft) {
+		return reportBuilderContext._getCostCode(ft);
 	}
 
 	@Override
@@ -199,6 +208,9 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		private Map<Class<?>, MappedCodes<?, Integer>> enumToCodeMapping = new HashMap<>();
 		private Map<Class<?>, MappedCodes<Integer, ?>> codeToEnumMapping = new HashMap<>();
 
+		private MappedCodes<NetworkNodeType, NetworkCostCode> nodeToCostCode;
+		private MappedCodes<FiberType, NetworkCostCode> fiberToCostCode;
+
 		private Set<FiberType> wellKnowFiber = EnumSet.of(
 				FiberType.DISTRIBUTION, FiberType.FEEDER);
 
@@ -223,10 +235,21 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 					.hash(networkCostCodeRepository.findAll(),
 							NetworkCostCode::getId);
 
-			registerCostCodes(NetworkNodeType.class, createNodeMapping(codeMap)
-					.reindexDomain(NetworkCostCode::getId));
-			registerCostCodes(FiberType.class, createFiberMapping(codeMap)
-					.reindexDomain(NetworkCostCode::getId));
+			nodeToCostCode = createNodeMapping(codeMap);
+			fiberToCostCode = createFiberMapping(codeMap);
+
+			registerCostCodes(NetworkNodeType.class,
+					nodeToCostCode.reindexDomain(NetworkCostCode::getId));
+			registerCostCodes(FiberType.class,
+					fiberToCostCode.reindexDomain(NetworkCostCode::getId));
+		}
+
+		public NetworkCostCode _getCostCode(FiberType ft) {
+			return fiberToCostCode.getDomain(ft);
+		}
+
+		public NetworkCostCode _getCostCode(NetworkNodeType nt) {
+			return nodeToCostCode.getDomain(nt);
 		}
 
 		private <S> void registerEnumMapping(Class<S> clz,
@@ -466,7 +489,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 				NetworkReportSummary reportSummary) {
 
 			if (reportSummary == null) {
-				planAnalysisReportService.createPlanAnalysisReport();
+				return planAnalysisReportService.createPlanAnalysisReport();
 			}
 
 			return PlanAnalysisReportImpl.create(
@@ -512,8 +535,8 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 			fc.setCostPerMeter(fiberCost.getCostPerMeter());
 			fc.setLengthMeters(fiberCost.getLengthMeters());
-			fc.setTotalCost(fc.getTotalCost());
-
+			fc.setTotalCost(fiberCost.getTotalCost());
+			
 			return fc;
 		}
 

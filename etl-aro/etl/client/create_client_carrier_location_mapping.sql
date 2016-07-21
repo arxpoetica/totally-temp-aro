@@ -66,3 +66,43 @@ INSERT INTO client.locations_distance_to_carrier (location_id, carrier_id, dista
     JOIN fiber_plant ON locations.geom && fiber_plant.buffer_geom
     JOIN carriers ON fiber_plant.carrier_id = carriers.id AND carriers.route_type='fiber'
     GROUP BY locations.id, carriers.id;
+
+
+DROP TABLE IF EXISTS client.census_blocks_carriers;
+
+CREATE TABLE client.census_blocks_carriers AS (
+	SELECT
+		cb.gid AS census_block_gid,
+		c.id AS carrier_id,
+		MAX(blks.maxaddown) AS download_speed,
+		MAX(blks.maxadup) AS upload_speed
+	FROM aro.census_blocks cb
+	JOIN nbm.blocks blks
+	ON cb.tabblock_id = blks.fullfipsid
+	JOIN aro.carriers c
+	ON LOWER(c.name) = LOWER(blks.hoconame) -- THIS MIGHT BE A PROBLEMATIC JOIN CHECK ME WHEN THINGS GO WRONG
+	WHERE c.route_type = 'ilec'
+	GROUP BY census_block_gid, carrier_id
+);
+
+ALTER TABLE client.census_blocks_carriers ADD PRIMARY KEY (census_block_gid, carrier_id);
+
+ALTER TABLE client.census_blocks_carriers ADD
+	FOREIGN KEY (carrier_id) REFERENCES aro.carriers (id) ON DELETE CASCADE;
+
+
+DROP TABLE IF EXISTS client.speeds;
+
+CREATE TABLE client.speeds (code integer PRIMARY KEY, description character varying);
+
+INSERT INTO client.speeds (code, description) VALUES
+	(2, '200 kbps - 768 kbps'),
+	(3, '768 kbps - 1.5 mbps'),
+	(4, '1.5 mbps - 3 mbps'),
+	(5, '3 mbps - 6 mbps'),
+	(6, '6 mbps - 10 mbps'),
+	(7, '10 mbps - 25 mbps'),
+	(8, '25 mbps - 50 mbps'),
+	(9, '50 mbps - 100 mbps'),
+	(10, '100 mbps - 1 gbps'),
+	(11, '+1 gbps');
