@@ -1,22 +1,23 @@
 package com.altvil.aro.service.optimization.strategy.comparators;
 
+import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 
 public class OptimizationImprovement implements Comparable<OptimizationImprovement>{
-    private final long planId;
+    private final PrunedNetwork prunedNetwork;
     private OptimizedNetwork base;
     private OptimizedNetwork improved;
     private final double score;
     private final double incrementalBeneift;
     private final double incrementalCost;
 
-    OptimizationImprovement(OptimizedNetwork base, OptimizedNetwork improved, double score, double incrementalBeneift, double incrementalCost, long planId) {
+    OptimizationImprovement(OptimizedNetwork base, OptimizedNetwork improved, double score, double incrementalBeneift, double incrementalCost, PrunedNetwork prunedNetwork) {
         this.base = base;
         this.improved = improved;
         this.score = score;
         this.incrementalBeneift = incrementalBeneift;
         this.incrementalCost = incrementalCost;
-        this.planId = planId;
+        this.prunedNetwork = prunedNetwork;
     }
 
 
@@ -41,7 +42,11 @@ public class OptimizationImprovement implements Comparable<OptimizationImproveme
     }
 
     public long getPlanId() {
-        return planId;
+        return prunedNetwork.getPlanId();
+    }
+
+    public PrunedNetwork getPrunedNetwork() {
+        return prunedNetwork;
     }
 
     @Override

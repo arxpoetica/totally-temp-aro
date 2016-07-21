@@ -69,7 +69,7 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
         private Optional<OptimizationImprovement> getBestImprovement(PrunedNetwork prunedNetwork, OptimizedNetwork base) {
                 return prunedNetwork.getOptimizedNetworks().stream()
                         .filter(optimizedNetwork -> base == null || getRawCoverage(optimizedNetwork) > getRawCoverage(base))
-                        .map(network -> comparator.calculateImprovement(base, network, prunedNetwork.getPlanId()))
+                        .map(network -> comparator.calculateImprovement(base, network, prunedNetwork))
                         .max((o1, o2) -> Double.compare(o1.getScore(), o2.getScore()));
         }
     }
