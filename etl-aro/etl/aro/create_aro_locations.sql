@@ -33,7 +33,9 @@ INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geog, geom)
         long AS lon,
         businesses.geog as geog,
         businesses.geog::geometry as geom
-    FROM infousa.businesses;
+    FROM infousa.businesses
+    JOIN aro.wirecenter_subset wc
+        ON ST_Within(businesses.geog::geometry, wc.geom);
 
 -- Make locations out of InfoGroup households (temp_hh.households)
 INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
@@ -47,7 +49,7 @@ INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
         hh.geom,
         hh.geog
     FROM temp_hh.households hh
-    JOIN aro.wirecenters wc
+    JOIN aro.wirecenter_subset wc
         ON ST_Within(hh.geom, wc.geom);
 
 
