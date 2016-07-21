@@ -11,7 +11,7 @@ import com.altvil.aro.service.roic.model.NetworkType;
 public interface RoicNetworkModel extends RoicAnalysis {
 
 	public enum NetworkAnalysisType {
-		undefined(NetworkType.Undefined), bau(NetworkType.Copper), planned(
+		undefined(NetworkType.Undefined), bau(NetworkType.Copper, true), planned(
 				NetworkType.Mixed), incremental(NetworkType.Mixed), copper(
 				NetworkType.Copper), fiber(NetworkType.Fiber), copper_intersects(
 				NetworkType.Copper), copper_remaining(NetworkType.Copper)
@@ -19,13 +19,22 @@ public interface RoicNetworkModel extends RoicAnalysis {
 		;
 
 		private NetworkType networkType;
+		private boolean alias ;
 
-		private NetworkAnalysisType(NetworkType type) {
+		private NetworkAnalysisType(NetworkType type, boolean alias) {
 			this.networkType = type;
+		}
+		
+		private NetworkAnalysisType(NetworkType type) {
+			this(type, false) ;
 		}
 
 		public NetworkType getNetworkType() {
 			return networkType;
+		}
+		
+		public boolean isAlias() {
+			return alias ;
 		}
 
 	}

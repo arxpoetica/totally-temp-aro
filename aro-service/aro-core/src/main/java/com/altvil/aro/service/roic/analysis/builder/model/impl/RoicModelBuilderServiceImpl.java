@@ -52,6 +52,7 @@ public class RoicModelBuilderServiceImpl implements RoicBuilderService {
 				Map<NetworkAnalysisType, List<RoicNetworkModel>> map = models
 						.stream()
 						.flatMap(m -> m.getRoicNetworkModels().stream())
+						.filter(m -> !m.getNetworkAnalysisType().isAlias())
 						.collect(
 								Collectors
 										.groupingBy(RoicNetworkModel::getNetworkAnalysisType));
