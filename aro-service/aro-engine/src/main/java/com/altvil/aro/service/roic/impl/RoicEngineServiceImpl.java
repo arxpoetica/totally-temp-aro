@@ -42,7 +42,7 @@ import com.altvil.utils.reflexive.DefaultMappedCodes;
 import com.altvil.utils.reflexive.MappedCodes;
 
 @Service
-public class RoicInputServiceImpl implements RoicInputService {
+public class RoicEngineServiceImpl implements RoicInputService {
 
 	private ArpuService arpuService;
 	private RoicBuilderService roicBuilderService;
@@ -51,7 +51,7 @@ public class RoicInputServiceImpl implements RoicInputService {
 	private VolatileReference<CacheInputData> roicInputRef;
 
 	@Autowired
-	public RoicInputServiceImpl(ArpuService arpuService,
+	public RoicEngineServiceImpl(ArpuService arpuService,
 			RoicBuilderService roicBuilderService,
 			RoicComponentInputModelRepository roicComponentInputModelRepository) {
 		super();
@@ -254,6 +254,7 @@ public class RoicInputServiceImpl implements RoicInputService {
 		}
 
 		public CashFlows createCashFlow(int periods) {
+			int x = 10 ;
 			SimpleCalcContext ctx = new SimpleCalcContext(2016, periods);
 			double[] result = new double[periods];
 			for (int i = 0; i < periods; i++) {

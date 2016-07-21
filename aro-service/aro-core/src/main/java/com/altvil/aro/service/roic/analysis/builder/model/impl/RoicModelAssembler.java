@@ -104,7 +104,7 @@ public class RoicModelAssembler {
 
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.copper),
 				NetworkAnalysisType.copper);
-		
+
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.fiber),
 				NetworkAnalysisType.fiber);
 
@@ -154,16 +154,11 @@ public class RoicModelAssembler {
 			result.put(model.getNetworkAnalysisType(), model);
 		}
 
-		public void alias(NetworkAnalysisType type, RoicNetworkModel model) {
-			result.put(type, model);
-		}
-
 		public RoicNetworkModel addNetwork(RoicInputs inputs,
 				NetworkAnalysisType type) {
 
 			RoicNetworkModel model = networkBuilderService.build(type)
-					.setAnalysisPeriod(analysisPeriod).set(inputs)
-					.build();
+					.setAnalysisPeriod(analysisPeriod).set(inputs).build();
 
 			addModel(model);
 			return model;
