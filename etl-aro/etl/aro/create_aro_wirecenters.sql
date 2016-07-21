@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS aro.wirecenters;
 
--- Create the existing fiber plant table for display on the ARO map and for eventual incorporation into the ARO graph.
+-- Create the existing fiber plant table fOR display on the ARO map and fOR eventual incORpORation into the ARO graph.
 CREATE TABLE aro.wirecenters
 (
 	id serial,
@@ -34,8 +34,31 @@ INSERT INTO aro.wirecenters (gid, state, wirecenter, aocn, aocn_name, geog, geom
 		wirecenter,
 		aocn,
 		aocn_name,
-		Geography(ST_Force_2D(the_geom)) as geog, -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
-		ST_Force_2D(the_geom) AS geom, -- Use ST_Force_2D because the source shapefiles have geometry type MultiLineStringZ...
-		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
-		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)  
+		Geography(ST_FORce_2D(the_geom)) as geog, -- Use ST_FORce_2D because the source shapefiles have geometry type MultiLineStringZ...
+		ST_FORce_2D(the_geom) AS geom, -- Use ST_FORce_2D because the source shapefiles have geometry type MultiLineStringZ...
+		ST_TransfORm(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
+		ST_TransfORm(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)  
 	FROM geotel.wirecenters;
+
+-- Use this view to filter if we have a large number of wirecenters but only want to load other geo data for a subset.
+-- The logic in this can obviously be changed as needed
+DROP VIEW IF EXISTS aro.wirecenter_subset;
+CREATE VIEW aro.wirecenter_subset AS
+	SELECT	
+		*
+	FROM aro.wirecenters
+	WHERE 
+		state = 'WA'
+		OR wirecenter = 'BFLONYHE'
+ 		OR wirecenter = 'BFLONYMA'
+ 		OR wirecenter = 'BFLONYEL'
+ 		OR wirecenter = 'BFLONYBA'
+ 		OR wirecenter = 'BFLONYSP'
+ 		OR wirecenter = 'BFLONYFR'
+ 		OR wirecenter = 'LOWVNYXA'
+ 		OR wirecenter = 'NYCMNY79'
+ 		OR wirecenter = 'SYRCNYSU'
+ 		OR wirecenter = 'SYRCNYJS'
+ 		OR wirecenter = 'SYRCNYGS'
+ 		OR wirecenter = 'SYRCNYSA';
+

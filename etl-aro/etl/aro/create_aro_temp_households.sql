@@ -32,7 +32,7 @@ INSERT INTO aro.temp_households (location_id, address, city, state, zipcode, lat
 	FROM temp_hh.households hh
 	JOIN aro.locations loc
 		ON ST_Equals(loc.geom, hh.geom)
-	JOIN aro.wirecenters wc
+	JOIN aro.wirecenter_subset wc
   	ON ST_Within(hh.geom, wc.geom);
 
 CREATE INDEX aro_temp_households_location_index ON aro.temp_households(location_id);
