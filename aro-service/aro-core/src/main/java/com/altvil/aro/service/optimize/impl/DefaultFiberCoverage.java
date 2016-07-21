@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -17,7 +18,6 @@ import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
-import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
 public class DefaultFiberCoverage implements DemandCoverage {
@@ -92,18 +92,16 @@ public class DefaultFiberCoverage implements DemandCoverage {
 	}
 
 	@Override
-	public Collection<LocationEntity> getLocations() {
-		return StreamUtil.map(locationEntities,
-				AssignedEntityDemand::getLocationEntity);
+	public Set<LocationEntity> getLocations() {
+		return locationEntities.stream().map(
+				AssignedEntityDemand::getLocationEntity).collect(Collectors.toSet());
 	}
-	
 	
 
 	@Override
 	public double getPenetration() {
 		return coverage.getPenetration() ;
 	}
-
 
 
 	public static class Accumulator {

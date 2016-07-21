@@ -51,12 +51,14 @@ public class RoicServiceImpl implements RoicService {
 			RoicBuilderService roicBuilderService,
 			NetworkPlanRepository planRepostory,
 			RoicComponentInputModelRepository roicComponentInputModelRepository,
-			NetworkReportService networkReportService) {
+			NetworkReportService networkReportService,
+			RoicInputService roicInputService) {
 		super();
 		this.roicBuilderService = roicBuilderService;
 		this.planRepostory = planRepostory;
 		this.roicComponentInputModelRepository = roicComponentInputModelRepository;
 		this.networkReportService = networkReportService;
+		this.roicInputService = roicInputService ;
 
 		cache = new SuperSimpleCache();
 		roicInputRef = createComponentInputs();

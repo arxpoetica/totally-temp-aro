@@ -328,6 +328,10 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		@Override
 		public Double generate(ReducerContext ctx, List<NetworkStatistic> value) {
+			
+			if( value == null ) {
+				return 0.0 ;
+			}
 			return value.stream().mapToDouble(NetworkStatistic::getValue).sum();
 		}
 	}
@@ -338,6 +342,12 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		@Override
 		public Double generate(ReducerContext ctx, List<NetworkStatistic> value) {
+			
+
+			if( value == null ) {
+				return 0.0 ;
+			}
+			
 			OptionalDouble result = value.stream()
 					.mapToDouble(NetworkStatistic::getValue).average();
 			return result.isPresent() ? result.getAsDouble() : 0.0;

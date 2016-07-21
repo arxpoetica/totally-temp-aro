@@ -6,6 +6,9 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.entity.LocationDemand;
@@ -16,6 +19,11 @@ import com.altvil.utils.func.Aggregator;
 
 public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory
+			.getLogger(NetworkDemandSummaryImpl.class.getName());
+
+	
 	private static final Set<DemandTypeEnum> validDemands = EnumSet.of(
 			DemandTypeEnum.new_demand, DemandTypeEnum.original_demand,
 			DemandTypeEnum.planned_demand);;
@@ -41,7 +49,7 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 		public NetworkDemandSummaryAggreagtor() {
 			demandAggregators = StreamUtil.createAggregator(
 					DemandTypeEnum.class, validDemands,
-					() -> NetworkDemand.aggregate());
+					(t) -> NetworkDemand.aggregate(t));
 		}
 
 		@Override
@@ -100,5 +108,26 @@ public class NetworkDemandSummaryImpl implements NetworkDemandSummary {
 	public NetworkDemand getNetworkDemand(DemandTypeEnum type) {
 		return demandMap.get(type);
 	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer() ;
+		
+		int index = 0 ;
+		sb.append("NetworkDemandSummary [") ;
+		for(Map.Entry<DemandTypeEnum, NetworkDemand> e : demandMap.entrySet()) {
+			if(index++ > 0) {
+				sb.append(",") ;
+			}
+			sb.append("{") ;
+			sb.append(e.getValue().toString()) ;
+			sb.append("}") ;
+		}
+		sb.append("]") ;
+		
+		return sb.toString() ;
+	}
+	
+	
 
 }
