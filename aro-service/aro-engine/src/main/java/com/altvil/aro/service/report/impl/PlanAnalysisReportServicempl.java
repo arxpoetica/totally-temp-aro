@@ -83,8 +83,16 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 		PriceModel priceModel = createPriceModel();
 		Map<NetworkStatisticType, NetworkStatistic> map = new HashMap<>();
 
-		LocationDemand ld = DefaultLocationDemand.build().build() ;
+		networkStatisticGenerator.createNetworkStatistic(
+				NetworkStatisticType.irr, Double.NaN);
 		
+		map.put(NetworkStatisticType.irr, networkStatisticGenerator
+				.createNetworkStatistic(NetworkStatisticType.irr, Double.NaN));
+		map.put(NetworkStatisticType.npv, networkStatisticGenerator
+				.createNetworkStatistic(NetworkStatisticType.npv, Double.NaN));
+		
+		LocationDemand ld = DefaultLocationDemand.build().build();
+
 		NetworkDemandSummaryImpl.Builder b = NetworkDemandSummaryImpl.build();
 		b.add(DemandTypeEnum.new_demand, SpeedCategory.cat7, ld)
 				.add(DemandTypeEnum.original_demand, SpeedCategory.cat3, ld)
