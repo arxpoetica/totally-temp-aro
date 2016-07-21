@@ -9,7 +9,7 @@ public enum AroLocationEntityType {
 
 	small(LocationEntityType.small), medium(LocationEntityType.medium), large(
 			LocationEntityType.large), household(LocationEntityType.household), celltower(
-			LocationEntityType.celltower), Business(LocationEntityType.small,
+			LocationEntityType.celltower), business(LocationEntityType.small,
 			LocationEntityType.medium, LocationEntityType.large);
 
 	;

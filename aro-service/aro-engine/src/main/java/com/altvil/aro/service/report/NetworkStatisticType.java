@@ -4,7 +4,7 @@ public enum NetworkStatisticType {
 	
 	irr(true, "irr"), 
 	npv(true, "npv"),
-	cashflow(false, "cashflow")
+	//cashflow(false, "cashflow")
 
 	;
 	

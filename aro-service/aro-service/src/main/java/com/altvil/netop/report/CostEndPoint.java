@@ -32,15 +32,15 @@ public class CostEndPoint {
 
 		private AroPriceModel priceModel;
 		private NetworkDemandSummary demandSummary;
-		private Collection<NetworkStatistic> ngetNetworkStatistics;
+		private Collection<NetworkStatistic> networkStatistics;
 
 		public AroPlanAnalysisReport(AroPriceModel priceModel,
 				NetworkDemandSummary demandSummary,
-				Collection<NetworkStatistic> ngetNetworkStatistics) {
+				Collection<NetworkStatistic> networkStatistics) {
 			super();
 			this.priceModel = priceModel;
 			this.demandSummary = demandSummary;
-			this.ngetNetworkStatistics = ngetNetworkStatistics;
+			this.networkStatistics = networkStatistics;
 		}
 
 		public AroPriceModel getPriceModel() {
@@ -51,8 +51,8 @@ public class CostEndPoint {
 			return demandSummary;
 		}
 
-		public Collection<NetworkStatistic> getNgetNetworkStatistics() {
-			return ngetNetworkStatistics;
+		public Collection<NetworkStatistic> getNetworkStatistics() {
+			return networkStatistics;
 		}
 	}
 
