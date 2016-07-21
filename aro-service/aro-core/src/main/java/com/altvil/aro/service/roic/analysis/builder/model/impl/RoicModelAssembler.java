@@ -104,10 +104,7 @@ public class RoicModelAssembler {
 
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.copper),
 				NetworkAnalysisType.copper);
-
-		modelBuilder.alias(NetworkAnalysisType.bau,
-				modelBuilder.get(NetworkAnalysisType.copper));
-
+		
 		modelBuilder.addNetwork(roicInputsMap.get(NetworkAnalysisType.fiber),
 				NetworkAnalysisType.fiber);
 
