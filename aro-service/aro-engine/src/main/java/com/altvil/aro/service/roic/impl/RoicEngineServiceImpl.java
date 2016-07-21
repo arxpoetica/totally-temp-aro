@@ -20,10 +20,11 @@ import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
-import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.roic.CashFlows;
 import com.altvil.aro.service.roic.NetworkFinancialInput;
-import com.altvil.aro.service.roic.RoicInputService;
+import com.altvil.aro.service.roic.RoicEngineService;
+import com.altvil.aro.service.roic.RoicFinancialInput;
+import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.builder.component.ComponentInput;
 import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilder;
 import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilderService;
@@ -31,6 +32,7 @@ import com.altvil.aro.service.roic.analysis.builder.network.RoicInputs;
 import com.altvil.aro.service.roic.analysis.calc.CalcContext;
 import com.altvil.aro.service.roic.analysis.calc.ResultStream;
 import com.altvil.aro.service.roic.analysis.calc.StreamFunction;
+import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
 import com.altvil.aro.service.roic.analysis.op.AnalysisCurve;
 import com.altvil.aro.service.roic.model.NetworkType;
@@ -42,7 +44,7 @@ import com.altvil.utils.reflexive.DefaultMappedCodes;
 import com.altvil.utils.reflexive.MappedCodes;
 
 @Service
-public class RoicEngineServiceImpl implements RoicInputService {
+public class RoicEngineServiceImpl implements RoicEngineService {
 
 	private ArpuService arpuService;
 	private RoicBuilderService roicBuilderService;
@@ -102,6 +104,18 @@ public class RoicEngineServiceImpl implements RoicInputService {
 		return roicInputRef.get().getMap()
 				.get(normalizeSpeedCategory(speedCategory))
 				.computeCashFlow(finacialInputs, years);
+	}
+
+	@Override
+	public RoicModel loadRoicModel(RoicFinancialInput roicFinancialInput) {
+		return createRoicBuilder(roicFinancialInput).setAnalysisPeriod(
+				new AnalysisPeriod(2016, 15)).build();
+	}
+
+	@Override
+	public CashFlows createRoicCashFlows(RoicFinancialInput roicFinancialInput) {
+		return new CashFlowsImpl(loadRoicModel(roicFinancialInput)
+				.getRowReference("incremental.network.cashflow").getAnalysisRow().getRawData());
 	}
 
 	private class CacheInputData {
@@ -254,7 +268,6 @@ public class RoicEngineServiceImpl implements RoicInputService {
 		}
 
 		public CashFlows createCashFlow(int periods) {
-			int x = 10 ;
 			SimpleCalcContext ctx = new SimpleCalcContext(2016, periods);
 			double[] result = new double[periods];
 			for (int i = 0; i < periods; i++) {
@@ -263,7 +276,7 @@ public class RoicEngineServiceImpl implements RoicInputService {
 					cashFlow -= capex;
 				}
 				result[i] = cashFlow;
-				ctx.inc(); 
+				ctx.inc();
 
 			}
 			return new CashFlowsImpl(result);
@@ -283,7 +296,7 @@ public class RoicEngineServiceImpl implements RoicInputService {
 
 				double currentPenetration = penetrationMap.get(t).calc(ctx);
 				double revenue = ds.getTotalRevenue() * currentPenetration;
-				totalRevenue += revenue ;
+				totalRevenue += revenue;
 				runningCosts += (revenue * (model.getOpexPercent() + model
 						.getMaintenanceExpenses()));
 
@@ -300,15 +313,14 @@ public class RoicEngineServiceImpl implements RoicInputService {
 
 	}
 
-	@Override
-	public RoicBuilder createRoicBuilder(PlanAnalysisReport planAnalysisReport) {
+	private RoicBuilder createRoicBuilder(RoicFinancialInput planAnalysisReport) {
 		return new RoicInputAssembler(planAnalysisReport)
 				.assembleRoicModel(roicInputRef.get().getModels());
 	}
 
 	private class RoicNetworkStats {
 
-		private PlanAnalysisReport planAnalysisReport;
+		private RoicFinancialInput planAnalysisReport;
 		private LocationEntityType type;
 		private SpeedCategory speedCategory;
 		private RoicComponentInputModel inputModel;
@@ -317,7 +329,7 @@ public class RoicEngineServiceImpl implements RoicInputService {
 		private double totalRevenue;
 		private double arpu;
 
-		public RoicNetworkStats(PlanAnalysisReport planAnalysisReport,
+		public RoicNetworkStats(RoicFinancialInput planAnalysisReport,
 				LocationEntityType type, SpeedCategory speedCategory,
 				RoicComponentInputModel inputModel) {
 			super();
@@ -397,7 +409,7 @@ public class RoicEngineServiceImpl implements RoicInputService {
 			case cat3:
 				return 0;
 			default:
-				return planAnalysisReport.getPriceModel().getTotalCost();
+				return planAnalysisReport.getFixedCosts() ;
 			}
 		}
 
@@ -447,9 +459,9 @@ public class RoicEngineServiceImpl implements RoicInputService {
 
 	private class RoicInputAssembler {
 
-		private PlanAnalysisReport planAnalysisReport;
+		private RoicFinancialInput planAnalysisReport;
 
-		public RoicInputAssembler(PlanAnalysisReport planAnalysisReport) {
+		public RoicInputAssembler(RoicFinancialInput planAnalysisReport) {
 			super();
 			this.planAnalysisReport = planAnalysisReport;
 		}
@@ -475,7 +487,7 @@ public class RoicEngineServiceImpl implements RoicInputService {
 			case cat3:
 				return 0;
 			default:
-				return planAnalysisReport.getPriceModel().getTotalCost();
+				return planAnalysisReport.getFixedCosts() ;
 			}
 		}
 
