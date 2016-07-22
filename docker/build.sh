@@ -17,5 +17,5 @@ for s in cmo.ini Dockerfile ; do
 done
 
 # install application npm dependencies
-(cd ${APP_TARGET}/app && npm install --no-bin-link)
+(cd ${APP_TARGET}/app && npm install --no-bin-link && npm run build)
 
