@@ -3,8 +3,8 @@ package com.altvil.netop.optimize;
 public class FinancialConstraints {
 
 	private double budget = Double.POSITIVE_INFINITY;
-	private double discountRate = Double.NaN;
-	private int years = -1;
+	private double discountRate = 0.06 ;
+	private int years = 15;
 	
 	
 	public double getBudget() {

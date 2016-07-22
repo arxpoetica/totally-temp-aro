@@ -50,6 +50,15 @@ public class StreamUtil {
 	public static <T extends Enum<T>> Map<Integer, T> hashEnum(Class<T> clz) {
 		return hashEnum(clz, (e) -> e.ordinal()) ;
 	}
+	
+	public static <K extends Enum<K>, T> Map<K, Aggregator<T>> createAggregator(
+			Class<K> clz, Collection<K> keys, Function<K, Aggregator<T>> s) {
+		Map<K, Aggregator<T>> result = new EnumMap<>(clz);
+		for (K k : keys) {
+			result.put(k, s.apply(k));
+		}
+		return result;
+	}
 
 	public static <K extends Enum<K>, T> Map<K, Aggregator<T>> createAggregator(
 			Class<K> clz, Collection<K> keys, Supplier<Aggregator<T>> s) {

@@ -1,11 +1,15 @@
 package com.altvil.aro.service.optimization.strategy.impl;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.lbrary.finaance.Finance;
+import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.optimization.strategy.spi.ComputedField;
 import com.altvil.aro.service.optimization.strategy.spi.FinancialAnalysis;
@@ -14,15 +18,19 @@ import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.roic.CashFlows;
 import com.altvil.aro.service.roic.NetworkFinancialInput;
-import com.altvil.aro.service.roic.RoicInputService;
+import com.altvil.aro.service.roic.RoicFinancialInput;
+import com.altvil.aro.service.roic.RoicEngineService;
 
 @Service
 public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 
-	private RoicInputService roicInputService;
-	
+	private RoicEngineService roicInputService;
+
+	private static final Logger log = LoggerFactory
+			.getLogger(PlanAnalysisServiceImpl.class.getName());
+
 	@Autowired
-	public PlanAnalysisServiceImpl(RoicInputService roicInputService) {
+	public PlanAnalysisServiceImpl(RoicEngineService roicInputService) {
 		super();
 		this.roicInputService = roicInputService;
 	}
@@ -46,25 +54,64 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 				.getFiberCoverage().getLocationDemand());
 	}
 
+	private NetworkFinancialInput toNetworkFinancialInput(
+			RoicFinancialInput roicInput) {
+		return new DefaultNetworkFinancialInput(true,
+				roicInput.getFixedCosts(), roicInput.getDemandSummary()
+						.getNetworkDemand(DemandTypeEnum.planned_demand)
+						.getLocationDemand());
+	}
+
+	public FinancialAnalysis createFinancialAnalysis(
+			NetworkFinancialInput networkFinancials,
+			Supplier<CashFlows> roicCashFlows,
+			Supplier<CashFlows> fastCashFlows, double discountRate) {
+
+		ComputedField<CashFlows> roicFlowsField = new SupplierComputedField<>(
+				roicCashFlows);
+
+		ComputedField<CashFlows> cashFlowField = new SupplierComputedField<>(
+				fastCashFlows);
+
+		return new DefaultFinancialAnalysis(networkFinancials, cashFlowField,
+				createField(() -> Finance.irr(cashFlowField.get()
+						.getAsRawData())), createField(() -> Finance.npv(
+						discountRate, cashFlowField.get().getAsRawData())),
+				roicFlowsField, createField(() -> Finance.irr(roicFlowsField
+						.get().getAsRawData())), createField(() -> Finance.npv(
+						discountRate, roicFlowsField.get().getAsRawData())));
+	};
+
+	private Supplier<CashFlows> createCashFlowSupplier(
+			RoicFinancialInput financialInput) {
+		return () -> roicInputService.createRoicCashFlows(financialInput);
+	}
+
+	private Supplier<CashFlows> createCashFlowSupplier(
+			NetworkFinancialInput basicInput, int years) {
+		return () -> roicInputService.createCashFlows(SpeedCategory.cat7,
+				basicInput, years);
+	}
+
 	@Override
-	public Function<NetworkFinancialInput, FinancialAnalysis> createFinancialAnalysis(
+	public FinancialAnalysis createFinancialAnalysis(
+			RoicFinancialInput financialInput, int years, double discountRate) {
+
+		NetworkFinancialInput fi = toNetworkFinancialInput(financialInput);
+
+		return createFinancialAnalysis(fi,
+				createCashFlowSupplier(financialInput),
+				createCashFlowSupplier(fi, years), discountRate);
+	}
+
+	private Function<NetworkFinancialInput, FinancialAnalysis> createFinancialAnalysis(
 			int years, double discountRate) {
 
-		Function<NetworkFinancialInput, CashFlows> cashFlowFunction = createCashFlowFunction(years);
-		Function<ComputedField<CashFlows>, Double> irrFunc = createIrrAnalysis();
-		Function<ComputedField<CashFlows>, Double> npvFunc = createNpvAnalysis(discountRate);
-
 		return (networkFinancials) -> {
-
-			ComputedField<CashFlows> cashFlowField = new DefaultComputedField<>(
-					networkFinancials, cashFlowFunction);
-
-			return new DefaultFinancialAnalysis(networkFinancials,
-					cashFlowField,
-					new DefaultComputedField<ComputedField<CashFlows>, Double>(
-							cashFlowField, irrFunc),
-					new DefaultComputedField<ComputedField<CashFlows>, Double>(
-							cashFlowField, npvFunc));
+			Supplier<CashFlows> s = createCashFlowSupplier(networkFinancials,
+					years);
+			return createFinancialAnalysis(networkFinancials, s, s,
+					discountRate);
 		};
 	}
 
@@ -74,17 +121,10 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 				inputs, years);
 	}
 
-	private Function<ComputedField<CashFlows>, Double> createIrrAnalysis() {
-		return (cashFlow) -> {
-			return Finance.irr(cashFlow.get().getAsRawData());
-		};
-	}
-
-	private Function<ComputedField<CashFlows>, Double> createNpvAnalysis(
-			double discountRate) {
-		return (cashFlow) -> {
-			return Finance.npv(discountRate, cashFlow.get().getAsRawData());
-		};
+	public Function<NetworkFinancialInput, CashFlows> createRoicCashFlowFunction(
+			int years) {
+		return (inputs) -> roicInputService.createCashFlows(SpeedCategory.cat7,
+				inputs, years);
 	}
 
 	private static class DefaultFinancialAnalysis implements FinancialAnalysis {
@@ -94,14 +134,40 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 		private ComputedField<Double> irr;
 		private ComputedField<Double> npv;
 
+		private ComputedField<CashFlows> roicCashFlows;
+		private ComputedField<Double> roicIrr;
+		private ComputedField<Double> roicNpv;
+
 		public DefaultFinancialAnalysis(NetworkFinancialInput networkFiancials,
 				ComputedField<CashFlows> cashFlows, ComputedField<Double> irr,
-				ComputedField<Double> npv) {
+				ComputedField<Double> npv,
+				ComputedField<CashFlows> roicCashFlows,
+				ComputedField<Double> roicIrr, ComputedField<Double> roicNpv) {
 			super();
 			this.networkFiancials = networkFiancials;
+
 			this.irr = irr;
 			this.npv = npv;
 			this.cashFlows = cashFlows;
+
+			this.roicCashFlows = roicCashFlows;
+			this.roicIrr = roicIrr;
+			this.roicNpv = roicNpv;
+		}
+
+		@Override
+		public double getRoicIrr() {
+			return roicIrr.get();
+		}
+
+		@Override
+		public double getRoicNpv() {
+			return roicNpv.get();
+		}
+
+		@Override
+		public CashFlows getRoicCashFlows() {
+			return roicCashFlows.get();
 		}
 
 		@Override
@@ -165,6 +231,21 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 		}
 
 		@Override
+		public CashFlows getRoicCashFlows() {
+			return financialAnalysis.getRoicCashFlows();
+		}
+
+		@Override
+		public double getRoicIrr() {
+			return financialAnalysis.getRoicIrr();
+		}
+
+		@Override
+		public double getRoicNpv() {
+			return financialAnalysis.getRoicNpv();
+		}
+
+		@Override
 		public double getNpv() {
 			return financialAnalysis.getNpv();
 		}
@@ -191,25 +272,37 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 
 	}
 
-	private static class DefaultComputedField<S, D> implements ComputedField<D> {
+	private static ComputedField<Double> createField(Supplier<Double> s) {
+		return new SupplierComputedField<Double>(makeSafe(s, Double.NaN));
+	}
 
-		public DefaultComputedField(S source, Function<S, D> f) {
-			super();
-			this.source = source;
-			this.f = f;
-		}
+	private static <D> Supplier<D> makeSafe(Supplier<D> s, D errorValue) {
+		return () -> {
+			try {
+				return s.get();
+			} catch (Throwable err) {
+				log.error(err.getMessage(), err);
+				return errorValue;
+			}
+		};
 
-		private S source;
-		private Function<S, D> f;
+	}
 
-		private D value = null;
+	private static class SupplierComputedField<D> implements ComputedField<D> {
+
+		private Supplier<D> supplier;
 		private boolean computed = false;
+		private D value = null;
+
+		public SupplierComputedField(Supplier<D> supplier) {
+			super();
+			this.supplier = supplier;
+		}
 
 		@Override
 		public D get() {
 			if (!computed) {
-				value = f.apply(source);
-				computed = true ;
+				value = supplier.get();
 				return value;
 			}
 			return value;

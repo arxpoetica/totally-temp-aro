@@ -16,24 +16,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.model.DemandTypeEnum;
-import com.altvil.aro.service.optimization.strategy.impl.DefaultNetworkFinancialInput;
 import com.altvil.aro.service.optimization.strategy.spi.FinancialAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.aro.service.report.NetworkStatistic;
 import com.altvil.aro.service.report.NetworkStatisticType;
 import com.altvil.aro.service.report.NetworkStatisticsService;
 import com.altvil.aro.service.report.ReportGenerator;
-import com.altvil.aro.service.roic.NetworkFinancialInput;
+import com.altvil.aro.service.roic.RoicFinancialInput;
 import com.altvil.utils.func.Aggregator;
 
 @Service
 public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 	private PlanAnalysisService planAnalysisService;
-	
+
 	private Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGenerators;
 
 	@Autowired
@@ -54,6 +53,10 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 						(ctx, plan) -> ctx.getFinancialAnalysis().getIrr())
 				.add(NetworkStatisticType.npv,
 						(ctx, plan) -> ctx.getFinancialAnalysis().getNpv())
+				.add(NetworkStatisticType.roic_irr,
+						(ctx, plan) -> ctx.getFinancialAnalysis().getRoicIrr())
+				.add(NetworkStatisticType.roic_npv,
+						(ctx, plan) -> ctx.getFinancialAnalysis().getRoicNpv())
 				.build();
 
 	}
@@ -100,12 +103,21 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			this.lineItemGenerators = lineItemGenerators;
 		}
 
-		private NetworkFinancialInput toNetworkFinancialInput(
-				GeneratedPlan plan, PriceModel priceModel) {
-			return new DefaultNetworkFinancialInput(true,
-					priceModel.getTotalCost(), plan.getDemandSummary()
-							.getNetworkDemand(DemandTypeEnum.planned_demand)
-							.getLocationDemand());
+		private RoicFinancialInput toNetworkFinancialInput(GeneratedPlan plan,
+				PriceModel priceModel) {
+			return new RoicFinancialInput() {
+
+				@Override
+				public double getFixedCosts() {
+					return priceModel.getTotalCost();
+				}
+
+				@Override
+				public NetworkDemandSummary getDemandSummary() {
+					return plan.getDemandSummary();
+				}
+			};
+
 		}
 
 		@Override
@@ -113,9 +125,9 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 				GeneratedPlan plan, PriceModel priceModel) {
 
 			FinancialAnalysis fa = planAnalysisService.createFinancialAnalysis(
-					plan.getOptimizationConstraints().getYears(),
-					plan.getOptimizationConstraints().getDiscountRate()).apply(
-					toNetworkFinancialInput(plan, priceModel));
+					toNetworkFinancialInput(plan, priceModel), plan
+							.getOptimizationConstraints().getYears(), plan
+							.getOptimizationConstraints().getDiscountRate());
 
 			return new ScalarReducer(lineItemGenerators, plan, fa).generate();
 		}
@@ -309,7 +321,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			this.type = type;
 			this.val = val;
 		}
-		
+
 		@Override
 		public NetworkStatisticType getNetworkStatisticType() {
 			return type;
@@ -328,6 +340,10 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		@Override
 		public Double generate(ReducerContext ctx, List<NetworkStatistic> value) {
+
+			if (value == null) {
+				return 0.0;
+			}
 			return value.stream().mapToDouble(NetworkStatistic::getValue).sum();
 		}
 	}
@@ -338,6 +354,11 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		@Override
 		public Double generate(ReducerContext ctx, List<NetworkStatistic> value) {
+
+			if (value == null) {
+				return 0.0;
+			}
+
 			OptionalDouble result = value.stream()
 					.mapToDouble(NetworkStatistic::getValue).average();
 			return result.isPresent() ? result.getAsDouble() : 0.0;

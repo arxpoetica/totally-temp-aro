@@ -12,7 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.model.DemandTypeEnum;
+import com.altvil.aro.service.demand.analysis.SpeedCategory;
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
@@ -78,10 +82,24 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	public PlanAnalysisReport createPlanAnalysisReport() {
 		PriceModel priceModel = createPriceModel();
 		Map<NetworkStatisticType, NetworkStatistic> map = new HashMap<>();
-		NetworkDemandSummaryImpl.build().build() ;
-		return new PlanAnalysisReportImpl(priceModel,
-				NetworkDemandSummaryImpl.build().build(), map);
+
+		networkStatisticGenerator.createNetworkStatistic(
+				NetworkStatisticType.irr, Double.NaN);
 		
+		map.put(NetworkStatisticType.irr, networkStatisticGenerator
+				.createNetworkStatistic(NetworkStatisticType.irr, Double.NaN));
+		map.put(NetworkStatisticType.npv, networkStatisticGenerator
+				.createNetworkStatistic(NetworkStatisticType.npv, Double.NaN));
+		
+		LocationDemand ld = DefaultLocationDemand.build().build();
+
+		NetworkDemandSummaryImpl.Builder b = NetworkDemandSummaryImpl.build();
+		b.add(DemandTypeEnum.new_demand, SpeedCategory.cat7, ld)
+				.add(DemandTypeEnum.original_demand, SpeedCategory.cat3, ld)
+				.add(DemandTypeEnum.planned_demand, SpeedCategory.cat7, ld);
+
+		return new PlanAnalysisReportImpl(priceModel, b.build(), map);
+
 	}
 
 	@Override

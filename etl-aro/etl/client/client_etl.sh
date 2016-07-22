@@ -89,4 +89,7 @@ ${PSQL} -a -f $DIR/create_client_location_competitors.view.sql
 
 ${PSQL} -a -f $DIR/create_client_business_competitors_strength.view.sql
 
+${PSQL} -a -f $DIR/summarized_competitors_strength.sql
+
+
 

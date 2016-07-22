@@ -52,13 +52,13 @@ public class DefaultDemandStatistic implements DemandStatistic {
 		this.revenue = revenue;
 
 		this.penetration = penetration;
-		
-		if( penetration > 1.0 ) {
-			throw new RuntimeException("Invalid Penetration") ;
+
+		if (penetration > 1.0) {
+			throw new RuntimeException("Invalid Penetration");
 		}
-		
-		if( totalRevenue < 0 || revenue < 0) {
-			throw new RuntimeException("Inavlid revenue") ;
+
+		if (totalRevenue < 0 || revenue < 0) {
+			throw new RuntimeException("Inavlid revenue");
 		}
 
 	}
@@ -101,25 +101,27 @@ public class DefaultDemandStatistic implements DemandStatistic {
 	}
 
 	public static DemandStatistic sum(Iterable<DemandStatistic> stats) {
-		
-		Aggregator<DemandStatistic> aggregator = aggregate() ;
+
+		Aggregator<DemandStatistic> aggregator = aggregate();
 		stats.forEach(aggregator::add);
-		return aggregator.apply() ;
-	
+		return aggregator.apply();
+
 	}
 
 	public static DemandStatistic sum(DemandStatistic... stats) {
-		Aggregator<DemandStatistic> aggregator = aggregate() ;
+		Aggregator<DemandStatistic> aggregator = aggregate();
 		for (DemandStatistic s : stats) {
 			aggregator.add(s);
 		}
 		return aggregator.apply();
 	}
 
-
 	public String toString() {
-		return new ToStringBuilder(this).append("demand", getFairShareDemand())
-				.append("rawCoverage", rawCoverage).append("revenue", revenue)
-				.toString();
+
+		return new ToStringBuilder(this).append("rc", rawCoverage)
+				.append("ac", atomicUnits).append("tr", totalRevenue)
+				.append("rv", revenue).append("pn", penetration).toString();
+
+		
 	}
 }

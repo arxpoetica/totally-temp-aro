@@ -38,7 +38,7 @@ INSERT INTO aro.towers(location_id, parcel_city, lat, lon, geom, geog)
 	FROM towers.vz_wa_towers t
 	JOIN aro.locations l
 		ON st_equals(l.geom, ST_SetSRID(ST_MakePoint(t.lon, t.lat), 4326))
-	JOIN aro.wirecenters wc
+	JOIN aro.wirecenter_subset wc
 		ON st_contains(wc.geom, l.geom);
 
 -----
