@@ -30,6 +30,7 @@ import com.altvil.aro.service.report.NetworkStatisticsService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.aro.service.report.ReportGenerator;
+import com.altvil.aro.service.report.ReportGenerator.AnalysisInput;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
@@ -85,12 +86,12 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 
 		networkStatisticGenerator.createNetworkStatistic(
 				NetworkStatisticType.irr, Double.NaN);
-		
+
 		map.put(NetworkStatisticType.irr, networkStatisticGenerator
 				.createNetworkStatistic(NetworkStatisticType.irr, Double.NaN));
 		map.put(NetworkStatisticType.npv, networkStatisticGenerator
 				.createNetworkStatistic(NetworkStatisticType.npv, Double.NaN));
-		
+
 		LocationDemand ld = DefaultLocationDemand.build().build();
 
 		NetworkDemandSummaryImpl.Builder b = NetworkDemandSummaryImpl.build();
@@ -102,15 +103,66 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 
 	}
 
+	// private AnalysisInput toAnalysisInput(GeneratedPlan network,
+	// double fixedCast) {
+	// return new AnalysisInput() {
+	//
+	// @Override
+	// public int getYears() {
+	// return network.getOptimizationConstraints().getYears();
+	// }
+	//
+	// @Override
+	// public double getDiscountRate() {
+	// return network.getOptimizationConstraints().getDiscountRate();
+	// }
+	//
+	// @Override
+	// public double getFixedCost() {
+	// return fixedCast;
+	// }
+	//
+	// @Override
+	// public NetworkDemandSummary getNetworkDemandSummary() {
+	// return network.getDemandSummary();
+	// }
+	//
+	// };
+	// }
+
 	@Override
 	public PlanAnalysisReport createPlanAnalysisReport(GeneratedPlan network) {
 
 		PriceModel priceModel = createPriceModel(network
 				.getWirecenterNetworkPlan());
 
+		Collection<NetworkStatistic> stats = reportGenerator
+				.createNetworkStatistic(new AnalysisInput() {
+					@Override
+					public int getYears() {
+						return network.getOptimizationConstraints().getYears();
+					}
+
+					@Override
+					public double getDiscountRate() {
+						return network.getOptimizationConstraints()
+								.getDiscountRate();
+					}
+
+					@Override
+					public double getFixedCost() {
+						return priceModel.getTotalCost();
+					}
+
+					@Override
+					public NetworkDemandSummary getNetworkDemandSummary() {
+						return network.getDemandSummary();
+					}
+
+				});
+
 		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
-				reportGenerator.generateNetworkStatistics(network, priceModel),
-				NetworkStatistic::getNetworkStatisticType);
+				stats, NetworkStatistic::getNetworkStatisticType);
 
 		return new PlanAnalysisReportImpl(priceModel,
 				network.getDemandSummary(), map);
@@ -125,26 +177,55 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 
 		private Aggregator<PriceModel> priceModelAggregator;
 		private Aggregator<NetworkDemandSummary> demandAggregator;
-		private Aggregator<Collection<NetworkStatistic>> statAggregator;
+
+		// private Aggregator<Collection<NetworkStatistic>> statAggregator;
 
 		public PlanAnalysisReportAggregator() {
 			priceModelAggregator = pricingService.aggregate();
 			demandAggregator = NetworkDemandSummaryImpl.aggregate();
-			statAggregator = reportGenerator.createAggregator();
+			// statAggregator = reportGenerator.createAggregator();
 		}
 
 		@Override
 		public void add(PlanAnalysisReport val) {
 			priceModelAggregator.add(val.getPriceModel());
 			demandAggregator.add(val.getDemandSummary());
-			statAggregator.add(val.getNetworkStatistics());
+			// statAggregator.add(val.getNetworkStatistics());
 		}
 
 		@Override
 		public PlanAnalysisReport apply() {
-			return new PlanAnalysisReportImpl(priceModelAggregator.apply(),
-					demandAggregator.apply(), StreamUtil.hash(
-							statAggregator.apply(),
+
+			PriceModel priceModel = priceModelAggregator.apply();
+			NetworkDemandSummary demandSummary = demandAggregator.apply();
+
+			Collection<NetworkStatistic> stats = networkStatisticGenerator
+					.createReportGenerator().createNetworkStatistic(
+							new AnalysisInput() {
+
+								@Override
+								public int getYears() {
+									return 15;
+								}
+
+								@Override
+								public NetworkDemandSummary getNetworkDemandSummary() {
+									return demandSummary;
+								}
+
+								@Override
+								public double getFixedCost() {
+									return priceModel.getTotalCost();
+								}
+
+								@Override
+								public double getDiscountRate() {
+									return 0.06;
+								}
+							});
+
+			return new PlanAnalysisReportImpl(priceModel, demandSummary,
+					StreamUtil.hash(stats,
 							NetworkStatistic::getNetworkStatisticType));
 		}
 
