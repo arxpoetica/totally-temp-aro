@@ -63,17 +63,17 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 	}
 
 	public FinancialAnalysis createFinancialAnalysis(
+			NetworkFinancialInput networkFinancials,
 			Supplier<CashFlows> roicCashFlows,
 			Supplier<CashFlows> fastCashFlows, double discountRate) {
 
 		ComputedField<CashFlows> roicFlowsField = new SupplierComputedField<>(
 				roicCashFlows);
-		
+
 		ComputedField<CashFlows> cashFlowField = new SupplierComputedField<>(
 				fastCashFlows);
-		
 
-		return new DefaultFinancialAnalysis(null, cashFlowField,
+		return new DefaultFinancialAnalysis(networkFinancials, cashFlowField,
 				createField(() -> Finance.irr(cashFlowField.get()
 						.getAsRawData())), createField(() -> Finance.npv(
 						discountRate, cashFlowField.get().getAsRawData())),
@@ -96,19 +96,22 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 	@Override
 	public FinancialAnalysis createFinancialAnalysis(
 			RoicFinancialInput financialInput, int years, double discountRate) {
-		return createFinancialAnalysis(
+
+		NetworkFinancialInput fi = toNetworkFinancialInput(financialInput);
+
+		return createFinancialAnalysis(fi,
 				createCashFlowSupplier(financialInput),
-				createCashFlowSupplier(toNetworkFinancialInput(financialInput),
-						years), discountRate);
+				createCashFlowSupplier(fi, years), discountRate);
 	}
 
 	private Function<NetworkFinancialInput, FinancialAnalysis> createFinancialAnalysis(
 			int years, double discountRate) {
-		
+
 		return (networkFinancials) -> {
 			Supplier<CashFlows> s = createCashFlowSupplier(networkFinancials,
 					years);
-			return createFinancialAnalysis(s, s, discountRate);
+			return createFinancialAnalysis(networkFinancials, s, s,
+					discountRate);
 		};
 	}
 
