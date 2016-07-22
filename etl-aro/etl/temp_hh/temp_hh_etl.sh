@@ -19,7 +19,6 @@ do
 	rm -f ${TMPDIR}/*.*
 	wget https://s3.amazonaws.com/public.aro/infousa/households_${STATE}.zip -nd -nc
 	$UNZIPTOOL households_${STATE}.zip -d ${TMPDIR}
-	cd $TMPDIR;
 	${PSQL} -a -c "COPY temp_hh.households (address, city, state, zip5, lon, lat, geog) FROM STDIN DELIMITER ',' CSV HEADER;" </$TMPDIR/households_${STATE}.csv
 done
 
