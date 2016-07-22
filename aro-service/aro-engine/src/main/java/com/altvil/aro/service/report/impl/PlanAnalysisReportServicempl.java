@@ -17,7 +17,10 @@ import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
+import com.altvil.aro.service.optimization.OptimizedPlan;
+import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
+import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.price.PricingService;
@@ -73,9 +76,15 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	}
 
 	@Override
-	public PlanAnalysisReport aggregate(Collection<PlanAnalysisReport> plans) {
-		Aggregator<PlanAnalysisReport> aggreagtor = createAggregator();
-		plans.forEach(aggreagtor::add);
+	public PlanAnalysisReport aggregate(GeneratedMasterPlan masterPlan) {
+
+		Aggregator<PlanAnalysisReport> aggreagtor = createAggregator(masterPlan
+				.getOptimizationRequest().getOptimizationConstraints());
+
+		masterPlan.getOptimizedPlans().stream()
+				.map(OptimizedPlan::getPlanAnalysisReport)
+				.forEach(aggreagtor::add);
+
 		return aggreagtor.apply();
 	}
 
@@ -102,33 +111,6 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 		return new PlanAnalysisReportImpl(priceModel, b.build(), map);
 
 	}
-
-	// private AnalysisInput toAnalysisInput(GeneratedPlan network,
-	// double fixedCast) {
-	// return new AnalysisInput() {
-	//
-	// @Override
-	// public int getYears() {
-	// return network.getOptimizationConstraints().getYears();
-	// }
-	//
-	// @Override
-	// public double getDiscountRate() {
-	// return network.getOptimizationConstraints().getDiscountRate();
-	// }
-	//
-	// @Override
-	// public double getFixedCost() {
-	// return fixedCast;
-	// }
-	//
-	// @Override
-	// public NetworkDemandSummary getNetworkDemandSummary() {
-	// return network.getDemandSummary();
-	// }
-	//
-	// };
-	// }
 
 	@Override
 	public PlanAnalysisReport createPlanAnalysisReport(GeneratedPlan network) {
@@ -168,29 +150,32 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 				network.getDemandSummary(), map);
 	}
 
-	private Aggregator<PlanAnalysisReport> createAggregator() {
-		return new PlanAnalysisReportAggregator();
+	private Aggregator<PlanAnalysisReport> createAggregator(
+			OptimizationConstraints optimizationConstraints) {
+		return new PlanAnalysisReportAggregator(optimizationConstraints);
 	}
 
 	private class PlanAnalysisReportAggregator implements
 			Aggregator<PlanAnalysisReport> {
 
-		private Aggregator<PriceModel> priceModelAggregator;
-		private Aggregator<NetworkDemandSummary> demandAggregator;
+		private OptimizationConstraints constraints;
 
-		// private Aggregator<Collection<NetworkStatistic>> statAggregator;
+		public PlanAnalysisReportAggregator(OptimizationConstraints constraints) {
+			super();
 
-		public PlanAnalysisReportAggregator() {
+			this.constraints = constraints;
 			priceModelAggregator = pricingService.aggregate();
 			demandAggregator = NetworkDemandSummaryImpl.aggregate();
-			// statAggregator = reportGenerator.createAggregator();
+
 		}
+
+		private Aggregator<PriceModel> priceModelAggregator;
+		private Aggregator<NetworkDemandSummary> demandAggregator;
 
 		@Override
 		public void add(PlanAnalysisReport val) {
 			priceModelAggregator.add(val.getPriceModel());
 			demandAggregator.add(val.getDemandSummary());
-			// statAggregator.add(val.getNetworkStatistics());
 		}
 
 		@Override
@@ -205,7 +190,7 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 
 								@Override
 								public int getYears() {
-									return 15;
+									return constraints.getYears();
 								}
 
 								@Override
@@ -220,7 +205,7 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 
 								@Override
 								public double getDiscountRate() {
-									return 0.06;
+									return constraints.getDiscountRate();
 								}
 							});
 

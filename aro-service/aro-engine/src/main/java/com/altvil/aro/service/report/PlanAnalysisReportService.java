@@ -1,11 +1,11 @@
 package com.altvil.aro.service.report;
 
-import java.util.Collection;
+import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 
 public interface PlanAnalysisReportService {
 	
 	PlanAnalysisReport createPlanAnalysisReport() ;
 	PlanAnalysisReport createPlanAnalysisReport(GeneratedPlan generatedPlan) ;
-	PlanAnalysisReport aggregate(Collection<PlanAnalysisReport> plans) ;
+	PlanAnalysisReport aggregate(GeneratedMasterPlan plam) ;
 
 }
