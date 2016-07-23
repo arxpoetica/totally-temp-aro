@@ -6,8 +6,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
+import com.altvil.aro.service.graph.assigment.SpiCompositeGraphEdgeAssignment;
+import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.DefaultSplitSegment;
@@ -15,7 +16,6 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.utils.StreamUtil;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 public class GeoSegmentSplitter {
 
@@ -39,9 +39,9 @@ public class GeoSegmentSplitter {
 
 	private void assignVertex(SplitAssignments.Builder builder,
 			GraphEdgeAssignment va, GraphNode vertex) {
-		if (va instanceof CompositeVertexAssignment) {
+		if (va instanceof SpiCompositeGraphEdgeAssignment) {
 			builder.assign(
-					((CompositeVertexAssignment) va).getVertexAssigments(),
+					((SpiCompositeGraphEdgeAssignment) va).getGraphEdgeAssignments(),
 					vertex);
 		} else {
 			builder.assign(va, vertex);
@@ -154,8 +154,10 @@ public class GeoSegmentSplitter {
 			GraphEdgeAssignment current, GraphEdgeAssignment previous,
 			List<GraphEdgeAssignment> result, double snapDistance) {
 
-		CompositeVertexAssignment merged = new CompositeVertexAssignment(
-				previous.getPinnedLocation());
+		GraphAssignmentFactoryImpl.FACTORY.createSpiCompositeGraphEdgeAssignment(null, previous.getPinnedLocation()) ;
+		
+		SpiCompositeGraphEdgeAssignment merged = GraphAssignmentFactoryImpl.FACTORY.createSpiCompositeGraphEdgeAssignment(null, previous.getPinnedLocation()) ;
+		
 		merged.add(previous);
 		merged.add(current);
 		result.add(merged);
@@ -233,45 +235,5 @@ public class GeoSegmentSplitter {
 	//
 
 
-	private static class CompositeVertexAssignment implements
-			GraphEdgeAssignment {
-
-		private PinnedLocation pinnedLocation;
-		private List<GraphEdgeAssignment> vertexAssignments = new ArrayList<>();
-
-		public CompositeVertexAssignment(PinnedLocation pinnedLocation) {
-			super();
-			this.pinnedLocation = pinnedLocation;
-
-		}
-
-		public List<GraphEdgeAssignment> getVertexAssigments() {
-			return vertexAssignments;
-		}
-
-		@Override
-		public Point getPoint() {
-			return pinnedLocation.getIntersectionPoint();
-		}
-
-		public void add(GraphEdgeAssignment va) {
-			vertexAssignments.add(va);
-		}
-
-		@Override
-		public AroEntity getAroEntity() {
-			return null;
-		}
-
-		@Override
-		public PinnedLocation getPinnedLocation() {
-			return pinnedLocation;
-		}
-
-		@Override
-		public GeoSegment getGeoSegment() {
-			return pinnedLocation.getGeoSegment();
-		}
-
-	}
+	
 }

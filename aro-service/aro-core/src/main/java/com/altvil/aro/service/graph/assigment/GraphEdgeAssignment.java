@@ -10,4 +10,11 @@ public interface GraphEdgeAssignment extends GraphAssignment {
 	
 	public GeoSegment getGeoSegment() ;
 	
+	//TODO Pass in GraphModel and associate Edges with Graph Models
+	
+	/*
+	 * GraphEsgeAssignments will maintain identity through transforms 
+	 */
+	public GraphEdgeAssignment getAsRootEdgeAssignment() ;
+	
 }

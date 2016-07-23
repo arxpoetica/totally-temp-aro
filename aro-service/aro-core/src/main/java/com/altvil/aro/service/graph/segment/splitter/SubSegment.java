@@ -9,6 +9,7 @@ import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.LocationEntityAssignment;
 import com.altvil.aro.service.graph.segment.impl.RoadLocationImpl;
+import com.altvil.aro.service.graph.segment.transform.TransformFactory;
 import com.vividsolutions.jts.geom.Geometry;
 
 import java.util.ArrayList;
@@ -53,7 +54,8 @@ public class SubSegment implements Comparable<SubSegment> {
 	}
 
 	public GeoSegmentAssembler createSubSegment(GeoSegment seg) {
-		return DefaultSegmentLocations.createAssembler(seg, seg.getLength() * getRange(),
+		return DefaultSegmentLocations.createAssembler(TransformFactory.FACTORY.createSplitTransform(start, seg), 
+					seg.getLength() * getRange(),
 				seg.getGid(), geometry, locations);
 	}
 

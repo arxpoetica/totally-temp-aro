@@ -6,12 +6,13 @@ import java.util.List;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.model.Reversable;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
+import com.altvil.aro.service.graph.segment.transform.GeoSegmentTransform;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 public interface GeoSegment extends Reversable {
 
-	public GeoSegment getParentSegment();
+	public GeoSegmentTransform getParentTransform() ;
 
 	public GeoSegment getRootSegment();
 
