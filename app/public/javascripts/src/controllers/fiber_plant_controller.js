@@ -57,7 +57,12 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     if (!plan) return
 
     $http.get('/network/carriers/' + plan.id + '?fiberType=ilec').success((carriers) => {
-      $scope.nbmCarriers = carriers.map((carrier) => {
+      var all = {
+        id: 'all',
+        name: 'All carriers',
+        color: 'blue'
+      }
+      $scope.nbmCarriers = [all].concat(carriers.map((carrier) => {
         return {
           id: carrier.id,
           name: carrier.name,
@@ -65,7 +70,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         }
       }).filter((carrier) => {
         return carrier.name !== config.client_carrier_name
-      })
+      }))
     })
 
     $http.get('/network/carriers/' + plan.id).success((carriers) => {

@@ -26,7 +26,7 @@ module.exports = class CensusBlock {
         cbc.download_speed,
         cbc.upload_speed,
         s.description AS speed,
-        ST_AsGeoJSON(ST_Centroid(cb.geom))::json as centroid
+        ST_AsGeoJSON(ST_Centroid(cb.geom))::json AS centroid
       FROM aro.census_blocks cb
       JOIN client.census_blocks_carriers cbc
         ON cbc.census_block_gid = cb.gid
@@ -38,6 +38,27 @@ module.exports = class CensusBlock {
     `
     var params = [carrier]
     return database.polygons(sql, params, true, viewport)
+  }
+
+  static findAllNbmCarriers (viewport) {
+    var sql = `
+      SELECT * FROM (
+        SELECT
+          cb.geom,
+          cb.name,
+          cbc.download_speed,
+          cbc.upload_speed,
+          s.description AS speed,
+          ST_AsGeoJSON(ST_Centroid(cb.geom))::json AS centroid,
+          ROW_NUMBER() OVER(PARTITION BY cb.gid ORDER BY cbc.download_speed DESC) AS rk
+        FROM aro.census_blocks cb
+        JOIN client.census_blocks_carriers cbc
+          ON cbc.census_block_gid = cb.gid
+        JOIN client.speeds s
+          ON s.code = cbc.download_speed
+       ) t WHERE t.rk=1
+    `
+    return database.polygons(sql, [], true, viewport)
   }
 
 }
