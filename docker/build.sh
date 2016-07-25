@@ -4,6 +4,11 @@
 APP_SOURCE_ROOT=$(cd "$(dirname "$0")" && pwd)/..
 APP_TARGET=${APP_SOURCE_ROOT}/target
 
+for d in etl-aro ; do
+    rm -rf ${APP_SOURCE_ROOT}/${d}
+done
+
+
 # copy content into target directory
 mkdir -p ${APP_TARGET}
 for d in app conf etl-aro init ; do
