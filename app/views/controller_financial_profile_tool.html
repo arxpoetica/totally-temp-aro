@@ -1,12 +1,13 @@
 <div>
   <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="#financialProfileSummary" aria-controls="home" role="tab" data-toggle="tab">Summary</a></li>
-      <li role="presentation"><a href="#financialProfilePremises" aria-controls="messages" role="tab" data-toggle="tab">Premises</a></li>
-      <li role="presentation"><a href="#financialProfileSubscribers" aria-controls="messages" role="tab" data-toggle="tab">Subscribers</a></li>
-      <li role="presentation"><a href="#financialProfileRevenue" aria-controls="messages" role="tab" data-toggle="tab">Revenue</a></li>
-      <li role="presentation"><a href="#financialProfileCapex" aria-controls="messages" role="tab" data-toggle="tab">Capex</a></li>
-      <li role="presentation"><a href="#financialProfileCashFlow" aria-controls="home" role="tab" data-toggle="tab">Cash Flow</a></li>
+      <li role="presentation" class="active"><a href="#financialProfileSummary" role="tab" data-toggle="tab">Summary</a></li>
+      <li role="presentation"><a href="#financialProfilePremises" role="tab" data-toggle="tab">Premises</a></li>
+      <li role="presentation"><a href="#financialProfileSubscribers" role="tab" data-toggle="tab">Subscribers</a></li>
+      <li role="presentation"><a href="#financialProfileRevenue" role="tab" data-toggle="tab">Revenue</a></li>
+      <li role="presentation"><a href="#financialProfileCapex" role="tab" data-toggle="tab">Capex</a></li>
+      <li role="presentation"><a href="#financialProfileCashFlow" role="tab" data-toggle="tab">Cash Flow</a></li>
+      <li role="presentation"><a href="#financialProfileOpex" role="tab" data-toggle="tab">Opex</a></li>
     </ul>
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="financialProfileSummary" style="margin-top: 20px">
@@ -192,6 +193,9 @@
           <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-penetration-legend"></div>
         </div>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="financialProfileOpex" style="margin-top: 20px">
+
       </div>
     </div>
   </div>
