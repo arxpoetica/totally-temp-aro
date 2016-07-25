@@ -243,7 +243,6 @@ module.exports = class NetworkPlan {
     var minimumCost = options.minimumCost
     var maximumCost = options.maximumCost
 
-    console.log('arguments', arguments)
     var num = 20
     var sortFields = [
       'name', 'created_at', 'updated_at',

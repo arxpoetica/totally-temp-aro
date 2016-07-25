@@ -192,7 +192,11 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
       layer.onDataLoaded = () => {
         var dataLayer = layer.data_layer
         dataLayer.forEach((feature) => {
-          var p = feature.getProperty('centroid').coordinates
+          var c = feature.getProperty('centroid')
+          if (!c) {
+            return console.warn('Feature missing centroid')
+          }
+          var p = c.coordinates
           var centroid = new google.maps.LatLng(p[1], p[0])
           var marker = map_utils.createCenteredMarker(dataLayer, feature, centroid, {})
           marker.setIcon('https://chart.googleapis.com/chart?chst=d_text_outline&chld=000000|16|h|FFFFFF|_|' + encodeURIComponent(feature.getProperty('speed')))
