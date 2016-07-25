@@ -42,21 +42,19 @@ module.exports = class CensusBlock {
 
   static findAllNbmCarriers (viewport) {
     var sql = `
-      SELECT * FROM (
-        SELECT
+        SELECT DISTINCT ON (cb.gid)
           cb.geom,
           cb.name,
           cbc.download_speed,
           cbc.upload_speed,
           s.description AS speed,
-          ST_AsGeoJSON(ST_Centroid(cb.geom))::json AS centroid,
-          ROW_NUMBER() OVER(PARTITION BY cb.gid ORDER BY cbc.download_speed DESC) AS rk
+          ST_AsGeoJSON(ST_Centroid(cb.geom))::json AS centroid
         FROM aro.census_blocks cb
         JOIN client.census_blocks_carriers cbc
           ON cbc.census_block_gid = cb.gid
         JOIN client.speeds s
           ON s.code = cbc.download_speed
-       ) t WHERE t.rk=1
+       ORDER BY cb.gid, cbc.download_speed DESC
     `
     return database.polygons(sql, [], true, viewport)
   }
