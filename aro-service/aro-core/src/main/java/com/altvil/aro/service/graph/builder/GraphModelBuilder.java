@@ -9,7 +9,7 @@ import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 
 public interface GraphModelBuilder<T> {
-
+	
 	public GraphNodeFactory getVertexFactory() ;
 	public GraphNode addVirtualRoot(Collection<GraphNode> targets) ;
 	public void addVertex(GraphNode vertex) ;

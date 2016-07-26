@@ -64,7 +64,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			if (path.getEdgeList().size() == 0) {
 				//Update Root
 				sourceRoot.add(path.getStartVertex(), path
-						.getStartVertex(), new HashSet<E>());
+						.getStartVertex(), new ArrayList<E>());
 				targetMap.remove(path.getStartVertex());
 				continue;
 			}
@@ -78,7 +78,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			targetMap.remove(previous);
 			sourceRootMap.put(previous, sourceRoot) ;
 			
-			Set<E> resultPath = new HashSet<>(pathList.size());
+			List<E> resultPath = new ArrayList<>(pathList.size());
 			while (itr.hasNext()) {
 				V next = itr.next();
 				//sources.add(next);

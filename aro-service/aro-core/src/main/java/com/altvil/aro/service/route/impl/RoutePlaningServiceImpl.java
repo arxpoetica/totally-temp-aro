@@ -166,7 +166,7 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 		public Collection<SourceRoute<GraphNode,AroEdge<GeoSegment>>> planRoute(
 				Collection<GraphNode> sources, Collection<GraphNode> targets) {
 			return new RouteBuilder<GraphNode, AroEdge<GeoSegment>>().build(
-					getModel().getGraph(), null, sources, targets);
+					getModel().getGraph(), sources, targets);
 		}
 
 		/*
