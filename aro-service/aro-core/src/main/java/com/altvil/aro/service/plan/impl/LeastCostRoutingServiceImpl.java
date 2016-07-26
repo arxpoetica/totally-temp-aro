@@ -12,6 +12,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.FDHEquipment;
@@ -49,6 +50,7 @@ import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
 import com.google.inject.Inject;
 
+@Service
 public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 
 	private static final Logger log = LoggerFactory

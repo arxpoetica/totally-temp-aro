@@ -18,6 +18,7 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationServ
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
+import com.altvil.aro.service.plan.LeastCostRoutingService;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
 import com.altvil.aro.service.price.PricingService;
@@ -43,7 +44,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	private PricingService pricingService;
 
 	@Autowired
-	private PlanService planService;
+	private LeastCostRoutingService planService;
 
 	private OptimizerContext createOptimizerContext(
 			WirecenterOptimizationRequest request) {

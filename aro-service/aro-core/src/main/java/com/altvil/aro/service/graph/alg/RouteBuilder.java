@@ -18,7 +18,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 	private Map<V, AllShortestPaths<V, E>> targetMap;
 
-	public Collection<SourceRoute<V,E>> build(WeightedGraph<V, E> source, ClosestFirstSurfaceBuilder<V, E> builder, Collection<V> all_roots,
+	public Collection<SourceRoute<V,E>> build(WeightedGraph<V, E> source, Collection<V> all_roots,
 			Collection<V> targets) {
 		
 		
@@ -41,7 +41,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 				sourceRootMap.get(target).add(target, target, new HashSet<E>());
 			} else {
 				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, builder, target));
+						new AllShortestPaths<V, E>(source, target));
 			}
 		}
 

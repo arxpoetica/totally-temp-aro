@@ -20,6 +20,7 @@ import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.GlobalConstraint;
+import com.altvil.aro.service.plan.LeastCostRoutingService;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
@@ -29,11 +30,11 @@ import com.google.inject.Inject;
 public class NetworkModelBuilderFactoryImpl implements
 		NetworkModelBuilderFactory {
 
-	private PlanService planService;
+	private LeastCostRoutingService planService;
 
 	@Autowired
 	@Inject
-	public NetworkModelBuilderFactoryImpl(PlanService planService) {
+	public NetworkModelBuilderFactoryImpl(LeastCostRoutingService planService) {
 		super();
 		this.planService = planService;
 	}
@@ -109,7 +110,7 @@ public class NetworkModelBuilderFactoryImpl implements
 		@Override
 		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
 			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, constraints, globalConstraints);
+					createNetworkData(rejectedLocations), constraints);
 		}
 	}
 }

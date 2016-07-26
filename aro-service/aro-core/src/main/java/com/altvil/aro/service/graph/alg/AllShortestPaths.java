@@ -7,6 +7,7 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.GraphPathImpl;
+
 import java.util.*;
 
 public class AllShortestPaths<V, E> {
@@ -19,13 +20,27 @@ public class AllShortestPaths<V, E> {
 	private ClosestFirstSurfaceIterator<V, E> itr;
 
 	private Set<V> currentTargets;
-
+	
+	private static  <V,E> ClosestFirstSurfaceIterator<V, E>  createItr(WeightedGraph<V, E> graph, V source) {
+		 return new ScalarClosestFirstSurfaceIterator<>(graph, source) ;
+	}
+	
 	public AllShortestPaths(WeightedGraph<V, E> graph,
-			ClosestFirstSurfaceBuilder<V, E> closestFirstSurfaceBuilder, V source) {
+			ClosestFirstSurfaceIterator<V, E> itr, V source) {
 		this.graph = graph;
 		this.source = source;
 		this.seenVertices = new HashSet<>();
-		this.itr = closestFirstSurfaceBuilder.build(graph, source);
+		this.itr = itr;
+	}
+	
+	public AllShortestPaths(WeightedGraph<V, E> graph,
+			ClosestFirstSurfaceBuilder<V, E> closestFirstSurfaceBuilder, V source) {
+		this(graph, closestFirstSurfaceBuilder.build(graph, source), source) ;
+	}
+	
+	
+	public AllShortestPaths(WeightedGraph<V, E> graph, V source) {
+		this(graph, createItr(graph, source), source) ;
 	}
 	
 	public TreeMultimap<Double, V> findPaths(Collection<V> targets) {
