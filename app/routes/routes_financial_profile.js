@@ -13,6 +13,11 @@ exports.configure = (api, middleware) => {
     return Array.isArray(arr) && arr.indexOf(value) >= 0
   }
 
+  function array (value) {
+    if (!Array.isArray(value)) return [value]
+    return value
+  }
+
   api.get('/financial_profile/:plan_id/export', (request, response, next) => {
     var req = {
       url: config.aro_service_url + `/rest/roic/models/${request.params.plan_id}.csv`
@@ -68,35 +73,52 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/financial_profile/:plan_id/revenue', (request, response, next) => {
-    var curves = {
-      bau: 'copper.household.revenue',
-      plan: 'planned.network.revenue',
-      incremental: 'incremental.network.revenue'
-    }
+    var filter = request.query.filter === 'bau' ? 'copper' : 'planned'
+    var curves = {}
+    var entityTypes = ['smallBusiness', 'mediumBusiness', 'largeBusiness', 'household', 'cellTower']
+    entityTypes.forEach((key) => {
+      curves[key] = `${filter}.${key}.revenue`
+    })
     requestData({
       plan_id: request.params.plan_id,
-      curves: {
-        households: curves[request.query.filter]
-      },
-      zeros: ['businesses', 'towers']
+      curves: curves
     })
     .then(jsonSuccess(response, next))
     .catch(next)
   })
 
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
+    var entities = array(request.query.entityTypes)
     var curves = {}
-    var zeros = ['incremental', 'existing']
-    if (contains(request.query.entityTypes, 'households')) {
-      curves = {
-        incremental: 'fiber.household.premises_passed'
-      }
-      zeros = ['existing']
+    var mapping = {
+      smallBusiness: 'planned.smallBusiness.premises_passed',
+      mediumBusiness: 'planned.mediumBusiness.premises_passed',
+      largeBusiness: 'planned.largeBusiness.premises_passed',
+      household: 'fiber.household.premises_passed',
+      cellTower: 'planned.cellTower.premises_passed'
     }
+    entities.forEach((entity) => {
+      var curve = mapping[entity]
+      if (curve) {
+        curves[entity] = curve
+      }
+    })
+    var zeros = ['existing']
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,
       zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        var n = 0
+        Object.keys(curves).forEach((key) => {
+          n += obj[key]
+        })
+        obj.incremental = n
+      })
+      console.log('data', data)
+      return data
     })
     .then(jsonSuccess(response, next))
     .catch(next)
@@ -104,18 +126,35 @@ exports.configure = (api, middleware) => {
 
   api.get('/financial_profile/:plan_id/subscribers', (request, response, next) => {
     var curves = {}
-    var zeros = ['bau', 'plan']
-    if (request.query.entityType === 'households') {
-      curves = {
-        bau: 'copper.household.subscribers_count',
-        plan: 'planned.network.subscribers_count'
-      }
-      zeros = []
+    var zeros = []
+    var entities = array(request.query.entityTypes)
+    entities.forEach((key) => {
+      curves[`bau_${key}`] = `copper.${key}.subscribers_count`
+      curves[`plan_${key}`] = `planned.${key}.subscribers_count`
+    })
+    if (entities.length === 0) {
+      zeros = ['bau', 'plan']
     }
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,
       zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        var bau = 0
+        var plan = 0
+        Object.keys(curves).forEach((key) => {
+          if (key.indexOf('bau_') === 0) {
+            bau += obj[key]
+          } else {
+            plan += obj[key]
+          }
+        })
+        obj.bau = bau
+        obj.plan = bau
+      })
+      return data
     })
     .then(jsonSuccess(response, next))
     .catch(next)
@@ -131,6 +170,20 @@ exports.configure = (api, middleware) => {
       }
       zeros = []
     }
+    /*
+      Bottom Chart - BAU
+      copper.cellTower.subscribers_penetration
+      copper.household.subscribers_penetration
+      copper.largeBusiness.subscribers_penetration
+      copper.mediumBusiness.subscribers_penetration
+      copper.smallBusiness.subscribers_penetration
+      Bottom Chart - Plan
+      planned.cellTower.subscribers_penetration
+      planned.household.subscribers_penetration
+      planned.largeBusiness.subscribers_penetration
+      planned.mediumBusiness.subscribers_penetration
+      planned.smallBusiness.subscribers_penetration
+    */
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,

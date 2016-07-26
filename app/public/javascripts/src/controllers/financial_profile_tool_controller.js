@@ -2,12 +2,24 @@
 app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', ($scope, $rootScope, $http, $timeout, map_tools) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
-  $scope.premisesFilterEntityTypes = { households: true }
-  $scope.subscribersFilterEntityType = 'households'
+  $scope.premisesFilterEntityTypes = { household: true }
+  $scope.subscribersFilterEntityTypes = { household: true }
+  $scope.penetrationFilter = {
+    entityType: 'household'
+  }
   $scope.revenueFilter = 'bau'
   $scope.capexFilterEntityTypes = { households: true }
   $scope.capexFilter = 'bau'
   $scope.details = false
+
+  $scope.entityTypes = {
+    smallBusiness: 'SMB',
+    mediumBusiness: 'Mid-tier',
+    largeBusiness: 'Large Enterprise',
+    household: 'Households',
+    cellTower: 'Towers'
+  }
+
   var dirty = false
 
   var charts = {}
@@ -215,11 +227,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   function showRevenueChart (force) {
-    var datasets = [
-      { key: 'businesses', name: 'Businesses' },
-      { key: 'households', name: 'Households' },
-      { key: 'towers', name: 'Towers' }
-    ]
+    var datasets = Object.keys($scope.entityTypes).map((key) => ({ key: key, name: $scope.entityTypes[key] }))
     request(force, 'revenue', { filter: $scope.revenueFilter }, (revenue) => {
       var data = buildChartData(revenue, datasets)
       var options = {
@@ -256,7 +264,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       { key: 'bau', name: 'BAU' },
       { key: 'plan', name: 'Plan' }
     ]
-    request(force, 'subscribers', { entityType: $scope.subscribersFilterEntityType }, (subscribers) => {
+    var entityTypes = Object.keys($scope.subscribersFilterEntityTypes).filter((key) => $scope.subscribersFilterEntityTypes[key])
+    request(force, 'subscribers', { entityTypes: entityTypes }, (subscribers) => {
       var data = buildChartData(subscribers, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
@@ -272,7 +281,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       { key: 'bau', name: 'BAU' },
       { key: 'plan', name: 'Plan' }
     ]
-    request(force, 'penetration', { entityType: $scope.subscribersFilterEntityType }, (penetration) => {
+    request(force, 'penetration', { entityType: $scope.penetrationFilter.entityType }, (penetration) => {
       var data = buildChartData(penetration, datasets)
       var options = {
         datasetFill: false,

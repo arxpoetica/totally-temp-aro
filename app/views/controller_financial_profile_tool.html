@@ -8,6 +8,7 @@
       <li role="presentation"><a href="#financialProfileCapex" role="tab" data-toggle="tab">Capex</a></li>
       <li role="presentation"><a href="#financialProfileCashFlow" role="tab" data-toggle="tab">Cash Flow</a></li>
       <li role="presentation"><a href="#financialProfileOpex" role="tab" data-toggle="tab">Opex</a></li>
+      <li role="presentation"><a href="#financialProfileRouteOportunities" role="tab" data-toggle="tab">Route Opportunities</a></li>
     </ul>
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="financialProfileSummary" style="margin-top: 20px">
@@ -121,7 +122,6 @@
               <select class="form-control" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
-                <option value="incremental">Incremental</option>
               </select>
             </div>
           </form>
@@ -143,19 +143,9 @@
             </div>
           </form>
           <form class="form-inline">
-            <div class="checkbox" style="margin-left: 10px">
+            <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
               <label>
-                <input type="checkbox" ng-model="premisesFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Businesses
-              </label>
-            </div>
-            <div class="checkbox" style="margin-left: 10px">
-              <label>
-                <input type="checkbox" ng-model="premisesFilterEntityTypes['households']" ng-change="refreshCurrentTab(true)"> Households
-              </label>
-            </div>
-            <div class="checkbox" style="margin-left: 10px">
-              <label>
-                <input type="checkbox" ng-model="premisesFilterEntityTypes['towers']" ng-change="refreshCurrentTab(true)"> Towers
+                <input type="checkbox" ng-model="premisesFilterEntityTypes[entityType]" ng-change="refreshCurrentTab(true)"> {{ entityName }}
               </label>
             </div>
           </form>
@@ -167,35 +157,75 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers" style="margin-top: 20px">
         <div>
+          <p class="text-center"><strong>Subscribers</strong></p>
           <form class="form-inline">
-            <div class="radio" style="margin-left: 10px">
+            <div class="radio" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
               <label>
-                <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="businesses"> Businesses
-              </label>
-            </div>
-            <div class="radio" style="margin-left: 10px">
-              <label>
-                <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="households"> Households
-              </label>
-            </div>
-            <div class="radio" style="margin-left: 10px">
-              <label>
-                <input type="radio" ng-model="subscribersFilterEntityType" ng-change="refreshCurrentTab(true)" value="towers"> Towers
+                <input name="entityType" type="checkbox"
+                ng-model="subscribersFilterEntityTypes[entityType]" ng-change="refreshCurrentTab(true)"> {{ entityName }}
               </label>
             </div>
           </form>
-          <br>
-          <p class="text-center"><strong>Subscribers</strong></p>
           <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-subscribers-legend"></div>
           <br>
           <p class="text-center"><strong>Penetration</strong></p>
+          <form class="form-inline">
+            <div class="radio" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
+              <label>
+                <input name="entityType" type="radio"
+                  ng-model="penetrationFilter.entityType" ng-change="refreshCurrentTab(true)" value="{{entityType}}"> {{ entityName }}
+              </label>
+            </div>
+          </form>
           <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-penetration-legend"></div>
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileOpex" style="margin-top: 20px">
 
+      </div>
+      <div role="tabpanel" class="tab-pane" id="financialProfileRouteOportunities" style="margin-top: 20px">
+        <table class="table">
+          <thead>
+            <th></th>
+            <th>1/4 mile</th>
+            <th>1/2 mile</th>
+            <th>1 mile</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>VES buildings with >=25 customers per building</td>
+              <td>1</td>
+              <td>2</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td>SMB SBUs</td>
+              <td>1</td>
+              <td>2</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td>SMB MTUs</td>
+              <td>1</td>
+              <td>2</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td>VES customers and VES prospects</td>
+              <td>1</td>
+              <td>2</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td>SMB customers and SMB prospects</td>
+              <td>1</td>
+              <td>2</td>
+              <td>3</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
