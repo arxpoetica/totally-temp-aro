@@ -2,7 +2,6 @@ package com.altvil.aro.service.plan.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -25,7 +24,6 @@ import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.assigment.impl.FiberSourceMapping;
-import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.assigment.impl.RootGraphMapping;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
@@ -37,13 +35,12 @@ import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.LeastCostRoutingService;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanException;
-import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.route.RouteModel;
 import com.altvil.aro.service.route.RoutePlaningService;
 import com.altvil.aro.util.DescribeGraph;
@@ -52,10 +49,14 @@ import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
 import com.google.inject.Inject;
 
-public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
+public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(PlanServiceImpl.class.getName());
+
+	private static final ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> CFSB = (
+			g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(
+			g, s);
 
 	private GraphTransformerFactory transformFactory;
 	private GraphNodeFactory vertexFactory;
@@ -63,7 +64,8 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 
 	@Autowired
 	@Inject
-	public LeastCostRoutingServiceImpl(GraphTransformerFactory transformFactory,
+	public LeastCostRoutingServiceImpl(
+			GraphTransformerFactory transformFactory,
 			GraphNodeFactory vertexFactory,
 			RoutePlaningService routePlaningService) {
 		super();
@@ -71,33 +73,17 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 		this.vertexFactory = vertexFactory;
 		this.routePlaningService = routePlaningService;
 	}
-	
 
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
-			NetworkData networkData,FtthThreshholds constraints)
+			NetworkData networkData, FtthThreshholds constraints)
 			throws PlanException {
 
-		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = (
-				g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(
-				g, s);
-			
-		return computeNetworkModel(networkData, closestFirstSurfaceBuilder, constraints, null) ;
-				
-	}
-
-
-	private Optional<CompositeNetworkModel> computeNetworkModel(
-			NetworkData networkData,
-			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			FtthThreshholds request, GlobalConstraint globalConstraint)
-			throws PlanException {
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					networkData, closestFirstSurfaceBuilder, request,
-					globalConstraint);
+					networkData, constraints);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
@@ -107,17 +93,18 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 					+ (System.currentTimeMillis() - startTime));
 			throw new PlanException(err.getMessage(), err);
 		}
+
 	}
 
+	
+
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
-			NetworkData networkData,
-			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			FtthThreshholds constraints, GlobalConstraint globalConstraint)
+			NetworkData networkData, FtthThreshholds constraints)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
 		CompositeNetworkModel networkModel = planning.build(networkData,
-				closestFirstSurfaceBuilder, constraints, globalConstraint);
+				constraints);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
@@ -176,11 +163,11 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 			super();
 		}
 
-		public CompositeNetworkModel build(
-				final NetworkData data,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				FtthThreshholds request, GlobalConstraint globalConstraint) {
+		public CompositeNetworkModel build(final NetworkData data,
 
+		FtthThreshholds request) {
+
+			// Root Model
 			GraphNetworkModel networkModel = transformFactory
 					.createGraphNetworkModel(data);
 
@@ -223,19 +210,19 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 
 			// Create a tree leading to each AroEdge with a value.
 
-			DAGModel<GeoSegment> dag = transformFactory.createDAG(
-					modifier.build(), rootNode, e -> {
-						GeoSegment gs =  e.getValue() ;
-						return gs == null ? false :  !gs.getGeoSegmentAssignments()
-								.isEmpty() ;
-					});
+			DAGModel<GeoSegment> dag = transformFactory.createDAG(modifier
+					.build(), rootNode, e -> {
+				GeoSegment gs = e.getValue();
+				return gs == null ? false : !gs.getGeoSegmentAssignments()
+						.isEmpty();
+			});
 
 			if (dag.getEdges().isEmpty()) {
 				log.warn("Unable to build DAG as no locations found on edges");
 				return null;
 			}
 
-			restoreLocationDemands(routeModel, dag);
+			// /restoreLocationDemands(routeModel, dag);
 
 			DescribeGraph.trace(log, dag.getGraph());
 
@@ -245,20 +232,17 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 
 			dag = dag.removeRootNode(rootNode);
 
-			//Update Fiber Source Bindings
+			// Update Fiber Source Bindings
 			rootGraphMapping.getChildren().forEach(gm -> {
 				edgeMap.get(gm.getGraphAssignment()).setGraphMapping(gm);
 			});
 
-			return new CompositeNetworkModelImpl(
-					assignedFiberSources
-							.stream()
-							.filter(fsb -> fsb.getGraphMapping() != null)
-							.map(createNetworkModelTransform(
-									dag,
-									(g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(
-											g, s)))
-							.collect(Collectors.toList()));
+			GraphContext graphCtx = new GraphContext(dag, networkModel.getGraphModel()) ;
+			
+			return new CompositeNetworkModelImpl(assignedFiberSources.stream()
+					.filter(fsb -> fsb.getGraphMapping() != null)
+					.map(createNetworkModelTransform(graphCtx))
+					.collect(Collectors.toList()));
 
 		}
 	}
@@ -272,46 +256,45 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 	 * This function copies the demands into the dag such that each path in the
 	 * panel will be seen as being necessary.
 	 */
-	private void restoreLocationDemands(RouteModel routeModel,
-			DAGModel<GeoSegment> dag) {
-		dag.getEdges()
-				.stream()
-				.forEach(
-						(e) -> {
-							final Collection<GraphAssignment> graphAssignments = routeModel
-									.getGraphAssignments(e.getSourceNode());
-
-							final GeoSegment value = e.getValue();
-
-							if (value != null) {
-								final Collection<GraphEdgeAssignment> geoSegmentAssignments = value
-										.getGeoSegmentAssignments();
-								List<AroEntity> segmentEntities = geoSegmentAssignments
-										.stream()
-										.map(GraphEdgeAssignment::getAroEntity)
-										.collect(Collectors.toList());
-
-								for (GraphAssignment graphAssignment : graphAssignments) {
-									AroEntity graphEntity = graphAssignment
-											.getAroEntity();
-
-									if (segmentEntities.add(graphEntity)) {
-										geoSegmentAssignments
-												.add(GraphAssignmentFactoryImpl.FACTORY.createEdgeAssignment(
-														value.pinLocation(graphAssignment
-																.getPoint()),
-														graphEntity));
-									}
-								}
-							}
-						});
-	}
+//	private void restoreLocationDemands(RouteModel routeModel,
+//			DAGModel<GeoSegment> dag) {
+//		dag.getEdges()
+//				.stream()
+//				.forEach(
+//						(e) -> {
+//							final Collection<GraphAssignment> graphAssignments = routeModel
+//									.getGraphAssignments(e.getSourceNode());
+//
+//							final GeoSegment value = e.getValue();
+//
+//							if (value != null) {
+//								final Collection<GraphEdgeAssignment> geoSegmentAssignments = value
+//										.getGeoSegmentAssignments();
+//								List<AroEntity> segmentEntities = geoSegmentAssignments
+//										.stream()
+//										.map(GraphEdgeAssignment::getAroEntity)
+//										.collect(Collectors.toList());
+//
+//								for (GraphAssignment graphAssignment : graphAssignments) {
+//									AroEntity graphEntity = graphAssignment
+//											.getAroEntity();
+//
+//									if (segmentEntities.add(graphEntity)) {
+//										geoSegmentAssignments
+//												.add(GraphAssignmentFactoryImpl.FACTORY.createEdgeAssignment(
+//														value.pinLocation(graphAssignment
+//																.getPoint()),
+//														graphEntity));
+//									}
+//								}
+//							}
+//						});
+//	}
 
 	public Function<FiberSourceBinding, NetworkModel> createNetworkModelTransform(
-			DAGModel<GeoSegment> dag,
-			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
-		return (fsb) -> new NetworkModelPlanner(fsb).createNetworkModel(dag,
-				fsb.getGraphMapping(), builder);
+			GraphContext graphCtx) {
+		return (fsb) -> new NetworkModelPlanner(fsb).createNetworkModel(graphCtx,
+				fsb.getGraphMapping());
 	}
 
 	private class NetworkModelPlanner {
@@ -329,32 +312,27 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 			this.fiberSourceBinding = fiberSourceBinding;
 		}
 
-		public NetworkModel createNetworkModel(
-				DAGModel<GeoSegment> dag,
-				GraphMapping graphMapping,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+		public NetworkModel createNetworkModel(GraphContext graphCtx,
+				GraphMapping graphMapping) {
 			FiberSourceMapping fiberMapping = (FiberSourceMapping) graphMapping;
 
-			this.renodedModel = renodeGraph(dag, graphMapping);
+			this.renodedModel = renodeGraph(graphCtx, graphMapping);
 
 			DescribeGraph.trace(log, renodedModel.getGraph());
 
-			Collection<AroEdge<GeoSegment>> feederFiber = planRoute(
-					graphMapping, builder);
-			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> distributionFiber = planDistributionRoutes(
-					graphMapping.getChildren(), builder);
+			Collection<AroEdge<GeoSegment>> feederFiber = planRoute(graphMapping);
+			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> distributionFiber = planDistributionRoutes(graphMapping
+					.getChildren());
 
-			return new NetworkModelImpl(
-					fiberSourceBinding.getNetworkAssignment(), null, dag,
+			return new NetworkRouteModel(
+					fiberSourceBinding.getNetworkAssignment(), null, graphCtx.getGraphModel(),
 					renodedModel, feederFiber, distributionFiber, fiberMapping,
 					resolved);
 		}
 
-		private Collection<AroEdge<GeoSegment>> planRoute(
-				GraphMapping mapping,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+		private Collection<AroEdge<GeoSegment>> planRoute(GraphMapping mapping) {
 			return planRoute(mapping.getGraphAssignment(),
-					mapping.getChildAssignments(), builder);
+					mapping.getChildAssignments());
 		}
 
 		private boolean isDistributionSource(AroEntity entity) {
@@ -362,37 +340,33 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 		}
 
 		private Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> planDistributionRoutes(
-				Collection<GraphMapping> children,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+				Collection<GraphMapping> children) {
 
 			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> map = new HashMap<>();
 
 			children.forEach(a -> {
 				if (isDistributionSource(a.getAroEntity())) {
-					map.put(a.getGraphAssignment(), planRoute(a, builder));
+					map.put(a.getGraphAssignment(), planRoute(a));
 				}
 			});
 
 			return map;
 		}
 
-		private Collection<AroEdge<GeoSegment>> planRoute(
-				GraphAssignment root,
-				Collection<? extends GraphAssignment> nodes,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+		private Collection<AroEdge<GeoSegment>> planRoute(GraphAssignment root,
+				Collection<? extends GraphAssignment> nodes) {
 
 			if (log.isDebugEnabled())
 				log.debug("Processing Routes for" + root.getAroEntity());
 
 			Collection<AroEdge<GeoSegment>> edges = new RouteBuilder<GraphNode, AroEdge<GeoSegment>>()
-					.build(renodedModel.getGraph(), builder,
-							resolved.get(root),
+					.build(renodedModel.getGraph(), CFSB, resolved.get(root),
 							StreamUtil.map(nodes, n -> resolved.get(n)));
 
 			return edges;
 		}
 
-		private GraphModel<GeoSegment> renodeGraph(GraphModel<GeoSegment> gm,
+		private GraphModel<GeoSegment> renodeGraph(GraphContext graphCtx,
 				GraphMapping co) {
 
 			if (log.isDebugEnabled())
@@ -402,24 +376,46 @@ public class LeastCostRoutingServiceImpl  implements LeastCostRoutingService {
 					.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
 							new AroEdgeFactory<GeoSegment>()));
 
-			NetworkBuilder networkBuilder = new NetworkBuilder(b, vertexFactory);
-			networkBuilder.add(co.getGraphAssignment());
+			GraphRenoder networkBuilder = new NormalizedRenoder(new NetworkBuilder(b, vertexFactory));
+			networkBuilder.add(co.getGraphAssignment()); //
 
 			co.getChildren().forEach(a -> {
-
-				networkBuilder.add(a.getGraphAssignment()); // FDH
+				networkBuilder.add((a.getGraphAssignment())); // FDH
 					networkBuilder.add(a.getChildAssignments()); // FDTs
 				});
 
-			networkBuilder.renodeGraph(gm);
+			networkBuilder.renodeGraph(graphCtx.getGraphModel());
 			// TODO Move into Model Abstraction
 			resolved = networkBuilder.getResolvedAssignments();
+
 			// Update Resolved Map with FiberSource Root Binding
 			this.resolved.put(fiberSourceBinding.getSource(),
 					fiberSourceBinding.getDomain());
 
 			return networkBuilder.getBuilder().build();
 
+		}
+
+	}
+
+	private class GraphContext {
+		private DAGModel<GeoSegment> dagModel;
+		private GraphModel<GeoSegment> graphModel;
+
+		public GraphContext(DAGModel<GeoSegment> dagModel,
+				GraphModel<GeoSegment> graphModel) {
+			super();
+			this.dagModel = dagModel;
+			this.graphModel = graphModel;
+		}
+
+		@SuppressWarnings("unused")
+		public DAGModel<GeoSegment> getDagModel() {
+			return dagModel;
+		}
+
+		public GraphModel<GeoSegment> getGraphModel() {
+			return graphModel;
 		}
 
 	}

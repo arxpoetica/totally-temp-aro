@@ -1,16 +1,11 @@
 package com.altvil.aro.service.graph.assigment.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.assigment.SpiCompositeGraphEdgeAssignment;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.segment.transform.GeoSegmentTransform;
@@ -29,12 +24,6 @@ public class GraphAssignmentFactoryImpl implements GraphAssignmentFactory {
 
 		return new GraphEdgeAssignmentImpl(SEQUENCER.next(), aroEntity, pl);
 
-	}
-
-	public SpiCompositeGraphEdgeAssignment createSpiCompositeGraphEdgeAssignment(
-			AroEntity aroEntity, PinnedLocation pinnedLocation) {
-		return new CompositeVertexAssignment(SEQUENCER.next(), aroEntity,
-				pinnedLocation);
 	}
 
 	public GraphEdgeAssignment debugGreateEdgeAssignment(PinnedLocation pl,
@@ -86,50 +75,6 @@ public class GraphAssignmentFactoryImpl implements GraphAssignmentFactory {
 					.toString();
 
 		}
-	}
-
-	private static class CompositeVertexAssignment extends
-			AbstractGraphAssigment implements SpiCompositeGraphEdgeAssignment {
-
-		private PinnedLocation pinnedLocation;
-		private List<GraphEdgeAssignment> vertexAssignments = new ArrayList<>();
-
-		public CompositeVertexAssignment(Long id, AroEntity aroEntity,
-				PinnedLocation pinnedLocation) {
-			super(id, aroEntity);
-			this.pinnedLocation = pinnedLocation;
-
-		}
-
-		@Override
-		public Collection<GraphEdgeAssignment> getGraphEdgeAssignments() {
-			return vertexAssignments;
-		}
-
-		@Override
-		public Point getPoint() {
-			return pinnedLocation.getIntersectionPoint();
-		}
-
-		public void add(GraphEdgeAssignment va) {
-			vertexAssignments.add(va);
-		}
-
-		@Override
-		public GraphEdgeAssignment getAsRootEdgeAssignment() {
-			return this;
-		}
-
-		@Override
-		public PinnedLocation getPinnedLocation() {
-			return pinnedLocation;
-		}
-
-		@Override
-		public GeoSegment getGeoSegment() {
-			return pinnedLocation.getGeoSegment();
-		}
-
 	}
 
 	private static class GraphEdgeAssignmentImpl extends AbstractGraphAssigment

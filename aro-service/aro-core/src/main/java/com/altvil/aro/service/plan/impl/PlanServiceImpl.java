@@ -38,6 +38,7 @@ import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.GlobalConstraint;
@@ -405,7 +406,7 @@ public class PlanServiceImpl implements PlanService {
 					.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
 							new AroEdgeFactory<GeoSegment>()));
 
-			NetworkBuilder networkBuilder = new NetworkBuilder(b, vertexFactory);
+			GraphRenoder networkBuilder = new NetworkBuilder(b, vertexFactory);
 			networkBuilder.add(co.getGraphAssignment());
 
 			co.getChildren().forEach(a -> {

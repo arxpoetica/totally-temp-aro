@@ -1,5 +1,5 @@
 package com.altvil.aro.service.graph.segment.transform;
 
-public interface FlippedTransform {
+public interface FlippedTransform extends GeoSegmentTransform {
 
 }

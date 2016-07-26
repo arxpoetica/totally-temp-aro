@@ -62,13 +62,13 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 		this(transform, length, gid, geometry, new ArrayList<>());
 	}
 
-	public static GeoSegment create(GeoSegmentTransform parent, double length,
-			Long gid, Geometry geometry,
-			Collection<LocationEntityAssignment> roadLocations) {
-
-		return createAssembler(parent, length, gid, geometry, roadLocations)
-				.getGeoSegment();
-	}
+//	public static GeoSegment create(GeoSegmentTransform parent, double length,
+//			Long gid, Geometry geometry,
+//			Collection<LocationEntityAssignment> roadLocations) {
+//
+//		return createAssembler(parent, length, gid, geometry, roadLocations)
+//				.getGeoSegment();
+//	}
 
 	public static GeoSegmentAssembler createAssembler(
 			GeoSegmentTransform transform, double length, Long gid,

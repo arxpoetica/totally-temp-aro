@@ -25,6 +25,7 @@ import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
+import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.aro.service.route.RouteModel;
 import com.altvil.aro.service.route.RouteNetworkData;
@@ -81,7 +82,7 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 				.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
 						new AroEdgeFactory<GeoSegment>()));
 
-		NetworkBuilder networkBuilder = new NetworkBuilder(b, vertexFactory);
+		GraphRenoder networkBuilder = new NetworkBuilder(b, vertexFactory);
 		edgeAssigments.forEach(a -> {
 			networkBuilder.add(a); // Assignments
 			});

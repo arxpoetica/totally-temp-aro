@@ -31,6 +31,7 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FiberDagScanner;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
@@ -123,7 +124,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	}
 
 	@Override
-	public NetworkBuilder createNetworkBuilder(
+	public GraphRenoder createNetworkBuilder(
 			GraphModelBuilder<GeoSegment> builder) {
 		return new NetworkBuilder(builder, factory);
 	}

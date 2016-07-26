@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
-import com.altvil.aro.service.graph.assigment.SpiCompositeGraphEdgeAssignment;
-import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.DefaultSplitSegment;
@@ -16,8 +18,12 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.utils.StreamUtil;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 public class GeoSegmentSplitter {
+
+	private static final Logger log = LoggerFactory
+			.getLogger(GeoSegmentSplitter.class.getName());
 
 	private static final double snapDistanceInMeteres = 1.0;
 
@@ -40,9 +46,8 @@ public class GeoSegmentSplitter {
 	private void assignVertex(SplitAssignments.Builder builder,
 			GraphEdgeAssignment va, GraphNode vertex) {
 		if (va instanceof SpiCompositeGraphEdgeAssignment) {
-			builder.assign(
-					((SpiCompositeGraphEdgeAssignment) va).getGraphEdgeAssignments(),
-					vertex);
+			builder.assign(((SpiCompositeGraphEdgeAssignment) va)
+					.getGraphEdgeAssignments(), vertex);
 		} else {
 			builder.assign(va, vertex);
 		}
@@ -137,6 +142,15 @@ public class GeoSegmentSplitter {
 			result.add(previous);
 		}
 
+		if (log.isTraceEnabled()) {
+			verifySnap(result, snapDistance);
+		}
+
+		return result;
+	}
+
+	private void verifySnap(Collection<GraphEdgeAssignment> result,
+			double snapDistance) {
 		Iterator<GraphEdgeAssignment> itz = result.iterator();
 		GraphEdgeAssignment p = itz.next();
 		while (itz.hasNext()) {
@@ -147,17 +161,15 @@ public class GeoSegmentSplitter {
 			}
 		}
 
-		return result;
 	}
 
 	private GraphEdgeAssignment merge(Iterator<GraphEdgeAssignment> itr,
 			GraphEdgeAssignment current, GraphEdgeAssignment previous,
 			List<GraphEdgeAssignment> result, double snapDistance) {
 
-		GraphAssignmentFactoryImpl.FACTORY.createSpiCompositeGraphEdgeAssignment(null, previous.getPinnedLocation()) ;
-		
-		SpiCompositeGraphEdgeAssignment merged = GraphAssignmentFactoryImpl.FACTORY.createSpiCompositeGraphEdgeAssignment(null, previous.getPinnedLocation()) ;
-		
+		SpiCompositeGraphEdgeAssignment merged = new CompositeVertexAssignment(
+				previous.getPinnedLocation());
+
 		merged.add(previous);
 		merged.add(current);
 		result.add(merged);
@@ -174,7 +186,7 @@ public class GeoSegmentSplitter {
 			}
 
 		}
-		
+
 		return null;
 	}
 
@@ -187,7 +199,8 @@ public class GeoSegmentSplitter {
 	 */
 	public List<GeoSegment> split(GeoSegment seg,
 			Collection<PinnedLocation> splitPoints, Geometry geom) {
-		return DefaultSplitSegment.split(seg, splitPoints, geom).getSubSegments() ;
+		return DefaultSplitSegment.split(seg, splitPoints, geom)
+				.getSubSegments();
 	}
 
 	private List<PinnedLocation> toPins(
@@ -233,7 +246,66 @@ public class GeoSegmentSplitter {
 
 	//
 	//
+	//
 
+	private interface SpiCompositeGraphEdgeAssignment extends
+			GraphEdgeAssignment {
+		void add(GraphEdgeAssignment assignemnt);
 
-	
+		Collection<GraphEdgeAssignment> getGraphEdgeAssignments();
+
+	}
+
+	private static class CompositeVertexAssignment implements
+			SpiCompositeGraphEdgeAssignment {
+
+		private PinnedLocation pinnedLocation;
+		private List<GraphEdgeAssignment> vertexAssignments = new ArrayList<>();
+		private Long id;
+
+		public CompositeVertexAssignment(PinnedLocation pinnedLocation) {
+			this.pinnedLocation = pinnedLocation;
+		}
+
+		@Override
+		public Long getId() {
+			throw new RuntimeException("Operation not supported");
+		}
+
+		@Override
+		public AroEntity getAroEntity() {
+			throw new RuntimeException("Operation not supported");
+		}
+
+		@Override
+		public Collection<GraphEdgeAssignment> getGraphEdgeAssignments() {
+			return vertexAssignments;
+		}
+
+		@Override
+		public Point getPoint() {
+			return pinnedLocation.getIntersectionPoint();
+		}
+
+		public void add(GraphEdgeAssignment va) {
+			vertexAssignments.add(va);
+		}
+
+		@Override
+		public GraphEdgeAssignment getAsRootEdgeAssignment() {
+			return this;
+		}
+
+		@Override
+		public PinnedLocation getPinnedLocation() {
+			return pinnedLocation;
+		}
+
+		@Override
+		public GeoSegment getGeoSegment() {
+			return pinnedLocation.getGeoSegment();
+		}
+
+	}
+
 }
