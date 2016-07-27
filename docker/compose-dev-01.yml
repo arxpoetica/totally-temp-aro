@@ -1,0 +1,31 @@
+data:
+    image: ait-docker-registry.cloud.altvil.com/aro/app-data
+postgres-data:
+    image: mdillon/postgis:9.5
+    volumes:
+        - /var/lib/postgresql/data
+    command: /bin/bash -l
+postgres:
+    image: mdillon/postgis:9.5
+    volumes_from:
+        - postgres-data
+        - data
+    ports:
+        - "5432:5432"
+    environment:
+        POSTGRES_PASSWORD: aro
+        POSTGRES_USER: aro
+app:
+    image: aro/app
+    volumes_from:
+        - data
+    ports:
+        - "8000:8000"
+    links:
+        - postgres:arodb
+    environment:
+        PGHOST: arodb
+        PGPASSWORD: aro
+        PGUSER: aro
+        PGDATABASE: aro
+

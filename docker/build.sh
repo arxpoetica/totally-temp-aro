@@ -4,10 +4,6 @@
 APP_SOURCE_ROOT=$(cd "$(dirname "$0")" && pwd)/..
 APP_TARGET=${APP_SOURCE_ROOT}/target
 
-for d in etl-aro ; do
-    rm -rf ${APP_SOURCE_ROOT}/${d}
-done
-
 
 # copy content into target directory
 mkdir -p ${APP_TARGET}
@@ -17,7 +13,7 @@ done
 for s in runserver.sh circle.yml ; do
     cp ${APP_SOURCE_ROOT}/${s} ${APP_TARGET}
 done
-for s in cmo.ini Dockerfile ; do
+for s in  aro.json Dockerfile ; do
     cp ${APP_SOURCE_ROOT}/docker/${s} ${APP_TARGET}
 done
 

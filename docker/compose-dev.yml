@@ -1,0 +1,30 @@
+data:
+    image: ait-docker-registry.cloud.altvil.com/aro/app-data
+    volumes:
+        - ..:/srv/www/aro/current/data
+postgres-data:
+    image: mdillon/postgis:9.5
+    volumes:
+        - /var/lib/postgresql/data
+postgres:
+    image: mdillon/postgis:9.5
+    volumes_from:
+        - postgres-data
+    ports:
+        - "5432:5432"
+    environment:
+        POSTGRES_PASSWORD: aro
+        POSTGRES_USER: aro
+aro-service:
+    image: ait-docker-registry.cloud.altvil.com/aro-service
+    links:
+        - postgres:arodb
+    ports: 
+        - "8080:8080"
+    environment: 
+        CATALINA_OPTS: "-Xmx1g"
+        PGUSER: aro
+        PGPASSWORD: aro
+        PHGOST: arodb
+        ARO_THREAD_COUNT: 5
+
