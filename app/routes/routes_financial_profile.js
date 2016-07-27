@@ -14,6 +14,7 @@ exports.configure = (api, middleware) => {
   }
 
   function array (value) {
+    if (value == null) return []
     if (!Array.isArray(value)) return [value]
     return value
   }
@@ -89,6 +90,7 @@ exports.configure = (api, middleware) => {
 
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
     var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
     var curves = {}
     entities.forEach((key) => {
       curves[key] = `fiber.${key}.premises_passed`
@@ -117,6 +119,7 @@ exports.configure = (api, middleware) => {
     var curves = {}
     var zeros = []
     var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
     entities.forEach((key) => {
       curves[`bau_${key}`] = `copper.${key}.subscribers_count`
       curves[`plan_${key}`] = `planned.${key}.subscribers_count`
@@ -150,29 +153,12 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/financial_profile/:plan_id/penetration', (request, response, next) => {
-    var curves = {}
-    var zeros = ['bau', 'plan']
-    if (request.query.entityType === 'households') {
-      curves = {
-        bau: 'copper.household.subscribers_penetration',
-        plan: 'planned.network.subscribers_penetration'
-      }
-      zeros = []
+    var entityType = request.query.entityType
+    var curves = {
+      bau: `copper.${entityType}.subscribers_penetration`,
+      plan: `planned.${entityType}.subscribers_penetration`
     }
-    /*
-      Bottom Chart - BAU
-      copper.cellTower.subscribers_penetration
-      copper.household.subscribers_penetration
-      copper.largeBusiness.subscribers_penetration
-      copper.mediumBusiness.subscribers_penetration
-      copper.smallBusiness.subscribers_penetration
-      Bottom Chart - Plan
-      planned.cellTower.subscribers_penetration
-      planned.household.subscribers_penetration
-      planned.largeBusiness.subscribers_penetration
-      planned.mediumBusiness.subscribers_penetration
-      planned.smallBusiness.subscribers_penetration
-    */
+    var zeros = []
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,

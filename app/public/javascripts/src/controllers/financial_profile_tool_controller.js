@@ -70,7 +70,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.selectedArea = {
       id: feature.getProperty('id')
     }
-    console.log('id', feature.getProperty('id'))
     $scope.calculateShowData()
     refresh()
     if (!$scope.$$phase) { $scope.$apply() }
@@ -294,6 +293,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-subscribers', 'Bar', data, options)
     })
   }
+  $scope.showSubscribersChart = showSubscribersChart
 
   function showPenetrationChart (force) {
     var datasets = [
@@ -312,6 +312,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-penetration', 'Line', data, options)
     })
   }
+  $scope.showPenetrationChart = showPenetrationChart
 
   function selectedKeys (obj) {
     return Object.keys(obj).filter((item) => !!obj[item])

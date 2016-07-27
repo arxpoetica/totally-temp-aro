@@ -166,7 +166,7 @@
             <div class="radio" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
               <label>
                 <input name="entityType" type="checkbox"
-                ng-model="subscribersFilterEntityTypes[entityType]" ng-change="refreshCurrentTab(true)"> {{ entityName }}
+                ng-model="subscribersFilterEntityTypes[entityType]" ng-change="showSubscribersChart(true)"> {{ entityName }}
               </label>
             </div>
           </form>
@@ -178,7 +178,7 @@
             <div class="radio" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
               <label>
                 <input name="entityType" type="radio"
-                  ng-model="penetrationFilter.entityType" ng-change="refreshCurrentTab(true)" value="{{entityType}}"> {{ entityName }}
+                  ng-model="penetrationFilter.entityType" ng-change="showPenetrationChart(true)" value="{{entityType}}"> {{ entityName }}
               </label>
             </div>
           </form>
