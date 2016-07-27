@@ -11,12 +11,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.eclipse.jetty.util.log.Log;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
@@ -25,11 +28,24 @@ import com.google.common.collect.TreeMultimap;
 
 public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(RouteBuilder.class.getName());
+
 	private Map<V, AllShortestPaths<V, E>> targetMap;
 
 	public Collection<SourceRoute<V, E>> build(WeightedGraph<V, E> source,
 			Collection<V> all_roots, Collection<V> targets) {
 
+		
+		if( log.isDebugEnabled() ) {
+			for(V v : targets) {
+				if( !source.containsVertex(v) ) {
+					throw new RuntimeException("Vertex not defined in graph " + v) ;
+				}
+			}
+		}
+		
+		
 		// Establish Root Structures
 		Set<V> roots = new HashSet<>(all_roots);
 

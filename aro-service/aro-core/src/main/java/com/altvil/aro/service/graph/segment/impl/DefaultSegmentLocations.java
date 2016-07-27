@@ -17,6 +17,7 @@ import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.segment.splitter.GeoSegmentSplitter;
 import com.altvil.aro.service.graph.segment.transform.GeoSegmentTransform;
+import com.altvil.aro.service.graph.segment.transform.TransformFactory;
 import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
@@ -57,7 +58,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 			throw new IllegalArgumentException("Negative length " + this.length);
 	}
 
-	protected DefaultSegmentLocations(GeoSegmentTransform transform,
+	private DefaultSegmentLocations(GeoSegmentTransform transform,
 			double length, Long gid, Geometry geometry) {
 		this(transform, length, gid, geometry, new ArrayList<>());
 	}
@@ -256,8 +257,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	@Override
 	public GeoSegment reverse() {
-
-		DefaultSegmentLocations seg = new DefaultSegmentLocations(null, length,
+		DefaultSegmentLocations seg = new DefaultSegmentLocations(TransformFactory.FACTORY.createFlippedTransform(this), length,
 				gid, geometry.reverse(), new ArrayList<>());
 
 		seg.reverseOriginalLocations(this);

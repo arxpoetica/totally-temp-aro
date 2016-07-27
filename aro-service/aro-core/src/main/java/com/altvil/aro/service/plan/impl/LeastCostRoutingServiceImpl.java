@@ -366,11 +366,27 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 					renodedModel.getGraph(),
 					 resolved.get(root), StreamUtil.map(nodes, n -> resolved.get(n))) ;
 			
-			Set<AroEdge<GeoSegment>> edges = sr.createDagModel(transformFactory.createGraphBuilder()).getEdges() ;
+			Set<AroEdge<GeoSegment>> edges = sr.createDagModel(transformFactory.createDAGBuilder()).getEdges() ;
 			
 			return new DefaultGeneratedFiberRoute(sr.getSourceVertex(), edges) ;
 		}
 			
+		
+		private void verifyAssignments(Map<GraphAssignment, GraphNode> map) {
+			int count = 0 ;
+			
+			for(Map.Entry<GraphAssignment, GraphNode> e : map.entrySet()) {
+				GraphEdgeAssignment ge = (GraphEdgeAssignment) e.getKey() ;
+				count++ ;
+				System.out.println("Failed Assignment Length = " + ge.getGeoSegment().getLength() + "gid= " +  ge.getGeoSegment().getGid() + " id=" + System.identityHashCode(ge.getGeoSegment())) ;
+			}
+			
+			if( count > 0 ) {
+				throw new RuntimeException("Failed assign all vertices") ;
+			}
+			
+			
+		}
 
 		private GraphModel<GeoSegment> renodeGraph(GraphContext graphCtx,
 				GraphMapping co) {
@@ -393,6 +409,9 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 			networkBuilder.renodeGraph(graphCtx.getGraphModel());
 			// TODO Move into Model Abstraction
 			resolved = networkBuilder.getResolvedAssignments();
+			
+			verifyAssignments(resolved) ;
+			
 
 			// Update Resolved Map with FiberSource Root Binding
 			this.resolved.put(fiberSourceBinding.getSource(),

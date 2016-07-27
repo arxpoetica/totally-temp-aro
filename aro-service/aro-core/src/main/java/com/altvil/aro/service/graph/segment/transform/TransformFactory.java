@@ -37,17 +37,17 @@ public class TransformFactory {
 
 		public double getOffsetDistance() {
 
-			if (this.offsetDistance == Double.NaN) {
+			if ( Double.isNaN(this.offsetDistance) ) {
 				this.offsetDistance = this.ratio
 						* this.currentSegment.getLength();
 			}
 
-			return ratio;
+			return offsetDistance;
 		}
 
 		public double getOffsetRatio() {
 
-			if (this.ratio == Double.NaN) {
+			if (Double.isNaN(this.ratio)) {
 				this.ratio = offsetDistance / this.currentSegment.getLength();
 			}
 
@@ -86,6 +86,8 @@ public class TransformFactory {
 				t = (AbstractTransform) t.getTargetGeoSegment()
 						.getParentTransform();
 			}
+			
+			System.out.println("Transformed "+  pl.getOffsetRatio() + " " + pl.getOffset() + "->" +p.getOffsetRatio() + " " + p.getOffsetDistance()) ;
 
 			return p.getCurrentSegment().pinLocation(p.getOffsetRatio());
 

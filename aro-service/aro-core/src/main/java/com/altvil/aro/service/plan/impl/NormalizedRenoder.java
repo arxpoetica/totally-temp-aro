@@ -29,7 +29,13 @@ public class NormalizedRenoder implements GraphRenoder {
 	@Override
 	public void add(GraphAssignment va) {
 		if (va instanceof GraphEdgeAssignment) {
-			renoder.add(((GraphEdgeAssignment) va).getAsRootEdgeAssignment());
+			//41582281
+			GraphEdgeAssignment ge = (GraphEdgeAssignment) va ; 
+			if( ge.getGeoSegment().getGid() != null && ge.getGeoSegment().getGid() == 41582281) {
+				int x = 10 ;
+			}
+			
+			renoder.add(ge.getAsRootEdgeAssignment());
 		} else {
 			renoder.add(va);
 		}
