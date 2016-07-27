@@ -5,6 +5,16 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
   $scope.carriers = []
   $scope.overlay = 'none'
 
+  var nbmCarriers = {
+    'Comcast Corporation': 'Comcast',
+    'Time Warner Cable Inc.': 'Time Warner Cable',
+    'Charter Communications': 'Charter',
+    'Cox Communications, Inc.': 'Cox',
+    'Bright House Networks, LLC': 'Bright House',
+    'CSC Holdings': 'Cablevision', // was CSC Holdings, LLC
+    'Mediacom Communications Corp.': 'Mediacom'
+  }
+
   $scope.competitors_fiber = new MapLayer({
     api_endpoint: '/network/fiber_plant_competitors',
     style_options: {
@@ -62,10 +72,11 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         name: 'All carriers',
         color: 'blue'
       }
-      $scope.nbmCarriers = [all].concat(carriers.map((carrier) => {
+      var filtered = carriers.filter((carrier) => nbmCarriers[carrier.name])
+      $scope.nbmCarriers = [all].concat(filtered.map((carrier) => {
         return {
           id: carrier.id,
-          name: carrier.name,
+          name: nbmCarriers[carrier.name],
           color: carrier.color
         }
       }).filter((carrier) => {
