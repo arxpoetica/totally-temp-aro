@@ -7,10 +7,9 @@
             "cwd":"/srv/www/aro/current/app",
             "env":{
                 "NODE_ENV":"staging",
-                "HOME":"/home/vagrant",
                 "DATABASE_URL":"postgres://aro:aro@arodb/aro",
                 "NODE_PATH":"/usr/lib/nodejs:/usr/lib/node_modules:/usr/share/javascript",
-                "APP_BASE_URL":"http://localhost %>",
+                "APP_BASE_URL":"http://localhost",
                 "ARO_CLIENT":"aro"
             }
         }

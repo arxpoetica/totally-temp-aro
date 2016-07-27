@@ -8,6 +8,6 @@ WORKDIR /srv/www/aro/current
 
 EXPOSE 8000
 # ADD ./cmo.ini /etc/uwsgi/apps-enabled/cmo.ini
-CMD /usr/bin/pm2 start /srv/www/aro/current/aro.json
+CMD /usr/bin/pm2 start /srv/www/aro/current/aro.json --no-daemon
 VOLUME /srv/www/aro/source_data
 
