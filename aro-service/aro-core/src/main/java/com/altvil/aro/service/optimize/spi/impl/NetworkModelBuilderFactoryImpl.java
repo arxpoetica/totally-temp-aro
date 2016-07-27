@@ -10,18 +10,12 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.LeastCostRoutingService;
-import com.altvil.aro.service.plan.PlanService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
 import com.google.inject.Inject;
@@ -40,30 +34,25 @@ public class NetworkModelBuilderFactoryImpl implements
 	}
 
 	@Override
-	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			FtthThreshholds fiberConstraints, GlobalConstraint globalConstraints) {
-		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, fiberConstraints, globalConstraints);
+	public NetworkModelBuilder create(NetworkData networkData,
+			FtthThreshholds fiberConstraints) {
+		return new NetworkModelBuilderImpl(networkData, fiberConstraints);
 	}
 
 	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
 
 		private NetworkData networkData;
 		
-		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder;
-		
 		private FtthThreshholds constraints;
-		private GlobalConstraint globalConstraints;
-
+		
 		private Map<Long, NetworkAssignment> map;
 
-		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				FtthThreshholds constraints, GlobalConstraint globalConstraints) {
+		private NetworkModelBuilderImpl(NetworkData networkData, 
+				FtthThreshholds constraints) {
 			super();
 			this.networkData = networkData;
-			this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
 			this.constraints = constraints;
-			this.globalConstraints = globalConstraints;
-
+		
 			map = StreamUtil.hash(networkData.getRoadLocations(),
 					a -> a.getSource().getObjectId());
 		}

@@ -261,8 +261,7 @@ public class GeoSegmentSplitter {
 
 		private PinnedLocation pinnedLocation;
 		private List<GraphEdgeAssignment> vertexAssignments = new ArrayList<>();
-		private Long id;
-
+		
 		public CompositeVertexAssignment(PinnedLocation pinnedLocation) {
 			this.pinnedLocation = pinnedLocation;
 		}

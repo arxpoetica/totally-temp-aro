@@ -19,7 +19,6 @@ import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.plan.LeastCostRoutingService;
-import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.utils.StreamUtil;

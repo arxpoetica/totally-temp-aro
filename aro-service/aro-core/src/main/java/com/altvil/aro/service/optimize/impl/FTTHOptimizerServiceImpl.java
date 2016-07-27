@@ -5,12 +5,7 @@ import java.util.function.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
-import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkConstraint;
 import com.altvil.aro.service.optimize.NetworkPlanner;
@@ -86,13 +81,10 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 			OptimizerContext ctx, PruningStrategy pruningStrategy,
 			ScoringStrategy scoringStrategy) {
 
-		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = (
-				g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(
-				g, s);
-
+		
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
-				.create(networkData, closestFirstSurfaceBuilder,
-						ctx.getFtthThreshholds(), null);
+				.create(networkData,
+						ctx.getFtthThreshholds());
 
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder, ctx,

@@ -52,7 +52,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 		serialize(
 				write(graphMapping,
 						createFiberRoute(
-								networkModel.getCentralOfficeFeederFiber(),
+								networkModel.getCentralOfficeFeederFiber().getEdges(),
 								FiberType.FEEDER, parentEquipment)), //
 
 				graphMapping.getChildren());
@@ -67,7 +67,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 		serialize(
 				write(graphMapping,
 						createFiberRoute(
-								networkModel.getCentralOfficeFeederFiber(),
+								networkModel.getCentralOfficeFeederFiber().getEdges(),
 								FiberType.FEEDER, parentEquipment)),
 				graphMapping.getChildren());
 
@@ -82,7 +82,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 				write(graphMapping,
 						createFiberRoute(networkModel
 								.getFiberRouteForFdh(graphMapping
-										.getGraphAssignment()),
+										.getGraphAssignment()).getEdges(),
 								FiberType.DISTRIBUTION, parentEquipment)), // TODO
 				// Compute
 				// Cable
