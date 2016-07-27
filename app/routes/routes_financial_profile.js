@@ -90,18 +90,8 @@ exports.configure = (api, middleware) => {
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
     var entities = array(request.query.entityTypes)
     var curves = {}
-    var mapping = {
-      smallBusiness: 'planned.smallBusiness.premises_passed',
-      mediumBusiness: 'planned.mediumBusiness.premises_passed',
-      largeBusiness: 'planned.largeBusiness.premises_passed',
-      household: 'fiber.household.premises_passed',
-      cellTower: 'planned.cellTower.premises_passed'
-    }
-    entities.forEach((entity) => {
-      var curve = mapping[entity]
-      if (curve) {
-        curves[entity] = curve
-      }
+    entities.forEach((key) => {
+      curves[key] = `fiber.${key}.premises_passed`
     })
     var zeros = ['existing']
     requestData({
@@ -117,7 +107,6 @@ exports.configure = (api, middleware) => {
         })
         obj.incremental = n
       })
-      console.log('data', data)
       return data
     })
     .then(jsonSuccess(response, next))
