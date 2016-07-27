@@ -9,14 +9,13 @@ postgres:
     image: mdillon/postgis:9.5
     volumes_from:
         - postgres-data
-        - data
     ports:
         - "5432:5432"
     environment:
         POSTGRES_PASSWORD: aro
         POSTGRES_USER: aro
 app:
-    image: aro/app
+    image: aro/app-dev
     volumes_from:
         - data
     ports:
