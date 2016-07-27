@@ -129,6 +129,7 @@ public class NewOptimizeEndPoint {
 				.setLocationEntities(toMask(plan.getLocationTypes()))
 				.setWirecenters(
 						toSelectedWireCenters(plan.getSelectedRegions()))
+				.setOptimizationMode(plan.getOptimizationMode())
 				.build();
 
 	}

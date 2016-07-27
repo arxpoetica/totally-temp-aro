@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +36,8 @@ import com.altvil.aro.service.optimization.spi.OptimizationException;
 import com.altvil.aro.service.optimization.spi.OptimizationExecutor;
 import com.altvil.aro.service.optimization.spi.OptimizationExecutorService;
 import com.altvil.aro.service.optimization.spi.OptimizationExecutorService.ExecutorType;
-import com.altvil.aro.service.optimization.strategy.OptimizationStrategy;
-import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
@@ -59,7 +61,7 @@ public class OptimizationPlannerServiceImpl implements
 			.getLogger(OptimizationPlannerServiceImpl.class.getName());
 
 	private NetworkPlanRepository networkPlanRepository;
-	private OptimizationStrategyService strategyService;
+	private OptimizationEvaluatorFactory strategyService;
 	private WirecenterOptimizationService wirecenterOptimizationService;
 	private WirecenterPlanningService wirecenterPlanningService;
 	private OptimizationExecutorService optimizationExecutorService;
@@ -74,7 +76,7 @@ public class OptimizationPlannerServiceImpl implements
 	@Autowired
 	public OptimizationPlannerServiceImpl(
 			NetworkPlanRepository networkPlanRepository,
-			OptimizationStrategyService strategyService,
+			OptimizationEvaluatorFactory strategyService,
 			WirecenterOptimizationService wirecenterOptimizationService,
 			WirecenterPlanningService wirecenterPlanningService,
 			OptimizationExecutorService optimizationExecutorService,
@@ -118,8 +120,8 @@ public class OptimizationPlannerServiceImpl implements
 		}
 
 		return new PruningOptimizer(
-				strategyService.getOptimizationStrategy(request
-						.getOptimizationConstraints()));
+				strategyService.getOptimizationEvaluator((ThresholdBudgetConstraint)request
+						.getOptimizationConstraints(), request.getOptimizationMode()) );
 
 	}
 
@@ -153,13 +155,16 @@ public class OptimizationPlannerServiceImpl implements
 					.build()
 					.add(DemandTypeEnum.planned_demand, SpeedCategory.cat7,
 							dc.getLocationDemand())
+							
+							
 					.add(DemandTypeEnum.new_demand,
 							SpeedCategory.cat7,
 							aroDemandService.aggregateDemandForSpeedCategory(
 									mapping.getAllDemandMapping(),
 									SpeedCategory.cat7))
+									
 					.add(DemandTypeEnum.original_demand,
-							SpeedCategory.cat7,
+							SpeedCategory.cat3,
 							aroDemandService.aggregateDemandForSpeedCategory(
 									plannedDemand, SpeedCategory.cat3))
 
@@ -176,6 +181,9 @@ public class OptimizationPlannerServiceImpl implements
 			NetworkDemandSummary demandSummary = toNetworkDemandSummary(
 					reifiedPlan.getDemandCoverage(),
 					plan.getCompetitiveDemandMapping());
+			
+			log.debug("ds ====>" + demandSummary.toString());
+			
 
 			return wirecenterPlanningService.save(new GeneratedPlanImpl(
 					demandSummary, constraints, reifiedPlan));
@@ -254,11 +262,11 @@ public class OptimizationPlannerServiceImpl implements
 
 	private class PruningOptimizer extends MasterOptimizer {
 
-		private OptimizationStrategy optimizationStrategy;
+		private OptimizationEvaluator optimizationEvaluator;
 
-		public PruningOptimizer(OptimizationStrategy optimizationStrategy) {
+		public PruningOptimizer(OptimizationEvaluator optimizationEvaluator) {
 			super();
-			this.optimizationStrategy = optimizationStrategy;
+			this.optimizationEvaluator = optimizationEvaluator;
 		}
 
 		private ComputeUnitCallable<WirecenterOptimization<PrunedNetwork>> asCommand(
@@ -283,7 +291,7 @@ public class OptimizationPlannerServiceImpl implements
 			Collection<PrunedNetwork> prunedNetworks = evaluateWirecenterCommands(
 					toCommands(wirecenters, this::asCommand), n -> !n.isEmpty());
 
-			return optimizationStrategy.evaluateNetworks(prunedNetworks);
+			return optimizationEvaluator.evaluateNetworks(prunedNetworks);
 
 		}
 

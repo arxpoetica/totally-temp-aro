@@ -43,7 +43,8 @@ public class RoicModelBuilderServiceImpl implements RoicBuilderService {
 	@Override
 	public Aggregator<NetworkAnalysisType, RoicModel> aggregate() {
 
-		 Aggregator<NetworkAnalysisType, RoicModel> aggregator = new AbstractEnumAggregator<NetworkAnalysisType, RoicNetworkModel, RoicModel>(NetworkAnalysisType.class) {
+		Aggregator<NetworkAnalysisType, RoicModel> aggregator = new AbstractEnumAggregator<NetworkAnalysisType, RoicNetworkModel, RoicModel>(
+				NetworkAnalysisType.class) {
 
 			@Override
 			protected DerivedModel<NetworkAnalysisType, RoicNetworkModel> transform(
@@ -75,9 +76,8 @@ public class RoicModelBuilderServiceImpl implements RoicBuilderService {
 						.sum();
 			}
 		};
-		
-		
-		return aggregator ;
+
+		return aggregator;
 	}
 
 	private class RoicModelBuilderImpl implements RoicBuilder {

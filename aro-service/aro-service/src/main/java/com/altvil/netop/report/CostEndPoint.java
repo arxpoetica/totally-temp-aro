@@ -2,6 +2,7 @@ package com.altvil.netop.report;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -76,13 +77,15 @@ public class CostEndPoint {
 
 	private Collection<AroFiberCost> toFiberCosts(
 			Collection<FiberCost> fiberCosts) {
-		return StreamUtil.map(
-				fiberCosts,
-				c -> new AroFiberCost(c.getFiberType().getCode(),
-						reportingService.getCostCode(c.getFiberType())
-								.getName(), c.getCostPerMeter(), c
-								.getLengthMeters(), c.getTotalCost()));
-
+	      return fiberCosts.stream()
+	                .filter(fiberCost -> fiberCost.getLengthMeters() != 0)
+	                .map(c -> new AroFiberCost(
+	                        c.getFiberType().getCode(),
+	                        reportingService.getCostCode(c.getFiberType()).getName(),
+	                        c.getCostPerMeter(),
+	                        c.getLengthMeters(),
+	                        c.getTotalCost()))
+	                .collect(Collectors.toList());
 	}
 
 	public static class AroPriceModel {

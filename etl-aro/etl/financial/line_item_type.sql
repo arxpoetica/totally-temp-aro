@@ -17,3 +17,9 @@ insert into financial.line_item_type (name, description)
 insert into financial.line_item_type (name, description) 
 	values('cashflow','Planned Cashflows') ;
 
+insert into financial.line_item_type (name, description) 
+	values('roic_irr','ROIC calculated - Internal Rate Return') ;
+
+insert into financial.line_item_type (name, description) 
+	values('roic_npv','ROIC calculated - Net Present Value') ;
+

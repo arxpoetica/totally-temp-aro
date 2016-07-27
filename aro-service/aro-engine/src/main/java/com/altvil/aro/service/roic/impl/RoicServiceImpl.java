@@ -21,11 +21,12 @@ import com.altvil.aro.model.RoicComponentInputModel;
 import com.altvil.aro.model.WirecenterPlan;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.RoicComponentInputModelRepository;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
-import com.altvil.aro.service.roic.RoicInputService;
+import com.altvil.aro.service.roic.RoicFinancialInput;
+import com.altvil.aro.service.roic.RoicEngineService;
 import com.altvil.aro.service.roic.RoicService;
-import com.altvil.aro.service.roic.analysis.AnalysisPeriod;
 import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilderService;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.utils.reference.VolatileReference;
@@ -41,7 +42,7 @@ public class RoicServiceImpl implements RoicService {
 	private RoicComponentInputModelRepository roicComponentInputModelRepository;
 	private NetworkReportService networkReportService;
 
-	private RoicInputService roicInputService;
+	private RoicEngineService roicInputService;
 
 	private SuperSimpleCache cache;
 	VolatileReference<Collection<RoicComponentInputModel>> roicInputRef;
@@ -51,12 +52,14 @@ public class RoicServiceImpl implements RoicService {
 			RoicBuilderService roicBuilderService,
 			NetworkPlanRepository planRepostory,
 			RoicComponentInputModelRepository roicComponentInputModelRepository,
-			NetworkReportService networkReportService) {
+			NetworkReportService networkReportService,
+			RoicEngineService roicInputService) {
 		super();
 		this.roicBuilderService = roicBuilderService;
 		this.planRepostory = planRepostory;
 		this.roicComponentInputModelRepository = roicComponentInputModelRepository;
 		this.networkReportService = networkReportService;
+		this.roicInputService = roicInputService;
 
 		cache = new SuperSimpleCache();
 		roicInputRef = createComponentInputs();
@@ -126,8 +129,17 @@ public class RoicServiceImpl implements RoicService {
 			PlanAnalysisReport report = networkReportService
 					.loadSummarizedPlan(planId).getPlanAnalysisReport();
 
-			return roicInputService.createRoicBuilder(report)
-					.setAnalysisPeriod(new AnalysisPeriod(2016, 15)).build();
+			return roicInputService.loadRoicModel(new RoicFinancialInput() {
+				@Override
+				public double getFixedCosts() {
+					return report.getPriceModel().getTotalCost();
+				}
+
+				@Override
+				public NetworkDemandSummary getDemandSummary() {
+					return report.getDemandSummary();
+				}
+			});
 
 		} catch (Throwable err) {
 			log.error(err.getMessage(), err);

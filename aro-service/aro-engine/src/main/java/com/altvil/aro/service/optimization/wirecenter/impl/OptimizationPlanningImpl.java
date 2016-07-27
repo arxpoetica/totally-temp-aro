@@ -3,14 +3,17 @@ package com.altvil.aro.service.optimization.wirecenter.impl;
 import java.util.Date;
 import java.util.Optional;
 
+import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkDataService;
-import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
@@ -31,7 +34,8 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 			.getLogger(OptimizationPlanningImpl.class.getName());
 
 	@Autowired
-	private OptimizationStrategyService optimizationStrategyService;
+	@Qualifier("singleEvaluator")
+	private OptimizationEvaluatorService optimizationEvaluatorService;
 
 	@Autowired
 	private transient NetworkDataService networkService;
@@ -88,13 +92,11 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
-
+		OptimizationEvaluator evaluator = optimizationEvaluatorService.getOptimizationEvaluator((ThresholdBudgetConstraint)request
+				.getOptimizationConstraints());
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
-				networkData, optimizationStrategyService
-						.getPruningStrategy(request
-								.getOptimizationConstraints()),
-				optimizationStrategyService.getScoringStrategy(request
-						.getOptimizationConstraints()),
+				networkData, evaluator.getPruningStrategy(),
+				evaluator.getScoringStrategy(),
 				createOptimizerContext(request));
 
 		return new PrunedNetworkImpl(request.getPlanId(),
