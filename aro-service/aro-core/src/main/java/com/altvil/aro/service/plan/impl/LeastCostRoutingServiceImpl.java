@@ -376,9 +376,11 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 			int count = 0 ;
 			
 			for(Map.Entry<GraphAssignment, GraphNode> e : map.entrySet()) {
-				GraphEdgeAssignment ge = (GraphEdgeAssignment) e.getKey() ;
-				count++ ;
-				System.out.println("Failed Assignment Length = " + ge.getGeoSegment().getLength() + "gid= " +  ge.getGeoSegment().getGid() + " id=" + System.identityHashCode(ge.getGeoSegment())) ;
+				if( e.getValue() ==  null ) {
+					GraphEdgeAssignment ge = (GraphEdgeAssignment) e.getKey() ;
+					count++ ;
+					log.error("Failed Assignment Length = " + ge.getGeoSegment().getLength() + "gid= " +  ge.getGeoSegment().getGid() + " id=" + System.identityHashCode(ge.getGeoSegment())) ;
+				}
 			}
 			
 			if( count > 0 ) {
