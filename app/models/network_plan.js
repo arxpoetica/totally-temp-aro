@@ -235,6 +235,15 @@ module.exports = class NetworkPlan {
       })
   }
 
+  static findWirecenterPlan (plan_id, wirecenter_id) {
+    var params = [plan_id, wirecenter_id]
+    return database.findOne('SELECT id FROM client.plan WHERE parent_plan_id=$1 AND wirecenter_id=$2', params)
+      .then((row) => {
+        if (!row) return {}
+        return this.findPlan(row.id, true)
+      })
+  }
+
   static findAll (user, options) {
     var text = options.text
     var sortField = options.sortField

@@ -46,8 +46,11 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function refresh () {
     $scope.financialData = {}
-    if ($scope.plan && $scope.plan.metadata) {
+    if ($scope.metadata) {
       refreshCurrentTab()
+    }
+    if ($scope.mode === 'area' && $scope.selectedArea) {
+      loadWirecenterMetadata()
     }
   }
 
@@ -61,31 +64,41 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
-
-    $scope.aboveWirecenter = layer.type === 'county_subdivisions'
+    if (layer.type !== 'wirecenter') return
 
     var feature = event.feature
-    if (feature.getGeometry().getType() === 'MultiPolygon') {
-      feature.toGeoJson((obj) => {
-        $scope.selectedArea = {
-          name: feature.getProperty('name'),
-          geog: obj.geometry
-        }
-        refresh()
-        $scope.$apply()
-      })
+    $scope.selectedArea = {
+      id: feature.getProperty('id')
     }
+    console.log('id', feature.getProperty('id'))
+    $scope.calculateShowData()
+    refresh()
+    if (!$scope.$$phase) { $scope.$apply() }
+
+    // $scope.aboveWirecenter = layer.type === 'county_subdivisions'
+
+    // var feature = event.feature
+    // if (feature.getGeometry().getType() === 'MultiPolygon') {
+    //   feature.toGeoJson((obj) => {
+    //     $scope.selectedArea = {
+    //       name: feature.getProperty('name'),
+    //       geog: obj.geometry
+    //     }
+    //     refresh()
+    //     $scope.$apply()
+    //   })
+    // }
   })
 
   $rootScope.$on('custom_boundary_clicked', (e, boundary) => {
     if (!map_tools.is_visible('financial_profile')) return
 
-    $scope.selectedArea = {
-      name: boundary.name,
-      geog: boundary.geom
-    }
-    refresh()
-    $scope.$apply()
+    // $scope.selectedArea = {
+    //   name: boundary.name,
+    //   geog: boundary.geom
+    // }
+    // refresh()
+    // $scope.$apply()
   })
 
   $('#financial_profile_controller .nav-tabs').on('shown.bs.tab', (e) => refreshCurrentTab())
@@ -112,10 +125,15 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+    $scope.mode = 'global'
+    $scope.metadata = plan.metadata
   })
 
   $rootScope.$on('plan_changed_metadata', (e, plan) => {
     $scope.plan = plan
+    if ($scope.mode === 'global') {
+      $scope.metadata = plan.metadata
+    }
     refresh()
   })
 
@@ -137,7 +155,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     if (force) delete $scope.financialData[key]
     else if ($scope.financialData[key]) return $scope.financialData[key]
     console.log('params', params)
-    $http({ url: `/financial_profile/${$scope.plan.id}/${key}`, params: params })
+    var plan_id = $scope.mode === 'global' ? $scope.plan.id : $scope.selectedArea.id
+    $http({ url: `/financial_profile/${plan_id}/${key}`, params: params })
       .success((response) => {
         $scope.financialData[key] = response
         console.log('Requested', key)
@@ -312,7 +331,32 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   $scope.mode = 'global'
+  $scope.showData = true
   $scope.setMode = (mode) => {
     $scope.mode = mode
+    $rootScope.$broadcast('financial_profile_changed_mode', mode)
+    $scope.selectedArea = null
+    $scope.metadata = $scope.plan.metadata
+    $scope.calculateShowData()
+    refresh()
+  }
+
+  $scope.calculateShowData = () => {
+    $scope.showData = $scope.mode === 'global' || !!$scope.selectedArea
+  }
+
+  function loadWirecenterMetadata () {
+    const calculateURL = () => {
+      if (!$scope.selectedArea || !$scope.plan) return null
+      return '/network_plan/' + $scope.plan.id + '/' + $scope.selectedArea.id
+    }
+    var url = calculateURL()
+    $http.get(url).success((response) => {
+      // Check if the user has changed to another wirectenter, to global mode or to another plan
+      if (url === calculateURL() && $scope.mode === 'area') {
+        console.log('loaded wirecenter data')
+        $scope.metadata = response.metadata
+      }
+    })
   }
 }])

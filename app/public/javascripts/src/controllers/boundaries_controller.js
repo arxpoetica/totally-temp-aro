@@ -419,4 +419,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.number_of_area_layers = () => {
     return _.size(area_layers)
   }
+
+  $rootScope.$on('financial_profile_changed_mode', (e, mode) => {
+    if (mode === 'area') {
+      area_layers['wirecenter'].show()
+    }
+  })
 }])

@@ -119,7 +119,12 @@
       </div>
       <div id="map-tools-financial" class="panel-collapse collapse" role="tabpanel" data-tool="financial_profile">
         <div class="panel-body">
-          <% include controller_financial_profile_summary.html %>
+          <p ng-hide="showData" class="text-center" style="margin: 30px 10px">
+            Click on a wirecenter to see its financial summary.
+          </p>
+          <div ng-show="showData">
+            <% include controller_financial_profile_summary.html %>
+          </div>
         </div>
       </div>
     </div>
