@@ -11,12 +11,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.eclipse.jetty.util.log.Log;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.GraphPathImpl;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 		Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 		all_roots.forEach(v -> {
-			sourceRootMap.put(v, new SourceRoute<>(v));
+			sourceRootMap.put(v, new SourceRoute<>(source, v));
 		});
 
 		List<SourceRoute<V, E>> originalSources = new ArrayList<>(
@@ -62,9 +62,9 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			// Exclude any source target match
 
 			if (roots.contains(target)) {
+				
 				// Update Root Structure
-				sourceRootMap.get(target).add(target, target,
-						Collections.emptyList());
+				sourceRootMap.get(target).add(new GraphPathImpl<V, E>(source, target, target, new ArrayList<>(), 0.0));
 			} else {
 				targetMap.put(target,
 						new AllShortestPaths<V, E>(source, target));
@@ -91,12 +91,12 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			// Filters out all 0 length routes
 			if (path.getEdgeList().size() == 0) {
 				// Update Root
-				sourceRoot.add(path.getStartVertex(), path.getStartVertex(),
-						new ArrayList<E>());
+				sourceRoot.add(path);
 				targetMap.remove(path.getStartVertex());
 				continue;
 			}
 
+			
 			List<V> pathList = Graphs.getPathVertexList(path);
 			Iterator<V> itr = pathList.iterator();
 
@@ -120,7 +120,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 				}
 			}
 
-			sourceRoot.add(startVertex, previous, resultPath);
+			sourceRoot.add(path);
 			targetMap.remove(path.getStartVertex());
 
 		}

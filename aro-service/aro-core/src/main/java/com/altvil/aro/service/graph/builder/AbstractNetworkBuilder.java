@@ -102,7 +102,7 @@ public abstract class AbstractNetworkBuilder {
 
 		GraphNode leftVertex = getLeftVertex(re);
 		GraphNode rightVertex = getRightVertex(re);
-
+		
 		if (re.getTindf() == re.getTnidt()) {
 
 			PinnedLocation pl = segAssembler.pinLocation(0.333);

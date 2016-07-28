@@ -54,7 +54,7 @@ public class NetworkBuilder implements GraphRenoder {
 			GraphEdgeAssignment edgeAssignment = (GraphEdgeAssignment) va;
 
 			List<GraphEdgeAssignment> assigments = assignmentsByGeoSegment
-					.get(edgeAssignment);
+					.get(edgeAssignment.getGeoSegment());
 			if (assigments == null) {
 				assignmentsByGeoSegment.put(edgeAssignment.getGeoSegment(),
 						assigments = new ArrayList<>());

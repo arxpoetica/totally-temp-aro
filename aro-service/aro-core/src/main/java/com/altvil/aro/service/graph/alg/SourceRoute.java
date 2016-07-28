@@ -3,10 +3,12 @@ package com.altvil.aro.service.graph.alg;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 
 import com.altvil.aro.service.graph.AroEdge;
@@ -25,8 +27,9 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> {
 
 	private Set<V> targets = new HashSet<>();
 
-	public SourceRoute(V sourceVertex) {
+	public SourceRoute(Graph<V, E> sourceGraph, V sourceVertex) {
 		super();
+		this.sourceGraph = sourceGraph ;
 		this.sourceVertex = sourceVertex;
 	}
 
@@ -38,9 +41,9 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> {
 		return new TargetRoutes<>(subRoutes);
 	}
 
-	public void add(V src, V target, List<E> path) {
-		targets.add(src);
-		subRoutes.add(new TargetRoute<>(target, src, path));
+	public void add(GraphPath<V, E> path) {
+		targets.add(path.getStartVertex());
+		subRoutes.add(new TargetRoute<>(path));
 	}
 
 	public Set<V> getTargets() {
@@ -57,7 +60,7 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> {
 
 	public Set<E> getAllEdges() {
 		Set<E> result = new HashSet<>();
-		subRoutes.forEach(r -> result.addAll(r.getPath()));
+		subRoutes.forEach(r -> result.addAll(r.getPath().getEdgeList()));
 		return result;
 	}
 
@@ -136,9 +139,15 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> {
 		}
 
 		public DagAssembler updatePath(TargetRoute<V, E> target) {
-			V start = target.getSourceVertex();
-			for (E e : target.getPath()) {
-				V end = Graphs.getOppositeVertex(sourceGraph, e, start);
+			
+			GraphPath<V,E> path = target.getPath() ;
+			Iterator<V> verticies = Graphs.getPathVertexList(path).iterator() ;
+			List<E> edgeList = path.getEdgeList() ;
+			
+			V start = verticies.next() ;
+			
+			for (E e : edgeList) {
+				V end = verticies.next() ;
 				if (seenEdges.add(e)) {
 					addEdge(e, start, end);
 				}

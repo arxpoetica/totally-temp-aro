@@ -86,9 +86,7 @@ public class TransformFactory {
 				t = (AbstractTransform) t.getTargetGeoSegment()
 						.getParentTransform();
 			}
-			
-			System.out.println("Transformed "+  pl.getOffsetRatio() + " " + pl.getOffset() + "->" +p.getOffsetRatio() + " " + p.getOffsetDistance()) ;
-
+		
 			return p.getCurrentSegment().pinLocation(p.getOffsetRatio());
 
 		}

@@ -39,7 +39,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 			double length, Long gid, Geometry geometry,
 			List<GraphEdgeAssignment> locations) {
 		super();
-
+		
 		this.transform = transform;
 
 		if (geometry == null || geometry.getLength() == 0) {

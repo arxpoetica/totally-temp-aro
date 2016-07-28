@@ -22,7 +22,7 @@ public class TargetRoutes<V, E extends AroEdge<GeoSegment>> {
 	
 	public Set<E> getAllEdges() {
 		Set<E> result = new HashSet<>() ;
-		routes.forEach( r -> result.addAll(r.getPath()));
+		routes.forEach( r -> result.addAll(r.getPath().getEdgeList()));
 		return result ;
 	}
 
