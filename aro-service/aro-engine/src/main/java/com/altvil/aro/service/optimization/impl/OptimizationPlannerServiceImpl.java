@@ -114,7 +114,9 @@ public class OptimizationPlannerServiceImpl implements
 			MasterOptimizationRequest request) {
 
 		if (request.getOptimizationConstraints() == null
-				|| request.getOptimizationConstraints().getOptimizationType() == OptimizationType.UNCONSTRAINED) {
+				|| request.getOptimizationConstraints().getOptimizationType() == OptimizationType.UNCONSTRAINED
+				|| request.getOptimizationConstraints().getOptimizationType() == OptimizationType.CAPEX) {
+			
 			return new PlanningOptimizer();
 		}
 
