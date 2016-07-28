@@ -110,7 +110,7 @@ public abstract class AbstractNetworkBuilder {
 			List<PinnedLocation> pins = new ArrayList<>();
 			pins.add(pl);
 			pins.add(p2);
-			SplitGeoSegment splitSegment = DefaultSplitSegment.split(segAssembler
+			SplitGeoSegment splitSegment = DefaultSplitSegment.split(true, segAssembler
 					.getGeoSegment(), pins, segAssembler.getGeoSegment().getLineString());
 			Collection<GeoSegment> splits = splitSegment.getSubSegments();
 			Iterator<GeoSegment> splitsItr = splits.iterator();
@@ -133,7 +133,7 @@ public abstract class AbstractNetworkBuilder {
 				PinnedLocation pl = segAssembler.pinLocation(0.5);
 				List<PinnedLocation> pins = new ArrayList<>();
 				pins.add(pl);
-				SplitGeoSegment splitSegment = DefaultSplitSegment.split(segAssembler
+				SplitGeoSegment splitSegment = DefaultSplitSegment.split(true, segAssembler
 						.getGeoSegment(), pins, segAssembler.getGeoSegment().getLineString());
 				Collection<GeoSegment> splits = splitSegment.getSubSegments();
 				Iterator<GeoSegment> splitsItr = splits.iterator();

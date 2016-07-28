@@ -34,6 +34,8 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.segment.PinnedLocation;
+import com.altvil.aro.service.graph.segment.transform.GeoSegmentTransform;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.network.GraphRenoder;
@@ -373,6 +375,18 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 
 			return new DefaultGeneratedFiberRoute(sr.getSourceVertex(), edges);
 		}
+		
+		private String toName(PinnedLocation pl) {
+			
+			GeoSegmentTransform gt = pl.getGeoSegment().getParentTransform()  ;
+			if( gt == null ) {
+				return "IDENTITY" ;
+			}
+			
+			return gt.getClass().getSimpleName() ;
+			
+			
+		}
 
 		private void verifyAssignments(Map<GraphAssignment, GraphNode> map, 
 					Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap) {
@@ -383,12 +397,13 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 					
 					GraphEdgeAssignment ge = (GraphEdgeAssignment) e.getKey();
 					GraphEdgeAssignment originalAssignment = assignmentMap.get(ge) ;
-					
+					String transform =  toName(originalAssignment.getPinnedLocation()) ;
 					
 					count++;
 					log.error("Failed Assignment Length = "
-							+ ge.getGeoSegment().getLength() + "gid= "
-							+ ge.getGeoSegment().getGid() + " id="
+							+ ge.getGeoSegment().getLength() + " gid= "
+							+ ge.getGeoSegment().getGid() + " id=" +
+							" name = " + transform +
 							+ System.identityHashCode(ge.getGeoSegment()));
 				}
 			}
@@ -438,7 +453,7 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 			// TODO Move into Model Abstraction
 			resolved = networkBuilder.getResolvedAssignments();
 
-			verifyAssignments(resolved);
+			verifyAssignments(resolved, assignmentMap);
 
 			// Update Resolved Map with FiberSource Root Binding
 			this.resolved.put(fiberSourceBinding.getSource(),

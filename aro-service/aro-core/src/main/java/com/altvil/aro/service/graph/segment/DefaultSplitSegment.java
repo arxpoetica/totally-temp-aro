@@ -19,9 +19,14 @@ import com.vividsolutions.jts.geom.Point;
 
 public class DefaultSplitSegment implements SplitGeoSegment {
 
+	public static SplitGeoSegment split(boolean isRoot, GeoSegment geoSegment,
+			Collection<PinnedLocation> splitPoints, Geometry geom) {
+		return new DefaultSplitSegment(isRoot, geoSegment).split(splitPoints, geom);
+	}
+	
 	public static SplitGeoSegment split(GeoSegment geoSegment,
 			Collection<PinnedLocation> splitPoints, Geometry geom) {
-		return new DefaultSplitSegment(geoSegment).split(splitPoints, geom);
+		return split(false, geoSegment, splitPoints, geom);
 	}
 
 	private GeoSegment geoSegment;
@@ -29,9 +34,11 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 	private List<GeoSegmentAssembler> geoSegments;
 	private List<SubSegment> subSegments;
 	private List<Double> offsets;
-
-	private DefaultSplitSegment(GeoSegment geoSegment) {
+	private boolean isRoot ;
+	
+	private DefaultSplitSegment(boolean isRoot, GeoSegment geoSegment) {
 		super();
+		this.isRoot = isRoot;
 		this.geoSegment = geoSegment;
 	}
 
@@ -131,7 +138,7 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 
 		geoSegments = redistribute(subSegments,
 				geoSegment.getGeoSegmentAssignments()).stream()
-				.map(s -> s.createSubSegment(geoSegment))
+				.map(s -> s.createSubSegment(isRoot, geoSegment))
 				.collect(Collectors.toList());
 
 		return this;
