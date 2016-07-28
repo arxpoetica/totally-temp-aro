@@ -8,9 +8,8 @@ import com.altvil.aro.service.entity.LocationEntityType;
 public enum AroLocationEntityType {
 
 	small(LocationEntityType.small), medium(LocationEntityType.medium), large(
-			LocationEntityType.large), household(LocationEntityType.household), celltower(
-			LocationEntityType.celltower), business(LocationEntityType.small,
-			LocationEntityType.medium, LocationEntityType.large);
+			LocationEntityType.large), household(LocationEntityType.small), celltower(
+			LocationEntityType.celltower), business(LocationEntityType.large);
 
 	;
 
