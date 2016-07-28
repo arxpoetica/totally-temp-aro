@@ -10,15 +10,7 @@ public enum OptimizationType {
 	COVERAGE,
 	
 	IRR,
-	
-	BUDGET,
-	MAX_IRR,
- 	TARGET_IRR,
- 	BUDGET_IRR,
- 	BUDGET_THRESHHOLD_IRR,
- 	
- 	
- 	NPV,
+	NPV,
  	PRUNNING_NPV,
  	
 }

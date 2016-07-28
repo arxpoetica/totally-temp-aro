@@ -93,16 +93,9 @@ public class OptimizationEvaluatorServiceImpl implements
 	}
 
 	private void init() {
-		register(OptimizationType.BUDGET_IRR, new ThresholdOptizationFactory<>(
-				(plan) -> plan.getIrr()));
-
-		register(OptimizationType.BUDGET_THRESHHOLD_IRR,
-				new ThresholdOptizationFactory<>((plan) -> plan.getIrr()));
 		register(OptimizationType.IRR, new ThresholdOptizationFactory<>(
 				(plan) -> plan.getIrr()));
-		register(OptimizationType.TARGET_IRR, new ThresholdOptizationFactory<>(
-				(plan) -> plan.getIrr()));
-
+		
 		register(OptimizationType.COVERAGE, new ThresholdOptizationFactory<>((
 				plan) -> plan.getCoverage()));
 
@@ -418,16 +411,6 @@ public class OptimizationEvaluatorServiceImpl implements
 
 		public void init() {
 			map.put(OptimizationType.IRR,
-					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
-							.getMonthlyRevenueImpact())));
-
-			map.put(OptimizationType.BUDGET_IRR,
-					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
-							.getMonthlyRevenueImpact())));
-			map.put(OptimizationType.BUDGET_THRESHHOLD_IRR,
-					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
-							.getMonthlyRevenueImpact())));
-			map.put(OptimizationType.TARGET_IRR,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getMonthlyRevenueImpact())));
 

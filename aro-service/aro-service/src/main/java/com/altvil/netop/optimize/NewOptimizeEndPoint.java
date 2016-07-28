@@ -84,10 +84,6 @@ public class NewOptimizeEndPoint {
 		switch (plan.getAlgorithm()) {
 
 		case IRR:
-		case MAX_IRR:
-		case BUDGET_IRR:
-		case BUDGET:
-		case TARGET_IRR:
 			return new IrrConstraints(plan.getAlgorithm(),
 					financials.getYears(), financials.getDiscountRate(),
 					plan.getThreshold() == null ? Double.NaN : plan

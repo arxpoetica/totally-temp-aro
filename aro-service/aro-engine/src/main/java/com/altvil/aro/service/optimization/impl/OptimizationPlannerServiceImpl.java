@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
-import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +26,7 @@ import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
+import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
@@ -37,7 +36,7 @@ import com.altvil.aro.service.optimization.spi.OptimizationExecutor;
 import com.altvil.aro.service.optimization.spi.OptimizationExecutorService;
 import com.altvil.aro.service.optimization.spi.OptimizationExecutorService.ExecutorType;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
-import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorFactory;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
