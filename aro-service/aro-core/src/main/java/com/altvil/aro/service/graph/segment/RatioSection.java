@@ -4,6 +4,6 @@ public interface RatioSection {
 	
 	double getStartRatioOffset() ;
 	double getEndRationOffset() ;
-	CableConstructionCategory getCableConstructionCategory() ;
+	CableConstruction getCableConstructionCategory() ;
 
 }

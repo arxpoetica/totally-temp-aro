@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
+import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 
@@ -22,6 +23,7 @@ public class NetworkData {
 	private Collection<NetworkAssignment> fiberSources;
 	private Collection<RoadEdge> roadEdges;
 	private Collection<Long> selectedRoadLocationIds;
+	private Collection<CableConduitEdge> cableConduitEdges ;
 
 	public void setCentralOffice(NetworkAssignment fiberSource) {
 		setFiberSources(Collections.singleton(fiberSource));
@@ -68,6 +70,16 @@ public class NetworkData {
 	public void setCompetitiveDemandMapping(
 			CompetitiveDemandMapping competitiveDemandMapping) {
 		this.competitiveDemandMapping = competitiveDemandMapping;
+	}
+	
+	
+
+	public Collection<CableConduitEdge> getCableConduitEdges() {
+		return cableConduitEdges;
+	}
+
+	public void setCableConduitEdges(Collection<CableConduitEdge> cableConduitEdges) {
+		this.cableConduitEdges = cableConduitEdges;
 	}
 
 	public Collection<NetworkAssignment> getSelectedRoadLocations() {

@@ -16,7 +16,7 @@ public interface GeoSegment extends Reversable {
 
 	public GeoSegment getRootSegment();
 	
-	public CableConstructionCategory getCableConstructionCategory() ;
+	public CableConstruction getCableConstructionCategory() ;
 
 	public Long getGid();
 
