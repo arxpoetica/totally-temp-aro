@@ -40,11 +40,11 @@ if [ ${state_array_len} > 1 ]; then
     done
 fi
 
-# create a basic Carriers table
-${PSQL} -a -f $DIR/sql/geotel.carrier.sql
+# create a basic Carriers table -- but for some reason name it carrier instead of carriers
+${PSQL} -a -f $DIR/sql/create_geotel_carrier.sql
 
 # create a alias table (This will be moved at some point)
-${PSQL} -a -f $DIR/sql/geotel.carrier_alias.sql
+${PSQL} -a -f $DIR/sql/create_geotel_carrier_alias.sql
 
 # Buffer Geotel routes and index into carrier table
-${PSQL} -a -f $DIR/sql/buffered_routes.sql
+${PSQL} -a -f $DIR/sql/create_geotel_buffered_routes.sql
