@@ -29,3 +29,5 @@ do
 done
 
 ${PSQL} -a -f $DIR/sql/optimize_nbm_blocks.sql
+
+${PSQL} -a -f $DIR/sql/create_nbm_aux_tables.sql
