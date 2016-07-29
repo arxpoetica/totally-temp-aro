@@ -171,7 +171,7 @@ module.exports = class Network {
   static recalculateNodes (plan_id, options) {
     var locationTypes = {
       households: 'household',
-      businesses: 'business',
+      businesses: ['medium', 'large'],
       towers: 'celltower',
       smb: 'small'
     }
@@ -184,7 +184,7 @@ module.exports = class Network {
     options.algorithm = algorithms[options.algorithm] || options.algorithm
     var body = {
       planId: plan_id,
-      locationTypes: options.locationTypes.map((key) => locationTypes[key]),
+      locationTypes: _.flatten(options.locationTypes.map((key) => locationTypes[key])),
       algorithm: options.algorithm
     }
     var req = {
