@@ -5,6 +5,7 @@ import com.altvil.interfaces.CableConstructionEnum;
 
 public interface CableConstructionPricing {
 	
+	CableConstruction getDefaultCableConstruction() ;
 	CableConstruction price(CableConstructionEnum type) ;
 
 }

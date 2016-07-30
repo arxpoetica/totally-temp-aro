@@ -17,6 +17,7 @@ import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
+import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
@@ -48,11 +49,15 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 	// private EntityFactory entityFactory = EntityFactory.FACTORY;
 	private GraphTransformerFactory transformFactory;
 	private GraphNodeFactory vertexFactory;
+	private CoreGraphNetworkModelService coreGraphNetworkModelService;
 
 	@Autowired
-	public RoutePlaningServiceImpl(GraphTransformerFactory transformFactory,
+	public RoutePlaningServiceImpl(
+			CoreGraphNetworkModelService coreGraphNetworkModelService,
+			GraphTransformerFactory transformFactory,
 			GraphNodeFactory vertexFactory) {
 		super();
+		this.coreGraphNetworkModelService = coreGraphNetworkModelService;
 		this.transformFactory = transformFactory;
 		this.vertexFactory = vertexFactory;
 	}
@@ -61,9 +66,9 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 	public RouteModel createRouteModel(RouteNetworkData routeData,
 			RoutingOptions options) {
 
-		GraphNetworkModel model = transformFactory.createGraphNetworkModel(
-				routeData.getRoadEdges(), routeData.getNetworkAssignments());
-
+		GraphNetworkModel model = coreGraphNetworkModelService
+				.createGraphNetworkModel(routeData,
+						options.getGraphBuilderContext());
 		return renodeGraph(model, model.getGraphAssignments());
 	}
 
@@ -101,8 +106,8 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 		private GraphNetworkModel graphModel;
 		private GraphModel<GeoSegment> model;
 		private Map<GraphAssignment, GraphNode> resolved;
-		private Multimap<GraphNode, NetworkAssignment> vertexToAssignments ;
-		private Multimap<GraphNode, GraphAssignment> vertexToGraphAssignments ;
+		private Multimap<GraphNode, NetworkAssignment> vertexToAssignments;
+		private Multimap<GraphNode, GraphAssignment> vertexToGraphAssignments;
 
 		public DefaultNodedModel(GraphNetworkModel graphModel,
 				GraphModel<GeoSegment> model,
@@ -112,40 +117,41 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 			this.model = model;
 			this.resolved = resolved;
 		}
-		
-		
-		private  Multimap<GraphNode, NetworkAssignment> getVertexToAssignments() {
-			if( vertexToAssignments == null ) {
-				vertexToAssignments = ArrayListMultimap.create() ;
-				graphModel.getNetworkAssignments().forEach(a -> {
-					vertexToAssignments.put(getVertex(a), a) ;
-				});
-			}
-			
-			return vertexToAssignments ;
-		}		
 
-		private  Multimap<GraphNode, GraphAssignment> getVertexToGraphAssignments() {
-			if( vertexToGraphAssignments == null ) {
-				vertexToGraphAssignments = ArrayListMultimap.create() ;
-				resolved.entrySet().forEach(e -> {
-					vertexToGraphAssignments.put(e.getValue(), e.getKey()) ;
+		private Multimap<GraphNode, NetworkAssignment> getVertexToAssignments() {
+			if (vertexToAssignments == null) {
+				vertexToAssignments = ArrayListMultimap.create();
+				graphModel.getNetworkAssignments().forEach(a -> {
+					vertexToAssignments.put(getVertex(a), a);
 				});
 			}
-			
-			return vertexToGraphAssignments ;
+
+			return vertexToAssignments;
 		}
-		
+
+		private Multimap<GraphNode, GraphAssignment> getVertexToGraphAssignments() {
+			if (vertexToGraphAssignments == null) {
+				vertexToGraphAssignments = ArrayListMultimap.create();
+				resolved.entrySet().forEach(e -> {
+					vertexToGraphAssignments.put(e.getValue(), e.getKey());
+				});
+			}
+
+			return vertexToGraphAssignments;
+		}
+
 		@Override
-		public Collection<GraphAssignment> getGraphAssignments(GraphNode graphNode) {
-			final Collection<GraphAssignment> collection = getVertexToGraphAssignments().get(graphNode);
+		public Collection<GraphAssignment> getGraphAssignments(
+				GraphNode graphNode) {
+			final Collection<GraphAssignment> collection = getVertexToGraphAssignments()
+					.get(graphNode);
 			return collection == null ? Collections.emptyList() : collection;
-		}		
+		}
 
 		@Override
 		public Collection<NetworkAssignment> getNetworkAssignments(
 				GraphNode graphNode) {
-			return getVertexToAssignments().get(graphNode) ;
+			return getVertexToAssignments().get(graphNode);
 		}
 
 		@Override
@@ -160,10 +166,9 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 			return new RouteBuilder<GraphNode, AroEdge<GeoSegment>>().build(
 					getModel().getGraph(), null, src, targets);
 		}
-		
 
 		@Override
-		public Collection<SourceRoute<GraphNode,AroEdge<GeoSegment>>> planRoute(
+		public Collection<SourceRoute<GraphNode, AroEdge<GeoSegment>>> planRoute(
 				Collection<GraphNode> sources, Collection<GraphNode> targets) {
 			return new RouteBuilder<GraphNode, AroEdge<GeoSegment>>().build(
 					getModel().getGraph(), sources, targets);

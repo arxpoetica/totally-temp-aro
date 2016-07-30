@@ -225,7 +225,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public Optional<CompositeNetworkModel> createNetworkModel() {
-			return networkModelBuilder.createModel(StreamUtil.map(
+			return networkModelBuilder.createModel(applicationContext, StreamUtil.map(
 					rejectedLocations, AroEntity::getObjectId));
 		}
 
@@ -403,8 +403,8 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		@Override
-		public Optional<CompositeNetworkModel> get() {
-			return networkModelBuilder.createModel(rejectedLocations);
+		public Optional<CompositeNetworkModel> get(ApplicationContext applicationContext) {
+			return networkModelBuilder.createModel(applicationContext, rejectedLocations);
 		}
 
 		@Override

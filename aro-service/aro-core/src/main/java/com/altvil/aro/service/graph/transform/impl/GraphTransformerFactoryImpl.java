@@ -1,6 +1,5 @@
 package com.altvil.aro.service.graph.transform.impl;
 
-import java.util.Collection;
 import java.util.function.Predicate;
 
 import org.jgrapht.EdgeFactory;
@@ -16,15 +15,10 @@ import com.altvil.aro.service.demand.EntityDemandService;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
-import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
-import com.altvil.aro.service.graph.builder.GraphNetworkBuilder;
-import com.altvil.aro.service.graph.builder.GraphNetworkModel;
-import com.altvil.aro.service.graph.builder.RoadModelBuilder;
 import com.altvil.aro.service.graph.builder.impl.DefaultGraphBuilder;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
 import com.altvil.aro.service.graph.impl.DagBuilder;
-import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -33,8 +27,6 @@ import com.altvil.aro.service.graph.transform.ftp.FiberDagScanner;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
-import com.altvil.interfaces.NetworkAssignment;
-import com.altvil.interfaces.RoadEdge;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -93,21 +85,6 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return new DefaultGraphBuilder<GeoSegment>(factory,
 				new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(f), f);
 	}
-
-	
-	@Override
-	public GraphNetworkModel createGraphNetworkModel(
-			Collection<RoadEdge> edges,
-			Collection<NetworkAssignment> networkAssignments) {
-
-		GraphNetworkBuilder b = new GraphNetworkBuilder(createSimpleBuilder(),
-				factory, GraphAssignmentFactoryImpl.FACTORY);
-
-		b.setNetworkAssignments(networkAssignments).setRoadEdges(edges);
-		return b.build();
-
-	}
-
 	
 
 	@Override
@@ -116,11 +93,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return new NetworkBuilder(builder, factory);
 	}
 
-	private GraphModelBuilder<GeoSegment> createSimpleBuilder() {
-		return createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
-				new AroEdgeFactory<GeoSegment>()));
-	}
-
+	
 	@Override
 	public FiberDagScanner createWirecenterTransformer(FtthThreshholds threshholds) {
 		return new FiberDagScanner(entityDemandService.createDemandAnalyizer(threshholds), threshholds);

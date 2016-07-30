@@ -15,6 +15,7 @@ import com.altvil.aro.service.graph.builder.RoadEdgeInfo;
 import com.altvil.aro.service.graph.builder.spi.GeoSegmentAssembler;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
+import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.DefaultSplitSegment;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
@@ -28,23 +29,27 @@ import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
 import com.vividsolutions.jts.geom.Point;
 
-class GraphNetworkModelBuilder {
+class CoreGraphNetworkModelBuilder {
 
 	private GraphAssignmentFactory factory;
 	private GraphNodeFactory vertexFactory;
 	private GraphModelBuilder<GeoSegment> graphModelBuilder;
 
+	private CableConstruction defaultCableConstruction ;
+	
 	private int totalNumberLocations = 0;
 	private Map<Long, GraphNode> roadVertexMap = new HashMap<>();
 	private Map<NetworkAssignment, GraphEdgeAssignment> graphEdgeAssignmentMap = new HashMap<>();
 
-	public GraphNetworkModelBuilder(GraphAssignmentFactory factory,
+	public CoreGraphNetworkModelBuilder(GraphAssignmentFactory factory,
 			GraphNodeFactory vertexFactory,
-			GraphModelBuilder<GeoSegment> graphModelBuilder) {
+			GraphModelBuilder<GeoSegment> graphModelBuilder,
+			 CableConstruction defaultCableConstruction) {
 		super();
 		this.factory = factory;
 		this.vertexFactory = vertexFactory;
 		this.graphModelBuilder = graphModelBuilder;
+		this.defaultCableConstruction = defaultCableConstruction ;
 	}
 
 	public GraphNetworkModel build() {
@@ -167,7 +172,7 @@ class GraphNetworkModelBuilder {
 			Collection<LocationEntityAssignment> orderedLocationsByRoadEdge) {
 
 		return DefaultSegmentLocations.createAssembler(null,
-				re.getLengthMeters(), re.getId(), re.getShape(),
+				defaultCableConstruction, re.getLengthMeters(), re.getId(), re.getShape(),
 				orderedLocationsByRoadEdge);
 	}
 

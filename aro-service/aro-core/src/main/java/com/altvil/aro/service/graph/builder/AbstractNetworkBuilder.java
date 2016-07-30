@@ -98,7 +98,7 @@ public abstract class AbstractNetworkBuilder {
 		List<LocationEntityAssignment> orderedLocationsByRoadEdge = getOrderedLocationsByRoadEdge(re);
 		totalNumberOfLocations += orderedLocationsByRoadEdge.size();
 		GeoSegmentAssembler segAssembler = DefaultSegmentLocations.createAssembler(null,
-				re.getLengthMeters(), re.getId(), re.getShape(),
+				null, re.getLengthMeters(), re.getId(), re.getShape(),
 				orderedLocationsByRoadEdge);
 
 		GraphNode leftVertex = getLeftVertex(re);

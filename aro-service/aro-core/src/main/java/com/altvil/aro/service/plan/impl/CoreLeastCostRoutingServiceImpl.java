@@ -30,7 +30,6 @@ import com.altvil.aro.service.graph.assigment.impl.RootGraphMapping;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
-import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -41,8 +40,8 @@ import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.plan.GeneratedFiberRoute;
-import com.altvil.aro.service.plan.LeastCostRoutingService;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanException;
 import com.altvil.aro.service.route.RouteModel;
@@ -54,7 +53,7 @@ import com.altvil.utils.StreamUtil;
 import com.google.inject.Inject;
 
 @Service
-public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
+public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingService {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(PlanServiceImpl.class.getName());
@@ -71,7 +70,7 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 
 	@Autowired
 	@Inject
-	public LeastCostRoutingServiceImpl(
+	public CoreLeastCostRoutingServiceImpl(
 			GraphTransformerFactory transformFactory,
 			GraphNodeFactory vertexFactory,
 			RoutePlaningService routePlaningService) {
@@ -83,14 +82,14 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
-			NetworkData networkData, FtthThreshholds constraints)
+			GraphNetworkModel model, FtthThreshholds constraints)
 			throws PlanException {
 
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					networkData, constraints);
+					model, constraints);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
@@ -104,11 +103,11 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 	}
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
-			NetworkData networkData, FtthThreshholds constraints)
+			GraphNetworkModel model, FtthThreshholds constraints)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
-		CompositeNetworkModel networkModel = planning.build(networkData,
+		CompositeNetworkModel networkModel = planning.build(model,
 				constraints);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
@@ -168,13 +167,9 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 			super();
 		}
 
-		public CompositeNetworkModel build(final NetworkData data,
+		public CompositeNetworkModel build(GraphNetworkModel networkModel,
 
 		FtthThreshholds request) {
-
-			// Root Model
-			GraphNetworkModel networkModel = transformFactory
-					.createGraphNetworkModel(data);
 
 			if (!networkModel.hasLocations()) {
 				// TODO make it return empty NetworkModel
@@ -188,7 +183,7 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 			// data.getSelectedRoadLocations().stream().map((rl)->routeModel.getVertex(rl)).collect(Collectors.toList());
 
 			Collection<FiberSourceBinding> possibleFiberSources = StreamUtil
-					.map(data.getFiberSources(), fs -> {
+					.map(networkModel.getNetworkAssignments(), fs -> {
 						FiberSourceBinding fsb = new FiberSourceBinding();
 						fsb.setSource(networkModel.getGraphEdgeAssignment(fs));
 						fsb.setDomain(routeModel.getVertex(fs));
@@ -375,36 +370,37 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 
 			return new DefaultGeneratedFiberRoute(sr.getSourceVertex(), edges);
 		}
-		
+
 		private String toName(PinnedLocation pl) {
-			
-			GeoSegmentTransform gt = pl.getGeoSegment().getParentTransform()  ;
-			if( gt == null ) {
-				return "IDENTITY" ;
+
+			GeoSegmentTransform gt = pl.getGeoSegment().getParentTransform();
+			if (gt == null) {
+				return "IDENTITY";
 			}
-			
-			return gt.getClass().getSimpleName() ;
-			
-			
+
+			return gt.getClass().getSimpleName();
+
 		}
 
-		private void verifyAssignments(Map<GraphAssignment, GraphNode> map, 
-					Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap) {
+		private void verifyAssignments(Map<GraphAssignment, GraphNode> map,
+				Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap) {
 			int count = 0;
 
 			for (Map.Entry<GraphAssignment, GraphNode> e : map.entrySet()) {
 				if (e.getValue() == null) {
-					
+
 					GraphEdgeAssignment ge = (GraphEdgeAssignment) e.getKey();
-					GraphEdgeAssignment originalAssignment = assignmentMap.get(ge) ;
-					String transform =  toName(originalAssignment.getPinnedLocation()) ;
-					
+					GraphEdgeAssignment originalAssignment = assignmentMap
+							.get(ge);
+					String transform = toName(originalAssignment
+							.getPinnedLocation());
+
 					count++;
 					log.error("Failed Assignment Length = "
 							+ ge.getGeoSegment().getLength() + " gid= "
-							+ ge.getGeoSegment().getGid() + " id=" +
-							" name = " + transform +
-							+ System.identityHashCode(ge.getGeoSegment()));
+							+ ge.getGeoSegment().getGid() + " id=" + " name = "
+							+ transform
+							+ +System.identityHashCode(ge.getGeoSegment()));
 				}
 			}
 
@@ -426,7 +422,7 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 								ge -> assignmentMap.put(ge, ge));
 
 					});
-			return assignmentMap ;
+			return assignmentMap;
 		}
 
 		private GraphModel<GeoSegment> renodeGraph(GraphContext graphCtx,
@@ -439,17 +435,16 @@ public class LeastCostRoutingServiceImpl implements LeastCostRoutingService {
 					.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
 							new AroEdgeFactory<GeoSegment>()));
 
-			
 			GraphRenoder networkBuilder = new NormalizedRenoder(
 					new NetworkBuilder(b, vertexFactory));
-			
-			Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap = extractAssignments(co) ;
-			
+
+			Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap = extractAssignments(co);
+
 			assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
-			
-			networkBuilder.add(assignmentMap.values()) ;
+
+			networkBuilder.add(assignmentMap.values());
 			networkBuilder.renodeGraph(graphCtx.getGraphModel());
-			
+
 			// TODO Move into Model Abstraction
 			resolved = networkBuilder.getResolvedAssignments();
 

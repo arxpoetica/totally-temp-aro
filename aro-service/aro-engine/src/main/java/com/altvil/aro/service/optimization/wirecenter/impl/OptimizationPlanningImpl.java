@@ -6,9 +6,15 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.construction.CableConstructionService;
+import com.altvil.aro.service.graph.GraphNetworkModelService;
+import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBuilderContext;
+import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
@@ -16,10 +22,12 @@ import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
+import com.altvil.aro.service.optimize.FTTHOptimizerService.OptimizerContextBuilder;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
-import com.altvil.aro.service.plan.LeastCostRoutingService;
+import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
+import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.utils.StreamUtil;
 
@@ -40,17 +48,18 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	private transient FTTHOptimizerService optimizerService;
 
 	@Autowired
-	private PricingService pricingService;
+	private transient PricingService pricingService;
 
 	@Autowired
-	private LeastCostRoutingService planService;
+	private transient GraphNetworkModelService graphBuilderService;
 
-	private OptimizerContext createOptimizerContext(
-			WirecenterOptimizationRequest request) {
-		return new OptimizerContext(pricingService.getPricingModel("*",
-				new Date()), FiberConstraintUtils.build(request
-				.getConstraints()));
-	}
+	@Autowired
+	private transient CoreLeastCostRoutingService planService;
+
+	@Autowired
+	private transient CableConstructionService cableConstructionService;
+
+	
 
 	//
 	// private Collection<NetworkDemand> toNetworkDemands(NetworkData
@@ -76,7 +85,16 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
 
-		return StreamUtil.map(planService.computeNetworkModel(networkData,
+		GraphNetworkModel model = graphBuilderService
+				.build(networkService.getNetworkData(request
+						.getNetworkDataRequest()))
+				.setCableConstructionPricing(
+						cableConstructionService
+								.createCableConstructionPricing("*",
+										new Date(), request.getRatioBuried()))
+				.build();
+
+		return StreamUtil.map(planService.computeNetworkModel(model,
 				FiberConstraintUtils.build(request.getConstraints())),
 				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
 						networkData.getCompetitiveDemandMapping()));
@@ -95,10 +113,44 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 								.getOptimizationConstraints()),
 				optimizationStrategyService.getScoringStrategy(request
 						.getOptimizationConstraints()),
-				createOptimizerContext(request));
+				new OptimizerContextBuilderImpl(request));
 
 		return new PrunedNetworkImpl(request.getPlanId(),
 				planner.getOptimizedPlans(),
 				networkData.getCompetitiveDemandMapping());
 	}
+
+	@SuppressWarnings("serial")
+	public static class OptimizerContextBuilderImpl implements
+			OptimizerContextBuilder {
+
+		private WirecenterOptimizationRequest request;
+
+		public OptimizerContextBuilderImpl(WirecenterOptimizationRequest request) {
+			super();
+			this.request = request;
+		}
+
+		@Override
+		public OptimizerContext createOptimizerContext(ApplicationContext ctx) {
+			PricingModel pricingModel = ctx.getBean(PricingService.class)
+					.getPricingModel("*", new Date());
+
+			FtthThreshholds threshHolds = FiberConstraintUtils.build(request
+					.getConstraints());
+
+			GraphBuilderContext graphContext = ctx
+					.getBean(GraphNetworkModelService.class)
+					.build()
+					.setCableConstructionPricing(
+							ctx.getBean(CableConstructionService.class)
+									.createCableConstructionPricing("*",
+											new Date(),
+											request.getRatioBuried()))
+					.createContext();
+
+			return new OptimizerContext(pricingModel, threshHolds, graphContext);
+		}
+	}
+
 }

@@ -13,6 +13,7 @@ import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.builder.spi.GeoSegmentAssembler;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.AroRoadLocation;
+import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.segment.splitter.GeoSegmentSplitter;
@@ -27,6 +28,7 @@ import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler {
 	private GeoSegmentTransform transform;
+	private CableConstruction cableConstruction;
 	private double length;
 	private Long gid;
 	private Geometry geometry;
@@ -36,11 +38,13 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	private double geometryLength;
 
 	private DefaultSegmentLocations(GeoSegmentTransform transform,
+			CableConstruction cableConstruction,
 			double length, Long gid, Geometry geometry,
 			List<GraphEdgeAssignment> locations) {
 		super();
 		
 		this.transform = transform;
+		this.cableConstruction = cableConstruction ;
 
 		if (geometry == null || geometry.getLength() == 0) {
 			throw new RuntimeException("BANG BANG");
@@ -59,8 +63,9 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	}
 
 	private DefaultSegmentLocations(GeoSegmentTransform transform,
+			CableConstruction cableConstruction,
 			double length, Long gid, Geometry geometry) {
-		this(transform, length, gid, geometry, new ArrayList<>());
+		this(transform, cableConstruction, length, gid, geometry, new ArrayList<>());
 	}
 
 //	public static GeoSegment create(GeoSegmentTransform parent, double length,
@@ -72,12 +77,12 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 //	}
 
 	public static GeoSegmentAssembler createAssembler(
-			GeoSegmentTransform transform, double length, Long gid,
+			GeoSegmentTransform transform, CableConstruction cableConstruction, double length, Long gid,
 			Geometry geometry,
 			Collection<LocationEntityAssignment> roadLocations) {
 
 		final DefaultSegmentLocations seg = new DefaultSegmentLocations(
-				transform, length, gid, geometry);
+				transform, cableConstruction, length, gid, geometry);
 
 		seg.assign(StreamUtil.map(roadLocations,
 				a -> GraphAssignmentFactoryImpl.FACTORY
@@ -104,6 +109,18 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	@Override
 	public GeoSegmentTransform getParentTransform() {
 		return transform;
+	}
+	
+	
+
+	@Override
+	public double getEffectiveWeight() {
+		return getCableConstructionCategory().getCostPerMeter() * getLength() ;
+	}
+
+	@Override
+	public CableConstruction getCableConstructionCategory() {
+		return cableConstruction ;
 	}
 
 	@Override
@@ -257,7 +274,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	@Override
 	public GeoSegment reverse() {
-		DefaultSegmentLocations seg = new DefaultSegmentLocations(TransformFactory.FACTORY.createFlippedTransform(this), length,
+		DefaultSegmentLocations seg = new DefaultSegmentLocations(TransformFactory.FACTORY.createFlippedTransform(this), cableConstruction, length,
 				gid, geometry.reverse(), new ArrayList<>());
 
 		seg.reverseOriginalLocations(this);

@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.impl.AnalysisNodeImpl;
@@ -45,8 +46,7 @@ public class NetworkConstrainer {
 	}
 
 	public List<OptimizedNetwork> constrainNetwork() {
-		ResultAssembler resultAssembler = new ResultAssembler(
-				networkModelBuilder);
+		ResultAssembler resultAssembler = new ResultAssembler();
 		if (networkAnalysis != null) {
 			{
 				// Remove nodes that do not satisfy the generating node
@@ -139,7 +139,7 @@ public class NetworkConstrainer {
 
 		return new LazyOptimizedNetwork(new AnalysisNodeImpl(
 				networkAnalysis.getAnalyisNode()),
-				networkAnalysis.lazySerialize(), networkModelBuilder);
+				networkAnalysis.lazySerialize());
 
 		// return new OptimizedNetworkImpl(networkAnalysis.createNetworkModel(),
 		// new AnalysisNodeImpl(networkAnalysis.getAnalyisNode()));
@@ -147,13 +147,11 @@ public class NetworkConstrainer {
 
 	private static class ResultAssembler {
 
-		private NetworkModelBuilder networkModelBuilder;
-
+		
 		private List<OptimizedNetwork> result = new ArrayList<OptimizedNetwork>();
 
-		public ResultAssembler(NetworkModelBuilder networkModelBuilder) {
+		public ResultAssembler() {
 			super();
-			this.networkModelBuilder = networkModelBuilder;
 		}
 
 		public void add(OptimizedNetwork network) {
@@ -166,7 +164,7 @@ public class NetworkConstrainer {
 
 		private OptimizedNetwork createEmptyNetwork() {
 			return new LazyOptimizedNetwork(AnalysisNodeImpl.ZERO_IDENTITY,
-					EmptyNetworkGenerator.GENERATOR, networkModelBuilder);
+					EmptyNetworkGenerator.GENERATOR);
 		}
 
 		public List<OptimizedNetwork> assemble() {
@@ -183,7 +181,7 @@ public class NetworkConstrainer {
 		public static final NetworkGenerator GENERATOR = new EmptyNetworkGenerator();
 
 		@Override
-		public Optional<CompositeNetworkModel> get() {
+		public Optional<CompositeNetworkModel> get(ApplicationContext ctx) {
 			return Optional.of(EmptyCompositeNetworkModel.MODEL);
 		}
 

@@ -7,10 +7,17 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 
 public class WirecenterOptimizationRequest extends OptimizationRequest {
 
+	private double ratioBuried = 0.5;
+
 	public WirecenterOptimizationRequest(
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints networkConstraints,
 			NetworkDataRequest networkDataRequest) {
 		super(optimizationConstraints, networkConstraints, networkDataRequest);
 	}
+
+	public double getRatioBuried() {
+		return ratioBuried;
+	}
+
 }

@@ -27,7 +27,6 @@ import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
-import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
@@ -104,24 +103,24 @@ public class NodeAssembler {
 
 	}
 
-	private DAGModel<GeoSegment> createDagModel(GraphNode vertex,
-			Collection<AroEdge<GeoSegment>> pathEdges) {
-
-		GraphModelBuilder<GeoSegment> b = ctx.getGraphTransformerFactory()
-				.createGraphBuilder();
-		if (pathEdges.size() == 0) {
-			b.addVertex(vertex);
-		} else {
-			for (AroEdge<GeoSegment> e : pathEdges) {
-				b.add(e.getSourceNode(), e.getTargetNode(), e.getValue(),
-						e.getWeight());
-			}
-		}
-
-		return ctx.getGraphTransformerFactory().createDAG(b.build(), vertex,
-				e -> true);
-
-	}
+//	private DAGModel<GeoSegment> createDagModel(GraphNode vertex,
+//			Collection<AroEdge<GeoSegment>> pathEdges) {
+//
+//		GraphModelBuilder<GeoSegment> b = ctx.getGraphTransformerFactory()
+//				.createGraphBuilder();
+//		if (pathEdges.size() == 0) {
+//			b.addVertex(vertex);
+//		} else {
+//			for (AroEdge<GeoSegment> e : pathEdges) {
+//				b.add(e.getSourceNode(), e.getTargetNode(), e.getValue(),
+//						e.getWeight());
+//			}
+//		}
+//
+//		return ctx.getGraphTransformerFactory().createDAG(b.build(), vertex,
+//				e -> true);
+//
+//	}
 
 	private Multimap<GraphNode, GraphEdgeAssignment> createEquipmentMap(
 			NetworkModel model, GraphMapping mapping) {

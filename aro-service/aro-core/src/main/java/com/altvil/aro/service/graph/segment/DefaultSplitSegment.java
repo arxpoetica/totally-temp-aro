@@ -206,7 +206,8 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 
 		intersectionPoints = StreamUtil.map(
 				this.geoSegments.subList(1, this.geoSegments.size() - 1),
-				gs -> (Point) gs.getGeoSegment().getLineString().getGeometryN(0));
+				gs -> (Point) gs.getGeoSegment().getLineString()
+						.getGeometryN(0));
 
 		return this;
 	}
@@ -248,7 +249,8 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 			return this;
 		}
 
-		intersectionPoints = StreamUtil.map(splitPoints, PinnedLocation::getPoint) ;
+		intersectionPoints = StreamUtil.map(splitPoints,
+				PinnedLocation::getPoint);
 		offsets = StreamUtil.map(splitPoints, pl -> pl.getOffsetRatio());
 
 		if (offsets.get(0) < 0) { // TODO
@@ -285,8 +287,9 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 		while (itr.hasNext()) {
 			RatioSection ratioSection = itr.next();
 			segs.add(new SubSegment(lineItr.next(), ratioSection
-					.getStartRatioOffset(), ratioSection.getEndRationOffset(),
-					!itr.hasNext()));
+					.getCableConstruction(),
+					ratioSection.getStartRatioOffset(), ratioSection
+							.getEndRationOffset(), !itr.hasNext()));
 		}
 
 		return segs;
@@ -305,7 +308,8 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 
 		double previous = 0;
 		for (Double offset : offsets) {
-			segs.add(new SubSegment(lineItr.next(), previous, offset, false));
+			segs.add(new SubSegment(lineItr.next(), geoSegment
+					.getCableConstructionCategory(), previous, offset, false));
 
 			if (offset < previous) {
 				throw new IllegalArgumentException("Inavlid Offsets "
@@ -315,7 +319,8 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 			previous = offset;
 
 		}
-		segs.add(new SubSegment(lineItr.next(), previous, 1.0, true));
+		segs.add(new SubSegment(lineItr.next(), geoSegment
+				.getCableConstructionCategory(), previous, 1.0, true));
 
 		return segs;
 

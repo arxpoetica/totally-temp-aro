@@ -7,64 +7,51 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService;
+import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.optimize.FTTHOptimizerService.OptimizerContextBuilder;
+import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.LeastCostRoutingService;
+import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
-import com.google.inject.Inject;
 
 @Service
 public class NetworkModelBuilderFactoryImpl implements
 		NetworkModelBuilderFactory {
 
-	private LeastCostRoutingService planService;
-
-	@Autowired
-	@Inject
-	public NetworkModelBuilderFactoryImpl(LeastCostRoutingService planService) {
+	
+	public NetworkModelBuilderFactoryImpl() {
 		super();
-		this.planService = planService;
 	}
 
 	@Override
 	public NetworkModelBuilder create(NetworkData networkData,
-			FtthThreshholds fiberConstraints) {
-		return new NetworkModelBuilderImpl(networkData, fiberConstraints);
+			OptimizerContextBuilder constraintBuilder) {
+		return new NetworkModelBuilderImpl(networkData, constraintBuilder);
 	}
 
-	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
+	@SuppressWarnings("serial")
+	public static class NetworkModelBuilderImpl implements NetworkModelBuilder {
 
+		private OptimizerContextBuilder constraintBuilder;
 		private NetworkData networkData;
-		
-		private FtthThreshholds constraints;
-		
+
 		private Map<Long, NetworkAssignment> map;
 
-		private NetworkModelBuilderImpl(NetworkData networkData, 
-				FtthThreshholds constraints) {
+		public NetworkModelBuilderImpl(NetworkData networkData,
+				OptimizerContextBuilder constraintBuilder) {
 			super();
+			this.constraintBuilder = constraintBuilder;
 			this.networkData = networkData;
-			this.constraints = constraints;
-		
-			map = StreamUtil.hash(networkData.getRoadLocations(),
-					a -> a.getSource().getObjectId());
-		}
-
-		@Override
-		public FtthThreshholds getFtthThreshholds() {
-			return constraints;
-		}
-
-		@Override
-		public Collection<NetworkAssignment> getNetworkAssignments() {
-			return networkData.getFiberSources() ;
+			map = StreamUtil.hash(networkData.getRoadLocations(), a -> a
+					.getSource().getObjectId());
 		}
 
 		private NetworkData createNetworkData(Collection<Long> rejectedLocations) {
@@ -75,8 +62,9 @@ public class NetworkModelBuilderFactoryImpl implements
 			Map<Long, NetworkAssignment> map = new HashMap<>(this.map);
 
 			rejectedLocations.forEach(map::remove);
-			
-			Set<Long> selectedRoadLocationIds = new HashSet<Long> (this.networkData.getSelectedRoadLocationIds());
+
+			Set<Long> selectedRoadLocationIds = new HashSet<Long>(
+					this.networkData.getSelectedRoadLocationIds());
 			rejectedLocations.forEach(selectedRoadLocationIds::remove);
 
 			NetworkData nd = new NetworkData();
@@ -97,9 +85,22 @@ public class NetworkModelBuilderFactoryImpl implements
 		 * (java.util.Collection)
 		 */
 		@Override
-		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
-			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), constraints);
+		public Optional<CompositeNetworkModel> createModel(
+				ApplicationContext appCtx, Collection<Long> rejectedLocations) {
+
+			OptimizerContext ctx = constraintBuilder
+					.createOptimizerContext(appCtx);
+
+			GraphNetworkModel networkModel = appCtx.getBean(
+					CoreGraphNetworkModelService.class)
+					.createGraphNetworkModel(
+							createNetworkData(rejectedLocations),
+							ctx.getGraphBuilderContext());
+
+			return appCtx
+					.getBean(CoreLeastCostRoutingService.class)
+					.computeNetworkModel(networkModel, ctx.getFtthThreshholds());
+
 		}
 	}
 }

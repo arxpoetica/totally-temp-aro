@@ -2,13 +2,14 @@ package com.altvil.aro.service.plan;
 
 import java.util.Optional;
 
-import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 
-public interface LeastCostRoutingService {
-
+public interface CoreLeastCostRoutingService {
+	
+	
 	Optional<CompositeNetworkModel> computeNetworkModel(
-			NetworkData networkData, FtthThreshholds consraints)
+			GraphNetworkModel model, FtthThreshholds consraints)
 			throws PlanException;
 	
 

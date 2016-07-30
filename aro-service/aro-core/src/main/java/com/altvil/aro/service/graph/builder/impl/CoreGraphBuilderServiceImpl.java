@@ -61,11 +61,13 @@ public class CoreGraphBuilderServiceImpl implements
 		this.vertexFactory = vertexFactory;
 	}
 
-	private GraphNetworkModel create(Iterator<RoadEdgeInfo> itr) {
+	private GraphNetworkModel create(Iterator<RoadEdgeInfo> itr,
+			GraphBuilderContext ctx) {
 
-		GraphNetworkModelBuilder nb = new GraphNetworkModelBuilder(
+		CoreGraphNetworkModelBuilder nb = new CoreGraphNetworkModelBuilder(
 				graphEdgeFactory, vertexFactory,
-				transformFactory.createGraphBuilder());
+				transformFactory.createGraphBuilder(),
+				ctx.getDefaultCableConstruction());
 
 		while (itr.hasNext()) {
 			nb.add(itr.next());
@@ -77,13 +79,13 @@ public class CoreGraphBuilderServiceImpl implements
 	@Override
 	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
 			GraphBuilderContext ctx) {
-		return create(createRoadEdgeInfoItr(networkData, ctx));
+		return create(createRoadEdgeInfoItr(networkData, ctx), ctx);
 	}
 
 	@Override
 	public GraphNetworkModel createGraphNetworkModel(EdgeData edgeData,
 			GraphBuilderContext ctx) {
-		return  create(createRoadEdgeInfoItr(edgeData, ctx)) ;
+		return create(createRoadEdgeInfoItr(edgeData, ctx), ctx);
 	}
 
 	private Iterator<RoadEdgeInfo> createRoadEdgeInfoItr(EdgeData edgeData,
