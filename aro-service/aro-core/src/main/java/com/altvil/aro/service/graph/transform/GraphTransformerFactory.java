@@ -37,14 +37,7 @@ public interface GraphTransformerFactory {
 	 */
 	public FiberDagScanner createWirecenterTransformer(FtthThreshholds threshhold);
 
-	/**
-	 * 
-	 * @param edgeFactory
-	 * @return
-	 */
-	public <T> GraphModelBuilder<T> createDAGBuilder(
-			EdgeFactory<GraphNode, AroEdge<T>> edgeFactory);
-
+	
 	/**
 	 * 
 	 * @param edgeFactory
@@ -93,14 +86,7 @@ public interface GraphTransformerFactory {
 			Collection<RoadEdge> edges,
 			Collection<NetworkAssignment> networkAssignments);
 
-	
-	/**
-	 * 
-	 * @param locationData
-	 * @return
-	 */
-	public GraphNetworkModel createGraphNetworkModel(NetworkData locationData);
-	
+		
 	public GraphRenoder createNetworkBuilder(
 			GraphModelBuilder<GeoSegment> builder);
 }

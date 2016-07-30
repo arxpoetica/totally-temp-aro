@@ -10,6 +10,7 @@ import java.util.Map;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
+import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.builder.RoadEdgeInfo;
 import com.altvil.aro.service.graph.builder.spi.GeoSegmentAssembler;
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -27,17 +28,17 @@ import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
 import com.vividsolutions.jts.geom.Point;
 
-class SegmentBuilder {
+class GraphNetworkModelBuilder {
 
 	private GraphAssignmentFactory factory;
 	private GraphNodeFactory vertexFactory;
 	private GraphModelBuilder<GeoSegment> graphModelBuilder;
 
+	private int totalNumberLocations = 0;
 	private Map<Long, GraphNode> roadVertexMap = new HashMap<>();
 	private Map<NetworkAssignment, GraphEdgeAssignment> graphEdgeAssignmentMap = new HashMap<>();
-	
-	
-	public SegmentBuilder(GraphAssignmentFactory factory,
+
+	public GraphNetworkModelBuilder(GraphAssignmentFactory factory,
 			GraphNodeFactory vertexFactory,
 			GraphModelBuilder<GeoSegment> graphModelBuilder) {
 		super();
@@ -46,18 +47,26 @@ class SegmentBuilder {
 		this.graphModelBuilder = graphModelBuilder;
 	}
 
-	public void assemble(RoadEdgeInfo roadEdgeInfo) {
+	public GraphNetworkModel build() {
+		return new DefaultNetworkModel(graphModelBuilder.build(),
+				graphEdgeAssignmentMap, totalNumberLocations);
+	}
+
+	public void add(RoadEdgeInfo roadEdgeInfo) {
 
 		RoadEdge re = roadEdgeInfo.getRoadEdge();
-		Collection<RatioSection> sections = roadEdgeInfo.getSections();
 		GraphNode leftVertex = getLeftVertex(re);
 		GraphNode rightVertex = getRightVertex(re);
 		int segmentCount = computeMinSections(leftVertex, rightVertex);
 
-		write(leftVertex,
-				rightVertex,
-				createGeoSegmentAssembler(re,
-						roadEdgeInfo.getOrderedLocations()),
+		Collection<LocationEntityAssignment> orderedLoctions = roadEdgeInfo
+				.getOrderedLocations();
+		Collection<RatioSection> sections = roadEdgeInfo.getSections();
+
+		totalNumberLocations += orderedLoctions.size();
+
+		write(leftVertex, rightVertex,
+				createGeoSegmentAssembler(re, orderedLoctions),
 				expand(sections, segmentCount - sections.size()),
 				roadEdgeInfo.getNetworkAssignments());
 
@@ -112,9 +121,10 @@ class SegmentBuilder {
 					sections);
 
 			assignEquipment(split, networkElements);
-			
+
 			Iterator<GeoSegment> segmentItr = split.getSubSegments().iterator();
-			Iterator<GraphNode> vertexItr = createVertexIterator(split.getIntersectionPoints());
+			Iterator<GraphNode> vertexItr = createVertexIterator(split
+					.getIntersectionPoints());
 
 			while (vertexItr.hasNext()) {
 				GraphNode next = vertexItr.next();

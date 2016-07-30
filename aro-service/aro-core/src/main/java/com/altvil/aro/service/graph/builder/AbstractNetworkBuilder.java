@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@Deprecated
 public abstract class AbstractNetworkBuilder {
 
 	@SuppressWarnings("unused")

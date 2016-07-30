@@ -9,50 +9,92 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
-import com.altvil.aro.service.graph.builder.GraphBuilderService;
+import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
+import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.builder.RoadEdgeInfo;
+import com.altvil.aro.service.graph.model.EdgeData;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.AroRoadLocation;
 import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.RatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultGeoRatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.LocationEntityAssignment;
 import com.altvil.aro.service.graph.segment.impl.RoadLocationImpl;
+import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
-import com.altvil.utils.StreamUtil;
 
-public class GraphBuilderServiceImpl implements GraphBuilderService {
+@Service
+public class CoreGraphBuilderServiceImpl implements
+		CoreGraphNetworkModelService {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(GraphBuilderServiceImpl.class.getName());
+			.getLogger(CoreGraphBuilderServiceImpl.class.getName());
+
+	private GraphTransformerFactory transformFactory;
+	private GraphAssignmentFactory graphEdgeFactory;
+	private GraphNodeFactory vertexFactory;
+
+	// //
+
+	@Autowired
+	public CoreGraphBuilderServiceImpl(
+			GraphTransformerFactory transformFactory,
+			GraphAssignmentFactory graphEdgeFactory,
+			GraphNodeFactory vertexFactory) {
+		super();
+		this.transformFactory = transformFactory;
+		this.graphEdgeFactory = graphEdgeFactory;
+		this.vertexFactory = vertexFactory;
+	}
+
+	private GraphNetworkModel create(Iterator<RoadEdgeInfo> itr) {
+
+		GraphNetworkModelBuilder nb = new GraphNetworkModelBuilder(
+				graphEdgeFactory, vertexFactory,
+				transformFactory.createGraphBuilder());
+
+		while (itr.hasNext()) {
+			nb.add(itr.next());
+		}
+
+		return nb.build();
+	}
 
 	@Override
 	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
-			Function<CableConduitEdge, RatioSection> fToRatioSection) {
+			GraphBuilderContext ctx) {
+		return create(createRoadEdgeInfoItr(networkData, ctx));
+	}
 
-		Iterator<RoadEdgeInfo> itr = createRoadEdgeInfoItr(networkData,
-				fToRatioSection);
+	@Override
+	public GraphNetworkModel createGraphNetworkModel(EdgeData edgeData,
+			GraphBuilderContext ctx) {
+		return  create(createRoadEdgeInfoItr(edgeData, ctx)) ;
+	}
 
+	private Iterator<RoadEdgeInfo> createRoadEdgeInfoItr(EdgeData edgeData,
+			GraphBuilderContext ctx) {
 		return null;
 	}
 
 	private Iterator<RoadEdgeInfo> createRoadEdgeInfoItr(
-			NetworkData networkData,
-			Function<CableConduitEdge, RatioSection> fToRatioSection) {
+			NetworkData networkData, GraphBuilderContext ctx) {
 
-		RoadEdgeInfoImpl rei = new RoadEdgeInfoImpl(fToRatioSection,
+		RoadEdgeInfoImpl rei = new RoadEdgeInfoImpl(ctx,
 				new RoadEdgeIndexer().index(networkData));
 
 		Iterator<RoadEdge> itr = networkData.getRoadEdges().iterator();
@@ -75,7 +117,7 @@ public class GraphBuilderServiceImpl implements GraphBuilderService {
 
 	private class RoadEdgeInfoImpl implements RoadEdgeInfo {
 
-		private Function<CableConduitEdge, RatioSection> fToRatioSection;
+		private GraphBuilderContext ctx;
 		private RoadEdgeIndexer indexer;
 
 		private Collection<RatioSection> defaultRatioSections;
@@ -84,11 +126,9 @@ public class GraphBuilderServiceImpl implements GraphBuilderService {
 		private RoadEdge roadEdge;
 		private Long id;
 
-		public RoadEdgeInfoImpl(
-				Function<CableConduitEdge, RatioSection> fToRatioSection,
-				RoadEdgeIndexer indexer) {
+		public RoadEdgeInfoImpl(GraphBuilderContext ctx, RoadEdgeIndexer indexer) {
 			super();
-			this.fToRatioSection = fToRatioSection;
+			this.ctx = ctx;
 			this.indexer = indexer;
 		}
 
@@ -118,14 +158,14 @@ public class GraphBuilderServiceImpl implements GraphBuilderService {
 
 			List<RatioSection> result = new ArrayList<>();
 			double previous = 0;
-			for(CableConduitEdge s : sections) {
+			for (CableConduitEdge s : sections) {
 				double startRatio = s.getStartRatio();
 				if (startRatio > previous) {
 					result.add(new DefaultGeoRatioSection(previous, startRatio,
 							defaultCableConstruction));
 				}
-				result.add(fToRatioSection.apply(s));
-				previous = s.getEndRatio() ;
+				result.add(ctx.convert(s));
+				previous = s.getEndRatio();
 			}
 			if (previous < 1.0) {
 				result.add(new DefaultGeoRatioSection(previous, 1.0,
@@ -137,7 +177,7 @@ public class GraphBuilderServiceImpl implements GraphBuilderService {
 
 		@Override
 		public Collection<LocationEntityAssignment> getOrderedLocations() {
-			return GraphBuilderServiceImpl.this
+			return CoreGraphBuilderServiceImpl.this
 					.getOrderedLocationsByRoadEdge(indexer.getRoadLocations(id));
 
 		}

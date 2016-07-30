@@ -80,8 +80,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	}
 	
 	
-	@Override
-	public <T> GraphModelBuilder<T> createDAGBuilder(
+	private <T> GraphModelBuilder<T> createDAGBuilder(
 			EdgeFactory<GraphNode, AroEdge<T>> edgeFactory) {
 		return new DefaultGraphBuilder<T>(factory,
 				new SimpleDirectedWeightedGraph<GraphNode, AroEdge<T>>(
@@ -109,19 +108,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 
 	}
 
-	@Override
-	public GraphNetworkModel createGraphNetworkModel(NetworkData locationData) {
-
-		RoadModelBuilder b = new RoadModelBuilder(createSimpleBuilder(),
-				factory, GraphAssignmentFactoryImpl.FACTORY);
-
-		b.setFiberSources(locationData.getFiberSources()) 
-				.setRoadLocations(locationData.getRoadLocations())
-				//.setSelectedRoadLocations(locationData.getRoadLocations(), locationData.getSelectedRoadLocationIds())
-				.setRoadEdges(locationData.getRoadEdges());
-		return b.build();
-		
-	}
+	
 
 	@Override
 	public GraphRenoder createNetworkBuilder(
