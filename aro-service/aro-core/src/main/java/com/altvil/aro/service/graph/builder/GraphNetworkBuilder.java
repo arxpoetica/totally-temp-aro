@@ -76,6 +76,6 @@ public class GraphNetworkBuilder extends AbstractNetworkBuilder {
 				add(n, segment.pinLocation(n.getDomain()));
 			});
 		}
-	}
+	}    
 
 }
