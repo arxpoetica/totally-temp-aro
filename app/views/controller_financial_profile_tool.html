@@ -21,7 +21,7 @@
             <table class="table">
               <tbody>
                 <tr>
-                  <th colspan="3">Fiber Capex</th>
+                  <th colspan="3">Fiber Capex ({{metadata.fiber_length * 0.000621371 | number : 0}} mi)</th>
                   <td colspan="2" class="text-right">{{metadata.fiber_cost / 1000 | currency:"$":1}}K</td>
                 </tr>
                 <tr ng-repeat="cost in metadata.fiber_summary">

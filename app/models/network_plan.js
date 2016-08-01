@@ -161,6 +161,7 @@ module.exports = class NetworkPlan {
 
         output.metadata.equipment_cost = output.metadata.equipment_summary.reduce((total, item) => item.totalCost + total, 0)
         output.metadata.fiber_cost = output.metadata.fiber_summary.reduce((total, item) => item.totalCost + total, 0)
+        output.metadata.fiber_length = output.metadata.fiber_summary.reduce((total, item) => item.lengthMeters + total, 0)
 
         plan.total_cost = output.metadata.equipment_cost + output.metadata.fiber_cost
 
