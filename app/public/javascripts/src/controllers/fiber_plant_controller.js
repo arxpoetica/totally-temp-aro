@@ -223,4 +223,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     }
     layer.show()
   }
+
+  $scope.clearNbmCarrier = () => {
+    $scope.nbmCarrier = ''
+    $scope.nbmCarrierChanged()
+  }
 }])
