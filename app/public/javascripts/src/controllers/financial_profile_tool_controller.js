@@ -20,6 +20,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     household: 'Households',
     cellTower: 'Towers'
   }
+  $scope.premisesPercentage = 'false'
 
   var dirty = false
 
@@ -263,7 +264,11 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       { key: 'incremental', name: 'Incremental OFS' },
       { key: 'existing', name: 'Existing OFS' }
     ]
-    request(force, 'premises', { entityTypes: selectedKeys($scope.premisesFilterEntityTypes) }, (premises) => {
+    var params = {
+      entityTypes: selectedKeys($scope.premisesFilterEntityTypes),
+      percentage: $scope.premisesPercentage
+    }
+    request(force, 'premises', params, (premises) => {
       var data = buildChartData(premises, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line

@@ -149,6 +149,20 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfilePremises" style="margin-top: 20px">
         <div>
+          <div class="pull-right">
+            <form class="form-inline">
+              <div class="radio">
+                <label>
+                  <input type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="refreshCurrentTab(true)"> Discrete
+                </label>
+              </div>
+              <div class="radio" style="margin-left: 10px">
+                <label>
+                  <input type="radio" name="percentage" value="true" ng-model="premisesPercentage" ng-change="refreshCurrentTab(true)"> Percentage
+                </label>
+              </div>
+            </form>
+          </div>
           <form class="form-inline" ng-show="aboveWirecenter">
             <div class="form-group">
               <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">

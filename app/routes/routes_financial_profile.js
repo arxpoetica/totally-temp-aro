@@ -95,6 +95,10 @@ exports.configure = (api, middleware) => {
     entities.forEach((key) => {
       curves[key] = `fiber.${key}.premises_passed`
     })
+    var percentage = request.query.percentage === 'true'
+    if (percentage) {
+      curves['household_count'] = 'planned.household.houseHolds_global_count'
+    }
     var zeros = ['existing']
     requestData({
       plan_id: request.params.plan_id,
@@ -103,11 +107,15 @@ exports.configure = (api, middleware) => {
     })
     .then((data) => {
       data.forEach((obj) => {
-        var n = 0
-        Object.keys(curves).forEach((key) => {
-          n += obj[key]
-        })
-        obj.incremental = n
+        if (percentage) {
+          obj.incremental = obj['household'] * 100 / obj['household_count']
+        } else {
+          var n = 0
+          Object.keys(curves).forEach((key) => {
+            n += obj[key]
+          })
+          obj.incremental = n
+        }
       })
       return data
     })
