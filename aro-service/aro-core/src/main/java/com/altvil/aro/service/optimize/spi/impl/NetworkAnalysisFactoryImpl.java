@@ -1,17 +1,10 @@
 package com.altvil.aro.service.optimize.spi.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,8 +199,8 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public NetworkGenerator lazySerialize() {
-			Set<Long> rejectedLocations = this.rejectedLocations.stream()
-					.map(AroEntity::getObjectId).collect(Collectors.toSet());
+			long[] rejectedLocations = this.rejectedLocations.stream()
+					.mapToLong(AroEntity::getObjectId).toArray();
 			return new DefaultNetworkGenerator(networkModelBuilder,
 					rejectedLocations);
 		}
@@ -382,10 +375,10 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 	private static class DefaultNetworkGenerator implements NetworkGenerator {
 
 		private NetworkModelBuilder networkModelBuilder;
-		private Set<Long> rejectedLocations;
+		private long[] rejectedLocations;
 
 		public DefaultNetworkGenerator(NetworkModelBuilder networkModelBuilder,
-				Set<Long> rejectedLocations) {
+				long[] rejectedLocations) {
 			super();
 			this.networkModelBuilder = networkModelBuilder;
 			this.rejectedLocations = rejectedLocations;
@@ -393,7 +386,8 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public Optional<CompositeNetworkModel> get() {
-			return networkModelBuilder.createModel(rejectedLocations);
+
+			return networkModelBuilder.createModel(Arrays.asList(ArrayUtils.toObject(rejectedLocations)));
 		}
 
 		@Override

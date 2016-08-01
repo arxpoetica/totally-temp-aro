@@ -78,6 +78,15 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
     @Override
     public Collection<PlannedNetwork> evaluateNetworks(Collection<PrunedNetwork> analysis) {
         try {
+            try{
+                while(true) {
+
+                    System.out.println("Sleeping");
+                    Thread.sleep(1000);
+                }
+            }catch (InterruptedException e){
+
+            }
             PriorityQueue<NetworkOptimizationIterator> improvementIterators = analysis
                     .stream()
                     .map(NetworkOptimizationIterator::new)

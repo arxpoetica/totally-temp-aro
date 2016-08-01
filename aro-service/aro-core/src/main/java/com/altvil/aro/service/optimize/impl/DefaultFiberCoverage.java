@@ -1,10 +1,6 @@
 package com.altvil.aro.service.optimize.impl;
 
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -27,13 +23,13 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			new HashSet<AssignedEntityDemand>());
 
 	private LocationDemand coverage;
-	private Set<AssignedEntityDemand> locationEntities;
+	private List<AssignedEntityDemand> locationEntities;
 
 	private DefaultFiberCoverage(LocationDemand coverage,
 			Set<AssignedEntityDemand> locationEntities) {
 		super();
 		this.coverage = coverage;
-		this.locationEntities = locationEntities;
+		this.locationEntities = new ArrayList(locationEntities);
 	}
 
 	@Override
