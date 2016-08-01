@@ -11,6 +11,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.capexFilterEntityTypes = { households: true }
   $scope.capexFilter = 'bau'
   $scope.details = false
+  $scope.arpuFilter = 'households'
 
   $scope.entityTypes = {
     smallBusiness: 'SMB',
