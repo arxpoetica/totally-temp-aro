@@ -25,9 +25,8 @@ public class AroEdge<T> extends DefaultWeightedEdge {
 
 	@Override
 	public double getWeight() {
-		// NOTE: As of May 2016 the edge's weight is set to the length of the edge in meters by
-		// com.altvil.aro.service.graph.builder.AbstractNetworkBuilder.add(GraphNode, GraphNode, GeoSegment)
-
+		// NOTE: As of August 2016 the edge's weight is set to the cost of edge in dollars
+		
 		return super.getWeight();
 	}
 
