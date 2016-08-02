@@ -21,5 +21,7 @@ public interface GraphRenoder {
 	public abstract GraphRenoder renodeGraph(GraphModel<GeoSegment> model);
 
 	public abstract GraphModelBuilder<GeoSegment> getBuilder();
+	
+	public RenodedGraph renode() ;
 
 }

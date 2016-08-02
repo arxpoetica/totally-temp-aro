@@ -43,6 +43,13 @@ public class NetworkBuilder implements GraphRenoder {
 	public Map<GraphAssignment, GraphNode> getResolvedAssignments() {
 		return resolvedAssignments;
 	}
+	
+
+	@Override
+	public RenodedGraph renode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.altvil.aro.service.graph.transform.network.GraphRenoder#add(com.altvil.aro.service.graph.assigment.GraphAssignment)

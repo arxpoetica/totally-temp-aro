@@ -37,11 +37,19 @@ public class GeoSegmentSplitter {
 	 */
 
 	private GraphNodeFactory vertexFactory;
+	private EdgeWeightFunction edgeWeightFunction ;
 
-	public GeoSegmentSplitter(GraphNodeFactory vertexFactory) {
+	public GeoSegmentSplitter(GraphNodeFactory vertexFactory, EdgeWeightFunction edgeWeightFunction) {
 		super();
 		this.vertexFactory = vertexFactory;
+		this.edgeWeightFunction = edgeWeightFunction ;
 	}
+	
+	public GeoSegmentSplitter(GraphNodeFactory vertexFactory) {
+		this(vertexFactory, geoSegment -> geoSegment.getLength()) ;
+	}
+	
+	
 
 	private void assignVertex(SplitAssignments.Builder builder,
 			GraphEdgeAssignment va, GraphNode vertex) {
@@ -80,7 +88,7 @@ public class GeoSegmentSplitter {
 		if (sortedAssignments.size() == 0) { // Very Special Case Snapped to
 												// original Segment
 			builder.add(new DefaultEdgeAssigment(src, target, geoSgement,
-					geoSgement.getLength()));
+					edgeWeightFunction.computeWeight(geoSgement)));
 		} else {
 
 			// TODO Refactor into strategy
@@ -228,7 +236,7 @@ public class GeoSegmentSplitter {
 	private EdgeAssignment createEdgeAssigment(GraphNode src, GraphNode target,
 			GeoSegment segment) {
 		return new DefaultEdgeAssigment(src, target, segment,
-				segment.getLength());
+				edgeWeightFunction.computeWeight(segment)) ;
 	}
 
 	private List<GraphEdgeAssignment> sort(

@@ -25,14 +25,14 @@ public class NetworkConstrainer {
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkConstrainer.class.getName());
 
-	private NetworkModelBuilder networkModelBuilder;
+	//private NetworkModelBuilder networkModelBuilder;
 	private PruningStrategy pruningStrategy;
 	private NetworkAnalysis networkAnalysis;
 
 	private NetworkConstrainer(NetworkModelBuilder networkModelBuilder,
 			PruningStrategy pruningStrategy, NetworkAnalysis networkAnalysis) {
 		super();
-		this.networkModelBuilder = networkModelBuilder;
+		//this.networkModelBuilder = networkModelBuilder;
 		this.pruningStrategy = pruningStrategy;
 		this.networkAnalysis = networkAnalysis;
 

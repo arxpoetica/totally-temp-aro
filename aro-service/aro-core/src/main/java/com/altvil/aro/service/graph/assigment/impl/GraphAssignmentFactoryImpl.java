@@ -6,6 +6,8 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
+import com.altvil.aro.service.graph.assigment.VertexAssignment;
+import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.segment.transform.GeoSegmentTransform;
@@ -25,6 +27,18 @@ public class GraphAssignmentFactoryImpl implements GraphAssignmentFactory {
 		return new GraphEdgeAssignmentImpl(SEQUENCER.next(), aroEntity, pl);
 
 	}
+	
+	
+	
+
+	@Override
+	public VertexAssignment createVertexAssignment(GraphNode vertex,
+			AroEntity entity) {
+		return new VertexAssignmentImpl(SEQUENCER.next(), entity, vertex);
+	}
+
+
+
 
 	public GraphEdgeAssignment debugGreateEdgeAssignment(PinnedLocation pl,
 			AroEntity aroEntity) {
@@ -75,6 +89,30 @@ public class GraphAssignmentFactoryImpl implements GraphAssignmentFactory {
 					.toString();
 
 		}
+	}
+	
+	private static class VertexAssignmentImpl
+		extends AbstractGraphAssigment
+		implements VertexAssignment {
+
+		private GraphNode vertex ;
+		
+		public VertexAssignmentImpl(Long id, AroEntity aroEntity,
+				GraphNode vertex) {
+			super(id, aroEntity);
+			this.vertex = vertex;
+		}
+
+		@Override
+		public Point getPoint() {
+			return vertex.getPoint();
+		}
+
+		@Override
+		public GraphNode getOriginalVertex() {
+			return vertex;
+		}
+		
 	}
 
 	private static class GraphEdgeAssignmentImpl extends AbstractGraphAssigment

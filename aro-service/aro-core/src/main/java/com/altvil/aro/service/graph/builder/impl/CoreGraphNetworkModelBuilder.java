@@ -119,7 +119,7 @@ class CoreGraphNetworkModelBuilder {
 		if (sections.size() == 1) {
 			assignEquipment(assembler, networkElements);
 			graphModelBuilder.add(leftVertex, rightVertex, gs,
-					gs.getEffectiveWeight());
+					gs.getLength());
 		} else {
 
 			SplitGeoSegment split = DefaultSplitSegment.splitSegments(true, gs,

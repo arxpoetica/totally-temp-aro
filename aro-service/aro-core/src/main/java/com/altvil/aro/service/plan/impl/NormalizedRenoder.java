@@ -10,6 +10,7 @@ import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.network.GraphRenoder;
+import com.altvil.aro.service.graph.transform.network.RenodedGraph;
 
 public class NormalizedRenoder implements GraphRenoder {
 
@@ -36,6 +37,13 @@ public class NormalizedRenoder implements GraphRenoder {
 			renoder.add(va);
 		}
 
+	}
+	
+	
+
+	@Override
+	public RenodedGraph renode() {
+		return renoder.renode() ;
 	}
 
 	@Override
