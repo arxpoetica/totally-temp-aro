@@ -16,29 +16,28 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 	private WeightedGraph<V, E> graph;
 	private boolean reversed = false;
 
-	private Set<V> seenVertices = new HashSet<>();
-	private ClosestFirstSurfaceIterator<V, E> itr;
+	private final Map<V, Double> pathLengthForSeenVertex = new HashMap<>();
+	private final ClosestFirstSurfaceIterator<V, E> itr;
 
-	private Set<V> currentTargets;
 
 	public AllShortestPaths(WeightedGraph<V, E> graph,
 			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder, V source) {
 		this.graph = graph;
 		this.source = source;
-		this.seenVertices = new HashSet<>();
 		this.itr = closestFirstSurfaceBuilder.build(graph, source);
 	}
 	
 	public TreeMultimap<Double, V> findPaths(Collection<V> targets) {
 		TreeMultimap<Double, V> lengthToPath = TreeMultimap.create(Double::compare, (o1, o2) -> Integer.compare(o1.hashCode(), o2.hashCode()));
-		currentTargets = new HashSet<>(targets);
+		Set<V> currentTargets = new HashSet<>(targets);
 
 		int count = 0 ;
 		
 		for (V target : targets) {
-			if (seenVertices.contains(target)) {
+			Double distance = pathLengthForSeenVertex.get(target);
+			if (distance != null) {
 				count++ ;
-				lengthToPath.put(itr.getShortestPathLength(target), target);
+				lengthToPath.put(distance, target);
 				currentTargets.remove(target);
 			}
 		}
@@ -49,11 +48,12 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 				break ;
 			}
 			
-			V n = itr.next();
-			seenVertices.add(n);
+			final V n = itr.next();
+			final double shortestPathLength = itr.getShortestPathLength(n);
+			pathLengthForSeenVertex.put(n, shortestPathLength);
 			if (currentTargets.remove(n)) {
 				count++ ;
-				lengthToPath.put(itr.getShortestPathLength(n), n);
+				lengthToPath.put(shortestPathLength, n);
 			}
 		}
 
@@ -64,13 +64,46 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 		return lengthToPath;
 	}
 
+	public V findClosestTarget(Collection<V> targets) {
+		double shortestLength = Double.MAX_VALUE;
+		V closestTarget = null;
+		
+		for (V target : targets) {
+			Double distance = pathLengthForSeenVertex.get(target);
+			
+			if (distance != null) {
+				if (distance < shortestLength){ 
+					shortestLength = distance;
+					closestTarget = target;
+				}
+			}
+		}
+		
+		if (closestTarget != null) {
+			return closestTarget;
+		}
+
+		while (itr.hasNext()) {
+			V n = itr.next();
+			
+			final double shortestPathLength = itr.getShortestPathLength(n);
+			pathLengthForSeenVertex.put(n, shortestPathLength);
+
+			if (targets.contains(n)) {
+				return n;
+			}
+		}
+
+		return null;
+	}
+
 	public Collection<V> findPathVertices(Collection<V> targets) {
 
 		List<V> result = new ArrayList<>();
-		currentTargets = new HashSet<>(targets);
+		Set<V> currentTargets = new HashSet<>(targets);
 
 		for (V target : targets) {
-			if (seenVertices.contains(target)) {
+			if (pathLengthForSeenVertex.containsKey(target)) {
 				result.add(target);
 				currentTargets.remove(target);
 			}
@@ -84,11 +117,9 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 			
 			V n = itr.next();
 			
-			//System.out.println("seen " + n);
-			
-			seenVertices.add(n);
+			final double shortestPathLength = itr.getShortestPathLength(n);
+			pathLengthForSeenVertex.put(n, shortestPathLength);
 			if (currentTargets.remove(n)) {
-				//System.out.println("recorded " + n);
 				result.add(n);
 			}
 		}
@@ -123,7 +154,20 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 	
 	
 	public double getWeight(V vertex) {
-		return itr.getShortestPathLength(vertex) ;
+		Double distance = pathLengthForSeenVertex.get(vertex);
+		
+		while (distance == null && itr.hasNext()) {
+			V n = itr.next();
+			
+			final double shortestPathLength = itr.getShortestPathLength(n);
+			pathLengthForSeenVertex.put(n, shortestPathLength);
+
+			if (n.equals(vertex)) {
+				distance = shortestPathLength;
+			}
+		}
+
+		return distance == null ? Double.POSITIVE_INFINITY : distance;
 	}
 
 	public E getSpanningTreeEdge(V target) {
