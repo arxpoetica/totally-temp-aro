@@ -135,12 +135,12 @@ class CoreGraphNetworkModelBuilder {
 				GraphNode next = vertexItr.next();
 				GeoSegment geoSegment = segmentItr.next();
 				graphModelBuilder.add(leftVertex, next, geoSegment,
-						geoSegment.getEffectiveWeight());
+						geoSegment.getLength());
 				leftVertex = next;
 			}
 			GeoSegment geoSegment = segmentItr.next();
 			graphModelBuilder.add(leftVertex, rightVertex, geoSegment,
-					geoSegment.getEffectiveWeight());
+					geoSegment.getLength());
 		}
 
 		//

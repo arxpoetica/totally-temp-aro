@@ -110,13 +110,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	public GeoSegmentTransform getParentTransform() {
 		return transform;
 	}
-	
-	
-
-	@Override
-	public double getEffectiveWeight() {
-		return getCableConstructionCategory().getCostPerMeter() * getLength() ;
-	}
+		
 
 	@Override
 	public CableConstruction getCableConstructionCategory() {
