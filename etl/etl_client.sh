@@ -3,7 +3,7 @@
 export PGBIN=/usr/bin
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
-DATAROOT=/vagrant/arop-data/avco
+DATAROOT=/vagrant/aro-app-data/avco
 TMPDIR=/tmp/arotmp
 UNZIPTOOL=unzip
 SHP2PGSQL=${PGBIN}/shp2pgsql
