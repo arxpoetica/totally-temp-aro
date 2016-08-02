@@ -14,6 +14,19 @@ postgres:
     environment:
         POSTGRES_PASSWORD: aro
         POSTGRES_USER: aro
+service:
+    image: ait-docker-registry.cloud.altvil.com/aro-service
+    expose:
+        - "8080"
+    links:
+        - postgres:arodb
+    environment:
+        CATALINA_OPTS: -Xmx1g
+        PGUSER: aro
+        PGPASSWORD: aro
+        PGDATABASE: aro
+        PGHOST: arodb
+        ARO_THREAD_COUNT: 5
 app:
     image: aro/app-dev
     volumes_from:
@@ -22,10 +35,12 @@ app:
         - "8000:8000"
     links:
         - postgres:arodb
+        - service:aro-service
     environment:
         PGHOST: arodb
         PGPASSWORD: aro
         PGUSER: aro
         PGDATABASE: aro
         ARO_DATA_ROOT: /srv/www/aro/source_data
+
 
