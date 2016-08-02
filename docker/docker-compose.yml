@@ -1,0 +1,31 @@
+data:
+    image: aro/app-data
+postgres-data:
+    image: mdillon/postgis:9.4
+    volumes:
+        - /var/lib/postgresql/data
+    command: /bin/bash -l
+postgres:
+    image: mdillon/postgis:9.4
+    volumes_from:
+        - postgres-data
+    ports:
+        - "5432:5432"
+    environment:
+        POSTGRES_PASSWORD: aro
+        POSTGRES_USER: aro
+app:
+    image: aro/app-dev
+    volumes_from:
+        - data
+    ports:
+        - "8000:8000"
+    links:
+        - postgres:arodb
+    environment:
+        PGHOST: arodb
+        PGPASSWORD: aro
+        PGUSER: aro
+        PGDATABASE: aro
+        ARO_DATA_ROOT: /srv/www/aro/source_data
+
