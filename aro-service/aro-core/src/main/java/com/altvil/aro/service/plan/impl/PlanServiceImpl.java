@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,6 @@ import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanException;
 import com.altvil.aro.service.plan.PlanService;
@@ -81,7 +81,7 @@ public class PlanServiceImpl implements PlanService {
 			NetworkData networkData,FtthThreshholds constraints)
 			throws PlanException {
 
-		return computeNetworkModel(networkData, ScalarClosestFirstSurfaceIterator.BUILDER, constraints, null) ;
+		return computeNetworkModel(networkData, ScalarClosestFirstSurfaceIterator.BUILDER, constraints) ;
 				
 	}
 
@@ -90,34 +90,37 @@ public class PlanServiceImpl implements PlanService {
 	public Optional<CompositeNetworkModel> computeNetworkModel(
 			NetworkData networkData,
 			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
-			FtthThreshholds request, GlobalConstraint globalConstraint)
+			FtthThreshholds request)
 			throws PlanException {
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					networkData, closestFirstSurfaceBuilder, request,
-					globalConstraint);
+					networkData, closestFirstSurfaceBuilder, request);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
 		} catch (Throwable err) {
-			log.error(err.getMessage(), err);
+			String message = err.getMessage();
+			if (message == null) {
+				message = err.getClass().getName();
+			}
+			log.error(message, err);
 			log.info("Failed to Process. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
-			throw new PlanException(err.getMessage(), err);
+			throw new PlanException(message, err);
 		}
 	}
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
 			NetworkData networkData,
 			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
-			FtthThreshholds constraints, GlobalConstraint globalConstraint)
+			FtthThreshholds constraints)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
 		CompositeNetworkModel networkModel = planning.build(networkData,
-				closestFirstSurfaceBuilder, constraints, globalConstraint);
+				closestFirstSurfaceBuilder, constraints);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
@@ -179,7 +182,7 @@ public class PlanServiceImpl implements PlanService {
 		public CompositeNetworkModel build(
 				final NetworkData data,
 				ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
-				FtthThreshholds request, GlobalConstraint globalConstraint) {
+				FtthThreshholds request) {
 
 			GraphNetworkModel networkModel = transformFactory
 					.createGraphNetworkModel(data);
@@ -213,8 +216,7 @@ public class PlanServiceImpl implements PlanService {
 			Map<GraphEdgeAssignment, FiberSourceBinding> edgeMap = StreamUtil
 					.hash(assignedFiberSources, fsb -> fsb.getSource());
 
-			GraphModelBuilder<GeoSegment> modifier = transformFactory
-					.modifyModel(routeModel.getModel());
+			GraphModelBuilder<GeoSegment> modifier = transformFactory.modifyModel(routeModel.getModel());
 
 			// Create a virtual root whose edges connect to all of the assigned
 			// fiber sources.
@@ -254,55 +256,50 @@ public class PlanServiceImpl implements PlanService {
 							.stream()
 							.filter(fsb -> fsb.getGraphMapping() != null)
 							.map(createNetworkModelTransform(
-									dag,
-									ScalarClosestFirstSurfaceIterator.BUILDER))
+									dag, ScalarClosestFirstSurfaceIterator.BUILDER))
 							.collect(Collectors.toList()));
 
 		}
-	}
 
 	/*
-	 * Renoding moves LocationDemands within the snap distance (currently 1m) of
-	 * an edge's split point into an external map. As a result, the
-	 * wireCenterTransform won't know about these demands so it final plan will
-	 * truncate the route to the point where it finally has a non-zero demand.
+		 * Renoding moves LocationDemands within the snap distance (currently
+		 * 1m) of an edge's split point into an external map. As a result, the
+		 * wireCenterTransform doesn't know about these demands so its final plan
+		 * will truncate the route to the point where it finally has a non-zero
+		 * demand.
 	 * 
-	 * This function copies the demands into the dag such that each path in the
-	 * panel will be seen as being necessary.
+		 * This function copies the demands into the dag such that each path in
+		 * the panel will be seen as being necessary.
 	 */
-	private void restoreLocationDemands(RouteModel routeModel,
-			DAGModel<GeoSegment> dag) {
-		dag.getEdges()
-				.stream()
-				.forEach(
-						(e) -> {
-							final Collection<GraphAssignment> graphAssignments = routeModel
-									.getGraphAssignments(e.getSourceNode());
+		private void restoreLocationDemands(RouteModel routeModel, DAGModel<GeoSegment> dag) {
+			// When an edge is split the location demands are left on the edge next to the target vertex.
+			// Build a set of target vertices to use as a filter
+			Set<GraphNode> targetVertices = dag.getEdges().stream().map(AroEdge::getTargetNode).collect(Collectors.toSet());
+			
+			// Add renoded location demands to leaf edges
+			dag.getEdges().stream()
+			.filter((e) -> !targetVertices.contains(e.getSourceNode()))
+			.forEach((e) -> {
+				final Collection<GraphAssignment> graphAssignments = routeModel.getGraphAssignments(e.getSourceNode());
 
 							final GeoSegment value = e.getValue();
 
 							if (value != null) {
-								final Collection<GraphEdgeAssignment> geoSegmentAssignments = value
-										.getGeoSegmentAssignments();
-								List<AroEntity> segmentEntities = geoSegmentAssignments
-										.stream()
-										.map(GraphEdgeAssignment::getAroEntity)
-										.collect(Collectors.toList());
+					final Collection<GraphEdgeAssignment> geoSegmentAssignments = value.getGeoSegmentAssignments();
+					List<AroEntity> segmentEntities = geoSegmentAssignments.stream()
+							.map(GraphEdgeAssignment::getAroEntity).collect(Collectors.toList());
 
 								for (GraphAssignment graphAssignment : graphAssignments) {
-									AroEntity graphEntity = graphAssignment
-											.getAroEntity();
+						AroEntity graphEntity = graphAssignment.getAroEntity();
 
 									if (segmentEntities.add(graphEntity)) {
-										geoSegmentAssignments
-												.add(GraphAssignmentFactoryImpl.FACTORY.createEdgeAssignment(
-														value.pinLocation(graphAssignment
-																.getPoint()),
-														graphEntity));
+							geoSegmentAssignments.add(GraphAssignmentFactoryImpl.FACTORY
+									.createEdgeAssignment(value.pinLocation(graphAssignment.getPoint()), graphEntity));
 									}
 								}
 							}
 						});
+		}
 	}
 
 	public Function<FiberSourceBinding, NetworkModel> createNetworkModelTransform(

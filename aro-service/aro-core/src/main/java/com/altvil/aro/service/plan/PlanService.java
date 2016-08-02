@@ -22,7 +22,7 @@ public interface PlanService {
 	 */
 	public Optional<CompositeNetworkModel> computeNetworkModel(NetworkData networkData,
 			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
-			FtthThreshholds request, GlobalConstraint globalConstraint) throws PlanException;
+			FtthThreshholds request) throws PlanException;
 
 	
 	

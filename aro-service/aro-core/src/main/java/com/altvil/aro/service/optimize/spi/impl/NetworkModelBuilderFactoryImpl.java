@@ -16,7 +16,6 @@ import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.plan.PlanService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
@@ -37,8 +36,8 @@ public class NetworkModelBuilderFactoryImpl implements
 
 	@Override
 	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
-			FtthThreshholds fiberConstraints, GlobalConstraint globalConstraints) {
-		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, fiberConstraints, globalConstraints);
+			FtthThreshholds fiberConstraints) {
+		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, fiberConstraints);
 	}
 
 	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
@@ -48,17 +47,15 @@ public class NetworkModelBuilderFactoryImpl implements
 		ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder;
 		
 		private FtthThreshholds constraints;
-		private GlobalConstraint globalConstraints;
 
 		private Map<Long, NetworkAssignment> map;
 
 		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
-				FtthThreshholds constraints, GlobalConstraint globalConstraints) {
+				FtthThreshholds constraints) {
 			super();
 			this.networkData = networkData;
 			this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
 			this.constraints = constraints;
-			this.globalConstraints = globalConstraints;
 
 			map = StreamUtil.hash(networkData.getRoadLocations(),
 					a -> a.getSource().getObjectId());
@@ -106,7 +103,7 @@ public class NetworkModelBuilderFactoryImpl implements
 		@Override
 		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
 			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, constraints, globalConstraints);
+					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, constraints);
 		}
 	}
 }

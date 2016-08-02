@@ -8,19 +8,16 @@ import org.jgrapht.WeightedGraph;
 import org.jgrapht.traverse.CrossComponentIterator;
 import org.jgrapht.util.FibonacciHeap;
 import org.jgrapht.util.FibonacciHeapNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
+import com.altvil.aro.service.entity.SimpleNetworkFinancials;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
-import com.altvil.aro.service.graph.node.impl.DefaultVertex;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.plan.GlobalConstraint;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import com.altvil.utils.func.Aggregator;
 
 /**
  * A closest-first iterator for a directed or undirected graph. For this
@@ -38,12 +35,10 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		extends CrossComponentIterator<V, E, FibonacciHeapNode<NpvClosestFirstIterator.QueueEntry<V, E>>>
 		implements ClosestFirstSurfaceIterator<V, E> {
 	public static class Builder implements ClosestFirstSurfaceBuilder {
-		private final GlobalConstraint globalConstraint;
 		private final double		   discountRate;
 		private final int			   years;
 
-		public Builder(GlobalConstraint globalConstraint, double discountRate, int years) {
-			this.globalConstraint = globalConstraint;
+		public Builder(double discountRate, int years) {
 			this.discountRate = discountRate;
 			this.years = years;
 		}
@@ -51,16 +46,9 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		@Override
 		public <V, E extends AroEdge<?>> ClosestFirstSurfaceIterator<V, E> build(WeightedGraph<V, E> graph,
 				V startVertex) {
-			return new NpvClosestFirstIterator<>(globalConstraint, discountRate, years, graph, startVertex);
+			return new NpvClosestFirstIterator<>(new SimpleNetworkFinancials(null, 0, discountRate, years), graph, startVertex);
 		}
 	}
-	private static final double EQUIPMENT_PER_COVERAGE = 76.5;
-
-	private static final double FIBER_PER_M = 17.32;
-
-	private static final double	MAX_NPV		 = 1.0E10;
-
-	private final Logger		log			 = LoggerFactory.getLogger(NpvClosestFirstIterator.class);
 
 	/**
 	 * Private data to associate with each entry in the priority queue.
@@ -100,7 +88,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 */
 	private double							radius		= Double.POSITIVE_INFINITY;
 
-	private double parametric;
+	private SimpleNetworkFinancials financials;
 	
 	/**
 	 * Creates a new closest-first iterator for the specified graph.
@@ -108,8 +96,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param g
 	 *            the graph to be iterated.
 	 */
-	public NpvClosestFirstIterator(GlobalConstraint globalConstraint, double discountRate, int years, Graph<V, E> g) {
-		this(globalConstraint, discountRate, years, g, null);
+	public NpvClosestFirstIterator(SimpleNetworkFinancials financials, Graph<V, E> g) {
+		this(financials, g, null);
 	}
 
 	/**
@@ -124,8 +112,8 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 * @param startVertex
 	 *            the vertex iteration to be started.
 	 */
-	public NpvClosestFirstIterator(GlobalConstraint globalConstraint, double discountRate, int years, Graph<V, E> g, V startVertex) {
-		this(globalConstraint, discountRate, years, g, startVertex, Double.POSITIVE_INFINITY);
+	public NpvClosestFirstIterator(SimpleNetworkFinancials financials, Graph<V, E> g, V startVertex) {
+		this(financials, g, startVertex, Double.POSITIVE_INFINITY);
 	}
 
 	/**
@@ -144,40 +132,24 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 *            limit on weighted path length, or Double.POSITIVE_INFINITY for
 	 *            unbounded search.
 	 */
-	public NpvClosestFirstIterator(GlobalConstraint globalConstraint, double discountRate, int years, Graph<V, E> g, V startVertex,
+	public NpvClosestFirstIterator(SimpleNetworkFinancials financials, Graph<V, E> g, V startVertex,
 			double radius) {
 		super(g, startVertex);
+		this.financials = financials;
 		this.radius = radius;
-		this.parametric = globalConstraint == null ? 1 : globalConstraint.nextParametric();
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
 
-		// NOTE: Calculate a scale factor that can be used to reduce the npv
-		// function to a linear equation. Assumes that the net revenue is fixed.
-		double npv = 0;
-
-		for (int t = 1; t <= years; t++) {
-			npv += 1 / Math.pow(1 + discountRate, t);
 		}
 
-		npvFactor = npv;
-	}
-
-	private final double npvFactor;
 
 	/**
 	 * Determine weighted path length to a vertex via an edge, using the path
 	 * length for the opposite vertex.
 	 *
-	 * @param terminal
-	 *            the vertex for which to calculate the path length.
-	 * @param base2terminal
-	 *            the edge via which the path is being extended.
-	 *
 	 * @return calculated path length.
 	 */
-	private double calculatePathLength(V terminal, E base2terminal) {
-		NpvData terminalData = createNpvData(terminal, base2terminal);
+	private double calculatePathLength(NpvData terminalData) {
 
 		double npv = netPresentValue(terminalData);
 
@@ -186,22 +158,15 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	}
 
 	private double netPresentValue(NpvData data) {
-		double npv = (data.revenue * npvFactor) - data.cost;
+		financials.setLocationDemand(data.demand);
+		financials.setFiberLength(data.totalLength);
 
-		return npv;
+		return financials.getNpv();
 	}
 
 	private static class NpvData {
-		double	   cost		   = 0;
-		double	   revenue	   = 0;
+		LocationDemand demand = DefaultLocationDemand.ZERO_DEMAND;
 		double	   totalLength = 0;
-		public int locations   = 0;
-
-		@Override
-		public String toString() {
-			return "NpvData [cost=" + cost + ", revenue=" + revenue + ", totalLength=" + totalLength + ", locations="
-					+ locations + "]";
-		}
 	}
 
 	private void checkRadiusTraversal(boolean crossComponentTraversal) {
@@ -241,19 +206,14 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		FibonacciHeapNode<QueueEntry<V, E>> sourceNode = getSeenData(source);
 		sourceData = sourceNode.getData().npvData;
 
-		// The destination's financials will be the source's financials plus the
-		// costs and revenues associated with the current edge.
-		destinationData.cost = sourceData.cost;
-		destinationData.revenue = sourceData.revenue;
+		// The destination's financial data will be the source's financial data plus the
+		// demands and revenues associated with the current edge.
+		Aggregator<LocationDemand> demandAggregator = DefaultLocationDemand.demandAggregate();
+		demandAggregator.add(sourceData.demand);
 
 		destinationData.totalLength = sourceData.totalLength + source2Destination.getWeight();
 
-		// Increment by the cost of laying fiber on this edge
-
-		destinationData.cost += source2Destination.getWeight() * FIBER_PER_M;
-
-		// if the cost of this plan does NOT exceed the budget then include the
-		// cost, and revenue, of its assignments in the NPV calculation.
+		// Include the cost, and revenue, of its assignments in the NPV calculation.
 		GeoSegment segment = (GeoSegment) source2Destination.getValue();
 
 		if (segment != null) {
@@ -262,12 +222,11 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			assignments.forEach((assignment) -> {
 				LocationEntity le = (LocationEntity) assignment.getAroEntity();
 				LocationDemand d = le.getLocationDemand();
-				// Count the locations on this page for later analysis
-				destinationData.locations++;
-				destinationData.revenue += parametric * d.getMonthlyRevenueImpact() * 12;
-				destinationData.cost += parametric * d.getRawCoverage() * EQUIPMENT_PER_COVERAGE;
+				demandAggregator.add(d);
 			});
 		}
+		
+		destinationData.demand = demandAggregator.apply();
 
 		return destinationData;
 	}
@@ -277,13 +236,14 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 */
 	@Override
 	protected void encounterVertex(V vertex, E edge) {
+		FibonacciHeapNode<QueueEntry<V, E>> node = createSeenData(vertex, edge);
+
 		double shortestPathLength;
 		if (edge == null) {
 			shortestPathLength = 0;
 		} else {
-			shortestPathLength = calculatePathLength(vertex, edge);
+			shortestPathLength = calculatePathLength(node.getData().npvData);
 		}
-		FibonacciHeapNode<QueueEntry<V, E>> node = createSeenData(vertex, edge);
 		putSeenData(vertex, node);
 		heap.insert(node, shortestPathLength);
 	}
@@ -306,10 +266,13 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			return;
 		}
 
-		double candidatePathLength = calculatePathLength(vertex, edge);
+		NpvData npvData = createNpvData(vertex, edge);
+
+		double candidatePathLength = calculatePathLength(npvData);
 
 		if (candidatePathLength < node.getKey()) {
 			node.getData().spanningTreeEdge = edge;
+			node.getData().npvData = npvData;
 			heap.decreaseKey(node, candidatePathLength);
 		}
 	}
@@ -323,11 +286,13 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 */
 
 	private double f(double npv) {
-		double normalized = MAX_NPV - npv;
-
-		assert (normalized >= 0.0);
-
-		return normalized;
+		if (npv > 1) {
+			return 100.0 - Math.log(npv);
+		} else if (npv > -1) {
+			return npv;
+		}
+		
+		return 100.0 + Math.log(-npv);
 	}
 
 	/*
@@ -361,29 +326,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 			return null;
 		}
 
-		DefaultVertex v = (DefaultVertex) vertex;
-
-		final QueueEntry<V, E> data = node.getData();
-
-		final E spanningTreeEdge = data.spanningTreeEdge;
-
-		if (v != null) {
-			final Point point = v.getPoint();
-			if (point != null) {
-				Coordinate coord = point.getCoordinate();
-
-				log.trace("{},{} {},{},{},{},{}",
-						v, coord.y, coord.x, data.npvData.totalLength, data.npvData.cost, data.npvData.revenue,
-						netPresentValue(data.npvData));
-
-				if (spanningTreeEdge != null) {
-					log.trace(
-							spanningTreeEdge.getSourceNode().getId() + " " + spanningTreeEdge.getTargetNode().getId());
-				}
-			}
-		}
-
-		return spanningTreeEdge;
+		return node.getData().spanningTreeEdge;
 	}
 
 	/**

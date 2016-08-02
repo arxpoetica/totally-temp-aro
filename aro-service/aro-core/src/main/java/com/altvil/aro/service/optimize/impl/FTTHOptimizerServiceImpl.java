@@ -84,7 +84,7 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
 				.create(networkData, ScalarClosestFirstSurfaceIterator.BUILDER,
-						ctx.getFtthThreshholds(), null);
+						ctx.getFtthThreshholds());
 
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder, ctx,
