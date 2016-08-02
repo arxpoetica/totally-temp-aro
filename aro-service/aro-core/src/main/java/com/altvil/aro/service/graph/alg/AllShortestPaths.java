@@ -1,5 +1,6 @@
 package com.altvil.aro.service.graph.alg;
 
+import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.google.common.collect.TreeMultimap;
 
@@ -9,7 +10,7 @@ import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.GraphPathImpl;
 import java.util.*;
 
-public class AllShortestPaths<V, E> {
+public class AllShortestPaths<V, E extends AroEdge<?>> {
 
 	private V source;
 	private WeightedGraph<V, E> graph;
@@ -21,7 +22,7 @@ public class AllShortestPaths<V, E> {
 	private Set<V> currentTargets;
 
 	public AllShortestPaths(WeightedGraph<V, E> graph,
-			ClosestFirstSurfaceBuilder<V, E> closestFirstSurfaceBuilder, V source) {
+			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder, V source) {
 		this.graph = graph;
 		this.source = source;
 		this.seenVertices = new HashSet<>();

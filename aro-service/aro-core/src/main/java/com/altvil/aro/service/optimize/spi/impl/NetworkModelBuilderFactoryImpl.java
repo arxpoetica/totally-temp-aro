@@ -10,11 +10,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
@@ -39,7 +36,7 @@ public class NetworkModelBuilderFactoryImpl implements
 	}
 
 	@Override
-	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
 			FtthThreshholds fiberConstraints, GlobalConstraint globalConstraints) {
 		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, fiberConstraints, globalConstraints);
 	}
@@ -48,14 +45,14 @@ public class NetworkModelBuilderFactoryImpl implements
 
 		private NetworkData networkData;
 		
-		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder;
+		ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder;
 		
 		private FtthThreshholds constraints;
 		private GlobalConstraint globalConstraints;
 
 		private Map<Long, NetworkAssignment> map;
 
-		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
 				FtthThreshholds constraints, GlobalConstraint globalConstraints) {
 			super();
 			this.networkData = networkData;

@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
+import org.jgrapht.WeightedGraph;
 import org.jgrapht.traverse.CrossComponentIterator;
 import org.jgrapht.util.FibonacciHeap;
 import org.jgrapht.util.FibonacciHeapNode;
@@ -14,6 +15,7 @@ import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.node.impl.DefaultVertex;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.GlobalConstraint;
@@ -35,6 +37,23 @@ import com.vividsolutions.jts.geom.Point;
 public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		extends CrossComponentIterator<V, E, FibonacciHeapNode<NpvClosestFirstIterator.QueueEntry<V, E>>>
 		implements ClosestFirstSurfaceIterator<V, E> {
+	public static class Builder implements ClosestFirstSurfaceBuilder {
+		private final GlobalConstraint globalConstraint;
+		private final double		   discountRate;
+		private final int			   years;
+
+		public Builder(GlobalConstraint globalConstraint, double discountRate, int years) {
+			this.globalConstraint = globalConstraint;
+			this.discountRate = discountRate;
+			this.years = years;
+		}
+
+		@Override
+		public <V, E extends AroEdge<?>> ClosestFirstSurfaceIterator<V, E> build(WeightedGraph<V, E> graph,
+				V startVertex) {
+			return new NpvClosestFirstIterator<>(globalConstraint, discountRate, years, graph, startVertex);
+		}
+	}
 	private static final double EQUIPMENT_PER_COVERAGE = 76.5;
 
 	private static final double FIBER_PER_M = 17.32;

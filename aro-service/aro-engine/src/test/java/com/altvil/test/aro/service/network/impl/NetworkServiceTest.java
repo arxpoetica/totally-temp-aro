@@ -14,11 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.network.NetworkService;
 import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.fiber.impl.AbstractFiberPlan;
@@ -100,7 +97,7 @@ public class NetworkServiceTest {
 			}
 
 			@Override
-			public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
+			public ClosestFirstSurfaceBuilder getClosestFirstSurfaceBuilder() {
 				// TODO Auto-generated method stub
 				return null;
 			}};

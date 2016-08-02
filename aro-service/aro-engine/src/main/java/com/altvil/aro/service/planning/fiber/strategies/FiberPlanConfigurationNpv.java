@@ -1,10 +1,7 @@
 package com.altvil.aro.service.planning.fiber.strategies;
 
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.NpvClosestFirstIterator;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.NpvFiberPlan;
 
@@ -22,9 +19,8 @@ public class FiberPlanConfigurationNpv extends FiberPlanConfiguration implements
 	}
 
 	@Override
-	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new NpvClosestFirstIterator<GraphNode, AroEdge<GeoSegment>>
-		(getGlobalConstraint(), getDiscountRate(), getYears(), g, s);
+	public ClosestFirstSurfaceBuilder getClosestFirstSurfaceBuilder() {
+		return new NpvClosestFirstIterator.Builder(getGlobalConstraint(), getDiscountRate(), getYears());
 	}
 
 	public double getBudget() {

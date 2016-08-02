@@ -5,11 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.plan.GlobalConstraint;
 import com.altvil.aro.service.planning.FiberPlan;
@@ -92,7 +89,7 @@ public class FiberPlanConfiguration implements Cloneable, Serializable, FiberPla
 		return true;
 	}
 
-	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> getClosestFirstSurfaceBuilder() {
-		return (g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(g, s);
+	public ClosestFirstSurfaceBuilder getClosestFirstSurfaceBuilder() {
+		return ScalarClosestFirstSurfaceIterator.BUILDER;
 	}
 }

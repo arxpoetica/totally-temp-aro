@@ -81,11 +81,7 @@ public class PlanServiceImpl implements PlanService {
 			NetworkData networkData,FtthThreshholds constraints)
 			throws PlanException {
 
-		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = (
-				g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(
-				g, s);
-			
-		return computeNetworkModel(networkData, closestFirstSurfaceBuilder, constraints, null) ;
+		return computeNetworkModel(networkData, ScalarClosestFirstSurfaceIterator.BUILDER, constraints, null) ;
 				
 	}
 
@@ -93,7 +89,7 @@ public class PlanServiceImpl implements PlanService {
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
 			NetworkData networkData,
-			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
 			FtthThreshholds request, GlobalConstraint globalConstraint)
 			throws PlanException {
 		log.info("" + "Processing Plan ");
@@ -115,7 +111,7 @@ public class PlanServiceImpl implements PlanService {
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
 			NetworkData networkData,
-			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
 			FtthThreshholds constraints, GlobalConstraint globalConstraint)
 			throws PlanException {
 
@@ -182,7 +178,7 @@ public class PlanServiceImpl implements PlanService {
 
 		public CompositeNetworkModel build(
 				final NetworkData data,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
+				ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
 				FtthThreshholds request, GlobalConstraint globalConstraint) {
 
 			GraphNetworkModel networkModel = transformFactory
@@ -259,8 +255,7 @@ public class PlanServiceImpl implements PlanService {
 							.filter(fsb -> fsb.getGraphMapping() != null)
 							.map(createNetworkModelTransform(
 									dag,
-									(g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(
-											g, s)))
+									ScalarClosestFirstSurfaceIterator.BUILDER))
 							.collect(Collectors.toList()));
 
 		}
@@ -312,7 +307,7 @@ public class PlanServiceImpl implements PlanService {
 
 	public Function<FiberSourceBinding, NetworkModel> createNetworkModelTransform(
 			DAGModel<GeoSegment> dag,
-			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+			ClosestFirstSurfaceBuilder builder) {
 		return (fsb) -> new NetworkModelPlanner(fsb).createNetworkModel(dag,
 				fsb.getGraphMapping(), builder);
 	}
@@ -335,7 +330,7 @@ public class PlanServiceImpl implements PlanService {
 		public NetworkModel createNetworkModel(
 				DAGModel<GeoSegment> dag,
 				GraphMapping graphMapping,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+				ClosestFirstSurfaceBuilder builder) {
 			FiberSourceMapping fiberMapping = (FiberSourceMapping) graphMapping;
 
 			this.renodedModel = renodeGraph(dag, graphMapping);
@@ -355,7 +350,7 @@ public class PlanServiceImpl implements PlanService {
 
 		private Collection<AroEdge<GeoSegment>> planRoute(
 				GraphMapping mapping,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+				ClosestFirstSurfaceBuilder builder) {
 			return planRoute(mapping.getGraphAssignment(),
 					mapping.getChildAssignments(), builder);
 		}
@@ -366,7 +361,7 @@ public class PlanServiceImpl implements PlanService {
 
 		private Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> planDistributionRoutes(
 				Collection<GraphMapping> children,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+				ClosestFirstSurfaceBuilder builder) {
 
 			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> map = new HashMap<>();
 
@@ -382,7 +377,7 @@ public class PlanServiceImpl implements PlanService {
 		private Collection<AroEdge<GeoSegment>> planRoute(
 				GraphAssignment root,
 				Collection<? extends GraphAssignment> nodes,
-				ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> builder) {
+				ClosestFirstSurfaceBuilder builder) {
 
 			if (log.isDebugEnabled())
 				log.debug("Processing Routes for" + root.getAroEntity());
