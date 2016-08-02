@@ -17,7 +17,7 @@ public class OptimizationExecutorServiceImpl implements
 	private int toThreadCount(ExecutorType type) {
 		switch (type) {
 		case Wirecenter:
-			return 10;
+			return 5;
 		case MasterPlan:
 			return 5;
 		default:
