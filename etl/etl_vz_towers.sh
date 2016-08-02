@@ -3,7 +3,7 @@
 export PGBIN=/usr/bin
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
-GISROOT=/vagrant/aro-app-data/vz_towers
+GISROOT=$ARO_DATA_ROOT/vz_towers
 TMPDIR=/tmp/arotmp
 UNZIPTOOL=unzip
 SHP2PGSQL=${PGBIN}/shp2pgsql
