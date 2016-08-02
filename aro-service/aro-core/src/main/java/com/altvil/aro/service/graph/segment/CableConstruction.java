@@ -5,6 +5,6 @@ import com.altvil.interfaces.CableConstructionEnum;
 public interface CableConstruction {
 	
 	CableConstructionEnum getCableConstructionEnum() ;
-	double getRatioBuried() ;
+	double getPricePetMeter() ;
 
 }

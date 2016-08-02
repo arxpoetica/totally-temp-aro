@@ -75,6 +75,8 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 //		return createAssembler(parent, length, gid, geometry, roadLocations)
 //				.getGeoSegment();
 //	}
+	
+	
 
 	public static GeoSegmentAssembler createAssembler(
 			GeoSegmentTransform transform, CableConstruction cableConstruction, double length, Long gid,
@@ -92,6 +94,11 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 		return seg;
 
+	}
+
+	@Override
+	public double getEffectiveWeight() {
+		return cableConstruction.getPricePetMeter() * getLength();
 	}
 
 	@Override
