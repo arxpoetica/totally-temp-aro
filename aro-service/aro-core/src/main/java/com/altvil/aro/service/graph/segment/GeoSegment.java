@@ -7,6 +7,7 @@ import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.model.Reversable;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.transform.GeoSegmentTransform;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -16,9 +17,7 @@ public interface GeoSegment extends Reversable {
 
 	public GeoSegment getRootSegment();
 	
-	public CableConstruction getCableConstructionCategory() ;
-
-	public double getEffectiveWeight() ;
+	public CableConstructionEnum getCableConstructionCategory() ;
 	
 	public Long getGid();
 

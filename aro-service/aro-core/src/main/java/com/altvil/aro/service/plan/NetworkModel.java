@@ -1,5 +1,6 @@
 package com.altvil.aro.service.plan;
 
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.assigment.impl.FiberSourceMapping;
@@ -13,7 +14,7 @@ public interface NetworkModel {
 
 	public GraphMapping getGraphMapping(GraphAssignment ga) ;
 	
-	public GraphNode getVertex(GraphAssignment graphAssignment) ;
+	public GraphNode getVertex(FiberType fiberType, GraphAssignment graphAssignment) ;
 	
 	public GeneratedFiberRoute getCentralOfficeFeederFiber() ;
 	public GeneratedFiberRoute getFiberRouteForFdh(GraphAssignment ga) ;

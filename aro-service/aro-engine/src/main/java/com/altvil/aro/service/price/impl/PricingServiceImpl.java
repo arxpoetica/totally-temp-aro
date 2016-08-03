@@ -3,8 +3,10 @@ package com.altvil.aro.service.price.impl;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -16,25 +18,28 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.entity.DropCable;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
+import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.aro.service.price.engine.PricingEngine;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 import com.altvil.utils.reference.VolatileReference;
 
 @Service
 public class PricingServiceImpl implements PricingService {
-	
+
 	private static final Logger log = LoggerFactory
 			.getLogger(PricingServiceImpl.class.getName());
-
 
 	private NetworkPlanRepository priceRepository;
 	private VolatileReference<PricingModel> modelRef;
 	private PricingEngine pricingEngine;
+
+	private static final Set<CableConstructionEnum> codedCableConstructionPricing = getCodedConstructionTypes();
 
 	@Autowired
 	public PricingServiceImpl(NetworkPlanRepository priceRepository,
@@ -47,25 +52,36 @@ public class PricingServiceImpl implements PricingService {
 		modelRef = new VolatileReference<PricingModel>(
 				() -> loadPricingModel(), 1000L * 60L * 5L);
 	}
-	
-	
+
+	private static Set<CableConstructionEnum> getCodedConstructionTypes() {
+
+		Set<CableConstructionEnum> result = EnumSet
+				.noneOf(CableConstructionEnum.class);
+
+		for (CableConstructionEnum ct : CableConstructionEnum.values()) {
+			if (ct.isPriceCoded()) {
+				result.add(ct);
+			}
+		}
+
+		return result;
+
+	}
 
 	@Override
 	public Aggregator<PriceModel> aggregate() {
-		return pricingEngine.createAggregator(getPricingModel("*", new Date()));
+		return pricingEngine.createAggregator(getPricingModel("*", new Date(), new PricingContext()));
 	}
 
-
-
 	@Override
-	public PriceModelBuilder createBuilder(String state, Date date) {
+	public PriceModelBuilder createBuilder(String state, Date date, PricingContext ctx) {
 		return pricingEngine.createPriceModelBuilder(getPricingModel(state,
-				date));
+				date, ctx));
 	}
 
 	@Override
-	public PricingModel getPricingModel(String state, Date date) {
-		return modelRef.get();
+	public PricingModel getPricingModel(String state, Date date, PricingContext ctx) {
+		return ContextPricingModel.create(modelRef.get(), ctx);
 	}
 
 	private PricingModel loadPricingModel() {
@@ -117,23 +133,6 @@ public class PricingServiceImpl implements PricingService {
 
 	}
 
-	private interface FiberPricing {
-		public double price(double meters);
-	}
-
-	private static class FiberUnitPricing implements FiberPricing {
-		private double price;
-
-		public FiberUnitPricing(double price) {
-			this.price = price;
-		}
-
-		@Override
-		public double price(double fiberLength) {
-			return price * fiberLength;
-		}
-	}
-
 	private static class CompositePrice extends AbstractPrice {
 		Collection<NetworkPricing> networkPricing;
 
@@ -170,7 +169,14 @@ public class PricingServiceImpl implements PricingService {
 			networkMapping.put(type, code);
 		}
 
-		private void add(FiberType type, String code) {
+		private void add(FiberType type,
+				CableConstructionEnum cableConstructionEnum) {
+
+			String code = type.name();
+			if (!cableConstructionEnum.isComputedEstimate()) {
+				code = code + "_" + cableConstructionEnum.getCodeName();
+			}
+
 			fiberMapping.put(type, code);
 		}
 
@@ -178,8 +184,16 @@ public class PricingServiceImpl implements PricingService {
 			return networkMapping.get(materialType);
 		}
 
-		public String getCode(FiberType ft) {
+		public String getCode(FiberType ft,
+				CableConstructionEnum constructionType) {
 			return fiberMapping.get(ft);
+		}
+
+		private void init(FiberType fiberType,
+				Set<CableConstructionEnum> constructionTypes) {
+			for (CableConstructionEnum ct : constructionTypes) {
+				add(fiberType, ct);
+			}
 		}
 
 		private void init() {
@@ -188,8 +202,29 @@ public class PricingServiceImpl implements PricingService {
 			add(MaterialType.FDT, "fiber_distribution_terminal");
 			add(MaterialType.FDH, "fiber_distribution_hub");
 
-			add(FiberType.FEEDER, "feeder_fiber");
-			add(FiberType.DISTRIBUTION, "distribution_fiber");
+			Set<CableConstructionEnum> codedConstructionTypes = getCodedConstructionTypes();
+
+			init(FiberType.FEEDER, codedConstructionTypes);
+			init(FiberType.DISTRIBUTION, codedConstructionTypes);
+			init(FiberType.BACKBONE, codedConstructionTypes);
+
+		}
+	}
+
+	private interface FiberPricing {
+		public double price(CableConstructionEnum cableType, double meters);
+	}
+
+	private static class FiberUnitPricing implements FiberPricing {
+		private Map<CableConstructionEnum, Double> priceMap;
+
+		public FiberUnitPricing(Map<CableConstructionEnum, Double> priceMap) {
+			this.priceMap = priceMap;
+		}
+
+		@Override
+		public double price(CableConstructionEnum type, double fiberLength) {
+			return priceMap.get(type) * fiberLength;
 		}
 	}
 
@@ -218,13 +253,17 @@ public class PricingServiceImpl implements PricingService {
 
 		private Map<FiberType, FiberPricing> resolveFiberPricing(
 				Map<String, List<PriceElement>> map) {
+
 			Map<FiberType, FiberPricing> fiberPricing = new EnumMap<>(
 					FiberType.class);
 
 			for (FiberType ft : FiberType.values()) {
-				fiberPricing.put(ft, createFiberPricing(map
-						.get(CodeMapping.MAPPING.getCode(ft))));
+				fiberPricing.put(
+						ft,
+						createFiberPricing(ft, codedCableConstructionPricing,
+								map));
 			}
+
 			return fiberPricing;
 		}
 
@@ -246,14 +285,21 @@ public class PricingServiceImpl implements PricingService {
 
 		}
 
-		private FiberPricing createFiberPricing(
-				Collection<PriceElement> priceElements) {
-			if (priceElements == null || priceElements.size() == 0) {
-				return new FiberUnitPricing(0);
-			}
+		private FiberPricing createFiberPricing(FiberType fiberType,
+				Collection<CableConstructionEnum> constructionTypes,
+				Map<String, List<PriceElement>> map) {
 
-			return new FiberUnitPricing(priceElements.iterator().next()
-					.getPrice());
+			Map<CableConstructionEnum, Double> pricingMap = new EnumMap<>(
+					CableConstructionEnum.class);
+
+			for (CableConstructionEnum ct : constructionTypes) {
+				List<PriceElement> priceElements = map.get(CodeMapping.MAPPING
+						.getCode(fiberType, ct));
+				double price = (priceElements == null || priceElements.size() == 0) ? 0
+						: priceElements.iterator().next().getPrice();
+				pricingMap.put(ct, price);
+			}
+			return new FiberUnitPricing(pricingMap);
 		}
 
 		private NetworkPricing createPrice(PriceElement pe) {
@@ -292,6 +338,10 @@ public class PricingServiceImpl implements PricingService {
 		}
 	}
 
+	//
+	//
+	//
+
 	private static class DefaultPriceModel implements PricingModel {
 
 		private Map<MaterialType, NetworkPricing> priceMappng = new EnumMap<>(
@@ -318,21 +368,23 @@ public class PricingServiceImpl implements PricingService {
 
 		@Override
 		public double getMaterialCost(MaterialType type, double atomicUnit) {
-			
-			NetworkPricing networkPricing =  priceMappng.get(type) ;
-			
-			if( networkPricing == null ) {
+
+			NetworkPricing networkPricing = priceMappng.get(type);
+
+			if (networkPricing == null) {
 				log.error("Failed to Map MaterialType return 0 price " + type);
-				return 0 ;
+				return 0;
 			}
-			
+
 			return networkPricing.price(atomicUnit);
 		}
 
 		@Override
 		public double getFiberCostPerMeter(FiberType fiberType,
-				int requiredFiberStrands) {
-			return fiberMap.get(fiberType).price(1);
+				CableConstructionEnum constructionType, int requiredFiberStrands) {
+			FiberPricing fiberPricing = fiberMap.get(fiberType);
+			return fiberPricing == null ? 0.0 : fiberPricing.price(
+					constructionType, 1);
 		}
 
 	}

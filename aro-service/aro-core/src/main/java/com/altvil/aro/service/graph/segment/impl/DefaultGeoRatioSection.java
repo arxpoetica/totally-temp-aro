@@ -4,21 +4,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.RatioSection;
+import com.altvil.interfaces.CableConstructionEnum;
 
 public class DefaultGeoRatioSection implements RatioSection {
 
 	private double startRatio;
 	private double endRatio;
-	private CableConstruction cableConstructionCategory;
+	private CableConstructionEnum cableConstructionEnum;
 
 	public DefaultGeoRatioSection(double startRatio, double endRatio,
-			CableConstruction cableConstructionCategory) {
+			CableConstructionEnum cableConstructionCategory) {
 		super();
 		this.startRatio = startRatio;
 		this.endRatio = endRatio;
-		this.cableConstructionCategory = cableConstructionCategory;
+		this.cableConstructionEnum = cableConstructionCategory;
 	}
 
 	@Override
@@ -32,8 +32,8 @@ public class DefaultGeoRatioSection implements RatioSection {
 	}
 
 	@Override
-	public CableConstruction getCableConstruction() {
-		return cableConstructionCategory;
+	public CableConstructionEnum getCableConstruction() {
+		return cableConstructionEnum;
 	}
 
 	@Override
@@ -54,12 +54,12 @@ public class DefaultGeoRatioSection implements RatioSection {
 			for (int i = 0; i < count - 1; i++) {
 				double endRatio = startRatio + sectionRatio;
 				result.add(new DefaultGeoRatioSection(startRatio, endRatio,
-						cableConstructionCategory));
+						cableConstructionEnum));
 				startRatio = endRatio;
 			}
 			// Force End Ratio to exactly match
 			result.add(new DefaultGeoRatioSection(startRatio, this
-					.getEndRationOffset(), cableConstructionCategory));
+					.getEndRationOffset(), cableConstructionEnum));
 		}
 
 		return result;

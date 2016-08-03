@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
@@ -94,7 +95,7 @@ public class NetworkModelImpl implements NetworkModel {
 	}
 
 	@Override
-	public GraphNode getVertex(GraphAssignment graphAssignment) {
+	public GraphNode getVertex(FiberType ft, GraphAssignment graphAssignment) {
 		return resolvedModel.get(graphAssignment);
 	}
 

@@ -3,7 +3,6 @@ package com.altvil.aro.service.graph.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.construction.CableConstructionPricing;
 import com.altvil.aro.service.graph.GraphNetworkModelBuilder;
 import com.altvil.aro.service.graph.GraphNetworkModelService;
 import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService;
@@ -11,10 +10,11 @@ import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBu
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.model.EdgeData;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.RatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultGeoRatioSection;
+import com.altvil.aro.service.price.PricingModel;
 import com.altvil.interfaces.CableConduitEdge;
+import com.altvil.interfaces.CableConstructionEnum;
 
 @Service
 public class GraphNetworkModelServiceImpl implements GraphNetworkModelService {
@@ -61,27 +61,27 @@ public class GraphNetworkModelServiceImpl implements GraphNetworkModelService {
 
 	private abstract class AbstractBuilder implements GraphNetworkModelBuilder {
 
-		private CableConstructionPricing pricing;
+		private PricingModel pricing;
 
 		@Override
-		public GraphNetworkModelBuilder setCableConstructionPricing(
-				CableConstructionPricing pricing) {
-			this.pricing = pricing;
+		public GraphNetworkModelBuilder setPricingModel(
+				PricingModel pricingModel) {
+			this.pricing = pricingModel ;
 			return this;
 		}
-		
-		
+
+
 
 		@Override
 		public GraphBuilderContext createContext() {
-			return new DefaultGraphBuilderContext(pricing) ;
+			return new DefaultGraphBuilderContext() ;
 		}
 
 
 
 		@Override
 		public GraphNetworkModel build() {
-			return doBuild(new DefaultGraphBuilderContext(pricing));
+			return doBuild(new DefaultGraphBuilderContext());
 		}
 
 		protected abstract GraphNetworkModel doBuild(
@@ -90,24 +90,21 @@ public class GraphNetworkModelServiceImpl implements GraphNetworkModelService {
 	}
 
 	private class DefaultGraphBuilderContext implements GraphBuilderContext {
-
-		private CableConstructionPricing pricing;
-
-		public DefaultGraphBuilderContext(CableConstructionPricing pricing) {
+		
+		public DefaultGraphBuilderContext() {
 			super();
-			this.pricing = pricing;
 		}
 
 		@Override
 		public RatioSection convert(CableConduitEdge edge) {
 			return new DefaultGeoRatioSection(edge.getStartRatio(),
-					edge.getEndRatio(), pricing.price(edge
-							.getCableConstructionEnum()));
+					edge.getEndRatio(), edge
+							.getCableConstructionEnum());
 		}
 
 		@Override
-		public CableConstruction getDefaultCableConstruction() {
-			return pricing.getDefaultCableConstruction();
+		public CableConstructionEnum getDefaultCableConstruction() {
+			return CableConstructionEnum.ESTIMATED;
 		}
 
 	}

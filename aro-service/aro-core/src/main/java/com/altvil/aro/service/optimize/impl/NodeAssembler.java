@@ -129,7 +129,7 @@ public class NodeAssembler {
 				.newListMultimap(new HashMap<>(), ArrayList::new);
 
 		mapping.getChildAssignments().forEach(
-				a -> map.put(model.getVertex(a), a));
+				a -> map.put(model.getVertex(fiberType, a), a));
 
 		return map;
 	}

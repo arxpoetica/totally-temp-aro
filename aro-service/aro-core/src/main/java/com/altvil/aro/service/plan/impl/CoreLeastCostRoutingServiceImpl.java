@@ -1,6 +1,7 @@
 package com.altvil.aro.service.plan.impl;
 
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.FDHEquipment;
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
@@ -42,24 +44,27 @@ import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.plan.GeneratedFiberRoute;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanException;
+import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.route.RouteModel;
 import com.altvil.aro.service.route.RoutePlaningService;
 import com.altvil.aro.util.DescribeGraph;
 import com.altvil.interfaces.Assignment;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
 
 @Service
-public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingService {
+public class CoreLeastCostRoutingServiceImpl implements
+		CoreLeastCostRoutingService {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(PlanServiceImpl.class.getName());
 
 	private GraphTransformerFactory transformFactory;
 	private RoutePlaningService routePlaningService;
-	
-	private GraphRenoderService graphRenoderService ;
-	private GraphAssignmentFactory assignmentFactory = GraphAssignmentFactoryImpl.FACTORY ;
+
+	private GraphRenoderService graphRenoderService;
+	private GraphAssignmentFactory assignmentFactory = GraphAssignmentFactoryImpl.FACTORY;
 
 	@Autowired
 	public CoreLeastCostRoutingServiceImpl(
@@ -72,14 +77,15 @@ public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingServ
 
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
-			GraphNetworkModel model, FtthThreshholds constraints)
+			GraphNetworkModel model, PricingModel pricingModel,
+			FtthThreshholds constraints)
 			throws PlanException {
 
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					model, constraints);
+					model, pricingModel, constraints);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
@@ -93,12 +99,11 @@ public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingServ
 	}
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
-			GraphNetworkModel model, FtthThreshholds constraints)
+			GraphNetworkModel model, PricingModel pricingModel, FtthThreshholds constraints)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
-		CompositeNetworkModel networkModel = planning.build(model,
-				constraints);
+		CompositeNetworkModel networkModel = planning.build(model, pricingModel, constraints);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
@@ -157,8 +162,7 @@ public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingServ
 			super();
 		}
 
-		public CompositeNetworkModel build(GraphNetworkModel networkModel,
-
+		public CompositeNetworkModel build(PricingModel pricingModel, GraphNetworkModel networkModel,
 		FtthThreshholds request) {
 
 			if (!networkModel.hasLocations()) {
@@ -232,55 +236,111 @@ public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingServ
 
 			return new CompositeNetworkModelImpl(assignedFiberSources.stream()
 					.filter(fsb -> fsb.getGraphMapping() != null)
-					.map(createNetworkModelTransform(graphCtx))
+					.map(createNetworkModelTransform(pricingModel, graphCtx))
 					.collect(Collectors.toList()));
 
 		}
 	}
 
-
-	public Function<FiberSourceBinding, NetworkModel> createNetworkModelTransform(
+	public Function<FiberSourceBinding, NetworkModel> createNetworkModelTransform(PricingModel pricingModel,
 			GraphContext graphCtx) {
-		return (fsb) -> new NetworkModelPlanner(fsb).createNetworkModel(
-				graphCtx, fsb.getGraphMapping());
+		return (fsb) -> new NetworkModelPlanner(pricingModel, fsb)
+				.createNetworkModel(graphCtx, fsb.getGraphMapping());
 	}
+	
 
 	private class NetworkModelPlanner {
 
+		private PricingModel pricingModel;
 		private FiberSourceBinding fiberSourceBinding;
-	
-		public NetworkModelPlanner(FiberSourceBinding fiberSourceBinding) {
+		private Map<Map<CableConstructionEnum, Double>, RenodedGraph> cache = new HashMap<>() ;
+
+		public NetworkModelPlanner(
+				PricingModel priceModel, FiberSourceBinding fiberSourceBinding) {
+			this.pricingModel = priceModel;
 			this.fiberSourceBinding = fiberSourceBinding;
+		}
+		
+		
+		private RenodedGraph getRenodedGraph(
+				GraphContext graphCtx,
+				FiberType fiberType,
+				GraphMapping graphMapping) {
+			
+			Map<CableConstructionEnum, Double> priceMap = createPriceMap(
+					fiberType);
+			
+			RenodedGraph renoded = cache.get(priceMap) ;
+			if( renoded != null ) {
+				return renoded ;
+			}
+
+			GraphRenoder renoder = graphRenoderService.createGraphRenoder(
+					graphCtx.getGraphModel(), true,
+					s -> priceMap.get(s.getCableConstructionCategory()));
+
+			renoder.add(extractAssignments(graphMapping).values());
+			renoder.add(assignmentFactory.createVertexAssignment(
+					fiberSourceBinding.getDomain(), graphMapping.getAroEntity()));
+			
+			cache.put(priceMap, renoded = renoder.renode());
+			
+			DescribeGraph.trace(log, renoded.getGraph().getGraph());
+			
+			return renoded ;
+
 		}
 
 		public NetworkModel createNetworkModel(GraphContext graphCtx,
 				GraphMapping graphMapping) {
-			
+
 			FiberSourceMapping fiberMapping = (FiberSourceMapping) graphMapping;
+//
+//			Map<CableConstructionEnum, Double> priceMap = createPriceMap(
+//					fiberType);
+//
+//			GraphRenoder renoder = graphRenoderService.createGraphRenoder(
+//					graphCtx.getGraphModel(), true,
+//					s -> priceMap.get(s.getCableConstructionCategory()));
+//
+//			renoder.add(extractAssignments(graphMapping).values());
+//			renoder.add(assignmentFactory.createVertexAssignment(
+//					fiberSourceBinding.getDomain(), graphMapping.getAroEntity()));
+//			
+//			RenodedGraph rendoded = renoder.renode();
+//
+//			DescribeGraph.trace(log, rendoded.getGraph().getGraph());
+			
+			Map<FiberType, RenodedGraph> renodedMap = new EnumMap<>(FiberType.class) ;
+			renodedMap.put(FiberType.FEEDER, getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping)) ;
+			renodedMap.put(FiberType.DISTRIBUTION, getRenodedGraph(graphCtx, FiberType.DISTRIBUTION, graphMapping)) ;
 
-			GraphRenoder renoder = 
-					graphRenoderService.createGraphRenoder(graphCtx.getGraphModel(),
-							true,
-							geoSegment -> geoSegment.getEffectiveWeight()) ;
-			
-			renoder.add(extractAssignments(graphMapping).values());
-			renoder.add(assignmentFactory.createVertexAssignment(fiberSourceBinding.getDomain(), graphMapping.getAroEntity()));
-			RenodedGraph rendoded = renoder.renode() ;
-			
-			DescribeGraph.trace(log, rendoded.getGraph().getGraph());
+			GeneratedFiberRoute feederFiber = planRoute(getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping), graphMapping);
 
-			GeneratedFiberRoute feederFiber = planRoute(rendoded, graphMapping);
-			
-			Map<GraphAssignment, GeneratedFiberRoute> distributionFiber = planDistributionRoutes(rendoded, graphMapping
-					.getChildren());
+			Map<GraphAssignment, GeneratedFiberRoute> distributionFiber = planDistributionRoutes(
+					getRenodedGraph(graphCtx, FiberType.DISTRIBUTION, graphMapping), graphMapping.getChildren());
 
 			return new NetworkRouteModel(
-					fiberSourceBinding.getNetworkAssignment(), null,
-					rendoded, feederFiber,
-					distributionFiber, fiberMapping);
+					fiberSourceBinding.getNetworkAssignment(), null, renodedMap,
+					feederFiber, distributionFiber, fiberMapping);
+		}
+		
+		
+		private Map<CableConstructionEnum, Double> createPriceMap(
+				FiberType fiberType) {
+			Map<CableConstructionEnum, Double> result = new EnumMap<>(
+					CableConstructionEnum.class);
+
+			for (CableConstructionEnum ct : CableConstructionEnum.values()) {
+				result.put(ct,
+						pricingModel.getFiberCostPerMeter(fiberType, ct, 1));
+			}
+
+			return result;
 		}
 
-		private GeneratedFiberRoute planRoute(RenodedGraph renoded, GraphMapping mapping) {
+		private GeneratedFiberRoute planRoute(RenodedGraph renoded,
+				GraphMapping mapping) {
 			return planRoute(renoded, mapping.getGraphAssignment(),
 					mapping.getChildAssignments());
 		}
@@ -290,8 +350,7 @@ public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingServ
 		}
 
 		private Map<GraphAssignment, GeneratedFiberRoute> planDistributionRoutes(
-				RenodedGraph renoded,
-				Collection<GraphMapping> children) {
+				RenodedGraph renoded, Collection<GraphMapping> children) {
 
 			Map<GraphAssignment, GeneratedFiberRoute> map = new HashMap<>();
 
@@ -303,17 +362,16 @@ public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingServ
 
 			return map;
 		}
-		
-		
 
-		private GeneratedFiberRoute planRoute(RenodedGraph renoded, GraphAssignment root,
+		private GeneratedFiberRoute planRoute(RenodedGraph renoded,
+				GraphAssignment root,
 				Collection<? extends GraphAssignment> nodes) {
 
 			if (log.isDebugEnabled())
 				log.debug("Processing Routes for" + root.getAroEntity());
 
-			renoded.getGraphNode(root) ;
-			
+			renoded.getGraphNode(root);
+
 			SourceRoute<GraphNode, AroEdge<GeoSegment>> sr = new RouteBuilder<GraphNode, AroEdge<GeoSegment>>()
 					.buildSourceRoute(renoded.getGraph().getGraph(),
 							renoded.getGraphNode(root),
@@ -325,44 +383,44 @@ public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingServ
 			return new DefaultGeneratedFiberRoute(sr.getSourceVertex(), edges);
 		}
 
-//		private String toName(PinnedLocation pl) {
-//
-//			GeoSegmentTransform gt = pl.getGeoSegment().getParentTransform();
-//			if (gt == null) {
-//				return "IDENTITY";
-//			}
-//
-//			return gt.getClass().getSimpleName();
-//
-//		}
+		// private String toName(PinnedLocation pl) {
+		//
+		// GeoSegmentTransform gt = pl.getGeoSegment().getParentTransform();
+		// if (gt == null) {
+		// return "IDENTITY";
+		// }
+		//
+		// return gt.getClass().getSimpleName();
+		//
+		// }
 
-//		private void verifyAssignments(Map<GraphAssignment, GraphNode> map,
-//				Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap) {
-//			int count = 0;
-//
-//			for (Map.Entry<GraphAssignment, GraphNode> e : map.entrySet()) {
-//				if (e.getValue() == null) {
-//
-//					GraphEdgeAssignment ge = (GraphEdgeAssignment) e.getKey();
-//					GraphEdgeAssignment originalAssignment = assignmentMap
-//							.get(ge);
-//					String transform = toName(originalAssignment
-//							.getPinnedLocation());
-//
-//					count++;
-//					log.error("Failed Assignment Length = "
-//							+ ge.getGeoSegment().getLength() + " gid= "
-//							+ ge.getGeoSegment().getGid() + " id=" + " name = "
-//							+ transform
-//							+ +System.identityHashCode(ge.getGeoSegment()));
-//				}
-//			}
-//
-//			if (count > 0) {
-//				throw new RuntimeException("Failed assign all vertices");
-//			}
-//
-//		}
+		// private void verifyAssignments(Map<GraphAssignment, GraphNode> map,
+		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap) {
+		// int count = 0;
+		//
+		// for (Map.Entry<GraphAssignment, GraphNode> e : map.entrySet()) {
+		// if (e.getValue() == null) {
+		//
+		// GraphEdgeAssignment ge = (GraphEdgeAssignment) e.getKey();
+		// GraphEdgeAssignment originalAssignment = assignmentMap
+		// .get(ge);
+		// String transform = toName(originalAssignment
+		// .getPinnedLocation());
+		//
+		// count++;
+		// log.error("Failed Assignment Length = "
+		// + ge.getGeoSegment().getLength() + " gid= "
+		// + ge.getGeoSegment().getGid() + " id=" + " name = "
+		// + transform
+		// + +System.identityHashCode(ge.getGeoSegment()));
+		// }
+		// }
+		//
+		// if (count > 0) {
+		// throw new RuntimeException("Failed assign all vertices");
+		// }
+		//
+		// }
 
 		private Map<GraphEdgeAssignment, GraphEdgeAssignment> extractAssignments(
 				GraphMapping co) {
@@ -378,106 +436,111 @@ public class CoreLeastCostRoutingServiceImpl implements CoreLeastCostRoutingServ
 					});
 			return assignmentMap;
 		}
-		
-//		private GraphModel<GeoSegment> renode(GraphRenoder networkBuilder, GraphContext graphCtx,
-//				GraphMapping co) {
-//
-//			if (log.isDebugEnabled())
-//				log.debug("renode  Graph for all assigned equipment");
-//
-////			GraphModelBuilder<GeoSegment> b = transformFactory
-////					.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
-////							new AroEdgeFactory<GeoSegment>()));
-//
-////			GraphRenoder networkBuilder = new NormalizedRenoder(
-////					new NetworkBuilder(b, vertexFactory));
-//
-//			Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap = extractAssignments(co);
-//			assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
-//			networkBuilder.add(assignmentMap.values());
-//			networkBuilder.renodeGraph(graphCtx.getGraphModel());
-//
-//			// TODO Move into Model Abstraction
-//			resolved = networkBuilder.getResolvedAssignments();
-//
-//			verifyAssignments(resolved, assignmentMap);
-//
-//			// Update Resolved Map with FiberSource Root Binding
-//			this.resolved.put(fiberSourceBinding.getSource(),
-//					fiberSourceBinding.getDomain());
-//
-//			return networkBuilder.getBuilder().build();
-//
-//		}
-		
-		
-//		private GraphModel<GeoSegment> renode(GraphRenoder networkBuilder,
-//				GraphMapping co) {
-//
-//			if (log.isDebugEnabled())
-//				log.debug("renode  Graph for all assigned equipment");
-//
-////			GraphModelBuilder<GeoSegment> b = transformFactory
-////					.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
-////							new AroEdgeFactory<GeoSegment>()));
-//
-////			GraphRenoder networkBuilder = new NormalizedRenoder(
-////					new NetworkBuilder(b, vertexFactory));
-//
-//			Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap = extractAssignments(co);
-//			assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
-//			networkBuilder.add(assignmentMap.values());
-//			
-//			//networkBuilder.renodeGraph(graphCtx.getGraphModel());
-//
-//			// TODO Move into Model Abstraction
-//			//resolved = networkBuilder.getResolvedAssignments();
-//
-//			//verifyAssignments(resolved, assignmentMap);
-//
-//			// Update Resolved Map with FiberSource Root Binding
-//			this.resolved.put(fiberSourceBinding.getSource(),
-//					fiberSourceBinding.getDomain());
-//
-//			networkBuilder.renode() ;
-//			
-//			return networkBuilder.getBuilder().build();
-//
-//		}
-		
-		
-//		private GraphModel<GeoSegment> renodeGraph(GraphContext graphCtx,
-//				GraphMapping co) {
-//
-//			if (log.isDebugEnabled())
-//				log.debug("renode  Graph for all assigned equipment");
-//
-//			GraphModelBuilder<GeoSegment> b = transformFactory
-//					.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
-//							new AroEdgeFactory<GeoSegment>()));
-//
-//			GraphRenoder networkBuilder = new NormalizedRenoder(
-//					new NetworkBuilder(b, vertexFactory));
-//
-//			Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap = extractAssignments(co);
-//
-//			assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
-//
-//			networkBuilder.add(assignmentMap.values());
-//			networkBuilder.renodeGraph(graphCtx.getGraphModel());
-//
-//			// TODO Move into Model Abstraction
-//			resolved = networkBuilder.getResolvedAssignments();
-//
-//			verifyAssignments(resolved, assignmentMap);
-//
-//			// Update Resolved Map with FiberSource Root Binding
-//			this.resolved.put(fiberSourceBinding.getSource(),
-//					fiberSourceBinding.getDomain());
-//
-//			return networkBuilder.getBuilder().build();
-//
-//		}
+
+		// private GraphModel<GeoSegment> renode(GraphRenoder networkBuilder,
+		// GraphContext graphCtx,
+		// GraphMapping co) {
+		//
+		// if (log.isDebugEnabled())
+		// log.debug("renode  Graph for all assigned equipment");
+		//
+		// // GraphModelBuilder<GeoSegment> b = transformFactory
+		// // .createBuilder(new SimpleWeightedGraph<GraphNode,
+		// AroEdge<GeoSegment>>(
+		// // new AroEdgeFactory<GeoSegment>()));
+		//
+		// // GraphRenoder networkBuilder = new NormalizedRenoder(
+		// // new NetworkBuilder(b, vertexFactory));
+		//
+		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap =
+		// extractAssignments(co);
+		// assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
+		// networkBuilder.add(assignmentMap.values());
+		// networkBuilder.renodeGraph(graphCtx.getGraphModel());
+		//
+		// // TODO Move into Model Abstraction
+		// resolved = networkBuilder.getResolvedAssignments();
+		//
+		// verifyAssignments(resolved, assignmentMap);
+		//
+		// // Update Resolved Map with FiberSource Root Binding
+		// this.resolved.put(fiberSourceBinding.getSource(),
+		// fiberSourceBinding.getDomain());
+		//
+		// return networkBuilder.getBuilder().build();
+		//
+		// }
+
+		// private GraphModel<GeoSegment> renode(GraphRenoder networkBuilder,
+		// GraphMapping co) {
+		//
+		// if (log.isDebugEnabled())
+		// log.debug("renode  Graph for all assigned equipment");
+		//
+		// // GraphModelBuilder<GeoSegment> b = transformFactory
+		// // .createBuilder(new SimpleWeightedGraph<GraphNode,
+		// AroEdge<GeoSegment>>(
+		// // new AroEdgeFactory<GeoSegment>()));
+		//
+		// // GraphRenoder networkBuilder = new NormalizedRenoder(
+		// // new NetworkBuilder(b, vertexFactory));
+		//
+		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap =
+		// extractAssignments(co);
+		// assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
+		// networkBuilder.add(assignmentMap.values());
+		//
+		// //networkBuilder.renodeGraph(graphCtx.getGraphModel());
+		//
+		// // TODO Move into Model Abstraction
+		// //resolved = networkBuilder.getResolvedAssignments();
+		//
+		// //verifyAssignments(resolved, assignmentMap);
+		//
+		// // Update Resolved Map with FiberSource Root Binding
+		// this.resolved.put(fiberSourceBinding.getSource(),
+		// fiberSourceBinding.getDomain());
+		//
+		// networkBuilder.renode() ;
+		//
+		// return networkBuilder.getBuilder().build();
+		//
+		// }
+
+		// private GraphModel<GeoSegment> renodeGraph(GraphContext graphCtx,
+		// GraphMapping co) {
+		//
+		// if (log.isDebugEnabled())
+		// log.debug("renode  Graph for all assigned equipment");
+		//
+		// GraphModelBuilder<GeoSegment> b = transformFactory
+		// .createBuilder(new SimpleWeightedGraph<GraphNode,
+		// AroEdge<GeoSegment>>(
+		// new AroEdgeFactory<GeoSegment>()));
+		//
+		// GraphRenoder networkBuilder = new NormalizedRenoder(
+		// new NetworkBuilder(b, vertexFactory));
+		//
+		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap =
+		// extractAssignments(co);
+		//
+		// assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
+		//
+		// networkBuilder.add(assignmentMap.values());
+		// networkBuilder.renodeGraph(graphCtx.getGraphModel());
+		//
+		// // TODO Move into Model Abstraction
+		// resolved = networkBuilder.getResolvedAssignments();
+		//
+		// verifyAssignments(resolved, assignmentMap);
+		//
+		// // Update Resolved Map with FiberSource Root Binding
+		// this.resolved.put(fiberSourceBinding.getSource(),
+		// fiberSourceBinding.getDomain());
+		//
+		// return networkBuilder.getBuilder().build();
+		//
+		// }
 
 	}
 

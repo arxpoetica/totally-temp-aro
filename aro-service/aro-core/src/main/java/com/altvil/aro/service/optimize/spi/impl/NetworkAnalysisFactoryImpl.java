@@ -305,7 +305,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			GraphEdgeAssignment coEdgeAssignment = model
 					.getFiberSourceMapping().getGraphAssignment();
 
-			GraphNode coVertex = model.getVertex(coEdgeAssignment);
+			GraphNode coVertex = model.getVertex(FiberType.FEEDER, coEdgeAssignment);
 
 			Builder source = createSource(coEdgeAssignment);
 

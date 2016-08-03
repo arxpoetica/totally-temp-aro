@@ -26,13 +26,13 @@ import com.altvil.aro.service.graph.model.EdgeData;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.AroRoadLocation;
-import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.RatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultGeoRatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.LocationEntityAssignment;
 import com.altvil.aro.service.graph.segment.impl.RoadLocationImpl;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.interfaces.CableConduitEdge;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
@@ -66,8 +66,7 @@ public class CoreGraphBuilderServiceImpl implements
 
 		CoreGraphNetworkModelBuilder nb = new CoreGraphNetworkModelBuilder(
 				graphEdgeFactory, vertexFactory,
-				transformFactory.createGraphBuilder(),
-				ctx.getDefaultCableConstruction());
+				transformFactory.createGraphBuilder());
 
 		while (itr.hasNext()) {
 			nb.add(itr.next());
@@ -123,8 +122,7 @@ public class CoreGraphBuilderServiceImpl implements
 		private RoadEdgeIndexer indexer;
 
 		private Collection<RatioSection> defaultRatioSections;
-		private CableConstruction defaultCableConstruction;
-
+		
 		private RoadEdge roadEdge;
 		private Long id;
 
@@ -164,14 +162,14 @@ public class CoreGraphBuilderServiceImpl implements
 				double startRatio = s.getStartRatio();
 				if (startRatio > previous) {
 					result.add(new DefaultGeoRatioSection(previous, startRatio,
-							defaultCableConstruction));
+							CableConstructionEnum.ESTIMATED));
 				}
 				result.add(ctx.convert(s));
 				previous = s.getEndRatio();
 			}
 			if (previous < 1.0) {
 				result.add(new DefaultGeoRatioSection(previous, 1.0,
-						defaultCableConstruction));
+						CableConstructionEnum.ESTIMATED));
 			}
 
 			return result;

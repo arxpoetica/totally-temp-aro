@@ -23,6 +23,7 @@ import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
 import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
@@ -34,6 +35,7 @@ import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.aro.service.report.ReportGenerator;
 import com.altvil.aro.service.report.ReportGenerator.AnalysisInput;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
@@ -60,11 +62,12 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	}
 
 	private PriceModel createPriceModel(WirecenterNetworkPlan plan) {
-		PriceModelBuilder b = pricingService.createBuilder("*", new Date());
+		PriceModelBuilder b = pricingService.createBuilder("*", new Date(), new PricingContext());
 		plan.getNetworkNodes().forEach(
 				n -> b.add(n.getNetworkNodeType(), 1, n.getAtomicUnit()));
 		for (FiberType ft : FiberType.values()) {
-			b.add(ft, plan.getFiberLengthInMeters(ft));
+			//BIG TODO
+			b.add(ft, CableConstructionEnum.ESTIMATED, plan.getFiberLengthInMeters(ft));
 		}
 
 		return b.build();
@@ -72,7 +75,7 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	}
 
 	private PriceModel createPriceModel() {
-		return pricingService.createBuilder("*", new Date()).build();
+		return pricingService.createBuilder("*", new Date(), new PricingContext()).build();
 	}
 
 	@Override

@@ -15,7 +15,6 @@ import com.altvil.aro.service.graph.builder.RoadEdgeInfo;
 import com.altvil.aro.service.graph.builder.spi.GeoSegmentAssembler;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
-import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.DefaultSplitSegment;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
@@ -23,6 +22,7 @@ import com.altvil.aro.service.graph.segment.RatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.LocationEntityAssignment;
 import com.altvil.aro.service.graph.segment.splitter.SplitGeoSegment;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.utils.GeometryUtil;
@@ -35,7 +35,6 @@ class CoreGraphNetworkModelBuilder {
 	private GraphNodeFactory vertexFactory;
 	private GraphModelBuilder<GeoSegment> graphModelBuilder;
 
-	private CableConstruction defaultCableConstruction ;
 	
 	private int totalNumberLocations = 0;
 	private Map<Long, GraphNode> roadVertexMap = new HashMap<>();
@@ -43,13 +42,12 @@ class CoreGraphNetworkModelBuilder {
 
 	public CoreGraphNetworkModelBuilder(GraphAssignmentFactory factory,
 			GraphNodeFactory vertexFactory,
-			GraphModelBuilder<GeoSegment> graphModelBuilder,
-			 CableConstruction defaultCableConstruction) {
+			GraphModelBuilder<GeoSegment> graphModelBuilder) {
 		super();
 		this.factory = factory;
 		this.vertexFactory = vertexFactory;
 		this.graphModelBuilder = graphModelBuilder;
-		this.defaultCableConstruction = defaultCableConstruction ;
+		
 	}
 
 	public GraphNetworkModel build() {
@@ -172,7 +170,7 @@ class CoreGraphNetworkModelBuilder {
 			Collection<LocationEntityAssignment> orderedLocationsByRoadEdge) {
 
 		return DefaultSegmentLocations.createAssembler(null,
-				defaultCableConstruction, re.getLengthMeters(), re.getId(), re.getShape(),
+				CableConstructionEnum.ESTIMATED, re.getLengthMeters(), re.getId(), re.getShape(),
 				orderedLocationsByRoadEdge);
 	}
 

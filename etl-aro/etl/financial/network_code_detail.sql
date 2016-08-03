@@ -45,15 +45,119 @@ insert into financial.network_code_detail (network_cost_code_id, cost_code_id, u
 			(select id from aro.uom where name = 'unit_cost'),
 			1,  1.0, 'FDT Cabinet and equipment') ;
 
+--Fiber ESTIMATED, ARIAL, BURIED, UNDERGROUND, CONDUIT, OBSTACLE
 
 insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
 	values ((select id from financial.network_cost_code where name = 'feeder_fiber'), 
-			(select id from financial.cost_code where name = 'feeder_fiber'),
-			(select id from aro.uom where name = 'unit_cost'),
-			1,  1.0, 'Feeder Fiber Code') ;
+			(select id from financial.cost_code where name = 'fiber_default'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Feeder Default') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'feeder_fiber_arial'), 
+			(select id from financial.cost_code where name = 'fiber_arial'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Feeder Arial') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'feeder_fiber_buried'), 
+			(select id from financial.cost_code where name = 'fiber_buried'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Feeder Buried') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'feeder_fiber_underground'), 
+			(select id from financial.cost_code where name = 'fiber_underground'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Feeder Underground') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'feeder_fiber_conduit'), 
+			(select id from financial.cost_code where name = 'fiber_conduit'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Feeder Conduit') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'feeder_fiber_obstacle'), 
+			(select id from financial.cost_code where name = 'fiber_obstacle'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Feeder Obstacle') ;
+
+
+
+-- Distribution Fiber ESTIMATED, ARIAL, BURIED, UNDERGROUND, CONDUIT, OBSTACLE
 
 insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
 	values ((select id from financial.network_cost_code where name = 'distribution_fiber'), 
-			(select id from financial.cost_code where name = 'distribution_fiber'),
-			(select id from aro.uom where name = 'unit_cost'),
-			1,  1.0, 'Distribution Fiber Code') ;
+			(select id from financial.cost_code where name = 'fiber_default'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Distribution Default') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'distribution_fiber_arial'), 
+			(select id from financial.cost_code where name = 'fiber_arial'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Distribution Arial') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'distribution_fiber_buried'), 
+			(select id from financial.cost_code where name = 'fiber_buried'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Distribution Buried') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'distribution_fiber_underground'), 
+			(select id from financial.cost_code where name = 'fiber_underground'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Distribution Underground') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'distribution_fiber_conduit'), 
+			(select id from financial.cost_code where name = 'fiber_conduit'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Distribution Conduit') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'distribution_fiber_obstacle'), 
+			(select id from financial.cost_code where name = 'fiber_obstacle'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Distribution Obstacle') ;
+
+
+-- Backbone Fiber ESTIMATED, ARIAL, BURIED, UNDERGROUND, CONDUIT, OBSTACLE
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'backbone_fiber'), 
+			(select id from financial.cost_code where name = 'fiber_default'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Backbone Default') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'backbone_fiber_arial'), 
+			(select id from financial.cost_code where name = 'fiber_arial'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Backbone Arial') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'backbone_fiber_buried'), 
+			(select id from financial.cost_code where name = 'fiber_buried'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Backbone Buried') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'backbone_fiber_underground'), 
+			(select id from financial.cost_code where name = 'fiber_underground'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Backbone Underground') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'backbone_fiber_conduit'), 
+			(select id from financial.cost_code where name = 'fiber_conduit'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Backbone Conduit') ;
+
+insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
+	values ((select id from financial.network_cost_code where name = 'backbone_fiber_obstacle'), 
+			(select id from financial.cost_code where name = 'fiber_obstacle'),
+			(select id from aro.uom where name = 'unit_per_meter'),
+			1,  1.0, 'Backbone Obstacle') ;

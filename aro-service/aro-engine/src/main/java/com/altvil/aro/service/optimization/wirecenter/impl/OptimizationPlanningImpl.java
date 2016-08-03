@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.construction.CableConstructionService;
 import com.altvil.aro.service.graph.GraphNetworkModelService;
 import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBuilderContext;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
@@ -27,6 +26,7 @@ import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
+import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.utils.StreamUtil;
@@ -55,10 +55,6 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 
 	@Autowired
 	private transient CoreLeastCostRoutingService planService;
-
-	@Autowired
-	private transient CableConstructionService cableConstructionService;
-
 	
 
 	//
@@ -85,13 +81,14 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
 
+		
 		GraphNetworkModel model = graphBuilderService
 				.build(networkService.getNetworkData(request
 						.getNetworkDataRequest()))
-				.setCableConstructionPricing(
-						cableConstructionService
-								.createCableConstructionPricing("*",
-										new Date(), request.getRatioBuried()))
+				.setPricingModel(
+						pricingService.getPricingModel("*",
+										new Date(),
+										PricingContext.create(request.getConstructionRatios())))
 				.build();
 
 		return StreamUtil.map(planService.computeNetworkModel(model,
@@ -134,7 +131,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		@Override
 		public OptimizerContext createOptimizerContext(ApplicationContext ctx) {
 			PricingModel pricingModel = ctx.getBean(PricingService.class)
-					.getPricingModel("*", new Date());
+					.getPricingModel("*", new Date(), PricingContext.create(request.getConstructionRatios()));
 
 			FtthThreshholds threshHolds = FiberConstraintUtils.build(request
 					.getConstraints());
@@ -142,11 +139,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 			GraphBuilderContext graphContext = ctx
 					.getBean(GraphNetworkModelService.class)
 					.build()
-					.setCableConstructionPricing(
-							ctx.getBean(CableConstructionService.class)
-									.createCableConstructionPricing("*",
-											new Date(),
-											request.getRatioBuried()))
+					.setPricingModel(pricingModel)
 					.createContext();
 
 			return new OptimizerContext(pricingModel, threshHolds, graphContext);

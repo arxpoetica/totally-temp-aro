@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.assigment.impl.FiberSourceMapping;
@@ -22,7 +23,7 @@ public class NetworkRouteModel implements NetworkModel {
 
 	private NetworkAssignment fiberSourceAssignment;
 	
-	private RenodedGraph renodedModel ;
+	private Map<FiberType, RenodedGraph> renodedGraphsMap ;
 	
 	private GeneratedFiberRoute feederFiber;
 	private Map<GraphAssignment, GeneratedFiberRoute> distributionFiber;
@@ -34,14 +35,14 @@ public class NetworkRouteModel implements NetworkModel {
 	public NetworkRouteModel(
 			NetworkAssignment fiberSourceAssignment,
 			LocationModel locationModel,
-			RenodedGraph renodedModel,
+			Map<FiberType, RenodedGraph> renodedGraphsMap,
 			GeneratedFiberRoute feederFiber,
 			Map<GraphAssignment, GeneratedFiberRoute> distributionFiber,
 			FiberSourceMapping networkPlan) {
 		super();
 		this.fiberSourceAssignment = fiberSourceAssignment;
 		
-		this.renodedModel = renodedModel ;
+		this.renodedGraphsMap = renodedGraphsMap ;
 		//this.dagModel = dagModel ;
 		
 		this.feederFiber = feederFiber;
@@ -79,8 +80,8 @@ public class NetworkRouteModel implements NetworkModel {
 	}
 
 	@Override
-	public GraphNode getVertex(GraphAssignment graphAssignment) {
-		return renodedModel.getGraphNode(graphAssignment) ;
+	public GraphNode getVertex(FiberType ft, GraphAssignment graphAssignment) {
+		return renodedGraphsMap.get(ft).getGraphNode(graphAssignment) ;
 	}
 
 	@Override

@@ -1,10 +1,12 @@
 package com.altvil.aro.service.graph.segment.splitter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.spi.GeoSegmentAssembler;
 import com.altvil.aro.service.graph.segment.AroRoadLocation;
-import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations;
@@ -12,22 +14,20 @@ import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.Locatio
 import com.altvil.aro.service.graph.segment.impl.RoadLocationImpl;
 import com.altvil.aro.service.graph.segment.transform.SplitTransform;
 import com.altvil.aro.service.graph.segment.transform.TransformFactory;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.vividsolutions.jts.geom.Geometry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SubSegment implements Comparable<SubSegment> {
 	private double start;
 	private double endExc;
 	private boolean isLastSegment;
 	private double range;
-	private CableConstruction cableConstruction;
+	private CableConstructionEnum cableConstruction;
 
 	private Geometry geometry;
 	private List<LocationEntityAssignment> locations = new ArrayList<>();
 
-	public SubSegment(Geometry geometry, CableConstruction cableConstruction,
+	public SubSegment(Geometry geometry, CableConstructionEnum cableConstruction,
 			double start, double endExc, boolean isLastSegment) {
 		super();
 

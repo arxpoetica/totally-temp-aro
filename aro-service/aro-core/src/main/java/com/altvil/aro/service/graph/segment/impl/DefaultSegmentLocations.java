@@ -13,12 +13,12 @@ import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.builder.spi.GeoSegmentAssembler;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.AroRoadLocation;
-import com.altvil.aro.service.graph.segment.CableConstruction;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.segment.splitter.GeoSegmentSplitter;
 import com.altvil.aro.service.graph.segment.transform.GeoSegmentTransform;
 import com.altvil.aro.service.graph.segment.transform.TransformFactory;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
@@ -28,7 +28,7 @@ import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler {
 	private GeoSegmentTransform transform;
-	private CableConstruction cableConstruction;
+	private CableConstructionEnum cableConstruction;
 	private double length;
 	private Long gid;
 	private Geometry geometry;
@@ -38,7 +38,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	private double geometryLength;
 
 	private DefaultSegmentLocations(GeoSegmentTransform transform,
-			CableConstruction cableConstruction,
+			CableConstructionEnum cableConstruction,
 			double length, Long gid, Geometry geometry,
 			List<GraphEdgeAssignment> locations) {
 		super();
@@ -63,7 +63,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	}
 
 	private DefaultSegmentLocations(GeoSegmentTransform transform,
-			CableConstruction cableConstruction,
+			CableConstructionEnum cableConstruction,
 			double length, Long gid, Geometry geometry) {
 		this(transform, cableConstruction, length, gid, geometry, new ArrayList<>());
 	}
@@ -79,7 +79,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	
 
 	public static GeoSegmentAssembler createAssembler(
-			GeoSegmentTransform transform, CableConstruction cableConstruction, double length, Long gid,
+			GeoSegmentTransform transform, CableConstructionEnum cableConstruction, double length, Long gid,
 			Geometry geometry,
 			Collection<LocationEntityAssignment> roadLocations) {
 
@@ -94,11 +94,6 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 		return seg;
 
-	}
-
-	@Override
-	public double getEffectiveWeight() {
-		return cableConstruction.getPricePetMeter() * getLength();
 	}
 
 	@Override
@@ -120,7 +115,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 		
 
 	@Override
-	public CableConstruction getCableConstructionCategory() {
+	public CableConstructionEnum getCableConstructionCategory() {
 		return cableConstruction ;
 	}
 
