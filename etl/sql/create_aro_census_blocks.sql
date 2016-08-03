@@ -16,7 +16,7 @@ CREATE TABLE aro.census_blocks AS
     ST_Transform(the_geom, 4326) AS geom,
     hh_2014
   FROM 
-    tiger.tabblock LEFT JOIN demographics.households
+    tiger.tabblock LEFT JOIN sti.households
       ON tabblock.tabblock_id = households.census_block
   ;
 
