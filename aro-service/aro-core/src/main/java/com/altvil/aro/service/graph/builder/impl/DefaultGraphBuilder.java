@@ -62,6 +62,11 @@ public class DefaultGraphBuilder<T> implements GraphModelBuilder<T> {
 	
 
 	@Override
+	public boolean containsVertex(GraphNode vertex) {
+		return graph.containsVertex(vertex) ;
+	}
+
+	@Override
 	public void addVertex(GraphNode vertex) {
 		graph.addVertex(vertex) ;
 	}
@@ -70,7 +75,6 @@ public class DefaultGraphBuilder<T> implements GraphModelBuilder<T> {
 	public AroEdge<T> add(GraphNode src, GraphNode target, T value,
 			double weight) {
 		
-		//System.out.println(src + "->" +target) ;
 		
 		graph.addVertex(src);
 		graph.addVertex(target);

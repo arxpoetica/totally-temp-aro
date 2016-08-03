@@ -13,6 +13,7 @@ public interface GraphModelBuilder<T> {
 	public GraphNodeFactory getVertexFactory() ;
 	public GraphNode addVirtualRoot(Collection<GraphNode> targets) ;
 	public void addVertex(GraphNode vertex) ;
+	public boolean containsVertex(GraphNode vertex) ;
 	public AroEdge<T> add(GraphNode src, GraphNode target, T value,  double weight) ;
 	public void setRoot(GraphNode root) ;
 	public DAGModel<T> buildDAG() ;
