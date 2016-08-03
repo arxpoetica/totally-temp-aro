@@ -1,3 +1,5 @@
+version: '2'
+
 services:
     data:
         image: aro/app-data
@@ -38,6 +40,9 @@ services:
             PGUSER: aro
             PGDATABASE: aro
             ARO_DATA_ROOT: /srv/www/aro/source_data
+            DATABASE_URL: postgres://aro:aro@arodb/aro
+            ARO_CLIENT: aro
+            
 volumes:
     postgres-data:
         driver: local
