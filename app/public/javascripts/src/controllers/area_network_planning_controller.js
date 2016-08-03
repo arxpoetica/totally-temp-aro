@@ -94,6 +94,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     if (algorithm === 'CAPEX') {
+      algorithm = 'UNCONSTRAINED'
       delete changes.budget
       delete changes.irrThreshold
     } else if (algorithm === 'MAX_IRR') {
