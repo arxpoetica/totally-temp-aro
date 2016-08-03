@@ -25,7 +25,6 @@ import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
-import com.altvil.aro.service.strategy.StrategyService;
 import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.plan.MasterPlanJobResponse;
 import com.altvil.netop.plan.SelectedRegion;
@@ -49,9 +48,6 @@ public class NewOptimizeEndPoint {
 		return mpr;
 
 	}
-
-	@Autowired
-	private StrategyService strategyService;
 
 	private Set<Integer> toSelectedWireCenters(
 			Collection<SelectedRegion> selectedRegions) {
