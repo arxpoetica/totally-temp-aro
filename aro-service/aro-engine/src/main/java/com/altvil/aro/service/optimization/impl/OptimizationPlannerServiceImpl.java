@@ -130,13 +130,19 @@ public class OptimizationPlannerServiceImpl implements
 
 		OptimizedMasterPlan optimize(MasterOptimizationRequest request) {
 
-			Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
-
-			Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
-					request.getOptimizationConstraints(), plannedNetworks);
-
-			return masterPlanningService.save(new GeneratedMasterPlanImpl(
-					request, optimizedNetworks));
+			try {
+			
+				Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
+	
+				Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
+						request.getOptimizationConstraints(), plannedNetworks);
+	
+				return masterPlanningService.save(new GeneratedMasterPlanImpl(
+						request, optimizedNetworks));
+			} catch( Throwable err ) {
+				log.error(err.getMessage(), err);
+				throw new RuntimeException(err.getMessage(), err) ;
+			}
 
 		}
 
