@@ -29,8 +29,8 @@ services:
         image: aro/app-dev
         volumes_from:
             - data
-        ports:
-            - "8000:8000"
+        expose:
+            - "8000"
         links:
             - postgres:arodb
             - service:aro-service
@@ -42,6 +42,14 @@ services:
             ARO_DATA_ROOT: /srv/www/aro/source_data
             DATABASE_URL: postgres://aro:aro@arodb/aro
             ARO_CLIENT: aro
+    nginx:
+        image: aro/app-nginx
+        ports:
+            - "80:80"
+            - "8081:8081"
+        links:
+            - app:aro-app
+
             
 volumes:
     postgres-data:
