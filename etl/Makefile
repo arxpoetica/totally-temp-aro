@@ -8,3 +8,9 @@ etl_reload_all:
 	bash ./etl_aro.sh
 	bash ./etl_client.sh
 	bash ./etl_financial.sh
+
+etl_reset_auth:
+	bash ./etl_auth.sh
+
+register_user:
+	node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password -r admin
