@@ -9,7 +9,7 @@ etl_reload_all:
 	bash ./etl_client.sh
 	bash ./etl_financial.sh
 
-etl_reset_auth:
+reset_auth:
 	bash ./etl_auth.sh
 
 register_user:
