@@ -46,6 +46,11 @@ public class GraphModelImpl<T> implements GraphModel<T> {
 		return graph.edgeSet();
 	}
 
+	@Override
+	public Set<GraphNode> getVertices() {
+		return graph.vertexSet();
+	}
+
 	public void replace(AroEdge<T> orginal,
 			Collection<AroEdgeDefinition<T>> updatedEdges) {
 		graph.removeEdge(orginal);
