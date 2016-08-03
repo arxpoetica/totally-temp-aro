@@ -1,121 +1,73 @@
 package com.altvil.aro.service.entity;
 
-public class SimpleNetworkFinancials {
+import java.util.Arrays;
 
-	public static double costPerAtomicUnit = 199.11;
+public class SimpleNetworkFinancials {
 	public static double coRatio = 0.269;
+	public static double costPerAtomicUnit = 199.11;
+	public static double costPerMeter = 17.32;
 	public static double fdhRatio = 0.383;
 	public static double fdtRatio = 0.348;
-	public static double costPerMeter = 17.32;
-
-	private LocationDemand locationDemand;
-	private double fiberLength;
-
-	private double fiberCost;
-
-	private double equipmentCost;
 
 	private double coCost;
+	private double discountRate;
+	protected double equipmentCost;
 	private double fdhCost;
 	private double fdtCost;
-	private double totalCost;
-	private double npv ;
-	
-	
-	public SimpleNetworkFinancials(LocationDemand locationDemand,
-			double fiberLength, FinancialInputs fi) {
-		init(locationDemand, fiberLength, fi.getDiscountRate(), fi.getYears());
-	}
+	protected double fiberCost;
+	protected double fiberLength;
+	protected LocationDemand locationDemand;
+	private double npv;
+	protected double totalCost;
+	private int years;
 
-	public SimpleNetworkFinancials(LocationDemand locationDemand,
-			double fiberLength, double discountRate, int years) {
-		init(locationDemand, fiberLength, discountRate, years);
-	}
-
-	private void init(LocationDemand locationDemand, double fiberLength, double discountRate, int years) {
+	public SimpleNetworkFinancials(LocationDemand locationDemand, double fiberLength, double discountRate, int years) {
 		this.locationDemand = locationDemand;
 		this.fiberLength = fiberLength;
 
-		this.fiberCost = this.fiberLength * costPerMeter;
-		this.equipmentCost = locationDemand.getAtomicUnits() * costPerAtomicUnit;
-		this.totalCost = equipmentCost + fiberCost;
-
-		this.coCost = equipmentCost * coRatio;
-		this.fdhCost = equipmentCost * fdhRatio;
-		this.fdtCost = equipmentCost * fdtRatio;
-		
-		this.npv = calcNpv(discountRate, years) ;
-		
-
-	}
-	
-	
-	private double calcNpv(double discountRate, int years) {
-		return (getRevenue() * calcNpvFactor(discountRate, years)) - this.getTotalCost() ;
-	}
-	
-	private double calcNpvFactor(double discountRate, int years) {
-		double npvFactor = 0;
-        for (int t = 1; t <= years; t++) {
-            npvFactor += 1 / Math.pow(1 + discountRate, t);
-        }
-        return npvFactor ;
+		this.discountRate = discountRate;
+		this.years = years;
+		dirty();
 	}
 
-	public LocationDemand getLocationDemand() {
-		return locationDemand;
-	}
-
-	public void setLocationDemand(LocationDemand locationDemand) {
-		this.locationDemand = locationDemand;
-	}
-
-	public double getFiberLength() {
-		return fiberLength;
-	}
-
-	public void setFiberLength(double fiberLength) {
-		this.fiberLength = fiberLength;
-	}
-
-	public double getFiberCost() {
-		return fiberCost;
-	}
-
-	public void setFiberCost(double fiberCost) {
-		this.fiberCost = fiberCost;
-	}
-
-	public double getEquipmentCost() {
-		return equipmentCost;
-	}
-
-	public void setEquipmentCost(double equipmentCost) {
-		this.equipmentCost = equipmentCost;
+	public SimpleNetworkFinancials(LocationDemand locationDemand, double fiberLength, FinancialInputs fi) {
+		this(locationDemand, fiberLength, fi.getDiscountRate(), fi.getYears());
 	}
 
 	public double getCoCost() {
-		return coCost;
+		return recalc().coCost;
 	}
 
-	public void setCoCost(double coCost) {
-		this.coCost = coCost;
+	public double getDiscountRate() {
+		return discountRate;
+	}
+
+	public double getEquipmentCost() {
+		return recalc().equipmentCost;
 	}
 
 	public double getFdhCost() {
 		return fdhCost;
 	}
 
-	public void setFdhCost(double fdhCost) {
-		this.fdhCost = fdhCost;
-	}
-
 	public double getFdtCost() {
-		return fdtCost;
+		return recalc().fdtCost;
 	}
 
-	public void setFdtCost(double fdtCost) {
-		this.fdtCost = fdtCost;
+	public double getFiberCost() {
+		return recalc().fiberCost;
+	}
+
+	public double getFiberLength() {
+		return fiberLength;
+	}
+
+	public LocationDemand getLocationDemand() {
+		return locationDemand;
+	}
+
+	public double getNpv() {
+		return recalc().npv;
 	}
 
 	public double getRevenue() {
@@ -123,17 +75,63 @@ public class SimpleNetworkFinancials {
 	}
 
 	public double getTotalCost() {
-		return totalCost;
+		return recalc().totalCost;
 	}
 
-	public void setTotalCost(double totalCost) {
-		this.totalCost = totalCost;
+	public int getYears() {
+		return years;
 	}
 
-	public double getNpv() {
-		return npv;
+	private SimpleNetworkFinancials recalc() {
+		if (Double.isNaN(npv)) {
+			recalcCosts();
+
+			coCost = equipmentCost * coRatio;
+			fdhCost = equipmentCost * fdhRatio;
+			fdtCost = equipmentCost * fdtRatio;
+
+			npv = -totalCost;
+			for (int t = 1; t <= years; t++) {
+				npv += getRevenue() / Math.pow(1 + discountRate, t);
+			}
+		}
+		
+		return this;
 	}
-	
-	
+
+	protected void recalcCosts() {
+		fiberCost = fiberLength * costPerMeter;
+
+		double demand = Arrays.stream(LocationEntityType.values())
+				.mapToDouble((value) -> locationDemand.getLocationDemand(value).getFairShareDemand()).sum();
+
+		equipmentCost = demand * costPerAtomicUnit;
+		totalCost = equipmentCost + fiberCost;
+	}
+
+	/**
+	 * Sets flag to trigger recalculation of all derived values when one is next
+	 * requested.
+	 */
+	private SimpleNetworkFinancials dirty() {
+		npv = Double.NaN;
+		return this;
+	}
+
+	public void setDiscountRate(double discountRate) {
+		dirty().discountRate = discountRate;
+	}
+
+	public void setFiberLength(double fiberLength) {
+		dirty().fiberLength = fiberLength;
+	}
+
+	public void setLocationDemand(LocationDemand locationDemand) {
+		dirty().locationDemand = locationDemand;
+	}
+
+	public void setYears(int years) {
+		dirty().years = years;
+	}
 
 }
