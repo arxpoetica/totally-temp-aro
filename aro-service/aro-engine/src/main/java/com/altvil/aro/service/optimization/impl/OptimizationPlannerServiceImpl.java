@@ -195,8 +195,14 @@ public class OptimizationPlannerServiceImpl implements
 				OptimizationConstraints constraints,
 				Collection<PlannedNetwork> plannedNetworks) {
 
-			return plannedNetworks.stream().map(p -> reify(constraints, p))
-					.collect(Collectors.toList());
+			try{
+			
+				return plannedNetworks.stream().map(p -> reify(constraints, p))
+						.collect(Collectors.toList());
+			} catch( Throwable err ) {
+				log.error(err.getMessage(), err);
+				throw new RuntimeException(err.getMessage(), err) ;
+			}
 
 		}
 
