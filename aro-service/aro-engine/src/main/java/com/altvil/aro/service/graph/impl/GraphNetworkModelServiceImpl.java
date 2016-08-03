@@ -61,8 +61,7 @@ public class GraphNetworkModelServiceImpl implements GraphNetworkModelService {
 
 	private abstract class AbstractBuilder implements GraphNetworkModelBuilder {
 
-		private PricingModel pricing;
-
+	
 		@Override
 		public GraphNetworkModelBuilder setPricingModel(
 				PricingModel pricingModel) {
