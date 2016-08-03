@@ -1,5 +1,7 @@
 package com.altvil.aro.service.demand.mapping;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.demand.analysis.spi.EntityDemandMapping;
 import com.altvil.utils.func.Aggregator;
 
@@ -46,6 +48,10 @@ public class EntityDemandMappingImpl  implements EntityDemandMapping {
 	@Override
 	public double getMappedRevenue() {
 		return revenue;
+	}
+
+	public String toString() {
+		return new ToStringBuilder(this).append("demand", demand).append("revenue", revenue).build();
 	}
 
 }

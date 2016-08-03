@@ -73,7 +73,7 @@ public class NodeAssembler {
 		this.fiberType = fiberType ;
 		
 		matchingEquipmentType = matchingEquipmentMap.get(fiberType);
-		DescribeGraph.debug(log, graph);
+		DescribeGraph.trace(log, graph);
 	}
 	
 	public  GeneratingNode.Builder assemble(GraphNode vertex, GraphMapping gm,
@@ -86,12 +86,6 @@ public class NodeAssembler {
 		
 		return depthFirstTraversal(vertex, 1) ;
 		
-//		if( graph.edgeSet().size() > 0 ) {
-//			return depthFirstTraversal(
-//					graph.incomingEdgesOf(vertex), 1);
-//		} else {
-//			return Collections.singleton(depthFirstTraversal(vertex, 1)) ;
-//		}
 		
 	}
 	

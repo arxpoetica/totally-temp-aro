@@ -1,5 +1,12 @@
 package com.altvil.aro.service.graph.segment.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
@@ -15,13 +22,6 @@ import com.altvil.utils.StreamUtil;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler {
 	private GeoSegment parent;
