@@ -2,21 +2,19 @@ machine:
   services:
     - docker
   environment:
-    IMAGE_NAME: docker-registry.cloud.altvil.com/avco/cmo-app
+    IMAGE_NAME: ait-docker-registry.cloud.altvil.com/aro/aro-app
     IMAGE_TAG: ${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
     LATEST_TAG: ${IMAGE_NAME}:latest
+  node:
+    version: 6.1.0
 
 checkout:
   post:
-    - git submodule sync
-    - git submodule update --init
 
 dependencies:
   pre:
-    - pip install numpy==1.8.2
-    - pip install -r requirements.txt
-    - aws s3 cp s3://pip.altvil.com/packages/trustack-latest.tar.gz .
-    - pip install trustack-latest.tar.gz
+    # - pip install numpy==1.8.2
+    # - pip install -r requirements.txt
   cache_directories:
     - "~/docker-image"
   post:
@@ -32,20 +30,21 @@ dependencies:
 
 database:
   override:
-    - createdb -U ubuntu cmo
-    - CMO_APP_ENVIRONMENT=TEST CMO_APP_DB_HOST=localhost CMO_APP_DB_USER=ubuntu CMO_APP_DB_PASS= CMO_APP_AGGRESSIVELY_DESTROY_DATABASE=1 bash bootstrap/drop_db.sh
+    # - createdb -U ubuntu cmo
+    # - CMO_APP_ENVIRONMENT=TEST CMO_APP_DB_HOST=localhost CMO_APP_DB_USER=ubuntu CMO_APP_DB_PASS= CMO_APP_AGGRESSIVELY_DESTROY_DATABASE=1 bash bootstrap/drop_db.sh
     
 test:
   override:
-    - PYTHONPATH=. nosetests --no-path-adjustment --where . test/unit
-    - karma start --single-run
+    #- PYTHONPATH=. nosetests --no-path-adjustment --where . test/unit
+    #- karma start --single-run
     # disable functional tests until they actually work
     # - CMO_TEST=1 python testrunner.py
+    - /bin/true
 
 deployment:
   qa:
-    branch: [master]
-    owner: MROI
+    branch: [dockerize]
+    owner: AIT
     commands:
       - docker push ${IMAGE_TAG}
       - docker push ${LATEST_TAG}
