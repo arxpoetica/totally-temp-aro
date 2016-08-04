@@ -11,7 +11,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.capexFilterEntityTypes = { households: true }
   $scope.capexFilter = 'bau'
   $scope.details = false
-  $scope.arpuFilter = 'households'
+  $scope.arpuFilter = 'household'
 
   $scope.entityTypes = {
     smallBusiness: 'SMB',
@@ -20,6 +20,10 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     household: 'Households',
     cellTower: 'Towers'
   }
+  $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
+    key: key,
+    name: $scope.entityTypes[key]
+  }))
   $scope.premisesPercentage = 'false'
 
   var dirty = false
@@ -114,6 +118,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showCapexChart(force)
     } else if (href === '#financialProfileRevenue') {
       showRevenueChart(force)
+      showArpuChart(force)
     } else if (href === '#financialProfilePremises') {
       showPremisesChart(force)
     } else if (href === '#financialProfileSubscribers') {
@@ -247,9 +252,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   function showRevenueChart (force) {
-    var datasets = Object.keys($scope.entityTypes).map((key) => ({ key: key, name: $scope.entityTypes[key] }))
     request(force, 'revenue', { filter: $scope.revenueFilter }, (revenue) => {
-      var data = buildChartData(revenue, datasets)
+      var data = buildChartData(revenue, $scope.entityTypesArray)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
@@ -258,6 +262,23 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-revenue', 'StackedBar', data, options)
     })
   }
+
+  function showArpuChart (force) {
+    var datasets = [
+      { key: 'bau', name: 'BAU' },
+      { key: 'plan', name: 'Plan' }
+    ]
+    request(force, 'arpu', { filter: $scope.arpuFilter }, (arpu) => {
+      var data = buildChartData(arpu, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+      }
+      showChart('financial-profile-chart-arpu', 'StackedBar', data, options)
+    })
+  }
+  $scope.showArpuChart = showArpuChart
 
   function showPremisesChart (force) {
     var datasets = [

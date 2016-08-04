@@ -136,10 +136,8 @@
           <p class="text-center"><strong>ARPU</strong></p>
           <form class="form-inline">
             <div class="form-group">
-              <select class="form-control" ng-model="arpuFilter" ng-change="refreshArpuChart(true)">
-                <option value="households">Households</option>
-                <option value="businesses">Businesses</option>
-                <option value="towers">Towers</option>
+              <select class="form-control" ng-model="arpuFilter" ng-change="showArpuChart(true)"
+                ng-options="entity.key as entity.name for entity in entityTypesArray">
               </select>
             </div>
           </form>

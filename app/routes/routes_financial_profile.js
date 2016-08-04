@@ -88,6 +88,20 @@ exports.configure = (api, middleware) => {
     .catch(next)
   })
 
+  api.get('/financial_profile/:plan_id/arpu', (request, response, next) => {
+    var filter = request.query.filter
+    var curves = {
+      bau: `copper.${filter}.arpu`,
+      plan: `planned.${filter}.arpu`
+    }
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
     var entities = array(request.query.entityTypes)
     if (entities.length === 0) return response.json([])
