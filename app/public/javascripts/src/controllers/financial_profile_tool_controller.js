@@ -4,12 +4,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.aboveWirecenter = false
   $scope.premisesFilterEntityTypes = { household: true }
   $scope.subscribersFilterEntityTypes = { household: true }
+  $scope.connectCapexFilterEntityTypes = { household: true }
   $scope.penetrationFilter = {
     entityType: 'household'
   }
   $scope.revenueFilter = 'bau'
   $scope.capexFilterEntityTypes = { households: true }
   $scope.capexFilter = 'bau'
+  $scope.connectCapexFilter = 'bau'
   $scope.details = false
   $scope.arpuFilter = 'household'
 
@@ -116,6 +118,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     } else if (href === '#financialProfileCapex') {
       // showBudgetChart(force)
       showCapexChart(force)
+      showConnectCapexChart(force)
     } else if (href === '#financialProfileRevenue') {
       showRevenueChart(force)
       showArpuChart(force)
@@ -279,6 +282,25 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
   $scope.showArpuChart = showArpuChart
+
+  function showConnectCapexChart (force) {
+    var entityTypes = Object.keys($scope.connectCapexFilterEntityTypes).filter((key) => $scope.connectCapexFilterEntityTypes[key])
+    var params = {
+      entityTypes: entityTypes,
+      filter: $scope.connectCapexFilter
+    }
+    var datasets = $scope.entityTypesArray.filter((entity) => entityTypes.indexOf(entity.key) > -1)
+    request(force, 'connectcapex', params, (connectcapex) => {
+      var data = buildChartData(connectcapex, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-connect-capex', 'Bar', data, options)
+    })
+  }
+  $scope.showConnectCapexChart = showConnectCapexChart
 
   function showPremisesChart (force) {
     var datasets = [

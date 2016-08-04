@@ -82,6 +82,7 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileCapex" style="margin-top: 20px">
         <div>
+          <p class="text-center"><strong>BAU Capex</strong></p>
           <form class="form-inline">
             <div class="form-group">
               <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
@@ -108,8 +109,6 @@
             </div>
             -->
           </form>
-          <br>
-          <p class="text-center"><strong>BAU Capex</strong></p>
           <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-capex-legend"></div>
           <!--
@@ -118,6 +117,26 @@
           <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-budget-legend"></div>
           -->
+          <br>
+          <p class="text-center"><strong>Connect Capex</strong></p>
+          <form class="form-inline">
+            <div class="form-group">
+              <select class="form-control" ng-model="connectCapexFilter" ng-change="showConnectCapexChart(true)">
+                <option value="bau">BAU</option>
+                <option value="plan">Plan</option>
+                <option value="incremental">Incremental</option>
+              </select>
+            </div>
+            <form class="form-inline">
+              <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
+                <label>
+                  <input type="checkbox" ng-model="connectCapexFilterEntityTypes[entityType]" ng-change="showConnectCapexChart(true)"> {{ entityName }}
+                </label>
+              </div>
+            </form>
+          </form>
+          <canvas id="financial-profile-chart-connect-capex" style="width:100%; height:200px"></canvas>
+          <div id="financial-profile-chart-connect-capex-legend"></div>
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileRevenue" style="margin-top: 20px">
@@ -179,7 +198,7 @@
             </div>
           </form>
           <br>
-          <p class="text-center"><strong>All Premises Passed</strong></p>
+          <p class="text-center"><strong>Cumulative Premises Passed</strong></p>
           <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-premises-legend"></div>
         </div>
