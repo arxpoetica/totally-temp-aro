@@ -159,7 +159,7 @@ public class PricingServiceImpl implements PricingService {
 
 		Map<MaterialType, String> networkMapping = new EnumMap<>(
 				MaterialType.class);
-		Map<FiberType, String> fiberMapping = new EnumMap<>(FiberType.class);
+		Map<FiberType, Map<CableConstructionEnum, String>> fiberMapping = new EnumMap<>(FiberType.class);
 
 		private CodeMapping() {
 			init();
@@ -172,12 +172,12 @@ public class PricingServiceImpl implements PricingService {
 		private void add(FiberType type,
 				CableConstructionEnum cableConstructionEnum) {
 
-			String code = type.name();
+			String code = type.getCode();
 			if (!cableConstructionEnum.isComputedEstimate()) {
 				code = code + "_" + cableConstructionEnum.getCodeName();
 			}
 
-			fiberMapping.put(type, code);
+			fiberMapping.get(type).put(cableConstructionEnum, code);
 		}
 
 		public String getCode(MaterialType materialType) {
@@ -186,14 +186,25 @@ public class PricingServiceImpl implements PricingService {
 
 		public String getCode(FiberType ft,
 				CableConstructionEnum constructionType) {
-			return fiberMapping.get(ft);
+			return fiberMapping.get(ft).get(constructionType);
 		}
 
 		private void init(FiberType fiberType,
 				Set<CableConstructionEnum> constructionTypes) {
+			
 			for (CableConstructionEnum ct : constructionTypes) {
 				add(fiberType, ct);
 			}
+		}
+		
+		private EnumMap<CableConstructionEnum, String> createEmptyMap() {
+			 EnumMap<CableConstructionEnum, String> map = new EnumMap<>(CableConstructionEnum.class) ;
+			 
+			 for(CableConstructionEnum ct : CableConstructionEnum.values()) {
+				 map.put(ct, "$INVALID_MATCH$") ;
+			 }
+			 
+			 return map ;
 		}
 
 		private void init() {
@@ -202,6 +213,10 @@ public class PricingServiceImpl implements PricingService {
 			add(MaterialType.FDT, "fiber_distribution_terminal");
 			add(MaterialType.FDH, "fiber_distribution_hub");
 
+			for(FiberType ft : FiberType.values()) {
+				fiberMapping.put(ft, createEmptyMap()) ;
+			}
+			
 			Set<CableConstructionEnum> codedConstructionTypes = getCodedConstructionTypes();
 
 			init(FiberType.FEEDER, codedConstructionTypes);

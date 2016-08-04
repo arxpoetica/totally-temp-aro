@@ -15,6 +15,7 @@ import com.altvil.aro.util.sequence.LongSequenceGenerator;
 import com.altvil.aro.util.sequence.SequenceGenerator;
 import com.vividsolutions.jts.geom.Point;
 
+
 public class GraphAssignmentFactoryImpl implements GraphAssignmentFactory {
 
 	public static final GraphAssignmentFactoryImpl FACTORY = new GraphAssignmentFactoryImpl();

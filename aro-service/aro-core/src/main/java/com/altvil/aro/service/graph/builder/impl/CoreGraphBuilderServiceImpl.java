@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
+import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.builder.RoadEdgeInfo;
@@ -44,8 +45,11 @@ public class CoreGraphBuilderServiceImpl implements
 	private static final Logger log = LoggerFactory
 			.getLogger(CoreGraphBuilderServiceImpl.class.getName());
 
+	
+	private GraphAssignmentFactory graphEdgeFactory = GraphAssignmentFactoryImpl.FACTORY ;
+
+	
 	private GraphTransformerFactory transformFactory;
-	private GraphAssignmentFactory graphEdgeFactory;
 	private GraphNodeFactory vertexFactory;
 
 	// //
@@ -53,7 +57,6 @@ public class CoreGraphBuilderServiceImpl implements
 	@Autowired
 	public CoreGraphBuilderServiceImpl(
 			GraphTransformerFactory transformFactory,
-			GraphAssignmentFactory graphEdgeFactory,
 			GraphNodeFactory vertexFactory) {
 		super();
 		this.transformFactory = transformFactory;
