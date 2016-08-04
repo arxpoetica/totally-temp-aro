@@ -433,4 +433,9 @@ public interface NetworkPlanRepository extends
 
 	@Query(value = "select id from client.plan where parent_plan_id = :planId", nativeQuery = true)
 	List<Number> wireCenterPlanIdsFor(@Param("planId") long planId);
+	
+	@Query(value = "select gid, construction_type, start_ratio, end_ratio from client.conduit_segment where plan_id = :planId", nativeQuery = true)
+	List<Object[]> queryConduitSections(@Param("planId") long planId);
+	
+	
 }

@@ -24,6 +24,7 @@ import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
 
+@Deprecated
 public class RoadModelBuilder extends GraphNetworkBuilder {
 
 	private static final Logger log = LoggerFactory

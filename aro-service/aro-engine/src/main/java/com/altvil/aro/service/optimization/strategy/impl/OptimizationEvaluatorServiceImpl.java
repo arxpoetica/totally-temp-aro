@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
@@ -43,12 +43,15 @@ public class OptimizationEvaluatorServiceImpl implements
 	private Map<OptimizationType, OptimizationStrategyFactory<?>> strategyMap = new EnumMap<OptimizationType, OptimizationEvaluatorServiceImpl.OptimizationStrategyFactory<?>>(
 			OptimizationType.class);
 
+	private ApplicationContext appContext ;
 	private PlanAnalysisService planAnalysisService;
 
-	@Autowired
+
 	public OptimizationEvaluatorServiceImpl(
+			ApplicationContext appContext,
 			PlanAnalysisService planAnalysisService) {
 		super();
+		this.appContext = appContext ;
 		this.planAnalysisService = planAnalysisService;
 	}
 
@@ -239,13 +242,13 @@ public class OptimizationEvaluatorServiceImpl implements
 			}
 
 			Optional<CompositeNetworkModel> p = plan.get()
-					.getOptimizedNetwork().getNetworkPlan();
+					.getOptimizedNetwork().getNetworkPlan(appContext);
 			if (!p.isPresent()) {
 				return Optional.empty();
 			}
 
 			return Optional.of(new DefaultPlannedNetwork(planId, plan.get()
-					.getOptimizedNetwork().getNetworkPlan().get(),
+					.getOptimizedNetwork().getNetworkPlan(appContext).get(),
 					demandMapping));
 
 		}

@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.altvil.aro.service.entity.MaterialType;
+import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 
@@ -24,7 +25,7 @@ public class PriceTest {
 	
 	@Test
 	public void testPrice() {
-		PricingModel model = pricingService.getPricingModel("*", new Date()) ;
+		PricingModel model = pricingService.getPricingModel("*", new Date(), new PricingContext()) ;
 		Assert.assertTrue(model.getMaterialCost(MaterialType.CO, 1) > 0);
 		Assert.assertTrue(model.getMaterialCost(MaterialType.FDT, 1) > 0);
 		Assert.assertTrue(model.getMaterialCost(MaterialType.FDH, 1) > 0);
