@@ -1,3 +1,0 @@
-[submodule "ops/config"]
-	path = ops/config
-	url = git@octocat.altvil.com:AIT/ARO-config
