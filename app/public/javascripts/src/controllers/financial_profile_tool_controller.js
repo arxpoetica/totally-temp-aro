@@ -124,6 +124,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showArpuChart(force)
     } else if (href === '#financialProfilePremises') {
       showPremisesChart(force)
+      showCostPerPremiseChart(force)
     } else if (href === '#financialProfileSubscribers') {
       showSubscribersChart(force)
       showPenetrationChart(force)
@@ -278,7 +279,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
-      showChart('financial-profile-chart-arpu', 'StackedBar', data, options)
+      showChart('financial-profile-chart-arpu', 'Bar', data, options)
     })
   }
   $scope.showArpuChart = showArpuChart
@@ -325,6 +326,22 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-premises', 'StackedBar', data, options)
     })
   }
+  $scope.showPremisesChart = showPremisesChart
+
+  function showCostPerPremiseChart (force) {
+    var datasets = [{ key: 'value', name: 'Value' }]
+    var params = {}
+    request(force, 'costperpremise', params, (costs) => {
+      var data = buildChartData(costs, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-cost-per-premise', 'Bar', data, options)
+    })
+  }
+  $scope.showCostPerPremiseChart = showCostPerPremiseChart
 
   function showSubscribersChart (force) {
     var datasets = [

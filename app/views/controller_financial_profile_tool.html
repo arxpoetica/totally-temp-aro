@@ -167,23 +167,24 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfilePremises" style="margin-top: 20px">
         <div>
+          <p class="text-center"><strong>Cumulative Premises Passed</strong></p>
           <div class="pull-right">
             <form class="form-inline">
               <div class="radio">
                 <label>
-                  <input type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="refreshCurrentTab(true)"> Discrete
+                  <input type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="showPremisesChart(true)"> Discrete
                 </label>
               </div>
               <div class="radio" style="margin-left: 10px">
                 <label>
-                  <input type="radio" name="percentage" value="true" ng-model="premisesPercentage" ng-change="refreshCurrentTab(true)"> Percentage
+                  <input type="radio" name="percentage" value="true" ng-model="premisesPercentage" ng-change="showPremisesChart(true)"> Percentage
                 </label>
               </div>
             </form>
           </div>
           <form class="form-inline" ng-show="aboveWirecenter">
             <div class="form-group">
-              <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+              <select class="form-control" ng-model="capexFilter" ng-change="showPremisesChart(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
                 <option value="incremental">Incremental</option>
@@ -193,14 +194,16 @@
           <form class="form-inline">
             <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
               <label>
-                <input type="checkbox" ng-model="premisesFilterEntityTypes[entityType]" ng-change="refreshCurrentTab(true)"> {{ entityName }}
+                <input type="checkbox" ng-model="premisesFilterEntityTypes[entityType]" ng-change="showPremisesChart(true)"> {{ entityName }}
               </label>
             </div>
           </form>
-          <br>
-          <p class="text-center"><strong>Cumulative Premises Passed</strong></p>
           <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-premises-legend"></div>
+          <br>
+          <p class="text-center"><strong>Cost per Premise Passed</strong></p>
+          <canvas id="financial-profile-chart-cost-per-premise" style="width:100%; height:200px"></canvas>
+          <div id="financial-profile-chart-cost-per-premise-legend" style="display:none"></div>
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers" style="margin-top: 20px">

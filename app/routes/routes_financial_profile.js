@@ -140,6 +140,25 @@ exports.configure = (api, middleware) => {
     .catch(next)
   })
 
+  api.get('/financial_profile/:plan_id/costperpremise', (request, response, next) => {
+    var curves = {
+      cost: 'planned.network.cost',
+      premises_passed: 'planned.network.premises_passed'
+    }
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.value = obj.cost / obj.premises_passed
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
     var entities = array(request.query.entityTypes)
     if (entities.length === 0) return response.json([])
