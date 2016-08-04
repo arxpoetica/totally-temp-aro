@@ -62,15 +62,17 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 	private GraphTransformerFactory transformFactory;
 	private RoutePlaningService routePlaningService;
-
 	private GraphRenoderService graphRenoderService;
+
 	private GraphAssignmentFactory assignmentFactory = GraphAssignmentFactoryImpl.FACTORY;
 
 	@Autowired
 	public CoreLeastCostRoutingServiceImpl(
+			GraphRenoderService graphRenoderService,
 			GraphTransformerFactory transformFactory,
 			RoutePlaningService routePlaningService) {
 		super();
+		this.graphRenoderService = graphRenoderService ;
 		this.transformFactory = transformFactory;
 		this.routePlaningService = routePlaningService;
 	}

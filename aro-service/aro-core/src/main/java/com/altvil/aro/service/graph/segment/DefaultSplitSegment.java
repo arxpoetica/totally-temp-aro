@@ -14,6 +14,7 @@ import com.altvil.aro.service.graph.segment.splitter.SplitGeoSegment;
 import com.altvil.aro.service.graph.segment.splitter.SubSegment;
 import com.altvil.aro.util.geometry.GeometrySplitter;
 import com.altvil.interfaces.RoadLocation;
+import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -205,9 +206,8 @@ public class DefaultSplitSegment implements SplitGeoSegment {
 				.collect(Collectors.toList());
 
 		intersectionPoints = StreamUtil.map(
-				this.geoSegments.subList(1, this.geoSegments.size() - 1),
-				gs -> (Point) gs.getGeoSegment().getLineString()
-						.getGeometryN(0));
+				this.geoSegments.subList(1, this.geoSegments.size()),
+				gs -> GeometryUtil.getStartPoint(gs.getGeoSegment().getLineString()));
 
 		return this;
 	}

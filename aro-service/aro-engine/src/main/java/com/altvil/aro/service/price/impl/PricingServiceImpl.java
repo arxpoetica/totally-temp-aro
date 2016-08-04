@@ -174,7 +174,7 @@ public class PricingServiceImpl implements PricingService {
 
 			String code = type.getCode();
 			if (!cableConstructionEnum.isComputedEstimate()) {
-				code = code + "_" + cableConstructionEnum.getCodeName();
+				code = code + "_fiber_" + cableConstructionEnum.getCodeName();
 			}
 
 			fiberMapping.get(type).put(cableConstructionEnum, code);
@@ -306,12 +306,18 @@ public class PricingServiceImpl implements PricingService {
 
 			Map<CableConstructionEnum, Double> pricingMap = new EnumMap<>(
 					CableConstructionEnum.class);
+			
+			//Ensure that Map is fully populated
+			for(CableConstructionEnum ct : CableConstructionEnum.values()) {
+				pricingMap.put(ct,  0.0) ;
+			}
 
 			for (CableConstructionEnum ct : constructionTypes) {
 				List<PriceElement> priceElements = map.get(CodeMapping.MAPPING
 						.getCode(fiberType, ct));
 				double price = (priceElements == null || priceElements.size() == 0) ? 0
 						: priceElements.iterator().next().getPrice();
+				log.debug(fiberType + "." + ct + "=" + price);
 				pricingMap.put(ct, price);
 			}
 			return new FiberUnitPricing(pricingMap);

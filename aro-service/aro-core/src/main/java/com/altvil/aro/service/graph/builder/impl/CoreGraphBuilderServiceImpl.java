@@ -51,7 +51,9 @@ public class CoreGraphBuilderServiceImpl implements
 	
 	private GraphTransformerFactory transformFactory;
 	private GraphNodeFactory vertexFactory;
-
+	
+	private Collection<RatioSection> DEFAULT_SECTIONS ;
+	
 	// //
 
 	@Autowired
@@ -60,8 +62,10 @@ public class CoreGraphBuilderServiceImpl implements
 			GraphNodeFactory vertexFactory) {
 		super();
 		this.transformFactory = transformFactory;
-		this.graphEdgeFactory = graphEdgeFactory;
 		this.vertexFactory = vertexFactory;
+		
+		DEFAULT_SECTIONS = Collections.singleton(new DefaultGeoRatioSection(0, 1, CableConstructionEnum.ESTIMATED)) ;
+		
 	}
 
 	private GraphNetworkModel create(Iterator<RoadEdgeInfo> itr,
@@ -124,7 +128,7 @@ public class CoreGraphBuilderServiceImpl implements
 		private GraphBuilderContext ctx;
 		private RoadEdgeIndexer indexer;
 
-		private Collection<RatioSection> defaultRatioSections;
+		private Collection<RatioSection> defaultRatioSections = DEFAULT_SECTIONS ;
 		
 		private RoadEdge roadEdge;
 		private Long id;

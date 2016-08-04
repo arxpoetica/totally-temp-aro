@@ -102,8 +102,10 @@ public class GraphRenoderServiceImpl implements GraphRenoderService {
 				GraphModelBuilder<GeoSegment> graphBuilder,
 				GraphNodeFactory graphNodeFactory, EdgeWeightFunction weightFunction) {
 			super();
-			splitter = new GeoSegmentSplitter(graphNodeFactory, weightFunction);
+			this.graphModel = graphModel ;
 			this.graphBuilder = graphBuilder;
+			splitter = new GeoSegmentSplitter(graphNodeFactory, weightFunction);
+			
 		}
 
 		/*

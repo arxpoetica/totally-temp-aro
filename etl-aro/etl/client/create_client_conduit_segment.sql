@@ -42,10 +42,12 @@ from(
 	and c."name" = 'ION') s ;
 
 
+
 drop view if exists client.conduit_segment cascade ;
 create view client.conduit_segment as  
 select plan_id, gid, max(construction_type) as construction_type,  min(start_ratio) as start_ratio, max(end_ratio) as end_ratio
-from client.conduit_edge_segments
+from client.conduit_edge_segments s
+where s.start_ratio is not null and s.end_ratio is not null
 group by plan_id, gid;
 
 
