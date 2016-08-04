@@ -127,10 +127,12 @@ module.exports = class Database {
       `
       params.push(viewport.linestring)
     } else {
+      // 2.1 doesn't support preserveCollapsed
+      var preserveCollapsed = postgisversion === '2.1' ? '' : ', true'
       finalSql = `
         WITH features AS (${sql})
         SELECT
-          ST_AsGeoJSON(ST_Simplify(ST_Union(geom), $${params.length + 1}::float, true))::json AS geom
+          ST_AsGeoJSON(ST_Simplify(ST_Union(geom), $${params.length + 1}::float ${preserveCollapsed}))::json AS geom
         FROM features
         WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 2})), 4326), features.geom)
       `
@@ -188,5 +190,12 @@ module.exports.query('SELECT * from aro.algorithms')
   .then((result) => {
     Array.prototype.splice.apply(config.route_planning,
       [0, config.route_planning.length].concat(result))
+  })
+  .catch((err) => console.error(err.stack))
+
+var postgisversion
+module.exports.findOne("SELECT split_part(PostGIS_version(), ' ', 1) AS version")
+  .then((result) => {
+    postgisversion = result.version
   })
   .catch((err) => console.error(err.stack))

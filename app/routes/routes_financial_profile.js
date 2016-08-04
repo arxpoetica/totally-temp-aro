@@ -88,6 +88,77 @@ exports.configure = (api, middleware) => {
     .catch(next)
   })
 
+  api.get('/financial_profile/:plan_id/arpu', (request, response, next) => {
+    var filter = request.query.filter
+    var curves = {
+      bau: `copper.${filter}.arpu`,
+      plan: `planned.${filter}.arpu`
+    }
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/connectcapex', (request, response, next) => {
+    var filter = request.query.filter
+    var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
+    var curves = {}
+    var mapTypes = {
+      bau: ['copper'],
+      plan: ['planned'],
+      incremental: ['copper', 'planned']
+    }
+    var types = mapTypes[filter]
+    entities.forEach((entity) => {
+      types.forEach((type) => {
+        curves[`${entity}_${type}`] = `${type}.${entity}.new_connections_cost`
+      })
+    })
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        if (filter === 'incremental') {
+          entities.forEach((entity) => {
+            obj[entity] = obj[`${entity}_planned`] - obj[`${entity}_copper`]
+          })
+        } else {
+          entities.forEach((entity) => {
+            obj[entity] = obj[`${entity}_${types[0]}`]
+          })
+        }
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/costperpremise', (request, response, next) => {
+    var curves = {
+      cost: 'planned.network.cost',
+      premises_passed: 'planned.network.premises_passed'
+    }
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.value = obj.cost / obj.premises_passed
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
     var entities = array(request.query.entityTypes)
     if (entities.length === 0) return response.json([])

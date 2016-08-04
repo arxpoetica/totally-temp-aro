@@ -4,14 +4,16 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.aboveWirecenter = false
   $scope.premisesFilterEntityTypes = { household: true }
   $scope.subscribersFilterEntityTypes = { household: true }
+  $scope.connectCapexFilterEntityTypes = { household: true }
   $scope.penetrationFilter = {
     entityType: 'household'
   }
   $scope.revenueFilter = 'bau'
   $scope.capexFilterEntityTypes = { households: true }
   $scope.capexFilter = 'bau'
+  $scope.connectCapexFilter = 'bau'
   $scope.details = false
-  $scope.arpuFilter = 'households'
+  $scope.arpuFilter = 'household'
 
   $scope.entityTypes = {
     smallBusiness: 'SMB',
@@ -20,6 +22,10 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     household: 'Households',
     cellTower: 'Towers'
   }
+  $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
+    key: key,
+    name: $scope.entityTypes[key]
+  }))
   $scope.premisesPercentage = 'false'
 
   var dirty = false
@@ -112,10 +118,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     } else if (href === '#financialProfileCapex') {
       // showBudgetChart(force)
       showCapexChart(force)
+      showConnectCapexChart(force)
     } else if (href === '#financialProfileRevenue') {
       showRevenueChart(force)
+      showArpuChart(force)
     } else if (href === '#financialProfilePremises') {
       showPremisesChart(force)
+      showCostPerPremiseChart(force)
     } else if (href === '#financialProfileSubscribers') {
       showSubscribersChart(force)
       showPenetrationChart(force)
@@ -247,9 +256,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   function showRevenueChart (force) {
-    var datasets = Object.keys($scope.entityTypes).map((key) => ({ key: key, name: $scope.entityTypes[key] }))
     request(force, 'revenue', { filter: $scope.revenueFilter }, (revenue) => {
-      var data = buildChartData(revenue, datasets)
+      var data = buildChartData(revenue, $scope.entityTypesArray)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
@@ -258,6 +266,42 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-revenue', 'StackedBar', data, options)
     })
   }
+
+  function showArpuChart (force) {
+    var datasets = [
+      { key: 'bau', name: 'BAU' },
+      { key: 'plan', name: 'Plan' }
+    ]
+    request(force, 'arpu', { filter: $scope.arpuFilter }, (arpu) => {
+      var data = buildChartData(arpu, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+      }
+      showChart('financial-profile-chart-arpu', 'Bar', data, options)
+    })
+  }
+  $scope.showArpuChart = showArpuChart
+
+  function showConnectCapexChart (force) {
+    var entityTypes = Object.keys($scope.connectCapexFilterEntityTypes).filter((key) => $scope.connectCapexFilterEntityTypes[key])
+    var params = {
+      entityTypes: entityTypes,
+      filter: $scope.connectCapexFilter
+    }
+    var datasets = $scope.entityTypesArray.filter((entity) => entityTypes.indexOf(entity.key) > -1)
+    request(force, 'connectcapex', params, (connectcapex) => {
+      var data = buildChartData(connectcapex, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-connect-capex', 'Bar', data, options)
+    })
+  }
+  $scope.showConnectCapexChart = showConnectCapexChart
 
   function showPremisesChart (force) {
     var datasets = [
@@ -282,6 +326,22 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-premises', 'StackedBar', data, options)
     })
   }
+  $scope.showPremisesChart = showPremisesChart
+
+  function showCostPerPremiseChart (force) {
+    var datasets = [{ key: 'value', name: 'Value' }]
+    var params = {}
+    request(force, 'costperpremise', params, (costs) => {
+      var data = buildChartData(costs, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-cost-per-premise', 'Bar', data, options)
+    })
+  }
+  $scope.showCostPerPremiseChart = showCostPerPremiseChart
 
   function showSubscribersChart (force) {
     var datasets = [

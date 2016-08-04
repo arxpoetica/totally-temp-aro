@@ -6,6 +6,7 @@
     <div  ng-show="showData">
     <ul class="nav nav-tabs" role="tablist">
       <li role="presentation" class="active"><a href="#financialProfileSummary" role="tab" data-toggle="tab">Summary</a></li>
+      <li role="presentation"><a href="#financialProfileFiberDetails" role="tab" data-toggle="tab">Fiber Details</a></li>
       <li role="presentation"><a href="#financialProfilePremises" role="tab" data-toggle="tab">Premises</a></li>
       <li role="presentation"><a href="#financialProfileSubscribers" role="tab" data-toggle="tab">Subscribers</a></li>
       <li role="presentation"><a href="#financialProfileRevenue" role="tab" data-toggle="tab">Revenue</a></li>
@@ -81,6 +82,7 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileCapex" style="margin-top: 20px">
         <div>
+          <p class="text-center"><strong>BAU Capex</strong></p>
           <form class="form-inline">
             <div class="form-group">
               <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
@@ -107,8 +109,6 @@
             </div>
             -->
           </form>
-          <br>
-          <p class="text-center"><strong>BAU Capex</strong></p>
           <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-capex-legend"></div>
           <!--
@@ -117,6 +117,26 @@
           <canvas id="financial-profile-chart-budget" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-budget-legend"></div>
           -->
+          <br>
+          <p class="text-center"><strong>Connect Capex</strong></p>
+          <form class="form-inline">
+            <div class="form-group">
+              <select class="form-control" ng-model="connectCapexFilter" ng-change="showConnectCapexChart(true)">
+                <option value="bau">BAU</option>
+                <option value="plan">Plan</option>
+                <option value="incremental">Incremental</option>
+              </select>
+            </div>
+            <form class="form-inline">
+              <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
+                <label>
+                  <input type="checkbox" ng-model="connectCapexFilterEntityTypes[entityType]" ng-change="showConnectCapexChart(true)"> {{ entityName }}
+                </label>
+              </div>
+            </form>
+          </form>
+          <canvas id="financial-profile-chart-connect-capex" style="width:100%; height:200px"></canvas>
+          <div id="financial-profile-chart-connect-capex-legend"></div>
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileRevenue" style="margin-top: 20px">
@@ -136,10 +156,8 @@
           <p class="text-center"><strong>ARPU</strong></p>
           <form class="form-inline">
             <div class="form-group">
-              <select class="form-control" ng-model="arpuFilter" ng-change="refreshArpuChart(true)">
-                <option value="households">Households</option>
-                <option value="businesses">Businesses</option>
-                <option value="towers">Towers</option>
+              <select class="form-control" ng-model="arpuFilter" ng-change="showArpuChart(true)"
+                ng-options="entity.key as entity.name for entity in entityTypesArray">
               </select>
             </div>
           </form>
@@ -149,23 +167,24 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfilePremises" style="margin-top: 20px">
         <div>
+          <p class="text-center"><strong>Cumulative Premises Passed</strong></p>
           <div class="pull-right">
             <form class="form-inline">
               <div class="radio">
                 <label>
-                  <input type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="refreshCurrentTab(true)"> Discrete
+                  <input type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="showPremisesChart(true)"> Discrete
                 </label>
               </div>
               <div class="radio" style="margin-left: 10px">
                 <label>
-                  <input type="radio" name="percentage" value="true" ng-model="premisesPercentage" ng-change="refreshCurrentTab(true)"> Percentage
+                  <input type="radio" name="percentage" value="true" ng-model="premisesPercentage" ng-change="showPremisesChart(true)"> Percentage
                 </label>
               </div>
             </form>
           </div>
           <form class="form-inline" ng-show="aboveWirecenter">
             <div class="form-group">
-              <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+              <select class="form-control" ng-model="capexFilter" ng-change="showPremisesChart(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
                 <option value="incremental">Incremental</option>
@@ -175,14 +194,16 @@
           <form class="form-inline">
             <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
               <label>
-                <input type="checkbox" ng-model="premisesFilterEntityTypes[entityType]" ng-change="refreshCurrentTab(true)"> {{ entityName }}
+                <input type="checkbox" ng-model="premisesFilterEntityTypes[entityType]" ng-change="showPremisesChart(true)"> {{ entityName }}
               </label>
             </div>
           </form>
-          <br>
-          <p class="text-center"><strong>All Premises Passed</strong></p>
           <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-premises-legend"></div>
+          <br>
+          <p class="text-center"><strong>Cost per Premise Passed</strong></p>
+          <canvas id="financial-profile-chart-cost-per-premise" style="width:100%; height:200px"></canvas>
+          <div id="financial-profile-chart-cost-per-premise-legend" style="display:none"></div>
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileSubscribers" style="margin-top: 20px">
@@ -253,6 +274,75 @@
               <td>1</td>
               <td>2</td>
               <td>3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="financialProfileFiberDetails" style="margin-top: 20px">
+        <table class="table">
+          <thead>
+            <th></th>
+            <th class="text-right">Distribution Fiber</th>
+            <th class="text-right">Feeder Fiber</th>
+            <th class="text-right">Backhaul Fiber</th>
+            <th class="text-right">Total miles</th>
+            <th class="text-right">Cost per Mile</th>
+            <th class="text-right">Total cost</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Aerial</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">$0</td>
+              <td class="text-right">$0K</td>
+            </tr>
+            <tr>
+              <td>Buried</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">$0</td>
+              <td class="text-right">$0K</td>
+            </tr>
+            <tr>
+              <td>Underground</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">$0</td>
+              <td class="text-right">$0K</td>
+            </tr>
+            <tr>
+              <td>Augmented Conduit</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">$0</td>
+              <td class="text-right">$0K</td>
+            </tr>
+            <tr>
+              <td>Other</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">0 mi</td>
+              <td class="text-right">$0</td>
+              <td class="text-right">$0K</td>
+            </tr>
+            <tr>
+              <th>Total</th>
+              <th class="text-right">0 mi</th>
+              <th class="text-right">0 mi</th>
+              <th class="text-right">0 mi</th>
+              <th class="text-right">0 mi</th>
+              <th class="text-right">$0</th>
+              <th class="text-right">$0K</th>
             </tr>
           </tbody>
         </table>
