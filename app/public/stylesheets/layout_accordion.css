@@ -50,6 +50,7 @@
 }
 
 #financial_profile_controller {
-  left: 400px;
-  top: 47px;
+  position: absolute;
+  left: 10px;
+  top: 0;
 }

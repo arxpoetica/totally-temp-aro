@@ -152,13 +152,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
     $scope.business_categories_selected = []
     $scope.business_categories.forEach((category) => {
-      $scope.business_categories_selected[category.id] = true
+      $scope.business_categories_selected[category.name] = true
     })
-    $scope.business_categories_selected['small'] = true
 
     $scope.household_categories_selected = []
     $scope.household_categories.forEach((category) => {
-      $scope.household_categories_selected[category.id] = true
+      $scope.household_categories_selected[category.name] = true
     })
 
     // industries
@@ -208,31 +207,29 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
-    const subcategories = (key, options) => {
+    const subcategories = (key) => {
       var obj = $scope[`${key}_categories_selected`]
       var categories = Object.keys(obj).filter((key) => obj[key])
-      if (categories.length < $scope[`${key}_categories`].length) {
-        options[`${key}_categories`] = categories
-      }
+      return categories
     }
 
     if ($scope.overlay === 'none') {
-      if (!$scope.show_businesses && !$scope.show_households) {
+      var businessCategories = subcategories('business')
+      var householdCategories = subcategories('household')
+      if (!$scope.show_businesses) {
+        businessCategories = _.difference(businessCategories, ['medium', 'large'])
+      }
+      if (!$scope.show_households) {
+        householdCategories = []
+      }
+
+      if (businessCategories.length === 0 && householdCategories.length === 0) {
         locationsLayer.hide()
       } else {
-        var business_categories = Object.keys($scope.business_categories_selected).filter((key) => $scope.business_categories_selected[key])
-        var type
-        var show_businesses = $scope.show_businesses && business_categories.length > 0
-        if (show_businesses && $scope.show_households) {
-          type = ''
-        } else if (show_businesses) {
-          type = 'businesses'
-        } else if ($scope.show_households) {
-          type = 'households'
+        var options = {
+          business_categories: businessCategories,
+          household_categories: householdCategories
         }
-        var options = { type }
-        subcategories('business', options)
-        subcategories('household', options)
         locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
       }

@@ -1,5 +1,5 @@
 <div id="fiber_plant_controller">
-  <h2>Fiber</h2>
+  <h2>Competitive Fiber Routes</h2>
   <div>
     <div class="checkbox">
       <label class="eye-control">
@@ -11,15 +11,20 @@
   </div>
   <hr>
 
-  <h2>Coverage</h2>
+  <h2>Competitive Coverage</h2>
   <div>
-    <select class="form-control" ng-change="nbmCarrierChanged()" ng-options="carrier as carrier.name for carrier in nbmCarriers track by carrier.id" ng-model="nbmCarrier">
-      <option value="">Select a carrier</option>
-    </select>
+    <div class="input-group" style="width:100%">
+      <select class="form-control" ng-change="nbmCarrierChanged()" ng-options="carrier as carrier.name for carrier in nbmCarriers track by carrier.id" ng-model="nbmCarrier">
+        <option value="">Select a carrier</option>
+      </select>
+      <span class="input-group-btn">
+        <button class="btn btn-default" ng-click="clearNbmCarrier()" ng-class="{disabled:!nbmCarrier}"><span class="fa fa-close"></span></button>
+      </span>
+    </div>
     <div class="row" style="margin-top: 10px">
-      <div class="col-md-2">Low</div>
-      <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-      <div class="col-md-2 text-right">High</div>
+      <div class="col-md-3">&lt;1 Mbps</div>
+      <div class="col-md-6" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
+      <div class="col-md-3 text-right">&gt;1 Gbps</div>
     </div>
   </div>
   <!--

@@ -130,7 +130,7 @@ module.exports = class Database {
       finalSql = `
         WITH features AS (${sql})
         SELECT
-          ST_AsGeoJSON(ST_Simplify(ST_Union(geom), $${params.length + 1}, true))::json AS geom
+          ST_AsGeoJSON(ST_Simplify(ST_Union(geom), $${params.length + 1}::float, true))::json AS geom
         FROM features
         WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 2})), 4326), features.geom)
       `
