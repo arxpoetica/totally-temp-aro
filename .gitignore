@@ -9,6 +9,8 @@
 Vagrantfile
 npm-debug.log
 
+ops-legacy/
+
 
 #app ignores
 
