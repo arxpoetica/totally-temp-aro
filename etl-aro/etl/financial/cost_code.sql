@@ -96,7 +96,7 @@ insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, de
 	values (
 		(select id from financial.cost_code_type where name = 'material'),
 		(select id from aro.uom where name = 'unit_per_meter')
-		, 'fiber_burried', 'Feeder Fiber Buried') ;
+		, 'fiber_buried', 'Feeder Fiber Buried') ;
 
 insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
 	values (
