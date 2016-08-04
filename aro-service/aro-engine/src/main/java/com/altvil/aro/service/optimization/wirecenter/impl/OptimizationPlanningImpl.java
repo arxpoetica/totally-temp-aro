@@ -81,17 +81,19 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
 
+
+		PricingModel pricingModel = pricingService.getPricingModel("*",
+				new Date(),
+				PricingContext.create(request.getConstructionRatios())) ;
 		
 		GraphNetworkModel model = graphBuilderService
 				.build(networkService.getNetworkData(request
 						.getNetworkDataRequest()))
-				.setPricingModel(
-						pricingService.getPricingModel("*",
-										new Date(),
-										PricingContext.create(request.getConstructionRatios())))
+				.setPricingModel(pricingModel)
 				.build();
 
 		return StreamUtil.map(planService.computeNetworkModel(model,
+				pricingModel,
 				FiberConstraintUtils.build(request.getConstraints())),
 				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
 						networkData.getCompetitiveDemandMapping()));

@@ -103,7 +103,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
-		CompositeNetworkModel networkModel = planning.build(model, pricingModel, constraints);
+		CompositeNetworkModel networkModel = planning.build(pricingModel, model, constraints);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
