@@ -76,6 +76,7 @@ public class NetworkModelBuilderFactoryImpl implements
 			nd.setFiberSources(networkData.getFiberSources());
 			nd.setRoadEdges(networkData.getRoadEdges());
 			nd.setRoadLocations(map.values());
+			nd.setCableConduitEdges(networkData.getCableConduitEdges());
 			nd.setSelectedRoadLocationIds(selectedRoadLocationIds);
 
 			return nd;
