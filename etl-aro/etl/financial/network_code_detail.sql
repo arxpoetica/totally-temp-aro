@@ -54,8 +54,8 @@ insert into financial.network_code_detail (network_cost_code_id, cost_code_id, u
 			1,  1.0, 'Feeder Default') ;
 
 insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
-	values ((select id from financial.network_cost_code where name = 'feeder_fiber_arial'), 
-			(select id from financial.cost_code where name = 'fiber_arial'),
+	values ((select id from financial.network_cost_code where name = 'feeder_fiber_ariel'), 
+			(select id from financial.cost_code where name = 'fiber_ariel'),
 			(select id from aro.uom where name = 'unit_per_meter'),
 			1,  1.0, 'Feeder Arial') ;
 
@@ -94,8 +94,8 @@ insert into financial.network_code_detail (network_cost_code_id, cost_code_id, u
 			1,  1.0, 'Distribution Default') ;
 
 insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
-	values ((select id from financial.network_cost_code where name = 'distribution_fiber_arial'), 
-			(select id from financial.cost_code where name = 'fiber_arial'),
+	values ((select id from financial.network_cost_code where name = 'distribution_fiber_ariel'), 
+			(select id from financial.cost_code where name = 'fiber_ariel'),
 			(select id from aro.uom where name = 'unit_per_meter'),
 			1,  1.0, 'Distribution Arial') ;
 
@@ -133,8 +133,8 @@ insert into financial.network_code_detail (network_cost_code_id, cost_code_id, u
 			1,  1.0, 'Backbone Default') ;
 
 insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
-	values ((select id from financial.network_cost_code where name = 'backbone_fiber_arial'), 
-			(select id from financial.cost_code where name = 'fiber_arial'),
+	values ((select id from financial.network_cost_code where name = 'backbone_fiber_ariel'), 
+			(select id from financial.cost_code where name = 'fiber_ariel'),
 			(select id from aro.uom where name = 'unit_per_meter'),
 			1,  1.0, 'Backbone Arial') ;
 

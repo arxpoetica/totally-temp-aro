@@ -1,6 +1,7 @@
 package com.altvil.aro.service.price.engine;
 
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.utils.func.Aggregator;
 
 public class FiberCost {
@@ -44,10 +45,14 @@ public class FiberCost {
 	}
 
 	private FiberType fiberType;
+	private CableConstructionEnum cableConstructionEnum = CableConstructionEnum.ESTIMATED ;
+	
 	private double costPerMeter;
 
 	private double lengthMeters;
 	private double totalCost;
+	
+	
 
 	private FiberCost(FiberType fiberType, double costPerMeter) {
 		super();
@@ -80,4 +85,9 @@ public class FiberCost {
 		return totalCost;
 	}
 
+	public CableConstructionEnum getCableConstructionEnum() {
+		return cableConstructionEnum;
+	}
+	
+	
 }

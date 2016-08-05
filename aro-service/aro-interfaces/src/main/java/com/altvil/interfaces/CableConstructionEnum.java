@@ -2,8 +2,8 @@ package com.altvil.interfaces;
 
 public enum CableConstructionEnum {
 
-	UNKNOWN("unkown", false), ESTIMATED("estimated", false), ARIAL("arial", true), BURIED("buried", true), 
-	UNDERGROUND("undergroumd", true), CONDUIT("conduit",
+	UNKNOWN("unkown", false), ESTIMATED("estimated", false), ARIEL("ariel", true), BURIED("buried", true), 
+	UNDERGROUND("underground", true), CONDUIT("conduit",
 			true), OBSTACLE("obstacle",true), 
 
 	;
@@ -26,6 +26,11 @@ public enum CableConstructionEnum {
 
 	public String getCodeName() {
 		return codeName;
+	}
+	
+	
+	public boolean isValidCode() {
+		return this != UNKNOWN;
 	}
 
 	

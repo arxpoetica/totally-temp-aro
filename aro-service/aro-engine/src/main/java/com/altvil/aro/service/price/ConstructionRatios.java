@@ -14,7 +14,7 @@ public class ConstructionRatios {
 
 	public static ConstructionRatios createDefaults() {
 		List<CableConstructionRatio> ratios = new ArrayList<>() ;
-		ratios.add(new CableConstructionRatio(CableConstructionEnum.ARIAL, 0.7)) ;
+		ratios.add(new CableConstructionRatio(CableConstructionEnum.ARIEL, 0.7)) ;
 		ratios.add(new CableConstructionRatio(CableConstructionEnum.BURIED, 0.3)) ;
 		ConstructionRatios constructionRatios = new ConstructionRatios() ;
 		constructionRatios.setCableConstructionRations(ratios);

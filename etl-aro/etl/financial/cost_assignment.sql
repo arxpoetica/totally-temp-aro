@@ -31,7 +31,7 @@ insert into financial.cost_assignment (date_from, date_to, state_code,  cost_cod
 	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'fiber_default'), 22.95) ;
 
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'fiber_arial'), 19.0) ;
+	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'fiber_ariel'), 19.0) ;
 
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
 	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'fiber_buried'), 32.2) ;

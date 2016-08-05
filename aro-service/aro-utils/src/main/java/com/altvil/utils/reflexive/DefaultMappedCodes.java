@@ -13,6 +13,20 @@ public class DefaultMappedCodes<S, D> implements MappedCodes<S, D> {
 		return new Builder<S, D>(new EnumMap<S, D>(sourceType),
 				new EnumMap<D, S>(domainType));
 	}
+	
+	
+	public static <S, D> DefaultMappedCodes<S, D> createMapping(
+			Map<S, D> srcToDomain) {
+
+		Map<D, S> domainToSrc = new HashMap<>();
+
+		for (Map.Entry<S, D> e : srcToDomain.entrySet()) {
+			domainToSrc.put(e.getValue(), e.getKey());
+		}
+
+		return new DefaultMappedCodes<>(srcToDomain, domainToSrc);
+
+	}
 
 	public static <S extends Enum<S>, D> DefaultMappedCodes<S, D> create(
 			Map<S, D> srcToDomain) {

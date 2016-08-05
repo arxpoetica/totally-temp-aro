@@ -32,7 +32,7 @@ insert into financial.network_cost_code (name, description)
 	values ('feeder_fiber','Feeder Fiber Default Installation') ;
 
 insert into financial.network_cost_code (name, description) 
-	values ('feeder_fiber_arial','Feeder Fiber Arial Installation') ;
+	values ('feeder_fiber_ariel','Feeder Fiber Arial Installation') ;
 
 insert into financial.network_cost_code (name, description) 
 	values ('feeder_fiber_buried','Feeder Fiber Buried Installation') ;
@@ -52,7 +52,7 @@ insert into financial.network_cost_code (name, description)
 	values ('distribution_fiber','Distibution Fiber Default Installation') ;
 
 insert into financial.network_cost_code (name, description) 
-	values ('distribution_fiber_arial','Distibution Fiber Arial Installation') ;
+	values ('distribution_fiber_ariel','Distibution Fiber Arial Installation') ;
 
 insert into financial.network_cost_code (name, description) 
 	values ('distribution_fiber_buried','Distibution Fiber Buried Installation') ;
@@ -73,7 +73,7 @@ insert into financial.network_cost_code (name, description)
 	values ('backbone_fiber','Backhaul Fiber Default Installation') ;
 
 insert into financial.network_cost_code (name, description) 
-	values ('backbone_fiber_arial','Backhaul Fiber Arial Installation') ;
+	values ('backbone_fiber_ariel','Backhaul Fiber Arial Installation') ;
 
 insert into financial.network_cost_code (name, description) 
 	values ('backbone_fiber_buried','Backhaul Fiber Buried Installation') ;
