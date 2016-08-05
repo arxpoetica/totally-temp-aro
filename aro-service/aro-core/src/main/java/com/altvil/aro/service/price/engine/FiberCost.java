@@ -1,13 +1,13 @@
 package com.altvil.aro.service.price.engine;
 
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.utils.func.Aggregator;
 
 public class FiberCost {
 
-	public static FiberCostAggregator aggregate(FiberType fiberType,
-			double costPerMeter) {
-		return new FiberCostAggregator(fiberType, costPerMeter);
+	public static FiberCostAggregator aggregate(FiberType fiberType) {
+		return new FiberCostAggregator(fiberType);
 	}
 
 	public static FiberCost createFiberCost(FiberType fiberType,
@@ -16,11 +16,11 @@ public class FiberCost {
 	}
 
 	public static class FiberCostAggregator implements Aggregator<FiberCost> {
-
+		
 		private FiberCost fiberCost;
 
-		public FiberCostAggregator(FiberType fiberType, double costPerMeter) {
-			fiberCost = new FiberCost(fiberType, costPerMeter);
+		public FiberCostAggregator(FiberType fiberType) {
+			fiberCost = new FiberCost(fiberType, 0.0);
 		}
 
 		public void add(double length, double cost) {
@@ -45,10 +45,14 @@ public class FiberCost {
 	}
 
 	private FiberType fiberType;
-	double costPerMeter;
+	private CableConstructionEnum cableConstructionEnum = CableConstructionEnum.ESTIMATED ;
+	
+	private double costPerMeter;
 
 	private double lengthMeters;
 	private double totalCost;
+	
+	
 
 	private FiberCost(FiberType fiberType, double costPerMeter) {
 		super();
@@ -81,4 +85,9 @@ public class FiberCost {
 		return totalCost;
 	}
 
+	public CableConstructionEnum getCableConstructionEnum() {
+		return cableConstructionEnum;
+	}
+	
+	
 }

@@ -81,7 +81,7 @@ public class CostEndPoint {
 	                .filter(fiberCost -> fiberCost.getLengthMeters() != 0)
 	                .map(c -> new AroFiberCost(
 	                        c.getFiberType().getCode(),
-	                        reportingService.getCostCode(c.getFiberType()).getName(),
+	                        reportingService.getCostCode(c.getFiberType(), c.getCableConstructionEnum()).getName(),
 	                        c.getCostPerMeter(),
 	                        c.getLengthMeters(),
 	                        c.getTotalCost()))

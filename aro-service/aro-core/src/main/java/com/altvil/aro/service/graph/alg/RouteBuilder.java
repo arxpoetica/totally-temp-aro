@@ -1,74 +1,102 @@
 package com.altvil.aro.service.graph.alg;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
-import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.google.common.collect.TreeMultimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.GraphPathImpl;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
+import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.google.common.collect.TreeMultimap;
 
 public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(RouteBuilder.class.getName());
+
 	private Map<V, AllShortestPaths<V, E>> targetMap;
 
-	public Collection<SourceRoute<V,E>> build(WeightedGraph<V, E> source, ClosestFirstSurfaceBuilder builder, Collection<V> all_roots,
-			Collection<V> targets) {
+
+	public Collection<SourceRoute<V, E>> build(WeightedGraph<V, E> source,
+			Collection<V> all_roots, Collection<V> targets) {
+		
+		if( log.isDebugEnabled() ) {
+			for(V v : targets) {
+				if( !source.containsVertex(v) ) {
+					throw new RuntimeException("Vertex not defined in graph " + v) ;
+				}
+			}
+		}
 		
 		
-		//Establish Root Structures
-		Set<V> roots = new HashSet<>(all_roots) ;
-		
-		Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>() ;
+		// Establish Root Structures
+		Set<V> roots = new HashSet<>(all_roots);
+
+		Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 		all_roots.forEach(v -> {
-			sourceRootMap.put(v, new SourceRoute<>(v)) ;
+			sourceRootMap.put(v, new SourceRoute<>(source, v));
 		});
-		
-		List<SourceRoute<V, E>> originalSources = new ArrayList<>(sourceRootMap.values()) ;
-		
+
+		List<SourceRoute<V, E>> originalSources = new ArrayList<>(
+				sourceRootMap.values());
+
 		targetMap = new HashMap<>(targets.size());
 		for (V target : targets) {
 			// Exclude any source target match
 
 			if (roots.contains(target)) {
-				//Update Root Structure
-				sourceRootMap.get(target).add(target, target, new HashSet<E>());
+				
+				// Update Root Structure
+				sourceRootMap.get(target).add(new GraphPathImpl<V, E>(source, target, target, new ArrayList<>(), 0.0));
 			} else {
 				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, builder, target));
+						new AllShortestPaths<V, E>(source, ScalarClosestFirstSurfaceIterator.BUILDER, target));
 			}
 		}
 
-		//Set<V> sources = new HashSet<>();
+		// Set<V> sources = new HashSet<>();
 
 		// Track all Sources
-		//sources.addAll(roots);
+		// sources.addAll(roots);
 
 		while (targetMap.size() > 0) {
 
-			GraphPath<V, E> path = this.getClosestSource(sourceRootMap.keySet());
-			//Evil Boundary Condition
-			if( path == null ) {
-				break ;
+			GraphPath<V, E> path = this
+					.getClosestSource(sourceRootMap.keySet());
+			// Evil Boundary Condition
+			if (path == null) {
+				break;
 			}
-			//Bind Root
-			SourceRoute<V, E> sourceRoot = sourceRootMap.get(path.getEndVertex());
-			
+			// Bind Root
+			SourceRoute<V, E> sourceRoot = sourceRootMap.get(path
+					.getEndVertex());
+
 			// Filters out all 0 length routes
 			if (path.getEdgeList().size() == 0) {
-				//Update Root
-				sourceRoot.add(path.getStartVertex(), path
-						.getStartVertex(), new HashSet<E>());
+				// Update Root
+				sourceRoot.add(path);
 				targetMap.remove(path.getStartVertex());
 				continue;
 			}
 
+			
 			List<V> pathList = Graphs.getPathVertexList(path);
 			Iterator<V> itr = pathList.iterator();
 
@@ -76,13 +104,13 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			V previous = startVertex;
 
 			targetMap.remove(previous);
-			sourceRootMap.put(previous, sourceRoot) ;
-			
-			Set<E> resultPath = new HashSet<>(pathList.size());
+			sourceRootMap.put(previous, sourceRoot);
+
+			List<E> resultPath = new ArrayList<>(pathList.size());
 			while (itr.hasNext()) {
 				V next = itr.next();
-				//sources.add(next);
-				sourceRootMap.put(next, sourceRoot) ;
+				// sources.add(next);
+				sourceRootMap.put(next, sourceRoot);
 				E e = source.getEdge(previous, next);
 
 				previous = next;
@@ -91,25 +119,33 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 					resultPath.add(e);
 				}
 			}
-			
-			sourceRoot.add(startVertex, previous, resultPath);
+
+			sourceRoot.add(path);
 			targetMap.remove(path.getStartVertex());
 
 		}
 
-		return originalSources  ;
+		return originalSources;
+	}
+
+	public SourceRoute<V, E> buildSourceRoute(WeightedGraph<V, E> source,
+			V root, Collection<V> targets) {
+		return build(source, Collections.singleton(root), targets).iterator()
+				.next();
 	}
 
 	// Return a composite Result
-	public Set<E> build(WeightedGraph<V, E> source, ClosestFirstSurfaceBuilder closestFirstBuilder, V root,
+
+	public Set<E> build(WeightedGraph<V, E> source,
+			ClosestFirstSurfaceBuilder closestFirstBuilder, V root,
 			Collection<V> targets) {
 
 		targetMap = new HashMap<>(targets.size());
 		for (V target : targets) {
 			// Exclude any source target match
 			if (target != null && !target.equals(root)) {
-				targetMap.put(target,
-						new AllShortestPaths<V, E>(source, closestFirstBuilder, target));
+				targetMap.put(target, new AllShortestPaths<V, E>(source,
+						closestFirstBuilder, target));
 			}
 		}
 
@@ -121,9 +157,9 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 		while (targetMap.size() > 0) {
 			GraphPath<V, E> path = this.getClosestSource(sources);
-			//Evil Boundary Condition
-			if( path == null ) {
-				break ;
+			// Evil Boundary Condition
+			if (path == null) {
+				break;
 			}
 
 			// Filters out all 0 length routes

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@Deprecated
 public abstract class AbstractNetworkBuilder {
 
 	@SuppressWarnings("unused")
@@ -97,12 +98,12 @@ public abstract class AbstractNetworkBuilder {
 		List<LocationEntityAssignment> orderedLocationsByRoadEdge = getOrderedLocationsByRoadEdge(re);
 		totalNumberOfLocations += orderedLocationsByRoadEdge.size();
 		GeoSegmentAssembler segAssembler = DefaultSegmentLocations.createAssembler(null,
-				re.getLengthMeters(), re.getId(), re.getShape(),
+				null, re.getLengthMeters(), re.getId(), re.getShape(),
 				orderedLocationsByRoadEdge);
 
 		GraphNode leftVertex = getLeftVertex(re);
 		GraphNode rightVertex = getRightVertex(re);
-
+		
 		if (re.getTindf() == re.getTnidt()) {
 
 			PinnedLocation pl = segAssembler.pinLocation(0.333);
@@ -110,7 +111,7 @@ public abstract class AbstractNetworkBuilder {
 			List<PinnedLocation> pins = new ArrayList<>();
 			pins.add(pl);
 			pins.add(p2);
-			SplitGeoSegment splitSegment = DefaultSplitSegment.split(segAssembler
+			SplitGeoSegment splitSegment = DefaultSplitSegment.split(true, segAssembler
 					.getGeoSegment(), pins, segAssembler.getGeoSegment().getLineString());
 			Collection<GeoSegment> splits = splitSegment.getSubSegments();
 			Iterator<GeoSegment> splitsItr = splits.iterator();
@@ -133,7 +134,7 @@ public abstract class AbstractNetworkBuilder {
 				PinnedLocation pl = segAssembler.pinLocation(0.5);
 				List<PinnedLocation> pins = new ArrayList<>();
 				pins.add(pl);
-				SplitGeoSegment splitSegment = DefaultSplitSegment.split(segAssembler
+				SplitGeoSegment splitSegment = DefaultSplitSegment.split(true, segAssembler
 						.getGeoSegment(), pins, segAssembler.getGeoSegment().getLineString());
 				Collection<GeoSegment> splits = splitSegment.getSubSegments();
 				Iterator<GeoSegment> splitsItr = splits.iterator();

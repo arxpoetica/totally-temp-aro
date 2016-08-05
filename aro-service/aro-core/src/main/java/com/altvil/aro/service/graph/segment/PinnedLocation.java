@@ -21,6 +21,8 @@ public interface PinnedLocation extends Comparable<PinnedLocation>,
 
 	public boolean isAtEndVertex();
 
+	//TODO investigate deprecating this method and replace with createRootGraphPin()
 	public PinnedLocation createRootPin();
+	
 
 }

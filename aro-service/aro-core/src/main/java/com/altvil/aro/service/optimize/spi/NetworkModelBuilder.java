@@ -1,16 +1,15 @@
 package com.altvil.aro.service.optimize.spi;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import org.springframework.context.ApplicationContext;
+
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.interfaces.NetworkAssignment;
 
-public interface NetworkModelBuilder {
+public interface NetworkModelBuilder extends Serializable {
 
-	FtthThreshholds getFtthThreshholds() ;
-	Collection<NetworkAssignment> getNetworkAssignments() ;
-	Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations);
+	Optional<CompositeNetworkModel> createModel(ApplicationContext ctx, Collection<Long> rejectedLocations);
 
 }

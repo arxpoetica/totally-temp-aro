@@ -10,3 +10,4 @@ ALTER TABLE "financial"."cost_code_type" OWNER TO "aro";
 
 insert into financial.cost_code_type (name, description) values ('labor', 'Labor') ;
 insert into financial.cost_code_type (name, description) values ('material', 'Material') ;
+	insert into financial.cost_code_type (name, description) values ('construction', 'Construction') ;

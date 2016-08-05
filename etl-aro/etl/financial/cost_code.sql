@@ -78,17 +78,44 @@ insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, de
 		(select id from aro.uom where name = 'unit_cost')
 		, 'optical_model', 'Optical Modem') ;
 
-insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
-	values (
-		(select id from financial.cost_code_type where name = 'material'),
-		(select id from aro.uom where name = 'unit_cost')
-		, 'feeder_fiber', 'Feeder Fiber') ;
+--Fiber ESTIMATED, ARIAL, BURIED, UNDERGROUND, CONDUIT, OBSTRACLE
 
 insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
 	values (
 		(select id from financial.cost_code_type where name = 'material'),
-		(select id from aro.uom where name = 'unit_cost')
-	, 'distribution_fiber', 'Distribution Fiber') ;
+		(select id from aro.uom where name = 'unit_per_meter')
+		, 'fiber_default', 'Default Fiber') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_per_meter')
+		, 'fiber_ariel', 'Fiber Arial') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_per_meter')
+		, 'fiber_buried', 'Feeder Fiber Buried') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_per_meter')
+		, 'fiber_underground', 'Fiber Underground') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_per_meter')
+		, 'fiber_conduit', 'Fiber Conduit') ;
+
+insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
+	values (
+		(select id from financial.cost_code_type where name = 'material'),
+		(select id from aro.uom where name = 'unit_per_meter')
+		, 'fiber_obstacle', 'Fiber Obstacle') ;
+
 
 insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
 	values (
