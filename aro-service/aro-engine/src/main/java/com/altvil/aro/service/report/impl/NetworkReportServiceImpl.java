@@ -492,8 +492,12 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		}
 
 		private FiberCost toFiberCost(FiberSummaryCost f) {
+			
+			FiberCableConstructionType fct = 
+					ctx.getCostCode(FiberCableConstructionType.class, f.getId().getCostCode()) ;
+			
 			return FiberCost.createFiberCost(
-					ctx.getCostCode(FiberType.class, f.getId().getCostCode()),
+					fct.getFiberType(),
 					f.getCostPerMeter(), f.getLengthMeters(), f.getTotalCost());
 		}
 
