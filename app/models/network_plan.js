@@ -275,7 +275,7 @@ module.exports = class NetworkPlan {
           FROM client.plan
           LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
           LEFT JOIN auth.users ON users.id = permissions.user_id
-          WHERE plan.plan_type='W'
+          WHERE plan.plan_type='M'
         `
         var params = [config.client_carrier_name]
         if (user) {
