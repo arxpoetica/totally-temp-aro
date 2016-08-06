@@ -12,10 +12,10 @@ import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.service.conversion.EquipmentLocationMapping;
 import com.altvil.aro.service.conversion.PlanModifications;
-import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.planing.DefaultWirecenterNetworkPlan;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.interfaces.FiberCableConstructionType;
 
 public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> {
 
@@ -29,7 +29,7 @@ public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> 
 	private List<FiberRoute> fiberRoutes = new ArrayList<FiberRoute>();
 	private DemandCoverage demandCoverage = null;
 	private Collection<EquipmentLocationMapping> equipmentLocationMappings;
-	private Map<FiberType, Double> fiberLengthMap;
+	private Map<FiberCableConstructionType, Double> fiberLengthMap;
 
 	public WireCenterMods(long planId) {
 		super();
@@ -65,7 +65,7 @@ public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> 
 
 	@Override
 	public PlanModifications<WirecenterNetworkPlan> setFiberLengths(
-			Map<FiberType, Double> map) {
+			Map<FiberCableConstructionType, Double> map) {
 		this.fiberLengthMap = map;
 		return this;
 	}

@@ -8,7 +8,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.model.NetworkNodeType;
-import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.engine.EquipmentCost;
@@ -18,7 +17,6 @@ import com.altvil.aro.service.price.engine.FiberCost.FiberCostAggregator;
 import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.aro.service.price.engine.PricingEngine;
-import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.FiberCableConstructionType;
 import com.altvil.interfaces.FiberCableConstructionTypeMapping;
 import com.altvil.utils.StreamUtil;
@@ -131,12 +129,11 @@ public class PricingEngineImpl implements PricingEngine {
 		}
 
 		@Override
-		public PriceModelBuilder add(FiberType type,
-				CableConstructionEnum constructionType, double lengthInMeters) {
-			fiberCostMap.get(type).add(
+		public PriceModelBuilder add(FiberCableConstructionType fct, double lengthInMeters) {
+			fiberCostMap.get(fct).add(
 					lengthInMeters,
 					pricingModel
-							.getFiberCostPerMeter(type, constructionType, 1)
+							.getFiberCostPerMeter(fct.getFiberType(), fct.getCableConstructionEnum(), 1)
 							* lengthInMeters);
 			return this;
 		}
