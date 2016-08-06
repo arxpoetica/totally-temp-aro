@@ -15,7 +15,8 @@ public class FiberSummaryCostKey implements Serializable {
 	public FiberSummaryCostKey() {
 	}
 
-	public FiberSummaryCostKey(int costCode, long networkReportId) {
+	public FiberSummaryCostKey(int costCode,
+			long networkReportId) {
 		super();
 		this.costCode = costCode;
 		this.networkReportId = networkReportId;
@@ -38,20 +39,26 @@ public class FiberSummaryCostKey implements Serializable {
 	public void setNetworkReportId(long networkReportId) {
 		this.networkReportId = networkReportId;
 	}
+	
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(Object other) {
 
-		if (this == o)
+		if (this == other)
 			return true;
 
-		if (o == null) {
+		if (other == null) {
 			return false;
 		}
 
-		EquipmentSummaryCostKey other = (EquipmentSummaryCostKey) o;
-		return other.getCostCode() == getCostCode()
-				&& other.getNetworkReportId() == getNetworkReportId();
+		if( other instanceof FiberSummaryCostKey) {
+			FiberSummaryCostKey fsc = (FiberSummaryCostKey) other;
+			return fsc.getCostCode() == getCostCode()
+					&& fsc.getNetworkReportId() == getNetworkReportId();
+		}
+		
+		return false ;
+		
 
 	}
 

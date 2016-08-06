@@ -2,6 +2,7 @@ package com.altvil.aro.service.price.engine.impl;
 
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.aro.service.price.engine.PricingEngine;
 import com.altvil.interfaces.CableConstructionEnum;
+import com.altvil.interfaces.FiberCableConstructionType;
+import com.altvil.interfaces.FiberCableConstructionTypeMapping;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 import com.altvil.utils.reflexive.DefaultMappedCodes;
@@ -71,8 +74,7 @@ public class PricingEngineImpl implements PricingEngine {
 		private PricingModel pricingModel;
 		private MappedCodes<NetworkNodeType, MaterialType> typeMapping;
 
-		private Map<FiberType, FiberCostAggregator> fiberCostMap = new EnumMap<>(
-				FiberType.class);
+		private Map<FiberCableConstructionType, FiberCostAggregator> fiberCostMap = new HashMap<>();
 		private Map<NetworkNodeType, EquipmentAggregator> equipmentMap = new EnumMap<>(
 				NetworkNodeType.class);
 
@@ -92,7 +94,7 @@ public class PricingEngineImpl implements PricingEngine {
 								.getMaterialCost(typeMapping.getDomain(nt))));
 			}
 
-			for (FiberType ft : FiberType.values()) {
+			for (FiberCableConstructionType ft : FiberCableConstructionTypeMapping.MAPPING.getPriceCodedCableTypes()) {
 				fiberCostMap.put(ft, FiberCost.aggregate(ft));
 			}
 		}
@@ -105,7 +107,7 @@ public class PricingEngineImpl implements PricingEngine {
 
 		@Override
 		public PriceModelBuilder add(FiberCost fiberCost) {
-			fiberCostMap.get(fiberCost.getFiberType()).add(fiberCost);
+			fiberCostMap.get(fiberCost.getFiberConstructionType()).add(fiberCost);
 			return this;
 		}
 

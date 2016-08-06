@@ -80,8 +80,9 @@ public class CostEndPoint {
 	      return fiberCosts.stream()
 	                .filter(fiberCost -> fiberCost.getLengthMeters() != 0)
 	                .map(c -> new AroFiberCost(
-	                        c.getFiberType().getCode(),
-	                        reportingService.getCostCode(c.getFiberType(), c.getCableConstructionEnum()).getName(),
+	                		 c.getFiberConstructionType().getCableConstructionEnum().getCodeName(),
+	                	    c.getFiberConstructionType().getFiberType().getCode(),
+	                        c.getFiberConstructionType().getCode(),
 	                        c.getCostPerMeter(),
 	                        c.getLengthMeters(),
 	                        c.getTotalCost()))
@@ -166,16 +167,18 @@ public class CostEndPoint {
 	public static class AroFiberCost {
 
 		private String fiberType;
+		private String constructionType;
 		private String costCode;
 		double costPerMeter;
 
 		private double lengthMeters;
 		private double totalCost;
 
-		public AroFiberCost(String fiberType, String costCode,
+		public AroFiberCost(String fiberType, String constructionType, String costCode,
 				double costPerMeter, double lengthMeters, double totalCost) {
 			super();
 			this.fiberType = fiberType;
+			this.constructionType = constructionType ;
 			this.costCode = costCode;
 			this.costPerMeter = costPerMeter;
 			this.lengthMeters = lengthMeters;
@@ -184,6 +187,10 @@ public class CostEndPoint {
 
 		public String getFiberType() {
 			return fiberType;
+		}
+		
+		public String getConstructionType() {
+			return constructionType;
 		}
 
 		public String getCostCode() {

@@ -3,9 +3,13 @@ package com.altvil.aro.service.conversion.impl;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.altvil.aro.model.FiberRoute;
+import com.altvil.aro.model.FiberRouteSegment;
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.service.analysis.GraphMappingSerializer;
 import com.altvil.aro.service.entity.FiberType;
@@ -13,7 +17,9 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.plan.GeneratedFiberRoute;
 import com.altvil.aro.service.plan.NetworkModel;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.AggregatorFactory.DoubleSummer;
@@ -52,7 +58,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 		serialize(
 				write(graphMapping,
 						createFiberRoute(
-								networkModel.getCentralOfficeFeederFiber().getEdges(),
+								networkModel.getCentralOfficeFeederFiber(),
 								FiberType.FEEDER, parentEquipment)), //
 
 				graphMapping.getChildren());
@@ -67,7 +73,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 		serialize(
 				write(graphMapping,
 						createFiberRoute(
-								networkModel.getCentralOfficeFeederFiber().getEdges(),
+								networkModel.getCentralOfficeFeederFiber(),
 								FiberType.FEEDER, parentEquipment)),
 				graphMapping.getChildren());
 
@@ -82,7 +88,7 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 				write(graphMapping,
 						createFiberRoute(networkModel
 								.getFiberRouteForFdh(graphMapping
-										.getGraphAssignment()).getEdges(),
+										.getGraphAssignment()),
 								FiberType.DISTRIBUTION, parentEquipment)), // TODO
 				// Compute
 				// Cable
@@ -99,9 +105,12 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 	}
 
 	private FiberRoute createFiberRoute(
-			Collection<AroEdge<GeoSegment>> segments, FiberType fiberType,
+			GeneratedFiberRoute route, FiberType fiberType,
 			NetworkNode equipment) {
 
+		
+		Collection<AroEdge<GeoSegment>> segments = route.getEdges() ;
+		
 		double length = segments.stream().mapToDouble(e -> e.getValue().getLength()).sum() ;
 		DoubleSummer ds = fiberLengthMap.get(fiberType) ;
 
@@ -118,6 +127,28 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 		fr.setName("auto-generated") ;
 		
 		return fr;
+	}
+	
+	private Function<Map.Entry<CableConstructionEnum, List<AroEdge<GeoSegment>>>, FiberRouteSegment> createFuncToFiberRouteSegment(FiberRoute fr) {
+		
+		return e -> {
+			
+			FiberRouteSegment frs = new FiberRouteSegment() ;
+			frs.setFiberRoute(fr);
+			frs.setGeometry(createMultiLineString(e.getValue()));
+			return frs  ;
+		} ;
+	}
+	
+	private void x(FiberRoute fr, Collection<AroEdge<GeoSegment>> segments) {
+	
+		Function<Map.Entry<CableConstructionEnum, List<AroEdge<GeoSegment>>>, FiberRouteSegment>  f 
+				= createFuncToFiberRouteSegment(fr) ;
+		
+		segments.stream()
+					.collect(Collectors.groupingBy(e -> e.getValue().getCableConstructionCategory()))
+					.entrySet() ;
+		StreamUtil.hash(segments, e -> e.getValue().getCableConstructionCategory()) ;
 	}
 
 	@Override
