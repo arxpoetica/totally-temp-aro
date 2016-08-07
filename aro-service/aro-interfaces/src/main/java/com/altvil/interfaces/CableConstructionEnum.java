@@ -3,8 +3,8 @@ package com.altvil.interfaces;
 public enum CableConstructionEnum {
 
 	UNKNOWN("unkown", false), ESTIMATED("estimated", false), ARIEL("ariel", true), BURIED("buried", true), 
-	UNDERGROUND("underground", true), CONDUIT("conduit",
-			true), OBSTACLE("obstacle",true), 
+	UNDERGROUND("underground", true), OBSTACLE("obstacle",true),  CONDUIT("conduit",
+			true) 
 
 	;
 
