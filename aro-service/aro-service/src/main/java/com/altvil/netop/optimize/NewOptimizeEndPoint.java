@@ -26,29 +26,33 @@ import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.enumerations.OptimizationType;
-import com.altvil.netop.plan.MasterPlanJobResponse;
 import com.altvil.netop.plan.SelectedRegion;
+import com.altvil.netop.service.AroConversionService;
 
 @RestController
 public class NewOptimizeEndPoint {
 
 	@Autowired
+	private AroConversionService aroConversionService;
+
+	@Autowired
 	private OptimizationPlannerService optimizationPlannerService;
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
-	public @ResponseBody MasterPlanJobResponse postRecalcMasterPlan(
+	public @ResponseBody AroMasterPlanJobResponse postRecalcMasterPlan(
 			@RequestBody AroOptimizationPlan aroRequest)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
 
-		OptimizedMasterPlan response = optimizationPlannerService
-				.optimize(toOptimizationPlan(aroRequest)).get();
+		OptimizedMasterPlan response = optimizationPlannerService.optimize(
+				toOptimizationPlan(aroRequest)).get();
 
-		MasterPlanJobResponse mpr = new MasterPlanJobResponse();
-		mpr.setPlanAnalysisReport(response.getPlanAnalysisReport()) ;
+		AroMasterPlanJobResponse mpr = new AroMasterPlanJobResponse();
+		mpr.setPlanAnalysisReport(aroConversionService
+				.toAroPlanAnalysisReport(response.getPlanAnalysisReport()));
 		return mpr;
 
 	}
-
+	
 	private Set<Integer> toSelectedWireCenters(
 			Collection<SelectedRegion> selectedRegions) {
 
@@ -121,8 +125,7 @@ public class NewOptimizeEndPoint {
 				.setLocationEntities(toMask(plan.getLocationTypes()))
 				.setWirecenters(
 						toSelectedWireCenters(plan.getSelectedRegions()))
-				.setOptimizationMode(plan.getOptimizationMode())
-				.build();
+				.setOptimizationMode(plan.getOptimizationMode()).build();
 
 	}
 

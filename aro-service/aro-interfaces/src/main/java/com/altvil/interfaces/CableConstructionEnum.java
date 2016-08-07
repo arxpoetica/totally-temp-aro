@@ -24,7 +24,7 @@ public enum CableConstructionEnum {
 		return this == ESTIMATED;
 	}
 
-	public String getCodeName() {
+	public String getCode() {
 		return codeName;
 	}
 	

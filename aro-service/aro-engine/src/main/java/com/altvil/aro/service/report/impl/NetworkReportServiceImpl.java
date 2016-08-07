@@ -214,7 +214,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		private MappedCodes<FiberCableConstructionType, NetworkCostCode> fiberToCostCode;
 
 		private Set<FiberType> wellKnowFiber = EnumSet.of(
-				FiberType.DISTRIBUTION, FiberType.FEEDER);
+				FiberType.DISTRIBUTION, FiberType.FEEDER, FiberType.BACKBONE);
 
 		private ReportBuilderContext init() {
 
@@ -427,7 +427,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		public boolean isValid(FiberCost fiberCost) {
 			return (fiberCost.getFiberConstructionType() != null
-					&& fiberCost.getTotalCost() > 0 && wellKnowFiber
+					 && wellKnowFiber
 						.contains(fiberCost.getFiberConstructionType().getFiberType()));
 		}
 
