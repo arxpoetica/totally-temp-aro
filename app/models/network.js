@@ -15,6 +15,12 @@ var transform = require('stream-transform')
 module.exports = class Network {
 
   // View existing fiber plant for a carrier
+  static viewFiberPlantForCurrentCarrier (viewport) {
+    var sql = 'SELECT geom FROM client.existing_fiber'
+    return database.lines(sql, [], true, viewport)
+  }
+
+  // View existing fiber plant for a carrier
   static viewFiberPlantForCarrier (carrier_name, viewport) {
     var sql = `
       SELECT geom

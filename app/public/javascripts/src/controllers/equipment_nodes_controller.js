@@ -34,7 +34,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     name: config.ui.labels.fiber,
     type: 'fiber_plant',
     short_name: 'F',
-    api_endpoint: '/network/fiber_plant/:client_carrier_name',
+    api_endpoint: '/network/fiber_plant/current_carrier',
     style_options: {
       normal: {
         strokeColor: config.ui.colors.fiber,
