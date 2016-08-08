@@ -78,6 +78,8 @@ public class CoreGraphBuilderServiceImpl implements
 		while (itr.hasNext()) {
 			nb.add(itr.next());
 		}
+		
+		log.debug("Total Conduit Edges = " + nb.getTotalDistanceEdges());
 
 		return nb.build();
 	}
