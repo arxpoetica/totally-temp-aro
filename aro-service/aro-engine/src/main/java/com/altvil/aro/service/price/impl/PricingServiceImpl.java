@@ -174,7 +174,7 @@ public class PricingServiceImpl implements PricingService {
 
 			String code = type.getCode();
 			if (!cableConstructionEnum.isComputedEstimate()) {
-				code = code + "_fiber_" + cableConstructionEnum.getCodeName();
+				code = code + "_fiber_" + cableConstructionEnum.getCode();
 			}
 
 			fiberMapping.get(type).put(cableConstructionEnum, code);

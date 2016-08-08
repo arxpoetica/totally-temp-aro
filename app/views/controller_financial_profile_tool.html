@@ -290,59 +290,23 @@
             <th class="text-right">Total cost</th>
           </thead>
           <tbody>
-            <tr>
-              <td>Aerial</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">$0</td>
-              <td class="text-right">$0K</td>
-            </tr>
-            <tr>
-              <td>Buried</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">$0</td>
-              <td class="text-right">$0K</td>
-            </tr>
-            <tr>
-              <td>Underground</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">$0</td>
-              <td class="text-right">$0K</td>
-            </tr>
-            <tr>
-              <td>Augmented Conduit</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">$0</td>
-              <td class="text-right">$0K</td>
-            </tr>
-            <tr>
-              <td>Other</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">0 mi</td>
-              <td class="text-right">$0</td>
-              <td class="text-right">$0K</td>
+            <tr ng-repeat="fiberDetail in metadata.fiberDetails">
+              <td>{{fiberDetail.description}}</td>
+              <td class="text-right">{{fiberDetail.types['distribution'].totalLength * 0.000621371 | number : 1}} mi</td>
+              <td class="text-right">{{fiberDetail.types['feeder'].totalLength * 0.000621371 | number : 1}} mi</td>
+              <td class="text-right">{{fiberDetail.types['backhaul'].totalLength * 0.000621371 | number : 1}} mi</td>
+              <td class="text-right">{{fiberDetail.totalLength * 0.000621371 | number : 1}} mi</td>
+              <td class="text-right">{{fiberDetail.totalCost / (fiberDetail.totalLength * 0.000621371) | currency:"$":1}}</td>
+              <td class="text-right">{{fiberDetail.totalCost / 1000 | currency:"$":1}}K</td>
             </tr>
             <tr>
               <th>Total</th>
-              <th class="text-right">0 mi</th>
-              <th class="text-right">0 mi</th>
-              <th class="text-right">0 mi</th>
-              <th class="text-right">0 mi</th>
-              <th class="text-right">$0</th>
-              <th class="text-right">$0K</th>
+              <th class="text-right">{{metadata.fiberTotals.types['distribution'].totalLength * 0.000621371 | number : 1}} mi</th>
+              <th class="text-right">{{metadata.fiberTotals.types['feeder'].totalLength * 0.000621371 | number : 1}} mi</th>
+              <th class="text-right">{{metadata.fiberTotals.types['backhaul'].totalLength * 0.000621371 | number : 1}} mi</th>
+              <th class="text-right">{{metadata.fiberTotals.totalLength * 0.000621371 | number : 1}} mi</th>
+              <th class="text-right">{{metadata.fiberTotals.totalCost / (metadata.fiberTotals.totalLength * 0.000621371) | currency:"$":1}}</th>
+              <th class="text-right">{{metadata.fiberTotals.totalCost / 1000 | currency:"$":1}}K</th>
             </tr>
           </tbody>
         </table>

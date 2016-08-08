@@ -1,12 +1,13 @@
 package com.altvil.aro.service.planing;
 
 import java.util.Collection;
+import java.util.Set;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
 import com.altvil.aro.service.conversion.EquipmentLocationMapping;
-import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
+import com.altvil.interfaces.FiberCableConstructionType;
 
 public interface WirecenterNetworkPlan {
 
@@ -20,6 +21,7 @@ public interface WirecenterNetworkPlan {
 
 	Collection<EquipmentLocationMapping> getEquipmentLocationMappings() ;
 	
-	Double getFiberLengthInMeters(FiberType fiberType);
+	Set<FiberCableConstructionType> getFiberCableConstructionTypes() ;
+	double getFiberLengthInMeters(FiberCableConstructionType fiberType);
 
 }
