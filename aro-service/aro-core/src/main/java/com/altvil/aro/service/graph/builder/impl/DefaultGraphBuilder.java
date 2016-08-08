@@ -36,6 +36,15 @@ public class DefaultGraphBuilder<T> implements GraphModelBuilder<T> {
 		this.edgeFactory = edgeFactory;
 		this.graph = graph;
 	}
+	
+	
+
+	@Override
+	public boolean containsEdge(GraphNode source, GraphNode target) {
+		return graph.containsEdge(source, target) ;
+	}
+
+
 
 	@Override
 	public void setRoot(GraphNode root) {

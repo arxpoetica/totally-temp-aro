@@ -1,17 +1,6 @@
 package com.altvil.aro.service.optimization.strategy;
 
-import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
-import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
-import com.altvil.aro.service.optimization.strategy.OptimizationTargetEvaluator;
-import com.altvil.aro.service.optimization.strategy.TargetEvaluatorFactory;
-import com.altvil.aro.service.optimization.strategy.comparators.OptimizationImprovement;
-import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
-import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
-import com.altvil.aro.service.optimize.OptimizedNetwork;
-import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.enumerations.OptimizationType;
-import org.apache.poi.ss.formula.functions.Irr;
-import org.springframework.stereotype.Service;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,11 +8,27 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.stream.Collectors.toList;
+import org.apache.poi.ss.formula.functions.Irr;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+
+import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
+import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.strategy.comparators.OptimizationImprovement;
+import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
+import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
+import com.altvil.aro.service.optimize.OptimizedNetwork;
+import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.enumerations.OptimizationType;
 
 @Service
 public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
 
+	@Autowired
+	private ApplicationContext applicationContext ;
+	
+	
     @Override
     public OptimizationTargetEvaluator getTargetEvaluator(ThresholdBudgetConstraint constraints) {
         if(constraints.getOptimizationType() == OptimizationType.IRR)
@@ -64,12 +69,12 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
         protected Optional<PlannedNetwork> toPlannedNetwork(long planId, OptimizedNetwork optimizedNetwork, CompetitiveDemandMapping competitiveDemandMapping) {
 
 
-            Optional<CompositeNetworkModel> p = optimizedNetwork.getNetworkPlan();
+            Optional<CompositeNetworkModel> p = optimizedNetwork.getNetworkPlan(applicationContext);
             if (!p.isPresent()) {
                 return Optional.empty();
             }
 
-            return Optional.of(new DefaultPlannedNetwork(planId, optimizedNetwork.getNetworkPlan().get(), competitiveDemandMapping));
+            return Optional.of(new DefaultPlannedNetwork(planId, optimizedNetwork.getNetworkPlan(applicationContext).get(), competitiveDemandMapping));
 
         }
     }

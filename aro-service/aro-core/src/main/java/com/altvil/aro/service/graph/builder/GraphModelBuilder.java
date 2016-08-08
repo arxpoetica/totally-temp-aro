@@ -9,7 +9,8 @@ import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 
 public interface GraphModelBuilder<T> {
-
+	
+	public boolean containsEdge(GraphNode left, GraphNode right) ;
 	public GraphNodeFactory getVertexFactory() ;
 	public GraphNode addVirtualRoot(Collection<GraphNode> targets) ;
 	public void addVertex(GraphNode vertex) ;

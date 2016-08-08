@@ -7,9 +7,9 @@ import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.utils.func.Aggregator;
 
 public interface PricingService {
-
-	PricingModel getPricingModel(String state, Date date) ;
-	PriceModelBuilder createBuilder(String state, Date date) ;
+	
+	PricingModel getPricingModel(String state, Date date, PricingContext ctx) ;
+	PriceModelBuilder createBuilder(String state, Date date, PricingContext ctx) ;
 	Aggregator<PriceModel> aggregate() ;
 	
 }

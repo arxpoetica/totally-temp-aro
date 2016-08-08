@@ -12,68 +12,40 @@ module.exports = class Location {
   /*
   * Returns the businesses and households locations except the selected ones
   */
-  static findLocations (plan_id, type, filters, viewport) {
-    var params = [plan_id]
-    var parts = []
-    var join
-    if (!type || type === 'households') {
-      join = ''
-      if (filters.household_categories.length > 0) {
-        params.push(filters.household_categories)
-        join = `
-          JOIN households h ON h.location_id = locations.id
-          JOIN client.household_category_mappings hcm ON h.id = hcm.household_id
-          JOIN client.household_categories hc ON hc.id = hcm.household_category_id AND hc.id IN ($${params.length})
-        `
-      }
-      parts.push(`(
-        -- households
-        SELECT locations.id, locations.geom, total_businesses, total_households, dn_largest_household_category AS largest_type
-          FROM locations
-               ${join}
-         WHERE locations.total_households > 0
-         GROUP BY locations.id
-        EXCEPT
-        SELECT locations.id, locations.geom, total_businesses, total_households, dn_largest_household_category AS largest_type
-          FROM locations
-          JOIN client.plan_targets
-            ON plan_targets.plan_id = $1
-           AND plan_targets.location_id = locations.id
-               ${join}
-         WHERE locations.total_households > 0
-         GROUP BY locations.id
-      )`)
-    }
-    if (!type || type === 'businesses') {
-      join = ''
-      if (filters.business_categories.length > 0) {
-        params.push(filters.business_categories)
-        join = `
-          JOIN businesses b ON b.location_id = locations.id
-          JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
-          JOIN client.business_categories bc ON bc.id = bcm.business_category_id AND bc.id IN ($${params.length})
-        `
-      }
-      parts.push(`(
-        -- businesses
-        SELECT locations.id, locations.geom, total_businesses, total_households, dn_largest_business_category AS largest_type
-          FROM locations
-               ${join}
-         WHERE locations.total_businesses > 0
-         GROUP BY locations.id
-        EXCEPT
-        SELECT locations.id, locations.geom, total_businesses, total_households, dn_largest_business_category AS largest_type
-          FROM locations
-          JOIN client.plan_targets
-            ON plan_targets.plan_id = $1
-           AND plan_targets.location_id = locations.id
-               ${join}
-         WHERE locations.total_businesses > 0
-         GROUP BY locations.id
-      )`)
-    }
-    var sql = parts.join(' UNION ALL ')
-    return database.points(sql, params, true, viewport)
+  static findLocations (plan_id, filters, viewport) {
+    var businesses = filters.business_categories.map((value) => 'b_' + value)
+    var households = filters.household_categories.map((value) => 'h_' + value)
+    var categories = businesses.concat(households)
+
+    var sql = `
+      SELECT
+        locations.id, locations.geom, total_businesses, total_households, (
+          CASE
+            WHEN dn_largest_household_category IS NOT NULL
+            THEN dn_largest_household_category
+            ELSE dn_largest_business_category
+          END
+        ) AS largest_type
+      FROM locations
+      WHERE ARRAY[$1]::varchar[] && dn_entity_categories
+
+      EXCEPT
+
+      SELECT
+        locations.id, locations.geom, total_businesses, total_households, (
+          CASE
+            WHEN dn_largest_household_category IS NOT NULL
+            THEN dn_largest_household_category
+            ELSE dn_largest_business_category
+          END
+        ) AS largest_type
+      FROM locations
+      JOIN client.plan_targets
+        ON plan_targets.plan_id = $2
+       AND plan_targets.location_id = locations.id
+       WHERE ARRAY[$1]::varchar[] && dn_entity_categories
+    `
+    return database.points(sql, [categories, plan_id], true, viewport)
   }
 
   /*

@@ -4,20 +4,19 @@ exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
   api.get('/locations/:plan_id', middleware.viewport, (request, response, next) => {
-    var type = request.query.type
     var viewport = request.viewport
     var plan_id = +request.params.plan_id
 
     var filters = {}
     var keys = ['business_categories', 'household_categories']
     keys.forEach((key) => {
-      var value = request.query[key] || ''
-      if (typeof value === 'string') {
-        value = value.split(',')
+      var value = request.query[key] || []
+      if (!Array.isArray(value)) {
+        value = [value]
       }
-      filters[key] = value.map((v) => +v || null).filter((n) => n)
+      filters[key] = value
     })
-    models.Location.findLocations(plan_id, type, filters, viewport)
+    models.Location.findLocations(plan_id, filters, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

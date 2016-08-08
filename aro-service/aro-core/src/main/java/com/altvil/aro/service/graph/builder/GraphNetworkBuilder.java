@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 
+@Deprecated
 public class GraphNetworkBuilder extends AbstractNetworkBuilder {
 
 	@SuppressWarnings("unused")
@@ -76,6 +77,6 @@ public class GraphNetworkBuilder extends AbstractNetworkBuilder {
 				add(n, segment.pinLocation(n.getDomain()));
 			});
 		}
-	}
+	}    
 
 }

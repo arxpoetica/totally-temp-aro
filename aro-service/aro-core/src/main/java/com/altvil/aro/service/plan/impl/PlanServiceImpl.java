@@ -2,6 +2,7 @@ package com.altvil.aro.service.plan.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,14 +34,15 @@ import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
-import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.aro.service.plan.GeneratedFiberRoute;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.aro.service.plan.PlanException;
 import com.altvil.aro.service.plan.PlanService;
@@ -66,7 +68,8 @@ public class PlanServiceImpl implements PlanService {
 
 	@Autowired
 	@Inject
-	public PlanServiceImpl(GraphTransformerFactory transformFactory,
+	public PlanServiceImpl(
+			GraphTransformerFactory transformFactory,
 			GraphNodeFactory vertexFactory,
 			RoutePlaningService routePlaningService) {
 		super();
@@ -74,21 +77,20 @@ public class PlanServiceImpl implements PlanService {
 		this.vertexFactory = vertexFactory;
 		this.routePlaningService = routePlaningService;
 	}
-	
 
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
-			NetworkData networkData,FtthThreshholds constraints)
+			GraphNetworkModel networkModel, FtthThreshholds constraints)
 			throws PlanException {
 
-		return computeNetworkModel(networkData, ScalarClosestFirstSurfaceIterator.BUILDER, constraints) ;
-				
-	}
+		return computeNetworkModel(networkModel, ScalarClosestFirstSurfaceIterator.BUILDER,
+				constraints);
 
+	}
 
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
-			NetworkData networkData,
+			GraphNetworkModel graphNetworkModel,
 			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
 			FtthThreshholds request)
 			throws PlanException {
@@ -96,7 +98,7 @@ public class PlanServiceImpl implements PlanService {
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					networkData, closestFirstSurfaceBuilder, request);
+					graphNetworkModel, closestFirstSurfaceBuilder, request);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
@@ -113,13 +115,14 @@ public class PlanServiceImpl implements PlanService {
 	}
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
-			NetworkData networkData,
+
+			GraphNetworkModel graphNetworkModel,
 			ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
 			FtthThreshholds constraints)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
-		CompositeNetworkModel networkModel = planning.build(networkData,
+		CompositeNetworkModel networkModel = planning.build(graphNetworkModel,
 				closestFirstSurfaceBuilder, constraints);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
@@ -180,13 +183,10 @@ public class PlanServiceImpl implements PlanService {
 		}
 
 		public CompositeNetworkModel build(
-				final NetworkData data,
+				final GraphNetworkModel networkModel,
 				ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
 				FtthThreshholds request) {
-
-			GraphNetworkModel networkModel = transformFactory
-					.createGraphNetworkModel(data);
-
+		
 			if (!networkModel.hasLocations()) {
 				// TODO make it return empty NetworkModel
 				return null;
@@ -199,7 +199,7 @@ public class PlanServiceImpl implements PlanService {
 			// data.getSelectedRoadLocations().stream().map((rl)->routeModel.getVertex(rl)).collect(Collectors.toList());
 
 			Collection<FiberSourceBinding> possibleFiberSources = StreamUtil
-					.map(data.getFiberSources(), fs -> {
+					.map(networkModel.getNetworkAssignments(), fs -> {
 						FiberSourceBinding fsb = new FiberSourceBinding();
 						fsb.setSource(networkModel.getGraphEdgeAssignment(fs));
 						fsb.setDomain(routeModel.getVertex(fs));
@@ -225,12 +225,12 @@ public class PlanServiceImpl implements PlanService {
 
 			// Create a tree leading to each AroEdge with a value.
 
-			DAGModel<GeoSegment> dag = transformFactory.createDAG(
-					modifier.build(), rootNode, e -> {
-						GeoSegment gs =  e.getValue() ;
-						return gs == null ? false :  !gs.getGeoSegmentAssignments()
-								.isEmpty() ;
-					});
+			DAGModel<GeoSegment> dag = transformFactory.createDAG(modifier
+					.build(), rootNode, e -> {
+				GeoSegment gs = e.getValue();
+				return gs == null ? false : !gs.getGeoSegmentAssignments()
+						.isEmpty();
+			});
 
 			if (dag.getEdges().isEmpty()) {
 				log.warn("Unable to build DAG as no locations found on edges");
@@ -334,9 +334,8 @@ public class PlanServiceImpl implements PlanService {
 
 			DescribeGraph.trace(log, renodedModel.getGraph());
 
-			Collection<AroEdge<GeoSegment>> feederFiber = planRoute(
-					graphMapping, builder);
-			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> distributionFiber = planDistributionRoutes(
+			GeneratedFiberRoute feederFiber = planRoute(graphMapping, builder);
+			Map<GraphAssignment, GeneratedFiberRoute> distributionFiber = planDistributionRoutes(
 					graphMapping.getChildren(), builder);
 
 			return new NetworkModelImpl(
@@ -345,7 +344,7 @@ public class PlanServiceImpl implements PlanService {
 					resolved);
 		}
 
-		private Collection<AroEdge<GeoSegment>> planRoute(
+		private GeneratedFiberRoute planRoute(
 				GraphMapping mapping,
 				ClosestFirstSurfaceBuilder builder) {
 			return planRoute(mapping.getGraphAssignment(),
@@ -356,11 +355,11 @@ public class PlanServiceImpl implements PlanService {
 			return entity.getType().equals(FDHEquipment.class);
 		}
 
-		private Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> planDistributionRoutes(
+		private Map<GraphAssignment, GeneratedFiberRoute> planDistributionRoutes(
 				Collection<GraphMapping> children,
 				ClosestFirstSurfaceBuilder builder) {
 
-			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> map = new HashMap<>();
+			Map<GraphAssignment, GeneratedFiberRoute> map = new HashMap<>();
 
 			children.forEach(a -> {
 				if (isDistributionSource(a.getAroEntity())) {
@@ -371,7 +370,7 @@ public class PlanServiceImpl implements PlanService {
 			return map;
 		}
 
-		private Collection<AroEdge<GeoSegment>> planRoute(
+		private GeneratedFiberRoute planRoute(
 				GraphAssignment root,
 				Collection<? extends GraphAssignment> nodes,
 				ClosestFirstSurfaceBuilder builder) {
@@ -384,7 +383,10 @@ public class PlanServiceImpl implements PlanService {
 							resolved.get(root),
 							StreamUtil.map(nodes, n -> resolved.get(n)));
 
-			return edges;
+			Set<AroEdge<GeoSegment>> result = new HashSet<>();
+			result.addAll(edges);
+			return new DefaultGeneratedFiberRoute(resolved.get(root), result);
+
 		}
 
 		private GraphModel<GeoSegment> renodeGraph(GraphModel<GeoSegment> gm,
@@ -397,7 +399,7 @@ public class PlanServiceImpl implements PlanService {
 					.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
 							new AroEdgeFactory<GeoSegment>()));
 
-			NetworkBuilder networkBuilder = new NetworkBuilder(b, vertexFactory);
+			GraphRenoder networkBuilder = new NetworkBuilder(b, vertexFactory);
 			networkBuilder.add(co.getGraphAssignment());
 
 			co.getChildren().forEach(a -> {

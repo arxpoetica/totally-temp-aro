@@ -17,6 +17,7 @@ import com.altvil.aro.service.price.engine.FiberCost.FiberCostAggregator;
 import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.aro.service.price.engine.PricingEngine;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 import com.altvil.utils.reflexive.DefaultMappedCodes;
@@ -75,9 +76,6 @@ public class PricingEngineImpl implements PricingEngine {
 		private Map<NetworkNodeType, EquipmentAggregator> equipmentMap = new EnumMap<>(
 				NetworkNodeType.class);
 
-		private Map<FiberType, Double> fiberCostPerMeterMap = new EnumMap<>(
-				FiberType.class);
-
 		public PriceModelBuilderImpl(PricingModel pricingModel,
 				MappedCodes<NetworkNodeType, MaterialType> typeMapping) {
 			super();
@@ -95,14 +93,7 @@ public class PricingEngineImpl implements PricingEngine {
 			}
 
 			for (FiberType ft : FiberType.values()) {
-
-				fiberCostPerMeterMap.put(ft,
-						pricingModel.getFiberCostPerMeter(ft, 1));
-
-				fiberCostMap.put(
-						ft,
-						FiberCost.aggregate(ft,
-								pricingModel.getFiberCostPerMeter(ft, 1)));
+				fiberCostMap.put(ft, FiberCost.aggregate(ft));
 			}
 		}
 
@@ -138,9 +129,13 @@ public class PricingEngineImpl implements PricingEngine {
 		}
 
 		@Override
-		public PriceModelBuilder add(FiberType type, double lengthInMeteres) {
-			fiberCostMap.get(type).add(lengthInMeteres,
-					fiberCostPerMeterMap.get(type) * lengthInMeteres);
+		public PriceModelBuilder add(FiberType type,
+				CableConstructionEnum constructionType, double lengthInMeters) {
+			fiberCostMap.get(type).add(
+					lengthInMeters,
+					pricingModel
+							.getFiberCostPerMeter(type, constructionType, 1)
+							* lengthInMeters);
 			return this;
 		}
 

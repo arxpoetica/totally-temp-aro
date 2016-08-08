@@ -161,6 +161,7 @@ module.exports = class NetworkPlan {
 
         output.metadata.equipment_cost = output.metadata.equipment_summary.reduce((total, item) => item.totalCost + total, 0)
         output.metadata.fiber_cost = output.metadata.fiber_summary.reduce((total, item) => item.totalCost + total, 0)
+        output.metadata.fiber_length = output.metadata.fiber_summary.reduce((total, item) => item.lengthMeters + total, 0)
 
         plan.total_cost = output.metadata.equipment_cost + output.metadata.fiber_cost
 
@@ -235,6 +236,15 @@ module.exports = class NetworkPlan {
       })
   }
 
+  static findWirecenterPlan (plan_id, wirecenter_id) {
+    var params = [plan_id, wirecenter_id]
+    return database.findOne('SELECT id FROM client.plan WHERE parent_plan_id=$1 AND wirecenter_id=$2', params)
+      .then((row) => {
+        if (!row) return {}
+        return this.findPlan(row.id, true)
+      })
+  }
+
   static findAll (user, options) {
     var text = options.text
     var sortField = options.sortField
@@ -243,7 +253,6 @@ module.exports = class NetworkPlan {
     var minimumCost = options.minimumCost
     var maximumCost = options.maximumCost
 
-    console.log('arguments', arguments)
     var num = 20
     var sortFields = [
       'name', 'created_at', 'updated_at',
@@ -266,11 +275,12 @@ module.exports = class NetworkPlan {
           FROM client.plan
           LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
           LEFT JOIN auth.users ON users.id = permissions.user_id
+          WHERE plan.plan_type='M'
         `
         var params = [config.client_carrier_name]
         if (user) {
           params.push(user.id)
-          sql += ` WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$${params.length})`
+          sql += ` AND plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$${params.length})`
         }
         if (text) {
           params.push(`%${text}%`)

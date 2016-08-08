@@ -8,6 +8,7 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.GraphPathImpl;
+
 import java.util.*;
 
 public class AllShortestPaths<V, E extends AroEdge<?>> {
@@ -18,6 +19,7 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 
 	private final Map<V, Double> pathLengthForSeenVertex = new HashMap<>();
 	private final ClosestFirstSurfaceIterator<V, E> itr;
+
 
 
 	public AllShortestPaths(WeightedGraph<V, E> graph,

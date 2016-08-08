@@ -1,19 +1,19 @@
 package com.altvil.aro.service.plan.impl;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.aro.service.entity.AroEntity;
-import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.assigment.impl.FiberSourceMapping;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.plan.GeneratedFiberRoute;
 import com.altvil.aro.service.plan.LocationModel;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
@@ -27,8 +27,8 @@ public class NetworkModelImpl implements NetworkModel {
 	//private GraphModel<GeoSegment> graphModel;
 	private Map<GraphAssignment, GraphNode> resolvedModel;
 
-	private Collection<AroEdge<GeoSegment>> feederFiber;
-	private Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> distributionFiber;
+	private GeneratedFiberRoute feederFiber;
+	private Map<GraphAssignment, GeneratedFiberRoute> distributionFiber;
 	private FiberSourceMapping networkPlan;
 
 	private Map<AroEntity, GraphAssignment> entityToAssignment = new HashMap<>();
@@ -41,8 +41,8 @@ public class NetworkModelImpl implements NetworkModel {
 			GraphModel<GeoSegment> dagModel,
 			GraphModel<GeoSegment> graphModel,
 
-			Collection<AroEdge<GeoSegment>> feederFiber,
-			Map<GraphAssignment, Collection<AroEdge<GeoSegment>>> distributionFiber,
+			GeneratedFiberRoute feederFiber,
+			Map<GraphAssignment, GeneratedFiberRoute> distributionFiber,
 			FiberSourceMapping networkPlan,
 			Map<GraphAssignment, GraphNode> resolvedModel) {
 		super();
@@ -95,7 +95,7 @@ public class NetworkModelImpl implements NetworkModel {
 	}
 
 	@Override
-	public GraphNode getVertex(GraphAssignment graphAssignment) {
+	public GraphNode getVertex(FiberType ft, GraphAssignment graphAssignment) {
 		return resolvedModel.get(graphAssignment);
 	}
 
@@ -105,12 +105,12 @@ public class NetworkModelImpl implements NetworkModel {
 	}
 
 	@Override
-	public Collection<AroEdge<GeoSegment>> getCentralOfficeFeederFiber() {
+	public GeneratedFiberRoute getCentralOfficeFeederFiber() {
 		return feederFiber;
 	}
 
 	@Override
-	public Collection<AroEdge<GeoSegment>> getFiberRouteForFdh(
+	public GeneratedFiberRoute getFiberRouteForFdh(
 			GraphAssignment ga) {
 		return distributionFiber.get(ga);
 	}

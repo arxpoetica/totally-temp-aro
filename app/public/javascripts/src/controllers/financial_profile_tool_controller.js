@@ -2,12 +2,32 @@
 app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', ($scope, $rootScope, $http, $timeout, map_tools) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
-  $scope.premisesFilterEntityTypes = { households: true }
-  $scope.subscribersFilterEntityType = 'households'
+  $scope.premisesFilterEntityTypes = { household: true }
+  $scope.subscribersFilterEntityTypes = { household: true }
+  $scope.connectCapexFilterEntityTypes = { household: true }
+  $scope.penetrationFilter = {
+    entityType: 'household'
+  }
   $scope.revenueFilter = 'bau'
   $scope.capexFilterEntityTypes = { households: true }
   $scope.capexFilter = 'bau'
+  $scope.connectCapexFilter = 'bau'
   $scope.details = false
+  $scope.arpuFilter = 'household'
+
+  $scope.entityTypes = {
+    smallBusiness: 'SMB',
+    mediumBusiness: 'Mid-tier',
+    largeBusiness: 'Large Enterprise',
+    household: 'Households',
+    cellTower: 'Towers'
+  }
+  $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
+    key: key,
+    name: $scope.entityTypes[key]
+  }))
+  $scope.premisesPercentage = 'false'
+
   var dirty = false
 
   var charts = {}
@@ -34,8 +54,11 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function refresh () {
     $scope.financialData = {}
-    if ($scope.plan && $scope.plan.metadata) {
+    if ($scope.metadata) {
       refreshCurrentTab()
+    }
+    if ($scope.mode === 'area' && $scope.selectedArea) {
+      loadWirecenterMetadata()
     }
   }
 
@@ -49,31 +72,40 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
-
-    $scope.aboveWirecenter = layer.type === 'county_subdivisions'
+    if (layer.type !== 'wirecenter') return
 
     var feature = event.feature
-    if (feature.getGeometry().getType() === 'MultiPolygon') {
-      feature.toGeoJson((obj) => {
-        $scope.selectedArea = {
-          name: feature.getProperty('name'),
-          geog: obj.geometry
-        }
-        refresh()
-        $scope.$apply()
-      })
+    $scope.selectedArea = {
+      id: feature.getProperty('id')
     }
+    $scope.calculateShowData()
+    refresh()
+    if (!$scope.$$phase) { $scope.$apply() }
+
+    // $scope.aboveWirecenter = layer.type === 'county_subdivisions'
+
+    // var feature = event.feature
+    // if (feature.getGeometry().getType() === 'MultiPolygon') {
+    //   feature.toGeoJson((obj) => {
+    //     $scope.selectedArea = {
+    //       name: feature.getProperty('name'),
+    //       geog: obj.geometry
+    //     }
+    //     refresh()
+    //     $scope.$apply()
+    //   })
+    // }
   })
 
   $rootScope.$on('custom_boundary_clicked', (e, boundary) => {
     if (!map_tools.is_visible('financial_profile')) return
 
-    $scope.selectedArea = {
-      name: boundary.name,
-      geog: boundary.geom
-    }
-    refresh()
-    $scope.$apply()
+    // $scope.selectedArea = {
+    //   name: boundary.name,
+    //   geog: boundary.geom
+    // }
+    // refresh()
+    // $scope.$apply()
   })
 
   $('#financial_profile_controller .nav-tabs').on('shown.bs.tab', (e) => refreshCurrentTab())
@@ -86,10 +118,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     } else if (href === '#financialProfileCapex') {
       // showBudgetChart(force)
       showCapexChart(force)
+      showConnectCapexChart(force)
     } else if (href === '#financialProfileRevenue') {
       showRevenueChart(force)
+      showArpuChart(force)
     } else if (href === '#financialProfilePremises') {
       showPremisesChart(force)
+      showCostPerPremiseChart(force)
     } else if (href === '#financialProfileSubscribers') {
       showSubscribersChart(force)
       showPenetrationChart(force)
@@ -100,10 +135,15 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+    $scope.mode = 'global'
+    $scope.metadata = plan.metadata
   })
 
   $rootScope.$on('plan_changed_metadata', (e, plan) => {
     $scope.plan = plan
+    if ($scope.mode === 'global') {
+      $scope.metadata = plan.metadata
+    }
     refresh()
   })
 
@@ -125,7 +165,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     if (force) delete $scope.financialData[key]
     else if ($scope.financialData[key]) return $scope.financialData[key]
     console.log('params', params)
-    $http({ url: `/financial_profile/${$scope.plan.id}/${key}`, params: params })
+    var plan_id = $scope.mode === 'global' ? $scope.plan.id : $scope.selectedArea.id
+    $http({ url: `/financial_profile/${plan_id}/${key}`, params: params })
       .success((response) => {
         $scope.financialData[key] = response
         console.log('Requested', key)
@@ -215,13 +256,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   function showRevenueChart (force) {
-    var datasets = [
-      { key: 'businesses', name: 'Businesses' },
-      { key: 'households', name: 'Households' },
-      { key: 'towers', name: 'Towers' }
-    ]
     request(force, 'revenue', { filter: $scope.revenueFilter }, (revenue) => {
-      var data = buildChartData(revenue, datasets)
+      var data = buildChartData(revenue, $scope.entityTypesArray)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
@@ -231,12 +267,52 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
+  function showArpuChart (force) {
+    var datasets = [
+      { key: 'bau', name: 'BAU' },
+      { key: 'plan', name: 'Plan' }
+    ]
+    request(force, 'arpu', { filter: $scope.arpuFilter }, (arpu) => {
+      var data = buildChartData(arpu, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+      }
+      showChart('financial-profile-chart-arpu', 'Bar', data, options)
+    })
+  }
+  $scope.showArpuChart = showArpuChart
+
+  function showConnectCapexChart (force) {
+    var entityTypes = Object.keys($scope.connectCapexFilterEntityTypes).filter((key) => $scope.connectCapexFilterEntityTypes[key])
+    var params = {
+      entityTypes: entityTypes,
+      filter: $scope.connectCapexFilter
+    }
+    var datasets = $scope.entityTypesArray.filter((entity) => entityTypes.indexOf(entity.key) > -1)
+    request(force, 'connectcapex', params, (connectcapex) => {
+      var data = buildChartData(connectcapex, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-connect-capex', 'Bar', data, options)
+    })
+  }
+  $scope.showConnectCapexChart = showConnectCapexChart
+
   function showPremisesChart (force) {
     var datasets = [
       { key: 'incremental', name: 'Incremental OFS' },
       { key: 'existing', name: 'Existing OFS' }
     ]
-    request(force, 'premises', { entityTypes: selectedKeys($scope.premisesFilterEntityTypes) }, (premises) => {
+    var params = {
+      entityTypes: selectedKeys($scope.premisesFilterEntityTypes),
+      percentage: $scope.premisesPercentage
+    }
+    request(force, 'premises', params, (premises) => {
       var data = buildChartData(premises, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
@@ -250,13 +326,30 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-premises', 'StackedBar', data, options)
     })
   }
+  $scope.showPremisesChart = showPremisesChart
+
+  function showCostPerPremiseChart (force) {
+    var datasets = [{ key: 'value', name: 'Value' }]
+    var params = {}
+    request(force, 'costperpremise', params, (costs) => {
+      var data = buildChartData(costs, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-cost-per-premise', 'Bar', data, options)
+    })
+  }
+  $scope.showCostPerPremiseChart = showCostPerPremiseChart
 
   function showSubscribersChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
       { key: 'plan', name: 'Plan' }
     ]
-    request(force, 'subscribers', { entityType: $scope.subscribersFilterEntityType }, (subscribers) => {
+    var entityTypes = Object.keys($scope.subscribersFilterEntityTypes).filter((key) => $scope.subscribersFilterEntityTypes[key])
+    request(force, 'subscribers', { entityTypes: entityTypes }, (subscribers) => {
       var data = buildChartData(subscribers, datasets)
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
@@ -266,13 +359,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-subscribers', 'Bar', data, options)
     })
   }
+  $scope.showSubscribersChart = showSubscribersChart
 
   function showPenetrationChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
       { key: 'plan', name: 'Plan' }
     ]
-    request(force, 'penetration', { entityType: $scope.subscribersFilterEntityType }, (penetration) => {
+    request(force, 'penetration', { entityType: $scope.penetrationFilter.entityType }, (penetration) => {
       var data = buildChartData(penetration, datasets)
       var options = {
         datasetFill: false,
@@ -284,6 +378,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showChart('financial-profile-chart-penetration', 'Line', data, options)
     })
   }
+  $scope.showPenetrationChart = showPenetrationChart
 
   function selectedKeys (obj) {
     return Object.keys(obj).filter((item) => !!obj[item])
@@ -303,7 +398,32 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   $scope.mode = 'global'
+  $scope.showData = true
   $scope.setMode = (mode) => {
     $scope.mode = mode
+    $rootScope.$broadcast('financial_profile_changed_mode', mode)
+    $scope.selectedArea = null
+    $scope.metadata = $scope.plan.metadata
+    $scope.calculateShowData()
+    refresh()
+  }
+
+  $scope.calculateShowData = () => {
+    $scope.showData = $scope.mode === 'global' || !!$scope.selectedArea
+  }
+
+  function loadWirecenterMetadata () {
+    const calculateURL = () => {
+      if (!$scope.selectedArea || !$scope.plan) return null
+      return '/network_plan/' + $scope.plan.id + '/' + $scope.selectedArea.id
+    }
+    var url = calculateURL()
+    $http.get(url).success((response) => {
+      // Check if the user has changed to another wirectenter, to global mode or to another plan
+      if (url === calculateURL() && $scope.mode === 'area') {
+        console.log('loaded wirecenter data')
+        $scope.metadata = response.metadata
+      }
+    })
   }
 }])
