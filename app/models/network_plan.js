@@ -138,8 +138,8 @@ module.exports = class NetworkPlan {
         return models.Network.planSummary(plan_id)
       })
       .then((summary) => {
-        output.metadata.npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'npv').value
-        output.metadata.irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'irr').value
+        output.metadata.npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_npv').value
+        output.metadata.irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_irr').value
 
         output.metadata.equipment_summary = summary.priceModel.equipmentCosts.map((item) => {
           var cost = financialCosts.find((i) => i.name === item.nodeType)
