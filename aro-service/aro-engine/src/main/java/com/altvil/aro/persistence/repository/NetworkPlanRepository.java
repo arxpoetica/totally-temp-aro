@@ -445,7 +445,7 @@ public interface NetworkPlanRepository extends
 			"    MIN(start_ratio) AS start_ratio, \n" + 
 			"    MAX(end_ratio) AS end_ratio\n" + 
 			"FROM selected_segs s\n" + 
-			"GROUP BY gid;", nativeQuery = true)
+			"GROUP BY gid", nativeQuery = true)
 	List<Object[]> queryConduitSections(@Param("planId") long planId);
 	
 	

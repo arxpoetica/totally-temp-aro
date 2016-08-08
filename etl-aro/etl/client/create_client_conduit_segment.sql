@@ -27,13 +27,13 @@ create view client.conduit_edge_segments as
 select
 	gid, 
 	plan_id,
-	1 as construction_type,
+	6 as construction_type,
 	st_length(edge::geography) as edge_length,
 	st_length(segment::geography) as segment_length,
 	st_line_locate_point(edge, st_startpoint(segment)) as start_ratio, 
 	st_line_locate_point(edge, st_endpoint(segment)) as end_ratio
 from(
-	select a.gid, r.id as plan_id, st_linemerge(a.geom) as edge, st_intersection(fr.geom, a.geom) as segment 
+	select a.tlid, r.id as plan_id, st_linemerge(a.geom) as edge, st_intersection(fr.geom, a.geom) as segment 
 	from client.plan r 
 	join aro.wirecenters w on r.wirecenter_id = w.id
 	join aro.edges a on st_intersects(edge_buffer, a.geom)
