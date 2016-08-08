@@ -296,7 +296,7 @@
               <td class="text-right">{{fiberDetail.types['feeder'].totalLength * 0.000621371 | number : 1}} mi</td>
               <td class="text-right">{{fiberDetail.types['backhaul'].totalLength * 0.000621371 | number : 1}} mi</td>
               <td class="text-right">{{fiberDetail.totalLength * 0.000621371 | number : 1}} mi</td>
-              <td class="text-right">{{fiberDetail.totalCost / fiberDetail.totalLength | currency:"$":1}}</td>
+              <td class="text-right">{{fiberDetail.totalCost / (fiberDetail.totalLength * 0.000621371) | currency:"$":1}}</td>
               <td class="text-right">{{fiberDetail.totalCost / 1000 | currency:"$":1}}K</td>
             </tr>
             <tr>
@@ -305,7 +305,7 @@
               <th class="text-right">{{metadata.fiberTotals.types['feeder'].totalLength * 0.000621371 | number : 1}} mi</th>
               <th class="text-right">{{metadata.fiberTotals.types['backhaul'].totalLength * 0.000621371 | number : 1}} mi</th>
               <th class="text-right">{{metadata.fiberTotals.totalLength * 0.000621371 | number : 1}} mi</th>
-              <th class="text-right">{{metadata.fiberTotals.totalCost / metadata.fiberTotals.totalLength | currency:"$":1}}</th>
+              <th class="text-right">{{metadata.fiberTotals.totalCost / (metadata.fiberTotals.totalLength * 0.000621371) | currency:"$":1}}</th>
               <th class="text-right">{{metadata.fiberTotals.totalCost / 1000 | currency:"$":1}}K</th>
             </tr>
           </tbody>
