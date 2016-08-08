@@ -25,7 +25,7 @@ CREATE INDEX geotel_buffered_routes_carrier_small_id_index
 drop view if exists client.conduit_edge_segments cascade ;
 create view client.conduit_edge_segments as 
 select
-	gid, 
+	tlid as gid, 
 	plan_id,
 	6 as construction_type,
 	st_length(edge::geography) as edge_length,
