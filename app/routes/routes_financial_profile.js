@@ -6,13 +6,6 @@ var config = helpers.config
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
-  function contains (arr, value) {
-    if (typeof arr === 'string') {
-      return arr === value
-    }
-    return Array.isArray(arr) && arr.indexOf(value) >= 0
-  }
-
   function array (value) {
     if (value == null) return []
     if (!Array.isArray(value)) return [value]
@@ -162,14 +155,14 @@ exports.configure = (api, middleware) => {
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
     var entities = array(request.query.entityTypes)
     if (entities.length === 0) return response.json([])
+    var percentage = request.query.percentage === 'true'
     var curves = {}
     entities.forEach((key) => {
       curves[key] = `fiber.${key}.premises_passed`
+      if (percentage) {
+        curves[`${key}_count`] = `fiber.${key}.houseHolds_global_count`
+      }
     })
-    var percentage = request.query.percentage === 'true'
-    if (percentage) {
-      curves['household_count'] = 'planned.household.houseHolds_global_count'
-    }
     var zeros = ['existing']
     requestData({
       plan_id: request.params.plan_id,
@@ -178,15 +171,17 @@ exports.configure = (api, middleware) => {
     })
     .then((data) => {
       data.forEach((obj) => {
+        var n = 0
         if (percentage) {
-          obj.incremental = obj['household'] * 100 / obj['household_count']
+          entities.forEach((key) => {
+            n += obj[key] * 100 / obj[`${key}_count`]
+          })
         } else {
-          var n = 0
-          Object.keys(curves).forEach((key) => {
+          entities.forEach((key) => {
             n += obj[key]
           })
-          obj.incremental = n
         }
+        obj.incremental = n
       })
       return data
     })
