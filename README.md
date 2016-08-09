@@ -15,22 +15,22 @@ The ARO platform has been restructured into several different components, most o
 In order to work with the application locally, you must first configure your workstation. This should be performed before cloning any of the repositories. If you already have a repository cloned locally (from prior development), it is recommened you delete it, or at least create a new, empty base working folder for the new iteration of the application. 
 These instructions *should* apply universally, but they are generally targeted toward users developing on OSX. If your base OS is Windows or especially Linux, you may encounter subtle differences in how things work. Additionally, the basic interaction (in terms of command line operation and how to open/install various applications) will be different. Please adjust accordingly or ask for help where needed.
 
-  - If you have [Virtualbox](https://www.virtualbox.org/wiki/Downloads) installed (e.g., from working with Vagrant), you must either upgrade it to the latest version or remove it entirely. The Docker installation is incompatible with older versions of Virtualbox.
-  - Install [Docker](https://docs.docker.com/docker-for-mac/) on your workstation. This provides the `docker` client and `docker-compose`, both of which are requirements for making the application work.
-  - Once installation is complete, edit the preferences/settings of the running application (by clicking on the Docker-whale icon in the menu/task bar). Under the "General" tab, ensure that you have at least 2 CPUs and 2GB of memory allocated. If you have a lot of RAM, you may want to increase the allocation to 3 or 4 GB. It is unlikely you'll see much benefit from allocationg more than 2 CPUs at this time, unless you plan on running OTHER Dockerized applications on your machine simultaneously.
-  - Obtain credentials to the AIT Docker Registry. Then log into the registry with the following command:
+If you have [Virtualbox](https://www.virtualbox.org/wiki/Downloads) installed (e.g., from working with Vagrant), you must either upgrade it to the latest version or remove it entirely. The Docker installation is incompatible with older versions of Virtualbox.
+Install [Docker](https://docs.docker.com/docker-for-mac/) on your workstation. This provides the `docker` client and `docker-compose`, both of which are requirements for making the application work.
+Once installation is complete, edit the preferences/settings of the running application (by clicking on the Docker-whale icon in the menu/task bar). Under the "General" tab, ensure that you have at least 2 CPUs and 2GB of memory allocated. If you have a lot of RAM, you may want to increase the allocation to 3 or 4 GB. It is unlikely you'll see much benefit from allocationg more than 2 CPUs at this time, unless you plan on running *other* Dockerized applications on your machine simultaneously.
+Obtain credentials to the AIT Docker Registry. Then log into the registry with the following command:
 ```shell
 $ docker login -u aro -e aro@altvil.com https://ait-docker-registry.cloud.altvil.com
 ```
-  This will prompt you for the password which will then be saved to your configuration and allow you to bypass entering the credentials in the future.
-  - If you intend to work with source data or modify any of the ETL in development, you need to install git-lfs on your machine. On a Mac workstation, the recommended method is installation via homebrew. Homebrew installation and documentation can be found [here](http://brew.sh/).Once you have homebrew, install and initialize git-lfs as follows:
+This will prompt you for the password which will then be saved to your configuration and allow you to bypass entering the credentials in the future.
+If you intend to work with source data or modify any of the ETL in development, you need to install git-lfs on your machine. On a Mac workstation, the recommended method is installation via homebrew. Homebrew installation and documentation can be found [here](http://brew.sh/).Once you have homebrew, install and initialize git-lfs as follows:
 ```shell
 $ brew install git-lfs
 ... prints some stuff ...
 $ git lfs install
 ... prints some stuff ...
 ```
-  - Clone this (`aro-platform`) repository as well as the `aro-etl` repository in the same parent folder on your machine. Once complete, your directory structure should similar to this:
+Clone this (`aro-platform`) repository as well as the `aro-etl` repository in the same parent folder on your machine. Once complete, your directory structure should similar to this:
 ```
 ├-- project_root
     ├-- ARO-Platform
@@ -48,8 +48,8 @@ $ git lfs install
 ```
 
 ## Local development
-### Initial setup
-Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To do this we use the `run` command of `docker-compose` which will build the necessary parts of the environment to run a single command. This can be accomplished as follows:
+### Initial application setup
+Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To do this we use the `run` command of `docker-compose` which will build and connect all the application compoenents that are required to run our setup/build scripts. This can be accomplished as follows:
 ```shell
 $ docker-compose -f docker/docker-compose-dev-initialize.yml app run docker/initialize_app.sh
 ... some output here from the npm install process
