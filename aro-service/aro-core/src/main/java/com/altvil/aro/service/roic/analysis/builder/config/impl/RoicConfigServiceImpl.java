@@ -58,7 +58,8 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 								inputs.getConnectionCost()));
 				
 				componentConfig.add(AnalysisCode.premises_passed,
-							(inputs) -> Op.constCurve(inputs.getEntityCount()));
+							(inputs) -> Op.growCurve(inputs.getEntityCount(),
+									inputs.getEntityGrowth()));
 						
 
 			}
