@@ -6,13 +6,6 @@ var config = helpers.config
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
-  function contains (arr, value) {
-    if (typeof arr === 'string') {
-      return arr === value
-    }
-    return Array.isArray(arr) && arr.indexOf(value) >= 0
-  }
-
   function array (value) {
     if (value == null) return []
     if (!Array.isArray(value)) return [value]
@@ -74,15 +67,35 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/financial_profile/:plan_id/revenue', (request, response, next) => {
-    var filter = request.query.filter === 'bau' ? 'copper' : 'planned'
+    var mapping = {
+      bau: 'copper',
+      plan: 'planned'
+    }
+    var filter = request.query.filter
     var curves = {}
     var entityTypes = ['smallBusiness', 'mediumBusiness', 'largeBusiness', 'household', 'cellTower']
     entityTypes.forEach((key) => {
-      curves[key] = `${filter}.${key}.revenue`
+      if (filter === 'incremental') {
+        curves[`${key}_copper`] = `copper.${key}.revenue`
+        curves[`${key}_planned`] = `planned.${key}.revenue`
+      } else {
+        curves[key] = `${mapping[filter]}.${key}.revenue`
+      }
     })
     requestData({
       plan_id: request.params.plan_id,
       curves: curves
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        if (filter === 'incremental') {
+          obj.incremental = 0
+          entityTypes.forEach((entity) => {
+            obj[entity] = obj[`${entity}_planned`] - obj[`${entity}_copper`]
+          })
+        }
+      })
+      return data
     })
     .then(jsonSuccess(response, next))
     .catch(next)
@@ -162,14 +175,14 @@ exports.configure = (api, middleware) => {
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
     var entities = array(request.query.entityTypes)
     if (entities.length === 0) return response.json([])
+    var percentage = request.query.percentage === 'true'
     var curves = {}
     entities.forEach((key) => {
       curves[key] = `fiber.${key}.premises_passed`
+      if (percentage) {
+        curves[`${key}_count`] = `fiber.${key}.houseHolds_global_count`
+      }
     })
-    var percentage = request.query.percentage === 'true'
-    if (percentage) {
-      curves['household_count'] = 'planned.household.houseHolds_global_count'
-    }
     var zeros = ['existing']
     requestData({
       plan_id: request.params.plan_id,
@@ -177,16 +190,19 @@ exports.configure = (api, middleware) => {
       zeros: zeros
     })
     .then((data) => {
-      data.forEach((obj) => {
+      data.forEach((obj, i) => {
+        var n = 0
         if (percentage) {
-          obj.incremental = obj['household'] * 100 / obj['household_count']
+          entities.forEach((key) => {
+            n += obj[key] * 100 / obj[`${key}_count`]
+          })
         } else {
-          var n = 0
-          Object.keys(curves).forEach((key) => {
+          entities.forEach((key) => {
             n += obj[key]
           })
-          obj.incremental = n
         }
+        obj.incremental = n
+        obj.period = i === 0 ? n : n - data[i - 1].incremental
       })
       return data
     })
@@ -243,6 +259,60 @@ exports.configure = (api, middleware) => {
       curves: curves,
       zeros: zeros
     }, (value) => value * 100)
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/opexrecurring', (request, response, next) => {
+    var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
+    var curves = {}
+    entities.forEach((entityType) => {
+      curves[`${entityType}_bau`] = `copper.${entityType}.opex_expenses`
+      curves[`${entityType}_plan`] = `planned.${entityType}.opex_expenses`
+    })
+    var zeros = []
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves,
+      zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.bau = 0
+        obj.plan = 0
+        entities.forEach((key) => {
+          obj.bau += obj[`${key}_bau`]
+          obj.plan += obj[`${key}_plan`]
+        })
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/opexcost', (request, response, next) => {
+    var entityType = request.query.entityType
+    var curves = {
+      copper_opex_expenses: `copper.${entityType}.opex_expenses`,
+      copper_revenue: `copper.${entityType}.revenue`,
+      planned_opex_expenses: `planned.${entityType}.opex_expenses`,
+      planned_revenue: `planned.${entityType}.revenue`
+    }
+    var zeros = []
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves,
+      zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.bau = obj.copper_opex_expenses / obj.copper_revenue
+        obj.plan = obj.planned_opex_expenses / obj.planned_revenue
+      })
+      return data
+    })
     .then(jsonSuccess(response, next))
     .catch(next)
   })

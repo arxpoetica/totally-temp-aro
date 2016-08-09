@@ -1,5 +1,5 @@
 <div>
-  <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
+  <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')" style="max-height: 700px; overflow: auto">
     <p ng-hide="showData" class="text-center" style="margin: 100px 10px">
       Click on a wirecenter to see its financial summary.
     </p>
@@ -82,7 +82,7 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileCapex" style="margin-top: 20px">
         <div>
-          <p class="text-center"><strong>BAU Capex</strong></p>
+          <p class="text-center"><strong>Capex</strong></p>
           <form class="form-inline">
             <div class="form-group">
               <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
@@ -141,12 +141,13 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileRevenue" style="margin-top: 20px">
         <div>
-          <p class="text-center"><strong>BAU Revenue</strong></p>
+          <p class="text-center"><strong>Revenue</strong></p>
           <form class="form-inline">
             <div class="form-group">
               <select class="form-control" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
+                <option value="incremental">Incremental</option>
               </select>
             </div>
           </form>
@@ -172,7 +173,7 @@
             <form class="form-inline">
               <div class="radio">
                 <label>
-                  <input type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="showPremisesChart(true)"> Discrete
+                  <input type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="showPremisesChart(true)"> Count
                 </label>
               </div>
               <div class="radio" style="margin-left: 10px">
@@ -200,6 +201,8 @@
           </form>
           <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-premises-legend"></div>
+          <canvas id="financial-profile-chart-premises-period" style="width:100%; height:200px"></canvas>
+          <div id="financial-profile-chart-premises-period-legend"></div>
           <br>
           <p class="text-center"><strong>Cost per Premise Passed</strong></p>
           <canvas id="financial-profile-chart-cost-per-premise" style="width:100%; height:200px"></canvas>
@@ -234,7 +237,27 @@
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileOpex" style="margin-top: 20px">
-
+        <p class="text-center"><strong>Recurring Costs</strong></p>
+        <form class="form-inline">
+          <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
+            <label>
+              <input type="checkbox" ng-model="opexRecurringFilterEntityTypes[entityType]" ng-change="showOpexRecurringChart(true)"> {{ entityName }}
+            </label>
+          </div>
+        </form>
+        <canvas id="financial-profile-chart-opex-recurring" style="width:100%; height:200px"></canvas>
+        <div id="financial-profile-chart-opex-recurring-legend"></div>
+        <br>
+        <p class="text-center"><strong>Cost %</strong></p>
+        <form class="form-inline">
+          <div class="form-group">
+            <select class="form-control" ng-model="opexCostFilter" ng-change="showOpexCostChart(true)"
+              ng-options="entity.key as entity.name for entity in entityTypesArray">
+            </select>
+          </div>
+        </form>
+        <canvas id="financial-profile-chart-opex-cost" style="width:100%; height:200px"></canvas>
+        <div id="financial-profile-chart-opex-cost-legend"></div>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileRouteOportunities" style="margin-top: 20px">
         <table class="table">

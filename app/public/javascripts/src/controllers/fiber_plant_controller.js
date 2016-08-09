@@ -192,7 +192,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         api_endpoint: endpoint,
         style_options: {
           normal: {
-            strokeColor: 'blue',
+            strokeColor: '#d3d3d3',
             strokeWeight: 2,
             fillColor: 'blue'
           }
@@ -202,7 +202,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         declarativeStyles: (feature, styles) => {
           var speed = feature.getProperty('download_speed')
           var h = 120 - speed * 10
-          styles.fillColor = 'hsl(' + h + ',100%,50%)'
+          styles.fillColor = 'hsl(' + h + ',100%,30%)'
         }
       })
       layer.onDataLoaded = () => {
