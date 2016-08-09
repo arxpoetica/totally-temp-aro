@@ -314,9 +314,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     request(force, 'connectcapex', params, (connectcapex) => {
       var data = buildChartData(connectcapex, datasets)
       var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
-        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>` // eslint-disable-line
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
       showChart('financial-profile-chart-connect-capex', 'Bar', data, options)
     })
