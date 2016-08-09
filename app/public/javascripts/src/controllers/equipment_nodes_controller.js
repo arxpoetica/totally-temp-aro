@@ -26,7 +26,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     declarativeStyles: (feature, styles) => {
       styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${feature.getProperty('name')}.png`
     }
-
   })
   network_nodes_layer.hide_in_ui = true
 

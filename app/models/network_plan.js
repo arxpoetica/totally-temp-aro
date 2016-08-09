@@ -161,7 +161,7 @@ module.exports = class NetworkPlan {
           output.metadata.fiberTotals.types[fiberType] = { totalLength: 0, totalCost: 0 }
         })
         output.metadata.fiberDetails = cableConstructionTypes.map((type) => {
-          var obj = { types: {}, totalLength: 0, totalCost: 0, description: type.description }
+          var obj = { types: {}, totalLength: 0, totalCost: 0, description: type.description, name: type.name }
           fiberTypes.forEach((fiberType) => {
             obj.types[fiberType] = { totalLength: 0, totalCost: 0 }
           })
@@ -180,8 +180,6 @@ module.exports = class NetworkPlan {
             })
           return obj
         })
-
-        console.log('output.metadata.fiberDetails', JSON.stringify(output.metadata.fiberTotals, null, 2))
 
         output.metadata.equipment_summary = summary.priceModel.equipmentCosts.map((item) => {
           var cost = financialCosts.find((i) => i.name === item.nodeType)

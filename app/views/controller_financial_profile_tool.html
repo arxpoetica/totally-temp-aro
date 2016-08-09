@@ -288,6 +288,7 @@
             <th class="text-right">Total miles</th>
             <th class="text-right">Cost per Mile</th>
             <th class="text-right">Total cost</th>
+            <th></th>
           </thead>
           <tbody>
             <tr ng-repeat="fiberDetail in metadata.fiberDetails">
@@ -298,6 +299,14 @@
               <td class="text-right">{{fiberDetail.totalLength * 0.000621371 | number : 1}} mi</td>
               <td class="text-right">{{fiberDetail.totalCost / (fiberDetail.totalLength * 0.000621371) | currency:"$":1}}</td>
               <td class="text-right">{{fiberDetail.totalCost / 1000 | currency:"$":1}}K</td>
+              <th>
+                <div class="checkbox" ng-if="fiberDetail.name === 'conduit'" style="margin:0">
+                  <label class="eye-control">
+                    <input type="checkbox" ng-click="conduitLayer.toggleVisibility()">
+                    <div class="eye-indicator"></div>
+                  </label>
+                </div>
+              </th>
             </tr>
             <tr>
               <th>Total</th>
@@ -307,6 +316,7 @@
               <th class="text-right">{{metadata.fiberTotals.totalLength * 0.000621371 | number : 1}} mi</th>
               <th class="text-right">{{metadata.fiberTotals.totalCost / (metadata.fiberTotals.totalLength * 0.000621371) | currency:"$":1}}</th>
               <th class="text-right">{{metadata.fiberTotals.totalCost / 1000 | currency:"$":1}}K</th>
+              <th></th>
             </tr>
           </tbody>
         </table>

@@ -1,5 +1,5 @@
 /* global app $ Chart */
-app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', ($scope, $rootScope, $http, $timeout, map_tools) => {
+app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', 'MapLayer', ($scope, $rootScope, $http, $timeout, map_tools, MapLayer) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
   $scope.premisesFilterEntityTypes = { household: true }
@@ -157,6 +157,21 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       $timeout(dirty ? refresh : refreshCurrentTab, 0)
       dirty = false
     }
+  })
+
+  $scope.conduitLayer = new MapLayer({
+    name: 'Conduit fiber',
+    type: 'conduit_fiber',
+    short_name: 'C',
+    api_endpoint: '/network/fiber_type/:plan_id/conduit',
+    style_options: {
+      normal: {
+        strokeColor: 'cyan',
+        strokeWeight: 2
+      }
+    },
+    threshold: 11,
+    reload: 'always'
   })
 
   $scope.financialData = {}
