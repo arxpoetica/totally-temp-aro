@@ -28,8 +28,6 @@ services:
             DATABASE_URL: postgres://aro:aro@arodb/aro
             ARO_CLIENT: aro
         working_dir: /srv/www/aro
-        command: (cd app && npm install --no-bin-links && npm build && cd ../etl && etl_initial_setup.sh)
-
 
 volumes:
     postgres-data:

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-(cd /srv/www/aro/current/app && node app.js)
+(cd app && node app.js)

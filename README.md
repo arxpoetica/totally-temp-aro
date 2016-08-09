@@ -49,14 +49,28 @@ These instructions *should* apply universally, but they are generally targeted t
 
 ## Local development
 ### Initial setup
-Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To simplify this process, a `docker-compose` configuration has been created with a stripped down environment (the `aro-service` container is left out) and an autostart command that will run the required `npm install` and `npm build` statements, kick of a full ETL reload, and create a default administrative user in the application. This configuration can be accessed as follows, from the root of the `ARO-Platform` repository:
+Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To do this we use the `run` command of `docker-compose` which will build the necessary parts of the environment to run a single command. This can be accomplished as follows:
 ```console
-$ docker-compose -f docker/docker-compose-dev-initialize.yml up
-... lots of output, logs from ETL process and from the database server
-... lots and lots of logs
-docker_app_1 exited with code 0
+$ docker-compose -f docker/docker-compose-dev-initialize.yml app run docker/initialize_app.sh
+... some output here from the npm install process
 ```
-Once you see that notification, the process is complete. This can take anywhere from 40 - 60 minutes (or longer, depending on system specs) to complete. The docker-compose process may not fully exit once the `docker_app_1` container exits. If you are not returned to a prompt after seeing that message, press Control+C once or twice to force the other containers to stop running. 
+Often, on OSX and on Windows this process will fail initially with a note about "call stack exceeded." Running the exact same command again will usually complete the process without issue. This is a known bug in NPM.
+If your log output ends with something that looks like the following, it has completed successfully:
+```console
+...
+...
+public/javascripts/src/models/map_utils.js -> public/javascripts/lib/models/map_utils.js
+public/javascripts/src/models/regions.js -> public/javascripts/lib/models/regions.js
+public/javascripts/src/models/selection.js -> public/javascripts/lib/models/selection.js
+public/javascripts/src/models/state.js -> public/javascripts/lib/models/state.js
+public/javascripts/src/models/tracker.js -> public/javascripts/lib/models/tracker.js
+```
+Next, to populate the database and create an initial user, use the following command:
+```console
+$ docker-compose -f docker/docker-compose-dev-initialize.yml app run etl/etl_initial_setup.sh
+```
+This will generate LOTS of output and can take from 30 - 60 minutes to complete depending on your system
+This can take anywhere from 40 - 60 minutes (or longer, depending on system specs) to complete. T
 
 ### Running the development environment
 As described earlier, in local development, your checked out version of the `ARO-Platform` repository is mapped into the `aro-app-base` container, so that code changes you make locally are immediately reflected in the running application. First run `docker ps` to ensure you don't have any duplicate or old versions of the containers already running. If you do, stop them with `docker stop <container_name> && docker rm <container_name>`
