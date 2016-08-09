@@ -308,8 +308,8 @@ exports.configure = (api, middleware) => {
     })
     .then((data) => {
       data.forEach((obj) => {
-        obj.bau = obj.copper_opex_expenses / obj.copper_revenue
-        obj.plan = obj.planned_opex_expenses / obj.planned_revenue
+        obj.bau = obj.copper_opex_expenses * 100 / obj.copper_revenue
+        obj.plan = obj.planned_opex_expenses * 100 / obj.planned_revenue
       })
       return data
     })
