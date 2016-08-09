@@ -141,12 +141,13 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileRevenue" style="margin-top: 20px">
         <div>
-          <p class="text-center"><strong>BAU Revenue</strong></p>
+          <p class="text-center"><strong>Revenue</strong></p>
           <form class="form-inline">
             <div class="form-group">
               <select class="form-control" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
+                <option value="incremental">Incremental</option>
               </select>
             </div>
           </form>

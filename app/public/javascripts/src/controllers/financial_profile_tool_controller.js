@@ -423,7 +423,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       { key: 'bau', name: 'BAU' },
       { key: 'plan', name: 'Plan' }
     ]
-    console.log('$scope.opexCostFilter', $scope.opexCostFilter)
     request(force, 'opexcost', { entityType: $scope.opexCostFilter }, (penetration) => {
       var data = buildChartData(penetration, datasets)
       var options = {

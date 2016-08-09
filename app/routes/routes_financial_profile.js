@@ -67,15 +67,35 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/financial_profile/:plan_id/revenue', (request, response, next) => {
-    var filter = request.query.filter === 'bau' ? 'copper' : 'planned'
+    var mapping = {
+      bau: 'copper',
+      plan: 'planned'
+    }
+    var filter = request.query.filter
     var curves = {}
     var entityTypes = ['smallBusiness', 'mediumBusiness', 'largeBusiness', 'household', 'cellTower']
     entityTypes.forEach((key) => {
-      curves[key] = `${filter}.${key}.revenue`
+      if (filter === 'incremental') {
+        curves[`${key}_copper`] = `copper.${key}.revenue`
+        curves[`${key}_planned`] = `planned.${key}.revenue`
+      } else {
+        curves[key] = `${mapping[filter]}.${key}.revenue`
+      }
     })
     requestData({
       plan_id: request.params.plan_id,
       curves: curves
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        if (filter === 'incremental') {
+          obj.incremental = 0
+          entityTypes.forEach((entity) => {
+            obj[entity] = obj[`${entity}_planned`] - obj[`${entity}_copper`]
+          })
+        }
+      })
+      return data
     })
     .then(jsonSuccess(response, next))
     .catch(next)
