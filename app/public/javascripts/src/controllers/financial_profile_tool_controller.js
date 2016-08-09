@@ -324,16 +324,15 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.showConnectCapexChart = showConnectCapexChart
 
   function showPremisesChart (force) {
-    var datasets = [
-      { key: 'incremental', name: 'Incremental OFS' },
-      { key: 'existing', name: 'Existing OFS' }
-    ]
     var params = {
       entityTypes: selectedKeys($scope.premisesFilterEntityTypes),
       percentage: $scope.premisesPercentage
     }
     request(force, 'premises', params, (premises) => {
-      var data = buildChartData(premises, datasets)
+      var data = buildChartData(premises, [
+        { key: 'incremental', name: 'Incremental OFS' },
+        { key: 'existing', name: 'Existing OFS' }
+      ])
       var options = {
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
@@ -344,6 +343,16 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         // scaleStartValue: 0
       }
       showChart('financial-profile-chart-premises', 'StackedBar', data, options)
+
+      data = buildChartData(premises, [
+        { key: 'period', name: 'Premises passed in time period' }
+      ])
+      options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-premises-period', 'Bar', data, options)
     })
   }
   $scope.showPremisesChart = showPremisesChart

@@ -1,5 +1,5 @@
 <div>
-  <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')">
+  <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')" style="max-height: 700px; overflow: auto">
     <p ng-hide="showData" class="text-center" style="margin: 100px 10px">
       Click on a wirecenter to see its financial summary.
     </p>
@@ -201,6 +201,8 @@
           </form>
           <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
           <div id="financial-profile-chart-premises-legend"></div>
+          <canvas id="financial-profile-chart-premises-period" style="width:100%; height:200px"></canvas>
+          <div id="financial-profile-chart-premises-period-legend"></div>
           <br>
           <p class="text-center"><strong>Cost per Premise Passed</strong></p>
           <canvas id="financial-profile-chart-cost-per-premise" style="width:100%; height:200px"></canvas>

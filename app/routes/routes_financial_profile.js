@@ -190,7 +190,7 @@ exports.configure = (api, middleware) => {
       zeros: zeros
     })
     .then((data) => {
-      data.forEach((obj) => {
+      data.forEach((obj, i) => {
         var n = 0
         if (percentage) {
           entities.forEach((key) => {
@@ -202,6 +202,7 @@ exports.configure = (api, middleware) => {
           })
         }
         obj.incremental = n
+        obj.period = i === 0 ? n : n - data[i - 1].incremental
       })
       return data
     })
