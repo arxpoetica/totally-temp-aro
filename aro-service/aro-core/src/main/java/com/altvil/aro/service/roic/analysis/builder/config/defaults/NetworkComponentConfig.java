@@ -46,11 +46,6 @@ public class NetworkComponentConfig extends AbstractConfig<RoicInputs> {
 				AnalysisCode.subscribers_count,
 				AnalysisCode.houseHolds_global_count));
 		
-		assembler.add(AnalysisCode.penetration, (inputs) -> Op.constCurve(666.0))  ;
-		
-		assembler.add(AnalysisCode.subscribers_penetration, (inputs) -> Op.constCurve(666.0))  ;
-		
-
 		assembler.add(AnalysisCode.cashflow, (inputs) -> Op.cashFlow(
 				AnalysisCode.revenue, AnalysisCode.maintenance_expenses,
 				AnalysisCode.opex_expenses, AnalysisCode.new_connections_cost,

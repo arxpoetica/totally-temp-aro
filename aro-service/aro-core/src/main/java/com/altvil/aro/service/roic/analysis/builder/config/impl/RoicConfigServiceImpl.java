@@ -44,8 +44,10 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 
 		register(NetworkAnalysisType.fiber, new DefaultRoicConfig(
 				NetworkAnalysisType.fiber) {
-			void specialize(SpiComponentConfig<ComponentInput> componentConfig) {
-
+			@Override
+			protected void specialize(ComponentType ct,
+					SpiComponentConfig<ComponentInput> componentConfig) {
+				super.specialize(ct, componentConfig);
 				componentConfig.add(AnalysisCode.new_connections_count,
 						(inputs) -> Op.connectedHouseHoldsYearly(15, inputs
 								.getPenetration().getEndPenetration(), inputs
@@ -59,58 +61,20 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 				componentConfig.add(AnalysisCode.premises_passed,
 						(inputs) -> Op.growCurve(inputs.getEntityCount(),
 								inputs.getEntityGrowth()));
-
 			}
-
-			void specialize(SpiComponentRoicRegistry<ComponentInput> registry,
-					ComponentType ct) {
-				specialize(registry.getConfig(ct));
-			}
-
-			@Override
-			protected SpiComponentRoicRegistry<ComponentInput> assembleComponents(
-					SpiComponentRoicRegistry<ComponentInput> registry) {
-				super.assembleComponents(registry);
-
-				specialize(registry, ComponentType.household);
-				specialize(registry, ComponentType.smallBusiness);
-				specialize(registry, ComponentType.mediumBusiness);
-				specialize(registry, ComponentType.largeBusiness);
-				specialize(registry, ComponentType.cellTower);
-
-				return registry;
-			}
-
 		});
 
 		register(NetworkAnalysisType.copper_intersects, new DefaultRoicConfig(
 				NetworkAnalysisType.copper_intersects) {
+
 			@Override
-			protected SpiComponentRoicRegistry<ComponentInput> assembleComponents(
-					SpiComponentRoicRegistry<ComponentInput> registry) {
-				super.assembleComponents(registry);
-
-				
-				for(ComponentType ct : ComponentType.values()) {
-					if( ct.isBaseComponent() ) {
-						registry.getConfig(ComponentType.household).add(
-								AnalysisCode.houseHolds_global_count,
-								(assenbler) -> Op.constCurve(0));
-					}
-				}
-				
-				registry.getConfig(ComponentType.household).add(
+			protected void specialize(ComponentType ct,
+					SpiComponentConfig<ComponentInput> component) {
+				component.add(
 						AnalysisCode.houseHolds_global_count,
 						(assenbler) -> Op.constCurve(0));
-
-				registry.getConfig(ComponentType.cellTower).add(
-						AnalysisCode.houseHolds_global_count,
-						(assenbler) -> Op.constCurve(0));
-
-				
-				return registry;
 			}
-
+			
 		});
 
 	}
