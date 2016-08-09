@@ -19,33 +19,33 @@ These instructions *should* apply universally, but they are generally targeted t
   - Install [Docker](https://docs.docker.com/docker-for-mac/) on your workstation. This provides the `docker` client and `docker-compose`, both of which are requirements for making the application work.
   - Once installation is complete, edit the preferences/settings of the running application (by clicking on the Docker-whale icon in the menu/task bar). Under the "General" tab, ensure that you have at least 2 CPUs and 2GB of memory allocated. If you have a lot of RAM, you may want to increase the allocation to 3 or 4 GB. It is unlikely you'll see much benefit from allocationg more than 2 CPUs at this time, unless you plan on running OTHER Dockerized applications on your machine simultaneously.
   - Obtain credentials to the AIT Docker Registry. Then log into the registry with the following command:
-  ```shell
-  $ docker login -u aro -e aro@altvil.com https://ait-docker-registry.cloud.altvil.com
-  ```
+```shell
+$ docker login -u aro -e aro@altvil.com https://ait-docker-registry.cloud.altvil.com
+```
   This will prompt you for the password which will then be saved to your configuration and allow you to bypass entering the credentials in the future.
   - If you intend to work with source data or modify any of the ETL in development, you need to install git-lfs on your machine. On a Mac workstation, the recommended method is installation via homebrew. Homebrew installation and documentation can be found [here](http://brew.sh/).Once you have homebrew, install and initialize git-lfs as follows:
-  ```shell
-  $ brew install git-lfs
-  ... prints some stuff ...
-  $ git lfs install
-  ... prints some stuff ...
-  ```
+```shell
+$ brew install git-lfs
+... prints some stuff ...
+$ git lfs install
+... prints some stuff ...
+```
   - Clone this (`aro-platform`) repository as well as the `aro-etl` repository in the same parent folder on your machine. Once complete, your directory structure should similar to this:
-  ```
-  ├-- project_root
-      ├-- ARO-Platform
-      |   ├-- app
-      |   ├-- conf
-      |   ├-- ..
-      |   ├-- ..
-      |   └-- (etc)
-      └-- aro-etl
-          ├-- data
-          ├-- python
-          ├-- sql
-          ├-- .. 
-          └-- (etc)
-  ```
+```
+├-- project_root
+    ├-- ARO-Platform
+    |   ├-- app
+    |   ├-- conf
+    |   ├-- ..
+    |   ├-- ..
+    |   └-- (etc)
+    └-- aro-etl
+        ├-- data
+        ├-- python
+        ├-- sql
+        ├-- .. 
+        └-- (etc)
+```
 
 ## Local development
 ### Initial setup
