@@ -111,7 +111,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (tool === 'boundaries' && !map_tools.is_visible('boundaries')) {
-      $scope.remove_drawing_manager()
+      $scope.removeDrawingManager()
     }
   })
 
@@ -151,24 +151,24 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
             strokeWeight: 2
           })
           boundary.overlay = overlay
-          make_boundary_editable(boundary)
-          update_tooltips()
+          makeBoundaryEditable(boundary)
+          updateTooltips()
         })
       })
   })
 
-  function update_tooltips () {
+  function updateTooltips () {
     setTimeout(() => {
       var tooltips = $('[ng-controller="boundaries_controller"] [data-toggle="tooltip"]')
       tooltips.tooltip()
     }, 1) // setTimeout to wait until the DOM is rendered
   }
 
-  $scope.toggle_boundary = (boundary) => {
+  $scope.toggleBoundary = (boundary) => {
     boundary.overlay.setMap(boundary.overlay.getMap() ? null : map)
   }
 
-  $scope.toggle_tool = () => {
+  $scope.toggleTool = () => {
     $scope.selected_tool = !$scope.selected_tool
     if ($scope.selected_tool) {
       drawingManager.setMap(map)
@@ -176,11 +176,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       map.setOptions({ draggable: false })
       tracker.track('Boundaries / Build')
     } else {
-      $scope.remove_drawing_manager()
+      $scope.removeDrawingManager()
     }
   }
 
-  $scope.remove_drawing_manager = () => {
+  $scope.removeDrawingManager = () => {
     drawingManager.setDrawingMode(null)
     drawingManager.setMap(null)
     map.setOptions({ draggableCursor: null, draggable: true })
@@ -193,7 +193,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   drawingManager.addListener('overlaycomplete', (e) => {
     var overlay = e.overlay
 
-    $scope.remove_drawing_manager()
+    $scope.removeDrawingManager()
 
     swal({
       title: 'Give it a name',
@@ -209,20 +209,20 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       }
       var data = {
         name: name || 'Untitled boundary',
-        geom: JSON.stringify(to_geo_json(overlay))
+        geom: JSON.stringify(toGeoJson(overlay))
       }
 
       $http.post('/boundary/' + $scope.plan.id + '/create', data)
         .success((boundary) => {
           $scope.boundaries.push(boundary)
           boundary.overlay = overlay
-          make_boundary_editable(boundary)
-          update_tooltips()
+          makeBoundaryEditable(boundary)
+          updateTooltips()
         })
     })
   })
 
-  function to_geo_json (overlay, closed) {
+  function toGeoJson (overlay, closed) {
     var coordinates = []
     var geo = { type: 'MultiPolygon', coordinates: [[ coordinates ]] }
     overlay.getPath().getArray().forEach((point) => {
@@ -243,7 +243,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       event.feature.toGeoJson((obj) => {
         if (false) { // TODO
           tracker.track('Boundaries / Network planning')
-          $scope.network_planning_boundary(obj.geometry)
+          $scope.networkPlanningBoundary(obj.geometry)
         } else {
           tracker.track('Boundaries / Market profile')
           $rootScope.$broadcast('boundary_selected', obj.geometry, name, 'market_size')
@@ -252,14 +252,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     }
   })
 
-  function make_boundary_editable (boundary) {
+  function makeBoundaryEditable (boundary) {
     var overlay = boundary.overlay
 
     function edit_boundary () {
       tracker.track('Boundaries / Edit')
       var data = {
         name: boundary.name,
-        geom: JSON.stringify(to_geo_json(overlay))
+        geom: JSON.stringify(toGeoJson(overlay))
       }
       $http.post('/boundary/' + $scope.plan.id + '/edit/' + boundary.id, data)
         .success((response) => {
@@ -287,17 +287,17 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
 
     overlay.marker.addListener('mouseover', () => {
-      update_counter(1)
+      updateCounter(1)
     })
 
     overlay.marker.addListener('mouseout', () => {
-      update_counter(-1)
+      updateCounter(-1)
     })
 
     var count = 0
     var timer = null
 
-    function update_counter (i) {
+    function updateCounter (i) {
       count += i
       timer && clearTimeout(timer)
       if (count > 0) {
@@ -326,15 +326,15 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       })
 
       overlay.marker.setPosition(bounds.getCenter())
-      update_counter(1)
+      updateCounter(1)
     })
 
     overlay.addListener('mouseout', () => {
-      update_counter(-1)
+      updateCounter(-1)
     })
   }
 
-  $scope.rename_boundary = (boundary) => {
+  $scope.renameBoundary = (boundary) => {
     swal({
       title: 'Give it a new name',
       text: 'How do you want to name this boundary?',
@@ -348,7 +348,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       if (!name) return false
       var data = {
         name: name || 'Untitled boundary',
-        geom: JSON.stringify(to_geo_json(boundary.overlay))
+        geom: JSON.stringify(toGeoJson(boundary.overlay))
       }
 
       $http.post('/boundary/' + $scope.plan.id + '/edit/' + boundary.id, data)
@@ -358,7 +358,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  $scope.network_planning_boundary = (geojson) => {
+  $scope.networkPlanningBoundary = (geojson) => {
     var data = { boundary: geojson }
     var config = {
       url: '/network/nodes/' + $scope.plan.id + '/select_boundary',
@@ -392,17 +392,17 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $scope.run_network_planning = (boundary) => {
     tracker.track('Boundaries / Network planning')
-    $scope.network_planning_boundary(to_geo_json(boundary.overlay, true))
+    $scope.networkPlanningBoundary(toGeoJson(boundary.overlay, true))
   }
 
   $scope.show_market_size = (boundary) => {
     tracker.track('Boundaries / Market profile')
-    $rootScope.$broadcast('boundary_selected', to_geo_json(boundary.overlay, true), boundary.name, 'market_size')
+    $rootScope.$broadcast('boundary_selected', toGeoJson(boundary.overlay, true), boundary.name, 'market_size')
   }
 
   $scope.show_customer_profile = (boundary) => {
     tracker.track('Boundaries / Customer profile')
-    $rootScope.$broadcast('boundary_selected', to_geo_json(boundary.overlay, true), boundary.name, 'customer_profile')
+    $rootScope.$broadcast('boundary_selected', toGeoJson(boundary.overlay, true), boundary.name, 'customer_profile')
   }
 
   $scope.select_area = (layer) => {

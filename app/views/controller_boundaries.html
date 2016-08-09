@@ -20,7 +20,7 @@
       <div class="checkbox">
         <div class="pull-right boundary-options">
           <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top"
-            title="Edit" ng-click="rename_boundary(boundary)">
+            title="Edit" ng-click="renameBoundary(boundary)">
               <span class="fa fa-pencil"></span>
           </a>
           <a href="javascript:void(0)" class="text-danger" data-toggle="tooltip"
@@ -43,7 +43,7 @@
           <% } %>
         </div>
         <label class="eye-control">
-          <input type="checkbox" ng-click="toggle_boundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
+          <input type="checkbox" ng-click="toggleBoundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
           <div class="eye-indicator"></div>
         </label>
       </div>
@@ -73,7 +73,7 @@
   <div ng-show="plan.owner_id === user_id">
     <h2>Build</h2>
     <p>
-      <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggle_tool()">Custom</a>
+      <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggleTool()">Custom</a>
     </p>
   </div>
 </div>
