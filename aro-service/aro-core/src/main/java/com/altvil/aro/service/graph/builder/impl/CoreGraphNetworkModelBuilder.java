@@ -25,7 +25,6 @@ import com.altvil.aro.service.graph.segment.RatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.LocationEntityAssignment;
 import com.altvil.aro.service.graph.segment.splitter.SplitGeoSegment;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
@@ -35,8 +34,9 @@ import com.vividsolutions.jts.geom.Point;
 
 class CoreGraphNetworkModelBuilder {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
-			.getLogger(PlanServiceImpl.class.getName());
+			.getLogger(CoreGraphNetworkModelBuilder.class.getName());
 
 
 	private GraphAssignmentFactory factory;
@@ -45,7 +45,6 @@ class CoreGraphNetworkModelBuilder {
 
 	
 	private int totalNumberLocations = 0;
-	private double totalDistanceEdges = 0 ;
 	private Map<Long, GraphNode> roadVertexMap = new HashMap<>();
 	private Map<NetworkAssignment, GraphEdgeAssignment> graphEdgeAssignmentMap = new HashMap<>();
 
@@ -55,18 +54,9 @@ class CoreGraphNetworkModelBuilder {
 		super();
 		this.factory = factory;
 		this.vertexFactory = vertexFactory;
-		this.graphModelBuilder = graphModelBuilder;
-		
+		this.graphModelBuilder = graphModelBuilder;	
 	}
 	
-	
-
-	public double getTotalDistanceEdges() {
-		return totalDistanceEdges;
-	}
-
-
-
 	public GraphNetworkModel build() {
 		return new DefaultNetworkModel(graphModelBuilder.build(),
 				graphEdgeAssignmentMap, totalNumberLocations);
@@ -84,11 +74,20 @@ class CoreGraphNetworkModelBuilder {
 	
 		Collection<RatioSection> sections = roadEdgeInfo.getSections();
 		
+//		if( sections != null ) {
+//			for(RatioSection rs : sections) {
+//				if( rs.getCableConstruction() != CableConstructionEnum.ESTIMATED) {
+//					totalEdgeCount++ ;
+//				}
+//				
+//			}
+//		}
 		
 		totalNumberLocations += orderedLoctions.size();
 
-		write(leftVertex, rightVertex,
-				createGeoSegmentAssembler(re, orderedLoctions),
+		write(leftVertex,
+				rightVertex,
+				re, orderedLoctions,
 				expand(sections, segmentCount - sections.size()),
 				roadEdgeInfo.getNetworkAssignments());
 
@@ -128,41 +127,38 @@ class CoreGraphNetworkModelBuilder {
 
 	}
 	
-	private void debug(Collection<RatioSection> sections) {
-		for(RatioSection rs : sections) {
-			log.debug("rs " + rs.getStartRatioOffset() + " "+ rs.getEndRationOffset() + " " + rs.getCableConstruction() );
-		}
-	}
+	
 
-	private void write(GraphNode leftVertex, GraphNode rightVertex,
-			GeoSegmentAssembler assembler, Collection<RatioSection> sections,
+	private void write(GraphNode leftVertex,
+			GraphNode rightVertex,
+			RoadEdge re,
+			Collection<LocationEntityAssignment> orderedLoctions, 
+			Collection<RatioSection> sections,
 			Collection<NetworkAssignment> networkElements) {
 
-		GeoSegment gs = assembler.getGeoSegment();
-
 		if (sections.size() == 1) {
+			
+			GeoSegmentAssembler assembler = createGeoSegmentAssembler(re, orderedLoctions,
+						sections.iterator().next().getCableConstruction()) ;
+			
+			GeoSegment gs = assembler.getGeoSegment();
 			
 			assignEquipment(assembler, networkElements);
 			graphModelBuilder.add(leftVertex, rightVertex, gs,
 					gs.getLength());
 			
 			
-			if( gs.getCableConstructionCategory() != CableConstructionEnum.ESTIMATED) {
-				log.debug("conduit " + gs.getGid() + "  "+ gs.getLength());
-				totalDistanceEdges += gs.getLength() ;
-			}
-			
 		} else {
+			
+			GeoSegmentAssembler assembler = createGeoSegmentAssembler(re, orderedLoctions,
+					CableConstructionEnum.ESTIMATED) ;
+		
+		GeoSegment gs = assembler.getGeoSegment();
+	
 
 			SplitGeoSegment split = DefaultSplitSegment.splitSegments(true, gs,
 					sections);
 			
-			for(GeoSegment gs1 : split.getSubSegments()) {
-				if( gs1.getCableConstructionCategory() != CableConstructionEnum.ESTIMATED) {
-					log.debug("conduit_" + gs1.getGid() + "  "+ gs1.getLength());
-					totalDistanceEdges += gs1.getLength() ;
-				}
-			}
 
 			assignEquipment(split, networkElements);
 
@@ -208,10 +204,12 @@ class CoreGraphNetworkModelBuilder {
 	}
 
 	private GeoSegmentAssembler createGeoSegmentAssembler(RoadEdge re,
-			Collection<LocationEntityAssignment> orderedLocationsByRoadEdge) {
+			Collection<LocationEntityAssignment> orderedLocationsByRoadEdge, CableConstructionEnum constructionType) {
 
 		return DefaultSegmentLocations.createAssembler(null,
-				CableConstructionEnum.ESTIMATED, re.getLengthMeters(), re.getId(), re.getShape(),
+				constructionType, re.getLengthMeters(), 
+				re.getId(),
+				re.getShape(),
 				orderedLocationsByRoadEdge);
 	}
 
