@@ -15,7 +15,7 @@ The ARO platform has been restructured into several different components, most o
 In order to work with the application locally, you must first configure your workstation. This should be performed before cloning any of the repositories. If you already have a repository cloned locally (from prior development), it is recommened you delete it, or at least create a new, empty base working folder for the new iteration of the application. 
 These instructions *should* apply universally, but they are generally targeted toward users developing on OSX. If your base OS is Windows or especially Linux, you may encounter subtle differences in how things work. Additionally, the basic interaction (in terms of command line operation and how to open/install various applications) will be different. Please adjust accordingly or ask for help where needed.
 
-  - If you already have [Virtualbox](https://www.virtualbox.org/wiki/Downloads) installed (e.g., from working with Vagrant), you must either upgrade it to the latest version or remove it entirely. The Docker installation is incompatible with older versions of Virtualbox.
+  - If you have [Virtualbox](https://www.virtualbox.org/wiki/Downloads) installed (e.g., from working with Vagrant), you must either upgrade it to the latest version or remove it entirely. The Docker installation is incompatible with older versions of Virtualbox.
   - Install [Docker](https://docs.docker.com/docker-for-mac/) on your workstation. This provides the `docker` client and `docker-compose`, both of which are requirements for making the application work.
   - Once installation is complete, edit the preferences/settings of the running application (by clicking on the Docker-whale icon in the menu/task bar). Under the "General" tab, ensure that you have at least 2 CPUs and 2GB of memory allocated. If you have a lot of RAM, you may want to increase the allocation to 3 or 4 GB. It is unlikely you'll see much benefit from allocationg more than 2 CPUs at this time, unless you plan on running OTHER Dockerized applications on your machine simultaneously.
   - Obtain credentials to the AIT Docker Registry. Then log into the registry with the following command:
@@ -23,10 +23,70 @@ These instructions *should* apply universally, but they are generally targeted t
   $ docker login -u aro -e aro@altvil.com https://ait-docker-registry.cloud.altvil.com
   ```
   This will prompt you for the password which will then be saved to your configuration and allow you to bypass entering the credentials in the future.
-  - If you intend to work with source data or modify any of the ETL in development, you need to install git-lfs on your machine.
+  - If you intend to work with source data or modify any of the ETL in development, you need to install git-lfs on your machine. On a Mac workstation, the recommended method is installation via homebrew. Homebrew installation and documentation can be found [here](http://brew.sh/).Once you have homebrew, install and initialize git-lfs as follows:
+  ```console
+  $ brew install git-lfs
+  ... prints some stuff ...
+  $ git lfs install
+  ... prints some stuff ...
+  ```
+  - Clone this (`aro-platform`) repository as well as the `aro-etl` repository in the same parent folder on your machine. Once complete, your directory structure should similar to this:
+  ```
+  ├-- project_root
+      ├-- ARO-Platform
+      |   ├-- app
+      |   ├-- conf
+      |   ├-- ..
+      |   ├-- ..
+      |   └-- (etc)
+      └-- aro-etl
+          ├-- data
+          ├-- python
+          ├-- sql
+          ├-- .. 
+          └-- (etc)
+  ```
 
+## Local development
+### Initial setup
+Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To simplify this process, a `docker-compose` configuration has been created with a stripped down environment (the `aro-service` container is left out) and an autostart command that will run the required `npm install` and `npm build` statements, kick of a full ETL reload, and create a default administrative user in the application. This configuration can be accessed as follows, from the root of the `ARO-Platform` repository:
+```console
+$ docker-compose -f docker/docker-compose-dev-initialize.yml up
+... lots of output, logs from ETL process and from the database server
+... lots and lots of logs
+docker_app_1 exited with code 0
+```
+Once you see that notification, the process is complete. This can take anywhere from 40 - 60 minutes (or longer, depending on system specs) to complete. The docker-compose process may not fully exit once the `docker_app_1` container exits. If you are not returned to a prompt after seeing that message, press Control+C once or twice to force the other containers to stop running. 
 
+### Running the development environment
+As described earlier, in local development, your checked out version of the `ARO-Platform` repository is mapped into the `aro-app-base` container, so that code changes you make locally are immediately reflected in the running application. First run `docker ps` to ensure you don't have any duplicate or old versions of the containers already running. If you do, stop them with `docker stop <container_name> && docker rm <container_name>`
+To start the standard development environment, run the `docker-compose-dev` configuration as follows:
+```console
+$ docker-compose -f docker/docker-compose-dev.yml up -d
+```
+This will start containers for all parts of the application, including the `aro-service` and run them in the background. However, the applciation itself is not yet running. To start the application in local/debug mode, use the following command:
+```console
+$ docker exec -it docker_app_1 runserver.sh
+```
+This will start the nodejs application and keep the debug log in the foreground. You can now connect to the application at https://localhost:8000. If you change the code, you'll need to Ctrl+C to kill the running task and then start it again in order to see the changes reflected.
 
+### Pulling in updates to Docker images (aro-service and aro-app-base)
+Occasionally these images are updated. To incorporate the newest versions of the images into your local environment, you need to first bring down the environment and remove the current containers. This can be accomplished as follows:
+```console
+$ docker-compose -f docker/docker-compose-dev.yml down
+Stopping docker_app_1 ...
+Stopping docker_service_1 ...
+Stopping docker_db_1 ...
+Removing docker_app_1 ... done
+Removing docker_service_1 ...
+Removing docker_db_1 ...
+Removing network docker_default
+$ docker-compose -f docker/docker-compose-dev.yml pull
+```
+Any changes to the underlying images will be pulled down and used the next time you bring up the environment. The database itself is always preserved, even if the database container/image is replaced, as we are using an external volume to store the actual data.
+
+### Automatic CI builds and deployments
+TODO
 
 
 
