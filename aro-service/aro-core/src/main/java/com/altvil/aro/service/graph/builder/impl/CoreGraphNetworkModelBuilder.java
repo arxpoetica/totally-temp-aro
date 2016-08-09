@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
@@ -30,6 +33,11 @@ import com.altvil.utils.StreamUtil;
 import com.vividsolutions.jts.geom.Point;
 
 class CoreGraphNetworkModelBuilder {
+	
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory
+			.getLogger(CoreGraphNetworkModelBuilder.class.getName());
+
 
 	private GraphAssignmentFactory factory;
 	private GraphNodeFactory vertexFactory;
@@ -46,10 +54,9 @@ class CoreGraphNetworkModelBuilder {
 		super();
 		this.factory = factory;
 		this.vertexFactory = vertexFactory;
-		this.graphModelBuilder = graphModelBuilder;
-		
+		this.graphModelBuilder = graphModelBuilder;	
 	}
-
+	
 	public GraphNetworkModel build() {
 		return new DefaultNetworkModel(graphModelBuilder.build(),
 				graphEdgeAssignmentMap, totalNumberLocations);
@@ -64,16 +71,28 @@ class CoreGraphNetworkModelBuilder {
 
 		Collection<LocationEntityAssignment> orderedLoctions = roadEdgeInfo
 				.getOrderedLocations();
+	
 		Collection<RatioSection> sections = roadEdgeInfo.getSections();
-
+		
+//		if( sections != null ) {
+//			for(RatioSection rs : sections) {
+//				if( rs.getCableConstruction() != CableConstructionEnum.ESTIMATED) {
+//					totalEdgeCount++ ;
+//				}
+//				
+//			}
+//		}
+		
 		totalNumberLocations += orderedLoctions.size();
 
-		write(leftVertex, rightVertex,
-				createGeoSegmentAssembler(re, orderedLoctions),
+		write(leftVertex,
+				rightVertex,
+				re, orderedLoctions,
 				expand(sections, segmentCount - sections.size()),
 				roadEdgeInfo.getNetworkAssignments());
 
 	}
+	
 
 	private int computeMinSections(GraphNode leftVertex, GraphNode rightVertex) {
 		if (leftVertex == rightVertex) {
@@ -107,21 +126,39 @@ class CoreGraphNetworkModelBuilder {
 				factory.createEdgeAssignment(pl, assignment.getSource()));
 
 	}
+	
+	
 
-	private void write(GraphNode leftVertex, GraphNode rightVertex,
-			GeoSegmentAssembler assembler, Collection<RatioSection> sections,
+	private void write(GraphNode leftVertex,
+			GraphNode rightVertex,
+			RoadEdge re,
+			Collection<LocationEntityAssignment> orderedLoctions, 
+			Collection<RatioSection> sections,
 			Collection<NetworkAssignment> networkElements) {
 
-		GeoSegment gs = assembler.getGeoSegment();
-
 		if (sections.size() == 1) {
+			
+			GeoSegmentAssembler assembler = createGeoSegmentAssembler(re, orderedLoctions,
+						sections.iterator().next().getCableConstruction()) ;
+			
+			GeoSegment gs = assembler.getGeoSegment();
+			
 			assignEquipment(assembler, networkElements);
 			graphModelBuilder.add(leftVertex, rightVertex, gs,
 					gs.getLength());
+			
+			
 		} else {
+			
+			GeoSegmentAssembler assembler = createGeoSegmentAssembler(re, orderedLoctions,
+					CableConstructionEnum.ESTIMATED) ;
+		
+		GeoSegment gs = assembler.getGeoSegment();
+	
 
 			SplitGeoSegment split = DefaultSplitSegment.splitSegments(true, gs,
 					sections);
+			
 
 			assignEquipment(split, networkElements);
 
@@ -167,10 +204,12 @@ class CoreGraphNetworkModelBuilder {
 	}
 
 	private GeoSegmentAssembler createGeoSegmentAssembler(RoadEdge re,
-			Collection<LocationEntityAssignment> orderedLocationsByRoadEdge) {
+			Collection<LocationEntityAssignment> orderedLocationsByRoadEdge, CableConstructionEnum constructionType) {
 
 		return DefaultSegmentLocations.createAssembler(null,
-				CableConstructionEnum.ESTIMATED, re.getLengthMeters(), re.getId(), re.getShape(),
+				constructionType, re.getLengthMeters(), 
+				re.getId(),
+				re.getShape(),
 				orderedLocationsByRoadEdge);
 	}
 

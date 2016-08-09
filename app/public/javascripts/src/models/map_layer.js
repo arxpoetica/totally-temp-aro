@@ -260,10 +260,8 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
           }
           _.extend(params, this.http_params || {})
           this.is_loading = true
-          var carrier = encodeURIComponent(config.client_carrier_name)
           var api_endpoint = this.api_endpoint
                                 .replace(/\:plan_id/g, (plan && plan.id) || 'none')
-                                .replace(/\:client_carrier_name/g, carrier)
 
           if (this._canceler) {
             this._canceler.promise.canceled = true

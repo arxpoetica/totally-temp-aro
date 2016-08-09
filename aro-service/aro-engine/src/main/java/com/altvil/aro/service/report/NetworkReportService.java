@@ -8,14 +8,13 @@ import com.altvil.aro.model.FiberSummaryCost;
 import com.altvil.aro.model.NetworkCostCode;
 import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.model.NetworkReportSummary;
-import com.altvil.aro.service.entity.FiberType;
-import com.altvil.interfaces.CableConstructionEnum;
+import com.altvil.interfaces.FiberCableConstructionType;
 
 public interface NetworkReportService {
 
 	
 	NetworkCostCode getCostCode(NetworkNodeType nt);
-	NetworkCostCode getCostCode(FiberType nt, CableConstructionEnum constructionType);
+	NetworkCostCode getCostCode(FiberCableConstructionType fiberConstructionType);
 
 	
 	NetworkReportSummary saveNetworkReport(SummarizedPlan plan);

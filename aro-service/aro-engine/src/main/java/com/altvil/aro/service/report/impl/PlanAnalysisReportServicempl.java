@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
-import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
@@ -35,7 +34,7 @@ import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.aro.service.report.ReportGenerator;
 import com.altvil.aro.service.report.ReportGenerator.AnalysisInput;
-import com.altvil.interfaces.CableConstructionEnum;
+import com.altvil.interfaces.FiberCableConstructionType;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
 
@@ -65,9 +64,9 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 		PriceModelBuilder b = pricingService.createBuilder("*", new Date(), new PricingContext());
 		plan.getNetworkNodes().forEach(
 				n -> b.add(n.getNetworkNodeType(), 1, n.getAtomicUnit()));
-		for (FiberType ft : FiberType.values()) {
-			//BIG TODO
-			b.add(ft, CableConstructionEnum.ESTIMATED, plan.getFiberLengthInMeters(ft));
+		
+		for (FiberCableConstructionType ft :plan.getFiberCableConstructionTypes()) {
+			b.add(ft,  plan.getFiberLengthInMeters(ft));
 		}
 
 		return b.build();

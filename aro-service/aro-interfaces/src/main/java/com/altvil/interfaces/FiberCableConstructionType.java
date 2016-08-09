@@ -16,7 +16,7 @@ public class FiberCableConstructionType {
 
 		this.code = fiberType.getCode() + "_fiber"  ;
 		if(  !cableConstructionEnum.isComputedEstimate() ) {
-			this.code += "_"  + cableConstructionEnum.getCodeName();
+			this.code += "_"  + cableConstructionEnum.getCode();
 		}
 		
 	}

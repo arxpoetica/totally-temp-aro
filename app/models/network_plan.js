@@ -138,8 +138,48 @@ module.exports = class NetworkPlan {
         return models.Network.planSummary(plan_id)
       })
       .then((summary) => {
-        output.metadata.npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'npv').value
-        output.metadata.irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'irr').value
+        var npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_npv') ||
+                  summary.networkStatistics.find((stat) => stat.networkStatisticType === 'npv')
+        var irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_irr') ||
+                  summary.networkStatistics.find((stat) => stat.networkStatisticType === 'irr')
+
+        output.metadata.npv = npv.value
+        output.metadata.irr = irr.value
+
+        var cableConstructionTypes = [
+          { name: 'arial', description: 'Aerial' },
+          { name: 'buried', description: 'Buried' },
+          { name: 'underground', description: 'Underground' },
+          { name: 'obstacle', description: 'Other' },
+          { name: 'conduit', description: 'Augmented Conduit' },
+          { name: 'estimated', description: 'Estimated Medium' }
+        ]
+
+        output.metadata.fiberTotals = { types: {}, totalLength: 0, totalCost: 0 }
+        var fiberTypes = ['distribution', 'feeder', 'backhaul']
+        fiberTypes.forEach((fiberType) => {
+          output.metadata.fiberTotals.types[fiberType] = { totalLength: 0, totalCost: 0 }
+        })
+        output.metadata.fiberDetails = cableConstructionTypes.map((type) => {
+          var obj = { types: {}, totalLength: 0, totalCost: 0, description: type.description, name: type.name }
+          fiberTypes.forEach((fiberType) => {
+            obj.types[fiberType] = { totalLength: 0, totalCost: 0 }
+          })
+          summary.priceModel.fiberCosts.filter((cost) => cost.constructionType === type.name)
+            .forEach((cost) => {
+              if (!obj.types[cost.fiberType]) return
+              obj.types[cost.fiberType].totalLength += cost.lengthMeters
+              obj.types[cost.fiberType].totalCost += cost.totalCost
+              obj.totalLength += cost.lengthMeters
+              obj.totalCost += cost.totalCost
+
+              output.metadata.fiberTotals.types[cost.fiberType].totalLength += cost.lengthMeters
+              output.metadata.fiberTotals.types[cost.fiberType].totalCost += cost.totalCost
+              output.metadata.fiberTotals.totalLength += cost.lengthMeters
+              output.metadata.fiberTotals.totalCost += cost.totalCost
+            })
+          return obj
+        })
 
         output.metadata.equipment_summary = summary.priceModel.equipmentCosts.map((item) => {
           var cost = financialCosts.find((i) => i.name === item.nodeType)
@@ -612,3 +652,12 @@ database.query('SELECT * FROM client.fiber_route_type').then((rows) => { fiberTy
 
 var entityNames = []
 database.query('SELECT * FROM client.entity_category').then((rows) => { entityNames = rows })
+
+// var cableConstructionTypes = []
+// database.query('SELECT * FROM client.cable_construction_type WHERE name <> \'estimated\' ORDER BY description ASC').then((rows) => {
+//   cableConstructionTypes = rows
+//   cableConstructionTypes.push({
+//     name: 'estimated',
+//     description: 'Estimated Medium'
+//   })
+// })

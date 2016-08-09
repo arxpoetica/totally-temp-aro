@@ -1,9 +1,8 @@
 package com.altvil.aro.service.price.engine;
 
 import com.altvil.aro.model.NetworkNodeType;
-import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.MaterialType;
-import com.altvil.interfaces.CableConstructionEnum;
+import com.altvil.interfaces.FiberCableConstructionType;
 
 public interface PriceModelBuilder {
 
@@ -16,8 +15,7 @@ public interface PriceModelBuilder {
 	PriceModelBuilder add(NetworkNodeType type, double quantity,
 			double atomicUnits);
 
-	PriceModelBuilder add(FiberType type,
-			CableConstructionEnum cableConstruction, double lengthInMeteres);
+	PriceModelBuilder add(FiberCableConstructionType ftc, double lengthInMeteres);
 
 	PriceModel build();
 

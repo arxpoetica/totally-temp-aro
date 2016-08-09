@@ -78,7 +78,7 @@ public class CoreGraphBuilderServiceImpl implements
 		while (itr.hasNext()) {
 			nb.add(itr.next());
 		}
-
+		
 		return nb.build();
 	}
 
@@ -163,9 +163,14 @@ public class CoreGraphBuilderServiceImpl implements
 				return defaultRatioSections;
 			}
 
+			List<CableConduitEdge> sortedEdges = new ArrayList<>(sections.size()) ;
+			sortedEdges.addAll(sections) ;
+			sortedEdges.sort((c1, c2) -> Double.compare(c1.getStartRatio(), c2.getStartRatio()));
+			
 			List<RatioSection> result = new ArrayList<>();
 			double previous = 0;
-			for (CableConduitEdge s : sections) {
+		
+			for (CableConduitEdge s : sortedEdges) {
 				double startRatio = s.getStartRatio();
 				if (startRatio > previous) {
 					result.add(new DefaultGeoRatioSection(previous, startRatio,

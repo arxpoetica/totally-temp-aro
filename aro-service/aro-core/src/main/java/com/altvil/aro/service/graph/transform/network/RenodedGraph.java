@@ -4,27 +4,41 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 
 public class RenodedGraph {
 
+	private GraphTransformerFactory transformFactory;
+
 	private Map<GraphAssignment, GraphNode> map;
 	private GraphModel<GeoSegment> graph;
-
 	private Map<GraphNode, List<GraphAssignment>> graphAssignmentsMap;
 
-	public RenodedGraph(Map<GraphAssignment, GraphNode> map,
-			GraphModel<GeoSegment> graph) {
+	public RenodedGraph(GraphTransformerFactory transformFactory,
+			Map<GraphAssignment, GraphNode> map, GraphModel<GeoSegment> graph) {
 		super();
+		this.transformFactory = transformFactory;
 		this.map = map;
 		this.graph = graph;
 
 		graphAssignmentsMap = index(map);
 
+	}
+
+	private RenodedGraph(GraphTransformerFactory transformFactory,
+			Map<GraphAssignment, GraphNode> map, GraphModel<GeoSegment> graph,
+			Map<GraphNode, List<GraphAssignment>> graphAssignmentsMap) {
+		super();
+		this.transformFactory = transformFactory;
+		this.map = map;
+		this.graph = graph;
+		this.graphAssignmentsMap = graphAssignmentsMap;
 	}
 
 	private static <K, T> Map<T, List<K>> index(Map<K, T> map) {
@@ -53,6 +67,11 @@ public class RenodedGraph {
 
 	public GraphModel<GeoSegment> getGraph() {
 		return graph;
+	}
+
+	public RenodedGraph transform(Function<GeoSegment, Double> f) {
+		return new RenodedGraph(transformFactory, map,
+				transformFactory.transform(graph, f), graphAssignmentsMap);
 	}
 
 }

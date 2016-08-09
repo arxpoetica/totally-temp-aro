@@ -59,7 +59,6 @@ import com.altvil.aro.service.report.NetworkStatisticsService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.aro.service.report.SummarizedPlan;
-import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.FiberCableConstructionType;
 import com.altvil.interfaces.FiberCableConstructionTypeMapping;
 import com.altvil.utils.StreamUtil;
@@ -122,9 +121,8 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	}
 
 	@Override
-	public NetworkCostCode getCostCode(FiberType ft,
-			CableConstructionEnum constructionType) {
-		return reportBuilderContext._getCostCode(ft, constructionType);
+	public NetworkCostCode getCostCode(FiberCableConstructionType type) {
+		return reportBuilderContext._getCostCode(type);
 	}
 
 	@Override
@@ -216,7 +214,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		private MappedCodes<FiberCableConstructionType, NetworkCostCode> fiberToCostCode;
 
 		private Set<FiberType> wellKnowFiber = EnumSet.of(
-				FiberType.DISTRIBUTION, FiberType.FEEDER);
+				FiberType.DISTRIBUTION, FiberType.FEEDER, FiberType.BACKBONE);
 
 		private ReportBuilderContext init() {
 
@@ -248,11 +246,9 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 					fiberToCostCode.reindexDomain(NetworkCostCode::getId));
 		}
 
-		public NetworkCostCode _getCostCode(FiberType ft,
-				CableConstructionEnum type) {
+		public NetworkCostCode _getCostCode(FiberCableConstructionType type) {
 			return fiberToCostCode
-					.getDomain(FiberCableConstructionTypeMapping.MAPPING
-							.getFiberCableConstructionType(ft, type));
+					.getDomain(type);
 		}
 
 		public NetworkCostCode _getCostCode(NetworkNodeType nt) {
@@ -430,9 +426,9 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		}
 
 		public boolean isValid(FiberCost fiberCost) {
-			return (fiberCost.getFiberType() != null
-					&& fiberCost.getTotalCost() > 0 && wellKnowFiber
-						.contains(fiberCost.getFiberType()));
+			return (fiberCost.getFiberConstructionType() != null
+					 && wellKnowFiber
+						.contains(fiberCost.getFiberConstructionType().getFiberType()));
 		}
 
 	}
@@ -492,13 +488,11 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		}
 
 		private FiberCost toFiberCost(FiberSummaryCost f) {
-			
-			FiberCableConstructionType fct = 
-					ctx.getCostCode(FiberCableConstructionType.class, f.getId().getCostCode()) ;
-			
-			return FiberCost.createFiberCost(
-					fct.getFiberType(),
-					f.getCostPerMeter(), f.getLengthMeters(), f.getTotalCost());
+
+			FiberCableConstructionType fct = ctx.getCostCode(
+					FiberCableConstructionType.class, f.getId().getCostCode());
+
+			return FiberCost.createFiberCost(fct, f.getCostPerMeter(), f.getLengthMeters(), f.getTotalCost());
 		}
 
 		private PriceModel toPriceModel(
@@ -551,12 +545,12 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 			return es;
 		}
-
+		
 		private FiberSummaryCost createFiberSummaryCost(FiberCost fiberCost) {
-
-			FiberSummaryCost fc = new FiberSummaryCost(
-					ctx.getCostCode(FiberCableConstructionTypeMapping.MAPPING.getFiberCableConstructionType(fiberCost.getFiberType(), 
-							fiberCost.getCableConstructionEnum())), reportSummary);
+			
+			FiberSummaryCost fc = new FiberSummaryCost( 
+					getCostCode(fiberCost.getFiberConstructionType()).getId(),
+					reportSummary);
 
 			fc.setCostPerMeter(fiberCost.getCostPerMeter());
 			fc.setLengthMeters(fiberCost.getLengthMeters());
