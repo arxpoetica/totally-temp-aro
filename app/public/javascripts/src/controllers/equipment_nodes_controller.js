@@ -77,7 +77,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $http.get('/network/nodes').success((response) => {
     response.forEach((node_type) => {
-      node_type.visible = true
+      // node_type.visible = true
     })
     $scope.view_node_types = _.reject(response, (type) => {
       return config.ui.map_tools.equipment.view.indexOf(type.name) === -1
