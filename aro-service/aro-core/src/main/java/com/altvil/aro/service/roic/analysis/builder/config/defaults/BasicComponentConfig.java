@@ -41,7 +41,7 @@ public class BasicComponentConfig extends AbstractConfig<ComponentInput> {
 				(inputs) -> Op.penetration(inputs.getPenetration()));
 
 		assembler.add(AnalysisCode.premises_passed,
-				(inputs) -> Op.constCurve(inputs.getEntityCount()));
+				(inputs) -> Op.constCurve(0.0));
 
 		assembler.add(AnalysisCode.subscribers_count, (inputs) -> Op.multiply(
 				AnalysisCode.penetration, AnalysisCode.houseHolds));
