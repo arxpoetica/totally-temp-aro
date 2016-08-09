@@ -241,6 +241,60 @@ exports.configure = (api, middleware) => {
     .then(jsonSuccess(response, next))
     .catch(next)
   })
+
+  api.get('/financial_profile/:plan_id/opexrecurring', (request, response, next) => {
+    var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
+    var curves = {}
+    entities.forEach((entityType) => {
+      curves[`${entityType}_bau`] = `copper.${entityType}.opex_expenses`
+      curves[`${entityType}_plan`] = `planned.${entityType}.opex_expenses`
+    })
+    var zeros = []
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves,
+      zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.bau = 0
+        obj.plan = 0
+        entities.forEach((key) => {
+          obj.bau += obj[`${key}_bau`]
+          obj.plan += obj[`${key}_plan`]
+        })
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/opexcost', (request, response, next) => {
+    var entityType = request.query.entityType
+    var curves = {
+      copper_opex_expenses: `copper.${entityType}.opex_expenses`,
+      copper_revenue: `copper.${entityType}.revenue`,
+      planned_opex_expenses: `planned.${entityType}.opex_expenses`,
+      planned_revenue: `planned.${entityType}.revenue`
+    }
+    var zeros = []
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves,
+      zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.bau = obj.copper_opex_expenses / obj.copper_revenue
+        obj.plan = obj.planned_opex_expenses / obj.planned_revenue
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
 }
 
 const requestData = (params, filter) => {

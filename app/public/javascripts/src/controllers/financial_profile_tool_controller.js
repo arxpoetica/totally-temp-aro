@@ -5,6 +5,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.premisesFilterEntityTypes = { household: true }
   $scope.subscribersFilterEntityTypes = { household: true }
   $scope.connectCapexFilterEntityTypes = { household: true }
+  $scope.opexRecurringFilterEntityTypes = { household: true }
   $scope.penetrationFilter = {
     entityType: 'household'
   }
@@ -14,6 +15,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.connectCapexFilter = 'bau'
   $scope.details = false
   $scope.arpuFilter = 'household'
+  $scope.opexCostFilter = 'household'
 
   $scope.entityTypes = {
     smallBusiness: 'SMB',
@@ -128,6 +130,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     } else if (href === '#financialProfileSubscribers') {
       showSubscribersChart(force)
       showPenetrationChart(force)
+    } else if (href === '#financialProfileOpex') {
+      showOpexRecurringChart(force)
+      showOpexCostChart(force)
     }
   }
   $scope.refreshCurrentTab = refreshCurrentTab
@@ -387,13 +392,51 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         datasetFill: false,
         bezierCurve: false,
         scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) + '%' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 1) + '%' %>` // eslint-disable-line
       }
       showChart('financial-profile-chart-penetration', 'Line', data, options)
     })
   }
   $scope.showPenetrationChart = showPenetrationChart
+
+  function showOpexRecurringChart (force) {
+    var datasets = [
+      { key: 'bau', name: 'BAU' },
+      { key: 'plan', name: 'Plan' }
+    ]
+    var entityTypes = Object.keys($scope.opexRecurringFilterEntityTypes).filter((key) => $scope.opexRecurringFilterEntityTypes[key])
+    request(force, 'opexrecurring', { entityTypes: entityTypes }, (penetration) => {
+      var data = buildChartData(penetration, datasets)
+      var options = {
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 1) %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-opex-recurring', 'Bar', data, options)
+    })
+  }
+  $scope.showOpexRecurringChart = showOpexRecurringChart
+
+  function showOpexCostChart (force) {
+    var datasets = [
+      { key: 'bau', name: 'BAU' },
+      { key: 'plan', name: 'Plan' }
+    ]
+    console.log('$scope.opexCostFilter', $scope.opexCostFilter)
+    request(force, 'opexcost', { entityType: $scope.opexCostFilter }, (penetration) => {
+      var data = buildChartData(penetration, datasets)
+      var options = {
+        datasetFill: false,
+        bezierCurve: false,
+        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) + '%' %>`, // eslint-disable-line
+        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
+        multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 1) + '%' %>` // eslint-disable-line
+      }
+      showChart('financial-profile-chart-opex-cost', 'Line', data, options)
+    })
+  }
+  $scope.showOpexCostChart = showOpexCostChart
 
   function selectedKeys (obj) {
     return Object.keys(obj).filter((item) => !!obj[item])
