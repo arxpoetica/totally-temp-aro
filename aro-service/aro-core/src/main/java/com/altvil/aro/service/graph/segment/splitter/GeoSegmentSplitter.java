@@ -35,20 +35,19 @@ public class GeoSegmentSplitter {
 	 * @param assignedVertices
 	 * @return
 	 */
+	
+	private interface EdgeWeightFunc {
+		double computeWeight(GeoSegment segment) ;
+	}
 
 	private GraphNodeFactory vertexFactory;
-	private EdgeWeightFunction edgeWeightFunction ;
+	private EdgeWeightFunc edgeWeightFunction = gs -> gs.getLength();
 
-	public GeoSegmentSplitter(GraphNodeFactory vertexFactory, EdgeWeightFunction edgeWeightFunction) {
+	public GeoSegmentSplitter(GraphNodeFactory vertexFactory) {
 		super();
 		this.vertexFactory = vertexFactory;
-		this.edgeWeightFunction = edgeWeightFunction ;
-	}
 	
-	public GeoSegmentSplitter(GraphNodeFactory vertexFactory) {
-		this(vertexFactory, geoSegment -> geoSegment.getLength()) ;
 	}
-	
 	
 
 	private void assignVertex(SplitAssignments.Builder builder,

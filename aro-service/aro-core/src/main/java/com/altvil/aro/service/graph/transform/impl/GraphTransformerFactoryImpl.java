@@ -1,5 +1,6 @@
 package com.altvil.aro.service.graph.transform.impl;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.jgrapht.EdgeFactory;
@@ -86,6 +87,14 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 				new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(f), f);
 	}
 	
+	
+
+	private <T> GraphModelBuilder<T> builder() {
+		AroEdgeFactory<T> f = new AroEdgeFactory<T>() ;
+		return new DefaultGraphBuilder<T>(factory,
+				new SimpleWeightedGraph<GraphNode, AroEdge<T>>(f), f);
+	}
+	
 
 	@Override
 	public GraphRenoder createNetworkBuilder(
@@ -105,7 +114,21 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return new DefaultGraphBuilder<T>(factory,
 				model.getGraph(), f);
 	}
+
+	@Override
+	public <T> GraphModel<T> transform(GraphModel<T> graph,
+			Function<T, Double> edgeWeight) {
 	
+	
+		GraphModelBuilder<T> b = builder() ;
+		
+		graph.getEdges().forEach(e -> {
+			b.addVertex(e.getSourceNode());
+			b.addVertex(e.getTargetNode());
+			b.add(e.getSourceNode(), e.getTargetNode(), e.getValue(), edgeWeight.apply(e.getValue())) ;
+		});
+		return b.build() ;
+	}
 	
 
 }

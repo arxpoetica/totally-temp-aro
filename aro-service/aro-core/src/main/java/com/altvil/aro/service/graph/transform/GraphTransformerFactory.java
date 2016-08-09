@@ -1,5 +1,6 @@
 package com.altvil.aro.service.graph.transform;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.jgrapht.WeightedGraph;
@@ -16,6 +17,8 @@ import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 
 public interface GraphTransformerFactory {
 
+	
+	public <T> GraphModel<T> transform(GraphModel<T> m, Function<T, Double> edgeWeight) ;
 	
 	/**
 	 * 

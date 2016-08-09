@@ -23,7 +23,6 @@ import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.splitter.EdgeAssignment;
-import com.altvil.aro.service.graph.segment.splitter.EdgeWeightFunction;
 import com.altvil.aro.service.graph.segment.splitter.GeoSegmentSplitter;
 import com.altvil.aro.service.graph.segment.splitter.SplitAssignments;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
@@ -51,44 +50,27 @@ public class GraphRenoderServiceImpl implements GraphRenoderService {
 	}
 	
 
+
 	@Override
 	public GraphRenoder createGraphRenoder(GraphModel<GeoSegment> graph,
 			boolean normalize) {
-		return createGraphRenoder(graph, normalize, geoSegment -> geoSegment.getLength());
-	}
-
-
-	@Override
-	public GraphRenoder createGraphRenoder(GraphModel<GeoSegment> graph,
-			boolean normalize, EdgeWeightFunction weightingFunction) {
 
 		GraphModelBuilder<GeoSegment> b = transformFactory
 				.createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
 						new AroEdgeFactory<GeoSegment>()));
 
 		GraphRenoder networkBuilder = new GraphRenoderImpl(graph, b, 
-				vertexFactory,
-				weightingFunction);
+				vertexFactory);
 
 		if (normalize) {
 			networkBuilder = new NormalizedRenoder(networkBuilder);
 		}
-		//
-		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap =
-		// extractAssignments(co);
-		//
-		// networkBuilder.add(assignmentMap.values());
-		// networkBuilder.renodeGraph(graph);
-
-		// Update Resolved Map with FiberSource Root Binding
-		// this.resolved.put(fiberSourceBinding.getSource(),
-		// fiberSourceBinding.getDomain());
-
+	
 		return networkBuilder;
 
 	}
 
-	private static class GraphRenoderImpl implements GraphRenoder {
+	private  class GraphRenoderImpl implements GraphRenoder {
 
 		private GraphModel<GeoSegment> graphModel ;
 		private GraphModelBuilder<GeoSegment> graphBuilder;
@@ -100,11 +82,11 @@ public class GraphRenoderServiceImpl implements GraphRenoderService {
 
 		public GraphRenoderImpl(GraphModel<GeoSegment> graphModel, 
 				GraphModelBuilder<GeoSegment> graphBuilder,
-				GraphNodeFactory graphNodeFactory, EdgeWeightFunction weightFunction) {
+				GraphNodeFactory graphNodeFactory) {
 			super();
 			this.graphModel = graphModel ;
 			this.graphBuilder = graphBuilder;
-			splitter = new GeoSegmentSplitter(graphNodeFactory, weightFunction);
+			splitter = new GeoSegmentSplitter(graphNodeFactory);
 			
 		}
 
@@ -128,7 +110,7 @@ public class GraphRenoderServiceImpl implements GraphRenoderService {
 			}
 
 			
-			return new RenodedGraph(resolvedAssignments, graphBuilder.build()) ;
+			return new RenodedGraph(transformFactory, resolvedAssignments, graphBuilder.build()) ;
 		}
 
 		/*

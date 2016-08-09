@@ -278,14 +278,13 @@ public class CoreLeastCostRoutingServiceImpl implements
 			}
 
 			GraphRenoder renoder = graphRenoderService.createGraphRenoder(
-					graphCtx.getGraphModel(), true,
-					s -> priceMap.get(s.getCableConstructionCategory()));
+					graphCtx.getGraphModel(), true);
 
 			renoder.add(extractAssignments(graphMapping).values());
 			renoder.add(assignmentFactory.createVertexAssignment(
 					fiberSourceBinding.getDomain(), graphMapping.getAroEntity()));
 			
-			cache.put(priceMap, renoded = renoder.renode());
+			cache.put(priceMap, renoded = renoder.renode().transform(s -> priceMap.get(s.getCableConstructionCategory())));
 			
 			DescribeGraph.trace(log, renoded.getGraph().getGraph());
 			
