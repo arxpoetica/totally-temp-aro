@@ -24,7 +24,6 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 	private Map<NetworkAnalysisType, RoicConfiguration> map = new EnumMap<>(
 			NetworkAnalysisType.class);
 
-
 	@Override
 	public RoicConfiguration getRoicConfiguration(
 			NetworkAnalysisType analysisType) {
@@ -32,21 +31,21 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 	}
 
 	private void register(NetworkAnalysisType type, DefaultRoicConfig config) {
-		config.init() ;
+		config.init();
 		map.put(type, config);
 	}
 
 	@PostConstruct
 	void assemble() {
-		
+
 		for (NetworkAnalysisType type : NetworkAnalysisType.values()) {
-			register(type,  new DefaultRoicConfig(type));
+			register(type, new DefaultRoicConfig(type));
 		}
 
-		register(NetworkAnalysisType.fiber,
-		new DefaultRoicConfig(NetworkAnalysisType.fiber) {
+		register(NetworkAnalysisType.fiber, new DefaultRoicConfig(
+				NetworkAnalysisType.fiber) {
 			void specialize(SpiComponentConfig<ComponentInput> componentConfig) {
-		
+
 				componentConfig.add(AnalysisCode.new_connections_count,
 						(inputs) -> Op.connectedHouseHoldsYearly(15, inputs
 								.getPenetration().getEndPenetration(), inputs
@@ -56,11 +55,10 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 						(inputs) -> Op.multiply(
 								AnalysisCode.new_connections_count,
 								inputs.getConnectionCost()));
-				
+
 				componentConfig.add(AnalysisCode.premises_passed,
-							(inputs) -> Op.growCurve(inputs.getEntityCount(),
-									inputs.getEntityGrowth()));
-						
+						(inputs) -> Op.growCurve(inputs.getEntityCount(),
+								inputs.getEntityGrowth()));
 
 			}
 
@@ -85,21 +83,35 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 
 		});
 
-		register(NetworkAnalysisType.copper_intersects,
-				new DefaultRoicConfig(NetworkAnalysisType.copper_intersects) {
-					@Override
-					protected SpiComponentRoicRegistry<ComponentInput> assembleComponents(
-							SpiComponentRoicRegistry<ComponentInput> registry) {
-						super.assembleComponents(registry);
+		register(NetworkAnalysisType.copper_intersects, new DefaultRoicConfig(
+				NetworkAnalysisType.copper_intersects) {
+			@Override
+			protected SpiComponentRoicRegistry<ComponentInput> assembleComponents(
+					SpiComponentRoicRegistry<ComponentInput> registry) {
+				super.assembleComponents(registry);
 
+				
+				for(ComponentType ct : ComponentType.values()) {
+					if( ct.isBaseComponent() ) {
 						registry.getConfig(ComponentType.household).add(
 								AnalysisCode.houseHolds_global_count,
 								(assenbler) -> Op.constCurve(0));
-
-						return registry;
 					}
+				}
+				
+				registry.getConfig(ComponentType.household).add(
+						AnalysisCode.houseHolds_global_count,
+						(assenbler) -> Op.constCurve(0));
 
-				});
+				registry.getConfig(ComponentType.cellTower).add(
+						AnalysisCode.houseHolds_global_count,
+						(assenbler) -> Op.constCurve(0));
+
+				
+				return registry;
+			}
+
+		});
 
 	}
 
