@@ -14,6 +14,7 @@ import com.altvil.interfaces.CableConstructionEnum;
 public class CableEdgeMerger {
 
 	public Collection<CableConduitEdge> merge(Collection<CableConduitEdge> edges) {
+		@SuppressWarnings("unused")
 		Map<Long, List<CableConduitEdge>> map = edges.stream().collect(
 				Collectors.groupingBy(CableConduitEdge::getEdgeId));
 
@@ -21,6 +22,7 @@ public class CableEdgeMerger {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private List<CableConduitEdge> mergeRoadEdge(List<CableConduitEdge> constructionEdges) {
 		
 		if(constructionEdges.size() <= 1 ) {
@@ -64,9 +66,9 @@ public class CableEdgeMerger {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static class OrderedConstructionEdges {
 		private TreeMap<Double, CableConduitEdge> edgeMap = new TreeMap<>() ;
-		
 		
 		
 		
