@@ -203,6 +203,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     elem.style.width = '100%'
     elem.style.height = '200px'
     var ctx = elem.getContext('2d')
+    // ctx.fillStyle = 'white'
+    // ctx.fillRect(0, 0, elem.offsetWidth, elem.offsetHeight)
     charts[id] = new Chart(ctx)[type](data, options)
     var legend = document.getElementById(id + '-legend')
     if (legend) {
@@ -491,5 +493,16 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         $scope.metadata = response.metadata
       }
     })
+  }
+
+  $scope.downloadChart = (id, name) => {
+    var canvas = document.getElementById(id)
+    var element = document.createElement('a')
+    element.setAttribute('href', canvas.toDataURL('image/png'))
+    element.setAttribute('download', name || `${id}.png`)
+    element.style.display = 'none'
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
   }
 }])
