@@ -1,13 +1,15 @@
 package com.altvil.aro.service.optimize.spi;
 
 import java.util.Optional;
-import java.util.function.Supplier;
+
+import org.springframework.context.ApplicationContext;
 
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 
 
-public interface NetworkGenerator extends Supplier<Optional<CompositeNetworkModel>> {
+public interface NetworkGenerator  {
 
+	Optional<CompositeNetworkModel> get(ApplicationContext appCtx) ;
 	boolean matches(NetworkGenerator other) ;
 	
 }

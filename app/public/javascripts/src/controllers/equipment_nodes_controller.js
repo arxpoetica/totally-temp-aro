@@ -26,7 +26,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     declarativeStyles: (feature, styles) => {
       styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${feature.getProperty('name')}.png`
     }
-
   })
   network_nodes_layer.hide_in_ui = true
 
@@ -34,7 +33,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     name: config.ui.labels.fiber,
     type: 'fiber_plant',
     short_name: 'F',
-    api_endpoint: '/network/fiber_plant/:client_carrier_name',
+    api_endpoint: '/network/fiber_plant/current_carrier',
     style_options: {
       normal: {
         strokeColor: config.ui.colors.fiber,
@@ -78,7 +77,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $http.get('/network/nodes').success((response) => {
     response.forEach((node_type) => {
-      node_type.visible = true
+      // node_type.visible = true
     })
     $scope.view_node_types = _.reject(response, (type) => {
       return config.ui.map_tools.equipment.view.indexOf(type.name) === -1

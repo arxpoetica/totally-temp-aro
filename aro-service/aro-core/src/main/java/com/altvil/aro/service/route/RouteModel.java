@@ -14,24 +14,25 @@ import com.altvil.interfaces.NetworkAssignment;
 
 public interface RouteModel {
 
-	public GraphModel<GeoSegment> getModel();
+	Collection<AroEdge<GeoSegment>> planRoute(GraphNode src,
+			Collection<GraphNode> targets);
 
-	public GraphNode getVertex(NetworkAssignment networkAssignment);
-	
-	public Assignment<GraphEdgeAssignment, GraphNode> createEdgeAssignment(NetworkAssignment networkAssignment) ;
+	Collection<SourceRoute<GraphNode, AroEdge<GeoSegment>>> planRoute(
+			Collection<GraphNode> sources, Collection<GraphNode> targets);
 
-	public Collection<GraphNode> getVertices(
+	GraphModel<GeoSegment> getModel();
+
+	GraphNode getVertex(NetworkAssignment networkAssignment);
+
+	Assignment<GraphEdgeAssignment, GraphNode> createEdgeAssignment(
+			NetworkAssignment networkAssignment);
+
+	Collection<GraphNode> getVertices(
 			Collection<NetworkAssignment> networkAssignment);
 
-	public GraphNode getVertex(GraphAssignment a);
+	GraphNode getVertex(GraphAssignment a);
 
-	public Collection<AroEdge<GeoSegment>> planRoute(GraphNode src,
-			Collection<GraphNode> targets);
-	
-	public Collection<SourceRoute<GraphNode, AroEdge<GeoSegment>>> planRoute(Collection<GraphNode> sources,
-			Collection<GraphNode> targets);
-	
-	public Collection<NetworkAssignment> getNetworkAssignments(GraphNode graphNode) ; 
+	Collection<NetworkAssignment> getNetworkAssignments(GraphNode graphNode);
 
-	Collection<GraphAssignment> getGraphAssignments(GraphNode graphNode); 
+	Collection<GraphAssignment> getGraphAssignments(GraphNode graphNode);
 }

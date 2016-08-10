@@ -130,13 +130,19 @@ public class OptimizationPlannerServiceImpl implements
 
 		OptimizedMasterPlan optimize(MasterOptimizationRequest request) {
 
-			Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
-
-			Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
-					request.getOptimizationConstraints(), plannedNetworks);
-
-			return masterPlanningService.save(new GeneratedMasterPlanImpl(
-					request, optimizedNetworks));
+			try {
+			
+				Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
+	
+				Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
+						request.getOptimizationConstraints(), plannedNetworks);
+	
+				return masterPlanningService.save(new GeneratedMasterPlanImpl(
+						request, optimizedNetworks));
+			} catch( Throwable err ) {
+				log.error(err.getMessage(), err);
+				throw new RuntimeException(err.getMessage(), err) ;
+			}
 
 		}
 
@@ -195,8 +201,14 @@ public class OptimizationPlannerServiceImpl implements
 				OptimizationConstraints constraints,
 				Collection<PlannedNetwork> plannedNetworks) {
 
-			return plannedNetworks.stream().map(p -> reify(constraints, p))
-					.collect(Collectors.toList());
+			try{
+			
+				return plannedNetworks.stream().map(p -> reify(constraints, p))
+						.collect(Collectors.toList());
+			} catch( Throwable err ) {
+				log.error(err.getMessage(), err);
+				throw new RuntimeException(err.getMessage(), err) ;
+			}
 
 		}
 

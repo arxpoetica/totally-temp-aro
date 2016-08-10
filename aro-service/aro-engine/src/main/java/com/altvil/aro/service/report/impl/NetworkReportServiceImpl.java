@@ -59,6 +59,8 @@ import com.altvil.aro.service.report.NetworkStatisticsService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.aro.service.report.SummarizedPlan;
+import com.altvil.interfaces.FiberCableConstructionType;
+import com.altvil.interfaces.FiberCableConstructionTypeMapping;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.reflexive.DefaultMappedCodes;
 import com.altvil.utils.reflexive.MappedCodes;
@@ -119,8 +121,8 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 	}
 
 	@Override
-	public NetworkCostCode getCostCode(FiberType ft) {
-		return reportBuilderContext._getCostCode(ft);
+	public NetworkCostCode getCostCode(FiberCableConstructionType type) {
+		return reportBuilderContext._getCostCode(type);
 	}
 
 	@Override
@@ -209,10 +211,10 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		private Map<Class<?>, MappedCodes<Integer, ?>> codeToEnumMapping = new HashMap<>();
 
 		private MappedCodes<NetworkNodeType, NetworkCostCode> nodeToCostCode;
-		private MappedCodes<FiberType, NetworkCostCode> fiberToCostCode;
+		private MappedCodes<FiberCableConstructionType, NetworkCostCode> fiberToCostCode;
 
 		private Set<FiberType> wellKnowFiber = EnumSet.of(
-				FiberType.DISTRIBUTION, FiberType.FEEDER);
+				FiberType.DISTRIBUTION, FiberType.FEEDER, FiberType.BACKBONE);
 
 		private ReportBuilderContext init() {
 
@@ -240,12 +242,13 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 			registerCostCodes(NetworkNodeType.class,
 					nodeToCostCode.reindexDomain(NetworkCostCode::getId));
-			registerCostCodes(FiberType.class,
+			registerCostCodes(FiberCableConstructionType.class,
 					fiberToCostCode.reindexDomain(NetworkCostCode::getId));
 		}
 
-		public NetworkCostCode _getCostCode(FiberType ft) {
-			return fiberToCostCode.getDomain(ft);
+		public NetworkCostCode _getCostCode(FiberCableConstructionType type) {
+			return fiberToCostCode
+					.getDomain(type);
 		}
 
 		public NetworkCostCode _getCostCode(NetworkNodeType nt) {
@@ -378,13 +381,26 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 		}
 
-		private MappedCodes<FiberType, NetworkCostCode> createFiberMapping(
+		private MappedCodes<FiberCableConstructionType, NetworkCostCode> createFiberMapping(
 				Map<Integer, NetworkCostCode> codeMap) {
 
-			return DefaultMappedCodes
-					.create(createAssociationMap(networkCostCodeRepository
-							.queryCostCodeToFiberTypeOrdinal(), codeMap,
-							FiberType.class));
+			Map<String, NetworkCostCode> map = StreamUtil.hash(
+					codeMap.values(), NetworkCostCode::getName);
+
+			Map<FiberCableConstructionType, NetworkCostCode> result = new HashMap<>();
+
+			for (FiberCableConstructionType fct : FiberCableConstructionTypeMapping.MAPPING
+					.getPriceCodedCableTypes()) {
+
+				NetworkCostCode ncc = map.get(fct.getCode());
+				if (ncc == null) {
+					throw new RuntimeException("Failed go map " + fct);
+				}
+
+				result.put(fct, ncc);
+			}
+
+			return DefaultMappedCodes.createMapping(result);
 
 		}
 
@@ -410,9 +426,9 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		}
 
 		public boolean isValid(FiberCost fiberCost) {
-			return (fiberCost.getFiberType() != null
-					&& fiberCost.getTotalCost() > 0 && wellKnowFiber
-						.contains(fiberCost.getFiberType()));
+			return (fiberCost.getFiberConstructionType() != null
+					 && wellKnowFiber
+						.contains(fiberCost.getFiberConstructionType().getFiberType()));
 		}
 
 	}
@@ -472,9 +488,11 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 		}
 
 		private FiberCost toFiberCost(FiberSummaryCost f) {
-			return FiberCost.createFiberCost(
-					ctx.getCostCode(FiberType.class, f.getId().getCostCode()),
-					f.getCostPerMeter(), f.getLengthMeters(), f.getTotalCost());
+
+			FiberCableConstructionType fct = ctx.getCostCode(
+					FiberCableConstructionType.class, f.getId().getCostCode());
+
+			return FiberCost.createFiberCost(fct, f.getCostPerMeter(), f.getLengthMeters(), f.getTotalCost());
 		}
 
 		private PriceModel toPriceModel(
@@ -527,16 +545,17 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 			return es;
 		}
-
+		
 		private FiberSummaryCost createFiberSummaryCost(FiberCost fiberCost) {
-
-			FiberSummaryCost fc = new FiberSummaryCost(
-					ctx.getCostCode(fiberCost.getFiberType()), reportSummary);
+			
+			FiberSummaryCost fc = new FiberSummaryCost( 
+					getCostCode(fiberCost.getFiberConstructionType()).getId(),
+					reportSummary);
 
 			fc.setCostPerMeter(fiberCost.getCostPerMeter());
 			fc.setLengthMeters(fiberCost.getLengthMeters());
 			fc.setTotalCost(fiberCost.getTotalCost());
-			
+
 			return fc;
 		}
 

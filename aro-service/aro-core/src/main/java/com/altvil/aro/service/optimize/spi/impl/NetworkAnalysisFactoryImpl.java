@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
@@ -45,7 +46,6 @@ import com.altvil.aro.service.optimize.spi.ParentResolver;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.NetworkModel;
-import com.altvil.aro.service.plan.PlanService;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.utils.StreamUtil;
 import com.google.inject.Inject;
@@ -57,6 +57,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkAnalysisFactoryImpl.class.getName());
 
+	private ApplicationContext applicationContext ;
 	private GraphTransformerFactory graphTransformerFactory;
 
 	// private PlanService planService;
@@ -65,9 +66,10 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 	@Inject
 	public NetworkAnalysisFactoryImpl(
 			GraphTransformerFactory graphTransformerFactory,
-			PlanService planService) {
+			ApplicationContext applicationContext) {
 		super();
 		this.graphTransformerFactory = graphTransformerFactory;
+		this.applicationContext = applicationContext ;
 		// this.planService = planService;
 	}
 
@@ -112,6 +114,15 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 			init();
 		}
+		
+		
+
+		@Override
+		public <S> S getService(Class<S> api) {
+			return applicationContext.getBean(api) ;
+		}
+
+
 
 		@Override
 		public boolean debugContains(GeneratingNode node) {
@@ -207,7 +218,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public Optional<CompositeNetworkModel> createNetworkModel() {
-			return networkModelBuilder.createModel(StreamUtil.map(
+			return networkModelBuilder.createModel(applicationContext, StreamUtil.map(
 					rejectedLocations, AroEntity::getObjectId));
 		}
 
@@ -281,13 +292,13 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 			//
 
 			networkModel = model;
-
+			
 			model.getFiberSourceMapping();
 
 			GraphEdgeAssignment coEdgeAssignment = model
 					.getFiberSourceMapping().getGraphAssignment();
 
-			GraphNode coVertex = model.getVertex(coEdgeAssignment);
+			GraphNode coVertex = model.getVertex(FiberType.FEEDER, coEdgeAssignment);
 
 			Builder source = createSource(coEdgeAssignment);
 
@@ -385,9 +396,8 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		}
 
 		@Override
-		public Optional<CompositeNetworkModel> get() {
-
-			return networkModelBuilder.createModel(Arrays.asList(ArrayUtils.toObject(rejectedLocations)));
+		public Optional<CompositeNetworkModel> get(ApplicationContext applicationContext) {
+			return networkModelBuilder.createModel(applicationContext, rejectedLocations);
 		}
 
 		@Override

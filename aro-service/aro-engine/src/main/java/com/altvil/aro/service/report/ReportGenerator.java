@@ -2,14 +2,26 @@ package com.altvil.aro.service.report;
 
 import java.util.Collection;
 
-import com.altvil.aro.service.price.engine.PriceModel;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.utils.func.Aggregator;
 
 public interface ReportGenerator {
 
-	public  Collection<NetworkStatistic> generateNetworkStatistics(
-			GeneratedPlan plan, PriceModel priceModel);
+	
+	//TODO Unify API with ROIC and reduce the number of interfaces
+	public interface AnalysisInput {
+		int getYears();
 
-	public  Aggregator<Collection<NetworkStatistic>> createAggregator();
+		double getDiscountRate();
+
+		double getFixedCost();
+
+		NetworkDemandSummary getNetworkDemandSummary();
+
+	}
+
+	Collection<NetworkStatistic> createNetworkStatistic(AnalysisInput input);
+
+	Aggregator<Collection<NetworkStatistic>> createAggregator();
 
 }

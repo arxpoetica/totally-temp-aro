@@ -138,8 +138,48 @@ module.exports = class NetworkPlan {
         return models.Network.planSummary(plan_id)
       })
       .then((summary) => {
-        output.metadata.npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'npv').value
-        output.metadata.irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'irr').value
+        var npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_npv') ||
+                  summary.networkStatistics.find((stat) => stat.networkStatisticType === 'npv')
+        var irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_irr') ||
+                  summary.networkStatistics.find((stat) => stat.networkStatisticType === 'irr')
+
+        output.metadata.npv = npv.value
+        output.metadata.irr = irr.value
+
+        var cableConstructionTypes = [
+          { name: 'arial', description: 'Aerial' },
+          { name: 'buried', description: 'Buried' },
+          { name: 'underground', description: 'Underground' },
+          { name: 'obstacle', description: 'Other' },
+          { name: 'conduit', description: 'Augmented Conduit' },
+          { name: 'estimated', description: 'Estimated Medium' }
+        ]
+
+        output.metadata.fiberTotals = { types: {}, totalLength: 0, totalCost: 0 }
+        var fiberTypes = ['distribution', 'feeder', 'backhaul']
+        fiberTypes.forEach((fiberType) => {
+          output.metadata.fiberTotals.types[fiberType] = { totalLength: 0, totalCost: 0 }
+        })
+        output.metadata.fiberDetails = cableConstructionTypes.map((type) => {
+          var obj = { types: {}, totalLength: 0, totalCost: 0, description: type.description, name: type.name }
+          fiberTypes.forEach((fiberType) => {
+            obj.types[fiberType] = { totalLength: 0, totalCost: 0 }
+          })
+          summary.priceModel.fiberCosts.filter((cost) => cost.constructionType === type.name)
+            .forEach((cost) => {
+              if (!obj.types[cost.fiberType]) return
+              obj.types[cost.fiberType].totalLength += cost.lengthMeters
+              obj.types[cost.fiberType].totalCost += cost.totalCost
+              obj.totalLength += cost.lengthMeters
+              obj.totalCost += cost.totalCost
+
+              output.metadata.fiberTotals.types[cost.fiberType].totalLength += cost.lengthMeters
+              output.metadata.fiberTotals.types[cost.fiberType].totalCost += cost.totalCost
+              output.metadata.fiberTotals.totalLength += cost.lengthMeters
+              output.metadata.fiberTotals.totalCost += cost.totalCost
+            })
+          return obj
+        })
 
         output.metadata.equipment_summary = summary.priceModel.equipmentCosts.map((item) => {
           var cost = financialCosts.find((i) => i.name === item.nodeType)
@@ -161,6 +201,7 @@ module.exports = class NetworkPlan {
 
         output.metadata.equipment_cost = output.metadata.equipment_summary.reduce((total, item) => item.totalCost + total, 0)
         output.metadata.fiber_cost = output.metadata.fiber_summary.reduce((total, item) => item.totalCost + total, 0)
+        output.metadata.fiber_length = output.metadata.fiber_summary.reduce((total, item) => item.lengthMeters + total, 0)
 
         plan.total_cost = output.metadata.equipment_cost + output.metadata.fiber_cost
 
@@ -235,6 +276,15 @@ module.exports = class NetworkPlan {
       })
   }
 
+  static findWirecenterPlan (plan_id, wirecenter_id) {
+    var params = [plan_id, wirecenter_id]
+    return database.findOne('SELECT id FROM client.plan WHERE parent_plan_id=$1 AND wirecenter_id=$2', params)
+      .then((row) => {
+        if (!row) return {}
+        return this.findPlan(row.id, true)
+      })
+  }
+
   static findAll (user, options) {
     var text = options.text
     var sortField = options.sortField
@@ -243,7 +293,6 @@ module.exports = class NetworkPlan {
     var minimumCost = options.minimumCost
     var maximumCost = options.maximumCost
 
-    console.log('arguments', arguments)
     var num = 20
     var sortFields = [
       'name', 'created_at', 'updated_at',
@@ -266,11 +315,12 @@ module.exports = class NetworkPlan {
           FROM client.plan
           LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
           LEFT JOIN auth.users ON users.id = permissions.user_id
+          WHERE plan.plan_type='M'
         `
         var params = [config.client_carrier_name]
         if (user) {
           params.push(user.id)
-          sql += ` WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$${params.length})`
+          sql += ` AND plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$${params.length})`
         }
         if (text) {
           params.push(`%${text}%`)
@@ -602,3 +652,12 @@ database.query('SELECT * FROM client.fiber_route_type').then((rows) => { fiberTy
 
 var entityNames = []
 database.query('SELECT * FROM client.entity_category').then((rows) => { entityNames = rows })
+
+// var cableConstructionTypes = []
+// database.query('SELECT * FROM client.cable_construction_type WHERE name <> \'estimated\' ORDER BY description ASC').then((rows) => {
+//   cableConstructionTypes = rows
+//   cableConstructionTypes.push({
+//     name: 'estimated',
+//     description: 'Estimated Medium'
+//   })
+// })

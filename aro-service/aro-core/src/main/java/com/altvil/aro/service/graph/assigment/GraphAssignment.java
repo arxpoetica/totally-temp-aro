@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Point;
 
 public interface GraphAssignment {
 
+	public Long getId() ;
 	public AroEntity getAroEntity();
 	public Point getPoint() ;
 	

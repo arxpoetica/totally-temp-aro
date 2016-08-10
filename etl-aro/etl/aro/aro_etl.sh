@@ -54,3 +54,5 @@ ${PSQL} -a -f $DIR/create_aro_cities.sql
 ${PSQL} -a -f $DIR/create_aro_algorithms.sql
 
 ${PSQL} -a -f $DIR/calculate_aro_locations_totals.sql
+
+${PSQL} -a -f $DIR/calculate_locations_dn_entity_categories.sql

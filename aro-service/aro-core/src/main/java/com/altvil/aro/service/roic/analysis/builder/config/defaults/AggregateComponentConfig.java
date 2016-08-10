@@ -19,7 +19,7 @@ public class AggregateComponentConfig<T> extends AbstractConfig<T> {
 	public Collection<CurveIdentifier> getGroupByCurves(
 			Collection<CurveIdentifier> existingCurves) {
 		return StreamUtil.filter(existingCurves,
-				id -> !id.equals(AnalysisCode.penetration));
+				id -> !id.equals(AnalysisCode.penetration) || !id.equals(AnalysisCode.subscribers_penetration));
 	}
 
 	@Override
@@ -35,6 +35,11 @@ public class AggregateComponentConfig<T> extends AbstractConfig<T> {
 		assembler.add(AnalysisCode.penetration, (inputs) -> Op.divide(
 				AnalysisCode.subscribers_penetration,
 				AnalysisCode.houseHolds_global_count));
+		
+		assembler.add(AnalysisCode.subscribers_penetration, (inputs) -> Op.divide(
+				AnalysisCode.subscribers_count,
+				AnalysisCode.houseHolds_global_count));
+
 
 		return assembler;
 	}

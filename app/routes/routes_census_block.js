@@ -12,6 +12,13 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/census_blocks/all', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    models.CensusBlock.findAllNbmCarriers(viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/census_blocks/:carrier', middleware.viewport, (request, response, next) => {
     var carrier = request.params.carrier
     var viewport = request.viewport

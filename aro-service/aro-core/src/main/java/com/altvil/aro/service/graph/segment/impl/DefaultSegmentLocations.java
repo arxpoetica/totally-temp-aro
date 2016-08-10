@@ -1,5 +1,12 @@
 package com.altvil.aro.service.graph.segment.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
@@ -9,6 +16,9 @@ import com.altvil.aro.service.graph.segment.AroRoadLocation;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.segment.splitter.GeoSegmentSplitter;
+import com.altvil.aro.service.graph.segment.transform.GeoSegmentTransform;
+import com.altvil.aro.service.graph.segment.transform.TransformFactory;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
@@ -16,15 +26,9 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler {
-	private GeoSegment parent;
+	private GeoSegmentTransform transform;
+	private CableConstructionEnum cableConstruction;
 	private double length;
 	private Long gid;
 	private Geometry geometry;
@@ -33,14 +37,17 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	private double angleInRadians;
 	private double geometryLength;
 
-	private DefaultSegmentLocations(GeoSegment parent, double length, Long gid,
-			Geometry geometry, List<GraphEdgeAssignment> locations) {
+	private DefaultSegmentLocations(GeoSegmentTransform transform,
+			CableConstructionEnum cableConstruction,
+			double length, Long gid, Geometry geometry,
+			List<GraphEdgeAssignment> locations) {
 		super();
-
-		this.parent = parent;
+		
+		this.transform = transform;
+		this.cableConstruction = cableConstruction ;
 
 		if (geometry == null || geometry.getLength() == 0) {
-			 throw new RuntimeException("BANG BANG") ;
+			throw new RuntimeException("BANG BANG");
 		}
 
 		this.length = length;
@@ -55,25 +62,29 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 			throw new IllegalArgumentException("Negative length " + this.length);
 	}
 
-	protected DefaultSegmentLocations(GeoSegment parent, double length,
-			Long gid, Geometry geometry) {
-		this(parent, length, gid, geometry, new ArrayList<>());
+	private DefaultSegmentLocations(GeoSegmentTransform transform,
+			CableConstructionEnum cableConstruction,
+			double length, Long gid, Geometry geometry) {
+		this(transform, cableConstruction, length, gid, geometry, new ArrayList<>());
 	}
 
-	public static GeoSegment create(GeoSegment parent, double length, Long gid,
+//	public static GeoSegment create(GeoSegmentTransform parent, double length,
+//			Long gid, Geometry geometry,
+//			Collection<LocationEntityAssignment> roadLocations) {
+//
+//		return createAssembler(parent, length, gid, geometry, roadLocations)
+//				.getGeoSegment();
+//	}
+	
+	
+
+	public static GeoSegmentAssembler createAssembler(
+			GeoSegmentTransform transform, CableConstructionEnum cableConstruction, double length, Long gid,
 			Geometry geometry,
 			Collection<LocationEntityAssignment> roadLocations) {
 
-		return createAssembler(parent, length, gid, geometry, roadLocations)
-				.getGeoSegment();
-	}
-
-	public static GeoSegmentAssembler createAssembler(GeoSegment parent,
-			double length, Long gid, Geometry geometry,
-			Collection<LocationEntityAssignment> roadLocations) {
-
-		final DefaultSegmentLocations seg = new DefaultSegmentLocations(parent,
-				length, gid, geometry);
+		final DefaultSegmentLocations seg = new DefaultSegmentLocations(
+				transform, cableConstruction, length, gid, geometry);
 
 		seg.assign(StreamUtil.map(roadLocations,
 				a -> GraphAssignmentFactoryImpl.FACTORY
@@ -98,15 +109,21 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 	}
 
 	@Override
-	public GeoSegment getParentSegment() {
-		return parent;
+	public GeoSegmentTransform getParentTransform() {
+		return transform;
+	}
+		
+
+	@Override
+	public CableConstructionEnum getCableConstructionCategory() {
+		return cableConstruction ;
 	}
 
 	@Override
 	public GeoSegment getRootSegment() {
 		GeoSegment gs = this;
-		while (gs.getParentSegment() != null) {
-			gs = gs.getParentSegment();
+		while (gs.getParentTransform() != null) {
+			gs = gs.getParentTransform().getTargetGeoSegment();
 		}
 		return gs;
 	}
@@ -122,7 +139,9 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("gid", gid).append("length", length).append("roadLocations", roadLocations).toString();
+		return new ToStringBuilder(this).append("gid", gid)
+				.append("length", length)
+				.append("roadLocations", roadLocations).toString();
 	}
 
 	@Override
@@ -186,52 +205,55 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	@Override
 	public Collection<GraphEdgeAssignment> getGeoSegmentAssignments() {
-		//KJG I'm hoping that this is no longer needed
-//		if (parent != null) {
-//			return new AbstractCollection<GraphEdgeAssignment>() {
-//				@Override
-//				public Iterator<GraphEdgeAssignment> iterator() {
-//					@SuppressWarnings("unchecked")
-//					final Iterator<GraphEdgeAssignment>[] iterators =new Iterator[]{ roadLocations.iterator(), parent.getGeoSegmentAssignments().iterator()};
-//					
-//					return new Iterator<GraphEdgeAssignment>() {
-//						int itr = 0;
-//						@Override
-//						public boolean hasNext() {
-//							while (itr < iterators.length) {
-//								if (iterators[itr].hasNext()) {
-//									return true;
-//								}
-//								itr++;
-//							}
-//							
-//							return false;
-//						}
-//
-//						@Override
-//						public GraphEdgeAssignment next() {
-//							return iterators[itr].next();
-//						}
-//
-//						@Override
-//						public void remove() {
-//							iterators[itr].remove();
-//						}						
-//					};
-//				}
-//
-//				@Override
-//				public int size() {
-//					return roadLocations.size() + parent.getGeoSegmentAssignments().size();
-//				}
-//
-//				@Override
-//				public boolean add(GraphEdgeAssignment e) {
-//					return roadLocations.add(e);
-//				}
-//			};
-//		}
-		
+		// KJG I'm hoping that this is no longer needed
+		// if (parent != null) {
+		// return new AbstractCollection<GraphEdgeAssignment>() {
+		// @Override
+		// public Iterator<GraphEdgeAssignment> iterator() {
+		// @SuppressWarnings("unchecked")
+		// final Iterator<GraphEdgeAssignment>[] iterators =new Iterator[]{
+		// roadLocations.iterator(),
+		// parent.getGeoSegmentAssignments().iterator()};
+		//
+		// return new Iterator<GraphEdgeAssignment>() {
+		// int itr = 0;
+		// @Override
+		// public boolean hasNext() {
+		// while (itr < iterators.length) {
+		// if (iterators[itr].hasNext()) {
+		// return true;
+		// }
+		// itr++;
+		// }
+		//
+		// return false;
+		// }
+		//
+		// @Override
+		// public GraphEdgeAssignment next() {
+		// return iterators[itr].next();
+		// }
+		//
+		// @Override
+		// public void remove() {
+		// iterators[itr].remove();
+		// }
+		// };
+		// }
+		//
+		// @Override
+		// public int size() {
+		// return roadLocations.size() +
+		// parent.getGeoSegmentAssignments().size();
+		// }
+		//
+		// @Override
+		// public boolean add(GraphEdgeAssignment e) {
+		// return roadLocations.add(e);
+		// }
+		// };
+		// }
+
 		return roadLocations;
 	}
 
@@ -248,7 +270,7 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 	@Override
 	public GeoSegment reverse() {
-		DefaultSegmentLocations seg = new DefaultSegmentLocations(this, length,
+		DefaultSegmentLocations seg = new DefaultSegmentLocations(TransformFactory.FACTORY.createFlippedTransform(this), cableConstruction, length,
 				gid, geometry.reverse(), new ArrayList<>());
 
 		seg.reverseOriginalLocations(this);
@@ -338,41 +360,43 @@ public class DefaultSegmentLocations implements GeoSegment, GeoSegmentAssembler 
 
 		private AroRoadLocation location;
 		// private double totalDistanceToVertex;
-		private double offset ;
+		private double offset;
 
 		public PinnedLocationImpl(AroRoadLocation location,
 				double offsetInMeters) {
 			this.location = location;
-			this.offset =  offsetInMeters ;
-		}
-		
-		public String toString() {
-			return new ToStringBuilder(this).append("location", location).append("offset", offset).toString();
+			this.offset = offsetInMeters;
 		}
 
+		public String toString() {
+			return new ToStringBuilder(this).append("location", location)
+					.append("offset", offset).toString();
+		}
 
 		public PinnedLocationImpl(AroRoadLocation location) {
 			this(location, 0.0);
 		}
-		
+
 		@Override
 		public double offsetFrom(PinnedLocation other) {
-			return (getOffsetFromStartVertex() - other.getOffsetFromStartVertex()) + (other.getOffset() - getOffset()) ;
+			return (getOffsetFromStartVertex() - other
+					.getOffsetFromStartVertex())
+					+ (other.getOffset() - getOffset());
 		}
-		
+
 		@Override
 		public double getEffectiveOffsetFromEndVertex() {
-			return getOffsetFromEndVertex() + getOffset() ;
+			return getOffsetFromEndVertex() + getOffset();
 		}
 
 		@Override
 		public double getEffectiveOffsetFromStartVertex() {
-			return getOffsetFromStartVertex() + getOffset() ;
+			return getOffsetFromStartVertex() + getOffset();
 		}
 
 		@Override
 		public double getOffset() {
-			return offset ;
+			return offset;
 		}
 
 		@Override

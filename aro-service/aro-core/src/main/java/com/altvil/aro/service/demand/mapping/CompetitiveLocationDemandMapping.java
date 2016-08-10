@@ -3,6 +3,8 @@ package com.altvil.aro.service.demand.mapping;
 import java.util.EnumMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.altvil.aro.service.demand.DemandMapping;
 import com.altvil.aro.service.demand.analysis.spi.EntityDemandMapping;
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -111,4 +113,7 @@ public class CompetitiveLocationDemandMapping implements DemandMapping,
 		return edm == null ? zeroDemand : edm;
 	}
 
+	public String toString() {
+		return new ToStringBuilder(this).append("competitiveStrength", competitiveStrength).append("blockId", blockId).append("map", map).build();
+	}
 }

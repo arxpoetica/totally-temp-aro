@@ -106,4 +106,13 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  // Return data of an existing wirecenter plan
+  api.get('/network_plan/:plan_id/:wirecenter_id', check_any_permission, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var wirecenter_id = request.params.wirecenter_id
+    models.NetworkPlan.findWirecenterPlan(plan_id, wirecenter_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

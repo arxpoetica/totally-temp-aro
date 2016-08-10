@@ -55,9 +55,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		if (markedEdges.size() > 0) {
 
 			AllShortestPaths<GraphNode, AroEdge<T>> shortestPaths = new AllShortestPaths<GraphNode, AroEdge<T>>(
-					graphModel.getGraph(),
-					(g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<T>>(
-							g, s), src);
+					graphModel.getGraph(), ScalarClosestFirstSurfaceIterator.BUILDER, src);
 
 			Set<GraphNode> vertices = toVertices(markedEdges);
 

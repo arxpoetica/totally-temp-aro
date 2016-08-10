@@ -12,21 +12,35 @@ import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 public interface RoicComponent extends RoicAnalysis {
 	
 	public enum ComponentType {
-		undefined(null),
+		undefined(false, null),
 		smallBusiness(LocationEntityType.small),
 		mediumBusiness(LocationEntityType.medium),
 		largeBusiness(LocationEntityType.large),
 		household(LocationEntityType.household),
 		cellTower(LocationEntityType.celltower),
-		network(null),
+		network(false, null),
 		
 		;
 		
-		LocationEntityType locationEntityType ;
+		
+		private boolean baseComponent ;
+		private LocationEntityType locationEntityType ;
 
-		private ComponentType(LocationEntityType locationEntityType) {
+		private ComponentType(boolean baseComponent, LocationEntityType locationEntityType) {
+			this.baseComponent = baseComponent ;
 			this.locationEntityType = locationEntityType;
 		}
+		private ComponentType( LocationEntityType locationEntityType) {
+			this(true, locationEntityType) ;
+		}
+		public boolean isBaseComponent() {
+			return baseComponent;
+		}
+		public LocationEntityType getLocationEntityType() {
+			return locationEntityType;
+		}
+		
+		
 		
 		
 		

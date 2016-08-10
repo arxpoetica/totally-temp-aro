@@ -19,12 +19,11 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.service.optimization.strategy.spi.FinancialAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
-import com.altvil.aro.service.price.engine.PriceModel;
-import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.aro.service.report.NetworkStatistic;
 import com.altvil.aro.service.report.NetworkStatisticType;
 import com.altvil.aro.service.report.NetworkStatisticsService;
 import com.altvil.aro.service.report.ReportGenerator;
+import com.altvil.aro.service.report.ReportGenerator.AnalysisInput;
 import com.altvil.aro.service.roic.RoicFinancialInput;
 import com.altvil.utils.func.Aggregator;
 
@@ -73,7 +72,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 				NetworkStatisticType.class);
 
 		public Builder add(NetworkStatisticType type,
-				GeneratorFunc<GeneratedPlan> scalarFunc,
+				GeneratorFunc<AnalysisInput> scalarFunc,
 				GeneratorFunc<List<NetworkStatistic>> aggragteFunc) {
 
 			lineItemGenerators.put(type, new NetworkStatisticGenerator(type,
@@ -83,7 +82,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 		}
 
 		public Builder add(NetworkStatisticType type,
-				GeneratorFunc<GeneratedPlan> scalarFunc) {
+				GeneratorFunc<AnalysisInput> scalarFunc) {
 			return add(type, scalarFunc, Average.FUNC);
 		}
 
@@ -103,33 +102,33 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			this.lineItemGenerators = lineItemGenerators;
 		}
 
-		private RoicFinancialInput toNetworkFinancialInput(GeneratedPlan plan,
-				PriceModel priceModel) {
+		private RoicFinancialInput toNetworkFinancialInput(
+				NetworkDemandSummary networkDemandSummary, double fixedCosts) {
 			return new RoicFinancialInput() {
-
 				@Override
 				public double getFixedCosts() {
-					return priceModel.getTotalCost();
+					return fixedCosts;
 				}
 
 				@Override
 				public NetworkDemandSummary getDemandSummary() {
-					return plan.getDemandSummary();
+					return networkDemandSummary;
 				}
 			};
 
 		}
 
 		@Override
-		public Collection<NetworkStatistic> generateNetworkStatistics(
-				GeneratedPlan plan, PriceModel priceModel) {
+		public Collection<NetworkStatistic> createNetworkStatistic(
+				AnalysisInput input) {
 
 			FinancialAnalysis fa = planAnalysisService.createFinancialAnalysis(
-					toNetworkFinancialInput(plan, priceModel), plan
-							.getOptimizationConstraints().getYears(), plan
-							.getOptimizationConstraints().getDiscountRate());
+					toNetworkFinancialInput(input.getNetworkDemandSummary(),
+							input.getFixedCost()), input.getYears(), input
+							.getDiscountRate());
 
-			return new ScalarReducer(lineItemGenerators, plan, fa).generate();
+			return new ScalarReducer(lineItemGenerators, input, fa).generate();
+
 		}
 
 		@Override
@@ -157,11 +156,11 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 	private static class NetworkStatisticGenerator {
 
 		private NetworkStatisticType type;
-		private GeneratorFunc<GeneratedPlan> scalarFunc;
+		private GeneratorFunc<AnalysisInput> scalarFunc;
 		private GeneratorFunc<List<NetworkStatistic>> aggregateFunc;
 
 		public NetworkStatisticGenerator(NetworkStatisticType type,
-				GeneratorFunc<GeneratedPlan> scalarFunc,
+				GeneratorFunc<AnalysisInput> scalarFunc,
 				GeneratorFunc<List<NetworkStatistic>> aggregateFunc) {
 			super();
 			this.type = type;
@@ -174,7 +173,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 			return type;
 		}
 
-		public GeneratorFunc<GeneratedPlan> getScalarFunc() {
+		public GeneratorFunc<AnalysisInput> getScalarFunc() {
 			return scalarFunc;
 		}
 
@@ -249,11 +248,11 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 	}
 
 	private static class ScalarReducer extends ReducerContext {
-		private GeneratedPlan plan;
+		private AnalysisInput plan;
 
 		public ScalarReducer(
 				Map<NetworkStatisticType, NetworkStatisticGenerator> lineItemGeneratorsMap,
-				GeneratedPlan plan, FinancialAnalysis financialAnalysis) {
+				AnalysisInput plan, FinancialAnalysis financialAnalysis) {
 			super(lineItemGeneratorsMap, financialAnalysis);
 			this.plan = plan;
 		}

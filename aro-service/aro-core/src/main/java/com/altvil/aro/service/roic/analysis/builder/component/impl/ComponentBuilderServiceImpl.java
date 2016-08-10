@@ -114,8 +114,7 @@ public class ComponentBuilderServiceImpl implements ComponentBuilderService {
 			return new Assembler<T>(period, componentConfig) {
 				@Override
 				protected void doAssemble(StreamAssembler assembler, T value) {
-					super.doAssemble(assembler, value);
-
+					//TODO Formalize into strategy as this create a fragile base class dependency issue
 					componentConfig.getGroupByCurves(componentMap.keySet())
 							.forEach(
 									k -> {
@@ -124,6 +123,11 @@ public class ComponentBuilderServiceImpl implements ComponentBuilderService {
 														.get(k)));
 										assembler.addOutput(k);
 									});
+					
+					
+					super.doAssemble(assembler, value);
+
+				
 				}
 
 			}.assemble(inputs);
@@ -189,6 +193,7 @@ public class ComponentBuilderServiceImpl implements ComponentBuilderService {
 
 			StreamAssembler assembler = StreamAssemblerImpl.create()
 					.setAnalysisPeriod(period);
+			
 			doAssemble(assembler, value);
 
 			return new ComponentModelImpl(period,

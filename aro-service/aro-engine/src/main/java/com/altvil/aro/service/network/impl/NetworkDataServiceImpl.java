@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,8 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
+import com.altvil.interfaces.CableConduitEdge;
+import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
@@ -49,6 +53,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
 
+	private Map<Integer, CableConstructionEnum> cableConstructionEnumMap;
+
 	@Override
 	public NetworkData getNetworkData(NetworkDataRequest request) {
 
@@ -56,7 +62,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
 
-		networkData.setCompetitiveDemandMapping(new CompetitiveDemandMapping(demandByLocationIdMap));
+		networkData.setCompetitiveDemandMapping(new CompetitiveDemandMapping(
+				demandByLocationIdMap));
 
 		// TODO Simplify Locations
 		Collection<NetworkAssignment> roadLocations = getNetworkLocations(
@@ -69,23 +76,32 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
 		networkData.setRoadEdges(getRoadEdges(request));
+		networkData.setCableConduitEdges(queryCableConduitEdges(request));
 
 		return networkData;
 	}
 
-//	private CompetitiveLocationDemandMapping aggregate(
-//			Collection<CompetitiveLocationDemandMapping> demandMapping) {
-//
-//		Aggregator<CompetitiveLocationDemandMapping> aggreagtor = CompetitiveLocationDemandMapping
-//				.aggregate();
-//		demandMapping.forEach(aggreagtor::add);
-//		return aggreagtor.apply();
-//
-//	}
-//
-//	private LocationDemand toFullShare(CompetitiveLocationDemandMapping mapping) {
-//		return aroDemandService.createFullShareDemand(mapping);
-//	}
+	@PostConstruct
+	void postConstruct() {
+		cableConstructionEnumMap = StreamUtil
+				.hashEnum(CableConstructionEnum.class);
+	}
+
+	// private CompetitiveLocationDemandMapping aggregate(
+	// Collection<CompetitiveLocationDemandMapping> demandMapping) {
+	//
+	// Aggregator<CompetitiveLocationDemandMapping> aggreagtor =
+	// CompetitiveLocationDemandMapping
+	// .aggregate();
+	// demandMapping.forEach(aggreagtor::add);
+	// return aggreagtor.apply();
+	//
+	// }
+	//
+	// private LocationDemand toFullShare(CompetitiveLocationDemandMapping
+	// mapping) {
+	// return aroDemandService.createFullShareDemand(mapping);
+	// }
 
 	private Collection<Long> toSelectedRoadLocationIds(
 			Collection<NetworkAssignment> locations) {
@@ -393,9 +409,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		gid, tlid, tnidf, tnidt, shape, edge_length
 	}
 
-	private Collection<RoadEdge> queryRoadEdges(long planId) {
+	private Collection<RoadEdge> getRoadEdges(
+			NetworkDataRequest networkConfiguration) {
 		return planRepository
-				.queryRoadEdgesbyPlanId(planId)
+				.queryRoadEdgesbyPlanId(networkConfiguration.getPlanId())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {
@@ -412,70 +429,88 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 						return null;
 					}
 				}).filter(e -> e != null).collect(Collectors.toList());
-
 	}
 
-	private Collection<RoadEdge> getRoadEdges(
+	private enum ConduitEdgeMap implements OrdinalAccessor {
+		gid, constructionType, startRatio, endRatio
+	}
+
+	private Collection<CableConduitEdge> queryCableConduitEdges(
 			NetworkDataRequest networkConfiguration) {
-		return queryRoadEdges(networkConfiguration.getPlanId());
+		return planRepository
+				.queryConduitSections(networkConfiguration.getPlanId())
+				.stream()
+				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+				.map(result -> {
+					return new CableConduitEdgeImpl(
+							result.getLong(ConduitEdgeMap.gid),
+							cableConstructionEnumMap.get(result
+									.getInteger(ConduitEdgeMap.constructionType)),
+							result.getDouble(ConduitEdgeMap.startRatio), result
+									.getDouble(ConduitEdgeMap.endRatio));
+				}).collect(Collectors.toList());
+
 	}
 
-//	private class LocationDemandAnalysisImpl implements LocationDemandAnalysis {
-//
-//		private Map<Long, CompetitiveLocationDemandMapping> locationDemandMappingMap;
-//		private LocationDemand selectedDemand;
-//
-//		private Map<SpeedCategory, LocationDemand> locationDemandMap = new EnumMap<>(
-//				SpeedCategory.class);
-//
-//		@Override
-//		public CompetitiveDemandMapping getCompetitiveDemandMapping() {
-//			return new CompetitiveDemandMapping(locationDemandMappingMap);
-//		}
-//
-//		public LocationDemandAnalysisImpl(
-//				Map<Long, CompetitiveLocationDemandMapping> locationDemandMappingMap,
-//				LocationDemand selectedDemand) {
-//			super();
-//			this.locationDemandMappingMap = locationDemandMappingMap;
-//			this.selectedDemand = selectedDemand;
-//		}
-//
-//		@Override
-//		public LocationDemand getSelectedDemand() {
-//			return selectedDemand;
-//		}
-//
-//		@Override
-//		public LocationDemand getLocationDemand(SpeedCategory speedCategory) {
-//			LocationDemand ld = locationDemandMap.get(speedCategory);
-//			if (ld == null) {
-//				locationDemandMap.put(speedCategory,
-//						ld = aggregateDemandForSpeedCategory(speedCategory));
-//			}
-//			return ld;
-//		}
-//
-//		private LocationDemand aggregateDemandForSpeedCategory(
-//				SpeedCategory speedCategory) {
-//
-//			Aggregator<LocationDemand> aggregator = DefaultLocationDemand
-//					.demandAggregate();
-//
-//			locationDemandMappingMap
-//					.values()
-//					.stream()
-//					.map(ldm -> aroDemandService
-//							.createFairShareDemandMapping(ldm)
-//							.getFairShareLocationDemand(speedCategory)
-//							.createLocationDemand(ldm)).forEach(ld -> {
-//						aggregator.add(ld);
-//					});
-//
-//			return aggregator.apply();
-//
-//		}
-//
-//	}
+	// private class LocationDemandAnalysisImpl implements
+	// LocationDemandAnalysis {
+	//
+	// private Map<Long, CompetitiveLocationDemandMapping>
+	// locationDemandMappingMap;
+	// private LocationDemand selectedDemand;
+	//
+	// private Map<SpeedCategory, LocationDemand> locationDemandMap = new
+	// EnumMap<>(
+	// SpeedCategory.class);
+	//
+	// @Override
+	// public CompetitiveDemandMapping getCompetitiveDemandMapping() {
+	// return new CompetitiveDemandMapping(locationDemandMappingMap);
+	// }
+	//
+	// public LocationDemandAnalysisImpl(
+	// Map<Long, CompetitiveLocationDemandMapping> locationDemandMappingMap,
+	// LocationDemand selectedDemand) {
+	// super();
+	// this.locationDemandMappingMap = locationDemandMappingMap;
+	// this.selectedDemand = selectedDemand;
+	// }
+	//
+	// @Override
+	// public LocationDemand getSelectedDemand() {
+	// return selectedDemand;
+	// }
+	//
+	// @Override
+	// public LocationDemand getLocationDemand(SpeedCategory speedCategory) {
+	// LocationDemand ld = locationDemandMap.get(speedCategory);
+	// if (ld == null) {
+	// locationDemandMap.put(speedCategory,
+	// ld = aggregateDemandForSpeedCategory(speedCategory));
+	// }
+	// return ld;
+	// }
+	//
+	// private LocationDemand aggregateDemandForSpeedCategory(
+	// SpeedCategory speedCategory) {
+	//
+	// Aggregator<LocationDemand> aggregator = DefaultLocationDemand
+	// .demandAggregate();
+	//
+	// locationDemandMappingMap
+	// .values()
+	// .stream()
+	// .map(ldm -> aroDemandService
+	// .createFairShareDemandMapping(ldm)
+	// .getFairShareLocationDemand(speedCategory)
+	// .createLocationDemand(ldm)).forEach(ld -> {
+	// aggregator.add(ld);
+	// });
+	//
+	// return aggregator.apply();
+	//
+	// }
+	//
+	// }
 
 }

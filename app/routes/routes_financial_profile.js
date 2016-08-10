@@ -6,11 +6,10 @@ var config = helpers.config
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
-  function contains (arr, value) {
-    if (typeof arr === 'string') {
-      return arr === value
-    }
-    return Array.isArray(arr) && arr.indexOf(value) >= 0
+  function array (value) {
+    if (value == null) return []
+    if (!Array.isArray(value)) return [value]
+    return value
   }
 
   api.get('/financial_profile/:plan_id/export', (request, response, next) => {
@@ -68,35 +67,144 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/financial_profile/:plan_id/revenue', (request, response, next) => {
+    var mapping = {
+      bau: 'copper',
+      plan: 'planned'
+    }
+    var filter = request.query.filter
+    var curves = {}
+    var entityTypes = ['smallBusiness', 'mediumBusiness', 'largeBusiness', 'household', 'cellTower']
+    entityTypes.forEach((key) => {
+      if (filter === 'incremental') {
+        curves[`${key}_copper`] = `copper.${key}.revenue`
+        curves[`${key}_planned`] = `planned.${key}.revenue`
+      } else {
+        curves[key] = `${mapping[filter]}.${key}.revenue`
+      }
+    })
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        if (filter === 'incremental') {
+          obj.incremental = 0
+          entityTypes.forEach((entity) => {
+            obj[entity] = obj[`${entity}_planned`] - obj[`${entity}_copper`]
+          })
+        }
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/arpu', (request, response, next) => {
+    var filter = request.query.filter
     var curves = {
-      bau: 'copper.household.revenue',
-      plan: 'planned.network.revenue',
-      incremental: 'incremental.network.revenue'
+      bau: `copper.${filter}.arpu`,
+      plan: `planned.${filter}.arpu`
     }
     requestData({
       plan_id: request.params.plan_id,
-      curves: {
-        households: curves[request.query.filter]
-      },
-      zeros: ['businesses', 'towers']
+      curves: curves
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/connectcapex', (request, response, next) => {
+    var filter = request.query.filter
+    var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
+    var curves = {}
+    var mapTypes = {
+      bau: ['copper'],
+      plan: ['planned'],
+      incremental: ['copper', 'planned']
+    }
+    var types = mapTypes[filter]
+    entities.forEach((entity) => {
+      types.forEach((type) => {
+        curves[`${entity}_${type}`] = `${type}.${entity}.new_connections_cost`
+      })
+    })
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        if (filter === 'incremental') {
+          entities.forEach((entity) => {
+            obj[entity] = obj[`${entity}_planned`] - obj[`${entity}_copper`]
+          })
+        } else {
+          entities.forEach((entity) => {
+            obj[entity] = obj[`${entity}_${types[0]}`]
+          })
+        }
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/costperpremise', (request, response, next) => {
+    var curves = {
+      cost: 'planned.network.cost',
+      premises_passed: 'planned.network.premises_passed'
+    }
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.value = obj.cost / obj.premises_passed
+      })
+      return data
     })
     .then(jsonSuccess(response, next))
     .catch(next)
   })
 
   api.get('/financial_profile/:plan_id/premises', (request, response, next) => {
+    var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
+    var percentage = request.query.percentage === 'true'
     var curves = {}
-    var zeros = ['incremental', 'existing']
-    if (contains(request.query.entityTypes, 'households')) {
-      curves = {
-        incremental: 'fiber.household.premises_passed'
+    entities.forEach((key) => {
+      curves[key] = `fiber.${key}.premises_passed`
+      if (percentage) {
+        curves[`${key}_count`] = `fiber.${key}.houseHolds_global_count`
       }
-      zeros = ['existing']
-    }
+    })
+    var zeros = ['existing']
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,
       zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj, i) => {
+        var n = 0
+        if (percentage) {
+          entities.forEach((key) => {
+            n += obj[key] * 100 / obj[`${key}_count`]
+          })
+        } else {
+          entities.forEach((key) => {
+            n += obj[key]
+          })
+        }
+        obj.incremental = n
+        obj.period = i === 0 ? n : n - data[i - 1].incremental
+      })
+      return data
     })
     .then(jsonSuccess(response, next))
     .catch(next)
@@ -104,38 +212,102 @@ exports.configure = (api, middleware) => {
 
   api.get('/financial_profile/:plan_id/subscribers', (request, response, next) => {
     var curves = {}
-    var zeros = ['bau', 'plan']
-    if (request.query.entityType === 'households') {
-      curves = {
-        bau: 'copper.household.subscribers_count',
-        plan: 'planned.network.subscribers_count'
-      }
-      zeros = []
-    }
+    var zeros = []
+    var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
+    entities.forEach((key) => {
+      curves[`bau_${key}`] = `copper.${key}.subscribers_count`
+      curves[`plan_${key}`] = `planned.${key}.subscribers_count`
+    })
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,
       zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.bau = 0
+        obj.plan = 0
+        Object.keys(curves).forEach((key) => {
+          if (key.indexOf('bau_') === 0) {
+            obj.bau += obj[key]
+          } else {
+            obj.plan += obj[key]
+          }
+        })
+      })
+      return data
     })
     .then(jsonSuccess(response, next))
     .catch(next)
   })
 
   api.get('/financial_profile/:plan_id/penetration', (request, response, next) => {
-    var curves = {}
-    var zeros = ['bau', 'plan']
-    if (request.query.entityType === 'households') {
-      curves = {
-        bau: 'copper.household.subscribers_penetration',
-        plan: 'planned.network.subscribers_penetration'
-      }
-      zeros = []
+    var entityType = request.query.entityType
+    var curves = {
+      bau: `copper.${entityType}.subscribers_penetration`,
+      plan: `planned.${entityType}.subscribers_penetration`
     }
+    var zeros = []
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,
       zeros: zeros
     }, (value) => value * 100)
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/opexrecurring', (request, response, next) => {
+    var entities = array(request.query.entityTypes)
+    if (entities.length === 0) return response.json([])
+    var curves = {}
+    entities.forEach((entityType) => {
+      curves[`${entityType}_bau`] = `copper.${entityType}.opex_expenses`
+      curves[`${entityType}_plan`] = `planned.${entityType}.opex_expenses`
+    })
+    var zeros = []
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves,
+      zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.bau = 0
+        obj.plan = 0
+        entities.forEach((key) => {
+          obj.bau += obj[`${key}_bau`]
+          obj.plan += obj[`${key}_plan`]
+        })
+      })
+      return data
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/opexcost', (request, response, next) => {
+    var entityType = request.query.entityType
+    var curves = {
+      copper_opex_expenses: `copper.${entityType}.opex_expenses`,
+      copper_revenue: `copper.${entityType}.revenue`,
+      planned_opex_expenses: `planned.${entityType}.opex_expenses`,
+      planned_revenue: `planned.${entityType}.revenue`
+    }
+    var zeros = []
+    requestData({
+      plan_id: request.params.plan_id,
+      curves: curves,
+      zeros: zeros
+    })
+    .then((data) => {
+      data.forEach((obj) => {
+        obj.bau = obj.copper_opex_expenses * 100 / obj.copper_revenue
+        obj.plan = obj.planned_opex_expenses * 100 / obj.planned_revenue
+      })
+      return data
+    })
     .then(jsonSuccess(response, next))
     .catch(next)
   })

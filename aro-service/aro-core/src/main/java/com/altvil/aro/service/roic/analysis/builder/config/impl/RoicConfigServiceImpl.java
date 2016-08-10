@@ -24,7 +24,6 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 	private Map<NetworkAnalysisType, RoicConfiguration> map = new EnumMap<>(
 			NetworkAnalysisType.class);
 
-
 	@Override
 	public RoicConfiguration getRoicConfiguration(
 			NetworkAnalysisType analysisType) {
@@ -32,21 +31,23 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 	}
 
 	private void register(NetworkAnalysisType type, DefaultRoicConfig config) {
-		config.init() ;
+		config.init();
 		map.put(type, config);
 	}
 
 	@PostConstruct
 	void assemble() {
-		
+
 		for (NetworkAnalysisType type : NetworkAnalysisType.values()) {
-			register(type,  new DefaultRoicConfig(type));
+			register(type, new DefaultRoicConfig(type));
 		}
 
-		register(NetworkAnalysisType.fiber,
-		new DefaultRoicConfig(NetworkAnalysisType.fiber) {
-			void specialize(SpiComponentConfig<ComponentInput> componentConfig) {
-		
+		register(NetworkAnalysisType.fiber, new DefaultRoicConfig(
+				NetworkAnalysisType.fiber) {
+			@Override
+			protected void specialize(ComponentType ct,
+					SpiComponentConfig<ComponentInput> componentConfig) {
+				super.specialize(ct, componentConfig);
 				componentConfig.add(AnalysisCode.new_connections_count,
 						(inputs) -> Op.connectedHouseHoldsYearly(15, inputs
 								.getPenetration().getEndPenetration(), inputs
@@ -57,44 +58,24 @@ public class RoicConfigServiceImpl implements RoicConfigService {
 								AnalysisCode.new_connections_count,
 								inputs.getConnectionCost()));
 
+				componentConfig.add(AnalysisCode.premises_passed,
+						(inputs) -> Op.growCurve(inputs.getEntityCount(),
+								inputs.getEntityGrowth()));
 			}
-
-			void specialize(SpiComponentRoicRegistry<ComponentInput> registry,
-					ComponentType ct) {
-				specialize(registry.getConfig(ct));
-			}
-
-			@Override
-			protected SpiComponentRoicRegistry<ComponentInput> assembleComponents(
-					SpiComponentRoicRegistry<ComponentInput> registry) {
-				super.assembleComponents(registry);
-
-				specialize(registry, ComponentType.household);
-				specialize(registry, ComponentType.smallBusiness);
-				specialize(registry, ComponentType.mediumBusiness);
-				specialize(registry, ComponentType.largeBusiness);
-				specialize(registry, ComponentType.cellTower);
-
-				return registry;
-			}
-
 		});
 
-		register(NetworkAnalysisType.copper_intersects,
-				new DefaultRoicConfig(NetworkAnalysisType.copper_intersects) {
-					@Override
-					protected SpiComponentRoicRegistry<ComponentInput> assembleComponents(
-							SpiComponentRoicRegistry<ComponentInput> registry) {
-						super.assembleComponents(registry);
+		register(NetworkAnalysisType.copper_intersects, new DefaultRoicConfig(
+				NetworkAnalysisType.copper_intersects) {
 
-						registry.getConfig(ComponentType.household).add(
-								AnalysisCode.houseHolds_global_count,
-								(assenbler) -> Op.constCurve(0));
-
-						return registry;
-					}
-
-				});
+			@Override
+			protected void specialize(ComponentType ct,
+					SpiComponentConfig<ComponentInput> component) {
+				component.add(
+						AnalysisCode.houseHolds_global_count,
+						(assenbler) -> Op.constCurve(0));
+			}
+			
+		});
 
 	}
 

@@ -107,10 +107,9 @@ public class DefaultLocationDemand extends DefaultDemandStatistic implements
 
 	private DefaultLocationDemand() {
 		super(0, 0, 0, 0, 0);
-		Map<LocationEntityType, DemandStatistic> map = new EnumMap<>(
-				LocationEntityType.class);
+		demands = new EnumMap<>(LocationEntityType.class);
 		for (LocationEntityType t : LocationEntityType.values()) {
-			map.put(t, DefaultDemandStatistic.ZERO_DEMAND);
+			demands.put(t, DefaultDemandStatistic.ZERO_DEMAND);
 		}
 	}
 	

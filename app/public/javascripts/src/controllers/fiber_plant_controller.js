@@ -5,6 +5,16 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
   $scope.carriers = []
   $scope.overlay = 'none'
 
+  var nbmCarriers = {
+    'Comcast Corporation': 'Comcast',
+    'Time Warner Cable Inc.': 'Time Warner Cable',
+    'Charter Communications': 'Charter',
+    'Cox Communications, Inc.': 'Cox',
+    'Bright House Networks, LLC': 'Bright House',
+    'CSC Holdings': 'Cablevision', // was CSC Holdings, LLC
+    'Mediacom Communications Corp.': 'Mediacom'
+  }
+
   $scope.competitors_fiber = new MapLayer({
     api_endpoint: '/network/fiber_plant_competitors',
     style_options: {
@@ -57,15 +67,21 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     if (!plan) return
 
     $http.get('/network/carriers/' + plan.id + '?fiberType=ilec').success((carriers) => {
-      $scope.nbmCarriers = carriers.map((carrier) => {
+      var all = {
+        id: 'all',
+        name: 'All carriers',
+        color: 'blue'
+      }
+      var filtered = carriers.filter((carrier) => nbmCarriers[carrier.name])
+      $scope.nbmCarriers = [all].concat(filtered.map((carrier) => {
         return {
           id: carrier.id,
-          name: carrier.name,
+          name: nbmCarriers[carrier.name],
           color: carrier.color
         }
       }).filter((carrier) => {
         return carrier.name !== config.client_carrier_name
-      })
+      }))
     })
 
     $http.get('/network/carriers/' + plan.id).success((carriers) => {
@@ -176,7 +192,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         api_endpoint: endpoint,
         style_options: {
           normal: {
-            strokeColor: 'blue',
+            strokeColor: '#d3d3d3',
             strokeWeight: 2,
             fillColor: 'blue'
           }
@@ -186,13 +202,17 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         declarativeStyles: (feature, styles) => {
           var speed = feature.getProperty('download_speed')
           var h = 120 - speed * 10
-          styles.fillColor = 'hsl(' + h + ',100%,50%)'
+          styles.fillColor = 'hsl(' + h + ',100%,30%)'
         }
       })
       layer.onDataLoaded = () => {
         var dataLayer = layer.data_layer
         dataLayer.forEach((feature) => {
-          var p = feature.getProperty('centroid').coordinates
+          var c = feature.getProperty('centroid')
+          if (!c) {
+            return console.warn('Feature missing centroid')
+          }
+          var p = c.coordinates
           var centroid = new google.maps.LatLng(p[1], p[0])
           var marker = map_utils.createCenteredMarker(dataLayer, feature, centroid, {})
           marker.setIcon('https://chart.googleapis.com/chart?chst=d_text_outline&chld=000000|16|h|FFFFFF|_|' + encodeURIComponent(feature.getProperty('speed')))
@@ -202,5 +222,10 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
       layer.setApiEndpoint(endpoint)
     }
     layer.show()
+  }
+
+  $scope.clearNbmCarrier = () => {
+    $scope.nbmCarrier = ''
+    $scope.nbmCarrierChanged()
   }
 }])

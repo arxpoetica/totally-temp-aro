@@ -1,7 +1,7 @@
 package com.altvil.aro.service.roic.analysis.builder.config.defaults;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,10 +14,11 @@ import com.altvil.aro.service.roic.analysis.registry.CurveIdentifier;
 
 public class NetworkComponentConfig extends AbstractConfig<RoicInputs> {
 
-	private Set<CurveIdentifier> excludedGroupBy = new HashSet<>();
+	private Set<? extends CurveIdentifier> excludedGroupBy;
 
 	public NetworkComponentConfig() {
 		super(ComponentType.network);
+		this.excludedGroupBy =  EnumSet.of(AnalysisCode.penetration, AnalysisCode.subscribers_penetration) ;
 	}
 
 	@Override
@@ -36,10 +37,15 @@ public class NetworkComponentConfig extends AbstractConfig<RoicInputs> {
 		assembler.add(AnalysisCode.cost,
 				(inputs) -> Op.constCurveTruncated(inputs.getFixedCost(), 1));
 
-		assembler.add(AnalysisCode.penetration, (inputs) -> Op.divide(
-				AnalysisCode.subscribers_penetration,
+		assembler.add(AnalysisCode.subscribers_penetration, (inputs) -> Op.divide(
+				AnalysisCode.subscribers_count,
 				AnalysisCode.houseHolds_global_count));
 
+		
+		assembler.add(AnalysisCode.penetration, (inputs) -> Op.divide(
+				AnalysisCode.subscribers_count,
+				AnalysisCode.houseHolds_global_count));
+		
 		assembler.add(AnalysisCode.cashflow, (inputs) -> Op.cashFlow(
 				AnalysisCode.revenue, AnalysisCode.maintenance_expenses,
 				AnalysisCode.opex_expenses, AnalysisCode.new_connections_cost,

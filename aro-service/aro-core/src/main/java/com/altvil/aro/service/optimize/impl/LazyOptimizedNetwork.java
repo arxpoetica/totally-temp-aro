@@ -1,29 +1,25 @@
 package com.altvil.aro.service.optimize.impl;
 
-import java.util.Collection;
 import java.util.Optional;
 
-import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import org.springframework.context.ApplicationContext;
+
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.AnalysisNode;
 import com.altvil.aro.service.optimize.spi.NetworkGenerator;
-import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.interfaces.NetworkAssignment;
 
 public class LazyOptimizedNetwork implements OptimizedNetwork {
 
 	private AnalysisNode anlysisNode;
 	private NetworkGenerator supplier;
 	private Optional<CompositeNetworkModel> model;
-	private NetworkModelBuilder networkModelBuilder;
-
+	
 	public LazyOptimizedNetwork(AnalysisNode anlysisNode,
-			NetworkGenerator supplier, NetworkModelBuilder networkModelBuilder) {
+			NetworkGenerator supplier) {
 		super();
 		this.anlysisNode = anlysisNode;
 		this.supplier = supplier;
-		this.networkModelBuilder = networkModelBuilder;
 	}
 
 	@Override
@@ -41,16 +37,7 @@ public class LazyOptimizedNetwork implements OptimizedNetwork {
 		return getAnalysisNode().getFiberCoverage().getAssignedEntityDemands()
 				.isEmpty();
 	}
-
-	@Override
-	public FtthThreshholds getFiberNetworkConstraints() {
-		return networkModelBuilder.getFtthThreshholds();
-	}
-
-	@Override
-	public Collection<NetworkAssignment> getSouceNetworkAssignments() {
-		return networkModelBuilder.getNetworkAssignments();
-	}
+	
 
 	@Override
 	public AnalysisNode getAnalysisNode() {
@@ -58,9 +45,9 @@ public class LazyOptimizedNetwork implements OptimizedNetwork {
 	}
 
 	@Override
-	public Optional<CompositeNetworkModel> getNetworkPlan() {
+	public Optional<CompositeNetworkModel> getNetworkPlan(ApplicationContext appCtx) {
 		if (model == null) {
-			model = supplier.get();
+			model = supplier.get(appCtx);
 		}
 		return model;
 	}

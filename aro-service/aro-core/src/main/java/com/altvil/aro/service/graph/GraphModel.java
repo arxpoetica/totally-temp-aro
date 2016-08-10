@@ -14,6 +14,6 @@ public interface GraphModel<T> {
 
 	public Set<AroEdge<T>> getEdges();
 	
-	
+	public Set<GraphNode> getVertices();
 
 }

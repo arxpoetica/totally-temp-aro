@@ -83,7 +83,7 @@
         <div class="checkbox" ng-repeat="category in business_categories" ng-if="category.name !== 'small'">
           <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_{{category.name}}_default.png" style="width:16px"></div>
           <label class="eye-control">
-            <input type="checkbox" ng-model="business_categories_selected[category.id]" ng-change="changeLocationsLayer()" ng-disabled="!show_businesses"> {{category.description}}
+            <input type="checkbox" ng-model="business_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_businesses"> {{category.description}}
             <div class="eye-indicator"></div>
           </label>
         </div>
@@ -98,7 +98,7 @@
         <% } %>
         <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px"></div>
         <label class="eye-control" style="padding-left:0">
-          <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()" ng-disabled="!show_businesses"> SMB
+          <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()"> SMB
           <div class="eye-indicator"></div>
         </label>
       </div>
@@ -119,7 +119,7 @@
         <div class="checkbox" ng-repeat="category in household_categories">
           <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px"></div>
           <label class="eye-control">
-            <input type="checkbox" ng-model="household_categories_selected[category.id]" ng-change="changeLocationsLayer()" ng-disabled="!show_households"> {{category.description}}
+            <input type="checkbox" ng-model="household_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_households"> {{category.description}}
             <div class="eye-indicator"></div>
           </label>
         </div>

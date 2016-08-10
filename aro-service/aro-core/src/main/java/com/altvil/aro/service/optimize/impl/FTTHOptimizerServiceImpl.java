@@ -3,19 +3,14 @@ package com.altvil.aro.service.optimize.impl;
 import java.util.function.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
-import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkConstraint;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
-import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysisFactory;
@@ -31,94 +26,75 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 
 	private NetworkAnalysisFactory networkAnalysisFactory;
 	private NetworkModelBuilderFactory networkModelBuilderFactory;
+	private ApplicationContext appCtx;
 
 	@Autowired
 	@Inject
-	public FTTHOptimizerServiceImpl(
+	public FTTHOptimizerServiceImpl(ApplicationContext appCtx,
 			NetworkAnalysisFactory networkAnalysisFactory,
 			NetworkModelBuilderFactory networkModelBuilderFactory) {
 		super();
+		this.appCtx = appCtx;
 		this.networkAnalysisFactory = networkAnalysisFactory;
 		this.networkModelBuilderFactory = networkModelBuilderFactory;
 	}
 
 	@Override
-	public NetworkPlanner createNetworkPlanner(
-			NetworkConstraint constraint, NetworkData networkData,
-			OptimizerContext ctx,
+	public NetworkPlanner createNetworkPlanner(NetworkConstraint constraint,
+			NetworkData networkData,  OptimizerContextBuilder ctxBuilder,
 			Predicate<GeneratingNode> generatingNodeConstraint,
 			ScoringStrategy scoringStrategy) {
-		
-		PruningStrategy strategy  = new PruningStrategy() {
-			
+
+		PruningStrategy strategy = new PruningStrategy() {
+
 			@Override
 			public boolean isCandidatePlan(OptimizedNetwork network) {
 				return false;
 			}
-			
+
 			@Override
 			public boolean isGeneratingNodeValid(GeneratingNode node) {
 				return true;
 			}
-			
+
 			@Override
 			public boolean isConstraintSatisfied(NetworkAnalysis node) {
 				return false;
 			}
-			
+
 		};
-		
-		return createNetworkPlanner(networkData, strategy, scoringStrategy, ctx) ;
-		
-		
+
+		return createNetworkPlanner(networkData, strategy, scoringStrategy, ctxBuilder);
+
 	}
 
 	@Override
 	public NetworkPlanner createNetworkPlanner(NetworkData networkData,
-			PruningStrategy pruningStrategy, ScoringStrategy scoringStrategy, OptimizerContext ctx) {
+			PruningStrategy pruningStrategy, ScoringStrategy scoringStrategy,
+			OptimizerContextBuilder ctxBuilder) {
 
 		return DefaultNetworkPlannerImpl.create(createConstrainer(networkData,
-				ctx, pruningStrategy, scoringStrategy));
+				ctxBuilder, pruningStrategy, scoringStrategy));
 
 	}
 
 	private NetworkConstrainer createConstrainer(NetworkData networkData,
-			OptimizerContext ctx, PruningStrategy pruningStrategy,
-			ScoringStrategy scoringStrategy) {
 
-		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder = (
-				g, s) -> new ScalarClosestFirstSurfaceIterator<GraphNode, AroEdge<GeoSegment>>(
-				g, s);
+			OptimizerContextBuilder ctxBuilder,
+			PruningStrategy pruningStrategy, ScoringStrategy scoringStrategy) {
 
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
-				.create(networkData, closestFirstSurfaceBuilder,
-						ctx.getFtthThreshholds(), null);
+				.create(networkData, ctxBuilder);
 
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
-				.createNetworkAnalysis(networkModelBuilder, ctx,
+				.createNetworkAnalysis(networkModelBuilder,
+						ctxBuilder.createOptimizerContext(appCtx),
 						scoringStrategy);
 
 		return NetworkConstrainer.create(networkModelBuilder, pruningStrategy,
 				networkAnalysis);
 	}
 
-//	private NetworkConstrainer createConstrainer(
-//			ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-//			NetworkConstraint constraint, NetworkData networkData,
-//			OptimizerContext ctx,
-//			Predicate<GeneratingNode> generatingNodeConstraint,
-//			ScoringStrategy scoringStrategy) {
-//
-//		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
-//				.create(networkData, closestFirstSurfaceBuilder,
-//						ctx.getFtthThreshholds(), null);
-//		NetworkAnalysis networkAnalysis = networkAnalysisFactory
-//				.createNetworkAnalysis(networkModelBuilder, ctx,
-//						scoringStrategy);
-//
-//		return NetworkConstrainer.create(networkModelBuilder,
-//				generatingNodeConstraint, constraint::requiredNode,
-//				constraint::isConstraintMet, networkAnalysis);
-//	}
+
 
 }

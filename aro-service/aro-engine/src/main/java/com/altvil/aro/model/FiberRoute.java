@@ -1,7 +1,10 @@
 package com.altvil.aro.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -33,6 +37,9 @@ public class FiberRoute extends ComparableModel {
 	private String name ;
 	private Geometry geometry;
 	
+	
+	private Set<FiberRouteSegment> fiberRouteSegments = new HashSet<>();
+	
 	@Transient
 	@Override
 	protected Serializable idKey() {
@@ -51,9 +58,16 @@ public class FiberRoute extends ComparableModel {
 		this.id = id;
 	}
 	
-	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "fiberRoute")
+	public Set<FiberRouteSegment> getFiberRouteSegments() {
+		return fiberRouteSegments;
+	}
+
+	public void setFiberRouteSegments(Set<FiberRouteSegment> fiberRouteSegments) {
+		this.fiberRouteSegments = fiberRouteSegments;
+	}
+
 	@Column(name = "plan_id")
-//	@Convert(converter = PlanIdConverter.class)
 	public long getPlanId() {
 		return planId;
 	}

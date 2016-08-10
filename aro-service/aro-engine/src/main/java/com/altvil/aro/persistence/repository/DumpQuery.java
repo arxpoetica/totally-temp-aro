@@ -17,36 +17,11 @@ public class DumpQuery {
 		}
 	}
 	
-	private static String query = "with selected_locations as (\n" + 
-			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength\n" + 
-			"	from client.plan p \n" + 
-			"	join aro.wirecenters w on w.id = p.wirecenter_id\n" + 
-			"	join aro.locations l on st_contains(w.geom, l.geom)\n" + 
-			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
-			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3\n" + 
-			"	where p.id =  :planId\n" + 
-			"),\n" + 
-			"bs as (\n" + 
-			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
-			"  from selected_locations l\n" + 
-			"  join client.business_summary e on e.location_id = l.id\n" + 
-			"   where year = :year and city_id = 1\n" + 
-			"),\n" + 
-			"hs as (\n" + 
-			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend, l.competitor_strength\n" + 
-			"  from selected_locations l\n" + 
-			"  join client.households_summary e on e.location_id = l.id\n" + 
-			"),\n" + 
-			"ct as (\n" + 
-			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend, l.competitor_strength\n" + 
-			"  from selected_locations l\n" + 
-			"  join client.celltower_summary e on e.location_id = l.id\n" + 
-			"),\n" + 
-			"select * from  bs\n" + 
-			"UNION\n" + 
-			"select * from  hs\n" + 
-			"UNION\n"
-			+ "limit 200000" ;
+	private static String query ="select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
+			+ "from client.plan r \n"
+			+ "join aro.wirecenters w on r.wirecenter_id = w.id\n"
+			+ "join aro.edges a on st_intersects(edge_buffer, a.geom)\n"
+			+ "where r.id = :planId" ;
 	
 	public static void value() {
 		System.out.println(query) ;

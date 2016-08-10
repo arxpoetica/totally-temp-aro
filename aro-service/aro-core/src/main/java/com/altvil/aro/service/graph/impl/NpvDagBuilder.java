@@ -34,9 +34,9 @@ public class NpvDagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>
 
 	private Set<AroEdge<T>> foundEdges = new HashSet<>();
 
-	private final ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder;
+	private final ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder;
 
-	public NpvDagBuilder(GraphModelBuilder<T> dagBuilder, GraphModel<T> graphModel, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> closestFirstSurfaceBuilder) {
+	public NpvDagBuilder(GraphModelBuilder<T> dagBuilder, GraphModel<T> graphModel, ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder) {
 		this.dagBuilder = dagBuilder;
 		this.graphModel = graphModel;
 		this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
@@ -85,7 +85,7 @@ public class NpvDagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>
 		return dagBuilder.buildDAG();
 	}
 
-	public ClosestFirstSurfaceBuilder<GraphNode, AroEdge<T>> getClosestFirstSurfaceBuilder() {
+	public ClosestFirstSurfaceBuilder getClosestFirstSurfaceBuilder() {
 		return closestFirstSurfaceBuilder;
 	}
 

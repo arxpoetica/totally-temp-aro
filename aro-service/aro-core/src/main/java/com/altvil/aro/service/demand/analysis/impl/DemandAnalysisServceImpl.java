@@ -196,7 +196,7 @@ public class DemandAnalysisServceImpl implements DemandAnalysisService {
 //				return new ProductDemandImpl(locationEntityType, type,
 //						arpuMapping, model, 4);
 			case medium:
-				return new BusinessProduct(LocationEntityType.large,
+				return new BusinessProduct(LocationEntityType.medium,
 						type, arpuMapping, model, 4);
 			case large:
 				return new BusinessProduct(LocationEntityType.large,
