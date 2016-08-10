@@ -7,6 +7,7 @@ import com.altvil.aro.persistence.repository.FiberRouteRepository;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
+import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
@@ -35,6 +36,12 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 
 
 	@Override
+	public OptimizedPlan optimizedPlan(GeneratedPlan generatedPlan) {
+		return new OptimizedPlanImpl(generatedPlan,
+				planAnalysisReportService.createPlanAnalysisReport(generatedPlan));
+	}
+
+	@Override
 	public OptimizedPlan save(GeneratedPlan plan) {
 		networkNodeRepository.save(plan.getWirecenterNetworkPlan()
 				.getNetworkNodes());
@@ -48,5 +55,17 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 
 		return optimizedPlan;
 
+	}
+
+	@Override
+	public OptimizedPlan save(OptimizedPlan optimizedPlan) {
+		final WirecenterNetworkPlan wirecenterNetworkPlan = optimizedPlan.getGeneratedPlan().getWirecenterNetworkPlan();
+
+		networkNodeRepository.save(wirecenterNetworkPlan.getNetworkNodes());
+		fiberRouteRepository.save(wirecenterNetworkPlan.getFiberRoutes());
+
+		networkReportService.saveNetworkReport(optimizedPlan);
+
+		return optimizedPlan;
 	}
 }

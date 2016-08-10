@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,7 +36,7 @@ public class NewOptimizeEndPoint {
 	@Autowired
 	private AroConversionService aroConversionService;
 
-	@Autowired
+	@Autowired @Qualifier("newOptimizationPlannerServiceImpl")
 	private OptimizationPlannerService optimizationPlannerService;
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
@@ -95,8 +96,10 @@ public class NewOptimizeEndPoint {
 					plan.getThreshold() == null ? Double.NaN : plan
 							.getThreshold(), financials.getBudget());
 
+		case NPV:
+
 		case PRUNNING_NPV:
-			return new NpvConstraints(OptimizationType.PRUNNING_NPV,
+			return new NpvConstraints(plan.getAlgorithm(),
 					financials.getYears(), financials.getDiscountRate(),
 					plan.getThreshold() == null ? Double.NaN : plan
 							.getThreshold(), financials.getBudget());
