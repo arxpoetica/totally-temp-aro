@@ -6,20 +6,31 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.graph.GraphNetworkModelService;
+import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBuilderContext;
+import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.network.NetworkDataService;
-import com.altvil.aro.service.optimization.strategy.OptimizationStrategyService;
+import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorService;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
+import com.altvil.aro.service.optimize.FTTHOptimizerService.OptimizerContextBuilder;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
-import com.altvil.aro.service.plan.PlanService;
+import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
+import com.altvil.aro.service.price.PricingContext;
+import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.utils.StreamUtil;
 
@@ -31,7 +42,8 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 			.getLogger(OptimizationPlanningImpl.class.getName());
 
 	@Autowired
-	private OptimizationStrategyService optimizationStrategyService;
+	@Qualifier("singleEvaluator")
+	private OptimizationEvaluatorService optimizationEvaluatorService;
 
 	@Autowired
 	private transient NetworkDataService networkService;
@@ -40,17 +52,14 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	private transient FTTHOptimizerService optimizerService;
 
 	@Autowired
-	private PricingService pricingService;
+	private transient PricingService pricingService;
 
 	@Autowired
-	private PlanService planService;
+	private transient GraphNetworkModelService graphBuilderService;
 
-	private OptimizerContext createOptimizerContext(
-			WirecenterOptimizationRequest request) {
-		return new OptimizerContext(pricingService.getPricingModel("*",
-				new Date()), FiberConstraintUtils.build(request
-				.getConstraints()));
-	}
+	@Autowired
+	private transient CoreLeastCostRoutingService planService;
+	
 
 	//
 	// private Collection<NetworkDemand> toNetworkDemands(NetworkData
@@ -76,7 +85,19 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
 
-		return StreamUtil.map(planService.computeNetworkModel(networkData,
+
+		PricingModel pricingModel = pricingService.getPricingModel("*",
+				new Date(),
+				PricingContext.create(request.getConstructionRatios())) ;
+		
+		GraphNetworkModel model = graphBuilderService
+				.build(networkService.getNetworkData(request
+						.getNetworkDataRequest()))
+				.setPricingModel(pricingModel)
+				.build();
+
+		return StreamUtil.map(planService.computeNetworkModel(model,
+				pricingModel,
 				FiberConstraintUtils.build(request.getConstraints())),
 				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
 						networkData.getCompetitiveDemandMapping()));
@@ -86,19 +107,52 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	@Override
 	public PrunedNetwork pruneNetwork(WirecenterOptimizationRequest request) {
 
+		//TODO KAMIL ThresholdBudgetConstraint => Change to OptimizationConstraint
+		
+		OptimizationEvaluator evaluator =  
+				optimizationEvaluatorService
+				.getOptimizationEvaluator((ThresholdBudgetConstraint) request
+						.getOptimizationConstraints()) ;
+		
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
-
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
-				networkData, optimizationStrategyService
-						.getPruningStrategy(request
-								.getOptimizationConstraints()),
-				optimizationStrategyService.getScoringStrategy(request
-						.getOptimizationConstraints()),
-				createOptimizerContext(request));
+				networkData, evaluator.getPruningStrategy(),
+				evaluator.getScoringStrategy(),
+				new OptimizerContextBuilderImpl(request));
 
 		return new PrunedNetworkImpl(request.getPlanId(),
 				planner.getOptimizedPlans(),
 				networkData.getCompetitiveDemandMapping());
 	}
+
+	@SuppressWarnings("serial")
+	public static class OptimizerContextBuilderImpl implements
+			OptimizerContextBuilder {
+
+		private WirecenterOptimizationRequest request;
+
+		public OptimizerContextBuilderImpl(WirecenterOptimizationRequest request) {
+			super();
+			this.request = request;
+		}
+
+		@Override
+		public OptimizerContext createOptimizerContext(ApplicationContext ctx) {
+			PricingModel pricingModel = ctx.getBean(PricingService.class)
+					.getPricingModel("*", new Date(), PricingContext.create(request.getConstructionRatios()));
+
+			FtthThreshholds threshHolds = FiberConstraintUtils.build(request
+					.getConstraints());
+
+			GraphBuilderContext graphContext = ctx
+					.getBean(GraphNetworkModelService.class)
+					.build()
+					.setPricingModel(pricingModel)
+					.createContext();
+
+			return new OptimizerContext(pricingModel, threshHolds, graphContext);
+		}
+	}
+
 }

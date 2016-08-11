@@ -38,21 +38,19 @@ public class FdtAssignment extends AbstractEquipmentAssignment {
 	@Override
 	public double getCost(PricingContext ctx, FiberConsumer fiberConsumer,
 			FiberProducer fiberProducer, DemandCoverage coverage) {
-		double dropCableCosts = fdtEquipment
-				.getDropCableSummary()
-				.getCounts()
-				.stream()
-				.mapToDouble(
-						s -> ctx.getPricingModel().getPrice(s.getDropCable())
-								* s.getCount()).sum();
+	
+
+		//TODO HT formalize DROP CABLE COSTS
+		
+//		double dropCableCosts = fdtEquipment
+//				.getDropCableSummary()
+//				.getCounts()
+//				.stream()
+//				.mapToDouble(
+//						s -> ctx.getPricingModel().getPrice(s.getDropCable())
+//								* s.getCount()).sum();
 		
 		return  ctx.getPricingModel().getMaterialCost(MaterialType.FDT) ;
-
-//		System.out.println("FDT COSTS" + dropCableCosts
-//				+ ctx.getPricingModel().getMaterialCost(MaterialType.FDT)) ;
-//		
-//		return dropCableCosts
-//				+ ctx.getPricingModel().getMaterialCost(MaterialType.FDT);
 
 	}
 

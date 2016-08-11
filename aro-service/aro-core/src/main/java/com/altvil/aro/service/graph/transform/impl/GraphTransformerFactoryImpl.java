@@ -1,6 +1,6 @@
 package com.altvil.aro.service.graph.transform.impl;
 
-import java.util.Collection;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.jgrapht.EdgeFactory;
@@ -16,24 +16,18 @@ import com.altvil.aro.service.demand.EntityDemandService;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
-import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
-import com.altvil.aro.service.graph.builder.GraphNetworkBuilder;
-import com.altvil.aro.service.graph.builder.GraphNetworkModel;
-import com.altvil.aro.service.graph.builder.RoadModelBuilder;
 import com.altvil.aro.service.graph.builder.impl.DefaultGraphBuilder;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
 import com.altvil.aro.service.graph.impl.DagBuilder;
-import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.ftp.FiberDagScanner;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.NetworkBuilder;
-import com.altvil.interfaces.NetworkAssignment;
-import com.altvil.interfaces.RoadEdge;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -79,8 +73,7 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	}
 	
 	
-	@Override
-	public <T> GraphModelBuilder<T> createDAGBuilder(
+	private <T> GraphModelBuilder<T> createDAGBuilder(
 			EdgeFactory<GraphNode, AroEdge<T>> edgeFactory) {
 		return new DefaultGraphBuilder<T>(factory,
 				new SimpleDirectedWeightedGraph<GraphNode, AroEdge<T>>(
@@ -93,46 +86,23 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return new DefaultGraphBuilder<GeoSegment>(factory,
 				new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(f), f);
 	}
-
 	
-	@Override
-	public GraphNetworkModel createGraphNetworkModel(
-			Collection<RoadEdge> edges,
-			Collection<NetworkAssignment> networkAssignments) {
+	
 
-		GraphNetworkBuilder b = new GraphNetworkBuilder(createSimpleBuilder(),
-				factory, GraphAssignmentFactoryImpl.FACTORY);
-
-		b.setNetworkAssignments(networkAssignments).setRoadEdges(edges);
-		return b.build();
-
+	private <T> GraphModelBuilder<T> builder() {
+		AroEdgeFactory<T> f = new AroEdgeFactory<T>() ;
+		return new DefaultGraphBuilder<T>(factory,
+				new SimpleWeightedGraph<GraphNode, AroEdge<T>>(f), f);
 	}
+	
 
 	@Override
-	public GraphNetworkModel createGraphNetworkModel(NetworkData locationData) {
-
-		RoadModelBuilder b = new RoadModelBuilder(createSimpleBuilder(),
-				factory, GraphAssignmentFactoryImpl.FACTORY);
-
-		b.setFiberSources(locationData.getFiberSources()) 
-				.setRoadLocations(locationData.getRoadLocations())
-				//.setSelectedRoadLocations(locationData.getRoadLocations(), locationData.getSelectedRoadLocationIds())
-				.setRoadEdges(locationData.getRoadEdges());
-		return b.build();
-		
-	}
-
-	@Override
-	public NetworkBuilder createNetworkBuilder(
+	public GraphRenoder createNetworkBuilder(
 			GraphModelBuilder<GeoSegment> builder) {
 		return new NetworkBuilder(builder, factory);
 	}
 
-	private GraphModelBuilder<GeoSegment> createSimpleBuilder() {
-		return createBuilder(new SimpleWeightedGraph<GraphNode, AroEdge<GeoSegment>>(
-				new AroEdgeFactory<GeoSegment>()));
-	}
-
+	
 	@Override
 	public FiberDagScanner createWirecenterTransformer(FtthThreshholds threshholds) {
 		return new FiberDagScanner(entityDemandService.createDemandAnalyizer(threshholds), threshholds);
@@ -144,5 +114,21 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 		return new DefaultGraphBuilder<T>(factory,
 				model.getGraph(), f);
 	}
+
+	@Override
+	public <T> GraphModel<T> transform(GraphModel<T> graph,
+			Function<T, Double> edgeWeight) {
+	
+	
+		GraphModelBuilder<T> b = builder() ;
+		
+		graph.getEdges().forEach(e -> {
+			b.addVertex(e.getSourceNode());
+			b.addVertex(e.getTargetNode());
+			b.add(e.getSourceNode(), e.getTargetNode(), e.getValue(), edgeWeight.apply(e.getValue())) ;
+		});
+		return b.build() ;
+	}
+	
 
 }

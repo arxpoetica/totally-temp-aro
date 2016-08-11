@@ -3,14 +3,12 @@ package com.altvil.aro.service.optimization.master.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
-import com.altvil.utils.StreamUtil;
 
 @Service
 public class MasterPlanningServiceImpl implements MasterPlanningService {
@@ -30,9 +28,7 @@ public class MasterPlanningServiceImpl implements MasterPlanningService {
 			GeneratedMasterPlan plan) {
 
 		return new OptimizedMasterPlanImpl(plan,
-				planAnalysisReportService.aggregate(StreamUtil.map(
-						plan.getOptimizedPlans(),
-						OptimizedPlan::getPlanAnalysisReport)));
+				planAnalysisReportService.aggregate(plan));
 	}
 
 	// TODO Add any extra information required

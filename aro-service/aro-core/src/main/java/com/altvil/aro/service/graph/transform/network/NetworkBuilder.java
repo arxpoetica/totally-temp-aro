@@ -19,8 +19,8 @@ import com.altvil.aro.service.graph.segment.splitter.EdgeAssignment;
 import com.altvil.aro.service.graph.segment.splitter.GeoSegmentSplitter;
 import com.altvil.aro.service.graph.segment.splitter.SplitAssignments;
 
-public class NetworkBuilder {
-
+public class NetworkBuilder implements GraphRenoder {
+	
 	private GraphModelBuilder<GeoSegment> graphBuilder;
 
 	private Map<GeoSegment, List<GraphEdgeAssignment>> assignmentsByGeoSegment = new HashMap<>();
@@ -36,10 +36,25 @@ public class NetworkBuilder {
 		this.graphBuilder = graphBuilder;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.altvil.aro.service.graph.transform.network.GraphRenoder#getResolvedAssignments()
+	 */
+	@Override
 	public Map<GraphAssignment, GraphNode> getResolvedAssignments() {
 		return resolvedAssignments;
 	}
+	
 
+	@Override
+	public RenodedGraph renode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.altvil.aro.service.graph.transform.network.GraphRenoder#add(com.altvil.aro.service.graph.assigment.GraphAssignment)
+	 */
+	@Override
 	public void add(GraphAssignment va) {
 		if (va instanceof GraphEdgeAssignment) {
 
@@ -61,6 +76,10 @@ public class NetworkBuilder {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.altvil.aro.service.graph.transform.network.GraphRenoder#add(java.util.Collection)
+	 */
+	@Override
 	public void add(Collection<? extends GraphAssignment> vertexAssignments) {
 
 		for (GraphAssignment va : vertexAssignments) {
@@ -103,7 +122,11 @@ public class NetworkBuilder {
 		}
 	}
 
-	public NetworkBuilder renodeGraph(GraphModel<GeoSegment> model) {
+	/* (non-Javadoc)
+	 * @see com.altvil.aro.service.graph.transform.network.GraphRenoder#renodeGraph(com.altvil.aro.service.graph.GraphModel)
+	 */
+	@Override
+	public GraphRenoder renodeGraph(GraphModel<GeoSegment> model) {
 
 		for (AroEdge<GeoSegment> edge : model.getEdges()) {
 			add(edge);
@@ -112,6 +135,10 @@ public class NetworkBuilder {
 		return this;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.altvil.aro.service.graph.transform.network.GraphRenoder#getBuilder()
+	 */
+	@Override
 	public GraphModelBuilder<GeoSegment> getBuilder() {
 		return graphBuilder;
 	}

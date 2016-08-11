@@ -20,6 +20,7 @@ public class BasicComponentConfig extends AbstractConfig<ComponentInput> {
 		registry.add(AnalysisCode.penetration).add(AnalysisCode.revenue)
 				.add(AnalysisCode.houseHolds).add(AnalysisCode.arpu)
 				.add(AnalysisCode.premises_passed)
+				.add(AnalysisCode.premises_passed_delta)
 				.add(AnalysisCode.subscribers_count)
 				.add(AnalysisCode.subscribers_penetration)
 				.add(AnalysisCode.opex_expenses)
@@ -40,9 +41,15 @@ public class BasicComponentConfig extends AbstractConfig<ComponentInput> {
 		assembler.add(AnalysisCode.penetration,
 				(inputs) -> Op.penetration(inputs.getPenetration()));
 
+		
 		assembler.add(AnalysisCode.premises_passed,
-				(inputs) -> Op.constCurve(inputs.getEntityCount()));
-
+				(inputs) -> Op.constCurve(0)) ;
+		
+		
+		assembler.add(AnalysisCode.premises_passed_delta,
+				(inputs) -> Op.streamMinus(AnalysisCode.premises_passed));
+		
+	
 		assembler.add(AnalysisCode.subscribers_count, (inputs) -> Op.multiply(
 				AnalysisCode.penetration, AnalysisCode.houseHolds));
 

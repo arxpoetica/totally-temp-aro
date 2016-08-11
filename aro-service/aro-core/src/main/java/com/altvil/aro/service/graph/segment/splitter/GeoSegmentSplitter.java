@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -19,6 +22,9 @@ import com.vividsolutions.jts.geom.Point;
 
 public class GeoSegmentSplitter {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(GeoSegmentSplitter.class.getName());
+
 	private static final double snapDistanceInMeteres = 1.0;
 
 	/**
@@ -29,20 +35,26 @@ public class GeoSegmentSplitter {
 	 * @param assignedVertices
 	 * @return
 	 */
+	
+	private interface EdgeWeightFunc {
+		double computeWeight(GeoSegment segment) ;
+	}
 
 	private GraphNodeFactory vertexFactory;
+	private EdgeWeightFunc edgeWeightFunction = gs -> gs.getLength();
 
 	public GeoSegmentSplitter(GraphNodeFactory vertexFactory) {
 		super();
 		this.vertexFactory = vertexFactory;
+	
 	}
+	
 
 	private void assignVertex(SplitAssignments.Builder builder,
 			GraphEdgeAssignment va, GraphNode vertex) {
-		if (va instanceof CompositeVertexAssignment) {
-			builder.assign(
-					((CompositeVertexAssignment) va).getVertexAssigments(),
-					vertex);
+		if (va instanceof SpiCompositeGraphEdgeAssignment) {
+			builder.assign(((SpiCompositeGraphEdgeAssignment) va)
+					.getGraphEdgeAssignments(), vertex);
 		} else {
 			builder.assign(va, vertex);
 		}
@@ -75,7 +87,7 @@ public class GeoSegmentSplitter {
 		if (sortedAssignments.size() == 0) { // Very Special Case Snapped to
 												// original Segment
 			builder.add(new DefaultEdgeAssigment(src, target, geoSgement,
-					geoSgement.getLength()));
+					edgeWeightFunction.computeWeight(geoSgement)));
 		} else {
 
 			// TODO Refactor into strategy
@@ -137,6 +149,15 @@ public class GeoSegmentSplitter {
 			result.add(previous);
 		}
 
+		if (log.isTraceEnabled()) {
+			verifySnap(result, snapDistance);
+		}
+
+		return result;
+	}
+
+	private void verifySnap(Collection<GraphEdgeAssignment> result,
+			double snapDistance) {
 		Iterator<GraphEdgeAssignment> itz = result.iterator();
 		GraphEdgeAssignment p = itz.next();
 		while (itz.hasNext()) {
@@ -147,15 +168,15 @@ public class GeoSegmentSplitter {
 			}
 		}
 
-		return result;
 	}
 
 	private GraphEdgeAssignment merge(Iterator<GraphEdgeAssignment> itr,
 			GraphEdgeAssignment current, GraphEdgeAssignment previous,
 			List<GraphEdgeAssignment> result, double snapDistance) {
 
-		CompositeVertexAssignment merged = new CompositeVertexAssignment(
+		SpiCompositeGraphEdgeAssignment merged = new CompositeVertexAssignment(
 				previous.getPinnedLocation());
+
 		merged.add(previous);
 		merged.add(current);
 		result.add(merged);
@@ -172,7 +193,7 @@ public class GeoSegmentSplitter {
 			}
 
 		}
-		
+
 		return null;
 	}
 
@@ -185,7 +206,8 @@ public class GeoSegmentSplitter {
 	 */
 	public List<GeoSegment> split(GeoSegment seg,
 			Collection<PinnedLocation> splitPoints, Geometry geom) {
-		return DefaultSplitSegment.split(seg, splitPoints, geom).getSubSegments() ;
+		return DefaultSplitSegment.split(seg, splitPoints, geom)
+				.getSubSegments();
 	}
 
 	private List<PinnedLocation> toPins(
@@ -213,7 +235,7 @@ public class GeoSegmentSplitter {
 	private EdgeAssignment createEdgeAssigment(GraphNode src, GraphNode target,
 			GeoSegment segment) {
 		return new DefaultEdgeAssigment(src, target, segment,
-				segment.getLength());
+				edgeWeightFunction.computeWeight(segment)) ;
 	}
 
 	private List<GraphEdgeAssignment> sort(
@@ -231,21 +253,38 @@ public class GeoSegmentSplitter {
 
 	//
 	//
+	//
 
+	private interface SpiCompositeGraphEdgeAssignment extends
+			GraphEdgeAssignment {
+		void add(GraphEdgeAssignment assignemnt);
+
+		Collection<GraphEdgeAssignment> getGraphEdgeAssignments();
+
+	}
 
 	private static class CompositeVertexAssignment implements
-			GraphEdgeAssignment {
+			SpiCompositeGraphEdgeAssignment {
 
 		private PinnedLocation pinnedLocation;
 		private List<GraphEdgeAssignment> vertexAssignments = new ArrayList<>();
-
+		
 		public CompositeVertexAssignment(PinnedLocation pinnedLocation) {
-			super();
 			this.pinnedLocation = pinnedLocation;
-
 		}
 
-		public List<GraphEdgeAssignment> getVertexAssigments() {
+		@Override
+		public Long getId() {
+			throw new RuntimeException("Operation not supported");
+		}
+
+		@Override
+		public AroEntity getAroEntity() {
+			throw new RuntimeException("Operation not supported");
+		}
+
+		@Override
+		public Collection<GraphEdgeAssignment> getGraphEdgeAssignments() {
 			return vertexAssignments;
 		}
 
@@ -259,8 +298,8 @@ public class GeoSegmentSplitter {
 		}
 
 		@Override
-		public AroEntity getAroEntity() {
-			return null;
+		public GraphEdgeAssignment getAsRootEdgeAssignment() {
+			return this;
 		}
 
 		@Override
@@ -274,4 +313,5 @@ public class GeoSegmentSplitter {
 		}
 
 	}
+
 }

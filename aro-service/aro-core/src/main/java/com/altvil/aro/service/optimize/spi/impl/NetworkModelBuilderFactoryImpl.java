@@ -7,74 +7,56 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
+import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService;
+import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.optimize.FTTHOptimizerService.OptimizerContextBuilder;
+import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.GlobalConstraint;
-import com.altvil.aro.service.plan.PlanService;
+import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
-import com.google.inject.Inject;
 
 @Service
 public class NetworkModelBuilderFactoryImpl implements
 		NetworkModelBuilderFactory {
 
-	private PlanService planService;
-
-	@Autowired
-	@Inject
-	public NetworkModelBuilderFactoryImpl(PlanService planService) {
+	
+	public NetworkModelBuilderFactoryImpl() {
 		super();
-		this.planService = planService;
 	}
 
 	@Override
-	public NetworkModelBuilder create(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-			FtthThreshholds fiberConstraints, GlobalConstraint globalConstraints) {
-		return new NetworkModelBuilderImpl(networkData, closestFirstSurfaceBuilder, fiberConstraints, globalConstraints);
+
+	public NetworkModelBuilder create(NetworkData networkData,
+			OptimizerContextBuilder constraintBuilder) {
+		return new NetworkModelBuilderImpl(networkData, constraintBuilder);
 	}
 
-	private class NetworkModelBuilderImpl implements NetworkModelBuilder {
+	@SuppressWarnings("serial")
+	public static class NetworkModelBuilderImpl implements NetworkModelBuilder {
 
+		private OptimizerContextBuilder constraintBuilder;
 		private NetworkData networkData;
-		
-		ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder;
-		
-		private FtthThreshholds constraints;
-		private GlobalConstraint globalConstraints;
+
 
 		private Map<Long, NetworkAssignment> map;
 
-		private NetworkModelBuilderImpl(NetworkData networkData, ClosestFirstSurfaceBuilder<GraphNode, AroEdge<GeoSegment>> closestFirstSurfaceBuilder,
-				FtthThreshholds constraints, GlobalConstraint globalConstraints) {
+		public NetworkModelBuilderImpl(NetworkData networkData,
+				OptimizerContextBuilder constraintBuilder) {
+
 			super();
+			this.constraintBuilder = constraintBuilder;
 			this.networkData = networkData;
-			this.closestFirstSurfaceBuilder = closestFirstSurfaceBuilder;
-			this.constraints = constraints;
-			this.globalConstraints = globalConstraints;
 
-			map = StreamUtil.hash(networkData.getRoadLocations(),
-					a -> a.getSource().getObjectId());
-		}
+			map = StreamUtil.hash(networkData.getRoadLocations(), a -> a
+					.getSource().getObjectId());
 
-		@Override
-		public FtthThreshholds getFtthThreshholds() {
-			return constraints;
-		}
-
-		@Override
-		public Collection<NetworkAssignment> getNetworkAssignments() {
-			return networkData.getFiberSources() ;
 		}
 
 		private NetworkData createNetworkData(Collection<Long> rejectedLocations) {
@@ -85,14 +67,16 @@ public class NetworkModelBuilderFactoryImpl implements
 			Map<Long, NetworkAssignment> map = new HashMap<>(this.map);
 
 			rejectedLocations.forEach(map::remove);
-			
-			Set<Long> selectedRoadLocationIds = new HashSet<Long> (this.networkData.getSelectedRoadLocationIds());
+
+			Set<Long> selectedRoadLocationIds = new HashSet<Long>(
+					this.networkData.getSelectedRoadLocationIds());
 			rejectedLocations.forEach(selectedRoadLocationIds::remove);
 
 			NetworkData nd = new NetworkData();
 			nd.setFiberSources(networkData.getFiberSources());
 			nd.setRoadEdges(networkData.getRoadEdges());
 			nd.setRoadLocations(map.values());
+			nd.setCableConduitEdges(networkData.getCableConduitEdges());
 			nd.setSelectedRoadLocationIds(selectedRoadLocationIds);
 
 			return nd;
@@ -107,9 +91,23 @@ public class NetworkModelBuilderFactoryImpl implements
 		 * (java.util.Collection)
 		 */
 		@Override
-		public Optional<CompositeNetworkModel> createModel(Collection<Long> rejectedLocations) {
-			return planService.computeNetworkModel(
-					createNetworkData(rejectedLocations), closestFirstSurfaceBuilder, constraints, globalConstraints);
+
+		public Optional<CompositeNetworkModel> createModel(
+				ApplicationContext appCtx, Collection<Long> rejectedLocations) {
+
+			OptimizerContext ctx = constraintBuilder
+					.createOptimizerContext(appCtx);
+
+			GraphNetworkModel networkModel = appCtx.getBean(
+					CoreGraphNetworkModelService.class)
+					.createGraphNetworkModel(
+							createNetworkData(rejectedLocations),
+							ctx.getGraphBuilderContext());
+
+			return appCtx
+					.getBean(CoreLeastCostRoutingService.class)
+					.computeNetworkModel(networkModel, ctx.getPricingModel(), ctx.getFtthThreshholds());
+
 		}
 	}
 }

@@ -10,10 +10,13 @@ import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.OptimizationRequest;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.enumerations.OptimizationMode;
 
 public class MasterOptimizationRequest extends OptimizationRequest {
 
 	private Collection<Integer> wireCenters;
+	private final OptimizationMode optimizationMode;
+
 
 	public static Builder build() {
 		return new Builder();
@@ -28,6 +31,8 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		private OptimizationConstraints optimizationConstraints;
 		private LocationSelectionMode locationSelectionMode = LocationSelectionMode.SELECTED_LOCATIONS;
 		private Set<Integer> wireCenters;
+		private OptimizationMode optimizationMode;
+
 
 		public Builder setOptimizationConstraints(
 				OptimizationConstraints constraints) {
@@ -74,16 +79,24 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 		public MasterOptimizationRequest build() {
 			return new MasterOptimizationRequest(optimizationConstraints,
-					fiberNetworkConstraints, createDataRequest(), wireCenters);
+					fiberNetworkConstraints, createDataRequest(), wireCenters, optimizationMode);
 		}
+
+		public Builder setOptimizationMode(OptimizationMode optimizationMode) {
+			this.optimizationMode = optimizationMode;
+			return this;
+		}
+
+
 	}
 
 	public MasterOptimizationRequest(
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
-			Collection<Integer> wireCenters) {
+			Collection<Integer> wireCenters, OptimizationMode optimizationMode) {
 		super(optimizationConstraints, constraints, request);
 		this.wireCenters = wireCenters;
+		this.optimizationMode = optimizationMode;
 	}
 
 	public Collection<Integer> getWireCenters() {
@@ -94,7 +107,12 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 		return new MasterOptimizationRequest(optimizationConstraints,
 				constraints, networkDataRequest.create(planId),
-				Collections.singleton(new Integer(wireCenterId)));
+				Collections.singleton(new Integer(wireCenterId)),
+				getOptimizationMode()
+		);
 	}
 
+	public OptimizationMode getOptimizationMode() {
+		return optimizationMode;
+	}
 }

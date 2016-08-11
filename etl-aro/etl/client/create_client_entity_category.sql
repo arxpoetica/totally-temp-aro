@@ -10,7 +10,7 @@ CREATE TABLE client.entity_category
 
 
 INSERT INTO client.entity_category(name, description) VALUES('small', 'SMB');
-INSERT INTO client.entity_category(name, description) VALUES('medium', 'Mid-tier');
-INSERT INTO client.entity_category(name, description) VALUES('large', 'Large Enterprise');
+INSERT INTO client.entity_category(name, description) VALUES('medium', 'Mid-tier (20-999 employees)');
+INSERT INTO client.entity_category(name, description) VALUES('large', 'Large Enterprise (1000+ employees)');
 INSERT INTO client.entity_category(name, description) VALUES('household', 'Household');
 INSERT INTO client.entity_category(name, description) VALUES('celltower', 'Tower');

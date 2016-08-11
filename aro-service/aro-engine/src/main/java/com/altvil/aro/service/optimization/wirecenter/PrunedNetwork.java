@@ -12,6 +12,7 @@ public interface PrunedNetwork {
 	long getPlanId() ;
 	
 	boolean isEmpty() ;
+
 	Collection<OptimizedNetwork> getOptimizedNetworks();
 
 }

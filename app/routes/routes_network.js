@@ -9,6 +9,22 @@ exports.configure = (api, middleware) => {
   var check_owner_permission = middleware.check_owner_permission
   var jsonSuccess = middleware.jsonSuccess
 
+  api.get('/network/fiber_type/:plan_id/:type', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var plan_id = request.params.plan_id
+    var type = request.params.type
+    models.Network.viewFiberByConstructionType(plan_id, type, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/network/fiber_plant/current_carrier', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    models.Network.viewFiberPlantForCurrentCarrier(viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/network/fiber_plant/:carrier_name', middleware.viewport, (request, response, next) => {
     var carrier_name = request.params.carrier_name
     var viewport = request.viewport

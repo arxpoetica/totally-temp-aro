@@ -72,13 +72,20 @@ public class DefaultRoicConfig implements RoicConfiguration,
 	protected SpiComponentRoicRegistry<ComponentInput> assembleComponents(
 			SpiComponentRoicRegistry<ComponentInput> registry) {
 
-		registry.register(new BasicComponentConfig(ComponentType.household));
-		registry.register(new BasicComponentConfig(ComponentType.cellTower));
-		registry.register(new BasicComponentConfig(ComponentType.smallBusiness));
-		registry.register(new BasicComponentConfig(ComponentType.mediumBusiness));
-		registry.register(new BasicComponentConfig(ComponentType.largeBusiness));
+		for(ComponentType ct : ComponentType.values()) {
+			if( ct.isBaseComponent() ) {
+				BasicComponentConfig basicComponent = new BasicComponentConfig(ct) ;
+				specialize(ct, basicComponent);
+				registry.register(basicComponent);
+			}
+		}
 		
+			
 		return registry;
+	}
+	
+	protected void specialize(ComponentType ct, SpiComponentConfig<ComponentInput> component) {
+		//NOOP
 	}
 
 	protected SpiComponentRoicRegistry<RoicInputs> assembleNetwork(
