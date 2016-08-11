@@ -24,6 +24,7 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.alg.RouteBuilder;
+import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
@@ -32,6 +33,7 @@ import com.altvil.aro.service.graph.assigment.GraphMapping;
 import com.altvil.aro.service.graph.assigment.impl.FiberSourceMapping;
 import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
 import com.altvil.aro.service.graph.assigment.impl.RootGraphMapping;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -118,6 +120,10 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
+	}
+	
+	protected ClosestFirstSurfaceBuilder getDijkstrIteratorBuilder() {
+		return ScalarClosestFirstSurfaceIterator.BUILDER;
 	}
 
 	private static class FiberSourceBinding implements
@@ -215,7 +221,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			// Create a tree leading to each AroEdge with a value.
 
-			DAGModel<GeoSegment> dag = transformFactory.createDAG(modifier
+			DAGModel<GeoSegment> dag = transformFactory.createDAG(getDijkstrIteratorBuilder(), modifier
 					.build(), rootNode, e -> {
 				GeoSegment gs = e.getValue();
 				return gs == null ? false : !gs.getGeoSegmentAssignments()
