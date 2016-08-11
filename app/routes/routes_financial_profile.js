@@ -219,9 +219,6 @@ exports.configure = (api, middleware) => {
       curves[`bau_${key}`] = `copper.${key}.subscribers_count`
       curves[`plan_${key}`] = `planned.${key}.subscribers_count`
     })
-    if (entities.length === 0) {
-      zeros = ['bau', 'plan']
-    }
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,
@@ -229,17 +226,15 @@ exports.configure = (api, middleware) => {
     })
     .then((data) => {
       data.forEach((obj) => {
-        var bau = 0
-        var plan = 0
+        obj.bau = 0
+        obj.plan = 0
         Object.keys(curves).forEach((key) => {
           if (key.indexOf('bau_') === 0) {
-            bau += obj[key]
+            obj.bau += obj[key]
           } else {
-            plan += obj[key]
+            obj.plan += obj[key]
           }
         })
-        obj.bau = bau
-        obj.plan = bau
       })
       return data
     })
@@ -308,8 +303,8 @@ exports.configure = (api, middleware) => {
     })
     .then((data) => {
       data.forEach((obj) => {
-        obj.bau = obj.copper_opex_expenses / obj.copper_revenue
-        obj.plan = obj.planned_opex_expenses / obj.planned_revenue
+        obj.bau = obj.copper_opex_expenses * 100 / obj.copper_revenue
+        obj.plan = obj.planned_opex_expenses * 100 / obj.planned_revenue
       })
       return data
     })

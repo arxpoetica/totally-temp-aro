@@ -24,6 +24,8 @@ public class MasterPlanningServiceImpl implements MasterPlanningService {
 		this.planAnalysisReportService = planAnalysisReportService;
 	}
 
+	@Override
+
 	public OptimizedMasterPlan createOptimizedMasterPlan(
 			GeneratedMasterPlan plan) {
 
@@ -37,6 +39,14 @@ public class MasterPlanningServiceImpl implements MasterPlanningService {
 	public OptimizedMasterPlan save(GeneratedMasterPlan generatedPlan) {
 
 		OptimizedMasterPlan op = createOptimizedMasterPlan(generatedPlan);
+
+		networkReportService.saveNetworkReport(op);
+
+		return op;
+	}
+
+	@Override
+	public OptimizedMasterPlan save(OptimizedMasterPlan op) {
 
 		networkReportService.saveNetworkReport(op);
 

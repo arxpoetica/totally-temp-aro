@@ -85,6 +85,12 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
 
+		return planNetwork(request, networkData);
+	}
+
+	@Override
+	public Optional<PlannedNetwork> planNetwork(WirecenterOptimizationRequest request, NetworkData networkData) {
+
 
 		PricingModel pricingModel = pricingService.getPricingModel("*",
 				new Date(),

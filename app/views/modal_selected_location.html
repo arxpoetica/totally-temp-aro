@@ -50,7 +50,7 @@
 
         <ul class="nav nav-tabs" role="tablist">
           <li role="presentation" ng-show="config.route_planning.length > 0">
-            <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Install costs</a>
+            <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Installation</a>
           </li>
           <li role="presentation" class="active">
             <a href="#selected_location_customer_profile" aria-controls="profile" role="tab" data-toggle="tab">Customer profile</a>
@@ -72,7 +72,7 @@
               <tbody>
                 <tr>
                   <th>Entry fee</th>
-                  <td colspan="2" class="text-right">{{location.entry_fee | currency}}</td>
+                  <td colspan="2" class="text-right">N/A</td>
                 </tr>
                 <tr>
                   <th>Number of businesses</th>
@@ -80,7 +80,7 @@
                 </tr>
                 <tr>
                   <th>Business install costs</th>
-                  <td colspan="2" class="text-right">{{location.business_install_costs | currency}}</td>
+                  <td colspan="2" class="text-right">N/A</td>
                 </tr>
                 <tr ng-show="show_households">
                   <th>Number of households</th>
@@ -91,11 +91,15 @@
                 </tr>
                 <tr ng-show="show_households">
                   <th>Household install costs</th>
-                  <td colspan="2" class="text-right">{{location.household_install_costs | currency}}</td>
+                  <td colspan="2" class="text-right">N/A</td>
+                </tr>
+                <tr>
+                  <th>Planned Fiber Strands</th>
+                  <td colspan="2" class="text-right">N/A</td>
                 </tr>
                 <tr>
                   <th>Total costs</th>
-                  <td colspan="2" class="text-right">{{location.total_costs | currency}}</td>
+                  <td colspan="2" class="text-right">N/A</td>
                 </tr>
               </tbody>
             </table>
