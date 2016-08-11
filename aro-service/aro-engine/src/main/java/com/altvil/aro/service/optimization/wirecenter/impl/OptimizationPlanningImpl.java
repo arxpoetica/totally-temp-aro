@@ -1,6 +1,8 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ import com.altvil.aro.service.planning.FiberConstraintUtils;
 import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
+import com.altvil.enumerations.OptimizationType;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -57,9 +60,22 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	@Autowired
 	private transient GraphNetworkModelService graphBuilderService;
 
-	@Autowired
-	private transient CoreLeastCostRoutingService planService;
+	private Map<OptimizationType, CoreLeastCostRoutingService> routingServiceByType = new EnumMap<>(OptimizationType.class);
 	
+	@Autowired
+	public void injectRoutingServices(CoreLeastCostRoutingService[] routingServices) {
+		types: for (OptimizationType type : OptimizationType.values()) {
+
+			for (CoreLeastCostRoutingService routingService : routingServices) {
+				if (routingService.isRoutingServiceFor(type)) {
+					routingServiceByType.put(type, routingService);
+					continue types;
+				}
+			}
+
+			throw new IllegalStateException("No CoreLeastCostRoutingService found for " + type);
+		}
+	}
 
 	//
 	// private Collection<NetworkDemand> toNetworkDemands(NetworkData
@@ -97,12 +113,11 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				PricingContext.create(request.getConstructionRatios())) ;
 		
 		GraphNetworkModel model = graphBuilderService
-				.build(networkService.getNetworkData(request
-						.getNetworkDataRequest()))
+				.build(networkData)
 				.setPricingModel(pricingModel)
 				.build();
 
-		return StreamUtil.map(planService.computeNetworkModel(model,
+		return StreamUtil.map(routingServiceByType.get(request.getOptimizationConstraints().getOptimizationType()).computeNetworkModel(model,
 				pricingModel,
 				FiberConstraintUtils.build(request.getConstraints())),
 				n -> new DefaultPlannedNetwork(request.getPlanId(), n,

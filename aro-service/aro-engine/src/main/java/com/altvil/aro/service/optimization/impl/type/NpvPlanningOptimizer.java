@@ -1,9 +1,8 @@
 package com.altvil.aro.service.optimization.impl.type;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +29,8 @@ import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.alg.NpvClosestFirstIterator;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.network.LocationSelectionMode;
+import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.network.impl.DefaultNetworkAssignment;
 import com.altvil.aro.service.optimization.OptimizedPlan;
@@ -41,12 +42,14 @@ import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultOptimizationResult;
+import com.altvil.aro.service.plan.NetworkAssignmentModelFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.enumerations.OptimizationType;
 import com.altvil.interfaces.NetworkAssignment;
+import com.altvil.interfaces.NetworkAssignmentModel;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -64,7 +67,9 @@ public class NpvPlanningOptimizer extends PlanningOptimizer {
 			try {
 				final PricingModel pricingModel = pricingService.getPricingModel("*", new Date(),
 						PricingContext.create(request.getConstructionRatios()));
-				final NetworkData networkData = networkService.getNetworkData(request.getNetworkDataRequest());
+				NetworkDataRequest networkDataRequest = request.getNetworkDataRequest();
+				networkDataRequest = networkDataRequest.createRequest(networkDataRequest.getPlanId(), LocationSelectionMode.ALL_LOCATIONS);
+				final NetworkData networkData = networkService.getNetworkData(networkDataRequest);
 
 				OptimizationConstraints optimizationConstraints = request.getOptimizationConstraints();
 				NpvPlanningStrategy nps = new NpvPlanningStrategy((ThresholdBudgetConstraint) optimizationConstraints);
@@ -104,19 +109,21 @@ public class NpvPlanningOptimizer extends PlanningOptimizer {
 		}
 
 		Map<Long, CompetitiveLocationDemandMapping> parametricCompetitiveLocationDemandMapping = new HashMap<>();
-		List<NetworkAssignment> roadLocations = new ArrayList<>();
 
-		for (NetworkAssignment rlNetworkAssignment : networkData.getRoadLocations()) {
+		Collection<NetworkAssignment> selected = networkData.getRoadLocations().getSelectedAssignments();
+		NetworkAssignmentModel.Builder factory = new NetworkAssignmentModelFactory();
+		
+		for (NetworkAssignment rlNetworkAssignment : networkData.getRoadLocations().getAllAssignments()) {
 			LocationEntity locationEntity = (LocationEntity) rlNetworkAssignment.getSource();
 			Long locationId = locationEntity.getObjectId();
 
-			if (networkData.getSelectedRoadLocationIds().contains(locationId)) {
+			if (selected.contains(rlNetworkAssignment)) {
 				CompetitiveLocationDemandMapping locationDemandMapping = networkData.getCompetitiveDemandMapping()
 						.getLocationDemandMapping(locationId);
 
-				roadLocations.add(rlNetworkAssignment);
-
 				assert locationDemandMapping != null;
+
+				factory.add(rlNetworkAssignment, true);
 
 				parametricCompetitiveLocationDemandMapping.put(locationId, locationDemandMapping);
 			} else if (nextParametric > 0) {
@@ -142,15 +149,13 @@ public class NpvPlanningOptimizer extends PlanningOptimizer {
 						locationEntity.getCensusBlockId(), locationEntity.getCompetitiveStrength(),
 						parametricLocationDemand);
 
-				roadLocations.add(new DefaultNetworkAssignment(aroEntity, rlNetworkAssignment.getDomain()));
+				factory.add(new DefaultNetworkAssignment(aroEntity, rlNetworkAssignment.getDomain()), false);
 				parametricCompetitiveLocationDemandMapping.put(locationId, parametricLocationDemandMapping);
 			}
 		}
 
 		NetworkData proxy = new NetworkData();
-
-		proxy.setRoadLocations(roadLocations);
-		proxy.setSelectedRoadLocationIds(networkData.getSelectedRoadLocationIds());
+		proxy.setRoadLocations(factory.build());
 
 		proxy.setFiberSources(networkData.getFiberSources());
 		proxy.setRoadEdges(networkData.getRoadEdges());

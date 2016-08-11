@@ -47,18 +47,21 @@ class CoreGraphNetworkModelBuilder {
 	private int totalNumberLocations = 0;
 	private Map<Long, GraphNode> roadVertexMap = new HashMap<>();
 	private Map<NetworkAssignment, GraphEdgeAssignment> graphEdgeAssignmentMap = new HashMap<>();
+	private final Collection<NetworkAssignment> allAssignments;
 
 	public CoreGraphNetworkModelBuilder(GraphAssignmentFactory factory,
 			GraphNodeFactory vertexFactory,
-			GraphModelBuilder<GeoSegment> graphModelBuilder) {
+			GraphModelBuilder<GeoSegment> graphModelBuilder,
+			Collection<NetworkAssignment> allAssignments) {
 		super();
 		this.factory = factory;
 		this.vertexFactory = vertexFactory;
 		this.graphModelBuilder = graphModelBuilder;	
+		this.allAssignments = allAssignments;
 	}
 	
 	public GraphNetworkModel build() {
-		return new DefaultNetworkModel(graphModelBuilder.build(),
+		return new DefaultNetworkModel(graphModelBuilder.build(), allAssignments, 
 				graphEdgeAssignmentMap, totalNumberLocations);
 	}
 

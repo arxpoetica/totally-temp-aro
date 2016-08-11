@@ -13,6 +13,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
@@ -48,12 +50,14 @@ import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.route.RouteModel;
 import com.altvil.aro.service.route.RoutePlaningService;
 import com.altvil.aro.util.DescribeGraph;
+import com.altvil.enumerations.OptimizationType;
 import com.altvil.interfaces.Assignment;
 import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
 
 @Service
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class CoreLeastCostRoutingServiceImpl implements
 		CoreLeastCostRoutingService {
 
@@ -75,6 +79,11 @@ public class CoreLeastCostRoutingServiceImpl implements
 		this.graphRenoderService = graphRenoderService ;
 		this.transformFactory = transformFactory;
 		this.routePlaningService = routePlaningService;
+	}
+
+	@Override
+	public boolean isRoutingServiceFor(OptimizationType type) {
+		return true;
 	}
 
 	@Override

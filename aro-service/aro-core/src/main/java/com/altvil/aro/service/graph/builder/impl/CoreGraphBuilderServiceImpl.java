@@ -69,11 +69,11 @@ public class CoreGraphBuilderServiceImpl implements
 	}
 
 	private GraphNetworkModel create(Iterator<RoadEdgeInfo> itr,
-			GraphBuilderContext ctx) {
+			Collection<NetworkAssignment> allAssignments, GraphBuilderContext ctx) {
 
 		CoreGraphNetworkModelBuilder nb = new CoreGraphNetworkModelBuilder(
 				graphEdgeFactory, vertexFactory,
-				transformFactory.createGraphBuilder());
+				transformFactory.createGraphBuilder(), allAssignments);
 
 		while (itr.hasNext()) {
 			nb.add(itr.next());
@@ -85,13 +85,13 @@ public class CoreGraphBuilderServiceImpl implements
 	@Override
 	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
 			GraphBuilderContext ctx) {
-		return create(createRoadEdgeInfoItr(networkData, ctx), ctx);
+		return create(createRoadEdgeInfoItr(networkData, ctx), networkData.getRoadLocations().getAllAssignments(), ctx);
 	}
 
 	@Override
 	public GraphNetworkModel createGraphNetworkModel(EdgeData edgeData,
 			GraphBuilderContext ctx) {
-		return create(createRoadEdgeInfoItr(edgeData, ctx), ctx);
+		return create(createRoadEdgeInfoItr(edgeData, ctx), Collections.emptyList(), ctx);
 	}
 
 	private Iterator<RoadEdgeInfo> createRoadEdgeInfoItr(EdgeData edgeData,
@@ -255,7 +255,7 @@ public class CoreGraphBuilderServiceImpl implements
 		public RoadEdgeIndexer index(NetworkData networkData) {
 
 			roadLocationsByTlid = groupLocationsByTlid(networkData
-					.getRoadLocations());
+					.getRoadLocations().getSelectedAssignments());
 			fiberSources = groupFiberSources(networkData.getFiberSources());
 			cableConduitMap = groupSections(networkData.getCableConduitEdges());
 
