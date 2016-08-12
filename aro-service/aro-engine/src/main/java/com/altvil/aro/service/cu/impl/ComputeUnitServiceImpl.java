@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.altvil.aro.service.cu.ComputeUnit;
 import com.altvil.aro.service.cu.ComputeUnitBuilder;
-import com.altvil.aro.service.cu.ComuteUnitService;
+import com.altvil.aro.service.cu.ComputeUnitService;
 import com.altvil.aro.service.cu.ComputeUnitFunction;
 import com.altvil.aro.service.cu.ComputeServiceApi;
 import com.altvil.aro.service.cu.cache.CacheHandle;
@@ -53,7 +53,7 @@ import com.altvil.aro.service.cu.version.VersionTrackingService;
 import com.altvil.aro.service.cu.version.VersionType;
 import com.altvil.utils.lock.ResourceLock;
 
-public class ComputeUnitServiceImpl  implements ComuteUnitService {
+public class ComputeUnitServiceImpl  implements ComputeUnitService {
 	private static final Logger log = LoggerFactory
 			.getLogger(ComputeUnitServiceImpl.class.getName());
 	private Ignite ignite;

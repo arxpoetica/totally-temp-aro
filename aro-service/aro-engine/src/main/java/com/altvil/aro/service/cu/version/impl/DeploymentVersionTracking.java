@@ -17,7 +17,7 @@ import org.springframework.context.ApplicationContext;
 import com.altvil.aro.model.DeploymentPlanVersionEntity;
 import com.altvil.aro.model.DeploymentPlanVersionKey;
 import com.altvil.aro.persistence.DeploymentPlanVersionRepository;
-import com.altvil.aro.service.cu.cache.impl.BSACacheKey;
+import com.altvil.aro.service.cu.cache.impl.AroCacheKey;
 import com.altvil.aro.service.cu.key.AroKey;
 import com.altvil.aro.service.cu.key.AroKeyService;
 import com.altvil.aro.service.cu.version.spi.VersionTrackingPersistence;
@@ -102,8 +102,8 @@ public class DeploymentVersionTracking implements VersionTrackingPersistence {
 		return key;
 	}
 
-	private BSACacheKey toBsaKey(DeploymentPlanVersionKey key) {
-		return new BSACacheKey(key.getServiceAreaId(),
+	private AroCacheKey toBsaKey(DeploymentPlanVersionKey key) {
+		return new AroCacheKey(key.getServiceAreaId(),
 				key.getDeploymentPlanId());
 	}
 

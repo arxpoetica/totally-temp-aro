@@ -2,7 +2,7 @@ package com.altvil.aro.service.cu;
 
 import java.io.Serializable;
 
-public interface ComuteUnitService {
+public interface ComputeUnitService {
 
 
 	ComputeUnit<?> getBsaExecutor(String name);

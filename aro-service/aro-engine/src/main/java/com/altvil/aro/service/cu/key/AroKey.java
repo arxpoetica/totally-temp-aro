@@ -9,10 +9,10 @@ public interface AroKey {
 	AroKey toKey(VersionType vt);
 
 	@AffinityKeyMapped
-	public abstract Integer getServiceAreaId();
+	Integer getServiceAreaId();
 
-	public abstract Long getDeploymentPlanId();
+	Long getDeploymentPlanId();
 
-	public abstract String getCompositeKey();
+	String getCompositeKey();
 
 }

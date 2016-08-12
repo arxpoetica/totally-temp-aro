@@ -51,8 +51,8 @@ public class VersionTrackingServiceImpl implements VersionTrackingService {
 	void postConstruct() {
 		map.put(VersionType.LOCATION,
 				createVersionTracking(VersionType.LOCATION));
-		map.put(VersionType.DEPLOYMENTS,
-				createVersionTracking(VersionType.DEPLOYMENTS));
+		map.put(VersionType.NETWORK,
+				createVersionTracking(VersionType.NETWORK));
 
 		for (VersionTracking tracking : map.values()) {
 			if (tracking != null) {
@@ -68,7 +68,7 @@ public class VersionTrackingServiceImpl implements VersionTrackingService {
 
 	private VersionTrackingPersistence createPersistence(VersionType vt) {
 		switch (vt) {
-		case DEPLOYMENTS:
+		case NETWORK:
 			return DeploymentVersionTracking.create(appCtx);
 		default:
 			return null;

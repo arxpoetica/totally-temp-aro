@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.interfaces.NetworkAssignment;
 
+@SuppressWarnings("serial")
 public class NetworkData extends EdgeData {
 
 	public Collection<NetworkAssignment> roadLocations;

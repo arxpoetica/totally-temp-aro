@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
-import com.altvil.aro.service.cu.cache.impl.BSACacheKey;
+import com.altvil.aro.service.cu.cache.impl.AroCacheKey;
 import com.altvil.aro.service.cu.execute.AroExecutorService;
 import com.altvil.aro.service.cu.execute.PreCacheAgent;
 import com.altvil.aro.service.cu.key.AroKey;
@@ -99,7 +99,7 @@ public class DefaultVersionTracking implements VersionTracking, PreCacheAgent {
 
 	@Override
 	public AroKey createKey(int serviceAreaId, long planId) {
-		return BSACacheKey.create(serviceAreaId, planId);
+		return AroCacheKey.create(serviceAreaId, planId);
 	}
 
 	@Override

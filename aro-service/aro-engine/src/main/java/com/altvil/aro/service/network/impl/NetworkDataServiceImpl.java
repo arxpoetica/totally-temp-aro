@@ -2,6 +2,7 @@ package com.altvil.aro.service.network.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +15,14 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
+import com.altvil.aro.service.cu.ComputeUnitBuilder.ExecutionCachePolicy;
+import com.altvil.aro.service.cu.ComputeUnitService;
+import com.altvil.aro.service.cu.cache.impl.DefaultCacheStrategy;
+import com.altvil.aro.service.cu.cache.query.CacheQuery;
+import com.altvil.aro.service.cu.key.AroKey;
+import com.altvil.aro.service.cu.version.VersionType;
 import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
@@ -30,6 +36,7 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
+import com.altvil.aro.service.network.loader.NetworkDataLoader;
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
@@ -39,9 +46,12 @@ import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
 import com.altvil.utils.conversion.OrdinalEntityFactory;
 
-@Service
 public class NetworkDataServiceImpl implements NetworkDataService {
 
+	
+	private NetworkDataLoader networkDataLoader ;
+	
+	
 	private static final Logger LOG = LoggerFactory
 			.getLogger(NetworkServiceImpl.class.getName());
 
@@ -52,8 +62,15 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private AroDemandService aroDemandService;
 
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
-
 	private Map<Integer, CableConstructionEnum> cableConstructionEnumMap;
+
+	private ComputeUnitService computeUnitService;
+
+	@PostConstruct
+	void postConstruct() {
+		cableConstructionEnumMap = StreamUtil
+				.hashEnum(CableConstructionEnum.class);
+	}
 
 	@Override
 	public NetworkData getNetworkData(NetworkDataRequest request) {
@@ -81,10 +98,29 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		return networkData;
 	}
 
-	@PostConstruct
-	void postConstruct() {
-		cableConstructionEnumMap = StreamUtil
-				.hashEnum(CableConstructionEnum.class);
+	private NetworkData loadNetworkData(NetworkDataRequest request) {
+
+		NetworkData networkData = new NetworkData();
+
+		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
+
+		networkData.setCompetitiveDemandMapping(new CompetitiveDemandMapping(
+				demandByLocationIdMap));
+
+		// TODO Simplify Locations
+		Collection<NetworkAssignment> roadLocations = getNetworkLocations(
+				request, demandByLocationIdMap);
+
+		networkData.setRoadLocations(roadLocations);
+
+		networkData
+				.setSelectedRoadLocationIds(toSelectedRoadLocationIds(roadLocations));
+
+		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
+		networkData.setRoadEdges(getRoadEdges(request));
+		networkData.setCableConduitEdges(queryCableConduitEdges(request));
+
+		return networkData;
 	}
 
 	// private CompetitiveLocationDemandMapping aggregate(

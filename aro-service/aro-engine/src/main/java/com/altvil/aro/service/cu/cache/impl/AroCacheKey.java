@@ -6,14 +6,14 @@ import com.altvil.aro.service.cu.key.AroKey;
 import com.altvil.aro.service.cu.version.VersionType;
 
 @SuppressWarnings("serial")
-public class BSACacheKey implements Serializable, AroKey {
+public class AroCacheKey implements Serializable, AroKey {
 
 	public static AroKey create(Integer serviceAreaId) {
-		return new BSACacheKey(serviceAreaId, -1L);
+		return new AroCacheKey(serviceAreaId, -1L);
 	}
 
 	public static AroKey create(Integer serviceAreaId, Long deploymentPlanId) {
-		return new BSACacheKey(serviceAreaId, deploymentPlanId);
+		return new AroCacheKey(serviceAreaId, deploymentPlanId);
 	}
 
 	/**
@@ -23,7 +23,7 @@ public class BSACacheKey implements Serializable, AroKey {
 	private Long deploymentPlanId;
 	private int hashCode;
 
-	public BSACacheKey(Integer serviceAreaId, Long deploymentPlanId) {
+	public AroCacheKey(Integer serviceAreaId, Long deploymentPlanId) {
 		this.serviceAreaId = serviceAreaId;
 		this.deploymentPlanId = deploymentPlanId;
 		hashCode = calcHash();
@@ -32,15 +32,15 @@ public class BSACacheKey implements Serializable, AroKey {
 	@Override
 	public AroKey toKey(VersionType vt) {
 
-		if (vt == VersionType.DEPLOYMENTS) {
+		if (vt == VersionType.NETWORK) {
 			if (this.getDeploymentPlanId() == null
 					|| this.getDeploymentPlanId() == -1) {
-				return new BSACacheKey(this.getServiceAreaId(), 0L);
+				return new AroCacheKey(this.getServiceAreaId(), 0L);
 			}
 			return this;
 		}
 
-		return new BSACacheKey(this.getServiceAreaId(), -1L);
+		return new AroCacheKey(this.getServiceAreaId(), -1L);
 
 	}
 

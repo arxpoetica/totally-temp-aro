@@ -16,7 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.cu.ComputeUnit;
-import com.altvil.aro.service.cu.ComuteUnitService;
+import com.altvil.aro.service.cu.ComputeUnitService;
 import com.altvil.aro.service.cu.ComputeServiceApi;
 import com.altvil.aro.service.cu.cache.query.CacheQuery;
 import com.altvil.aro.service.cu.execute.JobProgressListener;
@@ -80,7 +80,7 @@ public class SpiAroExecutorContextImpl implements SpiAroExecutorContext {
 		}
 
 		return (SpiComputeUnit) applicationContext.getBean(
-				ComuteUnitService.class).getBsaExecutor(name);
+				ComputeUnitService.class).getBsaExecutor(name);
 	}
 
 	@Override

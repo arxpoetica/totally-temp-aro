@@ -7,30 +7,34 @@ import java.util.Map;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
-import com.altvil.aro.service.cu.cache.impl.BSACacheKey;
+import com.altvil.aro.service.cu.cache.impl.AroCacheKey;
 import com.altvil.aro.service.cu.key.AroKey;
 
 @SuppressWarnings("serial")
 public class CacheQuery implements Serializable {
 
-	private AroKey bsaKey;
+	private AroKey aroKey;
 	private Map<String, Serializable> params;
 	private String extentionKey;
 
-	public CacheQuery(AroKey bsaKey, Map<String, Serializable> params,
+	public CacheQuery(AroKey aroKey, Map<String, Serializable> params,
 			String extentionKey) {
 		super();
-		this.bsaKey = bsaKey;
+		this.aroKey = aroKey;
 		this.params = params;
 		this.extentionKey = extentionKey;
 	}
 
 	public static Builder build(int serviceAreaId) {
-		return new Builder(new BSACacheKey(serviceAreaId, -1L));
+		return new Builder(new AroCacheKey(serviceAreaId, -1L));
 	}
 
 	public static Builder build(int serviceAreaId, Long deploymentPlanId) {
-		return new Builder(new BSACacheKey(serviceAreaId, deploymentPlanId));
+		return new Builder(new AroCacheKey(serviceAreaId, deploymentPlanId));
+	}
+	
+	public static Builder build(AroKey aroKey) {
+		return new Builder(aroKey);
 	}
 
 	private static String calcExtentionKey(Map<String, Serializable> params) {
@@ -80,8 +84,8 @@ public class CacheQuery implements Serializable {
 
 	}
 
-	public AroKey getBsaKey() {
-		return bsaKey;
+	public AroKey getAroKey() {
+		return aroKey;
 	}
 
 	public Map<String, Serializable> getParams() {
@@ -93,19 +97,19 @@ public class CacheQuery implements Serializable {
 	}
 
 	public Integer getServiceAreaId() {
-		return bsaKey.getServiceAreaId();
+		return aroKey.getServiceAreaId();
 	}
 
 	// //
 
 	@Override
 	public String toString() {
-		return " CacheQuery (" + bsaKey.toString()
+		return " CacheQuery (" + aroKey.toString()
 				+ (extentionKey.equals("") ? "" : "/" + extentionKey) + ")";
 	}
 
 	public Long getDeploymentPlanId() {
-		return bsaKey.getDeploymentPlanId();
+		return aroKey.getDeploymentPlanId();
 	}
 
 	public String getExtentionKey() {

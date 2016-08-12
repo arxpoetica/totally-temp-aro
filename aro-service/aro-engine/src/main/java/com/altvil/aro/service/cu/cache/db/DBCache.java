@@ -128,7 +128,7 @@ public class DBCache implements SimpleCache {
 			return equals(resourceVersion.getVersion(VersionType.LOCATION),
 					deploymentCacheEntity.getLocationVersion())
 					&& equals(
-							resourceVersion.getVersion(VersionType.DEPLOYMENTS),
+							resourceVersion.getVersion(VersionType.NETWORK),
 							deploymentCacheEntity.getVersion());
 
 		}
@@ -178,9 +178,9 @@ public class DBCache implements SimpleCache {
 					deploymentCacheEntity.setLocationVersion(resourceVersion
 							.getVersion(VersionType.LOCATION));
 					break;
-				case DEPLOYMENTS:
+				case NETWORK:
 					deploymentCacheEntity.setVersion(resourceVersion
-							.getVersion(VersionType.DEPLOYMENTS));
+							.getVersion(VersionType.NETWORK));
 					break;
 				}
 			}
