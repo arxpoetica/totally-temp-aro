@@ -262,22 +262,6 @@ module.exports = class Network {
     return this._callService(req)
   }
 
-  static equipmentSummary (plan_id) {
-    var req = {
-      url: config.aro_service_url + `/rest/report/plan/${plan_id}/equipment_summary`,
-      json: true
-    }
-    return this._callService(req)
-  }
-
-  static fiberSummary (plan_id) {
-    var req = {
-      url: config.aro_service_url + `/rest/report/plan/${plan_id}/fiber_summary`,
-      json: true
-    }
-    return this._callService(req)
-  }
-
   static irrAndNpv (plan_id) {
     var req = {
       url: config.aro_service_url + `/rest/roic/models/${plan_id}`,
