@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jgrapht.GraphPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -316,7 +318,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 			renodedMap.put(FiberType.FEEDER, getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping)) ;
 			renodedMap.put(FiberType.DISTRIBUTION, getRenodedGraph(graphCtx, FiberType.DISTRIBUTION, graphMapping)) ;
 
-			GeneratedFiberRoute feederFiber = planRoute(getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping), graphMapping);
+			GeneratedFiberRoute feederFiber = planRoute(DistancePredicate.PREDICATE_15K, getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping), graphMapping);
 
 			Map<GraphAssignment, GeneratedFiberRoute> distributionFiber = planDistributionRoutes(
 					getRenodedGraph(graphCtx, FiberType.DISTRIBUTION, graphMapping), graphMapping.getChildren());
@@ -340,9 +342,9 @@ public class CoreLeastCostRoutingServiceImpl implements
 			return result;
 		}
 
-		private GeneratedFiberRoute planRoute(RenodedGraph renoded,
+		private GeneratedFiberRoute planRoute(Predicate<GraphPath<GraphNode, AroEdge<GeoSegment>>> predicate, RenodedGraph renoded,
 				GraphMapping mapping) {
-			return planRoute(renoded, mapping.getGraphAssignment(),
+			return planRoute(predicate, renoded, mapping.getGraphAssignment(),
 					mapping.getChildAssignments());
 		}
 
@@ -357,14 +359,16 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			children.forEach(a -> {
 				if (isDistributionSource(a.getAroEntity())) {
-					map.put(a.getGraphAssignment(), planRoute(renoded, a));
+					map.put(a.getGraphAssignment(), planRoute(gp -> true, renoded, a));
 				}
 			});
 
 			return map;
 		}
 
-		private GeneratedFiberRoute planRoute(RenodedGraph renoded,
+		private GeneratedFiberRoute planRoute(
+				Predicate<GraphPath<GraphNode, AroEdge<GeoSegment>>> predicate,
+				RenodedGraph renoded,
 				GraphAssignment root,
 				Collection<? extends GraphAssignment> nodes) {
 
@@ -374,7 +378,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 			renoded.getGraphNode(root);
 
 			SourceRoute<GraphNode, AroEdge<GeoSegment>> sr = new RouteBuilder<GraphNode, AroEdge<GeoSegment>>()
-					.buildSourceRoute(renoded.getGraph().getGraph(),
+					.buildSourceRoute(predicate, renoded.getGraph().getGraph(),
 							renoded.getGraphNode(root),
 							StreamUtil.map(nodes, n -> renoded.getGraphNode(n)));
 
@@ -437,112 +441,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 					});
 			return assignmentMap;
 		}
-
-		// private GraphModel<GeoSegment> renode(GraphRenoder networkBuilder,
-		// GraphContext graphCtx,
-		// GraphMapping co) {
-		//
-		// if (log.isDebugEnabled())
-		// log.debug("renode  Graph for all assigned equipment");
-		//
-		// // GraphModelBuilder<GeoSegment> b = transformFactory
-		// // .createBuilder(new SimpleWeightedGraph<GraphNode,
-		// AroEdge<GeoSegment>>(
-		// // new AroEdgeFactory<GeoSegment>()));
-		//
-		// // GraphRenoder networkBuilder = new NormalizedRenoder(
-		// // new NetworkBuilder(b, vertexFactory));
-		//
-		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap =
-		// extractAssignments(co);
-		// assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
-		// networkBuilder.add(assignmentMap.values());
-		// networkBuilder.renodeGraph(graphCtx.getGraphModel());
-		//
-		// // TODO Move into Model Abstraction
-		// resolved = networkBuilder.getResolvedAssignments();
-		//
-		// verifyAssignments(resolved, assignmentMap);
-		//
-		// // Update Resolved Map with FiberSource Root Binding
-		// this.resolved.put(fiberSourceBinding.getSource(),
-		// fiberSourceBinding.getDomain());
-		//
-		// return networkBuilder.getBuilder().build();
-		//
-		// }
-
-		// private GraphModel<GeoSegment> renode(GraphRenoder networkBuilder,
-		// GraphMapping co) {
-		//
-		// if (log.isDebugEnabled())
-		// log.debug("renode  Graph for all assigned equipment");
-		//
-		// // GraphModelBuilder<GeoSegment> b = transformFactory
-		// // .createBuilder(new SimpleWeightedGraph<GraphNode,
-		// AroEdge<GeoSegment>>(
-		// // new AroEdgeFactory<GeoSegment>()));
-		//
-		// // GraphRenoder networkBuilder = new NormalizedRenoder(
-		// // new NetworkBuilder(b, vertexFactory));
-		//
-		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap =
-		// extractAssignments(co);
-		// assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
-		// networkBuilder.add(assignmentMap.values());
-		//
-		// //networkBuilder.renodeGraph(graphCtx.getGraphModel());
-		//
-		// // TODO Move into Model Abstraction
-		// //resolved = networkBuilder.getResolvedAssignments();
-		//
-		// //verifyAssignments(resolved, assignmentMap);
-		//
-		// // Update Resolved Map with FiberSource Root Binding
-		// this.resolved.put(fiberSourceBinding.getSource(),
-		// fiberSourceBinding.getDomain());
-		//
-		// networkBuilder.renode() ;
-		//
-		// return networkBuilder.getBuilder().build();
-		//
-		// }
-
-		// private GraphModel<GeoSegment> renodeGraph(GraphContext graphCtx,
-		// GraphMapping co) {
-		//
-		// if (log.isDebugEnabled())
-		// log.debug("renode  Graph for all assigned equipment");
-		//
-		// GraphModelBuilder<GeoSegment> b = transformFactory
-		// .createBuilder(new SimpleWeightedGraph<GraphNode,
-		// AroEdge<GeoSegment>>(
-		// new AroEdgeFactory<GeoSegment>()));
-		//
-		// GraphRenoder networkBuilder = new NormalizedRenoder(
-		// new NetworkBuilder(b, vertexFactory));
-		//
-		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap =
-		// extractAssignments(co);
-		//
-		// assignmentMap.put(co.getGraphAssignment(), co.getGraphAssignment());
-		//
-		// networkBuilder.add(assignmentMap.values());
-		// networkBuilder.renodeGraph(graphCtx.getGraphModel());
-		//
-		// // TODO Move into Model Abstraction
-		// resolved = networkBuilder.getResolvedAssignments();
-		//
-		// verifyAssignments(resolved, assignmentMap);
-		//
-		// // Update Resolved Map with FiberSource Root Binding
-		// this.resolved.put(fiberSourceBinding.getSource(),
-		// fiberSourceBinding.getDomain());
-		//
-		// return networkBuilder.getBuilder().build();
-		//
-		// }
-
+		
 	}
 
 	private class GraphContext {
@@ -565,6 +464,25 @@ public class CoreLeastCostRoutingServiceImpl implements
 			return graphModel;
 		}
 
+	}
+	
+	private static class DistancePredicate implements Predicate<GraphPath<GraphNode, AroEdge<GeoSegment>>> {
+
+		public static DistancePredicate PREDICATE_15K = new DistancePredicate(15 * 1000) ;//15K constraint
+		
+		private double maxDistance ;
+		
+		public DistancePredicate(double maxDistance) {
+			super();
+			this.maxDistance = maxDistance;
+		}
+
+
+		@Override
+		public boolean test(GraphPath<GraphNode, AroEdge<GeoSegment>> path) {
+			double sum = path.getEdgeList().stream().mapToDouble(e ->e.getValue().getLength()).sum() ;
+			return sum <= maxDistance ;
+		}		
 	}
 
 }

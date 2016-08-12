@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
@@ -33,9 +34,19 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 	private Map<V, AllShortestPaths<V, E>> targetMap;
 
+	private Predicate<GraphPath<V,E>> pathPredicate = gp ->true ;
 
 	public Collection<SourceRoute<V, E>> build(WeightedGraph<V, E> source,
 			Collection<V> all_roots, Collection<V> targets) {
+		
+		return build(gp ->true, source, all_roots, targets) ;
+	}
+	
+	
+	public Collection<SourceRoute<V, E>> build(Predicate<GraphPath<V,E>> pathPredicate, WeightedGraph<V, E> source,
+			Collection<V> all_roots, Collection<V> targets) {
+		
+		this.pathPredicate = pathPredicate ;
 		
 		if( log.isDebugEnabled() ) {
 			for(V v : targets) {
@@ -128,9 +139,9 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 		return originalSources;
 	}
 
-	public SourceRoute<V, E> buildSourceRoute(WeightedGraph<V, E> source,
+	public SourceRoute<V, E> buildSourceRoute(Predicate<GraphPath<V,E>> pathPredicate, WeightedGraph<V, E> source,
 			V root, Collection<V> targets) {
-		return build(source, Collections.singleton(root), targets).iterator()
+		return build(pathPredicate, source, Collections.singleton(root), targets).iterator()
 				.next();
 	}
 
@@ -206,8 +217,19 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 				treeMap.put(path.getWeight(), path);
 			}
 		}
-		return treeMap.size() == 0 ? null : treeMap.firstEntry().getValue();
+		
+		for( GraphPath<V, E> gp : treeMap.values()) {
+			if( isValidPath(gp) ) {
+				return gp ;
+			}
+		}
+		
+		return null ;
 
+	}
+	
+	private boolean isValidPath(GraphPath<V, E> path) {
+		return pathPredicate.test(path) ;
 	}
 
 	@SuppressWarnings("unused")
