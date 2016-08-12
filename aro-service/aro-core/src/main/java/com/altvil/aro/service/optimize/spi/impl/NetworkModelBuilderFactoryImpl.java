@@ -90,7 +90,6 @@ public class NetworkModelBuilderFactoryImpl implements
 		 * com.altvil.aro.service.optimize.spi.NetworkModelBuilder#createModel
 		 * (java.util.Collection)
 		 */
-		@Override
 
 		public Optional<CompositeNetworkModel> createModel(
 				ApplicationContext appCtx, Collection<Long> rejectedLocations) {

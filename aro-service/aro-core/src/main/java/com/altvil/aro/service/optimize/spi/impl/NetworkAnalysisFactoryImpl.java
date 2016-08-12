@@ -397,7 +397,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 
 		@Override
 		public Optional<CompositeNetworkModel> get(ApplicationContext applicationContext) {
-			return networkModelBuilder.createModel(applicationContext, rejectedLocations);
+			return networkModelBuilder.createModel(applicationContext, Arrays.asList(ArrayUtils.toObject(rejectedLocations)));
 		}
 
 		@Override
