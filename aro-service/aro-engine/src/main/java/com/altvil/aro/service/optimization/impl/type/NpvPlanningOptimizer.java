@@ -26,8 +26,6 @@ import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.entity.SimpleNetworkFinancials;
 import com.altvil.aro.service.entity.impl.EntityFactory;
-import com.altvil.aro.service.graph.alg.NpvClosestFirstIterator;
-import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
@@ -54,6 +52,11 @@ import com.altvil.interfaces.NetworkAssignmentModel;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class NpvPlanningOptimizer extends PlanningOptimizer {
+	// Locations appear to have a high minimum cost even when their demand and
+	// revenue approach zero. In order to remove those minimum costs exclude all
+	// locations whose revenue is less than the CUTOFF from the results.
+	private static final double CUTOFF = 25;
+
 	private final Logger log = LoggerFactory.getLogger(NpvPlanningOptimizer.class.getName());
 
 	@Autowired
@@ -131,26 +134,34 @@ public class NpvPlanningOptimizer extends PlanningOptimizer {
 						.getLocationDemandMapping(locationId);
 				CompetitiveLocationDemandMapping parametricLocationDemandMapping = new CompetitiveLocationDemandMapping(
 						locationDemandMapping.getBlockId(), locationDemandMapping.getCompetitiveStrength());
+				
+				double totalRevenue = 0;
 
 				for (LocationEntityType value : LocationEntityType.values()) {
 					EntityDemandMapping entityDemandMapping = locationDemandMapping.getEntityDemandMapping(value);
 
+					final double scaledRevenue = entityDemandMapping.getMappedRevenue() * nextParametric;
 					parametricLocationDemandMapping.add(value, entityDemandMapping.getMappedDemand() * nextParametric,
-							entityDemandMapping.getMappedRevenue() * nextParametric);
+							scaledRevenue);
+					totalRevenue += scaledRevenue;
 				}
 
-				 // NOTE:The fair share mapping is cached so do NOT use the parametric mapping in the call to createFairShareDemandMapping.
-				LocationDemand parametricLocationDemand = aroDemandService
-						.createFairShareDemandMapping(locationDemandMapping)
-						.getFairShareLocationDemand(SpeedCategory.cat7)
-						.createLocationDemand(parametricLocationDemandMapping);
+				if (totalRevenue > CUTOFF) {
+					// NOTE:The fair share mapping is cached so do NOT use the
+					// parametric mapping in the call to
+					// createFairShareDemandMapping.
+					LocationDemand parametricLocationDemand = aroDemandService
+							.createFairShareDemandMapping(locationDemandMapping)
+							.getFairShareLocationDemand(SpeedCategory.cat7)
+							.createLocationDemand(parametricLocationDemandMapping);
 
-				AroEntity aroEntity = EntityFactory.FACTORY.createLocationEntity(null, locationId,
-						locationEntity.getCensusBlockId(), locationEntity.getCompetitiveStrength(),
-						parametricLocationDemand);
+					AroEntity aroEntity = EntityFactory.FACTORY.createLocationEntity(null, locationId,
+							locationEntity.getCensusBlockId(), locationEntity.getCompetitiveStrength(),
+							parametricLocationDemand);
 
-				factory.add(new DefaultNetworkAssignment(aroEntity, rlNetworkAssignment.getDomain()), false);
-				parametricCompetitiveLocationDemandMapping.put(locationId, parametricLocationDemandMapping);
+					factory.add(new DefaultNetworkAssignment(aroEntity, rlNetworkAssignment.getDomain()), false);
+					parametricCompetitiveLocationDemandMapping.put(locationId, parametricLocationDemandMapping);
+				}
 			}
 		}
 
@@ -161,6 +172,8 @@ public class NpvPlanningOptimizer extends PlanningOptimizer {
 		proxy.setRoadEdges(networkData.getRoadEdges());
 
 		proxy.setCompetitiveDemandMapping(new CompetitiveDemandMapping(parametricCompetitiveLocationDemandMapping));
+		
+		proxy.setCableConduitEdges(networkData.getCableConduitEdges());
 
 		return proxy;
 	}
@@ -174,6 +187,7 @@ class NpvPlanningStrategy {
 		private final Logger log = LoggerFactory.getLogger(ApplyBudgetConstraint.class);
 		private double low;
 		private int numProbes = 3;
+		private double stop = 0.00001;
 
 		public ApplyBudgetConstraint(double low, double high) {
 			this.low = low;
@@ -193,7 +207,7 @@ class NpvPlanningStrategy {
 
 			if (totalCost > capex) {
 				log.debug("Budget exceeded : {} > {}", totalCost, capex);
-				if ((high - low) > 0.001) {
+				if ((high - low) > stop) {
 					searchPlan = new ApplyBudgetConstraint(probing - increment, probing);
 					return searchPlan.isConverging();
 				}
@@ -207,7 +221,7 @@ class NpvPlanningStrategy {
 				return true;
 			}
 
-			if ((high - low) > 0.001) {
+			if ((high - low) > stop) {
 				searchPlan = new ApplyBudgetConstraint(high - increment, high);
 				return searchPlan.isConverging();
 			}
@@ -324,10 +338,6 @@ class NpvPlanningStrategy {
 		capex = thresholdBudgetConstraint.getCapex();
 	}
 
-	public ClosestFirstSurfaceBuilder getClosestFirstSurfaceIteratorBuilder() {
-		return new NpvClosestFirstIterator.Builder(financialInputs.getDiscountRate(), financialInputs.getYears());
-	}
-
 	public boolean isConverging(OptimizedPlan optimizedPlan, PricingModel pricingModel) {
 
 		if (optimizedPlan == null) {
@@ -404,132 +414,3 @@ class PricingModelNetworkFinancials extends SimpleNetworkFinancials {
 		totalCost = equipmentCost + fiberCost;
 	}
 }
-// protected Collection<WirecenterOptimizationRequest>
-// computeWireCenterRequests(
-// MasterOptimizationRequest request) {
-// List<Number> wireCentersPlans = networkPlanRepository
-// .computeWirecenterUpdates(request.getPlanId());
-//
-// return StreamUtil.map(
-// wireCentersPlans,
-// id -> {
-// return new WirecenterOptimizationRequest(request
-// .getOptimizationConstraints(), request
-// .getConstraints(), request
-// .getNetworkDataRequest().createRequest(
-// id.longValue(), request.getNetworkDataRequest().getSelectionMode()));
-// });
-// }
-//
-// protected ComputeUnitCallable<WirecenterOptimization<GeneratedPlan>>
-// generatePlanCommand(
-// OptimizationConstraints constraints, WirecenterOptimizationRequest
-// wirecenterRequest) {
-// return () -> {
-// WirecenterNetworkPlan wirecenterNetworkPlan;
-// PlannedNetwork plan;
-// try {
-// PricingModel pricingModel = pricingService.getPricingModel("*", new Date());
-// NetworkData networkData = networkService.getNetworkData(wirecenterRequest
-// .getNetworkDataRequest());
-//
-// OptimizationConstraints optimizationConstraints =
-// wirecenterRequest.getOptimizationConstraints();
-// NpvPlanningStrategy nps = new NpvPlanningStrategy((ThresholdBudgetConstraint)
-// optimizationConstraints);
-// do {
-// NetworkData proxyData = proxyData(networkData, nps.nextParametric());
-// plan = planNetwork(wirecenterRequest, proxyData);
-// wirecenterNetworkPlan = reify(plan);
-// } while (nps.isConverging(wirecenterNetworkPlan, pricingModel));
-//
-// final NetworkDemandSummary demandSummary = toNetworkDemandSummary(
-// wirecenterNetworkPlan.getDemandCoverage(),
-// plan.getCompetitiveDemandMapping());
-//
-// GeneratedPlan generatedPlan = new GeneratedPlanImpl(
-// demandSummary, constraints, wirecenterNetworkPlan);
-// return new DefaultOptimizationResult<>(wirecenterRequest, generatedPlan);
-// } catch (Throwable err) {
-// String message = err.getMessage();
-// if (message == null) {
-// message = err.getClass().getName();
-// }
-// log.error(message, err);
-// return new DefaultOptimizationResult<>(wirecenterRequest,
-// new OptimizationException(message));
-// }
-// };
-// }
-//
-// private NetworkData proxyData(NetworkData networkData, double nextParametric)
-// {
-// if (nextParametric == 1D) {
-// return networkData;
-// }
-//
-// Map<Long, CompetitiveLocationDemandMapping>
-// parametricCompetitiveLocationDemandMapping = new HashMap<>();
-// List<NetworkAssignment> roadLocations = new ArrayList<>();
-//
-// for (NetworkAssignment rlNetworkAssignment : networkData.getRoadLocations())
-// {
-// LocationEntity locationEntity = (LocationEntity)
-// rlNetworkAssignment.getSource();
-// Long locationId = locationEntity.getObjectId();
-//
-// if (networkData.getSelectedRoadLocationIds().contains(locationId)) {
-// CompetitiveLocationDemandMapping locationDemandMapping =
-// networkData.getCompetitiveDemandMapping().getLocationDemandMapping(locationId);
-//
-// roadLocations.add(rlNetworkAssignment);
-//
-// assert locationDemandMapping != null;
-//
-// parametricCompetitiveLocationDemandMapping.put(locationId,
-// locationDemandMapping);
-// } else if (nextParametric > 0) {
-// CompetitiveLocationDemandMapping locationDemandMapping =
-// networkData.getCompetitiveDemandMapping().getLocationDemandMapping(locationId);
-// CompetitiveLocationDemandMapping parametricLocationDemandMapping = new
-// CompetitiveLocationDemandMapping(locationDemandMapping.getBlockId(),
-// locationDemandMapping.getCompetitiveStrength());
-//
-// for (LocationEntityType value : LocationEntityType.values()) {
-// EntityDemandMapping entityDemandMapping =
-// locationDemandMapping.getEntityDemandMapping(value);
-//
-// parametricLocationDemandMapping.add(value,entityDemandMapping.getMappedDemand()
-// * nextParametric, entityDemandMapping.getMappedRevenue() * nextParametric);
-// }
-//
-// LocationDemand parametricLocationDemand = aroDemandService
-// .createFairShareDemandMapping(locationDemandMapping) // NOTE: The fair share
-// mapping is cached so do NOT use the parametric mapping here.
-// .getFairShareLocationDemand(SpeedCategory.cat7)
-// .createLocationDemand(parametricLocationDemandMapping);
-//
-// AroEntity aroEntity = EntityFactory.FACTORY.createLocationEntity(
-// null, locationId, locationEntity.getCensusBlockId(),
-// locationEntity.getCompetitiveStrength(), parametricLocationDemand);
-//
-// roadLocations.add(new DefaultNetworkAssignment(aroEntity,
-// rlNetworkAssignment.getDomain()));
-// parametricCompetitiveLocationDemandMapping.put(locationId,
-// parametricLocationDemandMapping);
-// }
-// }
-//
-// NetworkData proxy = new NetworkData();
-//
-// proxy.setRoadLocations(roadLocations);
-// proxy.setSelectedRoadLocationIds(networkData.getSelectedRoadLocationIds());
-//
-// proxy.setFiberSources(networkData.getFiberSources());
-// proxy.setRoadEdges(networkData.getRoadEdges());
-//
-// proxy.setCompetitiveDemandMapping(new
-// CompetitiveDemandMapping(parametricCompetitiveLocationDemandMapping));
-//
-// return proxy;
-// }

@@ -85,7 +85,7 @@ public class NetworkModelBuilderFactoryImpl implements
 
 			return appCtx
 					.getBean(CoreLeastCostRoutingService.class)
-					.computeNetworkModel(networkModel, ctx.getPricingModel(), ctx.getFtthThreshholds());
+					.computeNetworkModel(networkModel, ctx.getPricingModel(), ctx.getFtthThreshholds(), ctx.getFinancialInputs());
 
 		}
 	}

@@ -10,6 +10,7 @@ import org.jgrapht.util.FibonacciHeap;
 import org.jgrapht.util.FibonacciHeapNode;
 
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
+import com.altvil.aro.service.entity.FinancialInputs;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.SimpleNetworkFinancials;
@@ -35,12 +36,12 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		extends CrossComponentIterator<V, E, FibonacciHeapNode<NpvClosestFirstIterator.QueueEntry<V, E>>>
 		implements ClosestFirstSurfaceIterator<V, E> {
 	public static class Builder implements ClosestFirstSurfaceBuilder {
-		private final double		   discountRate;
-		private final int			   years;
+		private final double discountRate;
+		private final int years;
 
-		public Builder(double discountRate, int years) {
-			this.discountRate = discountRate;
-			this.years = years;
+		public Builder(FinancialInputs financialInputs) {
+			discountRate = financialInputs.getDiscountRate();
+			years = financialInputs.getYears();
 		}
 
 		@Override
@@ -55,22 +56,22 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 */
 	static class QueueEntry<V, E> {
 		// List<Double> cashFlow = Collections.emptyList();
-		NpvData	npvData;
+		NpvData npvData;
 
 		/**
 		 * True once spanningTreeEdge is guaranteed to be the true minimum.
 		 */
-		boolean	frozen;
+		boolean frozen;
 
 		/**
 		 * Best spanning tree edge to vertex seen so far.
 		 */
-		E		spanningTreeEdge;
+		E spanningTreeEdge;
 
 		/**
 		 * The vertex reached.
 		 */
-		V		vertex;
+		V vertex;
 
 		QueueEntry() {
 		}
@@ -79,26 +80,16 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	/**
 	 * Priority queue of fringe vertices.
 	 */
-	private FibonacciHeap<QueueEntry<V, E>>	heap		= new FibonacciHeap<QueueEntry<V, E>>();
+	private FibonacciHeap<QueueEntry<V, E>> heap = new FibonacciHeap<QueueEntry<V, E>>();
 
-	private boolean							initialized	= false;
+	private boolean initialized = false;
 
 	/**
 	 * Maximum distance to search.
 	 */
-	private double							radius		= Double.POSITIVE_INFINITY;
+	private double radius = Double.POSITIVE_INFINITY;
 
 	private SimpleNetworkFinancials financials;
-	
-	/**
-	 * Creates a new closest-first iterator for the specified graph.
-	 *
-	 * @param g
-	 *            the graph to be iterated.
-	 */
-	public NpvClosestFirstIterator(SimpleNetworkFinancials financials, Graph<V, E> g) {
-		this(financials, g, null);
-	}
 
 	/**
 	 * Creates a new closest-first iterator for the specified graph. Iteration
@@ -132,16 +123,14 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 	 *            limit on weighted path length, or Double.POSITIVE_INFINITY for
 	 *            unbounded search.
 	 */
-	public NpvClosestFirstIterator(SimpleNetworkFinancials financials, Graph<V, E> g, V startVertex,
-			double radius) {
+	public NpvClosestFirstIterator(SimpleNetworkFinancials financials, Graph<V, E> g, V startVertex, double radius) {
 		super(g, startVertex);
 		this.financials = financials;
 		this.radius = radius;
 		checkRadiusTraversal(isCrossComponentTraversal());
 		initialized = true;
 
-		}
-
+	}
 
 	/**
 	 * Determine weighted path length to a vertex via an edge, using the path
@@ -166,7 +155,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 
 	private static class NpvData {
 		LocationDemand demand = DefaultLocationDemand.ZERO_DEMAND;
-		double	   totalLength = 0;
+		double totalLength = 0;
 	}
 
 	private void checkRadiusTraversal(boolean crossComponentTraversal) {
@@ -206,14 +195,15 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		FibonacciHeapNode<QueueEntry<V, E>> sourceNode = getSeenData(source);
 		sourceData = sourceNode.getData().npvData;
 
-		// The destination's financial data will be the source's financial data plus the
-		// demands and revenues associated with the current edge.
+		// The destination's financial data will be the source's financial data
+		// plus the demands and revenues associated with the current edge.
 		Aggregator<LocationDemand> demandAggregator = DefaultLocationDemand.demandAggregate();
 		demandAggregator.add(sourceData.demand);
 
 		destinationData.totalLength = sourceData.totalLength + source2Destination.getWeight();
 
-		// Include the cost, and revenue, of its assignments in the NPV calculation.
+		// Include the cost, and revenue, of its assignments in the NPV
+		// calculation.
 		GeoSegment segment = (GeoSegment) source2Destination.getValue();
 
 		if (segment != null) {
@@ -225,7 +215,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 				demandAggregator.add(d);
 			});
 		}
-		
+
 		destinationData.demand = demandAggregator.apply();
 
 		return destinationData;
@@ -291,7 +281,7 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		} else if (npv > -1) {
 			return npv;
 		}
-		
+
 		return 100.0 + Math.log(-npv);
 	}
 

@@ -20,7 +20,7 @@ import com.altvil.aro.service.graph.alg.AllShortestPaths;
 import com.altvil.aro.service.graph.alg.DAGPath;
 import com.altvil.aro.service.graph.alg.GraphPathListener;
 import com.altvil.aro.service.graph.alg.PathEdge;
-import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.model.Reversable;
 import com.altvil.aro.service.graph.node.GraphNode;
@@ -42,7 +42,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		this.graphModel = graphModel;
 	}
 
-	public DAGModel<T> createDAG(Predicate<AroEdge<T>> predicate, GraphNode src) {
+	public DAGModel<T> createDAG(ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder, Predicate<AroEdge<T>> predicate, GraphNode src) {
 
 		markedEdges = graphModel.getEdges().stream().filter(predicate)
 				.collect(Collectors.toSet());
@@ -55,7 +55,7 @@ public class DagBuilder<T> implements GraphPathListener<GraphNode, AroEdge<T>> {
 		if (markedEdges.size() > 0) {
 
 			AllShortestPaths<GraphNode, AroEdge<T>> shortestPaths = new AllShortestPaths<GraphNode, AroEdge<T>>(
-					graphModel.getGraph(), ScalarClosestFirstSurfaceIterator.BUILDER, src);
+					graphModel.getGraph(), closestFirstSurfaceBuilder, src);
 
 			Set<GraphNode> vertices = toVertices(markedEdges);
 

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.entity.FinancialInputs;
 import com.altvil.aro.service.graph.GraphNetworkModelService;
 import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBuilderContext;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
@@ -116,10 +117,12 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				.build(networkData)
 				.setPricingModel(pricingModel)
 				.build();
+		
+		FinancialInputs financialInputs = new FinancialInputs(request.getOptimizationConstraints().getDiscountRate(), request.getOptimizationConstraints().getYears());
 
 		return StreamUtil.map(routingServiceByType.get(request.getOptimizationConstraints().getOptimizationType()).computeNetworkModel(model,
 				pricingModel,
-				FiberConstraintUtils.build(request.getConstraints())),
+				FiberConstraintUtils.build(request.getConstraints()), financialInputs),
 				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
 						networkData.getCompetitiveDemandMapping()));
 
@@ -171,8 +174,10 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 					.build()
 					.setPricingModel(pricingModel)
 					.createContext();
+			
+			FinancialInputs financialInputs = new FinancialInputs(request.getOptimizationConstraints().getDiscountRate(), request.getOptimizationConstraints().getYears());
 
-			return new OptimizerContext(pricingModel, threshHolds, graphContext);
+			return new OptimizerContext(pricingModel, threshHolds, graphContext, financialInputs);
 		}
 	}
 

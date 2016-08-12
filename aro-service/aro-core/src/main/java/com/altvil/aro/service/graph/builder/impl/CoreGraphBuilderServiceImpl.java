@@ -253,9 +253,9 @@ public class CoreGraphBuilderServiceImpl implements
 		private Map<Long, List<CableConduitEdge>> cableConduitMap;
 
 		public RoadEdgeIndexer index(NetworkData networkData) {
-
+			// NOTE: Include ALL assignments otherwise the generated model won't allocate equipment for them.
 			roadLocationsByTlid = groupLocationsByTlid(networkData
-					.getRoadLocations().getSelectedAssignments());
+					.getRoadLocations().getAllAssignments());
 			fiberSources = groupFiberSources(networkData.getFiberSources());
 			cableConduitMap = groupSections(networkData.getCableConduitEdges());
 

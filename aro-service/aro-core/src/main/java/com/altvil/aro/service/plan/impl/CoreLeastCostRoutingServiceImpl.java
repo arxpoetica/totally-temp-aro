@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FiberType;
+import com.altvil.aro.service.entity.FinancialInputs;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
@@ -91,14 +92,14 @@ public class CoreLeastCostRoutingServiceImpl implements
 	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
 			GraphNetworkModel model, PricingModel pricingModel,
-			FtthThreshholds constraints)
+			FtthThreshholds constraints, FinancialInputs financialInputs)
 			throws PlanException {
 
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					model, pricingModel, constraints);
+					model, pricingModel, constraints, financialInputs);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
@@ -112,17 +113,17 @@ public class CoreLeastCostRoutingServiceImpl implements
 	}
 
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
-			GraphNetworkModel model, PricingModel pricingModel, FtthThreshholds constraints)
+			GraphNetworkModel model, PricingModel pricingModel, FtthThreshholds constraints, FinancialInputs financialInputs)
 			throws PlanException {
 
 		NetworkModelBuilder planning = new NetworkModelBuilder();
-		CompositeNetworkModel networkModel = planning.build(pricingModel, model, constraints);
+		CompositeNetworkModel networkModel = planning.build(pricingModel, model, constraints, financialInputs);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
 	}
 	
-	protected ClosestFirstSurfaceBuilder getDijkstrIteratorBuilder() {
+	protected ClosestFirstSurfaceBuilder getDijkstrIteratorBuilder(FinancialInputs financialInputs) {
 		return ScalarClosestFirstSurfaceIterator.BUILDER;
 	}
 
@@ -180,7 +181,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 		}
 
 		public CompositeNetworkModel build(PricingModel pricingModel, GraphNetworkModel networkModel,
-		FtthThreshholds request) {
+		FtthThreshholds request, FinancialInputs financialInputs) {
 
 			if (!networkModel.hasLocations()) {
 				// TODO make it return empty NetworkModel
@@ -221,7 +222,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			// Create a tree leading to each AroEdge with a value.
 
-			DAGModel<GeoSegment> dag = transformFactory.createDAG(getDijkstrIteratorBuilder(), modifier
+			DAGModel<GeoSegment> dag = transformFactory.createDAG(getDijkstrIteratorBuilder(financialInputs), modifier
 					.build(), rootNode, e -> {
 				GeoSegment gs = e.getValue();
 				return gs == null ? false : !gs.getGeoSegmentAssignments()
@@ -384,7 +385,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 				Collection<? extends GraphAssignment> nodes) {
 
 			if (log.isDebugEnabled())
-				log.debug("Processing Routes for" + root.getAroEntity());
+				log.debug("Processing Routes for " + root.getAroEntity());
 
 			renoded.getGraphNode(root);
 
