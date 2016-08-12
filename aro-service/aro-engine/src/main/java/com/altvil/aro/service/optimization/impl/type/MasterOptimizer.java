@@ -19,7 +19,6 @@ import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
-import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
@@ -65,14 +64,9 @@ public abstract class MasterOptimizer {
 
 	protected Collection<WirecenterOptimizationRequest> computeWireCenterRequests(
 			MasterOptimizationRequest request) {
-		boolean selectAllLocations = !request.getWireCenters().isEmpty();
-
-		List<Number> wireCentersPlans = selectAllLocations ? networkPlanRepository
-				.computeWirecenterUpdates(request.getPlanId(),
-						request.getWireCenters()) : networkPlanRepository
-				.computeWirecenterUpdates(request.getPlanId());
-		final LocationSelectionMode selectionMode = selectAllLocations ? LocationSelectionMode.ALL_LOCATIONS
-				: LocationSelectionMode.SELECTED_LOCATIONS;
+		List<Number> wireCentersPlans = request.getWireCenters().isEmpty()
+				? networkPlanRepository.computeWirecenterUpdates(request.getPlanId())
+				: networkPlanRepository.computeWirecenterUpdates(request.getPlanId(), request.getWireCenters());
 
 		return StreamUtil.map(
 				wireCentersPlans,
@@ -81,7 +75,7 @@ public abstract class MasterOptimizer {
 							.getOptimizationConstraints(), request
 							.getConstraints(), request
 							.getNetworkDataRequest().createRequest(
-									id.longValue(), selectionMode));
+									id.longValue(), request.getNetworkDataRequest().getSelectionMode()));
 				});
 	}
 

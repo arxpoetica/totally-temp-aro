@@ -225,7 +225,7 @@ public class PlanServiceImpl implements PlanService {
 
 			// Create a tree leading to each AroEdge with a value.
 
-			DAGModel<GeoSegment> dag = transformFactory.createDAG(modifier
+			DAGModel<GeoSegment> dag = transformFactory.createDAG(closestFirstSurfaceBuilder, modifier
 					.build(), rootNode, e -> {
 				GeoSegment gs = e.getValue();
 				return gs == null ? false : !gs.getGeoSegmentAssignments()
@@ -376,7 +376,7 @@ public class PlanServiceImpl implements PlanService {
 				ClosestFirstSurfaceBuilder builder) {
 
 			if (log.isDebugEnabled())
-				log.debug("Processing Routes for" + root.getAroEntity());
+				log.debug("Processing Routes for " + root.getAroEntity());
 
 			Collection<AroEdge<GeoSegment>> edges = new RouteBuilder<GraphNode, AroEdge<GeoSegment>>()
 					.build(renodedModel.getGraph(), builder,

@@ -2,16 +2,15 @@ package com.altvil.aro.service.graph.model;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.interfaces.NetworkAssignment;
+import com.altvil.interfaces.NetworkAssignmentModel;
 
 public class NetworkData extends EdgeData {
 
-	public Collection<NetworkAssignment> roadLocations;
+	public NetworkAssignmentModel roadLocations;
 
 	// public Map<RoadLocation, CoverageAggregateStatistic>
 	// roadLocationsProperties;
@@ -19,7 +18,6 @@ public class NetworkData extends EdgeData {
 	private CompetitiveDemandMapping competitiveDemandMapping ;
 
 	private Collection<NetworkAssignment> fiberSources;
-	private Collection<Long> selectedRoadLocationIds;
 	
 	public void setCentralOffice(NetworkAssignment fiberSource) {
 		setFiberSources(Collections.singleton(fiberSource));
@@ -34,23 +32,13 @@ public class NetworkData extends EdgeData {
 		this.fiberSources = fiberSources;
 	}
 
-	public Collection<NetworkAssignment> getRoadLocations() {
+	public NetworkAssignmentModel getRoadLocations() {
 		return roadLocations;
 	}
 
-	public void setRoadLocations(Collection<NetworkAssignment> roadLocations) {
+	public void setRoadLocations(NetworkAssignmentModel roadLocations) {
 		this.roadLocations = roadLocations;
 	}
-
-	public Collection<Long> getSelectedRoadLocationIds() {
-		return selectedRoadLocationIds;
-	}
-
-	public void setSelectedRoadLocationIds(
-			Collection<Long> selectedRoadLocationIds) {
-		this.selectedRoadLocationIds = selectedRoadLocationIds;
-	}
-	
 
 	public CompetitiveDemandMapping getCompetitiveDemandMapping() {
 		return competitiveDemandMapping;
@@ -62,23 +50,11 @@ public class NetworkData extends EdgeData {
 	}
 		
 
-	public Collection<NetworkAssignment> getSelectedRoadLocations() {
-		if (selectedRoadLocationIds == null
-				|| selectedRoadLocationIds.isEmpty() || roadLocations == null) {
-			return Collections.emptyList();
-		}
-
-		return roadLocations
-				.stream()
-				.filter((rl) -> selectedRoadLocationIds.contains(rl.getSource()
-						.getObjectId())).collect(Collectors.toList());
-	}
 
 	public String toString() {
 		return new ToStringBuilder(this).append("fiberSources", fiberSources)
 				.append("roadEdges", getRoadEdges())
 				.append("roadLocations", roadLocations)
-				.append("selectedRoadLocationIds", selectedRoadLocationIds)
 				.toString();
 	}
 }
