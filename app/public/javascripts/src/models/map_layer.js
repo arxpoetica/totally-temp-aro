@@ -333,6 +333,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
     }
 
     configureFeatureStyles () {
+      if (this.flat_color) return
       var data = this.data_layer
       var maxdensity = Number.MIN_VALUE
       var mindensity = Number.MAX_VALUE

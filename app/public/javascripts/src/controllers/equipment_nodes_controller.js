@@ -17,17 +17,28 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     short_name: 'NN',
     style_options: {
       normal: {
+        fillColor: 'brown',
+        strokeWeight: 1,
+        opacity: 0.8,
         visible: true
       },
       selected: {
         visible: true
       }
     },
+    threshold: 12,
+    reload: 'always',
     declarativeStyles: (feature, styles) => {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${feature.getProperty('name')}.png`
+      var name = feature.getProperty('name')
+      if (name) {
+        styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${name}.png`
+      } else {
+        styles.icon = { path: 0, scale: 3, strokeColor: 'brown' }
+      }
     }
   })
   network_nodes_layer.hide_in_ui = true
+  network_nodes_layer.flat_color = true
 
   var fiber_plant_layer = new MapLayer({
     name: config.ui.labels.fiber,

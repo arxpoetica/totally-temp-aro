@@ -78,7 +78,7 @@ module.exports = class Network {
       .then(() => {
         var sql = `
           SELECT
-            n.id, ST_AsGeoJSON(geom)::json AS geom, t.name AS name,
+            n.id, geom, t.name AS name,
             plan_id IS NOT NULL AS draggable,
             name <> 'central_office' AS unselectable
           FROM client.network_nodes n
@@ -112,7 +112,7 @@ module.exports = class Network {
         if (constraints.length > 0) {
           sql += ' WHERE ' + constraints.join(' AND ')
         }
-        return database.query(sql, params, true)
+        return database.points(sql, params, true, viewport)
       })
   }
 
