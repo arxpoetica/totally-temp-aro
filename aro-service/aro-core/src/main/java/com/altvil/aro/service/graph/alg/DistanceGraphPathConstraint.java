@@ -36,7 +36,7 @@ public class DistanceGraphPathConstraint<V, E extends AroEdge<GeoSegment>>
 		double distance = sourceRoot.getDistance(graphPath.getEndVertex());
 		double totalDistance = distance + pathLength ;
 		
-		if( totalDistance < distanceInMeters ) {
+		if( totalDistance >= distanceInMeters ) {
 			
 			double verified = new DijkstraShortestPath<GraphNode, AroEdge<GeoSegment>>(graph.getGraph(), source, (GraphNode) graphPath.getStartVertex()).getPathLength() ;
 			log.info("Route Condition Failed " + totalDistance + " " + verified) ;
