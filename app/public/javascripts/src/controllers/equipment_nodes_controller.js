@@ -5,13 +5,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.map_tools = map_tools
   $scope.user_id = user_id
   $scope.ARO_CLIENT = config.ARO_CLIENT
-  $scope.showFeederFiber = true
-  $scope.showDistributionFiber = true
+  $scope.showFeederFiber = false
+  $scope.showDistributionFiber = false
 
   $scope.selected_tool = null
   $scope.vztfttp = true
 
-  var network_nodes_layer = new MapLayer({
+  var networkNodesLayer = new MapLayer({
     type: 'network_nodes',
     name: 'Network Nodes',
     short_name: 'NN',
@@ -37,10 +37,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
     }
   })
-  network_nodes_layer.hide_in_ui = true
-  network_nodes_layer.flat_color = true
+  networkNodesLayer.hide_in_ui = true
+  networkNodesLayer.flat_color = true
 
-  var fiber_plant_layer = new MapLayer({
+  var fiberPlantLayer = new MapLayer({
     name: config.ui.labels.fiber,
     type: 'fiber_plant',
     short_name: 'F',
@@ -56,14 +56,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     reload: 'always'
   })
 
-  map_layers.addEquipmentLayer(network_nodes_layer)
-  map_layers.addEquipmentLayer(fiber_plant_layer)
+  map_layers.addEquipmentLayer(networkNodesLayer)
+  map_layers.addEquipmentLayer(fiberPlantLayer)
 
   $scope.equipment_layers = map_layers.equipment_layers
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('network_nodes')) {
-      network_nodes_layer.show()
+      networkNodesLayer.show()
     } else if (tool === 'network_nodes') {
       $scope.selected_tool = null
       map.setOptions({ draggableCursor: null })
@@ -71,7 +71,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    network_nodes_layer.reloadData(true)
+    networkNodesLayer.reloadData(true)
   })
 
   $scope.select_tool = (tool) => {
@@ -110,16 +110,24 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
-    if (!plan) return
+    if (!plan) {
+      map_layers.removeEquipmentLayer('route')
+      $scope.routeLayer = null
+      return
+    }
 
     map.ready(() => {
-      fiber_plant_layer.show()
-      network_nodes_layer.reloadData()
+      // fiberPlantLayer.show() // hidden by default
+      networkNodesLayer.reloadData()
+    })
+
+    $http.get('/network_plan/' + plan.id).success((response) => {
+      redrawRoute(response)
     })
   })
 
   $rootScope.$on('plan_cleared', () => {
-    network_nodes_layer.reloadData()
+    networkNodesLayer.reloadData()
   })
 
   $scope.change_node_types_visibility = () => {
@@ -130,10 +138,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
     })
     if (types.length === 0) {
-      network_nodes_layer.hide()
+      networkNodesLayer.hide()
     } else {
-      network_nodes_layer.show()
-      network_nodes_layer.setApiEndpoint('/network/nodes/:plan_id/find', {
+      networkNodesLayer.show()
+      networkNodesLayer.setApiEndpoint('/network/nodes/:plan_id/find', {
         node_types: types.join(',')
       })
     }
@@ -143,7 +151,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $http.post('/network/nodes/' + $scope.plan.id + '/edit', changes).success((response) => {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
-        network_nodes_layer.reloadData()
+        networkNodesLayer.reloadData()
       }
       changes = empty_changes()
       $rootScope.$broadcast('equipment_nodes_changed')
@@ -159,7 +167,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $scope.show_number_of_features = () => {
-    $scope.number_of_features = network_nodes_layer.number_of_features()
+    $scope.number_of_features = networkNodesLayer.number_of_features()
   }
 
   $rootScope.$on('map_layer_dragged_feature', (e, gm_event, feature) => {
@@ -189,7 +197,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       lon: coordinates.lng(),
       type: _.findWhere($scope.view_node_types, { name: type }).id
     })
-    var data_layer = network_nodes_layer.data_layer
+    var data_layer = networkNodesLayer.data_layer
     var arr = data_layer.addGeoJson(feature)
     arr.forEach((feature) => {
       data_layer.overrideStyle(feature, {
@@ -197,7 +205,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         draggable: true
       })
     })
-    network_nodes_layer.show()
+    networkNodesLayer.show()
     $scope.save_nodes()
   })
 
@@ -226,28 +234,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
   })
 
+  var routeLayer
   $scope.changedFiberVisibility = () => {
-    var routeLayer = map_layers.getEquipmentLayer('route')
-    if (!$scope.showFeederFiber && !$scope.showDistributionFiber) {
-      routeLayer.hide()
-    } else {
-      routeLayer.setDeclarativeStyle((feature, styles) => {
-        if (feature.getProperty('fiber_type') === 'feeder') {
-          styles.strokeColor = 'blue'
-          styles.strokeWeight = 4
-          if (!$scope.showDistributionFiber) {
-            styles.visible = false
-          }
-        } else {
-          styles.strokeColor = 'red'
-          styles.strokeWeight = 2
-          if (!$scope.showFeederFiber) {
-            styles.visible = false
-          }
-        }
-      })
-      routeLayer.show()
-    }
+    routeLayer.setVisible($scope.showFeederFiber || $scope.showDistributionFiber)
+    routeLayer.setDeclarativeStyle(routeStyles())
   }
 
   $scope.vztfttpChanged = () => {
@@ -256,4 +246,75 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       layer.setVisible($scope.vztfttp)
     })
   }
+
+  $rootScope.$on('equipment_nodes_changed', () => {
+    $http.get('/network_plan/' + $scope.plan.id + '/metadata').success((response) => {
+      redrawRoute(response, true)
+    })
+  })
+
+  $rootScope.$on('route_planning_changed', () => {
+    $http.get('/network_plan/' + $scope.plan.id).success((response) => {
+      redrawRoute(response, false)
+    })
+  })
+
+  $rootScope.$on('route_planning_changed', (e, response) => {
+    redrawRoute(response)
+  })
+
+  function routeStyles () {
+    return (feature, styles) => {
+      if (feature.getProperty('fiber_type') === 'feeder') {
+        styles.strokeColor = 'blue'
+        styles.strokeWeight = 4
+        if (!$scope.showFeederFiber) {
+          styles.visible = false
+        }
+      } else {
+        styles.strokeColor = 'red'
+        styles.strokeWeight = 2
+        if (!$scope.showDistributionFiber) {
+          styles.visible = false
+        }
+      }
+    }
+  }
+
+  function redrawRoute (data, only_metadata) {
+    if ($scope.plan && data.metadata) {
+      $scope.plan.metadata = data.metadata
+      $rootScope.$broadcast('plan_changed_metadata', $scope.plan)
+    }
+    if (only_metadata) return
+
+    if (config.route_planning.length > 0) {
+      var route = new MapLayer({
+        short_name: 'RT',
+        name: 'Route',
+        type: 'route',
+        data: data.feature_collection,
+        style_options: {
+          normal: {
+            strokeColor: 'red'
+          }
+        },
+        declarativeStyles: routeStyles()
+      })
+      route.hide_in_ui = true
+      route.show()
+      if ($scope.routeLayer) {
+        routeLayer.remove()
+      }
+      routeLayer = route
+      map_layers.addEquipmentLayer(route)
+    }
+
+    // to calculate market size
+    $rootScope.$broadcast('route_changed')
+  }
+
+  $rootScope.$on('plan_cleared', (e, plan) => {
+    $scope.routeLayer.clearData()
+  })
 }])
