@@ -139,6 +139,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
+    if (!plan) return
     $scope.plan = plan
     $scope.mode = 'global'
     $scope.metadata = plan.metadata
