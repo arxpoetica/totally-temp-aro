@@ -39,6 +39,7 @@ var routes = [
   'network_plan',
   'customer_profile',
   'admin_users',
+  'admin_settings',
   'settings',
   'financial_profile'
 ]
