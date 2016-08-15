@@ -94,8 +94,9 @@ module.exports = class NetworkPlan {
     var sql = `
       SELECT
         fiber_route.id,
-        ST_Length(geom::geography) * 0.000621371 AS edge_length,
+        -- ST_Length(geom::geography) * 0.000621371 AS edge_length,
         ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
         frt.name AS fiber_type,
         frt.description AS fiber_name
       FROM client.plan
@@ -225,7 +226,8 @@ module.exports = class NetworkPlan {
           'type': 'Feature',
           'geometry': edge.geom,
           'properties': {
-            'fiber_type': edge.fiber_type
+            'fiber_type': edge.fiber_type,
+            'centroid': edge.centroid
           }
         }))
 
