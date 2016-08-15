@@ -222,20 +222,19 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			TreeMultimap<Double, V> tm = paths.findPaths(sources);
 
 			Set<Map.Entry<Double, V>> entries = tm.entries();
-			if (!entries.isEmpty()) {
-				Map.Entry<Double, V> entry = entries.iterator().next();
+			Iterator<Map.Entry<Double, V>> itr = entries.iterator() ;
+			//Add the first GraphPath that statisfies ConstraintPredicate
+			while( itr.hasNext() ) {
+				Map.Entry<Double, V> entry = itr.next();
 				GraphPath<V, E> path = paths.getGraphPath(entry.getValue());
-				treeMap.put(path.getWeight(), path);
+				if( isValidPath(path) ) {
+					treeMap.put(path.getWeight(), path);
+					break ;
+				}
 			}
 		}
 		
-		for( GraphPath<V, E> gp : treeMap.values()) {
-			if( isValidPath(gp) ) {
-				return gp ;
-			}
-		}
-		
-		return null ;
+		return  treeMap.isEmpty() ? null :  treeMap.values().iterator().next() ;
 
 	}
 	

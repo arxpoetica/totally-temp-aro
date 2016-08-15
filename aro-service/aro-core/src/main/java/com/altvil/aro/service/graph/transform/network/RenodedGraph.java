@@ -70,8 +70,7 @@ public class RenodedGraph {
 	}
 
 	public RenodedGraph transform(Function<GeoSegment, Double> f) {
-		
-		//BPpass for testing
+		//ByPpass for testing
 		if( true ) {
 			return this ;
 		}
