@@ -621,10 +621,13 @@ module.exports = class NetworkPlan {
       ORDER BY wirecenter ASC
     `
     var wirecenters = database.query(sql, [`%${text}%`])
-    var addresses = request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+    var addresses = text.length > 0
+      ? request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+      : Promise.resolve(null)
     return Promise.all([wirecenters, addresses])
       .then((results) => {
         var wirecenters = results[0]
+        if (!results[1]) return wirecenters
         var addresses = results[1][1].results.map((item) => {
           var ne = item.geometry.viewport.northeast
           var sw = item.geometry.viewport.southwest
