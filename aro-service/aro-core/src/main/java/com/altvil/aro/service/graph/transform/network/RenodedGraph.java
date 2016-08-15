@@ -70,6 +70,12 @@ public class RenodedGraph {
 	}
 
 	public RenodedGraph transform(Function<GeoSegment, Double> f) {
+		
+		//BPpass for testing
+		if( true ) {
+			return this ;
+		}
+		
 		return new RenodedGraph(transformFactory, map,
 				transformFactory.transform(graph, f), graphAssignmentsMap);
 	}
