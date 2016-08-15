@@ -413,12 +413,11 @@
               <td class="text-right">{{fiberDetail.totalCost / (fiberDetail.totalLength * 0.000621371) | currency:"$":1}}</td>
               <td class="text-right">{{fiberDetail.totalCost / 1000 | currency:"$":1}}K</td>
               <th>
-                <div class="checkbox" ng-if="fiberDetail.name === 'conduit'" style="margin:0">
-                  <label class="eye-control">
-                    <input type="checkbox" ng-click="conduitLayer.toggleVisibility()">
-                    <div class="eye-indicator"></div>
-                  </label>
-                </div>
+                <a href="javascript:void(0)"
+                  style="color: {{ fiberDetailLayers[fiberDetail.name] && fiberDetailLayers[fiberDetail.name].visible ? fiberDetailColors[fiberDetail.name] : 'red' }}"
+                  ng-click="toggleFiberDetailLayer(fiberDetail.name)">
+                  <i class="fa fa-eye"></i>
+                </a>
               </th>
             </tr>
             <tr>
