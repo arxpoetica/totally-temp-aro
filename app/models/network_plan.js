@@ -611,7 +611,11 @@ module.exports = class NetworkPlan {
   static searchAddresses (text) {
     var sql = `
       SELECT
-        wirecenter || ' - ' || aocn_name as name,
+        (CASE WHEN aocn_name IS NULL THEN
+          wirecenter
+        ELSE
+          wirecenter || ' - ' || aocn_name
+        END) AS name,
         ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json as bounds
       FROM wirecenters
