@@ -139,6 +139,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
+    if (!plan) return
     $scope.plan = plan
     $scope.mode = 'global'
     $scope.metadata = plan.metadata
@@ -164,27 +165,44 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     }
   })
 
-  $scope.conduitLayer = new MapLayer({
-    name: 'Conduit fiber',
-    type: 'conduit_fiber',
-    short_name: 'C',
-    api_endpoint: '/network/fiber_type/:plan_id/conduit',
-    style_options: {
-      normal: {
-        strokeColor: 'cyan',
-        strokeWeight: 2
-      }
-    },
-    threshold: 11,
-    reload: 'always'
-  })
+  $scope.fiberDetailLayers = {}
+  $scope.fiberDetailColors = {
+    conduit: 'chocolate',
+    obstacle: 'CornflowerBlue',
+    underground: 'Olive',
+    buried: 'DarkBlue',
+    arial: 'DarkMagenta',
+    aerial: 'DarkMagenta',
+    estimated: 'SeaGreen'
+  }
+  $scope.toggleFiberDetailLayer = (type) => {
+    var layer = $scope.fiberDetailLayers[type]
+    if (!layer) {
+      layer = new MapLayer({
+        name: `${type} fiber`,
+        type: `${type}_fiber`,
+        api_endpoint: `/network/fiber_type/:plan_id/${type}`,
+        style_options: {
+          normal: {
+            strokeColor: $scope.fiberDetailColors[type],
+            strokeWeight: 4
+          }
+        },
+        threshold: 11,
+        reload: 'always'
+      })
+      $scope.fiberDetailLayers[type] = layer
+      layer.show()
+    } else {
+      layer.toggleVisibility()
+    }
+  }
 
   $scope.financialData = {}
   function request (force, key, params, callback) {
     if (!$scope.plan) return
     if (force) delete $scope.financialData[key]
     else if ($scope.financialData[key]) return $scope.financialData[key]
-    console.log('params', params)
     var plan_id = $scope.mode === 'global' ? $scope.plan.id : $scope.selectedArea.id
     $http({ url: `/financial_profile/${plan_id}/${key}`, params: params })
       .success((response) => {

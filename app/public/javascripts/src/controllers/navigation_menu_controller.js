@@ -1,6 +1,6 @@
 /* global app map config $ user_id google _ swal location */
 // Navigation Menu Controller
-app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state', ($scope, $rootScope, $http, map_tools, tracker, $location, state) => {
+app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state', '$filter', '$timeout', ($scope, $rootScope, $http, map_tools, tracker, $location, state, $filter, $timeout) => {
   // Controller instance variables
   $scope.new_plan_name = 'Untitled Plan'
   $scope.new_plan_area_name = ''
@@ -69,24 +69,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.show_financial_profile = config.ui.top_bar_tools.indexOf('financial_profile') >= 0
 
   var newPlanMap
-
-  // function initMap () {
-  //   if (newPlanMap) return
-  //
-  //   var styles = [{
-  //     featureType: 'poi',
-  //     elementType: 'labels',
-  //     stylers: [ { visibility: 'off' } ]
-  //   }]
-  //
-  //   newPlanMap = new google.maps.Map(document.getElementById('newPlanMap_canvas'), {
-  //     zoom: 12,
-  //     center: {lat: -34.397, lng: 150.644},
-  //     styles: styles,
-  //     disableDefaultUI: true,
-  //     draggable: false
-  //   })
-  // }
 
   $scope.selectPlan = function (plan) {
     $scope.plan = plan
@@ -401,4 +383,43 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $('#build-sequence').on('shown.bs.modal', drawChart)
+
+  function fetchApplicationSettings () {
+    $http.get('/admin/settings')
+      .success((response) => {
+        $scope.applicationSettings = response
+        $scope.applicationSettingsValues = {}
+
+        $timeout(() => {
+          const parseCost = (input) => +(input.val() || '0').match(/[\d\.]/g).join('') || 0
+
+          $('#application-settings .format-currency')
+            .on('focus', function () {
+              var input = $(this)
+              input.val(parseCost(input).toFixed(2))
+            })
+            .on('change', function () {
+              var input = $(this)
+              var id = input.attr('name')
+              $scope.applicationSettingsValues[id] = parseCost(input)
+            })
+            .on('blur', function () {
+              var input = $(this)
+              input.val($filter('number')(parseCost(input), 2))
+            })
+        }, 0)
+      })
+  }
+
+  $('#application-settings').on('shown.bs.modal', fetchApplicationSettings)
+
+  $scope.updateSettings = () => {
+    var values = {}
+    Object.keys($scope.applicationSettingsValues).forEach((key) => {
+      values[key] = $scope.applicationSettingsValues[key]
+    })
+    $http.post('/admin/settings', values).success((response) => {
+      $('#application-settings').modal('hide')
+    })
+  }
 }])

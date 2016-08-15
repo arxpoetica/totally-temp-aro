@@ -10,10 +10,10 @@
       <li role="presentation"><a href="#financialProfilePremises" role="tab" data-toggle="tab">Premises</a></li>
       <li role="presentation"><a href="#financialProfileSubscribers" role="tab" data-toggle="tab">Subscribers</a></li>
       <li role="presentation"><a href="#financialProfileRevenue" role="tab" data-toggle="tab">Revenue</a></li>
+      <li role="presentation"><a href="#financialProfileOpex" role="tab" data-toggle="tab">Opex</a></li>
       <li role="presentation"><a href="#financialProfileCapex" role="tab" data-toggle="tab">Capex</a></li>
       <li role="presentation"><a href="#financialProfileCashFlow" role="tab" data-toggle="tab">Cash Flow</a></li>
-      <li role="presentation"><a href="#financialProfileOpex" role="tab" data-toggle="tab">Opex</a></li>
-      <li role="presentation"><a href="#financialProfileRouteOportunities" role="tab" data-toggle="tab">Route Opportunities</a></li>
+      <li role="presentation"><a href="#financialProfileRouteOpportunities" role="tab" data-toggle="tab">Route Opportunities</a></li>
     </ul>
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="financialProfileSummary" style="margin-top: 20px">
@@ -295,44 +295,98 @@
         </button>
         <div id="financial-profile-chart-opex-cost-legend"></div>
       </div>
-      <div role="tabpanel" class="tab-pane" id="financialProfileRouteOportunities" style="margin-top: 20px">
+      <div role="tabpanel" class="tab-pane" id="financialProfileRouteOpportunities" style="margin-top: 20px">
         <table class="table">
-          <thead>
-            <th></th>
-            <th>1/4 mile</th>
-            <th>1/2 mile</th>
-            <th>1 mile</th>
-          </thead>
           <tbody>
             <tr>
-              <td>VES buildings with >=25 customers per building</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+              <th>Telco Buildings - (Off Net VzB buildings incurring > $2K MRCs)</th>
+              <th class="text-right">1/4 mile</th>
+              <th class="text-right">1/2 mile</th>
+              <th class="text-right">1 mile</th>
             </tr>
             <tr>
-              <td>SMB SBUs</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+              <td>Count</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
             </tr>
             <tr>
-              <td>SMB MTUs</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+              <td>Total MRC</td>
+              <td class="text-right">{{1000000 | currency:"$":0}}</td>
+              <td class="text-right">{{1000000 | currency:"$":0}}</td>
+              <td class="text-right">{{1000000 | currency:"$":0}}</td>
             </tr>
             <tr>
-              <td>VES customers and VES prospects</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+              <th>Count of Total Buildings by Number of Employees</th>
+              <th class="text-right">1/4 mile</th>
+              <th class="text-right">1/2 mile</th>
+              <th class="text-right">1 mile</th>
             </tr>
             <tr>
-              <td>SMB customers and SMB prospects</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+              <td>XS (1 employee)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <td>S (2-24 employees)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <td>M (25-49 employees)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <td>L (50-99 employees)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <td>XL (>100 employees)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <th>Count of Total Businesses by Number of Employees</th>
+              <th class="text-right">1/4 mile</th>
+              <th class="text-right">1/2 mile</th>
+              <th class="text-right">1 mile</th>
+            </tr>
+            <tr>
+              <td>XS (1 employee)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <td>S (2-24 employees)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <td>M (25-49 employees)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <td>L (50-99 employees)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
+            </tr>
+            <tr>
+              <td>XL (>100 employees)</td>
+              <td class="text-right">1</td>
+              <td class="text-right">2</td>
+              <td class="text-right">3</td>
             </tr>
           </tbody>
         </table>
@@ -359,12 +413,11 @@
               <td class="text-right">{{fiberDetail.totalCost / (fiberDetail.totalLength * 0.000621371) | currency:"$":1}}</td>
               <td class="text-right">{{fiberDetail.totalCost / 1000 | currency:"$":1}}K</td>
               <th>
-                <div class="checkbox" ng-if="fiberDetail.name === 'conduit'" style="margin:0">
-                  <label class="eye-control">
-                    <input type="checkbox" ng-click="conduitLayer.toggleVisibility()">
-                    <div class="eye-indicator"></div>
-                  </label>
-                </div>
+                <a href="javascript:void(0)"
+                  style="color: {{ fiberDetailLayers[fiberDetail.name] && fiberDetailLayers[fiberDetail.name].visible ? fiberDetailColors[fiberDetail.name] : 'red' }}"
+                  ng-click="toggleFiberDetailLayer(fiberDetail.name)">
+                  <i class="fa fa-eye"></i>
+                </a>
               </th>
             </tr>
             <tr>
