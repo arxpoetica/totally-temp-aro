@@ -41,11 +41,11 @@ build_num = os.environ['CIRCLE_BUILD_NUM']
 data_image_version = os.environ.get('ARO_APP_DATA_VERSION')
 nginx_image_version = 5 # current
 domain_name = os.environ.get('ARO_APP_CLIENT_DOMAIN')
-client_slug = os.environ.get('ARO_APP_CLIENT_SLUG') if environment == 'PROD' else 'altvil'
+env_slug = os.environ.get('ARO_APP_ENV_SLUG') 
 name_component = os.environ.get('ARO_APP_NAME_COMPONENT') if environment == 'PROD' else branch_name
 decrypt_key = os.environ.get('ARO_APP_DECRYPT_KEY')
 token_key = os.environ.get('ARO_APP_TOKEN_KEY')
-db_user = os.environ.get('ARO_APP_DB_USER') or 'cmo'
+db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
 docker_pass = os.environ['DOCKER_PASS']
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
