@@ -316,21 +316,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 				GraphMapping graphMapping) {
 
 			FiberSourceMapping fiberMapping = (FiberSourceMapping) graphMapping;
-			//
-			// Map<CableConstructionEnum, Double> priceMap = createPriceMap(
-			// fiberType);
-			//
-			// GraphRenoder renoder = graphRenoderService.createGraphRenoder(
-			// graphCtx.getGraphModel(), true,
-			// s -> priceMap.get(s.getCableConstructionCategory()));
-			//
-			// renoder.add(extractAssignments(graphMapping).values());
-			// renoder.add(assignmentFactory.createVertexAssignment(
-			// fiberSourceBinding.getDomain(), graphMapping.getAroEntity()));
-			//
-			// RenodedGraph rendoded = renoder.renode();
-			//
-			// DescribeGraph.trace(log, rendoded.getGraph().getGraph());
+		
 
 			Map<FiberType, RenodedGraph> renodedMap = new EnumMap<>(
 					FiberType.class);
@@ -341,8 +327,12 @@ public class CoreLeastCostRoutingServiceImpl implements
 					getRenodedGraph(graphCtx, FiberType.DISTRIBUTION,
 							graphMapping));
 
+			
+			RenodedGraph rg = getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping) ;
+			
 			GeneratedFiberRoute feederFiber = planRoute(
 					new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
+							rg.getGraph(), rg.getGraphNode(graphMapping.getGraphAssignment()),
 							15 * 1000),
 					getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping),
 					graphMapping);
@@ -388,7 +378,10 @@ public class CoreLeastCostRoutingServiceImpl implements
 			children.forEach(a -> {
 				if (isDistributionSource(a.getAroEntity())) {
 					map.put(a.getGraphAssignment(),
-							planRoute((sourceRoot, path) -> true, renoded, a));
+							planRoute(new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
+									renoded.getGraph(),
+									renoded.getGraphNode(a.getGraphAssignment()),
+									15 * 1000), renoded, a));
 				}
 			});
 
@@ -402,8 +395,6 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			if (log.isDebugEnabled())
 				log.debug("Processing Routes for" + root.getAroEntity());
-
-			renoded.getGraphNode(root);
 
 			SourceRoute<GraphNode, AroEdge<GeoSegment>> sr = new RouteBuilder<GraphNode, AroEdge<GeoSegment>>()
 					.buildSourceRoute(predicate, renoded.getGraph().getGraph(),

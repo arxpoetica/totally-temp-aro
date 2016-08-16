@@ -78,7 +78,7 @@ module.exports = class Network {
       .then(() => {
         var sql = `
           SELECT
-            n.id, ST_AsGeoJSON(geom)::json AS geom, t.name AS name,
+            n.id, geom, t.name AS name,
             plan_id IS NOT NULL AS draggable,
             name <> 'central_office' AS unselectable
           FROM client.network_nodes n
@@ -112,7 +112,7 @@ module.exports = class Network {
         if (constraints.length > 0) {
           sql += ' WHERE ' + constraints.join(' AND ')
         }
-        return database.query(sql, params, true)
+        return database.points(sql, params, true, viewport)
       })
   }
 
@@ -257,22 +257,6 @@ module.exports = class Network {
   static planSummary (plan_id) {
     var req = {
       url: config.aro_service_url + `/rest/report/plan/${plan_id}`,
-      json: true
-    }
-    return this._callService(req)
-  }
-
-  static equipmentSummary (plan_id) {
-    var req = {
-      url: config.aro_service_url + `/rest/report/plan/${plan_id}/equipment_summary`,
-      json: true
-    }
-    return this._callService(req)
-  }
-
-  static fiberSummary (plan_id) {
-    var req = {
-      url: config.aro_service_url + `/rest/report/plan/${plan_id}/fiber_summary`,
       json: true
     }
     return this._callService(req)

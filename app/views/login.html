@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="aro">
   <head>
-    <title>ARO</title>
+    <title><%= config.ui.title %></title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
@@ -13,7 +13,7 @@
       <div class="container">
         <div class="row">
           <div class="col-sm-12">
-            <img id="aro_logo" src="/images/logos/one_fiber_logo.png" />
+            <img id="aro_logo" src="/images/logos/<%= config.ARO_CLIENT %>/logo.png">
           </div>
           <div class="col-sm-6">
             <div class="well">

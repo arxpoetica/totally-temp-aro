@@ -94,8 +94,9 @@ module.exports = class NetworkPlan {
     var sql = `
       SELECT
         fiber_route.id,
-        ST_Length(geom::geography) * 0.000621371 AS edge_length,
+        -- ST_Length(geom::geography) * 0.000621371 AS edge_length,
         ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
         frt.name AS fiber_type,
         frt.description AS fiber_name
       FROM client.plan
@@ -225,7 +226,8 @@ module.exports = class NetworkPlan {
           'type': 'Feature',
           'geometry': edge.geom,
           'properties': {
-            'fiber_type': edge.fiber_type
+            'fiber_type': edge.fiber_type,
+            'centroid': edge.centroid
           }
         }))
 
@@ -609,7 +611,11 @@ module.exports = class NetworkPlan {
   static searchAddresses (text) {
     var sql = `
       SELECT
-        wirecenter || ' - ' || aocn_name as name,
+        (CASE WHEN aocn_name IS NULL THEN
+          wirecenter
+        ELSE
+          wirecenter || ' - ' || aocn_name
+        END) AS name,
         ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json as bounds
       FROM wirecenters
@@ -619,10 +625,13 @@ module.exports = class NetworkPlan {
       ORDER BY wirecenter ASC
     `
     var wirecenters = database.query(sql, [`%${text}%`])
-    var addresses = request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+    var addresses = text.length > 0
+      ? request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+      : Promise.resolve(null)
     return Promise.all([wirecenters, addresses])
       .then((results) => {
         var wirecenters = results[0]
+        if (!results[1]) return wirecenters
         var addresses = results[1][1].results.map((item) => {
           var ne = item.geometry.viewport.northeast
           var sw = item.geometry.viewport.southwest
