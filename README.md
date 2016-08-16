@@ -1,6 +1,15 @@
 # aro-platform
 (Now with 100% moar Docker)
 
+## Contents
+ - [Overview](#overview)
+ - [Workstation Setup](#workstation-setup)
+  - [Mac](#on-a-mac)
+  - [Windows](#on-windows)
+- [Local Development](#local-development)
+  - [Application Setup](#initial-application-setup)
+
+
 ## Overview
 
 The ARO platform has been restructured into several different components, most of which are built as separate Docker containers:
@@ -13,8 +22,7 @@ The ARO platform has been restructured into several different components, most o
 
 ## Workstation Setup
 In order to work with the application locally, you must first configure your workstation. This should be performed before cloning any of the repositories. If you already have a repository cloned locally (from prior development), it is recommened you delete it, or at least create a new, empty base working folder for the new iteration of the application. 
-These instructions *should* apply universally, but they are generally targeted toward users developing on OSX. If your base OS is Windows or especially Linux, you may encounter subtle differences in how things work. Additionally, the basic interaction (in terms of command line operation and how to open/install various applications) will be different. Please adjust accordingly or ask for help where needed.
-
+### On a Mac
 If you have [Virtualbox](https://www.virtualbox.org/wiki/Downloads) installed (e.g., from working with Vagrant), you must either upgrade it to the latest version or remove it entirely. The Docker installation is incompatible with older versions of Virtualbox.
 Install [Docker](https://docs.docker.com/docker-for-mac/) on your workstation. This provides the `docker` client and `docker-compose`, both of which are requirements for making the application work.
 Once installation is complete, edit the preferences/settings of the running application (by clicking on the Docker-whale icon in the menu/task bar). Under the "General" tab, ensure that you have at least 2 CPUs and 2GB of memory allocated. If you have a lot of RAM, you may want to increase the allocation to 3 or 4 GB. It is unlikely you'll see much benefit from allocationg more than 2 CPUs at this time, unless you plan on running *other* Dockerized applications on your machine simultaneously.
@@ -46,6 +54,14 @@ Clone this (`aro-platform`) repository as well as the `aro-etl` repository in th
         ├-- .. 
         └-- (etc)
 ```
+### On Windows
+Native Docker support on Windows as of the time of this writng is still wonky at best and has a whole bunch of prerequesites and caveats that we don't want to deal with. As a workaround, we'll use the Docker Toolbox. 
+Install the [Docker Toolbox](https://www.docker.com/products/docker-toolbox)
+Open the a Docker Toolbox command window. This will automatically create an initial `default` docker machine, which we're going to have to remove so we can rebuild one with the correct parameters.
+More stuff here
+More stuff here
+Install git-lfs
+More stuff here
 
 ## Local development
 ### Initial application setup
