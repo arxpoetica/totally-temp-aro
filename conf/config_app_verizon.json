@@ -3,6 +3,7 @@
   "aro_service_url": "http://localhost:8080/aro-service",
   "client_schema": "client",
   "client_carrier_name": "VERIZON",
+  "displayable_client_carrier_name": "VERIZON",
   "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
   "currency_symbol": "$",
