@@ -10,10 +10,10 @@
 - [Local Development](#local-development)
   - [Application Setup](#initial-application-setup)
   - [Running the App](#running-the-application-in-development)
-- [Continuous Integration and Deployment](#automatic-ci-builds-and-deployments)
+- [Continuous Integration and Deployment](#ci-builds-and-deployments)
 
 
-## Overview
+# Overview
 
 The ARO platform has been restructured into several different components, most of which are built as separate Docker containers:
   - `aro-app-base` is an Ubuntu 14.04 image with all the packages and components required to run the application compiled and installed. In local development environments, we run a container based on this image with the application code and (optionally) the ETL scripts/data mounted as volumes.
@@ -23,10 +23,10 @@ The ARO platform has been restructured into several different components, most o
   - `aro-app-nginx` is an nginx web server image modified with the appropriate configuration to serve as a reverse-proxy to the PM2 service running the app and to serve static content. It is only used in staging and production environments.
   - In local development, the database is provided by a docker container. In staging and production we use Amazon RDS. The various docker-compose configuration files ensure that we are using the same versions of Postgres and PostGIS across all environments.
 
-## Workstation Setup
+# Workstation Setup
 In order to work with the application locally, you must first configure your workstation. This should be performed before cloning any of the repositories. If you already have a repository cloned locally (from prior development), it is recommened you delete it, or at least create a new, empty base working folder for the new iteration of the application.
 
-### On a Mac
+## On a Mac
 If you have [Virtualbox](https://www.virtualbox.org/wiki/Downloads) installed (e.g., from working with Vagrant), you must either upgrade it to the latest version or remove it entirely. The Docker installation is incompatible with older versions of Virtualbox.
 
 Install [Docker](https://docs.docker.com/docker-for-mac/) on your workstation. This provides the `docker` client and `docker-compose`, both of which are requirements for making the application work.
@@ -66,7 +66,7 @@ Once the prerequesites are installed, clone this (`aro-platform`) repository as 
         └-- (etc)
 ```
 
-### On Windows
+## On Windows
 Native Docker support on Windows as of the time of this writng is still wonky at best and has a whole bunch of prerequesites and caveats that we don't want to deal with. As a workaround, we'll use the Docker Toolbox.  
 
 Install the [Docker Toolbox](https://www.docker.com/products/docker-toolbox)  
@@ -82,8 +82,8 @@ More stuff here
 Clone repositories
 More stuff here 
 
-## Local development
-### Initial application setup
+# Local development
+## Initial application setup
 Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To do this we use the `run` command of `docker-compose` which will build and connect all the application compoenents that are required to run our setup/build scripts. This can be accomplished as follows:
 ```shell
 $ docker-compose -f docker/docker-compose-dev-initialize.yml app run docker/initialize_app.sh
@@ -101,13 +101,14 @@ public/javascripts/src/models/selection.js -> public/javascripts/lib/models/sele
 public/javascripts/src/models/state.js -> public/javascripts/lib/models/state.js
 public/javascripts/src/models/tracker.js -> public/javascripts/lib/models/tracker.js
 ```
+***
 Next, to populate the database and create an initial user, use the following command:
 ```shell
 $ docker-compose -f docker/docker-compose-dev-initialize.yml app run etl/etl_initial_setup.sh
 ```
 This will generate LOTS of output and can take anywhere from 40 - 60 minutes (or longer, depending on system specs) to complete.
 
-### Running the application in development
+## Running the application in development
 As described earlier, in local development, your checked out version of the `ARO-Platform` repository is mapped into the `aro-app-base` container, so that code changes you make locally are immediately reflected in the running application. 
 
 First run `docker ps` to ensure you don't have any duplicate or old versions of the containers already running. If you do, stop them with `docker stop <container_name> && docker rm <container_name>`  
@@ -122,7 +123,7 @@ $ docker exec -it docker_app_1 runserver.sh
 ```
 This will start the nodejs application and keep the debug log in the foreground. You can now connect to the application at https://localhost:8000. If you change the code, you'll need to Ctrl+C to kill the running task and then start it again in order to see the changes reflected.  
 
-### Pulling in updates to Docker images (aro-service and aro-app-base)
+## Pulling in updates to Docker images (aro-service and aro-app-base)
 Occasionally these images are updated. To incorporate the newest versions of the images into your local environment, you need to first bring down the environment and remove the current containers. This can be accomplished as follows:
 ```shell
 $ docker-compose -f docker/docker-compose-dev.yml down
@@ -137,10 +138,16 @@ $ docker-compose -f docker/docker-compose-dev.yml pull
 ```
 Any changes to the underlying images will be pulled down and used the next time you bring up the environment. The database itself is always preserved, even if the database container/image is replaced, as we are using an external volume to store the actual data.
 
-## Automatic CI builds and deployments
+# CI builds and deployments
+The general philosophy around deployments and environments has shifted. Please understand these changes and how they affect everyone's workflow.
+
+
+
+## CircleCI
+
 On any commit, CircleCI will automatically build the application, run tests, and report the results in the ARO slack channel.  
 
-### Staging Deployments
+## Staging Deployments
 Automatic deployments to various environments are configured in the `circle.yml` file. In general, deployments to environments are mapped to specific branches of the code, with certain configurations applied to the environments.  
 Most client-facing environments (e.g., client-specific production environments, the "demo" server, etc) are tied to the `master` branch of code. Deployments to these environments are triggered manually.  
 

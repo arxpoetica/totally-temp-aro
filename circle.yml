@@ -47,7 +47,7 @@ test:
     - /bin/true
 
 deployment:
-  qa:
+  staging:
     branch: [none]
     owner: AIT
     commands:
