@@ -3,27 +3,38 @@ package com.altvil.aro.model;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.MultiPolygon;
 
 @Entity
-@Table(name = "wirecenters", schema = "aro")
+@Inheritance
+@DiscriminatorColumn(name = "service_type")
+@DiscriminatorOptions(force = true)
+@Table(name = "wirecenters", schema = "client")
 public class WireCenter extends ComparableModel {
 
 	private Integer id;
-	private long gid;
+	
+	private ServiceLayer layer;
+	private String sourceId;
+	private String code;
+
 	private String state;
-	private String wireCenter;
-	private String aocn;
-	private String aocnName;
+	
 	private MultiPolygon geog;
 	private MultiPolygon geom;
 
@@ -44,13 +55,33 @@ public class WireCenter extends ComparableModel {
 		this.id = id;
 	}
 
-	@Column(name = "gid")
-	public long getGid() {
-		return gid;
+
+	@Column(name="source_id")
+	public String getSourceId() {
+		return sourceId;
 	}
 
-	public void setGid(long gid) {
-		this.gid = gid;
+	public void setSourceId(String sourceId) {
+		this.sourceId = sourceId;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "layer_id", nullable = false)
+	public ServiceLayer getLayer() {
+		return layer;
+	}
+
+	public void setLayer(ServiceLayer layer) {
+		this.layer = layer;
+	}
+
+	@Column(name = "code")
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	@Column(name = "state")
@@ -60,33 +91,6 @@ public class WireCenter extends ComparableModel {
 
 	public void setState(String state) {
 		this.state = state;
-	}
-
-	@Column(name = "wirecenter")
-	public String getWireCenter() {
-		return wireCenter;
-	}
-
-	public void setWireCenter(String wireCenter) {
-		this.wireCenter = wireCenter;
-	}
-
-	@Column(name = "aocn")
-	public String getAocn() {
-		return aocn;
-	}
-
-	public void setAocn(String aocn) {
-		this.aocn = aocn;
-	}
-
-	@Column(name = "aocn_name")
-	public String getAocnName() {
-		return aocnName;
-	}
-
-	public void setAocnName(String aocnName) {
-		this.aocnName = aocnName;
 	}
 
 	@Column(name = "geog")

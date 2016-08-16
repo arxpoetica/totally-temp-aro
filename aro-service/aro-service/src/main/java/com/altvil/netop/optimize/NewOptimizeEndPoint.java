@@ -122,6 +122,7 @@ public class NewOptimizeEndPoint {
 
 		return MasterOptimizationRequest
 				.build()
+				.setServiceLayerId(plan.getServiceAreaLayer())
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
 				.setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())

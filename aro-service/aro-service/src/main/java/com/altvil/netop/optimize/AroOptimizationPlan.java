@@ -10,7 +10,8 @@ import com.altvil.netop.plan.SelectedRegion;
 
 public class AroOptimizationPlan {
 
-	private long planId = 0 ;
+	private int serviceAreaLayer = 1;
+	private long planId = 0;
 
 	private OptimizationType algorithm;
 	private OptimizationMode optimizationMode = OptimizationMode.INTER_WIRECENTER;
@@ -20,7 +21,6 @@ public class AroOptimizationPlan {
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
 	private List<SelectedRegion> selectedRegions = new ArrayList<>();
-
 
 	public long getPlanId() {
 		return planId;
@@ -55,7 +55,6 @@ public class AroOptimizationPlan {
 			FiberNetworkConstraints fiberNetworkConstraints) {
 		this.fiberNetworkConstraints = fiberNetworkConstraints;
 	}
-	
 
 	public Double getThreshold() {
 		return threshold;
@@ -88,4 +87,13 @@ public class AroOptimizationPlan {
 	public void setOptimizationMode(OptimizationMode optimizationMode) {
 		this.optimizationMode = optimizationMode;
 	}
+
+	public int getServiceAreaLayer() {
+		return serviceAreaLayer;
+	}
+
+	public void setServiceAreaLayer(int serviceAreaLayer) {
+		this.serviceAreaLayer = serviceAreaLayer;
+	}
+
 }

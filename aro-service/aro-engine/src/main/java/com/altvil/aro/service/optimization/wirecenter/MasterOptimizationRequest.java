@@ -1,9 +1,9 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
+import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
@@ -16,7 +16,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 	private Collection<Integer> wireCenters;
 	private final OptimizationMode optimizationMode;
-
+	private int serviceLayerId;
 
 	public static Builder build() {
 		return new Builder();
@@ -26,6 +26,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 		private long planId;
 		private int year = 2015;
+		private int serviceLayerId ;
 		private Set<LocationEntityType> locationEntities;
 		private FiberNetworkConstraints fiberNetworkConstraints;
 		private OptimizationConstraints optimizationConstraints;
@@ -33,11 +34,15 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		private Set<Integer> wireCenters;
 		private OptimizationMode optimizationMode;
 
-
 		public Builder setOptimizationConstraints(
 				OptimizationConstraints constraints) {
 			this.optimizationConstraints = constraints;
 			return this;
+		}
+		
+		public Builder setServiceLayerId(int serviceLayerId) {
+			this.serviceLayerId = serviceLayerId;
+			return this ;
 		}
 
 		public Builder setFiberNetworkConstraints(
@@ -78,8 +83,9 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		}
 
 		public MasterOptimizationRequest build() {
-			return new MasterOptimizationRequest(optimizationConstraints,
-					fiberNetworkConstraints, createDataRequest(), wireCenters, optimizationMode);
+			return new MasterOptimizationRequest(serviceLayerId, optimizationConstraints,
+					fiberNetworkConstraints, createDataRequest(), wireCenters,
+					optimizationMode);
 		}
 
 		public Builder setOptimizationMode(OptimizationMode optimizationMode) {
@@ -87,29 +93,25 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 			return this;
 		}
 
-
 	}
 
 	public MasterOptimizationRequest(
+			int serviceLayerId,
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
 			Collection<Integer> wireCenters, OptimizationMode optimizationMode) {
 		super(optimizationConstraints, constraints, request);
+		this.serviceLayerId = serviceLayerId ;
 		this.wireCenters = wireCenters;
 		this.optimizationMode = optimizationMode;
 	}
 
-	public Collection<Integer> getWireCenters() {
-		return wireCenters;
+	public int getServiceLayerId() {
+		return serviceLayerId;
 	}
 
-	public MasterOptimizationRequest create(long planId, int wireCenterId) {
-
-		return new MasterOptimizationRequest(optimizationConstraints,
-				constraints, networkDataRequest.create(planId),
-				Collections.singleton(new Integer(wireCenterId)),
-				getOptimizationMode()
-		);
+	public Collection<Integer> getWireCenters() {
+		return wireCenters;
 	}
 
 	public OptimizationMode getOptimizationMode() {

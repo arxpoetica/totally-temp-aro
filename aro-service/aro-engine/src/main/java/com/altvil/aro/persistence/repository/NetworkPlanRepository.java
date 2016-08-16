@@ -262,7 +262,7 @@ public interface NetworkPlanRepository extends
 			"	select st.location_id, st.master_plan_id, w.id as wirecenter_id  \n" + 
 			"	from selected_targets st \n" + 
 			"	join aro.locations l on l.id = st.location_id\n" + 
-			"	join aro.wirecenters w on st_contains(w.geom, l.geom)\n" + 
+			"	join aro.wirecenters w on st_contains(w.geom, l.geom)\n" + //Add Layer Constraint
 			"	where st.plan_id is null\n" + 
 			")\n" + 
 			"\n" + 
