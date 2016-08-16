@@ -2,8 +2,8 @@
 (Now with 100% moar Docker)
 
 ## Contents
- - [Overview](#overview)
- - [Workstation Setup](#workstation-setup)
+- [Overview](#overview)
+- [Workstation Setup](#workstation-setup)
   - [Mac](#on-a-mac)
   - [Windows](#on-windows)
 - [Local Development](#local-development)
@@ -115,8 +115,11 @@ $ docker-compose -f docker/docker-compose-dev.yml pull
 ```
 Any changes to the underlying images will be pulled down and used the next time you bring up the environment. The database itself is always preserved, even if the database container/image is replaced, as we are using an external volume to store the actual data.
 
-### Automatic CI builds and deployments
-TODO
+## Automatic CI builds and deployments
+On any commit, CircleCI will automatically build the application, run tests, and report the results in the ARO slack channel.
+### Staging Deployments
+Automatic deployments to various environments are configured in the `circle.yml` file. In general, deployments to environments are mapped to specific branches of the code, with certain configurations applied to the environments. Most client-facing environments (e.g., client-specific production environments, the "demo" server, etc) are tied to the `master` branch of code. Deployments to these environments are triggered manually.
+The `develop` branch of code is used by the `develop01` staging environment. Deployments to that server happen automatically on commits/merges to `develop` that pass tests in CircleCI. In order to test new features without affecting this environment, additional staging environments can be created for additional feature branches automatically by adding the branch to the deployment section in the `circle.yml` file. Once an environment is created from a branch, any additional commits or mergest to that branch will be automatically deployed to the specified environment. When the environment is no longer needed, it must be manually destroyed. This process will be automated at a later time.
 
 
 
