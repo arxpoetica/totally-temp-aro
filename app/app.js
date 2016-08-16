@@ -18,6 +18,9 @@ app.use(passport.session())
 app.use(express.static('public'))
 app.set('views', './views')
 app.engine('html', ejs.renderFile)
+if (process.env.NODE_ENV === 'staging') {
+  app.set('env', 'production')
+}
 
 var middleware = require('./middleware')
 require('./routes/routes_authentication').configure(app, middleware)
