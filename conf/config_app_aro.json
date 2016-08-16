@@ -2,11 +2,12 @@
   "database_url": "postgres://aro:aro@localhost/aro",
   "aro_service_url": "http://localhost:8080/aro-service",
   "client_schema": "client",
-  "client_carrier_name": "VERIZON",
+  "client_carrier_name": "Client",
   "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
   "currency_symbol": "$",
   "ui": {
+    "title": "ARO",
     "layout": "default",
     "map_tools": {
       "locations": {

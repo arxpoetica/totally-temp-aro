@@ -7,6 +7,7 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "ui": {
+    "title": "OneFiber",
     "eye_checkboxes": true,
     "layout": "accordion",
     "map_tools": {

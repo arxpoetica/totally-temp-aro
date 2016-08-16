@@ -16,3 +16,4 @@ try {
 }
 
 module.exports.base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
+module.exports.client_carrier_name = 'VERIZON' // for demo

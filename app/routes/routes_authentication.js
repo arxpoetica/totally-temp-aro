@@ -1,6 +1,8 @@
 var models = require('../models')
+var helpers = require('../helpers')
 var passport = require('passport')
 var querystring = require('querystring')
+var public_config = helpers.public_config
 
 exports.configure = (app, middleware) => {
   var LocalStrategy = require('passport-local').Strategy
@@ -32,7 +34,8 @@ exports.configure = (app, middleware) => {
     response.render('login.html', {
       error: request.flash('error'),
       info: request.flash('info'),
-      success: request.flash('success')
+      success: request.flash('success'),
+      config: public_config
     })
   })
 
@@ -49,7 +52,8 @@ exports.configure = (app, middleware) => {
 
   app.get('/forgot_password', (request, response, next) => {
     response.render('forgot_password.html', {
-      error: request.flash('error')
+      error: request.flash('error'),
+      config: public_config
     })
   })
 
@@ -70,7 +74,8 @@ exports.configure = (app, middleware) => {
     var code = request.query.code
     response.render('reset_password.html', {
       error: request.flash('error'),
-      code: code
+      code: code,
+      config: public_config
     })
   })
 

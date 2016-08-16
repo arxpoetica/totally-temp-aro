@@ -1,11 +1,14 @@
 var models = require('../models')
+var helpers = require('../helpers')
+var public_config = helpers.public_config
 
 exports.configure = (app, middleware) => {
   app.get('/settings/show', (request, response, next) => {
     response.render('settings.html', {
       user: request.user,
       error: request.flash('error'),
-      success: request.flash('success')
+      success: request.flash('success'),
+      config: public_config
     })
   })
 
