@@ -15,7 +15,7 @@ CREATE TABLE aro.census_blocks AS
     intptlon,
     ST_Transform(the_geom, 4326) AS geom,
     hh_2014
-  FROM 
+  FROM
     tiger.tabblock LEFT JOIN demographics.households
       ON tabblock.tabblock_id = households.census_block
   ;

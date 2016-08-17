@@ -94,8 +94,9 @@ module.exports = class NetworkPlan {
     var sql = `
       SELECT
         fiber_route.id,
-        ST_Length(geom::geography) * 0.000621371 AS edge_length,
+        -- ST_Length(geom::geography) * 0.000621371 AS edge_length,
         ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
         frt.name AS fiber_type,
         frt.description AS fiber_name
       FROM client.plan
@@ -138,13 +139,20 @@ module.exports = class NetworkPlan {
         return models.Network.planSummary(plan_id)
       })
       .then((summary) => {
+        summary.networkStatistics = Array.isArray(summary.networkStatistics) ? summary.networkStatistics : []
         var npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_npv') ||
                   summary.networkStatistics.find((stat) => stat.networkStatisticType === 'npv')
         var irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_irr') ||
                   summary.networkStatistics.find((stat) => stat.networkStatisticType === 'irr')
 
-        output.metadata.npv = npv.value
-        output.metadata.irr = irr.value
+        output.metadata.npv = npv && npv.value
+        output.metadata.irr = irr && irr.value
+
+        var priceModel = summary.priceModel || {}
+        var fiberCosts = Array.isArray(priceModel.fiberCosts) ? priceModel.fiberCosts : []
+
+        var demandSummary = summary.demandSummary || {}
+        var networkDemands = Array.isArray(demandSummary.networkDemands) ? demandSummary.networkDemands : []
 
         var cableConstructionTypes = [
           { name: 'arial', description: 'Aerial' },
@@ -165,7 +173,7 @@ module.exports = class NetworkPlan {
           fiberTypes.forEach((fiberType) => {
             obj.types[fiberType] = { totalLength: 0, totalCost: 0 }
           })
-          summary.priceModel.fiberCosts.filter((cost) => cost.constructionType === type.name)
+          fiberCosts.filter((cost) => cost.constructionType === type.name)
             .forEach((cost) => {
               if (!obj.types[cost.fiberType]) return
               obj.types[cost.fiberType].totalLength += cost.lengthMeters
@@ -181,7 +189,8 @@ module.exports = class NetworkPlan {
           return obj
         })
 
-        output.metadata.equipment_summary = summary.priceModel.equipmentCosts.map((item) => {
+        var equipmentCosts = priceModel.equipmentCosts || []
+        output.metadata.equipment_summary = equipmentCosts.map((item) => {
           var cost = financialCosts.find((i) => i.name === item.nodeType)
           return {
             totalCost: item.total,
@@ -190,7 +199,7 @@ module.exports = class NetworkPlan {
           }
         })
 
-        output.metadata.fiber_summary = summary.priceModel.fiberCosts.map((item) => {
+        output.metadata.fiber_summary = fiberCosts.map((item) => {
           var fiberType = fiberTypes.find((i) => i.name === item.fiberType)
           return {
             lengthMeters: item.lengthMeters,
@@ -205,8 +214,9 @@ module.exports = class NetworkPlan {
 
         plan.total_cost = output.metadata.equipment_cost + output.metadata.fiber_cost
 
-        var demand = summary.demandSummary.networkDemands.find((item) => item.demandType === 'planned_demand')
-        var entityDemands = demand.locationDemand.entityDemands
+        var demand = networkDemands.find((item) => item.demandType === 'planned_demand')
+        var locationDemand = (demand && demand.locationDemand) || {}
+        var entityDemands = locationDemand.entityDemands || {}
         output.metadata.premises = Object.keys(entityDemands).map((key) => {
           var entityName = entityNames.find((i) => i.name === key)
           return {
@@ -225,7 +235,8 @@ module.exports = class NetworkPlan {
           'type': 'Feature',
           'geometry': edge.geom,
           'properties': {
-            'fiber_type': edge.fiber_type
+            'fiber_type': edge.fiber_type,
+            'centroid': edge.centroid
           }
         }))
 
@@ -264,9 +275,6 @@ module.exports = class NetworkPlan {
             +output.metadata.irr || null,
             output.metadata.fiber_summary.reduce((total, item) => total + item.lengthMeters * 0.000621371, 0)
           ])
-          .then(() => {
-            console.log('Plan updated')
-          })
           .catch((err) => {
             console.log('err', err)
           })
@@ -391,7 +399,6 @@ module.exports = class NetworkPlan {
         JSON.stringify(area.centroid),
         JSON.stringify(area.bounds)
       ]
-      console.log('params', params)
       return database.findOne(sql, params)
     })
     .then((row) => {
@@ -609,7 +616,11 @@ module.exports = class NetworkPlan {
   static searchAddresses (text) {
     var sql = `
       SELECT
-        wirecenter || ' - ' || aocn_name as name,
+        (CASE WHEN aocn_name IS NULL THEN
+          wirecenter
+        ELSE
+          wirecenter || ' - ' || aocn_name
+        END) AS name,
         ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json as bounds
       FROM wirecenters
@@ -619,10 +630,13 @@ module.exports = class NetworkPlan {
       ORDER BY wirecenter ASC
     `
     var wirecenters = database.query(sql, [`%${text}%`])
-    var addresses = request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+    var addresses = text.length > 0
+      ? request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+      : Promise.resolve(null)
     return Promise.all([wirecenters, addresses])
       .then((results) => {
         var wirecenters = results[0]
+        if (!results[1]) return wirecenters
         var addresses = results[1][1].results.map((item) => {
           var ne = item.geometry.viewport.northeast
           var sw = item.geometry.viewport.southwest

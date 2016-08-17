@@ -9,5 +9,4 @@ public interface GraphNetworkModelService {
 	GraphNetworkModelBuilder build(EdgeData edgeData) ;
 	GraphNetworkModelBuilder build(NetworkData networkData) ;
 
-
 }

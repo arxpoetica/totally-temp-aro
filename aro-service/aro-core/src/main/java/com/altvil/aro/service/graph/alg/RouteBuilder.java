@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
@@ -24,18 +22,29 @@ import org.slf4j.LoggerFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.google.common.collect.TreeMultimap;
 
 public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(RouteBuilder.class.getName());
 
+	private Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
+	
 	private Map<V, AllShortestPaths<V, E>> targetMap;
 
+	private GraphPathConstraint<V, E> pathPredicate = (sourceRoot, path) -> true ;
 
 	public Collection<SourceRoute<V, E>> build(WeightedGraph<V, E> source,
 			Collection<V> all_roots, Collection<V> targets) {
+		
+		return build((sourceRoot, path) -> true, source, all_roots, targets) ;
+	}
+	
+	
+	public Collection<SourceRoute<V, E>> build(GraphPathConstraint<V, E> pathPredicate, WeightedGraph<V, E> source,
+			Collection<V> all_roots, Collection<V> targets) {
+		
+		this.pathPredicate = pathPredicate ;
 		
 		if( log.isDebugEnabled() ) {
 			for(V v : targets) {
@@ -49,7 +58,6 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 		// Establish Root Structures
 		Set<V> roots = new HashSet<>(all_roots);
 
-		Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 		all_roots.forEach(v -> {
 			sourceRootMap.put(v, new SourceRoute<>(source, v));
 		});
@@ -62,8 +70,8 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			// Exclude any source target match
 
 			if (roots.contains(target)) {
-				
 				// Update Root Structure
+				//Distance still bound at 0
 				sourceRootMap.get(target).add(new GraphPathImpl<V, E>(source, target, target, new ArrayList<>(), 0.0));
 			} else {
 				targetMap.put(target,
@@ -71,23 +79,24 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			}
 		}
 
-		// Set<V> sources = new HashSet<>();
-
+		
 		// Track all Sources
-		// sources.addAll(roots);
-
 		while (targetMap.size() > 0) {
 
 			GraphPath<V, E> path = this
 					.getClosestSource(sourceRootMap.keySet());
+			
 			// Evil Boundary Condition
 			if (path == null) {
 				break;
 			}
+			
 			// Bind Root
 			SourceRoute<V, E> sourceRoot = sourceRootMap.get(path
 					.getEndVertex());
 
+		
+			
 			// Filters out all 0 length routes
 			if (path.getEdgeList().size() == 0) {
 				// Update Root
@@ -96,41 +105,51 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 				continue;
 			}
 
+		
+			
+			targetMap.remove(path.getStartVertex());
+			sourceRoot.add(path);
 			
 			List<V> pathList = Graphs.getPathVertexList(path);
-			Iterator<V> itr = pathList.iterator();
+			Iterator<V> itr = new ReverseIterator<V>(pathList) ;
+			
+			V endVertex = itr.next();
+			
+			//sourceRootMap.put(, sourceRoot);
+			
+			double distanceToSource = sourceRoot.getDistance(endVertex) ;
+			
+			V previous = endVertex;
 
-			V startVertex = itr.next();
-			V previous = startVertex;
-
-			targetMap.remove(previous);
-			sourceRootMap.put(previous, sourceRoot);
-
-			List<E> resultPath = new ArrayList<>(pathList.size());
+			//This will not update the target Vertex as already assigned
 			while (itr.hasNext()) {
 				V next = itr.next();
-				// sources.add(next);
+				
+				//Update the vertex as bound with Source
 				sourceRootMap.put(next, sourceRoot);
+				
+				
 				E e = source.getEdge(previous, next);
-
-				previous = next;
-
+				//TODO remove this condition
 				if (e != null) {
-					resultPath.add(e);
+					distanceToSource += e.getValue().getLength() ;
 				}
+
+				//Keep Track of distance to source
+				sourceRoot.add(next, distanceToSource) ;
+				previous = next;
 			}
 
-			sourceRoot.add(path);
-			targetMap.remove(path.getStartVertex());
+			
 
 		}
 
 		return originalSources;
 	}
 
-	public SourceRoute<V, E> buildSourceRoute(WeightedGraph<V, E> source,
+	public SourceRoute<V, E> buildSourceRoute(GraphPathConstraint<V, E> pathPredicate, WeightedGraph<V, E> source,
 			V root, Collection<V> targets) {
-		return build(source, Collections.singleton(root), targets).iterator()
+		return build(pathPredicate, source, Collections.singleton(root), targets).iterator()
 				.next();
 	}
 
@@ -194,20 +213,34 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 	}
 
 	private GraphPath<V, E> getClosestSource(Set<V> sources) {
-		TreeMap<Double, GraphPath<V, E>> treeMap = new TreeMap<>();
+		double shortestPathLength = Double.MAX_VALUE;
+		GraphPath<V, E> shortedPath = null;
+		
 		for (V target : targetMap.keySet()) {
 			AllShortestPaths<V, E> paths = targetMap.get(target);
-			TreeMultimap<Double, V> tm = paths.findPaths(sources);
+			V source = paths.findClosestTarget(sources);
 
-			Set<Map.Entry<Double, V>> entries = tm.entries();
-			if (!entries.isEmpty()) {
-				Map.Entry<Double, V> entry = entries.iterator().next();
-				GraphPath<V, E> path = paths.getGraphPath(entry.getValue());
-				treeMap.put(path.getWeight(), path);
+			if (source != null) {
+				final double sourceWeight = paths.getWeight(source);
+				
+				if (sourceWeight < shortestPathLength) {
+					GraphPath<V, E> path = paths.getGraphPath(source);
+					
+					if (isValidPath(path)) {
+						shortedPath = paths.getGraphPath(source);
+						shortestPathLength = sourceWeight;
+					}
+				}
 			}
 		}
-		return treeMap.size() == 0 ? null : treeMap.firstEntry().getValue();
+		
+		return shortedPath ;
 
+	}
+
+	
+	private boolean isValidPath(GraphPath<V, E> path) {
+		return pathPredicate.isValid(sourceRootMap.get(path.getEndVertex()), path) ;
 	}
 
 	@SuppressWarnings("unused")
@@ -249,6 +282,29 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			}
 		}
 
+	}
+	
+	private static class ReverseIterator<T> implements Iterator<T> {
+
+		private int index ;
+		private List<T> list ;
+		
+		public ReverseIterator(List<T> list) {
+			super();
+			this.list = list;
+			this.index = list.size()-1 ;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return index>= 0 ;
+		}
+
+		@Override
+		public T next() {
+			return list.get(index--) ;
+		}
+		
 	}
 
 }

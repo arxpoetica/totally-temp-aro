@@ -8,6 +8,7 @@ import org.jgrapht.WeightedGraph;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -69,8 +70,8 @@ public interface GraphTransformerFactory {
 	 * @param selectedEdges
 	 * @return
 	 */
-	public <T> DAGModel<T> createDAG(GraphModel<T> graphModel, 
-			GraphNode srcNode, Predicate<AroEdge<T>> predicate);
+	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
+			GraphModel<T> graphModel, GraphNode srcNode, Predicate<AroEdge<T>> predicate);
 
 		
 	public GraphRenoder createNetworkBuilder(

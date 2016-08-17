@@ -2,9 +2,11 @@ package com.altvil.aro.service.graph.alg;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.Graph;
@@ -26,15 +28,27 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> {
 	private List<TargetRoute<V, E>> subRoutes = new ArrayList<>();
 
 	private Set<V> targets = new HashSet<>();
+	private Map<V, Double> distanceToSourceMap = new HashMap<>() ;
+	
 
 	public SourceRoute(Graph<V, E> sourceGraph, V sourceVertex) {
 		super();
 		this.sourceGraph = sourceGraph ;
 		this.sourceVertex = sourceVertex;
+		distanceToSourceMap.put(sourceVertex, 0.0) ;
 	}
 
 	public V getSourceVertex() {
 		return sourceVertex;
+	}
+	
+	public void add(V vertex, double distance) {
+		distanceToSourceMap.put(vertex, distance) ;
+	}
+	
+	public double getDistance(V vertex) {
+		Double distance = distanceToSourceMap.get(vertex) ;
+		return distance == null ? 0 : distance ;
 	}
 
 	public TargetRoutes<V, E> getSubRoutes() {
@@ -44,6 +58,8 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> {
 	public void add(GraphPath<V, E> path) {
 		targets.add(path.getStartVertex());
 		subRoutes.add(new TargetRoute<>(path));
+		
+		
 	}
 
 	public Set<V> getTargets() {
