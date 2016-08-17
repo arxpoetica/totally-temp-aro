@@ -13,18 +13,20 @@ describe('Boundary', () => {
     var area = {
       'name': 'Manhattan, New York, NY, USA',
       'centroid': {
-        'lat': 40.7830603,
-        'lng': -73.9712488
+        'type': 'Point',
+        'coordinates': [-73.9712488, 40.7830603]
       },
       'bounds': {
-        'northeast': {
-          'lat': 40.882214,
-          'lng': -73.907
-        },
-        'southwest': {
-          'lat': 40.6803955,
-          'lng': -74.047285
-        }
+        'type': 'Polygon',
+        'coordinates': [
+          [
+            [-73.70027209999999, 40.9152555],
+            [-73.70027209999999, 40.496044],
+            [-74.255735, 40.496044],
+            [-74.255735, 40.9152555],
+            [-73.70027209999999, 40.9152555]
+          ]
+        ]
       }
     }
     return models.NetworkPlan.createPlan('Untitled route', area, test_utils.test_user)

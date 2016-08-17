@@ -18,7 +18,7 @@ exports.config = {
     var q = require('q');
     var deferred = q.defer();
     var test_utils = require('../models/test_utils');
-    test_utils.create_test_user(function(err, user) {
+    test_utils.createTestUser(function(err, user) {
       if (err) return deferred.reject(err);
       return deferred.resolve();
     });

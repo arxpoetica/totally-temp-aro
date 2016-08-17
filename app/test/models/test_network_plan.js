@@ -14,18 +14,20 @@ describe('NetworkPlan', () => {
     var area = {
       name: 'Boston, MA, USA',
       centroid: {
-        lat: 42.3600825,
-        lng: -71.0588801
+        'type': 'Point',
+        'coordinates': [-71.0588801, 42.3600825]
       },
       bounds: {
-        northeast: {
-          lat: 42.3988669,
-          lng: -70.9232011
-        },
-        southwest: {
-          lat: 42.22788,
-          lng: -71.191113
-        }
+        'type': 'Polygon',
+        'coordinates': [
+          [
+            [-70.9232011, 42.3988669],
+            [-70.9232011, 42.2278801],
+            [-71.191113, 42.2278801],
+            [-71.191113, 42.3988669],
+            [-70.9232011, 42.3988669]
+          ]
+        ]
       }
     }
     request
@@ -124,29 +126,9 @@ describe('NetworkPlan', () => {
         expect(plan.metadata.total_cost).to.be.a('number')
 
         expect(plan.metadata.costs).to.be.an('array')
-        expect(plan.metadata.costs).to.have.length(3)
-        expect(plan.metadata.costs[0].name).to.be.equal('Fiber cost')
-        expect(plan.metadata.costs[0].value).to.be.a('number')
-        expect(plan.metadata.costs[1].name).to.be.equal('Locations cost')
-        expect(plan.metadata.costs[1].value).to.be.a('number')
-        expect(plan.metadata.costs[2].name).to.be.equal('Equipment nodes cost')
-        expect(plan.metadata.costs[2].value).to.be.a('number')
+        expect(plan.metadata.costs).to.have.length(0)
         expect(plan.metadata.total_cost).to.be.a('number')
 
-        expect(plan.metadata.customers_businesses_total).to.be.a('number')
-        expect(plan.metadata.customers_households_total).to.be.a('number')
-        expect(plan.metadata.customer_types).to.be.an('array')
-        // expect(plan.metadata.customer_types[0]).to.be.an('object')
-        // expect(plan.metadata.customer_types[0].name).to.be.a('string')
-        // expect(plan.metadata.customer_types[0].businesses).to.be.a('number')
-        // expect(plan.metadata.customer_types[0].households).to.be.a('number')
-
-        var year = new Date().getFullYear()
-        expect(plan.metadata.npv).to.be.an('array')
-        expect(plan.metadata.npv).to.have.length(5)
-        expect(plan.metadata.npv[0].year).to.be.a('number')
-        expect(plan.metadata.npv[0].year).to.be.equal(year)
-        expect(plan.metadata.npv[0].value).to.be.a('number')
         expect(plan.metadata.revenue).to.be.a('number')
 
         expect(plan).to.have.property('feature_collection')
@@ -169,29 +151,9 @@ describe('NetworkPlan', () => {
         expect(plan.metadata.total_cost).to.be.a('number')
 
         expect(plan.metadata.costs).to.be.an('array')
-        expect(plan.metadata.costs).to.have.length(3)
-        expect(plan.metadata.costs[0].name).to.be.equal('Fiber cost')
-        expect(plan.metadata.costs[0].value).to.be.a('number')
-        expect(plan.metadata.costs[1].name).to.be.equal('Locations cost')
-        expect(plan.metadata.costs[1].value).to.be.a('number')
-        expect(plan.metadata.costs[2].name).to.be.equal('Equipment nodes cost')
-        expect(plan.metadata.costs[2].value).to.be.a('number')
+        expect(plan.metadata.costs).to.have.length(0)
         expect(plan.metadata.total_cost).to.be.a('number')
 
-        expect(plan.metadata.customers_businesses_total).to.be.a('number')
-        expect(plan.metadata.customers_households_total).to.be.a('number')
-        expect(plan.metadata.customer_types).to.be.an('array')
-        // expect(plan.metadata.customer_types[0]).to.be.an('object')
-        // expect(plan.metadata.customer_types[0].name).to.be.a('string')
-        // expect(plan.metadata.customer_types[0].businesses).to.be.a('number')
-        // expect(plan.metadata.customer_types[0].households).to.be.a('number')
-
-        var year = new Date().getFullYear()
-        expect(plan.metadata.npv).to.be.an('array')
-        expect(plan.metadata.npv).to.have.length(5)
-        expect(plan.metadata.npv[0].year).to.be.a('number')
-        expect(plan.metadata.npv[0].year).to.be.equal(year)
-        expect(plan.metadata.npv[0].value).to.be.a('number')
         expect(plan.metadata.revenue).to.be.a('number')
 
         expect(plan).to.not.have.property('feature_collection')
