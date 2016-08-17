@@ -193,7 +193,8 @@ module.exports = class Network {
       households: 'household',
       businesses: ['medium', 'large'],
       towers: 'celltower',
-      smb: 'small'
+      smb: 'small',
+      '2kplus': '2kplus'
     }
     var algorithms = {
       'MAX_IRR': 'IRR',
