@@ -26,7 +26,7 @@ app.service('map_utils', ($rootScope, $http) => {
         timer = setTimeout(() => {
           marker.setMap(null)
           layer.revertStyle(feature)
-        }, 250)
+        }, 0)
       }
     }
 

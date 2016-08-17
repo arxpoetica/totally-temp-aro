@@ -106,3 +106,9 @@ INSERT INTO client.speeds (code, description) VALUES
 	(9, '50 mbps - 100 mbps'),
 	(10, '100 mbps - 1 gbps'),
 	(11, '+1 gbps');
+
+CREATE INDEX client_speeds_code ON client.speeds (code);
+
+CREATE INDEX client_census_blocks_carriers_census_block_gid ON client.census_blocks_carriers (census_block_gid);
+
+CREATE INDEX client_census_blocks_carriers_download_speed ON client.census_blocks_carriers (download_speed);
