@@ -30,6 +30,4 @@ CREATE INDEX aro_census_blocks_geom_gist
   USING gist
   (geom);
 
-CREATE INDEX aro_census_blocks_gid ON aro.census_blocks (gid);
-
 VACUUM ANALYZE aro.census_blocks;

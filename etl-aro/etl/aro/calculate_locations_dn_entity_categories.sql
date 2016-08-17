@@ -17,9 +17,3 @@ UPDATE locations SET dn_entity_categories =
 		WHERE h.location_id = locations.id
 	)
 ;
-
-UPDATE aro.locations
-   SET dn_entity_categories = (dn_entity_categories || ARRAY['b_2kplus']::varchar[])
-  FROM aro.businesses
- WHERE monthly_recurring_cost >= 2000
-   AND businesses.location_id = locations.id
