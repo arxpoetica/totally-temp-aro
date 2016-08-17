@@ -17,10 +17,13 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
   // --
 
-  var area_layers = $scope.area_layers = {}
+  var wirecentersLayer
+  var countySubdivisionsLayer
+  var censusBlocksLayer
+  var cmaBoundariesLayer
 
   if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
-    area_layers['wirecenter'] = new MapLayer({
+    wirecentersLayer = new MapLayer({
       short_name: 'WC',
       name: config.ui.labels.wirecenter,
       type: 'wirecenter',
@@ -45,7 +48,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
-    area_layers['county_subdivisions'] = new MapLayer({
+    countySubdivisionsLayer = new MapLayer({
       short_name: 'CS',
       name: 'County Subdivisions',
       type: 'county_subdivisions',
@@ -69,8 +72,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
-    area_layers['census_blocks_layer'] = new MapLayer({
+  if (config.ui.map_tools.boundaries.view.indexOf('census_blocks') >= 0) {
+    censusBlocksLayer = new MapLayer({
       type: 'census_blocks',
       short_name: 'CB',
       name: 'Census Blocks',
@@ -101,6 +104,34 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
+  cmaBoundariesLayer = new MapLayer({
+    short_name: 'CM',
+    name: 'CMA boundaries',
+    type: 'cma_boundaries',
+    api_endpoint: '/cma_boundaries',
+    style_options: {
+      normal: {
+        fillColor: 'coral',
+        strokeColor: 'coral',
+        strokeWeight: 2
+      },
+      highlight: {
+        fillColor: 'coral',
+        strokeColor: 'coral',
+        strokeWeight: 2
+      }
+    },
+    reload: 'always',
+    threshold: 0
+  })
+
+  $scope.areaLayers = [
+    censusBlocksLayer,
+    countySubdivisionsLayer,
+    wirecentersLayer,
+    cmaBoundariesLayer
+  ].filter((layer) => layer)
+
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
     drawingControl: false,
@@ -126,14 +157,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     $scope.boundaries = []
     if (!plan) return
 
-    var county_subdivisions = area_layers['county_subdivisions']
-    var census_blocks = area_layers['census_blocks_layer']
-
-    if (plan && (county_subdivisions || census_blocks)) {
+    if (plan && (countySubdivisionsLayer || censusBlocksLayer)) {
       $http.get(`/network_plan/${plan.id}/area_data`)
         .success((response) => {
-          area_layers['county_subdivisions'].setApiEndpoint('/county_subdivisions/' + response.statefp)
-          area_layers['census_blocks_layer'].setApiEndpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
+          countySubdivisionsLayer && countySubdivisionsLayer.setApiEndpoint('/county_subdivisions/' + response.statefp)
+          censusBlocksLayer && censusBlocksLayer.setApiEndpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
         })
     }
 
@@ -416,13 +444,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  $scope.number_of_area_layers = () => {
-    return _.size(area_layers)
-  }
-
   $rootScope.$on('financial_profile_changed_mode', (e, mode) => {
     if (mode === 'area') {
-      area_layers['wirecenter'].show()
+      wirecentersLayer && wirecentersLayer.show()
     }
   })
 }])

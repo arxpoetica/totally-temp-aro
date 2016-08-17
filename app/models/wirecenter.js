@@ -15,4 +15,12 @@ module.exports = class Wirecenter {
     return database.polygons(sql, [], true, viewport)
   }
 
+  static findAllCMA (viewport) {
+    var sql = `
+      SELECT gid AS id, the_geom AS geom, name
+      FROM boundaries.cma
+    `
+    return database.polygons(sql, [], true, viewport)
+  }
+
 }
