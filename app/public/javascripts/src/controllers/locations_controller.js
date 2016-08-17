@@ -39,7 +39,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.business_categories_selected = []
   $scope.household_categories_selected = []
   $scope.optimizeBusinesses = true
-  $scope.optimizeSMB = true // special case: optimize smlal businesses
+  $scope.optimizeSMB = true // special case: optimize small businesses
   $scope.optimizeHouseholds = true
   $scope.optimizeTowers = true
 
