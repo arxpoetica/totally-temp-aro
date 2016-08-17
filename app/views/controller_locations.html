@@ -104,6 +104,20 @@
       </div>
       <!-- / Special case -->
 
+      <!-- Special case -->
+      <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
+        <% if (config.ui.eye_checkboxes) { %>
+        <label class="eye-combo">
+          <input type="checkbox" ng-model="optimize2kplus" ng-change="changeOptimization()">
+        </label>
+        <% } %>
+        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
+          <input type="checkbox" ng-model="business_categories_selected['2kplus']" ng-change="changeLocationsLayer()"> $2,000+ MRC Customers
+          <div class="eye-indicator"></div>
+        </label>
+      </div>
+      <!-- / Special case -->
+
       <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
         <% if (config.ui.eye_checkboxes) { %>
         <label class="eye-combo">

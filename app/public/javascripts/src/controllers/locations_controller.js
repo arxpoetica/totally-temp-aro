@@ -40,6 +40,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.household_categories_selected = []
   $scope.optimizeBusinesses = true
   $scope.optimizeSMB = true // special case: optimize small businesses
+  $scope.optimize2kplus = true // yet another special case
   $scope.optimizeHouseholds = true
   $scope.optimizeTowers = true
 
@@ -154,6 +155,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.business_categories.forEach((category) => {
       $scope.business_categories_selected[category.name] = true
     })
+    $scope.business_categories_selected['2kplus'] = true
 
     $scope.household_categories_selected = []
     $scope.household_categories.forEach((category) => {
