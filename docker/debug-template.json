@@ -119,7 +119,7 @@
     },
     "ConfigRepoBranch" : {
       "Type" : "String",
-      "Default" : "develop"
+      "Default" : "master"
     },
     "AppRepoBranch" : {
       "Type" : "String",
@@ -154,10 +154,6 @@
     "GithubSshKey" : {
       "Type" : "String",
       "Description" : "SshKey for App and Config repository access"
-    },
-    "DockerRegistryPassword" : {
-      "Type" : "String",
-      "NoEcho" : "true"
     }
 
   },

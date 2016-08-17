@@ -88,14 +88,12 @@ def create_new_stack():
         'EnvSlug': env_slug,
         'ProjectTag': PROJECT_TAG,
         'AroClient': aro_client,
-        'GithubSshKey': github_ssh_key,
-        'DockerRegistryPassword': docker_pass
-        
+        'GithubSshKey': github_ssh_key
     }
     if environment == 'PRODUCTION':
         parameters.update({
             'ClientDomainName': domain_name,
-            'StackDomainName': domain_name + '.cmo',
+            'StackDomainName': domain_name + '.aro',
             'ClientSlug': client_slug,
             'NameComponent': name_component
         })
@@ -126,11 +124,11 @@ def create_new_stack():
 
 def provision_stack(cloudformation_stack):
     """Provision and start a newly created QA CloudFormation stack."""
-    real_name_component = branch_name if environment == 'QA' else name_component
+    real_name_component = branch_name if environment == 'staging' else name_component
     stack.provision_aro_stack(
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
         opsworks_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'Layer'),
-        internal_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ExtraInternalLayer'),
+        # internal_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ExtraInternalLayer'),
         rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance'),
         environment=environment,
         name='ARO-APP',
@@ -142,7 +140,7 @@ def provision_stack(cloudformation_stack):
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='c4.xlarge'
+        instance_type='m4.large'
     )
 
 
