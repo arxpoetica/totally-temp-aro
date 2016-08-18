@@ -12,9 +12,15 @@ import java.util.List;
 public class BusinessesNearFiberDataEndPoint {
     @Autowired
     BusinesessNearFiberReportService service;
+
     @RequestMapping(value = "/businesses/getTotals", method = RequestMethod.POST)
     public List<BusinessDataByDistance> getTotals(@RequestBody BusinessesReportRequest request){
         return service.getTotals(request);
+    }
+
+    @RequestMapping(value = "/businesses/getBuildingsCountsByBusinessesSizes", method = RequestMethod.POST)
+    public List<BusinessDataByDistance> getBuildingsCountsByBusinessesSizes(@RequestBody BusinessesReportRequest request){
+        return service.getBuildingsCountsByBusinessesSizes(request);
     }
 
 
