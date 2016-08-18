@@ -18,8 +18,7 @@ checkout:
 
 dependencies:
   pre:
-    # - pip install numpy==1.8.2
-    # - pip install -r requirements.txt
+    - npm install -g mocha
   cache_directories:
     - "~/docker-image"
   post:
@@ -40,20 +39,18 @@ database:
     
 test:
   override:
-    #- PYTHONPATH=. nosetests --no-path-adjustment --where . test/unit
-    #- karma start --single-run
-    # disable functional tests until they actually work
-    # - CMO_TEST=1 python testrunner.py
+    # - (cd app && npm test)
+
     - /bin/true
 
 deployment:
   staging:
-    branch: [dockerize]
+    branch: [none]
     owner: AIT
     commands:
       - docker push ${IMAGE_TAG}
       - docker push ${LATEST_TAG}
       - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
       - chmod 400 opsworks_ssh_key
-      - PYTHONPATH=. CMO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) bash docker/stack_ops.sh update qa
+      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) bash docker/stack_ops.sh update qa
       - rm -f opsworks_ssh_key

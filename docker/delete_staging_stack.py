@@ -1,0 +1,43 @@
+import boto3
+from boto3.session import Session
+import botocore.exceptions
+import os, sys
+from arostack import stack_kill
+import pprint
+import argparse
+pp = pprint.PrettyPrinter(indent=4)
+
+parser = argparse.ArgumentParser(description="Parse env type for deleting a stack.")
+parser.add_argument('env_type', metavar='E', type=str)
+args = parser.parse_args()
+if args.env_type.lower() != 'staging':
+    raise StandardError("Can only tear down staging stacks via the console.  Please specify 'staging' or go to AWS.")
+
+PROJECT_BASE_NAME = 'S-ARO-'
+branch_name = os.environ['CIRCLE_BRANCH']
+cloudformation_stack_name = PROJECT_BASE_NAME + branch_name
+
+session = Session(region_name='us-east-1')
+cloudformation_client = boto3.client('cloudformation', region_name='us-east-1')
+cloudformation = session.resource('cloudformation')
+cloudformation_stack = cloudformation.Stack(cloudformation_stack_name)
+
+opsworks_client = boto3.client('opsworks', region_name='us-east-1')
+opsworks = session.resource('opsworks')
+
+
+print "You are attempting to delete QA stack %s with the following specs: \n" % cloudformation_stack_name
+pp.pprint(cloudformation_client.describe_stacks(StackName=cloudformation_stack_name))
+resp = raw_input("This can't be undone. Continue? (YES/no [no]):  ")
+
+if resp == 'YES':
+    try:
+        stack_kill.stack_kill(cloudformation_stack=cloudformation_stack,
+                              opsworks_client=opsworks_client,
+                              cloudformation_client=cloudformation_client,
+                              stack_name=cloudformation_stack_name)
+    except botocore.exceptions.ClientError:
+        print "Something went wrong."
+        sys.exit(0)
+else:
+    print "Stack delete aborted."

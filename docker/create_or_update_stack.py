@@ -73,7 +73,6 @@ def create_new_stack():
     """Create a new Staging CloudFormation stack"""
     parameters = {
         'RdsFlag': 'yes',
-        'PgrFlag': 'no',
         'DBUsername': db_user,
         'DBPassword': db_pass,
         # 'StackBranchName': branch_name,
