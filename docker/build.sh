@@ -7,7 +7,7 @@ APP_TARGET=${APP_SOURCE_ROOT}/target
 
 # copy content into target directory
 mkdir -p ${APP_TARGET}
-for d in app conf etl etl-aro init ; do
+for d in app conf init ; do
     cp -r ${APP_SOURCE_ROOT}/${d} ${APP_TARGET}
 done
 for s in runserver.sh circle.yml ; do
