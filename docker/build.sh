@@ -18,5 +18,5 @@ for s in  aro.json Dockerfile ; do
 done
 
 # install application npm dependencies
-(cd ${APP_TARGET}/app && npm install --no-bin-link && npm run build)
+(cd ${APP_TARGET}/app && npm install --no-bin-link --only=prod && npm run build)
 
