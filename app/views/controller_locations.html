@@ -111,6 +111,7 @@
           <input type="checkbox" ng-model="optimize2kplus" ng-change="changeOptimization()">
         </label>
         <% } %>
+        <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_2kplus_default.png" style="width:16px"></div>
         <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
           <input type="checkbox" ng-model="business_categories_selected['2kplus']" ng-change="changeLocationsLayer()"> $2,000+ MRC Customers
           <div class="eye-indicator"></div>
