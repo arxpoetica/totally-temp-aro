@@ -133,6 +133,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     } else if (href === '#financialProfileOpex') {
       showOpexRecurringChart(force)
       showOpexCostChart(force)
+    } else if (href === '#financialProfileRouteOpportunities') {
+      loadRouteOpportunities()
     }
   }
   $scope.refreshCurrentTab = refreshCurrentTab
@@ -510,6 +512,14 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         console.log('loaded wirecenter data')
         $scope.metadata = response.metadata
       }
+    })
+  }
+
+  function loadRouteOpportunities () {
+    var url = `/financial_profile/${$scope.plan.id}/routeopportunities`
+    $http.get(url).success((response) => {
+      $scope.routeOpportunities = response
+      console.log('response', response)
     })
   }
 
