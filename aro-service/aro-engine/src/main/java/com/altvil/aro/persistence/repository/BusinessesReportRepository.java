@@ -57,10 +57,10 @@ public class BusinessesReportRepository {
     public Collection<BusinessReportElement> getBuildingsCountsByBusinessesSizes(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
         return Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
-                    Query query = jdbcTemplate.createNativeQuery("select bs.size_name,  cast (coalesce(count(1),0) as double PRECISION ) from \n" +
+                    Query query = jdbcTemplate.createNativeQuery("select bs.size_name,  cast(coalesce(count(building.location_id),0) as double precision) from " +
                             "(\n" +
                             "    select loc.id as location_id, sum(biz.number_of_employees) building_employees\n" +
-                            "    FROM select * from (\n" +
+                            "    FROM  (\n" +
                             "    select l.* from locations l\n" +
                             "    JOIN client.fiber_route fr ON\n" +
                             "\tfr.plan_id = :planId\n" +
@@ -72,9 +72,10 @@ public class BusinessesReportRepository {
                             "    AND biz.source = :source \n" +
                             "    group by 1\n" +
                             "    ) building\n" +
-                            " inner join client.businesses_sizes bs \n" +
+                            " right join client.businesses_sizes bs \n" +
                             "on bs.min_value <= building.building_employees and bs.max_value >= building.building_employees\n" +
-                            "group by bs.size_name\n");
+                            "group by bs.size_name\n" +
+                            "\n");
                     query.setParameter("threshold", threshold);
                     query.setParameter("planId", planId);
                     query.setParameter("source", locationSource);
