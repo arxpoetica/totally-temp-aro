@@ -165,7 +165,7 @@ def provision_aro_stack(opsworks_stack_id=None,
     data_sources = [
             { 'Type': 'RdsDbInstance',
               'Arn': rds_instance_arn,
-              'DatabaseName': db.get('name') or 'cmo' }
+              'DatabaseName': db.get('name') or 'aro' }
         ] if db else []
     app_response = opsworks_client.create_app(
         StackId=opsworks_stack_id,

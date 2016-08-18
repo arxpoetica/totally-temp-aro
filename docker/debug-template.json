@@ -97,11 +97,6 @@
       "Description" : "Project or billing code used to tag resources created by this template",
       "Default" : "AIT:ARO"
     },
-    "DBInstanceType" : {
-      "Type" : "String",
-      "Description" : "Image type for the PostGIS/PGRouting database instance",
-      "Default" : "db.m4.xlarge"
-    },
     "DBVolumeSize" : {
       "Type" : "String",
       "Description" : "size of extra db volume",
@@ -129,21 +124,6 @@
       "Type" : "String",
       "Default" : "aro",
       "Description" : "Passes through as ARO_CLIENT env key to determine which configuration to run in the application"
-    },
-    "PgrDbInstanceType" : {
-      "Type" : "String",
-      "Default" : "m4.xlarge"
-    },
-    "PgrDbImageId" : {
-      "Type" : "String",
-      "Default" : "ami-e9802a82",
-      "Description" : "AMI ID for PG_Routing enabled database"
-    },
-    "PgrFlag" : {
-      "Type" : "String",
-      "AllowedValues" : [ "yes", "no" ],
-      "Default" : "no",
-      "Description" : "Use PG_Routing enabled database?"
     },
     "RdsFlag" : {
       "Type" : "String",
@@ -214,15 +194,6 @@
   },
 
   "Conditions" : {
-    "PgrEnabled" : {
-      "Fn::Equals" : [ {"Ref" : "PgrFlag" }, "yes" ]
-    },
-    "PgrDisabled" : {
-      "Fn::Equals" : [ {"Ref" : "PgrFlag" }, "no" ]
-    },
-    "Debugging" : {
-      "Fn::Equals" : [ { "Ref" : "PgrFlag" }, "purple" ]
-    },
     "RdsEnabled" : {
       "Fn::Equals" : [ { "Ref" : "RdsFlag" }, "yes" ]
     }
@@ -390,62 +361,6 @@
       }
     },
 
-    "PgrDbSecurityGroup" : {
-      "Type" : "AWS::EC2::SecurityGroup",
-      "Condition" : "PgrEnabled",
-      "Properties" : {
-        "GroupDescription" : { "Fn::Join" : [ "", [ "S-ARO-", { "Ref" : "EnvSlug" } , "PGR Database Instances" ] ] },
-        "SecurityGroupIngress" : [
-          {
-            "SourceSecurityGroupId" : { "Ref" : "AppSecurityGroup" },
-            "IpProtocol" : "tcp",
-            "FromPort" : "5432",
-            "ToPort" : "5432" 
-          },
-          {
-            "CidrIp" : "0.0.0.0/0",
-            "IpProtocol" : "tcp",
-            "FromPort" : "22",
-            "ToPort" : "22" 
-          }
-        ],
-        "VpcId" : { "Ref" : "VpcId" },
-        "Tags" : [
-          { "Key" : "Name", "Value" : { "Fn::Join" : [ "", [ "S-ARO-", { "Ref" : "EnvSlug" } , "-PGRDB" ] ] } },
-          { "Key" : "Project" , "Value" : { "Ref" : "ProjectTag" } }
-        ]
-      }
-    },
-
-
-    "PgrDbInstance" : {
-      "Type" : "AWS::EC2::Instance",
-      "Condition" : "PgrEnabled",
-      "Properties" : {
-        "ImageId" : { "Ref" : "PgrDbImageId" },
-        "InstanceType" : { "Ref" : "PgrDbInstanceType" },
-        "AvailabilityZone" : "us-east-1b",
-        "KeyName" : { "Ref" : "SshKeyName" },
-        "SecurityGroupIds" : [ { "Ref" : "PgrDbSecurityGroup" } ],
-        "SubnetId" : { "Fn::GetAtt" : [ "SharedNetworkInfo", "AppSubnetB" ] },
-        "Tags" : [
-          { "Key" : "Name", "Value" : { "Fn::Join" : [ "", [ "S-ARO-", { "Ref" : "EnvSlug" }, "-DB" ] ] } },
-          { "Key" : "Project" , "Value" : { "Ref" : "ProjectTag" } }
-        ],
-        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
-             "#!/bin/bash -xe\n",
-             
-             "sudo -u postgres psql -d ", { "Ref" : "DBName" }, " -c \"ALTER ROLE aro PASSWORD '", { "Ref" : "DBPassword" }, "';\"\n",
-             "sudo -u postgres psql -d ", { "Ref" : "DBName" }, " -c \"ALTER ROLE aro SUPERUSER;\"\n",
-             "sudo -u postgres psql -d ", { "Ref" : "DBName" }, " -c \"CREATE EXTENSION postgis;\"\n",
-             "sudo -u postgres psql -d ", { "Ref" : "DBName" }, " -c \"CREATE EXTENSION fuzzystrmatch;\"\n",
-             "sudo -u postgres psql -d ", { "Ref" : "DBName" }, " -c \"CREATE EXTENSION pgrouting;\"\n",
-
-             "echo \"This sorta worked\" > firstrun.txt\n"
-        ]]}}
-      }
-    },
-
     "DB" : {
       "Type" : "AWS::RDS::DBInstance",
       "Condition" : "RdsEnabled",
@@ -508,50 +423,6 @@
       }
     },
 
-    "PgrDbServerElasticIP" : {
-      "Type" : "AWS::EC2::EIP",
-      "Condition" : "PgrEnabled",
-      "Properties" : {
-          "Domain" : "vpc",
-          "InstanceId" : { "Ref" : "PgrDbInstance" }
-      }
-    },
-
-    "PgrDbExternalDnsRecrordSet" : {
-      "Type" : "AWS::Route53::RecordSet",
-      "Condition" : "PgrEnabled",
-      "Properties" : {
-        "HostedZoneId" : { "Fn::FindInMap" : [ "DNSZoneMap", "Staging", "Public" ] },
-        "Name" : { "Fn::Join" : [ "", [ "db.", { "Ref" : "ClientSlug" }, ".aro.staging.app.altvil.com" ] ] },
-        "Type" : "A",
-        "TTL" : "300",
-         "ResourceRecords":[  
-          {  
-            "Ref" : "PgrDbServerElasticIP"
-          }
-        ]
-      }
-    },
-
-    "PgrDbInternalDnsRecordSet" : {
-      "Type" : "AWS::Route53::RecordSet",
-      "Condition" : "PgrEnabled",
-      "Properties" : {
-        "HostedZoneId" : { "Fn::FindInMap" : [ "DNSZoneMap", "Staging", "Private" ] },
-        "Name" : { "Fn::Join" : [ "", [ "db.", { "Ref" : "ClientSlug" }, ".aro.staging.app.altvil.com" ] ] },
-        "Type" : "A",
-        "TTL" : "300",
-         "ResourceRecords":[  
-          {  
-            "Fn::GetAtt":[  
-              "PgrDbInstance",
-              "PrivateIp"
-            ]
-          }
-        ]
-      }
-    },
-
     "StackRole" : {
       "Type" : "AWS::IAM::Role",
       "Properties" : {
@@ -566,34 +437,6 @@
           } ]
         },
         "Path" : "/"
-      }
-    },
-
-    "StackS3Policy": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "Roles": [ { "Ref": "StackRole" } ],
-        "PolicyName": { "Fn::Join": [ "", [ "S-ARO-", { "Ref": "EnvSlug" }, "-S3-POLICY" ] ] },
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [ {
-            "Effect": "Allow",
-            "Action": [
-              "s3:DeleteObject",
-              "s3:GetObject",
-              "s3:PutObject"
-            ],
-            "Resource": [ "arn:aws:s3:::public.aro/*" ]
-          },
-          {
-            "Effect": "Allow",
-            "Action": [
-              "s3:ListBucket"
-            ],
-            "Resource": [ "arn:aws:s3:::public.aro" ]
-          }
-           ]
-        }
       }
     },
 
@@ -713,12 +556,9 @@
       "Type": "AWS::OpsWorks::ElasticLoadBalancerAttachment",
       "Properties": {
         "ElasticLoadBalancerName": { "Ref": "LoadBalancer" },
-        "LayerId": { "Ref": "AppLayer" }
+        "LayerId": { "Ref": "DockerComposeLayer" }
       }
     },
-
-    
-
   },
 
   "Outputs" : {

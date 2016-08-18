@@ -42,9 +42,10 @@ with open('debug-template.json', 'r') as template_file:
 branch_name = os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
 build_num = os.environ['CIRCLE_BUILD_NUM']
 etl_image_version = os.environ.get('ARO_ETL_VERSION')
-nginx_image_version = 3 # current
+nginx_image_version = 5 # current
+aro_service_image_version = os.environ.get('ARO_SERVICE_VERSION')
 domain_name = os.environ.get('ARO_APP_CLIENT_DOMAIN')
-aro_client = os.environ.get('ARO_CLIENT')
+aro_client = os.environ.get('ARO_CLIENT') or 'aro'
 env_slug = branch_name
 name_component = os.environ.get('ARO_APP_NAME_COMPONENT') if environment == 'PROD' else branch_name
 decrypt_key = os.environ.get('ARO_APP_DECRYPT_KEY')
@@ -165,8 +166,9 @@ def _set_environment():
     return [{ 'Key': 'app_container_tag', 'Value': str(build_num), 'Secure': False },
             { 'Key': 'etl_container_tag', 'Value': str(etl_image_version), 'Secure': False },
             { 'Key': 'nginx_container_tag', 'Value': str(nginx_image_version), 'Secure': False },
-            #{ 'Key': 'decrypt_key', 'Value': str(decrypt_key), 'Secure': True },
-            #{ 'Key': 'token_key', 'Value': str(token_key), 'Secure': True },
+            { 'Key': 'aro_service_container_tag', 'Value': str(aro_service_image_version), 'Secure': False },
+            # { 'Key': 'database_url', 'Value': str(database_url), 'Secure': True },
+            { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
             { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
             { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False }]
 
