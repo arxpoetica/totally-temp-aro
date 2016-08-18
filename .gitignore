@@ -1,3 +1,5 @@
+docker/set_debug_env.sh
+
 #global file patterns
 
 *.pyc

@@ -9,7 +9,7 @@ from boto3.session import Session
 import os
 import string
 import sys
-from trustack import stack
+from arostack import stack
 import pprint
 import argparse
 
@@ -25,9 +25,9 @@ if action not in {'CREATE', 'UPDATE'}:
     raise StandardError('%s is not a valid action to take.' % action)
 
 PROJECT_TAG = 'AIT:ARO'
-PROJECT_BASE_NAME = {'QA': 'S-CMO-APP-QA-',
-                     'PRODUCTION': 'P-CMO-APP-',
-                     'STAGING': 'S-ARO-APP-'}
+PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-',
+                     'PRODUCTION': 'P-ARO-',
+                     'STAGING': 'S-ARO-'}
 SERVICE_TAG = 'aro-app'
 TEMPLATE_URLS = {
     'QA': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
@@ -35,17 +35,21 @@ TEMPLATE_URLS = {
     'PRODUCTION': 'https://cf-templates.altvil.com.s3.amazonaws.com/P-ARO.template'
 }
 
+with open('debug-template.json', 'r') as template_file:
+    TEMPLATE_BODY=template_file.read()
+
 # Config from environment
 branch_name = os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
 build_num = os.environ['CIRCLE_BUILD_NUM']
-data_image_version = os.environ.get('ARO_APP_DATA_VERSION')
-nginx_image_version = 5 # current
+etl_image_version = os.environ.get('ARO_ETL_VERSION')
+nginx_image_version = 3 # current
 domain_name = os.environ.get('ARO_APP_CLIENT_DOMAIN')
-client_slug = os.environ.get('ARO_APP_CLIENT_SLUG') if environment == 'PROD' else 'altvil'
+aro_client = os.environ.get('ARO_CLIENT')
+env_slug = branch_name
 name_component = os.environ.get('ARO_APP_NAME_COMPONENT') if environment == 'PROD' else branch_name
 decrypt_key = os.environ.get('ARO_APP_DECRYPT_KEY')
 token_key = os.environ.get('ARO_APP_TOKEN_KEY')
-db_user = os.environ.get('ARO_APP_DB_USER') or 'cmo'
+db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
 docker_pass = os.environ['DOCKER_PASS']
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
@@ -65,27 +69,31 @@ iam_client = boto3.client('iam', region_name='us-east-1')
 cloudwatch_client = boto3.client('cloudwatch', region_name='us-east-1')
 
 def create_new_stack():
-    """Create a new QA CloudFormation stack"""
+    """Create a new Staging CloudFormation stack"""
     parameters = {
-        'IfAttachDB': 'True',
-        'IfAttachCache': 'False',
+        'RdsFlag': 'yes',
+        'PgrFlag': 'no',
         'DBUsername': db_user,
         'DBPassword': db_pass,
-        'StackBranchName': branch_name,
-        'StackDomainName': branch_name + '.aro',
-        'StackContainerVersion': build_num,
-        'GithubSshKey': github_ssh_key,
-        'DockerRegistryPassword': docker_pass,
-        'ProjectBaseName': PROJECT_BASE_NAME[environment],
-        'ServiceTag': SERVICE_TAG,
-        'DeployRecipe': 'aro_app_compose',
-        'ExtraInternalPort': '8088'
-        
+        # 'StackBranchName': branch_name,
+        # 'StackDomainName': branch_name + '.aro',
+        # 'StackContainerVersion': build_num,
+        # 'GithubSshKey': github_ssh_key,
+        # 'DockerRegistryPassword': docker_pass,
+        # 'ProjectBaseName': PROJECT_BASE_NAME[environment],
+        # 'ServiceTag': SERVICE_TAG,
+        # 'DeployRecipe': 'aro_app_compose',
+        # 'ExtraInternalPort': '8088'
+        'ClientSlug': name_component,
+        'EnvSlug': env_slug,
+        'ProjectTag': PROJECT_TAG,
+        'AroClient': aro_client,
+        'GithubSshKey': github_ssh_key
     }
     if environment == 'PRODUCTION':
         parameters.update({
             'ClientDomainName': domain_name,
-            'StackDomainName': domain_name + '.cmo',
+            'StackDomainName': domain_name + '.aro',
             'ClientSlug': client_slug,
             'NameComponent': name_component
         })
@@ -96,7 +104,7 @@ def create_new_stack():
         proceed = True
 
     if proceed:
-        return stack.create_cmo_cfn_stack(
+        return stack.create_aro_cfn_stack(
             cloudformation_stack_name,
             environment=environment,
             parameters=parameters,
@@ -106,7 +114,8 @@ def create_new_stack():
                 'Branch': branch_name,
                 'Build': build_num
             },
-            template_urls=TEMPLATE_URLS,
+            template_body=TEMPLATE_BODY,
+            #template_urls=TEMPLATE_URLS,
             cloudformation_client=cloudformation_client
         )
     else:
@@ -115,14 +124,14 @@ def create_new_stack():
 
 def provision_stack(cloudformation_stack):
     """Provision and start a newly created QA CloudFormation stack."""
-    real_name_component = branch_name if environment == 'QA' else name_component
-    stack.provision_cmo_stack(
+    real_name_component = branch_name if environment == 'staging' else name_component
+    stack.provision_aro_stack(
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
         opsworks_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'Layer'),
-        internal_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ExtraInternalLayer'),
+        # internal_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ExtraInternalLayer'),
         rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance'),
         environment=environment,
-        name='CMO-APP',
+        name='ARO-APP',
         name_component=real_name_component,
         db={'user': db_user, 'pass': db_pass},
         docker_pass=docker_pass,
@@ -131,7 +140,7 @@ def provision_stack(cloudformation_stack):
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='c4.xlarge'
+        instance_type='m4.large'
     )
 
 
@@ -142,7 +151,7 @@ def update_stack(outputs):
     elb_alarm = cloudformation_stack_name + '-ELB-5XX-alarm'
     cloudwatch_client.disable_alarm_actions(AlarmNames=[http_alarm, elb_alarm])
     # deploy
-    stack.deploy_cmo_stack(
+    stack.deploy_aro_stack(
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
         docker_pass=docker_pass,
         environment_vars=_set_environment(),
@@ -154,12 +163,14 @@ def update_stack(outputs):
 def _set_environment():
     """ returns a list of hashes of environment variables """
     return [{ 'Key': 'app_container_tag', 'Value': str(build_num), 'Secure': False },
-            { 'Key': 'data_container_tag', 'Value': str(data_image_version), 'Secure': False },
+            { 'Key': 'etl_container_tag', 'Value': str(etl_image_version), 'Secure': False },
             { 'Key': 'nginx_container_tag', 'Value': str(nginx_image_version), 'Secure': False },
-            { 'Key': 'decrypt_key', 'Value': str(decrypt_key), 'Secure': True },
-            { 'Key': 'token_key', 'Value': str(token_key), 'Secure': True },
-            { 'Key': 'client_slug', 'Value': str(client_slug), 'Secure': False },
+            #{ 'Key': 'decrypt_key', 'Value': str(decrypt_key), 'Secure': True },
+            #{ 'Key': 'token_key', 'Value': str(token_key), 'Secure': True },
+            { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
             { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False }]
+
+
 
 
 if action == 'CREATE':
