@@ -22,6 +22,10 @@ public class BusinessesNearFiberDataEndPoint {
     public List<BusinessDataByDistance> getBuildingsCountsByBusinessesSizes(@RequestBody BusinessesReportRequest request){
         return service.getBuildingsCountsByBusinessesSizes(request);
     }
+    @RequestMapping(value = "/businesses/getBusinessesCountsBySizes", method = RequestMethod.POST)
+    public List<BusinessDataByDistance> getBusinessesCountsBySizes(@RequestBody BusinessesReportRequest request){
+        return service.getBusinessesCountsBySizes(request);
+    }
 
 
 }

@@ -86,5 +86,35 @@ public class BusinessesReportRepository {
                 .collect(Collectors.toList());
     }
 
+    public Collection<BusinessReportElement> getBusinessesCountsBySizes(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
+        return Arrays.stream(distanceThresholds)
+                .mapToObj(threshold ->{
+                    Query query = jdbcTemplate.createNativeQuery("select bs.size_name,  cast(coalesce(count(businesses.biz_id),0) as double precision) from \n" +
+                            "(\n" +
+                            "    select biz.id as biz_id, biz.number_of_employees \n" +
+                            "    FROM  (\n" +
+                            "    select distinct biz.id from aro.businesses biz\n" +
+                            "    JOIN client.fiber_route fr ON\n" +
+                            "\tfr.plan_id = :planId\n" +
+                            "\tAND   ST_Contains( cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry),biz.geom)\n" +
+                            "\t AND coalesce(biz.monthly_recurring_cost,0) >= :mrc\n" +
+                            "\tAND biz.source = :source \n" +
+                            "\t) biz_ids\n" +
+                            "    join aro.businesses biz\n" +
+                            "    on biz_ids.id = biz.id\n" +
+                            "    ) businesses \n" +
+                            " right join client.businesses_sizes bs \n" +
+                            "on bs.min_value <= businesses.number_of_employees and bs.max_value >= businesses.number_of_employees\n" +
+                            "group by bs.size_name");
+                    query.setParameter("threshold", threshold);
+                    query.setParameter("planId", planId);
+                    query.setParameter("source", locationSource);
+                    query.setParameter("mrc", mrcThreshold);
+                    List<Object[]> result = (List<Object[]>) query.getResultList();
+                    return result.stream().map( arr -> new BusinessReportElement(threshold, (String)arr[0], (Double)arr[1]) );
+                }).flatMap(Function.identity())
+                .collect(Collectors.toList());
+    }
+
 
 }
