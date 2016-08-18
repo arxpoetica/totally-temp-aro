@@ -46,7 +46,7 @@ test:
 
 deployment:
   staging:
-    branch: [none]
+    branch: [dockerize]
     owner: AIT
     commands:
       - docker push ${IMAGE_TAG}
