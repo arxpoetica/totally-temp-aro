@@ -3,12 +3,13 @@ package com.altvil.aro.service.optimization.impl;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Future;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.service.optimization.OptimizationPlannerService;
+import com.altvil.aro.service.optimization.ExpandedRoutingOptimization;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.impl.type.MasterOptimizer;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
@@ -20,7 +21,7 @@ import com.altvil.enumerations.OptimizationType;
 
 @Service
 public class NewOptimizationPlannerServiceImpl implements
-		OptimizationPlannerService {
+		ExpandedRoutingOptimization {
 
 	@Autowired
 	private OptimizationExecutorService optimizationExecutorService;

@@ -2,15 +2,15 @@ package com.altvil.netop.plan;
 
 public class SelectedRegion {
 
-	private RegionType regionType;
+	private AroAnalysisRegionType regionType;
 	private String id;
 	private String wkt;
 
-	public RegionType getRegionType() {
+	public AroAnalysisRegionType getRegionType() {
 		return regionType;
 	}
 
-	public void setRegionType(RegionType regionType) {
+	public void setRegionType(AroAnalysisRegionType regionType) {
 		this.regionType = regionType;
 	}
 

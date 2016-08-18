@@ -3,18 +3,18 @@ package com.altvil.aro.service.optimization.spatial;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class SpatialSelection implements Serializable {
+public class AnalysisSelection implements Serializable {
 
-	private SpatialRegionType spatialRegionType;
+	private SpatialAnalysisType spatialRegionType;
 	private int spatialId;
 	
-	public SpatialSelection(SpatialRegionType spatialRegionType, int spatialId) {
+	public AnalysisSelection(SpatialAnalysisType spatialRegionType, int spatialId) {
 		super();
 		this.spatialRegionType = spatialRegionType;
 		this.spatialId = spatialId;
 	}
 
-	public SpatialRegionType getSpatialRegionType() {
+	public SpatialAnalysisType getSpatialRegionType() {
 		return spatialRegionType;
 	}
 

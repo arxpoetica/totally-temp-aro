@@ -3,38 +3,31 @@ package com.altvil.aro.model;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.DiscriminatorOptions;
 
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.MultiPolygon;
 
 @Entity
-@Inheritance
-@DiscriminatorColumn(name = "service_type")
-@DiscriminatorOptions(force = true)
-@Table(name = "wirecenters", schema = "client")
-public class WireCenter extends ComparableModel {
+@Table(name = "analysis_area", schema = "client")
+public class AnalysisArea extends ComparableModel {
 
 	private Integer id;
-	
-	private ServiceLayer layer;
+
+	private AnalysisLayer layer;
 	private String sourceId;
 	private String code;
 
 	private String state;
-	
+
 	private MultiPolygon geog;
 	private MultiPolygon geom;
 
@@ -55,8 +48,7 @@ public class WireCenter extends ComparableModel {
 		this.id = id;
 	}
 
-
-	@Column(name="source_id")
+	@Column(name = "source_id")
 	public String getSourceId() {
 		return sourceId;
 	}
@@ -64,14 +56,14 @@ public class WireCenter extends ComparableModel {
 	public void setSourceId(String sourceId) {
 		this.sourceId = sourceId;
 	}
-	
+
 	@ManyToOne
-	@JoinColumn(name = "service_layer_id", nullable = false)
-	public ServiceLayer getLayer() {
+	@JoinColumn(name = "analysis_layer_id", nullable = false)
+	public AnalysisLayer getAnalysisLayer() {
 		return layer;
 	}
 
-	public void setLayer(ServiceLayer layer) {
+	public void setAnalysisLayer(AnalysisLayer layer) {
 		this.layer = layer;
 	}
 

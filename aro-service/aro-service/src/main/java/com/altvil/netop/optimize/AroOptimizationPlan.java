@@ -9,8 +9,7 @@ import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.plan.SelectedRegion;
 
 public class AroOptimizationPlan {
-
-	private int serviceAreaLayer = 1;
+	
 	private long planId = 0;
 
 	private OptimizationType algorithm;
@@ -20,11 +19,26 @@ public class AroOptimizationPlan {
 	private FinancialConstraints financialConstraints;
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
+	
+	private List<Integer> processLayers = new ArrayList<Integer>();
 	private List<SelectedRegion> selectedRegions = new ArrayList<>();
 
 	public long getPlanId() {
 		return planId;
 	}
+	
+
+	public List<Integer> getProcessLayers() {
+		return processLayers;
+	}
+
+
+
+	public void setProcessLayers(List<Integer> processLayers) {
+		this.processLayers = processLayers;
+	}
+
+
 
 	public void setPlanId(long planId) {
 		this.planId = planId;

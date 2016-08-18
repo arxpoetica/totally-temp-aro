@@ -1,7 +1,8 @@
 package com.altvil.netop.optimize;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -24,6 +25,8 @@ import com.altvil.aro.service.optimization.constraints.IrrConstraints;
 import com.altvil.aro.service.optimization.constraints.NpvConstraints;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
+import com.altvil.aro.service.optimization.spatial.AnalysisSelection;
+import com.altvil.aro.service.optimization.spatial.SpatialAnalysisType;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.enumerations.OptimizationType;
@@ -54,16 +57,18 @@ public class NewOptimizeEndPoint {
 
 	}
 	
-	private Set<Integer> toSelectedWireCenters(
+	private Collection<AnalysisSelection> toSelectedWireCenters(
 			Collection<SelectedRegion> selectedRegions) {
 
-		Set<Integer> result = new HashSet<>();
+		List<AnalysisSelection> result = new ArrayList<>();
 
 		if (selectedRegions != null) {
 			for (SelectedRegion sr : selectedRegions) {
 				switch (sr.getRegionType()) {
+				case ANALYSIS_AREA :
+					result.add(new AnalysisSelection(SpatialAnalysisType.ANALYSIS_AREA, Integer.parseInt(sr.getId())));
 				case WIRECENTER:
-					result.add(Integer.parseInt(sr.getId()));
+					result.add(new AnalysisSelection(SpatialAnalysisType.WIRECENTER, Integer.parseInt(sr.getId())));
 					break;
 				default:
 				}
@@ -122,14 +127,14 @@ public class NewOptimizeEndPoint {
 
 		return MasterOptimizationRequest
 				.build()
-				.setServiceLayerId(plan.getServiceAreaLayer())
+				.setProcessingLayers(plan.getProcessLayers())
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
 				.setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())
 				.setLocationEntities(toMask(plan.getLocationTypes()))
-				.setWirecenters(
-						toSelectedWireCenters(plan.getSelectedRegions()))
-				.setOptimizationMode(plan.getOptimizationMode()).build();
+				.setOptimizationMode(plan.getOptimizationMode())
+				.setAnalysisSelections(toSelectedWireCenters(plan.getSelectedRegions()))
+				.build();
 
 	}
 

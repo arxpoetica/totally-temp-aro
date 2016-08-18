@@ -8,15 +8,15 @@ import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.OptimizationRequest;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
-import com.altvil.aro.service.optimization.spatial.SpatialSelection;
+import com.altvil.aro.service.optimization.spatial.AnalysisSelection;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.OptimizationMode;
 
 public class MasterOptimizationRequest extends OptimizationRequest {
 
-	private Collection<SpatialSelection> wireCenters;
+	private Collection<AnalysisSelection> analysisSelections;
 	private final OptimizationMode optimizationMode;
-	private int serviceLayerId;
+	private Collection<Integer> processingLayers;
 
 	public static Builder build() {
 		return new Builder();
@@ -26,12 +26,13 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 		private long planId;
 		private int year = 2015;
-		private int serviceLayerId ;
+		private Collection<Integer> processingLayers;
+		private Collection<AnalysisSelection> analysisSelections;
+		
 		private Set<LocationEntityType> locationEntities;
 		private FiberNetworkConstraints fiberNetworkConstraints;
 		private OptimizationConstraints optimizationConstraints;
 		private LocationSelectionMode locationSelectionMode = LocationSelectionMode.SELECTED_LOCATIONS;
-		private Collection<SpatialSelection> wireCenters;
 		private OptimizationMode optimizationMode;
 
 		public Builder setOptimizationConstraints(
@@ -39,10 +40,10 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 			this.optimizationConstraints = constraints;
 			return this;
 		}
-		
-		public Builder setServiceLayerId(int serviceLayerId) {
-			this.serviceLayerId = serviceLayerId;
-			return this ;
+
+		public Builder setProcessingLayers(Collection<Integer> processingLayers) {
+			this.processingLayers = processingLayers;
+			return this;
 		}
 
 		public Builder setFiberNetworkConstraints(
@@ -51,9 +52,11 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 			return this;
 		}
 
-		public Builder setWirecenters(Set<SpatialSelection> spatialSelections) {
-			this.wireCenters = wireCenters;
-			if (this.wireCenters != null && this.wireCenters.size() > 0) {
+		public Builder setAnalysisSelections(
+				Collection<AnalysisSelection> analysisSelections) {
+			this.analysisSelections = analysisSelections;
+			if (this.analysisSelections != null
+					&& this.analysisSelections.size() > 0) {
 				this.locationSelectionMode = LocationSelectionMode.ALL_LOCATIONS;
 			}
 			return this;
@@ -83,9 +86,9 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		}
 
 		public MasterOptimizationRequest build() {
-			return new MasterOptimizationRequest(serviceLayerId, optimizationConstraints,
-					fiberNetworkConstraints, createDataRequest(), wireCenters,
-					optimizationMode);
+			return new MasterOptimizationRequest(processingLayers,
+					optimizationConstraints, fiberNetworkConstraints,
+					createDataRequest(), analysisSelections, optimizationMode);
 		}
 
 		public Builder setOptimizationMode(OptimizationMode optimizationMode) {
@@ -95,23 +98,27 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 	}
 
-	public MasterOptimizationRequest(
-			int serviceLayerId,
+	public MasterOptimizationRequest(Collection<Integer> processingLayers,
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
-			Collection<SpatialSelection> wireCenters, OptimizationMode optimizationMode) {
+			Collection<AnalysisSelection> analysisLayers,
+			OptimizationMode optimizationMode) {
 		super(optimizationConstraints, constraints, request);
-		this.serviceLayerId = serviceLayerId ;
-		this.wireCenters = wireCenters;
+		this.processingLayers = processingLayers;
+		this.analysisSelections = analysisLayers;
 		this.optimizationMode = optimizationMode;
 	}
 
-	public int getServiceLayerId() {
-		return serviceLayerId;
+	public Collection<AnalysisSelection> getAnalysisLayers() {
+		return analysisSelections;
 	}
 
-	public Collection<SpatialSelection> getWireCenters() {
-		return wireCenters;
+	public Collection<Integer> getProcessingLayers() {
+		return processingLayers;
+	}
+
+	public Collection<AnalysisSelection> getWireCenters() {
+		return analysisSelections;
 	}
 
 	public OptimizationMode getOptimizationMode() {
