@@ -61,7 +61,7 @@ public class BusinessesReportRepository {
                             "(\n" +
                             "    select loc.id as location_id, sum(biz.number_of_employees) building_employees\n" +
                             "    FROM  (\n" +
-                            "    select l.* from locations l\n" +
+                            "    select distinct l.id from locations l\n" +
                             "    JOIN client.fiber_route fr ON\n" +
                             "\tfr.plan_id = :planId\n" +
                             "\tAND   ST_Contains( cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry),l.geom)\n" +
