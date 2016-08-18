@@ -37,6 +37,12 @@ public class BusinesessNearFiberReportService {
 
     }
 
+    public String getBusinesses(BusinessesReportRequest request) {
+
+        return repository.getBusinesses(request.getPlanId(), request.getDistanceThresholds(), request.getLocationSource(), request.getMrcThreshold());
+
+
+    }
     private List<BusinessDataByDistance> aggregateElements(Collection<BusinessReportElement> elements) {
         return elements.stream()
                 .map(element -> new BusinessDataByDistance(element.getDistance(), element.getKey(), element.getValue()))
