@@ -8,8 +8,8 @@ var request = test_utils.agent
 chai.use(require('chai-string'))
 
 describe('User', () => {
-  before(() => test_utils.logout_app())
-  after(() => test_utils.login_app())
+  before(() => test_utils.logoutApp())
+  after(() => test_utils.loginApp())
 
   describe('#register() and #login()', () => {
     var email = 'user_' +

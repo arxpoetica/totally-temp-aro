@@ -5,29 +5,27 @@ var request = test_utils.request
 
 describe('Location', () => {
   describe('#findAll()', () => {
-    it('should return a GeoJSON FeatureCollection', (done) => {
+    it('should return an empty response if no filters are sent', (done) => {
       request
         .get('/locations/0')
-        .query(test_utils.test_viewport())
+        .query(test_utils.testViewport())
         .accept('application/json')
         .end((err, res) => {
           if (err) return done(err)
           var output = res.body
           expect(res.statusCode).to.be.equal(200)
           expect(output.feature_collection).to.have.property('type', 'FeatureCollection')
-          expect(output.feature_collection.features).to.have.length.above(0)
-
-          var first_feature = output.feature_collection.features[0]
-          expect(first_feature.geometry.type).to.equal('Point')
-          expect(first_feature.properties.id).to.a('number')
+          expect(output.feature_collection.features.length).to.be.equal(0)
           done()
         })
     })
 
-    it('should return only businesses', (done) => {
+    it('should return only large businesses', (done) => {
       request
         .get('/locations/0')
-        .query(test_utils.test_viewport({ type: 'businesses' }))
+        .query(test_utils.testViewport({
+          business_categories: ['large']
+        }))
         .accept('application/json')
         .end((err, res) => {
           if (err) return done(err)
@@ -46,7 +44,9 @@ describe('Location', () => {
     it('should return only households', (done) => {
       request
         .get('/locations/0')
-        .query(test_utils.test_viewport({ type: 'households' }))
+        .query(test_utils.testViewport({
+          household_categories: ['small']
+        }))
         .accept('application/json')
         .end((err, res) => {
           if (err) return done(err)
@@ -64,7 +64,7 @@ describe('Location', () => {
   })
 
   describe('#show_information()', () => {
-    var location_id = 1399894
+    var location_id = 186391
 
     it('should return information of the given location', (done) => {
       request
@@ -75,19 +75,11 @@ describe('Location', () => {
           if (err) return done(err)
           var output = res.body
           expect(res.statusCode).to.be.equal(200)
-          expect(output.location_id).to.equal('1399894')
-          expect(output.number_of_households).to.equal(23)
+          expect(output.location_id).to.equal('186391')
+          expect(output.number_of_households).to.equal(0)
           expect(output.number_of_businesses).to.equal(1)
           expect(output.business_install_costs).to.be.above(0)
           expect(output.household_install_costs).to.be.above(0)
-
-          expect(output.customers_businesses_total).to.be.a('number')
-          expect(output.customers_households_total).to.be.a('number')
-          expect(output.customer_types).to.be.an('array')
-          expect(output.customer_types[0]).to.be.an('object')
-          expect(output.customer_types[0].name).to.be.a('string')
-          expect(output.customer_types[0].households).to.be.a('number')
-          expect(output.customer_types[0].businesses).to.be.a('number')
 
           done()
         })
@@ -167,7 +159,7 @@ describe('Location', () => {
         .end((err, res) => {
           if (err) return done(err)
           var output = res.body
-          expect(output.length).to.equal(4)
+          expect(output.length).to.equal(1)
           var number_of_businesses = output.length
           var business_to_check = output[Math.floor(Math.random() * number_of_businesses) + 0]
           expect(business_to_check.id).to.be.a('number')

@@ -2,7 +2,8 @@
 var expect = require('chai').expect
 var models = require('../../models')
 var _ = require('underscore')
-var request = require('./test_utils').request
+var test_utils = require('./test_utils')
+var request = test_utils.request
 
 describe('MarketSize', () => {
   var filters
@@ -49,23 +50,25 @@ describe('MarketSize', () => {
       var area = {
         name: 'Boston, MA, USA',
         centroid: {
-          lat: 42.3600825,
-          lng: -71.0588801
+          'type': 'Point',
+          'coordinates': [-71.0588801, 42.3600825]
         },
         bounds: {
-          northeast: {
-            lat: 42.3988669,
-            lng: -70.9232011
-          },
-          southwest: {
-            lat: 42.22788,
-            lng: -71.191113
-          }
+          'type': 'Polygon',
+          'coordinates': [
+            [
+              [-70.9232011, 42.3988669],
+              [-70.9232011, 42.2278801],
+              [-71.191113, 42.2278801],
+              [-71.191113, 42.3988669],
+              [-70.9232011, 42.3988669]
+            ]
+          ]
         }
       }
       return models.NetworkPlan.createPlan('Untitled plan', area)
-        .then((route) => {
-          plan_id = route.id
+        .then((plan) => {
+          plan_id = plan.id
 
           var source = '3'
           var target = '40103873'
@@ -111,20 +114,19 @@ describe('MarketSize', () => {
 
     it('should return the market size calculation for a route', (done) => {
       var query = {
-        type: 'route'
+        type: 'all'
       }
       request
         .get('/market_size/plan/' + plan_id + '/calculate')
         .accept('application/json')
-        .query(query)
+        .query(test_utils.testViewport(query))
         .end((err, res) => {
           if (err) return done(err)
           var output = res.body
           expect(output).to.be.an('object')
           expect(output.market_size).to.be.an('array')
-          expect(output.market_size).length.to.be.above(0)
-          expect(output.market_size[0].year).to.be.an('number')
-          expect(output.market_size[0].total).to.be.a('number')
+          expect(output.fair_share).to.be.an('array')
+          expect(output.market_size_existing).to.be.an('array')
 
           var current = _.findWhere(output.market_size, { year: new Date().getFullYear() })
           total_current_year_no_filters = current.total
@@ -144,13 +146,13 @@ describe('MarketSize', () => {
 
     it('should return the market size calculation for a given area', (done) => {
       var query = {
-        type: 'boundary',
+        type: 'all',
         boundary: boundary
       }
       request
         .get('/market_size/plan/' + plan_id + '/calculate')
         .accept('application/json')
-        .query(query)
+        .query(test_utils.testViewport(query))
         .end((err, res) => {
           if (err) return done(err)
           var output = res.body
@@ -168,7 +170,7 @@ describe('MarketSize', () => {
 
     it('should return the market size calculation for a given area with filters', (done) => {
       var query = {
-        type: 'boundary',
+        type: 'all',
         industry: filters.industries[0].id,
         product: filters.products[0].id,
         employees_range: filters.employees_by_location[0].id,
@@ -177,7 +179,7 @@ describe('MarketSize', () => {
       request
         .get('/market_size/plan/' + plan_id + '/calculate')
         .accept('application/json')
-        .query(query)
+        .query(test_utils.testViewport(query))
         .end((err, res) => {
           if (err) return done(err)
           var output = res.body
@@ -196,12 +198,12 @@ describe('MarketSize', () => {
 
     it('should test the export route', (done) => {
       var query = {
-        type: 'boundary',
+        type: 'all',
         boundary: boundary
       }
       request
         .get('/market_size/' + plan_id + '/export')
-        .query(query)
+        .query(test_utils.testViewport(query))
         .end((err, res) => {
           if (err) return done(err)
           var output = res.text
@@ -216,7 +218,7 @@ describe('MarketSize', () => {
         filters: {},
         boundary: boundary
       }
-      return models.MarketSize.exportBusinesses(plan_id, 'boundary', options, null)
+      return models.MarketSize.exportBusinesses(plan_id, 'all', options, null)
         .then((output) => {
           expect(output).to.be.an('object')
           expect(output.csv).to.be.a('string')
@@ -235,7 +237,7 @@ describe('MarketSize', () => {
         },
         boundary: boundary
       }
-      return models.MarketSize.exportBusinesses(plan_id, 'boundary', options, null)
+      return models.MarketSize.exportBusinesses(plan_id, 'all', options, null)
         .then((output) => {
           expect(output).to.be.an('object')
           expect(output.csv).to.be.a('string')

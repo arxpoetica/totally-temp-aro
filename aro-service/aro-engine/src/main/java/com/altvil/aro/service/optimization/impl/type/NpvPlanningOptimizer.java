@@ -181,58 +181,63 @@ public class NpvPlanningOptimizer extends PlanningOptimizer {
 
 class NpvPlanningStrategy {
 	private class ApplyBudgetConstraint extends SearchPlan {
-		private int current = 1;
-		private double high;
-		private double increment;
 		private final Logger log = LoggerFactory.getLogger(ApplyBudgetConstraint.class);
-		private double low;
-		private int numProbes = 3;
-		private double stop = 0.00001;
+		private double threshold = 0.01;
+		private double lowP;
+		private double lowCost;
+		private double highP;
+		private double highCost;
+		private double interpolatedP;
 
-		public ApplyBudgetConstraint(double low, double high) {
-			this.low = low;
-			this.high = high;
-			increment = (high - low) / (numProbes + 1);
-			log.debug("Searching low = {}, high = {}", low, high);
+		public ApplyBudgetConstraint(double lowP, double lowCost, double highP, double highCost) {
+			double y1 = lowCost - capex;
+			double y2 = highCost - capex;
+			double x1 = lowP;
+			double x2 = highP;
+			
+			double x = x1 - y1 * (x2 - x1) / (y2 - y1);
+			
+			this.lowP = lowP;
+			this.lowCost = lowCost;
+			this.highP = highP;
+			this.highCost = highCost;
+			
+			this.interpolatedP = x;
+			log.debug("Searching lowP = {}, highP = {}", lowP, highP);
 		}
 
 		@Override
 		boolean isConverging() {
-			double probing = low + current * increment;
-
-			if (parametric != probing) {
-				parametric = probing;
+			if (parametric != interpolatedP) {
+				parametric = interpolatedP;
 				return true;
 			}
 
-			if (totalCost > capex) {
+			if (totalCost >= capex) {
 				log.debug("Budget exceeded : {} > {}", totalCost, capex);
-				if ((high - low) > stop) {
-					searchPlan = new ApplyBudgetConstraint(probing - increment, probing);
+				if ((totalCost - lowCost) > threshold * capex) {
+					searchPlan = new ApplyBudgetConstraint(lowP, lowCost, parametric, totalCost);
 					return searchPlan.isConverging();
 				}
 
-				searchPlan = new SelectPlan(Double.isFinite(highestNpv) ? highestNpvParametric : low);
+				// Converged on a minimum total cost which exceeds the budget
+				searchPlan = new SelectPlan(Double.isFinite(highestNpv) ? highestNpvParametric : lowP);
 				return searchPlan.isConverging();
+			} else {
+				if ((totalCost - lowCost) > threshold * capex) {
+					searchPlan = new ApplyBudgetConstraint(parametric, totalCost, highP, highCost);
+					return searchPlan.isConverging();
+				}
 			}
 
-			if (current < numProbes) {
-				parametric = low + ++current * increment;
-				return true;
-			}
-
-			if ((high - low) > stop) {
-				searchPlan = new ApplyBudgetConstraint(high - increment, high);
-				return searchPlan.isConverging();
-			}
-
-			searchPlan = new ScanForMaxNpv(high - increment, high);
+			searchPlan = new ScanForMaxNpv(0, lowP);
 			return searchPlan.isConverging();
 		}
 	}
 
 	private class CheckBoundaryConditions extends SearchPlan {
 		private final Logger log = LoggerFactory.getLogger(CheckBoundaryConditions.class);
+		private double cost1;
 
 		@Override
 		boolean isConverging() {
@@ -244,6 +249,7 @@ class NpvPlanningStrategy {
 					return searchPlan.isConverging();
 				}
 
+				cost1 = totalCost;
 				parametric = 0;
 				return true;
 			}
@@ -254,7 +260,7 @@ class NpvPlanningStrategy {
 				return searchPlan.isConverging();
 			}
 
-			searchPlan = new ApplyBudgetConstraint(0, 1);
+			searchPlan = new ApplyBudgetConstraint(0, totalCost, 1, cost1);
 			return searchPlan.isConverging();
 		}
 	}
@@ -264,7 +270,7 @@ class NpvPlanningStrategy {
 		private double high;
 		private double increment;
 		private final Logger log = LoggerFactory.getLogger(ScanForMaxNpv.class);
-		private int numProbes = 12;
+		private int numProbes = 6;
 
 		public ScanForMaxNpv(double low, double high) {
 			this.high = high;
