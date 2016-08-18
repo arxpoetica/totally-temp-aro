@@ -123,13 +123,13 @@ public class NewOptimizeEndPoint {
 		return MasterOptimizationRequest
 				.build()
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
+				.setMrc(plan.getMrc())
 				.setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())
 				.setLocationEntities(toMask(plan.getLocationTypes()))
 				.setWirecenters(
 						toSelectedWireCenters(plan.getSelectedRegions()))
 				.setOptimizationMode(plan.getOptimizationMode()).build();
-
 	}
 
 	private Set<LocationEntityType> toEntityTypes(

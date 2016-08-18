@@ -182,7 +182,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				networkConfiguration.getSelectionMode() == LocationSelectionMode.SELECTED_LOCATIONS,
 				networkConfiguration.getLocationEntities(),
 				networkConfiguration.getPlanId(),
-				networkConfiguration.getYear());
+				networkConfiguration.getYear(),
+				networkConfiguration.getMrc());
 
 	}
 
@@ -234,12 +235,12 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
 			boolean isFilteringRoadLocationDemandsBySelection,
-			Set<LocationEntityType> selectedTypes, long planId, int year) {
+			Set<LocationEntityType> selectedTypes, long planId, int year, double mrc) {
 
 		return assembleMapping(
 				(isFilteringRoadLocationDemandsBySelection ? planRepository.queryFiberDemand(
-						planId, year)
-						: planRepository.queryAllFiberDemand(planId, year)),
+						planId, year, mrc)
+						: planRepository.queryAllFiberDemand(planId, year, mrc)),
 				selectedTypes);
 
 	}

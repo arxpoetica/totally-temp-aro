@@ -91,7 +91,7 @@ public interface NetworkPlanRepository extends
 			"bs as (\n" + 
 			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.business_summary e on e.location_id = l.id\n" + 
+			"  join client.business_summary e on e.location_id = l.id and ((e.entity_type = 3 and monthly_recuring_cost>=:mrc) or e.entity_type !=3)\n" + 
 			"   where year = :year and city_id = 1\n" + 
 			"),\n" + 
 			"hs as (\n" + 
@@ -111,7 +111,7 @@ public interface NetworkPlanRepository extends
 			"select * from ct\n" + 
 			"limit 200000", 
 			nativeQuery = true)
-	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year);
+	List<Object[]> queryFiberDemand(@Param("planId") long planId, @Param("year") int year,  @Param("mrc") double mrc);
 	
 	@Query(value = 
 			"with selected_locations as (\n" + 
@@ -126,7 +126,7 @@ public interface NetworkPlanRepository extends
 			"bs as (\n" + 
 			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.business_summary e on e.location_id = l.id\n" + 
+			"  join client.business_summary e on e.location_id = l.id and  ((e.entity_type = 3 and monthly_recuring_cost>=:mrc) or e.entity_type !=3)\n" + 
 			"   where year = :year and city_id = 1\n" + 
 			"),\n" + 
 			"hs as (\n" + 
@@ -145,7 +145,7 @@ public interface NetworkPlanRepository extends
 			"UNION\n" +
 			"select * from ct\n" +
 			"limit 200000", nativeQuery = true)
-	List<Object[]> queryAllFiberDemand(@Param("planId") long planId, @Param("year") int year);
+	List<Object[]> queryAllFiberDemand(@Param("planId") long planId, @Param("year") int year, @Param("mrc") double mrc);
 
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
 			"WHERE pt.plan_id = :planId", nativeQuery = true)

@@ -24,6 +24,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 	public static class Builder {
 
+		private double mrc= 0.0 ;
 		private long planId;
 		private int year = 2015;
 		private Set<LocationEntityType> locationEntities;
@@ -74,12 +75,17 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 		private NetworkDataRequest createDataRequest() {
 			return new NetworkDataRequest(planId, year, locationSelectionMode,
-					locationEntities);
+					locationEntities, mrc);
 		}
 
 		public MasterOptimizationRequest build() {
 			return new MasterOptimizationRequest(optimizationConstraints,
 					fiberNetworkConstraints, createDataRequest(), wireCenters, optimizationMode);
+		}
+		
+		public Builder setMrc(double mrc) {
+			this.mrc = mrc ;
+			return this ;
 		}
 
 		public Builder setOptimizationMode(OptimizationMode optimizationMode) {
