@@ -19,6 +19,7 @@ checkout:
 dependencies:
   pre:
     - npm install -g mocha
+    - pip install -g boto3
   cache_directories:
     - "~/docker-image"
   post:
