@@ -17,7 +17,7 @@ checkout:
   post:
 
 dependencies:
-  pre:
+  override:
     - npm install -g mocha
     - pip install boto3
   cache_directories:
