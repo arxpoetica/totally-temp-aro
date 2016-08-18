@@ -1,4 +1,5 @@
 docker/set_debug_env.sh
+docker/config.json
 
 #global file patterns
 
