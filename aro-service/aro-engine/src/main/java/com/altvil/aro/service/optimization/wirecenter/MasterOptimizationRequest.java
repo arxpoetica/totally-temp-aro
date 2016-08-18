@@ -3,18 +3,18 @@ package com.altvil.aro.service.optimization.wirecenter;
 import java.util.Collection;
 import java.util.Set;
 
-import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.OptimizationRequest;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
+import com.altvil.aro.service.optimization.spatial.SpatialSelection;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.OptimizationMode;
 
 public class MasterOptimizationRequest extends OptimizationRequest {
 
-	private Collection<Integer> wireCenters;
+	private Collection<SpatialSelection> wireCenters;
 	private final OptimizationMode optimizationMode;
 	private int serviceLayerId;
 
@@ -31,7 +31,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		private FiberNetworkConstraints fiberNetworkConstraints;
 		private OptimizationConstraints optimizationConstraints;
 		private LocationSelectionMode locationSelectionMode = LocationSelectionMode.SELECTED_LOCATIONS;
-		private Set<Integer> wireCenters;
+		private Collection<SpatialSelection> wireCenters;
 		private OptimizationMode optimizationMode;
 
 		public Builder setOptimizationConstraints(
@@ -51,7 +51,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 			return this;
 		}
 
-		public Builder setWirecenters(Set<Integer> wireCenters) {
+		public Builder setWirecenters(Set<SpatialSelection> spatialSelections) {
 			this.wireCenters = wireCenters;
 			if (this.wireCenters != null && this.wireCenters.size() > 0) {
 				this.locationSelectionMode = LocationSelectionMode.ALL_LOCATIONS;
@@ -99,7 +99,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 			int serviceLayerId,
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
-			Collection<Integer> wireCenters, OptimizationMode optimizationMode) {
+			Collection<SpatialSelection> wireCenters, OptimizationMode optimizationMode) {
 		super(optimizationConstraints, constraints, request);
 		this.serviceLayerId = serviceLayerId ;
 		this.wireCenters = wireCenters;
@@ -110,7 +110,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		return serviceLayerId;
 	}
 
-	public Collection<Integer> getWireCenters() {
+	public Collection<SpatialSelection> getWireCenters() {
 		return wireCenters;
 	}
 

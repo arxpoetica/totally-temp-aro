@@ -262,7 +262,7 @@ public interface NetworkPlanRepository extends
 			"	select st.location_id, st.master_plan_id, w.id as wirecenter_id  \n" + 
 			"	from selected_targets st \n" + 
 			"	join aro.locations l on l.id = st.location_id\n" + 
-			"	join aro.wirecenters w on st_contains(w.geom, l.geom)\n" + //Add Layer Constraint
+			"	join aro.wirecenters w on st_contains(w.geom, l.geom) and service_type='A' and layer_id=:layerId\n" + //Add Layer Constraint
 			"	where st.plan_id is null\n" + 
 			")\n" + 
 			"\n" + 
@@ -380,7 +380,7 @@ public interface NetworkPlanRepository extends
 			"	returning id\n" + 
 			")\n" + 
 			"select plan_id from all_modified_plans\n", nativeQuery = true)
-	List<Number> computeWirecenterUpdates(@Param("planId") long planId);
+	List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("layerId") int layerId);
     
     
     

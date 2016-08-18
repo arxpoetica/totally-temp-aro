@@ -221,7 +221,7 @@ public class OptimizationPlannerServiceImpl implements
 			List<Number> wireCentersPlans = selectAllLocations ? networkPlanRepository
 					.computeWirecenterUpdates(request.getPlanId(),
 							request.getWireCenters()) : networkPlanRepository
-					.computeWirecenterUpdates(request.getPlanId());
+					.computeWirecenterUpdates(request.getPlanId(), request.getServiceLayerId());
 			final LocationSelectionMode selectionMode = selectAllLocations ? LocationSelectionMode.ALL_LOCATIONS
 					: LocationSelectionMode.SELECTED_LOCATIONS;
 

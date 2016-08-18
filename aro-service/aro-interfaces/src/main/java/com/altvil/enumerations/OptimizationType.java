@@ -5,6 +5,8 @@ public enum OptimizationType {
 	
 	UNCONSTRAINED,
 	
+	SUPER_LAYER_ROUTING,
+	
 	CAPEX,
 	
 	COVERAGE,
