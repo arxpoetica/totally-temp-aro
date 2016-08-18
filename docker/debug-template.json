@@ -669,8 +669,8 @@
         "UseCustomCookbooks" : true,
         "CustomCookbooksSource" : {
           "Type" : "git",
-          "Url" : "git@octocat.altvil.com:AIT/ARO-Config",
-          "Revision" : { "Ref" : "ConfigRepoBranch" },
+          "Url" : "git@octocat.altvil.com:AIT/aro-opsworks",
+          "Revision" : "master",
           "SshKey" : { "Ref" : "GithubSshKey" }
         },
         "UseOpsworksSecurityGroups" : false,
@@ -682,11 +682,11 @@
       }
     },
 
-    "AppLayer" : {
+    "DockerComposeLayer" : {
       "Type" : "AWS::OpsWorks::Layer",
       "Properties" : {
         "StackId": { "Ref" : "Stack" },
-        "Name" : "App Server Layer",
+        "Name" : "Docker-Compose App Layer",
         "Shortname" : "app",
         "Type" : "custom",
         "EnableAutoHealing" : true,
@@ -695,8 +695,11 @@
         "CustomSecurityGroupIds" : [ { "Ref" : "AppSecurityGroup" } ],
         "InstallUpdatesOnBoot" : true,
         "CustomRecipes" : {
-          "Setup" : [ "nginx", "aro::default", "aro::python-dependencies", "aro::aws", "aro::cwlogs" ],
-          "Deploy" : [ "deploy::node" ]
+          "Setup" : [ 
+            "aro_ops::cwlogs",
+            "aro_ops::install" 
+          ],
+          "Deploy" : [ "aro_ops::compose" ]
         },
         "VolumeConfigurations" : [ {
           "MountPoint" : "/var/lib/docker",
@@ -723,7 +726,7 @@
       "Value" : { "Ref" : "Stack" }
     },
     "Layer": {
-      "Value" : { "Ref" : "AppLayer" }
+      "Value" : { "Ref" : "DockerComposeLayer" }
     },
     "RDSInstance" : {
       "Value" : { "Ref" : "DB" },
