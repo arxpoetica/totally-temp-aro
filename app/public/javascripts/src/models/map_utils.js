@@ -11,7 +11,7 @@ app.service('map_utils', ($rootScope, $http) => {
     return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale)
   }
 
-  utils.createCenteredMarker = (layer, feature, centroid, hoverStyle) => {
+  utils.createCenteredMarker = (layer, feature, centroid, hoverStyle, timeout) => {
     var count = 0
     var timer = null
     var marker = new google.maps.Marker({ map: map })
@@ -26,7 +26,7 @@ app.service('map_utils', ($rootScope, $http) => {
         timer = setTimeout(() => {
           marker.setMap(null)
           layer.revertStyle(feature)
-        }, 250)
+        }, timeout || 0)
       }
     }
 

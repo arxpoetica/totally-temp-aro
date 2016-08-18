@@ -31,18 +31,20 @@ describe('Permission', () => {
         var area = {
           'name': 'Manhattan, New York, NY, USA',
           'centroid': {
-            'lat': 40.7830603,
-            'lng': -73.9712488
+            'type': 'Point',
+            'coordinates': [-73.9712488, 40.7830603]
           },
           'bounds': {
-            'northeast': {
-              'lat': 40.882214,
-              'lng': -73.907
-            },
-            'southwest': {
-              'lat': 40.6803955,
-              'lng': -74.047285
-            }
+            'type': 'Polygon',
+            'coordinates': [
+              [
+                [-73.70027209999999, 40.9152555],
+                [-73.70027209999999, 40.496044],
+                [-74.255735, 40.496044],
+                [-74.255735, 40.9152555],
+                [-73.70027209999999, 40.9152555]
+              ]
+            ]
           }
         }
         return models.NetworkPlan.createPlan('Untitled plan', area, owner)
@@ -68,18 +70,19 @@ describe('Permission', () => {
       })
   })
 
-  after(() => test_utils.login_app())
+  after(() => test_utils.loginApp())
 
   it('should return an empty list for guest\'s plans', () => {
-    return models.NetworkPlan.findAll(guest, null)
+    return models.NetworkPlan.findAll(guest, {})
       .then((plans) => {
-        expect(plans).to.be.an('array')
-        expect(plans).to.have.length(0)
+        expect(plans).to.be.an('object')
+        expect(plans.plans).to.be.an('array')
+        expect(plans.plans).to.have.length(0)
       })
   })
 
   it('should not have permission yet', (done) => {
-    test_utils.login_app(guest)
+    test_utils.loginApp(guest)
     request
       .get('/network_plan/' + plan_id + '/area_data')
       .accept('application/json')
@@ -93,7 +96,7 @@ describe('Permission', () => {
   })
 
   it('should grant access to the guest user', (done) => {
-    test_utils.login_app(owner)
+    test_utils.loginApp(owner)
     request
       .post('/permissions/' + plan_id + '/grant')
       .accept('application/json')
@@ -107,11 +110,12 @@ describe('Permission', () => {
   })
 
   it('should return one element for guest\'s plans', () => {
-    return models.NetworkPlan.findAll(guest, null)
+    return models.NetworkPlan.findAll(guest, {})
       .then((plans) => {
-        expect(plans).to.be.an('array')
-        expect(plans).to.have.length(1)
-        var plan = plans[0]
+        expect(plans).to.be.an('object')
+        expect(plans.plans).to.be.an('array')
+        expect(plans.plans).to.have.length(1)
+        var plan = plans.plans[0]
         expect(plan.owner_id).to.be.equal(owner.id)
         expect(plan.owner_first_name).to.be.equal(owner.first_name)
         expect(plan.owner_last_name).to.be.equal(owner.last_name)
@@ -123,10 +127,11 @@ describe('Permission', () => {
   })
 
   it('should return an empty list for guest\'s plans', () => {
-    return models.NetworkPlan.findAll(guest, null)
+    return models.NetworkPlan.findAll(guest, {})
       .then((plans) => {
-        expect(plans).to.be.an('array')
-        expect(plans).to.have.length(0)
+        expect(plans).to.be.an('object')
+        expect(plans.plans).to.be.an('array')
+        expect(plans.plans).to.have.length(0)
       })
   })
 })

@@ -97,8 +97,22 @@
         </label>
         <% } %>
         <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px"></div>
-        <label class="eye-control" style="padding-left:0">
+        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
           <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()"> SMB
+          <div class="eye-indicator"></div>
+        </label>
+      </div>
+      <!-- / Special case -->
+
+      <!-- Special case -->
+      <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
+        <% if (config.ui.eye_checkboxes) { %>
+        <label class="eye-combo">
+          <input type="checkbox" ng-model="optimize2kplus" ng-change="changeOptimization()">
+        </label>
+        <% } %>
+        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
+          <input type="checkbox" ng-model="business_categories_selected['2kplus']" ng-change="changeLocationsLayer()"> $2,000+ MRC Customers
           <div class="eye-indicator"></div>
         </label>
       </div>
@@ -131,7 +145,7 @@
         </label>
         <% } %>
         <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px"></div>
-        <label class="eye-control" style="padding-left:0">
+        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
           <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
           <div class="eye-indicator"></div>
         </label>

@@ -4,8 +4,8 @@ var test_utils = require('./test_utils')
 var request = test_utils.request
 
 describe('Authentication', () => {
-  before(() => test_utils.logout_app())
-  after(() => test_utils.login_app())
+  before(() => test_utils.logoutApp())
+  after(() => test_utils.loginApp())
 
   it('should redirect if not logged', (done) => {
     request

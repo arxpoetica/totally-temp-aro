@@ -8,7 +8,7 @@ describe('Wirecenter', () => {
     it('should return the information of the wirecenter', (done) => {
       request
         .get('/wirecenters')
-        .query(test_utils.test_viewport())
+        .query(test_utils.testViewport())
         .accept('application/json')
         .end((err, res) => {
           if (err) return done(err)

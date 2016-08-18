@@ -10,7 +10,7 @@ describe('CountySubdivision', () => {
     it('should return a feature collection', (done) => {
       request
         .get('/county_subdivisions/' + statefp)
-        .query(test_utils.test_viewport())
+        .query(test_utils.testViewport())
         .accept('application/json')
         .end((err, res) => {
           if (err) return done(err)
