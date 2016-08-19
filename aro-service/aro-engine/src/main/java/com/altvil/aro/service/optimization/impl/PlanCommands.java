@@ -7,26 +7,33 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
 import com.altvil.aro.model.AnalysisArea;
 import com.altvil.aro.model.ServiceArea;
+import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.model.SuperServiceArea;
 import com.altvil.aro.persistence.repository.AnalysisAreaRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.ServiceAreaRepository;
+import com.altvil.aro.persistence.repository.ServiceLayerRepository;
 import com.altvil.aro.persistence.repository.SuperServiceAreaRepository;
 import com.altvil.aro.service.network.LocationSelectionMode;
+import com.altvil.aro.service.optimization.impl.type.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.spatial.AnalysisSelection;
 import com.altvil.aro.service.optimization.spatial.SpatialAnalysisType;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.utils.StreamUtil;
 
+@Service
 public class PlanCommands {
 
 	private NetworkPlanRepository networkPlanRepository;
 	private ServiceAreaRepository serviceAreaRepository;
 	private AnalysisAreaRepository analysisAreaRepository;
 	private SuperServiceAreaRepository superServiceAreaRepository;
+	private ServiceLayerRepository serviceLayerRepository;
 
 	private ServiceAreaAnalyzer serviceAreaAnalyzer;
 
@@ -34,8 +41,16 @@ public class PlanCommands {
 		networkPlanRepository.deleteWireCenterPlans(planId);
 	}
 
-	public Collection<WirecenterOptimizationRequest> computeWireCenterRequests(
-			int processLayerId, MasterOptimizationRequest request) {
+	public Collection<ProcessLayerCommand> createLayerCommands(
+			MasterOptimizationRequest request) {
+
+		return serviceLayerRepository.findAll(request.getProcessingLayers())
+				.stream().map(l -> this.computeWireCenterRequests(l, request))
+				.collect(Collectors.toList());
+	}
+
+	private ProcessLayerCommand computeWireCenterRequests(
+			ServiceLayer serviceLayer, MasterOptimizationRequest request) {
 
 		final LocationSelectionMode selectionMode = request
 				.getNetworkDataRequest().getSelectionMode();
@@ -43,8 +58,10 @@ public class PlanCommands {
 		boolean selectAllLocations = selectionMode == LocationSelectionMode.ALL_LOCATIONS;
 
 		if (selectAllLocations) {
-			StreamUtil.map(serviceAreaAnalyzer.computeServiceAreas(processLayerId,
-					request.getWireCenters()), ServiceArea::getId);
+			StreamUtil.map(
+					serviceAreaAnalyzer.computeServiceAreas(
+							serviceLayer.getId(), request.getWireCenters()),
+					ServiceArea::getId);
 		}
 
 		List<Number> wireCentersPlans = selectAllLocations ? networkPlanRepository
@@ -53,7 +70,7 @@ public class PlanCommands {
 				.computeWirecenterUpdates(request.getPlanId(),
 						request.getServiceLayerId());
 
-		return StreamUtil.map(
+		Collection<WirecenterOptimizationRequest> cmds = StreamUtil.map(
 				wireCentersPlans,
 				id -> {
 					return new WirecenterOptimizationRequest(request
@@ -61,6 +78,8 @@ public class PlanCommands {
 							.getConstraints(), request.getNetworkDataRequest()
 							.createRequest(id.longValue(), selectionMode));
 				});
+
+		return new ProcessLayerCommandImpl(serviceLayer, cmds);
 	}
 
 	private Collection<Integer> toIds(List<AnalysisSelection> selections) {
@@ -145,6 +164,30 @@ public class PlanCommands {
 					.flatMap(Collection::stream).collect(Collectors.toSet());
 
 		}
+	}
+
+	private static class ProcessLayerCommandImpl implements ProcessLayerCommand {
+
+		private ServiceLayer serviceLayer;
+		private Collection<WirecenterOptimizationRequest> commands;
+
+		public ProcessLayerCommandImpl(ServiceLayer serviceLayer,
+				Collection<WirecenterOptimizationRequest> commands) {
+			super();
+			this.serviceLayer = serviceLayer;
+			this.commands = commands;
+		}
+
+		@Override
+		public ServiceLayer getServiceLayer() {
+			return serviceLayer;
+		}
+
+		@Override
+		public Collection<WirecenterOptimizationRequest> getServiceAreaCommands() {
+			return commands;
+		}
+
 	}
 
 }
