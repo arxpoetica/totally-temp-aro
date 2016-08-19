@@ -35,7 +35,8 @@ TEMPLATE_URLS = {
     'PRODUCTION': 'https://cf-templates.altvil.com.s3.amazonaws.com/P-ARO.template'
 }
 
-with open('debug-template.json', 'r') as template_file:
+TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json'
+with open(TEMPLATE_FILE, 'r') as template_file:
     TEMPLATE_BODY=template_file.read()
 
 # Config from environment
