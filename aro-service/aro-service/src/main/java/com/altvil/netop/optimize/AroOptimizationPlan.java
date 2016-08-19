@@ -16,7 +16,6 @@ public class AroOptimizationPlan {
 	private OptimizationMode optimizationMode = OptimizationMode.INTER_WIRECENTER;
 	private Double threshold;
 
-	private double mrc = 0 ;
 	private FinancialConstraints financialConstraints;
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
@@ -90,11 +89,4 @@ public class AroOptimizationPlan {
 		this.optimizationMode = optimizationMode;
 	}
 
-	public double getMrc() {
-		return mrc;
-	}
-
-	public void setMrc(double mrc) {
-		this.mrc = mrc;
-	}
 }

@@ -120,13 +120,15 @@ public class NewOptimizeEndPoint {
 	private MasterOptimizationRequest toOptimizationPlan(
 			AroOptimizationPlan plan) {
 
+		 Set<LocationEntityType> entityTypes = toMask(plan.getLocationTypes()) ;
+		
 		return MasterOptimizationRequest
 				.build()
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
-				.setMrc(plan.getMrc())
+				.setMrc(entityTypes.contains(AroLocationEntityType.mrcgte2000) ? 2000 : 0)
 				.setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())
-				.setLocationEntities(toMask(plan.getLocationTypes()))
+				.setLocationEntities(entityTypes)
 				.setWirecenters(
 						toSelectedWireCenters(plan.getSelectedRegions()))
 				.setOptimizationMode(plan.getOptimizationMode()).build();
