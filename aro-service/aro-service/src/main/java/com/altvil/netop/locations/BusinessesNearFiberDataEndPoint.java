@@ -4,6 +4,7 @@ package com.altvil.netop.locations;
 import com.altvil.netop.locations.model.BusinessDataByDistance;
 import com.altvil.netop.locations.model.BusinessesReportRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -29,8 +30,9 @@ public class BusinessesNearFiberDataEndPoint {
         return service.getBusinessesCountsBySizes(request);
     }
 
-    @RequestMapping(value = "/businesses", method = RequestMethod.POST, produces = "text/csv")
-    public void getBusinessesCountsBySizes(@RequestBody BusinessesReportRequest request, Writer writer){
+    @RequestMapping(value = "/businesses", method = RequestMethod.POST)
+    @ResponseStatus(value = HttpStatus.OK)
+    public void businesses(@RequestBody BusinessesReportRequest request, Writer writer){
         try {
             writer.write(service.getBusinesses(request));
         } catch (IOException e) {
