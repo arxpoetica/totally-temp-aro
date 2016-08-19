@@ -53,5 +53,5 @@ deployment:
       - docker push ${LATEST_TAG}
       - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
       - chmod 400 opsworks_ssh_key
-      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) python docker/create_or_update_stack.py staging update
+      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update staging
       - rm -f opsworks_ssh_key
