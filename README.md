@@ -84,12 +84,22 @@ More stuff here
 
 # Local development
 ## Initial application setup
-Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To do this we use the `run` command of `docker-compose` which will build and connect all the application compoenents that are required to run our setup/build scripts. This can be accomplished as follows:
+Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To do this we will first bring up the dev stack, then connect into the running application container and run the initialization scripts and ETL scripts. This can be accomplished as follows (from the root of the local `ARO-Platform` repository):
 ```shell
-$ docker-compose -f docker/docker-compose-dev-initialize.yml app run docker/initialize_app.sh
-... some output here from the npm install process
+$ docker-compose -f docker/docker-compose-dev.yml up -d
+...
+... this will create the containers (first downloading the images if necessary)
 ```
-In some cases, on a newly setup system, this process will fail the first time with a note about "call stack exceeded." Running the exact same command again should complete the process without issue. This is due to a known bug in the latest version of NPM and does not appear to cause any downstream issues.
+Now we want to connect into the running app container:
+```shell
+$ docker exec -it docker_app_1 /bin/bash
+root@9e501c4758d4:/srv/www/aro#
+```
+From here, we'll run the first script that installs the required NPM modules and builds the application:
+```shell
+root@9e501c4758d4:/srv/www/aro# docker/initialize_app.sh
+```
+In some cases, usually on a new system, this process will fail the first time with a warning about "call stack exceeded." Running the exact same command again should complete the process without issue. This is due to a known bug in the latest version of NPM and does not appear to cause any downstream issues.
 
 If your log output ends with something that looks like the following, it has completed successfully:
 ```shell
@@ -102,9 +112,9 @@ public/javascripts/src/models/state.js -> public/javascripts/lib/models/state.js
 public/javascripts/src/models/tracker.js -> public/javascripts/lib/models/tracker.js
 ```
 ***
-Next, to populate the database and create an initial user, use the following command:
+Next, to populate the database (running the full ETL based on the local version of your `aro-etl` repository) and create an initial user, use the following command:
 ```shell
-$ docker-compose -f docker/docker-compose-dev-initialize.yml app run etl/etl_initial_setup.sh
+root@9e501c4758d4:/srv/www/aro# etl/etl_initial_setup.sh
 ```
 This will generate LOTS of output and can take anywhere from 40 - 60 minutes (or longer, depending on system specs) to complete.
 
@@ -113,7 +123,7 @@ As described earlier, in local development, your checked out version of the `ARO
 
 First run `docker ps` to ensure you don't have any duplicate or old versions of the containers already running. If you do, stop them with `docker stop <container_name> && docker rm <container_name>`  
 
-To start the standard development environment, run the `docker-compose-dev` configuration as follows:
+To start the standard development environment (if it isn't already running), run the `docker-compose-dev` configuration as follows:
 ```shell
 $ docker-compose -f docker/docker-compose-dev.yml up -d
 ```
