@@ -301,9 +301,7 @@
           <tbody>
             <tr>
               <th>Telco Buildings - (Off Net VzB buildings incurring > $2K MRCs)</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
             <tr ng-repeat="item in routeOpportunities.totals">
               <td>
@@ -317,9 +315,7 @@
             </tr>
             <tr>
               <th>Count of Total Buildings by Number of Employees</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
             <tr ng-repeat="item in routeOpportunities.buildings">
               <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
@@ -327,9 +323,7 @@
             </tr>
             <tr>
               <th>Count of Total Businesses by Number of Employees</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
             <tr ng-repeat="item in routeOpportunities.businesses">
               <td>{{routeOpportunities.businessSizes[item.key].description}}</td>

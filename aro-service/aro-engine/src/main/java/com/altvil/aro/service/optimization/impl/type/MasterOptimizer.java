@@ -1,7 +1,6 @@
 package com.altvil.aro.service.optimization.impl.type;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -69,6 +68,8 @@ public abstract class MasterOptimizer {
 	protected Collection<WirecenterOptimizationRequest> computeWireCenterRequests(
 			MasterOptimizationRequest request) {
 
+		planCommandExecutorService.deleteOldPlans(request.getPlanId()) ;
+		
 		return planCommandExecutorService.createLayerCommands(request).stream()
 				.map(ProcessLayerCommand::getServiceAreaCommands)
 				.flatMap(Collection::stream).collect(Collectors.toList());
@@ -143,19 +144,8 @@ public abstract class MasterOptimizer {
 	protected OptimizedPlan reify(OptimizationConstraints constraints,
 			PlannedNetwork plan) {
 
-		WirecenterNetworkPlan reifiedPlan = conversionService.convert(
-				plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
-
-		NetworkDemandSummary demandSummary = toNetworkDemandSummary(
-				reifiedPlan.getDemandCoverage(),
-				plan.getCompetitiveDemandMapping());
-
-		log.debug("ds ====>" + demandSummary.toString());
-
-		final GeneratedPlanImpl generatedPlan = new GeneratedPlanImpl(
-				demandSummary, constraints, reifiedPlan);
-		return wirecenterPlanningService.optimizedPlan(generatedPlan);
-
+		return planCommandExecutorService.reify(constraints, plan) ;
+		
 	}
 
 	protected <S> Collection<ComputeUnitCallable<WirecenterOptimization<S>>> toCommands(
