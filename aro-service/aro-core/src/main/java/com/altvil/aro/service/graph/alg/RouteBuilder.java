@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.google.common.collect.TreeMultimap;
 
 public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
@@ -216,27 +213,31 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 	}
 
 	private GraphPath<V, E> getClosestSource(Set<V> sources) {
-		TreeMap<Double, GraphPath<V, E>> treeMap = new TreeMap<>();
+		double shortestPathLength = Double.MAX_VALUE;
+		GraphPath<V, E> shortedPath = null;
+		
 		for (V target : targetMap.keySet()) {
 			AllShortestPaths<V, E> paths = targetMap.get(target);
-			TreeMultimap<Double, V> tm = paths.findPaths(sources);
+			V source = paths.findClosestTarget(sources);
 
-			Set<Map.Entry<Double, V>> entries = tm.entries();
-			Iterator<Map.Entry<Double, V>> itr = entries.iterator() ;
-			//Add the first GraphPath that statisfies ConstraintPredicate
-			while( itr.hasNext() ) {
-				Map.Entry<Double, V> entry = itr.next();
-				GraphPath<V, E> path = paths.getGraphPath(entry.getValue());
-				if( isValidPath(path) ) {
-					treeMap.put(path.getWeight(), path);
-					break ;
+			if (source != null) {
+				final double sourceWeight = paths.getWeight(source);
+				
+				if (sourceWeight < shortestPathLength) {
+					GraphPath<V, E> path = paths.getGraphPath(source);
+					
+					if (isValidPath(path)) {
+						shortedPath = paths.getGraphPath(source);
+						shortestPathLength = sourceWeight;
+					}
 				}
 			}
 		}
 		
-		return  treeMap.isEmpty() ? null :  treeMap.values().iterator().next() ;
+		return shortedPath ;
 
 	}
+
 	
 	private boolean isValidPath(GraphPath<V, E> path) {
 		return pathPredicate.isValid(sourceRootMap.get(path.getEndVertex()), path) ;

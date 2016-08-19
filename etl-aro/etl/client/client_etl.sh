@@ -99,9 +99,16 @@ ${PSQL} -a -f $DIR/create_client_demand.views.sql
 
 ${PSQL} -a -f $DIR/create_client_location_competitors.view.sql
 
+${PSQL} -a -f $DIR/create_client_existing_fiber.sql
+
 ${PSQL} -a -f $DIR/create_client_business_competitors_strength.view.sql
 
 ${PSQL} -a -f $DIR/summarized_competitors_strength.sql
 
+${PSQL} -a -f $DIR/create_client_conduit_segment.sql
 
+${PSQL} -a -f $DIR/create_client_cable_construction_type.sql
 
+${PSQL} -a -f $DIR/create_client_fiber_route_segment.sql
+
+${PSQL} -a -f $DIR/create_client_businesses_sizes.sql

@@ -75,6 +75,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (scope.optimizeHouseholds) locationTypes.push('households')
     if (scope.optimizeBusinesses) locationTypes.push('businesses')
     if (scope.optimizeSMB) locationTypes.push('smb')
+    if (scope.optimize2kplus) locationTypes.push('2kplus')
     if (scope.optimizeTowers) locationTypes.push('towers')
 
     var algorithm = $scope.optimizationType

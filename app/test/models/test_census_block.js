@@ -4,7 +4,7 @@ var test_utils = require('./test_utils')
 var request = test_utils.request
 
 describe('CensusBlock', () => {
-  before(() => test_utils.login_app())
+  before(() => test_utils.loginApp())
 
   describe('#findByStatefpAndCountyfp', () => {
     var statefp = '36'
@@ -13,7 +13,7 @@ describe('CensusBlock', () => {
     it('should return a feature collection', (done) => {
       request
         .get('/census_blocks/' + statefp + '/' + countyfp)
-        .query(test_utils.test_viewport())
+        .query(test_utils.testViewport())
         .accept('application/json')
         .end((err, res) => {
           if (err) return done(err)

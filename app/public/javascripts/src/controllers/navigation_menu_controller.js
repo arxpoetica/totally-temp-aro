@@ -53,7 +53,9 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     if (selected) {
       $scope.new_plan_area_name = selected.text
       $scope.new_plan_area_bounds = selected.bounds
+      console.log('bounds', JSON.stringify(selected.bounds))
       $scope.new_plan_area_centroid = selected.centroid
+      console.log('centroid', JSON.stringify(selected.centroid))
     }
   })
 

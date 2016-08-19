@@ -2,15 +2,15 @@ var models = require('../../models')
 var _ = require('underscore')
 
 var app = require('../../app')
-var passport_stub = require('passport-stub')
-passport_stub.install(app)
+var passportStub = require('passport-stub')
+passportStub.install(app)
 
 var test_user = null
 
 exports.request = require('supertest')(app)
 exports.agent = require('supertest').agent(app)
 
-exports.create_test_user = () => {
+exports.createTestUser = () => {
   if (test_user) return Promise.resolve(test_user)
 
   var email = 'test@example.com'
@@ -30,22 +30,22 @@ exports.create_test_user = () => {
     })
 }
 
-exports.create_test_user()
+exports.createTestUser()
   .then(() => {
-    exports.login_app()
+    exports.loginApp()
     global.run && global.run() // mocha `run()` method
   })
   .catch((err) => console.log('err', err.stack))
 
-exports.login_app = (user) => {
-  passport_stub.login(user || test_user)
+exports.loginApp = (user) => {
+  passportStub.login(user || test_user)
 }
 
-exports.logout_app = () => {
-  passport_stub.logout()
+exports.logoutApp = () => {
+  passportStub.logout()
 }
 
-exports.test_viewport = (obj) => {
+exports.testViewport = (obj) => {
   return _.extend(obj || {}, {
     nelat: '40.805607996143685',
     nelon: '-73.91296976252443',
