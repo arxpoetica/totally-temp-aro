@@ -315,11 +315,7 @@ exports.configure = (api, middleware) => {
 
   api.get('/financial_profile/:plan_id/routeopportunities', (request, response, next) => {
     var plan_id = request.params.plan_id
-    const distanceThresholds = [
-      402.336, // 1/4 miles
-      804.672, // 1/2 miles
-      1609.34 // 1 mile
-    ]
+    const distanceThresholds = request.query.distanceThresholds.map((value) => +value)
 
     const groupByKey = (arr) => {
       var result = []
