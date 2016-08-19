@@ -195,7 +195,7 @@ if action == 'UPDATE':
     except botocore.exceptionsClientError:
         if environment == 'PROD':
             print "Stack does not exist, cannot update."
-        elif environment == 'QA':
+        elif environment == 'STAGING' or environment == 'QA':
             print "Stack does not exist; creating instead."
             opsworks_stack = create_new_stack()
             provision_stack(opsworks_stack)
