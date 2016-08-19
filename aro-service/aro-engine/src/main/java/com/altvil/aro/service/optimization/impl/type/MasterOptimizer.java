@@ -1,7 +1,6 @@
 package com.altvil.aro.service.optimization.impl.type;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -12,6 +11,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
@@ -22,6 +22,7 @@ import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
+import com.altvil.aro.service.optimization.impl.PlanCommandExecutorService;
 import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
@@ -44,45 +45,39 @@ import com.altvil.enumerations.OptimizationType;
 import com.altvil.utils.StreamUtil;
 
 public abstract class MasterOptimizer {
-	@Autowired 
+	@Autowired
 	protected AroDemandService aroDemandService;
-	@Autowired 
+	@Autowired
 	protected SerializationService conversionService;
-	private final Logger log = LoggerFactory
-			.getLogger(MasterOptimizer.class.getName());
-	@Autowired 
+	private final Logger log = LoggerFactory.getLogger(MasterOptimizer.class
+			.getName());
+	@Autowired
 	protected MasterPlanningService masterPlanningService;
 	@Autowired
 	protected NetworkPlanRepository networkPlanRepository;
-	@Autowired 
+	@Autowired
 	protected OptimizationExecutorService optimizationExecutorService;
 
 	private OptimizationExecutor wirecenterExecutor;
-	
-	@Autowired 
+
+	@Autowired
+	private PlanCommandExecutorService planCommandExecutorService;
+
+	@Autowired
 	protected WirecenterPlanningService wirecenterPlanningService;
 
 	protected Collection<WirecenterOptimizationRequest> computeWireCenterRequests(
 			MasterOptimizationRequest request) {
-		List<Number> wireCentersPlans = request.getWireCenters().isEmpty()
-				? networkPlanRepository.computeWirecenterUpdates(request.getPlanId())
-				: networkPlanRepository.computeWirecenterUpdates(request.getPlanId(), request.getWireCenters());
 
-		return StreamUtil.map(
-				wireCentersPlans,
-				id -> {
-					return new WirecenterOptimizationRequest(request
-							.getOptimizationConstraints(), request
-							.getConstraints(), request
-							.getNetworkDataRequest().createRequest(
-									id.longValue(), request.getNetworkDataRequest().getSelectionMode()));
-				});
+		return planCommandExecutorService.createLayerCommands(request).stream()
+				.map(ProcessLayerCommand::getServiceAreaCommands)
+				.flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
 	protected void deleteWireCenterPlans(MasterOptimizationRequest request) {
 		networkPlanRepository.deleteWireCenterPlans(request.getPlanId());
 	}
-	
+
 	protected <S> Collection<S> evaluateWirecenterCommands(
 			Collection<ComputeUnitCallable<WirecenterOptimization<S>>> cmds,
 			Predicate<S> validPredicate) {
@@ -103,7 +98,7 @@ public abstract class MasterOptimizer {
 				.collect(Collectors.toList());
 
 	}
-	
+
 	public abstract boolean isOptimizerFor(OptimizationType type);
 
 	public OptimizedMasterPlan optimize(MasterOptimizationRequest request) {
@@ -111,27 +106,32 @@ public abstract class MasterOptimizer {
 
 			deleteWireCenterPlans(request);
 
-			Collection<PlannedNetwork> plannedNetworks = planNetworks(request, computeWireCenterRequests(request));
+			Collection<PlannedNetwork> plannedNetworks = planNetworks(request,
+					computeWireCenterRequests(request));
 
 			Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
 					request.getOptimizationConstraints(), plannedNetworks);
-			
+
 			final GeneratedMasterPlanImpl generatedMasterPlan = new GeneratedMasterPlanImpl(
 					request, optimizedNetworks);
-			
-			optimizedNetworks.stream().forEach((optimizedNetwork) -> wirecenterPlanningService.save(optimizedNetwork));
 
-			OptimizedMasterPlan op = masterPlanningService.createOptimizedMasterPlan(generatedMasterPlan);
+			optimizedNetworks.stream().forEach(
+					(optimizedNetwork) -> wirecenterPlanningService
+							.save(optimizedNetwork));
+
+			OptimizedMasterPlan op = masterPlanningService
+					.createOptimizedMasterPlan(generatedMasterPlan);
 
 			return masterPlanningService.save(op);
-		} catch( Throwable err ) {
+		} catch (Throwable err) {
 			log.error(err.getMessage(), err);
-			throw new RuntimeException(err.getMessage(), err) ;
+			throw new RuntimeException(err.getMessage(), err);
 		}
 
 	}
 
-	protected abstract Collection<PlannedNetwork> planNetworks(MasterOptimizationRequest request,
+	protected abstract Collection<PlannedNetwork> planNetworks(
+			MasterOptimizationRequest request,
 			Collection<WirecenterOptimizationRequest> wirecenters);
 
 	@PostConstruct
@@ -149,7 +149,7 @@ public abstract class MasterOptimizer {
 		NetworkDemandSummary demandSummary = toNetworkDemandSummary(
 				reifiedPlan.getDemandCoverage(),
 				plan.getCompetitiveDemandMapping());
-		
+
 		log.debug("ds ====>" + demandSummary.toString());
 
 		final GeneratedPlanImpl generatedPlan = new GeneratedPlanImpl(
@@ -164,12 +164,11 @@ public abstract class MasterOptimizer {
 		return StreamUtil.map(requests, w -> cmdBuilder.apply(w));
 	}
 
-	protected NetworkDemandSummary toNetworkDemandSummary(
-			DemandCoverage dc, CompetitiveDemandMapping mapping) {
+	protected NetworkDemandSummary toNetworkDemandSummary(DemandCoverage dc,
+			CompetitiveDemandMapping mapping) {
 
 		Collection<CompetitiveLocationDemandMapping> plannedDemand = dc
-				.getLocations()
-				.stream()
+				.getLocations().stream()
 				.map(l -> mapping.getLocationDemandMapping(l.getObjectId()))
 				.collect(Collectors.toList());
 
@@ -177,14 +176,13 @@ public abstract class MasterOptimizer {
 				.build()
 				.add(DemandTypeEnum.planned_demand, SpeedCategory.cat7,
 						dc.getLocationDemand())
-						
-						
+
 				.add(DemandTypeEnum.new_demand,
 						SpeedCategory.cat7,
 						aroDemandService.aggregateDemandForSpeedCategory(
 								mapping.getAllDemandMapping(),
 								SpeedCategory.cat7))
-								
+
 				.add(DemandTypeEnum.original_demand,
 						SpeedCategory.cat3,
 						aroDemandService.aggregateDemandForSpeedCategory(
@@ -198,12 +196,12 @@ public abstract class MasterOptimizer {
 			OptimizationConstraints constraints,
 			Collection<PlannedNetwork> plannedNetworks) {
 
-		try {			
+		try {
 			return plannedNetworks.stream().map(p -> reify(constraints, p))
 					.collect(Collectors.toList());
-		} catch( Throwable err ) {
+		} catch (Throwable err) {
 			log.error(err.getMessage(), err);
-			throw new RuntimeException(err.getMessage(), err) ;
+			throw new RuntimeException(err.getMessage(), err);
 		}
 
 	}

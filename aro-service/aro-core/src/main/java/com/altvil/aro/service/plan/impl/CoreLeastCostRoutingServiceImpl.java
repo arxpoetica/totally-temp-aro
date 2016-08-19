@@ -7,11 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jgrapht.GraphPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -483,27 +481,6 @@ public class CoreLeastCostRoutingServiceImpl implements
 			return graphModel;
 		}
 
-	}
-
-	private static class DistancePredicate implements
-			Predicate<GraphPath<GraphNode, AroEdge<GeoSegment>>> {
-
-		public static DistancePredicate PREDICATE_15K = new DistancePredicate(
-				15 * 1000);// 15K constraint
-
-		private double maxDistance;
-
-		public DistancePredicate(double maxDistance) {
-			super();
-			this.maxDistance = maxDistance;
-		}
-
-		@Override
-		public boolean test(GraphPath<GraphNode, AroEdge<GeoSegment>> path) {
-			double sum = path.getEdgeList().stream()
-					.mapToDouble(e -> e.getValue().getLength()).sum();
-			return sum <= maxDistance;
-		}
-	}
+	}	
 
 }

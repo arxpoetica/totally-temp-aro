@@ -1,16 +1,16 @@
 package com.altvil.netop.locations;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.altvil.aro.persistence.repository.BusinessesReportRepository;
 import com.altvil.aro.persistence.repository.model.BusinessReportElement;
 import com.altvil.netop.locations.model.BusinessDataByDistance;
 import com.altvil.netop.locations.model.BusinessesReportRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class BusinesessNearFiberReportService {

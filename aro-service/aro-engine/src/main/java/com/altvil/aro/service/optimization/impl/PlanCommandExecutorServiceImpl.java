@@ -4,12 +4,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.model.AnalysisArea;
+import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.model.ServiceArea;
 import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.model.SuperServiceArea;
@@ -18,35 +23,164 @@ import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.ServiceAreaRepository;
 import com.altvil.aro.persistence.repository.ServiceLayerRepository;
 import com.altvil.aro.persistence.repository.SuperServiceAreaRepository;
+import com.altvil.aro.service.conversion.SerializationService;
+import com.altvil.aro.service.demand.AroDemandService;
+import com.altvil.aro.service.demand.analysis.SpeedCategory;
+import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
+import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
 import com.altvil.aro.service.network.LocationSelectionMode;
+import com.altvil.aro.service.optimization.OptimizedPlan;
+import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.impl.type.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.spatial.AnalysisSelection;
 import com.altvil.aro.service.optimization.spatial.SpatialAnalysisType;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
+import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
+import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
+import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
+import com.altvil.aro.service.optimize.model.DemandCoverage;
+import com.altvil.aro.service.plan.impl.PlanServiceImpl;
+import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.utils.StreamUtil;
 
 @Service
-public class PlanCommands {
+public class PlanCommandExecutorServiceImpl implements
+		PlanCommandExecutorService {
+
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory
+			.getLogger(PlanServiceImpl.class.getName());
 
 	private NetworkPlanRepository networkPlanRepository;
 	private ServiceAreaRepository serviceAreaRepository;
 	private AnalysisAreaRepository analysisAreaRepository;
 	private SuperServiceAreaRepository superServiceAreaRepository;
 	private ServiceLayerRepository serviceLayerRepository;
+	private SerializationService conversionService;
+	private WirecenterPlanningService wirecenterPlanningService;
+	private AroDemandService aroDemandService;
 
 	private ServiceAreaAnalyzer serviceAreaAnalyzer;
 
+	@Autowired
+	public PlanCommandExecutorServiceImpl(
+			NetworkPlanRepository networkPlanRepository,
+			ServiceAreaRepository serviceAreaRepository,
+			AnalysisAreaRepository analysisAreaRepository,
+			SuperServiceAreaRepository superServiceAreaRepository,
+			ServiceLayerRepository serviceLayerRepository,
+			SerializationService conversionService,
+			WirecenterPlanningService wirecenterPlanningService,
+			AroDemandService aroDemandService) {
+		super();
+		this.networkPlanRepository = networkPlanRepository;
+		this.serviceAreaRepository = serviceAreaRepository;
+		this.analysisAreaRepository = analysisAreaRepository;
+		this.superServiceAreaRepository = superServiceAreaRepository;
+		this.serviceLayerRepository = serviceLayerRepository;
+		this.conversionService = conversionService;
+		this.wirecenterPlanningService = wirecenterPlanningService;
+		this.aroDemandService = aroDemandService;
+
+		this.serviceAreaAnalyzer = new ServiceAreaAnalyzer();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.altvil.aro.service.optimization.impl.PlanCommandExectorService#
+	 * deleteOldPlans(long)
+	 */
+	@Override
 	public void deleteOldPlans(long planId) {
 		networkPlanRepository.deleteWireCenterPlans(planId);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.altvil.aro.service.optimization.impl.PlanCommandExectorService#
+	 * createLayerCommands
+	 * (com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest
+	 * )
+	 */
+	@Override
 	public Collection<ProcessLayerCommand> createLayerCommands(
 			MasterOptimizationRequest request) {
 
 		return serviceLayerRepository.findAll(request.getProcessingLayers())
 				.stream().map(l -> this.computeWireCenterRequests(l, request))
 				.collect(Collectors.toList());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.altvil.aro.service.optimization.impl.PlanCommandExectorService#reify
+	 * (com.altvil.aro.service.optimization.constraints.OptimizationConstraints,
+	 * com.altvil.aro.service.optimization.wirecenter.PlannedNetwork)
+	 */
+	@Override
+	public OptimizedPlan reify(OptimizationConstraints constraints,
+			PlannedNetwork plan) {
+
+		WirecenterNetworkPlan reifiedPlan = conversionService.convert(
+				plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
+
+		NetworkDemandSummary demandSummary = toNetworkDemandSummary(
+				reifiedPlan.getDemandCoverage(),
+				plan.getCompetitiveDemandMapping());
+
+		//log.debug("ds ====>" + demandSummary.toString());
+
+		final GeneratedPlanImpl generatedPlan = new GeneratedPlanImpl(
+				demandSummary, constraints, reifiedPlan);
+		return wirecenterPlanningService.optimizedPlan(generatedPlan);
+
+	}
+
+	protected NetworkDemandSummary toNetworkDemandSummary(DemandCoverage dc,
+			CompetitiveDemandMapping mapping) {
+
+		Collection<CompetitiveLocationDemandMapping> plannedDemand = dc
+				.getLocations().stream()
+				.map(l -> mapping.getLocationDemandMapping(l.getObjectId()))
+				.collect(Collectors.toList());
+
+		return NetworkDemandSummaryImpl
+				.build()
+				.add(DemandTypeEnum.planned_demand, SpeedCategory.cat7,
+						dc.getLocationDemand())
+
+				.add(DemandTypeEnum.new_demand,
+						SpeedCategory.cat7,
+						aroDemandService.aggregateDemandForSpeedCategory(
+								mapping.getAllDemandMapping(),
+								SpeedCategory.cat7))
+
+				.add(DemandTypeEnum.original_demand,
+						SpeedCategory.cat3,
+						aroDemandService.aggregateDemandForSpeedCategory(
+								plannedDemand, SpeedCategory.cat3))
+
+				.build();
+
+	}
+
+	private List<Number> createAllServiceAreaUpdates(ServiceLayer serviceLayer,
+			MasterOptimizationRequest request) {
+		return networkPlanRepository.computeWirecenterUpdates(request
+				.getPlanId(), StreamUtil.map(serviceAreaAnalyzer
+				.computeServiceAreas(serviceLayer.getId(),
+						request.getWireCenters()), ServiceArea::getId));
+	}
+
+	private List<Number> createSelectedAreaUpdates(ServiceLayer serviceLayer,
+			MasterOptimizationRequest request) {
+		return networkPlanRepository.computeWirecenterUpdates(
+				request.getPlanId(), serviceLayer.getId());
 	}
 
 	private ProcessLayerCommand computeWireCenterRequests(
@@ -57,18 +191,9 @@ public class PlanCommands {
 
 		boolean selectAllLocations = selectionMode == LocationSelectionMode.ALL_LOCATIONS;
 
-		if (selectAllLocations) {
-			StreamUtil.map(
-					serviceAreaAnalyzer.computeServiceAreas(
-							serviceLayer.getId(), request.getWireCenters()),
-					ServiceArea::getId);
-		}
-
-		List<Number> wireCentersPlans = selectAllLocations ? networkPlanRepository
-				.computeWirecenterUpdates(request.getPlanId(),
-						request.getWireCenters()) : networkPlanRepository
-				.computeWirecenterUpdates(request.getPlanId(),
-						request.getServiceLayerId());
+		List<Number> wireCentersPlans = (selectAllLocations) ? createAllServiceAreaUpdates(
+				serviceLayer, request) : createSelectedAreaUpdates(
+				serviceLayer, request);
 
 		Collection<WirecenterOptimizationRequest> cmds = StreamUtil.map(
 				wireCentersPlans,
