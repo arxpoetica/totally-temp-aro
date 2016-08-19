@@ -190,7 +190,7 @@ public class BusinessesReportRepository {
                     "    join aro.businesses biz\n" +
                     "    on biz_ids.id = biz.id\n" +
                     "    ");
-            query.setParameter("threshold", threshold);
+            query.setParameter("threshold", threshold.getAsDouble());
             query.setParameter("planId", planId);
             query.setParameter("source", locationSource);
             query.setParameter("mrc", mrcThreshold);
