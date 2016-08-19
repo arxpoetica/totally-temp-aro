@@ -177,25 +177,47 @@ public class BusinessesReportRepository {
     public String getBusinesses(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
         OptionalDouble threshold = Arrays.stream(distanceThresholds).max();
         if (threshold.isPresent()) {
-            Query query = jdbcTemplate.createNativeQuery("    select biz.*, biz_ids.distance\n" +
-                    "    FROM  (\n" +
-                    "    select biz.id, min(ST_DISTANCE( cast (fr.geom as geography), cast(biz.geom as geography))) as distance from aro.businesses biz\n" +
-                    "    JOIN client.fiber_route fr ON\n" +
-                    "\tfr.plan_id = :planId\n" +
-                    "\tAND   ST_Contains( cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry),biz.geom)\n" +
-                    "\t AND coalesce(biz.monthly_recurring_cost,0) >= :mrc\n" +
-                    "\tAND biz.source = :source \n" +
-                    "\tgroup by 1\n" +
-                    "\t) biz_ids\n" +
-                    "    join aro.businesses biz\n" +
-                    "    on biz_ids.id = biz.id\n" +
-                    "    ");
+            Query query = jdbcTemplate.createNativeQuery("  with  \n" +
+                    "    plan_ids as \n" +
+                    "        (select p.id from client.plan p where p.id = :planId  or p.parent_plan_id = :planId   ), \n" +
+                    "    locIds as ( select l.id \n" +
+                    "        from client.plan p \n" +
+                    "        inner join plan_ids \n" +
+                    "        on p.id = plan_ids.id \n" +
+                    "        inner join aro.wirecenters w  \n" +
+                    "        on p.wirecenter_id =  w.id \n" +
+                    "            inner join aro.locations l  \n" +
+                    "        on ST_Contains(w.geom, l.geom) \n" +
+                    "    ), \n" +
+                    "    buffered_routes as ( \n" +
+                    "        select cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape , geom\n" +
+                    "        from client.fiber_route fr  \n" +
+                    "        join plan_ids pid on fr.plan_id = pid.id  \n" +
+                    "    ) \n" +
+                    " select biz.id ,biz.location_id, biz.industry_id, biz.name, biz.address,biz.number_of_employees, biz.annual_recurring_cost, biz.monthly_recurring_cost, biz.source, ST_X(biz.geom), ST_Y(biz.geom), biz_ids.distance\n" +
+                    "                        FROM  ( \n" +
+                    "                        select biz.id, min(ST_DISTANCE( cast (fr.geom as geography), cast(biz.geom as geography))) as distance \n" +
+                    "                        from \n" +
+                    "                            locIds \n" +
+                    "                            join \n" +
+                    "                            aro.businesses biz \n" +
+                    "                            on locIds.id = biz.location_id\n" +
+                    "                        JOIN buffered_routes fr ON \n" +
+                    "                     ST_Contains(fr.shape, biz.geom) \n" +
+                    "                     AND coalesce(biz.monthly_recurring_cost,0) >= :mrc\n" +
+                    "                    AND biz.source = :source\n" +
+                    "                    group by 1 \n" +
+                    "                    ) biz_ids \n" +
+                    "                        join aro.businesses biz \n" +
+                    "                        on biz_ids.id = biz.id \n" +
+                    "                        ;");
             query.setParameter("threshold", threshold.getAsDouble());
             query.setParameter("planId", planId);
             query.setParameter("source", locationSource);
             query.setParameter("mrc", mrcThreshold);
             List<Object[]> result = (List<Object[]>) query.getResultList();
-            return result.stream().map(this::mapBussinessRow)
+            return " id,location_id,industry_id,name,address,number_of_employees,annual_recurring_cost,monthly_recurring_cost,source,longitude,lattitude,distance\n" +
+                    result.stream().map(this::mapBussinessRow)
                     .collect(Collectors.joining("\n"));
         }else{
             return "";
