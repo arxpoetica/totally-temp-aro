@@ -97,6 +97,11 @@
       "Description" : "Project or billing code used to tag resources created by this template",
       "Default" : "AIT:ARO"
     },
+    "DBInstanceType" : {
+      "Type" : "String",
+      "Description" : "Image type for the PostGIS/PGRouting database instance",
+      "Default" : "db.m4.xlarge"
+    },
     "DBVolumeSize" : {
       "Type" : "String",
       "Description" : "size of extra db volume",
