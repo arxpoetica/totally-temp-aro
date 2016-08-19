@@ -195,7 +195,7 @@ module.exports = class Network {
       businesses: ['medium', 'large'],
       towers: 'celltower',
       smb: 'small',
-      '2kplus': null
+      '2kplus': 'mrcgte2000'
     }
     var algorithms = {
       'MAX_IRR': 'IRR',
@@ -209,9 +209,6 @@ module.exports = class Network {
       planId: plan_id,
       locationTypes: _.compact(_.flatten(options.locationTypes.map((key) => locationTypes[key]))),
       algorithm: options.algorithm
-    }
-    if (options.locationTypes.indexOf('2kplus') >= 0) {
-      body.mrc = 2000
     }
     var req = {
       method: 'POST',
