@@ -192,7 +192,7 @@ if action == 'CREATE':
 if action == 'UPDATE':
     try:
         outputs = cloudformation_stack.outputs
-    except botocore.exceptionsClientError:
+    except botocore.exceptions.ClientError:
         if environment == 'PROD':
             print "Stack does not exist, cannot update."
         elif environment == 'STAGING' or environment == 'QA':
