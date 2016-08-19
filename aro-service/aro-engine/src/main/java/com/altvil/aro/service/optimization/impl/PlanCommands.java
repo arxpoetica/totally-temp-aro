@@ -4,18 +4,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.altvil.aro.model.AnalysisArea;
-import com.altvil.aro.model.AnalysisLayer;
 import com.altvil.aro.model.ServiceArea;
-import com.altvil.aro.model.WireCenter;
+import com.altvil.aro.model.SuperServiceArea;
 import com.altvil.aro.persistence.repository.AnalysisAreaRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.ServiceAreaRepository;
+import com.altvil.aro.persistence.repository.SuperServiceAreaRepository;
 import com.altvil.aro.service.network.LocationSelectionMode;
-import com.altvil.aro.service.optimization.spatial.SpatialAnalysisType;
 import com.altvil.aro.service.optimization.spatial.AnalysisSelection;
+import com.altvil.aro.service.optimization.spatial.SpatialAnalysisType;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.utils.StreamUtil;
@@ -25,24 +26,32 @@ public class PlanCommands {
 	private NetworkPlanRepository networkPlanRepository;
 	private ServiceAreaRepository serviceAreaRepository;
 	private AnalysisAreaRepository analysisAreaRepository;
+	private SuperServiceAreaRepository superServiceAreaRepository;
+
+	private ServiceAreaAnalyzer serviceAreaAnalyzer;
 
 	public void deleteOldPlans(long planId) {
 		networkPlanRepository.deleteWireCenterPlans(planId);
 	}
 
 	public Collection<WirecenterOptimizationRequest> computeWireCenterRequests(
-			MasterOptimizationRequest request) {
+			int processLayerId, MasterOptimizationRequest request) {
 
-		boolean selectAllLocations = !request.getWireCenters().isEmpty();
+		final LocationSelectionMode selectionMode = request
+				.getNetworkDataRequest().getSelectionMode();
+
+		boolean selectAllLocations = selectionMode == LocationSelectionMode.ALL_LOCATIONS;
+
+		if (selectAllLocations) {
+			StreamUtil.map(serviceAreaAnalyzer.computeServiceAreas(processLayerId,
+					request.getWireCenters()), ServiceArea::getId);
+		}
 
 		List<Number> wireCentersPlans = selectAllLocations ? networkPlanRepository
 				.computeWirecenterUpdates(request.getPlanId(),
 						request.getWireCenters()) : networkPlanRepository
 				.computeWirecenterUpdates(request.getPlanId(),
 						request.getServiceLayerId());
-
-		final LocationSelectionMode selectionMode = selectAllLocations ? LocationSelectionMode.ALL_LOCATIONS
-				: LocationSelectionMode.SELECTED_LOCATIONS;
 
 		return StreamUtil.map(
 				wireCentersPlans,
@@ -60,8 +69,6 @@ public class PlanCommands {
 
 	private class ServiceAreaAnalyzer {
 
-		private Map<Integer, ServiceArea> map;
-
 		private Collection<ServiceArea> processAnalysisAreas(
 				int serviceLayerId, List<AnalysisSelection> selections) {
 			Map<Integer, List<AnalysisArea>> map = analysisAreaRepository
@@ -70,34 +77,58 @@ public class PlanCommands {
 					.collect(
 							Collectors.groupingBy(a -> a.getAnalysisLayer()
 									.getId()));
-			return map.entrySet()
+			return map
+					.entrySet()
 					.stream()
 					.map(e -> serviceAreaRepository
 							.queryServiceAreasforForAnalysis(StreamUtil.map(
 									e.getValue(), AnalysisArea::getId),
-									serviceLayerId, e.getKey())).flatMap(Collection::stream).collect(Collectors.toSet());
+									serviceLayerId, e.getKey()))
+					.flatMap(Collection::stream).collect(Collectors.toSet());
 		}
 
-		public Collection<ServiceArea> computeWireCenters(
+		private Collection<ServiceArea> processSuperLayers(int serviceLayerId,
+				List<AnalysisSelection> selections) {
+
+			Map<Integer, List<SuperServiceArea>> map = superServiceAreaRepository
+					.findAll(toIds(selections)).stream()
+					.collect(Collectors.groupingBy(a -> a.getLayer().getId()));
+
+			return map
+					.entrySet()
+					.stream()
+					.map(e -> serviceAreaRepository
+							.queryServiceAreasFromSuperServiceAreas(
+									StreamUtil.map(e.getValue(),
+											SuperServiceArea::getId),
+									serviceLayerId, e.getKey()))
+
+					.flatMap(Collection::stream).collect(Collectors.toSet());
+		}
+
+		public Collection<ServiceArea> processServiceAreas(
+				List<AnalysisSelection> selections) {
+			return serviceAreaRepository.findAll(toIds(selections));
+		}
+
+		public Collection<ServiceArea> computeServiceAreas(int processLayerId,
 				SpatialAnalysisType regionType,
 				List<AnalysisSelection> selections) {
 
 			switch (regionType) {
 			case WIRECENTER:
-				return serviceAreaRepository.findAll(StreamUtil.map(selections,
-						AnalysisSelection::getSpatialId));
+				return processServiceAreas(selections);
 			case ANALYSIS_AREA:
-				return serviceAreaRepository
-						.queryServiceAreasFromSuperServiceAreas(null, 0, 0);
+				return processAnalysisAreas(processLayerId, selections);
 			case SUPER_SERVICE_AREA:
-				return null;
+				return processSuperLayers(processLayerId, selections);
 			default:
 				return Collections.emptyList();
 			}
 
 		}
 
-		public Collection<WireCenter> computeWirecenters(
+		public Set<ServiceArea> computeServiceAreas(int processLayerId,
 				Collection<AnalysisSelection> selections) {
 
 			Map<SpatialAnalysisType, List<AnalysisSelection>> mappedSelections = selections
@@ -106,7 +137,13 @@ public class PlanCommands {
 							Collectors
 									.groupingBy(AnalysisSelection::getSpatialRegionType));
 
-			return null;
+			return mappedSelections
+					.entrySet()
+					.stream()
+					.map(e -> this.computeServiceAreas(processLayerId,
+							e.getKey(), e.getValue()))
+					.flatMap(Collection::stream).collect(Collectors.toSet());
+
 		}
 	}
 

@@ -43,16 +43,6 @@ public interface NetworkPlanRepository extends
 	@Query(value = "select p from WirecenterPlan p where p.masterPlan.id = :planId")
 	List<WirecenterPlan> queryChildPlans(@Param("planId") long planId);
 	
-	
-	@Query(value = "select count(*) \n" + 
-			"from client.plan p\n" + 
-			"join aro.wirecenters w on p.wirecenter_id = w.id \n" + 
-			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
-			"join aro.households h on h.location_id = l.id\n" + 
-			"where p.id = :planId", nativeQuery = true)
-	Integer queryTotalHouseholdLocations(@Param("planId") long planId);
-	
-	
 	@Query(value = "with linked_locations as (\n" + 
 			"SELECT\n" + 
 			"l.id as id,\n" + 
@@ -62,7 +52,7 @@ public interface NetworkPlanRepository extends
 			"FROM aro.edges where st_intersects(r.area_bounds, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" + 
 			") as gid\n" + 
 			"FROM client.plan r\n" + 
-			"join aro.wirecenters w on r.wirecenter_id = w.id\n" + 
+			"join client.service_area w on r.wirecenter_id = w.id\n" + 
 			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
 			"where r.id = :planId\n" + 
 			")\n" + 
@@ -117,7 +107,7 @@ public interface NetworkPlanRepository extends
 			"with selected_locations as (\n" + 
 			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength\n" + 
 			"	from client.plan p \n" + 
-			"	join aro.wirecenters w on w.id = p.wirecenter_id\n" + 
+			"	join client.service_area w on w.id = p.wirecenter_id\n" + 
 			"	join aro.locations l on st_contains(w.geom, l.geom)\n" + 
 			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
 			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3\n" + 
@@ -187,7 +177,7 @@ public interface NetworkPlanRepository extends
 			"			FROM\n" + 
 			"				client.plan p\n" + 
 			"				join client.network_nodes n on p.id = n.plan_id and n.node_type_id = 1 \n" + 
-			"				join aro.wirecenters w on w.id = p.wirecenter_id\n" + 
+			"				join client.service_area w on w.id = p.wirecenter_id\n" + 
 			"			WHERE \n" + 
 			"				p.id = :planId\n" + 
 			"			limit 200 \n" + 
@@ -224,7 +214,7 @@ public interface NetworkPlanRepository extends
 
 	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
 			+ "from client.plan r \n"
-			+ "join aro.wirecenters w on r.wirecenter_id = w.id\n"
+			+ "join client.service_area w on r.wirecenter_id = w.id\n"
 			+ "join aro.edges a on st_intersects(edge_buffer, a.geom)\n"
 			+ "where r.id = :planId", nativeQuery = true)
 	List<Object[]> queryRoadEdgesbyPlanId(@Param("planId") long planId);
@@ -262,10 +252,9 @@ public interface NetworkPlanRepository extends
 			"	select st.location_id, st.master_plan_id, w.id as wirecenter_id  \n" + 
 			"	from selected_targets st \n" + 
 			"	join aro.locations l on l.id = st.location_id\n" + 
-			"	join aro.wirecenters w on st_contains(w.geom, l.geom) and service_type='A' and layer_id=:layerId\n" + //Add Layer Constraint
+			"	join client.service_area w on st_contains(w.geom, l.geom) and service_type='A' and service_layer_id=:layerId\n" + 
 			"	where st.plan_id is null\n" + 
 			")\n" + 
-			"\n" + 
 			",\n" + 
 			"deleted_locations as (\n" + 
 			"	select ot.location_id, ot.plan_id, ot.master_plan_id, ot.wirecenter_id\n" + 
@@ -276,49 +265,28 @@ public interface NetworkPlanRepository extends
 			",\n" + 
 			"new_plans as (\n" + 
 			"	insert into client.plan (name, plan_type, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at, parent_plan_id)\n" + 
-			"	select p.name, 'W', w.id, w.wirecenter, st_centroid(w.geom), w.geom,  NOW(), NOW(), p.master_plan_id \n" + 
+			"	select p.name, 'W', w.id, w.code, st_centroid(w.geom), w.geom,  NOW(), NOW(), p.master_plan_id \n" + 
 			"	from\n" + 
 			"	inputs p,\n" + 
 			"	(select distinct nt.master_plan_id, nt.wirecenter_id\n" + 
-			"		from new_targets nt\n" + 
-			"		join aro.wirecenters w on w.id = nt.wirecenter_id) nw\n" + 
-			"	join aro.wirecenters w on w.id = nw.wirecenter_id\n" + 
+			"	from new_targets nt\n" + 
+			"	join client.service_area w on w.id = nt.wirecenter_id) nw\n" + 
+			"	join client.service_area w on w.id = nw.wirecenter_id\n" + 
 			"	returning id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
 			")\n" + 
 			",\n" + 
-			"updated_new_cos as ( \n" + 
-			"			select \n" + 
-			"			\n" + 
-			"			pl.id,\n" + 
-			"			\n" + 
-			"			(select np.area_centroid\n" + 
-			"			from new_plans np \n" + 
-			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
-			"			and np.id = pl.id) as centroid,\n" + 
-			"			\n" + 
-			"			(select\n" + 
-			"			CO.geom\n" + 
-			"			from new_plans np\n" + 
-			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
-			"			join client.network_nodes CO on st_contains(w.geom, CO.geom) \n" + 
-			"			where CO.plan_id is null\n" + 
-			"			and np.id = pl.id) as location\n" + 
-			"			from new_plans pl 			\n" + 
-			"	)\n" + 
-			",\n" + 
-			"updated_network_nodes as (\n" + 
-			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
-			"	 select co.id, 1,\n" + 
-			"		case\n" + 
-			"		when co.location is not null then cast(co.location as geography)\n" + 
-			"		else cast(co.centroid as geography)\n" + 
-			"		end,\n" + 
-			"		case\n" + 
-			"		when co.location is not null then cast(co.location as geometry)\n" + 
-			"		else cast(co.centroid  as geometry)\n" + 
-			"		end\n" + 
-			"		from  updated_new_cos co\n" + 
-			"	returning id, plan_id\n" + 
+			"updated_network_nodes AS (\n" + 
+			"	INSERT INTO client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
+			"	SELECT\n" + 
+			"		p.id,\n" + 
+			"		n.node_type_id,\n" + 
+			"		n.geog,\n" + 
+			"		n.geom\n" + 
+			"	FROM new_plans p\n" + 
+			"	JOIN client.plan_head h on h.service_area_id = p.wirecenter_id\n" + 
+			"	JOIN client.network_nodes n on h.plan_id = h.id\n" + 
+			"	WHERE n.node_type_id in(1)\n" + 
+			"	RETURNING id, plan_id\n" + 
 			")\n" + 
 			",\n" + 
 			"updated_plan_sources as (\n" + 
@@ -349,7 +317,7 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			",\n" + 
 			"old_plans as (\n" + 
-			"	select plan_id, sum(location_id) as location_count\n" + 
+			"	select plan_id, sum(1) as location_count\n" + 
 			"	from deleted_locations\n" + 
 			"	group by plan_id\n" + 
 			")\n" + 
@@ -379,56 +347,43 @@ public interface NetworkPlanRepository extends
 			"		in (select plan_id from all_modified_plans)\n" + 
 			"	returning id\n" + 
 			")\n" + 
-			"select plan_id from all_modified_plans\n", nativeQuery = true)
+			"select plan_id from all_modified_plans", nativeQuery = true)
 	List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("layerId") int layerId);
     
     
     
     @Modifying
     @Transactional
-	@Query(value="with new_plans as (\n" + 
-			"	insert into client.plan (name, plan_type, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at, parent_plan_id)\n" + 
-			"	select p.name, 'W', w.id, w.wirecenter, st_centroid(w.geom), w.geom,  NOW(), NOW(), p.id \n" + 
-			"	from client.plan p, aro.wirecenters w\n" + 
-			"	where w.id in (:wireCentersIds) and p.id = :planId\n" + 
-			"	\n" + 
-			"   returning id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
+	@Query(value="WITH root_plans AS (\n" + 
+			"	SELECT m.name as master_name, m.id as master_plan_id, r.*\n" + 
+			"	FROM client.plan m,\n" + 
+			"	client.plan_head h \n" + 
+			"	JOIN client.plan r ON r.id = h.plan_id\n" + 
+			"	WHERE m.id = :planId AND h.service_area_id IN (:wireCentersIds) \n" + 
 			")\n" + 
 			",\n" + 
-			"new_cos as ( \n" + 
-			"			select \n" + 
-			"			\n" + 
-			"			pl.id,\n" + 
-			"\n" + 
-			"			(select np.area_centroid\n" + 
-			"			from new_plans np \n" + 
-			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
-			"			and np.id = pl.id) as centroid,\n" + 
-			"			\n" + 
-			"			(select\n" + 
-			"			CO.geom\n" + 
-			"			from new_plans np\n" + 
-			"			join aro.wirecenters w on w.id = np.wirecenter_id\n" + 
-			"			join client.network_nodes CO on st_contains(w.geom, CO.geom) \n" + 
-			"			where CO.plan_id is null\n" + 
-			"			and np.id = pl.id) as location\n" + 
-			"			from new_plans pl 			\n" + 
-			"),\n" + 
-			"updated_network_nodes as (\n" + 
-			"	insert into client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
-			"	 select co.id, 1,\n" + 
-			"		case\n" + 
-			"		when co.location is not null then cast(co.location as geography)\n" + 
-			"		else cast(co.centroid as geography)\n" + 
-			"		end,\n" + 
-			"		case\n" + 
-			"		when co.location is not null then cast(co.location as geometry)\n" + 
-			"		else cast(co.centroid  as geometry)\n" + 
-			"		end\n" + 
-			"		from  new_cos co\n" + 
-			"	returning plan_id\n" + 
+			"new_plans as (\n" + 
+			"	INSERT INTO client.plan (name, plan_type, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at, parent_plan_id)\n" + 
+			"	SELECT r.master_name, 'W', r.wirecenter_id, r.area_name, r.area_centroid, r.area_bounds,  NOW(), NOW(), r.master_plan_id \n" + 
+			"	FROM root_plans r\n" + 
+			"	RETURNING id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
 			")\n" + 
-			"select plan_id from updated_network_nodes",nativeQuery = true) 
+			",\n" + 
+			"updated_network_nodes AS (\n" + 
+			"	INSERT INTO client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
+			"	SELECT\n" + 
+			"		p.id,\n" + 
+			"		n.node_type_id,\n" + 
+			"		n.geog,\n" + 
+			"		n.geom\n" + 
+			"	FROM root_plans r\n" + 
+			"	JOIN new_plans p on p.wirecenter_id = r.wirecenter_id\n" + 
+			"	JOIN client.network_nodes n on n.plan_id = r.id\n" + 
+			"	WHERE n.node_type_id in(1)\n" + 
+			"	RETURNING plan_id\n" + 
+			")\n" + 
+			"SELECT DISTINCT plan_id \n" + 
+			"FROM updated_network_nodes",nativeQuery = true) 
     List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("wireCentersIds") Collection<Integer> wireCentersIds);
 
 	@Query(value = "select id from client.plan where parent_plan_id = :planId", nativeQuery = true)
