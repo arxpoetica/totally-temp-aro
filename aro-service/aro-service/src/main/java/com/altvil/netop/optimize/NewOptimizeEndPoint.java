@@ -29,6 +29,7 @@ import com.altvil.aro.service.optimization.spatial.AnalysisSelection;
 import com.altvil.aro.service.optimization.spatial.SpatialAnalysisType;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
+import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.OptimizationType;
 import com.altvil.netop.plan.SelectedRegion;
 import com.altvil.netop.service.AroConversionService;
@@ -39,7 +40,8 @@ public class NewOptimizeEndPoint {
 	@Autowired
 	private AroConversionService aroConversionService;
 
-	@Autowired @Qualifier("newOptimizationPlannerServiceImpl")
+	@Autowired
+	@Qualifier("newOptimizationPlannerServiceImpl")
 	private OptimizationPlannerService optimizationPlannerService;
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
@@ -56,7 +58,7 @@ public class NewOptimizeEndPoint {
 		return mpr;
 
 	}
-	
+
 	private Collection<AnalysisSelection> toSelectedWireCenters(
 			Collection<SelectedRegion> selectedRegions) {
 
@@ -65,10 +67,14 @@ public class NewOptimizeEndPoint {
 		if (selectedRegions != null) {
 			for (SelectedRegion sr : selectedRegions) {
 				switch (sr.getRegionType()) {
-				case ANALYSIS_AREA :
-					result.add(new AnalysisSelection(SpatialAnalysisType.ANALYSIS_AREA, Integer.parseInt(sr.getId())));
+				case ANALYSIS_AREA:
+					result.add(new AnalysisSelection(
+							SpatialAnalysisType.ANALYSIS_AREA, Integer
+									.parseInt(sr.getId())));
 				case WIRECENTER:
-					result.add(new AnalysisSelection(SpatialAnalysisType.WIRECENTER, Integer.parseInt(sr.getId())));
+					result.add(new AnalysisSelection(
+							SpatialAnalysisType.WIRECENTER, Integer.parseInt(sr
+									.getId())));
 					break;
 				default:
 				}
@@ -122,18 +128,39 @@ public class NewOptimizeEndPoint {
 
 	}
 
+	private AlgorithmType inferAlgorithmType(AroOptimizationPlan plan) {
+		if (plan.getAlgorithm() == null) {
+			return AlgorithmType.PLANNING;
+		}
+
+		switch (plan.getAlgorithm()) {
+		case PRUNNING_NPV:
+		case NPV :
+			return AlgorithmType.EXPANDED_ROUTING ;
+		case COVERAGE :
+		case IRR :
+			return AlgorithmType.PRUNING ;
+		case CAPEX:
+		case UNCONSTRAINED :
+		default:
+			return AlgorithmType.PLANNING;
+		}
+	}
+
 	private MasterOptimizationRequest toOptimizationPlan(
 			AroOptimizationPlan plan) {
 
 		return MasterOptimizationRequest
 				.build()
+				.setAlgorithmType(inferAlgorithmType(plan))
 				.setProcessingLayers(plan.getProcessLayers())
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
 				.setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())
 				.setLocationEntities(toMask(plan.getLocationTypes()))
 				.setOptimizationMode(plan.getOptimizationMode())
-				.setAnalysisSelections(toSelectedWireCenters(plan.getSelectedRegions()))
+				.setAnalysisSelections(
+						toSelectedWireCenters(plan.getSelectedRegions()))
 				.build();
 
 	}

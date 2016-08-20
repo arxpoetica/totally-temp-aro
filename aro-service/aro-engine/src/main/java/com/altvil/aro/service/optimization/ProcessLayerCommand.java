@@ -1,4 +1,4 @@
-package com.altvil.aro.service.optimization.impl.type;
+package com.altvil.aro.service.optimization;
 
 import java.util.Collection;
 
