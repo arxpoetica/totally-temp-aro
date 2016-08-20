@@ -42,11 +42,12 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
+import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.utils.StreamUtil;
 
 @Service
 public class PlanCommandExecutorServiceImpl implements
-		PlanCommandExecutorService {
+		PlanCommandService {
 
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
@@ -114,18 +115,9 @@ public class PlanCommandExecutorServiceImpl implements
 				.collect(Collectors.toList());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.altvil.aro.service.optimization.impl.PlanCommandExectorService#reify
-	 * (com.altvil.aro.service.optimization.constraints.OptimizationConstraints,
-	 * com.altvil.aro.service.optimization.wirecenter.PlannedNetwork)
-	 */
 	@Override
-	public OptimizedPlan reify(OptimizationConstraints constraints,
+	public GeneratedPlan reifyPlan(OptimizationConstraints constraints,
 			PlannedNetwork plan) {
-
 		WirecenterNetworkPlan reifiedPlan = conversionService.convert(
 				plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
 
@@ -133,12 +125,30 @@ public class PlanCommandExecutorServiceImpl implements
 				reifiedPlan.getDemandCoverage(),
 				plan.getCompetitiveDemandMapping());
 
-		//log.debug("ds ====>" + demandSummary.toString());
+		// log.debug("ds ====>" + demandSummary.toString());
 
-		final GeneratedPlanImpl generatedPlan = new GeneratedPlanImpl(
-				demandSummary, constraints, reifiedPlan);
-		return wirecenterPlanningService.optimizedPlan(generatedPlan);
+		return new GeneratedPlanImpl(demandSummary, constraints, reifiedPlan);
 
+	}
+
+	@Override
+	public OptimizedPlan summarize(GeneratedPlan plan) {
+		return wirecenterPlanningService.summarize(plan);
+	}
+
+	@Override
+	public void save(OptimizedPlan plan) {
+		wirecenterPlanningService.save(plan);
+	}
+
+	@Override
+	public OptimizedPlan reifyPlanSummarizeAndSave(OptimizationConstraints constraints,
+			PlannedNetwork plan) {
+
+		OptimizedPlan optimizedPlan = summarize(reifyPlan(constraints, plan)) ;
+		save(optimizedPlan);
+		return optimizedPlan ;
+		
 	}
 
 	protected NetworkDemandSummary toNetworkDemandSummary(DemandCoverage dc,
@@ -201,7 +211,8 @@ public class PlanCommandExecutorServiceImpl implements
 					return new WirecenterOptimizationRequest(request
 							.getOptimizationConstraints(), request
 							.getConstraints(), request.getNetworkDataRequest()
-							.createRequest(id.longValue(), selectionMode));
+							.createRequest(id.longValue(), selectionMode),
+							request.getAlgorithmType());
 				});
 
 		return new ProcessLayerCommandImpl(serviceLayer, cmds);

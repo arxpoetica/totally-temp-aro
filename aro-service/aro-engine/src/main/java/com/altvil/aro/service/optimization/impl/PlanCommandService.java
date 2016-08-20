@@ -7,14 +7,23 @@ import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.impl.type.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
+import com.altvil.aro.service.report.GeneratedPlan;
 
-public interface PlanCommandExecutorService {
+
+//
+// This acts as a facade and will be later turned into Explicit commands and composed
+//
+public interface PlanCommandService {
 
 	void deleteOldPlans(long planId);
 
 	Collection<ProcessLayerCommand> createLayerCommands(
 			MasterOptimizationRequest request);
 
-	OptimizedPlan reify(OptimizationConstraints constraints, PlannedNetwork plan);
+	GeneratedPlan reifyPlan(OptimizationConstraints constraints, PlannedNetwork plan) ;
+	OptimizedPlan summarize(GeneratedPlan plan) ;
+	void save(OptimizedPlan plan) ;
+	OptimizedPlan reifyPlanSummarizeAndSave(OptimizationConstraints constraints, PlannedNetwork plan) ;
+	
 
 }

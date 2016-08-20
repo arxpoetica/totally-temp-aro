@@ -16,6 +16,7 @@ import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.plan.NetworkAssignmentModelFactory;
+import com.altvil.aro.service.plan.impl.LcrContextImpl;
 
 @Service
 public class NetworkModelBuilderFactoryImpl implements
@@ -85,7 +86,7 @@ public class NetworkModelBuilderFactoryImpl implements
 
 			return appCtx
 					.getBean(CoreLeastCostRoutingService.class)
-					.computeNetworkModel(networkModel, ctx.getPricingModel(), ctx.getFtthThreshholds(), ctx.getFinancialInputs());
+					.computeNetworkModel(networkModel, LcrContextImpl.create(ctx.getPricingModel(), ctx.getFtthThreshholds()));
 
 		}
 	}

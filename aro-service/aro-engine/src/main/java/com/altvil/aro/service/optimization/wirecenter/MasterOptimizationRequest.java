@@ -10,6 +10,7 @@ import com.altvil.aro.service.optimization.OptimizationRequest;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.spatial.AnalysisSelection;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.OptimizationMode;
 
 public class MasterOptimizationRequest extends OptimizationRequest {
@@ -28,16 +29,24 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		private int year = 2015;
 		private Collection<Integer> processingLayers;
 		private Collection<AnalysisSelection> analysisSelections;
+
+		private AlgorithmType algorithmType ;
 		
 		private Set<LocationEntityType> locationEntities;
 		private FiberNetworkConstraints fiberNetworkConstraints;
 		private OptimizationConstraints optimizationConstraints;
 		private LocationSelectionMode locationSelectionMode = LocationSelectionMode.SELECTED_LOCATIONS;
 		private OptimizationMode optimizationMode;
+		
 
 		public Builder setOptimizationConstraints(
 				OptimizationConstraints constraints) {
 			this.optimizationConstraints = constraints;
+			return this;
+		}
+
+		public Builder setAlgorithmType(AlgorithmType algorithmType) {
+			this.algorithmType = algorithmType;
 			return this;
 		}
 
@@ -88,7 +97,8 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		public MasterOptimizationRequest build() {
 			return new MasterOptimizationRequest(processingLayers,
 					optimizationConstraints, fiberNetworkConstraints,
-					createDataRequest(), analysisSelections, optimizationMode);
+					createDataRequest(), analysisSelections, optimizationMode,
+					algorithmType);
 		}
 
 		public Builder setOptimizationMode(OptimizationMode optimizationMode) {
@@ -102,8 +112,8 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
 			Collection<AnalysisSelection> analysisLayers,
-			OptimizationMode optimizationMode) {
-		super(optimizationConstraints, constraints, request);
+			OptimizationMode optimizationMode, AlgorithmType algorithmType) {
+		super(optimizationConstraints, constraints, request, algorithmType);
 		this.processingLayers = processingLayers;
 		this.analysisSelections = analysisLayers;
 		this.optimizationMode = optimizationMode;

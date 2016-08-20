@@ -21,7 +21,7 @@ import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
-import com.altvil.aro.service.optimization.impl.PlanCommandExecutorService;
+import com.altvil.aro.service.optimization.impl.PlanCommandService;
 import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
@@ -60,7 +60,7 @@ public abstract class MasterOptimizer {
 	private OptimizationExecutor wirecenterExecutor;
 
 	@Autowired
-	private PlanCommandExecutorService planCommandExecutorService;
+	private PlanCommandService planCommandExecutorService;
 
 	@Autowired
 	protected WirecenterPlanningService wirecenterPlanningService;
@@ -144,7 +144,7 @@ public abstract class MasterOptimizer {
 	protected OptimizedPlan reify(OptimizationConstraints constraints,
 			PlannedNetwork plan) {
 
-		return planCommandExecutorService.reify(constraints, plan) ;
+		return planCommandExecutorService.reifyPlanSummarizeAndSave(constraints, plan) ;
 		
 	}
 

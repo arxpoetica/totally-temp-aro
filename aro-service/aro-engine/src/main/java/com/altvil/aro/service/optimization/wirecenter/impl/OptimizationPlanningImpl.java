@@ -1,8 +1,6 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
 import java.util.Date;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -14,6 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.FinancialInputs;
 import com.altvil.aro.service.graph.GraphNetworkModelService;
+import com.altvil.aro.service.graph.alg.NpvClosestFirstIterator;
+import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBuilderContext;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.model.NetworkData;
@@ -31,11 +32,11 @@ import com.altvil.aro.service.optimize.FTTHOptimizerService.OptimizerContextBuil
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
+import com.altvil.aro.service.plan.impl.LcrContextImpl;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
 import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
-import com.altvil.enumerations.OptimizationType;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -61,40 +62,10 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	@Autowired
 	private transient GraphNetworkModelService graphBuilderService;
 
-	private Map<OptimizationType, CoreLeastCostRoutingService> routingServiceByType = new EnumMap<>(OptimizationType.class);
-	
 	@Autowired
-	public void injectRoutingServices(CoreLeastCostRoutingService[] routingServices) {
-		types: for (OptimizationType type : OptimizationType.values()) {
+	private transient CoreLeastCostRoutingService coreLeastCostRoutingService;
 
-			for (CoreLeastCostRoutingService routingService : routingServices) {
-				if (routingService.isRoutingServiceFor(type)) {
-					routingServiceByType.put(type, routingService);
-					continue types;
-				}
-			}
-
-			throw new IllegalStateException("No CoreLeastCostRoutingService found for " + type);
-		}
-	}
-
-	//
-	// private Collection<NetworkDemand> toNetworkDemands(NetworkData
-	// networkData) {
-	//
-	// List<NetworkDemand> demands = new ArrayList<>();
-	//
-	// demands.add(new NetworkDemand(DemandTypeEnum.new_demand,
-	// SpeedCategory.cat7, networkData.getDemandAnalysis()
-	// .getSelectedDemand()));
-	//
-	// demands.add(new NetworkDemand(DemandTypeEnum.original_demand,
-	// SpeedCategory.cat3, networkData.getDemandAnalysis()
-	// .getLocationDemand(SpeedCategory.cat3)));
-	//
-	// return demands;
-	// }
-
+	
 	@Override
 	public Optional<PlannedNetwork> planNetwork(
 			WirecenterOptimizationRequest request) {
@@ -106,23 +77,38 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	}
 
 	@Override
-	public Optional<PlannedNetwork> planNetwork(WirecenterOptimizationRequest request, NetworkData networkData) {
+	public Optional<PlannedNetwork> planNetwork(
+			WirecenterOptimizationRequest request, NetworkData networkData) {
 
+		return planNetwork(request, networkData,
+				ScalarClosestFirstSurfaceIterator.BUILDER);
+	}
+
+	@Override
+	public Optional<PlannedNetwork> planNpvNetwork(
+			WirecenterOptimizationRequest request, NetworkData networkData) {
+		FinancialInputs financialInputs = new FinancialInputs(request
+				.getOptimizationConstraints().getDiscountRate(), request
+				.getOptimizationConstraints().getYears());
+		return planNetwork(request, networkData,
+				new NpvClosestFirstIterator.Builder(financialInputs));
+	}
+
+	private Optional<PlannedNetwork> planNetwork(
+			WirecenterOptimizationRequest request, NetworkData networkData,
+			ClosestFirstSurfaceBuilder itr) {
 
 		PricingModel pricingModel = pricingService.getPricingModel("*",
 				new Date(),
-				PricingContext.create(request.getConstructionRatios())) ;
-		
-		GraphNetworkModel model = graphBuilderService
-				.build(networkData)
-				.setPricingModel(pricingModel)
-				.build();
-		
-		FinancialInputs financialInputs = new FinancialInputs(request.getOptimizationConstraints().getDiscountRate(), request.getOptimizationConstraints().getYears());
+				PricingContext.create(request.getConstructionRatios()));
 
-		return StreamUtil.map(routingServiceByType.get(request.getOptimizationConstraints().getOptimizationType()).computeNetworkModel(model,
-				pricingModel,
-				FiberConstraintUtils.build(request.getConstraints()), financialInputs),
+		GraphNetworkModel model = graphBuilderService.build(networkData)
+				.setPricingModel(pricingModel).build();
+		
+		return StreamUtil.map(coreLeastCostRoutingService.computeNetworkModel(
+				model, LcrContextImpl.create(pricingModel,
+						FiberConstraintUtils.build(request.getConstraints()),
+						itr)),
 				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
 						networkData.getCompetitiveDemandMapping()));
 
@@ -131,13 +117,13 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	@Override
 	public PrunedNetwork pruneNetwork(WirecenterOptimizationRequest request) {
 
-		//TODO KAMIL ThresholdBudgetConstraint => Change to OptimizationConstraint
-		
-		OptimizationEvaluator evaluator =  
-				optimizationEvaluatorService
+		// TODO KAMIL ThresholdBudgetConstraint => Change to
+		// OptimizationConstraint
+
+		OptimizationEvaluator evaluator = optimizationEvaluatorService
 				.getOptimizationEvaluator((ThresholdBudgetConstraint) request
-						.getOptimizationConstraints()) ;
-		
+						.getOptimizationConstraints());
+
 		NetworkData networkData = networkService.getNetworkData(request
 				.getNetworkDataRequest());
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
@@ -164,20 +150,25 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		@Override
 		public OptimizerContext createOptimizerContext(ApplicationContext ctx) {
 			PricingModel pricingModel = ctx.getBean(PricingService.class)
-					.getPricingModel("*", new Date(), PricingContext.create(request.getConstructionRatios()));
+					.getPricingModel(
+							"*",
+							new Date(),
+							PricingContext.create(request
+									.getConstructionRatios()));
 
 			FtthThreshholds threshHolds = FiberConstraintUtils.build(request
 					.getConstraints());
 
 			GraphBuilderContext graphContext = ctx
-					.getBean(GraphNetworkModelService.class)
-					.build()
-					.setPricingModel(pricingModel)
-					.createContext();
-			
-			FinancialInputs financialInputs = new FinancialInputs(request.getOptimizationConstraints().getDiscountRate(), request.getOptimizationConstraints().getYears());
+					.getBean(GraphNetworkModelService.class).build()
+					.setPricingModel(pricingModel).createContext();
 
-			return new OptimizerContext(pricingModel, threshHolds, graphContext, financialInputs);
+			FinancialInputs financialInputs = new FinancialInputs(request
+					.getOptimizationConstraints().getDiscountRate(), request
+					.getOptimizationConstraints().getYears());
+
+			return new OptimizerContext(pricingModel, threshHolds,
+					graphContext, financialInputs);
 		}
 	}
 

@@ -5,6 +5,7 @@ import com.altvil.aro.service.optimization.OptimizationRequest;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.aro.service.price.ConstructionRatios;
+import com.altvil.enumerations.AlgorithmType;
 
 public class WirecenterOptimizationRequest extends OptimizationRequest {
 
@@ -13,8 +14,9 @@ public class WirecenterOptimizationRequest extends OptimizationRequest {
 	public WirecenterOptimizationRequest(
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints networkConstraints,
-			NetworkDataRequest networkDataRequest) {
-		super(optimizationConstraints, networkConstraints, networkDataRequest);
+			NetworkDataRequest networkDataRequest, AlgorithmType algorithmType) {
+		super(optimizationConstraints, networkConstraints, networkDataRequest,
+				algorithmType);
 	}
 
 	public ConstructionRatios getConstructionRatios() {

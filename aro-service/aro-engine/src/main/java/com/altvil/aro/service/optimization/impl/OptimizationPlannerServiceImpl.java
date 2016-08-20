@@ -18,6 +18,7 @@ import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.impl.type.NpvPlanningOptimizer;
 import com.altvil.aro.service.optimization.impl.type.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
@@ -36,7 +37,6 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultOptimizationResult;
-import com.altvil.enumerations.OptimizationType;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -51,24 +51,27 @@ public class OptimizationPlannerServiceImpl implements
 	private OptimizationExecutorService optimizationExecutorService;
 
 	private MasterPlanningService masterPlanningService;
-	
+
 	private OptimizationExecutor wirecenterExecutor;
 	private OptimizationExecutor masterPlanExecutor;
-	private PlanCommandExecutorService planCommandExecutorService;
+	private PlanCommandService planCommandExecutorService;
+	private NpvPlanningOptimizer npvPlanningOptimizer;
 
 	@Autowired
 	public OptimizationPlannerServiceImpl(
-			PlanCommandExecutorService planCommandExecutorService,
+			PlanCommandService planCommandExecutorService,
 			OptimizationEvaluatorFactory strategyService,
 			WirecenterOptimizationService wirecenterOptimizationService,
 			OptimizationExecutorService optimizationExecutorService,
-			MasterPlanningService masterPlanningService) {
+			MasterPlanningService masterPlanningService,
+			NpvPlanningOptimizer npvPlanningOptimizer) {
 		super();
 		this.planCommandExecutorService = planCommandExecutorService;
 		this.strategyService = strategyService;
 		this.wirecenterOptimizationService = wirecenterOptimizationService;
 		this.optimizationExecutorService = optimizationExecutorService;
 		this.masterPlanningService = masterPlanningService;
+		this.npvPlanningOptimizer = npvPlanningOptimizer;
 	}
 
 	@PostConstruct
@@ -91,17 +94,21 @@ public class OptimizationPlannerServiceImpl implements
 	private MasterOptimizer createMasterOptimizer(
 			MasterOptimizationRequest request) {
 
-		if (request.getOptimizationConstraints() == null
-				|| request.getOptimizationConstraints().getOptimizationType() == OptimizationType.UNCONSTRAINED
-				|| request.getOptimizationConstraints().getOptimizationType() == OptimizationType.CAPEX) {
-
+		switch (request.getAlgorithmType()) {
+		case PLANNING:
 			return new PlanningOptimizer();
+		case PRUNING:
+			return new PruningOptimizer(
+					strategyService.getOptimizationEvaluator(
+							(ThresholdBudgetConstraint) request
+									.getOptimizationConstraints(), request
+									.getOptimizationMode()));
+		case EXPANDED_ROUTING:
+			return new ExpandedNpvRouting();
+		case ROUTING:
+		default:
+			throw new RuntimeException("Operation not Supported");
 		}
-
-		return new PruningOptimizer(strategyService.getOptimizationEvaluator(
-				(ThresholdBudgetConstraint) request
-						.getOptimizationConstraints(), request
-						.getOptimizationMode()));
 
 	}
 
@@ -126,12 +133,12 @@ public class OptimizationPlannerServiceImpl implements
 		}
 
 		protected abstract Collection<PlannedNetwork> planNetworks(
-				 Collection<ProcessLayerCommand> serviceAreas);
+				Collection<ProcessLayerCommand> serviceAreas);
 
-		
 		protected OptimizedPlan reify(OptimizationConstraints constraints,
 				PlannedNetwork plan) {
-			return planCommandExecutorService.reify(constraints, plan) ;
+			return planCommandExecutorService.reifyPlanSummarizeAndSave(
+					constraints, plan);
 		}
 
 		protected Collection<OptimizedPlan> updateNetworks(
@@ -192,11 +199,25 @@ public class OptimizationPlannerServiceImpl implements
 				Collection<ProcessLayerCommand> layerCommands) {
 
 			return evaluateWirecenterCommands(
-					toCommands(toServiceAreaCommands(layerCommands), this::asCommand),
-					Optional::isPresent).stream().map(Optional::get)
-					.collect(Collectors.toList());
+					toCommands(toServiceAreaCommands(layerCommands),
+							this::asCommand), Optional::isPresent).stream()
+					.map(Optional::get).collect(Collectors.toList());
 
 		}
+	}
+
+	private class ExpandedNpvRouting extends MasterOptimizer {
+
+		@Override
+		protected Collection<PlannedNetwork> planNetworks(
+				Collection<ProcessLayerCommand> layerCommands) {
+			return evaluateWirecenterCommands(
+					toCommands(toServiceAreaCommands(layerCommands),
+							npvPlanningOptimizer::asCommand),
+					Optional::isPresent).stream().map(Optional::get)
+					.collect(Collectors.toList());
+		}
+
 	}
 
 	private class PruningOptimizer extends MasterOptimizer {
@@ -228,7 +249,8 @@ public class OptimizationPlannerServiceImpl implements
 				Collection<ProcessLayerCommand> layerCommands) {
 
 			Collection<PrunedNetwork> prunedNetworks = evaluateWirecenterCommands(
-					toCommands(toServiceAreaCommands(layerCommands), this::asCommand), n -> !n.isEmpty());
+					toCommands(toServiceAreaCommands(layerCommands),
+							this::asCommand), n -> !n.isEmpty());
 
 			return optimizationEvaluator.evaluateNetworks(prunedNetworks);
 
@@ -281,5 +303,4 @@ public class OptimizationPlannerServiceImpl implements
 		}
 	}
 
-	
 }
