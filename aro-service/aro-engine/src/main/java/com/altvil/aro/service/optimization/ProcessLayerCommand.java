@@ -7,6 +7,8 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequ
 
 public interface ProcessLayerCommand {
 
+	boolean isValid() ;
+	
 	ServiceLayer getServiceLayer();
 
 	Collection<WirecenterOptimizationRequest> getServiceAreaCommands();

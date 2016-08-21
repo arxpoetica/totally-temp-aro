@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -24,10 +25,12 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 	}
 
 	public static class Builder {
+		
+		private static final Collection<Integer> DEFAULT_PROCESSING_LAYERS = Collections.singleton(new Integer(1)) ;
 
 		private long planId;
 		private int year = 2015;
-		private Collection<Integer> processingLayers;
+		private Collection<Integer> processingLayers = DEFAULT_PROCESSING_LAYERS;
 		private Collection<AnalysisSelection> analysisSelections;
 
 		private AlgorithmType algorithmType ;
@@ -51,7 +54,9 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		}
 
 		public Builder setProcessingLayers(Collection<Integer> processingLayers) {
-			this.processingLayers = processingLayers;
+			if( processingLayers != null && processingLayers.size() > 0 ) {
+				this.processingLayers = processingLayers;
+			}
 			return this;
 		}
 

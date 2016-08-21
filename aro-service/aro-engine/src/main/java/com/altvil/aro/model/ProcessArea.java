@@ -24,8 +24,8 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 @Inheritance
 @DiscriminatorColumn(name = "service_type")
 @DiscriminatorOptions(force = true)
-@Table(name = "wirecenters", schema = "client")
-public class WireCenter extends ComparableModel {
+@Table(name = "service_area", schema = "client")
+public class ProcessArea extends ComparableModel {
 
 	private Integer id;
 	

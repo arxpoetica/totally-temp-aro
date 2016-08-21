@@ -5,6 +5,6 @@ import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("S")
-public class SuperServiceArea extends WireCenter {
+public class SuperServiceArea extends ProcessArea {
 
 }

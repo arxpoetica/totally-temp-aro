@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 public class WirecenterPlan extends NetworkPlan {
 
 	private MasterPlan masterPlan;
-	private WireCenter wireCenter;
+	private ProcessArea wireCenter;
 
 	@ManyToOne
 	@JoinColumn(name = "parent_plan_id", nullable = false)
@@ -24,11 +24,11 @@ public class WirecenterPlan extends NetworkPlan {
 
 	@ManyToOne
 	@JoinColumn(name = "wirecenter_id", nullable = false)
-	public WireCenter getWireCenter() {
+	public ProcessArea getWireCenter() {
 		return wireCenter;
 	}
 
-	public void setWireCenter(WireCenter wireCenter) {
+	public void setWireCenter(ProcessArea wireCenter) {
 		this.wireCenter = wireCenter;
 	}
 

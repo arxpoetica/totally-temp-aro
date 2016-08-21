@@ -59,7 +59,7 @@ public class NewOptimizeEndPoint {
 
 	}
 
-	private Collection<AnalysisSelection> toSelectedWireCenters(
+	private Collection<AnalysisSelection> toAnalysisSelections(
 			Collection<SelectedRegion> selectedRegions) {
 
 		List<AnalysisSelection> result = new ArrayList<>();
@@ -160,7 +160,7 @@ public class NewOptimizeEndPoint {
 				.setLocationEntities(toMask(plan.getLocationTypes()))
 				.setOptimizationMode(plan.getOptimizationMode())
 				.setAnalysisSelections(
-						toSelectedWireCenters(plan.getSelectedRegions()))
+						toAnalysisSelections(plan.getSelectedRegions()))
 				.build();
 
 	}
