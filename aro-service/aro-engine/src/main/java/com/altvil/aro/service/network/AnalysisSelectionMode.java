@@ -1,10 +1,10 @@
 package com.altvil.aro.service.network;
 
-public enum LocationSelectionMode {
+public enum AnalysisSelectionMode {
 	
 	
 	UNDEFINED,
 	SELECTED_LOCATIONS,
-	ALL_LOCATIONS
+	SELCTION_AREAS
 
 }

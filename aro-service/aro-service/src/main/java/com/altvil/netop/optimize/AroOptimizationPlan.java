@@ -3,17 +3,20 @@ package com.altvil.netop.optimize;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
+import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.OptimizationMode;
 import com.altvil.enumerations.OptimizationType;
-import com.altvil.netop.plan.SelectedRegion;
 
 public class AroOptimizationPlan {
 
 	private long planId = 0;
 
-	private OptimizationType algorithm;
+	private OptimizationType algorithm = OptimizationType.UNCONSTRAINED;
+	private AnalysisSelectionMode analysisSelectionMode = AnalysisSelectionMode.SELCTION_AREAS;
 	private OptimizationMode optimizationMode = OptimizationMode.INTER_WIRECENTER;
+	private AlgorithmType algorithmType = AlgorithmType.DEFAULT;
 	private Double threshold;
 
 	private FinancialConstraints financialConstraints;
@@ -21,7 +24,6 @@ public class AroOptimizationPlan {
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
 
 	private List<Integer> processLayers = new ArrayList<Integer>();
-	private List<SelectedRegion> selectedRegions = new ArrayList<>();
 
 	public long getPlanId() {
 		return planId;
@@ -77,16 +79,17 @@ public class AroOptimizationPlan {
 		return locationTypes;
 	}
 
+	public AnalysisSelectionMode getAnalysisSelectionMode() {
+		return analysisSelectionMode;
+	}
+
+	public void setAnalysisSelectionMode(
+			AnalysisSelectionMode analysisSelectionMode) {
+		this.analysisSelectionMode = analysisSelectionMode;
+	}
+
 	public void setLocationTypes(List<AroLocationEntityType> locationTypes) {
 		this.locationTypes = locationTypes;
-	}
-
-	public List<SelectedRegion> getSelectedRegions() {
-		return selectedRegions;
-	}
-
-	public void setSelectedRegions(List<SelectedRegion> selectedRegions) {
-		this.selectedRegions = selectedRegions;
 	}
 
 	public OptimizationMode getOptimizationMode() {
@@ -95,6 +98,14 @@ public class AroOptimizationPlan {
 
 	public void setOptimizationMode(OptimizationMode optimizationMode) {
 		this.optimizationMode = optimizationMode;
+	}
+
+	public AlgorithmType getAlgorithmType() {
+		return algorithmType;
+	}
+
+	public void setAlgorithmType(AlgorithmType algorithmType) {
+		this.algorithmType = algorithmType;
 	}
 
 }

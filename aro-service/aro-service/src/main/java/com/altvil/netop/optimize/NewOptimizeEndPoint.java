@@ -1,8 +1,6 @@
 package com.altvil.netop.optimize;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -25,13 +23,10 @@ import com.altvil.aro.service.optimization.constraints.IrrConstraints;
 import com.altvil.aro.service.optimization.constraints.NpvConstraints;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
-import com.altvil.aro.service.optimization.spatial.AnalysisSelection;
-import com.altvil.aro.service.optimization.spatial.SpatialAnalysisType;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.OptimizationType;
-import com.altvil.netop.plan.SelectedRegion;
 import com.altvil.netop.service.AroConversionService;
 
 @RestController
@@ -58,33 +53,7 @@ public class NewOptimizeEndPoint {
 		return mpr;
 
 	}
-
-	private Collection<AnalysisSelection> toAnalysisSelections(
-			Collection<SelectedRegion> selectedRegions) {
-
-		List<AnalysisSelection> result = new ArrayList<>();
-
-		if (selectedRegions != null) {
-			for (SelectedRegion sr : selectedRegions) {
-				switch (sr.getRegionType()) {
-				case ANALYSIS_AREA:
-					result.add(new AnalysisSelection(
-							SpatialAnalysisType.ANALYSIS_AREA, Integer
-									.parseInt(sr.getId())));
-				case WIRECENTER:
-					result.add(new AnalysisSelection(
-							SpatialAnalysisType.WIRECENTER, Integer.parseInt(sr
-									.getId())));
-					break;
-				default:
-				}
-			}
-		}
-
-		return result;
-
-	}
-
+	
 	private OptimizationConstraints toOptimizationConstraints(
 			AroOptimizationPlan plan) {
 
@@ -129,6 +98,11 @@ public class NewOptimizeEndPoint {
 	}
 
 	private AlgorithmType inferAlgorithmType(AroOptimizationPlan plan) {
+		
+		if( plan.getAlgorithmType() != AlgorithmType.DEFAULT ) {
+			return plan.getAlgorithmType() ;
+		}
+		
 		if (plan.getAlgorithm() == null) {
 			return AlgorithmType.PLANNING;
 		}
@@ -153,14 +127,13 @@ public class NewOptimizeEndPoint {
 		return MasterOptimizationRequest
 				.build()
 				.setAlgorithmType(inferAlgorithmType(plan))
+				.setAnalysisSelectionMode(plan.getAnalysisSelectionMode())
 				.setProcessingLayers(plan.getProcessLayers())
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
 				.setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())
 				.setLocationEntities(toMask(plan.getLocationTypes()))
 				.setOptimizationMode(plan.getOptimizationMode())
-				.setAnalysisSelections(
-						toAnalysisSelections(plan.getSelectedRegions()))
 				.build();
 
 	}

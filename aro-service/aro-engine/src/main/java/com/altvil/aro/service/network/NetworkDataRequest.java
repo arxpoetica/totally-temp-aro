@@ -8,11 +8,11 @@ public class NetworkDataRequest {
 
 	private long planId;
 	private Integer year;
-	private LocationSelectionMode selectionMode;
+	private AnalysisSelectionMode selectionMode;
 	private Set<LocationEntityType> locationEntities;
 
 	public NetworkDataRequest(long planId, Integer year,
-			LocationSelectionMode selectionMode,
+			AnalysisSelectionMode selectionMode,
 			Set<LocationEntityType> locationEntities) {
 		super();
 		this.planId = planId;
@@ -29,7 +29,7 @@ public class NetworkDataRequest {
 		return planId;
 	}
 
-	public LocationSelectionMode getSelectionMode() {
+	public AnalysisSelectionMode getSelectionMode() {
 		return selectionMode;
 	}
 
@@ -42,7 +42,7 @@ public class NetworkDataRequest {
 	}
 
 	public NetworkDataRequest createRequest(long planId,
-			LocationSelectionMode selectionMode) {
+			AnalysisSelectionMode selectionMode) {
 		return new NetworkDataRequest(planId, year, selectionMode,
 				locationEntities);
 	}

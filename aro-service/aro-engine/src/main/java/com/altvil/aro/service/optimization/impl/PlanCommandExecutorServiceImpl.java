@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.model.DemandTypeEnum;
@@ -20,7 +21,7 @@ import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
-import com.altvil.aro.service.network.LocationSelectionMode;
+import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
@@ -48,6 +49,23 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	private SerializationService conversionService;
 	private WirecenterPlanningService wirecenterPlanningService;
 	private AroDemandService aroDemandService;
+	
+	@Autowired
+	public PlanCommandExecutorServiceImpl(
+			NetworkPlanRepository networkPlanRepository,
+			ServiceAreaRepository serviceAreaRepository,
+			ServiceLayerRepository serviceLayerRepository,
+			SerializationService conversionService,
+			WirecenterPlanningService wirecenterPlanningService,
+			AroDemandService aroDemandService) {
+		super();
+		this.networkPlanRepository = networkPlanRepository;
+		this.serviceAreaRepository = serviceAreaRepository;
+		this.serviceLayerRepository = serviceLayerRepository;
+		this.conversionService = conversionService;
+		this.wirecenterPlanningService = wirecenterPlanningService;
+		this.aroDemandService = aroDemandService;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -61,7 +79,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	}
 
 	private Collection<ServiceArea> queryServiceAreas(long planId,
-			int serviceLayerId, LocationSelectionMode selectionMode) {
+			int serviceLayerId, AnalysisSelectionMode selectionMode) {
 		switch (selectionMode) {
 		case SELECTED_LOCATIONS:
 			return serviceAreaRepository.querySelectedLocationServiceAreas(
@@ -75,7 +93,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	private ProcessLayerCommand createProcessLayerCommand(
 			MasterOptimizationRequest request, ServiceLayer serviceLayer) {
 
-		LocationSelectionMode selectionMode = request.getNetworkDataRequest()
+		AnalysisSelectionMode selectionMode = request.getNetworkDataRequest()
 				.getSelectionMode();
 
 		Collection<ServiceArea> serviceAreas = queryServiceAreas(
@@ -104,7 +122,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 				.filter(ProcessLayerCommand::isValid)
 				.collect(Collectors.toList());
 
-		if (request.getNetworkDataRequest().getSelectionMode() == LocationSelectionMode.SELECTED_LOCATIONS) {
+		if (request.getNetworkDataRequest().getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS) {
 			serviceAreaRepository.updateWireCenterPlanLocations(request
 					.getPlanId());
 		}
@@ -176,12 +194,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 				.build();
 
 	}
-
-	private List<Number> createAllServiceAreaUpdates(ServiceLayer serviceLayer,
-			long planId, Collection<ServiceArea> serviceAreas) {
-		return networkPlanRepository.computeWirecenterUpdates(planId,
-				StreamUtil.map(serviceAreas, ServiceArea::getId));
-	}
+	
 
 	private WirecenterOptimizationRequest createWirecenterOptimizationRequest(
 			MasterOptimizationRequest request, long planId) {
