@@ -202,6 +202,16 @@ def provision_aro_stack(opsworks_stack_id=None,
         print "Starting stack..."
         start_response = opsworks_client.start_stack(StackId=opsworks_stack_id)
 
+    # Here is where we need to initialize the database
+
+    # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
+    # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `running`
+    # Any error along the way will generate a failure. Successful attainment of `running` status proceeds 
+
+    # Run the opsworks/chef recipe that will handle the various commands required to configure the database and run ETL
+    # I don't think we should wait for a response from this command, since it can take over an hour to run
+
+
 
 def deploy_aro_stack(opsworks_stack_id=None,
                      docker_pass='',
@@ -225,3 +235,4 @@ def deploy_aro_stack(opsworks_stack_id=None,
         }
     )
     return deploy_response
+

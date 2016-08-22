@@ -60,6 +60,7 @@ session = Session(region_name='us-east-1')
 
 cloudformation_stack_name = PROJECT_BASE_NAME[environment] + name_component
 # host_name = domain_name + '.aro.app.altvil.com' if environment == 'PRODUCTION' else branch_name + '.aro.staging.app.altvil.com'
+
 if environment == 'PRODUCTION':
     host_name = domain_name + 'aro.app.altvil.com'
 elif environment == 'STAGING': 
