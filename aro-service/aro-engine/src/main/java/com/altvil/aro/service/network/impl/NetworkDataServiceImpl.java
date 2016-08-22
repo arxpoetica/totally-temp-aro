@@ -390,7 +390,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private Collection<CableConduitEdge> queryCableConduitEdges(
 			NetworkDataRequest networkConfiguration) {
 		return planRepository
-				.queryConduitSections(networkConfiguration.getPlanId())
+				.queryConduitSections(networkConfiguration.getPlanId(), networkConfiguration.getServiceLayerId())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {

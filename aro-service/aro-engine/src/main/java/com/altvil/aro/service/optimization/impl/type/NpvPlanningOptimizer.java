@@ -26,7 +26,6 @@ import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.entity.SimpleNetworkFinancials;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.network.impl.DefaultNetworkAssignment;
@@ -80,7 +79,7 @@ public class NpvPlanningOptimizer  {
 				final PricingModel pricingModel = pricingService.getPricingModel("*", new Date(),
 						PricingContext.create(request.getConstructionRatios()));
 				NetworkDataRequest networkDataRequest = request.getNetworkDataRequest();
-				networkDataRequest = networkDataRequest.createRequest(networkDataRequest.getPlanId(), AnalysisSelectionMode.SELECTED_AREAS);
+				networkDataRequest = networkDataRequest.createRequest(networkDataRequest.getPlanId(), networkDataRequest.getServiceLayerId());
 				final NetworkData networkData = networkService.getNetworkData(networkDataRequest);
 
 				OptimizationConstraints optimizationConstraints = request.getOptimizationConstraints();

@@ -107,7 +107,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 				.stream()
 				.map(Number::longValue)
 				.map(id -> this
-						.createWirecenterOptimizationRequest(request, id))
+						.createWirecenterOptimizationRequest(request, id, serviceLayer))
 				.collect(Collectors.toList()));
 
 	}
@@ -197,12 +197,12 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	
 
 	private WirecenterOptimizationRequest createWirecenterOptimizationRequest(
-			MasterOptimizationRequest request, long planId) {
+			MasterOptimizationRequest request, long planId, ServiceLayer sl) {
 
 		return new WirecenterOptimizationRequest(
 				request.getOptimizationConstraints(), request.getConstraints(),
 				request.getNetworkDataRequest().createRequest(planId,
-						request.getNetworkDataRequest().getSelectionMode()),
+						sl.getId()),
 				request.getAlgorithmType());
 
 	}

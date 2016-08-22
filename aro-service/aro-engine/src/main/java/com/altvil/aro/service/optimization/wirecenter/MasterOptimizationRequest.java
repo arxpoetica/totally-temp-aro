@@ -88,7 +88,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		}
 
 		private NetworkDataRequest createDataRequest() {
-			return new NetworkDataRequest(planId, year, locationSelectionMode,
+			return new NetworkDataRequest(planId,null, year, locationSelectionMode,
 					locationEntities, mrc);
 		}
 
