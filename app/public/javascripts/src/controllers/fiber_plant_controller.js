@@ -189,6 +189,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     var endpoint = `/census_blocks/${$scope.nbmCarrier.id}`
     if (!layer) {
       layer = $scope.nbmLayer = new MapLayer({
+        type: 'census_blocks_nbm',
         api_endpoint: endpoint,
         style_options: {
           normal: {

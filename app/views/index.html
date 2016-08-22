@@ -17,6 +17,10 @@
   </head>
   <body>
 
+    <div ng-controller="selected_census_block_controller">
+      <% include modal_census_block.html %>
+    </div>
+
     <div ng-controller="customer_profile_controller">
       <% include modal_customer_profile.html %>
     </div>
@@ -388,6 +392,7 @@
   <script src="javascripts/lib/controllers/global_search_controller.js"></script>
   <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/demand_forecast_controller.js"></script>
+  <script src="javascripts/lib/controllers/selected_census_block_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
