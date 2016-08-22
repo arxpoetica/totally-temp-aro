@@ -22,7 +22,7 @@ module.exports = class CensusBlock {
     var sql = `
       SELECT
         cb.gid AS id,
-        cb.geom,
+        ST_AsGeoJSON(cb.geom)::json AS geom,
         cb.name,
         cbc.download_speed,
         cbc.upload_speed,

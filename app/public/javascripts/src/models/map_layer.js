@@ -1,4 +1,4 @@
-/* global app google map _ encodeURIComponent config document $ */
+/* global app google map _ encodeURIComponent document $ */
 'use strict'
 
 app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {

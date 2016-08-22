@@ -1,19 +1,19 @@
-/* global app config $ _ google */
+/* global app config $ _ google map */
 // Fiber Plant Controller
 app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', 'tracker', 'map_utils', ($scope, $rootScope, $http, map_tools, MapLayer, tracker, map_utils) => {
   $scope.map_tools = map_tools
   $scope.carriers = []
   $scope.overlay = 'none'
 
-  var nbmCarriers = {
-    'Comcast Corporation': 'Comcast',
-    'Time Warner Cable Inc.': 'Time Warner Cable',
-    'Charter Communications': 'Charter',
-    'Cox Communications, Inc.': 'Cox',
-    'Bright House Networks, LLC': 'Bright House',
-    'CSC Holdings': 'Cablevision', // was CSC Holdings, LLC
-    'Mediacom Communications Corp.': 'Mediacom'
-  }
+  // var nbmCarriers = {
+  //   'Comcast Corporation': 'Comcast',
+  //   'Time Warner Cable Inc.': 'Time Warner Cable',
+  //   'Charter Communications': 'Charter',
+  //   'Cox Communications, Inc.': 'Cox',
+  //   'Bright House Networks, LLC': 'Bright House',
+  //   'CSC Holdings': 'Cablevision', // was CSC Holdings, LLC
+  //   'Mediacom Communications Corp.': 'Mediacom'
+  // }
 
   $scope.competitors_fiber = new MapLayer({
     api_endpoint: '/network/fiber_plant_competitors',
@@ -65,24 +65,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     })
     layers = {}
     if (!plan) return
+    $scope.plan = plan
 
-    $http.get('/network/carriers/' + plan.id + '?fiberType=ilec').success((carriers) => {
-      var all = {
-        id: 'all',
-        name: 'All carriers',
-        color: 'blue'
-      }
-      var filtered = carriers.filter((carrier) => nbmCarriers[carrier.name])
-      $scope.nbmCarriers = [all].concat(filtered.map((carrier) => {
-        return {
-          id: carrier.id,
-          name: nbmCarriers[carrier.name],
-          color: carrier.color
-        }
-      }).filter((carrier) => {
-        return carrier.name !== config.client_carrier_name
-      }))
-    })
+    map.ready(() => refreshNbmCarriers())
 
     $http.get('/network/carriers/' + plan.id).success((carriers) => {
       $scope.carriers = carriers.map((carrier) => {
@@ -229,4 +214,34 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     $scope.nbmCarrier = ''
     $scope.nbmCarrierChanged()
   }
+
+  function refreshNbmCarriers () {
+    if (!$scope.plan || !map) return
+    var bounds = map.getBounds()
+    if (!bounds) return
+    var params = {
+      nelat: bounds.getNorthEast().lat(),
+      nelon: bounds.getNorthEast().lng(),
+      swlat: bounds.getSouthWest().lat(),
+      swlon: bounds.getSouthWest().lng(),
+      zoom: map.getZoom()
+    }
+    var url = '/network/carriers/' + $scope.plan.id + '/viewport?fiberType=ilec'
+    $http({ url: url, params: params }).success((carriers) => {
+      var all = {
+        id: 'all',
+        name: 'All carriers',
+        color: 'blue'
+      }
+      $scope.nbmCarriers = [all].concat(carriers).filter((carrier) => {
+        return carrier.name !== config.client_carrier_name
+      })
+    })
+  }
+
+  ;['dragend', 'zoom_changed'].forEach((eventName) => {
+    $rootScope.$on(`map_${eventName}`, () => {
+      refreshNbmCarriers()
+    })
+  })
 }])
