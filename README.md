@@ -97,7 +97,7 @@ root@9e501c4758d4:/srv/www/aro#
 ```
 From here, we'll run the first script that installs the required NPM modules and builds the application:
 ```shell
-root@9e501c4758d4:/srv/www/aro# docker/initialize_app.sh
+root@9e501c4758d4:/srv/www/aro# bootstrap/dev_initialize_app.sh
 ```
 In some cases, usually on a new system, this process will fail the first time with a warning about "call stack exceeded." Running the exact same command again should complete the process without issue. This is due to a known bug in the latest version of NPM and does not appear to cause any downstream issues.
 
