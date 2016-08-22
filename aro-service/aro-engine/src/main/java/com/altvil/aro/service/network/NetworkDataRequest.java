@@ -6,6 +6,7 @@ import com.altvil.aro.service.entity.LocationEntityType;
 
 public class NetworkDataRequest {
 
+	private double mrc ;
 	private long planId;
 	private Integer year;
 	private AnalysisSelectionMode selectionMode;
@@ -13,16 +14,23 @@ public class NetworkDataRequest {
 
 	public NetworkDataRequest(long planId, Integer year,
 			AnalysisSelectionMode selectionMode,
-			Set<LocationEntityType> locationEntities) {
+			Set<LocationEntityType> locationEntities,
+			double mrc) {
+
 		super();
 		this.planId = planId;
 		this.year = year;
 		this.selectionMode = selectionMode;
 		this.locationEntities = locationEntities;
+		this.mrc = mrc ;
 	}
 	
 	public NetworkDataRequest create(long planId) {
-		return new NetworkDataRequest(planId, year, selectionMode, locationEntities) ;
+		return new NetworkDataRequest(planId, year, selectionMode, locationEntities, mrc) ;
+	}
+	
+	public double getMrc() {
+		return mrc;
 	}
 
 	public long getPlanId() {
@@ -44,7 +52,7 @@ public class NetworkDataRequest {
 	public NetworkDataRequest createRequest(long planId,
 			AnalysisSelectionMode selectionMode) {
 		return new NetworkDataRequest(planId, year, selectionMode,
-				locationEntities);
+				locationEntities, mrc);
 	}
 
 }

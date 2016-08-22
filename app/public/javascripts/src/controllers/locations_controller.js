@@ -400,5 +400,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $rootScope.optimizeSMB = $scope.optimizeSMB
     $rootScope.optimizeHouseholds = $scope.optimizeHouseholds
     $rootScope.optimizeTowers = $scope.optimizeTowers
+    $rootScope.optimize2kplus = $scope.optimize2kplus
   }
+  $scope.changeOptimization()
 }])

@@ -189,12 +189,13 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
+    console.log('options', options)
     var locationTypes = {
       households: 'household',
       businesses: ['medium', 'large'],
       towers: 'celltower',
       smb: 'small',
-      '2kplus': '2kplus'
+      '2kplus': 'mrcgte2000'
     }
     var algorithms = {
       'MAX_IRR': 'IRR',
@@ -206,7 +207,7 @@ module.exports = class Network {
     options.locationTypes = Array.isArray(options.locationTypes) ? options.locationTypes : []
     var body = {
       planId: plan_id,
-      locationTypes: _.flatten(options.locationTypes.map((key) => locationTypes[key])),
+      locationTypes: _.compact(_.flatten(options.locationTypes.map((key) => locationTypes[key]))),
       algorithm: options.algorithm
     }
     var req = {

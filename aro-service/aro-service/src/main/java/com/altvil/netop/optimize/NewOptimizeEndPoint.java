@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -123,18 +122,20 @@ public class NewOptimizeEndPoint {
 	private MasterOptimizationRequest toOptimizationPlan(
 			AroOptimizationPlan plan) {
 
+		 Set<LocationEntityType> entityTypes = toMask(plan.getLocationTypes()) ;
+		
 		return MasterOptimizationRequest
 				.build()
 				.setAlgorithmType(inferAlgorithmType(plan))
 				.setAnalysisSelectionMode(plan.getAnalysisSelectionMode())
 				.setProcessingLayers(plan.getProcessLayers())
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
+				.setMrc(entityTypes.contains(AroLocationEntityType.mrcgte2000) ? 2000 : 0)
 				.setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())
 				.setLocationEntities(toMask(plan.getLocationTypes()))
 				.setOptimizationMode(plan.getOptimizationMode())
 				.build();
-
 	}
 
 	private Set<LocationEntityType> toEntityTypes(

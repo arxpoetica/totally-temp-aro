@@ -26,6 +26,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 		
 		private static final Collection<Integer> DEFAULT_PROCESSING_LAYERS = Collections.singleton(new Integer(1)) ;
 
+		private double mrc= 0.0 ;
 		private long planId;
 		private int year = 2015;
 		private Collection<Integer> processingLayers = DEFAULT_PROCESSING_LAYERS;
@@ -88,7 +89,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 
 		private NetworkDataRequest createDataRequest() {
 			return new NetworkDataRequest(planId, year, locationSelectionMode,
-					locationEntities);
+					locationEntities, mrc);
 		}
 
 		public MasterOptimizationRequest build() {
@@ -96,6 +97,11 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 					optimizationConstraints, fiberNetworkConstraints,
 					createDataRequest(), optimizationMode,
 					algorithmType);
+		}
+		
+		public Builder setMrc(double mrc) {
+			this.mrc = mrc ;
+			return this ;
 		}
 
 		public Builder setOptimizationMode(OptimizationMode optimizationMode) {
