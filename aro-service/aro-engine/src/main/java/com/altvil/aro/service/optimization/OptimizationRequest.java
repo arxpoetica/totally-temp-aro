@@ -20,6 +20,7 @@ public class OptimizationRequest {
 		this.optimizationConstraints = optimizationConstraints;
 		this.constraints = constraints;
 		this.networkDataRequest = networkDataRequest;
+		this.algorithmType = algorithmType ;
 	}
 
 	public AlgorithmType getAlgorithmType() {

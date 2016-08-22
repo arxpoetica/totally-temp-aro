@@ -80,7 +80,7 @@ public class NpvPlanningOptimizer  {
 				final PricingModel pricingModel = pricingService.getPricingModel("*", new Date(),
 						PricingContext.create(request.getConstructionRatios()));
 				NetworkDataRequest networkDataRequest = request.getNetworkDataRequest();
-				networkDataRequest = networkDataRequest.createRequest(networkDataRequest.getPlanId(), AnalysisSelectionMode.SELCTION_AREAS);
+				networkDataRequest = networkDataRequest.createRequest(networkDataRequest.getPlanId(), AnalysisSelectionMode.SELECTED_AREAS);
 				final NetworkData networkData = networkService.getNetworkData(networkDataRequest);
 
 				OptimizationConstraints optimizationConstraints = request.getOptimizationConstraints();

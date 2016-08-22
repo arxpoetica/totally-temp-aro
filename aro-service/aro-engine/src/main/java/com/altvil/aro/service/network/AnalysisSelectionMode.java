@@ -5,6 +5,6 @@ public enum AnalysisSelectionMode {
 	
 	UNDEFINED,
 	SELECTED_LOCATIONS,
-	SELCTION_AREAS
+	SELECTED_AREAS
 
 }

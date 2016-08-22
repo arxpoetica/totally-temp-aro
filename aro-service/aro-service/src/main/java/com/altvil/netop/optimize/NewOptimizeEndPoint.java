@@ -36,7 +36,6 @@ public class NewOptimizeEndPoint {
 	private AroConversionService aroConversionService;
 
 	@Autowired
-	@Qualifier("newOptimizationPlannerServiceImpl")
 	private OptimizationPlannerService optimizationPlannerService;
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)

@@ -14,7 +14,7 @@ public class AroOptimizationPlan {
 	private long planId = 0;
 
 	private OptimizationType algorithm = OptimizationType.UNCONSTRAINED;
-	private AnalysisSelectionMode analysisSelectionMode = AnalysisSelectionMode.SELCTION_AREAS;
+	private AnalysisSelectionMode analysisSelectionMode = AnalysisSelectionMode.SELECTED_AREAS;
 	private OptimizationMode optimizationMode = OptimizationMode.INTER_WIRECENTER;
 	private AlgorithmType algorithmType = AlgorithmType.DEFAULT;
 	private Double threshold;
