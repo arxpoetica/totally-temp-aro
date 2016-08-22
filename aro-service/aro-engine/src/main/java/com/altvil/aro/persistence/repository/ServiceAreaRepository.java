@@ -75,15 +75,19 @@ public interface ServiceAreaRepository extends
 	
 	
 	@Query(value = 
-			"SELECT DISTINCT sa.id\n" + 
-			"FROM client.plan p\n" + 
-			"JOIN client.plan_targets t\n" + 
-			"	ON t.plan_id = p.id\n" + 
-			"JOIN aro.locations l\n" + 
-			"	ON l.id = t.location_id\n" + 
-			"JOIN client.service_area sa\n" + 
-			"	ON ST_CONTAINS(sa.geom,l.geom)\n" + 
-			"WHERE p.id = :planId and sa.service_layer_id = :serviceLayerId",
+			"SELECT sa.*\n" + 
+			"FROM (\n" + 
+			"	SELECT DISTINCT sa.id\n" + 
+			"	FROM client.plan p\n" + 
+			"	JOIN client.plan_targets t\n" + 
+			"		ON t.plan_id = p.id\n" + 
+			"	JOIN aro.locations l\n" + 
+			"		ON l.id = t.location_id\n" + 
+			"	JOIN client.service_area sa\n" + 
+			"		ON ST_CONTAINS(sa.geom,l.geom)\n" + 
+			"	WHERE p.id = :planId and sa.service_layer_id = :serviceLayerId) s\n" + 
+			"JOIN client.service_area sa \n" + 
+			"	ON sa.id = s.id",
 			nativeQuery = true)
 	@Transactional
 	Collection<ServiceArea> querySelectedLocationServiceAreas(
@@ -107,7 +111,7 @@ public interface ServiceAreaRepository extends
 			nativeQuery = true)
 	@Transactional
 	@Modifying
-	Collection<ServiceArea> updateWireCenterPlanLocations(
+	void updateWireCenterPlanLocations(
 			@Param("masterPlanId") long masterPlanId);
 
 
