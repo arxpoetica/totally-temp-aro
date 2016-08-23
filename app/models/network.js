@@ -229,7 +229,7 @@ module.exports = class Network {
           var id = geography.id
           var params = [plan_id, geography.name, id, type]
           var queries = {
-            'wirecenter': '(SELECT geom FROM wirecenters WHERE id=$3::bigint)',
+            'wirecenter': '(SELECT geom FROM client.service_area WHERE id=$3::bigint)',
             'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
             'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)'
           }
@@ -307,9 +307,12 @@ module.exports = class Network {
 
   static searchBoundaries (text) {
     var sql = `
-      SELECT 'wirecenter:' || id AS id, wirecenter AS name, ST_AsGeoJSON(geom)::json AS geog
-        FROM wirecenters
-       WHERE lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
+      SELECT 'wirecenter:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+        FROM client.service_area
+       WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+         AND service_layer_id = (
+                SELECT id FROM client.service_layer WHERE name='wirecenter'
+             )
 
       UNION ALL
 

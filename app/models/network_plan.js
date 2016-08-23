@@ -616,18 +616,15 @@ module.exports = class NetworkPlan {
   static searchAddresses (text) {
     var sql = `
       SELECT
-        (CASE WHEN aocn_name IS NULL THEN
-          wirecenter
-        ELSE
-          wirecenter || ' - ' || aocn_name
-        END) AS name,
+        code AS name,
         ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json as bounds
-      FROM wirecenters
-      WHERE
-        lower(unaccent(aocn_name)) LIKE lower(unaccent($1)) OR
-        lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
-      ORDER BY wirecenter ASC
+        FROM client.service_area
+       WHERE service_layer_id = (
+          SELECT id FROM client.service_layer WHERE name='wirecenter'
+        )
+        AND lower(unaccent(code)) LIKE lower(unaccent($1))
+      ORDER BY code ASC
     `
     var wirecenters = database.query(sql, [`%${text}%`])
     var addresses = text.length > 0
