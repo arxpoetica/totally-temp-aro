@@ -6,17 +6,36 @@
         <h4 class="modal-title">Application Settings</h4>
       </div>
       <div class="modal-body">
-        <form class="form-horizontal">
-          <div class="form-group" ng-repeat="setting in applicationSettings">
-            <label class="col-sm-6 control-label">{{ setting.name }}</label>
-            <div class="col-sm-6">
-              <div class="input-group">
-                <div class="input-group-addon">$</div>
-                <input type="text" class="form-control format-currency" name="{{setting.id}}" value="{{setting.cost | number:2}}">
-              </div>
+        <div>
+          <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+              <a href="#applicationSettingsNetworkCosts" aria-controls="home" role="tab" data-toggle="tab">Network Costs</a>
+            </li>
+            <li role="presentation">
+              <a href="#applicationSettingsEndpointDemand" aria-controls="profile" role="tab" data-toggle="tab">Endpoint Demand</a>
+            </li>
+          </ul>
+          <div class="tab-content" style="padding-top: 20px">
+            <div role="tabpanel" class="tab-pane active" id="applicationSettingsNetworkCosts">
+              <form class="form-horizontal">
+                <div class="form-group" ng-repeat="setting in applicationSettings">
+                  <label class="col-sm-4 control-label">{{ setting.name }}</label>
+                  <div class="col-sm-5">
+                    <div class="input-group">
+                      <div class="input-group-addon">$</div>
+                      <input type="text" class="form-control format-currency" name="{{setting.id}}" value="{{setting.cost | number:2}}">
+                    </div>
+                  </div>
+                  <p class="col-sm-3 form-control-static">{{ setting.unit }}</p>
+                </div>
+              </form>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsEndpointDemand" style="padding-top: 20px">
+              <p class="text-center">...</p>
             </div>
           </div>
-        </form>
+
+        </div>
       </div>
       <div class="modal-footer">
         <a type="button" class="btn btn-default" ng-click="updateSettings()">Update</a>

@@ -301,93 +301,33 @@
           <tbody>
             <tr>
               <th>Telco Buildings - (Off Net VzB buildings incurring > $2K MRCs)</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
-            <tr>
-              <td>Count</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>Total MRC</td>
-              <td class="text-right">{{1000000 | currency:"$":0}}</td>
-              <td class="text-right">{{1000000 | currency:"$":0}}</td>
-              <td class="text-right">{{1000000 | currency:"$":0}}</td>
+            <tr ng-repeat="item in routeOpportunities.totals">
+              <td>
+                <span ng-show="item.key === 'MRC'">Total MRC</span>
+                <span ng-hide="item.key === 'MRC'">{{item.key}}</span>
+              </td>
+              <td class="text-right" ng-repeat="value in item.items">
+                <span ng-show="item.key === 'MRC'">{{value.value | currency:"$":0}}</span>
+                <span ng-hide="item.key === 'MRC'">{{value.value | number}}</span>
+              </td>
             </tr>
             <tr>
               <th>Count of Total Buildings by Number of Employees</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
-            <tr>
-              <td>XS (1 employee)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>S (2-24 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>M (25-49 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>L (50-99 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>XL (>100 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
+            <tr ng-repeat="item in routeOpportunities.buildings">
+              <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
+              <td class="text-right" ng-repeat="value in item.items">{{value.value | number}}</td>
             </tr>
             <tr>
               <th>Count of Total Businesses by Number of Employees</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
-            <tr>
-              <td>XS (1 employee)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>S (2-24 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>M (25-49 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>L (50-99 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>XL (>100 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
+            <tr ng-repeat="item in routeOpportunities.businesses">
+              <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
+              <td class="text-right" ng-repeat="value in item.items">{{value.value | number}}</td>
             </tr>
           </tbody>
         </table>

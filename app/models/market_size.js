@@ -7,6 +7,7 @@ var stringify = require('csv-stringify')
 var _ = require('underscore')
 var moment = require('moment')
 var config = require('../helpers').config
+var Network = require('./network')
 
 const emptyArray = (arr) => !Array.isArray(arr) || arr.length === 0
 
@@ -213,18 +214,6 @@ module.exports = class MarketSize {
       })
   }
 
-  static carriersByCityOfPlan (plan_id, fiberType) {
-    var params = []
-    if (fiberType) params.push(fiberType)
-    var sql = `
-      SELECT carriers.id, carriers.name, carriers.color
-        FROM carriers
-         ${fiberType ? ' WHERE carriers.route_type=$1' : ''}
-       ORDER BY carriers.name ASC
-    `
-    return database.query(sql, params)
-  }
-
   static calculate (plan_id, type, options) {
     var filters = options.filters
     var output = {}
@@ -345,7 +334,7 @@ module.exports = class MarketSize {
     var filters = options.filters
     var output = {}
 
-    return MarketSize.carriersByCityOfPlan(plan_id, 'fiber')
+    return Network.carriers(plan_id, 'fiber')
       .then((carriers) => {
         output.carriers = carriers
 
@@ -447,7 +436,7 @@ module.exports = class MarketSize {
     var filters = options.filters
     var output = {}
 
-    return MarketSize.carriersByCityOfPlan(plan_id, 'fiber')
+    return Network.carriers(plan_id, 'fiber')
       .then((carriers) => {
         output.carriers = carriers
 

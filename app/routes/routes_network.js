@@ -62,6 +62,15 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/network/carriers/:plan_id/viewport', middleware.viewport, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var viewport = request.viewport
+    var fiberType = request.query.fiberType || 'fiber'
+    models.Network.carriers(plan_id, fiberType, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   // Network nodes for user client by node type
   api.get('/network/nodes/:node_type', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
