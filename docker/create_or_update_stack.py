@@ -79,7 +79,7 @@ iam_client = boto3.client('iam', region_name='us-east-1')
 cloudwatch_client = boto3.client('cloudwatch', region_name='us-east-1')
 
 def create_new_stack():
-    """Create a new Staging CloudFormation stack"""
+    """Create a new Staging CloudFormation stack (and OpsWorks stack)"""
     parameters = {
         'RdsFlag': 'yes',
         'DBUsername': db_user,
@@ -132,7 +132,7 @@ def create_new_stack():
         exit(0)
 
 def provision_stack(cloudformation_stack):
-    """Provision and start a newly created QA CloudFormation stack."""
+    """Provision and start a newly created QA OpsWorks stack."""
     real_name_component = branch_name if environment == 'staging' else name_component
     stack.provision_aro_stack(
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
@@ -146,6 +146,7 @@ def provision_stack(cloudformation_stack):
         docker_pass=docker_pass,
         environment_vars=_set_environment(),
         start_stack=True,
+        initialize_database=True,
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
@@ -154,7 +155,7 @@ def provision_stack(cloudformation_stack):
 
 
 def update_stack(outputs):
-    """Update a previously created and provisioned stack"""
+    """Update a previously created and provisioned OpsWorks stack"""
     # disable alarms
     http_alarm = cloudformation_stack_name + '-HTTP-5XX-alarm'
     elb_alarm = cloudformation_stack_name + '-ELB-5XX-alarm'

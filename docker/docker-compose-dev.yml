@@ -27,7 +27,7 @@ services:
         image: ait-docker-registry.cloud.altvil.com/aro/aro-app-base-dev:latest
         volumes:
             - ..:/srv/www/aro
-            - ../../aro-etl:/srv/www/aro/etl
+            - ../../aro-etl:/srv/www/aro/db
         ports:
             - "8000:8000"
         links:

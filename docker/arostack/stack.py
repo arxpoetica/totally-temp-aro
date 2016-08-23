@@ -142,14 +142,18 @@ def provision_aro_stack(opsworks_stack_id=None,
                         docker_pass='',
                         environment_vars=[],
                         start_stack=False,
+                        initialize_database=False,
                         opsworks_client=None,
                         logs_client=None,
                         iam_client=None,
                         instance_type=''):
-    """Provision a newly created CloudFormation stack by hooking up the app and RDS"""
+    """Provision a newly created OpsWorks stack by hooking up the app and RDS"""
     opsworks_client = opsworks_client or boto3.client('opsworks', region_name='us-east-1')
     logs_client = logs_client or boto3.client('logs', region_name='us-east-1')
     iam_client = iam_client or boto3.client('iam', region_name='us-east-1')
+
+    TIMEOUT = 1200
+    INSTANCE_CREATE_DELAY = 10
 
     # Attach RDS instance to OpsWorks stack if provided
     if db:
@@ -169,8 +173,8 @@ def provision_aro_stack(opsworks_stack_id=None,
         ] if db else []
     app_response = opsworks_client.create_app(
         StackId=opsworks_stack_id,
-        Shortname='aro-docker',
-        Name='aro-docker',
+        Shortname='aro',
+        Name='aro',
         DataSources=data_sources,
         Type='other',
         EnableSsl=False,
@@ -203,13 +207,59 @@ def provision_aro_stack(opsworks_stack_id=None,
         start_response = opsworks_client.start_stack(StackId=opsworks_stack_id)
 
     # Here is where we need to initialize the database
+    if initialize_database:
+        print "Initializing and populating database..."
 
-    # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
-    # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `running`
-    # Any error along the way will generate a failure. Successful attainment of `running` status proceeds 
+        # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
+        # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `online`
+        # Any error along the way will generate a failure. Successful attainment of `online` status proceeds 
 
-    # Run the opsworks/chef recipe that will handle the various commands required to configure the database and run ETL
-    # I don't think we should wait for a response from this command, since it can take over an hour to run
+        # TODO: actually add error handling other than the timeout
+
+        # populate array of instances
+        instances_response = opsworks_client.describe_instances(StackId=opsworks_stack_id)
+        instances = []
+        for inst in instances_response['Instances']:
+            id = inst['InstanceId']
+            instances.append(id)
+        delay = 0
+        # start wait loop until they reach 'running' status
+        while delay < TIMEOUT:
+            print "Sleeping for %d seconds (%d so far) for instance startup..." \
+                % (INSTANCE_CREATE_DELAY, delay)
+            time.sleep(INSTANCE_CREATE_DELAY)
+            described_instances = opsworks_client.describe_instances(InstanceIds=instances)['Instances']
+            inst_names = [described_instances[i]['Hostname'] for i in range(len(instances))]
+            print "Waiting for instances: %s to reach running status" % ", ".join(i for i in inst_names)
+
+            for inst in described_instances:
+                status = inst['Status']
+                name = inst['Hostname']
+                id = inst['InstanceId']
+                if status == 'online':
+                    print "Instance %s is online" % name
+                    instances.remove(id)
+
+            if not instances:
+                break
+
+            delay += INSTANCE_CREATE_DELAY
+            if delay >= TIMEOUT:
+                raise StandardError("Instance creation timeout exhausted")
+
+        # Run the opsworks/chef recipe that will handle the various commands required to configure the database and run ETL
+        # I don't think we should wait for the deployment to actually complate, since it can take over an hour to run
+
+        deploy_response = opsworks_client.create_deployment(
+            StackId=opsworks_stack_id,
+            AppId=app_response['AppId'],
+            Command={
+                'Name': 'execute_recipes',
+                'Args': {
+                    'recipes' : ['aro_ops::debug-compose-initialize']
+                }
+            })
+        return deploy_response
 
 
 
