@@ -208,7 +208,9 @@ module.exports = class Network {
     var body = {
       planId: plan_id,
       locationTypes: _.compact(_.flatten(options.locationTypes.map((key) => locationTypes[key]))),
-      algorithm: options.algorithm
+      algorithm: options.algorithm,
+      analysisSelectionMode: options.selectionMode,
+      processLayers: [1] // wirecenter
     }
     var req = {
       method: 'POST',
@@ -220,10 +222,12 @@ module.exports = class Network {
     if (options.budget) financialConstraints.budget = options.budget
     if (options.discountRate) financialConstraints.discountRate = options.discountRate
     if (options.irrThreshold) body.threshold = options.irrThreshold
-    return database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id])
+    return Promise.all([
+      database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
+      database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id])
+    ])
     .then(() => {
       if (options.geographies) {
-        body.selectedRegions = []
         var promises = options.geographies.map((geography) => {
           var type = geography.type
           var id = geography.id
@@ -243,12 +247,13 @@ module.exports = class Network {
               plan_id, region_name, region_id, region_type, geom
             ) VALUES ($1, $2, $3, $4, ${query})
           `, params)
-            .then(() => {
-              body.selectedRegions.push({
-                regionType: type.toUpperCase(),
-                id: id
-              })
-            })
+            .then(() => (
+              database.execute(`
+                INSERT INTO client.selected_service_area (
+                  plan_id, service_area_id
+                ) VALUES ($1, $2)
+              `, [plan_id, id])
+            ))
         })
         return Promise.all(promises)
       }
