@@ -256,7 +256,7 @@ def provision_aro_stack(opsworks_stack_id=None,
             Command={
                 'Name': 'execute_recipes',
                 'Args': {
-                    'recipes' : ['aro_ops::debug-compose-initialize']
+                    'recipes' : ['aro_ops::compose-initialize']
                 }
             })
         return deploy_response
