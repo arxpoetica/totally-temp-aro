@@ -411,6 +411,27 @@ exports.configure = (api, middleware) => {
     .then(jsonSuccess(response, next))
     .catch(next)
   })
+
+  api.get('/financial_profile/:plan_id/exportBusinesses', (request, response, next) => {
+    const distanceThresholds = request.query.distanceThresholds.map((value) => +value)
+    var plan_id = request.params.plan_id
+    var req = {
+      method: 'POST',
+      url: config.aro_service_url + '/rest/businesses',
+      body: {
+        distanceThresholds: distanceThresholds,
+        locationSource: 'tam',
+        mrcThreshold: 1609.34, // 1 mile
+        planId: plan_id
+      },
+      json: true
+    }
+    return models.AROService.request(req)
+      .then((output) => {
+        response.attachment(`businesses_${moment().format('YYYY-MM-DD_HH:mm:ss')}.csv`)
+        response.send(output)
+      })
+  })
 }
 
 const requestData = (params, filter) => {
