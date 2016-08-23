@@ -10,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -30,6 +32,7 @@ public class NetworkPlan extends ComparableModel {
 	private String name ;
 	private String areaName ;
 	private Point areaCentroid ;
+	private ServiceLayer serviceLayer ; 
 	//private Polygon areaBounds ;
 	private Date createAt;
 	private Date updateAt ;
@@ -72,6 +75,8 @@ public class NetworkPlan extends ComparableModel {
 	}
 	
 	
+	
+	
 //	@Column(name = "area_bounds")
 //	@JsonDeserialize(using = GeometryJsonDeserializer.class)
 //	public Polygon getAreaBounds() {
@@ -82,6 +87,16 @@ public class NetworkPlan extends ComparableModel {
 //		this.areaBounds = areaBounds;
 //	}
 	
+
+	@ManyToOne
+	@JoinColumn(name = "service_layer_id", nullable = true)
+	public ServiceLayer getServiceLayer() {
+		return serviceLayer;
+	}
+
+	public void setServiceLayer(ServiceLayer serviceLayer) {
+		this.serviceLayer = serviceLayer;
+	}
 
 	@Column(name = "area_centroid")
 	@JsonDeserialize(using = GeometryJsonDeserializer.class)
