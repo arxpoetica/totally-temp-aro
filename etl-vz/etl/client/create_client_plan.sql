@@ -7,6 +7,7 @@ CREATE TABLE client.plan
   name character varying NOT NULL,
   plan_type character varying NOT NULL,
   parent_plan_id int8 REFERENCES client.plan ON DELETE CASCADE,
+  service_layer_id int4 REFERENCES client.service_layer,
   wirecenter_id int4,
   area_name character varying,
   area_centroid geometry,
