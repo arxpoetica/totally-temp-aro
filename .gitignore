@@ -119,28 +119,4 @@ bin/
 
 #aro-service git ignores
 
-aro-service/target
-aro-service/**/*.project
-aro-service/**/*.settings
-aro-service/**/*.classpath
-
-aro-service/aro-service/.settings
-aro-service/aro-service/.project
-
-aro-service/aro-engine/.settings
-aro-service/aro-engine/.project
-
-aro-service/aro-service/.settings
-aro-service/aro-service/.project
-
-aro-service/aro-interfaces/.settings
-aro-service/aro-interfaces/.project
-
-aro-service/aro-utils/.settings
-aro-service/aro-utils/.project
-
-aro-service/docker/aro-service.war
-
-aro-service/aro-core/src/main/java/com/altvil/aro/service/optimize/spi/impl/NetworkAnalysisFactoryImpl.java
-
-aro-service/aro-engine/src/main/java/com/altvil/aro/service/network/NetworkRequest.java
+aro-service
