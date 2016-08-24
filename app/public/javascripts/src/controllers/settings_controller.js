@@ -25,7 +25,6 @@ app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter
               var values = obj[id] || {}
               obj[id] = values
               values[field] = parseCost(input)
-              console.log('changes', $scope.changes)
             })
             .on('blur', function () {
               var input = $(this)

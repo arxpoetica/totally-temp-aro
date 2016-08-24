@@ -45,9 +45,11 @@
                     <th>Entity</th>
                     <th>Product</th>
                     <th class="text-right">Arpu</th>
-                    <th class="text-right">Entity growth</th>
-                    <th class="text-right">Churn rate</th>
-                    <th class="text-right">Opex percent</th>
+                    <th class="text-right">Entity Growth</th>
+                    <th class="text-right">Churn Rate</th>
+                    <th class="text-right">Opex Percent</th>
+                    <th class="text-right">Maintenance Expenses</th>
+                    <th class="text-right">Connection Cost</th>
                   </tr>
                 </tbody>
                 <tbody>
@@ -73,6 +75,16 @@
                       <input type="text" class="form-control input-sm format-currency text-right"
                         data-tab="financialAssumptions" data-field="opex_percent"
                         data-id="{{setting.id}}" value="{{setting.opex_percent | number:2}}">
+                    </td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="financialAssumptions" data-field="maintenance_expenses"
+                        data-id="{{setting.id}}" value="{{setting.maintenance_expenses | number:2}}">
+                    </td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="financialAssumptions" data-field="connection_cost"
+                        data-id="{{setting.id}}" value="{{setting.connection_cost | number:2}}">
                     </td>
                   </tr>
                 </tbody>
