@@ -17,7 +17,7 @@ public class ServiceLayer extends ComparableModel {
 	private String name;
 	private String description;
 	private boolean userDefined;
-
+	
 	@Override
 	protected Serializable idKey() {
 		return id;
@@ -60,5 +60,6 @@ public class ServiceLayer extends ComparableModel {
 	public void setUserDefined(boolean userDefined) {
 		this.userDefined = userDefined;
 	}
+	
 
 }

@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +28,6 @@ import com.altvil.aro.service.optimization.root.RootPlanningService;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.RootOptimizationRequest;
 import com.altvil.aro.service.processing.ProcessingLayerService;
-import com.altvil.aro.service.report.PlanAnalysisReport;
-import com.altvil.aro.service.report.PlanAnalysisReportService;
 
 @Service
 public class RootOptimizationServiceImpl implements RootOptimizationService {
@@ -44,18 +39,25 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 	private RootPlanRepository rootPlanRepository;
 	private MasterPlanRepository masterPlanRepository;
 	private OptimizationPlannerService optimizationPlannerService;
-	private PlanAnalysisReportService planAnalysisReportService;
-	private RootPlanningService rootPlanningService ;
+	private RootPlanningService rootPlanningService;
 
-	private ExecutorService executorService;
-
-	@PostConstruct
-	void PostConstruct() {
-		executorService = Executors.newFixedThreadPool(15);
+	@Autowired
+	public RootOptimizationServiceImpl(
+			ProcessingLayerService processingLayerService,
+			RootPlanRepository rootPlanRepository,
+			MasterPlanRepository masterPlanRepository,
+			OptimizationPlannerService optimizationPlannerService,
+			RootPlanningService rootPlanningService) {
+		super();
+		this.processingLayerService = processingLayerService;
+		this.rootPlanRepository = rootPlanRepository;
+		this.masterPlanRepository = masterPlanRepository;
+		this.optimizationPlannerService = optimizationPlannerService;
+		this.rootPlanningService = rootPlanningService;
 	}
 
 	@Override
-	public Future<OptimizedRootPlan> optimize(RootOptimizationRequest request) {
+	public OptimizedRootPlan optimize(RootOptimizationRequest request) {
 
 		Collection<MasterPlan> masterPlans = toMasterPlans(
 				request.getPlanId(),
@@ -66,7 +68,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 				.stream().map(request::toMasterOptimizationRequest)
 				.collect(Collectors.toList());
 
-		return executorService.submit(() -> doOptimize(request, masterRequests));
+		return doOptimize(request, masterRequests);
 
 	}
 
@@ -85,10 +87,10 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 				log.error(err.getMessage(), err);
 			}
 		});
-		
+
 		return rootPlanningService.save(new GeneratedRootPlanImpl(
-				rootOptimizationRequest, masterPlans)) ;
-		
+				rootOptimizationRequest, masterPlans));
+
 	}
 
 	private Collection<ServiceLayer> getServiceLayers(
@@ -116,38 +118,6 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 
 			return mp;
 		}).collect(Collectors.toList()));
-
-	}
-
-	private static class OptimizedRootPlanImpl implements OptimizedRootPlan {
-
-		private long planId;
-		private PlanAnalysisReport planAnalysisReport;
-		private GeneratedRootPlan generatedPlan;
-
-		public OptimizedRootPlanImpl(long planId,
-				PlanAnalysisReport planAnalysisReport,
-				GeneratedRootPlan generatedPlan) {
-			super();
-			this.planId = planId;
-			this.planAnalysisReport = planAnalysisReport;
-			this.generatedPlan = generatedPlan;
-		}
-
-		@Override
-		public long getPlanId() {
-			return planId;
-		}
-
-		@Override
-		public PlanAnalysisReport getPlanAnalysisReport() {
-			return planAnalysisReport;
-		}
-
-		@Override
-		public GeneratedRootPlan getGeneratedRootPlan() {
-			return generatedPlan;
-		}
 
 	}
 
