@@ -30,13 +30,16 @@ etl_tiger_census_blocks:
 reset_boundaries:
 	etl/reset_boundaries_data.sh
 
-etl_boundaries: etl_cran_boundaries etl_cma_boundaries
+etl_boundaries: etl_cran_boundaries etl_cma_boundaries etl_directional_facilities_boundaries
 
 etl_cran_boundaries:
 	etl/boundaries/cran_boundaries_etl.sh
 
 etl_cma_boundaries:
 	etl/boundaries/cma_boundaries.sh
+
+etl_directional_facilities_boundaries:
+	etl/boundaries/df_boundaries_etl.sh
 
 
 ########################
@@ -46,13 +49,16 @@ etl_cma_boundaries:
 reset_network_equipment:
 	etl/reset_network_equipment_data.sh
 
-etl_network_equipment: etl_hubs etl_ves_fiber
+etl_network_equipment: etl_hubs etl_ves_fiber etl_directional_facilities
 
 etl_hubs:
 	etl/network_equipment/hubs_etl.sh
 
 etl_ves_fiber:
 	etl/network_equipment/ves_fiber_etl.sh
+
+etl_directional_facilities:
+	etl/network_equipment/directional_facilities_etl.sh
 
 
 ###################
