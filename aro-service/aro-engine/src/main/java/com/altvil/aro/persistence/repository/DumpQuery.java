@@ -17,125 +17,19 @@ public class DumpQuery {
 		}
 	}
 	
-	private static String query = "with inputs as (\n" + 
-			" select p.id as master_plan_id, p.* \n" + 
-			" from client.plan p where p.id = :planId\n" + 
-			")\n" + 
-			",\n" + 
-			"original_targets as (\n" + 
-			" select pt.id, pt.location_id, pt.plan_id, mp.master_plan_id, wp.wirecenter_id\n" + 
-			" from inputs mp\n" + 
-			" join client.plan wp on wp.parent_plan_id = mp.id\n" + 
-			" join client.plan_targets pt on pt.plan_id = wp.id\n" + 
-			")\n" + 
-			",\n" + 
-			"selected_targets as (\n" + 
-			"	select mt.location_id, ot.plan_id, mp.master_plan_id, ot.wirecenter_id\n" + 
-			"	from inputs mp\n" + 
-			"	join client.plan_targets mt on mt.plan_id = mp.id and mt.plan_id = mp.id\n" + 
-			"	left join original_targets ot on ot.location_id = mt.location_id \n" + 
-			")\n" + 
-			",\n" + 
-			"new_targets as (\n" + 
-			"	select st.location_id, st.master_plan_id, w.id as wirecenter_id  \n" + 
-			"	from selected_targets st \n" + 
-			"	join aro.locations l on l.id = st.location_id\n" + 
-			"	join client.service_area w on st_contains(w.geom, l.geom) and service_type='A' and service_layer_id=:layerId\n" + 
-			"	where st.plan_id is null\n" + 
-			")\n" + 
-			",\n" + 
-			"deleted_locations as (\n" + 
-			"	select ot.location_id, ot.plan_id, ot.master_plan_id, ot.wirecenter_id\n" + 
-			"	from original_targets ot\n" + 
-			"	left join selected_targets st on st.location_id = ot.location_id and st.plan_id = ot.plan_id\n" + 
-			"	where st.location_id is null \n" + 
-			")\n" + 
-			",\n" + 
-			"new_plans as (\n" + 
-			"	insert into client.plan (name, plan_type, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at, parent_plan_id)\n" + 
-			"	select p.name, 'W', w.id, w.code, st_centroid(w.geom), w.geom,  NOW(), NOW(), p.master_plan_id \n" + 
-			"	from\n" + 
-			"	inputs p,\n" + 
-			"	(select distinct nt.master_plan_id, nt.wirecenter_id\n" + 
-			"	from new_targets nt\n" + 
-			"	join client.service_area w on w.id = nt.wirecenter_id) nw\n" + 
-			"	join client.service_area w on w.id = nw.wirecenter_id\n" + 
-			"	returning id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
-			")\n" + 
-			",\n" + 
-			"updated_network_nodes AS (\n" + 
-			"	INSERT INTO client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
-			"	SELECT\n" + 
-			"		p.id,\n" + 
-			"		n.node_type_id,\n" + 
-			"		n.geog,\n" + 
-			"		n.geom\n" + 
-			"	FROM new_plans p\n" + 
-			"	JOIN client.plan_head h on h.service_area_id = p.wirecenter_id\n" + 
-			"	JOIN client.network_nodes n on h.plan_id = h.id\n" + 
-			"	WHERE n.node_type_id in(1)\n" + 
-			"	RETURNING id, plan_id\n" + 
-			")\n" + 
-			",\n" + 
-			"updated_plan_sources as (\n" + 
-			"	insert into client.plan_sources (network_node_id, plan_id)\n" + 
-			"	select id, plan_id from updated_network_nodes	\n" + 
-			")\n" + 
-			",\n" + 
-			"update_plan_targets as (\n" + 
-			"	insert into client.plan_targets (location_id, plan_id)\n" + 
-			"	select nt.location_id, nt.plan_id\n" + 
-			"	from selected_targets nt\n" + 
-			"	where nt.plan_id is not null\n" + 
-			"	returning id, plan_id\n" + 
-			")\n" + 
-			",\n" + 
-			"updated_new_plan_targets as (	\n" + 
-			"	insert into client.plan_targets (location_id, plan_id)\n" + 
-			"	select nt.location_id, p.id\n" + 
-			"	from new_plans p \n" + 
-			"	join new_targets nt on nt.wirecenter_id = p.wirecenter_id\n" + 
-			"	returning id, plan_id\n" + 
-			")\n" + 
-			",\n" + 
-			"updated_deleted_targets as (\n" + 
-			"	delete from client.plan_targets \n" + 
-			"	where id in (select id from deleted_locations)\n" + 
-			"	returning id \n" + 
-			")\n" + 
-			",\n" + 
-			"old_plans as (\n" + 
-			"	select plan_id, sum(1) as location_count\n" + 
-			"	from deleted_locations\n" + 
-			"	group by plan_id\n" + 
-			")\n" + 
-			",\n" + 
-			"deleted_plans as (\n" + 
-			"	delete from client.plan where id in (select plan_id from old_plans where location_count = 0)\n" + 
-			"	returning id \n" + 
-			")\n" + 
-			",\n" + 
-			"all_modified_plans as (\n" + 
-			"select distinct p.plan_id \n" + 
-			"from (\n" + 
-			"(select distinct plan_id from update_plan_targets)\n" + 
-			"union\n" + 
-			"(select distinct plan_id from updated_new_plan_targets)\n" + 
-			"union\n" + 
-			"(select plan_id from old_plans where location_count > 0 )) p\n" + 
-			")\n" + 
-			",\n" + 
-			"deleted_network_nodes as (\n" + 
-			"	delete from client.network_nodes where plan_id in (select plan_id from all_modified_plans) and node_type_id != 1\n" + 
-			"	returning id\n" + 
-			")\n" + 
-			",\n" + 
-			"deleted_fiber_routes as (\n" + 
-			"	delete from client.fiber_route where plan_id \n" + 
-			"		in (select plan_id from all_modified_plans)\n" + 
-			"	returning id\n" + 
-			")\n" + 
-			"select plan_id from all_modified_plans" ;
+	private static String query = "INSERT INTO client.plan_targets (location_id, plan_id)\n" + 
+			"SELECT l.id, p.id \n" + 
+			"FROM client.plan mp \n" + 
+			"JOIN client.plan p \n" + 
+			"	ON p.parent_plan_id = mp.id\n" + 
+			"JOIN client.service_area sa \n" + 
+			"	ON sa.id = p.wirecenter_id\n" + 
+			"JOIN client.plan_targets t\n" + 
+			"	ON t.plan_id = mp.id\n" + 
+			"JOIN aro.locations l \n" + 
+			"	ON l.id = t.location_id\n" + 
+			"	AND ST_CONTAINS(sa.geom, l.geom)\n" + 
+			"WHERE mp.id = :masterPlanId";
 	
 	public static void value() {
 		System.out.println(query) ;

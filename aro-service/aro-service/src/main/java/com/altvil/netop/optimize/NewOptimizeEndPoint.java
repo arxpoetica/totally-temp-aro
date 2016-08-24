@@ -36,6 +36,7 @@ public class NewOptimizeEndPoint {
 	@Autowired
 	private AroConversionService aroConversionService;
 
+	@Autowired
 	private SchedulerService schedulerService;
 
 	@Autowired

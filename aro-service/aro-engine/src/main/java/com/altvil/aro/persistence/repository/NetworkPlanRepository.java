@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.model.NetworkPlan;
-import com.altvil.aro.model.WirecenterPlan;
 
 @Repository("networkPlanRepository")
 public interface NetworkPlanRepository extends
@@ -40,8 +39,8 @@ public interface NetworkPlanRepository extends
 	Integer queryWirecenterIdForPlanId(@Param("planId") long planId);
 	
 	
-	@Query(value = "select p from WirecenterPlan p where p.masterPlan.id = :planId")
-	List<WirecenterPlan> queryChildPlans(@Param("planId") long planId);
+	@Query(value = "select p from NetworkPlan p where p.parentPlan.id = :planId")
+	List<NetworkPlan> queryChildPlans(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n" + 
 			"SELECT\n" + 
@@ -224,7 +223,7 @@ public interface NetworkPlanRepository extends
 	@Modifying
     @Transactional
 	@Query(value = "delete from client.plan where parent_plan_id = :planId", nativeQuery = true)
-	void deleteWireCenterPlans(@Param("planId") long planId) ;
+	void deleteChildPlans(@Param("planId") long planId) ;
 			
 	
     @Modifying

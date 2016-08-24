@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.altvil.aro.model.ServiceLayer;
 
@@ -19,8 +18,8 @@ public interface ServiceLayerRepository extends
 			"	client.service_layer_entity_category c\n" + 
 			"JOIN client.system_rule r\n" + 
 			"	ON r.id = c.system_rule_id \n" + 
-			"WHERE name=:systemRule", nativeQuery = true)
-	List<Object[]> queryMappedCategories(@Param("systemRule") String systemRule) ;
+			"WHERE name='system_defaults'", nativeQuery = true)
+	List<Object[]> queryMappedCategories() ;
 	
 	
 	@Query(value = 
@@ -31,7 +30,7 @@ public interface ServiceLayerRepository extends
 			"	client.service_layer_priority c\n" + 
 			"JOIN client.system_rule r\n" + 
 			"	ON r.id = c.system_rule_id \n" + 
-			"WHERE name=:systemRule", nativeQuery = true)
-	List<Object[]> queryMappedPriorities(@Param("systemRule") String systemRule) ;
+			"WHERE name='system_defaults'", nativeQuery = true)
+	List<Object[]> queryMappedPriorities() ;
 	
 }

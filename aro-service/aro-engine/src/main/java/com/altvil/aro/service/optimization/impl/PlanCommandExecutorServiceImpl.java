@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimization.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,7 +48,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	private SerializationService conversionService;
 	private WirecenterPlanningService wirecenterPlanningService;
 	private AroDemandService aroDemandService;
-	
+
 	@Autowired
 	public PlanCommandExecutorServiceImpl(
 			NetworkPlanRepository networkPlanRepository,
@@ -71,18 +72,17 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	 */
 	@Override
 	public void deleteOldPlans(long planId) {
-		networkPlanRepository.deleteWireCenterPlans(planId);
+		networkPlanRepository.deleteChildPlans(planId);
 	}
 
 	private Collection<ServiceArea> queryServiceAreas(long planId,
-			int serviceLayerId, AnalysisSelectionMode selectionMode) {
+			AnalysisSelectionMode selectionMode) {
 		switch (selectionMode) {
 		case SELECTED_LOCATIONS:
-			return serviceAreaRepository.querySelectedLocationServiceAreas(
-					planId, serviceLayerId);
+			return serviceAreaRepository
+					.querySelectedLocationServiceAreas(planId);
 		default:
-			return serviceAreaRepository.querySelectedServiceAreas(planId,
-					serviceLayerId);
+			return serviceAreaRepository.querySelectedServiceAreas(planId);
 		}
 	}
 
@@ -90,45 +90,57 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	public ProcessLayerCommand createProcessLayerCommand(
 			MasterOptimizationRequest request) {
 
-		 ServiceLayer serviceLayer = request.getProcessingLayer() ;
-		
+		ServiceLayer serviceLayer = request.getProcessingLayer();
 		AnalysisSelectionMode selectionMode = request.getNetworkDataRequest()
 				.getSelectionMode();
 
 		Collection<ServiceArea> serviceAreas = queryServiceAreas(
-				request.getPlanId(), serviceLayer.getId(), selectionMode);
-
+				request.getPlanId(), selectionMode);
+		
+		if( serviceAreas.isEmpty() ) {
+			return new ProcessLayerCommandImpl(serviceLayer, Collections.emptyList()) ;
+		}
+		
 		List<Number> newPlans = networkPlanRepository.computeWirecenterUpdates(
 				request.getPlanId(),
 				StreamUtil.map(serviceAreas, ServiceArea::getId));
 
-		return new ProcessLayerCommandImpl(serviceLayer, newPlans
-				.stream()
-				.map(Number::longValue)
-				.map(id -> this
-						.createWirecenterOptimizationRequest(request, id, serviceLayer))
-				.collect(Collectors.toList()));
+		ProcessLayerCommand plc = new ProcessLayerCommandImpl(serviceLayer,
+				newPlans.stream()
+						.map(Number::longValue)
+						.map(id -> this.createWirecenterOptimizationRequest(
+								request, id, serviceLayer))
+						.collect(Collectors.toList()));
+
+		//TODO Simplify Dependency
+		if (selectionMode == AnalysisSelectionMode.SELECTED_LOCATIONS) {
+			serviceAreaRepository.updateWireCenterPlanLocations(request
+					.getPlanId());
+		}
+
+		return plc;
 
 	}
 
-//	@Override
-//	public Collection<ProcessLayerCommand> createLayerCommands(
-//			MasterOptimizationRequest request) {
-//
-//		Collection<ProcessLayerCommand> layerCommands = serviceLayerRepository
-//				.findAll(request.getProcessingLayers()).stream()
-//				.map(l -> createProcessLayerCommand(request, l))
-//				.filter(ProcessLayerCommand::isValid)
-//				.collect(Collectors.toList());
-//
-//		if (request.getNetworkDataRequest().getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS) {
-//			serviceAreaRepository.updateWireCenterPlanLocations(request
-//					.getPlanId());
-//		}
-//
-//		return layerCommands;
-//
-//	}
+	// @Override
+	// public Collection<ProcessLayerCommand> createLayerCommands(
+	// MasterOptimizationRequest request) {
+	//
+	// Collection<ProcessLayerCommand> layerCommands = serviceLayerRepository
+	// .findAll(request.getProcessingLayers()).stream()
+	// .map(l -> createProcessLayerCommand(request, l))
+	// .filter(ProcessLayerCommand::isValid)
+	// .collect(Collectors.toList());
+	//
+	// if (request.getNetworkDataRequest().getSelectionMode() ==
+	// AnalysisSelectionMode.SELECTED_LOCATIONS) {
+	// serviceAreaRepository.updateWireCenterPlanLocations(request
+	// .getPlanId());
+	// }
+	//
+	// return layerCommands;
+	//
+	// }
 
 	@Override
 	public GeneratedPlan reifyPlan(OptimizationConstraints constraints,
@@ -193,7 +205,6 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 				.build();
 
 	}
-	
 
 	private WirecenterOptimizationRequest createWirecenterOptimizationRequest(
 			MasterOptimizationRequest request, long planId, ServiceLayer sl) {
@@ -201,8 +212,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 		return new WirecenterOptimizationRequest(
 				request.getOptimizationConstraints(), request.getConstraints(),
 				request.getNetworkDataRequest().createRequest(planId,
-						sl.getId()),
-				request.getAlgorithmType());
+						sl.getId()), request.getAlgorithmType());
 
 	}
 

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.model.ServiceLayer;
@@ -26,7 +27,7 @@ import com.altvil.utils.StreamUtil;
 @Service
 public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
-	private static final String RULE = "system_rule";
+	//private static final String RULE = "system_defaults";
 
 	private ServiceLayerRepository serviceLayerRepository;
 
@@ -34,6 +35,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 	private Map<LocationEntityType, List<ServiceLayer>> entityMap;
 	private Comparator<ServiceLayer> serviceLayerComparator;
 
+	@Autowired
 	public ProcessingLayerServiceImpl(
 			ServiceLayerRepository serviceLayerRepository) {
 		super();
@@ -56,7 +58,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 	private Map<LocationEntityType, List<ServiceLayer>> loadCategoryRules(
 			Map<Integer, ServiceLayer> serviceLayerMap) {
 		Map<Object, List<Object[]>> objectMap = serviceLayerRepository
-				.queryMappedCategories(RULE).stream()
+				.queryMappedCategories().stream()
 				.collect(Collectors.groupingBy(a -> a[1]));
 
 		Map<LocationEntityType, List<ServiceLayer>> result = new EnumMap<>(
@@ -87,7 +89,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 		Map<ServiceLayer, Integer> result = new HashMap<>();
 
-		serviceLayerRepository.queryMappedPriorities(RULE).forEach(
+		serviceLayerRepository.queryMappedPriorities().forEach(
 				a -> {
 					result.put(serviceLayerMap.get(((Number) a[0]).intValue()),
 							((Number) a[1]).intValue());

@@ -22,8 +22,7 @@ public class AroOptimizationPlan {
 	private FinancialConstraints financialConstraints;
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
-
-	private List<Integer> processLayers = new ArrayList<Integer>();
+	private List<Integer> processLayers = new ArrayList<>();
 
 	public long getPlanId() {
 		return planId;

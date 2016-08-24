@@ -14,9 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.altvil.aro.model.MasterPlan;
-import com.altvil.aro.model.RootPlan;
+import com.altvil.aro.model.NetworkPlan;
 import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.persistence.repository.MasterPlanRepository;
+import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.RootPlanRepository;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
@@ -40,6 +41,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 	private MasterPlanRepository masterPlanRepository;
 	private OptimizationPlannerService optimizationPlannerService;
 	private RootPlanningService rootPlanningService;
+	private NetworkPlanRepository networkPlanRepository ;
 
 	@Autowired
 	public RootOptimizationServiceImpl(
@@ -47,18 +49,22 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 			RootPlanRepository rootPlanRepository,
 			MasterPlanRepository masterPlanRepository,
 			OptimizationPlannerService optimizationPlannerService,
-			RootPlanningService rootPlanningService) {
+			RootPlanningService rootPlanningService,
+			NetworkPlanRepository networkPlanRepository) {
 		super();
 		this.processingLayerService = processingLayerService;
 		this.rootPlanRepository = rootPlanRepository;
 		this.masterPlanRepository = masterPlanRepository;
 		this.optimizationPlannerService = optimizationPlannerService;
 		this.rootPlanningService = rootPlanningService;
+		this.networkPlanRepository = networkPlanRepository ;
 	}
 
 	@Override
 	public OptimizedRootPlan optimize(RootOptimizationRequest request) {
 
+		networkPlanRepository.deleteChildPlans(request.getPlanId());
+		
 		Collection<MasterPlan> masterPlans = toMasterPlans(
 				request.getPlanId(),
 				getServiceLayers(request.getProcessingLayers(), request
@@ -97,21 +103,21 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 			Collection<Integer> layerIds,
 			Collection<LocationEntityType> entityTypes) {
 		return (layerIds == null || layerIds.size() == 0) ? processingLayerService
-				.getServiceLayers(layerIds) : processingLayerService
-				.inferServiceLayers(entityTypes);
+				.inferServiceLayers(entityTypes) : processingLayerService
+				.getServiceLayers(layerIds);
 	}
 
 	@Transactional
 	private Collection<MasterPlan> toMasterPlans(long planId,
 			Collection<ServiceLayer> serviceLayers) {
-		RootPlan rootPlan = rootPlanRepository.findOne(planId);
+		NetworkPlan rootPlan = networkPlanRepository.findOne(planId);
 		return masterPlanRepository.save(serviceLayers.stream().map(s -> {
 			MasterPlan mp = new MasterPlan();
 
 			mp.setName(s.getName() + ":" + rootPlan.getName());
 			mp.setCentroid(rootPlan.getCentroid());
 			mp.setAreaName(rootPlan.getAreaName());
-			mp.setRootPlan(rootPlan);
+			mp.setParentPlan(rootPlan);
 			mp.setServiceLayer(s);
 			mp.setCreateAt(new Date());
 			mp.setUpdateAt(new Date());

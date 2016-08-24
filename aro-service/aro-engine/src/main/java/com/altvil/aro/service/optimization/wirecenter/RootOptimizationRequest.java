@@ -1,5 +1,6 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -17,7 +18,7 @@ import com.altvil.enumerations.OptimizationMode;
 public class RootOptimizationRequest extends OptimizationRequest {
 
 	private final OptimizationMode optimizationMode;
-	private Collection<Integer> processingLayers;
+	private Collection<Integer> processingLayers = new ArrayList<>() ;
 
 	public static Builder build() {
 		return new Builder();
@@ -59,9 +60,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		}
 
 		public Builder setProcessingLayers(Collection<Integer> processingLayers) {
-			if (processingLayers != null && processingLayers.size() > 0) {
-				this.processingLayers = processingLayers;
-			}
+			this.processingLayers = processingLayers;
 			return this;
 		}
 

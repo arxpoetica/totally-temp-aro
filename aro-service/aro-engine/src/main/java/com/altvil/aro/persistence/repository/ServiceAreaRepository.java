@@ -18,9 +18,9 @@ public interface ServiceAreaRepository extends
 	
 	@Query(value = 
 			"WITH selected_plan AS (\n" + 
-			"	SELECT p.id as plan_id, l.id as layer_id\n" + 
-			"	FROM client.plan p, client.service_layer l\n" + 
-			"	WHERE p.id=:planId AND l.id =:serviceLayerId \n" + 
+			"	SELECT p.parent_plan_id as plan_id, p.service_layer_id as layer_id\n" + 
+			"	FROM client.plan p\n" + 
+			"	WHERE p.id=:planId\n" + 
 			")\n" + 
 			",\n" + 
 			"selected_super_areas AS (\n" + 
@@ -70,40 +70,44 @@ public interface ServiceAreaRepository extends
 			"	ON sa.id = da.service_area_id", nativeQuery = true)
 	@Transactional
 	Collection<ServiceArea> querySelectedServiceAreas(
-			@Param("planId") long planId,
-			@Param("serviceLayerId") int serviceLayerId);
+			@Param("planId") long planId);
 	
 	
 	@Query(value = 
 			"SELECT sa.*\n" + 
 			"FROM (\n" + 
 			"	SELECT DISTINCT sa.id\n" + 
-			"	FROM client.plan p\n" + 
+			"	FROM client.plan mp\n" + 
+			"	JOIN client.plan rp\n" + 
+			"		ON rp.id = mp.parent_plan_id\n" + 
 			"	JOIN client.plan_targets t\n" + 
-			"		ON t.plan_id = p.id\n" + 
+			"		ON t.plan_id = rp.id\n" + 
 			"	JOIN aro.locations l\n" + 
 			"		ON l.id = t.location_id\n" + 
 			"	JOIN client.service_area sa\n" + 
-			"		ON ST_CONTAINS(sa.geom,l.geom)\n" + 
-			"	WHERE p.id = :planId and sa.service_layer_id = :serviceLayerId) s\n" + 
-			"JOIN client.service_area sa \n" + 
-			"	ON sa.id = s.id",
+			"		ON sa.service_layer_id = mp.service_layer_id\n" + 
+			"		AND ST_CONTAINS(sa.geom,l.geom)\n" + 
+			"	WHERE mp.id = :planId\n" + 
+			") s\n" + 
+			"JOIN client.service_area sa\n" + 
+			"	ON sa.id = s.id\n",
 			nativeQuery = true)
 	@Transactional
 	Collection<ServiceArea> querySelectedLocationServiceAreas(
-			@Param("planId") long planId,
-			@Param("serviceLayerId") int serviceLayerId);
+			@Param("planId") long planId);
 	
 	@Query(value = 
 			"INSERT INTO client.plan_targets (location_id, plan_id)\n" + 
-			"SELECT l.id, p.id \n" + 
+			"SELECT l.id, wp.id \n" + 
 			"FROM client.plan mp \n" + 
-			"JOIN client.plan p \n" + 
-			"	ON p.parent_plan_id = mp.id\n" + 
+			"JOIN client.plan wp\n" + 
+			"	ON  wp.parent_plan_id = mp.id\n" + 
+			"JOIN client.plan rp \n" + 
+			"	ON rp.id= mp.parent_plan_id\n" + 
 			"JOIN client.service_area sa \n" + 
-			"	ON sa.id = p.wirecenter_id\n" + 
+			"	ON sa.id = wp.wirecenter_id\n" + 
 			"JOIN client.plan_targets t\n" + 
-			"	ON t.plan_id = mp.id\n" + 
+			"	ON t.plan_id = rp.id\n" + 
 			"JOIN aro.locations l \n" + 
 			"	ON l.id = t.location_id\n" + 
 			"	AND ST_CONTAINS(sa.geom, l.geom)\n" + 
