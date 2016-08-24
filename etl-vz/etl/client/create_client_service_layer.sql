@@ -19,4 +19,4 @@ INSERT INTO client.service_layer (name, description, is_user_defined)
 	VALUES('cran', 'Cran Layer', false) ;
 
 INSERT INTO client.service_layer (name, description, is_user_defined) 
-	VALUES('cma', 'CMA Layer', false) ;
+	VALUES('directional_facility', 'Directional Facility', false) ;

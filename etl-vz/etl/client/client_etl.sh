@@ -118,6 +118,15 @@ ${PSQL} -a -f $DIR/create_client_service_area_assignment.sql
 # Create analysis_area_assignment
 ${PSQL} -a -f $DIR/create_client_analysis_area_assignment.sql
 
+# Create system_rule
+${PSQL} -a -f $DIR/create_client_system_rule.sql
+
+# Create system_rule
+${PSQL} -a -f $DIR/create_client_service_layer_priority.sql
+
+# Create system_rule
+${PSQL} -a -f $DIR/create_client_service_layer_entity_category.sql
+
 #  ETL (TODO Move into LOAD directory)
 
 # load plan equipment
