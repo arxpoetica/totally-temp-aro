@@ -17,6 +17,10 @@
   </head>
   <body>
 
+    <div ng-controller="settings_controller">
+      <% include modal_application_settings.html %>
+    </div>
+
     <div ng-controller="selected_census_block_controller">
       <% include modal_census_block.html %>
     </div>
@@ -79,8 +83,6 @@
       <% include modal_share_plan.html %>
 
       <% include modal_plan_combo.html %>
-
-      <% include modal_application_settings.html %>
 
       <div class="modal" id="export-plan" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -393,6 +395,7 @@
   <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/demand_forecast_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_census_block_controller.js"></script>
+  <script src="javascripts/lib/controllers/settings_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
