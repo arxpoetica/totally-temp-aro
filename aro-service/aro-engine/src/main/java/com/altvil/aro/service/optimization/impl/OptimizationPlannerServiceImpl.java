@@ -133,7 +133,7 @@ public class OptimizationPlannerServiceImpl implements
 		}
 
 		protected abstract Collection<PlannedNetwork> planNetworks(
-				Collection<ProcessLayerCommand> serviceAreas);
+				ProcessLayerCommand processLayer);
 
 		protected OptimizedPlan reify(OptimizationConstraints constraints,
 				PlannedNetwork plan) {
@@ -157,16 +157,15 @@ public class OptimizationPlannerServiceImpl implements
 		}
 
 		protected Collection<WirecenterOptimizationRequest> toServiceAreaCommands(
-				Collection<ProcessLayerCommand> layerCommands) {
-			return layerCommands.stream()
-					.map(ProcessLayerCommand::getServiceAreaCommands)
-					.flatMap(Collection::stream).collect(Collectors.toList());
+				ProcessLayerCommand layerCommand) {
+			return layerCommand.getServiceAreaCommands();
 		}
 
-		protected Collection<ProcessLayerCommand> computeWireCenterRequests(
+		protected ProcessLayerCommand computeWireCenterRequests(
 				MasterOptimizationRequest request) {
 			planCommandExecutorService.deleteOldPlans(request.getPlanId());
-			return planCommandExecutorService.createLayerCommands(request);
+			return planCommandExecutorService
+					.createProcessLayerCommand(request);
 		}
 
 		protected <S> Collection<ComputeUnitCallable<WirecenterOptimization<S>>> toCommands(
@@ -196,7 +195,7 @@ public class OptimizationPlannerServiceImpl implements
 
 		@Override
 		protected Collection<PlannedNetwork> planNetworks(
-				Collection<ProcessLayerCommand> layerCommands) {
+				ProcessLayerCommand layerCommands) {
 
 			return evaluateWirecenterCommands(
 					toCommands(toServiceAreaCommands(layerCommands),
@@ -210,7 +209,7 @@ public class OptimizationPlannerServiceImpl implements
 
 		@Override
 		protected Collection<PlannedNetwork> planNetworks(
-				Collection<ProcessLayerCommand> layerCommands) {
+				ProcessLayerCommand layerCommands) {
 			return evaluateWirecenterCommands(
 					toCommands(toServiceAreaCommands(layerCommands),
 							npvPlanningOptimizer::asCommand),
@@ -246,14 +245,13 @@ public class OptimizationPlannerServiceImpl implements
 
 		@Override
 		protected Collection<PlannedNetwork> planNetworks(
-				Collection<ProcessLayerCommand> layerCommands) {
+				ProcessLayerCommand layerCommand) {
 
 			Collection<PrunedNetwork> prunedNetworks = evaluateWirecenterCommands(
-					toCommands(toServiceAreaCommands(layerCommands),
+					toCommands(toServiceAreaCommands(layerCommand),
 							this::asCommand), n -> !n.isEmpty());
 
 			return optimizationEvaluator.evaluateNetworks(prunedNetworks);
-
 		}
 
 	}

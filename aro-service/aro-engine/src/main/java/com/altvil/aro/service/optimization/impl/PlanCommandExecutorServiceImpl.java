@@ -15,7 +15,6 @@ import com.altvil.aro.model.ServiceArea;
 import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.ServiceAreaRepository;
-import com.altvil.aro.persistence.repository.ServiceLayerRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
@@ -45,7 +44,6 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 
 	private NetworkPlanRepository networkPlanRepository;
 	private ServiceAreaRepository serviceAreaRepository;
-	private ServiceLayerRepository serviceLayerRepository;
 	private SerializationService conversionService;
 	private WirecenterPlanningService wirecenterPlanningService;
 	private AroDemandService aroDemandService;
@@ -54,14 +52,12 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	public PlanCommandExecutorServiceImpl(
 			NetworkPlanRepository networkPlanRepository,
 			ServiceAreaRepository serviceAreaRepository,
-			ServiceLayerRepository serviceLayerRepository,
 			SerializationService conversionService,
 			WirecenterPlanningService wirecenterPlanningService,
 			AroDemandService aroDemandService) {
 		super();
 		this.networkPlanRepository = networkPlanRepository;
 		this.serviceAreaRepository = serviceAreaRepository;
-		this.serviceLayerRepository = serviceLayerRepository;
 		this.conversionService = conversionService;
 		this.wirecenterPlanningService = wirecenterPlanningService;
 		this.aroDemandService = aroDemandService;
@@ -90,9 +86,12 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 		}
 	}
 
-	private ProcessLayerCommand createProcessLayerCommand(
-			MasterOptimizationRequest request, ServiceLayer serviceLayer) {
+	@Override
+	public ProcessLayerCommand createProcessLayerCommand(
+			MasterOptimizationRequest request) {
 
+		 ServiceLayer serviceLayer = request.getProcessingLayer() ;
+		
 		AnalysisSelectionMode selectionMode = request.getNetworkDataRequest()
 				.getSelectionMode();
 
@@ -112,24 +111,24 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 
 	}
 
-	@Override
-	public Collection<ProcessLayerCommand> createLayerCommands(
-			MasterOptimizationRequest request) {
-
-		Collection<ProcessLayerCommand> layerCommands = serviceLayerRepository
-				.findAll(request.getProcessingLayers()).stream()
-				.map(l -> createProcessLayerCommand(request, l))
-				.filter(ProcessLayerCommand::isValid)
-				.collect(Collectors.toList());
-
-		if (request.getNetworkDataRequest().getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS) {
-			serviceAreaRepository.updateWireCenterPlanLocations(request
-					.getPlanId());
-		}
-
-		return layerCommands;
-
-	}
+//	@Override
+//	public Collection<ProcessLayerCommand> createLayerCommands(
+//			MasterOptimizationRequest request) {
+//
+//		Collection<ProcessLayerCommand> layerCommands = serviceLayerRepository
+//				.findAll(request.getProcessingLayers()).stream()
+//				.map(l -> createProcessLayerCommand(request, l))
+//				.filter(ProcessLayerCommand::isValid)
+//				.collect(Collectors.toList());
+//
+//		if (request.getNetworkDataRequest().getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS) {
+//			serviceAreaRepository.updateWireCenterPlanLocations(request
+//					.getPlanId());
+//		}
+//
+//		return layerCommands;
+//
+//	}
 
 	@Override
 	public GeneratedPlan reifyPlan(OptimizationConstraints constraints,

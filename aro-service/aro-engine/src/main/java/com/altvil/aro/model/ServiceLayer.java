@@ -9,9 +9,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "service_layer", schema = "client")
-public class ServiceLayer extends ComparableModel {
+public class ServiceLayer extends ComparableModel implements Serializable  {
 
 	private Integer id;
 	private String name;

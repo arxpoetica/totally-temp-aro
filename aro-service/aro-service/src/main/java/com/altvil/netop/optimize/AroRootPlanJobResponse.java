@@ -4,7 +4,7 @@ import com.altvil.aro.service.job.Job;
 import com.altvil.aro.service.planing.MasterPlanUpdate;
 import com.altvil.netop.model.AroPlanAnalysisReport;
 
-public class AroMasterPlanJobResponse {
+public class AroRootPlanJobResponse {
 
 
 	private Job<MasterPlanUpdate> job;
@@ -22,11 +22,8 @@ public class AroMasterPlanJobResponse {
 		return planAnalysisReport;
 	}
 
-	public void setPlanAnalysisReport(AroPlanAnalysisReport planAnalysisReport) {
-		this.planAnalysisReport = planAnalysisReport;
+	public void setPlanAnalysisReport(AroPlanAnalysisReport report) {
+		this.planAnalysisReport = report;
 	}
-
-	
-
 	
 }

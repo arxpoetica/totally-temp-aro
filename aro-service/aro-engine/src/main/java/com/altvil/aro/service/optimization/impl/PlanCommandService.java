@@ -1,7 +1,5 @@
 package com.altvil.aro.service.optimization.impl;
 
-import java.util.Collection;
-
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
@@ -17,8 +15,8 @@ public interface PlanCommandService {
 
 	void deleteOldPlans(long planId);
 
-	Collection<ProcessLayerCommand> createLayerCommands(
-			MasterOptimizationRequest request);
+	 ProcessLayerCommand createProcessLayerCommand(
+				MasterOptimizationRequest request);
 
 	GeneratedPlan reifyPlan(OptimizationConstraints constraints, PlannedNetwork plan) ;
 	OptimizedPlan summarize(GeneratedPlan plan) ;

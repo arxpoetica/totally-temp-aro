@@ -24,32 +24,33 @@ public class RootOptimizationRequest extends OptimizationRequest {
 	}
 
 	public static class Builder {
-		
-		private static final Collection<Integer> DEFAULT_PROCESSING_LAYERS = Collections.singleton(new Integer(1)) ;
 
-		private double mrc= 0.0 ;
+		private static final Collection<Integer> DEFAULT_PROCESSING_LAYERS = Collections
+				.singleton(new Integer(1));
+
+		private double mrc = 0.0;
 		private long planId;
 		private int year = 2015;
 		private Collection<Integer> processingLayers = DEFAULT_PROCESSING_LAYERS;
-	
-		private AlgorithmType algorithmType ;
-		
+
+		private AlgorithmType algorithmType;
+
 		private Set<LocationEntityType> locationEntities;
 		private FiberNetworkConstraints fiberNetworkConstraints;
 		private OptimizationConstraints optimizationConstraints;
 		private AnalysisSelectionMode locationSelectionMode = AnalysisSelectionMode.SELECTED_LOCATIONS;
 		private OptimizationMode optimizationMode;
-		
 
 		public Builder setOptimizationConstraints(
 				OptimizationConstraints constraints) {
 			this.optimizationConstraints = constraints;
 			return this;
 		}
-		
-		public Builder setAnalysisSelectionMode(AnalysisSelectionMode analysisSelectionMode) {
-			this.locationSelectionMode = analysisSelectionMode ;
-			return this ;
+
+		public Builder setAnalysisSelectionMode(
+				AnalysisSelectionMode analysisSelectionMode) {
+			this.locationSelectionMode = analysisSelectionMode;
+			return this;
 		}
 
 		public Builder setAlgorithmType(AlgorithmType algorithmType) {
@@ -58,7 +59,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		}
 
 		public Builder setProcessingLayers(Collection<Integer> processingLayers) {
-			if( processingLayers != null && processingLayers.size() > 0 ) {
+			if (processingLayers != null && processingLayers.size() > 0) {
 				this.processingLayers = processingLayers;
 			}
 			return this;
@@ -69,7 +70,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 			this.fiberNetworkConstraints = constraints;
 			return this;
 		}
-		
+
 		public Builder setPlanId(long planId) {
 			this.planId = planId;
 			return this;
@@ -89,20 +90,19 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		}
 
 		private NetworkDataRequest createDataRequest() {
-			return new NetworkDataRequest(planId,null, year, locationSelectionMode,
-					locationEntities, mrc);
+			return new NetworkDataRequest(planId, null, year,
+					locationSelectionMode, locationEntities, mrc);
 		}
 
-		public MasterOptimizationRequest build() {
-			return new MasterOptimizationRequest(processingLayers,
+		public RootOptimizationRequest build() {
+			return new RootOptimizationRequest(processingLayers,
 					optimizationConstraints, fiberNetworkConstraints,
-					createDataRequest(), optimizationMode,
-					algorithmType);
+					createDataRequest(), optimizationMode, algorithmType);
 		}
-		
+
 		public Builder setMrc(double mrc) {
-			this.mrc = mrc ;
-			return this ;
+			this.mrc = mrc;
+			return this;
 		}
 
 		public Builder setOptimizationMode(OptimizationMode optimizationMode) {
@@ -120,16 +120,20 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		this.processingLayers = processingLayers;
 		this.optimizationMode = optimizationMode;
 	}
-	
-	public MasterOptimizationRequest toMasterOptimizationRequest(MasterPlan masterPlan) {
-		return null ;
+
+	public MasterOptimizationRequest toMasterOptimizationRequest(
+			MasterPlan masterPlan) {
+		return new MasterOptimizationRequest(masterPlan.getServiceLayer(),
+				optimizationConstraints, constraints,
+				networkDataRequest.createRequest(masterPlan.getId(), masterPlan
+						.getServiceLayer().getId()), optimizationMode,
+				algorithmType);
 	}
-	
+
 	public Collection<Integer> getProcessingLayers() {
 		return processingLayers;
 	}
 
-	
 	public OptimizationMode getOptimizationMode() {
 		return optimizationMode;
 	}
