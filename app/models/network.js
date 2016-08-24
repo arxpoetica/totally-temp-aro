@@ -65,8 +65,31 @@ module.exports = class Network {
     return database.density(sql, [config.client_carrier_name], true, viewport, density)
   }
 
-  static carriers (plan_id, fiberType) {
-    return models.MarketSize.carriersByCityOfPlan(plan_id, fiberType)
+  static carriers (plan_id, fiberType, viewport) {
+    var params = [fiberType]
+    var sql
+    if (!viewport) {
+      sql = `
+        SELECT carriers.id, carriers.name, carriers.color
+          FROM carriers
+           WHERE carriers.route_type=$1
+           ${database.intersects(viewport, 'cb.geom', 'AND')}
+         ORDER BY carriers.name ASC
+      `
+    } else {
+      sql = `
+      SELECT DISTINCT ON (carriers.name)
+             carriers.id, carriers.name, carriers.color
+        FROM carriers
+        JOIN client.census_blocks_carriers cbc ON carriers.id = cbc.carrier_id
+        JOIN census_blocks cb ON cbc.census_block_gid = cb.gid
+       WHERE carriers.route_type=$1
+         ${database.intersects(viewport, 'cb.geom', 'AND')}
+         ORDER BY carriers.name ASC
+      `
+      console.log('sql', sql)
+    }
+    return database.query(sql, params)
   }
 
   // View the user client's network nodes

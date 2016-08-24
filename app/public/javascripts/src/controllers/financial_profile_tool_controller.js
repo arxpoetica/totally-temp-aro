@@ -547,4 +547,10 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     element.click()
     document.body.removeChild(element)
   }
+
+  $scope.downloadBusinesses = () => {
+    var query = Object.keys($scope.routeOpportunitiesDistanceThresholds)
+      .map((item) => `distanceThresholds=${item.value}`).join('&')
+    window.location.href = `/financial_profile/${$scope.plan.id}/exportBusinesses?${query}`
+  }
 }])
