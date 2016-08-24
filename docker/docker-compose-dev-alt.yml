@@ -4,7 +4,7 @@ services:
     db:
         image: mdillon/postgis:9.5
         volumes:
-            - postgres-data:/var/lib/postgresql/data
+            - postgres-data-02:/var/lib/postgresql/data
         ports:
             - "5432:5432"
         environment:
@@ -46,7 +46,7 @@ services:
 
 
 volumes:
-    postgres-data:
+    postgres-data-02:
         driver: local
 
 
