@@ -22,9 +22,11 @@ import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
 import com.altvil.aro.service.network.AnalysisSelectionMode;
+import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
+import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
@@ -75,6 +77,13 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 		networkPlanRepository.deleteChildPlans(planId);
 	}
 
+	@Override
+	public void updatePlanConduit(OptimizedMasterPlan inputMasterPlan,
+			NetworkDataRequest request) {
+		networkPlanRepository.updateConduitInputs(inputMasterPlan.getPlanId(),
+				request.getPlanId());
+	}
+
 	private Collection<ServiceArea> queryServiceAreas(long planId,
 			AnalysisSelectionMode selectionMode) {
 		switch (selectionMode) {
@@ -96,11 +105,12 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 
 		Collection<ServiceArea> serviceAreas = queryServiceAreas(
 				request.getPlanId(), selectionMode);
-		
-		if( serviceAreas.isEmpty() ) {
-			return new ProcessLayerCommandImpl(serviceLayer, Collections.emptyList()) ;
+
+		if (serviceAreas.isEmpty()) {
+			return new ProcessLayerCommandImpl(serviceLayer,
+					Collections.emptyList());
 		}
-		
+
 		List<Number> newPlans = networkPlanRepository.computeWirecenterUpdates(
 				request.getPlanId(),
 				StreamUtil.map(serviceAreas, ServiceArea::getId));
@@ -112,7 +122,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 								request, id, serviceLayer))
 						.collect(Collectors.toList()));
 
-		//TODO Simplify Dependency
+		// TODO Simplify Dependency
 		if (selectionMode == AnalysisSelectionMode.SELECTED_LOCATIONS) {
 			serviceAreaRepository.updateWireCenterPlanLocations(request
 					.getPlanId());

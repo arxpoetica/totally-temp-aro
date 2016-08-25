@@ -403,6 +403,40 @@ public interface NetworkPlanRepository extends
 			"FROM updated_network_nodes\n", nativeQuery = true) 
     List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("wireCentersIds") Collection<Integer> wireCentersIds);
 
+    @Modifying
+    @Transactional
+	@Query(value="WITH selected_master AS (\n" + 
+			"	SELECT p.*\n" + 
+			"	FROM client.plan p\n" + 
+			"	WHERE p.id = :inputMasterPlan\n" + 
+			")\n" + 
+			",\n" + 
+			"all_fiber AS (\n" + 
+			"	SELECT\n" + 
+			"		id,\n" + 
+			"		ST_Union(f.geom) AS geom\n" + 
+			"	FROM (\n" + 
+			"	(SELECT mp.id, pc.geom\n" + 
+			"	FROM selected_master mp\n" + 
+			"	JOIN client.plan_fiber_conduit pc\n" + 
+			"		ON pc.plan_id = mp.id)\n" + 
+			"\n" + 
+			"		UNION\n" + 
+			"\n" + 
+			"	(SELECT mp.id, pc.geom\n" + 
+			"	FROM selected_master mp\n" + 
+			"	JOIN client.plan_fiber_conduit pc\n" + 
+			"		ON pc.plan_id = mp.id)\n" + 
+			"	) AS f\n" + 
+			"	GROUP BY id\n" + 
+			")\n" + 
+			"INSERT INTO client.plan_fiber_conduit\n" + 
+			"	(:planId, geom)\n" + 
+			"SELECT id, geom \n" + 
+			"FROM all_fiber", nativeQuery = true) 
+    List<Number> updateConduitInputs(@Param("inputMasterPlan") long planId, @Param("planId") long selectedPlanId);
+
+    
 	@Query(value = "select id from client.plan where parent_plan_id = :planId", nativeQuery = true)
 	List<Number> wireCenterPlanIdsFor(@Param("planId") long planId);
 	
