@@ -24,27 +24,7 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 	ON ST_Contains(fiber.buffer_geom, locations.geom);
 
 
--- Mapping for carriers from NBM
--- This is currently only being used for consumer locations, but will be mapped to any location
--- so we can easily incorporate this for commercial locations  in the future
-INSERT INTO client.locations_carriers(location_id, carrier_id, download_speed, upload_speed, provider_type)
-	SELECT
-		DISTINCT(l.id) AS location_id,
-		c.id AS carrier_id,
-		MAX(blks.maxaddown) AS download_speed,
-		MAX(blks.maxadup) AS upload_speed,
-		blks.provider_type AS provider_type
-	FROM aro.locations l
-	JOIN aro.census_blocks cb
-	ON st_contains(cb.geom, l.geom)
-	JOIN nbm.blocks blks
-	ON cb.tabblock_id = blks.fullfipsid
-	JOIN aro.carriers c
-	ON LOWER(c.name) = LOWER(blks.hoconame) -- THIS MIGHT BE A PROBLEMATIC JOIN CHECK ME WHEN THINGS GO WRONG
-	WHERE c.route_type = 'ilec'
-	GROUP BY location_id, carrier_id, provider_type;
-
--- Calculate distnace to fiber for each location for each carrier
+- Calculate distnace to fiber for each location for each carrier
 DROP TABLE IF EXISTS client.locations_distance_to_carrier;
 
 CREATE TABLE client.locations_distance_to_carrier (
@@ -52,24 +32,11 @@ CREATE TABLE client.locations_distance_to_carrier (
 );
 
 ALTER TABLE client.locations_distance_to_carrier ADD COLUMN location_id bigint REFERENCES aro.locations ON DELETE CASCADE;
-
 ALTER TABLE client.locations_distance_to_carrier ADD COLUMN carrier_id bigint REFERENCES aro.carriers ON DELETE CASCADE;
-
 ALTER TABLE client.locations_distance_to_carrier ADD PRIMARY KEY (location_id, carrier_id);
 
 
-INSERT INTO client.locations_distance_to_carrier (location_id, carrier_id, distance)
-  SELECT locations.id AS location_id,
-    carriers.id AS carrier_id,
-    MIN(ST_Distance(locations.geog, fiber_plant.geog)) AS distance
-    FROM locations
-    JOIN fiber_plant ON locations.geom && fiber_plant.buffer_geom
-    JOIN carriers ON fiber_plant.carrier_id = carriers.id AND carriers.route_type='fiber'
-    GROUP BY locations.id, carriers.id;
-
-
 DROP TABLE IF EXISTS client.census_blocks_carriers;
-
 CREATE TABLE client.census_blocks_carriers AS (
 	SELECT
 		cb.gid AS census_block_gid,
@@ -86,15 +53,12 @@ CREATE TABLE client.census_blocks_carriers AS (
 );
 
 ALTER TABLE client.census_blocks_carriers ADD PRIMARY KEY (census_block_gid, carrier_id);
-
 ALTER TABLE client.census_blocks_carriers ADD
 	FOREIGN KEY (carrier_id) REFERENCES aro.carriers (id) ON DELETE CASCADE;
 
 
 DROP TABLE IF EXISTS client.speeds;
-
 CREATE TABLE client.speeds (code integer PRIMARY KEY, description character varying);
-
 INSERT INTO client.speeds (code, description) VALUES
 	(2, '200 kbps - 768 kbps'),
 	(3, '768 kbps - 1.5 mbps'),
