@@ -354,22 +354,40 @@ public interface NetworkPlanRepository extends
     @Modifying
     @Transactional
 	@Query(value="WITH root_plans AS (\n" + 
-			"	SELECT m.name as master_name, m.id as master_plan_id, r.*\n" + 
-			"	FROM client.plan m,\n" + 
-			"	client.plan_head h \n" + 
-			"	JOIN client.plan r ON r.id = h.plan_id\n" + 
-			"	WHERE m.id = :planId AND h.service_area_id IN (:wireCentersIds) \n" + 
+			"	SELECT\n" + 
+			"		m.name as master_name,\n" + 
+			"		m.id as master_plan_id,\n" + 
+			"		h.*\n" + 
+			"	FROM client.plan m, client.plan h \n" + 
+			"	WHERE m.id = :planId\n" + 
+			"	AND h.plan_type='H' \n" + 
+			"	AND h.wirecenter_id IN (:wireCentersIds) \n" + 
 			")\n" + 
 			",\n" + 
 			"new_plans as (\n" + 
-			"	INSERT INTO client.plan (name, plan_type, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at, parent_plan_id)\n" + 
-			"	SELECT r.master_name, 'W', r.wirecenter_id, r.area_name, r.area_centroid, r.area_bounds,  NOW(), NOW(), r.master_plan_id \n" + 
+			"	INSERT INTO client.plan\n" + 
+			"		(service_layer_id, name, plan_type, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at, parent_plan_id)\n" + 
+			"	SELECT\n" + 
+			"		r.service_layer_id,\n" + 
+			"		r.master_name,\n" + 
+			"		'W',\n" + 
+			"		r.wirecenter_id,\n" + 
+			"		r.area_name,\n" + 
+			"		r.area_centroid,\n" + 
+			"		r.area_bounds,\n" + 
+			"		NOW(),\n" + 
+			"		NOW(),\n" + 
+			"		r.master_plan_id \n" + 
 			"	FROM root_plans r\n" + 
-			"	RETURNING id, parent_plan_id as master_plan_id, wirecenter_id, area_centroid \n" + 
+			"	RETURNING\n" + 
+			"		id,\n" + 
+			"		parent_plan_id as master_plan_id,\n" + 
+			"		wirecenter_id, area_centroid \n" + 
 			")\n" + 
 			",\n" + 
 			"updated_network_nodes AS (\n" + 
-			"	INSERT INTO client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
+			"	INSERT INTO client.network_nodes\n" + 
+			"		(plan_id, node_type_id, geog, geom)\n" + 
 			"	SELECT\n" + 
 			"		p.id,\n" + 
 			"		n.node_type_id,\n" + 
@@ -382,7 +400,7 @@ public interface NetworkPlanRepository extends
 			"	RETURNING plan_id\n" + 
 			")\n" + 
 			"SELECT DISTINCT plan_id \n" + 
-			"FROM updated_network_nodes",nativeQuery = true) 
+			"FROM updated_network_nodes\n", nativeQuery = true) 
     List<Number> computeWirecenterUpdates(@Param("planId") long planId, @Param("wireCentersIds") Collection<Integer> wireCentersIds);
 
 	@Query(value = "select id from client.plan where parent_plan_id = :planId", nativeQuery = true)
