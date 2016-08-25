@@ -5,7 +5,6 @@ SELECT
     s.tlid AS gid,
     s.plan_id,
     6 AS construction_type,
-    s.service_layer_id,
     ST_Length((s.edge)::geography) AS edge_length,
     ST_Length((s.segment)::geography) AS segment_length,
     ST_Line_Locate_Point(s.edge, st_startpoint(s.segment)) AS start_ratio,
@@ -14,7 +13,6 @@ FROM (
     SELECT 
         a.tlid,
         r.id AS plan_id,
-        w.service_layer_id,
         ST_LineMerge(a.geom) AS edge,
         ST_Intersection(fr.edge_intersect_buffer_geom, a.geom) AS segment
     FROM (((client.plan r

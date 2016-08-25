@@ -17,19 +17,18 @@ public class DumpQuery {
 		}
 	}
 	
-	private static String query = "INSERT INTO client.plan_targets (location_id, plan_id)\n" + 
-			"SELECT l.id, p.id \n" + 
-			"FROM client.plan mp \n" + 
-			"JOIN client.plan p \n" + 
-			"	ON p.parent_plan_id = mp.id\n" + 
-			"JOIN client.service_area sa \n" + 
-			"	ON sa.id = p.wirecenter_id\n" + 
-			"JOIN client.plan_targets t\n" + 
-			"	ON t.plan_id = mp.id\n" + 
-			"JOIN aro.locations l \n" + 
-			"	ON l.id = t.location_id\n" + 
-			"	AND ST_CONTAINS(sa.geom, l.geom)\n" + 
-			"WHERE mp.id = :masterPlanId";
+	private static String query = "WITH  selected_segs AS (\n" + 
+			" 	select s.gid, s.construction_type, start_ratio, end_ratio\n" + 
+			" 	FROM client.conduit_edge_segments s\n" + 
+			"   WHERE s.start_ratio IS NOT NULL AND s.end_ratio IS NOT NULL and s.plan_id = :planId\n" + 
+			")\n" + 
+			"SELECT  \n" + 
+			"    gid, \n" + 
+			"    MAX(construction_type) AS construction_type,  \n" + 
+			"    MIN(start_ratio) AS start_ratio, \n" + 
+			"    MAX(end_ratio) AS end_ratio\n" + 
+			"FROM selected_segs s\n" + 
+			"GROUP BY gid";
 	
 	public static void value() {
 		System.out.println(query) ;

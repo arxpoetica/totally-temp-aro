@@ -15,32 +15,20 @@ CREATE TABLE aro.towers
 );
 
 SELECT AddGeometryColumn('aro', 'towers', 'geom', 4326, 'POINT', 2);
+CREATE INDEX aro_towers_location_index ON towers(location_id);
 
-
--- Make locations out of towers.towers (towers source master) table
-INSERT INTO aro.locations(city, lat, lon, geom, geog)
-    SELECT DISTINCT ON (lat, lon)
-        t.city,
-        t.lat,
-        t.lon, 
-        t.geom,
-        t.geog
-    FROM towers.towers t
-    JOIN aro.wirecenter_subset wc
-        ON ST_Within(t.geom, wc.geom);
-
--- Map towers.towers to newly created locations
-INSERT INTO aro.towers(location_id, parcel_city, lat, lon, geom, geog)
-	SELECT
-		l.id,
-		t.city,
-		t.lat,
-		t.lon,
-		t.geom,
-		t.geog
-	FROM towers.towers t
-	JOIN aro.locations l
-		ON ST_Equals(l.geom, t.geom);
+-- -- Map towers.towers to newly created locations
+-- INSERT INTO aro.towers(location_id, parcel_city, lat, lon, geom, geog)
+-- 	SELECT
+-- 		l.id,
+-- 		t.city,
+-- 		t.lat,
+-- 		t.lon,
+-- 		t.geom,
+-- 		t.geog
+-- 	FROM towers.towers t
+-- 	JOIN aro.locations l
+-- 		ON ST_Equals(l.geom, t.geom);
 
 -----
 --NOT USING SITA TOWERS RIGHT NOW

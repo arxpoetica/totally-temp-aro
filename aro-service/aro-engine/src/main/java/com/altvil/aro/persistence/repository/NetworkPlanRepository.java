@@ -443,7 +443,7 @@ public interface NetworkPlanRepository extends
 	@Query(value = "WITH  selected_segs AS (\n" + 
 			" 	select s.gid, s.construction_type, start_ratio, end_ratio\n" + 
 			" 	FROM client.conduit_edge_segments s\n" + 
-			"   WHERE s.start_ratio IS NOT NULL AND s.end_ratio IS NOT NULL and s.plan_id = :planId and s.service_layer_id=:serviceLayerId\n" + 
+			"   WHERE s.start_ratio IS NOT NULL AND s.end_ratio IS NOT NULL and s.plan_id = :planId\n" + 
 			")\n" + 
 			"SELECT  \n" + 
 			"    gid, \n" + 
@@ -452,7 +452,7 @@ public interface NetworkPlanRepository extends
 			"    MAX(end_ratio) AS end_ratio\n" + 
 			"FROM selected_segs s\n" + 
 			"GROUP BY gid", nativeQuery = true)
-	List<Object[]> queryConduitSections(@Param("planId") long planId, @Param("serviceLayerId") int serviceLayerId);
+	List<Object[]> queryConduitSections(@Param("planId") long planId);
 	
 	
 }

@@ -1,9 +1,8 @@
 -- Insert Equipment Where Not defined
 WITH missing_equipment_service AS (	
 	SELECT p.id
-	FROM client.plan p
-	JOIN client.service_layer l
-		ON l.id = p.service_layer_id
+	FROM client.plan p,
+	client.service_layer l
 	LEFT JOIN client.network_nodes n 
 		ON n.plan_id = p.id
 		AND n.node_type_id = 1
