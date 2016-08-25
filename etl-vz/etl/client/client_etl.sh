@@ -121,11 +121,17 @@ ${PSQL} -a -f $DIR/create_client_analysis_area_assignment.sql
 # Create system_rule
 ${PSQL} -a -f $DIR/create_client_system_rule.sql
 
-# Create system_rule
+# Create system_rule layer_priority
 ${PSQL} -a -f $DIR/create_client_service_layer_priority.sql
 
-# Create system_rule
+# Create system_rule layer_category
 ${PSQL} -a -f $DIR/create_client_service_layer_entity_category.sql
+
+# Create display mapping table
+${PSQL} -a -f $DIR/create_client_service_layer_node_type.sql
+
+# Create plan_fiber_conduit
+${PSQL} -a -f $DIR/create_client_plan_fiber_conduit.sql
 
 #  ETL (TODO Move into LOAD directory)
 
