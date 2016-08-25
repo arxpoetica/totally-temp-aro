@@ -22,7 +22,6 @@ CREATE INDEX client_service_area_geog_gist ON client.service_area USING gist (ge
 CREATE INDEX client_service_area_edge_buffer ON client.service_area USING gist (edge_buffer);
 CREATE INDEX client_service_area_location_edge_buffer ON client.service_area USING gist (location_edge_buffer);
 
-
 -- Load Geotel wirecenters (public)
 WITH wirecenter_layer AS (
 	SELECT * FROM client.service_layer WHERE name = 'wirecenter'
@@ -40,23 +39,6 @@ INSERT INTO client.service_area (service_layer_id, service_type, source_id, stat
 		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)  
 	FROM geotel.wirecenters w, wirecenter_layer l;
 
--- Load FCC CMA boundaries (public)
-WITH cma_layer AS (
-	SELECT * FROM client.service_layer WHERE name = 'cma'
-)
-INSERT INTO client.service_area (service_layer_id, service_type, source_id, code, geog, geom, edge_buffer, location_edge_buffer)
-	SELECT
-		l.id,
-		'A',
-		c.gid::varchar,
-		c.name,
-		Geography(ST_Force_2D(the_geom)) as geog,
-		ST_Force_2D(the_geom) AS geom, -- Use ST_FORce_2D because the source shapefiles have geometry type MultiLineStringZ...
-		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
-		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)  
-	FROM boundaries.cma c, cma_layer l;
-
-
 -- Load client-defined CRAN boundaries (PRIVATE - client data)
 WITH cran_layer AS (
 	SELECT * FROM client.service_layer WHERE name = 'cran'
@@ -72,3 +54,19 @@ INSERT INTO client.service_area (service_layer_id, service_type, source_id, code
 		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
 		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)
 	FROM boundaries.cran c, cran_layer l; 
+	
+-- Boundaries around directional facility (points) created by AV&Co.
+WITH df_layer AS (
+	SELECT * FROM client.service_layer WHERE name = 'directional_facility'
+)
+INSERT INTO client.service_area (service_layer_id, service_type, source_id, code, geog, geom, edge_buffer, location_edge_buffer)
+	SELECT
+		l.id,
+		'A',
+		df.gid::varchar,
+		df.name,
+		Geography(ST_Force_2D(the_geom)) as geog,
+		ST_Force_2D(the_geom) AS geom,
+		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
+		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)
+	FROM boundaries.directional_facilities df, df_layer l;
