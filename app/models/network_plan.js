@@ -90,24 +90,6 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static findEdges (plan_id) {
-    var sql = `
-      SELECT
-        fiber_route.id,
-        -- ST_Length(geom::geography) * 0.000621371 AS edge_length,
-        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
-        ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
-        frt.name AS fiber_type,
-        frt.description AS fiber_name
-      FROM client.plan
-      JOIN client.plan p ON p.parent_plan_id = plan.id
-      JOIN client.fiber_route ON fiber_route.plan_id = p.id
-      JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
-      WHERE plan.id=$1
-    `
-    return database.query(sql, [plan_id])
-  }
-
   static findPlan (plan_id, metadata_only) {
     var output = {
       'feature_collection': {
@@ -227,18 +209,6 @@ module.exports = class NetworkPlan {
         // plan.total_revenue = demand.locationDemand.totalRevenue
 
         output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
-
-        return NetworkPlan.findEdges(plan_id)
-      })
-      .then((edges) => {
-        output.feature_collection.features = edges.map((edge) => ({
-          'type': 'Feature',
-          'geometry': edge.geom,
-          'properties': {
-            'fiber_type': edge.fiber_type,
-            'centroid': edge.centroid
-          }
-        }))
 
         return database.query(`
           SELECT

@@ -115,7 +115,7 @@
                 <div class="pull-right"><span style="background-color:blue; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="checkbox" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label class="eye-control">
-                    <input type="checkbox" ng-model="showFeederFiber" ng-change="changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled"> Feeder fiber
+                    <input type="checkbox" ng-model="serviceLayer.showFeederFiber" ng-change="serviceLayer.changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled"> Feeder fiber
                     <div class="eye-indicator"></div>
                   </label>
                 </div>
@@ -125,7 +125,7 @@
                 <div class="pull-right"><span style="background-color:red; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="checkbox" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label class="eye-control">
-                    <input type="checkbox" ng-model="showDistributionFiber" ng-change="changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled"> Distribution fiber
+                    <input type="checkbox" ng-model="serviceLayer.showDistributionFiber" ng-change="serviceLayer.changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled"> Distribution fiber
                     <div class="eye-indicator"></div>
                   </label>
                 </div>

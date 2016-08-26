@@ -96,6 +96,31 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     layer.showFeederFiber = false
     layer.showDistributionFiber = false
 
+    var routeLayer = new MapLayer({
+      short_name: 'RT',
+      name: 'Route',
+      type: 'route',
+      style_options: {
+        normal: {
+          strokeColor: 'red'
+        }
+      },
+      api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
+      declarativeStyles: routeStyles()
+    })
+    routeLayer.hide_in_ui = true
+    routeLayer.show()
+    if ($scope.routeLayer) {
+      routeLayer.remove()
+    }
+    layer.routeLayer = routeLayer
+    map_layers.addEquipmentLayer(routeLayer)
+
+    layer.changedFiberVisibility = () => {
+      routeLayer.setVisible(layer.showFeederFiber || layer.showDistributionFiber)
+      routeLayer.setDeclarativeStyle(routeStyles())
+    }
+
     var networkNodesLayer = new MapLayer({
       type: 'network_nodes',
       name: 'Network Nodes',
@@ -158,8 +183,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     if (!plan) {
-      map_layers.removeEquipmentLayer('route')
-      $scope.routeLayer = null
+      $scope.serviceLayers.forEach((layer) => {
+        layer.networkNodesLayer.clearData()
+        layer.routeLayer.clearData()
+      })
       return
     }
 
@@ -167,6 +194,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       // fiberPlantLayer.show() // hidden by default
       $scope.serviceLayers.forEach((layer) => {
         layer.networkNodesLayer.reloadData()
+        layer.routeLayer.reloadData()
       })
     })
 
@@ -178,6 +206,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('plan_cleared', () => {
     $scope.serviceLayers.forEach((layer) => {
       layer.networkNodesLayer.reloadData()
+      layer.routeLayer.clearData()
     })
   })
 
@@ -267,12 +296,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
   })
 
-  var routeLayer
-  $scope.changedFiberVisibility = () => {
-    routeLayer.setVisible($scope.showFeederFiber || $scope.showDistributionFiber)
-    routeLayer.setDeclarativeStyle(routeStyles())
-  }
-
   $scope.vztfttpChanged = () => {
     Object.keys($scope.equipment_layers).forEach((key) => {
       var layer = $scope.equipment_layers[key]
@@ -320,36 +343,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       $rootScope.$broadcast('plan_changed_metadata', $scope.plan)
     }
     if (only_metadata) return
-
-    if (config.route_planning.length > 0) {
-      var route = new MapLayer({
-        short_name: 'RT',
-        name: 'Route',
-        type: 'route',
-        data: data.feature_collection,
-        style_options: {
-          normal: {
-            strokeColor: 'red'
-          }
-        },
-        declarativeStyles: routeStyles()
-      })
-      route.hide_in_ui = true
-      route.show()
-      if ($scope.routeLayer) {
-        routeLayer.remove()
-      }
-      routeLayer = route
-      map_layers.addEquipmentLayer(route)
-    }
+    $scope.serviceLayers.forEach((layer) => {
+      layer.routeLayer.reloadData()
+    })
 
     // to calculate market size
     $rootScope.$broadcast('route_changed')
   }
-
-  $rootScope.$on('plan_cleared', (e, plan) => {
-    $scope.routeLayer.clearData()
-  })
 
   // prevent accordions from changing the URL
   var accordion = $('#serviceLayersAccordion')

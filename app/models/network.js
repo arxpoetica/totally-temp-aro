@@ -170,6 +170,27 @@ module.exports = class Network {
       ))
   }
 
+  static viewFiber (plan_id, serviceLayer) {
+    var sql = `
+      SELECT
+        fiber_route.id,
+        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
+        frt.name AS fiber_type,
+        frt.description AS fiber_name
+      FROM client.plan p
+      JOIN client.fiber_route ON fiber_route.plan_id = p.id
+      JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
+      WHERE p.id IN (
+        SELECT p.id
+          FROM client.plan p
+          JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${2}
+          WHERE p.parent_plan_id = $${1}
+      )
+    `
+    return database.query(sql, [plan_id, serviceLayer], true)
+  }
+
   static _addNodes (plan_id, insertions) {
     return Promise.resolve()
       .then(() => {
