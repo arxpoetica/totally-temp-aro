@@ -40,15 +40,6 @@ ${PSQL} -a -f $DIR/create_client_boundaries.sql
 # Create and load fiber route
 ${PSQL} -a -f $DIR/create_client_fiber_route.sql
 
-# Populates a location entry fees table with fake data for 'client'. This should be replaced with real data later.
-${PSQL} -a -f $DIR/load_location_entry_fees.sql
-
-# Populates a business install costs table with fake data for 'client'. This should be replaced with real data later.
-${PSQL} -a -f $DIR/load_business_install_costs.sql
-
-# Populates a household install costs table with fake data for 'client'. This should be replaced with real data later.
-${PSQL} -a -f $DIR/load_household_install_costs.sql
-
 # Create and load a fake customer type (existing, prospect, etc.) table for the client
 ${PSQL} -a -f $DIR/create_client_customer_types.sql
 
@@ -60,7 +51,6 @@ ${PSQL} -a -f $DIR/create_client_entity_category.sql
 
 # Create business categories table
 ${PSQL} -a -f $DIR/create_client_business_category.sql
-
 
 # Map businesses to categories
 ${PSQL} -a -f $DIR/create_client_business_category_mapping.sql
@@ -130,17 +120,6 @@ ${PSQL} -a -f $DIR/create_client_service_layer_node_type.sql
 
 # Create plan_fiber_conduit
 ${PSQL} -a -f $DIR/create_client_plan_fiber_conduit.sql
-
-#  ETL (TODO Move into LOAD directory)
-
-# load plan equipment
-${PSQL} -a -f $DIR/load_plan_equipment.sql
-
-# Load service_area_assignment
-${PSQL} -a -f $DIR/load_service_area_assignment.sql
-
-# Load analysis_area_assignment
-${PSQL} -a -f $DIR/load_analysis_area_assignment.sql
 
 #Views (These will be moved into their own VIEW Directory)
 ${PSQL} -a -f $DIR/create_client_views.sql

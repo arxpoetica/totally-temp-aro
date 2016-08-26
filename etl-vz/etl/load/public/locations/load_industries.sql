@@ -1,3 +1,4 @@
+TRUNCATE aro.industries CASCADE;
 
 INSERT INTO aro.industries(id, description)
 	SELECT DISTINCT ON (sic4)

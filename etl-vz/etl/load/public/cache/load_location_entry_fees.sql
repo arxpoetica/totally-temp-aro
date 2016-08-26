@@ -1,3 +1,4 @@
+TRUNCATE client.location_entry_fees CASCADE;
 
 -- Move every location id into the location_entry_fee table
 INSERT INTO client.location_entry_fees(location_id)

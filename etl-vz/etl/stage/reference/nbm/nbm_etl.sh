@@ -22,7 +22,7 @@ do
 done
 
 ${PSQL} -a -f $DIR/optimize_nbm_blocks.sql
-${PSQL} -a -f $DIR/brand_strength.sql
 ${PSQL} -a -f $DIR/competitor_speed_category.sql
+${PSQL} -a -f $DIR/brand_strength.sql
 
 

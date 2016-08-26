@@ -1,3 +1,4 @@
+TRUNCATE client.household_category_mappings CASCADE;
 
 -- Category mappings at an individual business level for detailed views
 INSERT INTO client.household_category_mappings(household_id, household_category_id)

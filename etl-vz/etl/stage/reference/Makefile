@@ -18,16 +18,25 @@ reload_towers: reset_towers etl_towers
 
 # Reset businesses
 reset_businesses:
-	etl/reset.sh
+	businesses/reset.sh
 
 etl_businesses: etl_infousa
 
 # Load InfoUSA businesses
 etl_infousa:
-	etl/businesses/infousa_etl.sh
+	businesses/infousa_etl.sh
 
 reload_business: reset_businesses etl_businesses
 
+###################
+# Households ETL
+###################
+
+reset_households:
+	temp_hh/reset.sh
+
+etl_households:
+	temp_hh/temp_hh_etl.sh
 
 
 ###################
@@ -61,21 +70,31 @@ reload_tiger: reset_tiger etl_tiger
 
 # Reset the entire boundaries schema
 reset_boundaries:
-	reference_boundaries/reset.sh
+	ref_boundaries/reset.sh
 
 etl_boundaries: etl_cma_boundaries
 
 etl_cma_boundaries:
-	reference_boundaries/cma_boundaries.sh
+	ref_boundaries/cma_boundaries.sh
 
 reload_boundaries: reset_boundaries etl_boundaries
+
+###################
+# Geotel ETL
+###################
+
+reset_geotel:
+	geotel/reset.sh
+
+etl_geotel:
+	geotel/geotel_etl.sh
 
 ###################
 # NBM ETL
 ###################
 
 reset_nbm:
-	nbm/reset_nbm_data.sh
+	nbm/reset.sh
 
 etl_nbm:
 	nbm/nbm_etl.sh
@@ -87,7 +106,7 @@ reload_nbm: reset_nbm etl_nbm
 ###################
 
 reset_demographics:
-	demographics/reset_demographics_data.sh
+	demographics/reset.sh
 
 etl_demographics:
 	demographics/demographics_etl.sh
@@ -99,8 +118,8 @@ reload_nbm: reset_demographics etl_demographics
 # Master ETL
 ###################
 
-reset: reset_tiger reset_boundaries reset_geotel reset_demographics reset_nbm reset_towers reset_businesses
-load: etl_tiger etl_boundaries etl_geotel etl_demographics etl_nbm etl_towers etl_businesses
+reset: reset_tiger reset_boundaries reset_geotel reset_demographics reset_nbm reset_towers reset_businesses reset_households
+load: etl_tiger etl_boundaries etl_geotel etl_demographics etl_nbm etl_towers etl_businesses etl_households
 
 etl_reload_all: reset load
 

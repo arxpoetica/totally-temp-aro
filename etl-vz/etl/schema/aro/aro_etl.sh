@@ -19,10 +19,6 @@ ${PSQL} -a -f $DIR/create_aro_edges.sql
 # Create aro census_blocks from tiger tabblock
 ${PSQL} -a -f $DIR/create_aro_census_blocks.sql
 
-${PSQL} -a -f $DIR/competitor_speed_category.sql
-
-${PSQL} -a -f $DIR/brand_strength.sql
-
 # Create and load aro.fiber_plant table from geotel.fiber_plant table
 ${PSQL} -a -f $DIR/create_aro_fiber_plant.sql
 
@@ -55,5 +51,3 @@ ${PSQL} -a -f $DIR/create_aro_cities.sql
 
 # Create aro.algorithms table
 ${PSQL} -a -f $DIR/create_aro_algorithms.sql
-
-${PSQL} -a -f $DIR/calculate_aro_locations_totals.sql

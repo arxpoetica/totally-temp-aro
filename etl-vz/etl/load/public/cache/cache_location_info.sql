@@ -1,4 +1,4 @@
--- Cache
+TRUNCATE client.business_category_mappings CASCADE;
 
 -- Category mappings at an individual business level for detailed views
 INSERT INTO client.business_category_mappings(business_id, business_category_id)

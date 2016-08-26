@@ -1,3 +1,7 @@
+TRUNCATE client.business_customer_types CASCADE;
+TRUNCATE client.household_customer_types CASCADE;
+TRUNCATE client.tower_customer_types CASCADE;
+
 -- Load the business ids into the mapping table
 INSERT INTO client.business_customer_types(business_id)
 	SELECT id from aro.businesses;

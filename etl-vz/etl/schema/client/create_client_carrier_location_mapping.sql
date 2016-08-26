@@ -24,7 +24,7 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 	ON ST_Contains(fiber.buffer_geom, locations.geom);
 
 
-- Calculate distnace to fiber for each location for each carrier
+-- Calculate distnace to fiber for each location for each carrier
 DROP TABLE IF EXISTS client.locations_distance_to_carrier;
 
 CREATE TABLE client.locations_distance_to_carrier (

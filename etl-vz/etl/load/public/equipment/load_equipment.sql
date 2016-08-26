@@ -1,13 +1,15 @@
+TRUNCATE client.network_nodes CASCADE;
+
 -- Insert Equipment Where Not defined
 WITH missing_equipment_service AS (	
-	SELECT p.id
-	FROM client.plan p,
-	client.service_layer l
-	LEFT JOIN client.network_nodes n 
-		ON n.plan_id = p.id
-		AND n.node_type_id = 1
-	WHERE p.plan_type = 'H'
-	AND n.id IS NULL
+SELECT p.id
+FROM client.plan p,
+client.service_layer l
+LEFT JOIN client.network_nodes n 
+ON n.plan_id = p.id
+AND n.node_type_id = 1
+WHERE p.plan_type = 'H'
+AND n.id IS NULL
 )
 ,
 new_cos as (

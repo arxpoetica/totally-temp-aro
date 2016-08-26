@@ -1,3 +1,5 @@
+TRUNCATE client.plan CASCADE;
+
 -- Creates Head Plan where not defined
 WITH plan_heads AS (
 	SELECT p.wirecenter_id

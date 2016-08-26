@@ -1,3 +1,5 @@
+TRUNCATE client.service_area CASCADE;
+
 -- load_service_areas
 -- This will only Load Missing Service Areas
 WITH all_service_areas AS (

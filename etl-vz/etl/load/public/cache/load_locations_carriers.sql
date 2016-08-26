@@ -1,3 +1,5 @@
+TRUNCATE client.locations_carriers CASCADE;
+
 -- Mapping for carriers from NBM
 -- This is currently only being used for consumer locations, but will be mapped to any location
 -- so we can easily incorporate this for commercial locations  in the future

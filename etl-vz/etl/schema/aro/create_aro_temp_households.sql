@@ -21,4 +21,3 @@ SELECT AddGeometryColumn('aro', 'temp_households', 'geom', 4326, 'POINT', 2);
 CREATE INDEX aro_temp_households_location_index ON aro.temp_households(location_id);
 CREATE INDEX aro_temp_households_geog_index ON aro.temp_households USING gist(geog);
 CREATE INDEX aro_temp_households_geom_index ON aro.temp_households USING gist(geom);
-CREATE INDEX aro_temp_households_location_index ON aro.temp_households(location_id);

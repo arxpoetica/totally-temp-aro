@@ -1,3 +1,4 @@
+TRUNCATE client.locations_distance_to_carrier CASCADE;
 
 -- load_locations_distance_to_carrier
 INSERT INTO client.locations_distance_to_carrier (location_id, carrier_id, distance)

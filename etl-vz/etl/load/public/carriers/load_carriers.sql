@@ -1,4 +1,4 @@
-
+TRUNCATE aro.carriers CASCADE;
 -- Fiber providers from Geotel
 INSERT INTO aro.carriers (name, route_type, color) values('186 COMMUNICATIONS', 'fiber', '#fcafae');
 INSERT INTO aro.carriers (name, route_type, color) values('ALLIED PROPOSED', 'fiber', '#f2cc10');

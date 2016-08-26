@@ -3,7 +3,7 @@
 ###################
 
 reset_auth:
-	auth/reset_auth_data.sh
+	auth/reset.sh
 
 etl_auth:
 	auth/auth_etl.sh
@@ -13,7 +13,7 @@ etl_auth:
 ###################
 
 reset_financial:
-	financial/reset_financial.sh
+	financial/reset.sh
 
 etl_financial:
 	financial/etl.sh
@@ -24,7 +24,7 @@ etl_financial:
 ###################
 
 reset_client:
-	client/reset_client_data.sh
+	client/reset.sh
 
 etl_client:
 	client/client_etl.sh
@@ -35,7 +35,7 @@ etl_client:
 ###################
 
 reset_aro:
-	aro/reset_aro_data.sh
+	aro/reset.sh
 
 etl_aro:
 	aro/aro_etl.sh
@@ -46,8 +46,8 @@ etl_aro:
 ###################
 
 
-reset: reset_financial reset_client, reset_aro, reset_auth
-load: etl_auth etl_aro etl_client etl_financial
+reset: reset_financial reset_client reset_aro reset_auth
+load: etl_aro etl_client etl_financial etl_auth 
 
 etl_reload_all: reset load
 

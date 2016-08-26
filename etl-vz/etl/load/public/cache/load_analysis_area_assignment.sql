@@ -1,3 +1,5 @@
+TRUNCATE client.analysis_area_assignment CASCADE;
+
 INSERT INTO client.analysis_area_assignment 
 	(service_layer_id, service_area_id, analysis_area_id, geom, area_m2, is_primary)
 WITH intersected_areas AS (
