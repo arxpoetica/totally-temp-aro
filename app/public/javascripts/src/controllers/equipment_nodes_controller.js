@@ -1,6 +1,6 @@
-/* global app user_id config map _ google swal config */
+/* global app user_id config map _ google swal config $ */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', '$timeout', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, $timeout) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -11,34 +11,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.selected_tool = null
   $scope.vztfttp = true
 
-  var networkNodesLayer = new MapLayer({
-    type: 'network_nodes',
-    name: 'Network Nodes',
-    short_name: 'NN',
-    style_options: {
-      normal: {
-        fillColor: 'brown',
-        strokeWeight: 1,
-        opacity: 0.8,
-        visible: true
-      },
-      selected: {
-        visible: true
-      }
-    },
-    threshold: 12,
-    reload: 'always',
-    declarativeStyles: (feature, styles) => {
-      var name = feature.getProperty('name')
-      if (name) {
-        styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${name}.png`
-      } else {
-        styles.icon = { path: 0, scale: 3, strokeColor: 'brown' }
-      }
-    }
-  })
-  networkNodesLayer.hide_in_ui = true
-  networkNodesLayer.flat_color = true
+  $scope.serviceLayers = []
 
   var fiberPlantLayer = new MapLayer({
     name: config.ui.labels.fiber,
@@ -56,14 +29,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     reload: 'always'
   })
 
-  map_layers.addEquipmentLayer(networkNodesLayer)
   map_layers.addEquipmentLayer(fiberPlantLayer)
 
   $scope.equipment_layers = map_layers.equipment_layers
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('network_nodes')) {
-      networkNodesLayer.show()
+      $scope.serviceLayers.forEach((layer) => {
+        layer.networkNodesLayer.show()
+      })
     } else if (tool === 'network_nodes') {
       $scope.selected_tool = null
       map.setOptions({ draggableCursor: null })
@@ -71,7 +45,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    networkNodesLayer.reloadData(true)
+    $scope.serviceLayers.forEach((layer) => {
+      layer.networkNodesLayer.reloadData(true)
+    })
   })
 
   $scope.select_tool = (tool) => {
@@ -97,15 +73,86 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       return config.ui.map_tools.equipment.build.indexOf(type.name) === -1
     })
     map.ready(() => {
-      $scope.change_node_types_visibility()
+      $http.get('/network/layers').success((response) => {
+        $scope.serviceLayers = response
+        if ($scope.serviceLayers.length > 0) {
+          var layer = $scope.serviceLayers[0]
+          layer.enabled = true
+          $timeout(() => {
+            $(`#serviceLayer${layer.id}`).addClass('in')
+            $scope.serviceLayers.slice(1).forEach((layer) => {
+              $(`#serviceLayer${layer.id}`).addClass('disabled')
+            })
+          }, 1)
+        }
+        $scope.serviceLayers.forEach((layer) => {
+          configureServiceLayer(layer)
+        })
+      })
     })
   })
 
-  function empty_changes () {
+  function configureServiceLayer (layer) {
+    layer.showFeederFiber = false
+    layer.showDistributionFiber = false
+
+    var networkNodesLayer = new MapLayer({
+      type: 'network_nodes',
+      name: 'Network Nodes',
+      short_name: 'NN',
+      style_options: {
+        normal: {
+          fillColor: 'brown',
+          strokeWeight: 1,
+          opacity: 0.8,
+          visible: true
+        },
+        selected: {
+          visible: true
+        }
+      },
+      threshold: 12,
+      reload: 'always',
+      declarativeStyles: (feature, styles) => {
+        var name = feature.getProperty('name')
+        if (name) {
+          styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${name}.png`
+        } else {
+          styles.icon = { path: 0, scale: 3, strokeColor: 'brown' }
+        }
+      }
+    })
+    networkNodesLayer.hide_in_ui = true
+    networkNodesLayer.flat_color = true
+    layer.networkNodesLayer = networkNodesLayer
+    map_layers.addEquipmentLayer(networkNodesLayer)
+
+    layer.changeNodeTypesVisibility = () => {
+      var types = []
+      $scope.view_node_types.forEach((node_type) => {
+        if (node_type.visible) {
+          types.push(node_type.name)
+        }
+      })
+      if (types.length === 0) {
+        networkNodesLayer.hide()
+      } else {
+        networkNodesLayer.show()
+        networkNodesLayer.setApiEndpoint(`/network/nodes/:plan_id/find/${layer.id}`, {
+          node_types: types.join(',')
+        })
+      }
+    }
+    layer.changedAvailability = function () {
+      networkNodesLayer.setVisible(layer.enabled)
+    }
+  }
+
+  function emptyChanges () {
     return { insertions: [], deletions: [], updates: [] }
   }
 
-  var changes = empty_changes()
+  var changes = emptyChanges()
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -118,7 +165,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     map.ready(() => {
       // fiberPlantLayer.show() // hidden by default
-      networkNodesLayer.reloadData()
+      $scope.serviceLayers.forEach((layer) => {
+        layer.networkNodesLayer.reloadData()
+      })
     })
 
     $http.get('/network_plan/' + plan.id).success((response) => {
@@ -127,33 +176,20 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   $rootScope.$on('plan_cleared', () => {
-    networkNodesLayer.reloadData()
-  })
-
-  $scope.change_node_types_visibility = () => {
-    var types = []
-    $scope.view_node_types.forEach((node_type) => {
-      if (node_type.visible) {
-        types.push(node_type.name)
-      }
+    $scope.serviceLayers.forEach((layer) => {
+      layer.networkNodesLayer.reloadData()
     })
-    if (types.length === 0) {
-      networkNodesLayer.hide()
-    } else {
-      networkNodesLayer.show()
-      networkNodesLayer.setApiEndpoint('/network/nodes/:plan_id/find', {
-        node_types: types.join(',')
-      })
-    }
-  }
+  })
 
   $scope.save_nodes = () => {
     $http.post('/network/nodes/' + $scope.plan.id + '/edit', changes).success((response) => {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
-        networkNodesLayer.reloadData()
+        $scope.serviceLayers.forEach((layer) => {
+          layer.networkNodesLayer.reloadData()
+        })
       }
-      changes = empty_changes()
+      changes = emptyChanges()
       $rootScope.$broadcast('equipment_nodes_changed')
     })
   }
@@ -164,10 +200,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
     $scope.selected_tool = $scope.build_node_types[0].name
     $rootScope.$broadcast('map_click', gm_event)
-  }
-
-  $scope.show_number_of_features = () => {
-    $scope.number_of_features = networkNodesLayer.number_of_features()
   }
 
   $rootScope.$on('map_layer_dragged_feature', (e, gm_event, feature) => {
@@ -197,10 +229,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       lon: coordinates.lng(),
       type: _.findWhere($scope.view_node_types, { name: type }).id
     })
-    var data_layer = networkNodesLayer.data_layer
-    var arr = data_layer.addGeoJson(feature)
+    var networkNodesLayer = $scope.serviceLayers[0].networkNodesLayer // TODO: use selected layer
+    var dataLayer = networkNodesLayer.data_layer
+    var arr = dataLayer.addGeoJson(feature)
     arr.forEach((feature) => {
-      data_layer.overrideStyle(feature, {
+      dataLayer.overrideStyle(feature, {
         icon: `/images/map_icons/${config.ARO_CLIENT}/${type}.png`,
         draggable: true
       })
@@ -316,5 +349,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('plan_cleared', (e, plan) => {
     $scope.routeLayer.clearData()
+  })
+
+  // prevent accordions from changing the URL
+  var accordion = $('#serviceLayersAccordion')
+  accordion.on('click', '[data-parent="#serviceLayersAccordion"]', (e) => {
+    e.preventDefault()
   })
 }])

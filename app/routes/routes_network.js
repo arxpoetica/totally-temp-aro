@@ -80,12 +80,21 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  // Network nodes of an existing route
   api.get('/network/nodes/:plan_id/find', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = request.params.plan_id
     var node_types = request.query.node_types && request.query.node_types.split(',')
     models.Network.viewNetworkNodes(node_types, plan_id, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/network/nodes/:plan_id/find/:serviceLayer', check_any_permission, middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var plan_id = request.params.plan_id
+    var serviceLayer = request.params.serviceLayer
+    var node_types = request.query.node_types && request.query.node_types.split(',')
+    models.Network.viewNetworkNodes(node_types, plan_id, viewport, serviceLayer)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -144,6 +153,13 @@ exports.configure = (api, middleware) => {
   // Network node types
   api.get('/network/nodes', (request, response, next) => {
     models.Network.viewNetworkNodeTypes()
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Network service layers
+  api.get('/network/layers', (request, response, next) => {
+    models.Network.viewServiceLayers()
       .then(jsonSuccess(response, next))
       .catch(next)
   })

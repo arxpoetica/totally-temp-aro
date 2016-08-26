@@ -512,3 +512,31 @@ footer nav {
   top: 53px;
   z-index: 1;
 }
+
+#serviceLayersAccordion div.panel-heading {
+  background: white;
+  padding: 1px 0;
+  color: #666;
+}
+
+#serviceLayersAccordion p.panel-title {
+  font-size: 14px;
+}
+
+#serviceLayersAccordion div.panel {
+  border: none;
+  box-shadow: none;
+}
+
+#serviceLayersAccordion a:hover, #serviceLayersAccordion a:focus {
+  text-decoration: none;
+}
+
+#serviceLayersAccordion input {
+  margin: 0;
+  margin-right: 5px;
+}
+
+#serviceLayersAccordion .panel-body {
+  padding: 5px 10px;
+}

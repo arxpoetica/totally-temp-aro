@@ -87,7 +87,6 @@ module.exports = class Network {
          ${database.intersects(viewport, 'cb.geom', 'AND')}
          ORDER BY carriers.name ASC
       `
-      console.log('sql', sql)
     }
     return database.query(sql, params)
   }
@@ -96,7 +95,7 @@ module.exports = class Network {
   //
   // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
   // 2. plan_id Number Pass a plan_id to find additionally the network nodes associated to that route
-  static viewNetworkNodes (node_types, plan_id, viewport) {
+  static viewNetworkNodes (node_types, plan_id, viewport, serviceLayer) {
     return Promise.resolve()
       .then(() => {
         var sql = `
@@ -122,12 +121,24 @@ module.exports = class Network {
 
         if (plan_id) {
           params.push(plan_id)
-          constraints.push(`
-            (plan_id IS NULL OR plan_id IN (
-              SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
-              UNION ALL
-              SELECT $${params.length}
-            ))`)
+          if (serviceLayer) {
+            params.push(serviceLayer)
+            constraints.push(`
+              plan_id IN (
+                SELECT p.id
+                  FROM client.plan p
+                  JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${params.length}
+                  WHERE p.parent_plan_id = $${params.length - 1}
+              )
+            `)
+          } else {
+            constraints.push(`
+              (plan_id IS NULL OR plan_id IN (
+                SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
+                UNION ALL
+                SELECT $${params.length}
+              ))`)
+          }
         } else {
           constraints.push('plan_id IS NULL')
         }
@@ -135,6 +146,7 @@ module.exports = class Network {
         if (constraints.length > 0) {
           sql += ' WHERE ' + constraints.join(' AND ')
         }
+        console.log('sql', sql)
         return database.points(sql, params, true, viewport)
       })
   }
@@ -142,6 +154,10 @@ module.exports = class Network {
   // View all the available network node types
   static viewNetworkNodeTypes () {
     return database.query('SELECT * FROM client.network_node_types')
+  }
+
+  static viewServiceLayers () {
+    return database.query('SELECT * FROM client.service_layer')
   }
 
   static editNetworkNodes (plan_id, changes) {
