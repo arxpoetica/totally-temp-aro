@@ -125,10 +125,12 @@ module.exports = class Network {
             params.push(serviceLayer)
             constraints.push(`
               plan_id IN (
-                SELECT p.id
-                  FROM client.plan p
-                  JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${params.length}
-                  WHERE p.parent_plan_id = $${params.length - 1}
+                SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+                  SELECT p.id
+                    FROM client.plan p
+                    JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${params.length}
+                    WHERE p.parent_plan_id = $${params.length - 1}
+                )
               )
             `)
           } else {
@@ -182,10 +184,12 @@ module.exports = class Network {
       JOIN client.fiber_route ON fiber_route.plan_id = p.id
       JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
       WHERE p.id IN (
-        SELECT p.id
-          FROM client.plan p
-          JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${2}
-          WHERE p.parent_plan_id = $${1}
+        SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+          SELECT p.id
+            FROM client.plan p
+            JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${2}
+            WHERE p.parent_plan_id = $${1}
+        )
       )
     `
     return database.query(sql, [plan_id, serviceLayer], true)

@@ -5,8 +5,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.map_tools = map_tools
   $scope.user_id = user_id
   $scope.ARO_CLIENT = config.ARO_CLIENT
-  $scope.showFeederFiber = false
-  $scope.showDistributionFiber = false
 
   $scope.selected_tool = null
   $scope.vztfttp = true
@@ -106,19 +104,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         }
       },
       api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
-      declarativeStyles: routeStyles()
+      declarativeStyles: routeStyles(layer)
     })
     routeLayer.hide_in_ui = true
-    routeLayer.show()
-    if ($scope.routeLayer) {
-      routeLayer.remove()
-    }
     layer.routeLayer = routeLayer
     map_layers.addEquipmentLayer(routeLayer)
 
     layer.changedFiberVisibility = () => {
       routeLayer.setVisible(layer.showFeederFiber || layer.showDistributionFiber)
-      routeLayer.setDeclarativeStyle(routeStyles())
+      routeLayer.setDeclarativeStyle(routeStyles(layer))
     }
 
     var networkNodesLayer = new MapLayer({
@@ -319,18 +313,19 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     redrawRoute(response)
   })
 
-  function routeStyles () {
+  function routeStyles (serviceLayer) {
     return (feature, styles) => {
-      if (feature.getProperty('fiber_type') === 'feeder') {
+      var type = feature.getProperty('fiber_type')
+      if (type === 'feeder') {
         styles.strokeColor = 'blue'
         styles.strokeWeight = 4
-        if (!$scope.showFeederFiber) {
+        if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
       } else {
         styles.strokeColor = 'red'
         styles.strokeWeight = 2
-        if (!$scope.showDistributionFiber) {
+        if (!serviceLayer.showDistributionFiber) {
           styles.visible = false
         }
       }
