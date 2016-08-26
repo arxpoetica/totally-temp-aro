@@ -75,8 +75,6 @@ ${PSQL} -a -f $DIR/calculate_locations_dn_entity_categories.sql
 
 # Create the tables for products and spend for a client
 ${PSQL} -a -f $DIR/create_client_spend.sql
-python $DIR/manage.py data spend values add $DIR/reformatted_spend.csv
-python $DIR/manage.py data spend mapping add $DIR/industry_mapping.csv
 
 ${PSQL} -a -f $DIR/create_city_spend_mapping.sql
 

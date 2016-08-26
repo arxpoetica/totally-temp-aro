@@ -10,6 +10,10 @@ ${PSQL} -a -f $DIR/load_business_customer_types.sql
 
 ${PSQL} -a -f $DIR/load_household_catehory_mappins.sql
 
+${PSQL} -a -f $DIR/load_household_install_costs.sql
+
+${PSQL} -a -f $DIR/load_business_install_costs.sql
+
 ${PSQL} -a -f $DIR/load_location_entry_fees.sql
 
 ${PSQL} -a -f $DIR/load_location_carriers.sql
