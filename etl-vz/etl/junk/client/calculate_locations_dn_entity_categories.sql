@@ -1,1 +1,0 @@
-ALTER TABLE locations ADD COLUMN dn_entity_categories character varying[];
