@@ -1,4 +1,7 @@
+-- Truncate arocities
+TRUNCATE aro.cities CASCADE;
 -- Create a bounding hull for New York based on aro.locations in NEW YORK
+--Insert cities
 INSERT INTO aro.cities(city_name, country_name, geom, buffer_geog, centroid)
 	SELECT
 		'New York'::text AS city_name,
@@ -9,9 +12,3 @@ INSERT INTO aro.cities(city_name, country_name, geom, buffer_geog, centroid)
 	FROM aro.locations
 	WHERE geom IS NOT NULL
 	AND city = 'NEW YORK';
-
-CREATE INDEX aro_cities_geom_gist
-  ON aro.cities USING gist (geom);
-
-CREATE INDEX aro_cities_buffer_geog_gist
-  ON aro.cities USING gist (buffer_geog);

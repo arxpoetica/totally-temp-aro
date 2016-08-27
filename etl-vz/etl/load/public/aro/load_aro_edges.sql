@@ -1,9 +1,12 @@
+--Drop Indexes
 DROP INDEX idx_aro_edges_geom_gist;
 DROP INDEX idx_aro_edges_geog_gist;
 DROP INDEX idx_aro_edges_buffer;
 
+--Truncate aro.edges
 TRUNCATE aro.edges CASCADE;
 
+--Update aro.edges
 INSERT INTO aro.edges
     (gid, tlid, tnidf, tnidt, statefp, countyfp, edge_length, geom, geog, buffer)
 SELECT

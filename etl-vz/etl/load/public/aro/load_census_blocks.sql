@@ -1,7 +1,8 @@
-TRUNCATE TABLE aro.census_blocks CASCADE;
+--Truncate aro.census_blocks
+TRUNCATE aro.census_blocks CASCADE;
+-- Update aro.census_blocks
 INSERT INTO aro.census_blocks
-(gid,statefp,countyfp,tabblock_id,aland,awater,intptlat,intptlon,geom)
-CREATE TABLE aro.census_blocks AS
+(gid,statefp,countyfp,tabblock_id,name, aland,awater,intptlat,intptlon,geom)
   SELECT
     gid,
     statefp,

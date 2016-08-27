@@ -1,4 +1,14 @@
 ###################
+# aro ETL
+###################
+
+reset_aro:
+
+# Load
+etl_aro:
+	aro/etl.sh
+
+###################
 # Carriers ETL
 ###################
 
@@ -62,8 +72,8 @@ etl_spend:
 # Master ETL
 ###################
 
-reset: reset_equipment reset_locations reset_spend reset_boundaries reset_carriers reset_cache
-load: etl_carriers etl_boundaries etl_spend etl_locations etl_equipment etl_cache
+reset: reset_aro reset_equipment reset_locations reset_spend reset_boundaries reset_carriers reset_cache
+load: etl_aro etl_carriers etl_boundaries etl_spend etl_locations etl_equipment etl_cache
 
 
 etl_reload_all: reset load

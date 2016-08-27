@@ -14,4 +14,5 @@ INSERT INTO client.census_blocks_carriers
 	JOIN aro.carriers c
 	ON LOWER(c.name) = LOWER(blks.hoconame) -- THIS MIGHT BE A PROBLEMATIC JOIN CHECK ME WHEN THINGS GO WRONG
 	WHERE c.route_type = 'ilec'
-	GROUP BY census_block_gid, carrier_id;
+	GROUP BY census_block_gid, carrier_id
+);

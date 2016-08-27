@@ -1,5 +1,8 @@
+-- Truncate aro.cousub
+TRUNCATE aro.cousub CASCADE;
+-- Update ro.cousub
 INSERT INTO aro.cousub
-(gid, statefp, countyfp, cosbidfp, name, aland, awater, intptlat, intptlon, geom)
+(gid, statefp, countyfp, geoid, name, aland, awater, intptlat, intptlon, geom)
   SELECT
     gid,
     statefp,
