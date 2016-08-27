@@ -7,7 +7,7 @@ INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_em
 		b.emps AS number_of_employees,
 		b.geog AS geog,
 		b.geog::geometry AS geom
-	FROM businesses.infousa b
+	FROM ref_businesses.infousa b
 	JOIN aro.locations l
 		ON ST_Equals(l.geom, b.geog::geometry);
 

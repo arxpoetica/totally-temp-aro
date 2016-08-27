@@ -1,8 +1,8 @@
 -- Table: public.infousa_businesses
 
-DROP TABLE IF EXISTS businesses.infousa;
+DROP TABLE IF EXISTS pub_businesses.infousa;
 
-CREATE TABLE businesses.infousa
+CREATE TABLE pub_businesses.infousa
 (
 	business varchar,
 	address varchar,

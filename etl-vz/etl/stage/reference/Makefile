@@ -72,8 +72,9 @@ reload_tiger: reset_tiger etl_tiger
 reset_boundaries:
 	ref_boundaries/reset.sh
 
-etl_boundaries: etl_cma_boundaries
-
+#comment this out until public S3 buckets resolved
+#etl_boundaries: etl_cma_boundaries
+etl_boundaries:
 etl_cma_boundaries:
 	ref_boundaries/cma_boundaries.sh
 

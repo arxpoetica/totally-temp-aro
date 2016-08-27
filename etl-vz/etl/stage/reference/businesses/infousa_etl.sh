@@ -18,9 +18,9 @@ cd $GISROOT;
 for STATE in "${STATE_ARRAY[@]}"
 do
 	rm -f ${TMPDIR}/*.*
-	aws s3 cp s3://public.aro/infousa/businesses_${STATE}.zip $GISROOT/pub_businesses_${STATE}.zip
+	aws s3 cp s3://public.aro/infousa/businesses_${STATE}.zip $GISROOT/businesses_${STATE}.zip
 	$UNZIPTOOL businesses_${STATE}.zip -d ${TMPDIR}
-	cat /$TMPDIR/businesses_${STATE}.csv | ${PSQL} -a -c "COPY businesses.infousa FROM STDIN DELIMITER ',' CSV HEADER;"
+	cat /$TMPDIR/businesses_${STATE}.csv | ${PSQL} -a -c "COPY pub_businesses.infousa FROM STDIN DELIMITER ',' CSV HEADER;"
 done
 
 # Optimize buisnesses table
