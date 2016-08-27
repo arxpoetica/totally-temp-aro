@@ -1,4 +1,17 @@
 ###################
+# project_constraints ETL
+###################
+
+# Reset the towers schema - SITA and client towers
+reset_project_constraints:
+	project_constraints/reset.sh
+
+etl_towers: 
+	rproject_constraints/etl.sh
+
+reload_project_constraints: reset_project_constraints etl_project_constraints
+
+###################
 # Towers ETL
 ###################
 
@@ -114,13 +127,12 @@ etl_demographics:
 
 reload_nbm: reset_demographics etl_demographics
 
-
 ###################
 # Master ETL
 ###################
 
-reset: reset_tiger reset_boundaries reset_geotel reset_demographics reset_nbm reset_towers reset_businesses reset_households
-load: etl_tiger etl_boundaries etl_geotel etl_demographics etl_nbm etl_towers etl_businesses etl_households
+reset: reset_boundaries reset_tiger reset_project_constraints reset_geotel reset_demographics reset_nbm reset_towers reset_businesses reset_households
+load: etl_boundaries etl_project_constraints etl_tiger etl_geotel etl_demographics etl_nbm etl_towers etl_businesses etl_households
 
 etl_reload_all: reset load
 

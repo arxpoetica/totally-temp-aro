@@ -1,3 +1,4 @@
+TRUNCATE aro.towers CASCADE ;
 --track unqiue locations and index geometry
 DROP TABLE IF EXISTS aro.unique_locations ;
 CREATE TABLE aro.unique_locations as 
@@ -5,7 +6,7 @@ CREATE TABLE aro.unique_locations as
     ST_SetSRID(ST_Point(t.longitude, t.latitude),4326) as geom,
     ST_SetSRID(ST_Point(t.longitude, t.latitude),4326)::geography as geog,
     ST_Buffer(ST_SetSRID(ST_Point(t.longitude, t.latitude),4326)::geography, 15)::geography as buffer
-    from towers.sita_towers t
+    from ref_towers.sita_towers t
     --Filter Invalid Towers
     WHERE sita_number !~ '[^0-9]'
       AND (latitude != 0 AND longitude != 0)
@@ -65,7 +66,7 @@ new_locations AS
             pl.longitude,
             ST_SetSRID(ST_Point(longitude, latitude), 4326) as geom,
             ST_SetSRID(ST_Point(longitude, latitude), 4326)::geography AS geog
-        FROM towers.sita_towers pl
+        FROM ref_towers.sita_towers pl
         JOIN missing_locations ml on ml.id = pl.sita_number
         RETURNING id, lat, lon
 )
@@ -90,7 +91,7 @@ updated_towers as (
         mel.location_id, sita_number::int8, parcel_address, parcel_city, parcel_state, latitude, longitude,
         geog,
         geom
-        from towers.sita_towers t
+        from ref_towers.sita_towers t
         join mapped_entity_location mel on t.sita_number = any(mel.sita_numbers)
     )
     returning id, location_id

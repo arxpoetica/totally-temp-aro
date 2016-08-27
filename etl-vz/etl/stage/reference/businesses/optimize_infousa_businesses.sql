@@ -1,2 +1,2 @@
-CREATE INDEX infousa_businesses_geog_gist ON businesses.infousa USING gist (geog);
-CREATE INDEX infousa_businesses_sic4 ON businesses.infousa USING btree (sic4);
+CREATE INDEX ref_businesses_infousa_geog_gist ON ref_businesses.infousa USING gist (geog);
+CREATE INDEX ref_businesses_infousa_sic4 ON ref_businesses.infousa USING btree (sic4);

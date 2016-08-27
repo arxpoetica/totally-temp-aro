@@ -24,6 +24,7 @@ CREATE INDEX aro_wirecenters_geog_gist ON aro.wirecenters USING gist (geog);
 CREATE INDEX aro_wirecenters_edge_buffer ON aro.wirecenters USING gist (edge_buffer);
 CREATE INDEX aro_wirecenters_location_edge_buffer ON aro.wirecenters USING gist (location_edge_buffer);
 
+
 -- -- Load VZ CRAN boundaries as wirecenters
 -- INSERT INTO aro.wirecenters (gid, wirecenter, geog, geom, edge_buffer, location_edge_buffer)
 -- 	SELECT
@@ -38,8 +39,5 @@ CREATE INDEX aro_wirecenters_location_edge_buffer ON aro.wirecenters USING gist 
 -- -- Use this view to filter if we have a large number of wirecenters but only want to load other geo data for a subset.
 -- -- The logic in this can obviously be changed as needed
 -- DROP VIEW IF EXISTS aro.wirecenter_subset;
--- CREATE VIEW aro.wirecenter_subset AS
--- 	SELECT	
--- 		*
--- 	FROM aro.wirecenters;
+
 

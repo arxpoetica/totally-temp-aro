@@ -33,7 +33,7 @@ etl_boundaries:
 ###################
 
 reset_locations:
-
+	locations/reset.sh
 # Load
 etl_locations:
 	locations/etl.sh
@@ -63,7 +63,7 @@ etl_spend:
 ###################
 
 reset: reset_equipment reset_locations reset_spend reset_boundaries reset_carriers reset_cache
-load: etl_carriers etl_boundaries etl_spend etl_locations etl_equipment reset_cache
+load: etl_carriers etl_boundaries etl_spend etl_locations etl_equipment etl_cache
 
 
 etl_reload_all: reset load
