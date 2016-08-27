@@ -22,6 +22,16 @@ reset_private:
 load_private:
 	(cd etl/load/private && make load)
 
+reset_view:
+		(cd etl/view/public && make reset)
+load_view:
+	(cd etl/view/public && make load)
+
+reset_all: reset_view reset_stage_reference reset_schema
+load_all: load_schema load_stage_reference load_public load_view
+
+etl_reload_all: reset_all load_all
+
 ###################
 # Web App Commands
 ###################
@@ -37,6 +47,8 @@ webserver:
 
 register_user:
 	node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password
+
+
 
 
 ###################

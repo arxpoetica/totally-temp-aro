@@ -6,8 +6,8 @@
 reset_project_constraints:
 	project_constraints/reset.sh
 
-etl_towers: 
-	rproject_constraints/etl.sh
+etl_project_constraints: 
+	project_constraints/etl.sh
 
 reload_project_constraints: reset_project_constraints etl_project_constraints
 

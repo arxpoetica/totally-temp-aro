@@ -122,7 +122,7 @@ ${PSQL} -a -f $DIR/create_client_service_layer_node_type.sql
 ${PSQL} -a -f $DIR/create_client_plan_fiber_conduit.sql
 
 #Views (These will be moved into their own VIEW Directory)
-${PSQL} -a -f $DIR/create_client_views.sql
+#${PSQL} -a -f $DIR/create_client_views.sql
 
 
 
