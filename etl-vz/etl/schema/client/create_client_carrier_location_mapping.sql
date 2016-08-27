@@ -26,7 +26,6 @@ INSERT INTO client.locations_carriers(location_id, carrier_id)
 
 -- Calculate distnace to fiber for each location for each carrier
 DROP TABLE IF EXISTS client.locations_distance_to_carrier;
-
 CREATE TABLE client.locations_distance_to_carrier (
 	distance float
 );
@@ -36,21 +35,17 @@ ALTER TABLE client.locations_distance_to_carrier ADD COLUMN carrier_id bigint RE
 ALTER TABLE client.locations_distance_to_carrier ADD PRIMARY KEY (location_id, carrier_id);
 
 
-DROP TABLE IF EXISTS client.census_blocks_carriers;
-CREATE TABLE client.census_blocks_carriers AS (
-	SELECT
-		cb.gid AS census_block_gid,
-		c.id AS carrier_id,
-		MAX(blks.maxaddown) AS download_speed,
-		MAX(blks.maxadup) AS upload_speed
-	FROM aro.census_blocks cb
-	JOIN nbm.blocks blks
-	ON cb.tabblock_id = blks.fullfipsid
-	JOIN aro.carriers c
-	ON LOWER(c.name) = LOWER(blks.hoconame) -- THIS MIGHT BE A PROBLEMATIC JOIN CHECK ME WHEN THINGS GO WRONG
-	WHERE c.route_type = 'ilec'
-	GROUP BY census_block_gid, carrier_id
+-- ----------------------------
+--  Table structure for census_blocks_carriers
+-- ----------------------------
+DROP TABLE IF EXISTS "client"."census_blocks_carriers";
+CREATE TABLE "client"."census_blocks_carriers" (
+	"census_block_gid" int4 NOT NULL,
+	"carrier_id" int4 NOT NULL,
+	"download_speed" int4,
+	"upload_speed" int4
 );
+
 
 ALTER TABLE client.census_blocks_carriers ADD PRIMARY KEY (census_block_gid, carrier_id);
 ALTER TABLE client.census_blocks_carriers ADD
