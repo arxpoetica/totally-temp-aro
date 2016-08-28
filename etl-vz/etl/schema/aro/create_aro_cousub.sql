@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS aro.cousub;
 -- ----------------------------
 DROP TABLE IF EXISTS "aro"."cousub";
 CREATE TABLE "aro"."cousub" (
-  "gid" int4 PRIMARY KEY,
+  "gid" int4,
   "statefp" varchar(2) COLLATE "default",
   "countyfp" varchar(3) COLLATE "default",
   "geoid" varchar(10) NOT NULL COLLATE "default",

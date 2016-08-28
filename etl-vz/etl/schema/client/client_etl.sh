@@ -63,6 +63,8 @@ ${PSQL} -a -f $DIR/create_client_household_category_mapping.sql
 
 ${PSQL} -a -f $DIR/calculate_locations_dn_entity_categories.sql
 
+${PSQL} -a -f $DIR/create_client_location_entry_fees.sql
+
 # Create the tables for products and spend for a client
 ${PSQL} -a -f $DIR/create_client_spend.sql
 

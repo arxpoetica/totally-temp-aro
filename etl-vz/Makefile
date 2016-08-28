@@ -27,8 +27,8 @@ reset_view:
 load_view:
 	(cd etl/view/public && make load)
 
-reset_all: reset_view reset_stage_reference reset_schema
-load_all: load_schema load_stage_reference load_public load_view
+reset_all: reset_schema reset_stage_reference reset_view  
+load_all: load_schema load_stage_reference load_view load_public 
 
 etl_reload_all: reset_all load_all
 

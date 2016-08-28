@@ -132,7 +132,7 @@ reload_nbm: reset_demographics etl_demographics
 ###################
 
 reset: reset_boundaries reset_tiger reset_project_constraints reset_geotel reset_demographics reset_nbm reset_towers reset_businesses reset_households
-load: etl_boundaries etl_project_constraints etl_tiger etl_geotel etl_demographics etl_nbm etl_towers etl_businesses etl_households
+load: etl_boundaries etl_geotel etl_project_constraints etl_tiger etl_demographics etl_nbm etl_towers etl_businesses etl_households
 
 etl_reload_all: reset load
 

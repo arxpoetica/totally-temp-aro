@@ -8,7 +8,7 @@ ${PSQL} -a -f $DIR/cache_location_info.sql
 
 ${PSQL} -a -f $DIR/load_business_customer_types.sql
 
-${PSQL} -a -f $DIR/load_household_catehory_mappins.sql
+${PSQL} -a -f $DIR/load_household_category_mappings.sql
 
 ${PSQL} -a -f $DIR/load_household_install_costs.sql
 
