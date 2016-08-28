@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS sita_towers.towers;
+DROP TABLE IF EXISTS ref_towers.sita_towers;
 
 CREATE TABLE ref_towers.sita_towers
 (

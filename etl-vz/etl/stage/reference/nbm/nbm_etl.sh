@@ -11,7 +11,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 ${PSQL} -a -f $DIR/create_nbm_blocks.sql
 
 # Use upper case state names. FIPS codes unnecessary here as well.
-declare -a STATE_ARRAY=( 'FL' 'IL' 'MO' 'WA' )
+declare -a STATE_ARRAY=( 'IL' 'MO' 'WA' )
 
 cd $GISROOT;
 for STATE in "${STATE_ARRAY[@]}"
