@@ -1,3 +1,4 @@
+TRUNCATE client.existing_fiber CASCADE;
 
 INSERT INTO client.existing_fiber(source_fiber_segment_id, source_name, geom, edge_intersect_buffer_geom)
 	SELECT

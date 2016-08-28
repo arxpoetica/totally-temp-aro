@@ -1,2 +1,2 @@
-VACUUM ANALYZE aro.locations
+VACUUM ANALYZE aro.locations;
 

@@ -1,3 +1,23 @@
+TRUNCATE aro.businesses CASCADE;
+
+INSERT INTO aro.locations(address, lat, lon, geog, geom)
+	SELECT
+		prism_formatted_address,
+		lat,
+		long,
+		ST_SetSRID(ST_MakePoint(b.long, b.lat), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(b.long, b.lat), 4326) AS geom
+	FROM businesses.vz_customers;
+
+INSERT INTO aro.locations(address, lat, lon, geog, geom)
+	SELECT
+		street_addr,
+		arcgis_latitude,
+		arcgis_longitude,
+		T_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326) AS geom
+	FROM businesses.tam;
+
 -- Insert all VZ customers
 INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_employees, annual_recurring_cost, monthly_recurring_cost, source, geog, geom)
 	SELECT

@@ -1,4 +1,21 @@
+TRUNCATE aro.temp_households CASCADE;
+TRUNCATE aro.households CASCADE;
 
+-- Make locations out of InfoGroup households (temp_hh.households)
+INSERT INTO aro.locations(address, city, state, zipcode, lat, lon, geom, geog)
+    SELECT DISTINCT ON (lat, lon)
+        hh.address,
+        hh.city,
+        hh.state,
+        hh.zip5,
+        hh.lat,
+        hh.lon,
+        hh.geom,
+        hh.geog
+    FROM project_constraints.spatial wc,
+    	temp_hh.households hh
+    WHERE ST_Contains(wc.geom, hh.geom);
+    
 -- Assign location_id of matching location to row on insert
 INSERT INTO aro.temp_households (location_id, address, city, state, zipcode, lat, lon, geog, geom)
 	SELECT

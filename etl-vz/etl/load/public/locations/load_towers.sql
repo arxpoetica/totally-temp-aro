@@ -1,4 +1,5 @@
 TRUNCATE aro.towers CASCADE ;
+
 --track unqiue locations and index geometry
 DROP TABLE IF EXISTS aro.unique_locations ;
 CREATE TABLE aro.unique_locations as 

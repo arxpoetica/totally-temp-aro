@@ -1,0 +1,1 @@
+TRUNCATE aro.locations CASCADE ;

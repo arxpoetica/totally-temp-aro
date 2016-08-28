@@ -1,3 +1,5 @@
+TRUNCATE aro.fiber_plant CASCADE;
+
 -- Load the data we need from geotel.fiber_plant into aro.fiber_plant
 -- We'll preserve all carriers' fiber plant in the aro.fiber_plant table, but only one set (the '"client's") will be added to the graph.
 INSERT INTO aro.fiber_plant (gid, carrier_name, cbsa, state, plant_type, zipcode, geog, geom)
