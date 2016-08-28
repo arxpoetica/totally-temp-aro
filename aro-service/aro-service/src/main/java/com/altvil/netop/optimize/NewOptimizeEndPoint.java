@@ -1,13 +1,12 @@
 package com.altvil.netop.optimize;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,18 +15,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.altvil.aro.service.demand.LocationTypeMask;
 import com.altvil.aro.service.entity.LocationEntityType;
-import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.constraints.CapexConstraints;
 import com.altvil.aro.service.optimization.constraints.CoverageConstraints;
 import com.altvil.aro.service.optimization.constraints.DefaultConstraints;
 import com.altvil.aro.service.optimization.constraints.IrrConstraints;
 import com.altvil.aro.service.optimization.constraints.NpvConstraints;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
-import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
-import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
+import com.altvil.aro.service.optimization.root.OptimizedRootPlan;
+import com.altvil.aro.service.optimization.root.RootOptimizationService;
+import com.altvil.aro.service.optimization.wirecenter.RootOptimizationRequest;
+import com.altvil.aro.service.scheduler.SchedulerService;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
+import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.OptimizationType;
-import com.altvil.netop.plan.SelectedRegion;
 import com.altvil.netop.service.AroConversionService;
 
 @RestController
@@ -36,41 +36,27 @@ public class NewOptimizeEndPoint {
 	@Autowired
 	private AroConversionService aroConversionService;
 
-	@Autowired @Qualifier("newOptimizationPlannerServiceImpl")
-	private OptimizationPlannerService optimizationPlannerService;
+	@Autowired
+	private SchedulerService schedulerService;
+
+	@Autowired
+	private RootOptimizationService rootOptimizationService;
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
-	public @ResponseBody AroMasterPlanJobResponse postRecalcMasterPlan(
+	public @ResponseBody AroRootPlanJobResponse postRecalcMasterPlan(
 			@RequestBody AroOptimizationPlan aroRequest)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
 
-		OptimizedMasterPlan response = optimizationPlannerService.optimize(
-				toOptimizationPlan(aroRequest)).get();
+		Future<OptimizedRootPlan> future = schedulerService.submit(() -> rootOptimizationService
+				.optimize(toOptimizationPlan(aroRequest)));
 
-		AroMasterPlanJobResponse mpr = new AroMasterPlanJobResponse();
+		OptimizedRootPlan rootPlan = future.get() ;
+		rootPlan.getPlanAnalysisReport() ;		
+
+		AroRootPlanJobResponse mpr = new AroRootPlanJobResponse();
 		mpr.setPlanAnalysisReport(aroConversionService
-				.toAroPlanAnalysisReport(response.getPlanAnalysisReport()));
+				.toAroPlanAnalysisReport(rootPlan.getPlanAnalysisReport()));
 		return mpr;
-
-	}
-	
-	private Set<Integer> toSelectedWireCenters(
-			Collection<SelectedRegion> selectedRegions) {
-
-		Set<Integer> result = new HashSet<>();
-
-		if (selectedRegions != null) {
-			for (SelectedRegion sr : selectedRegions) {
-				switch (sr.getRegionType()) {
-				case WIRECENTER:
-					result.add(Integer.parseInt(sr.getId()));
-					break;
-				default:
-				}
-			}
-		}
-
-		return result;
 
 	}
 
@@ -117,19 +103,45 @@ public class NewOptimizeEndPoint {
 
 	}
 
-	private MasterOptimizationRequest toOptimizationPlan(
-			AroOptimizationPlan plan) {
+	private AlgorithmType inferAlgorithmType(AroOptimizationPlan plan) {
 
-		return MasterOptimizationRequest
+		if (plan.getAlgorithmType() != AlgorithmType.DEFAULT) {
+			return plan.getAlgorithmType();
+		}
+
+		if (plan.getAlgorithm() == null) {
+			return AlgorithmType.PLANNING;
+		}
+
+		switch (plan.getAlgorithm()) {
+		case PRUNNING_NPV:
+		case NPV:
+			return AlgorithmType.EXPANDED_ROUTING;
+		case COVERAGE:
+		case IRR:
+			return AlgorithmType.PRUNING;
+		case CAPEX:
+		case UNCONSTRAINED:
+		default:
+			return AlgorithmType.PLANNING;
+		}
+	}
+
+	private RootOptimizationRequest toOptimizationPlan(AroOptimizationPlan plan) {
+
+		Set<LocationEntityType> entityTypes = toMask(plan.getLocationTypes());
+
+		return RootOptimizationRequest
 				.build()
+				.setAlgorithmType(inferAlgorithmType(plan))
+				.setAnalysisSelectionMode(plan.getAnalysisSelectionMode())
+				.setProcessingLayers(plan.getProcessLayers())
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
-				.setPlanId(plan.getPlanId())
+				.setMrc(entityTypes.contains(AroLocationEntityType.mrcgte2000) ? 2000
+						: 0).setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())
 				.setLocationEntities(toMask(plan.getLocationTypes()))
-				.setWirecenters(
-						toSelectedWireCenters(plan.getSelectedRegions()))
 				.setOptimizationMode(plan.getOptimizationMode()).build();
-
 	}
 
 	private Set<LocationEntityType> toEntityTypes(

@@ -126,6 +126,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 
   function postChanges (changes) {
     changes.algorithm = $scope.optimizationType.toUpperCase()
+    changes.selectionMode = 'SELECTED_LOCATIONS'
     if ($scope.optimizationType === 'npv') {
       if ($scope.npvType === 'targeted') {
         changes.budget = $scope.budget

@@ -9,11 +9,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.altvil.aro.model.NetworkNodeType;
+import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.analysis.spi.EntityDemandMapping;
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
@@ -27,51 +26,60 @@ import com.altvil.aro.service.entity.MaterialType;
 import com.altvil.aro.service.entity.SimpleNetworkFinancials;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
-import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.network.impl.DefaultNetworkAssignment;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.impl.PlanCommandService;
 import com.altvil.aro.service.optimization.spi.ComputeUnitCallable;
 import com.altvil.aro.service.optimization.spi.OptimizationException;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
+import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultOptimizationResult;
 import com.altvil.aro.service.plan.NetworkAssignmentModelFactory;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
-import com.altvil.enumerations.OptimizationType;
+import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
 
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class NpvPlanningOptimizer extends PlanningOptimizer {
+@Service
+public class NpvPlanningOptimizer  {
 	// Locations appear to have a high minimum cost even when their demand and
 	// revenue approach zero. In order to remove those minimum costs exclude all
 	// locations whose revenue is less than the CUTOFF from the results.
 	private static final double CUTOFF = 25;
-
+	
 	private final Logger log = LoggerFactory.getLogger(NpvPlanningOptimizer.class.getName());
 
+	@Autowired
+	private WirecenterOptimizationService wirecenterOptimizationService;
 	@Autowired
 	private NetworkDataService networkService;
 	@Autowired
 	private PricingService pricingService;
-
-	protected ComputeUnitCallable<WirecenterOptimization<Optional<PlannedNetwork>>> asCommand(
+	@Autowired
+	private PlanCommandService planCommandService ;
+	@Autowired
+	private AroDemandService aroDemandService;
+	@Autowired
+	private PlanAnalysisReportService planAnalysisReportService ;
+	
+	
+	public ComputeUnitCallable<WirecenterOptimization<Optional<PlannedNetwork>>> asCommand(
 			WirecenterOptimizationRequest request) {
 		return () -> {
 			try {
 				final PricingModel pricingModel = pricingService.getPricingModel("*", new Date(),
 						PricingContext.create(request.getConstructionRatios()));
 				NetworkDataRequest networkDataRequest = request.getNetworkDataRequest();
-				networkDataRequest = networkDataRequest.createRequest(networkDataRequest.getPlanId(), LocationSelectionMode.ALL_LOCATIONS);
+				networkDataRequest = networkDataRequest.createRequest(networkDataRequest.getPlanId(), networkDataRequest.getServiceLayerId());
 				final NetworkData networkData = networkService.getNetworkData(networkDataRequest);
 
 				OptimizationConstraints optimizationConstraints = request.getOptimizationConstraints();
@@ -80,12 +88,14 @@ public class NpvPlanningOptimizer extends PlanningOptimizer {
 				OptimizedPlan optimizedPlan;
 				do {
 					NetworkData proxyData = proxyData(networkData, nps.nextParametric());
-					plan = wirecenterOptimizationService.planNetwork(request, proxyData);
+					plan = wirecenterOptimizationService.planNpvNetwork(request, proxyData);
 					if (plan.isPresent()) {
-						optimizedPlan = reify(optimizationConstraints, plan.get());
+						optimizedPlan = planCommandService.summarize(
+								planCommandService.reifyPlan(optimizationConstraints, plan.get()));
 					} else {
 						optimizedPlan = null;
 					}
+					
 				} while (nps.isConverging(optimizedPlan, pricingModel));
 
 				return new DefaultOptimizationResult<>(request, plan);
@@ -96,16 +106,7 @@ public class NpvPlanningOptimizer extends PlanningOptimizer {
 		};
 	}
 
-	@Override
-	public boolean isOptimizerFor(OptimizationType type) {
-		switch (type) {
-		case NPV:
-			return true;
-		default:
-			return false;
-		}
-	}
-
+	
 	private NetworkData proxyData(NetworkData networkData, double nextParametric) {
 		if (nextParametric == 1D) {
 			return networkData;

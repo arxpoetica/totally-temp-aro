@@ -17,11 +17,18 @@ public class DumpQuery {
 		}
 	}
 	
-	private static String query ="select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
-			+ "from client.plan r \n"
-			+ "join aro.wirecenters w on r.wirecenter_id = w.id\n"
-			+ "join aro.edges a on st_intersects(edge_buffer, a.geom)\n"
-			+ "where r.id = :planId" ;
+	private static String query = "WITH  selected_segs AS (\n" + 
+			" 	select s.gid, s.construction_type, start_ratio, end_ratio\n" + 
+			" 	FROM client.conduit_edge_segments s\n" + 
+			"   WHERE s.start_ratio IS NOT NULL AND s.end_ratio IS NOT NULL and s.plan_id = :planId\n" + 
+			")\n" + 
+			"SELECT  \n" + 
+			"    gid, \n" + 
+			"    MAX(construction_type) AS construction_type,  \n" + 
+			"    MIN(start_ratio) AS start_ratio, \n" + 
+			"    MAX(end_ratio) AS end_ratio\n" + 
+			"FROM selected_segs s\n" + 
+			"GROUP BY gid";
 	
 	public static void value() {
 		System.out.println(query) ;

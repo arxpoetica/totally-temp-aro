@@ -90,24 +90,6 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static findEdges (plan_id) {
-    var sql = `
-      SELECT
-        fiber_route.id,
-        -- ST_Length(geom::geography) * 0.000621371 AS edge_length,
-        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
-        ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
-        frt.name AS fiber_type,
-        frt.description AS fiber_name
-      FROM client.plan
-      JOIN client.plan p ON p.parent_plan_id = plan.id
-      JOIN client.fiber_route ON fiber_route.plan_id = p.id
-      JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
-      WHERE plan.id=$1
-    `
-    return database.query(sql, [plan_id])
-  }
-
   static findPlan (plan_id, metadata_only) {
     var output = {
       'feature_collection': {
@@ -228,18 +210,6 @@ module.exports = class NetworkPlan {
 
         output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
 
-        return NetworkPlan.findEdges(plan_id)
-      })
-      .then((edges) => {
-        output.feature_collection.features = edges.map((edge) => ({
-          'type': 'Feature',
-          'geometry': edge.geom,
-          'properties': {
-            'fiber_type': edge.fiber_type,
-            'centroid': edge.centroid
-          }
-        }))
-
         return database.query(`
           SELECT
             region_id AS id, region_name AS name, region_type AS type, ST_AsGeoJSON(geom)::json AS geog
@@ -323,7 +293,7 @@ module.exports = class NetworkPlan {
           FROM client.plan
           LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
           LEFT JOIN auth.users ON users.id = permissions.user_id
-          WHERE plan.plan_type='M'
+          WHERE plan.plan_type='R'
         `
         var params = [config.client_carrier_name]
         if (user) {
@@ -391,7 +361,7 @@ module.exports = class NetworkPlan {
     .then(() => {
       var sql = `
         INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type)
-        VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326), ST_Envelope(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)), NOW(), NOW(), 'M') RETURNING id;
+        VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326), ST_Envelope(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)), NOW(), NOW(), 'R') RETURNING id;
       `
       var params = [
         name,
@@ -616,18 +586,15 @@ module.exports = class NetworkPlan {
   static searchAddresses (text) {
     var sql = `
       SELECT
-        (CASE WHEN aocn_name IS NULL THEN
-          wirecenter
-        ELSE
-          wirecenter || ' - ' || aocn_name
-        END) AS name,
+        code AS name,
         ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json as bounds
-      FROM wirecenters
-      WHERE
-        lower(unaccent(aocn_name)) LIKE lower(unaccent($1)) OR
-        lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
-      ORDER BY wirecenter ASC
+        FROM client.service_area
+       WHERE service_layer_id = (
+          SELECT id FROM client.service_layer WHERE name='wirecenter'
+        )
+        AND lower(unaccent(code)) LIKE lower(unaccent($1))
+      ORDER BY code ASC
     `
     var wirecenters = database.query(sql, [`%${text}%`])
     var addresses = text.length > 0

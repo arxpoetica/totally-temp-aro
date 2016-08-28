@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimization.master;
 
 
+//TODO create AggregatePlanningService
 public interface MasterPlanningService {
 	
 	OptimizedMasterPlan save(GeneratedMasterPlan plan) ;

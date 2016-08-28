@@ -1,7 +1,6 @@
 package com.altvil.aro.service.optimization.impl;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.function.Function;
@@ -15,18 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.model.DemandTypeEnum;
-import com.altvil.aro.persistence.repository.NetworkPlanRepository;
-import com.altvil.aro.service.conversion.SerializationService;
-import com.altvil.aro.service.demand.AroDemandService;
-import com.altvil.aro.service.demand.analysis.SpeedCategory;
-import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
-import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
-import com.altvil.aro.service.network.LocationSelectionMode;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.OptimizedPlan;
+import com.altvil.aro.service.optimization.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.impl.type.NpvPlanningOptimizer;
 import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
 import com.altvil.aro.service.optimization.master.OptimizedMasterPlan;
@@ -38,18 +31,12 @@ import com.altvil.aro.service.optimization.spi.OptimizationExecutorService.Execu
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluatorFactory;
 import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
-import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimization;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
-import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultOptimizationResult;
-import com.altvil.aro.service.optimize.model.DemandCoverage;
-import com.altvil.aro.service.planing.WirecenterNetworkPlan;
-import com.altvil.aro.service.report.GeneratedPlan;
-import com.altvil.enumerations.OptimizationType;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -59,38 +46,32 @@ public class OptimizationPlannerServiceImpl implements
 	private static final Logger log = LoggerFactory
 			.getLogger(OptimizationPlannerServiceImpl.class.getName());
 
-	private NetworkPlanRepository networkPlanRepository;
 	private OptimizationEvaluatorFactory strategyService;
 	private WirecenterOptimizationService wirecenterOptimizationService;
-	private WirecenterPlanningService wirecenterPlanningService;
 	private OptimizationExecutorService optimizationExecutorService;
 
 	private MasterPlanningService masterPlanningService;
-	private SerializationService conversionService;
-	private AroDemandService aroDemandService;
 
 	private OptimizationExecutor wirecenterExecutor;
 	private OptimizationExecutor masterPlanExecutor;
+	private PlanCommandService planCommandExecutorService;
+	private NpvPlanningOptimizer npvPlanningOptimizer;
 
 	@Autowired
 	public OptimizationPlannerServiceImpl(
-			NetworkPlanRepository networkPlanRepository,
+			PlanCommandService planCommandExecutorService,
 			OptimizationEvaluatorFactory strategyService,
 			WirecenterOptimizationService wirecenterOptimizationService,
-			WirecenterPlanningService wirecenterPlanningService,
 			OptimizationExecutorService optimizationExecutorService,
 			MasterPlanningService masterPlanningService,
-			SerializationService conversionService,
-			AroDemandService aroDemandService) {
+			NpvPlanningOptimizer npvPlanningOptimizer) {
 		super();
-		this.networkPlanRepository = networkPlanRepository;
+		this.planCommandExecutorService = planCommandExecutorService;
 		this.strategyService = strategyService;
 		this.wirecenterOptimizationService = wirecenterOptimizationService;
-		this.wirecenterPlanningService = wirecenterPlanningService;
 		this.optimizationExecutorService = optimizationExecutorService;
 		this.masterPlanningService = masterPlanningService;
-		this.conversionService = conversionService;
-		this.aroDemandService = aroDemandService;
+		this.npvPlanningOptimizer = npvPlanningOptimizer;
 	}
 
 	@PostConstruct
@@ -113,16 +94,21 @@ public class OptimizationPlannerServiceImpl implements
 	private MasterOptimizer createMasterOptimizer(
 			MasterOptimizationRequest request) {
 
-		if (request.getOptimizationConstraints() == null
-				|| request.getOptimizationConstraints().getOptimizationType() == OptimizationType.UNCONSTRAINED
-				|| request.getOptimizationConstraints().getOptimizationType() == OptimizationType.CAPEX) {
-			
+		switch (request.getAlgorithmType()) {
+		case PLANNING:
 			return new PlanningOptimizer();
+		case PRUNING:
+			return new PruningOptimizer(
+					strategyService.getOptimizationEvaluator(
+							(ThresholdBudgetConstraint) request
+									.getOptimizationConstraints(), request
+									.getOptimizationMode()));
+		case EXPANDED_ROUTING:
+			return new ExpandedNpvRouting();
+		case ROUTING:
+		default:
+			throw new RuntimeException("Operation not Supported");
 		}
-
-		return new PruningOptimizer(
-				strategyService.getOptimizationEvaluator((ThresholdBudgetConstraint)request
-						.getOptimizationConstraints(), request.getOptimizationMode()) );
 
 	}
 
@@ -131,109 +117,55 @@ public class OptimizationPlannerServiceImpl implements
 		OptimizedMasterPlan optimize(MasterOptimizationRequest request) {
 
 			try {
-			
+
 				Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
-	
+
 				Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
 						request.getOptimizationConstraints(), plannedNetworks);
-	
+
 				return masterPlanningService.save(new GeneratedMasterPlanImpl(
 						request, optimizedNetworks));
-			} catch( Throwable err ) {
+			} catch (Throwable err) {
 				log.error(err.getMessage(), err);
-				throw new RuntimeException(err.getMessage(), err) ;
+				throw new RuntimeException(err.getMessage(), err);
 			}
 
 		}
 
 		protected abstract Collection<PlannedNetwork> planNetworks(
-				Collection<WirecenterOptimizationRequest> wirecenters);
-
-		protected NetworkDemandSummary toNetworkDemandSummary(
-				DemandCoverage dc, CompetitiveDemandMapping mapping) {
-
-			Collection<CompetitiveLocationDemandMapping> plannedDemand = dc
-					.getLocations()
-					.stream()
-					.map(l -> mapping.getLocationDemandMapping(l.getObjectId()))
-					.collect(Collectors.toList());
-
-			return NetworkDemandSummaryImpl
-					.build()
-					.add(DemandTypeEnum.planned_demand, SpeedCategory.cat7,
-							dc.getLocationDemand())
-							
-							
-					.add(DemandTypeEnum.new_demand,
-							SpeedCategory.cat7,
-							aroDemandService.aggregateDemandForSpeedCategory(
-									mapping.getAllDemandMapping(),
-									SpeedCategory.cat7))
-									
-					.add(DemandTypeEnum.original_demand,
-							SpeedCategory.cat3,
-							aroDemandService.aggregateDemandForSpeedCategory(
-									plannedDemand, SpeedCategory.cat3))
-
-					.build();
-
-		}
+				ProcessLayerCommand processLayer);
 
 		protected OptimizedPlan reify(OptimizationConstraints constraints,
 				PlannedNetwork plan) {
-
-			WirecenterNetworkPlan reifiedPlan = conversionService.convert(
-					plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
-
-			NetworkDemandSummary demandSummary = toNetworkDemandSummary(
-					reifiedPlan.getDemandCoverage(),
-					plan.getCompetitiveDemandMapping());
-			
-			log.debug("ds ====>" + demandSummary.toString());
-			
-
-			return wirecenterPlanningService.save(new GeneratedPlanImpl(
-					demandSummary, constraints, reifiedPlan));
-
+			return planCommandExecutorService.reifyPlanSummarizeAndSave(
+					constraints, plan);
 		}
 
 		protected Collection<OptimizedPlan> updateNetworks(
 				OptimizationConstraints constraints,
 				Collection<PlannedNetwork> plannedNetworks) {
 
-			try{
-			
+			try {
+
 				return plannedNetworks.stream().map(p -> reify(constraints, p))
 						.collect(Collectors.toList());
-			} catch( Throwable err ) {
+			} catch (Throwable err) {
 				log.error(err.getMessage(), err);
-				throw new RuntimeException(err.getMessage(), err) ;
+				throw new RuntimeException(err.getMessage(), err);
 			}
 
 		}
 
-		protected Collection<WirecenterOptimizationRequest> computeWireCenterRequests(
+		protected Collection<WirecenterOptimizationRequest> toServiceAreaCommands(
+				ProcessLayerCommand layerCommand) {
+			return layerCommand.getServiceAreaCommands();
+		}
+
+		protected ProcessLayerCommand computeWireCenterRequests(
 				MasterOptimizationRequest request) {
-			networkPlanRepository.deleteWireCenterPlans(request.getPlanId());
-
-			boolean selectAllLocations = !request.getWireCenters().isEmpty();
-
-			List<Number> wireCentersPlans = selectAllLocations ? networkPlanRepository
-					.computeWirecenterUpdates(request.getPlanId(),
-							request.getWireCenters()) : networkPlanRepository
-					.computeWirecenterUpdates(request.getPlanId());
-			final LocationSelectionMode selectionMode = selectAllLocations ? LocationSelectionMode.ALL_LOCATIONS
-					: LocationSelectionMode.SELECTED_LOCATIONS;
-
-			return StreamUtil.map(
-					wireCentersPlans,
-					id -> {
-						return new WirecenterOptimizationRequest(request
-								.getOptimizationConstraints(), request
-								.getConstraints(), request
-								.getNetworkDataRequest().createRequest(
-										id.longValue(), selectionMode));
-					});
+			planCommandExecutorService.deleteOldPlans(request.getPlanId());
+			return planCommandExecutorService
+					.createProcessLayerCommand(request);
 		}
 
 		protected <S> Collection<ComputeUnitCallable<WirecenterOptimization<S>>> toCommands(
@@ -263,14 +195,28 @@ public class OptimizationPlannerServiceImpl implements
 
 		@Override
 		protected Collection<PlannedNetwork> planNetworks(
-				Collection<WirecenterOptimizationRequest> wirecenters) {
+				ProcessLayerCommand layerCommands) {
 
 			return evaluateWirecenterCommands(
-					toCommands(wirecenters, this::asCommand),
-					Optional::isPresent).stream().map(Optional::get)
-					.collect(Collectors.toList());
+					toCommands(toServiceAreaCommands(layerCommands),
+							this::asCommand), Optional::isPresent).stream()
+					.map(Optional::get).collect(Collectors.toList());
 
 		}
+	}
+
+	private class ExpandedNpvRouting extends MasterOptimizer {
+
+		@Override
+		protected Collection<PlannedNetwork> planNetworks(
+				ProcessLayerCommand layerCommands) {
+			return evaluateWirecenterCommands(
+					toCommands(toServiceAreaCommands(layerCommands),
+							npvPlanningOptimizer::asCommand),
+					Optional::isPresent).stream().map(Optional::get)
+					.collect(Collectors.toList());
+		}
+
 	}
 
 	private class PruningOptimizer extends MasterOptimizer {
@@ -299,13 +245,13 @@ public class OptimizationPlannerServiceImpl implements
 
 		@Override
 		protected Collection<PlannedNetwork> planNetworks(
-				Collection<WirecenterOptimizationRequest> wirecenters) {
+				ProcessLayerCommand layerCommand) {
 
 			Collection<PrunedNetwork> prunedNetworks = evaluateWirecenterCommands(
-					toCommands(wirecenters, this::asCommand), n -> !n.isEmpty());
+					toCommands(toServiceAreaCommands(layerCommand),
+							this::asCommand), n -> !n.isEmpty());
 
 			return optimizationEvaluator.evaluateNetworks(prunedNetworks);
-
 		}
 
 	}
@@ -353,38 +299,6 @@ public class OptimizationPlannerServiceImpl implements
 		public Collection<OptimizedPlan> getOptimizedPlans() {
 			return optimizedPlans;
 		}
-	}
-
-	private static class GeneratedPlanImpl implements GeneratedPlan {
-
-		private NetworkDemandSummary networkDemandSummary;
-		private OptimizationConstraints optimizationConstraints;
-		private WirecenterNetworkPlan wirecenterNetworkPlan;
-
-		public GeneratedPlanImpl(NetworkDemandSummary networkDemandSummary,
-				OptimizationConstraints optimizationConstraints,
-				WirecenterNetworkPlan wirecenterNetworkPlan) {
-			super();
-			this.networkDemandSummary = networkDemandSummary;
-			this.optimizationConstraints = optimizationConstraints;
-			this.wirecenterNetworkPlan = wirecenterNetworkPlan;
-		}
-
-		@Override
-		public NetworkDemandSummary getDemandSummary() {
-			return networkDemandSummary;
-		}
-
-		@Override
-		public OptimizationConstraints getOptimizationConstraints() {
-			return optimizationConstraints;
-		}
-
-		@Override
-		public WirecenterNetworkPlan getWirecenterNetworkPlan() {
-			return wirecenterNetworkPlan;
-		}
-
 	}
 
 }

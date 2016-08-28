@@ -11,10 +11,11 @@ public enum AroLocationEntityType {
 			LocationEntityType.large), household(LocationEntityType.household), celltower(
 			LocationEntityType.celltower), business(LocationEntityType.small, 
 					LocationEntityType.medium, 
-					LocationEntityType.large);
-
+					LocationEntityType.large),
+					mrcgte2000(LocationEntityType.large)
 	;
 
+	
 	private Set<LocationEntityType> mappedTypes = EnumSet
 			.noneOf(LocationEntityType.class);;
 

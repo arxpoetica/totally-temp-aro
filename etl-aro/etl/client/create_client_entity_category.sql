@@ -14,3 +14,4 @@ INSERT INTO client.entity_category(name, description) VALUES('medium', 'Mid-tier
 INSERT INTO client.entity_category(name, description) VALUES('large', 'Large Enterprise (1000+ employees)');
 INSERT INTO client.entity_category(name, description) VALUES('household', 'Household');
 INSERT INTO client.entity_category(name, description) VALUES('celltower', 'Tower');
+INSERT INTO client.entity_category(name, description) VALUES('business_unk', 'Unknown Business');

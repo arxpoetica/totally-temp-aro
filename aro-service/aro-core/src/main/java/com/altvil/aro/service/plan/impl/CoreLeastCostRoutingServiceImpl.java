@@ -7,16 +7,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jgrapht.GraphPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
@@ -44,7 +40,6 @@ import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
-import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.graph.transform.network.GraphRenoder;
 import com.altvil.aro.service.graph.transform.network.GraphRenoderService;
 import com.altvil.aro.service.graph.transform.network.RenodedGraph;
@@ -57,14 +52,12 @@ import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.route.RouteModel;
 import com.altvil.aro.service.route.RoutePlaningService;
 import com.altvil.aro.util.DescribeGraph;
-import com.altvil.enumerations.OptimizationType;
 import com.altvil.interfaces.Assignment;
 import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.utils.StreamUtil;
 
 @Service
-@Order(Ordered.LOWEST_PRECEDENCE)
 public class CoreLeastCostRoutingServiceImpl implements
 		CoreLeastCostRoutingService {
 
@@ -89,21 +82,13 @@ public class CoreLeastCostRoutingServiceImpl implements
 	}
 
 	@Override
-	public boolean isRoutingServiceFor(OptimizationType type) {
-		return true;
-	}
-
-	@Override
 	public Optional<CompositeNetworkModel> computeNetworkModel(
-			GraphNetworkModel model, PricingModel pricingModel,
-			FtthThreshholds constraints, FinancialInputs financialInputs)
-			throws PlanException {
-
+			GraphNetworkModel model, LcrContext context) throws PlanException {
 		log.info("" + "Processing Plan ");
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					model, pricingModel, constraints, financialInputs);
+					 model, context);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
@@ -113,21 +98,26 @@ public class CoreLeastCostRoutingServiceImpl implements
 					+ (System.currentTimeMillis() - startTime));
 			throw new PlanException(err.getMessage(), err);
 		}
-
 	}
 
+	
+
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
-			GraphNetworkModel model, PricingModel pricingModel, FtthThreshholds constraints, FinancialInputs financialInputs)
+	
+			GraphNetworkModel model,  LcrContext context)
 			throws PlanException {
 
-		NetworkModelBuilder planning = new NetworkModelBuilder();
-		CompositeNetworkModel networkModel = planning.build(pricingModel, model, constraints, financialInputs);
+		NetworkModelBuilder planning = new NetworkModelBuilder(
+				context);
+		CompositeNetworkModel networkModel = planning.build(
+				model);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
 	}
 
-	protected ClosestFirstSurfaceBuilder getDijkstrIteratorBuilder(FinancialInputs financialInputs) {
+	protected ClosestFirstSurfaceBuilder getDijkstrIteratorBuilder(
+			FinancialInputs financialInputs) {
 		return ScalarClosestFirstSurfaceIterator.BUILDER;
 	}
 
@@ -180,12 +170,16 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 	private class NetworkModelBuilder {
 
-		public NetworkModelBuilder() {
+		private LcrContext lcrContext;
+
+		public NetworkModelBuilder(
+				LcrContext lcrContext) {
 			super();
+			this.lcrContext = lcrContext;
 		}
 
-		public CompositeNetworkModel build(PricingModel pricingModel, GraphNetworkModel networkModel,
-		FtthThreshholds request, FinancialInputs financialInputs) {
+		public CompositeNetworkModel build(
+				GraphNetworkModel networkModel) {
 
 			if (!networkModel.hasLocations()) {
 				// TODO make it return empty NetworkModel
@@ -226,12 +220,13 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			// Create a tree leading to each AroEdge with a value.
 
-			DAGModel<GeoSegment> dag = transformFactory.createDAG(getDijkstrIteratorBuilder(financialInputs), modifier
-					.build(), rootNode, e -> {
-				GeoSegment gs = e.getValue();
-				return gs == null ? false : !gs.getGeoSegmentAssignments()
-						.isEmpty();
-			});
+			DAGModel<GeoSegment> dag = transformFactory.createDAG(
+					lcrContext.getClosestFirstSurfaceBuilder(), modifier.build(), rootNode,
+					e -> {
+						GeoSegment gs = e.getValue();
+						return gs == null ? false : !gs
+								.getGeoSegmentAssignments().isEmpty();
+					});
 
 			if (dag.getEdges().isEmpty()) {
 				log.warn("Unable to build DAG as no locations found on edges");
@@ -243,7 +238,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 			DescribeGraph.trace(log, dag.getGraph());
 
 			RootGraphMapping rootGraphMapping = transformFactory
-					.createWirecenterTransformer(request).apply(dag,
+					.createWirecenterTransformer(lcrContext.getFtthThreshholds()).apply(dag,
 							assignedFiberSources);
 
 			dag = dag.removeRootNode(rootNode);
@@ -258,7 +253,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			return new CompositeNetworkModelImpl(assignedFiberSources.stream()
 					.filter(fsb -> fsb.getGraphMapping() != null)
-					.map(createNetworkModelTransform(pricingModel, graphCtx))
+					.map(createNetworkModelTransform(lcrContext.getPricingModel(), graphCtx))
 					.collect(Collectors.toList()));
 
 		}
@@ -316,7 +311,6 @@ public class CoreLeastCostRoutingServiceImpl implements
 				GraphMapping graphMapping) {
 
 			FiberSourceMapping fiberMapping = (FiberSourceMapping) graphMapping;
-		
 
 			Map<FiberType, RenodedGraph> renodedMap = new EnumMap<>(
 					FiberType.class);
@@ -327,13 +321,13 @@ public class CoreLeastCostRoutingServiceImpl implements
 					getRenodedGraph(graphCtx, FiberType.DISTRIBUTION,
 							graphMapping));
 
-			
-			RenodedGraph rg = getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping) ;
-			
+			RenodedGraph rg = getRenodedGraph(graphCtx, FiberType.FEEDER,
+					graphMapping);
+
 			GeneratedFiberRoute feederFiber = planRoute(
 					new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
-							rg.getGraph(), rg.getGraphNode(graphMapping.getGraphAssignment()),
-							15 * 1000),
+							rg.getGraph(), rg.getGraphNode(graphMapping
+									.getGraphAssignment()), 15 * 1000),
 					getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping),
 					graphMapping);
 
@@ -378,10 +372,12 @@ public class CoreLeastCostRoutingServiceImpl implements
 			children.forEach(a -> {
 				if (isDistributionSource(a.getAroEntity())) {
 					map.put(a.getGraphAssignment(),
-							planRoute(new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
-									renoded.getGraph(),
-									renoded.getGraphNode(a.getGraphAssignment()),
-									15 * 1000), renoded, a));
+							planRoute(
+									new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
+											renoded.getGraph(),
+											renoded.getGraphNode(a
+													.getGraphAssignment()),
+											15 * 1000), renoded, a));
 				}
 			});
 
@@ -483,27 +479,6 @@ public class CoreLeastCostRoutingServiceImpl implements
 			return graphModel;
 		}
 
-	}
-
-	private static class DistancePredicate implements
-			Predicate<GraphPath<GraphNode, AroEdge<GeoSegment>>> {
-
-		public static DistancePredicate PREDICATE_15K = new DistancePredicate(
-				15 * 1000);// 15K constraint
-
-		private double maxDistance;
-
-		public DistancePredicate(double maxDistance) {
-			super();
-			this.maxDistance = maxDistance;
-		}
-
-		@Override
-		public boolean test(GraphPath<GraphNode, AroEdge<GeoSegment>> path) {
-			double sum = path.getEdgeList().stream()
-					.mapToDouble(e -> e.getValue().getLength()).sum();
-			return sum <= maxDistance;
-		}
 	}
 
 }

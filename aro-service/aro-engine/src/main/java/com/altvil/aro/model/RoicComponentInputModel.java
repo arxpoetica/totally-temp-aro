@@ -1,5 +1,7 @@
 package com.altvil.aro.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -12,7 +14,7 @@ import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 
 @Entity
 @Table(name = "roic_component_input", schema = "financial")
-public class RoicComponentInputModel {
+public class RoicComponentInputModel extends ComparableModel {
 
 	/*
 	 * 
@@ -51,6 +53,15 @@ public class RoicComponentInputModel {
 	public Long getId() {
 		return id;
 	}
+	
+	
+
+	@Override
+	protected Serializable idKey() {
+		return id ;
+	}
+
+
 
 	public void setId(Long id) {
 		this.id = id;

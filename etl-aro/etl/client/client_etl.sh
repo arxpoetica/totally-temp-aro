@@ -16,6 +16,15 @@ ${PSQL} -a -f $DIR/create_client_demand_type.sql
 #Create Cable Construction Types
 ${PSQL} -a -f $DIR/create_client_cable_construction_type.sql
 
+# Create and populate layers
+${PSQL} -a -f $DIR/create_client_service_layer.sql
+
+# Create and populate layers
+${PSQL} -a -f $DIR/create_client_service_layer.sql
+
+# Create and service area layers
+${PSQL} -a -f $DIR/create_client_service_area.sql
+
 # Map carriers to locations to determine service coverage
 ${PSQL} -a -f $DIR/create_client_carrier_location_mapping.sql
 

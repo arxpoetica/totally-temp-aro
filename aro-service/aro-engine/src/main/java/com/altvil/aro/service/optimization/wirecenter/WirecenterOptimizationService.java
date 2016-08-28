@@ -9,5 +9,6 @@ public interface WirecenterOptimizationService {
 	PrunedNetwork pruneNetwork(WirecenterOptimizationRequest request);
 	Optional<PlannedNetwork> planNetwork(WirecenterOptimizationRequest request) ;
 	Optional<PlannedNetwork> planNetwork(WirecenterOptimizationRequest request, NetworkData networkData) ;
+	Optional<PlannedNetwork> planNpvNetwork(WirecenterOptimizationRequest request, NetworkData networkData) ;
 
 }

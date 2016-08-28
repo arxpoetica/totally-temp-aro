@@ -1,11 +1,11 @@
 package com.altvil.aro.service.report;
 
-import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
+import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 
 public interface PlanAnalysisReportService {
 	
 	PlanAnalysisReport createPlanAnalysisReport() ;
 	PlanAnalysisReport createPlanAnalysisReport(GeneratedPlan generatedPlan) ;
-	PlanAnalysisReport aggregate(GeneratedMasterPlan plam) ;
-
+	PlanAnalysisReport aggregate(OptimizationConstraints constraints, Iterable<PlanAnalysisReport> reports) ;
+	
 }

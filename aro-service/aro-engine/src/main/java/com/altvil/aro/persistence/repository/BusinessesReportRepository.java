@@ -1,24 +1,20 @@
 package com.altvil.aro.persistence.repository;
 
-import com.altvil.aro.persistence.repository.model.BusinessReportElement;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+import com.altvil.aro.persistence.repository.model.BusinessReportElement;
 
 @Service
 public class BusinessesReportRepository {
@@ -29,8 +25,9 @@ public class BusinessesReportRepository {
     EntityManager jdbcTemplate;
 
 
-    public Collection<BusinessReportElement> getTotals(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
-        return Arrays.stream(distanceThresholds)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Collection<BusinessReportElement> getTotals(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
+        return (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
                     Query query = jdbcTemplate.createNativeQuery("\n" +
                             "with \n" +
@@ -74,8 +71,9 @@ public class BusinessesReportRepository {
     }
 
 
-    public Collection<BusinessReportElement> getBuildingsCountsByBusinessesSizes(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
-        return Arrays.stream(distanceThresholds)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Collection<BusinessReportElement> getBuildingsCountsByBusinessesSizes(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
+        return (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
                     Query query = jdbcTemplate.createNativeQuery("\n" +
                             "with \n" +
@@ -125,8 +123,9 @@ public class BusinessesReportRepository {
                 .collect(Collectors.toList());
     }
 
-    public Collection<BusinessReportElement> getBusinessesCountsBySizes(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
-        return Arrays.stream(distanceThresholds)
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public Collection<BusinessReportElement> getBusinessesCountsBySizes(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
+        return  (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
                     Query query = jdbcTemplate.createNativeQuery("\n" +
                             "with \n" +
@@ -215,7 +214,8 @@ public class BusinessesReportRepository {
             query.setParameter("planId", planId);
             query.setParameter("source", locationSource);
             query.setParameter("mrc", mrcThreshold);
-            List<Object[]> result = (List<Object[]>) query.getResultList();
+            @SuppressWarnings("unchecked")
+			List<Object[]> result = (List<Object[]>) query.getResultList();
             return " id,location_id,industry_id,name,address,number_of_employees,annual_recurring_cost,monthly_recurring_cost,source,longitude,lattitude,distance\n" +
                     result.stream().map(this::mapBussinessRow)
                     .collect(Collectors.joining("\n"));

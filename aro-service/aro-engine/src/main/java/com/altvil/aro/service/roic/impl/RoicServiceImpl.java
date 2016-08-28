@@ -8,26 +8,22 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.model.MasterPlan;
 import com.altvil.aro.model.NetworkPlan;
 import com.altvil.aro.model.RoicComponentInputModel;
-import com.altvil.aro.model.WirecenterPlan;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.RoicComponentInputModelRepository;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
-import com.altvil.aro.service.roic.RoicFinancialInput;
 import com.altvil.aro.service.roic.RoicEngineService;
+import com.altvil.aro.service.roic.RoicFinancialInput;
 import com.altvil.aro.service.roic.RoicService;
-import com.altvil.aro.service.roic.analysis.builder.model.RoicBuilderService;
 import com.altvil.aro.service.roic.analysis.model.RoicModel;
 import com.altvil.utils.reference.VolatileReference;
 
@@ -37,7 +33,6 @@ public class RoicServiceImpl implements RoicService {
 	private static final Logger log = LoggerFactory
 			.getLogger(RoicServiceImpl.class.getName());
 
-	private RoicBuilderService roicBuilderService;
 	private NetworkPlanRepository planRepostory;
 	private RoicComponentInputModelRepository roicComponentInputModelRepository;
 	private NetworkReportService networkReportService;
@@ -49,13 +44,11 @@ public class RoicServiceImpl implements RoicService {
 
 	@Autowired
 	public RoicServiceImpl(
-			RoicBuilderService roicBuilderService,
 			NetworkPlanRepository planRepostory,
 			RoicComponentInputModelRepository roicComponentInputModelRepository,
 			NetworkReportService networkReportService,
 			RoicEngineService roicInputService) {
 		super();
-		this.roicBuilderService = roicBuilderService;
 		this.planRepostory = planRepostory;
 		this.roicComponentInputModelRepository = roicComponentInputModelRepository;
 		this.networkReportService = networkReportService;
@@ -79,17 +72,20 @@ public class RoicServiceImpl implements RoicService {
 	@Override
 	public RoicModel getRoicModel(long planId) {
 
-		NetworkPlan plan = planRepostory.findOne(planId);
-
-		Optional<RoicModel> m = (plan instanceof MasterPlan) ? getMasterRoicModel((MasterPlan) plan)
-				: getWirecenterRoicModel((WirecenterPlan) plan);
+		NetworkPlan plan = planRepostory.getOne(planId) ;
+		
+		if( plan == null ) {
+			return null ;
+		}
+		
+		Optional<RoicModel> m = getRoicModel(planId,
+				() -> Optional.of(loadRoic(planId)));
 
 		return m.isPresent() ? m.get() : null;
 	}
 
-	private <T extends NetworkPlan> Optional<RoicModel> getRoicModel(T plan,
+	private Optional<RoicModel> getRoicModel(Long planId,
 			Supplier<Optional<RoicModel>> s) {
-		Long planId = plan.getId();
 
 		Optional<RoicModel> model = cache.get(planId);
 		if (model == null) {
@@ -99,32 +95,11 @@ public class RoicServiceImpl implements RoicService {
 		return model;
 	}
 
-	private Optional<RoicModel> getMasterRoicModel(MasterPlan plan) {
-		return getRoicModel(plan, () -> loadMasterRoicModel(plan));
-	}
+	
 
-	private Optional<RoicModel> getWirecenterRoicModel(WirecenterPlan plan) {
-		return getRoicModel(plan, () -> Optional.of(loadRoic(plan)));
-	}
-
-	private Optional<RoicModel> loadMasterRoicModel(MasterPlan plan) {
-
-		Collection<RoicModel> models = planRepostory
-				.queryChildPlans(plan.getId()).stream().map(this::loadRoic)
-				.filter(r -> r != null).collect(Collectors.toList());
-
-		if (models.size() == 0) {
-			return Optional.empty();
-		}
-
-		return Optional.of(roicBuilderService.aggregate().addAll(models).sum());
-	}
-
-	private RoicModel loadRoic(WirecenterPlan plan) {
+	private RoicModel loadRoic(long planId) {
 
 		try {
-
-			long planId = plan.getId();
 
 			PlanAnalysisReport report = networkReportService
 					.loadSummarizedPlan(planId).getPlanAnalysisReport();
