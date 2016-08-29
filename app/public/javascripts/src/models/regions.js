@@ -112,8 +112,20 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
             }
           })
 
+          var sections = [
+            { prefix: 'census_block', name: 'Census Blocks' },
+            { prefix: 'county', name: 'County Subdivisions' },
+            { prefix: 'wirecenter', name: 'Wirecenter' },
+            { prefix: 'cma_boundary', name: 'CMA boundaries' }
+          ]
+
+          var results = sections.map((section) => ({
+            text: section.name,
+            children: items.filter((item) => item.id.indexOf(section.prefix) === 0)
+          })).filter((item) => item.children.length > 0)
+
           return {
-            results: items,
+            results: results,
             pagination: {
               more: false
             }

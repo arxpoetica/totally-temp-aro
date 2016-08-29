@@ -176,9 +176,7 @@ exports.configure = (api, middleware) => {
     var text = request.query.text
     var viewport = request.viewport
     var types = request.query.types
-    console.log('types', types)
     types = (Array.isArray(types) ? types : [types]).filter(Boolean)
-    console.log('types', types)
     models.Network.searchBoundaries(text, types, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
