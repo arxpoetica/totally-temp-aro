@@ -1,4 +1,3 @@
-TRUNCATE aro.temp_households CASCADE;
 TRUNCATE aro.households CASCADE;
 
 -- Make locations out of InfoGroup households (temp_hh.households)
@@ -35,7 +34,6 @@ INSERT INTO aro.temp_households (location_id, address, city, state, zipcode, lat
 	WHERE ST_Contains(wc.geom, hh.geom);
 
 -- Assign the count of InfoGroup households to a location
-TRUNCATE aro.households CASCADE ;
 INSERT INTO aro.households (location_id, number_of_households)
 	SELECT
 		l.id AS location_id,

@@ -86,8 +86,8 @@ reset_boundaries:
 	ref_boundaries/reset.sh
 
 #comment this out until public S3 buckets resolved
-#etl_boundaries: etl_cma_boundaries
-etl_boundaries:
+etl_boundaries: etl_cma_boundaries
+
 etl_cma_boundaries:
 	ref_boundaries/cma_boundaries.sh
 

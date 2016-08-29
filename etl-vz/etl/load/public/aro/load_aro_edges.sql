@@ -1,7 +1,7 @@
 --Drop Indexes
-DROP INDEX idx_aro_edges_geom_gist;
-DROP INDEX idx_aro_edges_geog_gist;
-DROP INDEX idx_aro_edges_buffer;
+DROP INDEX IF EXISTS idx_aro_edges_geom_gist;
+DROP INDEX IF EXISTS idx_aro_edges_geog_gist;
+DROP INDEX IF EXISTS idx_aro_edges_buffer;
 
 --Truncate aro.edges
 TRUNCATE aro.edges CASCADE;
