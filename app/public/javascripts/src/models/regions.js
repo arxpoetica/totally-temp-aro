@@ -13,9 +13,18 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
   }
 
+  var searchOptions = {}
   $(document).ready(() => {
     initSelectionLayer()
-    configureSearch()
+    map.ready(() => {
+      configureSearch()
+    })
+  })
+
+  ;['dragend', 'zoom_changed'].forEach((eventName) => {
+    $rootScope.$on(`map_${eventName}`, () => {
+      configureSearch()
+    })
   })
 
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -72,9 +81,25 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
 
   var configureSearch = () => {
     var search = $('#area-network-planning-search')
+    var bounds = map.getBounds()
+    var params = {
+      nelat: bounds.getNorthEast().lat(),
+      nelon: bounds.getNorthEast().lng(),
+      swlat: bounds.getSouthWest().lat(),
+      swlon: bounds.getSouthWest().lng(),
+      zoom: map.getZoom(),
+      threshold: 0
+    }
+    var query = Object.keys(params).map((key) => `${key}=${params[key]}`).join('&')
+    Object.keys(searchOptions).forEach((type) => {
+      if (searchOptions[type]) {
+        query += `&types=${type}`
+      }
+    })
+    search.unbind()
     search.select2({
       ajax: {
-        url: '/search/boundaries',
+        url: `/search/boundaries?${query}`,
         dataType: 'json',
         delay: 250,
         data: (term) => ({ text: term }),
@@ -132,6 +157,11 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
       })
     }
   })
+
+  regions.setSearchOption = (type, enabled) => {
+    searchOptions[type] = enabled
+    configureSearch()
+  }
 
   return regions
 })

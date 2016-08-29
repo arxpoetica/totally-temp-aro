@@ -449,4 +449,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       wirecentersLayer && wirecentersLayer.show()
     }
   })
+
+  $scope.toggleVisibility = (layer) => {
+    layer.toggleVisibility()
+    regions.setSearchOption(layer.type, layer.visible)
+  }
 }])
