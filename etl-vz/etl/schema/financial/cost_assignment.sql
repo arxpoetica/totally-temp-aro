@@ -45,27 +45,7 @@ insert into financial.cost_assignment (date_from, date_to, state_code,  cost_cod
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
 	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'fiber_obstacle'), 1000000000.00) ;
 
-
-------ESTIMATED, ARIAL, BURIED, UNDERGROUND, CONDUIT, OBSTRACLE
-
-insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'distribution_fiber'), 22.95) ;
-
-insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'distribution_fiber_arial'), 12.00) ;
-
-insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'distribution_fiber_buried'), 40.00) ;
-
-insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'distribution_fiber_underground'), 16.00) ;
-
-insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'distribution_fiber_conduit'), 10.00) ;
-
-insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
-	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'distribution_fiber_obstracle'), 100000000.00) ;
-
+-------- bulk_distribution_terminal
 
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
 	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'bulk_distribution_terminal'), 0.0) ;
