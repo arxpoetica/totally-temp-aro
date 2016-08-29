@@ -89,7 +89,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 
 		List<OptimizedMasterPlan> masterPlans = new ArrayList<>();
 
-		new MasterPlanOptimizationIterator(rootOptimizationRequest, ) ;
+		//new MasterPlanOptimizationIterator(rootOptimizationRequest, ) ;
 		
 		requests.forEach(r -> {
 			Future<OptimizedMasterPlan> f = optimizationPlannerService
