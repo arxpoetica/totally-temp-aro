@@ -389,6 +389,18 @@ module.exports = class Network {
         `)
     }
 
+    if (types.indexOf('directional_facilities') >= 0) {
+      parts.push(`
+        SELECT 'directional_facility:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+          FROM client.service_area
+         WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+           AND service_layer_id = (
+                  SELECT id FROM client.service_layer WHERE name='directional_facility'
+               )
+               ${database.intersects(viewport, 'geom', 'AND')}
+        `)
+    }
+
     if (types.indexOf('cma_boundaries') >= 0) {
       parts.push(`
         SELECT 'cma_boundary:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog

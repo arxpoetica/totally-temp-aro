@@ -21,6 +21,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   var countySubdivisionsLayer
   var censusBlocksLayer
   var cmaBoundariesLayer
+  var directionalFacilities
 
   if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
     wirecentersLayer = new MapLayer({
@@ -125,11 +126,33 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     threshold: 0
   })
 
+  directionalFacilities = new MapLayer({
+    short_name: 'DF',
+    name: 'Directional Facilities',
+    type: 'directional_facilities',
+    api_endpoint: '/directional_facilities',
+    style_options: {
+      normal: {
+        fillColor: 'darkcyan',
+        strokeColor: 'darkcyan',
+        strokeWeight: 2
+      },
+      highlight: {
+        fillColor: 'darkcyan',
+        strokeColor: 'darkcyan',
+        strokeWeight: 2
+      }
+    },
+    reload: 'always',
+    threshold: 0
+  })
+
   $scope.areaLayers = [
     censusBlocksLayer,
     countySubdivisionsLayer,
     wirecentersLayer,
-    cmaBoundariesLayer
+    cmaBoundariesLayer,
+    directionalFacilities
   ].filter((layer) => layer)
 
   var drawingManager = new google.maps.drawing.DrawingManager({

@@ -26,4 +26,15 @@ module.exports = class Wirecenter {
     return database.polygons(sql, [], true, viewport)
   }
 
+  static findAllDirectionalFacilities (viewport) {
+    var sql = `
+      SELECT id, geom, code AS name
+        FROM client.service_area
+       WHERE service_layer_id = (
+        SELECT id FROM client.service_layer WHERE name='directional_facility'
+      )
+    `
+    return database.polygons(sql, [], true, viewport)
+  }
+
 }

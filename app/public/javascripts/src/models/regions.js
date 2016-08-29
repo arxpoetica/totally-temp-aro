@@ -116,7 +116,8 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
             { prefix: 'census_block', name: 'Census Blocks' },
             { prefix: 'county', name: 'County Subdivisions' },
             { prefix: 'wirecenter', name: 'Wirecenter' },
-            { prefix: 'cma_boundary', name: 'CMA boundaries' }
+            { prefix: 'cma_boundary', name: 'CMA boundaries' },
+            { prefix: 'directional_facility', name: 'Directional Facilities' }
           ]
 
           var results = sections.map((section) => ({
