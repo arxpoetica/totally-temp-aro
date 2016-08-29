@@ -10,7 +10,7 @@ CREATE TABLE client.cable_construction_type
 
 
 INSERT INTO client.cable_construction_type(name, description) VALUES('estimated', 'Estimated');
-INSERT INTO client.cable_construction_type(name, description) VALUES('arial', 'Arial');
+INSERT INTO client.cable_construction_type(name, description) VALUES('ariel', 'Ariel');
 INSERT INTO client.cable_construction_type(name, description) VALUES('buried', 'Buried');
 INSERT INTO client.cable_construction_type(name, description) VALUES('underground', 'Underground');
 INSERT INTO client.cable_construction_type(name, description) VALUES('obstacle', 'Obstacle');

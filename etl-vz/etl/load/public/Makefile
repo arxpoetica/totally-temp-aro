@@ -23,6 +23,7 @@ etl_carriers:
 ###################
 
 reset_cache:
+	cache/reset.sh
 
 # Load
 etl_cache:
@@ -33,6 +34,7 @@ etl_cache:
 ###################
 
 reset_boundaries:
+	boundaries/reset.sh
 
 # Load
 etl_boundaries:
@@ -53,6 +55,7 @@ etl_locations:
 ###################
 
 reset_equipment:
+	equipement/reset.sh
 
 # Load
 etl_equipment:
@@ -63,6 +66,7 @@ etl_equipment:
 ###################
 
 reset_spend:
+	spend/reset.sh
 
 # Load
 etl_spend:
@@ -72,7 +76,7 @@ etl_spend:
 # Master ETL
 ###################
 
-reset: reset_aro reset_equipment reset_locations reset_spend reset_boundaries reset_carriers reset_cache
+reset:reset: reset_cache reset_carriers reset_boundaries reset_spend reset_locations reset_equipment reset_aro
 load: etl_aro etl_carriers etl_boundaries etl_spend etl_locations etl_equipment etl_cache
 
 

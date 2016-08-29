@@ -2,10 +2,10 @@
 -- This will only Load Missing Service Areas
 WITH all_analysis_areas AS (
 	SELECT
-	  l.id AS analysis_layer_id,
-	  c.gid,
+		l.id AS analysis_layer_id,
+		c.gid,
 		c.gid::varchar AS source_id
-	FROM  ref_boundaries.cma c , client.service_layer l
+	FROM  ref_boundaries.cma c , client.analysis_layer l
 	WHERE l.name='cma'
 )
 ,

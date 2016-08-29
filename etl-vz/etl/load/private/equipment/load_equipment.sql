@@ -2,8 +2,7 @@
 WITH missing_equipment_service AS (	
 	SELECT
 		p.id,
-		p.service_layer_id,
-		p.source_id::int4 AS hub_id
+		p.service_layer_id
 	FROM client.plan p
 	JOIN client.service_layer l
 		ON l.id = p.service_layer_id
@@ -20,8 +19,8 @@ new_cos as (
 	SELECT
 		p.id,
 		(select t.id from client.network_node_types t where name = 'central_office' limit 1)::int, 
-		geog,
-		geom
+		h.geog,
+		h.geom
 	FROM  client.plan p
 	JOIN missing_equipment_service m
 		ON m.id = p.id 
@@ -33,12 +32,11 @@ new_cos as (
 )
 select count(*) from new_cos ;
 
--- Load Cran Equipment
+-- Load directional_facility
 WITH missing_equipment_service AS (	
 	SELECT
 		p.id,
-		p.service_layer_id,
-		p.source_id::int4 AS hub_id
+		p.service_layer_id
 	FROM client.plan p
 	JOIN client.service_layer l
 		ON l.id = p.service_layer_id
@@ -53,7 +51,7 @@ WITH missing_equipment_service AS (
 df_equipment AS (
 	SELECT 
 		longitude::varchar || latitude::varchar AS id,
-		ST_SetSRID((ST_MakePoint(longitude, latitude),4326) AS geom 
+		ST_SetSRID(ST_MakePoint(longitude, latitude),4326) AS geom 
 	FROM network_equipment.directional_facilities
 	WHERE longitude IS NOT NULL 
 	AND latitude IS NOT NULL
@@ -66,8 +64,8 @@ new_cos as (
 	SELECT
 		p.id,
 		(select t.id from client.network_node_types t where name = 'central_office' limit 1)::int, 
-		geog,
-		geom
+		df.geom::geography,
+		df.geom
 	FROM  client.plan p
 	JOIN missing_equipment_service m
 		ON m.id = p.id 
