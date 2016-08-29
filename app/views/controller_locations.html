@@ -69,14 +69,8 @@
   <div id="locations_controller">
     <form ng-hide="show_commercial && !show_residential">
       <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimizeBusinesses" ng-change="changeOptimization()">
-        </label>
-        <% } %>
-        <label class="eye-control">
+        <label>
           <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'"> Enterprise
-          <div class="eye-indicator"></div>
         </label>
       </div>
       <div style="margin-left: 20px">
@@ -91,43 +85,25 @@
 
       <!-- Special case -->
       <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimizeSMB" ng-change="changeOptimization()">
-        </label>
-        <% } %>
         <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px"></div>
-        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
+        <label>
           <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()"> SMB
-          <div class="eye-indicator"></div>
         </label>
       </div>
       <!-- / Special case -->
 
       <!-- Special case -->
       <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimize2kplus" ng-change="changeOptimization()">
-        </label>
-        <% } %>
         <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_2kplus_default.png" style="width:16px"></div>
-        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
+        <label>
           <input type="checkbox" ng-model="business_categories_selected['2kplus']" ng-change="changeLocationsLayer()"> $2,000+ MRC Customers
-          <div class="eye-indicator"></div>
         </label>
       </div>
       <!-- / Special case -->
 
       <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimizeHouseholds" ng-change="changeOptimization()">
-        </label>
-        <% } %>
-        <label class="eye-control">
+        <label>
           <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'"> Residential
-          <div class="eye-indicator"></div>
         </label>
       </div>
       <div style="margin-left: 20px">
@@ -140,15 +116,9 @@
         </div>
       </div>
       <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimizeTowers" ng-change="changeOptimization()">
-        </label>
-        <% } %>
         <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px"></div>
-        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
+        <label>
           <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
-          <div class="eye-indicator"></div>
         </label>
       </div>
     </form>
