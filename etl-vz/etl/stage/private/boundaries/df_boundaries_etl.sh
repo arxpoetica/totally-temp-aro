@@ -12,6 +12,6 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 cd $GISROOT;
 
 rm -f ${TMPDIR}/*.*
-aws s3 cp s3://public.aro/proto/boundaries/df_polygons.zip $GISROOT/cma.zip
+aws s3 cp s3://public.aro/proto/boundaries/df_polygons.zip $GISROOT/df_polygons.zip
 $UNZIPTOOL df_polygons.zip -d ${TMPDIR}
 ${SHP2PGSQL} -c -s 4326 -g the_geom -t 2D -W "latin1" /$TMPDIR/df_polygons.dbf boundaries.directional_facilities | ${PSQL}

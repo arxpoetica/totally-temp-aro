@@ -41,7 +41,7 @@ etl_directional_facilities:
 
 # Reset the towers schema - SITA and client towers
 reset_towers:
-	towers/reset_towers_data.sh
+	towers/reset.sh
 
 etl_towers: 
 	towers/towers_etl.sh
