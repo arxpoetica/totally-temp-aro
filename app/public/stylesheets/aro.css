@@ -540,3 +540,23 @@ footer nav {
 #serviceLayersAccordion .panel-body {
   padding: 5px 10px;
 }
+
+
+.locations-filter {
+  position: fixed;
+  padding: 30px;
+  background: white;
+  left: 370px;
+  width: 300px;
+  border: 1px solid #ddd;
+  border-left-style: none;
+}
+
+.locations-filter-btn, .locations-filter-btn:hover, .locations-filter-btn:focus, .locations-filter-btn:active {
+  margin-left: 3px;
+  background-color: #ddd !important;
+}
+
+.locations-filter-btn .fa {
+  text-shadow: none;
+}
