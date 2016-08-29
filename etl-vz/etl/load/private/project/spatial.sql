@@ -10,7 +10,7 @@ WITH all_areas AS (
 )
 ,
 combined_area AS (
-	SELECT ST_ConvexHull(ST_Union(geom)) as geom
+	SELECT ST_Union(geom) as geom
 	FROM all_areas
 )
 INSERT INTO project_constraints.spatial
