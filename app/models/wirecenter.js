@@ -21,7 +21,7 @@ module.exports = class Wirecenter {
   static findAllCMA (viewport) {
     var sql = `
       SELECT gid AS id, the_geom AS geom, name
-      FROM boundaries.cma
+      FROM ref_boundaries.cma
     `
     return database.polygons(sql, [], true, viewport)
   }
