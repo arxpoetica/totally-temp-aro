@@ -6,8 +6,8 @@ WITH all_service_areas AS (
 		l.id AS service_layer_id,
 		w.gid::varchar AS source_id
 	FROM boundaries.cran w, client.service_layer l
-	ORDER BY w.gid
 	WHERE l.name='cran'
+	ORDER BY w.gid
 )
 ,
 missing_service_areas AS (
@@ -32,7 +32,7 @@ INSERT INTO client.service_area (service_layer_id, service_type, source_id, code
 		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)
 FROM missing_service_areas m
 JOIN boundaries.cran c
-	ON m.gid = c.gid 
+	ON m.gid = c.gid;
 -- Boundaries around directional facility (points) created by AV&Co.
 
 -- Load client-defined CRAN boundaries (PRIVATE - client data)
@@ -43,8 +43,8 @@ WITH all_service_areas AS (
 		l.id AS service_layer_id,
 		w.gid::varchar AS source_id
 	FROM boundaries.directional_facilities w, client.service_layer l
-	ORDER BY w.gid
 	WHERE l.name='directional_facility'
+	ORDER BY w.gid
 )
 ,
 missing_service_areas AS (
@@ -59,7 +59,7 @@ missing_service_areas AS (
 )
 INSERT INTO client.service_area (service_layer_id, service_type, source_id, code, geog, geom, edge_buffer, location_edge_buffer)
 	SELECT
-		l.id,
+		m.service_layer_id,
 		'A',
 		df.gid::varchar,
 		df.name,

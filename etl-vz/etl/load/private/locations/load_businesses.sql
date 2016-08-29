@@ -1,22 +1,25 @@
 TRUNCATE aro.businesses CASCADE;
 
 INSERT INTO aro.locations(address, lat, lon, geog, geom)
-	SELECT
+	SELECT DISTINCT ON (lat, long)
 		prism_formatted_address,
 		lat,
 		long,
-		ST_SetSRID(ST_MakePoint(b.long, b.lat), 4326)::geography AS geog,
-		ST_SetSRID(ST_MakePoint(b.long, b.lat), 4326) AS geom
-	FROM businesses.vz_customers;
+		ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
+	FROM project_constraints.spatial wc, businesses.vz_customers b
+    WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(long, lat), 4326));
 
 INSERT INTO aro.locations(address, lat, lon, geog, geom)
-	SELECT
+	SELECT DISTINCT ON (arcgis_latitude, arcgis_longitude)
 		street_addr,
 		arcgis_latitude,
 		arcgis_longitude,
-		T_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326)::geography AS geog,
 		ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326) AS geom
-	FROM businesses.tam;
+	FROM project_constraints.spatial wc, businesses.tam b
+    WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326));
+
 
 -- Insert all VZ customers
 INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_employees, annual_recurring_cost, monthly_recurring_cost, source, geog, geom)

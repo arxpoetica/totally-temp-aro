@@ -8,9 +8,7 @@ INSERT INTO aro.locations(city, lat, lon, geom, geog)
         t.lon, 
         t.geom,
         t.geog
-    FROM towers.towers t
-    JOIN aro.wirecenter_subset wc
-        ON ST_Within(t.geom, wc.geom);
+    FROM towers.towers t;
 
 -- Map towers.towers to newly created locations
 INSERT INTO aro.towers(location_id, parcel_city, lat, lon, geom, geog)
