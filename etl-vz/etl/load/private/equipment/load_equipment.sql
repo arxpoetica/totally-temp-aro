@@ -2,8 +2,8 @@
 WITH missing_equipment_service AS (	
 	SELECT
 		p.id,
-		p.serv
-		p.source_id:int4 AS hub_id
+		p.service_layer_id,
+		p.source_id::int4 AS hub_id
 	FROM client.plan p
 	JOIN client.service_layer l
 		ON l.id = p.service_layer_id
@@ -28,7 +28,7 @@ new_cos as (
 	JOIN client.service_area sa
 		ON sa.id = p.wirecenter_id 
 	JOIN network_equipment.hubs h
-		ST_Contains(sa.geom, h.geom) 
+		ON ST_Contains(sa.geom, h.geom) 
 	RETURNING id
 )
 select count(*) from new_cos ;
@@ -37,8 +37,8 @@ select count(*) from new_cos ;
 WITH missing_equipment_service AS (	
 	SELECT
 		p.id,
-		p.serv
-		p.source_id:int4 AS hub_id
+		p.service_layer_id,
+		p.source_id::int4 AS hub_id
 	FROM client.plan p
 	JOIN client.service_layer l
 		ON l.id = p.service_layer_id
@@ -52,7 +52,7 @@ WITH missing_equipment_service AS (
 ,
 df_equipment AS (
 	SELECT 
-		longitude::varchar || latitude::varchar AS id
+		longitude::varchar || latitude::varchar AS id,
 		ST_SetSRID((ST_MakePoint(longitude, latitude),4326) AS geom 
 	FROM network_equipment.directional_facilities
 	WHERE longitude IS NOT NULL 
@@ -74,7 +74,7 @@ new_cos as (
 	JOIN client.service_area sa
 		ON sa.id = p.wirecenter_id 
 	JOIN df_equipment df
-		ST_Contains(sa.geom, df.geom) 
+		ON ST_Contains(sa.geom, df.geom) 
 	RETURNING id
 )
 select count(*) from new_cos ;
@@ -97,7 +97,10 @@ WITH missing_equipment_service AS (
 new_cos as (
 	INSERT INTO client.network_nodes (plan_id, node_type_id, geog, geom)
 	SELECT
-		p.id, 1,p. area_centroid::geography, p.area_centroid
+		p.id, 
+		1,
+		p.area_centroid::geography, 
+		p.area_centroid
 	FROM client.plan p
 	JOIN missing_equipment_service m
 		ON m.id = p.id 
