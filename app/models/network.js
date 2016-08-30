@@ -374,35 +374,65 @@ module.exports = class Network {
       ))
   }
 
-  static searchBoundaries (text) {
-    var sql = `
-      SELECT 'wirecenter:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
-        FROM client.service_area
-       WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-         AND service_layer_id = (
-                SELECT id FROM client.service_layer WHERE name='wirecenter'
-             )
+  static searchBoundaries (text, types, viewport) {
+    var parts = []
 
-      UNION ALL
+    if (types.indexOf('wirecenter') >= 0) {
+      parts.push(`
+        SELECT 'wirecenter:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+          FROM client.service_area
+         WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+           AND service_layer_id = (
+                  SELECT id FROM client.service_layer WHERE name='wirecenter'
+               )
+               ${database.intersects(viewport, 'geom', 'AND')}
+        `)
+    }
 
-      SELECT 'census_block:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
-        FROM census_blocks
-       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+    if (types.indexOf('directional_facilities') >= 0) {
+      parts.push(`
+        SELECT 'directional_facility:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+          FROM client.service_area
+         WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+           AND service_layer_id = (
+                  SELECT id FROM client.service_layer WHERE name='directional_facility'
+               )
+               ${database.intersects(viewport, 'geom', 'AND')}
+        `)
+    }
 
-      UNION ALL
+    if (types.indexOf('cma_boundaries') >= 0) {
+      parts.push(`
+        SELECT 'cma_boundary:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+        FROM ref_boundaries.cma
+      `)
+    }
 
-      SELECT 'custom_boundary:' || id AS id, name, ST_AsGeoJSON(geom)::json AS geog
-        FROM client.boundaries
-       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+    if (types.indexOf('county_subdivisions') >= 0) {
+      parts.push(`
+        SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+          FROM aro.cousub
+         WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+               ${database.intersects(viewport, 'geom', 'AND')}
+        `)
+    }
 
-       UNION ALL
+    if (types.indexOf('census_blocks') >= 0) {
+      parts.push(`
+        SELECT 'census_block:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+          FROM census_blocks
+         WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+               ${database.intersects(viewport, 'geom', 'AND')}
+        `)
+    }
 
-      SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
-        FROM aro.cousub
-       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+    console.log('parts', parts.length, types)
 
-      LIMIT 100
-    `
+    if (parts.length === 0) {
+      return Promise.resolve([])
+    }
+
+    var sql = parts.join(' UNION ALL ') + ' LIMIT 100'
     return database.query(sql, [`%${text}%`])
   }
 

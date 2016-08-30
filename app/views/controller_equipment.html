@@ -91,11 +91,11 @@
           </div>
           <div id="serviceLayer{{serviceLayer.id}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
             <div class="panel-body" style="border-top: none">
-              <div ng-repeat="node_type in view_node_types">
-                <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png" style="width:16px"></div>
+              <div ng-repeat="nodeType in serviceLayer.viewNodeTypes">
+                <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{nodeType.name}}.png" style="width:16px"></div>
                 <div class="checkbox" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label class="eye-control">
-                    <input type="checkbox" ng-model="node_type.visible" ng-change="serviceLayer.changeNodeTypesVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled"> {{node_type.description}}
+                    <input type="checkbox" ng-model="nodeType.visible" ng-change="serviceLayer.changeNodeTypesVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled"> {{nodeType.description}}
                     <div class="eye-indicator"></div>
                   </label>
                 </div>

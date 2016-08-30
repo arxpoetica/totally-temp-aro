@@ -26,10 +26,10 @@ INSERT INTO client.service_area (service_layer_id, service_type, source_id, code
 		'A',
 		c.gid::varchar,
 		c.name,
-		Geography(ST_Force_2D(the_geom)) as geog,
-		ST_Force_2D(the_geom) AS geom,
-		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
-		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)
+		Geography(ST_Force_2D(ST_MakeValid(the_geom)) as geog,
+		ST_Force_2D(ST_MakeValid(the_geom)) AS geom,
+		ST_Transform(ST_MakeValid(ST_buffer(ST_Convexhull(the_geom))::Geography, 200)::Geometry, 4326),
+		ST_Transform(ST_MakeValid(ST_buffer(ST_Convexhull(the_geom))::Geography, 50)::Geometry, 4326)
 FROM missing_service_areas m
 JOIN boundaries.cran c
 	ON m.gid = c.gid;
@@ -63,10 +63,10 @@ INSERT INTO client.service_area (service_layer_id, service_type, source_id, code
 		'A',
 		df.gid::varchar,
 		df.name,
-		Geography(ST_Force_2D(the_geom)) as geog,
-		ST_Force_2D(the_geom) AS geom,
-		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
-		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)
+		Geography(ST_Force_2D(ST_MakeValid(the_geom)) as geog,
+		ST_Force_2D(ST_MakeValid(the_geom)) AS geom,
+		ST_Transform(ST_buffer(ST_MakeValid(ST_Convexhull(the_geom))::Geography, 200)::Geometry, 4326),
+		ST_Transform(ST_buffer(ST_MakeValid(ST_Convexhull(the_geom))::Geography, 50)::Geometry, 4326)
 	FROM missing_service_areas m
 	JOIN boundaries.directional_facilities df
 	ON m.gid = df.gid;
@@ -104,7 +104,7 @@ inserted_service_area AS (
 		w.state,
 		w.wirecenter,
 		Geography(ST_Force_2D(the_geom)) as geog, -- Use ST_FORce_2D because the source shapefiles have geometry type MultiLineStringZ...
-		ST_Force_2D(the_geom) AS geom, -- Use ST_FORce_2D because the source shapefiles have geometry type MultiLineStringZ...
+		ST_Force_2D(ST_MakeValid(the_geom)) AS geom, -- Use ST_FORce_2D because the source shapefiles have geometry type MultiLineStringZ...
 		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
 		ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)  
 	FROM geotel.wirecenters w

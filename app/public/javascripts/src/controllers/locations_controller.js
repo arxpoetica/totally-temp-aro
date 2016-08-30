@@ -38,11 +38,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.industries = []
   $scope.business_categories_selected = []
   $scope.household_categories_selected = []
-  $scope.optimizeBusinesses = true
-  $scope.optimizeSMB = true // special case: optimize small businesses
-  $scope.optimize2kplus = true // yet another special case
-  $scope.optimizeHouseholds = true
-  $scope.optimizeTowers = true
 
   var locationStyles = {
     normal: {
@@ -154,12 +149,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.business_categories_selected = []
     $scope.business_categories.forEach((category) => {
       $scope.business_categories_selected[category.name] = true
+      category.fullName = `b_${category.name}`
     })
     $scope.business_categories_selected['2kplus'] = true
 
     $scope.household_categories_selected = []
     $scope.household_categories.forEach((category) => {
       $scope.household_categories_selected[category.name] = true
+      category.fullName = `h_${category.name}`
     })
 
     // industries
@@ -247,6 +244,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $('#locations_controller .business-filter').select2('val', [], true)
       $('#locations_controller .business-filter').prop('disabled', true)
     }
+
+    changeOptimization()
   }
 
   $('#create-location').on('shown.bs.modal', () => {
@@ -395,12 +394,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     }
   }
 
-  $scope.changeOptimization = () => {
-    $rootScope.optimizeBusinesses = $scope.optimizeBusinesses
-    $rootScope.optimizeSMB = $scope.optimizeSMB
-    $rootScope.optimizeHouseholds = $scope.optimizeHouseholds
-    $rootScope.optimizeTowers = $scope.optimizeTowers
-    $rootScope.optimize2kplus = $scope.optimize2kplus
+  function changeOptimization () {
+    $rootScope.optimizeBusinesses = $scope.show_businesses
+    $rootScope.optimizeSMB = $scope.business_categories_selected['small']
+    $rootScope.optimizeHouseholds = $scope.show_households
+    $rootScope.optimizeTowers = $scope.show_towers
+    $rootScope.optimize2kplus = $scope.business_categories_selected['2kplus']
   }
-  $scope.changeOptimization()
+  changeOptimization()
+
+  $scope.selectedFilter = null
+  $scope.toggleFilter = (filter) => {
+    $scope.selectedFilter = $scope.selectedFilter === filter ? null : filter
+  }
 }])
