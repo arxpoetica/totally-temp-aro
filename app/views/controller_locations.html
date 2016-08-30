@@ -69,7 +69,7 @@
   <!-- Locations layer modal -->
   <div id="locations_controller">
     <form ng-hide="show_commercial && !show_residential">
-      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
+      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'enterprise'">
           <p class="text-center">...</p>
         </div>
@@ -84,7 +84,7 @@
         </label>
         <label style="margin-left:25px">Enterprise</label>
       </div>
-      <div>
+      <div class="customer-type">
         <div ng-repeat="category in business_categories" ng-if="category.name !== 'small'">
           <div class="pull-left">
             <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_{{category.name}}_default.png" style="width:16px;margin-right:10px">
@@ -97,7 +97,7 @@
       </div>
 
       <!-- Special case -->
-      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
+      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'smb'">
           <p class="text-center">...</p>
         </div>
@@ -118,7 +118,7 @@
       <!-- / Special case -->
 
       <!-- Special case -->
-      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
+      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial" class="customer-type">
         <div class="locations-filter" ng-show="selectedFilter === '2kplus'">
           <p class="text-center">...</p>
         </div>
@@ -138,24 +138,36 @@
       </div>
       <!-- / Special case -->
 
-      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
-        <label class="pull-right" style="margin-right: 22px">
+      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential" class="customer-type shaded">
+        <div class="locations-filter" ng-show="selectedFilter === '2kplus'">
+          <p class="text-center">...</p>
+        </div>
+        <div class="pull-right">
+          <a href="javascript:;" ng-click="toggleFilter('2kplus')" class="btn btn-default btn-xs locations-filter-btn">
+            <span class="fa fa-chevron-left" ng-show="selectedFilter === '2kplus'"></span>
+            <span class="fa fa-chevron-right" ng-show="selectedFilter !== '2kplus'"></span>
+          </a>
+        </div>
+        <label class="pull-right">
           <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
         <label style="margin-left:25px">Residential</label>
       </div>
-      <div>
+      <div class="customer-type">
         <div ng-repeat="category in household_categories">
           <div class="pull-left">
             <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px;margin-right:10px">
           </div>
           <label class="pull-right" style="margin-right: 22px">
+            <!--
             <input type="checkbox" ng-model="household_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_households">
+            -->
+            <input type="checkbox" ng-model="show_households" disabled>
           </label>
           <label style="font-weight:normal">{{category.description}}</label>
         </div>
       </div>
-      <div ng-class="{'disabled': overlay !== 'none'}">
+      <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type">
         <div class="locations-filter" ng-show="selectedFilter === 'towers'">
           <p class="text-center">...</p>
         </div>
