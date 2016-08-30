@@ -86,7 +86,7 @@ etl_spend:
 # Master ETL
 ###################
 
-reset:reset: reset_cache reset_carriers reset_boundaries reset_spend reset_locations reset_equipment reset_aro reset_project
+reset: reset_cache reset_carriers reset_boundaries reset_spend reset_locations reset_equipment reset_aro reset_project
 load: etl_project etl_aro etl_carriers etl_boundaries etl_spend etl_locations etl_equipment etl_cache
 
 
