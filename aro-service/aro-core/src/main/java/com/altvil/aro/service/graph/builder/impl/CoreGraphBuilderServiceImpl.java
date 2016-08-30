@@ -127,6 +127,7 @@ public class CoreGraphBuilderServiceImpl implements
 
 		private GraphBuilderContext ctx;
 		private RoadEdgeIndexer indexer;
+		private CableEdgeMerger cableEdgeMerger = new CableEdgeMerger();
 
 		private Collection<RatioSection> defaultRatioSections = DEFAULT_SECTIONS ;
 		
@@ -162,11 +163,9 @@ public class CoreGraphBuilderServiceImpl implements
 			if (sections == null || sections.size() == 0) {
 				return defaultRatioSections;
 			}
-
-			List<CableConduitEdge> sortedEdges = new ArrayList<>(sections.size()) ;
-			sortedEdges.addAll(sections) ;
-			sortedEdges.sort((c1, c2) -> Double.compare(c1.getStartRatio(), c2.getStartRatio()));
 			
+			Collection<CableConduitEdge> sortedEdges = cableEdgeMerger.reset().merge(sections) ;
+		
 			List<RatioSection> result = new ArrayList<>();
 			double previous = 0;
 		

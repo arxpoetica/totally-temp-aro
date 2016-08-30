@@ -7,5 +7,13 @@ public interface CableConduitEdge {
 	double getStartRatio() ;
 	double getEndRatio() ;
 	
+	CableConduitEdge resize(double startRatio, double endRatio) ;
+	
+	boolean isValid() ;
+	
+	CableConduitEdge expandHigher(double ratio) ;
+	CableConduitEdge expandLower(double ratio) ;
+	CableConduitEdge splitLower(double ratio) ;
+	CableConduitEdge splitHigher(double ratio) ;
 
 }

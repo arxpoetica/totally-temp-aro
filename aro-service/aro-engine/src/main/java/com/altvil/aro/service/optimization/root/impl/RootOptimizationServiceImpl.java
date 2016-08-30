@@ -19,7 +19,6 @@ import com.altvil.aro.model.NetworkPlan;
 import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.persistence.repository.MasterPlanRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
-import com.altvil.aro.persistence.repository.RootPlanRepository;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.optimization.OptimizationPlannerService;
 import com.altvil.aro.service.optimization.impl.PlanCommandService;
@@ -39,7 +38,6 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 			.getLogger(RootOptimizationServiceImpl.class.getName());
 
 	private ProcessingLayerService processingLayerService;
-	private RootPlanRepository rootPlanRepository;
 	private MasterPlanRepository masterPlanRepository;
 	private OptimizationPlannerService optimizationPlannerService;
 	private RootPlanningService rootPlanningService;
@@ -49,7 +47,6 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 	@Autowired
 	public RootOptimizationServiceImpl(
 			ProcessingLayerService processingLayerService,
-			RootPlanRepository rootPlanRepository,
 			MasterPlanRepository masterPlanRepository,
 			OptimizationPlannerService optimizationPlannerService,
 			RootPlanningService rootPlanningService,
@@ -57,7 +54,6 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 			PlanCommandService planCommandService) {
 		super();
 		this.processingLayerService = processingLayerService;
-		this.rootPlanRepository = rootPlanRepository;
 		this.masterPlanRepository = masterPlanRepository;
 		this.optimizationPlannerService = optimizationPlannerService;
 		this.rootPlanningService = rootPlanningService;
@@ -89,18 +85,12 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 
 		List<OptimizedMasterPlan> masterPlans = new ArrayList<>();
 
-		//new MasterPlanOptimizationIterator(rootOptimizationRequest, ) ;
-		
-		requests.forEach(r -> {
-			Future<OptimizedMasterPlan> f = optimizationPlannerService
-					.optimize(r);
-			try {
-				masterPlans.add(f.get());
-			} catch (Throwable err) {
-				// TODO Communicate Failure
-				log.error(err.getMessage(), err);
-			}
-		});
+		Iterator<OptimizedMasterPlan> itr = new MasterPlanOptimizationIterator(rootOptimizationRequest,
+				requests.iterator());
+
+		while( itr.hasNext() ) {
+			masterPlans.add(itr.next()) ;
+		}
 
 		return rootPlanningService.save(new GeneratedRootPlanImpl(
 				rootOptimizationRequest, masterPlans));
@@ -119,7 +109,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 	private Collection<MasterPlan> toMasterPlans(long planId,
 			Collection<ServiceLayer> serviceLayers) {
 		NetworkPlan rootPlan = networkPlanRepository.findOne(planId);
-		return masterPlanRepository.save(serviceLayers.stream().map(s -> {
+		Collection<MasterPlan> masterPLans =  masterPlanRepository.save(serviceLayers.stream().map(s -> {
 			MasterPlan mp = new MasterPlan();
 
 			mp.setName(s.getName() + ":" + rootPlan.getName());
@@ -132,6 +122,10 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 
 			return mp;
 		}).collect(Collectors.toList()));
+		
+		networkPlanRepository.updateMasterPlanAreas(planId) ;
+		
+		return masterPLans ;
 
 	}
 
@@ -163,7 +157,6 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 	private class MasterPlanOptimizationIterator implements
 			Iterator<OptimizedMasterPlan> {
 
-		private RootOptimizationRequest rootOptimizationRequest;
 		private Iterator<MasterOptimizationRequest> optimizationRequestItr;
 		private OptimizedMasterPlan previous = null;
 
@@ -171,7 +164,6 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 				RootOptimizationRequest rootOptimizationRequest,
 				Iterator<MasterOptimizationRequest> optimizationRequestItr) {
 			super();
-			this.rootOptimizationRequest = rootOptimizationRequest;
 			this.optimizationRequestItr = optimizationRequestItr;
 		}
 

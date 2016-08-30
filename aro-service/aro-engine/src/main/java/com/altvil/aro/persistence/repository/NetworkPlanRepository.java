@@ -405,6 +405,58 @@ public interface NetworkPlanRepository extends
 
     @Modifying
     @Transactional
+	@Query(value="WITH selected_plan AS (\n" + 
+			"    SELECT p.*\n" + 
+			"    FROM client.plan p\n" + 
+			"    WHERE p.id=:rootPlanId\n" + 
+			")\n" + 
+			",\n" + 
+			"master_plans AS (\n" + 
+			"	SELECT mp.id\n" + 
+			"	FROM selected_plan rp\n" + 
+			"	JOIN client.plan mp\n" + 
+			"		ON mp.parent_plan_id = rp.id\n" + 
+			")\n" + 
+			",\n" + 
+			"selected_service_areas AS (\n" + 
+			"     SELECT\n" + 
+			"		p.id, ST_Union(sa.geom) AS geom\n" + 
+			"    FROM selected_plan p\n" + 
+			"    JOIN client.selected_service_area s\n" + 
+			"       ON s.plan_id = p.id\n" + 
+			"    JOIN client.service_area sa \n" + 
+			"      ON sa.id = s.service_area_id\n" + 
+			"	GROUP BY p.id\n" + 
+			")\n" + 
+			",\n" + 
+			"selected_analysis_areas AS (\n" + 
+			"    SELECT \n" + 
+			"		p.id, \n" + 
+			"		ST_Union(aa.geom) AS geom\n" + 
+			"    FROM selected_plan p\n" + 
+			"    JOIN client.selected_analysis_area s\n" + 
+			"        ON s.plan_id = p.id\n" + 
+			"    JOIN client.analysis_area aa\n" + 
+			"		ON aa.id = s.analysis_area_id\n" + 
+			"	GROUP BY p.id\n" + 
+			"),\n" + 
+			"union_area AS (\n" + 
+			"	SELECT ST_Union(u.geom) AS geom\n" + 
+			"		FROM (\n" + 
+			"			SELECT geom FROM selected_service_areas\n" + 
+			"			UNION\n" + 
+			"			SELECT geom FROM selected_analysis_areas\n" + 
+			"		) u\n" + 
+			")\n" + 
+			"UPDATE client.plan\n" + 
+			"SET area_bounds = (SELECT geom FROM union_area)\n" + 
+			"WHERE id IN (SELECT id FROM master_plans)", nativeQuery = true) 
+    void updateMasterPlanAreas(@Param("rootPlanId") long rootPlanId);
+
+    
+    
+    @Modifying
+    @Transactional
 	@Query(value="WITH selected_master AS (\n" + 
 			"	SELECT p.*\n" + 
 			"	FROM client.plan p\n" + 
@@ -414,7 +466,7 @@ public interface NetworkPlanRepository extends
 			"all_fiber AS (\n" + 
 			"	SELECT\n" + 
 			"		id,\n" + 
-			"		ST_Union(f.geom) AS geom\n" + 
+			"		ST_Buffer(ST_Union(f.geom)::geography,3)::geometry AS geom\n" + 
 			"	FROM (\n" + 
 			"	(SELECT mp.id, pc.geom\n" + 
 			"	FROM selected_master mp\n" + 
@@ -425,15 +477,17 @@ public interface NetworkPlanRepository extends
 			"\n" + 
 			"	(SELECT mp.id, pc.geom\n" + 
 			"	FROM selected_master mp\n" + 
-			"	JOIN client.plan_fiber_conduit pc\n" + 
-			"		ON pc.plan_id = mp.id)\n" + 
+			"	JOIN client.plan wp\n" + 
+			"		ON wp.parent_plan_id = mp.id\n" + 
+			"	JOIN client.fiber_route pc\n" + 
+			"		ON pc.plan_id = wp.id)\n" + 
 			"	) AS f\n" + 
 			"	GROUP BY id\n" + 
 			")\n" + 
 			"INSERT INTO client.plan_fiber_conduit\n" + 
-			"	(:planId, geom)\n" + 
-			"SELECT id, geom \n" + 
-			"FROM all_fiber", nativeQuery = true) 
+			"	(plan_id, geom)\n" + 
+			"SELECT :selectedPlanId, geom \n" + 
+			"FROM all_fiber\n", nativeQuery = true) 
     List<Number> updateConduitInputs(@Param("inputMasterPlan") long planId, @Param("planId") long selectedPlanId);
 
     
