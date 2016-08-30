@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="aro">
   <head>
-    <title>OneFiber</title>
+    <title><%= config.ui.title %></title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
@@ -16,6 +16,14 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/client_<%= config.ARO_CLIENT %>.css">
   </head>
   <body>
+
+    <div ng-controller="settings_controller">
+      <% include modal_application_settings.html %>
+    </div>
+
+    <div ng-controller="selected_census_block_controller">
+      <% include modal_census_block.html %>
+    </div>
 
     <div ng-controller="customer_profile_controller">
       <% include modal_customer_profile.html %>
@@ -36,7 +44,7 @@
         <div class="container">
           <div class="row">
             <div class="col-sm-12">
-              <img id="aro_logo" src="/images/logos/one_fiber_logo.png" />
+              <img id="aro_logo" src="/images/logos/<%= config.ARO_CLIENT %>/logo.png">
             </div>
             <div class="col-sm-8">
               <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="new_plan()">Create New Network Plan</a>
@@ -53,6 +61,10 @@
             <% if (user.rol === 'admin') { %>
               <div class="col-sm-8">
                 <a href="#manage-users" class="btn btn-primary btn-block" data-toggle="modal">Manage Users</a>
+                <br>
+              </div>
+              <div class="col-sm-8">
+                <a href="#application-settings" class="btn btn-primary btn-block" data-toggle="modal">Application Settings</a>
                 <br>
               </div>
             <% } %>
@@ -235,6 +247,10 @@
 
     </div>
 
+    <div ng-controller="selected_fiber_controller">
+      <% include controller_selected_fiber.html %>
+    </div>
+
     <div ng-controller="route_controller">
     </div>
 
@@ -367,6 +383,7 @@
   <script src="javascripts/lib/controllers/equipment_nodes_controller.js"></script>
   <script src="javascripts/lib/controllers/fiber_plant_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_location_controller.js"></script>
+  <script src="javascripts/lib/controllers/selected_fiber_controller.js"></script>
   <script src="javascripts/lib/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
@@ -377,6 +394,8 @@
   <script src="javascripts/lib/controllers/global_search_controller.js"></script>
   <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/demand_forecast_controller.js"></script>
+  <script src="javascripts/lib/controllers/selected_census_block_controller.js"></script>
+  <script src="javascripts/lib/controllers/settings_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>

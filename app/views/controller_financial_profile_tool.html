@@ -10,10 +10,10 @@
       <li role="presentation"><a href="#financialProfilePremises" role="tab" data-toggle="tab">Premises</a></li>
       <li role="presentation"><a href="#financialProfileSubscribers" role="tab" data-toggle="tab">Subscribers</a></li>
       <li role="presentation"><a href="#financialProfileRevenue" role="tab" data-toggle="tab">Revenue</a></li>
+      <li role="presentation"><a href="#financialProfileOpex" role="tab" data-toggle="tab">Opex</a></li>
       <li role="presentation"><a href="#financialProfileCapex" role="tab" data-toggle="tab">Capex</a></li>
       <li role="presentation"><a href="#financialProfileCashFlow" role="tab" data-toggle="tab">Cash Flow</a></li>
-      <li role="presentation"><a href="#financialProfileOpex" role="tab" data-toggle="tab">Opex</a></li>
-      <li role="presentation"><a href="#financialProfileRouteOportunities" role="tab" data-toggle="tab">Route Opportunities</a></li>
+      <li role="presentation"><a href="#financialProfileRouteOpportunities" role="tab" data-toggle="tab">Route Opportunities</a></li>
     </ul>
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="financialProfileSummary" style="margin-top: 20px">
@@ -77,6 +77,9 @@
         <div>
           <p class="text-center"><strong>Cash Flow Summary</strong></p>
           <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-cash-flow')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-cash-flow-legend"></div>
         </div>
       </div>
@@ -110,6 +113,9 @@
             -->
           </form>
           <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-capex')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-capex-legend"></div>
           <!--
           <br>
@@ -136,6 +142,9 @@
             </form>
           </form>
           <canvas id="financial-profile-chart-connect-capex" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-connect-capex')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-connect-capex-legend"></div>
         </div>
       </div>
@@ -152,6 +161,9 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-revenue" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-revenue')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-revenue-legend"></div>
 
           <p class="text-center"><strong>ARPU</strong></p>
@@ -163,6 +175,9 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-arpu" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-arpu')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-arpu-legend"></div>
         </div>
       </div>
@@ -200,12 +215,22 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-premises')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-premises-legend"></div>
+          <p class="text-center"><strong>New Premises Passed</strong></p>
           <canvas id="financial-profile-chart-premises-period" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-premises-period')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-premises-period-legend"></div>
           <br>
           <p class="text-center"><strong>Cost per Premise Passed</strong></p>
           <canvas id="financial-profile-chart-cost-per-premise" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-cost-per-premise')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-cost-per-premise-legend" style="display:none"></div>
         </div>
       </div>
@@ -221,6 +246,9 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-subscribers')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-subscribers-legend"></div>
           <br>
           <p class="text-center"><strong>Penetration</strong></p>
@@ -233,6 +261,9 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
+          <button ng-click="downloadChart('financial-profile-chart-penetration')" class="pull-right btn btn-default btn-sm">
+            <span style="color:white" class="fa fa-download"></span>
+          </button>
           <div id="financial-profile-chart-penetration-legend"></div>
         </div>
       </div>
@@ -246,6 +277,9 @@
           </div>
         </form>
         <canvas id="financial-profile-chart-opex-recurring" style="width:100%; height:200px"></canvas>
+        <button ng-click="downloadChart('financial-profile-chart-opex-recurring')" class="pull-right btn btn-default btn-sm">
+          <span style="color:white" class="fa fa-download"></span>
+        </button>
         <div id="financial-profile-chart-opex-recurring-legend"></div>
         <br>
         <p class="text-center"><strong>Cost %</strong></p>
@@ -257,49 +291,47 @@
           </div>
         </form>
         <canvas id="financial-profile-chart-opex-cost" style="width:100%; height:200px"></canvas>
+        <button ng-click="downloadChart('financial-profile-chart-opex-cost')" class="pull-right btn btn-default btn-sm">
+          <span style="color:white" class="fa fa-download"></span>
+        </button>
         <div id="financial-profile-chart-opex-cost-legend"></div>
       </div>
-      <div role="tabpanel" class="tab-pane" id="financialProfileRouteOportunities" style="margin-top: 20px">
+      <div role="tabpanel" class="tab-pane" id="financialProfileRouteOpportunities" style="margin-top: 20px">
         <table class="table">
-          <thead>
-            <th></th>
-            <th>1/4 mile</th>
-            <th>1/2 mile</th>
-            <th>1 mile</th>
-          </thead>
           <tbody>
             <tr>
-              <td>VES buildings with >=25 customers per building</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+              <th>Telco Buildings - (Off Net VzB buildings incurring > $2K MRCs)</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
+            </tr>
+            <tr ng-repeat="item in routeOpportunities.totals">
+              <td>
+                <span ng-show="item.key === 'MRC'">Total MRC</span>
+                <span ng-hide="item.key === 'MRC'">{{item.key}}</span>
+              </td>
+              <td class="text-right" ng-repeat="value in item.items">
+                <span ng-show="item.key === 'MRC'">{{value.value | currency:"$":0}}</span>
+                <span ng-hide="item.key === 'MRC'">{{value.value | number}}</span>
+              </td>
             </tr>
             <tr>
-              <td>SMB SBUs</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+              <th>Count of Total Buildings by Number of Employees</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
+            </tr>
+            <tr ng-repeat="item in routeOpportunities.buildings">
+              <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
+              <td class="text-right" ng-repeat="value in item.items">{{value.value | number}}</td>
             </tr>
             <tr>
-              <td>SMB MTUs</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+              <th>Count of Total Businesses by Number of Employees</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
-            <tr>
-              <td>VES customers and VES prospects</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
-            </tr>
-            <tr>
-              <td>SMB customers and SMB prospects</td>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
+            <tr ng-repeat="item in routeOpportunities.businesses">
+              <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
+              <td class="text-right" ng-repeat="value in item.items">{{value.value | number}}</td>
             </tr>
           </tbody>
         </table>
+        <button class="btn btn-default" ng-click="downloadBusinesses()">Download all businesses within 1 mile of route</button>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileFiberDetails" style="margin-top: 20px">
         <table class="table">
@@ -323,12 +355,11 @@
               <td class="text-right">{{fiberDetail.totalCost / (fiberDetail.totalLength * 0.000621371) | currency:"$":1}}</td>
               <td class="text-right">{{fiberDetail.totalCost / 1000 | currency:"$":1}}K</td>
               <th>
-                <div class="checkbox" ng-if="fiberDetail.name === 'conduit'" style="margin:0">
-                  <label class="eye-control">
-                    <input type="checkbox" ng-click="conduitLayer.toggleVisibility()">
-                    <div class="eye-indicator"></div>
-                  </label>
-                </div>
+                <a href="javascript:void(0)"
+                  style="color: {{ fiberDetailLayers[fiberDetail.name] && fiberDetailLayers[fiberDetail.name].visible ? fiberDetailColors[fiberDetail.name] : 'red' }}"
+                  ng-click="toggleFiberDetailLayer(fiberDetail.name)">
+                  <i class="fa fa-eye"></i>
+                </a>
               </th>
             </tr>
             <tr>

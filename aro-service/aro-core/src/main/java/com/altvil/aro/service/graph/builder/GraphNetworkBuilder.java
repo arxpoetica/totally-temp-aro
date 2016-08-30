@@ -38,7 +38,7 @@ public class GraphNetworkBuilder extends AbstractNetworkBuilder {
 	}
 
 	public GraphNetworkModel build() {
-		return new DefaultNetworkModel(assembleGraph(), getAssignments(), getTotalNumberOfLocations());
+		return new DefaultNetworkModel(assembleGraph(), null, getAssignments(), getTotalNumberOfLocations());
 	}
 
 

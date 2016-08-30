@@ -65,20 +65,42 @@ module.exports = class Network {
     return database.density(sql, [config.client_carrier_name], true, viewport, density)
   }
 
-  static carriers (plan_id, fiberType) {
-    return models.MarketSize.carriersByCityOfPlan(plan_id, fiberType)
+  static carriers (plan_id, fiberType, viewport) {
+    var params = [fiberType]
+    var sql
+    if (!viewport) {
+      sql = `
+        SELECT carriers.id, carriers.name, carriers.color
+          FROM carriers
+           WHERE carriers.route_type=$1
+           ${database.intersects(viewport, 'cb.geom', 'AND')}
+         ORDER BY carriers.name ASC
+      `
+    } else {
+      sql = `
+      SELECT DISTINCT ON (carriers.name)
+             carriers.id, carriers.name, carriers.color
+        FROM carriers
+        JOIN client.census_blocks_carriers cbc ON carriers.id = cbc.carrier_id
+        JOIN census_blocks cb ON cbc.census_block_gid = cb.gid
+       WHERE carriers.route_type=$1
+         ${database.intersects(viewport, 'cb.geom', 'AND')}
+         ORDER BY carriers.name ASC
+      `
+    }
+    return database.query(sql, params)
   }
 
   // View the user client's network nodes
   //
   // 1. node_type String (ex. 'central_office', 'fiber_distribution_hub', 'fiber_distribution_terminal')
   // 2. plan_id Number Pass a plan_id to find additionally the network nodes associated to that route
-  static viewNetworkNodes (node_types, plan_id, viewport) {
+  static viewNetworkNodes (node_types, plan_id, viewport, serviceLayer) {
     return Promise.resolve()
       .then(() => {
         var sql = `
           SELECT
-            n.id, ST_AsGeoJSON(geom)::json AS geom, t.name AS name,
+            n.id, geom, t.name AS name,
             plan_id IS NOT NULL AS draggable,
             name <> 'central_office' AS unselectable
           FROM client.network_nodes n
@@ -99,12 +121,26 @@ module.exports = class Network {
 
         if (plan_id) {
           params.push(plan_id)
-          constraints.push(`
-            (plan_id IS NULL OR plan_id IN (
-              SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
-              UNION ALL
-              SELECT $${params.length}
-            ))`)
+          if (serviceLayer) {
+            params.push(serviceLayer)
+            constraints.push(`
+              plan_id IN (
+                SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+                  SELECT p.id
+                    FROM client.plan p
+                    JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${params.length}
+                    WHERE p.parent_plan_id = $${params.length - 1}
+                )
+              )
+            `)
+          } else {
+            constraints.push(`
+              (plan_id IS NULL OR plan_id IN (
+                SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
+                UNION ALL
+                SELECT $${params.length}
+              ))`)
+          }
         } else {
           constraints.push('plan_id IS NULL')
         }
@@ -112,13 +148,18 @@ module.exports = class Network {
         if (constraints.length > 0) {
           sql += ' WHERE ' + constraints.join(' AND ')
         }
-        return database.query(sql, params, true)
+        console.log('sql', sql)
+        return database.points(sql, params, true, viewport)
       })
   }
 
   // View all the available network node types
   static viewNetworkNodeTypes () {
     return database.query('SELECT * FROM client.network_node_types')
+  }
+
+  static viewServiceLayers () {
+    return database.query('SELECT * FROM client.service_layer')
   }
 
   static editNetworkNodes (plan_id, changes) {
@@ -129,6 +170,29 @@ module.exports = class Network {
       .then(() => (
         database.execute('UPDATE client.plan SET updated_at=NOW() WHERE id=$1', [plan_id])
       ))
+  }
+
+  static viewFiber (plan_id, serviceLayer) {
+    var sql = `
+      SELECT
+        fiber_route.id,
+        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
+        frt.name AS fiber_type,
+        frt.description AS fiber_name
+      FROM client.plan p
+      JOIN client.fiber_route ON fiber_route.plan_id = p.id
+      JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
+      WHERE p.id IN (
+        SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+          SELECT p.id
+            FROM client.plan p
+            JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${2}
+            WHERE p.parent_plan_id = $${1}
+        )
+      )
+    `
+    return database.query(sql, [plan_id, serviceLayer], true)
   }
 
   static _addNodes (plan_id, insertions) {
@@ -189,11 +253,13 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
+    console.log('options', options)
     var locationTypes = {
       households: 'household',
       businesses: ['medium', 'large'],
       towers: 'celltower',
-      smb: 'small'
+      smb: 'small',
+      '2kplus': 'mrcgte2000'
     }
     var algorithms = {
       'MAX_IRR': 'IRR',
@@ -202,10 +268,13 @@ module.exports = class Network {
       'IRR': 'IRR'
     }
     options.algorithm = algorithms[options.algorithm] || options.algorithm
+    options.locationTypes = Array.isArray(options.locationTypes) ? options.locationTypes : []
     var body = {
       planId: plan_id,
-      locationTypes: _.flatten(options.locationTypes.map((key) => locationTypes[key])),
-      algorithm: options.algorithm
+      locationTypes: _.compact(_.flatten(options.locationTypes.map((key) => locationTypes[key]))),
+      algorithm: options.algorithm,
+      analysisSelectionMode: options.selectionMode,
+      processLayers: [1] // wirecenter
     }
     var req = {
       method: 'POST',
@@ -217,16 +286,18 @@ module.exports = class Network {
     if (options.budget) financialConstraints.budget = options.budget
     if (options.discountRate) financialConstraints.discountRate = options.discountRate
     if (options.irrThreshold) body.threshold = options.irrThreshold
-    return database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id])
+    return Promise.all([
+      database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
+      database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id])
+    ])
     .then(() => {
       if (options.geographies) {
-        body.selectedRegions = []
         var promises = options.geographies.map((geography) => {
           var type = geography.type
           var id = geography.id
           var params = [plan_id, geography.name, id, type]
           var queries = {
-            'wirecenter': '(SELECT geom FROM wirecenters WHERE id=$3::bigint)',
+            'wirecenter': '(SELECT geom FROM client.service_area WHERE id=$3::bigint)',
             'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
             'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)'
           }
@@ -240,12 +311,13 @@ module.exports = class Network {
               plan_id, region_name, region_id, region_type, geom
             ) VALUES ($1, $2, $3, $4, ${query})
           `, params)
-            .then(() => {
-              body.selectedRegions.push({
-                regionType: type.toUpperCase(),
-                id: id
-              })
-            })
+            .then(() => (
+              database.execute(`
+                INSERT INTO client.selected_service_area (
+                  plan_id, service_area_id
+                ) VALUES ($1, $2)
+              `, [plan_id, id])
+            ))
         })
         return Promise.all(promises)
       }
@@ -257,22 +329,6 @@ module.exports = class Network {
   static planSummary (plan_id) {
     var req = {
       url: config.aro_service_url + `/rest/report/plan/${plan_id}`,
-      json: true
-    }
-    return this._callService(req)
-  }
-
-  static equipmentSummary (plan_id) {
-    var req = {
-      url: config.aro_service_url + `/rest/report/plan/${plan_id}/equipment_summary`,
-      json: true
-    }
-    return this._callService(req)
-  }
-
-  static fiberSummary (plan_id) {
-    var req = {
-      url: config.aro_service_url + `/rest/report/plan/${plan_id}/fiber_summary`,
       json: true
     }
     return this._callService(req)
@@ -320,9 +376,12 @@ module.exports = class Network {
 
   static searchBoundaries (text) {
     var sql = `
-      SELECT 'wirecenter:' || id AS id, wirecenter AS name, ST_AsGeoJSON(geom)::json AS geog
-        FROM wirecenters
-       WHERE lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
+      SELECT 'wirecenter:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+        FROM client.service_area
+       WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+         AND service_layer_id = (
+                SELECT id FROM client.service_layer WHERE name='wirecenter'
+             )
 
       UNION ALL
 

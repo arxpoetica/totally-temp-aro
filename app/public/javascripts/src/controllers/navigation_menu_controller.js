@@ -54,6 +54,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       $scope.new_plan_area_name = selected.text
       $scope.new_plan_area_bounds = selected.bounds
       $scope.new_plan_area_centroid = selected.centroid
+      // console.log('bounds', JSON.stringify(selected.bounds))
+      // console.log('centroid', JSON.stringify(selected.centroid))
     }
   })
 
@@ -69,24 +71,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.show_financial_profile = config.ui.top_bar_tools.indexOf('financial_profile') >= 0
 
   var newPlanMap
-
-  // function initMap () {
-  //   if (newPlanMap) return
-  //
-  //   var styles = [{
-  //     featureType: 'poi',
-  //     elementType: 'labels',
-  //     stylers: [ { visibility: 'off' } ]
-  //   }]
-  //
-  //   newPlanMap = new google.maps.Map(document.getElementById('newPlanMap_canvas'), {
-  //     zoom: 12,
-  //     center: {lat: -34.397, lng: 150.644},
-  //     styles: styles,
-  //     disableDefaultUI: true,
-  //     draggable: false
-  //   })
-  // }
 
   $scope.selectPlan = function (plan) {
     $scope.plan = plan

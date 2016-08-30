@@ -5,6 +5,8 @@ import com.altvil.aro.service.report.GeneratedPlan;
 
 public interface WirecenterPlanningService {
 	
-	OptimizedPlan save(GeneratedPlan generatedPlan) ;
+	OptimizedPlan summarize(GeneratedPlan generatedPlan) ;
+	void save(OptimizedPlan optimizedPlan) ;
+	void save(GeneratedPlan generatedPlan) ;
 
 }

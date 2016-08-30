@@ -10,6 +10,8 @@ CREATE TABLE client.business_category
 );
 
 INSERT INTO client.business_category(id, min_value, max_value) 
+	VALUES((select id from client.entity_category where name ='business_ukn'), 0, 1);
+INSERT INTO client.business_category(id, min_value, max_value) 
 	VALUES((select id from client.entity_category where name ='small'), 1, 20);
 INSERT INTO client.business_category(id, min_value, max_value)
 	VALUES((select id from client.entity_category where name ='medium'), 20, 1000);

@@ -1,4 +1,4 @@
-/* global app google map _ encodeURIComponent config document $ */
+/* global app google map _ encodeURIComponent document $ */
 'use strict'
 
 app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
@@ -333,6 +333,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
     }
 
     configureFeatureStyles () {
+      if (this.flat_color) return
       var data = this.data_layer
       var maxdensity = Number.MIN_VALUE
       var mindensity = Number.MAX_VALUE

@@ -90,23 +90,6 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static findEdges (plan_id) {
-    var sql = `
-      SELECT
-        fiber_route.id,
-        ST_Length(geom::geography) * 0.000621371 AS edge_length,
-        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
-        frt.name AS fiber_type,
-        frt.description AS fiber_name
-      FROM client.plan
-      JOIN client.plan p ON p.parent_plan_id = plan.id
-      JOIN client.fiber_route ON fiber_route.plan_id = p.id
-      JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
-      WHERE plan.id=$1
-    `
-    return database.query(sql, [plan_id])
-  }
-
   static findPlan (plan_id, metadata_only) {
     var output = {
       'feature_collection': {
@@ -138,13 +121,20 @@ module.exports = class NetworkPlan {
         return models.Network.planSummary(plan_id)
       })
       .then((summary) => {
+        summary.networkStatistics = Array.isArray(summary.networkStatistics) ? summary.networkStatistics : []
         var npv = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_npv') ||
                   summary.networkStatistics.find((stat) => stat.networkStatisticType === 'npv')
         var irr = summary.networkStatistics.find((stat) => stat.networkStatisticType === 'roic_irr') ||
                   summary.networkStatistics.find((stat) => stat.networkStatisticType === 'irr')
 
-        output.metadata.npv = npv.value
-        output.metadata.irr = irr.value
+        output.metadata.npv = npv && npv.value
+        output.metadata.irr = irr && irr.value
+
+        var priceModel = summary.priceModel || {}
+        var fiberCosts = Array.isArray(priceModel.fiberCosts) ? priceModel.fiberCosts : []
+
+        var demandSummary = summary.demandSummary || {}
+        var networkDemands = Array.isArray(demandSummary.networkDemands) ? demandSummary.networkDemands : []
 
         var cableConstructionTypes = [
           { name: 'arial', description: 'Aerial' },
@@ -165,7 +155,7 @@ module.exports = class NetworkPlan {
           fiberTypes.forEach((fiberType) => {
             obj.types[fiberType] = { totalLength: 0, totalCost: 0 }
           })
-          summary.priceModel.fiberCosts.filter((cost) => cost.constructionType === type.name)
+          fiberCosts.filter((cost) => cost.constructionType === type.name)
             .forEach((cost) => {
               if (!obj.types[cost.fiberType]) return
               obj.types[cost.fiberType].totalLength += cost.lengthMeters
@@ -181,7 +171,8 @@ module.exports = class NetworkPlan {
           return obj
         })
 
-        output.metadata.equipment_summary = summary.priceModel.equipmentCosts.map((item) => {
+        var equipmentCosts = priceModel.equipmentCosts || []
+        output.metadata.equipment_summary = equipmentCosts.map((item) => {
           var cost = financialCosts.find((i) => i.name === item.nodeType)
           return {
             totalCost: item.total,
@@ -190,7 +181,7 @@ module.exports = class NetworkPlan {
           }
         })
 
-        output.metadata.fiber_summary = summary.priceModel.fiberCosts.map((item) => {
+        output.metadata.fiber_summary = fiberCosts.map((item) => {
           var fiberType = fiberTypes.find((i) => i.name === item.fiberType)
           return {
             lengthMeters: item.lengthMeters,
@@ -205,8 +196,9 @@ module.exports = class NetworkPlan {
 
         plan.total_cost = output.metadata.equipment_cost + output.metadata.fiber_cost
 
-        var demand = summary.demandSummary.networkDemands.find((item) => item.demandType === 'planned_demand')
-        var entityDemands = demand.locationDemand.entityDemands
+        var demand = networkDemands.find((item) => item.demandType === 'planned_demand')
+        var locationDemand = (demand && demand.locationDemand) || {}
+        var entityDemands = locationDemand.entityDemands || {}
         output.metadata.premises = Object.keys(entityDemands).map((key) => {
           var entityName = entityNames.find((i) => i.name === key)
           return {
@@ -217,17 +209,6 @@ module.exports = class NetworkPlan {
         // plan.total_revenue = demand.locationDemand.totalRevenue
 
         output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
-
-        return NetworkPlan.findEdges(plan_id)
-      })
-      .then((edges) => {
-        output.feature_collection.features = edges.map((edge) => ({
-          'type': 'Feature',
-          'geometry': edge.geom,
-          'properties': {
-            'fiber_type': edge.fiber_type
-          }
-        }))
 
         return database.query(`
           SELECT
@@ -264,9 +245,6 @@ module.exports = class NetworkPlan {
             +output.metadata.irr || null,
             output.metadata.fiber_summary.reduce((total, item) => total + item.lengthMeters * 0.000621371, 0)
           ])
-          .then(() => {
-            console.log('Plan updated')
-          })
           .catch((err) => {
             console.log('err', err)
           })
@@ -315,7 +293,7 @@ module.exports = class NetworkPlan {
           FROM client.plan
           LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
           LEFT JOIN auth.users ON users.id = permissions.user_id
-          WHERE plan.plan_type='M'
+          WHERE plan.plan_type='R'
         `
         var params = [config.client_carrier_name]
         if (user) {
@@ -383,7 +361,7 @@ module.exports = class NetworkPlan {
     .then(() => {
       var sql = `
         INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type)
-        VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326), ST_Envelope(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)), NOW(), NOW(), 'M') RETURNING id;
+        VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326), ST_Envelope(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)), NOW(), NOW(), 'R') RETURNING id;
       `
       var params = [
         name,
@@ -391,7 +369,6 @@ module.exports = class NetworkPlan {
         JSON.stringify(area.centroid),
         JSON.stringify(area.bounds)
       ]
-      console.log('params', params)
       return database.findOne(sql, params)
     })
     .then((row) => {
@@ -609,20 +586,24 @@ module.exports = class NetworkPlan {
   static searchAddresses (text) {
     var sql = `
       SELECT
-        wirecenter || ' - ' || aocn_name as name,
+        code AS name,
         ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json as bounds
-      FROM wirecenters
-      WHERE
-        lower(unaccent(aocn_name)) LIKE lower(unaccent($1)) OR
-        lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
-      ORDER BY wirecenter ASC
+        FROM client.service_area
+       WHERE service_layer_id = (
+          SELECT id FROM client.service_layer WHERE name='wirecenter'
+        )
+        AND lower(unaccent(code)) LIKE lower(unaccent($1))
+      ORDER BY code ASC
     `
     var wirecenters = database.query(sql, [`%${text}%`])
-    var addresses = request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+    var addresses = text.length > 0
+      ? request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+      : Promise.resolve(null)
     return Promise.all([wirecenters, addresses])
       .then((results) => {
         var wirecenters = results[0]
+        if (!results[1]) return wirecenters
         var addresses = results[1][1].results.map((item) => {
           var ne = item.geometry.viewport.northeast
           var sw = item.geometry.viewport.southwest

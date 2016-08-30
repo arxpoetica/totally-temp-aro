@@ -16,6 +16,15 @@ ${PSQL} -a -f $DIR/create_client_demand_type.sql
 #Create Cable Construction Types
 ${PSQL} -a -f $DIR/create_client_cable_construction_type.sql
 
+# Create and populate layers
+${PSQL} -a -f $DIR/create_client_service_layer.sql
+
+# Create and populate layers
+${PSQL} -a -f $DIR/create_client_service_layer.sql
+
+# Create and service area layers
+${PSQL} -a -f $DIR/create_client_service_area.sql
+
 # Map carriers to locations to determine service coverage
 ${PSQL} -a -f $DIR/create_client_carrier_location_mapping.sql
 
@@ -90,9 +99,16 @@ ${PSQL} -a -f $DIR/create_client_demand.views.sql
 
 ${PSQL} -a -f $DIR/create_client_location_competitors.view.sql
 
+${PSQL} -a -f $DIR/create_client_existing_fiber.sql
+
 ${PSQL} -a -f $DIR/create_client_business_competitors_strength.view.sql
 
 ${PSQL} -a -f $DIR/summarized_competitors_strength.sql
 
+${PSQL} -a -f $DIR/create_client_conduit_segment.sql
 
+${PSQL} -a -f $DIR/create_client_cable_construction_type.sql
 
+${PSQL} -a -f $DIR/create_client_fiber_route_segment.sql
+
+${PSQL} -a -f $DIR/create_client_businesses_sizes.sql

@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -25,8 +25,10 @@ import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.NetworkService;
+import com.altvil.aro.service.plan.NetworkAssignmentModelFactory;
 import com.altvil.aro.service.planning.NetworkConfiguration;
 import com.altvil.interfaces.NetworkAssignment;
+import com.altvil.interfaces.NetworkAssignmentModel;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.conversion.OrdinalAccessor;
@@ -125,37 +127,27 @@ public class NetworkServiceImpl implements NetworkService {
 					selectedRoadLocations);
 		}
 
-		Collection<NetworkAssignment> roadLocations = toValidAssignments(roadLocationByLocationIdMap
-				.keySet()
-				.stream()
-				.map(result -> {
-					Long locationId = result;
+		NetworkAssignmentModel.Builder factory = new NetworkAssignmentModelFactory();
+		roadLocationByLocationIdMap.keySet().stream().forEach(result -> {
+			Long locationId = result;
 
-					LocationDemand ldm = demandByLocationIdMap.get(locationId);
-					if (ldm == null || ldm.getAtomicUnits() == 0) {
-						// No Demand no location mapped in for fiber Linking
-						return null;
-					}
+			LocationDemand ldm = demandByLocationIdMap.get(locationId);
+			if (ldm != null && ldm.getAtomicUnits() > 0) {
+				AroEntity aroEntity = entityFactory.createLocationEntity(networkConfiguration.getLocationEntityTypes(),
+						locationId, 0, 0, ldm);
 
-					AroEntity aroEntity = entityFactory.createLocationEntity(
-							networkConfiguration.getLocationEntityTypes(),
-							locationId, 0, 0, ldm);
+				DefaultNetworkAssignment roadLocation = new DefaultNetworkAssignment(aroEntity,
+						roadLocationByLocationIdMap.get(locationId));
 
-					return new DefaultNetworkAssignment(aroEntity,
-							roadLocationByLocationIdMap.get(locationId));
-				}));
+				
+				factory.add(roadLocation, selectedRoadLocations.contains(locationId));
+			}
+		});
 
-		networkData.setRoadLocations(roadLocations);
+		networkData.setRoadLocations(factory.build());
 
 		networkData.setRoadEdges(getRoadEdges(networkConfiguration));
-		networkData.setSelectedRoadLocationIds(selectedRoadLocations);
-
 		return networkData;
-	}
-
-	private Collection<NetworkAssignment> toValidAssignments(
-			Stream<NetworkAssignment> stream) {
-		return stream.filter((na) -> na != null).collect(Collectors.toList());
 	}
 
 	private enum LocationMap implements OrdinalAccessor {
@@ -306,16 +298,7 @@ public class NetworkServiceImpl implements NetworkService {
 												result.getPoint(LocationMap.intersect_point))
 										.setDistanceFromRoadSegmentInMeters(
 												result.getDouble(LocationMap.distance))
-										.build(); // TODO
-													// why
-													// build()
-													// twice?
-													// does
-													// second
-													// produce
-													// a
-													// deep
-													// clone?
+										.build(); 
 
 								roadLocationsMap.put(locationId, rl);
 							} catch (Throwable err) {
@@ -378,7 +361,7 @@ public class NetworkServiceImpl implements NetworkService {
 
 	private Collection<NetworkAssignment> queryFiberSources(long planId) {
 
-		return toValidAssignments(planRepository
+		return planRepository
 				.querySourceLocations(planId)
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
@@ -410,7 +393,7 @@ public class NetworkServiceImpl implements NetworkService {
 								+ tlid + " due to: " + err.getMessage(), err);
 						return null;
 					}
-				}));
+				}).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(

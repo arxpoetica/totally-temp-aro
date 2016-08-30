@@ -19,6 +19,13 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/census_blocks/:id/info', (request, response, next) => {
+    var id = request.params.id
+    models.CensusBlock.findCarriers(id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/census_blocks/:carrier', middleware.viewport, (request, response, next) => {
     var carrier = request.params.carrier
     var viewport = request.viewport

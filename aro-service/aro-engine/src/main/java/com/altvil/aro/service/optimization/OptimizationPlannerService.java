@@ -7,7 +7,6 @@ import com.altvil.aro.service.optimization.wirecenter.MasterOptimizationRequest;
 
 public interface OptimizationPlannerService {
 
-	Future<OptimizedMasterPlan> optimize(
-			MasterOptimizationRequest request);
+	Future<OptimizedMasterPlan> optimize(MasterOptimizationRequest request);
 
 }

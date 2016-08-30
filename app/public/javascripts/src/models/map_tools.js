@@ -109,12 +109,6 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       icon: 'icon icon-boundaries'
     },
     {
-      id: 'search',
-      name: 'Search',
-      short_name: 'S',
-      icon: 'fa fa-search'
-    },
-    {
       id: 'financial_profile',
       name: 'Financial Profile',
       short_name: 'F',

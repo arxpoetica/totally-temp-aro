@@ -96,7 +96,7 @@ html, body, #map-canvas, #map-canvas-wrapper {
   top: 50px;
   bottom: 0px; /* footer height */
   left: 0;
-  z-index: 1;
+  z-index: 3;
   width: 400px;
 }
 
@@ -240,7 +240,7 @@ footer nav {
   margin-top: 50px;
   top: 0;
   left: 0;
-  z-index: 2;
+  z-index: 4;
   background-color: black;
   background: url(/images/backgrounds/fiber_1_reverse.jpg);
   background-position: center;
@@ -253,12 +253,11 @@ footer nav {
 }
 
 #aro_logo {
-margin-top: 150px;
-margin-left: -5px;
-margin-bottom: 10px;
-width: 500px;
-height:100px;
-
+  margin-top: 150px;
+  margin-left: -5px;
+  margin-bottom: 10px;
+  /*width: 500px;*/
+  height:100px;
 }
 
 #home_screen_logo {
@@ -512,4 +511,32 @@ height:100px;
   width: 319px;
   top: 53px;
   z-index: 1;
+}
+
+#serviceLayersAccordion div.panel-heading {
+  background: white;
+  padding: 1px 0;
+  color: #666;
+}
+
+#serviceLayersAccordion p.panel-title {
+  font-size: 14px;
+}
+
+#serviceLayersAccordion div.panel {
+  border: none;
+  box-shadow: none;
+}
+
+#serviceLayersAccordion a:hover, #serviceLayersAccordion a:focus {
+  text-decoration: none;
+}
+
+#serviceLayersAccordion input {
+  margin: 0;
+  margin-right: 5px;
+}
+
+#serviceLayersAccordion .panel-body {
+  padding: 5px 10px;
 }

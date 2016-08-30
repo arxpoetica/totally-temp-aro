@@ -28,6 +28,8 @@ WITH location_business_category_mapping AS
 	SELECT
 		l.id AS location_id,
 		(CASE
+			WHEN max(b.monthly_recurring_cost) >= 2000 THEN
+				'2kplus'
 			WHEN max(b.number_of_employees) < 20 THEN
 				'small'
 			WHEN max(b.number_of_employees) > 20 and max(b.number_of_employees) < 1000 THEN
@@ -43,7 +45,7 @@ WITH location_business_category_mapping AS
 UPDATE aro.locations
 SET dn_largest_business_category = lbcm.category_assignment
 FROM
-	(SELECT 
+	(SELECT
 		location_id,
 		category_assignment
 	FROM location_business_category_mapping) AS lbcm

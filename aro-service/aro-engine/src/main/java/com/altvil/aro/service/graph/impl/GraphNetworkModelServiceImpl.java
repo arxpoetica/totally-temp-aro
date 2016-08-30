@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.graph.GraphNetworkModelBuilder;
 import com.altvil.aro.service.graph.GraphNetworkModelService;
+
 import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService;
 import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBuilderContext;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
@@ -108,8 +109,4 @@ public class GraphNetworkModelServiceImpl implements GraphNetworkModelService {
 		}
 
 	}
-
-	
-	
-	
 }

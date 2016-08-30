@@ -5,9 +5,9 @@ import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 
 public interface GeneratedPlan {
+	OptimizationConstraints getOptimizationConstraints();
 	NetworkDemandSummary getDemandSummary();
 
-	OptimizationConstraints getOptimizationConstraints();
 
 	WirecenterNetworkPlan getWirecenterNetworkPlan();
 

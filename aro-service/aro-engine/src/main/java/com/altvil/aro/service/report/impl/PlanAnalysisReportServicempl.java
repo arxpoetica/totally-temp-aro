@@ -16,10 +16,8 @@ import com.altvil.aro.model.DemandTypeEnum;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.demand.impl.DefaultLocationDemand;
 import com.altvil.aro.service.entity.LocationDemand;
-import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.impl.NetworkDemandSummaryImpl;
-import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.price.PricingContext;
@@ -61,12 +59,14 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	}
 
 	private PriceModel createPriceModel(WirecenterNetworkPlan plan) {
-		PriceModelBuilder b = pricingService.createBuilder("*", new Date(), new PricingContext());
+		PriceModelBuilder b = pricingService.createBuilder("*", new Date(),
+				new PricingContext());
 		plan.getNetworkNodes().forEach(
 				n -> b.add(n.getNetworkNodeType(), 1, n.getAtomicUnit()));
-		
-		for (FiberCableConstructionType ft :plan.getFiberCableConstructionTypes()) {
-			b.add(ft,  plan.getFiberLengthInMeters(ft));
+
+		for (FiberCableConstructionType ft : plan
+				.getFiberCableConstructionTypes()) {
+			b.add(ft, plan.getFiberLengthInMeters(ft));
 		}
 
 		return b.build();
@@ -74,21 +74,43 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	}
 
 	private PriceModel createPriceModel() {
-		return pricingService.createBuilder("*", new Date(), new PricingContext()).build();
+		return pricingService.createBuilder("*", new Date(),
+				new PricingContext()).build();
 	}
 
+	
 	@Override
-	public PlanAnalysisReport aggregate(GeneratedMasterPlan masterPlan) {
-
-		Aggregator<PlanAnalysisReport> aggreagtor = createAggregator(masterPlan
-				.getOptimizationRequest().getOptimizationConstraints());
-
-		masterPlan.getOptimizedPlans().stream()
-				.map(OptimizedPlan::getPlanAnalysisReport)
-				.forEach(aggreagtor::add);
-
+	public PlanAnalysisReport aggregate(OptimizationConstraints constraints, Iterable<PlanAnalysisReport> reports) {
+		Aggregator<PlanAnalysisReport> aggreagtor = createAggregator(constraints);
+		reports.forEach(aggreagtor::add);
 		return aggreagtor.apply();
 	}
+	
+
+//	@Override
+//	public PlanAnalysisReport aggregate(GeneratedRootPlan rootPlan) {
+//		Aggregator<PlanAnalysisReport> aggreagtor = createAggregator(rootPlan
+//				.getOptimizationRequest().getOptimizationConstraints());
+//
+//		rootPlan.getOptimizedPlans().stream()
+//				.map(OptimizedMasterPlan::getPlanAnalysisReport)
+//				.forEach(aggreagtor::add);
+//		
+//		return aggreagtor.apply();
+//	}
+//
+//	@Override
+//	public PlanAnalysisReport aggregate(GeneratedMasterPlan masterPlan) {
+//
+//		Aggregator<PlanAnalysisReport> aggreagtor = createAggregator(masterPlan
+//				.getOptimizationRequest().getOptimizationConstraints());
+//
+//		masterPlan.getOptimizedPlans().stream()
+//				.map(OptimizedPlan::getPlanAnalysisReport)
+//				.forEach(aggreagtor::add);
+//
+//		return aggreagtor.apply();
+//	}
 
 	@Override
 	public PlanAnalysisReport createPlanAnalysisReport() {

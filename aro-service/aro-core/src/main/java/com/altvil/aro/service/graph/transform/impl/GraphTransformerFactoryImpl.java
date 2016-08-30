@@ -16,6 +16,7 @@ import com.altvil.aro.service.demand.EntityDemandService;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
+import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.builder.impl.DefaultGraphBuilder;
 import com.altvil.aro.service.graph.impl.AroEdgeFactory;
@@ -56,9 +57,10 @@ public class GraphTransformerFactoryImpl implements GraphTransformerFactory {
 	}
 
 	@Override
-	public <T> DAGModel<T> createDAG(GraphModel<T> graph, GraphNode srcNode,
+	public <T> DAGModel<T> createDAG(ClosestFirstSurfaceBuilder closestFirstSurfaceBuilder,
+				GraphModel<T> graph, GraphNode srcNode,
 			Predicate<AroEdge<T>> predicate) {
-		return new DagBuilder<T>(createDAGBuilder(), graph).createDAG(predicate,
+		return new DagBuilder<T>(createDAGBuilder(), graph).createDAG(closestFirstSurfaceBuilder, predicate,
 				srcNode);
 	}
 

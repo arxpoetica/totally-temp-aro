@@ -87,12 +87,17 @@
   <p><strong>Customers to Optimize For</strong></p>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="optimizeHouseholds"> Households
+      <input type="checkbox" ng-model="optimizeBusinesses"> Enterprise
     </label>
   </div>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="optimizeBusinesses"> Businesses
+      <input type="checkbox" ng-model="optimizeSMB"> SMB
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="optimizeHouseholds"> Households
     </label>
   </div>
   <div class="checkbox">
@@ -102,6 +107,7 @@
   </div>
   <% } %>
 
+  <% if (config.ARO_CLIENT === 'verizon') { %>
   <p><strong>Technology</strong></p>
   <form>
     <div class="radio">
@@ -139,6 +145,7 @@
       </label>
     </div>
   </form>
+  <% } %>
 
   <div>
     <p class="pull-right">

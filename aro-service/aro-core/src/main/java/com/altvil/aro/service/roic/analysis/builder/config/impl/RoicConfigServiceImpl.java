@@ -13,7 +13,6 @@ import com.altvil.aro.service.roic.analysis.builder.config.RoicConfigService;
 import com.altvil.aro.service.roic.analysis.builder.config.RoicConfiguration;
 import com.altvil.aro.service.roic.analysis.builder.config.defaults.DefaultRoicConfig;
 import com.altvil.aro.service.roic.analysis.builder.config.spi.SpiComponentConfig;
-import com.altvil.aro.service.roic.analysis.builder.config.spi.SpiComponentRoicRegistry;
 import com.altvil.aro.service.roic.analysis.model.RoicComponent.ComponentType;
 import com.altvil.aro.service.roic.analysis.model.RoicNetworkModel.NetworkAnalysisType;
 import com.altvil.aro.service.roic.analysis.op.Op;

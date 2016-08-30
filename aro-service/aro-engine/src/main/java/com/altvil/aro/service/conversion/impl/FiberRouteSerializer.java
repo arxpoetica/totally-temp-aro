@@ -141,10 +141,8 @@ public class FiberRouteSerializer extends GraphMappingSerializer<FiberRoute> {
 					frs.setCableConstructionType(constructionType);
 					frs.setLengthInMeters(segs.stream().map(AroEdge::getValue).mapToDouble(GeoSegment::getLength).sum());
 					
-					//TODO Revisit Data Model. For now Only Store non default segments 
-					if( !constructionType.isComputedEstimate() ) {
-						frs.setGeometry(createMultiLineString(segs));
-					}
+					//TODO Revisit Data Model.
+					frs.setGeometry(createMultiLineString(segs));
 
 					//TODO  separate concerns 
 					DoubleSummer ds = fiberLengthMap.get(fct) ;

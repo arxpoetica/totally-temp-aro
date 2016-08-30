@@ -1,4 +1,5 @@
 var helpers = require('../helpers')
+var database = helpers.database
 var models = require('../models')
 var moment = require('moment')
 var config = helpers.config
@@ -219,9 +220,6 @@ exports.configure = (api, middleware) => {
       curves[`bau_${key}`] = `copper.${key}.subscribers_count`
       curves[`plan_${key}`] = `planned.${key}.subscribers_count`
     })
-    if (entities.length === 0) {
-      zeros = ['bau', 'plan']
-    }
     requestData({
       plan_id: request.params.plan_id,
       curves: curves,
@@ -229,17 +227,15 @@ exports.configure = (api, middleware) => {
     })
     .then((data) => {
       data.forEach((obj) => {
-        var bau = 0
-        var plan = 0
+        obj.bau = 0
+        obj.plan = 0
         Object.keys(curves).forEach((key) => {
           if (key.indexOf('bau_') === 0) {
-            bau += obj[key]
+            obj.bau += obj[key]
           } else {
-            plan += obj[key]
+            obj.plan += obj[key]
           }
         })
-        obj.bau = bau
-        obj.plan = bau
       })
       return data
     })
@@ -308,13 +304,133 @@ exports.configure = (api, middleware) => {
     })
     .then((data) => {
       data.forEach((obj) => {
-        obj.bau = obj.copper_opex_expenses / obj.copper_revenue
-        obj.plan = obj.planned_opex_expenses / obj.planned_revenue
+        obj.bau = obj.copper_opex_expenses * 100 / obj.copper_revenue
+        obj.plan = obj.planned_opex_expenses * 100 / obj.planned_revenue
       })
       return data
     })
     .then(jsonSuccess(response, next))
     .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/routeopportunities', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    const distanceThresholds = request.query.distanceThresholds.map((value) => +value)
+
+    const groupByKey = (arr) => {
+      var result = []
+      arr.forEach((item) => {
+        var key = item.key
+        var items = result.find((item) => item.key === key)
+        if (!items) {
+          items = { key: key, items: [] }
+          result.push(items)
+        }
+        items.items.push(item)
+      })
+      return result
+    }
+
+    const getTotals = () => {
+      var req = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/businesses/getTotals',
+        body: {
+          distanceThresholds: distanceThresholds,
+          locationSource: 'vz_customers',
+          mrcThreshold: 2000,
+          planId: plan_id
+        },
+        json: true
+      }
+      return models.AROService.request(req)
+    }
+
+    const getBuildingsCountsByBusinessesSizes = () => {
+      var req = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/businesses/getBuildingsCountsByBusinessesSizes',
+        body: {
+          distanceThresholds: distanceThresholds,
+          locationSource: 'tam',
+          mrcThreshold: 0,
+          planId: plan_id
+        },
+        json: true
+      }
+      return models.AROService.request(req)
+    }
+
+    const getBusinessesCountsBySizes = () => {
+      var req = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/businesses/getBusinessesCountsBySizes',
+        body: {
+          distanceThresholds: distanceThresholds,
+          locationSource: 'tam',
+          mrcThreshold: 0,
+          planId: plan_id
+        },
+        json: true
+      }
+      return models.AROService.request(req)
+    }
+
+    const sizesDict = (arr) => {
+      var dict = {}
+      arr.forEach((item) => {
+        dict[item.size_name] = item
+        item.description = item.max_value === 1
+          ? `${item.size_name} (${item.max_value} employee)`
+          : item.max_value < 1000000
+            ? `${item.size_name} (${item.min_value} - ${item.max_value} employees)`
+            : `${item.size_name} (>${item.min_value} employees)`
+      })
+      return dict
+    }
+
+    const sortByBusinessSize = (arr, sizes) => {
+      return arr.sort((a, b) => sizes[a.key].min_value - sizes[b.key].min_value)
+    }
+
+    return Promise.all([
+      getTotals(),
+      getBuildingsCountsByBusinessesSizes(),
+      getBusinessesCountsBySizes(),
+      database.query('SELECT * FROM client.businesses_sizes')
+    ])
+    .then((results) => {
+      var sizes = sizesDict(results[3])
+      return {
+        totals: groupByKey(results[0]),
+        businesses: sortByBusinessSize(groupByKey(results[1]), sizes),
+        buildings: sortByBusinessSize(groupByKey(results[2]), sizes),
+        businessSizes: sizes
+      }
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/exportBusinesses', (request, response, next) => {
+    const distanceThresholds = request.query.distanceThresholds.map((value) => +value)
+    var plan_id = request.params.plan_id
+    var req = {
+      method: 'POST',
+      url: config.aro_service_url + '/rest/businesses',
+      body: {
+        distanceThresholds: distanceThresholds,
+        locationSource: 'tam',
+        mrcThreshold: 1609.34, // 1 mile
+        planId: plan_id
+      },
+      json: true
+    }
+    return models.AROService.request(req)
+      .then((output) => {
+        response.attachment(`businesses_${moment().format('YYYY-MM-DD_HH:mm:ss')}.csv`)
+        response.send(output)
+      })
   })
 }
 
@@ -360,3 +476,55 @@ const requestData = (params, filter) => {
       return chart
     })
 }
+
+if (module.id === require.main.id) {
+  var req = {
+    method: 'POST',
+    url: config.aro_service_url + '/rest/businesses/getTotals',
+    body: {
+      distanceThresholds: [
+        402.336, // 1/4 miles
+        804.672, // 1/2 miles
+        1609.34 // 1 mile
+      ],
+      locationSource: 'vz_customers',
+      mrcThreshold: 2000,
+      planId: 8
+    },
+    json: true
+  }
+  models.AROService.request(req)
+    .then((response) => {
+      console.log('', JSON.stringify(response, null, 2))
+    })
+    .catch((err) => {
+      console.log('err', err.stack)
+    })
+}
+
+/*
+[
+  {
+    "distance": 100,
+    "key": "Count",
+    "value": 0
+  },
+  {
+    "distance": 100,
+    "key": "MRC",
+    "value": 0
+  }
+]
+ [
+  {
+    "distance": 100,
+    "key": "Count",
+    "value": 0
+  },
+  {
+    "distance": 100,
+    "key": "MRC",
+    "value": 0
+  }
+]
+*/

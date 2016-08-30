@@ -1,0 +1,103 @@
+<div class="modal" id="application-settings" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Application Settings</h4>
+      </div>
+      <div class="modal-body">
+        <div>
+          <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+              <a href="#applicationSettingsNetworkCosts" aria-controls="home" role="tab" data-toggle="tab">Network Costs</a>
+            </li>
+            <li role="presentation">
+              <a href="#applicationSettingsEndpointDemand" aria-controls="profile" role="tab" data-toggle="tab">Endpoint Demand</a>
+            </li>
+            <li role="presentation">
+              <a href="#applicationSettingsFinancialAssumptions" aria-controls="profile" role="tab" data-toggle="tab">Financial Assumptions</a>
+            </li>
+          </ul>
+          <div class="tab-content" style="padding-top: 20px">
+            <div role="tabpanel" class="tab-pane active" id="applicationSettingsNetworkCosts">
+              <form class="form-horizontal">
+                <div class="form-group" ng-repeat="setting in applicationSettings.networkCosts">
+                  <label class="col-sm-4 control-label">{{ setting.name }}</label>
+                  <div class="col-sm-5">
+                    <div class="input-group">
+                      <div class="input-group-addon">$</div>
+                      <input type="text" class="form-control format-currency"
+                        data-id="{{setting.id}}" value="{{setting.cost | number:2}}"
+                        data-tab="networkCosts" data-field="cost">
+                    </div>
+                  </div>
+                  <p class="col-sm-3 form-control-static">{{ setting.unit }}</p>
+                </div>
+              </form>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsEndpointDemand" style="padding-top: 20px">
+              <p class="text-center">...</p>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsFinancialAssumptions" style="padding-top: 20px">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <th>Entity</th>
+                    <th>Product</th>
+                    <th class="text-right">Arpu</th>
+                    <th class="text-right">Entity Growth</th>
+                    <th class="text-right">Churn Rate</th>
+                    <th class="text-right">Opex Percent</th>
+                    <th class="text-right">Maintenance Expenses</th>
+                    <th class="text-right">Connection Cost</th>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr ng-repeat="setting in applicationSettings.financialAssumptions">
+                    <td>{{ setting.entity_description }}</td>
+                    <td>{{ setting.product }}</td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="financialAssumptions" data-field="arpu"
+                        data-id="{{setting.id}}" value="{{setting.arpu | number:2}}">
+                    </td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="financialAssumptions" data-field="entity_growth"
+                        data-id="{{setting.id}}" value="{{setting.entity_growth | number:2}}">
+                    </td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="financialAssumptions" data-field="churn_rate"
+                        data-id="{{setting.id}}" value="{{setting.churn_rate | number:2}}">
+                    </td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="financialAssumptions" data-field="opex_percent"
+                        data-id="{{setting.id}}" value="{{setting.opex_percent | number:2}}">
+                    </td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="financialAssumptions" data-field="maintenance_expenses"
+                        data-id="{{setting.id}}" value="{{setting.maintenance_expenses | number:2}}">
+                    </td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="financialAssumptions" data-field="connection_cost"
+                        data-id="{{setting.id}}" value="{{setting.connection_cost | number:2}}">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn btn-default" ng-click="updateSettings()">Update</a>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>

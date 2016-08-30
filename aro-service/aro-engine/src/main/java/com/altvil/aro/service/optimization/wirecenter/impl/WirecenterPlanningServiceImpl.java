@@ -35,18 +35,23 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 
 
 	@Override
-	public OptimizedPlan save(GeneratedPlan plan) {
+	public OptimizedPlan summarize(GeneratedPlan generatedPlan) {
+		return new OptimizedPlanImpl(generatedPlan,
+				planAnalysisReportService.createPlanAnalysisReport(generatedPlan));
+	}
+
+	@Override
+	public void save(GeneratedPlan plan) {
 		networkNodeRepository.save(plan.getWirecenterNetworkPlan()
 				.getNetworkNodes());
 		fiberRouteRepository.save(plan.getWirecenterNetworkPlan()
 				.getFiberRoutes());
 
-		OptimizedPlan optimizedPlan = new OptimizedPlanImpl(plan,
-				planAnalysisReportService.createPlanAnalysisReport(plan));
+	}
 
+	@Override
+	public void save(OptimizedPlan optimizedPlan) {
+		save(optimizedPlan.getGeneratedPlan()) ;
 		networkReportService.saveNetworkReport(optimizedPlan);
-
-		return optimizedPlan;
-
 	}
 }
