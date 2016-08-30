@@ -379,24 +379,24 @@ module.exports = class Network {
 
     if (types.indexOf('wirecenter') >= 0) {
       parts.push(`
-        SELECT 'wirecenter:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+        SELECT 'wirecenter:' || id AS service_area.id, code AS name, ST_AsGeoJSON(geom)::json AS geog
           FROM client.service_area
-         WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-           AND service_layer_id = (
-                  SELECT id FROM client.service_layer WHERE name='wirecenter'
-               )
-               ${database.intersects(viewport, 'geom', 'AND')}
+          JOIN client.service_layer
+            ON service_area.service_layer_id = service_layer.id
+          AND service_layer.name='wirecenter'
+        WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+              ${database.intersects(viewport, 'geom', 'AND')}
         `)
     }
 
     if (types.indexOf('directional_facilities') >= 0) {
       parts.push(`
-        SELECT 'directional_facility:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+        SELECT 'directional_facility:' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
           FROM client.service_area
+          JOIN client.service_layer
+            ON service_area.service_layer_id = service_layer.id
+           AND service_layer.name='directional_facility'
          WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-           AND service_layer_id = (
-                  SELECT id FROM client.service_layer WHERE name='directional_facility'
-               )
                ${database.intersects(viewport, 'geom', 'AND')}
         `)
     }
@@ -426,7 +426,17 @@ module.exports = class Network {
         `)
     }
 
-    console.log('parts', parts.length, types)
+    if (types.indexOf('cran_boundaries') >= 0) {
+      parts.push(`
+        SELECT 'cran:' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+          FROM client.service_area
+          JOIN client.service_layer
+            ON service_area.service_layer_id = service_layer.id
+          AND service_layer.name='cran'
+        WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+              ${database.intersects(viewport, 'geom', 'AND')}
+        `)
+    }
 
     if (parts.length === 0) {
       return Promise.resolve([])

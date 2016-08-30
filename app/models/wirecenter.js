@@ -7,32 +7,21 @@ var database = helpers.database
 
 module.exports = class Wirecenter {
 
-  static findAll (viewport) {
+  static findServiceAreas (viewport, type) {
     var sql = `
-      SELECT id, geom, code AS name
+      SELECT service_area.id, geom, code AS name
         FROM client.service_area
-       WHERE service_layer_id = (
-        SELECT id FROM client.service_layer WHERE name='wirecenter'
-      )
+        JOIN client.service_layer
+          ON service_area.service_layer_id = service_layer.id
+        AND service_layer.name=$1
     `
-    return database.polygons(sql, [], true, viewport)
+    return database.polygons(sql, [type], true, viewport)
   }
 
-  static findAllCMA (viewport) {
+  static findCMA (viewport) {
     var sql = `
       SELECT gid AS id, the_geom AS geom, name
       FROM ref_boundaries.cma
-    `
-    return database.polygons(sql, [], true, viewport)
-  }
-
-  static findAllDirectionalFacilities (viewport) {
-    var sql = `
-      SELECT id, geom, code AS name
-        FROM client.service_area
-       WHERE service_layer_id = (
-        SELECT id FROM client.service_layer WHERE name='directional_facility'
-      )
     `
     return database.polygons(sql, [], true, viewport)
   }

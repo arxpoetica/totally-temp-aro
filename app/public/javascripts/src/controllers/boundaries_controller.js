@@ -22,13 +22,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   var censusBlocksLayer
   var cmaBoundariesLayer
   var directionalFacilities
+  var cranBoundaries
 
   if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
     wirecentersLayer = new MapLayer({
       short_name: 'WC',
       name: config.ui.labels.wirecenter,
       type: 'wirecenter',
-      api_endpoint: '/wirecenters',
+      api_endpoint: '/service_areas/wirecenter',
       highlighteable: true,
       style_options: {
         normal: {
@@ -130,7 +131,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     short_name: 'DF',
     name: 'Directional Facilities',
     type: 'directional_facilities',
-    api_endpoint: '/directional_facilities',
+    api_endpoint: '/service_areas/directional_facility',
     style_options: {
       normal: {
         fillColor: 'darkcyan',
@@ -147,12 +148,34 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     threshold: 0
   })
 
+  cranBoundaries = new MapLayer({
+    short_name: 'CB',
+    name: 'Cran Boundaries',
+    type: 'cran_boundaries',
+    api_endpoint: '/service_areas/cran',
+    style_options: {
+      normal: {
+        fillColor: 'dodgerblue',
+        strokeColor: 'dodgerblue',
+        strokeWeight: 2
+      },
+      highlight: {
+        fillColor: 'dodgerblue',
+        strokeColor: 'dodgerblue',
+        strokeWeight: 2
+      }
+    },
+    reload: 'always',
+    threshold: 0
+  })
+
   $scope.areaLayers = [
     censusBlocksLayer,
     countySubdivisionsLayer,
     wirecentersLayer,
     cmaBoundariesLayer,
-    directionalFacilities
+    directionalFacilities,
+    cranBoundaries
   ].filter((layer) => layer)
 
   var drawingManager = new google.maps.drawing.DrawingManager({

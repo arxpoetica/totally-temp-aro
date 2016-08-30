@@ -7,7 +7,7 @@ describe('Wirecenter', () => {
   describe('#findAll()', () => {
     it('should return the information of the wirecenter', (done) => {
       request
-        .get('/wirecenters')
+        .get('/service_areas/wirecenter')
         .query(test_utils.testViewport())
         .accept('application/json')
         .end((err, res) => {
