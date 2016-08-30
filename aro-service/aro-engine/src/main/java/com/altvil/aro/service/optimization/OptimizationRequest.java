@@ -34,7 +34,7 @@ public class OptimizationRequest {
 	public OptimizationConstraints getOptimizationConstraints() {
 		return optimizationConstraints;
 	}
-
+	
 	public NetworkDataRequest getNetworkDataRequest() {
 		return networkDataRequest;
 	}

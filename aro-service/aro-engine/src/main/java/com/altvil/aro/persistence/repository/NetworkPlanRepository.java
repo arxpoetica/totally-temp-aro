@@ -509,4 +509,22 @@ public interface NetworkPlanRepository extends
 	List<Object[]> queryConduitSections(@Param("planId") long planId);
 	
 	
+	@Query(value = "SELECT\n" + 
+			" c.gid,\n" + 
+			" c.construction_type,\n" + 
+			" CASE \n" + 
+			"	WHEN start_ratio < end_ratio THEN start_ratio \n" + 
+			"	ELSE 0 \n" + 
+			"	END AS start_ratio, \n" + 
+			" CASE\n" + 
+			"	WHEN start_ratio < end_ratio THEN end_ratio \n" + 
+			"	WHEN edge_length = segment_length THEN 1 \n" + 
+			"	ELSE 0 \n" + 
+			" END AS end_ratio 	\n" + 
+			" FROM client.plan_conduit_fiber c\n" + 
+			"WHERE plan_id = :planId\n" + 
+			"AND end_ratio >= start_ratio ", nativeQuery = true)
+	List<Object[]> queryPlanConduitSections(@Param("planId") long planId);
+	
+	
 }

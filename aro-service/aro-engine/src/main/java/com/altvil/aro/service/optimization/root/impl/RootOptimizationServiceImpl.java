@@ -175,18 +175,19 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 		@Override
 		public OptimizedMasterPlan next() {
 
-			MasterOptimizationRequest masterReqiest = optimizationRequestItr
+			MasterOptimizationRequest masterRequest = optimizationRequestItr
 					.next();
 
 			// Update Transitively "Previous Master Plan Fiber"
 			if (previous != null) {
 				planCommandService.updatePlanConduit(previous,
-						masterReqiest.getNetworkDataRequest());
+						masterRequest.getNetworkDataRequest());
+				masterRequest = masterRequest.includePlanConduit() ;
 			}
 
 			// Submit Optimization Of Master Plan
 			Future<OptimizedMasterPlan> f = optimizationPlannerService
-					.optimize(masterReqiest);
+					.optimize(masterRequest);
 
 			// Block until Optimization Complete
 			try {

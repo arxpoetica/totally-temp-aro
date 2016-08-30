@@ -7,7 +7,6 @@ public interface CableConduitEdge {
 	double getStartRatio() ;
 	double getEndRatio() ;
 	
-	CableConduitEdge resize(double startRatio, double endRatio) ;
 	
 	boolean isValid() ;
 	

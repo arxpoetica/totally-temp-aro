@@ -90,7 +90,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 
 		private NetworkDataRequest createDataRequest() {
 			return new NetworkDataRequest(planId, null, year,
-					locationSelectionMode, locationEntities, mrc);
+					locationSelectionMode, locationEntities, mrc, false);
 		}
 
 		public RootOptimizationRequest build() {
