@@ -310,11 +310,14 @@ module.exports = class Network {
             if (!query) {
               params.push(type)
               query = `
-                SELECT geom
-                FROM client.service_area
-                JOIN client.service_layer
-                  ON service_area.service_layer_id = service_layer.id
-                AND service_layer.name=$${params.length}
+                (
+                  SELECT geom
+                  FROM client.service_area
+                  JOIN client.service_layer
+                    ON service_area.service_layer_id = service_layer.id
+                  AND service_layer.name=$${params.length}
+                  WHERE service_area.id=$3::bigint
+                )
               `
               promises.push(
                 database.execute(`
