@@ -27,7 +27,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
     wirecentersLayer = new MapLayer({
       short_name: 'WC',
-      name: config.ui.labels.wirecenter,
+      name: 'VZT FTTP',
       type: 'wirecenter',
       api_endpoint: '/service_areas/wirecenter',
       highlighteable: true,
@@ -129,7 +129,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   directionalFacilities = new MapLayer({
     short_name: 'DF',
-    name: 'Directional Facilities',
+    name: 'VZB Owned',
     type: 'directional_facilities',
     api_endpoint: '/service_areas/directional_facility',
     style_options: {
@@ -150,7 +150,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   cranBoundaries = new MapLayer({
     short_name: 'CB',
-    name: 'Cran Boundaries',
+    name: 'VZW Owned',
     type: 'cran_boundaries',
     api_endpoint: '/service_areas/cran',
     style_options: {
