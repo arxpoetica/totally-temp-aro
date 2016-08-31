@@ -1,4 +1,4 @@
-/* global $ app user_id swal _ google map config */
+/* global $ app user_id swal _ google map config globalServiceLayers */
 // Boundaries Controller
 app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions) => {
   $scope.map_tools = map_tools
@@ -17,37 +17,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
   // --
 
-  var wirecentersLayer
   var countySubdivisionsLayer
   var censusBlocksLayer
   var cmaBoundariesLayer
-  var directionalFacilities
-  var cranBoundaries
-
-  if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
-    wirecentersLayer = new MapLayer({
-      short_name: 'WC',
-      name: 'VZT FTTP',
-      type: 'wirecenter',
-      api_endpoint: '/service_areas/wirecenter',
-      highlighteable: true,
-      style_options: {
-        normal: {
-          strokeColor: '#00ff00',
-          strokeWeight: 4,
-          fillOpacity: 0
-        },
-        highlight: {
-          strokeColor: '#00ff00',
-          strokeWeight: 6,
-          fillOpacity: 0.1
-        }
-      },
-      reload: 'always',
-      threshold: 0,
-      minZoom: 6
-    })
-  }
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
     countySubdivisionsLayer = new MapLayer({
@@ -127,56 +99,41 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     threshold: 0
   })
 
-  directionalFacilities = new MapLayer({
-    short_name: 'DF',
-    name: 'VZB Owned',
-    type: 'directional_facilities',
-    api_endpoint: '/service_areas/directional_facility',
-    style_options: {
-      normal: {
-        fillColor: 'darkcyan',
-        strokeColor: 'darkcyan',
-        strokeWeight: 2
-      },
-      highlight: {
-        fillColor: 'darkcyan',
-        strokeColor: 'darkcyan',
-        strokeWeight: 2
-      }
-    },
-    reload: 'always',
-    threshold: 0
-  })
-
-  cranBoundaries = new MapLayer({
-    short_name: 'CB',
-    name: 'VZW Owned',
-    type: 'cran_boundaries',
-    api_endpoint: '/service_areas/cran',
-    style_options: {
-      normal: {
-        fillColor: 'dodgerblue',
-        strokeColor: 'dodgerblue',
-        strokeWeight: 2
-      },
-      highlight: {
-        fillColor: 'dodgerblue',
-        strokeColor: 'dodgerblue',
-        strokeWeight: 2
-      }
-    },
-    reload: 'always',
-    threshold: 0
-  })
-
   $scope.areaLayers = [
     censusBlocksLayer,
     countySubdivisionsLayer,
-    wirecentersLayer,
-    cmaBoundariesLayer,
-    directionalFacilities,
-    cranBoundaries
+    cmaBoundariesLayer
   ].filter((layer) => layer)
+
+  var serviceLayersColors = [
+    '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
+  ]
+
+  globalServiceLayers.forEach((serviceLayer) => {
+    var color = serviceLayersColors.shift() || 'black'
+    var layer = new MapLayer({
+      name: serviceLayer.description,
+      type: serviceLayer.name,
+      api_endpoint: `/service_areas/${serviceLayer.name}`,
+      highlighteable: true,
+      style_options: {
+        normal: {
+          strokeColor: color,
+          strokeWeight: 4,
+          fillOpacity: 0
+        },
+        highlight: {
+          strokeColor: color,
+          strokeWeight: 6,
+          fillOpacity: 0.1
+        }
+      },
+      reload: 'always',
+      threshold: 0,
+      minZoom: 6
+    })
+    $scope.areaLayers.push(layer)
+  })
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
@@ -492,7 +449,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $rootScope.$on('financial_profile_changed_mode', (e, mode) => {
     if (mode === 'area') {
-      wirecentersLayer && wirecentersLayer.show()
+      // wirecentersLayer && wirecentersLayer.show()
     }
   })
 

@@ -376,73 +376,50 @@ module.exports = class Network {
 
   static searchBoundaries (text, types, viewport) {
     var parts = []
+    var limit = 20
 
-    if (types.indexOf('wirecenter') >= 0) {
-      parts.push(`
-        SELECT 'wirecenter:' || id AS service_area.id, code AS name, ST_AsGeoJSON(geom)::json AS geog
-          FROM client.service_area
-          JOIN client.service_layer
-            ON service_area.service_layer_id = service_layer.id
-          AND service_layer.name='wirecenter'
-        WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-              ${database.intersects(viewport, 'geom', 'AND')}
+    types.forEach((type) => {
+      if (type === 'cma_boundaries') {
+        parts.push(`
+          SELECT 'cma_boundary:' || gid AS id, name, ST_AsGeoJSON(the_geom)::json AS geog
+          FROM ref_boundaries.cma LIMIT ${limit}
         `)
-    }
-
-    if (types.indexOf('directional_facilities') >= 0) {
-      parts.push(`
-        SELECT 'directional_facility:' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
-          FROM client.service_area
-          JOIN client.service_layer
-            ON service_area.service_layer_id = service_layer.id
-           AND service_layer.name='directional_facility'
-         WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-               ${database.intersects(viewport, 'geom', 'AND')}
-        `)
-    }
-
-    if (types.indexOf('cma_boundaries') >= 0) {
-      parts.push(`
-        SELECT 'cma_boundary:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
-        FROM ref_boundaries.cma
-      `)
-    }
-
-    if (types.indexOf('county_subdivisions') >= 0) {
-      parts.push(`
-        SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
-          FROM aro.cousub
-         WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
-               ${database.intersects(viewport, 'geom', 'AND')}
-        `)
-    }
-
-    if (types.indexOf('census_blocks') >= 0) {
-      parts.push(`
-        SELECT 'census_block:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
-          FROM census_blocks
-         WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
-               ${database.intersects(viewport, 'geom', 'AND')}
-        `)
-    }
-
-    if (types.indexOf('cran_boundaries') >= 0) {
-      parts.push(`
-        SELECT 'cran:' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
-          FROM client.service_area
-          JOIN client.service_layer
-            ON service_area.service_layer_id = service_layer.id
-          AND service_layer.name='cran'
-        WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-              ${database.intersects(viewport, 'geom', 'AND')}
-        `)
-    }
+      } else if (type === 'county_subdivision') {
+        parts.push(`
+          SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+            FROM aro.cousub
+           WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+                 ${database.intersects(viewport, 'geom', 'AND')}
+                 LIMIT ${limit}
+          `)
+      } else if (type === 'census_blocks') {
+        parts.push(`
+          SELECT 'census_block:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+            FROM census_blocks
+           WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+                 ${database.intersects(viewport, 'geom', 'AND')}
+                 LIMIT ${limit}
+          `)
+      } else {
+        parts.push(`
+          SELECT '${type}:' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+            FROM client.service_area
+            JOIN client.service_layer
+              ON service_area.service_layer_id = service_layer.id
+            AND service_layer.name='${type}'
+          WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+                ${database.intersects(viewport, 'geom', 'AND')}
+                LIMIT ${limit}
+          `)
+      }
+    })
 
     if (parts.length === 0) {
       return Promise.resolve([])
     }
 
-    var sql = parts.join(' UNION ALL ') + ' LIMIT 100'
+    var sql = parts.map((sql) => `(${sql})`).join(' UNION ALL ')
+    console.log('sql', sql)
     return database.query(sql, [`%${text}%`])
   }
 
