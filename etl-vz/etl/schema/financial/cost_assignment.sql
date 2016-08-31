@@ -45,6 +45,10 @@ insert into financial.cost_assignment (date_from, date_to, state_code,  cost_cod
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
 	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'fiber_obstacle'), 1000000000.00) ;
 
+insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
+	values ('2000-01-01', NULL, '*', (select id from financial.cost_code where name = 'planned_conduit'), 0.0) ;
+
+
 -------- bulk_distribution_terminal
 
 insert into financial.cost_assignment (date_from, date_to, state_code,  cost_code_id, cost)
