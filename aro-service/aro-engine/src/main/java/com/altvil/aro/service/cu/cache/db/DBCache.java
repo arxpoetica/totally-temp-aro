@@ -36,8 +36,6 @@ public class DBCache implements SimpleCache {
 	private static final Logger log = LoggerFactory
 			.getLogger(PlanServiceImpl.class.getName());
 
-	private final org.apache.log4j.Logger logger = org.apache.log4j.Logger
-			.getLogger(this.getClass());
 	private DeploymentPlanCacheRepository deploymentPlanCacheRepository;
 	private QueryExecutor queryExecutor;
 
@@ -64,7 +62,7 @@ public class DBCache implements SimpleCache {
 			entity = deploymentPlanCacheRepository.save(entity);
 			return entity;
 		} catch (DataIntegrityViolationException exception) {
-			logger.warn("Creational Optimistic Exception fetching data "
+			log.warn("Creational Optimistic Exception fetching data "
 					+ exception.getMessage());
 			try {
 				Thread.sleep((long) (Math.random() * 2000));

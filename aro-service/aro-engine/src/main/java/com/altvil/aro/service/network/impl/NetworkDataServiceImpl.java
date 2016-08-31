@@ -104,13 +104,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				demandByLocationIdMap));
 
 		// TODO Simplify Locations
-		Collection<NetworkAssignment> roadLocations = getNetworkLocations(
+		NetworkAssignmentModel networkModel = getNetworkLocations(
 				request, demandByLocationIdMap);
 
-		networkData.setRoadLocations(roadLocations);
-
-		networkData
-				.setSelectedRoadLocationIds(toSelectedRoadLocationIds(roadLocations));
+		networkData.setRoadLocations(networkModel);
 
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
 		networkData.setRoadEdges(getRoadEdges(request));

@@ -457,7 +457,7 @@ public class ComputeUnitServiceImpl  implements ComputeUnitService {
 
 		public CacheKey createCacheKey(CacheQuery query) {
 			return new DefaultCacheKey(executorContext.getCacheType(),
-					query.getBsaKey(), query.getExtentionKey());
+					query.getAroKey(), query.getExtentionKey());
 		}
 	}
 
