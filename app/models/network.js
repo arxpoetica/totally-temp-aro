@@ -148,7 +148,6 @@ module.exports = class Network {
         if (constraints.length > 0) {
           sql += ' WHERE ' + constraints.join(' AND ')
         }
-        console.log('sql', sql)
         return database.points(sql, params, true, viewport)
       })
   }
