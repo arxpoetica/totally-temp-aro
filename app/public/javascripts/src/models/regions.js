@@ -180,5 +180,9 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     configureSearch()
   }
 
+  regions.getSelectedServiceAreas = () => {
+    return globalServiceLayers.filter((layer) => searchOptions[layer.name])
+  }
+
   return regions
 })

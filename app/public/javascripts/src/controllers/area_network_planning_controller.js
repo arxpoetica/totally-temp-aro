@@ -92,7 +92,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       algorithm: $scope.optimizationType,
       budget: parseBudget(),
       irrThreshold: $scope.irrThreshold / 100,
-      selectionMode: 'SELECTED_AREAS'
+      selectionMode: 'SELECTED_AREAS',
+      processingLayers: regions.getSelectedServiceAreas().map((layer) => layer.id)
     }
 
     if (algorithm === 'CAPEX') {
