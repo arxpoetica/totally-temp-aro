@@ -570,6 +570,7 @@ footer nav {
 [ng-controller=locations_controller] .panel-body .customer-type {
   padding: 0 10px;
   padding-top: 3px;
+  margin-top: 2px;
 }
 
 [ng-controller=locations_controller] .panel-body .shaded {
