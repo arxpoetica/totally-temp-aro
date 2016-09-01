@@ -29,10 +29,14 @@ public class BusinessesReportRepository {
 	public Collection<BusinessReportElement> getTotals(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
         return (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
-                    Query query = jdbcTemplate.createNativeQuery("\n" +
-                            "with \n" +
-                            "plan_ids as (select p.id from client.plan p where p.id = :planId or p.parent_plan_id = :planId  ),\n" +
-                            "locIds as ( select l.id\n" +
+                    Query query = jdbcTemplate.createNativeQuery(
+                            "with recursive plan_ids (id) as (\n" +
+                            "   select p.id from \n" +
+                            "   client.plan p where p.id = :planId\n" +
+                            "   union all\n" +
+                            "   select p.id from plan_ids , client.plan p\n" +
+                            "       where p.parent_plan_id = plan_ids.id\n" +
+                            ")," +        "locIds as ( select l.id\n" +
                             "\tfrom client.plan p\n" +
                             "\tinner join plan_ids\n" +
                             "\ton p.id = plan_ids.id\n" +
@@ -75,10 +79,14 @@ public class BusinessesReportRepository {
 	public Collection<BusinessReportElement> getBuildingsCountsByBusinessesSizes(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
         return (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
-                    Query query = jdbcTemplate.createNativeQuery("\n" +
-                            "with \n" +
-                            "plan_ids as (select p.id from client.plan p where p.id = :planId or p.parent_plan_id = :planId  ),\n" +
-                            "locIds as ( select l.id\n" +
+                    Query query = jdbcTemplate.createNativeQuery(
+                            "with recursive plan_ids (id) as (\n" +
+                            "   select p.id from \n" +
+                            "   client.plan p where p.id = :planId\n" +
+                            "   union all\n" +
+                            "   select p.id from plan_ids , client.plan p\n" +
+                            "       where p.parent_plan_id = plan_ids.id\n" +
+                            ")," +"locIds as ( select l.id\n" +
                             "\tfrom client.plan p\n" +
                             "\tinner join plan_ids\n" +
                             "\ton p.id = plan_ids.id\n" +
@@ -127,9 +135,14 @@ public class BusinessesReportRepository {
 	public Collection<BusinessReportElement> getBusinessesCountsBySizes(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
         return  (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
-                    Query query = jdbcTemplate.createNativeQuery("\n" +
-                            "with \n" +
-                            "plan_ids as (select p.id from client.plan p where p.id = :planId or p.parent_plan_id = :planId  ),\n" +
+                    Query query = jdbcTemplate.createNativeQuery(
+                            "with recursive plan_ids (id) as (\n" +
+                            "   select p.id from \n" +
+                            "   client.plan p where p.id = :planId\n" +
+                            "   union all\n" +
+                            "   select p.id from plan_ids , client.plan p\n" +
+                            "       where p.parent_plan_id = plan_ids.id\n" +
+                            ")," +
                             "locIds as ( select l.id\n" +
                             "\tfrom client.plan p\n" +
                             "\tinner join plan_ids\n" +
@@ -176,9 +189,13 @@ public class BusinessesReportRepository {
     public String getBusinesses(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
         OptionalDouble threshold = Arrays.stream(distanceThresholds).max();
         if (threshold.isPresent()) {
-            Query query = jdbcTemplate.createNativeQuery("  with  \n" +
-                    "    plan_ids as \n" +
-                    "        (select p.id from client.plan p where p.id = :planId  or p.parent_plan_id = :planId   ), \n" +
+            Query query = jdbcTemplate.createNativeQuery("with recursive plan_ids (id) as (\n" +
+                    "   select p.id from \n" +
+                    "   client.plan p where p.id = :planId\n" +
+                    "   union all\n" +
+                    "   select p.id from plan_ids , client.plan p\n" +
+                    "       where p.parent_plan_id = plan_ids.id\n" +
+                    ")," +
                     "    locIds as ( select l.id \n" +
                     "        from client.plan p \n" +
                     "        inner join plan_ids \n" +
