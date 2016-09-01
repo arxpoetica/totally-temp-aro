@@ -17,6 +17,12 @@
             <li role="presentation">
               <a href="#applicationSettingsFinancialAssumptions" aria-controls="profile" role="tab" data-toggle="tab">Financial Assumptions</a>
             </li>
+            <li role="presentation">
+              <a href="#applicationSettingsServiceLayerPriorities" aria-controls="profile" role="tab" data-toggle="tab">Service Layer Priorities</a>
+            </li>
+            <li role="presentation">
+              <a href="#applicationSettingsServiceLayerEntityCategories" aria-controls="profile" role="tab" data-toggle="tab">Service Layer Entity Categories</a>
+            </li>
           </ul>
           <div class="tab-content" style="padding-top: 20px">
             <div role="tabpanel" class="tab-pane active" id="applicationSettingsNetworkCosts">
@@ -90,8 +96,52 @@
                 </tbody>
               </table>
             </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsServiceLayerPriorities" style="padding-top: 20px">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <th>Service Layer</th>
+                    <th>Default priority</th>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr ng-repeat="setting in applicationSettings.serviceLayerPriorities">
+                    <td>{{ setting.service_layer_description }}</td>
+                    <td>
+                      <input type="number" class="form-control input-sm text-right"
+                        data-tab="serviceLayerPriorities" data-field="default_priority"
+                        data-id="{{setting.id}}" value="{{setting.default_priority}}"
+                        style="width: 50px">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsServiceLayerEntityCategories" style="padding-top: 20px">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <th>Entity</th>
+                    <th>Service Layer</th>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr ng-repeat="setting in applicationSettings.serviceLayerEntityCategories">
+                    <td>{{ setting.entity_description }}</td>
+                    <td>
+                      <select class="form-control"
+                        data-tab="serviceLayerEntityCategories" data-field="service_layer_id"
+                        data-id="{{setting.id}}">
+                        <option ng-repeat="layer in serviceLayers"
+                           ng-selected="setting.service_layer_id === layer.id"
+                          value="{{layer.id}}">{{layer.description}}</option>
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-
         </div>
       </div>
       <div class="modal-footer">
