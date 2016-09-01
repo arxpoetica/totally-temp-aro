@@ -65,7 +65,7 @@ etl_locations:
 ###################
 
 reset_equipment:
-	equipement/reset.sh
+	equipment/reset.sh
 
 # Load
 etl_equipment:

@@ -83,22 +83,6 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				.hashEnum(CableConstructionEnum.class);
 	}
 
-	// private CompetitiveLocationDemandMapping aggregate(
-	// Collection<CompetitiveLocationDemandMapping> demandMapping) {
-	//
-	// Aggregator<CompetitiveLocationDemandMapping> aggreagtor =
-	// CompetitiveLocationDemandMapping
-	// .aggregate();
-	// demandMapping.forEach(aggreagtor::add);
-	// return aggreagtor.apply();
-	//
-	// }
-	//
-	// private LocationDemand toFullShare(CompetitiveLocationDemandMapping
-	// mapping) {
-	// return aroDemandService.createFullShareDemand(mapping);
-	// }
-
 	private NetworkAssignmentModel getNetworkLocations(
 			NetworkDataRequest request,
 			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap) {
@@ -245,10 +229,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	}
 
-	// private Long getWirecenterIdByPlanId(long planId) {
-	// return planRepository.queryWirecenterIdForPlanId(planId);
-	// }
-
+	
 	private Map<Long, RoadLocation> queryRoadLocations(long planId) {
 		Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
 		planRepository
@@ -386,8 +367,36 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private enum ConduitEdgeMap implements OrdinalAccessor {
 		gid, constructionType, startRatio, endRatio
 	}
-
+	
+	
 	private Collection<CableConduitEdge> queryCableConduitEdges(
+			NetworkDataRequest networkConfiguration) {
+		Collection<CableConduitEdge> existing = queryExistingCableConduitEdges(networkConfiguration) ;
+		
+		if( networkConfiguration.isQueryPlanConduit() ) {
+			existing.addAll(queryPlanConditEdges(networkConfiguration)) ;
+		}
+		
+		return existing ;
+	}
+	
+	
+	private Collection<CableConduitEdge> queryPlanConditEdges(NetworkDataRequest networkConfiguration) {
+		return planRepository
+				.queryPlanConduitSections(networkConfiguration.getPlanId())
+				.stream()
+				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+				.map(result -> {
+					return new CableConduitEdgeImpl(
+							result.getLong(ConduitEdgeMap.gid),
+							cableConstructionEnumMap.get(result
+									.getInteger(ConduitEdgeMap.constructionType)),
+							result.getDouble(ConduitEdgeMap.startRatio), result
+									.getDouble(ConduitEdgeMap.endRatio));
+				}).collect(Collectors.toList());
+	}
+
+	private Collection<CableConduitEdge> queryExistingCableConduitEdges(
 			NetworkDataRequest networkConfiguration) {
 		return planRepository
 				.queryConduitSections(networkConfiguration.getPlanId())

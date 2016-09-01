@@ -15,3 +15,4 @@ INSERT INTO client.cable_construction_type(name, description) VALUES('buried', '
 INSERT INTO client.cable_construction_type(name, description) VALUES('underground', 'Underground');
 INSERT INTO client.cable_construction_type(name, description) VALUES('obstacle', 'Obstacle');
 INSERT INTO client.cable_construction_type(name, description) VALUES('conduit', 'Conduit');
+INSERT INTO client.cable_construction_type(name, description) VALUES('planned_conduit', 'Planned Conduit');

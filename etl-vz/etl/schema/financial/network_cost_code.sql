@@ -3,7 +3,7 @@
 DROP TABLE IF EXISTS "financial"."network_cost_code";
 CREATE TABLE "financial"."network_cost_code" (
 	"id" serial primary key,
-	"name" varchar(32) UNIQUE,
+	"name" varchar(64) UNIQUE,
 	"description" varchar(256)
 )
 WITH (OIDS=FALSE);
@@ -44,6 +44,9 @@ insert into financial.network_cost_code (name, description)
 	values ('feeder_fiber_conduit','Feeder Fiber Conduit Installation') ;
 
 insert into financial.network_cost_code (name, description) 
+	values ('feeder_fiber_planned_conduit','Feeder Fiber Planned Conduit Installation') ;
+
+insert into financial.network_cost_code (name, description) 
 	values ('feeder_fiber_obstacle','Feeder Fiber Obstacle Installation') ;
 
 ----Fiber ESTIMATED, ARIAL, BURIED, UNDERGROUND, CONDUIT, OBSTRACLE
@@ -62,6 +65,10 @@ insert into financial.network_cost_code (name, description)
 
 insert into financial.network_cost_code (name, description) 
 	values ('distribution_fiber_conduit','Distibution Fiber Conduit Installation') ;
+
+insert into financial.network_cost_code (name, description) 
+	values ('distribution_fiber_planned_conduit','Distribution Fiber Planned Conduit Installation') ;
+
 
 insert into financial.network_cost_code (name, description) 
 	values ('distribution_fiber_obstacle','Distibution Fiber Obstacle Installation') ;
@@ -83,6 +90,9 @@ insert into financial.network_cost_code (name, description)
 
 insert into financial.network_cost_code (name, description) 
 	values ('backbone_fiber_conduit','Backhaul Fiber Conduit Installation') ;
+
+insert into financial.network_cost_code (name, description) 
+	values ('backbone_fiber_planned_conduit','Backhaul Fiber Planned Conduit Installation') ;
 
 insert into financial.network_cost_code (name, description) 
 	values ('backbone_fiber_obstacle','Backhaul Fiber Obstacle Installation') ;
