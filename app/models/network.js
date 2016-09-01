@@ -114,7 +114,7 @@ module.exports = class Network {
           var arr = []
           node_types.forEach((node_type) => {
             params.push(node_type)
-            arr.push('t.name = $' + params.length)
+            arr.push('t.id = $' + params.length)
           })
           constraints.push('(' + arr.join(' OR ') + ')')
         }
