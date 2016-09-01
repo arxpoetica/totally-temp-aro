@@ -75,6 +75,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 			return this;
 		}
 
+
 		public Builder setYear(Integer year) {
 			if (year != null) {
 				this.year = year;

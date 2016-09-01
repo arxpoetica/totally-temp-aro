@@ -57,14 +57,15 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(NetworkServiceImpl.class.getName());
 
-	@Autowired
-	private NetworkPlanRepository planRepository;
 
 	@Autowired
 	private AroDemandService aroDemandService;
 
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
 	private Map<Integer, CableConstructionEnum> cableConstructionEnumMap;
+	@Autowired
+	private NetworkDataDAO networkDataDAO;
+
 
 	private ComputeUnitService computeUnitService;
 
@@ -73,6 +74,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		cableConstructionEnumMap = StreamUtil
 				.hashEnum(CableConstructionEnum.class);
 	}
+
+	private EntityFactory entityFactory = EntityFactory.FACTORY;
 
 	@Override
 	public NetworkData getNetworkData(NetworkDataRequest request) {
@@ -88,27 +91,13 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap));
 
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
-		networkData.setRoadEdges(getRoadEdges(request));
-		networkData.setCableConduitEdges(queryCableConduitEdges(request));
+		networkData.setRoadEdges(networkDataDAO.getRoadEdges(request.getServiceAreaId()));
+		networkData.setCableConduitEdges(networkDataDAO.queryCableConduitEdges(request.getPlanId()));
 
 		return networkData;
 	}
 
-	// private CompetitiveLocationDemandMapping aggregate(
-	// Collection<CompetitiveLocationDemandMapping> demandMapping) {
-	//
-	// Aggregator<CompetitiveLocationDemandMapping> aggreagtor =
-	// CompetitiveLocationDemandMapping
-	// .aggregate();
-	// demandMapping.forEach(aggreagtor::add);
-	// return aggreagtor.apply();
-	//
-	// }
-	//
-	// private LocationDemand toFullShare(CompetitiveLocationDemandMapping
-	// mapping) {
-	// return aroDemandService.createFullShareDemand(mapping);
-	// }
+	}
 
 	private NetworkAssignmentModel getNetworkLocations(
 			NetworkDataRequest request,
@@ -116,7 +105,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request);
 
-		List<Long> selectedRoadLocations = selectedRoadLocationIds(
+		List<Long> selectedRoadLocations = networkDataDAO.selectedRoadLocationIds(
 				request.getPlanId(), roadLocationByLocationIdMap);
 
 		if (request.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS) {
@@ -128,32 +117,6 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				roadLocationByLocationIdMap, selectedRoadLocations);
 	}
 
-	public NetworkData _getNetworkData(NetworkDataRequest networkConfiguration) {
-		// final long planId = networkConfiguration.getPlanId();
-		NetworkData networkData = new NetworkData();
-
-		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(networkConfiguration);
-		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(networkConfiguration);
-		List<Long> selectedRoadLocations = selectedRoadLocationIds(
-				networkConfiguration.getPlanId(), roadLocationByLocationIdMap);
-
-		networkData
-				.setFiberSources(getFiberSourceNetworkAssignments(networkConfiguration));
-
-		if (networkConfiguration.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS) {
-			roadLocationByLocationIdMap.keySet().retainAll(
-					selectedRoadLocations);
-		}
-
-		NetworkAssignmentModel model = networkAssignmentModel(networkConfiguration.getLocationEntities(), demandByLocationIdMap,
-				roadLocationByLocationIdMap, selectedRoadLocations);
-		
-		networkData.setRoadLocations(model);
-
-		networkData.setRoadEdges(getRoadEdges(networkConfiguration));
-
-		return networkData;
-	}
 
 	private NetworkAssignmentModel networkAssignmentModel(Set<LocationEntityType> locationEntities,
 			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap,
@@ -182,14 +145,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		return factory.build();
 	}
 
-	private enum LocationMap implements OrdinalAccessor {
-		id, gid, tlid, point, ratio, intersect_point, distance
-	}
-
 	private Map<Long, CompetitiveLocationDemandMapping> getLocationDemand(
 			NetworkDataRequest networkConfiguration) {
 
-		return queryLocationDemand(
+		return networkDataDAO.queryLocationDemand(
 				networkConfiguration.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS,
 				networkConfiguration.getLocationEntities(),
 				networkConfiguration.getPlanId(),
@@ -198,222 +157,23 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	}
 
-	private enum EntityDemandMap implements OrdinalAccessor {
-		location_id, block_id, entity_type, count, monthly_spend, competitive_strength
-	}
-
-	private LocationEntityType toLocationEntityType(int entityTypeCode) {
-		return LocationEntityTypeMapping.MAPPING
-				.toLocationEntityType(entityTypeCode);
-	}
-
-	// private static EntityDe
-	private Map<Long, CompetitiveLocationDemandMapping> assembleMapping(
-			List<Object[]> entityDemands, Set<LocationEntityType> selectedTypes) {
-		Map<Long, CompetitiveLocationDemandMapping> map = new HashMap<>();
-
-		entityDemands
-				.stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-				.forEach(
-						d -> {
-
-							Long locationId = d
-									.getLong(EntityDemandMap.location_id);
-
-							CompetitiveLocationDemandMapping ldm = map
-									.get(locationId);
-							if (ldm == null) {
-								map.put(locationId,
-										ldm = new CompetitiveLocationDemandMapping(
-												d.getInteger(EntityDemandMap.block_id),
-												d.getDouble(EntityDemandMap.competitive_strength)));
-							}
-
-							LocationEntityType lt = toLocationEntityType(d
-									.getInteger(EntityDemandMap.entity_type));
-
-							if (selectedTypes.contains(lt)) {
-								ldm.add(lt,
-										d.getDouble(EntityDemandMap.count),
-										d.getDouble(EntityDemandMap.monthly_spend));
-							}
-
-						});
-
-		return map;
-	}
-
-	private Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
-			boolean isFilteringRoadLocationDemandsBySelection,
-			Set<LocationEntityType> selectedTypes, long planId, int year, double mrc) {
-
-		return assembleMapping(
-				(isFilteringRoadLocationDemandsBySelection ? planRepository.queryFiberDemand(
-						planId, year, mrc)
-						: planRepository.queryAllFiberDemand(planId, year, mrc)),
-				selectedTypes);
-
-	}
-
-	// private Long getWirecenterIdByPlanId(long planId) {
-	// return planRepository.queryWirecenterIdForPlanId(planId);
-	// }
-
-	private Map<Long, RoadLocation> queryRoadLocations(long planId) {
-		Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
-		planRepository
-				.queryAllLocationsByPlanId(planId)
-				.stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-				.forEach(
-						result -> {
-							long tlid = result.getLong(LocationMap.tlid);
-							Long locationId = result.getLong(LocationMap.id);
-							try {
-								RoadLocation rl = RoadLocationImpl
-										.build()
-										.setTlid(tlid)
-										.setLocationPoint(
-												result.getPoint(LocationMap.point))
-										.setRoadSegmentPositionRatio(
-												result.getDouble(LocationMap.ratio))
-										.setRoadSegmentClosestPoint(
-												result.getPoint(LocationMap.intersect_point))
-										.setDistanceFromRoadSegmentInMeters(
-												result.getDouble(LocationMap.distance))
-										.build();
-
-								roadLocationsMap.put(locationId, rl);
-							} catch (Throwable err) {
-								LOG.error(
-										"Failed creating RoadLocation for locationId "
-												+ locationId + " due to: "
-												+ err.getMessage(), err);
-							}
-						});
-		return roadLocationsMap;
-	}
 
 	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(
 			NetworkDataRequest networkConfiguration) {
-		return queryRoadLocations(networkConfiguration.getPlanId());
+		return networkDataDAO.queryRoadLocations(networkConfiguration.getPlanId());
 	}
 
-	private List<Long> selectedRoadLocationIds(long planId,
-			Map<Long, RoadLocation> roadLocationByLocationIdMap) {
-		List<Long> selectedRoadLocations = planRepository
-				.querySelectedLocationsByPlanId(planId).stream()
-				.mapToLong(bi -> bi.longValue()).boxed()
-				.collect(Collectors.toList());
 
-		if (selectedRoadLocations.isEmpty()) {
-			selectedRoadLocations = new ArrayList<>(
-					roadLocationByLocationIdMap.size());
 
-			selectedRoadLocations.addAll(roadLocationByLocationIdMap.keySet());
-		}
 
-		return selectedRoadLocations;
-	}
-
-	private AroEntity createAroNetworkNode(long id, int type) {
-		return entityFactory.createCentralOfficeEquipment(id);
-	}
-
-	private enum FiberSourceMap implements OrdinalAccessor {
-		id, gid, tlid, point, ratio, intersect_point, distance, node_type
-	}
-
-	private Collection<NetworkAssignment> queryFiberSources(long planId) {
-
-		return planRepository
-				.querySourceLocations(planId)
-				.stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-				.map(result -> {
-					long tlid = result.getLong(FiberSourceMap.tlid);
-
-					try {
-						AroEntity aroEntity = createAroNetworkNode(
-								result.getLong(FiberSourceMap.id),
-								result.getInteger(FiberSourceMap.node_type));
-
-						RoadLocation rl = RoadLocationImpl
-								.build()
-								.setTlid(tlid)
-								.setLocationPoint(
-										result.getPoint(FiberSourceMap.point))
-								.setRoadSegmentPositionRatio(
-										result.getDouble(FiberSourceMap.ratio))
-								.setRoadSegmentClosestPoint(
-										result.getPoint(FiberSourceMap.intersect_point))
-
-								.setDistanceFromRoadSegmentInMeters(
-										result.getDouble(FiberSourceMap.distance))
-								.build();
-
-						return new DefaultNetworkAssignment(aroEntity, rl);
-					} catch (Throwable err) {
-						LOG.error("Failed creating FiberSource for tlid "
-								+ tlid + " due to: " + err.getMessage(), err);
-						return null;
-					}
-				}).filter(Objects::nonNull).collect(Collectors.toList());
-	}
 
 	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(
 			NetworkDataRequest networkConfiguration) {
 
-		return queryFiberSources(networkConfiguration.getPlanId());
+		return networkDataDAO.queryFiberSources(networkConfiguration.getPlanId());
 	}
 
-	private enum RoadEdgeMap implements OrdinalAccessor {
-		gid, tlid, tnidf, tnidt, shape, edge_length
-	}
 
-	private Collection<RoadEdge> getRoadEdges(
-			NetworkDataRequest networkConfiguration) {
-		return planRepository
-				.queryRoadEdgesbyPlanId(networkConfiguration.getPlanId())
-				.stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-				.map(result -> {
-					try {
-						return new RoadEdgeImpl(result
-								.getLong(RoadEdgeMap.tlid), result
-								.getLong(RoadEdgeMap.tnidf), result
-								.getLong(RoadEdgeMap.tnidt), result
-								.getGeometry(RoadEdgeMap.shape), result
-								.getDouble(RoadEdgeMap.edge_length));
-					} catch (Exception err) {
-						LOG.error(result.toString());
-						LOG.error(err.getMessage(), err);
-						return null;
-					}
-				}).filter(e -> e != null).collect(Collectors.toList());
-	}
-
-	private enum ConduitEdgeMap implements OrdinalAccessor {
-		gid, constructionType, startRatio, endRatio
-	}
-
-	private Collection<CableConduitEdge> queryCableConduitEdges(
-			NetworkDataRequest networkConfiguration) {
-		return planRepository
-				.queryConduitSections(networkConfiguration.getPlanId())
-				.stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-				.map(result -> {
-					return new CableConduitEdgeImpl(
-							result.getLong(ConduitEdgeMap.gid),
-							cableConstructionEnumMap.get(result
-									.getInteger(ConduitEdgeMap.constructionType)),
-							result.getDouble(ConduitEdgeMap.startRatio), result
-									.getDouble(ConduitEdgeMap.endRatio));
-				}).collect(Collectors.toList());
-
-	}
 
 	// private class LocationDemandAnalysisImpl implements
 	// LocationDemandAnalysis {

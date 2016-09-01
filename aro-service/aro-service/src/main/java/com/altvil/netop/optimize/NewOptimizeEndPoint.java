@@ -137,8 +137,8 @@ public class NewOptimizeEndPoint {
 				.setAnalysisSelectionMode(plan.getAnalysisSelectionMode())
 				.setProcessingLayers(plan.getProcessLayers())
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
-				.setMrc(entityTypes.contains(AroLocationEntityType.mrcgte2000) ? 2000
-						: 0).setPlanId(plan.getPlanId())
+				.setMrc(entityTypes.contains(AroLocationEntityType.mrcgte2000) ? 2000 : 0)
+				.setPlanId(plan.getPlanId())
 				.setFiberNetworkConstraints(plan.getFiberNetworkConstraints())
 				.setLocationEntities(toMask(plan.getLocationTypes()))
 				.setOptimizationMode(plan.getOptimizationMode()).build();
