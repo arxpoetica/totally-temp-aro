@@ -1,13 +1,16 @@
-SELECT AddGeometryColumn('temp_hh', 'households', 'geom', 4326, 'POINT', 2);
+DO $$
+DECLARE
+    all_states text[][] := array[['NY', '36'], ['WA', '53']];
+    state text[];
+    expr text;
+    current_table text;
 
-UPDATE temp_hh.households SET geom = ST_SetSRID(ST_MakePoint(lon, lat), 4326);
-
-CREATE INDEX temp_hh_geog_gist
-  ON temp_hh.households
-  USING gist
-  (geog);
-
-CREATE INDEX temp_hh_geom_gist
-  ON temp_hh.households
-  USING gist
-  (geom);
+BEGIN
+    FOREACH state SLICE 1 IN ARRAY all_states
+    LOOP
+    	RAISE NOTICE '*** CREATE GEOMETRY FOR STATE: %', state[1];
+    	current_table := 'temp_hh_data.households_' || lower(state[1]);
+    	expr := 'UPDATE ' || current_table || ' SET geom = ST_SetSRID(ST_MakePoint(lon, lat), 4326);';
+    	EXECUTE expr;
+    END LOOP;
+END$$;
