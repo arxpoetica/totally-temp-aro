@@ -36,7 +36,7 @@ public class BusinessesReportRepository {
                             "\tfrom client.plan p\n" +
                             "\tinner join plan_ids\n" +
                             "\ton p.id = plan_ids.id\n" +
-                            "\tinner join aro.wirecenters w \n" +
+                            "\tinner join client.service_area w \n" +
                             "\t\ton p.wirecenter_id =  w.id\n" +
                             "\t inner join aro.locations l \n" +
                             "\t\ton ST_Contains(w.geom, l.geom)\n" +
@@ -82,7 +82,7 @@ public class BusinessesReportRepository {
                             "\tfrom client.plan p\n" +
                             "\tinner join plan_ids\n" +
                             "\ton p.id = plan_ids.id\n" +
-                            "\tinner join aro.wirecenters w \n" +
+                            "\tinner join client.service_area w \n" +
                             "\t\ton p.wirecenter_id =  w.id\n" +
                             "\t inner join aro.locations l \n" +
                             "\t\ton ST_Contains(w.geom, l.geom)\n" +
@@ -134,7 +134,7 @@ public class BusinessesReportRepository {
                             "\tfrom client.plan p\n" +
                             "\tinner join plan_ids\n" +
                             "\ton p.id = plan_ids.id\n" +
-                            "\tinner join aro.wirecenters w \n" +
+                            "\tinner join client.service_area w \n" +
                             "\t\ton p.wirecenter_id =  w.id\n" +
                             "\t inner join aro.locations l \n" +
                             "\t\ton ST_Contains(w.geom, l.geom)\n" +
@@ -183,7 +183,7 @@ public class BusinessesReportRepository {
                     "        from client.plan p \n" +
                     "        inner join plan_ids \n" +
                     "        on p.id = plan_ids.id \n" +
-                    "        inner join aro.wirecenters w  \n" +
+                    "        inner join client.service_area w  \n" +
                     "        on p.wirecenter_id =  w.id \n" +
                     "            inner join aro.locations l  \n" +
                     "        on ST_Contains(w.geom, l.geom) \n" +
