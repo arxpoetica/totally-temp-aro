@@ -413,13 +413,12 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/financial_profile/:plan_id/exportBusinesses', (request, response, next) => {
-    const distanceThresholds = request.query.distanceThresholds.map((value) => +value)
     var plan_id = request.params.plan_id
     var req = {
       method: 'POST',
       url: config.aro_service_url + '/rest/businesses',
       body: {
-        distanceThresholds: distanceThresholds,
+        distanceThresholds: [1609.34],
         locationSource: 'tam',
         mrcThreshold: 0,
         planId: plan_id

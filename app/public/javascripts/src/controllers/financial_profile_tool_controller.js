@@ -533,8 +533,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   $scope.downloadBusinesses = () => {
-    var query = $scope.routeOpportunitiesDistanceThresholds
-      .map((item) => `distanceThresholds=${item.value}`).join('&')
-    window.location.href = `/financial_profile/${$scope.plan.id}/exportBusinesses?${query}`
+    window.location.href = `/financial_profile/${$scope.plan.id}/exportBusinesses`
   }
 }])
