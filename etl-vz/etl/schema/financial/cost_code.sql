@@ -114,15 +114,13 @@ insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, de
 values (
 	(select id from financial.cost_code_type where name = 'material'),
 	(select id from aro.uom where name = 'unit_per_meter')
-	, 'planned_conduit', 'Planned Conduit) ;
+	, 'planned_conduit', 'Planned Conduit') ;
 
 insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
 	values (
 		(select id from financial.cost_code_type where name = 'material'),
 		(select id from aro.uom where name = 'unit_per_meter')
 		, 'fiber_obstacle', 'Fiber Obstacle') ;
-
-
 
 insert into financial.cost_code (cost_code_type_id, unit_of_measure_id, name, description)
 	values (

@@ -169,7 +169,7 @@ insert into financial.network_code_detail (network_cost_code_id, cost_code_id, u
 
 insert into financial.network_code_detail (network_cost_code_id, cost_code_id, uom_id, quantity, ratio_fixed_cost, comment)
 	values ((select id from financial.network_cost_code where name = 'backbone_fiber_planned_conduit'), 
-			(select id from financial.cost_code where name = 'fiber_planned_conduit'),
+			(select id from financial.cost_code where name = 'planned_conduit'),
 			(select id from aro.uom where name = 'unit_per_meter'),
 			1,  1.0, 'Backbone Planned Conduit') ;
 

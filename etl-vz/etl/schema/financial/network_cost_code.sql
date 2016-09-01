@@ -3,7 +3,7 @@
 DROP TABLE IF EXISTS "financial"."network_cost_code";
 CREATE TABLE "financial"."network_cost_code" (
 	"id" serial primary key,
-	"name" varchar(32) UNIQUE,
+	"name" varchar(64) UNIQUE,
 	"description" varchar(256)
 )
 WITH (OIDS=FALSE);
