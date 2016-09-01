@@ -148,7 +148,6 @@ module.exports = class Network {
         if (constraints.length > 0) {
           sql += ' WHERE ' + constraints.join(' AND ')
         }
-        console.log('sql', sql)
         return database.points(sql, params, true, viewport)
       })
   }
@@ -274,7 +273,7 @@ module.exports = class Network {
       locationTypes: _.compact(_.flatten(options.locationTypes.map((key) => locationTypes[key]))),
       algorithm: options.algorithm,
       analysisSelectionMode: options.selectionMode,
-      processLayers: [1] // wirecenter
+      processLayers: options.processingLayers
     }
     var req = {
       method: 'POST',
@@ -292,32 +291,48 @@ module.exports = class Network {
     ])
     .then(() => {
       if (options.geographies) {
-        var promises = options.geographies.map((geography) => {
+        var promises = []
+        options.geographies.forEach((geography) => {
           var type = geography.type
           var id = geography.id
           var params = [plan_id, geography.name, id, type]
           var queries = {
-            'wirecenter': '(SELECT geom FROM client.service_area WHERE id=$3::bigint)',
             'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
-            'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)'
+            'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)',
+            'cma_boundaries': '(SELECT the_geom FROM ref_boundaries.cma WHERE gid=$3::bigint)'
           }
-          var query = queries[type]
-          if (!query) {
+          var query
+          if (geography.geog) {
             params.push(JSON.stringify(geography.geog))
             query = `ST_GeomFromGeoJSON($${params.length})`
+          } else {
+            query = queries[type]
+            if (!query) {
+              params.push(type)
+              query = `
+                (
+                  SELECT geom
+                  FROM client.service_area
+                  JOIN client.service_layer
+                    ON service_area.service_layer_id = service_layer.id
+                  AND service_layer.name=$${params.length}
+                  WHERE service_area.id=$3::bigint
+                )
+              `
+              promises.push(
+                database.execute(`
+                  INSERT INTO client.selected_service_area (
+                    plan_id, service_area_id
+                  ) VALUES ($1, $2)
+                `, [plan_id, id])
+              )
+            }
           }
-          return database.execute(`
+          promises.push(database.execute(`
             INSERT INTO client.selected_regions (
               plan_id, region_name, region_id, region_type, geom
             ) VALUES ($1, $2, $3, $4, ${query})
-          `, params)
-            .then(() => (
-              database.execute(`
-                INSERT INTO client.selected_service_area (
-                  plan_id, service_area_id
-                ) VALUES ($1, $2)
-              `, [plan_id, id])
-            ))
+          `, params))
         })
         return Promise.all(promises)
       }
@@ -374,36 +389,54 @@ module.exports = class Network {
       ))
   }
 
-  static searchBoundaries (text) {
-    var sql = `
-      SELECT 'wirecenter:' || id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
-        FROM client.service_area
-       WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-         AND service_layer_id = (
-                SELECT id FROM client.service_layer WHERE name='wirecenter'
-             )
+  static searchBoundaries (text, types, viewport) {
+    var parts = []
+    var limit = 20
+    var params = [`%${text}%`]
 
-      UNION ALL
+    types.forEach((type) => {
+      if (type === 'cma_boundaries') {
+        parts.push(`
+          SELECT 'cma_boundary:' || gid AS id, name, ST_AsGeoJSON(the_geom)::json AS geog
+          FROM ref_boundaries.cma LIMIT ${limit}
+        `)
+      } else if (type === 'county_subdivision') {
+        parts.push(`
+          SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+            FROM aro.cousub
+           WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+                 ${database.intersects(viewport, 'geom', 'AND')}
+                 LIMIT ${limit}
+          `)
+      } else if (type === 'census_blocks') {
+        parts.push(`
+          SELECT 'census_block:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
+            FROM census_blocks
+           WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+                 ${database.intersects(viewport, 'geom', 'AND')}
+                 LIMIT ${limit}
+          `)
+      } else {
+        params.push(type)
+        parts.push(`
+          SELECT $${params.length} || ':' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+            FROM client.service_area
+            JOIN client.service_layer
+              ON service_area.service_layer_id = service_layer.id
+            AND service_layer.name=$${params.length}
+          WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+                ${database.intersects(viewport, 'geom', 'AND')}
+                LIMIT ${limit}
+          `)
+      }
+    })
 
-      SELECT 'census_block:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
-        FROM census_blocks
-       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+    if (parts.length === 0) {
+      return Promise.resolve([])
+    }
 
-      UNION ALL
-
-      SELECT 'custom_boundary:' || id AS id, name, ST_AsGeoJSON(geom)::json AS geog
-        FROM client.boundaries
-       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
-
-       UNION ALL
-
-      SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
-        FROM aro.cousub
-       WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
-
-      LIMIT 100
-    `
-    return database.query(sql, [`%${text}%`])
+    var sql = parts.map((sql) => `(${sql})`).join(' UNION ALL ')
+    return database.query(sql, params)
   }
 
   static importLocations (plan_id, file) {

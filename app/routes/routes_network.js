@@ -172,9 +172,12 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/search/boundaries', (request, response, next) => {
+  api.get('/search/boundaries', middleware.viewport, (request, response, next) => {
     var text = request.query.text
-    models.Network.searchBoundaries(text)
+    var viewport = request.viewport
+    var types = request.query.types
+    types = (Array.isArray(types) ? types : [types]).filter(Boolean)
+    models.Network.searchBoundaries(text, types, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

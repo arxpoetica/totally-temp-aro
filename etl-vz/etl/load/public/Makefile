@@ -1,4 +1,14 @@
 ###################
+# project ETL
+###################
+
+reset_project:
+
+# Load
+etl_project:
+	project/etl.sh
+
+###################
 # aro ETL
 ###################
 
@@ -76,8 +86,8 @@ etl_spend:
 # Master ETL
 ###################
 
-reset:reset: reset_cache reset_carriers reset_boundaries reset_spend reset_locations reset_equipment reset_aro
-load: etl_aro etl_carriers etl_boundaries etl_spend etl_locations etl_equipment etl_cache
+reset: reset_cache reset_carriers reset_boundaries reset_spend reset_locations reset_equipment reset_aro reset_project
+load: etl_project etl_aro etl_carriers etl_boundaries etl_spend etl_locations etl_equipment etl_cache
 
 
 etl_reload_all: reset load

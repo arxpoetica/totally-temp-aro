@@ -1,5 +1,4 @@
 DROP TABLE IF EXISTS project_constraints.spatial;
-
 CREATE TABLE project_constraints.spatial AS
 SELECT
 	 geom AS native_geom,

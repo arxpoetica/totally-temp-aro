@@ -57,14 +57,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' })
   }
 
-  $scope.view_node_types = []
+  var viewNodeTypes = []
   $scope.build_node_types = []
 
   $http.get('/network/nodes').success((response) => {
     response.forEach((node_type) => {
       // node_type.visible = true
     })
-    $scope.view_node_types = _.reject(response, (type) => {
+    viewNodeTypes = _.reject(response, (type) => {
       return config.ui.map_tools.equipment.view.indexOf(type.name) === -1
     })
     $scope.build_node_types = _.reject(response, (type) => {
@@ -146,11 +146,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     layer.networkNodesLayer = networkNodesLayer
     map_layers.addEquipmentLayer(networkNodesLayer)
 
+    layer.viewNodeTypes = viewNodeTypes.map((item) => Object.assign({}, item)) // clone
+
     layer.changeNodeTypesVisibility = () => {
       var types = []
-      $scope.view_node_types.forEach((node_type) => {
-        if (node_type.visible) {
-          types.push(node_type.name)
+      layer.viewNodeTypes.forEach((nodeType) => {
+        if (nodeType.visible) {
+          types.push(nodeType.name)
         }
       })
       if (types.length === 0) {
@@ -250,7 +252,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     changes.insertions.push({
       lat: coordinates.lat(),
       lon: coordinates.lng(),
-      type: _.findWhere($scope.view_node_types, { name: type }).id
+      type: _.findWhere(viewNodeTypes, { name: type }).id
     })
     var networkNodesLayer = $scope.serviceLayers[0].networkNodesLayer // TODO: use selected layer
     var dataLayer = networkNodesLayer.data_layer

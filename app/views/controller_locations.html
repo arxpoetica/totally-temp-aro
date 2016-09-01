@@ -1,4 +1,5 @@
 <div>
+
   <div class="modal" id="create-location" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -68,88 +69,121 @@
   <!-- Locations layer modal -->
   <div id="locations_controller">
     <form ng-hide="show_commercial && !show_residential">
-      <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimizeBusinesses" ng-change="changeOptimization()">
+      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial" class="customer-type shaded">
+        <div class="locations-filter" ng-show="selectedFilter === 'enterprise'">
+          <p class="text-center">...</p>
+        </div>
+        <div class="pull-right">
+          <a href="javascript:;" ng-click="toggleFilter('enterprise')" class="btn btn-default btn-xs locations-filter-btn">
+            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'enterprise'"></span>
+            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'enterprise'"></span>
+          </a>
+        </div>
+        <label class="pull-right">
+          <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
-        <% } %>
-        <label class="eye-control">
-          <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'"> Enterprise
-          <div class="eye-indicator"></div>
-        </label>
+        <label style="margin-left:25px">Enterprise</label>
       </div>
-      <div style="margin-left: 20px">
-        <div class="checkbox" ng-repeat="category in business_categories" ng-if="category.name !== 'small'">
-          <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_{{category.name}}_default.png" style="width:16px"></div>
-          <label class="eye-control">
-            <input type="checkbox" ng-model="business_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_businesses"> {{category.description}}
-            <div class="eye-indicator"></div>
+      <div class="customer-type">
+        <div ng-repeat="category in business_categories" ng-if="category.name !== 'small'">
+          <div class="pull-left">
+            <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_{{category.name}}_default.png" style="width:16px;margin-right:10px">
+          </div>
+          <label style="font-weight:normal">{{category.description}}</label>
+          <label class="pull-right" style="margin-right: 22px">
+            <input type="checkbox" ng-model="business_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_businesses">
           </label>
         </div>
       </div>
 
       <!-- Special case -->
-      <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimizeSMB" ng-change="changeOptimization()">
+      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial" class="customer-type shaded">
+        <div class="locations-filter" ng-show="selectedFilter === 'smb'">
+          <p class="text-center">...</p>
+        </div>
+        <div class="pull-right">
+          <a href="javascript:;" ng-click="toggleFilter('smb')" class="btn btn-default btn-xs locations-filter-btn">
+            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'smb'"></span>
+            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'smb'"></span>
+          </a>
+        </div>
+        <div class="pull-left">
+          <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px;margin-right:10px">
+        </div>
+        <label class="pull-right">
+          <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()">
         </label>
-        <% } %>
-        <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px"></div>
-        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
-          <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()"> SMB
-          <div class="eye-indicator"></div>
-        </label>
+        <label>SMB</label>
       </div>
       <!-- / Special case -->
 
       <!-- Special case -->
-      <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimize2kplus" ng-change="changeOptimization()">
+      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial" class="customer-type shaded">
+        <div class="locations-filter" ng-show="selectedFilter === '2kplus'">
+          <p class="text-center">...</p>
+        </div>
+        <div class="pull-right">
+          <a href="javascript:;" ng-click="toggleFilter('2kplus')" class="btn btn-default btn-xs locations-filter-btn">
+            <span class="fa fa-chevron-left" ng-show="selectedFilter === '2kplus'"></span>
+            <span class="fa fa-chevron-right" ng-show="selectedFilter !== '2kplus'"></span>
+          </a>
+        </div>
+        <div class="pull-left">
+          <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_2kplus_default.png" style="width:16px;margin-right:10px">
+        </div>
+        <label class="pull-right">
+          <input type="checkbox" ng-model="business_categories_selected['2kplus']" ng-change="changeLocationsLayer()">
         </label>
-        <% } %>
-        <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_2kplus_default.png" style="width:16px"></div>
-        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
-          <input type="checkbox" ng-model="business_categories_selected['2kplus']" ng-change="changeLocationsLayer()"> $2,000+ MRC Customers
-          <div class="eye-indicator"></div>
-        </label>
+        <label>$2,000+ MRC Customers</label>
       </div>
       <!-- / Special case -->
 
-      <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimizeHouseholds" ng-change="changeOptimization()">
+      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential" class="customer-type shaded">
+        <div class="locations-filter" ng-show="selectedFilter === 'residential'">
+          <p class="text-center">...</p>
+        </div>
+        <div class="pull-right">
+          <a href="javascript:;" ng-click="toggleFilter('residential')" class="btn btn-default btn-xs locations-filter-btn">
+            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'residential'"></span>
+            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'residential'"></span>
+          </a>
+        </div>
+        <label class="pull-right">
+          <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
-        <% } %>
-        <label class="eye-control">
-          <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'"> Residential
-          <div class="eye-indicator"></div>
-        </label>
+        <label style="margin-left:25px">Residential</label>
       </div>
-      <div style="margin-left: 20px">
-        <div class="checkbox" ng-repeat="category in household_categories">
-          <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px"></div>
-          <label class="eye-control">
-            <input type="checkbox" ng-model="household_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_households"> {{category.description}}
-            <div class="eye-indicator"></div>
+      <div class="customer-type">
+        <div ng-repeat="category in household_categories">
+          <div class="pull-left">
+            <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px;margin-right:10px">
+          </div>
+          <label class="pull-right" style="margin-right: 22px">
+            <!--
+            <input type="checkbox" ng-model="household_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_households">
+            -->
+            <input type="checkbox" ng-model="show_households" disabled>
           </label>
+          <label style="font-weight:normal">{{category.description}}</label>
         </div>
       </div>
-      <div class="checkbox" ng-class="{'disabled': overlay !== 'none'}">
-        <% if (config.ui.eye_checkboxes) { %>
-        <label class="eye-combo">
-          <input type="checkbox" ng-model="optimizeTowers" ng-change="changeOptimization()">
+      <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
+        <div class="locations-filter" ng-show="selectedFilter === 'towers'">
+          <p class="text-center">...</p>
+        </div>
+        <div class="pull-right">
+          <a href="javascript:;" ng-click="toggleFilter('towers')" class="btn btn-default btn-xs locations-filter-btn">
+            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'towers'"></span>
+            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'towers'"></span>
+          </a>
+        </div>
+        <div class="pull-left">
+          <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px;margin-right:10px">
+        </div>
+        <label class="pull-right">
+          <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'">
         </label>
-        <% } %>
-        <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px"></div>
-        <label class="eye-control" <% if (config.ui.eye_checkboxes) { %> style="padding-left:0" <% } %>>
-          <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'"> Towers
-          <div class="eye-indicator"></div>
-        </label>
+        <label>Towers</label>
       </div>
     </form>
 

@@ -26,7 +26,7 @@ exports.configure = (app, middleware) => {
 
   passport.deserializeUser((id, callback) => {
     models.User.find_by_id(id)
-      .then((user) => callback(null, user))
+      .then((user) => callback(null, user || null))
       .catch(callback)
   })
 

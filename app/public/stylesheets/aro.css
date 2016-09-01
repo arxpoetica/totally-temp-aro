@@ -540,3 +540,43 @@ footer nav {
 #serviceLayersAccordion .panel-body {
   padding: 5px 10px;
 }
+
+
+.locations-filter {
+  position: fixed;
+  padding: 30px;
+  background: white;
+  left: 370px;
+  width: 300px;
+  border: 1px solid #ddd;
+  border-left-style: none;
+}
+
+.locations-filter-btn, .locations-filter-btn:hover, .locations-filter-btn:focus, .locations-filter-btn:active {
+  margin-left: 3px;
+  background-color: #ddd !important;
+}
+
+.locations-filter-btn .fa {
+  text-shadow: none;
+}
+
+
+[ng-controller=locations_controller] .panel-body {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+[ng-controller=locations_controller] .panel-body .customer-type {
+  padding: 0 10px;
+  padding-top: 3px;
+  margin-top: 2px;
+}
+
+[ng-controller=locations_controller] .panel-body .shaded {
+  background-color: #eee;
+}
+
+[ng-controller=locations_controller] .alert {
+  margin: 10px;
+}

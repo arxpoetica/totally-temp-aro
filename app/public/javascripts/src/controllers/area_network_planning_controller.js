@@ -1,4 +1,4 @@
-/* global app swal $ config */
+/* global app swal $ config globalServiceLayers */
 // Search Controller
 app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', ($scope, $rootScope, $http, $q, map_tools, regions) => {
   // Controller instance variables
@@ -69,6 +69,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     })
   }
 
+  var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions']
+  globalServiceLayers.forEach((layer) => {
+    standardTypes.push(layer.name)
+  })
+
   $scope.run = () => {
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
@@ -84,7 +89,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       geographies: regions.selectedRegions.map((i) => {
         var info = { name: i.name, id: i.id, type: i.type }
         // geography information may be too large so we avoid to send it for known region types
-        if (['wirecenter', 'census_blocks', 'county_subdivisions'].indexOf(i.type) === -1) {
+        if (standardTypes.indexOf(i.type) === -1) {
           info.geog = i.geog
         }
         return info
@@ -92,7 +97,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       algorithm: $scope.optimizationType,
       budget: parseBudget(),
       irrThreshold: $scope.irrThreshold / 100,
-      selectionMode: 'SELECTED_AREAS'
+      selectionMode: 'SELECTED_AREAS',
+      processingLayers: regions.getSelectedServiceAreas().map((layer) => layer.id)
     }
 
     if (algorithm === 'CAPEX') {
