@@ -1,25 +1,22 @@
--- Table: aro.edges
--- Edges stored with additional geographic/geometric data for dramatically faster computations
--- ----------------------------
---  Table structure for edges
--- ----------------------------
-DROP TABLE IF EXISTS "aro"."edges";
-CREATE TABLE "aro"."edges" (
-    "gid" int4 NOT NULL,
-    "tlid" int8,
-    "tnidf" numeric(10,0),
-    "tnidt" numeric(10,0),
-    "statefp" varchar(2) COLLATE "default",
-    "countyfp" varchar(3) COLLATE "default",
-    "edge_length" float8,
-    "geom" "public"."geometry",
-    "geog" "public"."geography",
-    "buffer" "public"."geometry"
-) ;
+DROP TABLE IF EXISTS aro.edges CASCADE;
 
-ALTER TABLE aro.edges
-    ADD CONSTRAINT pkey_aro_edges_gid
-        PRIMARY KEY (gid);
+-- EDGES
+CREATE TABLE aro.edges (
+    gid INTEGER,
+    statefp varchar,
+    countyfp varchar,
+    tlid bigint,
+    tnidf numeric,
+    tnidt numeric,
+    edge_type text,
+    edge_length float,
+    geog Geography(MULTILINESTRING, 4326),
+    
+    CONSTRAINT pkey_aro_edges_gid PRIMARY KEY (gid)
+);
+
+SELECT AddGeometryColumn('aro', 'edges', 'geom', 4326, 'MULTILINESTRING', 2);
+SELECT AddGeometryColumn('aro', 'edges', 'buffer', 4326, 'GEOMETRY', 2);
 
 CREATE INDEX idx_aro_edges_geom_gist ON aro.edges USING gist(geom);
 CREATE INDEX idx_aro_edges_geog_gist ON aro.edges USING gist(geog);
