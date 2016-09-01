@@ -18,13 +18,13 @@ public interface ServiceAreaRepository extends
 	
 	@Query(value = 
 			"SELECT distinct\n" + 
-			"	sa.id AS service_area_id\n" + 
+			"	sa.*\n" + 
 			"FROM client.plan mp\n" + 
 			"JOIN client.service_area sa\n" + 
 			"	ON sa.service_type  = 'A'\n" + 
 			"	AND sa.service_layer_id = mp.service_layer_id\n" + 
 			"	AND  ST_Contains(mp.area_bounds, sa.geom)\n" + 
-			"	AND mp.id = :planId;", nativeQuery = true)
+			"	AND mp.id = :planId", nativeQuery = true)
 	@Transactional
 	Collection<ServiceArea> querySelectedServiceAreas(
 			@Param("planId") long planId);
