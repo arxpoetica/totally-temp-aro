@@ -1,4 +1,4 @@
-/* global app _ config */
+/* global app config */
 app.controller('legend-controller', ['$scope', '$http', ($scope, $http) => {
   $scope.expanded = false
   $scope.ARO_CLIENT = config.ARO_CLIENT

@@ -421,7 +421,7 @@ exports.configure = (api, middleware) => {
       body: {
         distanceThresholds: distanceThresholds,
         locationSource: 'tam',
-        mrcThreshold: 1609.34, // 1 mile
+        mrcThreshold: 0,
         planId: plan_id
       },
       json: true

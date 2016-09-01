@@ -46,6 +46,7 @@
     "ejs": "^2.3.3",
     "express": "^4.13.1",
     "express-flash": "0.0.2",
+    "gm": "^1.23.0",
     "moment": "^2.10.6",
     "node-cache": "^3.0.0",
     "node-errors": "^0.2.0",
