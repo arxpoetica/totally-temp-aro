@@ -94,28 +94,6 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		return networkData;
 	}
 
-	private NetworkData loadNetworkData(NetworkDataRequest request) {
-
-		NetworkData networkData = new NetworkData();
-
-		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
-
-		networkData.setCompetitiveDemandMapping(new CompetitiveDemandMapping(
-				demandByLocationIdMap));
-
-		// TODO Simplify Locations
-		NetworkAssignmentModel networkModel = getNetworkLocations(
-				request, demandByLocationIdMap);
-
-		networkData.setRoadLocations(networkModel);
-
-		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
-		networkData.setRoadEdges(getRoadEdges(request));
-		networkData.setCableConduitEdges(queryCableConduitEdges(request));
-
-		return networkData;
-	}
-
 	// private CompetitiveLocationDemandMapping aggregate(
 	// Collection<CompetitiveLocationDemandMapping> demandMapping) {
 	//
