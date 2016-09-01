@@ -11,7 +11,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 ${PSQL} -a -f $DIR/create_infousa_businesses.sql
 
 # Use lower case state names. FIPS codes unnecessary here as well.
-declare -a STATE_ARRAY=( 'il' 'mo' 'wa' )
+declare -a STATE_ARRAY=( 'ny' 'wa' )
 
 cd $GISROOT;
 
@@ -20,7 +20,7 @@ do
 	rm -f ${TMPDIR}/*.*
 	aws s3 cp s3://public.aro/infousa/businesses_${STATE}.zip $GISROOT/businesses_${STATE}.zip
 	$UNZIPTOOL businesses_${STATE}.zip -d ${TMPDIR}
-	cat /$TMPDIR/businesses_${STATE}.csv | ${PSQL} -a -c "COPY ref_businesses.infousa FROM STDIN DELIMITER ',' CSV HEADER;"
+	cat /$TMPDIR/businesses_${STATE}.csv | ${PSQL} -a -c "COPY ref_businesses_data.infousa_${STATE} FROM STDIN DELIMITER ',' CSV HEADER;"
 done
 
 # Optimize buisnesses table
