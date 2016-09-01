@@ -267,21 +267,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function showBudgetChart (force) {
-    var datasets = [
-      { key: 'budget', name: 'Budget' },
-      { key: 'plan', name: 'Plan' }
-    ]
-    request(force, 'budget', {}, (budget) => {
-      var data = buildChartData(budget, datasets)
-      var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
-      }
-      showChart('financial-profile-chart-budget', 'Bar', data, options)
-    })
-  }
-
   function showCapexChart (force) {
     var datasets = [
       { key: 'network_deployment', name: 'Network Deployment' },
@@ -533,7 +518,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
     .success((response) => {
       $scope.routeOpportunities = response
-      console.log('response', response)
     })
   }
 
@@ -549,7 +533,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   $scope.downloadBusinesses = () => {
-    var query = Object.keys($scope.routeOpportunitiesDistanceThresholds)
+    var query = $scope.routeOpportunitiesDistanceThresholds
       .map((item) => `distanceThresholds=${item.value}`).join('&')
     window.location.href = `/financial_profile/${$scope.plan.id}/exportBusinesses?${query}`
   }

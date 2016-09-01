@@ -158,20 +158,6 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  // Network node types
-  api.get('/network/nodes', (request, response, next) => {
-    models.Network.viewNetworkNodeTypes()
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  // Network service layers
-  api.get('/network/layers', (request, response, next) => {
-    models.Network.viewServiceLayers()
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
   api.get('/search/boundaries', middleware.viewport, (request, response, next) => {
     var text = request.query.text
     var viewport = request.viewport
