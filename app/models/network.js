@@ -4,6 +4,7 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var cache = helpers.cache
 var _ = require('underscore')
 var config = helpers.config
 var models = require('./')
@@ -243,7 +244,6 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
-    console.log('options', options)
     var locationTypes = {
       households: 'household',
       businesses: ['medium', 'large'],
@@ -263,8 +263,7 @@ module.exports = class Network {
       planId: plan_id,
       locationTypes: _.compact(_.flatten(options.locationTypes.map((key) => locationTypes[key]))),
       algorithm: options.algorithm,
-      analysisSelectionMode: options.selectionMode,
-      processLayers: options.processingLayers
+      analysisSelectionMode: options.selectionMode
     }
     var req = {
       method: 'POST',
@@ -278,7 +277,8 @@ module.exports = class Network {
     if (options.irrThreshold) body.threshold = options.irrThreshold
     return Promise.all([
       database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
-      database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id])
+      database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
+      database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id])
     ])
     .then(() => {
       if (options.geographies) {
@@ -289,35 +289,54 @@ module.exports = class Network {
           var params = [plan_id, geography.name, id, type]
           var queries = {
             'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
-            'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)',
-            'cma_boundaries': '(SELECT the_geom FROM ref_boundaries.cma WHERE gid=$3::bigint)'
+            'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)'
           }
+          var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
+          var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type)
           var query
-          if (geography.geog) {
+          if (isAnalysisLayer) {
+            params.push(type)
+            query = `
+              (
+                SELECT geom
+                FROM client.analysis_area
+                JOIN client.analysis_layer
+                  ON analysis_area.analysis_layer_id = analysis_layer.id
+                AND analysis_layer.name=$${params.length}
+                WHERE analysis_area.id=$3::bigint
+              )
+            `
+            promises.push(
+              database.execute(`
+                INSERT INTO client.selected_analysis_area (
+                  plan_id, analysis_area_id
+                ) VALUES ($1, $2)
+              `, [plan_id, id])
+            )
+          } else if (isServiceLayer) {
+            params.push(type)
+            query = `
+              (
+                SELECT geom
+                FROM client.service_area
+                JOIN client.service_layer
+                  ON service_area.service_layer_id = service_layer.id
+                AND service_layer.name=$${params.length}
+                WHERE service_area.id=$3::bigint
+              )
+            `
+            promises.push(
+              database.execute(`
+                INSERT INTO client.selected_service_area (
+                  plan_id, service_area_id
+                ) VALUES ($1, $2)
+              `, [plan_id, id])
+            )
+          } else if (geography.geog) {
             params.push(JSON.stringify(geography.geog))
             query = `ST_GeomFromGeoJSON($${params.length})`
           } else {
             query = queries[type]
-            if (!query) {
-              params.push(type)
-              query = `
-                (
-                  SELECT geom
-                  FROM client.service_area
-                  JOIN client.service_layer
-                    ON service_area.service_layer_id = service_layer.id
-                  AND service_layer.name=$${params.length}
-                  WHERE service_area.id=$3::bigint
-                )
-              `
-              promises.push(
-                database.execute(`
-                  INSERT INTO client.selected_service_area (
-                    plan_id, service_area_id
-                  ) VALUES ($1, $2)
-                `, [plan_id, id])
-              )
-            }
           }
           promises.push(database.execute(`
             INSERT INTO client.selected_regions (
@@ -386,12 +405,7 @@ module.exports = class Network {
     var params = [`%${text}%`]
 
     types.forEach((type) => {
-      if (type === 'cma_boundaries') {
-        parts.push(`
-          SELECT 'cma_boundary:' || gid AS id, name, ST_AsGeoJSON(the_geom)::json AS geog
-          FROM ref_boundaries.cma LIMIT ${limit}
-        `)
-      } else if (type === 'county_subdivision') {
+      if (type === 'county_subdivision') {
         parts.push(`
           SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
             FROM aro.cousub
@@ -408,17 +422,35 @@ module.exports = class Network {
                  LIMIT ${limit}
           `)
       } else {
-        params.push(type)
-        parts.push(`
-          SELECT $${params.length} || ':' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
-            FROM client.service_area
-            JOIN client.service_layer
-              ON service_area.service_layer_id = service_layer.id
-            AND service_layer.name=$${params.length}
-          WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-                ${database.intersects(viewport, 'geom', 'AND')}
-                LIMIT ${limit}
-          `)
+        var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
+        var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type)
+        if (isServiceLayer) {
+          params.push(type)
+          parts.push(`
+            SELECT $${params.length} || ':' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+              FROM client.service_area
+              JOIN client.service_layer
+                ON service_area.service_layer_id = service_layer.id
+              AND service_layer.name=$${params.length}
+            WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+                  ${database.intersects(viewport, 'geom', 'AND')}
+                  LIMIT ${limit}
+            `)
+        } else if (isAnalysisLayer) {
+          params.push(type)
+          parts.push(`
+            SELECT $${params.length} || ':' || analysis_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+              FROM client.analysis_area
+              JOIN client.analysis_layer
+                ON analysis_area.analysis_layer_id = analysis_layer.id
+              AND analysis_layer.name=$${params.length}
+            WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+                  ${database.intersects(viewport, 'geom', 'AND')}
+                  LIMIT ${limit}
+            `)
+        } else {
+          console.warn('Unknown boundary type', type)
+        }
       }
     })
 

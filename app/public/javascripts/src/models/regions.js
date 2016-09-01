@@ -114,9 +114,14 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
 
           var sections = [
             { prefix: 'census_block', name: 'Census Blocks' },
-            { prefix: 'county', name: 'County Subdivisions' },
-            { prefix: 'cma_boundary', name: 'CMA boundaries' }
+            { prefix: 'county', name: 'County Subdivisions' }
           ]
+          globalAnalysisLayers.forEach((layer) => {
+            sections.push({
+              prefix: layer.name,
+              name: layer.description
+            })
+          })
           globalServiceLayers.forEach((layer) => {
             sections.push({
               prefix: layer.name,

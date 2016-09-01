@@ -18,12 +18,15 @@ module.exports = class Wirecenter {
     return database.polygons(sql, [type], true, viewport)
   }
 
-  static findCMA (viewport) {
+  static findAnalysisAreas (viewport, type) {
     var sql = `
-      SELECT gid AS id, the_geom AS geom, name
-      FROM ref_boundaries.cma
+      SELECT analysis_area.id, geom, code AS name
+        FROM client.analysis_area
+        JOIN client.analysis_layer
+          ON analysis_area.analysis_layer_id = analysis_layer.id
+        AND analysis_layer.name=$1
     `
-    return database.polygons(sql, [], true, viewport)
+    return database.polygons(sql, [type], true, viewport)
   }
 
 }
