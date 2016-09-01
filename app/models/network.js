@@ -152,15 +152,6 @@ module.exports = class Network {
       })
   }
 
-  // View all the available network node types
-  static viewNetworkNodeTypes () {
-    return database.query('SELECT * FROM client.network_node_types')
-  }
-
-  static viewServiceLayers () {
-    return database.query('SELECT * FROM client.service_layer')
-  }
-
   static editNetworkNodes (plan_id, changes) {
     return Promise.resolve()
       .then(() => this._addNodes(plan_id, changes.insertions))
