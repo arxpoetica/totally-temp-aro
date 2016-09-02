@@ -1,4 +1,4 @@
-/* global app user_id config map _ google swal config $ */
+/* global app user_id config map _ google swal config $ globalServiceLayers */
 // Equipment Nodes Controller
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', '$timeout', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, $timeout) => {
   // Controller instance variables
@@ -57,35 +57,21 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' })
   }
 
-  var viewNodeTypes = []
-  $scope.build_node_types = []
-
-  $http.get('/network/nodes').success((response) => {
-    response.forEach((node_type) => {
-      // node_type.visible = true
-    })
-    viewNodeTypes = _.reject(response, (type) => {
-      return config.ui.map_tools.equipment.view.indexOf(type.name) === -1
-    })
-    $scope.build_node_types = _.reject(response, (type) => {
-      return config.ui.map_tools.equipment.build.indexOf(type.name) === -1
-    })
+  $(document).ready(() => {
     map.ready(() => {
-      $http.get('/network/layers').success((response) => {
-        $scope.serviceLayers = response
-        if ($scope.serviceLayers.length > 0) {
-          var layer = $scope.serviceLayers[0]
-          layer.enabled = true
-          $timeout(() => {
-            $(`#serviceLayer${layer.id}`).addClass('in')
-            $scope.serviceLayers.slice(1).forEach((layer) => {
-              $(`#serviceLayer${layer.id}`).addClass('disabled')
-            })
-          }, 1)
-        }
-        $scope.serviceLayers.forEach((layer) => {
-          configureServiceLayer(layer)
-        })
+      $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)) // clone
+      if ($scope.serviceLayers.length > 0) {
+        var layer = $scope.serviceLayers[0]
+        layer.enabled = true
+        $timeout(() => {
+          $(`#serviceLayer${layer.id}`).addClass('in')
+          $scope.serviceLayers.slice(1).forEach((layer) => {
+            $(`#serviceLayer${layer.id}`).addClass('disabled')
+          })
+        }, 1)
+      }
+      $scope.serviceLayers.forEach((layer) => {
+        configureServiceLayer(layer)
       })
     })
   })
@@ -135,7 +121,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       declarativeStyles: (feature, styles) => {
         var name = feature.getProperty('name')
         if (name) {
-          styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${name}.png`
+          styles.icon = `/images/map_icons/${config.ARO_CLIENT}/composite/${layer.name}_${name}.png`
         } else {
           styles.icon = { path: 0, scale: 3, strokeColor: 'brown' }
         }
@@ -146,13 +132,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     layer.networkNodesLayer = networkNodesLayer
     map_layers.addEquipmentLayer(networkNodesLayer)
 
-    layer.viewNodeTypes = viewNodeTypes.map((item) => Object.assign({}, item)) // clone
-
     layer.changeNodeTypesVisibility = () => {
       var types = []
-      layer.viewNodeTypes.forEach((nodeType) => {
+      layer.nodeTypes.forEach((nodeType) => {
         if (nodeType.visible) {
-          types.push(nodeType.name)
+          types.push(nodeType.id)
         }
       })
       if (types.length === 0) {

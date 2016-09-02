@@ -1,6 +1,8 @@
-/* global app $ */
+/* global app $ globalServiceLayers */
 // Navigation Menu Controller
 app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter', '$timeout', ($scope, $rootScope, $http, $filter, $timeout) => {
+  $scope.serviceLayers = globalServiceLayers
+
   function fetchApplicationSettings () {
     $http.get('/admin/settings')
       .success((response) => {
@@ -10,10 +12,12 @@ app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter
         $timeout(() => {
           const parseCost = (input) => +(input.val() || '0').match(/[\d\.]/g).join('') || 0
 
-          $('#application-settings .format-currency')
+          $('#application-settings input, #application-settings select')
             .on('focus', function () {
               var input = $(this)
-              input.val(parseCost(input).toFixed(2))
+              if (input.hasClass('format-currency')) {
+                input.val(parseCost(input).toFixed(2))
+              }
             })
             .on('change', function () {
               var input = $(this)
@@ -24,11 +28,17 @@ app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter
               $scope.changes[tab] = obj
               var values = obj[id] || {}
               obj[id] = values
-              values[field] = parseCost(input)
+              if (input.hasClass('format-currency')) {
+                values[field] = parseCost(input)
+              } else {
+                values[field] = input.val()
+              }
             })
             .on('blur', function () {
               var input = $(this)
-              input.val($filter('number')(parseCost(input), 2))
+              if (input.hasClass('format-currency')) {
+                input.val($filter('number')(parseCost(input), 2))
+              }
             })
         }, 0)
       })
@@ -37,6 +47,7 @@ app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter
   $('#application-settings').on('shown.bs.modal', fetchApplicationSettings)
 
   $scope.updateSettings = () => {
+    console.log('changes', $scope.changes)
     $http.post('/admin/settings', $scope.changes).success((response) => {
       $scope.changes = {}
       $('#application-settings').modal('hide')

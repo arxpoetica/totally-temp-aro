@@ -229,7 +229,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 					if (isValidPath(path)) {
 						shortedPath = paths.getGraphPath(source);
 						shortestPathLength = sourceWeight;
-					}
+					} 
 				}
 			}
 		}

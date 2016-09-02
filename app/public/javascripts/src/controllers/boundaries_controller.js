@@ -1,4 +1,4 @@
-/* global $ app user_id swal _ google map config */
+/* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
 app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions) => {
   $scope.map_tools = map_tools
@@ -17,36 +17,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
   // --
 
-  var wirecentersLayer
   var countySubdivisionsLayer
   var censusBlocksLayer
   var cmaBoundariesLayer
-  var directionalFacilities
-
-  if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
-    wirecentersLayer = new MapLayer({
-      short_name: 'WC',
-      name: config.ui.labels.wirecenter,
-      type: 'wirecenter',
-      api_endpoint: '/wirecenters',
-      highlighteable: true,
-      style_options: {
-        normal: {
-          strokeColor: '#00ff00',
-          strokeWeight: 4,
-          fillOpacity: 0
-        },
-        highlight: {
-          strokeColor: '#00ff00',
-          strokeWeight: 6,
-          fillOpacity: 0.1
-        }
-      },
-      reload: 'always',
-      threshold: 0,
-      minZoom: 6
-    })
-  }
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
     countySubdivisionsLayer = new MapLayer({
@@ -105,55 +78,69 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  cmaBoundariesLayer = new MapLayer({
-    short_name: 'CM',
-    name: 'CMA boundaries',
-    type: 'cma_boundaries',
-    api_endpoint: '/cma_boundaries',
-    style_options: {
-      normal: {
-        fillColor: 'coral',
-        strokeColor: 'coral',
-        strokeWeight: 2
-      },
-      highlight: {
-        fillColor: 'coral',
-        strokeColor: 'coral',
-        strokeWeight: 2
-      }
-    },
-    reload: 'always',
-    threshold: 0
-  })
-
-  directionalFacilities = new MapLayer({
-    short_name: 'DF',
-    name: 'Directional Facilities',
-    type: 'directional_facilities',
-    api_endpoint: '/directional_facilities',
-    style_options: {
-      normal: {
-        fillColor: 'darkcyan',
-        strokeColor: 'darkcyan',
-        strokeWeight: 2
-      },
-      highlight: {
-        fillColor: 'darkcyan',
-        strokeColor: 'darkcyan',
-        strokeWeight: 2
-      }
-    },
-    reload: 'always',
-    threshold: 0
-  })
-
   $scope.areaLayers = [
     censusBlocksLayer,
     countySubdivisionsLayer,
-    wirecentersLayer,
-    cmaBoundariesLayer,
-    directionalFacilities
+    cmaBoundariesLayer
   ].filter((layer) => layer)
+
+  var analysisLayersColors = [
+    'coral'
+  ]
+
+  globalAnalysisLayers.forEach((analysisLayer) => {
+    var color = analysisLayersColors.shift() || 'black'
+    var layer = new MapLayer({
+      name: analysisLayer.description,
+      type: analysisLayer.name,
+      api_endpoint: `/analysis_areas/${analysisLayer.name}`,
+      style_options: {
+        normal: {
+          fillColor: color,
+          strokeColor: color,
+          strokeWeight: 2
+        },
+        highlight: {
+          fillColor: color,
+          strokeColor: color,
+          strokeWeight: 2
+        }
+      },
+      reload: 'always',
+      threshold: 0
+    })
+    $scope.areaLayers.push(layer)
+  })
+
+  var serviceLayersColors = [
+    '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
+  ]
+
+  globalServiceLayers.forEach((serviceLayer) => {
+    var color = serviceLayersColors.shift() || 'black'
+    var layer = new MapLayer({
+      name: serviceLayer.description,
+      type: serviceLayer.name,
+      api_endpoint: `/service_areas/${serviceLayer.name}`,
+      highlighteable: true,
+      style_options: {
+        normal: {
+          strokeColor: color,
+          strokeWeight: 4,
+          fillOpacity: 0
+        },
+        highlight: {
+          strokeColor: color,
+          strokeWeight: 6,
+          fillOpacity: 0.1
+        }
+      },
+      reload: 'always',
+      threshold: 0,
+      minZoom: 6
+    })
+    $scope.areaLayers.push(layer)
+  })
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
@@ -469,7 +456,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $rootScope.$on('financial_profile_changed_mode', (e, mode) => {
     if (mode === 'area') {
-      wirecentersLayer && wirecentersLayer.show()
+      // wirecentersLayer && wirecentersLayer.show()
     }
   })
 

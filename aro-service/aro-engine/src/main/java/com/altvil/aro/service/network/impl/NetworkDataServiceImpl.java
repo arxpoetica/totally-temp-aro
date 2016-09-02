@@ -50,10 +50,10 @@ import com.altvil.utils.conversion.OrdinalEntityFactory;
 
 public class NetworkDataServiceImpl implements NetworkDataService {
 
-	
+
 	private NetworkDataLoader networkDataLoader ;
-	
-	
+
+
 	private static final Logger LOG = LoggerFactory
 			.getLogger(NetworkServiceImpl.class.getName());
 
@@ -174,6 +174,76 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	}
 
 
+	private Collection<RoadEdge> getRoadEdges(
+			NetworkDataRequest networkConfiguration) {
+		return planRepository
+				.queryRoadEdgesbyPlanId(networkConfiguration.getPlanId())
+				.stream()
+				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+				.map(result -> {
+					try {
+						return new RoadEdgeImpl(result
+								.getLong(RoadEdgeMap.tlid), result
+								.getLong(RoadEdgeMap.tnidf), result
+								.getLong(RoadEdgeMap.tnidt), result
+								.getGeometry(RoadEdgeMap.shape), result
+								.getDouble(RoadEdgeMap.edge_length));
+					} catch (Exception err) {
+						LOG.error(result.toString());
+						LOG.error(err.getMessage(), err);
+						return null;
+					}
+				}).filter(e -> e != null).collect(Collectors.toList());
+	}
+
+	private enum ConduitEdgeMap implements OrdinalAccessor {
+		gid, constructionType, startRatio, endRatio
+	}
+	
+	
+	private Collection<CableConduitEdge> queryCableConduitEdges(
+			NetworkDataRequest networkConfiguration) {
+		Collection<CableConduitEdge> existing = queryExistingCableConduitEdges(networkConfiguration) ;
+		
+		if( networkConfiguration.isQueryPlanConduit() ) {
+			existing.addAll(queryPlanConditEdges(networkConfiguration)) ;
+		}
+		
+		return existing ;
+	}
+	
+	
+	private Collection<CableConduitEdge> queryPlanConditEdges(NetworkDataRequest networkConfiguration) {
+		return planRepository
+				.queryPlanConduitSections(networkConfiguration.getPlanId())
+				.stream()
+				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+				.map(result -> {
+					return new CableConduitEdgeImpl(
+							result.getLong(ConduitEdgeMap.gid),
+							cableConstructionEnumMap.get(result
+									.getInteger(ConduitEdgeMap.constructionType)),
+							result.getDouble(ConduitEdgeMap.startRatio), result
+									.getDouble(ConduitEdgeMap.endRatio));
+				}).collect(Collectors.toList());
+	}
+
+	private Collection<CableConduitEdge> queryExistingCableConduitEdges(
+			NetworkDataRequest networkConfiguration) {
+		return planRepository
+				.queryConduitSections(networkConfiguration.getPlanId())
+				.stream()
+				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+				.map(result -> {
+					return new CableConduitEdgeImpl(
+							result.getLong(ConduitEdgeMap.gid),
+							cableConstructionEnumMap.get(result
+									.getInteger(ConduitEdgeMap.constructionType)),
+							result.getDouble(ConduitEdgeMap.startRatio), result
+									.getDouble(ConduitEdgeMap.endRatio));
+				}).collect(Collectors.toList());
+
+	}
 
 	// private class LocationDemandAnalysisImpl implements
 	// LocationDemandAnalysis {

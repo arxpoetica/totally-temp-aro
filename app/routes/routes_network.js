@@ -158,26 +158,19 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  // Network node types
-  api.get('/network/nodes', (request, response, next) => {
-    models.Network.viewNetworkNodeTypes()
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  // Network service layers
-  api.get('/network/layers', (request, response, next) => {
-    models.Network.viewServiceLayers()
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
   api.get('/search/boundaries', middleware.viewport, (request, response, next) => {
     var text = request.query.text
     var viewport = request.viewport
     var types = request.query.types
     types = (Array.isArray(types) ? types : [types]).filter(Boolean)
     models.Network.searchBoundaries(text, types, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/network/road_segments', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    models.Network.roadSegments(viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

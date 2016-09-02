@@ -1,4 +1,4 @@
-/* global app map google $ config */
+/* global app map google $ config globalServiceLayers */
 app.service('regions', ($rootScope, $timeout, map_tools) => {
   var regions = { selectedRegions: [] }
   var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
@@ -114,11 +114,20 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
 
           var sections = [
             { prefix: 'census_block', name: 'Census Blocks' },
-            { prefix: 'county', name: 'County Subdivisions' },
-            { prefix: 'wirecenter', name: 'Wirecenter' },
-            { prefix: 'cma_boundary', name: 'CMA boundaries' },
-            { prefix: 'directional_facility', name: 'Directional Facilities' }
+            { prefix: 'county', name: 'County Subdivisions' }
           ]
+          globalAnalysisLayers.forEach((layer) => {
+            sections.push({
+              prefix: layer.name,
+              name: layer.description
+            })
+          })
+          globalServiceLayers.forEach((layer) => {
+            sections.push({
+              prefix: layer.name,
+              name: layer.description
+            })
+          })
 
           var results = sections.map((section) => ({
             text: section.name,
@@ -174,6 +183,10 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
   regions.setSearchOption = (type, enabled) => {
     searchOptions[type] = enabled
     configureSearch()
+  }
+
+  regions.getSelectedServiceAreas = () => {
+    return globalServiceLayers.filter((layer) => searchOptions[layer.name])
   }
 
   return regions

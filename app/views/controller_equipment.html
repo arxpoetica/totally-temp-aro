@@ -1,56 +1,4 @@
 <div id="equipment_nodes_controller">
-  <% if (config.ARO_CLIENT === 'verizon') { %>
-  <div class="row">
-    <div class="col-md-2">
-      <p style="margin-top: 10px"><strong>LOB</strong></p>
-    </div>
-    <div class="col-md-5">
-      <div class="checkbox">
-        <label>
-          <input type="checkbox" ng-model="vztfttp" ng-change="vztfttpChanged()"> VZT FTTP
-        </label>
-      </div>
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> VZT Core
-        </label>
-      </div>
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> VZB Owned
-        </label>
-      </div>
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> VZB Leased
-        </label>
-      </div>
-    </div>
-    <div class="col-md-5" style="padding-left: 0">
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> Wireless Owned
-        </label>
-      </div>
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> Wireless Leased
-        </label>
-      </div>
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> XO Owned
-        </label>
-      </div>
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> XO Leased
-        </label>
-      </div>
-    </div>
-  </div>
-  <% } %>
-
   <div class="row">
     <div class="col-md-2">
       <p style="margin-top: 10px"><strong>Asset Type</strong></p>
@@ -91,11 +39,11 @@
           </div>
           <div id="serviceLayer{{serviceLayer.id}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
             <div class="panel-body" style="border-top: none">
-              <div ng-repeat="nodeType in serviceLayer.viewNodeTypes">
-                <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{nodeType.name}}.png" style="width:16px"></div>
+              <div ng-repeat="nodeType in serviceLayer.nodeTypes">
+                <div class="pull-right"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/composite/{{serviceLayer.name}}_{{nodeType.name}}.png" style="width:16px"></div>
                 <div class="checkbox" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label class="eye-control">
-                    <input type="checkbox" ng-model="nodeType.visible" ng-change="serviceLayer.changeNodeTypesVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled"> {{nodeType.description}}
+                    <input type="checkbox" ng-model="nodeType.visible" ng-change="serviceLayer.changeNodeTypesVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled"> {{nodeType.service_layer_node_name}}
                     <div class="eye-indicator"></div>
                   </label>
                 </div>

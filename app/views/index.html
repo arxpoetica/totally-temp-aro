@@ -360,6 +360,8 @@
 
     var user_id = <%= user.id %>;
     var config = <%- JSON.stringify(config) %>;
+    var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
+    var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;
 
     $(document).ready(initialize);
   </script>

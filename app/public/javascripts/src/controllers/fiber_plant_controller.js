@@ -64,6 +64,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
       layers[key].remove()
     })
     layers = {}
+    $scope.clearNbmCarrier()
     if (!plan) return
     $scope.plan = plan
 
@@ -168,8 +169,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
 
   $scope.nbmCarrierChanged = () => {
     var layer = $scope.nbmLayer
-    if (layer && !$scope.nbmCarrier) {
-      return layer.hide()
+    if (!$scope.nbmCarrier || !$scope.nbmCarrier.id) {
+      if (layer) return layer.hide()
+      return
     }
     var endpoint = `/census_blocks/${$scope.nbmCarrier.id}`
     if (!layer) {
