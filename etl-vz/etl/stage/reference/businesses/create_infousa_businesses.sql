@@ -25,20 +25,13 @@ familymsas integer,
 geog geography (POINT, 4326) 
 );
 
+CREATE INDEX ref_businesses_infousa_geog_gist ON ref_businesses.infousa USING gist (geog);
+CREATE INDEX ref_businesses_infousa_sic4 ON ref_businesses.infousa USING btree (sic4);
+
 DO $$
 DECLARE
     all_states text[][] := array[['NY', '36'], ['WA', '53']];
     state text[];
-    expr text;
-    expr2 text;
-    expr_start timestamp;
-    state_start timestamp;
-    expr_result record;
-    i_rows INTEGER;
-    current_table text;
-    current_source_table text;
-    current_table_suffix text;
-    current_table_as_text text;
 
 BEGIN
     
@@ -50,11 +43,15 @@ BEGIN
         RAISE NOTICE '*** CURRENT STATE: %', state[1];
 
         current_table := 'ref_businesses_data.infousa_' || lower(state[1]);
-        state_start := timeofday()::timestamp;
         
         RAISE NOTICE '**** CREATING TABLE ****';
-        expr := 'CREATE TABLE ' || current_table || ' (CHECK (state = ''' || state[1] || ''')) INHERITS (ref_businesses.infousa);';
-        RAISE NOTICE 'Executing %', expr;
-        EXECUTE expr;
+        EXECUTE 'CREATE TABLE ' || current_table || ' (CHECK (state = ''' || state[1] || ''')) INHERITS (ref_businesses.infousa);';
+
+        RAISE NOTICE '**** CREATING GEOGRAPHY INDEX ****';
+        EXECUTE 'CREATE INDEX ref_businesses_infousa_' || state[1] || '_geog_gist ON ref_businesses_data.infousa_' || state[1] || ' USING gist (geog);';
+
+        RAISE NOTICE '*** CREATING SIC4 INDEX ****';
+        EXECUTE 'CREATE INDEX ref_businesses_infousa_' || state[1] || '_sic4 ON ref_businesses_data.infousa_' || state[1] || ' USING btree (sic4);';
+
     END LOOP;
 END$$;
