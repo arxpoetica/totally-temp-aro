@@ -204,22 +204,6 @@ public class NetworkDataDAO{
         return selectedRoadLocations;
     }
 
-    public Collection<CableConduitEdge> queryCableConduitEdges(
-            long planId) {
-        return planRepository
-                .queryConduitSections(planId)
-                .stream()
-                .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-                .map(result -> {
-                    return new CableConduitEdgeImpl(
-                            result.getLong(ConduitEdgeMap.gid),
-                            cableConstructionEnumMap.get(result
-                                    .getInteger(ConduitEdgeMap.constructionType)),
-                            result.getDouble(ConduitEdgeMap.startRatio), result
-                            .getDouble(ConduitEdgeMap.endRatio));
-                }).collect(Collectors.toList());
-
-    }
 
 
     private LocationEntityType toLocationEntityType(int entityTypeCode) {

@@ -91,7 +91,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
 		networkData.setRoadEdges(networkDataDAO.getRoadEdges(request.getServiceAreaId().get()));
-		networkData.setCableConduitEdges(networkDataDAO.queryCableConduitEdges(request.getPlanId()));
+		networkData.setCableConduitEdges(queryCableConduitEdges(request));
 
 		return networkData;
 	}
@@ -191,8 +191,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		
 		return existing ;
 	}
-	
-	
+
+
+
 	private Collection<CableConduitEdge> queryPlanConditEdges(NetworkDataRequest networkConfiguration) {
 		return networkDataDAO
 				.queryPlanConditEdges(networkConfiguration.getPlanId());
