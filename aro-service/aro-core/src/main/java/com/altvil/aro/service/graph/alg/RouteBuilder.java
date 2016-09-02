@@ -45,6 +45,9 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 		
 		long fp = System.currentTimeMillis() ;
 		
+		long a = 186587228 ;
+		long b = 186951103 ;
+		
 		AroEdge<GeoSegment> edgeA = null ;
 		AroEdge<GeoSegment> edgeB = null ;
 		
@@ -53,13 +56,13 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			Long gid = s.getValue().getGid() ;
 			
 			if(gid != null ) {
-				if( gid == 186587230 ) {
-					log.info(" " + fp + " " + "======> FOUND 186587798");
+				if( gid == a ) {
+					log.info(" " + fp + " " + "======> FOUND " +a);
 					edgeA = s ;
 				}
 				
-				if( gid == 186951103 ) {
-					log.info(" " + fp + " " + "======> FOUND 186951103");
+				if( gid == b ) {
+					log.info(" " + fp + " " + "======> FOUND " + b);
 					edgeB = s ;
 				}
 			}
