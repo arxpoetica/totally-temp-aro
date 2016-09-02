@@ -6,6 +6,7 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.entity.mapping.LocationEntityTypeMapping;
+import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.interfaces.*;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
@@ -165,7 +166,7 @@ public class NetworkDataDAO{
     }
 
     public Collection<RoadEdge> getRoadEdges(
-            long serviceAreaId) {
+            int serviceAreaId) {
         return planRepository
                 .queryRoadEdgesbyServiceAreaId(serviceAreaId)
                 .stream()
@@ -228,6 +229,38 @@ public class NetworkDataDAO{
 
     private AroEntity createAroNetworkNode(long id, int type) {
         return entityFactory.createCentralOfficeEquipment(id);
+    }
+
+
+    public Collection<CableConduitEdge> queryPlanConditEdges(long planid) {
+        return planRepository
+                .queryPlanConduitSections(planid)
+                .stream()
+                .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+                .map(result -> {
+                    return new CableConduitEdgeImpl(
+                            result.getLong(ConduitEdgeMap.gid),
+                            cableConstructionEnumMap.get(result
+                                    .getInteger(ConduitEdgeMap.constructionType)),
+                            result.getDouble(ConduitEdgeMap.startRatio), result
+                            .getDouble(ConduitEdgeMap.endRatio));
+                }).collect(Collectors.toList());
+    }
+    public Collection<CableConduitEdge> queryExistingCableConduitEdges(
+            long planId) {
+        return planRepository
+                .queryConduitSections(planId)
+                .stream()
+                .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
+                .map(result -> {
+                    return new CableConduitEdgeImpl(
+                            result.getLong(ConduitEdgeMap.gid),
+                            cableConstructionEnumMap.get(result
+                                    .getInteger(ConduitEdgeMap.constructionType)),
+                            result.getDouble(ConduitEdgeMap.startRatio), result
+                            .getDouble(ConduitEdgeMap.endRatio));
+                }).collect(Collectors.toList());
+
     }
 
 

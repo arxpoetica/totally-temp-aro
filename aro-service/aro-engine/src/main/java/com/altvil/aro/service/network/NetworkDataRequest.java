@@ -33,15 +33,15 @@ public class NetworkDataRequest {
 	}
 	
 	public NetworkDataRequest createRequest(long planId, int serviceLayerId) {
-		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, serviceAreaId) ;
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, serviceAreaId) ;
 	}
 	public NetworkDataRequest createRequest(int serviceAreaId) {
-		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, Optional.of(serviceAreaId));
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, Optional.of(serviceAreaId));
 	}
 
 	public NetworkDataRequest includePlanConduit() {
 		return new NetworkDataRequest(planId, serviceLayerId, year,
-				selectionMode, locationEntities, mrc, true);
+				selectionMode, locationEntities, mrc, true, serviceAreaId);
 	}
 
 	public Integer getServiceLayerId() {
@@ -72,4 +72,7 @@ public class NetworkDataRequest {
 		return queryPlanConduit;
 	}
 
+	public Optional<Integer> getServiceAreaId() {
+		return serviceAreaId;
+	}
 }

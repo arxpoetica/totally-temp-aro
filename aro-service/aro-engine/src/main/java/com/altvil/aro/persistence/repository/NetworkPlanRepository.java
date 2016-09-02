@@ -68,34 +68,7 @@ public interface NetworkPlanRepository extends
 			"order by gid, intersect_position limit 40000", nativeQuery = true) // KG debugging
 	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
 
-	
-	@Query(value = "with linked_locations as (\n" + 
-			"SELECT\n" + 
-			"l.id as id,\n" + 
-			"l.geom as point,\n" + 
-			"(SELECT gid \n" + 
-			"FROM (SELECT aro.edges.gid, ST_Distance(cast(aro.edges.geom as geography), cast(l.geom as geography)) AS distance \n" + 
-			"FROM aro.edges where st_intersects(r.area_bounds, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" + 
-			") as gid\n" + 
-			"FROM aro.wirecenters w \n" + 
-			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
-			"where w.id = :wirecenterId\n" + 
-			")\n" + 
-			"select\n" + 
-			"ll.id as location_id,\n" + 
-			"ll.gid,\n" + 
-			"e.tlid,\n" + 
-			"st_astext(ll.point) as location_point,\n" + 
-			"st_line_locate_point(st_linemerge(e.geom), ll.point) as intersect_position,\n" + 
-			"st_astext(st_closestpoint(st_linemerge(e.geom), ll.point)) as intersect_point,\n" + 
-			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" + 
-			"from linked_locations ll\n" + 
-			"join aro.edges e on e.gid = ll.gid\n" + 
-			"order by gid, intersect_position limit 40000", nativeQuery = true) 
-	List<Object[]> queryAllLocationsByWirecenterId(@Param("wirecenterId") int id) ;
 
-	
-	
 	@Query(value = "with selected_locations as (\n" + 
 			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength	\n" + 
 			"	from client.plan_targets t\n" + 
@@ -163,43 +136,6 @@ public interface NetworkPlanRepository extends
 			"limit 200000", nativeQuery = true)
 	List<Object[]> queryAllFiberDemand(@Param("planId") long planId, @Param("year") int year, @Param("mrc") double mrc);
 
-	
-	@Query(value = 
-			"with selected_locations as (\n" + 
-			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength\n" + 
-			"	from aro.wirecenters w \n" + 
-			"	join aro.locations l on st_contains(w.geom, l.geom)\n" + 
-			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
-			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3\n" + 
-			"	where w.id =  :wirecenterId\n" + 
-			"),\n" + 
-			"bs as (\n" + 
-			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
-			"  from selected_locations l\n" + 
-			"  join client.business_summary e on e.location_id = l.id\n" + 
-			"   where year = :year and city_id = 1\n" + 
-			"),\n" + 
-			"hs as (\n" + 
-			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend, l.competitor_strength\n" + 
-			"  from selected_locations l\n" + 
-			"  join client.households_summary e on e.location_id = l.id\n" + 
-			"),\n" + 
-			"ct as (\n" + 
-			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend, l.competitor_strength\n" + 
-			"  from selected_locations l\n" + 
-			"  join client.celltower_summary e on e.location_id = l.id\n" + 
-			")\n" + 
-			"select * from  bs\n" + 
-			"UNION\n" + 
-			"select * from  hs\n" + 
-			"UNION\n" +
-			"select * from ct\n" +
-			"limit 200000", nativeQuery = true)
-	List<Object[]> queryAllFiberDemandByWirecenterId(@Param("wirecenterId") int wirecenterId, @Param("year") int year);
-
-	
-	
-	
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
 			"WHERE pt.plan_id = :planId", nativeQuery = true)
 	List<BigInteger> querySelectedLocationsByPlanId(@Param("planId") long planId);
@@ -280,7 +216,7 @@ public interface NetworkPlanRepository extends
 			+ "join aro.edges a on "
 			+ "w.id = :serviceAreaId "
 			+ "and st_intersects(edge_buffer, a.geom)", nativeQuery = true)
-	List<Object[]> queryRoadEdgesbyServiceAreaId(@Param("serviceAreaId") long serviceAreaId);
+	List<Object[]> queryRoadEdgesbyServiceAreaId(@Param("serviceAreaId") int serviceAreaId);
 
 	
 	
@@ -296,6 +232,8 @@ public interface NetworkPlanRepository extends
     @Transactional
 	@Query(value = "delete from client.plan where parent_plan_id = :planId", nativeQuery = true)
 	void deleteChildPlans(@Param("planId") long planId) ;
+
+
 
 
     @Modifying
@@ -404,19 +342,22 @@ public interface NetworkPlanRepository extends
 	List<Object[]> queryConduitSections(@Param("planId") long planId);
 	
 	
-	@Query(value = "WITH  selected_segs AS (\n" + 
-			" 	select s.gid, s.construction_type, start_ratio, end_ratio\n" + 
-			" 	FROM client.wirecenter_conduit_edge_segments s\n" + 
-			"   WHERE s.start_ratio IS NOT NULL AND s.end_ratio IS NOT NULL and s.wirecenter_id = :wirecenter_id\n" + 
-			")\n" + 
-			"SELECT  \n" + 
-			"    gid, \n" + 
-			"    MAX(construction_type) AS construction_type,  \n" + 
-			"    MIN(start_ratio) AS start_ratio, \n" + 
-			"    MAX(end_ratio) AS end_ratio\n" + 
-			"FROM selected_segs s\n" + 
-			"GROUP BY gid", nativeQuery = true)
-	List<Object[]> queryConduitSectionsByWirecenterId(@Param("wirecenter_id") int wirecenterId);
+	@Query(value = "SELECT\n" +
+			" c.gid,\n" +
+			" c.construction_type,\n" +
+			" CASE \n" +
+			"	WHEN start_ratio < end_ratio THEN start_ratio \n" +
+			"	ELSE 0 \n" +
+			"	END AS start_ratio, \n" +
+			" CASE\n" +
+			"	WHEN start_ratio < end_ratio THEN end_ratio \n" +
+			"	WHEN edge_length = segment_length THEN 1 \n" +
+			"	ELSE 0 \n" +
+			" END AS end_ratio 	\n" +
+			" FROM client.plan_conduit_fiber c\n" +
+			"WHERE plan_id = :planId\n" +
+			"AND end_ratio >= start_ratio ", nativeQuery = true)
+	List<Object[]> queryPlanConduitSections(@Param("planId") long planId);
 	
 	
 }
