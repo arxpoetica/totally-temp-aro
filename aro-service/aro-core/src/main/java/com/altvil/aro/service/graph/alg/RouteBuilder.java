@@ -41,8 +41,51 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 	}
 	
 	
+	private void weirdTest(WeightedGraph<V, E> source) {
+		
+		AroEdge<GeoSegment> edgeA = null ;
+		AroEdge<GeoSegment> edgeB = null ;
+		
+		for(AroEdge<GeoSegment> s : source.edgeSet()) {
+			
+			Long gid = s.getValue().getGid() ;
+			
+			if(gid != null ) {
+				if( gid == 186587798 ) {
+					log.info("======> FOUND 186587798");
+					edgeA = s ;
+				}
+				
+				if( gid == 186951103 ) {
+					log.info("======> FOUND 186951103");
+					edgeB = s ;
+				}
+			}
+		}
+		
+		if( edgeA != null && edgeB != null ) {
+			V vertexA  = source.getEdgeSource((E) edgeA) ;
+			V vertexB  = source.getEdgeSource((E) edgeB) ;
+			
+			
+			DijkstraShortestPath<V, E> dp = new DijkstraShortestPath<V, E>(source, vertexA, vertexB) ;
+			
+			log.info("PATH ==========> " + dp.getPathLength());
+			for(AroEdge<GeoSegment> e : dp.getPathEdgeList()) {
+				log.info("Gid = " + e.getValue().getGid() + " " + e.getValue().getLength()); ;
+			}
+			
+		
+		}
+		
+		
+	}
+	
+	
 	public Collection<SourceRoute<V, E>> build(GraphPathConstraint<V, E> pathPredicate, WeightedGraph<V, E> source,
 			Collection<V> all_roots, Collection<V> targets) {
+		
+		weirdTest(source);
 		
 		this.pathPredicate = pathPredicate ;
 		
