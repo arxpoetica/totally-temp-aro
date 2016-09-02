@@ -423,6 +423,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   }
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (layer.type !== 'road_segments') return
     var feature = event.feature
     layer.data_layer.revertStyle()
     layer.data_layer.overrideStyle(feature, {
