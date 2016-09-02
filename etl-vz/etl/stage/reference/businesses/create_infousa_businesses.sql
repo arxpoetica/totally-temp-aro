@@ -32,6 +32,7 @@ DO $$
 DECLARE
     all_states text[][] := array[['NY', '36'], ['WA', '53']];
     state text[];
+    current_table text;
 
 BEGIN
     
