@@ -45,8 +45,9 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 		
 		long fp = System.currentTimeMillis() ;
 		
-		long a = 186587756 ;
+		long a = 186587751 ;
 		long b = 186587771 ;
+		
 		
 		AroEdge<GeoSegment> edgeA = null ;
 		AroEdge<GeoSegment> edgeB = null ;
