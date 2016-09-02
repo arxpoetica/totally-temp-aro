@@ -244,13 +244,16 @@ public class BusinessesReportRepository {
 
     private String mapBussinessRow(Object[] objects) {
         return Arrays.stream(objects)
-                .map(this::quoteString)
+
+                .map(this::quoteStringAndReplaceNulls)
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
 
     }
 
-    private Object quoteString(Object o) {
+    private Object quoteStringAndReplaceNulls(Object o) {
+        if(  o == null )
+            return  "";
         if(o instanceof String){
             return '"' + o.toString() + '"';
         }else{
