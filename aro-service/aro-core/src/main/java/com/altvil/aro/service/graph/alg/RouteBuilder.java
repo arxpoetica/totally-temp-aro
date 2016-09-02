@@ -77,7 +77,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			
 			log.info(" " + fp + " " + "PATH ==========> " + dp.getPathLength());
 			for(AroEdge<GeoSegment> e : dp.getPathEdgeList()) {
-				log.info("" + fp + "," + "Gid = " + e.getValue().getGid() + " " + e.getValue().getLength()); ;
+				log.info("" + fp + "," + "Gid = " + e.getValue().getGid() + " " + e.getValue().getLength() + " weight " + e.getWeight()); ;
 			}
 			
 		
