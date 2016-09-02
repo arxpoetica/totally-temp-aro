@@ -299,7 +299,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 					renoded = renoder.renode()
 							.transform(
 									s -> priceMap.get(s
-											.getCableConstructionCategory())));
+											.getCableConstructionCategory()) * s.getLength()));
 
 			DescribeGraph.trace(log, renoded.getGraph().getGraph());
 
