@@ -43,6 +43,8 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 	
 	private void weirdTest(WeightedGraph<V, E> source) {
 		
+		long fp = System.currentTimeMillis() ;
+		
 		AroEdge<GeoSegment> edgeA = null ;
 		AroEdge<GeoSegment> edgeB = null ;
 		
@@ -51,13 +53,13 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			Long gid = s.getValue().getGid() ;
 			
 			if(gid != null ) {
-				if( gid == 186587798 ) {
-					log.info("======> FOUND 186587798");
+				if( gid == 186587230 ) {
+					log.info(" " + fp + " " + "======> FOUND 186587798");
 					edgeA = s ;
 				}
 				
 				if( gid == 186951103 ) {
-					log.info("======> FOUND 186951103");
+					log.info(" " + fp + " " + "======> FOUND 186951103");
 					edgeB = s ;
 				}
 			}
@@ -67,12 +69,11 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			V vertexA  = source.getEdgeSource((E) edgeA) ;
 			V vertexB  = source.getEdgeSource((E) edgeB) ;
 			
-			
 			DijkstraShortestPath<V, E> dp = new DijkstraShortestPath<V, E>(source, vertexA, vertexB) ;
 			
-			log.info("PATH ==========> " + dp.getPathLength());
+			log.info(" " + fp + " " + "PATH ==========> " + dp.getPathLength());
 			for(AroEdge<GeoSegment> e : dp.getPathEdgeList()) {
-				log.info("Gid = " + e.getValue().getGid() + " " + e.getValue().getLength()); ;
+				log.info("" + fp + "," + "Gid = " + e.getValue().getGid() + " " + e.getValue().getLength()); ;
 			}
 			
 		
