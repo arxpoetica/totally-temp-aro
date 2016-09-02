@@ -25,5 +25,7 @@ tail -n +2 /$TMPDIR/SITA_DATA_TOWER_13MAR10.txt > /$TMPDIR/sita_towers.txt
 
 cat /$TMPDIR/sita_towers.txt | ${PSQL} -a -c "COPY ref_towers.sita_towers FROM stdin WITH (DELIMITER E'\t', ENCODING 'Latin1', NULL '""');"
 
+${PSQL} -a -f $DIR/partition_sita_towers.sql
+
 rm /$TMPDIR/SITA_DATA_TOWER_13MAR10.txt
 rm /$TMPDIR/sita_towers.txt
