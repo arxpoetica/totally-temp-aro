@@ -529,4 +529,8 @@ module.exports = class Network {
     })
   }
 
+  static roadSegments (viewport) {
+    return database.lines('SELECT geom, gid, tlid FROM edges', [], true, viewport)
+  }
+
 }

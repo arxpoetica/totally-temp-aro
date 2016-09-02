@@ -167,4 +167,11 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.get('/network/road_segments', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    models.Network.roadSegments(viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

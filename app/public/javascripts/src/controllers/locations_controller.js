@@ -21,6 +21,20 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.overlay = 'none'
   $scope.heatmapVisible = false
   $scope.heatmapOn = true
+  $scope.roadLayer = new MapLayer({
+    short_name: 'RS',
+    name: 'Road Segments',
+    type: 'road_segments',
+    style_options: {
+      normal: {
+        strokeColor: 'teal',
+        strokeWeight: 1
+      }
+    },
+    api_endpoint: '/network/road_segments',
+    threshold: 12,
+    reload: 'always'
+  })
 
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
