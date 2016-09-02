@@ -80,6 +80,8 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			}
 			
 		
+		} else {
+			log.info("FAILED TO FIND " + a + " " + b);
 		}
 		
 		
