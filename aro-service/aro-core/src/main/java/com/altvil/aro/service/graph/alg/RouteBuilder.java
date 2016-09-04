@@ -223,20 +223,22 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 			Set<Map.Entry<Double, V>> entries = tm.entries();
 			if (!entries.isEmpty()) {
-				Map.Entry<Double, V> entry = entries.iterator().next();
-				GraphPath<V, E> path = paths.getGraphPath(entry.getValue());
-				treeMap.put(path.getWeight(), path);
+				for(Map.Entry<Double, V> entry : entries) {
+					GraphPath<V, E> path = paths.getGraphPath(entry.getValue());
+					if( isValidPath(path) ) {
+						treeMap.put(path.getWeight(), path);
+						break ;
+					}
+				}
 			}
 		}
 		
-		for( GraphPath<V, E> gp : treeMap.values()) {
-			if( isValidPath(gp) ) {
-				return gp ;
-			}
+		if( treeMap.isEmpty() ) {
+			return null ;
 		}
 		
-		return null ;
-
+		return treeMap.values().iterator().next() ;
+		
 	}
 	
 	private boolean isValidPath(GraphPath<V, E> path) {
