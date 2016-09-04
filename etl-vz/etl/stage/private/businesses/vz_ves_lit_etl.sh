@@ -20,5 +20,5 @@ do
 	rm -f ${TMPDIR}/*.*
 	aws s3 cp s3://public.aro/proto/businesses/ves_lit_${STATE}.zip $GISROOT/ves_lit_${STATE}.zip
 	$UNZIPTOOL ves_lit_${STATE}.zip -d ${TMPDIR}
-	cat /$TMPDIR/ves_lit_${STATE}.csv | ${PSQL} -a -c "COPY businesses.ves_lit FROM STDIN DELIMITER ',' CSV HEADER;"
+	cat /$TMPDIR/ves_lit_${STATE}.csv | ${PSQL} -a -c "COPY businesses_data.ves_lit_${STATE} FROM STDIN DELIMITER ',' CSV HEADER;"
 done

@@ -21,8 +21,9 @@ cd $GISROOT;
 # Current TAM lists
 for STATE in "${STATE_ARRAY[@]}"
 do
+	state_abbrev=${STATE:0:2}
 	rm -f ${TMPDIR}/*.*
 	aws s3 cp s3://public.aro/proto/businesses/tam_${STATE}.zip $GISROOT/tam_${STATE}.zip
 	$UNZIPTOOL tam_${STATE}.zip -d ${TMPDIR}
-	cat /$TMPDIR/tam_${STATE}.csv | ${PSQL} -a -c "COPY businesses.tam FROM STDIN DELIMITER ',' CSV HEADER;"
+	cat /$TMPDIR/tam_${STATE}.csv | ${PSQL} -a -c "COPY businesses_data.tam_${state_abbrev} FROM STDIN DELIMITER ',' CSV HEADER;"
 done
