@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.google.common.collect.TreeMultimap;
 
 public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
@@ -41,58 +44,8 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 	}
 	
 	
-	private void weirdTest(WeightedGraph<V, E> source) {
-		
-		long fp = System.currentTimeMillis() ;
-		
-		long a = 186587228 ;
-		long b = 186951103 ;
-		
-		
-		AroEdge<GeoSegment> edgeA = null ;
-		AroEdge<GeoSegment> edgeB = null ;
-		
-		for(AroEdge<GeoSegment> s : source.edgeSet()) {
-			
-			Long gid = s.getValue().getGid() ;
-			
-			if(gid != null ) {
-				if( gid == a ) {
-					log.info(" " + fp + " " + "======> FOUND " +a);
-					edgeA = s ;
-				}
-				
-				if( gid == b ) {
-					log.info(" " + fp + " " + "======> FOUND " + b);
-					edgeB = s ;
-				}
-			}
-		}
-		
-		if( edgeA != null && edgeB != null ) {
-			V vertexA  = source.getEdgeSource((E) edgeA) ;
-			V vertexB  = source.getEdgeSource((E) edgeB) ;
-			
-			DijkstraShortestPath<V, E> dp = new DijkstraShortestPath<V, E>(source, vertexA, vertexB) ;
-			
-			log.info(" " + fp + " " + "PATH ==========> " + dp.getPathLength());
-			for(AroEdge<GeoSegment> e : dp.getPathEdgeList()) {
-				log.info("" + fp + "," + "Gid = " + e.getValue().getGid() + " " + e.getValue().getLength() + " weight " + e.getWeight()); ;
-			}
-			
-		
-		} else {
-			log.info("FAILED TO FIND " + a + " " + b);
-		}
-		
-		
-	}
-	
-	
 	public Collection<SourceRoute<V, E>> build(GraphPathConstraint<V, E> pathPredicate, WeightedGraph<V, E> source,
 			Collection<V> all_roots, Collection<V> targets) {
-		
-		weirdTest(source);
 		
 		this.pathPredicate = pathPredicate ;
 		
@@ -263,31 +216,28 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 	}
 
 	private GraphPath<V, E> getClosestSource(Set<V> sources) {
-		double shortestPathLength = Double.MAX_VALUE;
-		GraphPath<V, E> shortedPath = null;
-		
+		TreeMap<Double, GraphPath<V, E>> treeMap = new TreeMap<>();
 		for (V target : targetMap.keySet()) {
 			AllShortestPaths<V, E> paths = targetMap.get(target);
-			V source = paths.findClosestTarget(sources);
+			TreeMultimap<Double, V> tm = paths.findPaths(sources);
 
-			if (source != null) {
-				final double sourceWeight = paths.getWeight(source);
-				
-				if (sourceWeight < shortestPathLength) {
-					GraphPath<V, E> path = paths.getGraphPath(source);
-					
-					if (isValidPath(path)) {
-						shortedPath = paths.getGraphPath(source);
-						shortestPathLength = sourceWeight;
-					} 
-				}
+			Set<Map.Entry<Double, V>> entries = tm.entries();
+			if (!entries.isEmpty()) {
+				Map.Entry<Double, V> entry = entries.iterator().next();
+				GraphPath<V, E> path = paths.getGraphPath(entry.getValue());
+				treeMap.put(path.getWeight(), path);
 			}
 		}
 		
-		return shortedPath ;
+		for( GraphPath<V, E> gp : treeMap.values()) {
+			if( isValidPath(gp) ) {
+				return gp ;
+			}
+		}
+		
+		return null ;
 
 	}
-
 	
 	private boolean isValidPath(GraphPath<V, E> path) {
 		return pathPredicate.isValid(sourceRootMap.get(path.getEndVertex()), path) ;
