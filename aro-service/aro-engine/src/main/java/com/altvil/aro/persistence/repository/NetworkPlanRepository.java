@@ -494,6 +494,7 @@ public interface NetworkPlanRepository extends
     List<Number> updateConduitInputs(@Param("inputMasterPlan") long planId, @Param("selectedPlanId") long selectedPlanId);
 
     
+    
 	@Query(value = "select id from client.plan where parent_plan_id = :planId", nativeQuery = true)
 	List<Number> wireCenterPlanIdsFor(@Param("planId") long planId);
 	
