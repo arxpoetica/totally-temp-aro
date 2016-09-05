@@ -530,7 +530,6 @@ module.exports = class Network {
   }
 
   static importLocationsByIds (plan_id, file) {
-    console.log('file', file)
     return new Promise((resolve, reject) => {
       var errors = 0
       var ids = []

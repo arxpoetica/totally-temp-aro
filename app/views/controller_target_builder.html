@@ -62,10 +62,12 @@
       <button class="btn btn-default btn-sm"
         ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
         ng-click="setSelectedTool('polygon')">Many</button>
-      <span style="display:inline-block; width:100px; position:relative">
+      <span style="display:inline-block; width:30px; position:relative">
         <button class="btn btn-default btn-sm"><i class="fa fa-file-o"></i></button>
-        <input type="file" name="photo" style="opacity:0; width: 100px; position:absolute; top:0; left:0">
+        <input type="file" name="csv" style="opacity:0; width: 30px; position:absolute; top:0; left:0">
       </span>
+      <button class="btn btn-success active btn-sm" ng-show="pendingPost"
+        ng-click="postChanges({})">Get Results</button>
     </p>
   </form>
   <p><strong>Targeted Locations</strong></p>

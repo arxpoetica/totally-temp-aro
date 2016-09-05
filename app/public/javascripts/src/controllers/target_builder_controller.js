@@ -149,10 +149,13 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     $http(config).success((response) => {
       updateButton.removeAttr('disabled')
       $rootScope.$broadcast('route_planning_changed', response)
+      $scope.pendingPost = false
     }).error(() => {
       updateButton.removeAttr('disabled')
     })
   }
+
+  $scope.postChanges = postChanges
 
   $scope.optimizationTypeChanged = () => postChanges({})
   $scope.npvTypeChanged = () => postChanges({})
@@ -164,7 +167,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     var form = $('#target-builder-upload').get(0)
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
-    xhr.open('POST', `/network/nodes/${$scope.plan.id}/csv`, true)
+    xhr.open('POST', `/network/nodes/${$scope.plan.id}/csvIds`, true)
     xhr.addEventListener('error', (err) => {
       form.reset()
       console.log('error', err)
@@ -184,6 +187,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       swal('File processed', `Locations selected: ${data.found}, not found: ${data.notFound}, errors: ${data.errors}`, 'info')
       map_layers.getFeatureLayer('locations').reloadData()
       map_layers.getFeatureLayer('selected_locations').reloadData()
+      $scope.pendingPost = true
     })
     xhr.send(formData)
   })

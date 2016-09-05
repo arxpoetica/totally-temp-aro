@@ -191,13 +191,6 @@
       To see individual locations, zoom in or turn off the heatmap button below the zoom buttons
     </div>
 
-    <form id="locations-upload">
-      <span style="display:inline-block; width:160px; position:relative; margin-left:10px">
-        <button class="btn btn-default btn-sm"><i class="fa fa-file-o"></i> Select multiple locations</button>
-        <input type="file" name="photo" style="opacity:0; width: 160px; position:absolute; top:0; left:0">
-      </span>
-    </form>
-
     <% if (env_is_test) { %>
       <a href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">.</a>
     <% } %>
