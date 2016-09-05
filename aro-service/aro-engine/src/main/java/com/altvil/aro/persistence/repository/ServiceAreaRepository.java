@@ -34,7 +34,7 @@ public interface ServiceAreaRepository extends
 			"),\n" + 
 			"overlap as (\n" + 
 			"  SELECT\n" + 
-			"    sa.id, ST_Area(cast(ST_Intersection(sa.geom, mp.area_bounds) as geography)), ST_Area(sa.geog), (ST_Area(cast(ST_Intersection(sa.geom, mp.area_bounds) as geography)) / ST_Area(sa.geog)) as percentage_overlap\n" + 
+			"    sa.id, ST_Area(cast(ST_Intersection(ST_MakeValid(sa.geom), mp.area_bounds) as geography)), ST_Area(sa.geog), (ST_Area(cast(ST_Intersection(ST_MakeValid(sa.geom), mp.area_bounds) as geography)) / ST_Area(sa.geog)) as percentage_overlap\n" + 
 			"  FROM master_plan mp, intersects ss\n" + 
 			"  JOIN client.service_area sa ON (ss.id = sa.id)\n" + 
 			")\n" + 
