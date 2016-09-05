@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.jetty.util.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +48,10 @@ import com.altvil.utils.reflexive.MappedCodes;
 
 @Service
 public class RoicEngineServiceImpl implements RoicEngineService {
+	
+	private static final Logger log = LoggerFactory
+			.getLogger(RoicEngineServiceImpl.class.getName());
+
 
 	private ArpuService arpuService;
 	private RoicBuilderService roicBuilderService;
@@ -114,8 +121,15 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 
 	@Override
 	public CashFlows createRoicCashFlows(RoicFinancialInput roicFinancialInput) {
-		return new CashFlowsImpl(loadRoicModel(roicFinancialInput)
+		
+		log.info("Compute Roic Cashflow");
+		
+		CashFlows cf = new CashFlowsImpl(loadRoicModel(roicFinancialInput)
 				.getRowReference("incremental.network.cashflow").getAnalysisRow().getRawData());
+		
+		log.info("Computed Roic Cashflow");
+		
+		return cf ;
 	}
 
 	private class CacheInputData {
@@ -204,12 +218,20 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 
 		public CashFlows computeCashFlow(NetworkFinancialInput finacialInputs,
 				int periods) {
+			
+			log.info("Compute Cashflow aprox");
+			
 			Map<LocationEntityType, StreamFunction> penetrationMap = createPenetrationCurveMap(finacialInputs
 					.getLocationDemand());
 
-			return new CashFlowGenerator(map, penetrationMap,
+			CashFlows cf =  new CashFlowGenerator(map, penetrationMap,
 					finacialInputs.getLocationDemand(),
 					finacialInputs.getFixedCosts()).createCashFlow(periods);
+			
+			log.info("Computed Cashflow aprox");
+			
+			
+			return cf ;
 
 		}
 

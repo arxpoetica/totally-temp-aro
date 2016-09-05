@@ -259,6 +259,9 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		@Override
 		protected NetworkStatistic reduce(NetworkStatisticType type) {
+			
+			log.info(" reduce type " + type) ;
+			
 			return DefaultNetworkStatistic.create(
 					type,
 					() -> getGenerator(type).getScalarFunc().generate(this,
