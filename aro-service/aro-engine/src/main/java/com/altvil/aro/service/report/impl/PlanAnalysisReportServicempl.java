@@ -59,16 +59,26 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	}
 
 	private PriceModel createPriceModel(WirecenterNetworkPlan plan) {
+		
+		log.info("create Price Builder") ;
+		
 		PriceModelBuilder b = pricingService.createBuilder("*", new Date(),
 				new PricingContext());
+	
+		log.info("stream Network Nodes Pricing") ;
+		
 		plan.getNetworkNodes().forEach(
 				n -> b.add(n.getNetworkNodeType(), 1, n.getAtomicUnit()));
 
+		log.info("stream Fiber Pricing") ;
+		
 		for (FiberCableConstructionType ft : plan
 				.getFiberCableConstructionTypes()) {
 			b.add(ft, plan.getFiberLengthInMeters(ft));
 		}
-
+		
+		log.info("Build Fiber Pricing") ;
+		
 		return b.build();
 
 	}
@@ -139,9 +149,14 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 	@Override
 	public PlanAnalysisReport createPlanAnalysisReport(GeneratedPlan network) {
 
+		log.info("Create Price Model");
+		
 		PriceModel priceModel = createPriceModel(network
 				.getWirecenterNetworkPlan());
 
+		log.info("Create Network Stats");
+		
+		
 		Collection<NetworkStatistic> stats = reportGenerator
 				.createNetworkStatistic(new AnalysisInput() {
 					@Override
@@ -166,10 +181,13 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 					}
 
 				});
-
+		
+		
 		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
 				stats, NetworkStatistic::getNetworkStatisticType);
 
+		log.info("Created Network Stats");
+		
 		return new PlanAnalysisReportImpl(priceModel,
 				network.getDemandSummary(), map);
 	}
