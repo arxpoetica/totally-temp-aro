@@ -1,6 +1,5 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
-import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import com.altvil.aro.persistence.repository.FiberRouteRepository;
 import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
 import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
