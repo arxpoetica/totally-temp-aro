@@ -33,6 +33,10 @@ public class NetworkDataRequest {
 		return new NetworkDataRequest(planId, serviceLayerId, year,
 				selectionMode, locationEntities, mrc, queryPlanConduit);
 	}
+	
+	public NetworkDataRequest createRequest(Set<LocationEntityType> types) {
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, types, mrc, queryPlanConduit) ;
+	}
 
 	public NetworkDataRequest includePlanConduit() {
 		return new NetworkDataRequest(planId, serviceLayerId, year,

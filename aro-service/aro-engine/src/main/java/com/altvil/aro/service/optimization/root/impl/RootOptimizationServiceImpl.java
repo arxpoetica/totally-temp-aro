@@ -3,8 +3,12 @@ package com.altvil.aro.service.optimization.root.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
@@ -66,13 +70,28 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 
 		networkPlanRepository.deleteChildPlans(request.getPlanId());
 
-		Collection<MasterPlan> masterPlans = toMasterPlans(
-				request.getPlanId(),
-				getServiceLayers(request.getProcessingLayers(), request
-						.getNetworkDataRequest().getLocationEntities()));
+		Collection<ServiceLayer> serviceLayers = getServiceLayers(
+				request.getProcessingLayers(), request.getNetworkDataRequest()
+						.getLocationEntities());
+
+		SupportedTypeSelector selector = new SupportedTypeSelector(request
+				.getNetworkDataRequest().getLocationEntities());
+
+		Map<ServiceLayer, Set<LocationEntityType>> serviceLayerRequests = new HashMap<>();
+		serviceLayers.forEach(sl -> {
+			Set<LocationEntityType> types = selector.getEntityTypes(sl);
+			if (types != null && !types.isEmpty()) {
+				serviceLayerRequests.put(sl, types);
+			}
+		});
+
+		Collection<MasterPlan> masterPlans = toMasterPlans(request.getPlanId(),
+				serviceLayerRequests.keySet());
 
 		Collection<MasterOptimizationRequest> masterRequests = masterPlans
-				.stream().map(request::toMasterOptimizationRequest)
+				.stream()
+				.map(mp -> request.toMasterOptimizationRequest(mp,
+						serviceLayerRequests.get(mp.getServiceLayer())))
 				.collect(Collectors.toList());
 
 		return doOptimize(request, masterRequests);
@@ -85,11 +104,11 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 
 		List<OptimizedMasterPlan> masterPlans = new ArrayList<>();
 
-		Iterator<OptimizedMasterPlan> itr = new MasterPlanOptimizationIterator(rootOptimizationRequest,
-				requests.iterator());
+		Iterator<OptimizedMasterPlan> itr = new MasterPlanOptimizationIterator(
+				rootOptimizationRequest, requests.iterator());
 
-		while( itr.hasNext() ) {
-			masterPlans.add(itr.next()) ;
+		while (itr.hasNext()) {
+			masterPlans.add(itr.next());
 		}
 
 		return rootPlanningService.save(new GeneratedRootPlanImpl(
@@ -109,23 +128,52 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 	private Collection<MasterPlan> toMasterPlans(long planId,
 			Collection<ServiceLayer> serviceLayers) {
 		NetworkPlan rootPlan = networkPlanRepository.findOne(planId);
-		Collection<MasterPlan> masterPLans =  masterPlanRepository.save(serviceLayers.stream().map(s -> {
-			MasterPlan mp = new MasterPlan();
+		Collection<MasterPlan> masterPLans = masterPlanRepository
+				.save(serviceLayers.stream().map(s -> {
+					MasterPlan mp = new MasterPlan();
 
-			mp.setName(s.getName() + ":" + rootPlan.getName());
-			mp.setCentroid(rootPlan.getCentroid());
-			mp.setAreaName(rootPlan.getAreaName());
-			mp.setParentPlan(rootPlan);
-			mp.setServiceLayer(s);
-			mp.setCreateAt(new Date());
-			mp.setUpdateAt(new Date());
+					mp.setName(s.getName() + ":" + rootPlan.getName());
+					mp.setCentroid(rootPlan.getCentroid());
+					mp.setAreaName(rootPlan.getAreaName());
+					mp.setParentPlan(rootPlan);
+					mp.setServiceLayer(s);
+					mp.setCreateAt(new Date());
+					mp.setUpdateAt(new Date());
 
-			return mp;
-		}).collect(Collectors.toList()));
-		
-		networkPlanRepository.updateMasterPlanAreas(planId) ;
-		
-		return masterPLans ;
+					return mp;
+				}).collect(Collectors.toList()));
+
+		networkPlanRepository.updateMasterPlanAreas(planId);
+
+		return masterPLans;
+
+	}
+
+	private class SupportedTypeSelector {
+
+		private Set<LocationEntityType> requestedTypes;
+
+		public SupportedTypeSelector(Set<LocationEntityType> requestedTypes) {
+			super();
+			this.requestedTypes = EnumSet.copyOf(requestedTypes);
+		}
+
+		public Set<LocationEntityType> getEntityTypes(ServiceLayer sl) {
+			Set<LocationEntityType> supportedTypes = processingLayerService
+					.getSupportedEntityTypes(sl);
+			Set<LocationEntityType> result = EnumSet
+					.noneOf(LocationEntityType.class);
+
+			for (LocationEntityType t : requestedTypes) {
+				if (supportedTypes.contains(t)) {
+					result.add(t);
+				}
+			}
+
+			requestedTypes.removeAll(result);
+
+			return result;
+		}
 
 	}
 
@@ -182,7 +230,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 			if (previous != null) {
 				planCommandService.updatePlanConduit(previous,
 						masterRequest.getNetworkDataRequest());
-				masterRequest = masterRequest.includePlanConduit() ;
+				masterRequest = masterRequest.includePlanConduit();
 			}
 
 			// Submit Optimization Of Master Plan

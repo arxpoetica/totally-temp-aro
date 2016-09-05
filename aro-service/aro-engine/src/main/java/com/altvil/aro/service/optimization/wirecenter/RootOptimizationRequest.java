@@ -121,11 +121,11 @@ public class RootOptimizationRequest extends OptimizationRequest {
 	}
 
 	public MasterOptimizationRequest toMasterOptimizationRequest(
-			MasterPlan masterPlan) {
+			MasterPlan masterPlan, Set<LocationEntityType> types) {
 		return new MasterOptimizationRequest(masterPlan.getServiceLayer(),
 				optimizationConstraints, constraints,
 				networkDataRequest.createRequest(masterPlan.getId(), masterPlan
-						.getServiceLayer().getId()), optimizationMode,
+						.getServiceLayer().getId()).createRequest(types), optimizationMode,
 				algorithmType);
 	}
 
