@@ -1,4 +1,4 @@
-/* global app _ config user_id $ map google randomColor tinycolor Chart */
+/* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
 app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
   $scope.ARO_CLIENT = config.ARO_CLIENT
@@ -28,7 +28,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     style_options: {
       normal: {
         strokeColor: 'teal',
-        strokeWeight: 1
+        strokeWeight: 2
       }
     },
     api_endpoint: '/network/road_segments',
@@ -421,4 +421,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.toggleFilter = (filter) => {
     $scope.selectedFilter = $scope.selectedFilter === filter ? null : filter
   }
+
+  $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (layer.type !== 'road_segments') return
+    var feature = event.feature
+    layer.data_layer.revertStyle()
+    layer.data_layer.overrideStyle(feature, {
+      strokeWeight: 4
+    })
+    swal({ title: '', text: `gid: ${feature.getProperty('gid')} tlid: ${feature.getProperty('tlid')}`, type: 'info' })
+  })
 }])
