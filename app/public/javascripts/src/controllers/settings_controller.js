@@ -1,4 +1,4 @@
-/* global app $ globalServiceLayers */
+/* global app $ globalServiceLayers swal _ */
 // Navigation Menu Controller
 app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter', '$timeout', ($scope, $rootScope, $http, $filter, $timeout) => {
   $scope.serviceLayers = globalServiceLayers
@@ -46,11 +46,35 @@ app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter
 
   $('#application-settings').on('shown.bs.modal', fetchApplicationSettings)
 
-  $scope.updateSettings = () => {
-    console.log('changes', $scope.changes)
+  $scope.updateSettings = (close) => {
     $http.post('/admin/settings', $scope.changes).success((response) => {
       $scope.changes = {}
-      $('#application-settings').modal('hide')
+      swal({ title: 'Settings saved', type: 'success' })
+      if (close) {
+        $('#application-settings').modal('hide')
+      }
     })
   }
+
+  $('#application-settings').on('hide.bs.modal', (e) => {
+    if (_.size($scope.changes) === 0) return
+    e.preventDefault()
+    setTimeout(() => {
+      swal({
+        title: 'Are you sure?',
+        text: 'Continue without saving changes?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        showCancelButton: true,
+        closeOnConfirm: true
+      }, (confirmed) => {
+        if (confirmed) {
+          $scope.changes = {}
+          $('#application-settings').modal('hide')
+        }
+      })
+    }, 100)
+  })
 }])
