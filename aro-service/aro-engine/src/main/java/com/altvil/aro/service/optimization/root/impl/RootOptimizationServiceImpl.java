@@ -227,7 +227,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 					.next();
 
 			// Update Transitively "Previous Master Plan Fiber"
-			if (previous != null) {
+			if (previous != null && false) {
 				planCommandService.updatePlanConduit(previous,
 						masterRequest.getNetworkDataRequest());
 				masterRequest = masterRequest.includePlanConduit();
