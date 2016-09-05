@@ -468,7 +468,7 @@ public interface NetworkPlanRepository extends
 			"all_fiber AS (\n" + 
 			"	SELECT\n" + 
 			"		id,\n" + 
-			"		ST_Buffer(ST_Union(f.geom)::geography,3)::geometry AS geom\n" + 
+			"		cast(ST_Buffer(cast(ST_Union(f.geom) AS geography),3) AS geometry) AS geom\n" + 
 			"	FROM (\n" + 
 			"	(SELECT mp.id, pc.geom\n" + 
 			"	FROM selected_master mp\n" + 
