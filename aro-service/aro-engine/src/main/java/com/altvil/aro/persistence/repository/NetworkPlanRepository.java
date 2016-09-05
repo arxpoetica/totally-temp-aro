@@ -457,7 +457,9 @@ public interface NetworkPlanRepository extends
     
     @Modifying
     @Transactional
-	@Query(value="WITH selected_master AS (\n" + 
+	@Query(value=
+	
+			"WITH selected_master AS (\n" + 
 			"	SELECT p.*\n" + 
 			"	FROM client.plan p\n" + 
 			"	WHERE p.id = :inputMasterPlan\n" + 
@@ -486,8 +488,9 @@ public interface NetworkPlanRepository extends
 			")\n" + 
 			"INSERT INTO client.plan_fiber_conduit\n" + 
 			"	(plan_id, geom)\n" + 
-			"SELECT :selectedPlanId, geom \n" + 
-			"FROM all_fiber\n", nativeQuery = true) 
+			"SELECT sp.id, a.geom \n" + 
+			"FROM all_fiber a, client.plan sp WHERE sp.id =:selectedPlanId\n"
+			, nativeQuery = true) 
     List<Number> updateConduitInputs(@Param("inputMasterPlan") long planId, @Param("selectedPlanId") long selectedPlanId);
 
     
