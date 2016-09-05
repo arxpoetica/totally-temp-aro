@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,7 +78,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 		SupportedTypeSelector selector = new SupportedTypeSelector(request
 				.getNetworkDataRequest().getLocationEntities());
 
-		Map<ServiceLayer, Set<LocationEntityType>> serviceLayerRequests = new HashMap<>();
+		Map<ServiceLayer, Set<LocationEntityType>> serviceLayerRequests = new LinkedHashMap<>();
 		serviceLayers.forEach(sl -> {
 			Set<LocationEntityType> types = selector.getEntityTypes(sl);
 			if (types != null && !types.isEmpty()) {
