@@ -1,4 +1,4 @@
-/* global app _ config user_id $ map google randomColor tinycolor Chart swal */
+/* global app _ config user_id $ map google randomColor tinycolor Chart swal FormData XMLHttpRequest */
 // Locations Controller
 app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
   $scope.ARO_CLIENT = config.ARO_CLIENT
@@ -430,5 +430,33 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       strokeWeight: 4
     })
     swal({ title: '', text: `gid: ${feature.getProperty('gid')} tlid: ${feature.getProperty('tlid')}`, type: 'info' })
+  })
+
+  $('#locations-upload input').change(() => {
+    var form = $('#locations-upload').get(0)
+    var formData = new FormData(form)
+    var xhr = new XMLHttpRequest()
+    xhr.open('POST', `/network/nodes/${$scope.plan.id}/csvIds`, true)
+    xhr.addEventListener('error', (err) => {
+      form.reset()
+      console.log('error', err)
+      swal('Error', err.message, 'error')
+    })
+    xhr.addEventListener('load', function (e) {
+      form.reset()
+      try {
+        var data = JSON.parse(this.responseText)
+      } catch (e) {
+        console.log(e, e)
+        return swal('Error', 'Unexpected response from server', 'error')
+      }
+      if (this.status !== 200) {
+        return swal('Error', data.error || 'Unknown error', 'error')
+      }
+      swal('File processed', `Locations selected: ${data.found}, not found: ${data.notFound}, errors: ${data.errors}`, 'info')
+      map_layers.getFeatureLayer('locations').reloadData()
+      map_layers.getFeatureLayer('selected_locations').reloadData()
+    })
+    xhr.send(formData)
   })
 }])

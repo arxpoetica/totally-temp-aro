@@ -178,6 +178,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
         console.log(e, e)
         return swal('Error', 'Unexpected response from server', 'error')
       }
+      if (this.status !== 200) {
+        return swal('Error', data.error || 'Unknown error', 'error')
+      }
       swal('File processed', `Locations selected: ${data.found}, not found: ${data.notFound}, errors: ${data.errors}`, 'info')
       map_layers.getFeatureLayer('locations').reloadData()
       map_layers.getFeatureLayer('selected_locations').reloadData()
