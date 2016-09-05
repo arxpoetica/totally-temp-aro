@@ -491,7 +491,7 @@ public interface NetworkPlanRepository extends
 			"SELECT sp.id, a.geom \n" + 
 			"FROM all_fiber a, client.plan sp WHERE sp.id =:selectedPlanId\n"
 			, nativeQuery = true) 
-    List<Number> updateConduitInputs(@Param("inputMasterPlan") long planId, @Param("selectedPlanId") long selectedPlanId);
+    void updateConduitInputs(@Param("inputMasterPlan") long planId, @Param("selectedPlanId") long selectedPlanId);
 
     
     
