@@ -431,6 +431,27 @@ exports.configure = (api, middleware) => {
         response.send(output)
       })
   })
+
+  api.get('/financial_profile/:plan_id/fiber_details', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var sql = `
+      SELECT SUM(ST_Length(geom)) AS length
+        FROM client.existing_fiber ef
+        WHERE ST_Intersects(geom, (
+          SELECT ST_Union(geom) FROM client.selected_analysis_area saa
+          JOIN client.analysis_area aa ON aa.id = saa.analysis_area_id
+          WHERE plan_id=$1
+        ))
+        OR ST_Intersects(geom, (
+          SELECT ST_Union(geom) FROM client.selected_service_area ssa
+          JOIN client.service_area sa ON sa.id = ssa.service_area_id
+          WHERE plan_id=$1
+        ))
+    `
+    return database.findOne(sql, [plan_id])
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }
 
 const requestData = (params, filter) => {
@@ -500,30 +521,3 @@ if (module.id === require.main.id) {
       console.log('err', err.stack)
     })
 }
-
-/*
-[
-  {
-    "distance": 100,
-    "key": "Count",
-    "value": 0
-  },
-  {
-    "distance": 100,
-    "key": "MRC",
-    "value": 0
-  }
-]
- [
-  {
-    "distance": 100,
-    "key": "Count",
-    "value": 0
-  },
-  {
-    "distance": 100,
-    "key": "MRC",
-    "value": 0
-  }
-]
-*/

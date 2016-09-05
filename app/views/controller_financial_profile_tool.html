@@ -372,6 +372,11 @@
               <th class="text-right">{{metadata.fiberTotals.totalCost / 1000 | currency:"$":1}}K</th>
               <th></th>
             </tr>
+            <tr>
+              <th>Existing Fiber</th>
+              <th class="text-right" ng-show="fiberDetailsAdditional">{{fiberDetailsAdditional.length * 0.000621371 | number : 1}} mi</th>
+              <th class="text-right" ng-hide="fiberDetailsAdditional">Calculating...</th>
+            </tr>
           </tbody>
         </table>
       </div>
