@@ -432,7 +432,7 @@ public interface NetworkPlanRepository extends
 			"selected_analysis_areas AS (\n" + 
 			"    SELECT \n" + 
 			"		p.id, \n" + 
-			"		ST_MakeValid(ST_Union(aa.geom)) AS geom\n" + 
+			"		ST_Union(ST_MakeValid(aa.geom)) AS geom\n" + 
 			"    FROM selected_plan p\n" + 
 			"    JOIN client.selected_analysis_area s\n" + 
 			"        ON s.plan_id = p.id\n" + 
@@ -441,7 +441,7 @@ public interface NetworkPlanRepository extends
 			"	GROUP BY p.id\n" + 
 			"),\n" + 
 			"union_area AS (\n" + 
-			"	SELECT ST_MakeValid(ST_Union(u.geom)) AS geom\n" + 
+			"	SELECT ST_Union(ST_MakeValid(u.geom)) AS geom\n" + 
 			"		FROM (\n" + 
 			"			SELECT geom FROM selected_service_areas\n" + 
 			"			UNION\n" + 
