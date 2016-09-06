@@ -182,12 +182,8 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	public OptimizedPlan reifyPlanSummarizeAndSave(
 			OptimizationConstraints constraints, PlannedNetwork plan) {
 
-		log.info("Summarize Plan " + plan.getPlanId());
 		OptimizedPlan optimizedPlan = summarize(reifyPlan(constraints, plan));
-		log.info("Summarized Plan " + plan.getPlanId());
 		save(optimizedPlan);
-		log.info("Saved Plan " + plan.getPlanId());
-		
 		return optimizedPlan;
 
 	}
