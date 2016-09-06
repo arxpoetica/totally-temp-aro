@@ -146,13 +146,9 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 
 	@Override
 	public PlanAnalysisReport createPlanAnalysisReport(GeneratedPlan network) {
-
-		log.info("Create Price Model");
-
+	
 		PriceModel priceModel = createPriceModel(network
 				.getWirecenterNetworkPlan());
-
-		log.info("Create Network Stats");
 
 		Collection<NetworkStatistic> stats = reportGenerator
 				.createNetworkStatistic(new AnalysisInput() {
@@ -181,8 +177,6 @@ public class PlanAnalysisReportServicempl implements PlanAnalysisReportService {
 
 		Map<NetworkStatisticType, NetworkStatistic> map = StreamUtil.hash(
 				stats, NetworkStatistic::getNetworkStatisticType);
-
-		log.info("Created Network Stats");
 
 		return new PlanAnalysisReportImpl(priceModel,
 				network.getDemandSummary(), map);

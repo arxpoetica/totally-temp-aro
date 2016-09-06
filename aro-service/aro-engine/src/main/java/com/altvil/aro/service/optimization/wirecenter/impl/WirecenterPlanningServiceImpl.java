@@ -49,20 +49,12 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 	@Override
 	public void save(GeneratedPlan plan) {
 		
-		log.info("Equipment save .... " + plan.getWirecenterNetworkPlan().getPlanId()) ;
-		
 		networkNodeRepository.save(plan.getWirecenterNetworkPlan()
 				.getNetworkNodes());
 		
-		log.info("Equipment  saved .... " + plan.getWirecenterNetworkPlan().getPlanId()) ;
-		
 		fiberRouteRepository.save(plan.getWirecenterNetworkPlan()
 				.getFiberRoutes());
-		
-		log.info("Fiber saved .... " + plan.getWirecenterNetworkPlan().getPlanId()) ;
-		
-		
-
+	
 	}
 
 	@Override
