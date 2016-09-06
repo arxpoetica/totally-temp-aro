@@ -165,7 +165,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $scope.business_categories_selected[category.name] = true
       category.fullName = `b_${category.name}`
     })
-    $scope.business_categories_selected['2kplus'] = true
+    $scope.business_categories_selected['2kplus'] = false
 
     $scope.household_categories_selected = []
     $scope.household_categories.forEach((category) => {
