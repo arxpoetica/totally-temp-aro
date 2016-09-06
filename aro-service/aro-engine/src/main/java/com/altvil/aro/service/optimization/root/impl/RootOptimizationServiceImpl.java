@@ -47,7 +47,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 	private RootPlanningService rootPlanningService;
 	private NetworkPlanRepository networkPlanRepository;
 	private PlanCommandService planCommandService;
-
+	
 	@Autowired
 	public RootOptimizationServiceImpl(
 			ProcessingLayerService processingLayerService,
@@ -231,7 +231,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 					.next();
 
 			// Update Transitively "Previous Master Plan Fiber"
-			if (previous != null && false) {
+			if (previous != null && masterRequest.isUsePlanConduit()) {
 				planCommandService.updatePlanConduit(previous,
 						masterRequest.getNetworkDataRequest());
 				masterRequest = masterRequest.includePlanConduit();

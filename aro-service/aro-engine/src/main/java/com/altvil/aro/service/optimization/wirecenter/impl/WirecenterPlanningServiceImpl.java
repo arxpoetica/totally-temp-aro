@@ -16,6 +16,7 @@ import com.altvil.aro.service.report.PlanAnalysisReportService;
 @Service
 public class WirecenterPlanningServiceImpl implements WirecenterPlanningService {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 			.getLogger(WirecenterPlanningServiceImpl.class.getName());
 

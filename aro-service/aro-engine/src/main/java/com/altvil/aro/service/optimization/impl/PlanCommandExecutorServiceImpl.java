@@ -41,6 +41,7 @@ import com.altvil.utils.StreamUtil;
 @Service
 public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 			.getLogger(PlanServiceImpl.class.getName());
 
@@ -222,7 +223,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 		return new WirecenterOptimizationRequest(
 				request.getOptimizationConstraints(), request.getConstraints(),
 				request.getNetworkDataRequest().createRequest(planId,
-						sl.getId()), request.getAlgorithmType());
+						sl.getId()), request.getAlgorithmType(), request.isUsePlanConduit());
 
 	}
 
