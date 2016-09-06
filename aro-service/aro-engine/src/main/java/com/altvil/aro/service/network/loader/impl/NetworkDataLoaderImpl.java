@@ -48,8 +48,9 @@ import com.altvil.utils.conversion.OrdinalEntityFactory;
 
 
 @Service
-public class NetworkDataLoaderImpl implements NetworkDataLoader {
-
+public class NetworkDataLoaderImpl //implements NetworkDataLoader
+{
+/*
 	private static final Logger log = LoggerFactory
 			.getLogger(PlanServiceImpl.class.getName());
 
@@ -371,5 +372,5 @@ public class NetworkDataLoaderImpl implements NetworkDataLoader {
 
 		return map;
 	}
-
+*/
 }

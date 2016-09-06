@@ -47,7 +47,9 @@ import com.altvil.interfaces.RoadLocation;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
 import com.altvil.utils.conversion.OrdinalEntityFactory;
+import org.springframework.stereotype.Service;
 
+@Service
 public class NetworkDataServiceImpl implements NetworkDataService {
 
 
@@ -67,7 +69,6 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private NetworkDataDAO networkDataDAO;
 
 
-	private ComputeUnitService computeUnitService;
 
 	@PostConstruct
 	void postConstruct() {
@@ -90,7 +91,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap));
 
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
-		networkData.setRoadEdges(networkDataDAO.getRoadEdges(request.getServiceAreaId().get()));
+		networkData.setRoadEdges(getRoadEdges(request));
 		networkData.setCableConduitEdges(queryCableConduitEdges(request));
 
 		return networkData;
@@ -173,7 +174,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private Collection<RoadEdge> getRoadEdges(
 			NetworkDataRequest networkConfiguration) {
-		return networkDataDAO.getRoadEdges(networkConfiguration.getServiceAreaId().get());
+		return networkDataDAO
+				.getRoadEdges(networkConfiguration.getServiceAreaId().get())
+				.getRoadEdges();
 	}
 
 	private enum ConduitEdgeMap implements OrdinalAccessor {

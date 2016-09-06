@@ -84,5 +84,36 @@
 		transaction-manager-ref="transactionManager" />
 
 
+	<bean name="igniteConfiguration" class="org.apache.ignite.configuration.IgniteConfiguration">
+		<property name="userAttributes">
+			<map>
+				<entry key="ROLE" value="${ignite_role}"/>
+			</map>
+		</property>
+		<property name="collisionSpi">
+			<bean class="org.apache.ignite.spi.collision.priorityqueue.PriorityQueueCollisionSpi">
+				<!--
+                  Change the parallel job number if needed.
+                  Default is number of cores times 2.
+                -->
+				<!-- <property name="parallelJobsNumber" value="5"/> -->
+			</bean>
+		</property>
+		<!--<property name="discoverySpi">
+                        <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+                            <property name="ipFinder">
+                                <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.s3.TcpDiscoveryS3IpFinder">
+                                    <property name="awsCredentials" ref="aws.creds"/>
+                                    <property name="bucketName" value="${aws.bucket.name}"/>
+                                </bean>
+                            </property>
+                        </bean>
+                    </property>
+                    -->
+	</bean>
+
+	<bean class="org.apache.ignite.IgniteSpringBean">
+		<property name="configuration" ref="igniteConfiguration"/>
+	</bean>
 
 </beans>

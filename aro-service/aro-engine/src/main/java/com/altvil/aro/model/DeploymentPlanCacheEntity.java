@@ -12,7 +12,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@javax.persistence.Table(name = "deployment_plan_cache", schema = "network")
+@javax.persistence.Table(name = "deployment_plan_cache", schema = "cache")
 public class DeploymentPlanCacheEntity {
 	private Date lastUpdated = new Date();
 	private DeploymentPlanCacheKey key;

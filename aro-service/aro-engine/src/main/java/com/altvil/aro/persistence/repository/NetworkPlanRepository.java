@@ -218,8 +218,15 @@ public interface NetworkPlanRepository extends
 			+ "and st_intersects(edge_buffer, a.geom)", nativeQuery = true)
 	List<Object[]> queryRoadEdgesbyServiceAreaId(@Param("serviceAreaId") int serviceAreaId);
 
-	
-	
+	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
+			+ "from client.plan r \n"
+			+ "join client.service_area w on r.wirecenter_id = w.id\n"
+			+ "join aro.edges a on st_intersects(edge_buffer, a.geom)\n"
+			+ "where r.id = :planId", nativeQuery = true)
+	List<Object[]> queryRoadEdgesbyPlanId(@Param("planId") long planId);
+
+
+
 	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
 			+ "join aro.wirecenters w\n"
 			+ "join aro.edges a on st_intersects(edge_buffer, a.geom)\n"

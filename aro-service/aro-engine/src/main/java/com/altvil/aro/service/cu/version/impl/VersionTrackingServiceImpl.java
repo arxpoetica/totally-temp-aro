@@ -17,7 +17,9 @@ import com.altvil.aro.service.cu.version.VersionTrackingService;
 import com.altvil.aro.service.cu.version.VersionType;
 import com.altvil.aro.service.cu.version.spi.DefaultVersionTracking;
 import com.altvil.aro.service.cu.version.spi.VersionTrackingPersistence;
+import org.springframework.stereotype.Service;
 
+@Service
 public class VersionTrackingServiceImpl implements VersionTrackingService {
 
 	private ApplicationContext appCtx;

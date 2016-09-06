@@ -16,6 +16,5 @@ public interface DeploymentPlanVersionRepository extends
 
 	Set<DeploymentPlanVersionEntity> findByLastUpdatedAfter(Date date);
 
-	@Query(value = "select id from network.deployment_plans where ?1 = ANY(parents)  and id <> ?1", nativeQuery = true)
-	Set<Integer> getChildPlans(Integer deploymentPlanId);
+
 }

@@ -12,7 +12,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@javax.persistence.Table(name = "deployment_plan_versions", schema = "network")
+@javax.persistence.Table(name = "deployment_plan_versions", schema = "cache")
 public class DeploymentPlanVersionEntity {
 	DeploymentPlanVersionKey key;
 	Long deploymentVersion = 0l;

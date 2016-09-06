@@ -423,7 +423,7 @@ public class NetworkServiceImpl implements NetworkService {
 
 	private Collection<RoadEdge> queryRoadEdges(long planId) {
 		return planRepository
-				.queryRoadEdgesbyServiceAreaId(planId)
+				.queryRoadEdgesbyPlanId(planId)
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {

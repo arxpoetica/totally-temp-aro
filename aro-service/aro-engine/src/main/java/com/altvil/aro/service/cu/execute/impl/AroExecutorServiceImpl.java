@@ -22,7 +22,9 @@ import com.altvil.aro.service.cu.execute.AroExecutorService;
 import com.altvil.aro.service.cu.execute.PreCacheAgent;
 import com.altvil.aro.service.cu.execute.Priority;
 import com.altvil.aro.service.cu.execute.PriorityThreadPoolExecutor;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AroExecutorServiceImpl implements AroExecutorService {
 
 	private static final Logger log = LoggerFactory

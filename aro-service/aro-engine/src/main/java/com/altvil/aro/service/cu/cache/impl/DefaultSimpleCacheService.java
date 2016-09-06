@@ -13,7 +13,9 @@ import com.altvil.aro.service.cu.cache.SimpleCache;
 import com.altvil.aro.service.cu.cache.SimpleCacheService;
 import com.altvil.aro.service.cu.cache.db.DBCache;
 import com.altvil.aro.service.cu.cache.memory.IgniteMemoryCache;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DefaultSimpleCacheService implements SimpleCacheService {
 
 	private ApplicationContext applicationContext;

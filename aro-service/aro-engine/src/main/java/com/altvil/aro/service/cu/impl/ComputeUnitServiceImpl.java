@@ -52,7 +52,9 @@ import com.altvil.aro.service.cu.version.VersionEvent;
 import com.altvil.aro.service.cu.version.VersionTrackingService;
 import com.altvil.aro.service.cu.version.VersionType;
 import com.altvil.utils.lock.ResourceLock;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ComputeUnitServiceImpl  implements ComputeUnitService {
 	private static final Logger log = LoggerFactory
 			.getLogger(ComputeUnitServiceImpl.class.getName());

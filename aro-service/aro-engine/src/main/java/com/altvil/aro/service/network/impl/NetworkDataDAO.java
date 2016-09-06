@@ -1,12 +1,20 @@
 package com.altvil.aro.service.network.impl;
 
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
+import com.altvil.aro.service.cu.ComputeServiceApi;
+import com.altvil.aro.service.cu.ComputeUnit;
+import com.altvil.aro.service.cu.ComputeUnitBuilder;
+import com.altvil.aro.service.cu.ComputeUnitService;
+import com.altvil.aro.service.cu.cache.query.CacheQuery;
+import com.altvil.aro.service.cu.execute.Priority;
+import com.altvil.aro.service.cu.version.VersionType;
 import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.entity.mapping.LocationEntityTypeMapping;
 import com.altvil.aro.service.network.NetworkDataRequest;
+import com.altvil.aro.service.network.model.ServiceAreaRoadEdges;
 import com.altvil.interfaces.*;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
@@ -20,8 +28,11 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.altvil.aro.service.cu.ComputeUnitBuilder.ExecutionCachePolicy.MEMORY;
+import static com.altvil.aro.service.cu.ComputeUnitBuilder.ExecutionCachePolicy.PERSISTENCE;
+
 @Service
-public class NetworkDataDAO{
+public class NetworkDataDAO implements ComputeServiceApi{
     private static final Logger LOG = LoggerFactory
             .getLogger(NetworkDataDAO.class.getName());
     @Autowired
@@ -31,10 +42,27 @@ public class NetworkDataDAO{
 
     private EntityFactory entityFactory = EntityFactory.FACTORY;
 
+    @Autowired
+    private ComputeUnitService computeUnitService;
+
+    private ComputeUnit<ServiceAreaRoadEdges> serviceAreaRoadEdges;
+
+
     @PostConstruct
     void postConstruct() {
         cableConstructionEnumMap = StreamUtil
                 .hashEnum(CableConstructionEnum.class);
+        serviceAreaRoadEdges = computeUnitService
+                .build(ServiceAreaRoadEdges.class, this.getClass())
+                .setName("service_area_road_edges")
+                .setCacheMemorySize(100)
+                .setExecutionCachePolicies(EnumSet.of(MEMORY, PERSISTENCE))
+                .setVersionTypes(EnumSet.of(VersionType.NETWORK))
+                .setCacheLoaderFunc(
+                        (cacheQuery) -> () -> _getRoadEdges(
+                                cacheQuery.getServiceAreaId()
+                        ))
+                .build();
     }
 
     public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
@@ -165,9 +193,16 @@ public class NetworkDataDAO{
                 }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public Collection<RoadEdge> getRoadEdges(
+    public ServiceAreaRoadEdges getRoadEdges(
             int serviceAreaId) {
-        return planRepository
+        return serviceAreaRoadEdges.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId).build());
+    }
+
+
+    private ServiceAreaRoadEdges _getRoadEdges(
+            int serviceAreaId) {
+        return new ServiceAreaRoadEdges(
+                planRepository
                 .queryRoadEdgesbyServiceAreaId(serviceAreaId)
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
@@ -184,8 +219,11 @@ public class NetworkDataDAO{
                         LOG.error(err.getMessage(), err);
                         return null;
                     }
-                }).filter(e -> e != null).collect(Collectors.toList());
+                }).filter(e -> e != null).collect(Collectors.toList())
+        );
     }
+
+
 
     public List<Long> selectedRoadLocationIds(long planId,
                                                Map<Long, RoadLocation> roadLocationByLocationIdMap) {
