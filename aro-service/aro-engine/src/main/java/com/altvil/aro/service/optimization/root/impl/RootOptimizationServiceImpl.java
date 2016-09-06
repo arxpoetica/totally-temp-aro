@@ -161,17 +161,21 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 		public Set<LocationEntityType> getEntityTypes(ServiceLayer sl) {
 			Set<LocationEntityType> supportedTypes = processingLayerService
 					.getSupportedEntityTypes(sl);
+
 			Set<LocationEntityType> result = EnumSet
 					.noneOf(LocationEntityType.class);
 
-			for (LocationEntityType t : requestedTypes) {
-				if (supportedTypes.contains(t)) {
-					result.add(t);
+			
+			if( supportedTypes != null ) {
+				for (LocationEntityType t : requestedTypes) {
+					if (supportedTypes.contains(t)) {
+						result.add(t);
+					}
 				}
+
+				requestedTypes.removeAll(result);
 			}
-
-			requestedTypes.removeAll(result);
-
+			
 			return result;
 		}
 
