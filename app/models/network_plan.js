@@ -603,7 +603,7 @@ module.exports = class NetworkPlan {
         ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
       FROM aro.businesses
-      WHERE to_tsvector('english', name) @@ $2
+      WHERE to_tsvector('english', name) @@ plainto_tsquery($2)
 
       ORDER BY name ASC
 
