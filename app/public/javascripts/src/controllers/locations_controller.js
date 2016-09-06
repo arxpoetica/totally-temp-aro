@@ -409,7 +409,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   }
 
   function changeOptimization () {
-    $rootScope.optimizeBusinesses = $scope.show_businesses
+    $rootScope.optimizeMedium = $scope.business_categories_selected['medium']
+    $rootScope.optimizeLarge = $scope.business_categories_selected['large']
     $rootScope.optimizeSMB = $scope.business_categories_selected['small']
     $rootScope.optimizeHouseholds = $scope.show_households
     $rootScope.optimizeTowers = $scope.show_towers
