@@ -447,7 +447,10 @@ public interface NetworkPlanRepository extends
 			"            UNION\n" + 
 			"            SELECT geom FROM selected_analysis_areas\n" + 
 			"        ) u\n" + 
-			")", nativeQuery = true) 
+			")\n" +
+			"UPDATE client.plan\n" +
+			"SET area_bounds = (SELECT geom FROM union_area)\n" +
+			"WHERE id IN (SELECT id FROM master_plans)\n", nativeQuery = true) 
     void updateMasterPlanAreas(@Param("rootPlanId") long rootPlanId);
 
     
