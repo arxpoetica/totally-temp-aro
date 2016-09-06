@@ -103,7 +103,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   updateButton.on('click', () => {
     $scope.budget = parseBudget()
     checkBudget()
-    postChanges({})
+    postChanges({}, false)
   })
 
   const checkBudget = () => {
@@ -121,10 +121,10 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       layer.type !== 'network_nodes' &&
       layer.type !== 'towers') return
 
-    postChanges(changes)
+    postChanges(changes, true)
   })
 
-  function postChanges (changes) {
+  function postChanges (changes, lazy) {
     changes.algorithm = $scope.optimizationType.toUpperCase()
     changes.selectionMode = 'SELECTED_LOCATIONS'
     if ($scope.optimizationType === 'npv') {
@@ -137,6 +137,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     var locationTypes = map_layers.getFeatureLayer('locations').shows
     if (map_layers.getFeatureLayer('towers').visible) locationTypes = locationTypes.concat('towers')
     changes.locationTypes = locationTypes
+    changes.lazy = !!lazy
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'
     var config = {
@@ -149,7 +150,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     $http(config).success((response) => {
       updateButton.removeAttr('disabled')
       $rootScope.$broadcast('route_planning_changed', response)
-      $scope.pendingPost = _.size(changes) > 0
+      $scope.pendingPost = lazy
     }).error(() => {
       updateButton.removeAttr('disabled')
     })
@@ -157,11 +158,11 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 
   $scope.postChanges = postChanges
 
-  $scope.optimizationTypeChanged = () => postChanges({})
-  $scope.npvTypeChanged = () => postChanges({})
+  $scope.optimizationTypeChanged = () => postChanges({}, false)
+  $scope.npvTypeChanged = () => postChanges({}, false)
 
-  // $rootScope.$on('locations_layer_changed', () => postChanges({}))
-  // $rootScope.$on('towers_layer_changed', () => postChanges({}))
+  // $rootScope.$on('locations_layer_changed', () => postChanges({}, false))
+  // $rootScope.$on('towers_layer_changed', () => postChanges({}, false))
 
   $('#target-builder-upload input').change(() => {
     var form = $('#target-builder-upload').get(0)

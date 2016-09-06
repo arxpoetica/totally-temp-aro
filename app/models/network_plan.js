@@ -459,8 +459,7 @@ module.exports = class NetworkPlan {
         this._deleteTargets(plan_id, changes.deletions && changes.deletions.locations)
       ))
       .then(() => (
-        // call ARO-service only when changes is empty. This means the user selected "Get results"
-        _.size(changes) === 0 ? models.Network.recalculateNodes(plan_id, changes) : null
+        changes.lazy ? null : models.Network.recalculateNodes(plan_id, changes)
       ))
       .then(() => NetworkPlan.findPlan(plan_id))
   }
