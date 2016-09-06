@@ -606,6 +606,8 @@ module.exports = class NetworkPlan {
       WHERE to_tsvector('english', name) @@ $2
 
       ORDER BY name ASC
+
+      LIMIT 100
     `
     var wirecenters = database.query(sql, [`%${text}%`, text.toLowerCase()])
     var addresses = text.length > 0
