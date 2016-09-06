@@ -587,14 +587,25 @@ module.exports = class NetworkPlan {
     var sql = `
       SELECT
         code AS name,
-        ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
-        ST_AsGeoJSON(ST_envelope(geom))::json as bounds
+        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
         FROM client.service_area
        WHERE service_layer_id = (
           SELECT id FROM client.service_layer WHERE name='wirecenter'
         )
         AND lower(unaccent(code)) LIKE lower(unaccent($1))
-      ORDER BY code ASC
+
+      UNION ALL
+
+      SELECT
+        name,
+        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
+      FROM aro.businesses
+      WHERE lower(unaccent(name)) LIKE lower(unaccent($1))
+
+      ORDER BY name ASC
+      LIMIT 500
     `
     var wirecenters = database.query(sql, [`%${text}%`])
     var addresses = text.length > 0
