@@ -544,4 +544,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.downloadBusinesses = () => {
     window.location.href = `/financial_profile/${$scope.plan.id}/exportBusinesses`
   }
+
+  $scope.showBuildLease = () => {
+    $('#build-lease').modal('show')
+  }
 }])

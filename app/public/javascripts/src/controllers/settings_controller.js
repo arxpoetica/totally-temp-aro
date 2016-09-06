@@ -1,5 +1,4 @@
 /* global app $ globalServiceLayers swal _ */
-// Navigation Menu Controller
 app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter', '$timeout', ($scope, $rootScope, $http, $filter, $timeout) => {
   $scope.serviceLayers = globalServiceLayers
 
