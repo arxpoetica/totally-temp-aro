@@ -218,11 +218,11 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 		public CashFlows computeCashFlow(NetworkFinancialInput finacialInputs,
 				int periods) {
 			
-			log.info("Compute Cashflow aprox");
+			log.info("Compute Cashflow aprox " + periods + " " + finacialInputs.getLocationDemand());
 			
 			Map<LocationEntityType, StreamFunction> penetrationMap = createPenetrationCurveMap(finacialInputs
 					.getLocationDemand());
-
+		
 			CashFlows cf =  new CashFlowGenerator(map, penetrationMap,
 					finacialInputs.getLocationDemand(),
 					finacialInputs.getFixedCosts()).createCashFlow(periods);

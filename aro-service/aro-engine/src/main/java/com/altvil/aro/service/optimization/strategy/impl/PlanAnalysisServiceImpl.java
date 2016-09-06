@@ -117,8 +117,31 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 
 	public Function<NetworkFinancialInput, CashFlows> createCashFlowFunction(
 			int years) {
-		return (inputs) -> roicInputService.createCashFlows(SpeedCategory.cat7,
-				inputs, years);
+		return (inputs) -> {
+			try {
+				return roicInputService.createCashFlows(SpeedCategory.cat7, inputs, years);
+			} catch( Throwable err ) {
+				log.error(err.getMessage(), err);
+				return new CashFlows() {
+
+					@Override
+					public int getPeriods() {
+						return 15;
+					}
+
+					@Override
+					public double[] getAsRawData() {
+						return new double[15] ;
+					}
+
+					@Override
+					public double getCashFlow(int period) {
+						return 0;
+					}
+					
+				} ;
+			}
+		};
 	}
 
 	public Function<NetworkFinancialInput, CashFlows> createRoicCashFlowFunction(
@@ -302,8 +325,10 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 		@Override
 		public D get() {
 			if (!computed) {
+				computed = true;
 				value = supplier.get();
 				return value;
+
 			}
 			return value;
 		}
