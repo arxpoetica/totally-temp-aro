@@ -1,4 +1,4 @@
-/* global app user_id google $ map FormData XMLHttpRequest swal */
+/* global app user_id google $ map FormData XMLHttpRequest swal _ */
 // Search Controller
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', ($scope, $rootScope, $http, map_tools, map_layers) => {
   // Controller instance variables
@@ -149,7 +149,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     $http(config).success((response) => {
       updateButton.removeAttr('disabled')
       $rootScope.$broadcast('route_planning_changed', response)
-      $scope.pendingPost = false
+      $scope.pendingPost = _.size(changes) > 0
     }).error(() => {
       updateButton.removeAttr('disabled')
     })
