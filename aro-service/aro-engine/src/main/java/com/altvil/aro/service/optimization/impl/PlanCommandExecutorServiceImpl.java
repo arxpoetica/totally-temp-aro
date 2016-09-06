@@ -41,7 +41,6 @@ import com.altvil.utils.StreamUtil;
 @Service
 public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 			.getLogger(PlanServiceImpl.class.getName());
 
