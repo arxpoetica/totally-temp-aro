@@ -1,4 +1,4 @@
-/* global app user_id google $ map FormData XMLHttpRequest swal _ */
+/* global app user_id google $ map FormData XMLHttpRequest swal config */
 // Search Controller
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', ($scope, $rootScope, $http, map_tools, map_layers) => {
   // Controller instance variables
@@ -134,20 +134,29 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       }
     }
 
-    var locationTypes = map_layers.getFeatureLayer('locations').shows
-    if (map_layers.getFeatureLayer('towers').visible) locationTypes = locationTypes.concat('towers')
+    var locationTypes = []
+    var scope = config.ui.eye_checkboxes ? $rootScope : $scope
+
+    if (scope.optimizeHouseholds) locationTypes.push('household')
+    if (scope.optimizeBusinesses) locationTypes.push('businesses')
+    if (scope.optimizeMedium) locationTypes.push('medium')
+    if (scope.optimizeLarge) locationTypes.push('large')
+    if (scope.optimizeSMB) locationTypes.push('small')
+    if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
+    if (scope.optimizeTowers) locationTypes.push('celltower')
+
     changes.locationTypes = locationTypes
     changes.lazy = !!lazy
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'
-    var config = {
+    var req = {
       url: url,
       method: 'post',
       saving_plan: true,
       data: changes
     }
     updateButton.attr('disabled', 'disabled')
-    $http(config).success((response) => {
+    $http(req).success((response) => {
       updateButton.removeAttr('disabled')
       $rootScope.$broadcast('route_planning_changed', response)
       $scope.pendingPost = lazy
