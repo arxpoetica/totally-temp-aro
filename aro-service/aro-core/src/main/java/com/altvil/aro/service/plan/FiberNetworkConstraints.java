@@ -23,6 +23,7 @@ public class FiberNetworkConstraints implements Serializable {
 	
 	private Boolean clusterMergingSupported ;
 	private Boolean dropCableConstraintsSupported ;
+	private Boolean useDirectRouting ;
 
 	public FiberNetworkConstraints() {
 		// TODO Auto-generated constructor stub
@@ -108,6 +109,14 @@ public class FiberNetworkConstraints implements Serializable {
 	public void setDropCableConstraintsSupported(
 			Boolean dropCableConstraintsSupported) {
 		this.dropCableConstraintsSupported = dropCableConstraintsSupported;
+	}
+
+	public Boolean getUseDirectRouting() {
+		return useDirectRouting;
+	}
+
+	public void setUseDirectRouting(Boolean useDirectRouting) {
+		this.useDirectRouting = useDirectRouting;
 	}
 	
 	

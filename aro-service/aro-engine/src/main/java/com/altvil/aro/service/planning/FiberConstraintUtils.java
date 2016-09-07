@@ -9,6 +9,7 @@ public class FiberConstraintUtils {
 		final FtthThreshholds.Builder builder = new FtthThreshholds.Builder();
 		if (fiberNetworkConstraints != null) {
 			builder
+			.setUseDirectRouting(fiberNetworkConstraints.getUseDirectRouting())
 			.setDropCableInFeet(fiberNetworkConstraints.getDropCableLengthInFeet())
 			.setPrefferedOffsetInFeet(fiberNetworkConstraints.getPreferredCableLengthInFeet())
 			.setMaxOffsetInFeet(fiberNetworkConstraints.getMaxDistrubitionLengthInFeet())
