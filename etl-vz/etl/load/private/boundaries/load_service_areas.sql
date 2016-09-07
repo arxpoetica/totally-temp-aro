@@ -1,75 +1,75 @@
 -- Load client-defined CRAN boundaries (PRIVATE - client data)
 -- This will only Load Missing Service Areas
 WITH all_service_areas AS (
-	SELECT
-		w.gid,
-		l.id AS service_layer_id,
-		w.gid::varchar AS source_id
-	FROM boundaries.cran w, client.service_layer l
-	WHERE l.name='cran'
-	ORDER BY w.gid
+        SELECT
+                w.id,
+                l.id AS service_layer_id,
+                w.id::varchar AS source_id
+        FROM boundaries.cran w, client.service_layer l
+        WHERE l.name='cran'
+        ORDER BY w.id
 )
 ,
 missing_service_areas AS (
-	SELECT
-		w.gid,
-		w.service_layer_id
-	FROM all_service_areas w
-	LEFT JOIN client.service_area sa
-		ON sa.source_id = w.source_id
-		AND sa.service_layer_id = w.service_layer_id
-	WHERE sa.id IS NULL
+        SELECT
+                w.id,
+                w.service_layer_id
+        FROM all_service_areas w
+        LEFT JOIN client.service_area sa
+                ON sa.source_id = w.source_id
+                AND sa.service_layer_id = w.service_layer_id
+        WHERE sa.id IS NULL
 )
 INSERT INTO client.service_area (service_layer_id, service_type, source_id, code, geog, geom, edge_buffer, location_edge_buffer)
-	SELECT
-		m.service_layer_id,
-		'A',
-		c.gid::varchar,
-		c.name,
-		Geography(ST_Force_2D(ST_MakeValid(the_geom)) as geog,
-		ST_Force_2D(ST_MakeValid(the_geom)) AS geom,
-		ST_Transform(ST_MakeValid(ST_buffer(ST_Convexhull(the_geom))::Geography, 200)::Geometry, 4326),
-		ST_Transform(ST_MakeValid(ST_buffer(ST_Convexhull(the_geom))::Geography, 50)::Geometry, 4326)
+        SELECT
+                m.service_layer_id,
+                'A',
+                c.gid::varchar,
+                c.name,
+                Geography(ST_Force_2D(ST_MakeValid(the_geom))) as geog,
+                ST_Force_2D(ST_MakeValid(the_geom)) AS geom,
+                ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 200)::Geometry, 4326),
+                ST_Transform(ST_buffer(ST_Convexhull(the_geom)::Geography, 50)::Geometry, 4326)
 FROM missing_service_areas m
 JOIN boundaries.cran c
-	ON m.gid = c.gid;
+        ON m.id = c.id;
 -- Boundaries around directional facility (points) created by AV&Co.
 
 -- Load client-defined CRAN boundaries (PRIVATE - client data)
 -- This will only Load Missing Service Areas
 WITH all_service_areas AS (
-	SELECT
-		w.gid,
-		l.id AS service_layer_id,
-		w.gid::varchar AS source_id
-	FROM boundaries.directional_facilities w, client.service_layer l
-	WHERE l.name='directional_facility'
-	ORDER BY w.gid
+    SELECT
+        w.gid,
+        l.id AS service_layer_id,
+        w.gid::varchar AS source_id
+    FROM boundaries.directional_facilities w, client.service_layer l
+    WHERE l.name='directional_facility'
+    ORDER BY w.gid
 )
 ,
 missing_service_areas AS (
-	SELECT
-		w.gid,
-		w.service_layer_id
-	FROM all_service_areas w
-	LEFT JOIN client.service_area sa
-		ON sa.source_id = w.source_id
-		AND sa.service_layer_id = w.service_layer_id
-	WHERE sa.id IS NULL
+    SELECT
+        w.gid,
+        w.service_layer_id
+    FROM all_service_areas w
+    LEFT JOIN client.service_area sa
+        ON sa.source_id = w.source_id
+        AND sa.service_layer_id = w.service_layer_id
+    WHERE sa.id IS NULL
 )
 INSERT INTO client.service_area (service_layer_id, service_type, source_id, code, geog, geom, edge_buffer, location_edge_buffer)
-	SELECT
-		m.service_layer_id,
-		'A',
-		df.gid::varchar,
-		df.name,
-		Geography(ST_Force_2D(ST_MakeValid(the_geom)) as geog,
-		ST_Force_2D(ST_MakeValid(the_geom)) AS geom,
-		ST_Transform(ST_buffer(ST_MakeValid(ST_Convexhull(the_geom))::Geography, 200)::Geometry, 4326),
-		ST_Transform(ST_buffer(ST_MakeValid(ST_Convexhull(the_geom))::Geography, 50)::Geometry, 4326)
-	FROM missing_service_areas m
-	JOIN boundaries.directional_facilities df
-	ON m.gid = df.gid;
+    SELECT
+        m.service_layer_id,
+        'A',
+        df.gid::varchar,
+        df.name,
+        Geography(ST_Force_2D(ST_MakeValid(the_geom))) as geog,
+        ST_Force_2D(ST_MakeValid(the_geom)) AS geom,
+        ST_Transform(ST_buffer(ST_MakeValid(ST_Convexhull(the_geom))::Geography, 200)::Geometry, 4326),
+        ST_Transform(ST_buffer(ST_MakeValid(ST_Convexhull(the_geom))::Geography, 50)::Geometry, 4326)
+    FROM missing_service_areas m
+    JOIN boundaries.directional_facilities df
+    ON m.gid = df.gid;
 	
 
 -- GeoTel Data
