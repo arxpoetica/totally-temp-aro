@@ -269,13 +269,19 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
             this._canceler = null
           }
           this._canceler = $q.defer()
+          var spinner = $(`.map-layer-spinner-${this.type}`)
+          spinner.addClass('spin')
           $http({
             url: api_endpoint,
             method: 'GET',
             params: params,
             timeout: this._canceler.promise
           })
+          .error(() => {
+            spinner.removeClass('spin')
+          })
           .success((response) => {
+            spinner.removeClass('spin')
             this.is_loading = false
             var data = response
             // hide layer to change styles "in background"
