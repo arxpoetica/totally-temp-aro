@@ -38,7 +38,7 @@ public class BusinessesReportRepository {
                             "                                   where p.parent_plan_id = plan_ids.id \n" +
                             "                            ),        \n" +
                             "                            areasShapes as (\n" +
-                            "                                select sa.id, cast (st_buffer (cast(st_simplify(sa.geom) as geography) , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
+                            "                                select sa.id, cast (st_buffer (sa.geog , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
                             "                                plan_ids p_id\n" +
                             "                                inner join client.plan p\n" +
                             "                                on p_id.id = p.id\n" +
@@ -95,7 +95,7 @@ public class BusinessesReportRepository {
                             "                where p.parent_plan_id = plan_ids.id \n" +
                             "        ),        \n" +
                             "        areasShapes as (\n" +
-                            "            select sa.id, cast (st_buffer (cast(st_simplify(sa.geom) as geography) , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
+                            "            select sa.id, cast st_buffer (sa.geog , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
                             "            plan_ids p_id\n" +
                             "            inner join client.plan p\n" +
                             "            on p_id.id = p.id\n" +
@@ -158,7 +158,7 @@ public class BusinessesReportRepository {
                             "                where p.parent_plan_id = plan_ids.id \n" +
                             "        ),        \n" +
                             "        areasShapes as (\n" +
-                            "            select sa.id, cast (st_buffer (cast(st_simplify(sa.geom) as geography) , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
+                            "            select sa.id, cast (st_buffer (sa.geog , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
                             "            plan_ids p_id\n" +
                             "            inner join client.plan p\n" +
                             "            on p_id.id = p.id\n" +
@@ -217,7 +217,7 @@ public class BusinessesReportRepository {
                     "                where p.parent_plan_id = plan_ids.id \n" +
                     "        ),        \n" +
                     "        areasShapes as (\n" +
-                    "            select sa.id, cast (st_buffer (cast(st_simplify(sa.geom) as geography) , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
+                    "            select sa.id, cast (st_buffer (sa.geog , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
                     "            plan_ids p_id\n" +
                     "            inner join client.plan p\n" +
                     "            on p_id.id = p.id\n" +
