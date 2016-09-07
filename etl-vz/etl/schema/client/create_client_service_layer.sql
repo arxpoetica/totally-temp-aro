@@ -15,9 +15,14 @@ ALTER TABLE "client"."service_layer" OWNER TO "aro";
 INSERT INTO client.service_layer (name, description, is_user_defined)
 VALUES('wirecenter', 'Wirecenter Layer', false) ;
 
-INSERT INTO client.service_layer (name, description, is_user_defined) 
+INSERT INTO client.service_layer (name, description, is_user_defined)
 VALUES('cran', 'Cran Layer', false) ;
 
 INSERT INTO client.service_layer (name, description, is_user_defined)
 VALUES('directional_facility', 'Directional Facility', false) ;
 
+ALTER TABLE client.service_layer ADD COLUMN show_in_boundaries BOOL NOT NULL DEFAULT TRUE;
+
+UPDATE client.service_layer SET show_in_boundaries=FALSE WHERE name='wirecenter';
+
+UPDATE client.service_layer SET show_in_boundaries=FALSE WHERE name='directional_facility';

@@ -117,6 +117,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   ]
 
   globalServiceLayers.forEach((serviceLayer) => {
+    if (!serviceLayer.show_in_boundaries) return
     var color = serviceLayersColors.shift() || 'black'
     var layer = new MapLayer({
       name: serviceLayer.description,
