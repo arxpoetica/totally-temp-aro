@@ -232,7 +232,7 @@ public class BusinessesReportRepository {
                     "        on ST_Contains(areasShapes.buffered_shape  , l.geom) \n" +
                     "        ),\n" +
                     "        buffered_routes as ( \n" +
-                    "        select cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape  \n" +
+                    "        select fr.geom, cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape  \n" +
                     "        from client.fiber_route fr  \n" +
                     "        join plan_ids pid on fr.plan_id = pid.id  \n" +
                     "        ) " +
