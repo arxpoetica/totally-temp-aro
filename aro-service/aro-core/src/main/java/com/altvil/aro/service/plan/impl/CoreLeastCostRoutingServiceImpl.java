@@ -403,45 +403,6 @@ public class CoreLeastCostRoutingServiceImpl implements
 			return new DefaultGeneratedFiberRoute(sr.getSourceVertex(), edges);
 		}
 
-		// private String toName(PinnedLocation pl) {
-		//
-		// GeoSegmentTransform gt = pl.getGeoSegment().getParentTransform();
-		// if (gt == null) {
-		// return "IDENTITY";
-		// }
-		//
-		// return gt.getClass().getSimpleName();
-		//
-		// }
-
-		// private void verifyAssignments(Map<GraphAssignment, GraphNode> map,
-		// Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap) {
-		// int count = 0;
-		//
-		// for (Map.Entry<GraphAssignment, GraphNode> e : map.entrySet()) {
-		// if (e.getValue() == null) {
-		//
-		// GraphEdgeAssignment ge = (GraphEdgeAssignment) e.getKey();
-		// GraphEdgeAssignment originalAssignment = assignmentMap
-		// .get(ge);
-		// String transform = toName(originalAssignment
-		// .getPinnedLocation());
-		//
-		// count++;
-		// log.error("Failed Assignment Length = "
-		// + ge.getGeoSegment().getLength() + " gid= "
-		// + ge.getGeoSegment().getGid() + " id=" + " name = "
-		// + transform
-		// + +System.identityHashCode(ge.getGeoSegment()));
-		// }
-		// }
-		//
-		// if (count > 0) {
-		// throw new RuntimeException("Failed assign all vertices");
-		// }
-		//
-		// }
-
 		private Map<GraphEdgeAssignment, GraphEdgeAssignment> extractAssignments(
 				GraphMapping co) {
 			Map<GraphEdgeAssignment, GraphEdgeAssignment> assignmentMap = new HashMap<>();

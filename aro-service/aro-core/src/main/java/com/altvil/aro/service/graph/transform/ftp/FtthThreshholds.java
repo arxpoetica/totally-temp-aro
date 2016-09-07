@@ -7,6 +7,7 @@ import com.altvil.utils.UnitUtils;
 public class FtthThreshholds {
 
 	private boolean reduceIncomingStreams = false;
+	private boolean  useDirectRouting = false ;
 	private int maxlocationPerFDT = 12;
 	private int threshHoldClusteringFDT = 10;
 	private HubModel hubModel;
@@ -34,6 +35,12 @@ public class FtthThreshholds {
 
 	public double getLocationBulkThreshhold() {
 		return locationBulkThreshhold;
+	}
+	
+	
+
+	public boolean isUseDirectRouting() {
+		return useDirectRouting;
 	}
 
 	public DropCableModel getDropCableModel() {
@@ -75,6 +82,8 @@ public class FtthThreshholds {
 	public double getMaxDropCableLengthInMeters() {
 		return maxDropCableLengthInMeters;
 	}
+	
+	
 
 	public HubModel getHubModel() {
 		return hubModel;
@@ -163,6 +172,13 @@ public class FtthThreshholds {
 						.toMeters(feet);
 			}
 			return this;
+		}
+		
+		public Builder setUseDirectRouting(Boolean useDirectRouting) {
+			if( useDirectRouting != null ) {
+				thresholds.useDirectRouting = useDirectRouting ;
+			}
+			return null ;
 		}
 
 		public Builder setClusterMergingSupported(

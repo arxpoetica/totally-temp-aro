@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.altvil.aro.service.demand.DefaultAssignedEntityDemand;
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.EdgeUtils;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 
@@ -66,7 +67,7 @@ public class EdgeList {
 		}
 
 		PinnedLocation pl = pinnedLocations.get(startIndex).getPinnedLocation();
-		double length = edge.getWeight() - pl.getOffsetFromStartVertex();
+		double length = EdgeUtils.getLength(edge) - pl.getOffsetFromStartVertex();
 		List<DefaultAssignedEntityDemand> subList = pinnedLocations.subList(startIndex,
 				pinnedLocations.size());
 		return new EdgeList(edge, subList, length);
