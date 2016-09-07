@@ -225,7 +225,7 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 			V source = paths.findClosestTarget(sources);
 
 			if (source != null) {
-				final double sourceWeight = paths.getWeight(source);
+				 double sourceWeight = paths.getWeight(source);
 				
 				if (sourceWeight < shortestPathLength) {
 					GraphPath<V, E> path = paths.getGraphPath(source);
@@ -237,13 +237,12 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 						//Still need to try and find a shortest Path
 						if( shortedPath == null ) {
 							ClosestTargetItr targetItr = paths.getClosestTargetItr(sources) ;
-							targetItr.next();
 							source = null ;
 							while((source= (V) targetItr.next()) !=null) {
 								path = paths.getGraphPath(source);
 								if (isValidPath(path)) {
 									shortedPath = path;
-									shortestPathLength = sourceWeight;
+									shortestPathLength = paths.getWeight(source) ;
 									break ;
 								}
 							}

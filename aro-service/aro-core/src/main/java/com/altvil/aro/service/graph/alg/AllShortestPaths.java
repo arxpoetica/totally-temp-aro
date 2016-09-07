@@ -122,9 +122,6 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 			List<V> ordered = new ArrayList<>();
 			ordered.addAll(treeMap.values());
 			Iterator<V> itr = ordered.iterator();
-			if (itr.hasNext()) {
-				itr.next(); // Remove leading result as already computed
-			}
 
 			return itr;
 		}
