@@ -214,32 +214,71 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 
 		return edges;
 	}
-
+	
+	
 	private GraphPath<V, E> getClosestSource(Set<V> sources) {
-		TreeMap<Double, GraphPath<V, E>> treeMap = new TreeMap<>();
+		double shortestPathLength = Double.MAX_VALUE;
+		GraphPath<V, E> shortedPath = null;
+		
 		for (V target : targetMap.keySet()) {
 			AllShortestPaths<V, E> paths = targetMap.get(target);
-			TreeMultimap<Double, V> tm = paths.findPaths(sources);
+			V source = paths.findClosestTarget(sources);
 
-			Set<Map.Entry<Double, V>> entries = tm.entries();
-			if (!entries.isEmpty()) {
-				for(Map.Entry<Double, V> entry : entries) {
-					GraphPath<V, E> path = paths.getGraphPath(entry.getValue());
-					if( isValidPath(path) ) {
-						treeMap.put(path.getWeight(), path);
-						break ;
+			if (source != null) {
+				final double sourceWeight = paths.getWeight(source);
+				
+				if (sourceWeight < shortestPathLength) {
+					GraphPath<V, E> path = paths.getGraphPath(source);
+					
+					if (isValidPath(path)) {
+						shortedPath = paths.getGraphPath(source);
+						shortestPathLength = sourceWeight;
+					} else {
+						TreeMultimap<Double, V> tm = paths.findPaths(sources);
+						Set<Map.Entry<Double, V>> entries = tm.entries();
+						for(Map.Entry<Double, V> entry : entries) {
+							GraphPath<V, E> nextPath = paths.getGraphPath(entry.getValue());
+							if( isValidPath(nextPath) ) {
+								shortedPath = paths.getGraphPath(source);
+								shortestPathLength = path.getWeight() ;
+								break ;
+							}
+						}
+						
 					}
+
 				}
 			}
 		}
 		
-		if( treeMap.isEmpty() ) {
-			return null ;
-		}
-		
-		return treeMap.values().iterator().next() ;
-		
+		return shortedPath ;
 	}
+
+//	private GraphPath<V, E> getClosestSource(Set<V> sources) {
+//		TreeMap<Double, GraphPath<V, E>> treeMap = new TreeMap<>();
+//		for (V target : targetMap.keySet()) {
+//			AllShortestPaths<V, E> paths = targetMap.get(target);
+//			TreeMultimap<Double, V> tm = paths.findPaths(sources);
+//
+//			Set<Map.Entry<Double, V>> entries = tm.entries();
+//			if (!entries.isEmpty()) {
+//				for(Map.Entry<Double, V> entry : entries) {
+//					GraphPath<V, E> path = paths.getGraphPath(entry.getValue());
+//					if( isValidPath(path) ) {
+//						treeMap.put(path.getWeight(), path);
+//						break ;
+//					}
+//				}
+//			}
+//		}
+//		
+//		if( treeMap.isEmpty() ) {
+//			return null ;
+//		}
+//		
+//		return treeMap.values().iterator().next() ;
+//		
+//	}
 	
 	private boolean isValidPath(GraphPath<V, E> path) {
 		return pathPredicate.isValid(sourceRootMap.get(path.getEndVertex()), path) ;
