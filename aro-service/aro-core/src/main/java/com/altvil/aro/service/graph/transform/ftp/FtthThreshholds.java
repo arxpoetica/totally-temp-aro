@@ -178,7 +178,7 @@ public class FtthThreshholds {
 			if( useDirectRouting != null ) {
 				thresholds.useDirectRouting = useDirectRouting ;
 			}
-			return null ;
+			return this ;
 		}
 
 		public Builder setClusterMergingSupported(
