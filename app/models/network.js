@@ -256,7 +256,8 @@ module.exports = class Network {
       planId: plan_id,
       locationTypes: options.locationTypes,
       algorithm: options.algorithm,
-      analysisSelectionMode: options.selectionMode
+      analysisSelectionMode: options.selectionMode,
+      fiberNetworkConstraints: options.fiberNetworkConstraints
     }
     var req = {
       method: 'POST',
@@ -268,6 +269,7 @@ module.exports = class Network {
     if (options.budget) financialConstraints.budget = options.budget
     if (options.discountRate) financialConstraints.discountRate = options.discountRate
     if (options.irrThreshold) body.threshold = options.irrThreshold
+
     return Promise.all([
       database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),

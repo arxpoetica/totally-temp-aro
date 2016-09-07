@@ -14,6 +14,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.npvType = 'targeted'
   $scope.user_id = user_id
   $scope.plan = null
+  $scope.technology = 'direct_routing'
 
   const planChanged = (e, plan) => {
     $scope.plan = plan
@@ -147,6 +148,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 
     changes.locationTypes = locationTypes
     changes.lazy = !!lazy
+    changes.fiberNetworkConstraints = {
+      useDirectRouting: $scope.technology === 'direct_routing'
+    }
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'
     var req = {

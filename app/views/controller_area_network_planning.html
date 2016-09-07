@@ -112,12 +112,17 @@
   <form>
     <div class="radio">
       <label>
-        <input type="radio" name="technology" checked> ODN 1.0 (Centralized Split)
+        <input type="radio" name="technology" ng-model="technology" value="direct_routing" checked> Direct Routing
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="technology" ng-model="technology" value="odn1" checked> ODN 1.0 (Centralized Split)
       </label>
     </div>
     <div class="radio disabled">
       <label>
-        <input type="radio" name="technology" disabled> ODN 2.0 (Distributed Split)
+        <input type="radio" name="technology" ng-model="technology" value="odn2" disabled> ODN 2.0 (Distributed Split)
       </label>
     </div>
   </form>
