@@ -7,6 +7,7 @@ app.controller('selected_census_block_controller', ['$scope', '$rootScope', '$ht
     $http.get(`/census_blocks/${id}/info`)
       .success((response) => {
         $scope.carriers = response
+        $scope.selectedId = id
         $('#modal-census-block').modal('show')
       })
   })

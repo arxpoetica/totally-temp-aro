@@ -181,8 +181,16 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         style_options: {
           normal: {
             strokeColor: '#d3d3d3',
-            strokeWeight: 2,
+            strokeWeight: 1,
             fillColor: 'blue'
+          },
+          highlight: {
+            strokeColor: 'brown',
+            strokeWeight: 2
+          },
+          selected: {
+            strokeColor: 'brown',
+            strokeWeight: 2
           }
         },
         threshold: 13,
@@ -191,7 +199,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
           var speed = feature.getProperty('download_speed')
           var h = 120 - speed * 10
           styles.fillColor = 'hsl(' + h + ',100%,30%)'
-        }
+        },
+        highlighteable: true,
+        single_selection: true
       })
       layer.onDataLoaded = () => {
         var dataLayer = layer.data_layer
