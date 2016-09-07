@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
@@ -22,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.alg.AllShortestPaths.ClosestTargetItr;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.google.common.collect.TreeMultimap;
@@ -234,17 +234,20 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 						shortedPath = paths.getGraphPath(source);
 						shortestPathLength = sourceWeight;
 					} else {
-						TreeMultimap<Double, V> tm = paths.findPaths(sources);
-						Set<Map.Entry<Double, V>> entries = tm.entries();
-						for(Map.Entry<Double, V> entry : entries) {
-							GraphPath<V, E> nextPath = paths.getGraphPath(entry.getValue());
-							if( isValidPath(nextPath) ) {
-								shortedPath = paths.getGraphPath(source);
-								shortestPathLength = path.getWeight() ;
-								break ;
+						//Still need to try and find a shortest Path
+						if( shortedPath == null ) {
+							ClosestTargetItr targetItr = paths.getClosestTargetItr(sources) ;
+							targetItr.next();
+							source = null ;
+							while((source= (V) targetItr.next()) !=null) {
+								path = paths.getGraphPath(source);
+								if (isValidPath(path)) {
+									shortedPath = path;
+									shortestPathLength = sourceWeight;
+									break ;
+								}
 							}
 						}
-						
 					}
 
 				}
