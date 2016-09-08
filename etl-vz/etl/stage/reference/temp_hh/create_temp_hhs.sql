@@ -22,7 +22,7 @@ CREATE INDEX temp_households_geog_gist ON temp_hh.households USING gist (geog);
 -- Create children tables for each state
 DO $$
 DECLARE
-    all_states text[][] := array[['NY', '36'], ['WA', '53']];
+    all_states text[][] := array[['NY', '36']];
     state text[];
     current_table text;
 

@@ -30,7 +30,7 @@ CREATE INDEX ref_businesses_infousa_sic4 ON ref_businesses.infousa USING btree (
 
 DO $$
 DECLARE
-    all_states text[][] := array[['NY', '36'], ['WA', '53']];
+    all_states text[][] := array[['NY', '36']];
     state text[];
     current_table text;
 

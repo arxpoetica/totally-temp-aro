@@ -29,14 +29,13 @@ BEGIN
         RAISE NOTICE '*************************';
         RAISE NOTICE '*** CURRENT STATE: %', state[1];
 
-        current_table := data_schema || '.' || lower(state[1]) || '_edges';
+        current_table := data_schema || '.edges_' || lower(state[1]);
         current_source_table := source_data_schema || '.' || lower(state[1])|| '_edges';
         state_start := timeofday()::timestamp;
         
 
         RAISE NOTICE '**** CREATING TABLE ****';
-        EXECUTE 'CREATE TABLE ' || current_table || ' (CHECK (statefp = ''' || state[2] || '''), CONSTRAINT pkey_aro_' || lower(state[1]) || '_edges_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
-
+        EXECUTE 'CREATE TABLE IF NOT EXISTS' || current_table || ' (CHECK (statefp = ''' || state[2] || '''), CONSTRAINT pkey_aro_edges_' || lower(state[1]) || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
         
         expr2 := 'INSERT INTO ' || current_table || '
                 (
