@@ -25,6 +25,7 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 	private V source;
 	private WeightedGraph<V, E> graph;
 	private boolean reversed = false;
+	private ClosestTargetItr targetItr = null;
 
 	private final Map<V, Double> pathLengthForSeenVertex = new HashMap<>();
 	private final ClosestFirstSurfaceIterator<V, E> itr;
@@ -83,22 +84,32 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 
 		private Collection<V> targets;
 
-		private Iterator<V> knownTargetItr;
+		private List<V> knownTargets = new ArrayList<>();
+		private TreeMap<Double, V> treeMap = new TreeMap<>();
 		private TargetState targetState = TargetState.KNOWN;
+		private int index = 0;
 
-		public ClosestTargetItr(Collection<V> targets) {
+		public ClosestTargetItr() {
 			super();
-			this.targets = targets;
-			knownTargetItr = orderKnown() ;
+		}
+
+		public ClosestTargetItr setTargets(Collection<V> targets) {
+
+			knownTargets.clear();
+			treeMap.clear();
+			index = 0;
+			knownTargets = orderKnown();
+	
+			return this;
 		}
 
 		public V next() {
 
 			switch (targetState) {
-			
+
 			case KNOWN:
-				if (knownTargetItr.hasNext()) {
-					return knownTargetItr.next();
+				if (index < knownTargets.size()) {
+					return knownTargets.get(index++);
 				}
 				targetState = TargetState.UNKNOWN;
 				return next();
@@ -109,21 +120,17 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 
 		}
 
-		private Iterator<V> orderKnown() {
-
-			TreeMap<Double, V> treeMap = new TreeMap<>();
-
+		private List<V> orderKnown() {
+		
 			for (V target : targets) {
 				Double distance = pathLengthForSeenVertex.get(target);
 				if (distance != null) {
 					treeMap.put(distance, target);
 				}
 			}
-			List<V> ordered = new ArrayList<>();
-			ordered.addAll(treeMap.values());
-			Iterator<V> itr = ordered.iterator();
 
-			return itr;
+			knownTargets.addAll(treeMap.values());
+			return knownTargets;
 		}
 
 		private V nextUnknown() {
@@ -140,12 +147,15 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 			return null;
 		}
 
-		
-
 	}
 
 	public ClosestTargetItr getClosestTargetItr(Collection<V> targets) {
-		return new ClosestTargetItr(targets);
+
+		if (targetItr == null) {
+			targetItr = new ClosestTargetItr();
+		}
+
+		return targetItr.setTargets(targets);
 	}
 
 	public V findClosestTarget(Collection<V> targets) {
