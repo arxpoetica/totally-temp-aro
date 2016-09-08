@@ -22,6 +22,7 @@ module.exports = class CensusBlock {
     var sql = `
       SELECT
         cb.gid AS id,
+        cb.tabblock_id,
         ST_AsGeoJSON(cb.geom)::json AS geom,
         cb.name,
         cbc.download_speed,
@@ -46,6 +47,7 @@ module.exports = class CensusBlock {
     var sql = `
         SELECT DISTINCT ON (cb.gid)
           cb.gid AS id,
+          cb.tabblock_id,
           ST_AsGeoJSON(cb.geom)::json AS geom,
           cb.name,
           cbc.download_speed,
