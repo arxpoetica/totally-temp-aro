@@ -377,7 +377,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 											renoded.getGraph(),
 											renoded.getGraphNode(a
 													.getGraphAssignment()),
-											15 * 1000), renoded, a));
+											30 * 1000), renoded, a));
 				}
 			});
 
