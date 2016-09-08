@@ -46,9 +46,10 @@ etl_aro:
 ###################
 
 
-reset: reset_financial reset_client reset_aro reset_auth
-load: etl_aro etl_client etl_financial etl_auth 
+reset: reset_financial reset_client reset_aro
+load: etl_aro etl_client etl_financial
 
+etl_reload_auth: reset_auth etl_auth
 etl_reload_all: reset load
 
 

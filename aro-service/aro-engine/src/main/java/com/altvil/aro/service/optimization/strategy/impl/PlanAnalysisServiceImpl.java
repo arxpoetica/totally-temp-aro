@@ -84,13 +84,43 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 
 	private Supplier<CashFlows> createCashFlowSupplier(
 			RoicFinancialInput financialInput) {
-		return () -> roicInputService.createRoicCashFlows(financialInput);
+		//RODO pass in years from INPUT
+		return makeSafe(() -> roicInputService.createRoicCashFlows(financialInput),15);
+	}
+
+	private Supplier<CashFlows> makeSafe(Supplier<CashFlows> s,
+			int periods) {
+
+		return () -> {
+			try {
+				return s.get() ;
+			} catch (Throwable err) {
+				log.error(err.getMessage(), err) ;
+				return new CashFlows() {
+					@Override
+					public int getPeriods() {
+						return periods;
+					}
+
+					@Override
+					public double[] getAsRawData() {
+						return new double[periods] ;
+					}
+
+					@Override
+					public double getCashFlow(int period) {
+						return 0 ;
+					}
+
+				};
+			}
+		};
 	}
 
 	private Supplier<CashFlows> createCashFlowSupplier(
 			NetworkFinancialInput basicInput, int years) {
-		return () -> roicInputService.createCashFlows(SpeedCategory.cat7,
-				basicInput, years);
+		return makeSafe(() -> roicInputService.createCashFlows(SpeedCategory.cat7,
+				basicInput, years),years);
 	}
 
 	@Override
@@ -110,6 +140,7 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 		return (networkFinancials) -> {
 			Supplier<CashFlows> s = createCashFlowSupplier(networkFinancials,
 					years);
+
 			return createFinancialAnalysis(networkFinancials, s, s,
 					discountRate);
 		};
@@ -117,8 +148,32 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 
 	public Function<NetworkFinancialInput, CashFlows> createCashFlowFunction(
 			int years) {
-		return (inputs) -> roicInputService.createCashFlows(SpeedCategory.cat7,
-				inputs, years);
+		return (inputs) -> {
+			try {
+				return roicInputService.createCashFlows(SpeedCategory.cat7,
+						inputs, years);
+			} catch (Throwable err) {
+				log.error(err.getMessage(), err);
+				return new CashFlows() {
+
+					@Override
+					public int getPeriods() {
+						return 15;
+					}
+
+					@Override
+					public double[] getAsRawData() {
+						return new double[15];
+					}
+
+					@Override
+					public double getCashFlow(int period) {
+						return 0;
+					}
+
+				};
+			}
+		};
 	}
 
 	public Function<NetworkFinancialInput, CashFlows> createRoicCashFlowFunction(
@@ -302,8 +357,10 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 		@Override
 		public D get() {
 			if (!computed) {
+				computed = true;
 				value = supplier.get();
 				return value;
+
 			}
 			return value;
 		}

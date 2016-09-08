@@ -136,6 +136,7 @@ public class NewOptimizeEndPoint {
 				.setAlgorithmType(inferAlgorithmType(plan))
 				.setAnalysisSelectionMode(plan.getAnalysisSelectionMode())
 				.setProcessingLayers(plan.getProcessLayers())
+				.setUsePlanConduit(plan.isUsePlanConduit())
 				.setOptimizationConstraints(toOptimizationConstraints(plan))
 				.setMrc(entityTypes.contains(AroLocationEntityType.mrcgte2000) ? 2000 : 0)
 				.setPlanId(plan.getPlanId())

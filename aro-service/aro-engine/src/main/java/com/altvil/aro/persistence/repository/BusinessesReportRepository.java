@@ -30,39 +30,46 @@ public class BusinessesReportRepository {
         return (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
                     Query query = jdbcTemplate.createNativeQuery(
-                            "with recursive plan_ids (id) as (\n" +
-                            "   select p.id from \n" +
-                            "   client.plan p where p.id = :planId\n" +
-                            "   union all\n" +
-                            "   select p.id from plan_ids , client.plan p\n" +
-                            "       where p.parent_plan_id = plan_ids.id\n" +
-                            ")," +        "locIds as ( select l.id\n" +
-                            "\tfrom client.plan p\n" +
-                            "\tinner join plan_ids\n" +
-                            "\ton p.id = plan_ids.id\n" +
-                            "\tinner join client.service_area w \n" +
-                            "\t\ton p.wirecenter_id =  w.id\n" +
-                            "\t inner join aro.locations l \n" +
-                            "\t\ton ST_Contains(w.geom, l.geom)\n" +
-                            "\t),\n" +
-                            "buffered_routes as (\n" +
-                            "\tselect cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape \n" +
-                            "\tfrom client.fiber_route fr \n" +
-                            "\tjoin plan_ids pid on fr.plan_id = pid.id \n" +
-                            ")\n" +
-                            "SELECT cast (count(biz.id) as double precision) , coalesce(cast(sum(biz.annual_recurring_cost) as double precision),0) \n" +
-                            " \n" +
-                            "                            FROM aro.businesses biz  \n" +
-                            "                            where id in( \n" +
-                            "                            select biz.id  \n" +
-                            "                            FROM locIds \n" +
-                            "                            join aro.businesses biz \n" +
-                            "                            on locIds.id = biz.location_id\n" +
-                            "                            JOIN buffered_routes fr ON \n" +
-                            "\t\t\t\tST_Contains( fr.shape,biz.geom) \n" +
-                            "                            AND biz.source = :source  \n" +
-                            "                            \tAND biz.monthly_recurring_cost >= :mrc\n" +
-                            "                            \t)");
+                            "with recursive plan_ids (id) as ( \n" +
+                            "                               select p.id from  \n" +
+                            "                               client.plan p where p.id = :planId\n" +
+                            "                               union all \n" +
+                            "                               select p.id from plan_ids , client.plan p \n" +
+                            "                                   where p.parent_plan_id = plan_ids.id \n" +
+                            "                            ),        \n" +
+                            "                            areasShapes as (\n" +
+                            "                                select sa.id, cast (st_buffer (sa.geog , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
+                            "                                plan_ids p_id\n" +
+                            "                                inner join client.plan p\n" +
+                            "                                on p_id.id = p.id\n" +
+                            "                                inner join \n" +
+                            "                                        client.service_area sa \n" +
+                            "                                    on p.wirecenter_id =  sa.id \n" +
+                            "                            ) ,\n" +
+                            "                            \n" +
+                            "                            locIds as ( select l.id \n" +
+                            "                            from areasShapes \n" +
+                            "                             inner join aro.locations l  \n" +
+                            "                            on ST_Contains(areasShapes.buffered_shape  , l.geom) \n" +
+                            "                            ),\n" +
+                            "                            buffered_routes as ( \n" +
+                            "                            select cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape  \n" +
+                            "                            from client.fiber_route fr  \n" +
+                            "                            join plan_ids pid on fr.plan_id = pid.id  \n" +
+                            "                            ) \n" +
+                            "                            SELECT cast (count(biz.id) as double precision) , coalesce(cast(sum(biz.annual_recurring_cost) as double precision),0)  \n" +
+                            "                              \n" +
+                            "                                                        FROM aro.businesses biz   \n" +
+                            "                                                        where id in(  \n" +
+                            "                                                        select biz.id   \n" +
+                            "                                                        FROM locIds  \n" +
+                            "                                                        join aro.businesses biz  \n" +
+                            "                                                        on locIds.id = biz.location_id \n" +
+                            "                                                        JOIN buffered_routes fr ON  \n" +
+                            "                            ST_Contains( fr.shape,biz.geom)  \n" +
+                            "                                                        AND biz.source = :source\n" +
+                            "                                                        AND biz.monthly_recurring_cost >= :mrc\n" +
+                            "                                                        \t)");
                     query.setParameter("threshold", threshold);
                     query.setParameter("planId", planId);
                     query.setParameter("source", locationSource);
@@ -80,26 +87,33 @@ public class BusinessesReportRepository {
         return (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
                     Query query = jdbcTemplate.createNativeQuery(
-                            "with recursive plan_ids (id) as (\n" +
-                            "   select p.id from \n" +
-                            "   client.plan p where p.id = :planId\n" +
-                            "   union all\n" +
-                            "   select p.id from plan_ids , client.plan p\n" +
-                            "       where p.parent_plan_id = plan_ids.id\n" +
-                            ")," +"locIds as ( select l.id\n" +
-                            "\tfrom client.plan p\n" +
-                            "\tinner join plan_ids\n" +
-                            "\ton p.id = plan_ids.id\n" +
-                            "\tinner join client.service_area w \n" +
-                            "\t\ton p.wirecenter_id =  w.id\n" +
-                            "\t inner join aro.locations l \n" +
-                            "\t\ton ST_Contains(w.geom, l.geom)\n" +
-                            "\t),\n" +
-                            "buffered_routes as (\n" +
-                            "\tselect cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape \n" +
-                            "\tfrom client.fiber_route fr \n" +
-                            "\tjoin plan_ids pid on fr.plan_id = pid.id \n" +
-                            ")\n" +
+                            "with recursive plan_ids (id) as ( \n" +
+                            "            select p.id from  \n" +
+                            "            client.plan p where p.id = :planId\n" +
+                            "            union all \n" +
+                            "            select p.id from plan_ids , client.plan p \n" +
+                            "                where p.parent_plan_id = plan_ids.id \n" +
+                            "        ),        \n" +
+                            "        areasShapes as (\n" +
+                            "            select sa.id, cast (st_buffer (sa.geog , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
+                            "            plan_ids p_id\n" +
+                            "            inner join client.plan p\n" +
+                            "            on p_id.id = p.id\n" +
+                            "            inner join \n" +
+                            "                    client.service_area sa \n" +
+                            "                on p.wirecenter_id =  sa.id \n" +
+                            "        ) ,\n" +
+                            "        \n" +
+                            "        locIds as ( select l.id \n" +
+                            "        from areasShapes \n" +
+                            "            inner join aro.locations l  \n" +
+                            "        on ST_Contains(areasShapes.buffered_shape  , l.geom) \n" +
+                            "        ),\n" +
+                            "        buffered_routes as ( \n" +
+                            "        select cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape  \n" +
+                            "        from client.fiber_route fr  \n" +
+                            "        join plan_ids pid on fr.plan_id = pid.id  \n" +
+                            "        ) " +
                             "\n" +
                             "select bs.size_name,  cast(coalesce(count(building.location_id),0) as double precision) from  \n" +
                             "                            ( \n" +
@@ -136,27 +150,33 @@ public class BusinessesReportRepository {
         return  (Collection) Arrays.stream(distanceThresholds)
                 .mapToObj(threshold ->{
                     Query query = jdbcTemplate.createNativeQuery(
-                            "with recursive plan_ids (id) as (\n" +
-                            "   select p.id from \n" +
-                            "   client.plan p where p.id = :planId\n" +
-                            "   union all\n" +
-                            "   select p.id from plan_ids , client.plan p\n" +
-                            "       where p.parent_plan_id = plan_ids.id\n" +
-                            ")," +
-                            "locIds as ( select l.id\n" +
-                            "\tfrom client.plan p\n" +
-                            "\tinner join plan_ids\n" +
-                            "\ton p.id = plan_ids.id\n" +
-                            "\tinner join client.service_area w \n" +
-                            "\t\ton p.wirecenter_id =  w.id\n" +
-                            "\t inner join aro.locations l \n" +
-                            "\t\ton ST_Contains(w.geom, l.geom)\n" +
-                            "\t),\n" +
-                            "buffered_routes as (\n" +
-                            "\tselect cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape \n" +
-                            "\tfrom client.fiber_route fr \n" +
-                            "\tjoin plan_ids pid on fr.plan_id = pid.id \n" +
-                            ")\n" +
+                            "with recursive plan_ids (id) as ( \n" +
+                            "            select p.id from  \n" +
+                            "            client.plan p where p.id = :planId\n" +
+                            "            union all \n" +
+                            "            select p.id from plan_ids , client.plan p \n" +
+                            "                where p.parent_plan_id = plan_ids.id \n" +
+                            "        ),        \n" +
+                            "        areasShapes as (\n" +
+                            "            select sa.id, cast (st_buffer (sa.geog , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
+                            "            plan_ids p_id\n" +
+                            "            inner join client.plan p\n" +
+                            "            on p_id.id = p.id\n" +
+                            "            inner join \n" +
+                            "                    client.service_area sa \n" +
+                            "                on p.wirecenter_id =  sa.id \n" +
+                            "        ) ,\n" +
+                            "        \n" +
+                            "        locIds as ( select l.id \n" +
+                            "        from areasShapes \n" +
+                            "            inner join aro.locations l  \n" +
+                            "        on ST_Contains(areasShapes.buffered_shape  , l.geom) \n" +
+                            "        ),\n" +
+                            "        buffered_routes as ( \n" +
+                            "        select cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape  \n" +
+                            "        from client.fiber_route fr  \n" +
+                            "        join plan_ids pid on fr.plan_id = pid.id  \n" +
+                            "        ) " +
                             "select bs.size_name,  cast(coalesce(count(businesses.biz_id),0) as double precision) from \n" +
                             "                            ( \n" +
                             "                                select biz.id as biz_id, biz.number_of_employees  \n" +
@@ -189,27 +209,33 @@ public class BusinessesReportRepository {
     public String getBusinesses(long planId, double[] distanceThresholds, String locationSource, double mrcThreshold) {
         OptionalDouble threshold = Arrays.stream(distanceThresholds).max();
         if (threshold.isPresent()) {
-            Query query = jdbcTemplate.createNativeQuery("with recursive plan_ids (id) as (\n" +
-                    "   select p.id from \n" +
-                    "   client.plan p where p.id = :planId\n" +
-                    "   union all\n" +
-                    "   select p.id from plan_ids , client.plan p\n" +
-                    "       where p.parent_plan_id = plan_ids.id\n" +
-                    ")," +
-                    "    locIds as ( select l.id \n" +
-                    "        from client.plan p \n" +
-                    "        inner join plan_ids \n" +
-                    "        on p.id = plan_ids.id \n" +
-                    "        inner join client.service_area w  \n" +
-                    "        on p.wirecenter_id =  w.id \n" +
+            Query query = jdbcTemplate.createNativeQuery("with recursive plan_ids (id) as ( \n" +
+                    "            select p.id from  \n" +
+                    "            client.plan p where p.id = :planId\n" +
+                    "            union all \n" +
+                    "            select p.id from plan_ids , client.plan p \n" +
+                    "                where p.parent_plan_id = plan_ids.id \n" +
+                    "        ),        \n" +
+                    "        areasShapes as (\n" +
+                    "            select sa.id, cast (st_buffer (sa.geog , 1609.34 *1.5) as geometry) as buffered_shape  from \n" +
+                    "            plan_ids p_id\n" +
+                    "            inner join client.plan p\n" +
+                    "            on p_id.id = p.id\n" +
+                    "            inner join \n" +
+                    "                    client.service_area sa \n" +
+                    "                on p.wirecenter_id =  sa.id \n" +
+                    "        ) ,\n" +
+                    "        \n" +
+                    "        locIds as ( select l.id \n" +
+                    "        from areasShapes \n" +
                     "            inner join aro.locations l  \n" +
-                    "        on ST_Contains(w.geom, l.geom) \n" +
-                    "    ), \n" +
-                    "    buffered_routes as ( \n" +
-                    "        select cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape , geom\n" +
+                    "        on ST_Contains(areasShapes.buffered_shape  , l.geom) \n" +
+                    "        ),\n" +
+                    "        buffered_routes as ( \n" +
+                    "        select fr.geom, cast (st_buffer(cast (fr.geom as geography), :threshold) as geometry) shape  \n" +
                     "        from client.fiber_route fr  \n" +
                     "        join plan_ids pid on fr.plan_id = pid.id  \n" +
-                    "    ) \n" +
+                    "        ) " +
                     " select biz.id ,biz.location_id, biz.industry_id, biz.name, biz.address,biz.number_of_employees, biz.annual_recurring_cost, biz.monthly_recurring_cost, biz.source, ST_X(biz.geom), ST_Y(biz.geom), biz_ids.distance\n" +
                     "                        FROM  ( \n" +
                     "                        select biz.id, min(ST_DISTANCE( cast (fr.geom as geography), cast(biz.geom as geography))) as distance \n" +

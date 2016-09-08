@@ -223,7 +223,9 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 				request.getNetworkDataRequest()
 						.createRequest(planId, sl.getId())
 						.createRequest(serviceAreaId),
-				request.getAlgorithmType());
+				request.getAlgorithmType(), 
+				request.isUsePlanConduit()
+		);
 	}
 
 	// private List<Number> createSelectedAreaUpdates(ServiceLayer serviceLayer,

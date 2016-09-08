@@ -1,4 +1,4 @@
-/* global app user_id google $ map FormData XMLHttpRequest swal */
+/* global app user_id google $ map FormData XMLHttpRequest swal config */
 // Search Controller
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', ($scope, $rootScope, $http, map_tools, map_layers) => {
   // Controller instance variables
@@ -103,7 +103,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   updateButton.on('click', () => {
     $scope.budget = parseBudget()
     checkBudget()
-    postChanges({})
+    postChanges({}, false)
   })
 
   const checkBudget = () => {
@@ -121,10 +121,10 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       layer.type !== 'network_nodes' &&
       layer.type !== 'towers') return
 
-    postChanges(changes)
+    postChanges(changes, true)
   })
 
-  function postChanges (changes) {
+  function postChanges (changes, lazy) {
     changes.algorithm = $scope.optimizationType.toUpperCase()
     changes.selectionMode = 'SELECTED_LOCATIONS'
     if ($scope.optimizationType === 'npv') {
@@ -134,37 +134,50 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       }
     }
 
-    var locationTypes = map_layers.getFeatureLayer('locations').shows
-    if (map_layers.getFeatureLayer('towers').visible) locationTypes = locationTypes.concat('towers')
+    var locationTypes = []
+    var scope = config.ui.eye_checkboxes ? $rootScope : $scope
+
+    if (scope.optimizeHouseholds) locationTypes.push('household')
+    if (scope.optimizeBusinesses) locationTypes.push('businesses')
+    if (scope.optimizeMedium) locationTypes.push('medium')
+    if (scope.optimizeLarge) locationTypes.push('large')
+    if (scope.optimizeSMB) locationTypes.push('small')
+    if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
+    if (scope.optimizeTowers) locationTypes.push('celltower')
+
     changes.locationTypes = locationTypes
+    changes.lazy = !!lazy
 
     var url = '/network_plan/' + $scope.plan.id + '/edit'
-    var config = {
+    var req = {
       url: url,
       method: 'post',
       saving_plan: true,
       data: changes
     }
     updateButton.attr('disabled', 'disabled')
-    $http(config).success((response) => {
+    $http(req).success((response) => {
       updateButton.removeAttr('disabled')
       $rootScope.$broadcast('route_planning_changed', response)
+      $scope.pendingPost = lazy
     }).error(() => {
       updateButton.removeAttr('disabled')
     })
   }
 
-  $scope.optimizationTypeChanged = () => postChanges({})
-  $scope.npvTypeChanged = () => postChanges({})
+  $scope.postChanges = postChanges
 
-  // $rootScope.$on('locations_layer_changed', () => postChanges({}))
-  // $rootScope.$on('towers_layer_changed', () => postChanges({}))
+  $scope.optimizationTypeChanged = () => postChanges({}, false)
+  $scope.npvTypeChanged = () => postChanges({}, false)
+
+  // $rootScope.$on('locations_layer_changed', () => postChanges({}, false))
+  // $rootScope.$on('towers_layer_changed', () => postChanges({}, false))
 
   $('#target-builder-upload input').change(() => {
     var form = $('#target-builder-upload').get(0)
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
-    xhr.open('POST', `/network/nodes/${$scope.plan.id}/csv`, true)
+    xhr.open('POST', `/network/nodes/${$scope.plan.id}/csvIds`, true)
     xhr.addEventListener('error', (err) => {
       form.reset()
       console.log('error', err)
@@ -178,9 +191,13 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
         console.log(e, e)
         return swal('Error', 'Unexpected response from server', 'error')
       }
+      if (this.status !== 200) {
+        return swal('Error', data.error || 'Unknown error', 'error')
+      }
       swal('File processed', `Locations selected: ${data.found}, not found: ${data.notFound}, errors: ${data.errors}`, 'info')
       map_layers.getFeatureLayer('locations').reloadData()
       map_layers.getFeatureLayer('selected_locations').reloadData()
+      $scope.pendingPost = true
     })
     xhr.send(formData)
   })

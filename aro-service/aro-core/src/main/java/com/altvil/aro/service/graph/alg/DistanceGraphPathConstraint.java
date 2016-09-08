@@ -32,8 +32,8 @@ public class DistanceGraphPathConstraint<V, E extends AroEdge<GeoSegment>>
 		double totalDistance = distance + pathLength ;
 		
 		
-		if( log.isInfoEnabled() && totalDistance >= distanceInMeters ) {
-			log.info("Route Condition Failed " + totalDistance) ;
+		if( log.isTraceEnabled() && totalDistance >= distanceInMeters ) {
+			log.trace("Route Condition Failed " + totalDistance) ;
 		}
 		
 		

@@ -125,7 +125,23 @@ exports.configure = (api, middleware) => {
       file.pipe(fs.createWriteStream(fullpath))
     })
     busboy.on('finish', () => {
-      models.Network.importLocations(plan_id, fullpath)
+      models.Network.importLocationsByCoordinates(plan_id, fullpath)
+        .then(jsonSuccess(response, next))
+        .catch(next)
+    })
+    request.pipe(busboy)
+  })
+
+  api.post('/network/nodes/:plan_id/csvIds', check_owner_permission, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var busboy = new Busboy({ headers: request.headers })
+    var fullpath
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      file.pipe(fs.createWriteStream(fullpath))
+    })
+    busboy.on('finish', () => {
+      models.Network.importLocationsByIds(plan_id, fullpath)
         .then(jsonSuccess(response, next))
         .catch(next)
     })

@@ -17,14 +17,31 @@ public interface ServiceAreaRepository extends
 
 	
 	@Query(value = 
-			"SELECT distinct\n" + 
-			"	sa.*\n" + 
-			"FROM client.plan mp\n" + 
-			"JOIN client.service_area sa\n" + 
-			"	ON sa.service_type  = 'A'\n" + 
-			"	AND sa.service_layer_id = mp.service_layer_id\n" + 
-			"	AND  ST_Contains(mp.area_bounds, sa.geom)\n" + 
-			"	AND mp.id = :planId", nativeQuery = true)
+			"WITH master_plan as (\n" + 
+			"  SELECT *\n" + 
+			"  FROM client.plan\n" + 
+			"  WHERE id = :planId\n" + 
+			"),\n" + 
+			"intersects as (\n" + 
+			"  SELECT distinct\n" + 
+			"      sa.id\n" + 
+			"  FROM client.plan mp\n" + 
+			"  JOIN master_plan sp ON sp.id = mp.id\n" + 
+			"  JOIN client.service_area sa\n" + 
+			"      ON sa.service_type  = 'A'\n" + 
+			"      AND sa.service_layer_id = mp.service_layer_id\n" + 
+			"      AND  ST_Intersects(mp.area_bounds, sa.geom)\n" + 
+			"),\n" + 
+			"overlap as (\n" + 
+			"  SELECT\n" + 
+			"    sa.id, ST_Area(cast(ST_Intersection(ST_MakeValid(sa.geom), mp.area_bounds) as geography)), ST_Area(sa.geog), (ST_Area(cast(ST_Intersection(ST_MakeValid(sa.geom), mp.area_bounds) as geography)) / ST_Area(sa.geog)) as percentage_overlap\n" + 
+			"  FROM master_plan mp, intersects ss\n" + 
+			"  JOIN client.service_area sa ON (ss.id = sa.id)\n" + 
+			")\n" + 
+			"SELECT sa.*\n" + 
+			"FROM overlap op\n" + 
+			"JOIN client.service_area sa ON op.id = sa.id\n" + 
+			"WHERE percentage_overlap >= 0.8", nativeQuery = true)
 	@Transactional
 	Collection<ServiceArea> querySelectedServiceAreas(
 			@Param("planId") long planId);

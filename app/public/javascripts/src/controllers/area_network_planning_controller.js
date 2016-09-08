@@ -77,11 +77,14 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.run = () => {
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
-    if (scope.optimizeHouseholds) locationTypes.push('households')
+
+    if (scope.optimizeHouseholds) locationTypes.push('household')
     if (scope.optimizeBusinesses) locationTypes.push('businesses')
-    if (scope.optimizeSMB) locationTypes.push('smb')
-    if (scope.optimize2kplus) locationTypes.push('2kplus')
-    if (scope.optimizeTowers) locationTypes.push('towers')
+    if (scope.optimizeMedium) locationTypes.push('medium')
+    if (scope.optimizeLarge) locationTypes.push('large')
+    if (scope.optimizeSMB) locationTypes.push('small')
+    if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
+    if (scope.optimizeTowers) locationTypes.push('celltower')
 
     var algorithm = $scope.optimizationType
     var changes = {

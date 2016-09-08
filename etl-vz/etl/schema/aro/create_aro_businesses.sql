@@ -23,5 +23,6 @@ CREATE INDEX aro_businesses_location_index ON aro.businesses(location_id);
 CREATE INDEX aro_businesses_industry_index ON aro.businesses(industry_id);
 CREATE INDEX aro_businesses_geog_index ON aro.businesses USING gist(geog);
 CREATE INDEX aro_businesses_geom_index ON aro.businesses USING gist(geom);
+CREATE INDEX aro_businesses_name ON aro.businesses USING GIN (to_tsvector('english', name));
 
 CREATE EXTENSION unaccent;

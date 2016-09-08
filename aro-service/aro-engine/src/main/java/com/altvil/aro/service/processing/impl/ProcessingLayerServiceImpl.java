@@ -42,6 +42,12 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 		this.serviceLayerRepository = serviceLayerRepository;
 	}
 
+	@Override
+	public Set<LocationEntityType> getSupportedEntityTypes(
+			ServiceLayer serviceLayer) {
+		return systemRuleRef.get().getSupportedEntityTypes(serviceLayer);
+	}
+
 	private SystemRule loadSystemRule() {
 		return new SystemRule().construct();
 	}
@@ -79,6 +85,12 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 					loadCategoryRules(serviceLayerMap));
 
 			return this;
+		}
+
+		@Override
+		public Set<LocationEntityType> getSupportedEntityTypes(
+				ServiceLayer serviceLayer) {
+			return layerAssignmentMap.get(serviceLayer);
 		}
 
 		private LinkedHashMap<ServiceLayer, Set<LocationEntityType>> createLayerAssignmentMap(
@@ -177,10 +189,10 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 			final LinkedHashSet<ServiceLayer> selectedLayers = new LinkedHashSet<>();
 			layerAssignmentMap.entrySet().forEach(e -> {
-				
-				Set<LocationEntityType> matchSet = e.getValue() ;
-				
-				if( matchSet != null ) {
+
+				Set<LocationEntityType> matchSet = e.getValue();
+
+				if (matchSet != null) {
 					matchSet.forEach(entity -> {
 						if (set.contains(entity)) {
 							set.remove(entity);

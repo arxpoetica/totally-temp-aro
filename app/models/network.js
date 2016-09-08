@@ -244,13 +244,6 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
-    var locationTypes = {
-      households: 'household',
-      businesses: ['medium', 'large'],
-      towers: 'celltower',
-      smb: 'small',
-      '2kplus': 'mrcgte2000'
-    }
     var algorithms = {
       'MAX_IRR': 'IRR',
       'TARGET_IRR': 'IRR',
@@ -261,7 +254,7 @@ module.exports = class Network {
     options.locationTypes = Array.isArray(options.locationTypes) ? options.locationTypes : []
     var body = {
       planId: plan_id,
-      locationTypes: _.compact(_.flatten(options.locationTypes.map((key) => locationTypes[key]))),
+      locationTypes: options.locationTypes,
       algorithm: options.algorithm,
       analysisSelectionMode: options.selectionMode
     }
@@ -462,7 +455,7 @@ module.exports = class Network {
     return database.query(sql, params)
   }
 
-  static importLocations (plan_id, file) {
+  static importLocationsByCoordinates (plan_id, file) {
     return new Promise((resolve, reject) => {
       var found = 0
       var notFound = 0
@@ -523,6 +516,49 @@ module.exports = class Network {
           })
       }, { parallel: 10 }, () => {
         resolve({ found: found, notFound: notFound, errors: errors })
+      })
+      input.pipe(parser).pipe(transformer)
+      transformer.on('error', reject)
+    })
+  }
+
+  static importLocationsByIds (plan_id, file) {
+    return new Promise((resolve, reject) => {
+      var errors = 0
+      var ids = []
+
+      var parser = parse()
+      var input = fs.createReadStream(file)
+      var transformer = transform((record, callback) => {
+        var empty = record.every((item) => item === '')
+        if (empty) return callback()
+
+        var id = record[0]
+        if (id != +id) { // eslint-disable-line
+          errors++
+          return callback()
+        }
+        ids.push(+id)
+        callback()
+      }, { parallel: 1 }, () => {
+        if (ids.length === 0) return resolve({ found: 0, notFound: 0, errors: errors })
+        database.execute('DELETE FROM client.plan_targets WHERE plan_id = $1 AND location_id IN ($2)', [plan_id, ids])
+          .then(() => {
+            var params = [plan_id]
+            var sql = `
+              INSERT INTO client.plan_targets (plan_id, location_id) VALUES
+                ${ids.map((id) => `($1, $${params.push(id) || params.length})`)}
+            `
+            return database.execute(sql, params)
+          })
+          .then((rows) => {
+            resolve({
+              found: rows,
+              notFound: ids.length - rows,
+              errors: errors
+            })
+          })
+          .catch(reject)
       })
       input.pipe(parser).pipe(transformer)
       transformer.on('error', reject)

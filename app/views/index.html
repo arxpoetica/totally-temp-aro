@@ -17,6 +17,10 @@
   </head>
   <body>
 
+    <div ng-controller="build_lease_controller">
+      <% include modal_build_lease.html %>
+    </div>
+
     <div ng-controller="settings_controller">
       <% include modal_application_settings.html %>
     </div>
@@ -398,6 +402,7 @@
   <script src="javascripts/lib/controllers/demand_forecast_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_census_block_controller.js"></script>
   <script src="javascripts/lib/controllers/settings_controller.js"></script>
+  <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>

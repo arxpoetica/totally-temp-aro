@@ -46,6 +46,7 @@ module.exports = class Settings {
         FROM client.service_layer_entity_category
         JOIN client.service_layer ON service_layer.id = service_layer_entity_category.service_layer_id
         JOIN client.entity_category ON entity_category.id = service_layer_entity_category.entity_category_id
+        ORDER BY id ASC
       `)
     ])
     .then((results) => ({

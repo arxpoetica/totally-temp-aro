@@ -165,7 +165,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $scope.business_categories_selected[category.name] = true
       category.fullName = `b_${category.name}`
     })
-    $scope.business_categories_selected['2kplus'] = true
+    $scope.business_categories_selected['2kplus'] = false
+    changeOptimization()
 
     $scope.household_categories_selected = []
     $scope.household_categories.forEach((category) => {
@@ -409,13 +410,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   }
 
   function changeOptimization () {
-    $rootScope.optimizeBusinesses = $scope.show_businesses
+    $rootScope.optimizeMedium = $scope.business_categories_selected['medium']
+    $rootScope.optimizeLarge = $scope.business_categories_selected['large']
     $rootScope.optimizeSMB = $scope.business_categories_selected['small']
     $rootScope.optimizeHouseholds = $scope.show_households
     $rootScope.optimizeTowers = $scope.show_towers
     $rootScope.optimize2kplus = $scope.business_categories_selected['2kplus']
   }
-  changeOptimization()
 
   $scope.selectedFilter = null
   $scope.toggleFilter = (filter) => {

@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,11 @@ import com.altvil.aro.service.report.PlanAnalysisReportService;
 
 @Service
 public class WirecenterPlanningServiceImpl implements WirecenterPlanningService {
+	
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory
+			.getLogger(WirecenterPlanningServiceImpl.class.getName());
+
 
 	private NetworkNodeRepository networkNodeRepository;
 	private FiberRouteRepository fiberRouteRepository;
@@ -42,11 +49,13 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 
 	@Override
 	public void save(GeneratedPlan plan) {
+		
 		networkNodeRepository.save(plan.getWirecenterNetworkPlan()
 				.getNetworkNodes());
+		
 		fiberRouteRepository.save(plan.getWirecenterNetworkPlan()
 				.getFiberRoutes());
-
+	
 	}
 
 	@Override
