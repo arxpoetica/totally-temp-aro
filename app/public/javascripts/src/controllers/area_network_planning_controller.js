@@ -25,7 +25,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
-  $scope.technology = 'direct_routing'
+  $scope.technology = 'odn1'
 
   var budgetInput = $('#area_network_planning_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
