@@ -61,7 +61,7 @@ public interface NetworkPlanRepository extends
 			"FROM client.plan r\n" + 
 			"join client.service_area w on r.wirecenter_id = w.id\n" + 
 			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
-			"where r.id = 15602\n" + 
+			"where r.id = :planId\n" + 
 			")\n" + 
 			"select\n" + 
 			"ll.id as location_id,\n" + 
