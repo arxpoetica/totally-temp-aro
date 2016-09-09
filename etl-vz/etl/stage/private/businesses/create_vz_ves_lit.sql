@@ -20,7 +20,7 @@ CREATE TABLE businesses.ves_lit
 
 DO $$
 DECLARE
-    all_states text[][] := array[['NY', '36'], ['WA', '53']];
+    all_states text[][] := array[['FL', '12'], ['IL', '17'], ['MO', '29'] ['WA', '53']];
     state text[];
     current_table text;
 
