@@ -327,7 +327,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 			GeneratedFiberRoute feederFiber = planRoute(
 					new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
 							rg.getGraph(), rg.getGraphNode(graphMapping
-									.getGraphAssignment()), 15 * 1000),
+									.getGraphAssignment()), 60 * 1000),
 					getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping),
 					graphMapping);
 
