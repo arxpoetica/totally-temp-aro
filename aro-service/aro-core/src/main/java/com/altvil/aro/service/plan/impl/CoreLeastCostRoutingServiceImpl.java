@@ -22,6 +22,7 @@ import com.altvil.aro.service.entity.FinancialInputs;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
+import com.altvil.aro.service.graph.alg.DefaultGraphPathConstraint;
 import com.altvil.aro.service.graph.alg.DistanceGraphPathConstraint;
 import com.altvil.aro.service.graph.alg.GraphPathConstraint;
 import com.altvil.aro.service.graph.alg.RouteBuilder;
@@ -253,27 +254,29 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			return new CompositeNetworkModelImpl(assignedFiberSources.stream()
 					.filter(fsb -> fsb.getGraphMapping() != null)
-					.map(createNetworkModelTransform(lcrContext.getPricingModel(), graphCtx))
+					.map(createNetworkModelTransform(lcrContext, graphCtx))
 					.collect(Collectors.toList()));
 
 		}
 	}
 
 	public Function<FiberSourceBinding, NetworkModel> createNetworkModelTransform(
-			PricingModel pricingModel, GraphContext graphCtx) {
-		return (fsb) -> new NetworkModelPlanner(pricingModel, fsb)
+			LcrContext lcrContext, GraphContext graphCtx) {
+		return (fsb) -> new NetworkModelPlanner(lcrContext, fsb)
 				.createNetworkModel(graphCtx, fsb.getGraphMapping());
 	}
 
 	private class NetworkModelPlanner {
 
 		private PricingModel pricingModel;
+		private LcrContext lcrContext ;
 		private FiberSourceBinding fiberSourceBinding;
 		private Map<Map<CableConstructionEnum, Double>, RenodedGraph> cache = new HashMap<>();
 
-		public NetworkModelPlanner(PricingModel priceModel,
+		public NetworkModelPlanner(LcrContext lcrContex,
 				FiberSourceBinding fiberSourceBinding) {
-			this.pricingModel = priceModel;
+			this.lcrContext = lcrContex ;
+			this.pricingModel = lcrContex.getPricingModel() ;
 			this.fiberSourceBinding = fiberSourceBinding;
 		}
 
@@ -306,6 +309,17 @@ public class CoreLeastCostRoutingServiceImpl implements
 			return renoded;
 
 		}
+		
+		private GraphPathConstraint<GraphNode, AroEdge<GeoSegment>> createConstraint(FiberType fiberType) {
+			Double distanceInMeters = lcrContext.getFtthThreshholds().getMaxFiberLength(fiberType) ;
+			
+			if( distanceInMeters == null || distanceInMeters <100 ) {
+				return new DefaultGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>() ;
+			}
+			
+			return new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(distanceInMeters) ;
+			
+		}
 
 		public NetworkModel createNetworkModel(GraphContext graphCtx,
 				GraphMapping graphMapping) {
@@ -325,9 +339,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 					graphMapping);
 
 			GeneratedFiberRoute feederFiber = planRoute(
-					new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
-							rg.getGraph(), rg.getGraphNode(graphMapping
-									.getGraphAssignment()), 15 * 1000),
+					createConstraint(FiberType.DISTRIBUTION),
 					getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping),
 					graphMapping);
 
@@ -369,15 +381,13 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			Map<GraphAssignment, GeneratedFiberRoute> map = new HashMap<>();
 
+			 GraphPathConstraint<GraphNode, AroEdge<GeoSegment>> constraint = 
+					 createConstraint(FiberType.DISTRIBUTION) ;
+			
 			children.forEach(a -> {
 				if (isDistributionSource(a.getAroEntity())) {
 					map.put(a.getGraphAssignment(),
-							planRoute(
-									new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
-											renoded.getGraph(),
-											renoded.getGraphNode(a
-													.getGraphAssignment()),
-											15 * 1000), renoded, a));
+							planRoute(constraint, renoded, a));
 				}
 			});
 

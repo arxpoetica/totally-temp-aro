@@ -1,5 +1,6 @@
 package com.altvil.aro.service.planning;
 
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 
@@ -10,6 +11,10 @@ public class FiberConstraintUtils {
 		if (fiberNetworkConstraints != null) {
 			builder
 			.setUseDirectRouting(fiberNetworkConstraints.getUseDirectRouting())
+			.setFiberLengthConstraint(FiberType.DISTRIBUTION,
+					fiberNetworkConstraints.getMaxDistributionFiberLengthMeters())
+			.setFiberLengthConstraint(FiberType.FEEDER,
+					fiberNetworkConstraints.getMaxFeederFiberLengthMeters()) 
 			.setDropCableInFeet(fiberNetworkConstraints.getDropCableLengthInFeet())
 			.setPrefferedOffsetInFeet(fiberNetworkConstraints.getPreferredCableLengthInFeet())
 			.setMaxOffsetInFeet(fiberNetworkConstraints.getMaxDistrubitionLengthInFeet())

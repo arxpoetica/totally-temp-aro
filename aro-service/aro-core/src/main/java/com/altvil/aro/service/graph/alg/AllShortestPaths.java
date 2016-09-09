@@ -94,7 +94,8 @@ public class AllShortestPaths<V, E extends AroEdge<?>> {
 		}
 
 		public ClosestTargetItr setTargets(Collection<V> targets) {
-
+			
+			this.targets = targets ;
 			knownTargets.clear();
 			treeMap.clear();
 			index = 0;

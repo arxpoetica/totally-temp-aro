@@ -24,6 +24,8 @@ public class FiberNetworkConstraints implements Serializable {
 	private Boolean clusterMergingSupported ;
 	private Boolean dropCableConstraintsSupported ;
 	private Boolean useDirectRouting ;
+	private Double maxDistributionFiberLengthMeters = 0.0 ;
+	private Double maxFeederFiberLengthMeters = 0.0 ;
 
 	public FiberNetworkConstraints() {
 		// TODO Auto-generated constructor stub
@@ -118,6 +120,25 @@ public class FiberNetworkConstraints implements Serializable {
 	public void setUseDirectRouting(Boolean useDirectRouting) {
 		this.useDirectRouting = useDirectRouting;
 	}
+
+	public Double getMaxDistributionFiberLengthMeters() {
+		return maxDistributionFiberLengthMeters;
+	}
+
+	public void setMaxDistributionFiberLengthMeters(
+			Double maxDistributionFiberLengthMeters) {
+		this.maxDistributionFiberLengthMeters = maxDistributionFiberLengthMeters;
+	}
+
+	public Double getMaxFeederFiberLengthMeters() {
+		return maxFeederFiberLengthMeters;
+	}
+
+	public void setMaxFeederFiberLengthMeters(Double maxFeederFiberLengthMeters) {
+		this.maxFeederFiberLengthMeters = maxFeederFiberLengthMeters;
+	}
+	
+	
 	
 	
 

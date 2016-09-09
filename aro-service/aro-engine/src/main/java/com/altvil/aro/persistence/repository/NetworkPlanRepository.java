@@ -46,10 +46,18 @@ public interface NetworkPlanRepository extends
 			"SELECT\n" + 
 			"l.id as id,\n" + 
 			"l.geom as point,\n" + 
-			"(SELECT gid \n" + 
-			"FROM (SELECT aro.edges.gid, ST_Distance(cast(aro.edges.geom as geography), cast(l.geom as geography)) AS distance \n" + 
-			"FROM aro.edges where st_intersects(r.area_bounds, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" + 
-			") as gid\n" + 
+			"(\n" + 
+			"  SELECT gid \n" + 
+			"  FROM (\n" + 
+			"    SELECT \n" + 
+			"      aro.edges.gid, \n" + 
+			"      ST_Distance(cast(aro.edges.geom as geography), \n" + 
+			"      cast(l.geom as geography)) AS distance \n" + 
+			"    FROM aro.edges \n" + 
+			"    WHERE st_intersects(w.geom, aro.edges.geom) \n" + 
+			"    ORDER BY l.geom <#> aro.edges.geom LIMIT 5 \n" + 
+			"    ) AS index_query ORDER BY distance LIMIT 1\n" + 
+			"  ) as gid\n" + 
 			"FROM client.plan r\n" + 
 			"join client.service_area w on r.wirecenter_id = w.id\n" + 
 			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
@@ -65,7 +73,7 @@ public interface NetworkPlanRepository extends
 			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" + 
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
-			"order by gid, intersect_position limit 40000", nativeQuery = true) // KG debugging
+			"order by gid, intersect_position limit 80000", nativeQuery = true) // KG debugging
 	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
 
 	
