@@ -37,6 +37,7 @@ import com.altvil.aro.service.planning.FiberConstraintUtils;
 import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
+import com.altvil.aro.service.property.SystemPropertyService;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -65,6 +66,8 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	@Autowired
 	private transient CoreLeastCostRoutingService coreLeastCostRoutingService;
 
+	@Autowired
+	private transient SystemPropertyService systemPropertyService ;
 	
 	@Override
 	public Optional<PlannedNetwork> planNetwork(
@@ -107,7 +110,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		
 		return StreamUtil.map(coreLeastCostRoutingService.computeNetworkModel(
 				model, LcrContextImpl.create(pricingModel,
-						FiberConstraintUtils.build(request.getConstraints()),
+						FiberConstraintUtils.build(request.getConstraints(), systemPropertyService.getConfiguration()),
 						itr)),
 				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
 						networkData.getCompetitiveDemandMapping()));
@@ -157,7 +160,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 									.getConstructionRatios()));
 
 			FtthThreshholds threshHolds = FiberConstraintUtils.build(request
-					.getConstraints());
+					.getConstraints(), ctx.getBean(SystemPropertyService.class).getConfiguration());
 
 			GraphBuilderContext graphContext = ctx
 					.getBean(GraphNetworkModelService.class).build()

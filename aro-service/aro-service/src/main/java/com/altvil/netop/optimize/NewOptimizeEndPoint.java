@@ -24,6 +24,7 @@ import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.root.OptimizedRootPlan;
 import com.altvil.aro.service.optimization.root.RootOptimizationService;
 import com.altvil.aro.service.optimization.wirecenter.RootOptimizationRequest;
+import com.altvil.aro.service.property.SystemPropertyService;
 import com.altvil.aro.service.scheduler.SchedulerService;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.enumerations.AlgorithmType;
@@ -41,6 +42,9 @@ public class NewOptimizeEndPoint {
 
 	@Autowired
 	private RootOptimizationService rootOptimizationService;
+	
+	@Autowired
+	private SystemPropertyService systemPropertyService ;
 
 	@RequestMapping(value = "/optimize/masterplan", method = RequestMethod.POST)
 	public @ResponseBody AroRootPlanJobResponse postRecalcMasterPlan(

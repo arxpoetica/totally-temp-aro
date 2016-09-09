@@ -335,8 +335,8 @@ public class CoreLeastCostRoutingServiceImpl implements
 					getRenodedGraph(graphCtx, FiberType.DISTRIBUTION,
 							graphMapping));
 
-			RenodedGraph rg = getRenodedGraph(graphCtx, FiberType.FEEDER,
-					graphMapping);
+//			RenodedGraph rg = getRenodedGraph(graphCtx, FiberType.FEEDER,
+//					graphMapping);
 
 			GeneratedFiberRoute feederFiber = planRoute(
 					createConstraint(FiberType.DISTRIBUTION),

@@ -17,7 +17,16 @@ import com.altvil.aro.model.NetworkPlan;
 public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
-	
+	  //TODO SystemProperty Repository
+    @Query(value = "SELECT f.name, p.string_value\n" + 
+            "FROM client.system_property p\n" + 
+            "JOIN client.system_property_field f\n" + 
+            "   ON f.id = p.property_field_id \n" + 
+            "JOIN client.system_rule r\n" + 
+            "   ON r.id = p.system_rule_id\n" + 
+            "WHERE r.name = 'system_defaults'", nativeQuery = true)
+    @Transactional
+    List<Object[]> querySystemProperties();
 	
 	//TODO Create SpeedCategory Repository
 	@Query(value = "select s.provname, s.speed_category, s.stateabbr, b.brand_strength\n" + 
