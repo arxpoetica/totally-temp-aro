@@ -169,6 +169,14 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 										.intValue()), ((Number) a[1])
 										.intValue());
 							});
+			
+			
+			int priroty = 40 ;
+			for(ServiceLayer sl : serviceLayerMap.values()) {
+				if( result.get(sl) == null ) {
+					result.put(sl, priroty++) ;
+				}
+			}
 
 			return result;
 		}
