@@ -13,7 +13,7 @@ cd $GISROOT;
 
 # 1. Load Fiber 
 
-declare -a FIBER_STATE_ARRAY=( 'wa' )
+declare -a FIBER_STATE_ARRAY=( 'il' 'mo' 'wa' 'wi' )
 fiber_state_array_len=${#FIBER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table
@@ -40,7 +40,7 @@ fi
 
 # 2. Load Wirecenters
 
-declare -a WIRECENTER_STATE_ARRAY=( 'wa' )
+declare -a FIBER_STATE_ARRAY=( 'il' 'mo' 'wa' 'wi' )
 wirecenter_state_array_len=${#WIRECENTER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table
