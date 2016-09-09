@@ -17,7 +17,7 @@ public class DistanceGraphPathConstraint<V, E extends AroEdge<GeoSegment>>
 	
 	private double distanceInMeters;
 
-	public DistanceGraphPathConstraint( GraphModel<GeoSegment> graph, GraphNode source, double distanceInMeters) {
+	public DistanceGraphPathConstraint(double distanceInMeters) {
 		super();
 		this.distanceInMeters = distanceInMeters;
 	}
