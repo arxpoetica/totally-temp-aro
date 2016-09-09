@@ -1,4 +1,4 @@
-/* global app map google $ config globalServiceLayers */
+/* global app map google $ config globalServiceLayers globalAnalysisLayers */
 app.service('regions', ($rootScope, $timeout, map_tools) => {
   var regions = { selectedRegions: [] }
   var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
@@ -10,7 +10,7 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     selectionLayer.setStyle({
       fillColor: 'green'
     })
-    selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
+    configureSelectionVisibility()
   }
 
   var searchOptions = {}
@@ -48,9 +48,7 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     $rootScope.$broadcast('regions_changed')
   })
 
-  $rootScope.$on('map_tool_changed_visibility', () => {
-    selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
-  })
+  $rootScope.$on('map_tool_changed_visibility', () => configureSelectionVisibility())
 
   regions.removeGeography = (geography) => {
     var index = regions.selectedRegions.indexOf(geography)
@@ -187,6 +185,13 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
 
   regions.getSelectedServiceAreas = () => {
     return globalServiceLayers.filter((layer) => searchOptions[layer.name])
+  }
+
+  function configureSelectionVisibility () {
+    // selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
+    if (selectionLayer.getMap() !== map) {
+      selectionLayer.setMap(map)
+    }
   }
 
   return regions
