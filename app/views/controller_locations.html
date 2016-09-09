@@ -91,7 +91,7 @@
           </div>
           <label style="font-weight:normal">{{category.description}}</label>
           <label class="pull-right" style="margin-right: 22px">
-            <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations"></span>
+            <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected[category.name]"></span>
             <input type="checkbox" ng-model="business_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_businesses">
           </label>
         </div>
@@ -112,7 +112,7 @@
           <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px;margin-right:10px">
         </div>
         <label class="pull-right">
-          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations"></span>
+          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected['small']"></span>
           <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()">
         </label>
         <label>SMB</label>
@@ -151,7 +151,7 @@
           </a>
         </div>
         <label class="pull-right">
-          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations"></span>
+          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_households"></span>
           <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
         <label style="margin-left:25px">Residential</label>
