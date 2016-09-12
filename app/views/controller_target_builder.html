@@ -66,8 +66,6 @@
         <button class="btn btn-default btn-sm"><i class="fa fa-file-o"></i></button>
         <input type="file" name="csv" style="opacity:0; width: 30px; position:absolute; top:0; left:0">
       </span>
-      <button class="btn btn-success active btn-sm" ng-show="pendingPost"
-        ng-click="postChanges({}, false)">Get Results</button>
     </p>
   </form>
 
@@ -99,4 +97,9 @@
     <li>Households: {{plan.metadata.customers_households_total}}</li>
     <li>Towers: {{plan.metadata.customers_towers_total}}</li>
   </ul>
+
+  <p class="pull-right">
+    <button class="btn btn-success active"
+      ng-click="postChanges({}, false)">Get Results</button>
+  </p>
 </div>

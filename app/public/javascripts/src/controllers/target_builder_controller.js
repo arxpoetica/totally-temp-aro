@@ -156,7 +156,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     var req = {
       url: url,
       method: 'post',
-      saving_plan: true,
+      saving_plan: !changes.lazy,
       data: changes
     }
     updateButton.attr('disabled', 'disabled')
