@@ -43,7 +43,7 @@ public class SystemPropertyServiceImpl implements SystemPropertyService {
 
 	@PostConstruct
 	void postConstruct() {
-		volatileReferenceService.createVolatileReference(
+		ref = volatileReferenceService.createVolatileReference(
 				ReferenceType.SYSTEM_PROPERTIES,
 				() -> loadPropertyConfiguration());
 	}
