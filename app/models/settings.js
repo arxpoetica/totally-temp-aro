@@ -3,6 +3,8 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var config = helpers.config
+var models = require('../models')
 var pync = require('pync')
 
 module.exports = class Settings {
@@ -112,6 +114,54 @@ module.exports = class Settings {
         `, [systemProperties[key].string_value, key])
       ))
     ])
+    .then(() => {
+      var invalidation = []
+      if (Object.keys(networkCosts).length > 0) {
+        invalidation.push('PRICE_INPUTS')
+      }
+      if (Object.keys(systemProperties).length > 0) {
+        invalidation.push('SYSTEM_PROPERTIES')
+      }
+      if (Object.keys(serviceLayerPriorities).length > 0) {
+        invalidation.push('SERVICE_LAYER_INPUTS')
+      }
+      if (Object.keys(serviceLayerEntityCategories).length > 0) {
+        invalidation.push('SERVICE_LAYER_INPUTS')
+      }
+      return pync.series(invalidation, (key) => (
+        models.AROService.request({
+          url: config.aro_service_url + `/rest/ref-cache/${invalidation}`,
+          method: 'DELETE',
+          json: true
+        })
+      ))
+    })
+  }
+
+  static queryAroCache () {
+    /*
+        [ { type: 'ROIC_ENGINE_INPUTS',
+        info: { lastTouchedInMillis: 300000, valuePresent: false } },
+      { type: 'ROIC_SERVICE_INPUTS',
+        info: { lastTouchedInMillis: 300000, valuePresent: false } },
+      { type: 'SERVICE_LAYER_INPUTS',
+        info: { lastTouchedInMillis: 300000, valuePresent: false } },
+      { type: 'PRICE_INPUTS',
+        info: { lastTouchedInMillis: 300000, valuePresent: false } },
+      { type: 'SYSTEM_PROPERTIES',
+        info: { lastTouchedInMillis: 300000, valuePresent: false } } ]
+    */
+    var req = {
+      url: config.aro_service_url + '/rest/ref-cache',
+      json: true
+    }
+    models.AROService.request(req)
+      .then((data) => {
+        console.log('data', data)
+      })
+      .catch((err) => {
+        console.log('err', err)
+      })
   }
 
 }
