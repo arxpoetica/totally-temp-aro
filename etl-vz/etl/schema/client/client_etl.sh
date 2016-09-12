@@ -129,6 +129,11 @@ ${PSQL} -a -f $DIR/create_client_service_layer_node_type.sql
 # Create plan_fiber_conduit
 ${PSQL} -a -f $DIR/create_client_plan_fiber_conduit.sql
 
+# Create _businesses_sizes (used by Kamil reporting)
+${PSQL} -a -f $DIR/create_client_businesses_sizes.sql
+
+
+
 #Views (These will be moved into their own VIEW Directory)
 #${PSQL} -a -f $DIR/create_client_views.sql
 
