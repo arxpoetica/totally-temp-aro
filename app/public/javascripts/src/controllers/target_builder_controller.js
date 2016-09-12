@@ -1,6 +1,6 @@
-/* global app user_id google $ map FormData XMLHttpRequest swal config */
+/* global app user_id google $ map FormData XMLHttpRequest swal config _ */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', ($scope, $rootScope, $http, map_tools, map_layers) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', '$timeout', ($scope, $rootScope, $http, map_tools, map_layers, $timeout) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.optimizationType = 'unconstrained'
@@ -206,5 +206,62 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     xhr.send(formData)
   })
 
-  // TODO: hide this tool if not config.route_planning
+  $scope.search_results = null
+
+  var marker
+  var search = $('#map-tools-target-builder .select2')
+
+  function configureBusinessesSearch () {
+    search.select2({
+      ajax: {
+        url: '/search/businesses',
+        dataType: 'json',
+        delay: 250,
+        data: (term) => ({ text: term }),
+        results: (data, params) => {
+          var items = data.map((location) => {
+            return {
+              id: String(location.location_id),
+              text: location.name,
+              geog: location.geog
+            }
+          })
+          $scope.search_results = items
+
+          return {
+            results: items,
+            pagination: {
+              more: false
+            }
+          }
+        },
+        cache: true
+      }
+    })
+
+    search.on('change', () => {
+      var value = search.select2('val')
+      var location = _.findWhere($scope.search_results, { id: value })
+      var center = { lat: location.geog.coordinates[1], lng: location.geog.coordinates[0] }
+      map.setCenter(center)
+      if (marker) marker.setMap(null)
+
+      marker = new google.maps.Marker({
+        position: center,
+        map: map,
+        animation: google.maps.Animation.DROP
+      })
+
+      google.maps.event.addListener(marker, 'click', (event) => {
+        $rootScope.$broadcast('open_location', location.id)
+      })
+    })
+
+    $rootScope.$on('plan_selected', (e, plan) => {
+      if (marker) marker.setMap(null)
+      search.select2('val', '')
+    })
+  }
+
+  $timeout(() => configureBusinessesSearch())
 }])
