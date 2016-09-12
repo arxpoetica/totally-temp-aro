@@ -47,13 +47,19 @@ module.exports = class Settings {
         JOIN client.service_layer ON service_layer.id = service_layer_entity_category.service_layer_id
         JOIN client.entity_category ON entity_category.id = service_layer_entity_category.entity_category_id
         ORDER BY id ASC
+      `),
+      database.query(`
+        SELECT system_rule_id || ':' || property_field_id AS id, name, type, description, string_value FROM client.system_property sp
+        JOIN client.system_property_field spf ON  spf.id = sp.property_field_id
+        ORDER BY description ASC
       `)
     ])
     .then((results) => ({
       networkCosts: results[0],
       financialAssumptions: results[1],
       serviceLayerPriorities: results[2],
-      serviceLayerEntityCategories: results[3]
+      serviceLayerEntityCategories: results[3],
+      systemProperties: results[4]
     }))
   }
 
@@ -62,6 +68,7 @@ module.exports = class Settings {
     var financialAssumptions = options.financialAssumptions || {}
     var serviceLayerPriorities = options.serviceLayerPriorities || {}
     var serviceLayerEntityCategories = options.serviceLayerEntityCategories || {}
+    var systemProperties = options.systemProperties || {}
     var financialFields = [
       'arpu',
       'entity_growth',
@@ -97,6 +104,12 @@ module.exports = class Settings {
           UPDATE client.service_layer_entity_category
           SET service_layer_id=$1 WHERE id=$2
         `, [serviceLayerEntityCategories[key].service_layer_id, key])
+      )),
+      pync.series(Object.keys(systemProperties), (key) => (
+        database.execute(`
+          UPDATE client.system_property
+          SET string_value=$1 WHERE (system_rule_id || ':' || property_field_id) =$2
+        `, [systemProperties[key].string_value, key])
       ))
     ])
   }

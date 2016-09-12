@@ -24,6 +24,9 @@
               <a href="#applicationSettingsServiceLayerEntityCategories" aria-controls="profile" role="tab" data-toggle="tab">Service Layer Entity Categories</a>
             </li>
             <li role="presentation">
+              <a href="#applicationSettingsAdvanced" aria-controls="profile" role="tab" data-toggle="tab">Advanced</a>
+            </li>
+            <li role="presentation">
               <a href="#applicationSettingsOther" aria-controls="profile" role="tab" data-toggle="tab">Other</a>
             </li>
           </ul>
@@ -150,6 +153,27 @@
                   <button class="btn btn-default">Refresh Cache</button>
                 </p>
               </form>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsAdvanced" style="padding-top: 20px">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr ng-repeat="property in applicationSettings.systemProperties">
+                    <td>{{ property.description }}</td>
+                    <td>
+                      <input class="form-control" type="text"
+                        data-tab="systemProperties" data-field="string_value"
+                        data-id="{{ property.id }}"
+                        ng-model="property.string_value">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
