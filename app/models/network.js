@@ -69,13 +69,20 @@ module.exports = class Network {
   static carriers (plan_id, fiberType, viewport) {
     var params = [fiberType]
     var sql
-    if (!viewport) {
+    if (fiberType === 'fiber') {
       sql = `
+        WITH visible_carriers AS (SELECT c.*
+          FROM carriers c
+          JOIN fiber_plant fp ON fp.carrier_id = c.id
+          ${database.intersects(viewport, 'fp.geom', 'AND')}
+          WHERE c.route_type=$1
+          GROUP BY c.id
+          LIMIT 1
+        )
+
         SELECT carriers.id, carriers.name, carriers.color
-          FROM carriers
-           WHERE carriers.route_type=$1
-           ${database.intersects(viewport, 'cb.geom', 'AND')}
-         ORDER BY carriers.name ASC
+        FROM visible_carriers carriers
+        ORDER BY carriers.name ASC
       `
     } else {
       sql = `
