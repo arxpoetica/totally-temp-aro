@@ -117,6 +117,12 @@ ${PSQL} -a -f $DIR/create_client_service_layer_priority.sql
 # Create system_rule layer_category
 ${PSQL} -a -f $DIR/create_client_service_layer_entity_category.sql
 
+# Create system property field
+${PSQL} -a -f $DIR/create_client_system_property_field.sql
+
+# Create system property field
+${PSQL} -a -f $DIR/create_client_system_property.sql
+
 # Create display mapping table
 ${PSQL} -a -f $DIR/create_client_service_layer_node_type.sql
 

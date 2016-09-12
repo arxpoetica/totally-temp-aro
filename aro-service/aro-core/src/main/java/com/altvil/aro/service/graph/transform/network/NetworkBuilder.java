@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.EdgeUtils;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;

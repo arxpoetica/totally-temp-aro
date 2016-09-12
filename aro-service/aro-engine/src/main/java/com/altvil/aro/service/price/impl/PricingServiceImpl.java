@@ -24,6 +24,8 @@ import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.price.engine.PriceModel;
 import com.altvil.aro.service.price.engine.PriceModelBuilder;
 import com.altvil.aro.service.price.engine.PricingEngine;
+import com.altvil.aro.service.reference.ReferenceType;
+import com.altvil.aro.service.reference.VolatileReferenceService;
 import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.func.Aggregator;
@@ -38,19 +40,20 @@ public class PricingServiceImpl implements PricingService {
 	private NetworkPlanRepository priceRepository;
 	private VolatileReference<PricingModel> modelRef;
 	private PricingEngine pricingEngine;
-
+	
 	private static final Set<CableConstructionEnum> codedCableConstructionPricing = getCodedConstructionTypes();
 
 	@Autowired
 	public PricingServiceImpl(NetworkPlanRepository priceRepository,
-			PricingEngine pricingEngine) {
+			PricingEngine pricingEngine,
+			VolatileReferenceService volatileReferenceService) {
 		super();
 		this.priceRepository = priceRepository;
 		this.pricingEngine = pricingEngine;
+		
+		modelRef = volatileReferenceService.createVolatileReference(
+				ReferenceType.PRICE_INPUTS, () -> loadPricingModel());
 
-		// TODO version Tracking on price Model
-		modelRef = new VolatileReference<PricingModel>(
-				() -> loadPricingModel(), 1000L * 60L * 5L);
 	}
 
 	private static Set<CableConstructionEnum> getCodedConstructionTypes() {
@@ -70,17 +73,20 @@ public class PricingServiceImpl implements PricingService {
 
 	@Override
 	public Aggregator<PriceModel> aggregate() {
-		return pricingEngine.createAggregator(getPricingModel("*", new Date(), new PricingContext()));
+		return pricingEngine.createAggregator(getPricingModel("*", new Date(),
+				new PricingContext()));
 	}
 
 	@Override
-	public PriceModelBuilder createBuilder(String state, Date date, PricingContext ctx) {
+	public PriceModelBuilder createBuilder(String state, Date date,
+			PricingContext ctx) {
 		return pricingEngine.createPriceModelBuilder(getPricingModel(state,
 				date, ctx));
 	}
 
 	@Override
-	public PricingModel getPricingModel(String state, Date date, PricingContext ctx) {
+	public PricingModel getPricingModel(String state, Date date,
+			PricingContext ctx) {
 		return ContextPricingModel.create(modelRef.get(), ctx);
 	}
 
@@ -159,7 +165,8 @@ public class PricingServiceImpl implements PricingService {
 
 		Map<MaterialType, String> networkMapping = new EnumMap<>(
 				MaterialType.class);
-		Map<FiberType, Map<CableConstructionEnum, String>> fiberMapping = new EnumMap<>(FiberType.class);
+		Map<FiberType, Map<CableConstructionEnum, String>> fiberMapping = new EnumMap<>(
+				FiberType.class);
 
 		private CodeMapping() {
 			init();
@@ -191,20 +198,21 @@ public class PricingServiceImpl implements PricingService {
 
 		private void init(FiberType fiberType,
 				Set<CableConstructionEnum> constructionTypes) {
-			
+
 			for (CableConstructionEnum ct : constructionTypes) {
 				add(fiberType, ct);
 			}
 		}
-		
+
 		private EnumMap<CableConstructionEnum, String> createEmptyMap() {
-			 EnumMap<CableConstructionEnum, String> map = new EnumMap<>(CableConstructionEnum.class) ;
-			 
-			 for(CableConstructionEnum ct : CableConstructionEnum.values()) {
-				 map.put(ct, "$INVALID_MATCH$") ;
-			 }
-			 
-			 return map ;
+			EnumMap<CableConstructionEnum, String> map = new EnumMap<>(
+					CableConstructionEnum.class);
+
+			for (CableConstructionEnum ct : CableConstructionEnum.values()) {
+				map.put(ct, "$INVALID_MATCH$");
+			}
+
+			return map;
 		}
 
 		private void init() {
@@ -213,10 +221,10 @@ public class PricingServiceImpl implements PricingService {
 			add(MaterialType.FDT, "fiber_distribution_terminal");
 			add(MaterialType.FDH, "fiber_distribution_hub");
 
-			for(FiberType ft : FiberType.values()) {
-				fiberMapping.put(ft, createEmptyMap()) ;
+			for (FiberType ft : FiberType.values()) {
+				fiberMapping.put(ft, createEmptyMap());
 			}
-			
+
 			Set<CableConstructionEnum> codedConstructionTypes = getCodedConstructionTypes();
 
 			init(FiberType.FEEDER, codedConstructionTypes);
@@ -306,10 +314,10 @@ public class PricingServiceImpl implements PricingService {
 
 			Map<CableConstructionEnum, Double> pricingMap = new EnumMap<>(
 					CableConstructionEnum.class);
-			
-			//Ensure that Map is fully populated
-			for(CableConstructionEnum ct : CableConstructionEnum.values()) {
-				pricingMap.put(ct,  0.0) ;
+
+			// Ensure that Map is fully populated
+			for (CableConstructionEnum ct : CableConstructionEnum.values()) {
+				pricingMap.put(ct, 0.0);
 			}
 
 			for (CableConstructionEnum ct : constructionTypes) {
