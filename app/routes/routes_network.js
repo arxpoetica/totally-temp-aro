@@ -99,11 +99,10 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/network/fiber/:plan_id/find/:serviceLayer', check_any_permission, middleware.viewport, (request, response, next) => {
-    var viewport = request.viewport
+  api.get('/network/fiber/:plan_id/find/:serviceLayer', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
     var serviceLayer = request.params.serviceLayer
-    models.Network.viewFiber(plan_id, serviceLayer, viewport)
+    models.Network.viewFiber(plan_id, serviceLayer)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

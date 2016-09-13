@@ -90,9 +90,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         }
       },
       api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
-      declarativeStyles: routeStyles(layer),
-      threshold: 12,
-      reload: 'always'
+      declarativeStyles: routeStyles(layer)
     })
     routeLayer.hide_in_ui = true
     layer.routeLayer = routeLayer
