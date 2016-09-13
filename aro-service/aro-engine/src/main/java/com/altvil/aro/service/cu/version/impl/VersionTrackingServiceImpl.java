@@ -56,6 +56,9 @@ public class VersionTrackingServiceImpl implements VersionTrackingService {
 		map.put(VersionType.NETWORK,
 				createVersionTracking(VersionType.NETWORK));
 
+		map.put(VersionType.SERVICE,
+				createVersionTracking(VersionType.SERVICE));
+
 		for (VersionTracking tracking : map.values()) {
 			if (tracking != null) {
 				bsaExecutorService.register((PreCacheAgent) tracking);
@@ -73,7 +76,7 @@ public class VersionTrackingServiceImpl implements VersionTrackingService {
 		case NETWORK:
 			return DeploymentVersionTracking.create(appCtx);
 		default:
-			return null;
+			return new StubVersionTracking();
 
 		}
 

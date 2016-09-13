@@ -123,7 +123,10 @@ public class DBCache implements SimpleCache {
 		}
 
 		private boolean matchResourceVersion() {
-			return equals(resourceVersion.getVersion(VersionType.LOCATION),
+			return
+					equals(resourceVersion.getVersion(VersionType.SERVICE),
+							deploymentCacheEntity.getServiceAreaVersion())
+			&& equals(resourceVersion.getVersion(VersionType.LOCATION),
 					deploymentCacheEntity.getLocationVersion())
 					&& equals(
 							resourceVersion.getVersion(VersionType.NETWORK),
@@ -172,15 +175,19 @@ public class DBCache implements SimpleCache {
 			for (VersionType vt : resourceVersion.keys()) {
 				switch (vt) {
 				case LOCATION:
-				case SERVICE:
-					deploymentCacheEntity.setLocationVersion(resourceVersion
-							.getVersion(VersionType.LOCATION));
-					break;
+						deploymentCacheEntity.setLocationVersion(resourceVersion
+								.getVersion(VersionType.LOCATION));
+						break;
+					case SERVICE:
+						deploymentCacheEntity.setServiceAreaVersion(resourceVersion
+								.getVersion(VersionType.SERVICE));
+						break;
 				case NETWORK:
 					deploymentCacheEntity.setVersion(resourceVersion
 							.getVersion(VersionType.NETWORK));
 					break;
 				}
+
 			}
 
 			//
@@ -194,7 +201,7 @@ public class DBCache implements SimpleCache {
 			CacheKey key = getCacheKey();
 
 			Map<String, Object> params = new HashMap<>();
-			String query = "update cache.deployment_plan_cache set last_updated=now(),optlock=:optLock + 1, deployment_version=:deploymentVersion, location_version=:locationVersion, cache_data = :blob, length = :length where service_area_id=:serviceAreaId and deployment_plan_id=:deploymentPlanId and cache_type=:key and optlock=:optLock";
+			String query = "update cache.deployment_plan_cache set last_updated=now(),optlock=:optLock + 1, deployment_version=:deploymentVersion, location_version=:locationVersion, service_area_version=:serviceAreaVersion, cache_data = :blob, length = :length where service_area_id=:serviceAreaId and deployment_plan_id=:deploymentPlanId and cache_type=:key and optlock=:optLock";
 			params.put("optLock", deploymentCacheEntity.getOptiLock());
 			params.put("deploymentVersion", deploymentCacheEntity.getVersion());
 			params.put("locationVersion",
@@ -204,6 +211,10 @@ public class DBCache implements SimpleCache {
 			params.put("deploymentPlanId", key.getBsaKey()
 					.getDeploymentPlanId() == null ? -1 : key.getBsaKey()
 					.getDeploymentPlanId());
+
+			params.put("serviceAreaVersion", deploymentCacheEntity.getServiceAreaVersion());
+
+
 			params.put("key", key.getCacheTypeExtendedKey());
 			params.put("length", (long) cacheData.length);
 

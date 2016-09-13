@@ -40,7 +40,7 @@ public class NetworkDataRequest {
 	}
 	
 	public NetworkDataRequest createRequest(Set<LocationEntityType> types) {
-		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, types, mrc, queryPlanConduit) ;
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, types, mrc, queryPlanConduit, serviceAreaId) ;
 	}
 
 	public NetworkDataRequest includePlanConduit() {

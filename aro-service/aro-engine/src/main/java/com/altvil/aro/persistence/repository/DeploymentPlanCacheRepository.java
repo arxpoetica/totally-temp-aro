@@ -22,13 +22,14 @@ public interface DeploymentPlanCacheRepository extends
 
 	@Modifying
 	@Transactional
-	@Query(value = "update cache.deployment_plan_cache set optlock=:optLock + 1, deployment_version=:deploymentVersion, location_version=:locationVersion, cache_data = :blob, length = :length where service_area_id=:serviceAreaId and deployment_plan_id=:deploymentPlanId and cache_type=:key and optlock=:optLock", nativeQuery = true)
+	@Query(value = "update cache.deployment_plan_cache set optlock=:optLock + 1, deployment_version=:deploymentVersion, location_version=:locationVersion, service_area_version=:serviceAreaVersion, cache_data = :blob, length = :length where service_area_id=:serviceAreaId and deployment_plan_id=:deploymentPlanId and cache_type=:key and optlock=:optLock", nativeQuery = true)
 	public void updateDeploymentPlanCacheEntity(
 			@Param("serviceAreaId") int serviceAreaId,
 			@Param("deploymentPlanId") int deploymentPlanId,
 			@Param("key") String key, @Param("optLock") long optLock,
 			@Param("deploymentVersion") Long deploymentVersion,
 			@Param("locationVersion") Long locationVersion,
+			@Param("serviceAreaVersion") Long serviceAreaVersion,
 			@Param("length") long length, @Param("blob") byte[] blob);
 
 }

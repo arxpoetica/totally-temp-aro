@@ -57,7 +57,7 @@ public class NetworkDataDAO implements ComputeServiceApi{
                 .setName("service_area_road_edges")
                 .setCacheMemorySize(100)
                 .setExecutionCachePolicies(EnumSet.of(MEMORY, PERSISTENCE))
-                .setVersionTypes(EnumSet.of(VersionType.NETWORK))
+                .setVersionTypes(EnumSet.of(VersionType.SERVICE))
                 .setCacheLoaderFunc(
                         (cacheQuery) -> () -> _getRoadEdges(
                                 cacheQuery.getServiceAreaId()

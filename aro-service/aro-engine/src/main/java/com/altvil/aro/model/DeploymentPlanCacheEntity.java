@@ -20,6 +20,7 @@ public class DeploymentPlanCacheEntity {
 	private Long version;
 	private Long locationVersion;
 	private Long length = 0L;
+	private Long serviceAreaVersion;
 
 	@EmbeddedId
 	public DeploymentPlanCacheKey getKey() {
@@ -60,6 +61,15 @@ public class DeploymentPlanCacheEntity {
 		this.locationVersion = locationVersion;
 	}
 
+	@Basic
+	@Column(name = "service_area_version", insertable = false, updatable = false)
+	public Long getServiceAreaVersion() {
+		return serviceAreaVersion;
+	}
+
+	public void setServiceAreaVersion(Long serviceAreaVersion) {
+		this.serviceAreaVersion = serviceAreaVersion;
+	}
 	// @Lob
 	// @Column(name = "cache_data", length = 10000000)
 	// public byte[] getCacheData() {
@@ -94,5 +104,6 @@ public class DeploymentPlanCacheEntity {
 	void preUpdate() {
 		setLastUpdated(new Date(System.currentTimeMillis()));
 	}
+
 
 }

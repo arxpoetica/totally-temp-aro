@@ -60,13 +60,13 @@ public class Finance {
 		
 		return Math.round(seekZero((rate) -> {
 			counter.inc() ;
-			double rrate = 1 + 1/100 ;
+			double rrate = 1 + rate/100 ;
 			double npvValue = cfs[0];
 			for (int i = 1; i < cfs.length; i++) {
 				npvValue += (cfs[i] / Math.pow(rrate, i));
 			}
 			return npvValue;
-		}) * 100) / 100;
+		}) * 100) / 100.0;
 
 	}
 
