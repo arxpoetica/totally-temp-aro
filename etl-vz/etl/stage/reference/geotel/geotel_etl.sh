@@ -40,7 +40,7 @@ fi
 
 # 2. Load Wirecenters
 
-declare -a FIBER_STATE_ARRAY=( 'wi' )
+declare -a WIRECENTER_STATE_ARRAY=( 'wi' )
 wirecenter_state_array_len=${#WIRECENTER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table
