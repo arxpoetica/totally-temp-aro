@@ -12,7 +12,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 cd $GISROOT;
 
-declare -a STATE_ARRAY=( 'wi' )
+declare -a STATE_ARRAY=( 'wi_v2' )
 state_array_len=${#STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table

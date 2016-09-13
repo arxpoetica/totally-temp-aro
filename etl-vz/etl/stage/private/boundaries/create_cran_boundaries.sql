@@ -12,6 +12,6 @@ SELECT AddGeometryColumn('boundaries', 'cran', 'the_geom', 4326, 'MULTIPOLYGON',
 INSERT INTO boundaries.cran(gid, name, the_geom)
 	SELECT
 		gid,
-		name,
+		gid::varchar,
 		the_geom
-	FROM boundaries.cran_wi;
+	FROM boundaries.cran_wi_v2;
