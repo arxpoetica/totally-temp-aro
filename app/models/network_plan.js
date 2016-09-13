@@ -503,10 +503,11 @@ module.exports = class NetworkPlan {
 
         var sql = `
           SELECT ST_AsKML(fiber_route.geom) AS geom
-          FROM client.plan
-          JOIN client.plan p ON p.parent_plan_id = plan.id
+          FROM client.plan r
+          JOIN client.plan mp ON mp.parent_plan_id = r.id
+          JOIN client.plan p ON p.parent_plan_id = mp.id
           JOIN client.fiber_route ON fiber_route.plan_id = p.id
-          WHERE plan.id=$1
+          WHERE r.id=$1
         `
         return database.query(sql, [plan_id])
       })
