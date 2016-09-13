@@ -11,15 +11,14 @@ INSERT INTO aro.locations(address, lat, lon, geog, geom)
     WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(prism_long, prism_lat), 4326));
 
 INSERT INTO aro.locations(address, lat, lon, geog, geom)
-	SELECT DISTINCT ON (arcgis_latitude, arcgis_longitude)
+	SELECT DISTINCT ON (latitude, longitude)
 		street_addr,
-		arcgis_latitude,
-		arcgis_longitude,
-		ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326)::geography AS geog,
-		ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326) AS geom
-	FROM project_constraints.spatial wc, businesses.tam b
-    WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326));
-
+		latitude,
+		longitude,
+		ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) AS geom
+	FROM project_constraints.spatial wc, businesses.tam_full_stage b
+    WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(longitude, latitude), 4326));
 
 -- Insert all VZ customers
 INSERT INTO aro.businesses(location_id, industry_id, address, number_of_employees, annual_recurring_cost, monthly_recurring_cost, source, geog, geom)
@@ -46,11 +45,8 @@ INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_em
 		b.street_addr,
 		b.emp_here,
 		'tam',
-		ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326)::geography AS geog,
-    ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326) AS geom
-   FROM businesses.tam b
+		ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography AS geog,
+    ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) AS geom
+   FROM businesses.tam_full_stage b
    JOIN aro.locations l
-   	ON ST_Equals(l.geom, ST_SetSRID(ST_MakePoint(arcgis_longitude, arcgis_latitude), 4326))
-   WHERE 
-   	arcgis_latitude != 0 
-   	AND arcgis_longitude != 0;
+   	ON ST_Equals(l.geom, ST_SetSRID(ST_MakePoint(longitude, latitude), 4326));
