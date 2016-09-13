@@ -16,30 +16,16 @@ cd $GISROOT;
 
 # Seattle hubs are a shapefile, but we've been given multiple file types.
 # This section handles the shapefile import
-declare -a STATE_ARRAY=( 'wa' 'mo' )
+declare -a STATE_ARRAY=( 'wa' 'mo' 'wi' )
 state_array_len=${#STATE_ARRAY[@]}
 
-# If there is only one state, download the file and create the table
-if [ ${state_array_len} == 1 ]; then
+for ((i=0; i<$state_array_len; i++ ));
+do
 	rm -f ${TMPDIR}/*.*
-	aws s3 cp s3://public.aro/proto/network_equipment/hubs_${STATE_ARRAY[0]}.zip $GISROOT/hubs_${STATE_ARRAY[0]}.zip 
-	$UNZIPTOOL hubs_${STATE_ARRAY[0]}.zip -d ${TMPDIR}
-	${SHP2PGSQL} -c -s 4326 -g the_geom -t 2D -W "latin1" /$TMPDIR/hubs_${STATE_ARRAY[0]}.dbf network_equipment.hubs_shp | ${PSQL}
-# If there are two or more states, download the first file, create the table, then loop through the rest and append
-elif [ ${state_array_len} > 1 ]; then
-	rm -f ${TMPDIR}/*.*
-	aws s3 cp s3://public.aro/proto/network_equipment/hubs_${STATE_ARRAY[0]}.zip $GISROOT/hubs_${STATE_ARRAY[0]}.zip
-	$UNZIPTOOL hubs_${STATE_ARRAY[0]}.zip -d ${TMPDIR}
-	${SHP2PGSQL} -c -s 4326 -g the_geom -t 2D -W "latin1" /$TMPDIR/hubs_${STATE_ARRAY[0]}.dbf network_equipment.hubs_shp | ${PSQL}
-
-	for ((i=1; i<$state_array_len; i++ ));
-	do
-		rm -f ${TMPDIR}/*.*
-		aws s3 cp s3://public.aro/proto/network_equipment/hubs_${STATE_ARRAY[i]}.zip $GISROOT/hubs_${STATE_ARRAY[i]}.zip
-		$UNZIPTOOL hubs_${STATE_ARRAY[i]}.zip -d ${TMPDIR}
-		${SHP2PGSQL} -a -s 4326 -g the_geom -t 2D -W "latin1" /$TMPDIR/hubs_${STATE_ARRAY[i]}.dbf network_equipment.hubs_shp | ${PSQL}
-	done
-fi
+	aws s3 cp s3://public.aro/proto/network_equipment/hubs_${STATE_ARRAY[i]}.zip $GISROOT/hubs_${STATE_ARRAY[i]}.zip
+	$UNZIPTOOL hubs_${STATE_ARRAY[i]}.zip -d ${TMPDIR}
+	${SHP2PGSQL} -c -s 4326 -g the_geom -t 2D -W "latin1" /$TMPDIR/hubs_${STATE_ARRAY[i]}.dbf network_equipment.hubs_shp_${STATE_ARRAY[i]} | ${PSQL}
+done
 
 # Some other hub data was given as CSV
 # This section handles the CSV import

@@ -21,6 +21,13 @@ INSERT INTO boundaries.cran(gid, name, the_geom)
 INSERT INTO boundaries.cran(gid, name, the_geom)
 	SELECT
 		gid,
+		gid::varchar,
+		the_geom
+	FROM boundaries.cran_wa_v2;
+
+INSERT INTO boundaries.cran(gid, name, the_geom)
+	SELECT
+		gid,
 		name,
 		the_geom
-	FROM boundaries.cran_wa;
+	FROM boundaries.cran_wi;
