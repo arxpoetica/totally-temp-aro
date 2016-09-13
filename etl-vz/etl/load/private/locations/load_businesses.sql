@@ -18,7 +18,7 @@ INSERT INTO aro.locations(address, lat, lon, geog, geom)
 		ST_SetSRID(ST_MakePoint(cast(longitude AS double precision), cast(latitude AS double precision)), 4326)::geography AS geog,
 		ST_SetSRID(ST_MakePoint(cast(longitude AS double precision), cast(latitude AS double precision)), 4326) AS geom
 	FROM project_constraints.spatial wc, businesses.tam_full_stage b
-    WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(longitude, latitude), 4326));
+    WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(cast(longitude AS double precision), cast(latitude AS double precision)), 4326));
 
 -- Insert all VZ customers
 INSERT INTO aro.businesses(location_id, industry_id, address, number_of_employees, annual_recurring_cost, monthly_recurring_cost, source, geog, geom)
