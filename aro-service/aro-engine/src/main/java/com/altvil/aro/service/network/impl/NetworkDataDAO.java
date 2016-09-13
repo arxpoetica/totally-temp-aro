@@ -3,7 +3,6 @@ package com.altvil.aro.service.network.impl;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.cu.ComputeServiceApi;
 import com.altvil.aro.service.cu.ComputeUnit;
-import com.altvil.aro.service.cu.ComputeUnitBuilder;
 import com.altvil.aro.service.cu.ComputeUnitService;
 import com.altvil.aro.service.cu.cache.query.CacheQuery;
 import com.altvil.aro.service.cu.execute.Priority;
@@ -13,8 +12,8 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.entity.mapping.LocationEntityTypeMapping;
-import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.model.ServiceAreaRoadEdges;
+import com.altvil.aro.service.network.model.ServiceAreaRoadLocations;
 import com.altvil.interfaces.*;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
@@ -46,6 +45,7 @@ public class NetworkDataDAO implements ComputeServiceApi{
     private ComputeUnitService computeUnitService;
 
     private ComputeUnit<ServiceAreaRoadEdges> serviceAreaRoadEdges;
+    private ComputeUnit<ServiceAreaRoadLocations> serviceAreaRoadLocations;
 
 
     @PostConstruct
@@ -60,6 +60,17 @@ public class NetworkDataDAO implements ComputeServiceApi{
                 .setVersionTypes(EnumSet.of(VersionType.SERVICE))
                 .setCacheLoaderFunc(
                         (cacheQuery) -> () -> _getRoadEdges(
+                                cacheQuery.getServiceAreaId()
+                        ))
+                .build();
+        serviceAreaRoadLocations = computeUnitService
+                .build( ServiceAreaRoadLocations.class, this.getClass())
+                .setName("service_area_road_locations")
+                .setCacheMemorySize(100)
+                .setExecutionCachePolicies(EnumSet.of(MEMORY, PERSISTENCE))
+                .setVersionTypes(EnumSet.of(VersionType.SERVICE))
+                .setCacheLoaderFunc(
+                        (cacheQuery) -> () -> _queryRoadLocations(
                                 cacheQuery.getServiceAreaId()
                         ))
                 .build();
@@ -121,10 +132,13 @@ public class NetworkDataDAO implements ComputeServiceApi{
         return map;
     }
 
-    public Map<Long, RoadLocation> queryRoadLocations(long planId) {
+    public ServiceAreaRoadLocations queryRoadLocations(int serviceAreaId) {
+        return serviceAreaRoadLocations.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId).build());
+    }
+    private ServiceAreaRoadLocations _queryRoadLocations(int serviceAreaId) {
         Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
         planRepository
-                .queryAllLocationsByPlanId(planId)
+                .queryAllLocationsByServiceAreaId(serviceAreaId)
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
                 .forEach(
@@ -153,7 +167,7 @@ public class NetworkDataDAO implements ComputeServiceApi{
                                                 + err.getMessage(), err);
                             }
                         });
-        return roadLocationsMap;
+        return new ServiceAreaRoadLocations(roadLocationsMap);
     }
 
     public Collection<NetworkAssignment> queryFiberSources(long planId) {
@@ -283,6 +297,11 @@ public class NetworkDataDAO implements ComputeServiceApi{
                             .getDouble(ConduitEdgeMap.endRatio));
                 }).collect(Collectors.toList());
 
+    }
+
+    public Map<Long, RoadLocation> queryRoadLocationsByPlanId(long planId) {
+        int serviceAreaId = planRepository.getPlanServiceAreaId(planId);
+        return queryRoadLocations(serviceAreaId).getId2location();
     }
 
 

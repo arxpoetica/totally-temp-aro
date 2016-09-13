@@ -159,7 +159,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(
 			NetworkDataRequest networkConfiguration) {
-		return networkDataDAO.queryRoadLocations(networkConfiguration.getPlanId());
+		return networkDataDAO
+				.queryRoadLocations(networkConfiguration.getServiceAreaId().get())
+				.getId2location();
 	}
 
 

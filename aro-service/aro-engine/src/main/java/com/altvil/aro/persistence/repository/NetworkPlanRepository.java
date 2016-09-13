@@ -50,11 +50,10 @@ public interface NetworkPlanRepository extends
 			"FROM (SELECT aro.edges.gid, ST_Distance(cast(aro.edges.geom as geography), cast(l.geom as geography)) AS distance \n" + 
 			"FROM aro.edges where st_intersects(r.area_bounds, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" + 
 			") as gid\n" + 
-			"FROM client.plan r\n" + 
-			"join client.service_area w on r.wirecenter_id = w.id\n" + 
-			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
-			"where r.id = :planId\n" + 
-			")\n" + 
+			"FROM  client.service_area w on r.wirecenter_id = \n" +
+			"join aro.locations l on st_contains(w.geom, l.geom)\n" +
+			" and w.id = :serviceAreaId" +
+			")\n" +
 			"select\n" + 
 			"ll.id as location_id,\n" + 
 			"ll.gid,\n" + 
@@ -66,7 +65,7 @@ public interface NetworkPlanRepository extends
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
 			"order by gid, intersect_position limit 40000", nativeQuery = true) // KG debugging
-	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
+	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId) ;
 
 
 	@Query(value = "with selected_locations as (\n" + 
@@ -369,6 +368,8 @@ public interface NetworkPlanRepository extends
 			"WHERE plan_id = :planId\n" +
 			"AND end_ratio >= start_ratio ", nativeQuery = true)
 	List<Object[]> queryPlanConduitSections(@Param("planId") long planId);
-	
-	
+
+	@Query(value = "select wirecenter_id from client.plan where id = :planId", nativeQuery = true)
+	int getPlanServiceAreaId(@Param("planId") long planId);
+
 }

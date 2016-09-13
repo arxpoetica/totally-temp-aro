@@ -61,6 +61,9 @@ public class NetworkServiceImpl implements NetworkService {
 	@Autowired
 	private NetworkPlanRepository planRepository;
 
+	@Autowired
+	private NetworkDataDAO networkDataDao;
+
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
 
 	@Value("${CACHE_LOCATION_DEMANDS_BY_PLAN_ID_AND_YEAR}")
@@ -277,38 +280,7 @@ public class NetworkServiceImpl implements NetworkService {
 	// }
 
 	private Map<Long, RoadLocation> queryRoadLocations(long planId) {
-		Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
-		planRepository
-				.queryAllLocationsByPlanId(planId)
-				.stream()
-				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
-				.forEach(
-						result -> {
-							long tlid = result.getLong(LocationMap.tlid);
-							Long locationId = result.getLong(LocationMap.id);
-							try {
-								RoadLocation rl = RoadLocationImpl
-										.build()
-										.setTlid(tlid)
-										.setLocationPoint(
-												result.getPoint(LocationMap.point))
-										.setRoadSegmentPositionRatio(
-												result.getDouble(LocationMap.ratio))
-										.setRoadSegmentClosestPoint(
-												result.getPoint(LocationMap.intersect_point))
-										.setDistanceFromRoadSegmentInMeters(
-												result.getDouble(LocationMap.distance))
-										.build(); 
-
-								roadLocationsMap.put(locationId, rl);
-							} catch (Throwable err) {
-								LOG.error(
-										"Failed creating RoadLocation for locationId "
-												+ locationId + " due to: "
-												+ err.getMessage(), err);
-							}
-						});
-		return roadLocationsMap;
+		return networkDataDao.queryRoadLocationsByPlanId(planId);
 	}
 
 	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(
