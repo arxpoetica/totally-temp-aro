@@ -12,16 +12,6 @@ CREATE TABLE towers.towers
 
 SELECT AddGeometryColumn('towers', 'towers', 'geom', 4326, 'POINT', 2);
 
--- -- Load SITA towers
--- INSERT INTO towers.towers(city, lat, lon, geog, geom)
--- 	SELECT
--- 		parcel_city,
--- 		latitude,
--- 		longitude,
--- 		ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography AS geog,
--- 		ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) AS geom
--- 	FROM towers.sita_towers;
-
 -- Load WA towers
 INSERT INTO towers.towers(city, lat, lon, geog, geom)
 	SELECT
@@ -51,3 +41,12 @@ INSERT INTO towers.towers(city, lat, lon, geog, geom)
 		ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography AS geog,
 		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
 	FROM towers.vz_mo_towers;
+
+-- Load WI towers
+INSERT INTO towers.towers(lat, lon, geog, geom)
+	SELECT
+		lat,
+		long,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
+	FROM towers.vz_wi_towers;

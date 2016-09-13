@@ -4,7 +4,7 @@ exports.serviceLayers = []
 exports.analysisLayers = []
 
 function readServiceLayers () {
-  database.query('SELECT * FROM client.service_layer ORDER BY id ASC')
+  return database.query('SELECT * FROM client.service_layer ORDER BY id ASC')
     .then((response) => {
       exports.serviceLayers = response
       return database.query(`
@@ -20,16 +20,22 @@ function readServiceLayers () {
         layer.nodeTypes = nodeTypes.filter((type) => type.service_layer_id === layer.id)
       })
     })
-    .catch((err) => console.log('Error querying service_layers', err.stack))
 }
 
 function readAnalysisLayers () {
-  database.query('SELECT * FROM client.analysis_layer ORDER BY id ASC')
+  return database.query('SELECT * FROM client.analysis_layer ORDER BY id ASC')
     .then((response) => {
       exports.analysisLayers = response
     })
-    .catch((err) => console.log('Error querying analysis_layers', err.stack))
 }
 
-readAnalysisLayers()
-readServiceLayers()
+exports.refresh = () => {
+  return Promise.all([
+    readAnalysisLayers(),
+    readServiceLayers()
+  ])
+  .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
+}
+
+exports.refresh()
+  .catch((err) => console.log('Error refreshing cache', err.stack))

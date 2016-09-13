@@ -22,6 +22,8 @@ import com.altvil.aro.service.demand.analysis.SpeedCategory;
 import com.altvil.aro.service.entity.DemandStatistic;
 import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.reference.ReferenceType;
+import com.altvil.aro.service.reference.VolatileReferenceService;
 import com.altvil.aro.service.roic.CashFlows;
 import com.altvil.aro.service.roic.NetworkFinancialInput;
 import com.altvil.aro.service.roic.RoicEngineService;
@@ -47,25 +49,28 @@ import com.altvil.utils.reflexive.MappedCodes;
 
 @Service
 public class RoicEngineServiceImpl implements RoicEngineService {
-	
+
 	private static final Logger log = LoggerFactory
 			.getLogger(RoicEngineServiceImpl.class.getName());
-
 
 	private ArpuService arpuService;
 	private RoicBuilderService roicBuilderService;
 	private RoicComponentInputModelRepository roicComponentInputModelRepository;
+	private VolatileReferenceService volatileReferenceService;
 
 	private VolatileReference<CacheInputData> roicInputRef;
 
 	@Autowired
-	public RoicEngineServiceImpl(ArpuService arpuService,
+	public RoicEngineServiceImpl(
+			ArpuService arpuService,
 			RoicBuilderService roicBuilderService,
-			RoicComponentInputModelRepository roicComponentInputModelRepository) {
+			RoicComponentInputModelRepository roicComponentInputModelRepository,
+			VolatileReferenceService volatileReferenceService) {
 		super();
 		this.arpuService = arpuService;
 		this.roicBuilderService = roicBuilderService;
 		this.roicComponentInputModelRepository = roicComponentInputModelRepository;
+		this.volatileReferenceService = volatileReferenceService;
 	}
 
 	@PostConstruct
@@ -82,8 +87,8 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 			.flip();
 
 	private VolatileReference<CacheInputData> createComponentInputs() {
-		return new VolatileReference<CacheInputData>(
-				() -> loadCacheInputData(), 1000L * 50L * 5L);
+		return volatileReferenceService.createVolatileReference(
+				ReferenceType.ROIC_ENGINE_INPUTS, () -> loadCacheInputData());
 	}
 
 	private CacheInputData loadCacheInputData() {
@@ -120,15 +125,16 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 
 	@Override
 	public CashFlows createRoicCashFlows(RoicFinancialInput roicFinancialInput) {
-		
+
 		log.info("Compute Roic Cashflow");
-		
+
 		CashFlows cf = new CashFlowsImpl(loadRoicModel(roicFinancialInput)
-				.getRowReference("incremental.network.cashflow").getAnalysisRow().getRawData());
-		
+				.getRowReference("incremental.network.cashflow")
+				.getAnalysisRow().getRawData());
+
 		log.info("Computed Roic Cashflow");
-		
-		return cf ;
+
+		return cf;
 	}
 
 	private class CacheInputData {
@@ -217,20 +223,20 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 
 		public CashFlows computeCashFlow(NetworkFinancialInput finacialInputs,
 				int periods) {
-			
-			log.info("Compute Cashflow aprox " + periods + " " + finacialInputs.getLocationDemand());
-			
+
+			log.info("Compute Cashflow aprox " + periods + " "
+					+ finacialInputs.getLocationDemand());
+
 			Map<LocationEntityType, StreamFunction> penetrationMap = createPenetrationCurveMap(finacialInputs
 					.getLocationDemand());
-		
-			CashFlows cf =  new CashFlowGenerator(map, penetrationMap,
+
+			CashFlows cf = new CashFlowGenerator(map, penetrationMap,
 					finacialInputs.getLocationDemand(),
 					finacialInputs.getFixedCosts()).createCashFlow(periods);
-			
+
 			log.info("Computed Cashflow aprox");
-			
-			
-			return cf ;
+
+			return cf;
 
 		}
 
@@ -430,7 +436,7 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 			case cat3:
 				return 0;
 			default:
-				return planAnalysisReport.getFixedCosts() ;
+				return planAnalysisReport.getFixedCosts();
 			}
 		}
 
@@ -508,7 +514,7 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 			case cat3:
 				return 0;
 			default:
-				return planAnalysisReport.getFixedCosts() ;
+				return planAnalysisReport.getFixedCosts();
 			}
 		}
 

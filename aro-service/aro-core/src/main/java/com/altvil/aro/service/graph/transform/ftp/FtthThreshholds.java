@@ -1,12 +1,17 @@
 package com.altvil.aro.service.graph.transform.ftp;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import com.altvil.aro.service.entity.FiberType;
 import com.altvil.utils.UnitUtils;
 
 public class FtthThreshholds {
 
 	private boolean reduceIncomingStreams = false;
+	private boolean  useDirectRouting = false ;
 	private int maxlocationPerFDT = 12;
 	private int threshHoldClusteringFDT = 10;
 	private HubModel hubModel;
@@ -18,6 +23,7 @@ public class FtthThreshholds {
 	private double sparseThreshholdInMeters = 1 / UnitUtils.toMeters(500); // Sparse
 	private boolean clusterMergingSupported = false;
 	private boolean dropCableConstraintsSupported = true;
+	private Map<FiberType, Double> maxFiberLengthMap = new EnumMap<FiberType, Double>(FiberType.class) ;
 
 	private FtthThreshholds() {
 
@@ -34,6 +40,12 @@ public class FtthThreshholds {
 
 	public double getLocationBulkThreshhold() {
 		return locationBulkThreshhold;
+	}
+	
+	
+
+	public boolean isUseDirectRouting() {
+		return useDirectRouting;
 	}
 
 	public DropCableModel getDropCableModel() {
@@ -75,7 +87,11 @@ public class FtthThreshholds {
 	public double getMaxDropCableLengthInMeters() {
 		return maxDropCableLengthInMeters;
 	}
-
+	
+	public Double getMaxFiberLength(FiberType fiberType) {
+		return maxFiberLengthMap.get(fiberType) ;
+	}
+	
 	public HubModel getHubModel() {
 		return hubModel;
 	}
@@ -112,6 +128,14 @@ public class FtthThreshholds {
 				thresholds.threshHoldClusteringFDT = count - 2;
 			}
 			return this;
+		}
+		
+		public Builder setFiberLengthConstraint(FiberType fiberType, Double length) {
+			if( fiberType != null ) {
+				thresholds.maxFiberLengthMap.put(fiberType, length) ;
+			}
+			
+			return this ;
 		}
 
 		public Builder setSplitterRatio(Integer count) {
@@ -163,6 +187,13 @@ public class FtthThreshholds {
 						.toMeters(feet);
 			}
 			return this;
+		}
+		
+		public Builder setUseDirectRouting(Boolean useDirectRouting) {
+			if( useDirectRouting != null ) {
+				thresholds.useDirectRouting = useDirectRouting ;
+			}
+			return this ;
 		}
 
 		public Builder setClusterMergingSupported(

@@ -1,5 +1,5 @@
 <div class="modal" id="application-settings" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog modal-lg" role="document" style="width: 1200px">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -22,6 +22,12 @@
             </li>
             <li role="presentation">
               <a href="#applicationSettingsServiceLayerEntityCategories" aria-controls="profile" role="tab" data-toggle="tab">Service Layer Entity Categories</a>
+            </li>
+            <li role="presentation">
+              <a href="#applicationSettingsAdvanced" aria-controls="profile" role="tab" data-toggle="tab">Advanced</a>
+            </li>
+            <li role="presentation">
+              <a href="#applicationSettingsOther" aria-controls="profile" role="tab" data-toggle="tab">Other</a>
             </li>
           </ul>
           <div class="tab-content" style="padding-top: 20px">
@@ -136,6 +142,34 @@
                            ng-selected="setting.service_layer_id === layer.id"
                           value="{{layer.id}}">{{layer.description}}</option>
                       </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsOther" style="padding-top: 20px">
+              <form action="/admin/settings/refresh_cache" method="post">
+                <p class="text-center">
+                  <button class="btn btn-default">Refresh Cache</button>
+                </p>
+              </form>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsAdvanced" style="padding-top: 20px">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr ng-repeat="property in applicationSettings.systemProperties">
+                    <td>{{ property.description }}</td>
+                    <td>
+                      <input class="form-control" type="text"
+                        data-tab="systemProperties" data-field="string_value"
+                        data-id="{{ property.id }}"
+                        ng-model="property.string_value">
                     </td>
                   </tr>
                 </tbody>

@@ -51,8 +51,8 @@
 
   <br>
   <p><strong>Search, Click or Upload Locations</strong></p>
-  <input class="form-control" placeholder="Address, Business Name">
-  <br>
+  <input class="form-control select2" type="text" placeholder="Business Name">
+  <br><br>
   <form id="target-builder-upload">
     <p>
       Select:
@@ -66,14 +66,40 @@
         <button class="btn btn-default btn-sm"><i class="fa fa-file-o"></i></button>
         <input type="file" name="csv" style="opacity:0; width: 30px; position:absolute; top:0; left:0">
       </span>
-      <button class="btn btn-success active btn-sm" ng-show="pendingPost"
-        ng-click="postChanges({}, false)">Get Results</button>
     </p>
   </form>
+
+  <% if (config.ARO_CLIENT === 'verizon') { %>
+    <br>
+    <p><strong>Technology</strong></p>
+    <form>
+      <div class="radio">
+        <label>
+          <input type="radio" name="technology" ng-model="technology" value="direct_routing" checked> Direct Routing
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="technology" ng-model="technology" value="odn1" checked> ODN 1.0 (Centralized Split)
+        </label>
+      </div>
+      <div class="radio disabled">
+        <label>
+          <input type="radio" name="technology" ng-model="technology" value="odn2" disabled> ODN 2.0 (Distributed Split)
+        </label>
+      </div>
+    </form>
+  <% } %>
+
   <p><strong>Targeted Locations</strong></p>
   <ul style="padding: 0 20px">
     <li>Businesses: {{plan.metadata.customers_businesses_total}}</li>
     <li>Households: {{plan.metadata.customers_households_total}}</li>
     <li>Towers: {{plan.metadata.customers_towers_total}}</li>
   </ul>
+
+  <p class="pull-right">
+    <button class="btn btn-success active"
+      ng-click="postChanges({}, false)">Get Results</button>
+  </p>
 </div>

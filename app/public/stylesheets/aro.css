@@ -580,3 +580,16 @@ footer nav {
 [ng-controller=locations_controller] .alert {
   margin: 10px;
 }
+
+#locations_controller .spin {
+  margin-right: 5px;
+}
+
+.map-layer-spinner.fa-repeat {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.map-layer-spinner.spin {
+  opacity: 1;
+}

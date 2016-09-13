@@ -19,23 +19,25 @@ import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
 @Service
 public class EdgeDemandAnalysisImpl implements EntityDemandService {
 
-	
-
 	@Override
 	public DemandAnalyizer createDemandAnalyizer(FtthThreshholds constraints) {
-		return new DemandAnalysisImpl(constraints.getLocationBulkThreshhold()) ;
+		return new DemandAnalysisImpl(constraints.isUseDirectRouting(),
+				constraints.getLocationBulkThreshhold());
 	}
 
 	private class DemandAnalysisImpl implements DemandAnalyizer {
 
 		// private FtthThreshholds constraints;
 		private double bulkFiberThreshold;
-		
-		public DemandAnalysisImpl(double bulkFiberThreshold) {
+		private boolean useDirectRouting;
+
+		public DemandAnalysisImpl(boolean useDirectRouting,
+				double bulkFiberThreshold) {
 			super();
 			this.bulkFiberThreshold = bulkFiberThreshold;
+			this.useDirectRouting = useDirectRouting;
 		}
-		
+
 		@Override
 		public EdgeDemand createDemandAnalyis(GeoSegment geoSegment) {
 			EdgeDemandAnalyisImpl.Builder b = EdgeDemandAnalyisImpl.build();
@@ -61,10 +63,11 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 			double totalDemand = locationDemand.getAtomicUnits();
 
 			if (totalDemand != 0) {
-				
-				DefaultAssignedEntityDemand ad = new DefaultAssignedEntityDemand(entity, pl, entity.getLocationDemand());
 
-				if (totalDemand >= bulkFiberThreshold) {
+				DefaultAssignedEntityDemand ad = new DefaultAssignedEntityDemand(
+						entity, pl, entity.getLocationDemand());
+
+				if (useDirectRouting || totalDemand >= bulkFiberThreshold) {
 					builder.addBulkDemand(ad);
 				} else {
 					builder.addFdtDemand(ad);
@@ -77,23 +80,23 @@ public class EdgeDemandAnalysisImpl implements EntityDemandService {
 	private static class EdgeDemandAnalyisImpl implements EdgeDemand {
 
 		public static Builder build() {
-			return new Builder() ;
+			return new Builder();
 		}
-		
+
 		public static class Builder {
-			
-			private EdgeDemandAnalyisImpl demandAnalysis = new EdgeDemandAnalyisImpl() ;
-			
+
+			private EdgeDemandAnalyisImpl demandAnalysis = new EdgeDemandAnalyisImpl();
+
 			public void addFdtDemand(DefaultAssignedEntityDemand demand) {
-				demandAnalysis.fdtAssigments.add(demand) ;
+				demandAnalysis.fdtAssigments.add(demand);
 			}
 
 			public void addBulkDemand(DefaultAssignedEntityDemand demand) {
 				demandAnalysis.bulkFiberAssigments.add(demand);
 			}
-			
+
 			public EdgeDemand build() {
-				return demandAnalysis ;
+				return demandAnalysis;
 			}
 		}
 

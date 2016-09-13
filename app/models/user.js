@@ -10,6 +10,9 @@ var crypto = require('crypto')
 var querystring = require('querystring')
 var validate = helpers.validate
 var dedent = require('dedent')
+var pify = require('pify')
+var stringify = pify(require('csv-stringify'))
+var pync = require('pync')
 
 module.exports = class User {
 
@@ -247,6 +250,31 @@ module.exports = class User {
       ))
       .then((hash) => (
         database.findOne('UPDATE auth.users SET password=$1 WHERE id=$2', [hash, id])
+      ))
+  }
+
+  static downloadCSV () {
+    var rows = [['First name', 'Last name', 'email']]
+    return database.query('SELECT * FROM auth.users')
+      .then((users) => {
+        users.forEach((user) => {
+          rows.push([user.first_name, user.last_name, user.email])
+        })
+        return stringify(rows)
+      })
+  }
+
+  static sendMail (subject, text) {
+    return database.query('SELECT * FROM auth.users')
+      .then((users) => (
+        pync.series(users, (user) => {
+          // do not return the promise. We don't wait
+          helpers.mail.sendMail({
+            subject: subject,
+            to: user.email,
+            text: text
+          })
+        })
       ))
   }
 

@@ -68,49 +68,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     if (!plan) return
     $scope.plan = plan
 
-    map.ready(() => refreshNbmCarriers())
-
-    $http.get('/network/carriers/' + plan.id).success((carriers) => {
-      $scope.carriers = carriers.map((carrier) => {
-        return {
-          id: carrier.name,
-          name: carrier.name,
-          color: carrier.color
-        }
-      }).filter((carrier) => {
-        return carrier.name !== config.client_carrier_name
-      })
-
-      $scope.carriers.forEach((carrier) => {
-        layers[layer_name(carrier.name)] = new MapLayer({
-          name: config.ui.labels.fiber,
-          short_name: 'F',
-          api_endpoint: '/network/fiber_plant/' + encodeURIComponent(carrier.name),
-          style_options: {
-            normal: {
-              strokeColor: carrier.color,
-              strokeWeight: 2,
-              fillColor: carrier.color
-            }
-          },
-          threshold: 12,
-          reload: 'always'
-        })
-      })
-
-      function format (carrier) {
-        return `<span style="background-color:${carrier.color}; padding: 1px 10px; margin-right: 10px"> </span> ${carrier.name}`
-      }
-
-      select.select2({
-        placeholder: 'Write the name of the carriers to show',
-        formatResult: format,
-        formatSelection: format,
-        escapeMarkup: (m) => m,
-        data: $scope.carriers,
-        multiple: true
-      })
-    })
+    map.ready(() => refreshAllCarriers())
   })
 
   $scope.toggleAllCompetitors = () => {
@@ -181,8 +139,16 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         style_options: {
           normal: {
             strokeColor: '#d3d3d3',
-            strokeWeight: 2,
+            strokeWeight: 1,
             fillColor: 'blue'
+          },
+          highlight: {
+            strokeColor: 'brown',
+            strokeWeight: 2
+          },
+          selected: {
+            strokeColor: 'brown',
+            strokeWeight: 2
           }
         },
         threshold: 13,
@@ -191,7 +157,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
           var speed = feature.getProperty('download_speed')
           var h = 120 - speed * 10
           styles.fillColor = 'hsl(' + h + ',100%,30%)'
-        }
+        },
+        highlighteable: true,
+        single_selection: true
       })
       layer.onDataLoaded = () => {
         var dataLayer = layer.data_layer
@@ -217,10 +185,16 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     $scope.nbmCarrierChanged()
   }
 
-  function refreshNbmCarriers () {
+  function refreshAllCarriers () {
     if (!$scope.plan || !map) return
     var bounds = map.getBounds()
     if (!bounds) return
+    refreshCarriers()
+    refreshNbmCarriers()
+  }
+
+  function refreshNbmCarriers () {
+    var bounds = map.getBounds()
     var params = {
       nelat: bounds.getNorthEast().lat(),
       nelon: bounds.getNorthEast().lng(),
@@ -241,9 +215,77 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     })
   }
 
+  function refreshCarriers () {
+    var bounds = map.getBounds()
+    var params = {
+      nelat: bounds.getNorthEast().lat(),
+      nelon: bounds.getNorthEast().lng(),
+      swlat: bounds.getSouthWest().lat(),
+      swlon: bounds.getSouthWest().lng(),
+      zoom: map.getZoom()
+    }
+    var url = '/network/carriers/' + $scope.plan.id + '/viewport?fiberType=fiber'
+    $http({ url: url, params: params }).success((carriers) => {
+      $scope.carriers = carriers.map((carrier) => {
+        return {
+          id: carrier.name,
+          name: carrier.name,
+          color: carrier.color
+        }
+      }).filter((carrier) => {
+        return carrier.name !== config.client_carrier_name
+      })
+
+      Object.keys(layers).forEach((layerName) => {
+        var carrier = $scope.carriers.find((carrier) => layerName === layer_name(carrier.name))
+        if (!carrier) {
+          layers[layerName].hide()
+        }
+      })
+
+      $scope.carriers.forEach((carrier) => {
+        var layerName = layer_name(carrier.name)
+        var layer = layers[layerName]
+        if (layer) {
+          var selected = select.select2('val')
+          selected.indexOf(carrier.name) >= 0 ? layer.show() : layer.hide()
+          return
+        }
+        layer = new MapLayer({
+          name: config.ui.labels.fiber,
+          short_name: 'F',
+          api_endpoint: '/network/fiber_plant/' + encodeURIComponent(carrier.name),
+          style_options: {
+            normal: {
+              strokeColor: carrier.color,
+              strokeWeight: 2,
+              fillColor: carrier.color
+            }
+          },
+          threshold: 12,
+          reload: 'always'
+        })
+        layers[layerName] = layer
+      })
+
+      function format (carrier) {
+        return `<span style="background-color:${carrier.color}; padding: 1px 10px; margin-right: 10px"> </span> ${carrier.name}`
+      }
+
+      select.select2({
+        placeholder: 'Write the name of the carriers to show',
+        formatResult: format,
+        formatSelection: format,
+        escapeMarkup: (m) => m,
+        data: $scope.carriers,
+        multiple: true
+      })
+    })
+  }
+
   ;['dragend', 'zoom_changed'].forEach((eventName) => {
     $rootScope.$on(`map_${eventName}`, () => {
-      refreshNbmCarriers()
+      refreshAllCarriers()
     })
   })
 }])

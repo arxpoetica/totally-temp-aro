@@ -69,13 +69,20 @@ module.exports = class Network {
   static carriers (plan_id, fiberType, viewport) {
     var params = [fiberType]
     var sql
-    if (!viewport) {
+    if (fiberType === 'fiber') {
       sql = `
+        WITH visible_carriers AS (SELECT c.*
+          FROM carriers c
+          JOIN fiber_plant fp ON fp.carrier_id = c.id
+          ${database.intersects(viewport, 'fp.geom', 'AND')}
+          WHERE c.route_type=$1
+          GROUP BY c.id
+          LIMIT 1
+        )
+
         SELECT carriers.id, carriers.name, carriers.color
-          FROM carriers
-           WHERE carriers.route_type=$1
-           ${database.intersects(viewport, 'cb.geom', 'AND')}
-         ORDER BY carriers.name ASC
+        FROM visible_carriers carriers
+        ORDER BY carriers.name ASC
       `
     } else {
       sql = `
@@ -256,7 +263,8 @@ module.exports = class Network {
       planId: plan_id,
       locationTypes: options.locationTypes,
       algorithm: options.algorithm,
-      analysisSelectionMode: options.selectionMode
+      analysisSelectionMode: options.selectionMode,
+      fiberNetworkConstraints: options.fiberNetworkConstraints
     }
     var req = {
       method: 'POST',
@@ -268,6 +276,7 @@ module.exports = class Network {
     if (options.budget) financialConstraints.budget = options.budget
     if (options.discountRate) financialConstraints.discountRate = options.discountRate
     if (options.irrThreshold) body.threshold = options.irrThreshold
+
     return Promise.all([
       database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),

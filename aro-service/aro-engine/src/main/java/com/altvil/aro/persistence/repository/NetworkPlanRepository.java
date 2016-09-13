@@ -17,7 +17,16 @@ import com.altvil.aro.model.NetworkPlan;
 public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
-	
+	  //TODO SystemProperty Repository
+    @Query(value = "SELECT f.name, p.string_value\n" + 
+            "FROM client.system_property p\n" + 
+            "JOIN client.system_property_field f\n" + 
+            "   ON f.id = p.property_field_id \n" + 
+            "JOIN client.system_rule r\n" + 
+            "   ON r.id = p.system_rule_id\n" + 
+            "WHERE r.name = 'system_defaults'", nativeQuery = true)
+    @Transactional
+    List<Object[]> querySystemProperties();
 	
 	//TODO Create SpeedCategory Repository
 	@Query(value = "select s.provname, s.speed_category, s.stateabbr, b.brand_strength\n" + 
@@ -46,14 +55,22 @@ public interface NetworkPlanRepository extends
 			"SELECT\n" + 
 			"l.id as id,\n" + 
 			"l.geom as point,\n" + 
-			"(SELECT gid \n" + 
-			"FROM (SELECT aro.edges.gid, ST_Distance(cast(aro.edges.geom as geography), cast(l.geom as geography)) AS distance \n" + 
-			"FROM aro.edges where st_intersects(r.area_bounds, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" + 
-			") as gid\n" + 
-			"FROM  client.service_area w on r.wirecenter_id = \n" +
-			"join aro.locations l on st_contains(w.geom, l.geom)\n" +
-			" and w.id = :serviceAreaId" +
-			")\n" +
+			"(\n" + 
+			"  SELECT gid \n" + 
+			"  FROM (\n" + 
+			"    SELECT \n" + 
+			"      aro.edges.gid, \n" + 
+			"      ST_Distance(cast(aro.edges.geom as geography), \n" + 
+			"      cast(l.geom as geography)) AS distance \n" + 
+			"    FROM aro.edges \n" + 
+			"    WHERE st_intersects(w.geom, aro.edges.geom) \n" + 
+			"    ORDER BY l.geom <#> aro.edges.geom LIMIT 5 \n" + 
+			"    ) AS index_query ORDER BY distance LIMIT 1\n" + 
+			"  ) as gid\n" + 
+			"FROM  client.service_area w on r.wirecenter_id = " +
+			" join aro.locations l on st_contains(w.geom, l.geom) " +
+			" and w.id = :serviceAreaId" + 
+			")\n" + 
 			"select\n" + 
 			"ll.id as location_id,\n" + 
 			"ll.gid,\n" + 
@@ -64,10 +81,10 @@ public interface NetworkPlanRepository extends
 			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" + 
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
-			"order by gid, intersect_position limit 40000", nativeQuery = true) // KG debugging
+			"order by gid, intersect_position limit 80000", nativeQuery = true) // KG debugging
 	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId) ;
 
-
+	
 	@Query(value = "with selected_locations as (\n" + 
 			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength	\n" + 
 			"	from client.plan_targets t\n" + 
@@ -238,9 +255,6 @@ public interface NetworkPlanRepository extends
     @Transactional
 	@Query(value = "delete from client.plan where parent_plan_id = :planId", nativeQuery = true)
 	void deleteChildPlans(@Param("planId") long planId) ;
-
-
-
 
     @Modifying
     @Transactional
