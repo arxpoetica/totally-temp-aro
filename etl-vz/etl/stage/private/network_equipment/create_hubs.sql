@@ -16,7 +16,21 @@ INSERT INTO network_equipment.hubs(name, geog, geom)
 		name,
 		the_geom::geography,
 		the_geom
-	FROM network_equipment.hubs_shp;
+	FROM network_equipment.hubs_shp_wa;
+
+INSERT INTO network_equipment.hubs(name, geog, geom)
+	SELECT
+		name,
+		the_geom::geography,
+		the_geom
+	FROM network_equipment.hubs_shp_mo;
+
+INSERT INTO network_equipment.hubs(name, geog, geom)
+	SELECT
+		name,
+		the_geom::geography,
+		the_geom
+	FROM network_equipment.hubs_shp_wi;
 
 -- Insert the CSV hubs
 INSERT INTO network_equipment.hubs(name, geog, geom)
