@@ -11,12 +11,12 @@ INSERT INTO aro.locations(address, lat, lon, geog, geom)
     WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(prism_long, prism_lat), 4326));
 
 INSERT INTO aro.locations(address, lat, lon, geog, geom)
-	SELECT DISTINCT ON (latitude, longitude)
+	SELECT DISTINCT ON (cast(latitude AS double precision), cast(longitude AS double precision))
 		street_addr,
-		latitude,
-		longitude,
-		ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography AS geog,
-		ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) AS geom
+		cast(latitude AS double precision),
+		cast(longitude AS double precision),
+		ST_SetSRID(ST_MakePoint(cast(longitude AS double precision), cast(latitude AS double precision)), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(cast(longitude AS double precision), cast(latitude AS double precision)), 4326) AS geom
 	FROM project_constraints.spatial wc, businesses.tam_full_stage b
     WHERE ST_Contains(wc.geom, ST_SetSRID(ST_MakePoint(longitude, latitude), 4326));
 
@@ -43,10 +43,10 @@ INSERT INTO aro.businesses(location_id, industry_id, name, address, number_of_em
 		(SELECT id FROM aro.industries WHERE description = 'MENS & BOYS CLOTHING STORES'), -- Generic SIC4, try to force categorization as retail
 		b.business_nm,
 		b.street_addr,
-		b.emp_here,
+		b.emp_here::int,
 		'tam',
-		ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography AS geog,
-    ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) AS geom
+		ST_SetSRID(ST_MakePoint(cast(longitude AS double precision), cast(latitude AS double precision)), 4326)::geography AS geog,
+    ST_SetSRID(ST_MakePoint(cast(longitude AS double precision), cast(latitude AS double precision)), 4326) AS geom
    FROM businesses.tam_full_stage b
    JOIN aro.locations l
-   	ON ST_Equals(l.geom, ST_SetSRID(ST_MakePoint(longitude, latitude), 4326));
+   	ON ST_Equals(l.geom, ST_SetSRID(ST_MakePoint(cast(longitude AS double precision), cast(latitude AS double precision)), 4326));
