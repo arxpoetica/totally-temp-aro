@@ -170,7 +170,7 @@ module.exports = class Network {
       ))
   }
 
-  static viewFiber (plan_id, serviceLayer) {
+  static viewFiber (plan_id, serviceLayer, viewport) {
     var sql = `
       SELECT
         fiber_route.id,
@@ -189,6 +189,7 @@ module.exports = class Network {
             WHERE p.parent_plan_id = $${1}
         )
       )
+      ${database.intersects(viewport, 'fiber_route.geom', 'AND')}
     `
     return database.query(sql, [plan_id, serviceLayer], true)
   }
