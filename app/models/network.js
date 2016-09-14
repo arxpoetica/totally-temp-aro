@@ -189,8 +189,10 @@ module.exports = class Network {
             WHERE p.parent_plan_id = $${1}
         )
       )
+      AND NOT ST_IsEmpty(fiber_route.geom)
       ${database.intersects(viewport, 'fiber_route.geom', 'AND')}
     `
+    console.log('sql', sql, [plan_id, serviceLayer])
     return database.query(sql, [plan_id, serviceLayer], true)
   }
 
