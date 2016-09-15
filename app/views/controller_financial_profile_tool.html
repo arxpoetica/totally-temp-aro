@@ -301,7 +301,7 @@
         <div id="financial-profile-chart-opex-cost-legend"></div>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileRouteOpportunities" style="margin-top: 20px">
-        <table class="table">
+        <table class="table" ng-hide="loadingRouteOpportunities">
           <tbody>
             <tr>
               <th>Telco Buildings - (Off Net VzB buildings incurring > $2K MRCs)</th>
@@ -335,6 +335,9 @@
             </tr>
           </tbody>
         </table>
+        <div class="text-center" ng-show="loadingRouteOpportunities">
+          <span class="fa fa-refresh spin"></span> Loading...
+        </div>
         <button class="btn btn-default" ng-click="downloadBusinesses()">Download all businesses within 1 mile of route</button>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileFiberDetails" style="margin-top: 20px">
