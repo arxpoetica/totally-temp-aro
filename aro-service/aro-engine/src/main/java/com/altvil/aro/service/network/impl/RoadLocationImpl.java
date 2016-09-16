@@ -7,7 +7,9 @@ import com.altvil.utils.GeometryUtil;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 
-public class RoadLocationImpl implements RoadLocation {
+import java.io.Serializable;
+
+public class RoadLocationImpl implements RoadLocation, Serializable{
 
 	public static Builder build() {
 		return new Builder() ;

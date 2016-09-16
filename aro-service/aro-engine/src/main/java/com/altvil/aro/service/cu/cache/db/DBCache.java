@@ -17,10 +17,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.altvil.aro.model.DeploymentPlanCacheEntity;
-import com.altvil.aro.model.DeploymentPlanCacheKey;
+import com.altvil.aro.model.CacheEntity;
+import com.altvil.aro.model.PlanCacheKey;
 import com.altvil.aro.persistence.query.QueryExecutor;
-import com.altvil.aro.persistence.repository.DeploymentPlanCacheRepository;
+import com.altvil.aro.persistence.repository.CacheEntityRepository;
 import com.altvil.aro.service.cu.cache.CacheHandle;
 import com.altvil.aro.service.cu.cache.CacheType;
 import com.altvil.aro.service.cu.cache.SimpleCache;
@@ -36,13 +36,13 @@ public class DBCache implements SimpleCache {
 	private static final Logger log = LoggerFactory
 			.getLogger(PlanServiceImpl.class.getName());
 
-	private DeploymentPlanCacheRepository deploymentPlanCacheRepository;
+	private CacheEntityRepository cacheEntityRepository;
 	private QueryExecutor queryExecutor;
 
 	public DBCache(QueryExecutor queryExecutor,
-			DeploymentPlanCacheRepository deploymentPlanCacheRepository) {
+			CacheEntityRepository cacheEntityRepository) {
 		this.queryExecutor = queryExecutor;
-		this.deploymentPlanCacheRepository = deploymentPlanCacheRepository;
+		this.cacheEntityRepository = cacheEntityRepository;
 	}
 
 	@Override
@@ -50,16 +50,16 @@ public class DBCache implements SimpleCache {
 		return CacheType.PERISTSTENCE;
 	}
 
-	private DeploymentPlanCacheKey createKey(CacheKey key) {
-		return new DeploymentPlanCacheKey(key.getServiceAreaId(), key
+	private PlanCacheKey createKey(CacheKey key) {
+		return new PlanCacheKey(key.getServiceAreaId(), key
 				.getBsaKey().getDeploymentPlanId(),
 				key.getCacheTypeExtendedKey());
 	}
 
-	private DeploymentPlanCacheEntity doSave(DeploymentPlanCacheEntity entity,
+	private CacheEntity doSave(CacheEntity entity,
 			int count) {
 		try {
-			entity = deploymentPlanCacheRepository.save(entity);
+			entity = cacheEntityRepository.save(entity);
 			return entity;
 		} catch (DataIntegrityViolationException exception) {
 			log.warn("Creational Optimistic Exception fetching data "
@@ -67,7 +67,7 @@ public class DBCache implements SimpleCache {
 			try {
 				Thread.sleep((long) (Math.random() * 2000));
 
-				DeploymentPlanCacheEntity existingEntity = deploymentPlanCacheRepository
+				CacheEntity existingEntity = cacheEntityRepository
 						.findOne(entity.getKey());
 
 				if (existingEntity != null) {
@@ -90,11 +90,11 @@ public class DBCache implements SimpleCache {
 	@Override
 	public CacheHandle createCacheHandle(CacheKey key, ResourceVersion rv) {
 
-		DeploymentPlanCacheKey cacheKey = createKey(key);
-		DeploymentPlanCacheEntity entity = deploymentPlanCacheRepository
+		PlanCacheKey cacheKey = createKey(key);
+		CacheEntity entity = cacheEntityRepository
 				.findOne(cacheKey);
 		if (entity == null) {
-			entity = new DeploymentPlanCacheEntity();
+			entity = new CacheEntity();
 			entity.setKey(cacheKey);
 			entity = doSave(entity, 0);
 		}
@@ -104,11 +104,11 @@ public class DBCache implements SimpleCache {
 	private class CacheHandleImpl extends AbstractCacheHandle implements
 			CacheHandle {
 
-		private DeploymentPlanCacheEntity deploymentCacheEntity;
+		private CacheEntity deploymentCacheEntity;
 		private ResourceVersion resourceVersion;
 
 		public CacheHandleImpl(CacheKey cacheKey,
-				DeploymentPlanCacheEntity deploymentCacheEntity,
+				CacheEntity deploymentCacheEntity,
 				ResourceVersion resourceVersion) {
 			super(cacheKey);
 			this.deploymentCacheEntity = deploymentCacheEntity;
@@ -158,7 +158,7 @@ public class DBCache implements SimpleCache {
 			CacheKey key = getCacheKey();
 			AroKey bsaKey = key.getBsaKey();
 
-			byte[] blob = deploymentPlanCacheRepository.queryBlobData(
+			byte[] blob = cacheEntityRepository.queryBlobData(
 					bsaKey.getServiceAreaId(), bsaKey.getDeploymentPlanId(),
 					key.getCacheTypeExtendedKey());
 			try (ObjectInputStream in = new ObjectInputStream(
@@ -169,7 +169,7 @@ public class DBCache implements SimpleCache {
 
 		@Modifying
 		@Transactional
-		private <T> void save(DeploymentPlanCacheEntity deploymentCacheEntity,
+		private <T> void save(CacheEntity deploymentCacheEntity,
 				byte[] cacheData) {
 
 			for (VersionType vt : resourceVersion.keys()) {

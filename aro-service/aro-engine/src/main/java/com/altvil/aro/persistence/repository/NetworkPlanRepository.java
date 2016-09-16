@@ -67,7 +67,7 @@ public interface NetworkPlanRepository extends
 			"    ORDER BY l.geom <#> aro.edges.geom LIMIT 5 \n" + 
 			"    ) AS index_query ORDER BY distance LIMIT 1\n" + 
 			"  ) as gid\n" + 
-			"FROM  client.service_area w on r.wirecenter_id = " +
+			"FROM  client.service_area w" +
 			" join aro.locations l on st_contains(w.geom, l.geom) " +
 			" and w.id = :serviceAreaId" + 
 			")\n" + 

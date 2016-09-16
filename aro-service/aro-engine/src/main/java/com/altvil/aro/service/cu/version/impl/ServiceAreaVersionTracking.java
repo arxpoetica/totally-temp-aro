@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.altvil.aro.model.DeploymentPlanVersionEntity;
-import com.altvil.aro.model.DeploymentPlanVersionKey;
+import com.altvil.aro.model.ServiceAreaVersionEntity;
+import com.altvil.aro.model.ServiceAreaAndPlanVersionKey;
 import com.altvil.aro.persistence.DeploymentPlanVersionRepository;
 import com.altvil.aro.service.cu.cache.impl.AroCacheKey;
 import com.altvil.aro.service.cu.key.AroKey;
@@ -24,14 +24,14 @@ import com.altvil.aro.service.cu.version.spi.VersionTrackingPersistence;
 import com.altvil.aro.service.cu.version.spi.VersionUpdates;
 
 
-public class DeploymentVersionTracking implements VersionTrackingPersistence {
+public class ServiceAreaVersionTracking implements VersionTrackingPersistence {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(DeploymentVersionTracking.class.getName());
+			.getLogger(ServiceAreaVersionTracking.class.getName());
 	private DeploymentPlanVersionRepository versionRepository;
 	private AroKeyService keyService;
 
-	public DeploymentVersionTracking(
+	public ServiceAreaVersionTracking(
 			DeploymentPlanVersionRepository versionRepository, AroKeyService keyService) {
 		super();
 		this.versionRepository = versionRepository;
@@ -39,7 +39,7 @@ public class DeploymentVersionTracking implements VersionTrackingPersistence {
 	}
 
 	public static VersionTrackingPersistence create(ApplicationContext ctx) {
-		return new DeploymentVersionTracking(
+		return new ServiceAreaVersionTracking(
 				ctx.getBean(DeploymentPlanVersionRepository.class), ctx.getBean(AroKeyService.class));
 
 	}
@@ -57,8 +57,8 @@ public class DeploymentVersionTracking implements VersionTrackingPersistence {
 		return Collections.singleton(bsaKey) ;
 	}
 
-	protected DeploymentPlanVersionEntity save(
-			DeploymentPlanVersionEntity version) {
+	protected ServiceAreaVersionEntity save(
+			ServiceAreaVersionEntity version) {
 
 		try {
 			return versionRepository.save(version);
@@ -73,59 +73,59 @@ public class DeploymentVersionTracking implements VersionTrackingPersistence {
 
 	@Override
 	public Long incrementVersion(AroKey bsaKey) {
-		DeploymentPlanVersionKey key = toKey(bsaKey);
-		DeploymentPlanVersionEntity entity = versionRepository.findOne(key);
+		ServiceAreaAndPlanVersionKey key = toKey(bsaKey);
+		ServiceAreaVersionEntity entity = versionRepository.findOne(key);
 		if (entity != null) {
-			long version = entity.getDeploymentVersion() + 1;
+			long version = entity.getServiceAreaVersion() + 1;
 
 			do {
-				entity.setDeploymentVersion(version);
+				entity.setServiceAreaVersion(version);
 				entity = save(entity);
-			} while (entity.getDeploymentVersion() < version);
+			} while (entity.getServiceAreaVersion() < version);
 
-			return entity.getDeploymentVersion();
+			return entity.getServiceAreaVersion();
 		} else {
 			return null;
 		}
 	}
 
 	public Long startVersionTracking(AroKey bsaKey) {
-		DeploymentPlanVersionEntity entity = new DeploymentPlanVersionEntity();
+		ServiceAreaVersionEntity entity = new ServiceAreaVersionEntity();
 		entity.setKey(toKey(bsaKey));
-		return save(entity).getDeploymentVersion();
+		return save(entity).getServiceAreaVersion();
 	}
 
-	private DeploymentPlanVersionKey toKey(AroKey bsaKey) {
-		DeploymentPlanVersionKey key = new DeploymentPlanVersionKey();
+	private ServiceAreaAndPlanVersionKey toKey(AroKey bsaKey) {
+		ServiceAreaAndPlanVersionKey key = new ServiceAreaAndPlanVersionKey();
 		key.setDeploymentPlanId(bsaKey.getDeploymentPlanId());
 		key.setServiceAreaId(bsaKey.getServiceAreaId());
 		return key;
 	}
 
-	private AroCacheKey toBsaKey(DeploymentPlanVersionKey key) {
+	private AroCacheKey toBsaKey(ServiceAreaAndPlanVersionKey key) {
 		return new AroCacheKey(key.getServiceAreaId(),
 				key.getDeploymentPlanId());
 	}
 
 	@Override
 	public Long loadVersion(AroKey bsaKey) {
-		DeploymentPlanVersionKey key = toKey(bsaKey);
-		DeploymentPlanVersionEntity version = versionRepository.findOne(key);
-		return version == null ? null : version.getDeploymentVersion();
+		ServiceAreaAndPlanVersionKey key = toKey(bsaKey);
+		ServiceAreaVersionEntity version = versionRepository.findOne(key);
+		return version == null ? null : version.getServiceAreaVersion();
 	}
 
 	@Override
 	public VersionUpdates checkDbForVersionChanges(Date lastDate) {
 
 		Date prviousDate = lastDate;
-		Set<DeploymentPlanVersionEntity> versions = versionRepository
+		Set<ServiceAreaVersionEntity> versions = versionRepository
 				.findByLastUpdatedAfter(lastDate);
 		Map<AroKey, Long> result = new HashMap<>();
-		for (DeploymentPlanVersionEntity v : versions) {
+		for (ServiceAreaVersionEntity v : versions) {
 			if (v.getLastUpdated().after(prviousDate)) {
 				prviousDate = v.getLastUpdated();
 			}
-			result.put(toBsaKey(v.getKey()), v.getDeploymentVersion());
+			result.put(toBsaKey(v.getKey()), v.getServiceAreaVersion());
 		}
 
 		return new VersionUpdates(result, prviousDate);

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import com.altvil.aro.persistence.query.QueryExecutor;
-import com.altvil.aro.persistence.repository.DeploymentPlanCacheRepository;
+import com.altvil.aro.persistence.repository.CacheEntityRepository;
 import com.altvil.aro.service.cu.cache.SimpleCache;
 import com.altvil.aro.service.cu.cache.SimpleCacheService;
 import com.altvil.aro.service.cu.cache.db.DBCache;
@@ -51,7 +51,7 @@ public class DefaultSimpleCacheService implements SimpleCacheService {
 		return new DBCache(
 				applicationContext.getBean(QueryExecutor.class),
 				applicationContext
-						.getBean(DeploymentPlanCacheRepository.class));
+						.getBean(CacheEntityRepository.class));
 
 	}
 

@@ -12,30 +12,30 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@javax.persistence.Table(name = "deployment_plan_versions", schema = "cache")
-public class DeploymentPlanVersionEntity {
-	DeploymentPlanVersionKey key;
-	Long deploymentVersion = 0l;
+@javax.persistence.Table(name = "service_area_versions", schema = "cache")
+public class ServiceAreaVersionEntity {
+	ServiceAreaAndPlanVersionKey key;
+	Long serviceAreaVersion = 0l;
 	Date lastUpdated = new Date();
 	Integer optlock = 0;
 
 	@EmbeddedId
-	public DeploymentPlanVersionKey getKey() {
+	public ServiceAreaAndPlanVersionKey getKey() {
 		return key;
 	}
 
-	public void setKey(DeploymentPlanVersionKey key) {
+	public void setKey(ServiceAreaAndPlanVersionKey key) {
 		this.key = key;
 	}
 
 	@Basic
-	@Column(name = "deployment_version")
-	public Long getDeploymentVersion() {
-		return deploymentVersion;
+	@Column(name = "service_area_version")
+	public Long getServiceAreaVersion() {
+		return serviceAreaVersion;
 	}
 
-	public void setDeploymentVersion(Long deploymentVersion) {
-		this.deploymentVersion = deploymentVersion;
+	public void setServiceAreaVersion(Long deploymentVersion) {
+		this.serviceAreaVersion = deploymentVersion;
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)

@@ -5,11 +5,27 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-@SuppressWarnings("serial")
 @Embeddable
-public class DeploymentPlanVersionKey implements Serializable {
-	Integer serviceAreaId;
-	Long deploymentPlanId;
+public class PlanCacheKey implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Integer serviceAreaId;
+	private Long deploymentPlanId;
+	private String cacheType;
+
+	public PlanCacheKey(Integer serviceAreaId,
+						Long deploymentPlanId, String cacheType) {
+		super();
+		this.serviceAreaId = serviceAreaId;
+		this.deploymentPlanId = deploymentPlanId == null ? -1
+				: deploymentPlanId;
+		this.cacheType = cacheType;
+	}
+
+	public PlanCacheKey() {
+	}
 
 	@Column(name = "service_area_id")
 	public Integer getServiceAreaId() {
@@ -29,6 +45,15 @@ public class DeploymentPlanVersionKey implements Serializable {
 		this.deploymentPlanId = deploymentPlanId;
 	}
 
+	@Column(name = "cache_type")
+	public String getCacheType() {
+		return cacheType;
+	}
+
+	public void setCacheType(String caheType) {
+		this.cacheType = caheType;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -36,11 +61,18 @@ public class DeploymentPlanVersionKey implements Serializable {
 		if (o == null || getClass() != o.getClass())
 			return false;
 
-		DeploymentPlanVersionKey that = (DeploymentPlanVersionKey) o;
+		PlanCacheKey that = (PlanCacheKey) o;
 
 		if (getServiceAreaId() != null ? !getServiceAreaId().equals(
-				that.getServiceAreaId()) : that.getServiceAreaId() != null)
+				that.getServiceAreaId()) : that.getServiceAreaId() != null) {
 			return false;
+		}
+
+		if (getCacheType() != null ? !getCacheType()
+				.equals(that.getCacheType()) : that.getCacheType() != null) {
+			return false;
+		}
+
 		return !(getDeploymentPlanId() != null ? !getDeploymentPlanId().equals(
 				that.getDeploymentPlanId())
 				: that.getDeploymentPlanId() != null);
@@ -55,12 +87,14 @@ public class DeploymentPlanVersionKey implements Serializable {
 				* result
 				+ (getDeploymentPlanId() != null ? getDeploymentPlanId()
 						.hashCode() : 0);
+		result = 31 * result
+				+ (getCacheType() != null ? getCacheType().hashCode() : 0);
 		return result;
 	}
 
 	@Override
 	public String toString() {
 		return " serviceAreaId=" + serviceAreaId + ", deploymentPlanId="
-				+ deploymentPlanId + ' ';
+				+ deploymentPlanId + ' ' + ", caheType=" + cacheType + ' ';
 	}
 }

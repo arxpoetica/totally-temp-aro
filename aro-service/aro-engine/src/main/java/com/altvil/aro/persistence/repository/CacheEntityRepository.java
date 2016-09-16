@@ -7,12 +7,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.altvil.aro.model.DeploymentPlanCacheEntity;
-import com.altvil.aro.model.DeploymentPlanCacheKey;
+import com.altvil.aro.model.CacheEntity;
+import com.altvil.aro.model.PlanCacheKey;
 
 @Repository
-public interface DeploymentPlanCacheRepository extends
-		JpaRepository<DeploymentPlanCacheEntity, DeploymentPlanCacheKey> {
+public interface CacheEntityRepository extends
+		JpaRepository<CacheEntity, PlanCacheKey> {
 
 	@Transactional
 	@Query(value = "select cache_data from cache.deployment_plan_cache c where c.service_area_id=:serviceAreaId and c.deployment_plan_id=:deploymentPlanId and c.cache_type=:key", nativeQuery = true)

@@ -73,8 +73,8 @@ public class VersionTrackingServiceImpl implements VersionTrackingService {
 
 	private VersionTrackingPersistence createPersistence(VersionType vt) {
 		switch (vt) {
-		case NETWORK:
-			return DeploymentVersionTracking.create(appCtx);
+			case SERVICE:
+			return ServiceAreaVersionTracking.create(appCtx);
 		default:
 			return new StubVersionTracking();
 

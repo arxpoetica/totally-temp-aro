@@ -12,10 +12,10 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@javax.persistence.Table(name = "deployment_plan_cache", schema = "cache")
-public class DeploymentPlanCacheEntity {
+@javax.persistence.Table(name = "cache_entries", schema = "cache")
+public class CacheEntity {
 	private Date lastUpdated = new Date();
-	private DeploymentPlanCacheKey key;
+	private PlanCacheKey key;
 	private Long optiLock = 0L;
 	private Long version;
 	private Long locationVersion;
@@ -23,11 +23,11 @@ public class DeploymentPlanCacheEntity {
 	private Long serviceAreaVersion;
 
 	@EmbeddedId
-	public DeploymentPlanCacheKey getKey() {
+	public PlanCacheKey getKey() {
 		return key;
 	}
 
-	public void setKey(DeploymentPlanCacheKey key) {
+	public void setKey(PlanCacheKey key) {
 		this.key = key;
 	}
 
