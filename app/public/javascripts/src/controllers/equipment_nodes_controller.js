@@ -99,12 +99,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     map_layers.addEquipmentLayer(routeLayer)
 
     layer.changedFiberVisibility = () => {
-      routeLayer.setVisible(layer.showFeederFiber || layer.showDistributionFiber)
+      routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber))
       routeLayer.setDeclarativeStyle(routeStyles(layer))
-    }
-
-    if (layer.enabled) {
-      layer.changedFiberVisibility()
     }
 
     var networkNodesLayer = new MapLayer({
@@ -156,7 +152,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
     layer.changedAvailability = function () {
       networkNodesLayer.setVisible(layer.enabled)
+      layer.changedFiberVisibility()
     }
+    layer.changedAvailability()
   }
 
   function emptyChanges () {
