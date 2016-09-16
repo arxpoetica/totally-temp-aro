@@ -1,58 +1,66 @@
--- Table: public.infousa_businesses
+--
+-- Create and Index functions for loading InfoUSA businesses into tables partitioned by state
+--
 
-DROP TABLE IF EXISTS ref_businesses.infousa CASCADE;
-
-CREATE TABLE ref_businesses.infousa
-(
-business varchar,
-address varchar,
-city varchar,
-state varchar,
-zip varchar,
-zip4 varchar,
-emps integer,
-sic4 integer,
-sic4desc varchar,
-bldgid bigint,
-sourceid bigint,
-lat double precision,
-long double precision,
-accuracy integer,
-hqbranch integer,
-familyid bigint,
-familybus bigint,
-familymsas integer,
-geog geography (POINT, 4326) 
-);
-
-CREATE INDEX ref_businesses_infousa_geog_gist ON ref_businesses.infousa USING gist (geog);
-CREATE INDEX ref_businesses_infousa_sic4 ON ref_businesses.infousa USING btree (sic4);
-
-DO $$
+CREATE OR REPLACE FUNCTION create_infousa_businesses_table(state_abbrev text, target_schema_name text)
+RETURNS text AS $scoped_table_name$
 DECLARE
-    all_states text[][] := array[['NY', '36']];
-    state text[];
-    current_table text;
-
+    base_table_name text;
+    prefix_name text;
+    index_prefix_name text;
+    scoped_table_name text;
+    state_name text;
 BEGIN
-    
-    -- Loop for creating partitioned subtables
-    FOREACH state SLICE 1 IN ARRAY all_states
-    LOOP
+    state_name := lower(state_abbrev);
+    base_table_name := 'infousa_businesses';
+    scoped_table_name := target_schema_name || '.' || base_table_name || '_' || state_name;
+    prefix_name := target_schema_name || '_' || base_table_name || '_' || state_name || '_';
+    index_prefix_name := prefix_name || '_' || state_name || '_';
 
-        RAISE NOTICE '*************************';
-        RAISE NOTICE '*** CURRENT STATE: %', state[1];
+    EXECUTE 'DROP TABLE IF EXISTS ' || scoped_table_name || ' CASCADE;';
+    EXECUTE 'CREATE TABLE ' || scoped_table_name || ' (
+        business varchar,
+        address varchar,
+        city varchar,
+        state varchar,
+        zip varchar,
+        zip4 varchar,
+        emps integer,
+        sic4 integer,
+        sic4desc varchar,
+        bldgid bigint,
+        sourceid bigint,
+        lat double precision,
+        long double precision,
+        accuracy integer,
+        hqbranch integer,
+        familyid bigint,
+        familybus bigint,
+        familymsas integer,
+        geog geography (POINT, 4326) 
+        );';
+    RETURN scoped_table_name;
+END;
+$scoped_table_name$ LANGUAGE plpgsql;
+      
+-- Index function should be run after creating table and loading records
+CREATE OR REPLACE FUNCTION create_infousa_businesses_indexes(state_abbrev text, target_schema_name text)
+RETURNS text AS $scoped_table_name$
+DECLARE
+    base_table_name text;
+    prefix_name text;
+    index_prefix_name text;
+    scoped_table_name text;
+    state_name text;
+BEGIN
+    state_name := lower(state_abbrev);
+    base_table_name := 'infousa_businesses';
+    scoped_table_name := target_schema_name || '.' || base_table_name || '_' || state_name;
+    index_prefix_name := target_schema_name || '_' || base_table_name || '_' || state_name || '_';
 
-        current_table := 'ref_businesses_data.infousa_' || lower(state[1]);
-        
-        RAISE NOTICE '**** CREATING TABLE ****';
-        EXECUTE 'CREATE TABLE ' || current_table || ' (CHECK (state = ''' || state[1] || ''')) INHERITS (ref_businesses.infousa);';
-
-        RAISE NOTICE '**** CREATING GEOGRAPHY INDEX ****';
-        EXECUTE 'CREATE INDEX ref_businesses_infousa_' || state[1] || '_geog_gist ON ref_businesses_data.infousa_' || state[1] || ' USING gist (geog);';
-
-        RAISE NOTICE '*** CREATING SIC4 INDEX ****';
-        EXECUTE 'CREATE INDEX ref_businesses_infousa_' || state[1] || '_sic4 ON ref_businesses_data.infousa_' || state[1] || ' USING btree (sic4);';
-
-    END LOOP;
-END$$;
+    EXECUTE 'CREATE INDEX ' || index_prefix_name || 'geog_gist ON ' || scoped_table_name || ' USING GIST (geog);';
+    EXECUTE 'CREATE INDEX ' || index_prefix_name || 'sic4 ON ' || scoped_table_name || ' USING btree (sic4);';
+    EXECUTE 'CREATE INDEX ' || index_prefix_name || 'sourceid ON ' || scoped_table_name || ' USING btree (sourceid);';
+    RETURN scoped_table_name;
+END;
+$scoped_table_name$ LANGUAGE plpgsql;

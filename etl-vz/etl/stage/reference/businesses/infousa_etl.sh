@@ -12,6 +12,7 @@ ${PSQL} -a -f $DIR/create_infousa_businesses.sql
 
 # Use lower case state names. FIPS codes unnecessary here as well.
 declare -a STATE_ARRAY=( 'ny' )
+TARGET_SCHEMA_NAME='ref_businesses'
 
 cd $GISROOT;
 
@@ -20,8 +21,7 @@ do
 	rm -f ${TMPDIR}/*.*
 	aws s3 cp s3://public.aro/infousa/businesses_${STATE}.zip $GISROOT/businesses_${STATE}.zip
 	$UNZIPTOOL businesses_${STATE}.zip -d ${TMPDIR}
-	cat /$TMPDIR/businesses_${STATE}.csv | ${PSQL} -a -c "COPY ref_businesses_data.infousa_${STATE} FROM STDIN DELIMITER ',' CSV HEADER;"
+	${PSQL} -a -c "SELECT create_infousa_businesses_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
+	cat /$TMPDIR/businesses_${STATE}.csv | ${PSQL} -a -c "COPY ${TARGET_SCHEMA_NAME}.infousa_businesses_${STATE} FROM STDIN DELIMITER ',' CSV HEADER;"
+	${PSQL} -a -c "SELECT create_infousa_businesses_indexes('${STATE}', '${TARGET_SCHEMA_NAME}');"
 done
-
-# Optimize buisnesses table
-${PSQL} -a -f $DIR/optimize_infousa_businesses.sql
