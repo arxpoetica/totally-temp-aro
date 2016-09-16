@@ -103,6 +103,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       routeLayer.setDeclarativeStyle(routeStyles(layer))
     }
 
+    if (layer.enabled) {
+      layer.changedFiberVisibility()
+    }
+
     var networkNodesLayer = new MapLayer({
       type: 'network_nodes',
       name: 'Network Nodes',
