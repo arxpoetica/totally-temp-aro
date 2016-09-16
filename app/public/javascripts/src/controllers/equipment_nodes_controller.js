@@ -77,8 +77,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   function configureServiceLayer (layer) {
-    layer.showFeederFiber = false
-    layer.showDistributionFiber = false
+    layer.showFeederFiber = true
+    layer.showDistributionFiber = true
 
     var routeLayer = new MapLayer({
       short_name: 'RT',
