@@ -25,6 +25,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
+  $scope.technology = 'odn1'
 
   var budgetInput = $('#area_network_planning_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
@@ -77,11 +78,14 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.run = () => {
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
-    if (scope.optimizeHouseholds) locationTypes.push('households')
+
+    if (scope.optimizeHouseholds) locationTypes.push('household')
     if (scope.optimizeBusinesses) locationTypes.push('businesses')
-    if (scope.optimizeSMB) locationTypes.push('smb')
-    if (scope.optimize2kplus) locationTypes.push('2kplus')
-    if (scope.optimizeTowers) locationTypes.push('towers')
+    if (scope.optimizeMedium) locationTypes.push('medium')
+    if (scope.optimizeLarge) locationTypes.push('large')
+    if (scope.optimizeSMB) locationTypes.push('small')
+    if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
+    if (scope.optimizeTowers) locationTypes.push('celltower')
 
     var algorithm = $scope.optimizationType
     var changes = {
@@ -111,6 +115,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     } else if (algorithm === 'IRR') {
       delete changes.irrThreshold
     } else if (algorithm === 'BUDGET_IRR') {
+    }
+
+    changes.fiberNetworkConstraints = {
+      useDirectRouting: $scope.technology === 'direct_routing'
     }
 
     canceler = $q.defer()

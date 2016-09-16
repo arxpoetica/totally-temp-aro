@@ -17,7 +17,16 @@ import com.altvil.aro.model.NetworkPlan;
 public interface NetworkPlanRepository extends
 		JpaRepository<NetworkPlan, Long> {
 	
-	
+	  //TODO SystemProperty Repository
+    @Query(value = "SELECT f.name, p.string_value\n" + 
+            "FROM client.system_property p\n" + 
+            "JOIN client.system_property_field f\n" + 
+            "   ON f.id = p.property_field_id \n" + 
+            "JOIN client.system_rule r\n" + 
+            "   ON r.id = p.system_rule_id\n" + 
+            "WHERE r.name = 'system_defaults'", nativeQuery = true)
+    @Transactional
+    List<Object[]> querySystemProperties();
 	
 	//TODO Create SpeedCategory Repository
 	@Query(value = "select s.provname, s.speed_category, s.stateabbr, b.brand_strength\n" + 
@@ -46,10 +55,18 @@ public interface NetworkPlanRepository extends
 			"SELECT\n" + 
 			"l.id as id,\n" + 
 			"l.geom as point,\n" + 
-			"(SELECT gid \n" + 
-			"FROM (SELECT aro.edges.gid, ST_Distance(cast(aro.edges.geom as geography), cast(l.geom as geography)) AS distance \n" + 
-			"FROM aro.edges where st_intersects(r.area_bounds, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" + 
-			") as gid\n" + 
+			"(\n" + 
+			"  SELECT gid \n" + 
+			"  FROM (\n" + 
+			"    SELECT \n" + 
+			"      aro.edges.gid, \n" + 
+			"      ST_Distance(cast(aro.edges.geom as geography), \n" + 
+			"      cast(l.geom as geography)) AS distance \n" + 
+			"    FROM aro.edges \n" + 
+			"    WHERE st_intersects(w.geom, aro.edges.geom) \n" + 
+			"    ORDER BY l.geom <#> aro.edges.geom LIMIT 5 \n" + 
+			"    ) AS index_query ORDER BY distance LIMIT 1\n" + 
+			"  ) as gid\n" + 
 			"FROM client.plan r\n" + 
 			"join client.service_area w on r.wirecenter_id = w.id\n" + 
 			"join aro.locations l on st_contains(w.geom, l.geom)\n" + 
@@ -65,7 +82,7 @@ public interface NetworkPlanRepository extends
 			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" + 
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
-			"order by gid, intersect_position limit 40000", nativeQuery = true) // KG debugging
+			"order by gid, intersect_position limit 80000", nativeQuery = true) // KG debugging
 	List<Object[]> queryAllLocationsByPlanId(@Param("planId") long id) ;
 
 	
@@ -405,7 +422,61 @@ public interface NetworkPlanRepository extends
 
     @Modifying
     @Transactional
-	@Query(value="WITH selected_master AS (\n" + 
+	@Query(value="WITH selected_plan AS (\n" + 
+			"    SELECT p.*\n" + 
+			"    FROM client.plan p\n" + 
+			"    WHERE p.id=:rootPlanId\n" + 
+			")\n" + 
+			",\n" + 
+			"master_plans AS (\n" + 
+			"    SELECT mp.id\n" + 
+			"    FROM selected_plan rp\n" + 
+			"    JOIN client.plan mp\n" + 
+			"        ON mp.parent_plan_id = rp.id\n" + 
+			")\n" + 
+			",\n" + 
+			"selected_service_areas AS (\n" + 
+			"     SELECT\n" + 
+			"        p.id, ST_Union(ST_MakeValid(sa.geom)) AS geom\n" + 
+			"    FROM selected_plan p\n" + 
+			"    JOIN client.selected_service_area s\n" + 
+			"       ON s.plan_id = p.id\n" + 
+			"    JOIN client.service_area sa \n" + 
+			"      ON sa.id = s.service_area_id\n" + 
+			"    GROUP BY p.id\n" + 
+			")\n" + 
+			",\n" + 
+			"selected_analysis_areas AS (\n" + 
+			"    SELECT \n" + 
+			"        p.id, \n" + 
+			"        ST_Union(ST_MakeValid(aa.geom)) AS geom\n" + 
+			"    FROM selected_plan p\n" + 
+			"    JOIN client.selected_analysis_area s\n" + 
+			"        ON s.plan_id = p.id\n" + 
+			"    JOIN client.analysis_area aa\n" + 
+			"        ON aa.id = s.analysis_area_id\n" + 
+			"    GROUP BY p.id\n" + 
+			"),\n" + 
+			"union_area AS (\n" + 
+			"    SELECT ST_MakeValid(ST_Union(u.geom)) AS geom\n" + 
+			"        FROM (\n" + 
+			"            SELECT geom FROM selected_service_areas\n" + 
+			"            UNION\n" + 
+			"            SELECT geom FROM selected_analysis_areas\n" + 
+			"        ) u\n" + 
+			")\n" +
+			"UPDATE client.plan\n" +
+			"SET area_bounds = (SELECT geom FROM union_area)\n" +
+			"WHERE id IN (SELECT id FROM master_plans)\n", nativeQuery = true) 
+    void updateMasterPlanAreas(@Param("rootPlanId") long rootPlanId);
+
+    
+    
+    @Modifying
+    @Transactional
+	@Query(value=
+	
+			"WITH selected_master AS (\n" + 
 			"	SELECT p.*\n" + 
 			"	FROM client.plan p\n" + 
 			"	WHERE p.id = :inputMasterPlan\n" + 
@@ -414,7 +485,7 @@ public interface NetworkPlanRepository extends
 			"all_fiber AS (\n" + 
 			"	SELECT\n" + 
 			"		id,\n" + 
-			"		ST_Union(f.geom) AS geom\n" + 
+			"		cast(ST_Buffer(cast(ST_Union(f.geom) AS geography),3) AS geometry) AS geom\n" + 
 			"	FROM (\n" + 
 			"	(SELECT mp.id, pc.geom\n" + 
 			"	FROM selected_master mp\n" + 
@@ -425,17 +496,21 @@ public interface NetworkPlanRepository extends
 			"\n" + 
 			"	(SELECT mp.id, pc.geom\n" + 
 			"	FROM selected_master mp\n" + 
-			"	JOIN client.plan_fiber_conduit pc\n" + 
-			"		ON pc.plan_id = mp.id)\n" + 
+			"	JOIN client.plan wp\n" + 
+			"		ON wp.parent_plan_id = mp.id\n" + 
+			"	JOIN client.fiber_route pc\n" + 
+			"		ON pc.plan_id = wp.id)\n" + 
 			"	) AS f\n" + 
 			"	GROUP BY id\n" + 
 			")\n" + 
 			"INSERT INTO client.plan_fiber_conduit\n" + 
-			"	(:planId, geom)\n" + 
-			"SELECT id, geom \n" + 
-			"FROM all_fiber", nativeQuery = true) 
-    List<Number> updateConduitInputs(@Param("inputMasterPlan") long planId, @Param("planId") long selectedPlanId);
+			"	(plan_id, geom)\n" + 
+			"SELECT sp.id, a.geom \n" + 
+			"FROM all_fiber a, client.plan sp WHERE sp.id =:selectedPlanId\n"
+			, nativeQuery = true) 
+    void updateConduitInputs(@Param("inputMasterPlan") long planId, @Param("selectedPlanId") long selectedPlanId);
 
+    
     
 	@Query(value = "select id from client.plan where parent_plan_id = :planId", nativeQuery = true)
 	List<Number> wireCenterPlanIdsFor(@Param("planId") long planId);
@@ -453,6 +528,24 @@ public interface NetworkPlanRepository extends
 			"FROM selected_segs s\n" + 
 			"GROUP BY gid", nativeQuery = true)
 	List<Object[]> queryConduitSections(@Param("planId") long planId);
+	
+	
+	@Query(value = "SELECT\n" + 
+			" c.gid,\n" + 
+			" c.construction_type,\n" + 
+			" CASE \n" + 
+			"	WHEN start_ratio < end_ratio THEN start_ratio \n" + 
+			"	ELSE 0 \n" + 
+			"	END AS start_ratio, \n" + 
+			" CASE\n" + 
+			"	WHEN start_ratio < end_ratio THEN end_ratio \n" + 
+			"	WHEN edge_length = segment_length THEN 1 \n" + 
+			"	ELSE 0 \n" + 
+			" END AS end_ratio 	\n" + 
+			" FROM client.plan_conduit_fiber c\n" + 
+			"WHERE plan_id = :planId\n" + 
+			"AND end_ratio >= start_ratio ", nativeQuery = true)
+	List<Object[]> queryPlanConduitSections(@Param("planId") long planId);
 	
 	
 }

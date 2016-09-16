@@ -41,6 +41,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		private OptimizationConstraints optimizationConstraints;
 		private AnalysisSelectionMode locationSelectionMode = AnalysisSelectionMode.SELECTED_LOCATIONS;
 		private OptimizationMode optimizationMode;
+		private boolean usePlanConduit ;
 
 		public Builder setOptimizationConstraints(
 				OptimizationConstraints constraints) {
@@ -81,6 +82,12 @@ public class RootOptimizationRequest extends OptimizationRequest {
 			}
 			return this;
 		}
+		
+		
+		public Builder setUsePlanConduit(boolean usePlanConduit) {
+			this.usePlanConduit = usePlanConduit ;
+			return this ;
+		}
 
 		public Builder setLocationEntities(
 				Set<LocationEntityType> locationEntities) {
@@ -90,14 +97,16 @@ public class RootOptimizationRequest extends OptimizationRequest {
 
 		private NetworkDataRequest createDataRequest() {
 			return new NetworkDataRequest(planId, null, year,
-					locationSelectionMode, locationEntities, mrc);
+					locationSelectionMode, locationEntities, mrc, false);
 		}
 
 		public RootOptimizationRequest build() {
 			return new RootOptimizationRequest(processingLayers,
 					optimizationConstraints, fiberNetworkConstraints,
-					createDataRequest(), optimizationMode, algorithmType);
+					createDataRequest(), optimizationMode, algorithmType, usePlanConduit);
 		}
+		
+		
 
 		public Builder setMrc(double mrc) {
 			this.mrc = mrc;
@@ -114,19 +123,19 @@ public class RootOptimizationRequest extends OptimizationRequest {
 	public RootOptimizationRequest(Collection<Integer> processingLayers,
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
-			OptimizationMode optimizationMode, AlgorithmType algorithmType) {
-		super(optimizationConstraints, constraints, request, algorithmType);
+			OptimizationMode optimizationMode, AlgorithmType algorithmType, boolean usePlanConduit) {
+		super(optimizationConstraints, constraints, request, algorithmType, usePlanConduit);
 		this.processingLayers = processingLayers;
 		this.optimizationMode = optimizationMode;
 	}
 
 	public MasterOptimizationRequest toMasterOptimizationRequest(
-			MasterPlan masterPlan) {
+			MasterPlan masterPlan, Set<LocationEntityType> types) {
 		return new MasterOptimizationRequest(masterPlan.getServiceLayer(),
 				optimizationConstraints, constraints,
 				networkDataRequest.createRequest(masterPlan.getId(), masterPlan
-						.getServiceLayer().getId()), optimizationMode,
-				algorithmType);
+						.getServiceLayer().getId()).createRequest(types), optimizationMode,
+				algorithmType, usePlanConduit);
 	}
 
 	public Collection<Integer> getProcessingLayers() {

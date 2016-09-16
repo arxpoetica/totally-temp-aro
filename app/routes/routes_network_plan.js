@@ -100,6 +100,13 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/search/businesses', (request, response, next) => {
+    var text = request.query.text
+    models.NetworkPlan.searchBusinesses(text)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/search/addresses', (request, response, next) => {
     var text = request.query.text
     models.NetworkPlan.searchAddresses(text)

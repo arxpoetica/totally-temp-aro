@@ -17,6 +17,10 @@
   </head>
   <body>
 
+    <div ng-controller="build_lease_controller">
+      <% include modal_build_lease.html %>
+    </div>
+
     <div ng-controller="settings_controller">
       <% include modal_application_settings.html %>
     </div>
@@ -33,6 +37,7 @@
       <div ng-controller="admin_users_controller">
         <% include modal_manage_users.html %>
         <% include modal_new_user.html %>
+        <% include modal_send_mail.html %>
       </div>
     <% } %>
 
@@ -361,6 +366,7 @@
     var user_id = <%= user.id %>;
     var config = <%- JSON.stringify(config) %>;
     var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
+    var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;
 
     $(document).ready(initialize);
   </script>
@@ -397,6 +403,7 @@
   <script src="javascripts/lib/controllers/demand_forecast_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_census_block_controller.js"></script>
   <script src="javascripts/lib/controllers/settings_controller.js"></script>
+  <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>

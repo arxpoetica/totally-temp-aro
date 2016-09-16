@@ -8,3 +8,4 @@ ${PSQL} -c "CREATE SCHEMA businesses;"
 
 ${PSQL} -c "DROP SCHEMA IF EXISTS businesses_data CASCADE;"
 ${PSQL} -c "CREATE SCHEMA businesses_data;"
+

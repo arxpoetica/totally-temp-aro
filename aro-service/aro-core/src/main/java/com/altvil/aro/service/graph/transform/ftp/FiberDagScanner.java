@@ -18,6 +18,7 @@ import com.altvil.aro.service.demand.DemandAnalyizer;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
+import com.altvil.aro.service.graph.EdgeUtils;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
@@ -150,7 +151,7 @@ public class FiberDagScanner {
 		writeBulkFiber(e.getValue(), edgeDemand.getBulkFiberAssigments()) ;
 		
 		EdgeList el = new EdgeList(e, edgeDemand.getFdtAssigments(),
-				e.getWeight());
+				EdgeUtils.getLength(e));
 
 		return toEdgeStream(el, scanVertex(el, src));
 	}

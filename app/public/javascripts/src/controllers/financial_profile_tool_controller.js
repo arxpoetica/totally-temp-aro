@@ -141,6 +141,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       showOpexCostChart(force)
     } else if (href === '#financialProfileRouteOpportunities') {
       loadRouteOpportunities()
+    } else if (href === '#financialProfileFiberDetails') {
+      showDistanceToFiber()
     }
   }
   $scope.refreshCurrentTab = refreshCurrentTab
@@ -246,6 +248,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         data: result.map((row) => row[dataset.key])
       }, chartStyles[i % chartStyles.length]))
     }
+  }
+
+  function showDistanceToFiber () {
+    $http.get(`/financial_profile/${$scope.plan.id}/fiber_details`)
+      .success((response) => {
+        $scope.fiberDetailsAdditional = response
+      })
   }
 
   function showCashFlowChart (force) {
@@ -533,8 +542,10 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   $scope.downloadBusinesses = () => {
-    var query = $scope.routeOpportunitiesDistanceThresholds
-      .map((item) => `distanceThresholds=${item.value}`).join('&')
-    window.location.href = `/financial_profile/${$scope.plan.id}/exportBusinesses?${query}`
+    window.location.href = `/financial_profile/${$scope.plan.id}/exportBusinesses`
+  }
+
+  $scope.showBuildLease = () => {
+    $('#build-lease').modal('show')
   }
 }])

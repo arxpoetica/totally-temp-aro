@@ -77,8 +77,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   function configureServiceLayer (layer) {
-    layer.showFeederFiber = false
-    layer.showDistributionFiber = false
+    layer.showFeederFiber = true
+    layer.showDistributionFiber = true
 
     var routeLayer = new MapLayer({
       short_name: 'RT',
@@ -90,14 +90,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         }
       },
       api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
-      declarativeStyles: routeStyles(layer)
+      declarativeStyles: routeStyles(layer),
+      threshold: 12,
+      reload: 'always'
     })
     routeLayer.hide_in_ui = true
     layer.routeLayer = routeLayer
     map_layers.addEquipmentLayer(routeLayer)
 
     layer.changedFiberVisibility = () => {
-      routeLayer.setVisible(layer.showFeederFiber || layer.showDistributionFiber)
+      routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber))
       routeLayer.setDeclarativeStyle(routeStyles(layer))
     }
 
@@ -121,7 +123,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       declarativeStyles: (feature, styles) => {
         var name = feature.getProperty('name')
         if (name) {
-          styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${name}.png`
+          styles.icon = `/images/map_icons/${config.ARO_CLIENT}/composite/${layer.name}_${name}.png`
         } else {
           styles.icon = { path: 0, scale: 3, strokeColor: 'brown' }
         }
@@ -150,7 +152,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
     layer.changedAvailability = function () {
       networkNodesLayer.setVisible(layer.enabled)
+      layer.changedFiberVisibility()
     }
+    layer.changedAvailability()
   }
 
   function emptyChanges () {

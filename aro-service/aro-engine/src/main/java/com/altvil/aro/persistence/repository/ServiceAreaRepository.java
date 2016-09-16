@@ -17,57 +17,31 @@ public interface ServiceAreaRepository extends
 
 	
 	@Query(value = 
-			"WITH selected_plan AS (\n" + 
-			"	SELECT p.parent_plan_id as plan_id, p.service_layer_id as layer_id\n" + 
-			"	FROM client.plan p\n" + 
-			"	WHERE p.id=:planId\n" + 
-			")\n" + 
-			",\n" + 
-			"selected_super_areas AS (\n" + 
-			"	SELECT sa.service_area_id\n" + 
-			"	FROM selected_plan p\n" + 
-			"	JOIN client.selected_service_area s\n" + 
-			"		ON s.plan_id = p.plan_id\n" + 
-			"	JOIN client.service_area_assignment sa \n" + 
-			"		ON sa.service_area_id = s.service_area_id \n" + 
-			"		AND sa.service_layer_id  = p.layer_id\n" + 
-			"		AND sa.is_primary\n" + 
-			")\n" + 
-			",\n" + 
-			"selected_wire_centers AS (\n" + 
-			"	SELECT sa.id AS service_area_id\n" + 
-			"	FROM selected_plan p\n" + 
-			"	JOIN client.selected_service_area s\n" + 
-			"		ON s.plan_id = p.plan_id\n" + 
-			"	JOIN client.service_area sa\n" + 
-			"		ON sa.id = s.service_area_id\n" + 
-			")\n" + 
-			",\n" + 
-			"selected_analysis_areas AS (\n" + 
-			"	SELECT sa.service_area_id\n" + 
-			"	FROM selected_plan p\n" + 
-			"	JOIN client.selected_analysis_area s\n" + 
-			"		ON s.plan_id = p.plan_id\n" + 
-			"	JOIN client.analysis_area_assignment sa\n" + 
-			"		ON sa.analysis_area_id = s.analysis_area_id\n" + 
-			"		AND sa.service_layer_id  = p.layer_id\n" + 
-			"		AND sa.is_primary\n" + 
-			")\n" + 
-			",\n" + 
-			"distinct_areas AS (\n" + 
-			"	SELECT DISTINCT a.service_area_id\n" + 
-			"	FROM (\n" + 
-			"		SELECT service_area_id FROM selected_super_areas\n" + 
-			"		UNION\n" + 
-			"		SELECT service_area_id FROM selected_wire_centers\n" + 
-			"		UNION\n" + 
-			"		SELECT service_area_id FROM selected_analysis_areas\n" + 
-			"	) a \n" + 
+			"WITH master_plan as (\n" + 
+			"  SELECT *\n" + 
+			"  FROM client.plan\n" + 
+			"  WHERE id = :planId\n" + 
+			"),\n" + 
+			"intersects as (\n" + 
+			"  SELECT distinct\n" + 
+			"      sa.id\n" + 
+			"  FROM client.plan mp\n" + 
+			"  JOIN master_plan sp ON sp.id = mp.id\n" + 
+			"  JOIN client.service_area sa\n" + 
+			"      ON sa.service_type  = 'A'\n" + 
+			"      AND sa.service_layer_id = mp.service_layer_id\n" + 
+			"      AND  ST_Intersects(mp.area_bounds, sa.geom)\n" + 
+			"),\n" + 
+			"overlap as (\n" + 
+			"  SELECT\n" + 
+			"    sa.id, ST_Area(cast(ST_Intersection(ST_MakeValid(sa.geom), mp.area_bounds) as geography)), ST_Area(sa.geog), (ST_Area(cast(ST_Intersection(ST_MakeValid(sa.geom), mp.area_bounds) as geography)) / ST_Area(sa.geog)) as percentage_overlap\n" + 
+			"  FROM master_plan mp, intersects ss\n" + 
+			"  JOIN client.service_area sa ON (ss.id = sa.id)\n" + 
 			")\n" + 
 			"SELECT sa.*\n" + 
-			"FROM distinct_areas da \n" + 
-			"JOIN client.service_area sa\n" + 
-			"	ON sa.id = da.service_area_id", nativeQuery = true)
+			"FROM overlap op\n" + 
+			"JOIN client.service_area sa ON op.id = sa.id\n" + 
+			"WHERE percentage_overlap >= 0.8", nativeQuery = true)
 	@Transactional
 	Collection<ServiceArea> querySelectedServiceAreas(
 			@Param("planId") long planId);

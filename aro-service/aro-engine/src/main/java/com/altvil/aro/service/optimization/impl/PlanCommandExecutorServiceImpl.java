@@ -131,6 +131,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 		return plc;
 
 	}
+	
 
 	// @Override
 	// public Collection<ProcessLayerCommand> createLayerCommands(
@@ -222,7 +223,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 		return new WirecenterOptimizationRequest(
 				request.getOptimizationConstraints(), request.getConstraints(),
 				request.getNetworkDataRequest().createRequest(planId,
-						sl.getId()), request.getAlgorithmType());
+						sl.getId()), request.getAlgorithmType(), request.isUsePlanConduit());
 
 	}
 

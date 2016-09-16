@@ -27,6 +27,12 @@ public class VolatileReference<T> {
 		return value ;
 	}
 	
+	public synchronized VolatileReferenceInfo getVolatileReferenceInfo() {
+        return new VolatileReferenceInfo(timeMillis, value != null);
+    }
+
+
+	
 
 	
 

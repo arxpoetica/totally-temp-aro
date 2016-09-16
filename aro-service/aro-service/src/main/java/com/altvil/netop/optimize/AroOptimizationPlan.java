@@ -18,6 +18,7 @@ public class AroOptimizationPlan {
 	private OptimizationMode optimizationMode = OptimizationMode.INTER_WIRECENTER;
 	private AlgorithmType algorithmType = AlgorithmType.DEFAULT;
 	private Double threshold;
+	private boolean usePlanConduit = false ;
 
 	private FinancialConstraints financialConstraints;
 	private FiberNetworkConstraints fiberNetworkConstraints;
@@ -107,5 +108,12 @@ public class AroOptimizationPlan {
 		this.algorithmType = algorithmType;
 	}
 
+	public boolean isUsePlanConduit() {
+		return usePlanConduit;
+	}
 
+	public void setUsePlanConduit(boolean usePlanConduit) {
+		this.usePlanConduit = usePlanConduit;
+	}
+	
 }

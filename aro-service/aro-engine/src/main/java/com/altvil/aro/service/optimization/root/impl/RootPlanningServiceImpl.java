@@ -46,6 +46,7 @@ public class RootPlanningServiceImpl implements RootPlanningService {
 								.getOptimizationConstraints(),
 						plan.getOptimizedPlans().stream()
 								.map(SummarizedPlan::getPlanAnalysisReport)
+								.filter(p -> p!=null)
 								.collect(Collectors.toList())));
 
 	}

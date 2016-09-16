@@ -12,8 +12,8 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 cd $GISROOT;
 
 # 1. Load Fiber 
-
 declare -a FIBER_STATE_ARRAY=( 'ny' )
+
 fiber_state_array_len=${#FIBER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table
@@ -40,7 +40,11 @@ fi
 
 # 2. Load Wirecenters
 
+<<<<<<< HEAD
 declare -a WIRECENTER_STATE_ARRAY=( 'ny' )
+=======
+declare -a WIRECENTER_STATE_ARRAY=( 'wi' )
+>>>>>>> develop
 wirecenter_state_array_len=${#WIRECENTER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table

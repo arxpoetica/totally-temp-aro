@@ -11,9 +11,10 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/cma_boundaries', middleware.viewport, (request, response, next) => {
+  api.get('/analysis_areas/:type', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
-    models.Wirecenter.findCMA(viewport)
+    var type = request.params.type
+    models.Wirecenter.findAnalysisAreas(viewport, type)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

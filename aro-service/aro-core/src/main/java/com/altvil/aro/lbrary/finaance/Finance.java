@@ -31,12 +31,39 @@ public class Finance {
 		}
 		return x + 0.01;
 	}
+	
+	private static class Counter {
+		private int maxCount ;
+		private int currentCount = 0;
+		
+		
+		
+		public Counter(int maxCount) {
+			super();
+			this.maxCount = maxCount;
+		}
+
+
+
+		public int inc() {
+			currentCount++ ;
+			if( currentCount > maxCount) {
+				throw new RuntimeException("Failed to converge") ;
+			}
+			return currentCount;
+		}
+	}
 
 	public static double irr(double[] cfs) {
+		
+		Counter counter = new Counter(1000) ;
+		
 		return Math.round(seekZero((rate) -> {
+			counter.inc() ;
+			double rrate = 1 + 1/100 ;
 			double npvValue = cfs[0];
 			for (int i = 1; i < cfs.length; i++) {
-				npvValue += (cfs[i] / Math.pow(rate, i));
+				npvValue += (cfs[i] / Math.pow(rrate, i));
 			}
 			return npvValue;
 		}) * 100) / 100;

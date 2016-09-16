@@ -44,6 +44,18 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 	public ReportGenerator createReportGenerator() {
 		return new ReportGeneratorSpi(lineItemGenerators);
 	}
+	
+	
+	private static GeneratorFunc<AnalysisInput> makeSafe(GeneratorFunc<AnalysisInput> f) {
+		return (ctx, plan) -> {
+			try {
+				return f.generate(ctx, plan) ;
+			} catch( Throwable err ) {
+				log.error(err.getMessage(), err) ;
+				return Double.NaN ;
+			}
+		} ;
+	}
 
 	@PostConstruct
 	void postConstruct() {
@@ -83,7 +95,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		public Builder add(NetworkStatisticType type,
 				GeneratorFunc<AnalysisInput> scalarFunc) {
-			return add(type, scalarFunc, Average.FUNC);
+			return add(type, makeSafe(scalarFunc), Average.FUNC);
 		}
 
 		public Map<NetworkStatisticType, NetworkStatisticGenerator> build() {
@@ -259,6 +271,9 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		@Override
 		protected NetworkStatistic reduce(NetworkStatisticType type) {
+			
+			log.info(" reduce type " + type) ;
+			
 			return DefaultNetworkStatistic.create(
 					type,
 					() -> getGenerator(type).getScalarFunc().generate(this,
@@ -295,7 +310,10 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		public static NetworkStatistic create(NetworkStatisticType type,
 				Supplier<Double> supplier) {
-			return new DefaultNetworkStatistic(type, eval(supplier));
+			log.info("generating network stat") ;
+			NetworkStatistic stat =  new DefaultNetworkStatistic(type, eval(supplier));
+			log.info("generated network stat "  + stat.toString());
+			return stat ;
 		}
 
 		// public static NetworkStatistic create(NetworkStatisticType type,
@@ -330,6 +348,14 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 		public double getValue() {
 			return val;
 		}
+
+		@Override
+		public String toString() {
+			return "DefaultNetworkStatistic(" + type.toString() + " = " + val + ")" ;
+		}
+		
+		
+		
 	}
 
 	public static class Average implements

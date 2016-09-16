@@ -4,7 +4,7 @@ public enum CableConstructionEnum {
 
 	UNKNOWN("unkown", false), ESTIMATED("estimated", false), ARIEL("ariel", true), BURIED("buried", true), 
 	UNDERGROUND("underground", true), OBSTACLE("obstacle",true),  CONDUIT("conduit",
-			true) 
+			true), PLANNED_CONDUIT("planned_conduit", true) 
 
 	;
 

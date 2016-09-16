@@ -1,4 +1,4 @@
-/* global $ app user_id swal _ google map config globalServiceLayers */
+/* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
 app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions) => {
   $scope.map_tools = map_tools
@@ -78,38 +78,46 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  cmaBoundariesLayer = new MapLayer({
-    short_name: 'CM',
-    name: 'CMA boundaries',
-    type: 'cma_boundaries',
-    api_endpoint: '/cma_boundaries',
-    style_options: {
-      normal: {
-        fillColor: 'coral',
-        strokeColor: 'coral',
-        strokeWeight: 2
-      },
-      highlight: {
-        fillColor: 'coral',
-        strokeColor: 'coral',
-        strokeWeight: 2
-      }
-    },
-    reload: 'always',
-    threshold: 0
-  })
-
   $scope.areaLayers = [
     censusBlocksLayer,
     countySubdivisionsLayer,
     cmaBoundariesLayer
   ].filter((layer) => layer)
 
+  var analysisLayersColors = [
+    'coral'
+  ]
+
+  globalAnalysisLayers.forEach((analysisLayer) => {
+    var color = analysisLayersColors.shift() || 'black'
+    var layer = new MapLayer({
+      name: analysisLayer.description,
+      type: analysisLayer.name,
+      api_endpoint: `/analysis_areas/${analysisLayer.name}`,
+      style_options: {
+        normal: {
+          fillColor: color,
+          strokeColor: color,
+          strokeWeight: 2
+        },
+        highlight: {
+          fillColor: color,
+          strokeColor: color,
+          strokeWeight: 2
+        }
+      },
+      reload: 'always',
+      threshold: 0
+    })
+    $scope.areaLayers.push(layer)
+  })
+
   var serviceLayersColors = [
     '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
   ]
 
   globalServiceLayers.forEach((serviceLayer) => {
+    if (!serviceLayer.show_in_boundaries) return
     var color = serviceLayersColors.shift() || 'black'
     var layer = new MapLayer({
       name: serviceLayer.description,

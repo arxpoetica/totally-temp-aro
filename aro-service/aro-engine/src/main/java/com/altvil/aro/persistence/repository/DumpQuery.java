@@ -17,18 +17,35 @@ public class DumpQuery {
 		}
 	}
 	
-	private static String query = "WITH  selected_segs AS (\n" + 
-			" 	select s.gid, s.construction_type, start_ratio, end_ratio\n" + 
-			" 	FROM client.conduit_edge_segments s\n" + 
-			"   WHERE s.start_ratio IS NOT NULL AND s.end_ratio IS NOT NULL and s.plan_id = :planId\n" + 
+	private static String query = "WITH selected_master AS (\n" + 
+			"	SELECT p.*\n" + 
+			"	FROM client.plan p\n" + 
+			"	WHERE p.id = :inputMasterPlan\n" + 
 			")\n" + 
-			"SELECT  \n" + 
-			"    gid, \n" + 
-			"    MAX(construction_type) AS construction_type,  \n" + 
-			"    MIN(start_ratio) AS start_ratio, \n" + 
-			"    MAX(end_ratio) AS end_ratio\n" + 
-			"FROM selected_segs s\n" + 
-			"GROUP BY gid";
+			",\n" + 
+			"all_fiber AS (\n" + 
+			"	SELECT\n" + 
+			"		id,\n" + 
+			"		ST_Union(f.geom) AS geom\n" + 
+			"	FROM (\n" + 
+			"	(SELECT mp.id, pc.geom\n" + 
+			"	FROM selected_master mp\n" + 
+			"	JOIN client.plan_fiber_conduit pc\n" + 
+			"		ON pc.plan_id = mp.id)\n" + 
+			"\n" + 
+			"		UNION\n" + 
+			"\n" + 
+			"	(SELECT mp.id, pc.geom\n" + 
+			"	FROM selected_master mp\n" + 
+			"	JOIN client.plan_fiber_conduit pc\n" + 
+			"		ON pc.plan_id = mp.id)\n" + 
+			"	) AS f\n" + 
+			"	GROUP BY id\n" + 
+			")\n" + 
+			"INSERT INTO client.plan_fiber_conduit\n" + 
+			"	(:planId, geom)\n" + 
+			"SELECT id, geom \n" + 
+			"FROM all_fiber";
 	
 	public static void value() {
 		System.out.println(query) ;

@@ -5,12 +5,14 @@ import com.altvil.interfaces.CableConstructionEnum;
 
 public class CableConduitEdgeImpl implements CableConduitEdge {
 
-	private long edgeId ;
-	private CableConstructionEnum cableConstructionEnum ;
-	private double startRatio ;
-	private double endRatio ;
 	
+	public static final CableConduitEdge INVALID_EDGE = new CableConduitEdgeImpl(-1, CableConstructionEnum.UNKNOWN, 0, -1) ;
 	
+	private long edgeId;
+	private CableConstructionEnum cableConstructionEnum;
+	private double startRatio;
+	private double endRatio;
+
 	public CableConduitEdgeImpl(long edgeId,
 			CableConstructionEnum cableConstructionEnum, double startRatio,
 			double endRatio) {
@@ -23,7 +25,41 @@ public class CableConduitEdgeImpl implements CableConduitEdge {
 
 	@Override
 	public Long getEdgeId() {
-		return edgeId ;
+		return edgeId;
+	}
+
+	@Override
+	public boolean isValid() {
+		return endRatio > startRatio;
+	}
+
+	@Override
+	public CableConduitEdge expandHigher(double ratio) {
+		return new CableConduitEdgeImpl(edgeId, cableConstructionEnum,
+				startRatio, Math.min(1.0, Math.max(ratio, endRatio)));
+	}
+
+	@Override
+	public CableConduitEdge expandLower(double ratio) {
+		return new CableConduitEdgeImpl(edgeId, cableConstructionEnum,
+				Math.max(0.0, Math.min(ratio, startRatio)), endRatio);
+	};
+
+	@Override
+	public CableConduitEdge splitLower(double ratio) {
+		if( ratio <= this.getStartRatio()) {
+			return INVALID_EDGE ;
+		}
+		return new CableConduitEdgeImpl(edgeId, cableConstructionEnum, getStartRatio(), ratio);
+	}
+
+	@Override
+	public CableConduitEdge splitHigher(double ratio) {
+		if( ratio >= getEndRatio() ) {
+			return INVALID_EDGE ;
+		}
+		
+		return new CableConduitEdgeImpl(edgeId, cableConstructionEnum, startRatio, endRatio);
 	}
 
 	@Override
@@ -33,12 +69,12 @@ public class CableConduitEdgeImpl implements CableConduitEdge {
 
 	@Override
 	public double getStartRatio() {
-		return startRatio ;
+		return startRatio;
 	}
 
 	@Override
 	public double getEndRatio() {
-		return endRatio ;
+		return endRatio;
 	}
 
 }

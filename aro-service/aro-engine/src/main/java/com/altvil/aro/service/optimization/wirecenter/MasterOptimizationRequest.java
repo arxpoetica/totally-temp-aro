@@ -13,20 +13,24 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 	private final OptimizationMode optimizationMode;
 	private ServiceLayer processingLayer;
 
-
 	public MasterOptimizationRequest(ServiceLayer processingLayer,
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
-			OptimizationMode optimizationMode, AlgorithmType algorithmType) {
-		super(optimizationConstraints, constraints, request, algorithmType);
+			OptimizationMode optimizationMode, AlgorithmType algorithmType, boolean usePlanConduit) {
+		super(optimizationConstraints, constraints, request, algorithmType, usePlanConduit);
 		this.processingLayer = processingLayer;
 		this.optimizationMode = optimizationMode;
 	}
-		
+
+	public MasterOptimizationRequest includePlanConduit() {
+		return new MasterOptimizationRequest(processingLayer,
+				optimizationConstraints, constraints, getNetworkDataRequest()
+						.includePlanConduit(), optimizationMode, algorithmType, usePlanConduit);
+	}
+
 	public ServiceLayer getProcessingLayer() {
 		return processingLayer;
 	}
-
 
 	public OptimizationMode getOptimizationMode() {
 		return optimizationMode;

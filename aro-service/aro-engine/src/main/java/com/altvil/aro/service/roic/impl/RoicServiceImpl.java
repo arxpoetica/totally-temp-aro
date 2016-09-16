@@ -19,6 +19,8 @@ import com.altvil.aro.model.RoicComponentInputModel;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.RoicComponentInputModelRepository;
 import com.altvil.aro.service.optimization.wirecenter.NetworkDemandSummary;
+import com.altvil.aro.service.reference.ReferenceType;
+import com.altvil.aro.service.reference.VolatileReferenceService;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.PlanAnalysisReport;
 import com.altvil.aro.service.roic.RoicEngineService;
@@ -36,7 +38,8 @@ public class RoicServiceImpl implements RoicService {
 	private NetworkPlanRepository planRepostory;
 	private RoicComponentInputModelRepository roicComponentInputModelRepository;
 	private NetworkReportService networkReportService;
-
+	private VolatileReferenceService volatileReferenceService ;
+	
 	private RoicEngineService roicInputService;
 
 	private SuperSimpleCache cache;
@@ -47,21 +50,21 @@ public class RoicServiceImpl implements RoicService {
 			NetworkPlanRepository planRepostory,
 			RoicComponentInputModelRepository roicComponentInputModelRepository,
 			NetworkReportService networkReportService,
-			RoicEngineService roicInputService) {
+			RoicEngineService roicInputService,
+			VolatileReferenceService volatileReferenceService) {
 		super();
 		this.planRepostory = planRepostory;
 		this.roicComponentInputModelRepository = roicComponentInputModelRepository;
 		this.networkReportService = networkReportService;
 		this.roicInputService = roicInputService;
+		this.volatileReferenceService = volatileReferenceService ;
 
 		cache = new SuperSimpleCache();
 		roicInputRef = createComponentInputs();
 	}
 
 	private VolatileReference<Collection<RoicComponentInputModel>> createComponentInputs() {
-		return new VolatileReference<Collection<RoicComponentInputModel>>(
-				() -> roicComponentInputModelRepository.findAll(),
-				1000L * 50L * 5L);
+		return volatileReferenceService.createVolatileReference(ReferenceType.ROIC_SERVICE_INPUTS, () -> roicComponentInputModelRepository.findAll()) ;
 	}
 
 	@Override

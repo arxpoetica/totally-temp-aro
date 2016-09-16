@@ -413,15 +413,14 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/financial_profile/:plan_id/exportBusinesses', (request, response, next) => {
-    const distanceThresholds = request.query.distanceThresholds.map((value) => +value)
     var plan_id = request.params.plan_id
     var req = {
       method: 'POST',
       url: config.aro_service_url + '/rest/businesses',
       body: {
-        distanceThresholds: distanceThresholds,
+        distanceThresholds: [1609.34],
         locationSource: 'tam',
-        mrcThreshold: 1609.34, // 1 mile
+        mrcThreshold: 0,
         planId: plan_id
       },
       json: true
@@ -431,6 +430,60 @@ exports.configure = (api, middleware) => {
         response.attachment(`businesses_${moment().format('YYYY-MM-DD_HH:mm:ss')}.csv`)
         response.send(output)
       })
+  })
+
+  api.get('/financial_profile/:plan_id/fiber_details', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var sql = `
+        WITH selected_plan AS (
+          SELECT p.*
+          FROM client.plan p
+          WHERE p.id=$1
+        )
+        ,
+        master_plans AS (
+          SELECT mp.id
+          FROM selected_plan rp
+          JOIN client.plan mp
+          ON mp.parent_plan_id = rp.id
+        )
+        ,
+        selected_service_areas AS (
+          SELECT
+          p.id, ST_MakeValid(ST_Union(sa.geom)) AS geom
+          FROM selected_plan p
+          JOIN client.selected_service_area s
+          ON s.plan_id = p.id
+          JOIN client.service_area sa
+          ON sa.id = s.service_area_id
+          GROUP BY p.id
+        )
+        ,
+        selected_analysis_areas AS (
+          SELECT
+          p.id,
+          ST_MakeValid(ST_Union(aa.geom)) AS geom
+          FROM selected_plan p
+          JOIN client.selected_analysis_area s
+          ON s.plan_id = p.id
+          JOIN client.analysis_area aa
+          ON aa.id = s.analysis_area_id
+          GROUP BY p.id
+        ),
+        union_area AS (
+          SELECT ST_MakeValid(ST_Union(u.geom)) AS geom
+          FROM (
+          SELECT geom FROM selected_service_areas
+          UNION
+          SELECT geom FROM selected_analysis_areas
+          ) u
+        )
+        SELECT SUM ( ST_Length (ST_Intersection (ua.geom, ef.geom) ) ) AS length
+        FROM union_area ua, client.existing_fiber ef
+    `
+    return database.findOne(sql, [plan_id])
+      .then(jsonSuccess(response, next))
+      .catch(next)
   })
 }
 
@@ -501,30 +554,3 @@ if (module.id === require.main.id) {
       console.log('err', err.stack)
     })
 }
-
-/*
-[
-  {
-    "distance": 100,
-    "key": "Count",
-    "value": 0
-  },
-  {
-    "distance": 100,
-    "key": "MRC",
-    "value": 0
-  }
-]
- [
-  {
-    "distance": 100,
-    "key": "Count",
-    "value": 0
-  },
-  {
-    "distance": 100,
-    "key": "MRC",
-    "value": 0
-  }
-]
-*/

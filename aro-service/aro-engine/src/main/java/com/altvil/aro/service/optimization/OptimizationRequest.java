@@ -11,16 +11,19 @@ public class OptimizationRequest {
 	protected FiberNetworkConstraints constraints;
 	protected NetworkDataRequest networkDataRequest;
 	protected AlgorithmType algorithmType;
-
+	protected boolean usePlanConduit ;
+	
 	public OptimizationRequest(OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints,
 			NetworkDataRequest networkDataRequest,
-			AlgorithmType algorithmType) {
+			AlgorithmType algorithmType,
+			boolean usePlanConduit) {
 		super();
 		this.optimizationConstraints = optimizationConstraints;
 		this.constraints = constraints;
 		this.networkDataRequest = networkDataRequest;
 		this.algorithmType = algorithmType ;
+		this.usePlanConduit = usePlanConduit ;
 	}
 
 	public AlgorithmType getAlgorithmType() {
@@ -34,7 +37,7 @@ public class OptimizationRequest {
 	public OptimizationConstraints getOptimizationConstraints() {
 		return optimizationConstraints;
 	}
-
+	
 	public NetworkDataRequest getNetworkDataRequest() {
 		return networkDataRequest;
 	}
@@ -43,4 +46,8 @@ public class OptimizationRequest {
 		return constraints;
 	}
 
+	public boolean isUsePlanConduit() {
+		return usePlanConduit;
+	}
+	
 }

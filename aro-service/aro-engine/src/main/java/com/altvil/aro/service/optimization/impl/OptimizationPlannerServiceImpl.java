@@ -118,11 +118,23 @@ public class OptimizationPlannerServiceImpl implements
 
 			try {
 
+				log.info("Generating Plans ... planId"
+						+ request.getPlanId()
+						+ " "
+						+ request.getNetworkDataRequest().getLocationEntities()
+								.toString());
+				
 				Collection<PlannedNetwork> plannedNetworks = planNetworks(computeWireCenterRequests(request));
 
+				log.info("Reify Plans ... planId"
+						+ request.getPlanId()) ;
+				
 				Collection<OptimizedPlan> optimizedNetworks = updateNetworks(
 						request.getOptimizationConstraints(), plannedNetworks);
 
+				log.info("Update Master Planning ... planId"
+						+ request.getPlanId()) ;
+				
 				return masterPlanningService.save(new GeneratedMasterPlanImpl(
 						request, optimizedNetworks));
 			} catch (Throwable err) {
@@ -266,7 +278,7 @@ public class OptimizationPlannerServiceImpl implements
 				.map(f -> {
 					try {
 						return f.get();
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						log.error(e.getMessage(), e);
 						return new DefaultOptimizationResult<S>(null,
 								new OptimizationException(e.getMessage()));

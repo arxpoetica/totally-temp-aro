@@ -459,7 +459,7 @@ module.exports = class NetworkPlan {
         this._deleteTargets(plan_id, changes.deletions && changes.deletions.locations)
       ))
       .then(() => (
-        models.Network.recalculateNodes(plan_id, changes)
+        changes.lazy ? null : models.Network.recalculateNodes(plan_id, changes)
       ))
       .then(() => NetworkPlan.findPlan(plan_id))
   }
@@ -503,10 +503,11 @@ module.exports = class NetworkPlan {
 
         var sql = `
           SELECT ST_AsKML(fiber_route.geom) AS geom
-          FROM client.plan
-          JOIN client.plan p ON p.parent_plan_id = plan.id
+          FROM client.plan r
+          JOIN client.plan mp ON mp.parent_plan_id = r.id
+          JOIN client.plan p ON p.parent_plan_id = mp.id
           JOIN client.fiber_route ON fiber_route.plan_id = p.id
-          WHERE plan.id=$1
+          WHERE r.id=$1
         `
         return database.query(sql, [plan_id])
       })
@@ -583,20 +584,43 @@ module.exports = class NetworkPlan {
       }))
   }
 
+  static searchBusinesses (text) {
+    var sql = `
+      SELECT
+        name,
+        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
+      FROM aro.businesses
+      WHERE to_tsvector('english', name) @@ plainto_tsquery($1)
+    `
+    return database.query(sql, [text.toLowerCase()])
+  }
+
   static searchAddresses (text) {
     var sql = `
       SELECT
         code AS name,
-        ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
-        ST_AsGeoJSON(ST_envelope(geom))::json as bounds
+        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
         FROM client.service_area
        WHERE service_layer_id = (
           SELECT id FROM client.service_layer WHERE name='wirecenter'
         )
         AND lower(unaccent(code)) LIKE lower(unaccent($1))
-      ORDER BY code ASC
+
+      UNION ALL
+
+      SELECT
+        name,
+        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
+      FROM aro.businesses
+      WHERE to_tsvector('english', name) @@ plainto_tsquery($2)
+
+      ORDER BY name ASC
+      LIMIT 100
     `
-    var wirecenters = database.query(sql, [`%${text}%`])
+    var wirecenters = database.query(sql, [`%${text}%`, text.toLowerCase()])
     var addresses = text.length > 0
       ? request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
       : Promise.resolve(null)

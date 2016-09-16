@@ -14,9 +14,9 @@ public class WirecenterOptimizationRequest extends OptimizationRequest {
 	public WirecenterOptimizationRequest(
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints networkConstraints,
-			NetworkDataRequest networkDataRequest, AlgorithmType algorithmType) {
+			NetworkDataRequest networkDataRequest, AlgorithmType algorithmType, boolean usePlanConduit) {
 		super(optimizationConstraints, networkConstraints, networkDataRequest,
-				algorithmType);
+				algorithmType, usePlanConduit);
 	}
 
 	public ConstructionRatios getConstructionRatios() {

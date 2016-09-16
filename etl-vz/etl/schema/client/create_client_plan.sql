@@ -29,3 +29,7 @@ total_cost float8,
 "fiber_length" float8,
 CONSTRAINT client_plan_pkey PRIMARY KEY (id)
 );
+
+
+CREATE INDEX idx_client_area_bounds ON client.plan USING gist(area_bounds);
+

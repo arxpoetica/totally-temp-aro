@@ -30,4 +30,21 @@ exports.configure = (app, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  app.get('/admin/users/csv', check_admin, (request, response, next) => {
+    models.User.downloadCSV()
+      .then((output) => {
+        response.attachment('users.csv')
+        response.send(output)
+      })
+      .catch(next)
+  })
+
+  app.post('/admin/users/mail', check_admin, (request, response, next) => {
+    var subject = request.body.subject
+    var text = request.body.text
+    models.User.sendMail(subject, text)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

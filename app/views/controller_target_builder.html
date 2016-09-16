@@ -51,8 +51,8 @@
 
   <br>
   <p><strong>Search, Click or Upload Locations</strong></p>
-  <input class="form-control" placeholder="Address, Business Name">
-  <br>
+  <input class="form-control select2" type="text" placeholder="Business Name">
+  <br><br>
   <form id="target-builder-upload">
     <p>
       Select:
@@ -62,16 +62,44 @@
       <button class="btn btn-default btn-sm"
         ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
         ng-click="setSelectedTool('polygon')">Many</button>
-      <span style="display:inline-block; width:100px; position:relative">
+      <span style="display:inline-block; width:30px; position:relative">
         <button class="btn btn-default btn-sm"><i class="fa fa-file-o"></i></button>
-        <input type="file" name="photo" style="opacity:0; width: 100px; position:absolute; top:0; left:0">
+        <input type="file" name="csv" style="opacity:0; width: 30px; position:absolute; top:0; left:0">
       </span>
     </p>
   </form>
+
+  <% if (config.ARO_CLIENT === 'verizon') { %>
+    <br>
+    <p><strong>Technology</strong></p>
+    <form>
+      <div class="radio">
+        <label>
+          <input type="radio" name="technology" ng-model="technology" value="direct_routing" checked> Direct Routing
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="technology" ng-model="technology" value="odn1" checked> ODN 1.0 (Centralized Split)
+        </label>
+      </div>
+      <div class="radio disabled">
+        <label>
+          <input type="radio" name="technology" ng-model="technology" value="odn2" disabled> ODN 2.0 (Distributed Split)
+        </label>
+      </div>
+    </form>
+  <% } %>
+
   <p><strong>Targeted Locations</strong></p>
   <ul style="padding: 0 20px">
     <li>Businesses: {{plan.metadata.customers_businesses_total}}</li>
     <li>Households: {{plan.metadata.customers_households_total}}</li>
     <li>Towers: {{plan.metadata.customers_towers_total}}</li>
   </ul>
+
+  <p class="pull-right">
+    <button class="btn btn-success active"
+      ng-click="postChanges({}, false)">Get Results</button>
+  </p>
 </div>

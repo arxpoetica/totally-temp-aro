@@ -99,10 +99,11 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/network/fiber/:plan_id/find/:serviceLayer', check_any_permission, (request, response, next) => {
+  api.get('/network/fiber/:plan_id/find/:serviceLayer', check_any_permission, middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
     var plan_id = request.params.plan_id
     var serviceLayer = request.params.serviceLayer
-    models.Network.viewFiber(plan_id, serviceLayer)
+    models.Network.viewFiber(plan_id, serviceLayer, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -125,7 +126,23 @@ exports.configure = (api, middleware) => {
       file.pipe(fs.createWriteStream(fullpath))
     })
     busboy.on('finish', () => {
-      models.Network.importLocations(plan_id, fullpath)
+      models.Network.importLocationsByCoordinates(plan_id, fullpath)
+        .then(jsonSuccess(response, next))
+        .catch(next)
+    })
+    request.pipe(busboy)
+  })
+
+  api.post('/network/nodes/:plan_id/csvIds', check_owner_permission, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var busboy = new Busboy({ headers: request.headers })
+    var fullpath
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      file.pipe(fs.createWriteStream(fullpath))
+    })
+    busboy.on('finish', () => {
+      models.Network.importLocationsByIds(plan_id, fullpath)
         .then(jsonSuccess(response, next))
         .catch(next)
     })
@@ -164,6 +181,13 @@ exports.configure = (api, middleware) => {
     var types = request.query.types
     types = (Array.isArray(types) ? types : [types]).filter(Boolean)
     models.Network.searchBoundaries(text, types, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/network/road_segments', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    models.Network.roadSegments(viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

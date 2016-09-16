@@ -1,4 +1,4 @@
-/* global app _ config user_id $ map google randomColor tinycolor Chart */
+/* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
 app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
   $scope.ARO_CLIENT = config.ARO_CLIENT
@@ -21,6 +21,20 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.overlay = 'none'
   $scope.heatmapVisible = false
   $scope.heatmapOn = true
+  $scope.roadLayer = new MapLayer({
+    short_name: 'RS',
+    name: 'Road Segments',
+    type: 'road_segments',
+    style_options: {
+      normal: {
+        strokeColor: 'teal',
+        strokeWeight: 2
+      }
+    },
+    api_endpoint: '/network/road_segments',
+    threshold: 12,
+    reload: 'always'
+  })
 
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
@@ -151,7 +165,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $scope.business_categories_selected[category.name] = true
       category.fullName = `b_${category.name}`
     })
-    $scope.business_categories_selected['2kplus'] = true
+    $scope.business_categories_selected['2kplus'] = false
+    changeOptimization()
 
     $scope.household_categories_selected = []
     $scope.household_categories.forEach((category) => {
@@ -395,16 +410,26 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   }
 
   function changeOptimization () {
-    $rootScope.optimizeBusinesses = $scope.show_businesses
+    $rootScope.optimizeMedium = $scope.show_businesses && $scope.business_categories_selected['medium']
+    $rootScope.optimizeLarge = $scope.show_businesses && $scope.business_categories_selected['large']
     $rootScope.optimizeSMB = $scope.business_categories_selected['small']
     $rootScope.optimizeHouseholds = $scope.show_households
     $rootScope.optimizeTowers = $scope.show_towers
     $rootScope.optimize2kplus = $scope.business_categories_selected['2kplus']
   }
-  changeOptimization()
 
   $scope.selectedFilter = null
   $scope.toggleFilter = (filter) => {
     $scope.selectedFilter = $scope.selectedFilter === filter ? null : filter
   }
+
+  $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (layer.type !== 'road_segments') return
+    var feature = event.feature
+    layer.data_layer.revertStyle()
+    layer.data_layer.overrideStyle(feature, {
+      strokeWeight: 4
+    })
+    swal({ title: '', text: `gid: ${feature.getProperty('gid')} tlid: ${feature.getProperty('tlid')}`, type: 'info' })
+  })
 }])

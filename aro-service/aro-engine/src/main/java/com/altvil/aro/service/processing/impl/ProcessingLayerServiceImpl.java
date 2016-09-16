@@ -23,6 +23,8 @@ import com.altvil.aro.persistence.repository.ServiceLayerRepository;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.mapping.LocationEntityTypeMapping;
 import com.altvil.aro.service.processing.ProcessingLayerService;
+import com.altvil.aro.service.reference.ReferenceType;
+import com.altvil.aro.service.reference.VolatileReferenceService;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.reference.VolatileReference;
 
@@ -31,15 +33,23 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 	// private static final String RULE = "system_defaults";
 
+	private VolatileReferenceService volatileReferenceService ;
 	private ServiceLayerRepository serviceLayerRepository;
-
-	VolatileReference<SystemRule> systemRuleRef;
+	private VolatileReference<SystemRule> systemRuleRef;
 
 	@Autowired
 	public ProcessingLayerServiceImpl(
-			ServiceLayerRepository serviceLayerRepository) {
+			ServiceLayerRepository serviceLayerRepository,
+			VolatileReferenceService volatileReferenceService) {
 		super();
 		this.serviceLayerRepository = serviceLayerRepository;
+		this.volatileReferenceService = volatileReferenceService ;
+	}
+
+	@Override
+	public Set<LocationEntityType> getSupportedEntityTypes(
+			ServiceLayer serviceLayer) {
+		return systemRuleRef.get().getSupportedEntityTypes(serviceLayer);
 	}
 
 	private SystemRule loadSystemRule() {
@@ -48,8 +58,8 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 	@PostConstruct
 	void postConstruct() {
-		systemRuleRef = new VolatileReference<>(this::loadSystemRule,
-				1000L * 60L * 5L);
+		systemRuleRef = volatileReferenceService.createVolatileReference(ReferenceType.SERVICE_LAYER_INPUTS,
+				this::loadSystemRule) ;
 	}
 
 	@Override
@@ -79,6 +89,12 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 					loadCategoryRules(serviceLayerMap));
 
 			return this;
+		}
+
+		@Override
+		public Set<LocationEntityType> getSupportedEntityTypes(
+				ServiceLayer serviceLayer) {
+			return layerAssignmentMap.get(serviceLayer);
 		}
 
 		private LinkedHashMap<ServiceLayer, Set<LocationEntityType>> createLayerAssignmentMap(
@@ -157,6 +173,14 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 										.intValue()), ((Number) a[1])
 										.intValue());
 							});
+			
+			
+			int priroty = 40 ;
+			for(ServiceLayer sl : serviceLayerMap.values()) {
+				if( result.get(sl) == null ) {
+					result.put(sl, priroty++) ;
+				}
+			}
 
 			return result;
 		}
@@ -177,10 +201,10 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 			final LinkedHashSet<ServiceLayer> selectedLayers = new LinkedHashSet<>();
 			layerAssignmentMap.entrySet().forEach(e -> {
-				
-				Set<LocationEntityType> matchSet = e.getValue() ;
-				
-				if( matchSet != null ) {
+
+				Set<LocationEntityType> matchSet = e.getValue();
+
+				if (matchSet != null) {
 					matchSet.forEach(entity -> {
 						if (set.contains(entity)) {
 							set.remove(entity);

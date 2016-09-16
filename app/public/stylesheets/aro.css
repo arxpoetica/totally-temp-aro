@@ -6,7 +6,7 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 
 .navbar.navbar-default {
   margin-bottom: 0;
-  z-index: 2;
+  z-index: 9;
   background-image: none;
   background-color: rgb(20, 22, 22);
   border: none;
@@ -579,4 +579,17 @@ footer nav {
 
 [ng-controller=locations_controller] .alert {
   margin: 10px;
+}
+
+#locations_controller .spin {
+  margin-right: 5px;
+}
+
+.map-layer-spinner.fa-repeat {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.map-layer-spinner.spin {
+  opacity: 1;
 }

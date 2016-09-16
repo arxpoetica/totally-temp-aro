@@ -16,11 +16,15 @@ var transporter = process.env.NODE_ENV === 'production'
 var aro_client = process.env.ARO_CLIENT || ''
 exports.sendMail = (options) => {
   options.from = 'ARO <no-reply@' + aro_client + '.aro.app.altvil.com>'
-  transporter.sendMail(options, (err, info) => {
-    if (err) {
-      return console.log(err)
-    }
-    console.log('Message sent:', info.response)
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(options, (err, info) => {
+      if (err) {
+        reject(err)
+        return console.log(err)
+      }
+      console.log('Message sent:', info.response)
+      resolve()
+    })
   })
 }
 

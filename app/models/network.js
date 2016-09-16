@@ -4,6 +4,7 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var cache = helpers.cache
 var _ = require('underscore')
 var config = helpers.config
 var models = require('./')
@@ -68,13 +69,20 @@ module.exports = class Network {
   static carriers (plan_id, fiberType, viewport) {
     var params = [fiberType]
     var sql
-    if (!viewport) {
+    if (fiberType === 'fiber') {
       sql = `
+        WITH visible_carriers AS (SELECT c.*
+          FROM carriers c
+          JOIN fiber_plant fp ON fp.carrier_id = c.id
+          ${database.intersects(viewport, 'fp.geom', 'AND')}
+          WHERE c.route_type=$1
+          GROUP BY c.id
+          LIMIT 1
+        )
+
         SELECT carriers.id, carriers.name, carriers.color
-          FROM carriers
-           WHERE carriers.route_type=$1
-           ${database.intersects(viewport, 'cb.geom', 'AND')}
-         ORDER BY carriers.name ASC
+        FROM visible_carriers carriers
+        ORDER BY carriers.name ASC
       `
     } else {
       sql = `
@@ -114,7 +122,7 @@ module.exports = class Network {
           var arr = []
           node_types.forEach((node_type) => {
             params.push(node_type)
-            arr.push('t.name = $' + params.length)
+            arr.push('t.id = $' + params.length)
           })
           constraints.push('(' + arr.join(' OR ') + ')')
         }
@@ -162,11 +170,11 @@ module.exports = class Network {
       ))
   }
 
-  static viewFiber (plan_id, serviceLayer) {
+  static viewFiber (plan_id, serviceLayer, viewport) {
     var sql = `
       SELECT
         fiber_route.id,
-        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        fiber_route.geom AS geom,
         ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
         frt.name AS fiber_type,
         frt.description AS fiber_name
@@ -177,12 +185,14 @@ module.exports = class Network {
         SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
           SELECT p.id
             FROM client.plan p
-            JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${2}
-            WHERE p.parent_plan_id = $${1}
+            JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $2
+            WHERE p.parent_plan_id = $1
         )
       )
+      AND NOT ST_IsEmpty(fiber_route.geom)
+      ${database.intersects(viewport, 'fiber_route.geom', 'AND')}
     `
-    return database.query(sql, [plan_id, serviceLayer], true)
+    return database.lines(sql, [plan_id, serviceLayer], true, viewport)
   }
 
   static _addNodes (plan_id, insertions) {
@@ -243,14 +253,6 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
-    console.log('options', options)
-    var locationTypes = {
-      households: 'household',
-      businesses: ['medium', 'large'],
-      towers: 'celltower',
-      smb: 'small',
-      '2kplus': 'mrcgte2000'
-    }
     var algorithms = {
       'MAX_IRR': 'IRR',
       'TARGET_IRR': 'IRR',
@@ -261,10 +263,10 @@ module.exports = class Network {
     options.locationTypes = Array.isArray(options.locationTypes) ? options.locationTypes : []
     var body = {
       planId: plan_id,
-      locationTypes: _.compact(_.flatten(options.locationTypes.map((key) => locationTypes[key]))),
+      locationTypes: options.locationTypes,
       algorithm: options.algorithm,
       analysisSelectionMode: options.selectionMode,
-      processLayers: options.processingLayers
+      fiberNetworkConstraints: options.fiberNetworkConstraints
     }
     var req = {
       method: 'POST',
@@ -276,9 +278,11 @@ module.exports = class Network {
     if (options.budget) financialConstraints.budget = options.budget
     if (options.discountRate) financialConstraints.discountRate = options.discountRate
     if (options.irrThreshold) body.threshold = options.irrThreshold
+
     return Promise.all([
       database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
-      database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id])
+      database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
+      database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id])
     ])
     .then(() => {
       if (options.geographies) {
@@ -289,35 +293,54 @@ module.exports = class Network {
           var params = [plan_id, geography.name, id, type]
           var queries = {
             'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
-            'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)',
-            'cma_boundaries': '(SELECT the_geom FROM ref_boundaries.cma WHERE gid=$3::bigint)'
+            'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)'
           }
+          var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
+          var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type)
           var query
-          if (geography.geog) {
+          if (isAnalysisLayer) {
+            params.push(type)
+            query = `
+              (
+                SELECT geom
+                FROM client.analysis_area
+                JOIN client.analysis_layer
+                  ON analysis_area.analysis_layer_id = analysis_layer.id
+                AND analysis_layer.name=$${params.length}
+                WHERE analysis_area.id=$3::bigint
+              )
+            `
+            promises.push(
+              database.execute(`
+                INSERT INTO client.selected_analysis_area (
+                  plan_id, analysis_area_id
+                ) VALUES ($1, $2)
+              `, [plan_id, id])
+            )
+          } else if (isServiceLayer) {
+            params.push(type)
+            query = `
+              (
+                SELECT geom
+                FROM client.service_area
+                JOIN client.service_layer
+                  ON service_area.service_layer_id = service_layer.id
+                AND service_layer.name=$${params.length}
+                WHERE service_area.id=$3::bigint
+              )
+            `
+            promises.push(
+              database.execute(`
+                INSERT INTO client.selected_service_area (
+                  plan_id, service_area_id
+                ) VALUES ($1, $2)
+              `, [plan_id, id])
+            )
+          } else if (geography.geog) {
             params.push(JSON.stringify(geography.geog))
             query = `ST_GeomFromGeoJSON($${params.length})`
           } else {
             query = queries[type]
-            if (!query) {
-              params.push(type)
-              query = `
-                (
-                  SELECT geom
-                  FROM client.service_area
-                  JOIN client.service_layer
-                    ON service_area.service_layer_id = service_layer.id
-                  AND service_layer.name=$${params.length}
-                  WHERE service_area.id=$3::bigint
-                )
-              `
-              promises.push(
-                database.execute(`
-                  INSERT INTO client.selected_service_area (
-                    plan_id, service_area_id
-                  ) VALUES ($1, $2)
-                `, [plan_id, id])
-              )
-            }
           }
           promises.push(database.execute(`
             INSERT INTO client.selected_regions (
@@ -386,12 +409,7 @@ module.exports = class Network {
     var params = [`%${text}%`]
 
     types.forEach((type) => {
-      if (type === 'cma_boundaries') {
-        parts.push(`
-          SELECT 'cma_boundary:' || gid AS id, name, ST_AsGeoJSON(the_geom)::json AS geog
-          FROM ref_boundaries.cma LIMIT ${limit}
-        `)
-      } else if (type === 'county_subdivision') {
+      if (type === 'county_subdivision') {
         parts.push(`
           SELECT 'county:' || gid AS id, name, ST_AsGeoJSON(geom)::json AS geog
             FROM aro.cousub
@@ -408,17 +426,35 @@ module.exports = class Network {
                  LIMIT ${limit}
           `)
       } else {
-        params.push(type)
-        parts.push(`
-          SELECT $${params.length} || ':' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
-            FROM client.service_area
-            JOIN client.service_layer
-              ON service_area.service_layer_id = service_layer.id
-            AND service_layer.name=$${params.length}
-          WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
-                ${database.intersects(viewport, 'geom', 'AND')}
-                LIMIT ${limit}
-          `)
+        var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
+        var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type)
+        if (isServiceLayer) {
+          params.push(type)
+          parts.push(`
+            SELECT $${params.length} || ':' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+              FROM client.service_area
+              JOIN client.service_layer
+                ON service_area.service_layer_id = service_layer.id
+              AND service_layer.name=$${params.length}
+            WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+                  ${database.intersects(viewport, 'geom', 'AND')}
+                  LIMIT ${limit}
+            `)
+        } else if (isAnalysisLayer) {
+          params.push(type)
+          parts.push(`
+            SELECT $${params.length} || ':' || analysis_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+              FROM client.analysis_area
+              JOIN client.analysis_layer
+                ON analysis_area.analysis_layer_id = analysis_layer.id
+              AND analysis_layer.name=$${params.length}
+            WHERE lower(unaccent(code)) LIKE lower(unaccent($1))
+                  ${database.intersects(viewport, 'geom', 'AND')}
+                  LIMIT ${limit}
+            `)
+        } else {
+          console.warn('Unknown boundary type', type)
+        }
       }
     })
 
@@ -430,7 +466,7 @@ module.exports = class Network {
     return database.query(sql, params)
   }
 
-  static importLocations (plan_id, file) {
+  static importLocationsByCoordinates (plan_id, file) {
     return new Promise((resolve, reject) => {
       var found = 0
       var notFound = 0
@@ -495,6 +531,53 @@ module.exports = class Network {
       input.pipe(parser).pipe(transformer)
       transformer.on('error', reject)
     })
+  }
+
+  static importLocationsByIds (plan_id, file) {
+    return new Promise((resolve, reject) => {
+      var errors = 0
+      var ids = []
+
+      var parser = parse()
+      var input = fs.createReadStream(file)
+      var transformer = transform((record, callback) => {
+        var empty = record.every((item) => item === '')
+        if (empty) return callback()
+
+        var id = record[0]
+        if (id != +id) { // eslint-disable-line
+          errors++
+          return callback()
+        }
+        ids.push(+id)
+        callback()
+      }, { parallel: 1 }, () => {
+        if (ids.length === 0) return resolve({ found: 0, notFound: 0, errors: errors })
+        database.execute('DELETE FROM client.plan_targets WHERE plan_id = $1 AND location_id IN ($2)', [plan_id, ids])
+          .then(() => {
+            var params = [plan_id]
+            var sql = `
+              INSERT INTO client.plan_targets (plan_id, location_id) VALUES
+                ${ids.map((id) => `($1, $${params.push(id) || params.length})`)}
+            `
+            return database.execute(sql, params)
+          })
+          .then((rows) => {
+            resolve({
+              found: rows,
+              notFound: ids.length - rows,
+              errors: errors
+            })
+          })
+          .catch(reject)
+      })
+      input.pipe(parser).pipe(transformer)
+      transformer.on('error', reject)
+    })
+  }
+
+  static roadSegments (viewport) {
+    return database.lines('SELECT geom, gid, tlid FROM edges', [], true, viewport)
   }
 
 }
