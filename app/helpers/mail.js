@@ -22,7 +22,7 @@ exports.sendMail = (options) => {
         reject(err)
         return console.log(err)
       }
-      console.log('Message sent:', info.response)
+      console.log('Message sent:', info)
       resolve()
     })
   })
