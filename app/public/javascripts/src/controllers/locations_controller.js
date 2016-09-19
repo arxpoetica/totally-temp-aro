@@ -333,6 +333,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+    plan.location_types = plan.location_types || []
 
     // unselect all entity types
     $scope.show_businesses = false
