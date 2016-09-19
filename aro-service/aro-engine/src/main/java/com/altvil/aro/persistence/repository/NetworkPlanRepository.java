@@ -91,8 +91,7 @@ public interface NetworkPlanRepository extends
 			"   from client.service_area w \n" +
 			"	join aro.locations l on w.id = :serviceAreaId and st_contains(w.geom, l.geom)\n" +
 			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
-			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3\n" + 
-			"	where p.id =  :planId\n" + 
+			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3\n" +
 			"),\n" + 
 			"bs as (\n" + 
 			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
