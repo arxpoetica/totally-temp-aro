@@ -22,7 +22,7 @@ cd $GISROOT;
 for STATE in "${STATE_ARRAY[@]}"
 do
 	rm -f ${TMPDIR}/*.*
-	#aws s3 cp s3://public.aro/proto/businesses/tam_${STATE}.zip $GISROOT/tam_${STATE}.zip
+	aws s3 cp s3://public.aro/proto/businesses/tam_${STATE}.zip $GISROOT/tam_${STATE}.zip
 	$UNZIPTOOL tam_${STATE}.zip -d ${TMPDIR}
 	${PSQL} -a -c "SELECT create_vz_tam_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
 	cat /$TMPDIR/tam_${STATE}.csv | ${PSQL} -a -c "COPY ${TARGET_SCHEMA_NAME}.tam_${STATE} FROM STDIN DELIMITER ',' CSV HEADER;"
