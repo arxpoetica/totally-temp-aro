@@ -1,4 +1,3 @@
-
 ###################
 # Boundaries ETL
 ###################
@@ -55,18 +54,11 @@ etl_towers:
 reset_businesses:
 	businesses/reset.sh
 
-etl_businesses: etl_ves_lit etl_tam etl_vz_enterprise etl_vz_customers
-
-# Load LIT VES businesses
-etl_ves_lit:
-	businesses/vz_ves_lit_etl.sh
+etl_businesses: etl_tam etl_vz_customers
 
 # Load TAM businesses
 etl_tam:
 	businesses/vz_tam_etl.sh
-
-etl_vz_enterprise:
-	businesses/vz_enterprise_etl.sh
 
 etl_vz_customers:
 	businesses/vz_customers_etl.sh
