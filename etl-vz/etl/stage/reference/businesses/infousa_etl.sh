@@ -8,8 +8,6 @@ export AWS_DEFAULT_REGION=us-east-1
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-${PSQL} -a -f $DIR/create_infousa_businesses.sql
-
 # Use lower case state names. FIPS codes unnecessary here as well.
 declare -a STATE_ARRAY=( 'ny' )
 TARGET_SCHEMA_NAME='ref_businesses'
