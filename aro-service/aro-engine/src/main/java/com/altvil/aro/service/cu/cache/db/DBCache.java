@@ -201,7 +201,7 @@ public class DBCache implements SimpleCache {
 			CacheKey key = getCacheKey();
 
 			Map<String, Object> params = new HashMap<>();
-			String query = "update cache.deployment_plan_cache set last_updated=now(),optlock=:optLock + 1, deployment_version=:deploymentVersion, location_version=:locationVersion, service_area_version=:serviceAreaVersion, cache_data = :blob, length = :length where service_area_id=:serviceAreaId and deployment_plan_id=:deploymentPlanId and cache_type=:key and optlock=:optLock";
+			String query = "update cache.cache_entries set last_updated=now(),optlock=:optLock + 1, deployment_version=:deploymentVersion, location_version=:locationVersion, service_area_version=:serviceAreaVersion, cache_data = :blob, length = :length where service_area_id=:serviceAreaId and deployment_plan_id=:deploymentPlanId and cache_type=:key and optlock=:optLock";
 			params.put("optLock", deploymentCacheEntity.getOptiLock());
 			params.put("deploymentVersion", deploymentCacheEntity.getVersion());
 			params.put("locationVersion",

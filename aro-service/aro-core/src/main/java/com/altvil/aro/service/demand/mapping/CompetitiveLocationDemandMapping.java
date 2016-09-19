@@ -2,6 +2,8 @@ package com.altvil.aro.service.demand.mapping;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -20,6 +22,13 @@ public class CompetitiveLocationDemandMapping implements DemandMapping,
 
 	public static Aggregator<CompetitiveLocationDemandMapping> aggregate() {
 		return new DemandMappingAggregator();
+	}
+
+	public Map<LocationEntityType, EntityDemandMapping> getMatchingMappings(Set<LocationEntityType> selectedTypes) {
+		return map.entrySet()
+				.stream()
+				.filter(entry -> selectedTypes.contains(entry.getKey()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	private static class DemandMappingAggregator implements

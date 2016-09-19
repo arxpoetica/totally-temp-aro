@@ -124,14 +124,17 @@ public class NetworkDataDAO implements ComputeServiceApi{
 
 
     private ServiceAreaLocationDemand _queryFiberDemand(int serviceAreaId, int year, double mrc, Set<LocationEntityType> selectedTypes) {
-        return new ServiceAreaLocationDemand(assembleMapping(planRepository.queryAllFiberDemand(serviceAreaId, year, mrc),selectedTypes));
+        return  ServiceAreaLocationDemand.build()
+                .setMapping(assembleMapping(planRepository.queryAllFiberDemand(serviceAreaId, year, mrc)))
+                .filterBySelectedTypes(selectedTypes)
+                .build();
     }
 
 
 
 
     private Map<Long, CompetitiveLocationDemandMapping> assembleMapping(
-            List<Object[]> entityDemands, Set<LocationEntityType> selectedTypes) {
+            List<Object[]> entityDemands) {
         Map<Long, CompetitiveLocationDemandMapping> map = new HashMap<>();
 
         entityDemands
@@ -155,11 +158,10 @@ public class NetworkDataDAO implements ComputeServiceApi{
                             LocationEntityType lt = toLocationEntityType(d
                                     .getInteger(EntityDemandMap.entity_type));
 
-                            if (selectedTypes.contains(lt)) {
-                                ldm.add(lt,
-                                        d.getDouble(EntityDemandMap.count),
-                                        d.getDouble(EntityDemandMap.monthly_spend));
-                            }
+                            ldm.add(lt,
+                                    d.getDouble(EntityDemandMap.count),
+                                    d.getDouble(EntityDemandMap.monthly_spend));
+
 
                         });
 
