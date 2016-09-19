@@ -1,10 +1,10 @@
 DO $$
 DECLARE
-    all_states text[][] := array[['FL', '12'], ['WA', '53']];
+    all_states text[][] := array[['FL', '12'], ['IL', '17'], ['MO', '29'], ['WA', '53'], ['WI', '55']];
 
     state text[];
     master_schema text := 'aro';
-    data_schema text := 'aro_data';
+    data_schema text := 'aro_edges_data';
     source_data_schema text := 'tiger_data';
 
     expr text;
@@ -35,6 +35,7 @@ BEGIN
         
 
         RAISE NOTICE '**** CREATING TABLE ****';
+        EXECUTE 'DROP TABLE IF EXISTS ' || current_table || ';';
         EXECUTE 'CREATE TABLE IF NOT EXISTS' || current_table || ' (CHECK (statefp = ''' || state[2] || '''), CONSTRAINT pkey_aro_edges_' || lower(state[1]) || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
         
         expr2 := 'INSERT INTO ' || current_table || '

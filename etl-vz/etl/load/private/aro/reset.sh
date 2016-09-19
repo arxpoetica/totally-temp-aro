@@ -4,5 +4,10 @@ PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-${PSQL} -a -f $DIR/reset_aro.sql
+# Partition schema for edges
+${PSQL} -c "DROP SCHEMA IF EXISTS aro_edges_data CASCADE;"
+${PSQL} -c "CREATE SCHEMA aro_edges_data;"
+
+${PSQL} -c "DROP SCHEMA IF EXISTS aro_edges_data CASCADE;"
+${PSQL} -c "CREATE SCHEMA aro_edges_data;"
 

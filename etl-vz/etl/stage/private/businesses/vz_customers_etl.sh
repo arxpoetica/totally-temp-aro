@@ -9,7 +9,7 @@ export AWS_DEFAULT_REGION=us-east-1
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
 # Specify states to load and target schema
-declare -a STATE_ARRAY=( 'mo' )
+declare -a STATE_ARRAY=( 'fl' 'il' 'mo' 'wa' 'wi' )
 TARGET_SCHEMA_NAME='businesses'
 
 cd $GISROOT;
