@@ -30,7 +30,7 @@ BEGIN
 		cpl_cd varchar,
 		num_of_co_in_bldg int
 	);';
-	RETURN scoped_table_name
+	RETURN scoped_table_name;
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
 
@@ -73,7 +73,7 @@ BEGIN
 		prism_long double precision,
 		prism_lat double precision
 	);';
-	RETURN scoped_table_name
+	RETURN scoped_table_name;
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
 
