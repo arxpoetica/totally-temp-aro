@@ -334,6 +334,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
 
+    // unselect all entity types
+    $scope.show_businesses = false
+    $scope.show_households = false
+    $scope.business_categories_selected = []
+    $scope.household_categories_selected = []
+    $scope.changeLocationsLayer()
+
     if (plan) {
       map.ready(() => {
         // map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources)
