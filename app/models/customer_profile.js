@@ -22,38 +22,6 @@ module.exports = class CustomerProfile {
     return metadata
   }
 
-  static targetedLocationCounts (plan_id) {
-    var sql = `
-        (SELECT MAX(bc.description) AS description, COUNT(*)
-        FROM client.plan_targets t
-        JOIN businesses b ON b.location_id = t.location_id
-        JOIN client.business_category_mappings bcm ON b.id = bcm.business_id
-        JOIN client.business_categories bc ON bc.id = bcm.business_category_id
-        WHERE t.plan_id=$1
-        GROUP BY bc.id
-        ORDER BY bc.id ASC)
-
-        UNION ALL
-
-        (SELECT MAX(hc.description) AS description, COUNT(*)
-        FROM client.plan_targets t
-        JOIN households h ON h.location_id = t.location_id
-        JOIN client.household_category_mappings hcm ON h.id = hcm.household_id
-        JOIN client.household_categories hc ON hc.id = hcm.household_category_id
-        WHERE t.plan_id=$1
-        GROUP BY hc.id
-        ORDER BY hc.id ASC)
-
-        UNION ALL
-
-        (SELECT 'Towers' AS description, COUNT(*)
-        FROM client.plan_targets t
-        JOIN towers h ON h.location_id = t.location_id
-        WHERE t.plan_id=$1)
-    `
-    return database.query(sql, [plan_id])
-  }
-
   static customerProfileForRoute (plan_id, metadata) {
     var sql = `
       SELECT

@@ -520,7 +520,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     var params = {
       distanceThresholds: $scope.routeOpportunitiesDistanceThresholds.map((item) => item.value)
     }
-    $scope.loadingRouteOpportunities = true
     $http({
       url: url,
       method: 'GET',
@@ -528,10 +527,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
     .success((response) => {
       $scope.routeOpportunities = response
-      $scope.loadingRouteOpportunities = false
-    })
-    .error(() => {
-      $scope.loadingRouteOpportunities = false
     })
   }
 

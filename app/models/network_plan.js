@@ -90,8 +90,13 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static findPlan (plan_id) {
-    var output = { metadata: { costs: [] } }
+  static findPlan (plan_id, metadata_only) {
+    var output = {
+      'feature_collection': {
+        'type': 'FeatureCollection'
+      },
+      'metadata': { costs: [] }
+    }
     var plan
 
     return database.findOne(`
@@ -214,6 +219,10 @@ module.exports = class NetworkPlan {
       .then((selectedRegions) => {
         output.metadata.selectedRegions = selectedRegions
 
+        // return config.route_planning.length > 0
+        //   ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
+        //   : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
+
         plan.total_revenue = plan.total_revenue || 0
         plan.total_cost = plan.total_cost || 0
         output.metadata.revenue = plan.total_revenue
@@ -240,10 +249,7 @@ module.exports = class NetworkPlan {
             console.log('err', err)
           })
 
-        return models.CustomerProfile.targetedLocationCounts(plan_id)
-      })
-      .then((targetedLocations) => {
-        output.metadata.targetedLocations = targetedLocations
+        if (metadata_only) delete output.feature_collection
         return output
       })
   }

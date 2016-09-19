@@ -40,6 +40,13 @@ reset_aro:
 etl_aro:
 	aro/aro_etl.sh
 
+###################
+# UTILS
+###################
+
+load_utils:
+	utils/load_utils.sh
+
 
 ###################
 # Master ETL
@@ -47,7 +54,7 @@ etl_aro:
 
 
 reset: reset_financial reset_client reset_aro
-load: etl_aro etl_client etl_financial
+load: etl_aro etl_client etl_financial load_utils
 
 etl_reload_auth: reset_auth etl_auth
 etl_reload_all: reset load

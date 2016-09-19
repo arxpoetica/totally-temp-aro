@@ -93,9 +93,9 @@
 
   <p><strong>Targeted Locations</strong></p>
   <ul style="padding: 0 20px">
-    <li ng-repeat="item in plan.metadata.targetedLocations">
-      {{item.description}}: {{item.count | number}}
-    </li>
+    <li>Businesses: {{plan.metadata.customers_businesses_total}}</li>
+    <li>Households: {{plan.metadata.customers_households_total}}</li>
+    <li>Towers: {{plan.metadata.customers_towers_total}}</li>
   </ul>
 
   <p class="pull-right">
