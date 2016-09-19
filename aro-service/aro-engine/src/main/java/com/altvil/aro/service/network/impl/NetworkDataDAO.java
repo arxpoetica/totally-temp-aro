@@ -12,6 +12,7 @@ import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.entity.mapping.LocationEntityTypeMapping;
+import com.altvil.aro.service.network.model.ServiceAreaLocationDemand;
 import com.altvil.aro.service.network.model.ServiceAreaRoadEdges;
 import com.altvil.aro.service.network.model.ServiceAreaRoadLocations;
 import com.altvil.interfaces.*;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,6 +48,7 @@ public class NetworkDataDAO implements ComputeServiceApi{
 
     private ComputeUnit<ServiceAreaRoadEdges> serviceAreaRoadEdges;
     private ComputeUnit<ServiceAreaRoadLocations> serviceAreaRoadLocations;
+    private ComputeUnit<ServiceAreaLocationDemand> locationDemand;
 
 
     @PostConstruct
@@ -74,27 +77,58 @@ public class NetworkDataDAO implements ComputeServiceApi{
                                 cacheQuery.getServiceAreaId()
                         ))
                 .build();
+        locationDemand = computeUnitService
+                .build( ServiceAreaLocationDemand.class, this.getClass())
+                .setName("location_demand")
+                .setCacheMemorySize(100)
+                .setExecutionCachePolicies(EnumSet.of(MEMORY, PERSISTENCE))
+                .setVersionTypes(EnumSet.of(VersionType.SERVICE))
+                .setCacheLoaderFunc(
+                        (cacheQuery) -> () -> _queryFiberDemand(
+                                cacheQuery.getServiceAreaId(),
+                                cacheQuery.getParam("year", Integer.class),
+                                cacheQuery.getParam("mrc", Double.class),
+                                cacheQuery.getParam("selectedTypes", Set.class)
+                        ))
+                .build();
+
     }
+
 
     public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
             boolean isFilteringRoadLocationDemandsBySelection,
-            Set<LocationEntityType> selectedTypes, long planId, int year, double mrc) {
+            Set<LocationEntityType> selectedTypes, int serviceAreaId, long planId, int year, double mrc) {
 
-        return assembleMapping(
-                (isFilteringRoadLocationDemandsBySelection ? queryFiberDemand(planId, year, mrc)
-                        : queryAllFiberDemand(planId, year, mrc)),
-                selectedTypes);
+        Map<Long, CompetitiveLocationDemandMapping> locationDemand = queryFiberDemand(serviceAreaId, year, mrc, selectedTypes).getDemandMapping();
+        if(isFilteringRoadLocationDemandsBySelection){
+            Set<Long> selectedRoadLocationIds = planRepository.querySelectedLocationsByPlanId(planId).stream().map(BigInteger::longValue).collect(Collectors.toSet());
+            return locationDemand.entrySet()
+                    .stream()
+                    .filter(entry -> selectedRoadLocationIds.contains(entry.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }else{
+            return locationDemand;
+        }
+
 
     }
 
-    private List<Object[]> queryAllFiberDemand(long planId, int year, double mrc) {
-        return planRepository.queryAllFiberDemand(planId, year, mrc);
+    private ServiceAreaLocationDemand queryFiberDemand(int serviceAreaId, int year, double mrc, Set<LocationEntityType> selectedTypes) {
+        return locationDemand.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId)
+                .add("year", year)
+                .add("mrc", mrc)
+                .add("selectedTypes",new HashSet<>(selectedTypes))
+                .build());
+
     }
 
-    private List<Object[]> queryFiberDemand(long planId, int year, double mrc) {
-        return planRepository.queryFiberDemand(
-                planId, year, mrc);
+
+    private ServiceAreaLocationDemand _queryFiberDemand(int serviceAreaId, int year, double mrc, Set<LocationEntityType> selectedTypes) {
+        return new ServiceAreaLocationDemand(assembleMapping(planRepository.queryAllFiberDemand(serviceAreaId, year, mrc),selectedTypes));
     }
+
+
+
 
     private Map<Long, CompetitiveLocationDemandMapping> assembleMapping(
             List<Object[]> entityDemands, Set<LocationEntityType> selectedTypes) {

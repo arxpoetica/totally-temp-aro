@@ -150,6 +150,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		return networkDataDAO.queryLocationDemand(
 				networkConfiguration.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS,
 				networkConfiguration.getLocationEntities(),
+				networkConfiguration.getServiceAreaId().get(),
 				networkConfiguration.getPlanId(),
 				networkConfiguration.getYear(),
 				networkConfiguration.getMrc());
