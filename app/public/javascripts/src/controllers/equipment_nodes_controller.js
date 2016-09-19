@@ -62,7 +62,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)) // clone
       if ($scope.serviceLayers.length > 0) {
         var layer = $scope.serviceLayers[0]
-        layer.enabled = true
+        // layer.enabled = true
         $timeout(() => {
           $(`#serviceLayer${layer.id}`).addClass('in')
           $scope.serviceLayers.slice(1).forEach((layer) => {
@@ -79,6 +79,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   function configureServiceLayer (layer) {
     layer.showFeederFiber = true
     layer.showDistributionFiber = true
+    layer.enabled = true
 
     var routeLayer = new MapLayer({
       short_name: 'RT',
