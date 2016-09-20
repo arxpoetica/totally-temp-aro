@@ -146,7 +146,7 @@ BEGIN
         SELECT  
             m.location_id,
             me.source_id,
-            (SELECT id FROM aro.industries WHERE description = ''MENS & BOYS CLOTHING STORES''),
+            (SELECT id FROM aro.industries WHERE description = ''Retail Department Stores''),
             e.business_nm,
             e.street_addr,
             ''' || state_abbrev || ''',
@@ -288,7 +288,7 @@ BEGIN
         SELECT  
             m.location_id,
             me.source_id,
-            (SELECT id FROM aro.industries WHERE description = ''MENS & BOYS CLOTHING STORES''),
+            (SELECT id FROM aro.industries WHERE description = ''Retail Department Stores''),
             e.prism_formatted_address,
             ''' || state_abbrev || ''',
             1000,
