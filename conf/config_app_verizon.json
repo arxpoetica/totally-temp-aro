@@ -7,6 +7,7 @@
   "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
   "currency_symbol": "$",
+  "from_email_address": "vz-one-fiber@app.altvil.com",
   "ui": {
     "title": "OneFiber",
     "eye_checkboxes": true,

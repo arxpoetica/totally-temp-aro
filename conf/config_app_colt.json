@@ -6,6 +6,7 @@
   "route_planning": [],
   "spend_by_city": true,
   "currency_symbol": "€",
+  "from_email_address": "no-reply@colt.aro.app.altvil.com",
   "ui": {
     "map_tools": {
       "locations": {
