@@ -12,10 +12,7 @@ state_code_lookup() {
 }
 
 
-#declare -A STATE_FIPS_ARRAY=( [FL]=12 [IL]=17 [MO]=29 [WA]=53 [WI]=55 )
-
 export -f state_code_lookup ;
-export STATE_CODES='fl,il,mo,wa,wi' ;
 
 
 tower_code_lookup() {
@@ -30,7 +27,6 @@ tower_code_lookup() {
 }
 
 export -f tower_code_lookup ;
-export TOWER_CODES='towers_seattle_wa,towers_columbus_oh,towers_mo,towers_wi' ;
 
 
 cran_code_lookup() {
@@ -45,5 +41,4 @@ cran_code_lookup() {
 }
 
 export -f cran_code_lookup; 
-export CRAN_CODES 'mo,wa,wi';
 
