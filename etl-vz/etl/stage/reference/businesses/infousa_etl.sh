@@ -9,7 +9,7 @@ export AWS_DEFAULT_REGION=us-east-1
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
 # Use lower case state names. FIPS codes unnecessary here as well.
-declare -a STATE_ARRAY=( 'ny' )
+IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 TARGET_SCHEMA_NAME='ref_businesses'
 
 cd $GISROOT;

@@ -27,14 +27,16 @@ ${PSQL} -a -f $DIR/create_vz_wi_towers.sql
 
 # file_name:table_name
 # Assumes files end in .csv
-declare -A TOWER_DATA_FILES=( [towers_seattle_wa]=vz_wa_towers [towers_columbus_oh]=vz_oh_towers [towers_mo]=vz_mo_towers [towers_wi]=vz_wi_towers )
+IFS=',' read -a TOWER_DATA_FILES <<< "${TOWER_CODES}"
+declare TOWER_TABLE;
 
 cd $GISROOT;
 
 for TOWER_DATA_FILE in "${!TOWER_DATA_FILES[@]}"
 do
+	TOWER_TABLE=tower_code_lookup TOWER_TABLE $TOWER_DATA_FILE
 	aws s3 cp s3://public.aro/towers/${TOWER_DATA_FILE}.csv $GISROOT/${TOWER_DATA_FILE}.csv
-	cat /$GISROOT/${TOWER_DATA_FILE}.csv | ${PSQL} -a -c "COPY towers.${TOWER_DATA_FILES[$TOWER_DATA_FILE]} FROM STDIN DELIMITER ',' CSV HEADER ENCODING 'Latin1';"
+	cat /$GISROOT/${TOWER_DATA_FILE}.csv | ${PSQL} -a -c "COPY towers.${TOWER_TABLE} FROM STDIN DELIMITER ',' CSV HEADER ENCODING 'Latin1';"
 done
 
 # Merge towers into single source table

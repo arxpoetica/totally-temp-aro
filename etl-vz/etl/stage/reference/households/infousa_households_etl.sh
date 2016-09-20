@@ -11,7 +11,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 ${PSQL} -a -f $DIR/create_infousa_households.sql
 
 # Use lower case state names. FIPS codes unnecessary here as well.
-declare -a STATE_ARRAY=( 'ny' )
+IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 TARGET_SCHEMA_NAME='ref_households'
 
 cd $GISROOT;

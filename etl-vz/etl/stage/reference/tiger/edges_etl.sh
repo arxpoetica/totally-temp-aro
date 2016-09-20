@@ -7,10 +7,12 @@ PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
 
 # Set array of states and FIPS codes to iterate through
-declare -A STATE_FIPS_ARRAY=( [FL]=12 [IL]=17 [MO]=29 [WA]=53 [WI]=55 )
+IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
+declare STATE_ID
 
-for STATE in "${!STATE_FIPS_ARRAY[@]}"
+for STATE in "${!STATE_ARRAY[@]}"
 do
+	STATE_ID=state_code_loookup STATE_ID $STATE
 	rm -f ${TMPDIR}/*.*
 	${PSQL} -c "DROP SCHEMA IF EXISTS tiger_staging CASCADE;"
 	${PSQL} -c "CREATE SCHEMA tiger_staging;"
@@ -18,9 +20,9 @@ do
 	# Download all edges
 	cd $GISROOT;
 	
-	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATE_FIPS_ARRAY[$STATE]}* --accept=zip --reject=html -nd -nc
-	for z in tl_*_${STATE_FIPS_ARRAY[$STATE]}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
-	for z in */tl_*_${STATE_FIPS_ARRAY[$STATE]}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done  #unsure what, if anything, this does
+	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATE_ID}* --accept=zip --reject=html -nd -nc
+	for z in tl_*_${STATE_ID}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
+	for z in */tl_*_${STATE_ID}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done  #unsure what, if anything, this does
 	cd $TMPDIR;
 
 	# Create table from parent edges table

@@ -11,11 +11,12 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 ${PSQL} -a -f $DIR/create_nbm_blocks.sql
 
 # Use upper case state names. FIPS codes unnecessary here as well.
-declare -a STATE_ARRAY=( 'FL' 'IL' 'MO' 'WA' 'WI' )
+IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 
 cd $GISROOT;
-for STATE in "${STATE_ARRAY[@]}"
+for STATE_CODE in "${STATE_ARRAY[@]}"
 do
+	STATE="${STATE_CODE,,}"
 	rm -f ${TMPDIR}/*.*
 	aws s3 cp s3://public.aro/nbm/${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip $GISROOT/${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip
 	$UNZIPTOOL -p ${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;" 

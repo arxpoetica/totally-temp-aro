@@ -12,7 +12,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 cd $GISROOT;
 
 # 1. Load Fiber 
-declare -a FIBER_STATE_ARRAY=( 'fl' 'il' 'mo' 'wa' 'wi' )
+IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 
 fiber_state_array_len=${#FIBER_STATE_ARRAY[@]}
 
@@ -39,7 +39,7 @@ elif [ ${fiber_state_array_len} > 1 ]; then
 fi
 
 # 2. Load Wirecenters
-declare -a WIRECENTER_STATE_ARRAY=( 'fl' 'il' 'mo' 'wa' 'wi' )
+IFS=',' read -a WIRECENTER_STATE_ARRAY <<< "${STATE_CODES}"
 
 wirecenter_state_array_len=${#WIRECENTER_STATE_ARRAY[@]}
 

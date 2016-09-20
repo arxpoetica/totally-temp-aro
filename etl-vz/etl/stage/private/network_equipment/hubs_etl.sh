@@ -16,7 +16,7 @@ cd $GISROOT;
 
 # Seattle hubs are a shapefile, but we've been given multiple file types.
 # This section handles the shapefile import
-declare -a STATE_ARRAY=( 'wa' 'mo' 'wi' )
+IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 state_array_len=${#STATE_ARRAY[@]}
 
 for ((i=0; i<$state_array_len; i++ ));
