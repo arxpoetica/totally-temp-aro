@@ -46,10 +46,10 @@ reload_business: reset_businesses etl_businesses
 ###################
 
 reset_households:
-	temp_hh/reset.sh
+	households/reset.sh
 
 etl_households:
-	temp_hh/temp_hh_etl.sh
+	households/infousa_households_etl.sh
 
 
 ###################

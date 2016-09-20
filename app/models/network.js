@@ -170,11 +170,11 @@ module.exports = class Network {
       ))
   }
 
-  static viewFiber (plan_id, serviceLayer) {
+  static viewFiber (plan_id, serviceLayer, viewport) {
     var sql = `
       SELECT
         fiber_route.id,
-        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
+        fiber_route.geom AS geom,
         ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
         frt.name AS fiber_type,
         frt.description AS fiber_name
@@ -185,12 +185,14 @@ module.exports = class Network {
         SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
           SELECT p.id
             FROM client.plan p
-            JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${2}
-            WHERE p.parent_plan_id = $${1}
+            JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $2
+            WHERE p.parent_plan_id = $1
         )
       )
+      AND NOT ST_IsEmpty(fiber_route.geom)
+      ${database.intersects(viewport, 'fiber_route.geom', 'AND')}
     `
-    return database.query(sql, [plan_id, serviceLayer], true)
+    return database.lines(sql, [plan_id, serviceLayer], true, viewport)
   }
 
   static _addNodes (plan_id, insertions) {
@@ -280,7 +282,8 @@ module.exports = class Network {
     return Promise.all([
       database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
-      database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id])
+      database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id]),
+      database.execute('UPDATE client.plan SET location_types=ARRAY[$2]::varchar[] WHERE id=$1', [plan_id, options.locationTypes])
     ])
     .then(() => {
       if (options.geographies) {

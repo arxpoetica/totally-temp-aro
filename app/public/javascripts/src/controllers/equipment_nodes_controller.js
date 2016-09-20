@@ -62,7 +62,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)) // clone
       if ($scope.serviceLayers.length > 0) {
         var layer = $scope.serviceLayers[0]
-        layer.enabled = true
+        // layer.enabled = true
         $timeout(() => {
           $(`#serviceLayer${layer.id}`).addClass('in')
           $scope.serviceLayers.slice(1).forEach((layer) => {
@@ -77,8 +77,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   function configureServiceLayer (layer) {
-    layer.showFeederFiber = false
-    layer.showDistributionFiber = false
+    layer.showFeederFiber = true
+    layer.showDistributionFiber = true
+    layer.enabled = true
 
     var routeLayer = new MapLayer({
       short_name: 'RT',
@@ -90,14 +91,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         }
       },
       api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
-      declarativeStyles: routeStyles(layer)
+      declarativeStyles: routeStyles(layer),
+      threshold: 12,
+      reload: 'always'
     })
     routeLayer.hide_in_ui = true
     layer.routeLayer = routeLayer
     map_layers.addEquipmentLayer(routeLayer)
 
     layer.changedFiberVisibility = () => {
-      routeLayer.setVisible(layer.showFeederFiber || layer.showDistributionFiber)
+      routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber))
       routeLayer.setDeclarativeStyle(routeStyles(layer))
     }
 
@@ -150,7 +153,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
     layer.changedAvailability = function () {
       networkNodesLayer.setVisible(layer.enabled)
+      layer.changedFiberVisibility()
     }
+    layer.changedAvailability()
   }
 
   function emptyChanges () {

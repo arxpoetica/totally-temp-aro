@@ -8,11 +8,17 @@ export AWS_DEFAULT_REGION=us-east-1
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-${PSQL} -a -f $DIR/create_vz_customers.sql
+# Specify states to load and target schema
+declare -a STATE_ARRAY=( 'fl' 'il' 'mo' 'wa' 'wi' )
+TARGET_SCHEMA_NAME='businesses'
 
 cd $GISROOT;
 
-rm -f ${TMPDIR}/*.*
-aws s3 cp s3://public.aro/proto/businesses/vz_customers.zip $GISROOT/vz_customers.zip
-$UNZIPTOOL vz_customers.zip -d ${TMPDIR}
-cat /$TMPDIR/vz_customers.csv | ${PSQL} -a -c "COPY businesses.vz_customers FROM STDIN DELIMITER ',' CSV HEADER;"
+for STATE in "${STATE_ARRAY[@]}"
+do
+	rm -f ${TMPDIR}/*.*
+	aws s3 cp s3://public.aro/proto/businesses/vz_customers_${STATE}.zip $GISROOT/vz_customers_${STATE}.zip
+	$UNZIPTOOL vz_customers_${STATE}.zip -d ${TMPDIR}
+	${PSQL} -a -c "SELECT create_vz_customers_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
+	cat /$TMPDIR/vz_customers_${STATE}.csv | ${PSQL} -a -c "COPY ${TARGET_SCHEMA_NAME}.vz_customers_${STATE} FROM STDIN DELIMITER ',' CSV HEADER;"
+done

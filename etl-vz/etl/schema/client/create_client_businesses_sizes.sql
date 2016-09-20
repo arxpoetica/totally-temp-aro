@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS client.businesses_sizes
+DROP TABLE IF EXISTS client.businesses_sizes;
 CREATE TABLE client.businesses_sizes
 (
   size_name character varying primary key,
