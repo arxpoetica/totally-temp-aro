@@ -20,8 +20,8 @@ BEGIN
     index_prefix_name := prefix_name || '_' || state_name;
     scoped_name := parent_schema || '.' || parent_table_name;
     
-    EXECUTE 'DROP TABLE IF EXISTS ' || table_name;
-    EXECUTE 'CREATE TABLE ' || table_name || ' (CHECK (state = ''' || state_name || ''' OR state = ''' || state_abbrev || ''')) INHERITS (' || scoped_name || ');';
+    --EXECUTE 'DROP TABLE IF EXISTS ' || table_name;
+    EXECUTE 'CREATE TABLE IF NOT EXISTS' || table_name || ' (CHECK (state = ''' || state_name || ''' OR state = ''' || state_abbrev || ''')) INHERITS (' || scoped_name || ');';
     EXECUTE 'CREATE INDEX ' || index_prefix_name || '_location_index ON ' || table_name || '(location_id);';
     EXECUTE 'CREATE INDEX ' || index_prefix_name || '_industry_index ON ' || table_name || '(industry_id);';
     EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_geog_gist ON ' || table_name || ' USING gist (geog);';
