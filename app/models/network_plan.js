@@ -90,6 +90,64 @@ module.exports = class NetworkPlan {
     })
   }
 
+  static copyPlan (plan_id, name, user) {
+    return database.findOne(`
+      INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type, location_types)
+      SELECT
+        $2 AS name,
+        area_name,
+        area_centroid,
+        area_bounds,
+        NOW() AS created_at,
+        NOW() AS updated_at,
+        'R' AS plan_type,
+        location_types
+      FROM client.plan WHERE id=$1
+      RETURNING id
+    `, [plan_id, name])
+    .then((plan) => {
+      var id = plan.id
+      return Promise.all([
+        database.execute(`
+          INSERT INTO client.selected_regions (plan_id, region_name, region_id, region_type)
+          SELECT $2 AS plan_id, region_name, region_id, region_type FROM client.selected_regions WHERE plan_id = $1
+        `, [plan_id, id]),
+        database.execute(`
+          INSERT INTO client.selected_service_area (plan_id, service_area_id)
+          SELECT $2 AS plan_id, service_area_id FROM client.selected_service_area WHERE plan_id = $1
+        `, [plan_id, id]),
+        database.execute(`
+          INSERT INTO client.selected_analysis_area (plan_id, analysis_area_id)
+          SELECT $2 AS plan_id, analysis_area_id FROM client.selected_analysis_area WHERE plan_id = $1
+        `, [plan_id, id]),
+        database.execute(`
+          INSERT INTO client.plan_sources (plan_id, network_node_id)
+          SELECT $2 AS plan_id, network_node_id FROM client.plan_sources WHERE plan_id = $1
+        `, [plan_id, id]),
+        database.execute(`
+          INSERT INTO client.plan_targets (plan_id, location_id)
+          SELECT $2 AS plan_id, location_id FROM client.plan_targets WHERE plan_id = $1
+        `, [plan_id, id])
+      ])
+      .then(() => models.Permission.grantAccess(id, user.id, 'owner'))
+      .then(() => {
+        var sql = `
+          SELECT
+            $2::text AS carrier_name,
+            plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
+            users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
+            created_at, updated_at
+          FROM
+            client.plan
+          LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
+          LEFT JOIN auth.users ON users.id = permissions.user_id
+          WHERE plan.id=$1
+        `
+        return database.findOne(sql, [id, config.client_carrier_name])
+      })
+    })
+  }
+
   static findPlan (plan_id, metadata_only) {
     var output = {
       'feature_collection': {

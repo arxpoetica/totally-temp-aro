@@ -1,6 +1,6 @@
 /* global app swal $ config globalServiceLayers */
 // Search Controller
-app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', ($scope, $rootScope, $http, $q, map_tools, regions) => {
+app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', 'optimization', ($scope, $rootScope, $http, $q, map_tools, regions, optimization) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.regions = regions
@@ -121,23 +121,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       useDirectRouting: $scope.technology === 'direct_routing'
     }
 
-    canceler = $q.defer()
-    var url = '/network_plan/' + $scope.plan.id + '/edit'
-    var options = {
-      url: url,
-      method: 'post',
-      saving_plan: true,
-      data: changes,
-      timeout: canceler.promise
-    }
-    $scope.calculating = true
-    $http(options)
-      .success((response) => {
-        $scope.calculating = false
-        $rootScope.$broadcast('route_planning_changed', response)
-      })
-      .error(() => {
-        $scope.calculating = false
-      })
+    canceler = optimization.optimize($scope.plan, changes, () => {
+      $scope.calculating = false
+    }, () => {
+      $scope.calculating = false
+    })
   }
 }])
