@@ -23,6 +23,9 @@ exports.sendMail = (options) => {
         return console.log(err)
       }
       console.log('Message sent:', info)
+      if (Array.isArray(info.accepted) && info.accepted.length === 0) {
+        console.log('Mail not accepted', options)
+      }
       resolve()
     })
   })
