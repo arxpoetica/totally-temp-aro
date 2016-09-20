@@ -282,7 +282,8 @@ module.exports = class Network {
     return Promise.all([
       database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
-      database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id])
+      database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id]),
+      database.execute('UPDATE client.plan SET location_types=ARRAY[$2]::varchar[] WHERE id=$1', [plan_id, options.locationTypes])
     ])
     .then(() => {
       if (options.geographies) {

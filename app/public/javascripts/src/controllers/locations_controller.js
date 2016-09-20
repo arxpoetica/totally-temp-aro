@@ -50,8 +50,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.show_towers = false
   $scope.new_location_data = null
   $scope.industries = []
-  $scope.business_categories_selected = []
-  $scope.household_categories_selected = []
+  $scope.business_categories_selected = {}
+  $scope.household_categories_selected = {}
 
   var locationStyles = {
     normal: {
@@ -160,7 +160,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.business_categories = response.business_categories
     $scope.household_categories = response.household_categories
 
-    $scope.business_categories_selected = []
+    $scope.business_categories_selected = {}
     $scope.business_categories.forEach((category) => {
       $scope.business_categories_selected[category.name] = true
       category.fullName = `b_${category.name}`
@@ -333,12 +333,30 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+    plan.location_types = plan.location_types || []
+
+    // unselect all entity types
+    $scope.show_businesses = false
+    $scope.show_households = false
+    $scope.business_categories_selected = {}
+    $scope.household_categories_selected = {}
 
     if (plan) {
       map.ready(() => {
         // map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources)
         // locationsLayer.set_always_show_selected($scope.always_shows_targets)
         selectedLocationsLayer.show()
+
+        // select entity types used in optimization
+        if (plan.location_types.indexOf('medium') >= 0) $scope.business_categories_selected['medium'] = true
+        if (plan.location_types.indexOf('large') >= 0) $scope.business_categories_selected['large'] = true
+        $scope.show_businesses = _.size($scope.business_categories_selected) > 0
+        if (plan.location_types.indexOf('small') >= 0) $scope.business_categories_selected['small'] = true
+        if (plan.location_types.indexOf('mrcgte2000') >= 0) $scope.business_categories_selected['2kplus'] = true
+        if (plan.location_types.indexOf('celltower') >= 0) $scope.show_towers = true
+
+        towersLayer.setVisible($scope.show_towers)
+        $scope.changeLocationsLayer()
       })
     }
   })

@@ -22,7 +22,7 @@ CUSTOMERS_SCOPED_SOURCE_TABLE='businesses.vz_customers'
 
 for STATE in "${STATE_ARRAY[@]}"
 do
-	${PSQL} -a -c "SELECT aro.create_locations_shard_table('$STATE}', '${TARGET_SCHEMA_NAME}');"
+	${PSQL} -a -c "SELECT aro.create_locations_shard_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
 	${PSQL} -a -c "SELECT aro.create_businesses_shard_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
 	${PSQL} -a -c "SELECT aro.load_shard_tam_businesses('${TAM_SCOPED_SOURCE_TABLE}_${STATE}', '${TARGET_SCHEMA_NAME}', '${STATE}');"
 	${PSQL} -a -c "SELECT aro.load_shard_customer_businesses('${CUSTOMERS_SCOPED_SOURCE_TABLE}_${STATE}', '${TARGET_SCHEMA_NAME}', '${STATE}');"

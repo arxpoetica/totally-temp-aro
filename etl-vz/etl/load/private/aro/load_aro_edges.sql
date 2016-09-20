@@ -36,7 +36,7 @@ BEGIN
 
         RAISE NOTICE '**** CREATING TABLE ****';
         EXECUTE 'DROP TABLE IF EXISTS ' || current_table || ';';
-        EXECUTE 'CREATE TABLE IF NOT EXISTS' || current_table || ' (CHECK (statefp = ''' || state[2] || '''), CONSTRAINT pkey_aro_edges_' || lower(state[1]) || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || current_table || ' (CHECK (statefp = ''' || state[2] || '''), CONSTRAINT pkey_aro_edges_' || lower(state[1]) || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
         
         expr2 := 'INSERT INTO ' || current_table || '
                 (

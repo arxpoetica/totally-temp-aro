@@ -593,3 +593,11 @@ footer nav {
 .map-layer-spinner.spin {
   opacity: 1;
 }
+
+a[data-toggle="collapse"].collapsed > .fa-caret-up {
+  display: none
+}
+
+a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
+  display: none
+}
