@@ -5,10 +5,12 @@ DECLARE
 	state_name text;
 	base_table_name text;
 	scoped_table_name text;
+	index_prefix text;
 BEGIN
 	state_name := lower(state_abbrev);
 	base_table_name := 'tam';
 	scoped_table_name := target_schema_name || '.' || base_table_name || '_' || state_name;
+	index_prefix := target_schema_name || '_' || base_table_name || '_' || state_name;
  
 	EXECUTE 'DROP TABLE IF EXISTS ' || scoped_table_name || ' CASCADE;';
 	EXECUTE 'CREATE TABLE ' || scoped_table_name || ' (
@@ -30,6 +32,7 @@ BEGIN
 		cpl_cd varchar,
 		num_of_co_in_bldg int
 	);';
+	EXECUTE 'CREATE INDEX ' || index_prefix || '_duns_number_index ON ' scoped_table_name || ' (duns_number);';
 	RETURN scoped_table_name;
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
