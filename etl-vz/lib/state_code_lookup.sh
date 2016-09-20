@@ -44,4 +44,6 @@ cran_code_lookup() {
 	return 0
 }
 
-declare -a CRAN_STATES=( 'mo' 'wa' 'wi' )
+export -f cran_code_lookup; 
+export CRAN_CODES 'mo,wa,wi';
+
