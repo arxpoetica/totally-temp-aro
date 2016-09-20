@@ -9,7 +9,6 @@ SHP2PGSQL=${PGBIN}/shp2pgsql
 # Set array of states and FIPS codes to iterate through
 
 IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
-declare -A STATE_FIPS_ARRAY=( [FL]=12 [IL]=17 [MO]=29 [WA]=53 [WI]=55 )
 declare STATE_ID
 
 for STATE_CODE in "${!STATE_ARRAY[@]}"

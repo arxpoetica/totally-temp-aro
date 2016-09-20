@@ -12,7 +12,7 @@ declare STATE_ID
 
 for STATE in "${!STATE_ARRAY[@]}"
 do
-	STATE_ID=state_code_loookup STATE_ID $STATE
+	state_code_lookup STATE_ID $STATE
 	rm -f ${TMPDIR}/*.*
 	${PSQL} -c "DROP SCHEMA IF EXISTS tiger_staging CASCADE;"
 	${PSQL} -c "CREATE SCHEMA tiger_staging;"
