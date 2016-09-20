@@ -10,7 +10,7 @@ if (!region) {
 }
 AWS.config.update({ region: region })
 
-var transporter = process.env.NODE_ENV === 'production'
+var transporter = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging'
   ? nodemailer.createTransport(ses({ ses: new AWS.SES() }))
   : nodemailer.createTransport() // direct
 
@@ -23,9 +23,6 @@ exports.sendMail = (options) => {
         return console.log(err)
       }
       console.log('Message sent:', info)
-      if (Array.isArray(info.accepted) && info.accepted.length === 0) {
-        console.log('Mail not accepted', options)
-      }
       resolve()
     })
   })
