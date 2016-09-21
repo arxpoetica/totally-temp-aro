@@ -9,7 +9,7 @@ ${PSQL} -a -f $DIR/load_industries.sql
 
 #${PSQL} -a -f $DIR/load_households.sql
 
-${PSQL} -a -f $DIR/load_towers.sql
+#${PSQL} -a -f $DIR/load_towers.sql
 
 # Below for loading TAM and Customer data only. 
 declare -a STATE_ARRAY=( 'fl' 'il' 'mo' 'wa' 'wi' )
