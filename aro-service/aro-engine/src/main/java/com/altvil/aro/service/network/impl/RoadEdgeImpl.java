@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import com.altvil.interfaces.RoadEdge;
 import com.vividsolutions.jts.geom.Geometry;
 
+@SuppressWarnings("serial")
 public class RoadEdgeImpl implements RoadEdge {
 	
 	private long tlid ;

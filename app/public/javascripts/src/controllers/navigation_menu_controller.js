@@ -88,11 +88,16 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         map.setZoom(14)
       }
     }
+  }
+
+  $rootScope.$on('plan_selected', (e, plan) => {
+    $scope.plan = plan
+    state.loadPlan(plan)
     $location.path(plan ? '/plan/' + plan.id : '/')
 
     $scope.market_profile = {}
     $scope.market_profile_current_year = {}
-  }
+  })
 
   $rootScope.$on('route_changed', (e) => {
     if (!$scope.plan) return

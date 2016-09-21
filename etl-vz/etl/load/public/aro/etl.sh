@@ -12,3 +12,5 @@ ${PSQL} -a -f $DIR/load_census_blocks.sql
 
 ${PSQL} -a -f $DIR/load_cities.sql
 
+${PSQL} -a -f $DIR/load_aro_states.sql
+

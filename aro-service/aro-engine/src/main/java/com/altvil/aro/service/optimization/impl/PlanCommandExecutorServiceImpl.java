@@ -1,19 +1,15 @@
 package com.altvil.aro.service.optimization.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.altvil.aro.model.*;
+import com.altvil.aro.persistence.repository.WirecenterPlanRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.altvil.aro.model.DemandTypeEnum;
-import com.altvil.aro.model.ServiceArea;
-import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.ServiceAreaRepository;
 import com.altvil.aro.service.conversion.SerializationService;
@@ -50,6 +46,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	private SerializationService conversionService;
 	private WirecenterPlanningService wirecenterPlanningService;
 	private AroDemandService aroDemandService;
+	private WirecenterPlanRepository wirecenterPlanRepository;
 
 	@Autowired
 	public PlanCommandExecutorServiceImpl(
@@ -57,13 +54,14 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 			ServiceAreaRepository serviceAreaRepository,
 			SerializationService conversionService,
 			WirecenterPlanningService wirecenterPlanningService,
-			AroDemandService aroDemandService) {
+			AroDemandService aroDemandService, WirecenterPlanRepository wirecenterPlanRepository) {
 		super();
 		this.networkPlanRepository = networkPlanRepository;
 		this.serviceAreaRepository = serviceAreaRepository;
 		this.conversionService = conversionService;
 		this.wirecenterPlanningService = wirecenterPlanningService;
 		this.aroDemandService = aroDemandService;
+		this.wirecenterPlanRepository = wirecenterPlanRepository;
 	}
 
 	/*
@@ -111,15 +109,14 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 					Collections.emptyList());
 		}
 
-		List<Number> newPlans = networkPlanRepository.computeWirecenterUpdates(
+		Collection<WirecenterPlan> newPlans = wirecenterPlanRepository.computeWirecenterUpdates(
 				request.getPlanId(),
 				StreamUtil.map(serviceAreas, ServiceArea::getId));
 
 		ProcessLayerCommand plc = new ProcessLayerCommandImpl(serviceLayer,
 				newPlans.stream()
-						.map(Number::longValue)
-						.map(id -> this.createWirecenterOptimizationRequest(
-								request, id, serviceLayer))
+						.map(plan -> this.createWirecenterOptimizationRequest(
+								request, plan.getId(), serviceLayer, plan.getWireCenter().getId()))
 						.collect(Collectors.toList()));
 
 		// TODO Simplify Dependency
@@ -218,13 +215,17 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	}
 
 	private WirecenterOptimizationRequest createWirecenterOptimizationRequest(
-			MasterOptimizationRequest request, long planId, ServiceLayer sl) {
+			MasterOptimizationRequest request, long planId, ServiceLayer sl, int serviceAreaId) {
 
 		return new WirecenterOptimizationRequest(
-				request.getOptimizationConstraints(), request.getConstraints(),
-				request.getNetworkDataRequest().createRequest(planId,
-						sl.getId()), request.getAlgorithmType(), request.isUsePlanConduit());
-
+				request.getOptimizationConstraints(),
+				request.getConstraints(),
+				request.getNetworkDataRequest()
+						.createRequest(planId, sl.getId())
+						.createRequest(serviceAreaId),
+				request.getAlgorithmType(), 
+				request.isUsePlanConduit()
+		);
 	}
 
 	// private List<Number> createSelectedAreaUpdates(ServiceLayer serviceLayer,

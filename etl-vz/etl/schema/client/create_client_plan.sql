@@ -33,3 +33,4 @@ CONSTRAINT client_plan_pkey PRIMARY KEY (id)
 
 CREATE INDEX idx_client_area_bounds ON client.plan USING gist(area_bounds);
 
+ALTER TABLE client.plan ADD COLUMN location_types character varying[];

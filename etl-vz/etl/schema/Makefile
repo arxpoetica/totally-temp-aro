@@ -49,12 +49,22 @@ load_utils:
 
 
 ###################
+# cache ETL
+###################
+
+reset_cache:
+	cache/reset.sh
+
+etl_cache:
+	cache/cache_etl.sh
+
+###################
 # Master ETL
 ###################
 
 
-reset: reset_financial reset_client reset_aro
-load: etl_aro etl_client etl_financial load_utils
+reset: reset_financial reset_client reset_aro reset_cache
+load: etl_aro etl_client etl_financial etl_cache load_utils
 
 etl_reload_auth: reset_auth etl_auth
 etl_reload_all: reset load

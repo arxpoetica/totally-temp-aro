@@ -1,11 +1,13 @@
 package com.altvil.aro.service.graph.model;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.RoadEdge;
 
-public class EdgeData {
+@SuppressWarnings("serial")
+public class EdgeData implements Serializable {
 
 	private Collection<RoadEdge> roadEdges;
 	private Collection<CableConduitEdge> cableConduitEdges;

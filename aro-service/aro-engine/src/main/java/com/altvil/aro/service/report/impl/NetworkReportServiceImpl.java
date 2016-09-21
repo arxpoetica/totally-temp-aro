@@ -394,7 +394,7 @@ public class NetworkReportServiceImpl implements NetworkReportService {
 
 				NetworkCostCode ncc = map.get(fct.getCode());
 				if (ncc == null) {
-					throw new RuntimeException("Failed go map " + fct);
+ 					throw new RuntimeException("Failed go map " + fct);
 				}
 
 				result.put(fct, ncc);

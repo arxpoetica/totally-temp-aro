@@ -1,9 +1,6 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import com.altvil.aro.model.MasterPlan;
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -76,6 +73,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 			return this;
 		}
 
+
 		public Builder setYear(Integer year) {
 			if (year != null) {
 				this.year = year;
@@ -97,7 +95,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 
 		private NetworkDataRequest createDataRequest() {
 			return new NetworkDataRequest(planId, null, year,
-					locationSelectionMode, locationEntities, mrc, false);
+					locationSelectionMode, locationEntities, mrc, false, Optional.<Integer>empty());
 		}
 
 		public RootOptimizationRequest build() {

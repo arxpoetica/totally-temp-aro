@@ -6,9 +6,9 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 ${PSQL} -a -f $DIR/load_businesses.sql
 
-${PSQL} -a -f $DIR/load_households.sql
+#${PSQL} -a -f $DIR/load_households.sql
 
-${PSQL} -a -f $DIR/load_towers.sql
+#${PSQL} -a -f $DIR/load_towers.sql
 
 ${PSQL} -a -f $DIR/load_industries.sql
 

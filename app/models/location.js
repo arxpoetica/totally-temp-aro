@@ -28,6 +28,7 @@ module.exports = class Location {
         ) AS largest_type
       FROM locations
       WHERE ARRAY[$1]::varchar[] && dn_entity_categories
+      ${database.intersects(viewport, 'geom', 'AND')}
 
       EXCEPT
 
@@ -44,6 +45,7 @@ module.exports = class Location {
         ON plan_targets.plan_id = $2
        AND plan_targets.location_id = locations.id
        WHERE ARRAY[$1]::varchar[] && dn_entity_categories
+       ${database.intersects(viewport, 'geom', 'AND')}
     `
     return database.points(sql, [categories, plan_id], true, viewport)
   }
@@ -58,6 +60,7 @@ module.exports = class Location {
           JOIN towers ON towers.location_id = locations.id
      LEFT JOIN client.plan_targets
             ON plan_targets.location_id=locations.id AND plan_targets.plan_id=$1
+          ${database.intersects(viewport, 'locations.geom', 'WHERE')}
       GROUP BY locations.id
     `
     return database.points(sql, [plan_id], true, viewport)
@@ -74,6 +77,7 @@ module.exports = class Location {
         JOIN client.plan_targets
           ON plan_targets.plan_id = $1
          AND plan_targets.location_id = locations.id
+             ${database.intersects(viewport, 'locations.geom', 'WHERE')}
       GROUP BY locations.id
 
       UNION
@@ -84,6 +88,7 @@ module.exports = class Location {
         JOIN client.plan_targets
           ON plan_targets.plan_id = $1
          AND plan_targets.location_id = locations.id
+             ${database.intersects(viewport, 'locations.geom', 'WHERE')}
       GROUP BY locations.id
     `
     return database.points(sql, [plan_id], true, viewport)

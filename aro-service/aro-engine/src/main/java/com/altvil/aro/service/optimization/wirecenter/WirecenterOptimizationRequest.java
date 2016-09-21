@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
+import java.util.Collection;
+
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.OptimizationRequest;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
@@ -10,7 +12,8 @@ import com.altvil.enumerations.AlgorithmType;
 public class WirecenterOptimizationRequest extends OptimizationRequest {
 
 	private ConstructionRatios constructionRatios = ConstructionRatios.DEFAULT;
-
+	private Collection<String> stateCodes ;
+	
 	public WirecenterOptimizationRequest(
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints networkConstraints,
@@ -22,5 +25,11 @@ public class WirecenterOptimizationRequest extends OptimizationRequest {
 	public ConstructionRatios getConstructionRatios() {
 		return constructionRatios;
 	}
+
+	public Collection<String> getStateCodes() {
+		return stateCodes;
+	}
+	
+	
 
 }

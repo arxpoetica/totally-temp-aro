@@ -1,11 +1,9 @@
 package com.altvil.aro.service.network;
 
+import com.altvil.aro.service.cu.ComputeServiceApi;
 import com.altvil.aro.service.graph.model.NetworkData;
 
-public interface NetworkDataService {
-	
-	//Collection<NetworkAssignment> getFiberSources(NetworkDataRequest request) ;
-	//Collection<NetworkAssignment> getNetworkLocations(NetworkDataRequest request) ;
+public interface NetworkDataService extends ComputeServiceApi {
 	
 	NetworkData getNetworkData(NetworkDataRequest request) ;
 	

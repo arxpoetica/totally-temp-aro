@@ -8,6 +8,7 @@ import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
 
+@SuppressWarnings("serial")
 public class NetworkData extends EdgeData {
 
 	public NetworkAssignmentModel roadLocations;

@@ -1,5 +1,6 @@
 package com.altvil.aro.service.network;
 
+import java.util.Optional;
 import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
@@ -13,11 +14,12 @@ public class NetworkDataRequest {
 	private boolean queryPlanConduit = false;
 	private AnalysisSelectionMode selectionMode;
 	private Set<LocationEntityType> locationEntities;
+	private Optional<Integer> serviceAreaId = Optional.empty();
 
 	public NetworkDataRequest(long planId, Integer serviceLayerId,
 			Integer year, AnalysisSelectionMode selectionMode,
 			Set<LocationEntityType> locationEntities, double mrc,
-			boolean queryPlanConduit) {
+			boolean queryPlanConduit, Optional<Integer> serviceAreaId) {
 
 		super();
 		this.planId = planId;
@@ -27,20 +29,23 @@ public class NetworkDataRequest {
 		this.queryPlanConduit = queryPlanConduit;
 		this.locationEntities = locationEntities;
 		this.mrc = mrc;
+		this.serviceAreaId = serviceAreaId;
 	}
-
+	
 	public NetworkDataRequest createRequest(long planId, int serviceLayerId) {
-		return new NetworkDataRequest(planId, serviceLayerId, year,
-				selectionMode, locationEntities, mrc, queryPlanConduit);
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, serviceAreaId) ;
+	}
+	public NetworkDataRequest createRequest(int serviceAreaId) {
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, Optional.of(serviceAreaId));
 	}
 	
 	public NetworkDataRequest createRequest(Set<LocationEntityType> types) {
-		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, types, mrc, queryPlanConduit) ;
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, types, mrc, queryPlanConduit, serviceAreaId) ;
 	}
 
 	public NetworkDataRequest includePlanConduit() {
 		return new NetworkDataRequest(planId, serviceLayerId, year,
-				selectionMode, locationEntities, mrc, true);
+				selectionMode, locationEntities, mrc, true, serviceAreaId);
 	}
 
 	public Integer getServiceLayerId() {
@@ -71,4 +76,7 @@ public class NetworkDataRequest {
 		return queryPlanConduit;
 	}
 
+	public Optional<Integer> getServiceAreaId() {
+		return serviceAreaId;
+	}
 }

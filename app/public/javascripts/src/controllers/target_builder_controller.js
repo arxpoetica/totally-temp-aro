@@ -1,6 +1,6 @@
 /* global app user_id google $ map FormData XMLHttpRequest swal config _ */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', '$timeout', ($scope, $rootScope, $http, map_tools, map_layers, $timeout) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, $timeout, optimization) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.optimizationType = 'unconstrained'
@@ -152,19 +152,11 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       useDirectRouting: $scope.technology === 'direct_routing'
     }
 
-    var url = '/network_plan/' + $scope.plan.id + '/edit'
-    var req = {
-      url: url,
-      method: 'post',
-      saving_plan: !changes.lazy,
-      data: changes
-    }
     updateButton.attr('disabled', 'disabled')
-    $http(req).success((response) => {
+    optimization.optimize($scope.plan, changes, () => {
       updateButton.removeAttr('disabled')
-      $rootScope.$broadcast('route_planning_changed', response)
       $scope.pendingPost = lazy
-    }).error(() => {
+    }, () => {
       updateButton.removeAttr('disabled')
     })
   }

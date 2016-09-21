@@ -90,9 +90,7 @@ module.exports = class Database {
           features.*,
           ST_AsGeoJSON(geom)::json AS geom
         FROM features
-        WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
       `
-      params.push(viewport.linestring)
     } else {
       finalSql = `
         WITH features AS (${sql})
@@ -105,10 +103,8 @@ module.exports = class Database {
           }
           '{ "path": 0, "scale": 3, "strokeColor": "blue" }'::json AS icon
         FROM features
-        WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
-        GROUP BY ST_SnapToGrid(geom, $${params.length + 2})
+        GROUP BY ST_SnapToGrid(geom, $${params.length + 1})
       `
-      params.push(viewport.linestring)
       params.push(viewport.buffer * 3)
     }
     return this.query(finalSql, params, asFeatureCollection)

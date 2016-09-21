@@ -1,5 +1,7 @@
 package com.altvil.aro.service.network.impl;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.interfaces.RoadLocation;
@@ -7,7 +9,8 @@ import com.altvil.utils.GeometryUtil;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 
-public class RoadLocationImpl implements RoadLocation {
+@SuppressWarnings("serial")
+public class RoadLocationImpl implements RoadLocation, Serializable{
 
 	public static Builder build() {
 		return new Builder() ;

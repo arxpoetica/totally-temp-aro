@@ -154,7 +154,9 @@ module.exports = class Network {
         }
 
         if (constraints.length > 0) {
-          sql += ' WHERE ' + constraints.join(' AND ')
+          sql += ` WHERE ${constraints.join(' AND ')} ${database.intersects(viewport, 'geom', 'AND')}`
+        } else {
+          sql += database.intersects(viewport, 'geom', 'WHERE')
         }
         return database.points(sql, params, true, viewport)
       })
@@ -294,7 +296,7 @@ module.exports = class Network {
           var params = [plan_id, geography.name, id, type]
           var queries = {
             'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
-            'county_subdivisions': '(SELECT geom FROM cousub WHERE id=$3::bigint)'
+            'county_subdivisions': '(SELECT geom FROM cousub WHERE gid=$3::bigint)'
           }
           var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
           var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type)

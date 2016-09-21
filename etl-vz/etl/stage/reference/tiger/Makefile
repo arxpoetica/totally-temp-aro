@@ -11,3 +11,5 @@ stage_cosub:
 	cousub_etl.sh
 stage_census_blocks:
 	census_blocks_etl.sh
+stage_states:
+	states_etl.sh
