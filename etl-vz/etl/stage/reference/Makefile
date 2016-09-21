@@ -61,7 +61,7 @@ reset_tiger:
 	tiger/reset.sh
 
 # Reset all of TIGER data
-etl_tiger: etl_tiger_cousub etl_tiger_edges etl_tiger_census_blocks
+etl_tiger: etl_tiger_cousub etl_tiger_edges etl_tiger_census_blocks etl_tiger_states
 
 # Reset only County Subdivisions
 etl_tiger_cousub:
@@ -74,6 +74,9 @@ etl_tiger_edges:
 # Reset only Census Blocks
 etl_tiger_census_blocks:
 	tiger/census_blocks_etl.sh
+
+etl_tiger_states:
+	tiger/states_etl.sh
 
 reload_tiger: reset_tiger etl_tiger
 
