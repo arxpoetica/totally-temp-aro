@@ -14,6 +14,7 @@ IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 
 TARGET_SCHEMA_NAME='aro_location_data'
 INFOUSA_SCOPED_SOURCE_TABLE='ref_businesses.infousa_businesses'
+TOWERS_SCOPED_SOURCE_TABLE='ref_towers.sita_towers'
 # TODO: add households
 # TODO: maybe add towers
 
@@ -30,6 +31,9 @@ do
 	${PSQL} -a -c "SELECT aro.create_businesses_shard_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
 	${PSQL} -a -c "SELECT aro.update_shard_industries('${INFOUSA_SCOPED_SOURCE_TABLE}_${STATE}', '${STATE}');"
 
+	${PSQL} -a -c "SELECT aro.create_towers_shard_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
+	${PSQL} -a -c "SELECT aro.load_shard_towers('${TOWERS_SCOPED_SOURCE_TABLE}', '${TARGET_SCHEMA_NAME}', '${STATE}');"
+	
 done
 
 
