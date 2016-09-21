@@ -108,7 +108,7 @@ BEGIN
   missing_locations AS (
     SELECT
         dl.source_id,
-        (SELECT nextval(''locations_id_seq''::regclass)) AS location_id
+        nextval(''aro.locations_id_seq''::regclass) AS location_id
     FROM distinct_locations dl
     LEFT JOIN matched_locations ml
           ON ml.source_id = dl.source_id

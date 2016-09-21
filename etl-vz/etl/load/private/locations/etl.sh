@@ -7,7 +7,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 # Industries, households, and towers do not load into paritions yet
 ${PSQL} -a -f $DIR/load_industries.sql
 
-${PSQL} -a -f $DIR/load_households.sql
+#${PSQL} -a -f $DIR/load_households.sql
 
 ${PSQL} -a -f $DIR/load_towers.sql
 
