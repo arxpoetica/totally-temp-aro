@@ -85,7 +85,7 @@ BEGIN
   missing_locations AS (
       SELECT
           me.source_id,
-          (SELECT nextval(''locations_id_seq''::regclass)) AS location_id
+          nextval(''locations_id_seq''::regclass) AS location_id
       FROM ' || missing_entities_table || ' me
       LEFT JOIN matched_locations ml
           ON ml.source_id = me.source_id
