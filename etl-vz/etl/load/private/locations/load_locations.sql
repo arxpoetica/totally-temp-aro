@@ -18,8 +18,12 @@ BEGIN
   prefix_name := parent_schema || '_' || parent_table_name;
   index_prefix_name := prefix_name || '_' || state_name;
   scoped_name := parent_schema || '.' || parent_table_name;
+
   
   EXECUTE 'CREATE TABLE IF NOT EXISTS ' || table_name || ' (CHECK (state = ''' || state_name || ''' OR state = ''' || state_abbrev || ''')) INHERITS (' || scoped_name || ');';
+
+  EXECUTE 'ALTER TABLE ' || table_name || ' ADD CONSTRAINT ' || index_prefix_name || '_pkey PRIMARY KEY (id);';
+
   EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_geog_gist ON ' || table_name || ' USING gist (geog);';
   EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_geom_gist ON ' || table_name || ' USING gist (geom);';
   EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_total_businesses_index ON ' || table_name || '(total_businesses);';
