@@ -75,9 +75,9 @@ BEGIN
     ST_Buffer(ST_MakePoint(long, lat)::geography, 5)::geometry AS buffer
   FROM ' || scoped_source_table || ' st
   LEFT JOIN  ' || scoped_target_table || '  tt
-    ON st.source::varchar = tt.source_id
+    ON st.sourceid::varchar = tt.source_id
   WHERE tt.id IS NULL
-  AND NOT(longitude = 0 AND latitude = 0);';
+  AND NOT(long = 0 AND lat = 0);';
 
   EXECUTE missing_expr;
 
