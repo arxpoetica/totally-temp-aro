@@ -12,12 +12,13 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 cd $GISROOT;
 
 # 1. Load Fiber 
-IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
+IFS=',' read -a FIBER_STATE_ARRAY <<< "${STATE_CODES}"
 
 fiber_state_array_len=${#FIBER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table
 if [ ${fiber_state_array_len} == 1 ]; then
+	state_code_lookup STATE_ID ${}
 	rm -f ${TMPDIR}/*.*
 	aws s3 cp s3://public.aro/geotel/geotel_fiber_${FIBER_STATE_ARRAY[0]}.zip $GISROOT/geotel_fiber_${FIBER_STATE_ARRAY[0]}.zip
 	$UNZIPTOOL geotel_fiber_${FIBER_STATE_ARRAY[0]}.zip -d ${TMPDIR}
