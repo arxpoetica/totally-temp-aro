@@ -73,7 +73,7 @@ BEGIN
     ST_SetSRID(ST_Point(t.longitude, t.latitude),4326) as geom,
     ST_SetSRID(ST_Point(t.longitude, t.latitude),4326)::geography as geog,
     ST_Buffer(ST_SetSRID(ST_Point(t.longitude, t.latitude),4326)::geography, 15)::geography as buffer
-    from ref_towers.sita_towers t
+    from ' || scoped_source_table || ' t
     WHERE sita_number !~ ''[^0-9]''
       AND (latitude != 0 AND longitude != 0)
       AND latitude != longitude
@@ -130,8 +130,8 @@ new_locations AS
             000000,
             pl.latitude,
             pl.longitude,
-            ST_SetSRID(ST_Point(longitude, latitude), 4326) as geom,
-            ST_SetSRID(ST_Point(longitude, latitude), 4326)::geography AS geog
+            ST_SetSRID(ST_Point(pl.longitude, pl.latitude), 4326) as geom,
+            ST_SetSRID(ST_Point(pl.longitude, pl.latitude), 4326)::geography AS geog
         FROM ' || scoped_source_table || ' pl
         JOIN ' || missing_entities_table || ' ml on ml.id = pl.sita_number
         RETURNING id, lat, lon
@@ -151,7 +151,7 @@ mapped_entity_location as (
 )
 ,
 updated_towers as (
-    insert into ' || scoped_source_table || ' (location_id, sita_number, parcel_address, parcel_city, parcel_state, lat, lon, geog, geom)
+    insert into ' || scoped_target_table || ' (location_id, sita_number, parcel_address, parcel_city, parcel_state, lat, lon, geog, geom)
     (
         select
         mel.location_id,

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
@@ -8,6 +10,9 @@ ${PSQL} -c "CREATE SCHEMA aro_location_data;"
 
 # Create the functions to load partitioned businesses
 ${PSQL} -a -f $DIR/load_businesses.sql
+
+# Create the functions to load partitioned businesses
+${PSQL} -a -f $DIR/load_towers.sql
 
 # Create the functions to load partitioned locations
 ${PSQL} -a -f $DIR/load_locations.sql

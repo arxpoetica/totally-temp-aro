@@ -11,8 +11,10 @@ DECLARE
     index_prefix_name text;
     scoped_name text;
     state_name text;
+    state_name_upper text;
 BEGIN
     state_name := lower(state_abbrev);
+    state_name_upper := upper(state_abbrev) ;
     parent_schema := 'aro';
     parent_table_name := 'businesses';
     table_name := target_schema_name || '.' || parent_table_name || '_' || state_name;
@@ -21,7 +23,7 @@ BEGIN
     scoped_name := parent_schema || '.' || parent_table_name;
 
 
-    EXECUTE 'CREATE TABLE IF NOT EXISTS ' || table_name || ' (CHECK (state = ''' || state_name || ''' OR state = ''' || state_abbrev || ''')) INHERITS (' || scoped_name || ');';
+    EXECUTE 'CREATE TABLE IF NOT EXISTS ' || table_name || ' (CHECK (state = ''' || state_name_upper || ''') INHERITS (' || scoped_name || ');';
     
     EXECUTE 'ALTER TABLE ' || table_name || ' ADD CONSTRAINT ' || index_prefix_name || '_pkey PRIMARY KEY (id);'; 
 

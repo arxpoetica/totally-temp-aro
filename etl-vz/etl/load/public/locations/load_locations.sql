@@ -8,8 +8,10 @@ DECLARE
   index_prefix_name text;
   scoped_name text;
   state_name text;
+  state_name_upper text;
 BEGIN
   state_name := lower(state_abbrev);
+  state_name_upper := upper(state_abbrev);
   table_name := target_schema_name || '.' || 'locations_' || state_name;
   state_name := lower(state_abbrev);
   parent_schema := 'aro';
@@ -21,7 +23,7 @@ BEGIN
   
   
   EXECUTE 'DROP TABLE IF EXISTS ' || table_name;
-  EXECUTE 'CREATE TABLE ' || table_name || ' (CHECK (state = ''' || state_name || ''' OR state = ''' || state_abbrev || ''')) INHERITS (' || scoped_name || ');';
+  EXECUTE 'CREATE TABLE ' || table_name || ' (CHECK (state = ''' || state_name_upper || ''')) INHERITS (' || scoped_name || ');';
   EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_geog_gist ON ' || table_name || ' USING gist (geog);';
   EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_geom_gist ON ' || table_name || ' USING gist (geom);';
   EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_total_businesses_index ON ' || table_name || '(total_businesses);';

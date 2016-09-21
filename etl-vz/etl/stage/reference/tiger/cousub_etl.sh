@@ -12,7 +12,7 @@ SHP2PGSQL=${PGBIN}/shp2pgsql
 IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 declare STATE_ID
 
-for STATE in "${!STATE_FIPS_ARRAY[@]}"
+for STATE in "${STATE_FIPS_ARRAY[@]}"
 do
 	state_code_lookup STATE_CODE $STATE_CODE
 	rm -f ${TMPDIR}/*.*

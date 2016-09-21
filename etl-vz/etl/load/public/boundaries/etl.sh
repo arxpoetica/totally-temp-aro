@@ -6,5 +6,6 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 ${PSQL} -a -f $DIR/load_service_areas.sql
 
-${PSQL} -a -f $DIR/load_analysis_areas.sql
+#TODO FIX CMA File
+#${PSQL} -a -f $DIR/load_analysis_areas.sql
 

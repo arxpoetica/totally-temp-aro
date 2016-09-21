@@ -10,9 +10,11 @@ SHP2PGSQL=${PGBIN}/shp2pgsql
 IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 declare STATE_ID
 
-for STATE in "${!STATE_ARRAY[@]}"
+for STATE in "${STATE_ARRAY[@]}"
 do
-	state_code_lookup STATE_ID $STATE
+	state_code_lookup STATE_ID ${STATE};
+	echo "STATE = "${STATE}
+	echo "STATE_ID = "${STATE_ID}
 	rm -f ${TMPDIR}/*.*
 	${PSQL} -c "DROP SCHEMA IF EXISTS tiger_staging CASCADE;"
 	${PSQL} -c "CREATE SCHEMA tiger_staging;"
