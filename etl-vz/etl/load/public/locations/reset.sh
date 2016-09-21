@@ -11,3 +11,6 @@ ${PSQL} -a -f $DIR/load_businesses.sql
 
 # Create the functions to load partitioned locations
 ${PSQL} -a -f $DIR/load_locations.sql
+
+# Create the functions to update industry codes
+${PSQL} -a -f $DIR/load_industries.sql
