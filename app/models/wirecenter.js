@@ -14,6 +14,7 @@ module.exports = class Wirecenter {
         JOIN client.service_layer
           ON service_area.service_layer_id = service_layer.id
         AND service_layer.name=$1
+        ${database.intersects(viewport, 'geom', 'WHERE')}
     `
     return database.polygons(sql, [type], true, viewport)
   }
@@ -25,6 +26,7 @@ module.exports = class Wirecenter {
         JOIN client.analysis_layer
           ON analysis_area.analysis_layer_id = analysis_layer.id
         AND analysis_layer.name=$1
+        ${database.intersects(viewport, 'geom', 'WHERE')}
     `
     return database.polygons(sql, [type], true, viewport)
   }

@@ -16,6 +16,7 @@ module.exports = class CountySubdivision {
       SELECT gid AS id, name, geom
       FROM aro.cousub
       WHERE statefp = $1
+      ${database.intersects(viewport, 'geom', 'AND')}
     `
     var params = [statefp]
     return database.polygons(sql, params, true, viewport)
