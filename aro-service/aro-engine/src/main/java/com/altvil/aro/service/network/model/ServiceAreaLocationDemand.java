@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("serial")
 public class ServiceAreaLocationDemand implements Serializable{
     Map<Long, CompetitiveLocationDemandMapping> demandMapping;
 

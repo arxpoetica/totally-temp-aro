@@ -1,7 +1,6 @@
 package com.altvil.aro.persistence.repository;
 
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -24,7 +24,6 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.AllShortestPaths.ClosestTargetItr;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.segment.GeoSegment;
-import com.google.common.collect.TreeMultimap;
 
 public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 

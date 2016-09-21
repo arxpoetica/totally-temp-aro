@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.altvil.aro.model.ServiceAreaVersionEntity;
 import com.altvil.aro.model.ServiceAreaAndPlanVersionKey;
+import com.altvil.aro.model.ServiceAreaVersionEntity;
 import com.altvil.aro.persistence.DeploymentPlanVersionRepository;
 import com.altvil.aro.service.cu.cache.impl.AroCacheKey;
 import com.altvil.aro.service.cu.key.AroKey;
@@ -29,13 +29,13 @@ public class ServiceAreaVersionTracking implements VersionTrackingPersistence {
 	private static final Logger log = LoggerFactory
 			.getLogger(ServiceAreaVersionTracking.class.getName());
 	private DeploymentPlanVersionRepository versionRepository;
-	private AroKeyService keyService;
+	//private AroKeyService keyService;
 
 	public ServiceAreaVersionTracking(
 			DeploymentPlanVersionRepository versionRepository, AroKeyService keyService) {
 		super();
 		this.versionRepository = versionRepository;
-		this.keyService = keyService;
+		//this.keyService = keyService;
 	}
 
 	public static VersionTrackingPersistence create(ApplicationContext ctx) {

@@ -19,12 +19,14 @@ import com.altvil.interfaces.*;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.conversion.OrdinalAccessor;
 import com.altvil.utils.conversion.OrdinalEntityFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,7 +53,8 @@ public class NetworkDataDAO implements ComputeServiceApi{
     private ComputeUnit<ServiceAreaLocationDemand> locationDemand;
 
 
-    @PostConstruct
+    @SuppressWarnings("unchecked")
+	@PostConstruct
     void postConstruct() {
         cableConstructionEnumMap = StreamUtil
                 .hashEnum(CableConstructionEnum.class);

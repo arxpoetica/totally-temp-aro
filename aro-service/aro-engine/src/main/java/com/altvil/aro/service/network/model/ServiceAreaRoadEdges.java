@@ -5,6 +5,7 @@ import com.altvil.interfaces.RoadEdge;
 import java.io.Serializable;
 import java.util.Collection;
 
+@SuppressWarnings("serial")
 public class ServiceAreaRoadEdges implements Serializable {
 
     Collection<RoadEdge> roadEdges;
