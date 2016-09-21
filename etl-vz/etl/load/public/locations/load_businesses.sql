@@ -1,3 +1,6 @@
+-- We need a unique ID for vz_customers
+
+-- Same function as public since the target table structure stays the same between both.
 CREATE OR REPLACE FUNCTION aro.create_businesses_shard_table(state_abbrev text, target_schema_name text)
 RETURNS text AS $table_name$
 DECLARE
@@ -16,9 +19,12 @@ BEGIN
     prefix_name := parent_schema || '_' || parent_table_name;
     index_prefix_name := prefix_name || '_' || state_name;
     scoped_name := parent_schema || '.' || parent_table_name;
+
+
+    EXECUTE 'CREATE TABLE IF NOT EXISTS ' || table_name || ' (CHECK (state = ''' || state_name || ''' OR state = ''' || state_abbrev || ''')) INHERITS (' || scoped_name || ');';
     
-    EXECUTE 'DROP TABLE IF EXISTS ' || table_name;
-    EXECUTE 'CREATE TABLE ' || table_name || ' (CHECK (state = ''' || state_name || ''' OR state = ''' || state_abbrev || ''')) INHERITS (' || scoped_name || ');';
+    EXECUTE 'ALTER TABLE ' || table_name || ' ADD CONSTRAINT ' || index_prefix_name || '_pkey PRIMARY KEY (id);'; 
+
     EXECUTE 'CREATE INDEX ' || index_prefix_name || '_location_index ON ' || table_name || '(location_id);';
     EXECUTE 'CREATE INDEX ' || index_prefix_name || '_industry_index ON ' || table_name || '(industry_id);';
     EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_geog_gist ON ' || table_name || ' USING gist (geog);';
@@ -28,8 +34,9 @@ BEGIN
 END;
 $table_name$ LANGUAGE plpgsql;
 
--- source_table = 'ref_businesses.infousa_businesses_ny', target_schema_name = 'aro', state_abbrev = 'NY'
-CREATE OR REPLACE FUNCTION aro.load_shard_businesses(scoped_source_table text, target_schema text, state_abbrev text)
+-- Load VZ TAM businesses into aro.locations and aro.businesses tables
+-- source_table = 'businesses.tam_ny', target_schema_name = 'aro_location_data', state_abbrev = 'NY'
+CREATE OR REPLACE FUNCTION aro.load_shard_infousa_businesses(scoped_source_table text, target_schema text, state_abbrev text)
 RETURNS integer AS $records_loaded_count$
 DECLARE
   records_loaded_count int;
@@ -62,77 +69,104 @@ BEGIN
   EXECUTE 'DROP TABLE IF EXISTS ' || missing_entities_table || ';';
   missing_expr := 'CREATE TABLE ' || missing_entities_table || ' AS     
   SELECT
-      sourceid AS source_id, 
-      ST_BUFFER(ST_MakePoint(long, lat)::geography, 5)::geometry AS buffer
+    sourceid AS source_id, 
+    lat as longitude,
+    long as latitude,
+    ST_Buffer(ST_MakePoint(long, lat)::geography, 5)::geometry AS buffer
   FROM ' || scoped_source_table || ' st
-  LEFT JOIN ' || scoped_target_table || ' tt
-      ON st.sourceid::varchar = tt.source_id
-  WHERE tt.id IS NULL ;';
+  LEFT JOIN  ' || scoped_target_table || '  tt
+    ON st.source::varchar = tt.source_id
+  WHERE tt.id IS NULL
+  AND NOT(longitude = 0 AND latitude = 0);';
 
   EXECUTE missing_expr;
 
   EXECUTE 'CREATE INDEX  tmp_' || missing_entities_index || '_buffer_gist ON ' || missing_entities_table || ' USING gist(buffer);';
   EXECUTE 'CREATE INDEX  tmp_' || missing_entities_index || '_buffer_source_id ON ' || missing_entities_table || ' USING btree(source_id);';
+  EXECUTE 'CREATE INDEX  tmp_' || missing_entities_index || '_latitude ON ' || missing_entities_table || ' USING btree(latitude);';
+  EXECUTE 'CREATE INDEX  tmp_' || missing_entities_index || '_longitude ON ' || missing_entities_table || ' USING btree(longitude);';
 
-  update_expr := 'WITH matched_locations AS (
-  SELECT
-     me.source_id,
-     l.id AS location_id
-  FROM ' || missing_entities_table || ' me
-  JOIN ' || scoped_location_table || ' l
-      ON ST_Contains(me.buffer, l.geom)
+  update_expr := 'WITH distinct_locations AS (
+    SELECT 
+      MAX(source_id) AS source_id, 
+      longitude, 
+      latitude
+    FROM ' || missing_entities_table || ' 
+    GROUP BY longitude, latitude
   ),
+  matched_locations AS (
+    SELECT
+       me.source_id,
+       MAX(l.id) AS location_id
+    FROM distinct_locations dl
+    JOIN ' || missing_entities_table || '  me
+          ON me.source_id = dl.source_id
+    JOIN ' || scoped_location_table || ' l
+        ON ST_Contains(me.buffer, l.geom)
+     GROUP BY me.source_id
+   ),
   missing_locations AS (
-      SELECT
-          me.source_id,
-          nextval(''locations_id_seq''::regclass) AS location_id
-      FROM ' || missing_entities_table || ' me
-      LEFT JOIN matched_locations ml
-          ON ml.source_id = me.source_id
-      WHERE ml.source_id IS NULL
+    SELECT
+        dl.source_id,
+        nextval(''aro.locations_id_seq''::regclass) AS location_id
+    FROM distinct_locations dl
+    LEFT JOIN matched_locations ml
+          ON ml.source_id = dl.source_id
+    WHERE ml.source_id IS NULL
   ),
   new_locations AS
   (
-      INSERT INTO ' || scoped_location_table || ' (id, address, city, state, zipcode, lat, lon, geom, geog)
-          SELECT DISTINCT ON (e.lat, e.long)
-              ml.location_id,
-              e.address,
-              e.city,
-              e.state,
-              e.zip, 
-              e.lat,
-              e.long,
-              ST_SetSRID(ST_Point(long, lat), 4326),
-              ST_SetSRID(ST_Point(long, lat), 4326)::geography
-          FROM ' || scoped_source_table  || ' e
-          JOIN missing_locations ml
-              ON ml.source_id = e.sourceid
-          RETURNING id
+    INSERT INTO ' || scoped_location_table || ' (id, address, city, state, zipcode, lat, lon, geom, geog)
+      SELECT DISTINCT ON (e.latitude, e.longitude)
+          ml.location_id,
+          e.address,
+          e.city,
+          ''' || state_abbrev || ''',
+          e.zip, 
+          e.lat,
+          e.long,
+          ST_SetSRID(ST_Point(long, lat), 4326),
+          ST_SetSRID(ST_Point(long, lat), 4326)::geography
+      FROM ' || scoped_source_table  || ' e
+      JOIN missing_locations ml
+          ON ml.source_id = e.sourceid::varchar
+      RETURNING id, lon AS longitude, lat as latitude
   ),
   matched_entities AS (
-      SELECT location_id, source_id FROM matched_locations
+    SELECT location_id, longitude, latitude
+    FROM matched_locations ml
+    JOIN ' || missing_entities_table || ' me
+    ON me.source_id = ml.source_id
 
-      UNION
+    UNION
 
-      SELECT location_id, source_id FROM missing_locations
+    SELECT location_id, longitude, latitude
+    FROM missing_locations ml
+    JOIN ' || missing_entities_table || ' me
+    ON me.source_id = ml.source_id
   ),
   updated_entities AS (
-       INSERT INTO  ' || scoped_target_table || ' (location_id, source_id, industry_id, name, address, state, number_of_employees, geog, geom)
-          SELECT  
-              me.location_id,
-              me.source_id,
-              e.sic4,
-              e.business,
-              e.address,
-              ''' || state_abbrev || ''',
-              e.emps,
-              e.geog,
-              e.geog::geometry
-          FROM  ' || scoped_source_table || ' e
-          JOIN matched_entities me
-              ON me.source_id = e.sourceid
+     INSERT INTO  ' || scoped_target_table || ' (location_id, source_id, industry_id, name, address, state, number_of_employees, source, geog, geom)
+        SELECT  
+            m.location_id,
+            me.source_id,
+            e.sic4,
+            e.business,
+            e.address,
+            ''' || state_abbrev || ''',
+            e.emps,
+            ''infousa'',
+            e.geog,
+            e.geog::geometry
+        FROM ' || missing_entities_table || ' me
+        JOIN ' || scoped_source_table  || ' e
+          ON me.source_id = e.sourceid::varchar
+        JOIN matched_entities m
+            ON m.longitude = me.longitude
+            AND m.latitude = me.latitude 
+   RETURNING id
   )
-  SELECT COUNT(*) FROM ' || scoped_target_table || ';';
+  SELECT COUNT(*) FROM updated_entities;';
 
   RAISE NOTICE 'MATCHING BUSINESSES TO LOCATIONS FOR %', state_abbrev;
   EXECUTE update_expr;
