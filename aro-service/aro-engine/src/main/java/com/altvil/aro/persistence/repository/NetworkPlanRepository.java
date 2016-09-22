@@ -83,7 +83,7 @@ public interface NetworkPlanRepository extends
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
 			"order by gid, intersect_position limit 80000", nativeQuery = true) // KG debugging
-	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId, Collection<String> states) ;
+	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId, @Param("states") Collection<String> states) ;
 
 
 	@Query(value = 
