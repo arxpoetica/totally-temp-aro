@@ -26,7 +26,7 @@ module.exports = class Location {
       unselected_locations AS (
         SELECT visible_locations.* FROM visible_locations
         LEFT JOIN client.plan_targets
-          ON plan_targets.plan_id = $2
+          ON plan_targets.plan_id = $1
          AND plan_targets.location_id = visible_locations.id
         WHERE plan_targets.location_id IS NULL
       ),
@@ -52,10 +52,10 @@ module.exports = class Location {
       features AS (
         SELECT categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories
         FROM categorized_locations
-        WHERE ARRAY[$1]::text[] && entity_categories
+        WHERE ARRAY[$2]::text[] && entity_categories
       )
     `
-    return database.points(sql, [categories, plan_id], true, viewport)
+    return database.points(sql, [plan_id, categories], true, viewport)
   }
 
   /*
@@ -79,25 +79,41 @@ module.exports = class Location {
   */
   static findSelected (plan_id, viewport) {
     var sql = `
-      SELECT locations.id, locations.geom AS geom, true AS selected, total_businesses, total_households, dn_largest_household_category AS largest_type
-        FROM aro.locations
-        JOIN households h ON h.location_id = locations.id
-        JOIN client.plan_targets
+      WITH visible_locations AS (
+        SELECT locations.* FROM locations
+        INNER JOIN aro.states st ON ST_Intersects(locations.geom, st.geom)
+        ${database.intersects(viewport, 'locations.geom', 'WHERE')}
+      ),
+      unselected_locations AS (
+        SELECT visible_locations.* FROM visible_locations
+        LEFT JOIN client.plan_targets
           ON plan_targets.plan_id = $1
-         AND plan_targets.location_id = locations.id
-             ${database.intersects(viewport, 'locations.geom', 'WHERE')}
-      GROUP BY locations.id
-
-      UNION
-
-      SELECT locations.id, locations.geom AS geom, true AS selected, total_businesses, total_households, dn_largest_business_category AS largest_type
-        FROM aro.locations
-        JOIN businesses b ON b.location_id = locations.id
-        JOIN client.plan_targets
-          ON plan_targets.plan_id = $1
-         AND plan_targets.location_id = locations.id
-             ${database.intersects(viewport, 'locations.geom', 'WHERE')}
-      GROUP BY locations.id
+         AND plan_targets.location_id = visible_locations.id
+        WHERE plan_targets.location_id IS NOT NULL
+      ),
+      categorized_locations AS (
+        SELECT *, (
+          array(
+            SELECT DISTINCT 'b_' || c.name
+            FROM businesses b
+            JOIN client.business_categories c ON b.number_of_employees >= c.min_value AND b.number_of_employees < c.max_value
+            JOIN client.employees_by_location e ON (b.number_of_employees >= e.min_value) AND (b.number_of_employees <= e.max_value)
+            WHERE b.location_id = unselected_locations.id
+          )
+          ||
+          array(
+            SELECT DISTINCT 'h_' || c.name
+            FROM households b
+            JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households < c.max_value
+            WHERE b.location_id = unselected_locations.id
+          )
+        ) AS entity_categories
+        FROM unselected_locations
+      ),
+      features AS (
+        SELECT categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories
+        FROM categorized_locations
+      )
     `
     return database.points(sql, [plan_id], true, viewport)
   }

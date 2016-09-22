@@ -638,8 +638,8 @@ module.exports = class NetworkPlan {
         return database.findOne(sql, [plan_id])
       })
       .then((row) => ({
-        statefp: row.statefp,
-        countyfp: row.countyfp
+        statefp: row && row.statefp,
+        countyfp: row && row.countyfp
       }))
   }
 
