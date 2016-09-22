@@ -122,7 +122,6 @@ module.exports = class Database {
           ST_AsGeoJSON(geom)::json AS geom
         FROM features
       `
-      params.push(viewport.linestring)
     } else {
       // 2.1 doesn't support preserveCollapsed
       var preserveCollapsed = postgisversion === '2.1' ? '' : ', true'
@@ -133,7 +132,6 @@ module.exports = class Database {
         FROM features
       `
       params.push(viewport.simplify_factor)
-      params.push(viewport.linestring)
     }
     return this.query(finalSql, params, asFeatureCollection)
   }

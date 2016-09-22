@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS network_equipment.hubs_csv;
+DROP TABLE IF EXISTS towers.vz_il_towers;
 
-CREATE TABLE network_equipment.hubs_csv
+CREATE TABLE towers.vz_il_towers
 (
 	site varchar,
 	address varchar,
@@ -14,4 +14,3 @@ CREATE TABLE network_equipment.hubs_csv
 	site_category varchar,
 	location varchar
 );
-
