@@ -9,10 +9,10 @@ export AWS_DEFAULT_REGION=us-east-1
 
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
-IFS=',' read -a SHP_STATE_ARRAY <<< "${STATE_CODES}"
-IFS=',' read -a KML_STATE_ARRAY <<< "${STATE_CODES}"
 
 cd $GISROOT;
+IFS=',' read -a SHP_STATE_ARRAY <<< "${SHP_FIBER_CODES}"
+IFS=',' read -a KML_STATE_ARRAY <<< "${KML_FIBER_CODES}"
 
 # Some fiber came as SHP, this section handles SHP
 shp_state_array_len=${#SHP_STATE_ARRAY[@]}
@@ -38,7 +38,6 @@ elif [ ${shp_state_array_len} > 1 ]; then
 		${SHP2PGSQL} -a -s 4326 -g the_geom -t 2D -W "latin1" /$TMPDIR/ves_fiber_${SHP_STATE_ARRAY[i]}.dbf network_equipment.shp_ves_fiber | ${PSQL}
 	done
 fi
-
 
 # Handle fiber from KML (converted to SHP but with different columns than above)
 kml_state_array_len=${#KML_STATE_ARRAY[@]}
