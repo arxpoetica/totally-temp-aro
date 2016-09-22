@@ -8,7 +8,7 @@ DECLARE
 
     table_name text;
     master_schema text := 'aro';
-    data_schema text := 'aro_data';
+    data_schema text := 'aro_edges_data';
     source_data_schema text := 'tiger_data';
 
     expr text;
@@ -36,7 +36,7 @@ BEGIN
         table_name := current_table ;
 
         RAISE NOTICE '**** CREATING TABLE ****';
-        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || current_table || ' (CHECK (statefp = ''' || state_code || '''), CONSTRAINT pkey_aro_edges_' || state_name || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || current_table || '( CHECK (statefp = ''' || state_code || '''), CONSTRAINT pkey_aro_edges_' || state_name || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
         
         expr2 := 'INSERT INTO ' || current_table || '
                 (
