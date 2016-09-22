@@ -8,7 +8,7 @@ DECLARE
 
     table_name text;
     master_schema text := 'aro';
-    data_schema text := 'aro_data';
+    data_schema text := 'aro_edges_data';
     source_data_schema text := 'tiger_data';
 
     expr text;
@@ -36,7 +36,7 @@ BEGIN
         table_name := current_table ;
 
         RAISE NOTICE '**** CREATING TABLE ****';
-        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || current_table || ' (CHECK (statefp = ''' || state_code || '''), CONSTRAINT pkey_aro_edges_' || state_name || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || current_table || '( CHECK (statefp = ''' || state_code || '''), CONSTRAINT pkey_aro_edges_' || state_name || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
         
         expr2 := 'INSERT INTO ' || current_table || '
                 (
@@ -71,12 +71,12 @@ BEGIN
         RAISE NOTICE '**** INSERTING DATA FROM EDGES TABLE ****';
         expr_start := timeofday()::timestamp;
         EXECUTE expr2;
-        RAISE NOTICE '----- % rows inserted in % seconds', i_rows, EXTRACT(epoch FROM timeofday()::timestamp - expr_start) as seconds;
+        RAISE NOTICE '-----  rows inserted in % seconds', EXTRACT(epoch FROM timeofday()::timestamp - expr_start) as seconds;
 
         expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_statefp ON ' || current_table || ' USING btree (statefp);';
         RAISE NOTICE '**** CREATING INDEX ON statefp ****';
         EXECUTE expr;
-        expr := 'CREATE INDEX idx_aro_data_' || lstate_name || '_edges_countyfp ON ' || current_table || ' USING btree (countyfp);';
+        expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_countyfp ON ' || current_table || ' USING btree (countyfp);';
         RAISE NOTICE '**** CREATING INDEX ON countyfp ****';
         EXECUTE expr;
         expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_geom ON ' || current_table || ' USING gist (geom);';

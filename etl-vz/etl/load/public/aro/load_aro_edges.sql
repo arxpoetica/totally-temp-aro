@@ -8,7 +8,7 @@ DECLARE
 
     table_name text;
     master_schema text := 'aro';
-    data_schema text := 'aro_data';
+    data_schema text := 'aro_edges_data';
     source_data_schema text := 'tiger_data';
 
     expr text;
