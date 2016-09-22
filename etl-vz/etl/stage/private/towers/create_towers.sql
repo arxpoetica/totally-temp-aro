@@ -58,7 +58,8 @@ INSERT INTO towers.towers(city, lat, lon, geog, geom)
 		long,
 		ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography AS geog,
 		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
-	FROM towers.vz_il_towers;
+	FROM towers.vz_il_towers
+	WHERE NOT (lat IS NULL AND long IS NULL);
 
 
 
