@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -77,7 +78,9 @@ public class NetworkDataDAO implements ComputeServiceApi{
                 .setVersionTypes(EnumSet.of(VersionType.SERVICE))
                 .setCacheLoaderFunc(
                         (cacheQuery) -> () -> _queryRoadLocations(
-                                cacheQuery.getServiceAreaId()
+                                cacheQuery.getServiceAreaId(),
+                                cacheQuery.getParam("states", Collection.class)
+
                         ))
                 .build();
         locationDemand = computeUnitService
@@ -171,13 +174,15 @@ public class NetworkDataDAO implements ComputeServiceApi{
         return map;
     }
 
-    public ServiceAreaRoadLocations queryRoadLocations(int serviceAreaId) {
-        return serviceAreaRoadLocations.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId).build());
+    public ServiceAreaRoadLocations queryRoadLocations(int serviceAreaId, Collection<String> states) {
+        return serviceAreaRoadLocations.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId)
+                .add("states", (Serializable) states)
+                .build());
     }
-    private ServiceAreaRoadLocations _queryRoadLocations(int serviceAreaId) {
+    private ServiceAreaRoadLocations _queryRoadLocations(int serviceAreaId, Collection<String> states) {
         Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
         planRepository
-                .queryAllLocationsByServiceAreaId(serviceAreaId)
+                .queryAllLocationsByServiceAreaId(serviceAreaId, states)
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
                 .forEach(
@@ -338,9 +343,9 @@ public class NetworkDataDAO implements ComputeServiceApi{
 
     }
 
-    public Map<Long, RoadLocation> queryRoadLocationsByPlanId(long planId) {
-        int serviceAreaId = planRepository.getPlanServiceAreaId(planId);
-        return queryRoadLocations(serviceAreaId).getId2location();
+
+    public Collection<String> getServiceAreaStates(Integer serviceAreaId) {
+        return planRepository.getServiceAreaStates(serviceAreaId);
     }
 
 

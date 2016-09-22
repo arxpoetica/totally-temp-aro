@@ -1,6 +1,7 @@
 package com.altvil.aro.persistence.repository;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -60,7 +61,7 @@ public interface NetworkPlanRepository extends
 			"    SELECT \n" + 
 			"      aro.edges.gid, \n" + 
 			"      ST_Distance(cast(aro.edges.geom as geography), \n" + 
-			"      cast(l.geom as geography)) AS distance \n" + 
+			"      cast(l.geom as geography)) AS distance \n" +
 			"    FROM aro.edges \n" + 
 			"    WHERE st_intersects(w.geom, aro.edges.geom) \n" + 
 			"    ORDER BY l.geom <#> aro.edges.geom LIMIT 5 \n" + 
@@ -68,7 +69,8 @@ public interface NetworkPlanRepository extends
 			"  ) as gid\n" + 
 			"FROM  client.service_area w" +
 			" join aro.locations l on st_contains(w.geom, l.geom) " +
-			" and w.id = :serviceAreaId" + 
+			" and l.state in :states" +
+			" and w.id = :serviceAreaId" +
 			")\n" + 
 			"select\n" + 
 			"ll.id as location_id,\n" + 
@@ -81,7 +83,7 @@ public interface NetworkPlanRepository extends
 			"from linked_locations ll\n" + 
 			"join aro.edges e on e.gid = ll.gid\n" + 
 			"order by gid, intersect_position limit 80000", nativeQuery = true) // KG debugging
-	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId) ;
+	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId, Collection<String> states) ;
 
 
 	@Query(value = 
@@ -349,5 +351,12 @@ public interface NetworkPlanRepository extends
 
 	@Query(value = "select wirecenter_id from client.plan where id = :planId", nativeQuery = true)
 	int getPlanServiceAreaId(@Param("planId") long planId);
+
+	@Query(value = "select st.stusps \n" +
+			"    from client.service_area sa \n" +
+			"    inner join aro.states st \n" +
+			"    on ST_Intersects(sa.geom, st.geom) \n" +
+			"        and sa.id =:serviceAreaId", nativeQuery = true)
+	Collection<String> getServiceAreaStates(@Param("serviceAreaId") Integer serviceAreaId);
 
 }

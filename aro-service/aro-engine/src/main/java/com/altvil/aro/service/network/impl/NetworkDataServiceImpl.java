@@ -45,7 +45,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private AroDemandService aroDemandService;
 
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
-	//private Map<Integer, CableConstructionEnum> cableConstructionEnumMap;
+							//private Map<Integer, CableConstructionEnum> cableConstructionEnumMap;
 	@Autowired
 	private NetworkDataDAO networkDataDAO;
 
@@ -62,14 +62,14 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	public NetworkData getNetworkData(NetworkDataRequest request) {
 
 		NetworkData networkData = new NetworkData();
-
+		Collection<String> states = networkDataDAO.getServiceAreaStates(request.getServiceAreaId().get());
 		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
 
 		networkData.setCompetitiveDemandMapping(new CompetitiveDemandMapping(
 				demandByLocationIdMap));
 
 		// TODO Simplify Locations
-		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap));
+		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap, states));
 
 		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
 		networkData.setRoadEdges(getRoadEdges(request));
@@ -81,9 +81,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private NetworkAssignmentModel getNetworkLocations(
 			NetworkDataRequest request,
-			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap) {
+			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap, Collection<String> states) {
 
-		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request);
+		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request, states);
 
 		List<Long> selectedRoadLocations = networkDataDAO.selectedRoadLocationIds(
 				request.getPlanId(), roadLocationByLocationIdMap);
@@ -140,9 +140,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 
 	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(
-			NetworkDataRequest networkConfiguration) {
+			NetworkDataRequest networkConfiguration, Collection<String> states) {
 		return networkDataDAO
-				.queryRoadLocations(networkConfiguration.getServiceAreaId().get())
+				.queryRoadLocations(networkConfiguration.getServiceAreaId().get(), states)
 				.getId2location();
 	}
 
