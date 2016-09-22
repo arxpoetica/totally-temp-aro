@@ -35,7 +35,7 @@ declare TOWER_TABLE;
 
 cd $GISROOT;
 
-for TOWER_DATA_FILE in "${!TOWER_DATA_FILES[@]}"
+for TOWER_DATA_FILE in "${TOWER_DATA_FILES[@]}"
 do
 	TOWER_TABLE=tower_code_lookup TOWER_TABLE $TOWER_DATA_FILE
 	aws s3 cp s3://public.aro/towers/${TOWER_DATA_FILE}.csv $GISROOT/${TOWER_DATA_FILE}.csv
