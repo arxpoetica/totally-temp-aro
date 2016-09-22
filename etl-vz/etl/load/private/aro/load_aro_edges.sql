@@ -76,7 +76,7 @@ BEGIN
         expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_statefp ON ' || current_table || ' USING btree (statefp);';
         RAISE NOTICE '**** CREATING INDEX ON statefp ****';
         EXECUTE expr;
-        expr := 'CREATE INDEX idx_aro_data_' || lstate_name || '_edges_countyfp ON ' || current_table || ' USING btree (countyfp);';
+        expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_countyfp ON ' || current_table || ' USING btree (countyfp);';
         RAISE NOTICE '**** CREATING INDEX ON countyfp ****';
         EXECUTE expr;
         expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_geom ON ' || current_table || ' USING gist (geom);';
