@@ -13,7 +13,8 @@ declare STATE_CODE ;
 for STATE in "${STATE_ARRAY[@]}"
 do	
 	state_code_lookup STATE_CODE $STATE
-	${PSQL} -a -c "SELECT aro.create_and_load_edge('${STATE}', '$STATE_CODE');"		
+	${PSQL} -a -c "SELECT aro.create_shard_edge('${STATE}', '$STATE_CODE');"	
+	${PSQL} -a -c "SELECT aro.load_shard_edge('${STATE}', '$STATE_CODE');"		
 done
 
 ${PSQL} -a -f $DIR/load_cosub.sql
