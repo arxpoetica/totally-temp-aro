@@ -12,7 +12,7 @@ declare STATE_CODE ;
 
 for STATE in "${STATE_ARRAY[@]}"
 do	
-	state_lookup_code STATE_CODE $STATE
+	state_code_lookup STATE_CODE $STATE
 	${PSQL} -a -c "SELECT aro.create_and_load_edge('${STATE}', '$STATE_CODE');"		
 done
 
