@@ -23,7 +23,7 @@ BEGIN
     scoped_name := parent_schema || '.' || parent_table_name;
 
 
-    EXECUTE 'CREATE TABLE IF NOT EXISTS ' || table_name || ' (CHECK (state = ''' || state_name_upper || ''') INHERITS (' || scoped_name || ');';
+    EXECUTE 'CREATE TABLE IF NOT EXISTS ' || table_name || ' (CHECK (state = ''' || state_name_upper || ''')) INHERITS (' || scoped_name || ');';
     
     EXECUTE 'ALTER TABLE ' || table_name || ' ADD CONSTRAINT ' || index_prefix_name || '_pkey PRIMARY KEY (id);'; 
 
