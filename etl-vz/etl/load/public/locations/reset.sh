@@ -19,3 +19,6 @@ ${PSQL} -a -f $DIR/load_locations.sql
 
 # Create the functions to update industry codes
 ${PSQL} -a -f $DIR/load_industries.sql
+
+# Industries, households, and towers do not load into paritions yet
+${PSQL} -a -f $DIR/load_industries.sql
