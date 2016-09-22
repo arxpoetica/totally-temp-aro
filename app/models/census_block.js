@@ -13,6 +13,7 @@ module.exports = class CensusBlock {
       SELECT gid as id, name, geom
       FROM aro.census_blocks
       WHERE statefp = $1 AND countyfp = $2
+      ${database.intersects(viewport, 'geom', 'AND')}
     `
     var params = [statefp, countyfp]
     return database.polygons(sql, params, true, viewport)

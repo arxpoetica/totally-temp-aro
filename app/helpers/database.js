@@ -83,9 +83,10 @@ module.exports = class Database {
 
   static points (sql, params, asFeatureCollection, viewport) {
     var finalSql
+    var prefix = sql.trim().indexOf('WITH') === 0 ? sql : `WITH features AS (${sql})`
     if (viewport.zoom > viewport.threshold) {
       finalSql = `
-        WITH features AS (${sql})
+        ${prefix}
         SELECT
           features.*,
           ST_AsGeoJSON(geom)::json AS geom
@@ -93,7 +94,7 @@ module.exports = class Database {
       `
     } else {
       finalSql = `
-        WITH features AS (${sql})
+        ${prefix}
         SELECT
           COUNT(*) AS density,
           ${
@@ -112,14 +113,14 @@ module.exports = class Database {
 
   static polygons (sql, params, asFeatureCollection, viewport) {
     var finalSql
+    var prefix = sql.trim().indexOf('WITH') === 0 ? sql : `WITH features AS (${sql})`
     if (viewport.zoom > viewport.threshold) {
       finalSql = `
-        WITH features AS (${sql})
+        ${prefix}
         SELECT
           features.*,
           ST_AsGeoJSON(geom)::json AS geom
         FROM features
-        WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
       `
       params.push(viewport.linestring)
     } else {
@@ -130,7 +131,6 @@ module.exports = class Database {
         SELECT
           ST_AsGeoJSON(ST_Simplify(ST_Union(geom), $${params.length + 1}::float ${preserveCollapsed}))::json AS geom
         FROM features
-        WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 2})), 4326), features.geom)
       `
       params.push(viewport.simplify_factor)
       params.push(viewport.linestring)
@@ -147,20 +147,16 @@ module.exports = class Database {
           features.*,
           ST_AsGeoJSON(geom)::json AS geom
         FROM features
-        WHERE ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
       `
-      params.push(viewport.linestring)
     } else {
       finalSql = `
         WITH features AS (${sql})
         SELECT
           COUNT(*) AS _density,
-          ST_AsGeoJSON(ST_Envelope( ST_SnapToGrid(geom, $${params.length + 2}) ))::json AS geom
+          ST_AsGeoJSON(ST_Envelope( ST_SnapToGrid(geom, $${params.length + 1}) ))::json AS geom
         FROM features
-        WHERE ST_Contains(ST_SetSRID(ST_MakePolygon(ST_GeomFromText($${params.length + 1})), 4326), features.geom)
-        GROUP BY ST_SnapToGrid(geom, $${params.length + 2})
+        GROUP BY ST_SnapToGrid(geom, $${params.length + 1})
       `
-      params.push(viewport.linestring)
       params.push(viewport.buffer * 3)
     }
     return this.query(finalSql, params, asFeatureCollection)
