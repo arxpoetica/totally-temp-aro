@@ -71,7 +71,7 @@ BEGIN
         RAISE NOTICE '**** INSERTING DATA FROM EDGES TABLE ****';
         expr_start := timeofday()::timestamp;
         EXECUTE expr2;
-        RAISE NOTICE '----- % rows inserted in % seconds', i_rows, EXTRACT(epoch FROM timeofday()::timestamp - expr_start) as seconds;
+        RAISE NOTICE '-----  rows inserted in % seconds', EXTRACT(epoch FROM timeofday()::timestamp - expr_start) as seconds;
 
         expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_statefp ON ' || current_table || ' USING btree (statefp);';
         RAISE NOTICE '**** CREATING INDEX ON statefp ****';
