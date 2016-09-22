@@ -25,13 +25,17 @@ module.exports = class Network {
         AND seg.cable_construction_type_id = (
           SELECT id FROM client.cable_construction_type WHERE name=$2
         )
+        ${database.intersects(viewport, 'seg.geom', 'AND')}
     `
     return database.lines(sql, [plan_id, type], true, viewport)
   }
 
   // View existing fiber plant for the current carrier
   static viewFiberPlantForCurrentCarrier (viewport) {
-    var sql = 'SELECT geom FROM client.existing_fiber'
+    var sql = `
+      SELECT geom FROM client.existing_fiber
+      ${database.intersects(viewport, 'geom', 'WHERE')}
+    `
     return database.lines(sql, [], true, viewport)
   }
 
@@ -41,6 +45,7 @@ module.exports = class Network {
       SELECT geom
       FROM aro.fiber_plant
       WHERE carrier_name = $1
+      ${database.intersects(viewport, 'geom', 'AND')}
     `
     return database.lines(sql, [carrier_name], true, viewport)
   }
@@ -51,6 +56,7 @@ module.exports = class Network {
       SELECT geom
       FROM aro.fiber_plant
       WHERE carrier_id <> (SELECT id FROM carriers WHERE name=$1)
+      ${database.intersects(viewport, 'geom', 'AND')}
     `
     return database.lines(sql, [config.client_carrier_name], true, viewport)
   }
@@ -580,7 +586,10 @@ module.exports = class Network {
   }
 
   static roadSegments (viewport) {
-    return database.lines('SELECT geom, gid, tlid FROM edges', [], true, viewport)
+    return database.lines(`
+      SELECT geom, gid, tlid FROM edges
+      ${database.intersects(viewport, 'geom', 'WHERE')}
+    `, [], true, viewport)
   }
 
 }

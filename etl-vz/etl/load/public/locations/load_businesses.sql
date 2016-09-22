@@ -23,7 +23,7 @@ BEGIN
     scoped_name := parent_schema || '.' || parent_table_name;
 
 
-    EXECUTE 'CREATE TABLE IF NOT EXISTS ' || table_name || ' (CHECK (state = ''' || state_name_upper || ''') INHERITS (' || scoped_name || ');';
+    EXECUTE 'CREATE TABLE IF NOT EXISTS ' || table_name || ' (CHECK (state = ''' || state_name_upper || ''')) INHERITS (' || scoped_name || ');';
     
     EXECUTE 'ALTER TABLE ' || table_name || ' ADD CONSTRAINT ' || index_prefix_name || '_pkey PRIMARY KEY (id);'; 
 
@@ -53,6 +53,7 @@ DECLARE
   missing_entities_table text;
   missing_expr text;
   update_expr text;
+  state_name_upper text;
 
 BEGIN
   -- Constants
@@ -61,6 +62,7 @@ BEGIN
   records_loaded_count := 0;
 
   state_name := lower(state_abbrev);
+  state_name_upper := upper(state_abbrev);
   scoped_target_table := target_schema || '.' || target_table || '_' || state_name;
   scoped_location_table := target_schema || '.' || location_table || '_' || state_name;
   missing_entities_index := target_schema || '_temp_missing_' || target_table || '_' || state_name;
@@ -119,11 +121,11 @@ BEGIN
   new_locations AS
   (
     INSERT INTO ' || scoped_location_table || ' (id, address, city, state, zipcode, lat, lon, geom, geog)
-      SELECT DISTINCT ON (e.latitude, e.longitude)
+      SELECT DISTINCT ON (e.lat, e.long)
           ml.location_id,
           e.address,
           e.city,
-          ''' || state_abbrev || ''',
+          ''' || state_name_upper || ''',
           e.zip, 
           e.lat,
           e.long,
@@ -131,7 +133,7 @@ BEGIN
           ST_SetSRID(ST_Point(long, lat), 4326)::geography
       FROM ' || scoped_source_table  || ' e
       JOIN missing_locations ml
-          ON ml.source_id = e.sourceid::varchar
+          ON ml.source_id = e.sourceid
       RETURNING id, lon AS longitude, lat as latitude
   ),
   matched_entities AS (
@@ -155,14 +157,14 @@ BEGIN
             e.sic4,
             e.business,
             e.address,
-            ''' || state_abbrev || ''',
+            ''' || state_name_upper || ''',
             e.emps,
             ''infousa'',
             e.geog,
             e.geog::geometry
         FROM ' || missing_entities_table || ' me
         JOIN ' || scoped_source_table  || ' e
-          ON me.source_id = e.sourceid::varchar
+          ON me.source_id = e.sourceid
         JOIN matched_entities m
             ON m.longitude = me.longitude
             AND m.latitude = me.latitude 

@@ -32,7 +32,7 @@ BEGIN
 		cpl_cd varchar,
 		num_of_co_in_bldg int
 	);';
-	EXECUTE 'CREATE INDEX ' || index_prefix || '_duns_number_index ON ' scoped_table_name || ' (duns_number);';
+	EXECUTE 'CREATE INDEX ' || index_prefix || '_duns_number_index ON ' || scoped_table_name || ' (duns_number);';
 	RETURN scoped_table_name;
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
