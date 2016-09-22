@@ -9,11 +9,12 @@ export AWS_DEFAULT_REGION=us-east-1
 
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
+IFS=',' read -a SHP_STATE_ARRAY <<< "${STATE_CODES}"
+IFS=',' read -a KML_STATE_ARRAY <<< "${STATE_CODES}"
 
 cd $GISROOT;
 
 # Some fiber came as SHP, this section handles SHP
-declare -a SHP_STATE_ARRAY=( 'wa' )
 shp_state_array_len=${#SHP_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table
@@ -40,7 +41,6 @@ fi
 
 
 # Handle fiber from KML (converted to SHP but with different columns than above)
-declare -a KML_STATE_ARRAY=( 'mo' 'il' 'wi' )
 kml_state_array_len=${#KML_STATE_ARRAY[@]}
 
 if [ ${kml_state_array_len} == 1 ]; then
