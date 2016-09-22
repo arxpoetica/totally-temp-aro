@@ -65,6 +65,7 @@ CREATE VIEW client.business_summary as
 SELECT 
 	city_id,
 	year,
+	state,
 	b.location_id, b.entity_type,
 	sum(s.monthly_spend) AS monthly_spend,
 	count(1) AS count,
@@ -73,7 +74,7 @@ FROM client.classified_business b
 JOIN client.spend_summary s 
 	ON s.employees_by_location_id = b.employee_count_id
 	AND s.industry_id = b.industry_cat_id
-GROUP BY city_id, year, b.location_id, b.entity_type ;
+GROUP BY city_id, year, b.location_id, b.entity_type, b.state ;
 
 -- households_summary
 DROP VIEW IF EXISTS client.households_summary ;
@@ -88,6 +89,7 @@ GROUP BY location_id ;
 DROP VIEW IF EXISTS client.celltower_summary ;
 CREATE VIEW client.celltower_summary AS
 SELECT
+	t.pracel_state as state,
 	location_id,
 	sum(1) as count
 FROM aro.towers t
