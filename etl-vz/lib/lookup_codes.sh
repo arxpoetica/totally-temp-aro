@@ -33,7 +33,7 @@ cran_code_lookup() {
 	declare -n __result=$1
 	declare  state=$2
 
-	declare -A CRAN_CODES=( [mo]=mo [wa]=wa_v2 [wi]=wi_v2 )
+	declare -A CRAN_CODES=( [mo]=mo [wa]=wa_v2 [wi]=wi_v2 [il]=il )
 
 	__result=${CRAN_CODES[$state]} ;
 	
