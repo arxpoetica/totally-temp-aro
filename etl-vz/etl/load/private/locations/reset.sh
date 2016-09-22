@@ -17,4 +17,8 @@ ${PSQL} -a -f $DIR/load_businesses.sql
 # Create the functions to load partitioned locations
 ${PSQL} -a -f $DIR/load_locations.sql
 
+# Create the functions to load partitioned towers
+${PSQL} -a -f $DIR/load_towers.sql
+
+
 

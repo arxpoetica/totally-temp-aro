@@ -50,3 +50,24 @@ INSERT INTO towers.towers(lat, lon, geog, geom)
 		ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography AS geog,
 		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
 	FROM towers.vz_wi_towers;
+
+
+
+CREATE INDEX  towers_towers_geom ON  towers.towers USING gist(geom);
+
+DROP VIEW IF EXISTS  towers.towers_state ;
+CREATE VIEW towers.towers_state AS 
+SELECT
+	t.id,
+	t.id::varchar as source_id,
+	t.city, 
+	t.lat as latitude,
+	t.lon as longitude, 
+	t.geog, 
+	t.geom,
+	s.stusps as state
+
+FROM towers.towers t
+JOIN tiger_data.state s
+	ON ST_Contains(s.the_geom, t.geom); 
+

@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS aro.towers;
 CREATE TABLE aro.towers
 (
 	id serial,
+	source_id varchar,
 	location_id int4 references aro.locations,
 	sita_number bigint,
 	parcel_address varchar,
