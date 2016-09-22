@@ -1,4 +1,5 @@
--- We need a unique ID for vz_customers
+
+#SELECT aro.create_tower_shard_table('wa', 'aro_location_data')
 
 -- Same function as public since the target table structure stays the same between both.
 CREATE OR REPLACE FUNCTION aro.create_tower_shard_table(state_abbrev text, target_schema_name text)
@@ -32,6 +33,9 @@ BEGIN
     RETURN table_name;
 END;
 $table_name$ LANGUAGE plpgsql;
+
+
+-- Shard Loader
 
 
 CREATE OR REPLACE FUNCTION aro.load_shard_tower(scoped_source_table text, target_schema text, state_abbrev text)
@@ -69,7 +73,7 @@ BEGIN
   EXECUTE 'DROP TABLE IF EXISTS ' || missing_entities_table || ';';
   missing_expr := 'CREATE TABLE ' || missing_entities_table || ' AS     
   SELECT
-    duns_number AS source_id, 
+    st.source_id AS source_id, 
     longitude,
     latitude,
     ST_Buffer(ST_MakePoint(longitude, latitude)::geography, 5)::geometry AS buffer
@@ -77,7 +81,7 @@ BEGIN
   LEFT JOIN  ' || scoped_target_table || '  tt
     ON st.source_id = tt.source_id
   WHERE tt.id IS NULL
-  AND st.state =  ' || state_name_upper || ' 
+  AND st.state =  ''' || state_name_upper || ''' 
   AND NOT(longitude = 0 AND latitude = 0);';
 
   EXECUTE missing_expr;
@@ -120,7 +124,7 @@ BEGIN
     INSERT INTO ' || scoped_location_table || ' (id, address, city, state, zipcode, lat, lon, geom, geog)
       SELECT DISTINCT ON (e.latitude, e.longitude)
           ml.location_id,
-          ''vz-data'',
+          ''vz-tower-address'',
           e.city,
           ''' || state_name_upper || ''',
          ''vz-zip'', 
@@ -130,7 +134,7 @@ BEGIN
           ST_SetSRID(ST_Point(longitude, latitude), 4326)::geography
       FROM ' || scoped_source_table  || ' e
       JOIN missing_locations ml
-          ON ml.source_id = e.duns_number
+          ON ml.source_id = e.source_id
       WHERE e.state=''' || state_name_upper || '''
       RETURNING id, lon AS longitude, lat as latitude
   ),
@@ -153,8 +157,8 @@ BEGIN
             me.source_id,
             m.location_id,
             e.city,
-            ' || state_name_upper || ',
-            e.lattitude,
+            ''' || state_name_upper || ''',
+            e.latitude,
             e.longitude,
             e.geom,
             e.geog
