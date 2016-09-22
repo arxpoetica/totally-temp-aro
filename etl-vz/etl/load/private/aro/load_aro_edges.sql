@@ -1,10 +1,14 @@
-DO $$
-DECLARE
-    all_states text[][] := array[['FL', '12'], ['IL', '17'], ['MO', '29'], ['WA', '53'], ['WI', '55']];
 
-    state text[];
+CREATE OR REPLACE FUNCTION aro.create_and_load_edge(shard_state text, state_code text)
+RETURNS text AS $table_name$
+DECLARE
+
+    state_name text ;
+    state_name_upper text ;
+
+    table_name text;
     master_schema text := 'aro';
-    data_schema text := 'aro_edges_data';
+    data_schema text := 'aro_data';
     source_data_schema text := 'tiger_data';
 
     expr text;
@@ -12,31 +16,27 @@ DECLARE
     expr_start timestamp;
     state_start timestamp;
     expr_result record;
-    
-    i_rows INTEGER;
-
+   
     current_table text;
     current_source_table text;
     current_table_suffix text;
     current_table_as_text text;
-
 BEGIN
 
-    -- Main loop for each state
-    FOREACH state SLICE 1 IN ARRAY all_states
-    LOOP
+        state_name := lower(shard_state) ;
+        state_name_upper := upper(shard_state) ;
 
         RAISE NOTICE '*************************';
-        RAISE NOTICE '*** CURRENT STATE: %', state[1];
+        RAISE NOTICE '*** CURRENT STATE: %', state_name;
 
-        current_table := data_schema || '.edges_' || lower(state[1]);
-        current_source_table := source_data_schema || '.' || lower(state[1])|| '_edges';
+        current_table := data_schema || '.edges_' || state_name;
+        current_source_table := source_data_schema || '.' || state_name|| '_edges';
         state_start := timeofday()::timestamp;
         
+        table_name := current_table ;
 
         RAISE NOTICE '**** CREATING TABLE ****';
-        EXECUTE 'DROP TABLE IF EXISTS ' || current_table || ';';
-        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || current_table || ' (CHECK (statefp = ''' || state[2] || '''), CONSTRAINT pkey_aro_edges_' || lower(state[1]) || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || current_table || ' (CHECK (statefp = ''' || state_code || '''), CONSTRAINT pkey_aro_edges_' || state_name || '_gid PRIMARY KEY (gid)) INHERITS (aro.edges);';
         
         expr2 := 'INSERT INTO ' || current_table || '
                 (
@@ -71,27 +71,25 @@ BEGIN
         RAISE NOTICE '**** INSERTING DATA FROM EDGES TABLE ****';
         expr_start := timeofday()::timestamp;
         EXECUTE expr2;
-        GET CURRENT DIAGNOSTICS i_rows = ROW_COUNT;
         RAISE NOTICE '----- % rows inserted in % seconds', i_rows, EXTRACT(epoch FROM timeofday()::timestamp - expr_start) as seconds;
 
-        expr := 'CREATE INDEX idx_aro_data_' || lower(state[1]) || '_edges_statefp ON ' || current_table || ' USING btree (statefp);';
+        expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_statefp ON ' || current_table || ' USING btree (statefp);';
         RAISE NOTICE '**** CREATING INDEX ON statefp ****';
         EXECUTE expr;
-        expr := 'CREATE INDEX idx_aro_data_' || lower(state[1]) || '_edges_countyfp ON ' || current_table || ' USING btree (countyfp);';
+        expr := 'CREATE INDEX idx_aro_data_' || lstate_name || '_edges_countyfp ON ' || current_table || ' USING btree (countyfp);';
         RAISE NOTICE '**** CREATING INDEX ON countyfp ****';
         EXECUTE expr;
-        expr := 'CREATE INDEX idx_aro_data_' || lower(state[1]) || '_edges_geom ON ' || current_table || ' USING gist (geom);';
+        expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_geom ON ' || current_table || ' USING gist (geom);';
         RAISE NOTICE '**** CREATING INDEX ON geom ****';
         EXECUTE expr;
-        expr := 'CREATE INDEX idx_aro_data_' || lower(state[1]) || '_edges_geog ON ' || current_table || ' USING gist (geog);';
+        expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_geog ON ' || current_table || ' USING gist (geog);';
         RAISE NOTICE '**** CREATING INDEX ON geog ****';
         EXECUTE expr;
-        expr := 'CREATE INDEX idx_aro_data_' || lower(state[1]) || '_edges_buffer ON ' || current_table || ' USING gist (buffer);';
+        expr := 'CREATE INDEX idx_aro_data_' || state_name || '_edges_buffer ON ' || current_table || ' USING gist (buffer);';
         RAISE NOTICE '**** CREATING INDEX ON buffer ****';
         EXECUTE expr;
         
         RAISE NOTICE '*** State completed in % seconds', EXTRACT(epoch FROM timeofday()::timestamp - state_start) as seconds;
-        
-    END LOOP;
 
-END$$;
+END;
+$table_name$ LANGUAGE plpgsql;

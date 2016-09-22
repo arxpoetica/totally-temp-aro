@@ -13,7 +13,7 @@ etl_project:
 ###################
 
 reset_aro:
-
+	aro/reset.sh
 # Load
 etl_aro:
 	aro/etl.sh

@@ -4,7 +4,19 @@ PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-${PSQL} -a -f $DIR/load_aro_edges.sql
+
+IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
+
+
+#Load edges
+declare STATE_CODE ;
+
+for STATE in "${STATE_ARRAY[@]}"
+do	
+	state_lookup_code STATE_CODE $STATE
+	${PSQL} -a -c "SELECT aro.create_and_load_edge('${STATE}', '$STATE_CODE');"		
+done
+
 
 ${PSQL} -a -f $DIR/load_cosub.sql
 
@@ -13,4 +25,8 @@ ${PSQL} -a -f $DIR/load_census_blocks.sql
 ${PSQL} -a -f $DIR/load_cities.sql
 
 ${PSQL} -a -f $DIR/load_aro_states.sql
+
+
+
+
 
