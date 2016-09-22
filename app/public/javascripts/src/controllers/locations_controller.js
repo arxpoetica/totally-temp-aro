@@ -89,7 +89,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       })
     }
     var selected = feature.getProperty('selected') ? 'selected' : 'default'
-    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestCategory}_${selected}.png`
+    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestCategory.substring(2)}_${selected}.png`
   }
 
   var locationsLayer = $scope.locations_layer = new MapLayer({
