@@ -71,14 +71,25 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   var declarativeStyles = (feature, styles) => {
     if (styles.icon) return
-    var totalBusinesses = feature.getProperty('total_businesses') || 0
-    var totalHouseholds = feature.getProperty('total_households') || 0
+    var type = 'households'
+    var categories = feature.getProperty('entity_categories')
+    var order = [
+      'b_small', 'b_medium', 'b_large'
+    ]
+    var largestCategory = null
+    var largestIndex = -1
+    if (Array.isArray(categories)) {
+      categories.forEach((category) => {
+        if (category.indexOf('b_') === 0) type = 'businesses'
+        var index = order.indexOf(category)
+        if (index > largestIndex) {
+          largestIndex = index
+          largestCategory = category
+        }
+      })
+    }
     var selected = feature.getProperty('selected') ? 'selected' : 'default'
-    var largestType = feature.getProperty('largest_type')
-    var type = (totalBusinesses && totalHouseholds)
-      ? 'composite_location'
-      : totalBusinesses ? 'businesses' : 'households'
-    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestType}_${selected}.png`
+    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestCategory}_${selected}.png`
   }
 
   var locationsLayer = $scope.locations_layer = new MapLayer({
