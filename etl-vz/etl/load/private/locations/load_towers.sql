@@ -1,5 +1,5 @@
 
-#SELECT aro.create_tower_shard_table('wa', 'aro_location_data')
+--SELECT aro.create_tower_shard_table('wa', 'aro_location_data')
 
 -- Same function as public since the target table structure stays the same between both.
 CREATE OR REPLACE FUNCTION aro.create_tower_shard_table(state_abbrev text, target_schema_name text)
