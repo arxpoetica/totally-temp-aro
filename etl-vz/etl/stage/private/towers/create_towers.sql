@@ -51,6 +51,15 @@ INSERT INTO towers.towers(lat, lon, geog, geom)
 		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
 	FROM towers.vz_wi_towers;
 
+INSERT INTO towers.towers(city, lat, lon, geog, geom)
+	SELECT
+		city,
+		lat,
+		long,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
+	FROM towers.vz_il_towers;
+
 
 
 CREATE INDEX  towers_towers_geom ON  towers.towers USING gist(geom);

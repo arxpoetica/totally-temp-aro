@@ -25,6 +25,9 @@ ${PSQL} -a -f $DIR/create_vz_mo_towers.sql
 # Create and load vz madison, wi table
 ${PSQL} -a -f $DIR/create_vz_wi_towers.sql
 
+# Create and load vz madison, wi table
+${PSQL} -a -f $DIR/create_vz_il_towers.sql
+
 # file_name:table_name
 # Assumes files end in .csv
 IFS=',' read -a TOWER_DATA_FILES <<< "${TOWER_CODES}"

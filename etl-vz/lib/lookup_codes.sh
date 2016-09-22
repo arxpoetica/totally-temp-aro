@@ -19,7 +19,7 @@ tower_code_lookup() {
 	declare -n __result=$1
 	declare  tower_code=$2
 
-	declare -A TOWER_DATA_FILES=( [towers_seattle_wa]=vz_wa_towers [towers_columbus_oh]=vz_oh_towers [towers_mo]=vz_mo_towers [towers_wi]=vz_wi_towers )
+	declare -A TOWER_DATA_FILES=( [towers_seattle_wa]=vz_wa_towers [towers_columbus_oh]=vz_oh_towers [towers_mo]=vz_mo_towers [towers_wi]=vz_wi_towers [towers_il]=vz_il_towers )
 
 	__result=${TOWER_DATA_FILES[$tower_code]} ;
 	
