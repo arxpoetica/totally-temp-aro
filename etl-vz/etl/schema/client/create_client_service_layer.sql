@@ -13,13 +13,13 @@ ALTER TABLE "client"."service_layer" OWNER TO "aro";
 -- Basic Report Types
 
 INSERT INTO client.service_layer (name, description, is_user_defined)
-VALUES('wirecenter', 'Wirecenter Layer', false) ;
+VALUES('wirecenter', 'Wirecenter', false) ;
 
 INSERT INTO client.service_layer (name, description, is_user_defined)
-VALUES('cran', 'Cran Layer', false) ;
+VALUES('cran', 'CRAN Polygon', false) ;
 
 INSERT INTO client.service_layer (name, description, is_user_defined)
-VALUES('directional_facility', 'Directional Facility', false) ;
+VALUES('directional_facility', 'VZB', false) ;
 
 ALTER TABLE client.service_layer ADD COLUMN show_in_boundaries BOOL NOT NULL DEFAULT TRUE;
 
