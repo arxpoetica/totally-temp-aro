@@ -270,7 +270,7 @@ BEGIN
       SELECT DISTINCT ON (e.prism_lat, e.prism_long)
           ml.location_id,
           e.prism_formatted_address,
-          ''' || state_abbrev || ''',
+          ''' || state_name_upper || ''',
           e.prism_lat,
           e.prism_long,
           ST_SetSRID(ST_Point(prism_long, prism_lat), 4326),
@@ -300,7 +300,7 @@ BEGIN
             me.source_id,
             (SELECT id FROM aro.industries WHERE description = ''WOMENS CLOTHING STORES''),
             e.prism_formatted_address,
-            ''' || state_abbrev || ''',
+            ''' || state_name_upper || ''',
             1000,
             grand_total * 12,
             grand_total,
