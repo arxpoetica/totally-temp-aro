@@ -9,4 +9,6 @@ CREATE TABLE aro.industries
 	CONSTRAINT aro_industries_pkey PRIMARY KEY (id)
 );
 
+INSERT INTO aro.industries(id, description) VALUES (5621, 'WOMENS CLOTHING STORES');
+
 

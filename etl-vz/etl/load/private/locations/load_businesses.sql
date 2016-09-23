@@ -156,7 +156,7 @@ BEGIN
         SELECT  
             m.location_id,
             me.source_id,
-            (SELECT id FROM aro.industries WHERE description = ''Retail Department Stores''),
+            (SELECT id FROM aro.industries WHERE description = ''WOMENS CLOTHING STORES''),
             e.business_nm,
             e.street_addr,
             ''' || state_name_upper || ''',
@@ -298,7 +298,7 @@ BEGIN
         SELECT  
             m.location_id,
             me.source_id,
-            (SELECT id FROM aro.industries WHERE description = ''Retail Department Stores''),
+            (SELECT id FROM aro.industries WHERE description = ''WOMENS CLOTHING STORES''),
             e.prism_formatted_address,
             ''' || state_abbrev || ''',
             1000,
