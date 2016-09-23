@@ -23,7 +23,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
         .error(error)
     }
 
-    if (!plan.ran_optimization) {
+    if (changes.lazy || !plan.ran_optimization) {
       run(plan)
     } else {
       swal({

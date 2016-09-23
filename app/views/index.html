@@ -128,14 +128,15 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="selectPlan(null)"><span class="fa fa-chevron-left"></span></button>
+            <button ng-show="plan" type="button" style="float: left; margin-right: 8px; margin-left: 7px;" class="btn btn-sm navbar-btn" ng-click="selectPlan(null)"><span class="fa fa-home"></span></button>
             <a href="javascript:void(0)" class="navbar-brand" ng-click="showCombo()">{{plan.name}}</a>
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
               <span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
                 <span class="fa fa-usd"></span>
-                <span class="label label-info">{{plan.metadata.npv | currency}}</span>
-                <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost | currency}}</span>
+                <span class="label label-info" ng-show="plan.ranOptimization">{{plan.metadata.npv / 1000 | currency:"$":0}}K NPV</span>
+                <span class="label label-info" ng-hide="plan.ranOptimization">$- K NPV</span>
+                <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost / 1000 | currency:"$":0}}K CapEx</span>
               </span>
               <!--
               <span data-toggle="modal" ng-click="openCustomerProfile()" style="cursor:pointer" ng-show="show_customer_profile">
@@ -228,11 +229,13 @@
 
     <div id="left-col-wrapper">
       <div id="left-col" class="left-col-expanded">
+        <div style="pointer-events: auto">
         <% if (config.ui.layout === 'accordion') { %>
           <% include layout_accordion.html %>
         <% } else if (config.ui.layout === 'default') { %>
           <% include layout_default.html %>
         <% } %>
+        </div>
       </div>
     </div>
 

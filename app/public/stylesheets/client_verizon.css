@@ -78,3 +78,19 @@
 .eye-combo + .eye-control {
   padding-left: 0;
 }
+
+#map-tools-accordion .panel-heading {
+  background-color: #959595;
+}
+
+.locations-filter-btn, .locations-filter-btn:hover, .locations-filter-btn:focus, .locations-filter-btn:active {
+  background-color: #eee !important;
+}
+
+#expander {
+  background-color: #959595 !important;
+}
+
+#map-tools-accordion .locations-filter-btn .fa {
+  color: #CB0C1A;
+}

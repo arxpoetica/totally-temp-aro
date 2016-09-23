@@ -23,7 +23,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         fillColor: config.ui.colors.fiber
       }
     },
-    threshold: 11,
+    threshold: 0,
     reload: 'always'
   })
 
@@ -92,7 +92,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       },
       api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
       declarativeStyles: routeStyles(layer),
-      threshold: 12,
+      threshold: 0,
       reload: 'always'
     })
     routeLayer.hide_in_ui = true

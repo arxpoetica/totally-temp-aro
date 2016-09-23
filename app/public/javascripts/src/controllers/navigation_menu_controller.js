@@ -332,7 +332,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       user_id: +$('#share-plan-search').select2('val'), // will be removed in select2 4.1
       message: $('#share-plan textarea').val()
     }
-    $http.post('/permissions/' + $scope.shared_route.id + '/grant', params).success((response) => {
+    $http.post('/permissions/' + $scope.shared_plan.id + '/grant', params).success((response) => {
       swal({
         title: 'Network plan shared successfully',
         type: 'success'

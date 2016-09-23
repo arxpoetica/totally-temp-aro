@@ -110,7 +110,6 @@ BEGIN
                     ' || current_source_table || ' 
                 WHERE
                     mtfcc IN ( ''C3061'',''C3062'',''S1200'',''S1400'',''S1630'',''S1640'' )
-                    LIMIT 1000
                     ;';
         RAISE NOTICE '**** INSERTING DATA FROM EDGES TABLE ****';
         expr_start := timeofday()::timestamp;

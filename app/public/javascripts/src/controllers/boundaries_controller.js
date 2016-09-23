@@ -42,7 +42,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       },
       reload: 'always',
       threshold: 0,
-      minZoom: 9
+      minZoom: 9,
+      hoverField: 'name'
     })
   }
 
@@ -74,7 +75,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       },
       threshold: 13,
       reload: 'dynamic',
-      minZoom: 14
+      minZoom: 14,
+      hoverField: 'name'
     })
   }
 
@@ -104,7 +106,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
           fillColor: color,
           strokeColor: color,
           strokeWeight: 2
-        }
+        },
+        hoverField: 'name'
       },
       reload: 'always',
       threshold: 0
@@ -138,7 +141,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       },
       reload: 'always',
       threshold: 0,
-      minZoom: 6
+      minZoom: 6,
+      hoverField: 'name'
     })
     $scope.areaLayers.push(layer)
   })
