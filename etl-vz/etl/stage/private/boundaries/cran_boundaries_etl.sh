@@ -27,6 +27,7 @@ if [ ${state_array_len} == 1 ]; then
 	${SHP2PGSQL} -c -s 4326 -g the_geom -t 2D -W "latin1" /$TMPDIR/cran_${FILE_NAME}.dbf boundaries.cran_${FILE_NAME} | ${PSQL}
 # If there are two or more states, download the first file, create the table, then loop through the rest and append
 elif [ ${state_array_len} > 1 ]; then
+	cran_code_lookup FILE_NAME ${STATE_ARRAY[0]}
 	rm -f ${TMPDIR}/*.*
 	aws s3 cp s3://public.aro/proto/boundaries/cran_${FILE_NAME}.zip $GISROOT/cran_${FILE_NAME}.zip 
 	$UNZIPTOOL cran_${FILE_NAME}.zip -d ${TMPDIR}
