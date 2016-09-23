@@ -83,7 +83,7 @@ BEGIN
   WHERE tt.id IS NULL
   AND NOT(longitude = 0 AND latitude = 0)
   AND bemfab NOT IN (''A'',''O'',''X'')
-  AND cottage_file_ind=''N'';';
+  AND cottage_file_ind=''0'';';
 
   EXECUTE missing_expr;
 
