@@ -85,15 +85,16 @@ SELECT
 FROM aro.households h
 GROUP BY location_id ;
 
+
 -- celltower_summary
 DROP VIEW IF EXISTS client.celltower_summary ;
 CREATE VIEW client.celltower_summary AS
 SELECT
-	t.pracel_state as state,
+	t.parcel_state as state,
 	location_id,
 	sum(1) as count
 FROM aro.towers t
-GROUP BY location_id ;
+GROUP BY location_id, t.parcel_state ;
 
 -- location_competitors 
 DROP VIEW IF EXISTS client.location_competitors CASCADE ;
