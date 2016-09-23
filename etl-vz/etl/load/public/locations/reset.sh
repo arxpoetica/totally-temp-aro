@@ -11,14 +11,11 @@ ${PSQL} -c "CREATE SCHEMA aro_location_data;"
 # Create the functions to load partitioned businesses
 ${PSQL} -a -f $DIR/load_businesses.sql
 
-# Create the functions to load partitioned businesses
+# Create the functions to load partitioned towers
 ${PSQL} -a -f $DIR/load_towers.sql
 
 # Create the functions to load partitioned locations
 ${PSQL} -a -f $DIR/load_locations.sql
 
 # Create the functions to update industry codes
-${PSQL} -a -f $DIR/load_industries.sql
-
-# Industries, households, and towers do not load into paritions yet
 ${PSQL} -a -f $DIR/load_industries.sql
