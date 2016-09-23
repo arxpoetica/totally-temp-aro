@@ -45,7 +45,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private AroDemandService aroDemandService;
 
 	private EntityFactory entityFactory = EntityFactory.FACTORY;
-	//private Map<Integer, CableConstructionEnum> cableConstructionEnumMap;
+							//private Map<Integer, CableConstructionEnum> cableConstructionEnumMap;
 	@Autowired
 	private NetworkDataDAO networkDataDAO;
 
@@ -62,17 +62,19 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	public NetworkData getNetworkData(NetworkDataRequest request) {
 
 		NetworkData networkData = new NetworkData();
+		Collection<String> statesUSPS = networkDataDAO.getServiceAreaStates(request.getServiceAreaId().get());
+		Collection<String> statesFips = networkDataDAO.getServiceAreaStatesFips(request.getServiceAreaId().get());
 
-		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
+		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request, statesUSPS);
 
 		networkData.setCompetitiveDemandMapping(new CompetitiveDemandMapping(
 				demandByLocationIdMap));
 
 		// TODO Simplify Locations
-		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap));
+		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap, statesUSPS, statesFips));
 
-		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
-		networkData.setRoadEdges(getRoadEdges(request));
+		networkData.setFiberSources(getFiberSourceNetworkAssignments(request, statesUSPS));
+		networkData.setRoadEdges(getRoadEdges(request, statesFips));
 		networkData.setCableConduitEdges(queryCableConduitEdges(request));
 
 		return networkData;
@@ -81,9 +83,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private NetworkAssignmentModel getNetworkLocations(
 			NetworkDataRequest request,
-			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap) {
+			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap, Collection<String> states, Collection<String> statesFips) {
 
-		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request);
+		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request, states, statesFips);
 
 		List<Long> selectedRoadLocations = networkDataDAO.selectedRoadLocationIds(
 				request.getPlanId(), roadLocationByLocationIdMap);
@@ -126,7 +128,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	}
 
 	private Map<Long, CompetitiveLocationDemandMapping> getLocationDemand(
-			NetworkDataRequest networkConfiguration) {
+			NetworkDataRequest networkConfiguration, Collection<String> statesUSPS) {
 
 		return networkDataDAO.queryLocationDemand(
 				networkConfiguration.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS,
@@ -134,15 +136,16 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				networkConfiguration.getServiceAreaId().get(),
 				networkConfiguration.getPlanId(),
 				networkConfiguration.getYear(),
-				networkConfiguration.getMrc());
+				networkConfiguration.getMrc(),
+				statesUSPS);
 
 	}
 
 
 	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(
-			NetworkDataRequest networkConfiguration) {
+			NetworkDataRequest networkConfiguration, Collection<String> states, Collection<String> statesFips) {
 		return networkDataDAO
-				.queryRoadLocations(networkConfiguration.getServiceAreaId().get())
+				.queryRoadLocations(networkConfiguration.getServiceAreaId().get(), states, statesFips)
 				.getId2location();
 	}
 
@@ -151,15 +154,15 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 
 	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(
-			NetworkDataRequest networkConfiguration) {
-		return networkDataDAO.queryFiberSources(networkConfiguration.getPlanId());
+			NetworkDataRequest networkConfiguration, Collection<String> statesUSPS) {
+		return networkDataDAO.queryFiberSources(networkConfiguration.getPlanId(), statesUSPS);
 	}
 
 
 	private Collection<RoadEdge> getRoadEdges(
-			NetworkDataRequest networkConfiguration) {
+			NetworkDataRequest networkConfiguration, Collection<String> stateFips) {
 		return networkDataDAO
-				.getRoadEdges(networkConfiguration.getServiceAreaId().get())
+				.getRoadEdges(networkConfiguration.getServiceAreaId().get(), stateFips)
 				.getRoadEdges();
 	}
 

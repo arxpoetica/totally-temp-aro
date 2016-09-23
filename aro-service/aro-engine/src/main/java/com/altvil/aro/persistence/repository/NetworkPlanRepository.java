@@ -1,6 +1,7 @@
 package com.altvil.aro.persistence.repository;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,63 +51,62 @@ public interface NetworkPlanRepository extends
 	@Query(value = "select p from NetworkPlan p where p.parentPlan.id = :planId")
 	List<NetworkPlan> queryChildPlans(@Param("planId") long planId);
 	
-	@Query(value = "with linked_locations as (\n" + 
-			"SELECT\n" + 
-			"l.id as id,\n" + 
-			"l.geom as point,\n" + 
-			"(\n" + 
-			"  SELECT gid \n" + 
-			"  FROM (\n" + 
-			"    SELECT \n" + 
-			"      aro.edges.gid, \n" + 
-			"      ST_Distance(cast(aro.edges.geom as geography), \n" + 
-			"      cast(l.geom as geography)) AS distance \n" + 
-			"    FROM aro.edges \n" + 
-			"    WHERE st_intersects(w.geom, aro.edges.geom) \n" + 
-			"    ORDER BY l.geom <#> aro.edges.geom LIMIT 5 \n" + 
-			"    ) AS index_query ORDER BY distance LIMIT 1\n" + 
-			"  ) as gid\n" + 
-			"FROM  client.service_area w" +
-			" join aro.locations l on st_contains(w.geom, l.geom) " +
-			" and w.id = :serviceAreaId" + 
-			")\n" + 
-			"select\n" + 
-			"ll.id as location_id,\n" + 
-			"ll.gid,\n" + 
-			"e.tlid,\n" + 
-			"st_astext(ll.point) as location_point,\n" + 
-			"st_line_locate_point(st_linemerge(e.geom), ll.point) as intersect_position,\n" + 
-			"st_astext(st_closestpoint(st_linemerge(e.geom), ll.point)) as intersect_point,\n" + 
-			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" + 
-			"from linked_locations ll\n" + 
-			"join aro.edges e on e.gid = ll.gid\n" + 
+	@Query(value = "with linked_locations as (SELECT\n" +
+			"l.id as id,\n" +
+			"l.geom as point,\n" +
+			"(\n" +
+			"  SELECT gid \n" +
+			"  FROM (\n" +
+			"    SELECT \n" +
+			"      aro.edges.gid, \n" +
+			"      ST_Distance(cast(aro.edges.geom as geography), \n" +
+			"      cast(l.geom as geography)) AS distance \n" +
+			"    FROM aro.edges \n" +
+			"    WHERE st_intersects(w.geom, aro.edges.geom) \n" +
+			"\tand aro.edges.statefp in :statesFips\n" +
+			"    ORDER BY l.geom <#> aro.edges.geom LIMIT 5 \n" +
+			"    ) AS index_query ORDER BY distance LIMIT 1\n" +
+			"  ) as gid\n" +
+			"FROM  client.service_area w join aro.locations l on st_contains(w.geom, l.geom)  and l.state in :states and w.id = :serviceAreaId )\n" +
+			"select\n" +
+			"ll.id as location_id,\n" +
+			"ll.gid,\n" +
+			"e.tlid,\n" +
+			"st_astext(ll.point) as location_point,\n" +
+			"st_line_locate_point(st_linemerge(e.geom), ll.point) as intersect_position,\n" +
+			"st_astext(st_closestpoint(st_linemerge(e.geom), ll.point)) as intersect_point,\n" +
+			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" +
+			"from linked_locations ll\n" +
+			"join aro.edges e on e.gid = ll.gid\n" +
+			"\tand e.statefp in :statesFips\n" +
 			"order by gid, intersect_position limit 80000", nativeQuery = true) // KG debugging
-	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId) ;
+	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId, @Param("states") Collection<String> states, @Param("statesFips")Collection<String> statesFips) ;
 
 
 	@Query(value = 
 			"with selected_locations as (\n" + 
 			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength\n" + 
 			"   from client.service_area w \n" +
-			"	join aro.locations l on w.id = :serviceAreaId and st_contains(w.geom, l.geom)\n" +
+			"	join aro.locations l on w.id = :serviceAreaId and st_contains(w.geom, l.geom) and l.state in :stateUSPS \n" +
 			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
 			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3\n" +
 			"),\n" + 
 			"bs as (\n" + 
 			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.business_summary e on e.location_id = l.id and  ((e.entity_type = 3 and monthly_recurring_cost>=:mrc) or e.entity_type !=3)\n" + 
+			"  join client.business_summary e on e.location_id = l.id and  ((e.entity_type = 3 and monthly_recurring_cost>=:mrc) or e.entity_type !=3) " +
+			"  and e.state in :stateUSPS" +
 			"   where year = :year\n" + 
 			"),\n" + 
 			"hs as (\n" + 
 			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.households_summary e on e.location_id = l.id\n" + 
+			"  join client.households_summary e on e.location_id = l.id \n" +
 			"),\n" + 
 			"ct as (\n" + 
 			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.celltower_summary e on e.location_id = l.id\n" + 
+			"  join client.celltower_summary e on e.location_id = l.id \n" +
 			")\n" + 
 			"select * from  bs\n" + 
 			"UNION\n" + 
@@ -114,7 +114,7 @@ public interface NetworkPlanRepository extends
 			"UNION\n" +
 			"select * from ct\n" +
 			"limit 200000", nativeQuery = true)
-	List<Object[]> queryAllFiberDemand(@Param("serviceAreaId") int serviceAreaId, @Param("year") int year, @Param("mrc") double mrc);
+	List<Object[]> queryAllFiberDemand(@Param("serviceAreaId") int serviceAreaId, @Param("year") int year, @Param("mrc") double mrc, @Param("stateUSPS") Collection<String> stateUSPS);
 
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
 			"WHERE pt.plan_id = :planId", nativeQuery = true)
@@ -172,7 +172,7 @@ public interface NetworkPlanRepository extends
 			"			-- Draw line connecting network_cos to edge.\n" + 
 			"			(SELECT gid\n" + 
 			"				FROM ( SELECT  aro.edges.gid, ST_Distance(cast(aro.edges.geom as geography), cast(l.geom as geography)) AS distance\n" + 
-			"					  FROM aro.edges where st_intersects(l.buffer_geom, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" + 
+			"					  FROM aro.edges where aro.edges.statefp in :stateFips and st_intersects(l.buffer_geom, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" +
 			"			) as gid\n" + 
 			"			FROM nodes l\n" + 
 			"		)\n" + 
@@ -189,14 +189,14 @@ public interface NetworkPlanRepository extends
 			"		JOIN  aro.edges  e on e.gid = ll.gid\n" + 
 			"		ORDER BY gid, intersect_position\n" + 
 			"	limit 200", nativeQuery = true)
-	List<Object[]> querySourceLocations(@Param("planId") long planId);
+	List<Object[]> querySourceLocations(@Param("planId") long planId, @Param("stateFips") Collection<String> stateFips );
 
 	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
 			+ "from client.service_area w \n"
 			+ "join aro.edges a on "
-			+ "w.id = :serviceAreaId "
+			+ "w.id = :serviceAreaId and a.statefp in :stateFips "
 			+ "and st_intersects(edge_buffer, a.geom)", nativeQuery = true)
-	List<Object[]> queryRoadEdgesbyServiceAreaId(@Param("serviceAreaId") int serviceAreaId);
+	List<Object[]> queryRoadEdgesbyServiceAreaId(@Param("serviceAreaId") int serviceAreaId, @Param("stateFips") Collection<String> stateFips);
 
 	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
 			+ "from client.plan r \n"
@@ -350,4 +350,17 @@ public interface NetworkPlanRepository extends
 	@Query(value = "select wirecenter_id from client.plan where id = :planId", nativeQuery = true)
 	int getPlanServiceAreaId(@Param("planId") long planId);
 
+	@Query(value = "select st.stusps \n" +
+			"    from client.service_area sa \n" +
+			"    inner join aro.states st \n" +
+			"    on ST_Intersects(sa.geom, st.geom) \n" +
+			"        and sa.id =:serviceAreaId", nativeQuery = true)
+	Collection<String> getServiceAreaStates(@Param("serviceAreaId") Integer serviceAreaId);
+
+	@Query(value = "select st.statefp \n" +
+			"    from client.service_area sa \n" +
+			"    inner join aro.states st \n" +
+			"    on ST_Intersects(sa.geom, st.geom) \n" +
+			"        and sa.id =:serviceAreaId", nativeQuery = true)
+	Collection<String> getServiceAreaFips(Integer serviceAreaId);
 }
