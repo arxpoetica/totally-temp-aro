@@ -81,7 +81,9 @@ BEGIN
   LEFT JOIN  ' || scoped_target_table || '  tt
     ON st.duns_number = tt.source_id
   WHERE tt.id IS NULL
-  AND NOT(longitude = 0 AND latitude = 0);';
+  AND NOT(longitude = 0 AND latitude = 0)
+  AND bemfab NOT IN (''A'',''O'',''X'')
+  AND cottage_file_ind=''N'';';
 
   EXECUTE missing_expr;
 
