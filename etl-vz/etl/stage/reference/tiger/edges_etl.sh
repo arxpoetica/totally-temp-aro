@@ -24,7 +24,6 @@ do
 	
 	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/EDGES/tl_2014_${STATE_ID}* --accept=zip --reject=html -nd -nc
 	for z in tl_*_${STATE_ID}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
-	for z in */tl_*_${STATE_ID}*_edges.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done  #unsure what, if anything, this does
 	cd $TMPDIR;
 
 	# Create table from parent edges table

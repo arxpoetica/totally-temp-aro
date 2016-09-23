@@ -11,9 +11,9 @@ SHP2PGSQL=${PGBIN}/shp2pgsql
 IFS=',' read -a STATE_ARRAY <<< "${STATE_CODES}"
 declare STATE_ID
 
-for STATE_CODE in "${STATE_ARRAY[@]}"
+for STATE in "${STATE_ARRAY[@]}"
 do
-	state_code_lookup STATE_ID $STATE_CODE
+	state_code_lookup STATE_ID $STATE
 	rm -f ${TMPDIR}/*.*
 	${PSQL} -c "DROP SCHEMA IF EXISTS tiger_staging CASCADE;"
 	${PSQL} -c "CREATE SCHEMA tiger_staging;"
@@ -23,7 +23,6 @@ do
 	
 	wget ftp://ftp2.census.gov/geo/tiger/TIGER2014/TABBLOCK/tl_2014_${STATE_ID}* --accept=zip --reject=html -nd -nc
 	for z in tl_*_${STATE_ID}*_tabblock10.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done
-	for z in */tl_*_${STATE_ID}*_tabblock10.zip ; do $UNZIPTOOL -o -d $TMPDIR $z; done  #unsure what, if anything, this does
 	cd $TMPDIR;
 
 	# Create table from parent tabblock table
