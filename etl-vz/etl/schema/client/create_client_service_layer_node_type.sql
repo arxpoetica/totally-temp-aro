@@ -28,13 +28,14 @@ VALUES (
 ) ;
 
 INSERT INTO client.service_layer_node_type
-	(service_layer_id, network_node_type_id, code, name, description)
+	(service_layer_id, network_node_type_id, code, name, description, is_displayed)
 VALUES (
 	(SELECT id FROM client.service_layer where name = 'wirecenter'),
 	(SELECT id FROM client.network_node_types where name = 'splice_point'),
 	'wirecenter_splice_point',
 	'Splice Point',
-	'Splice Point'
+	'Splice Point',
+	0
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -70,13 +71,14 @@ VALUES (
 ) ;
 
 INSERT INTO client.service_layer_node_type
-	(service_layer_id, network_node_type_id, code, name, description)
+	(service_layer_id, network_node_type_id, code, name, description, is_displayed)
 VALUES (
 	(SELECT id FROM client.service_layer where name = 'wirecenter'),
 	(SELECT id FROM client.network_node_types where name = 'bulk_distribution_consumer'),
 	'wirecenter_bulk_distribution_consumer',
-	'bulk_distribution_consumer',
-	'bulk_distribution_consumer'
+	'Direct Feeder',
+	'Direct Feeder',
+	0
 ) ;
 
 -- cran
@@ -93,13 +95,14 @@ VALUES (
 ) ;
 
 INSERT INTO client.service_layer_node_type
-	(service_layer_id, network_node_type_id, code, name, description)
+	(service_layer_id, network_node_type_id, code, name, description, is_displayed)
 VALUES (
 	(SELECT id FROM client.service_layer where name = 'cran'),
 	(SELECT id FROM client.network_node_types where name = 'splice_point'),
 	'cran_splice_point',
 	'Splice Point',
-	'Splice Point'
+	'Splice Point',
+	0
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -130,18 +133,19 @@ VALUES (
 	(SELECT id FROM client.service_layer where name = 'cran'),
 	(SELECT id FROM client.network_node_types where name = 'bulk_distrubution_terminal'),
 	'cran_bulk_distrubution_terminal',
-	'bulk_distrubution_terminal',
-	'bulk_distrubution_terminal'
+	'Direct Feeder',
+	'Direct Feeder'
 ) ;
 
 INSERT INTO client.service_layer_node_type
-	(service_layer_id, network_node_type_id, code, name, description)
+	(service_layer_id, network_node_type_id, code, name, description, is_displayed)
 VALUES (
 	(SELECT id FROM client.service_layer where name = 'cran'),
 	(SELECT id FROM client.network_node_types where name = 'bulk_distribution_consumer'),
 	'cran_bulk_distribution_consumer',
 	'bulk_distribution_consumer',
-	'bulk_distribution_consumer'
+	'bulk_distribution_consumer',
+	0
 ) ;
 
 
@@ -159,13 +163,14 @@ VALUES (
 ) ;
 
 INSERT INTO client.service_layer_node_type
-	(service_layer_id, network_node_type_id, code, name, description)
+	(service_layer_id, network_node_type_id, code, name, description, is_displayed)
 VALUES (
 	(SELECT id FROM client.service_layer where name = 'directional_facility'),
 	(SELECT id FROM client.network_node_types where name = 'splice_point'),
 	'df_splice_point',
 	'Splice Point',
-	'Splice Point'
+	'Splice Point',
+	0
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -196,16 +201,17 @@ VALUES (
 	(SELECT id FROM client.service_layer where name = 'directional_facility'),
 	(SELECT id FROM client.network_node_types where name = 'bulk_distrubution_terminal'),
 	'df_bulk_distrubution_terminal',
-	'bulk_distrubution_terminal',
-	'bulk_distrubution_terminal'
+	'Direct Feeder',
+	'Direct Feeder'
 ) ;
 
 INSERT INTO client.service_layer_node_type
-	(service_layer_id, network_node_type_id, code, name, description)
+	(service_layer_id, network_node_type_id, code, name, description, 0)
 VALUES (
 	(SELECT id FROM client.service_layer where name = 'directional_facility'),
 	(SELECT id FROM client.network_node_types where name = 'bulk_distribution_consumer'),
 	'df_bulk_distribution_consumer',
 	'bulk_distribution_consumer',
-	'bulk_distribution_consumer'
+	'bulk_distribution_consumer',
+	0
 ) ;
