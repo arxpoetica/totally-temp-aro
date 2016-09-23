@@ -101,12 +101,12 @@ public interface NetworkPlanRepository extends
 			"hs as (\n" + 
 			"  select l.id, l.block_id, 4 as entity_type, e.count, e.count*60 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.households_summary e on e.location_id = l.id and e.state in :stateUSPS\n" +
+			"  join client.households_summary e on e.location_id = l.id \n" +
 			"),\n" + 
 			"ct as (\n" + 
 			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.celltower_summary e on e.location_id = l.id and e.state in :stateUSPS\n" +
+			"  join client.celltower_summary e on e.location_id = l.id \n" +
 			")\n" + 
 			"select * from  bs\n" + 
 			"UNION\n" + 

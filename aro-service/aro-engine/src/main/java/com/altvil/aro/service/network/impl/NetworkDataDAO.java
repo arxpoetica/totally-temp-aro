@@ -105,9 +105,9 @@ public class NetworkDataDAO implements ComputeServiceApi{
 
     public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
             boolean isFilteringRoadLocationDemandsBySelection,
-            Set<LocationEntityType> selectedTypes, int serviceAreaId, long planId, int year, double mrc) {
+            Set<LocationEntityType> selectedTypes, int serviceAreaId, long planId, int year, double mrc, Collection<String> statesUSPS) {
 
-        Map<Long, CompetitiveLocationDemandMapping> locationDemand = queryFiberDemand(serviceAreaId, year, mrc, selectedTypes).getDemandMapping();
+        Map<Long, CompetitiveLocationDemandMapping> locationDemand = queryFiberDemand(serviceAreaId, year, mrc, selectedTypes, statesUSPS).getDemandMapping();
         if(isFilteringRoadLocationDemandsBySelection){
             Set<Long> selectedRoadLocationIds = planRepository.querySelectedLocationsByPlanId(planId).stream().map(BigInteger::longValue).collect(Collectors.toSet());
             return locationDemand.entrySet()
@@ -121,11 +121,12 @@ public class NetworkDataDAO implements ComputeServiceApi{
 
     }
 
-    private ServiceAreaLocationDemand queryFiberDemand(int serviceAreaId, int year, double mrc, Set<LocationEntityType> selectedTypes) {
+    private ServiceAreaLocationDemand queryFiberDemand(int serviceAreaId, int year, double mrc, Set<LocationEntityType> selectedTypes, Collection<String> states) {
         return locationDemand.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId)
                 .add("year", year)
                 .add("mrc", mrc)
-                .add("selectedTypes",new HashSet<>(selectedTypes))
+                .add("selectedTypes", new HashSet<>(selectedTypes))
+                .add("states", (Serializable)states)
                 .build());
 
     }

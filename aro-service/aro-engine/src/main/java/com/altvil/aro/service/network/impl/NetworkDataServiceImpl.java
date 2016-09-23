@@ -64,7 +64,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		NetworkData networkData = new NetworkData();
 		Collection<String> statesUSPS = networkDataDAO.getServiceAreaStates(request.getServiceAreaId().get());
 		Collection<String> statesFips = networkDataDAO.getServiceAreaStatesFips(request.getServiceAreaId().get());
-		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
+
+		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request, statesUSPS);
 
 		networkData.setCompetitiveDemandMapping(new CompetitiveDemandMapping(
 				demandByLocationIdMap));
@@ -127,7 +128,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	}
 
 	private Map<Long, CompetitiveLocationDemandMapping> getLocationDemand(
-			NetworkDataRequest networkConfiguration) {
+			NetworkDataRequest networkConfiguration, Collection<String> statesUSPS) {
 
 		return networkDataDAO.queryLocationDemand(
 				networkConfiguration.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS,
@@ -135,7 +136,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				networkConfiguration.getServiceAreaId().get(),
 				networkConfiguration.getPlanId(),
 				networkConfiguration.getYear(),
-				networkConfiguration.getMrc());
+				networkConfiguration.getMrc(),
+				statesUSPS);
 
 	}
 
