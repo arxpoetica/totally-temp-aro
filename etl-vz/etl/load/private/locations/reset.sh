@@ -12,7 +12,7 @@ ${PSQL} -c "DROP SCHEMA IF EXISTS aro_location_data CASCADE;"
 ${PSQL} -c "CREATE SCHEMA aro_location_data;"
 
 # Create the functions to load partitioned businesses
-${PSQL} -a -f $DIR/load_industries.sql
+# ${PSQL} -a -f $DIR/load_industries.sql
 
 # Create the functions to load partitioned businesses
 ${PSQL} -a -f $DIR/load_businesses.sql

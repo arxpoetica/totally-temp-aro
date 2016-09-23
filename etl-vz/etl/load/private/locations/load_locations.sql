@@ -1,41 +1,34 @@
--- Load VZ TAM businesses into aro.locations and aro.businesses tables
--- source_table = 'businesses.tam_ny', target_schema_name = 'aro_location_data', state_abbrev = 'NY'
-CREATE OR REPLACE FUNCTION aro.update_shard_industries(scoped_source_table text, state_abbrev text)
-RETURNS integer AS $records_loaded_count$
+CREATE OR REPLACE FUNCTION aro.create_locations_shard_table(state_abbrev text, target_schema_name text)
+RETURNS text AS $table_name$
 DECLARE
-  records_loaded_count int;
-  scoped_target_table text;
-  update_expr text;
-
+  table_name text;
+  parent_schema text;
+  parent_table_name text;
+  prefix_name text;
+  index_prefix_name text;
+  scoped_name text;
+  state_name text;
+  state_name_upper text;
 BEGIN
-  -- Constants
-  scoped_target_table := 'aro.industries';
+  state_name := lower(state_abbrev);
+  state_name_upper := upper(state_abbrev);
+  table_name := target_schema_name || '.' || 'locations_' || state_name;
+  state_name := lower(state_abbrev);
+  parent_schema := 'aro';
+  parent_table_name := 'locations';
+  table_name := target_schema_name || '.' || parent_table_name || '_' || state_name;
+  prefix_name := parent_schema || '_' || parent_table_name;
+  index_prefix_name := prefix_name || '_' || state_name;
+  scoped_name := parent_schema || '.' || parent_table_name;
   
-  RAISE NOTICE 'UPDATING INDUSTRY CODES FOR %', state_abbrev;
-
-  update_expr := 'WITH distinct_codes AS (
-  SELECT DISTINCT ON (sic4)
-    sic4 AS id,
-    sic4desc AS description
-  FROM ' || scoped_source_table ||'
-)
-,
-missing_codes AS (
-  SELECT dc.id, dc.description
-  FROM distinct_codes dc
-  LEFT JOIN ' || scoped_target_table ||' i ON i.id = dc.id
-  WHERE i.id IS NULL
-)
-INSERT INTO ' || scoped_target_table ||'(id, description)
-  SELECT 
-    id,
-    description
-  FROM missing_codes ;';
-
-   records_loaded_count := 0;
-
-  EXECUTE update_expr;
-
-  RETURN records_loaded_count;
+  
+  EXECUTE 'DROP TABLE IF EXISTS ' || table_name;
+  EXECUTE 'CREATE TABLE ' || table_name || ' (CHECK (state = ''' || state_name_upper || ''')) INHERITS (' || scoped_name || ');';
+  EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_geog_gist ON ' || table_name || ' USING gist (geog);';
+  EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_geom_gist ON ' || table_name || ' USING gist (geom);';
+  EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_total_businesses_index ON ' || table_name || '(total_businesses);';
+  EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_total_households_index ON ' || table_name || '(total_households);';
+  EXECUTE 'CREATE INDEX ' || index_prefix_name ||  '_total_towers_index ON ' || table_name || '(total_towers);';
+  RETURN table_name;
 END;
-$records_loaded_count$ LANGUAGE plpgsql;
+$table_name$ LANGUAGE plpgsql;
