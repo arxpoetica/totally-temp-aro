@@ -193,6 +193,7 @@ DECLARE
   target_table text;
   scoped_target_table text;
   state_name text;
+  state_name_upper text;
   table_name text;
   index_prefix text;
   location_table text;
@@ -209,6 +210,7 @@ BEGIN
   records_loaded_count := 0;
 
   state_name := lower(state_abbrev);
+  state_name_upper := upper(state_abbrev) ;
   scoped_target_table := target_schema || '.' || target_table || '_' || state_name;
   scoped_location_table := target_schema || '.' || location_table || '_' || state_name;
   missing_entities_index := target_schema || '_temp_missing_' || target_table || '_' || state_name;
