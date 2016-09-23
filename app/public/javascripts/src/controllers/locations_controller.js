@@ -232,6 +232,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
+    if (!$scope.show_businesses) {
+      $scope.business_categories_selected['large'] = false
+      $scope.business_categories_selected['medium'] = false
+    }
+    if (!$scope.show_households) {
+      // TODO
+    }
+
     const subcategories = (key) => {
       var obj = $scope[`${key}_categories_selected`]
       var categories = Object.keys(obj).filter((key) => obj[key])

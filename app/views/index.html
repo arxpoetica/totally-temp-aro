@@ -229,11 +229,13 @@
 
     <div id="left-col-wrapper">
       <div id="left-col" class="left-col-expanded">
+        <div style="pointer-events: auto">
         <% if (config.ui.layout === 'accordion') { %>
           <% include layout_accordion.html %>
         <% } else if (config.ui.layout === 'default') { %>
           <% include layout_default.html %>
         <% } %>
+        </div>
       </div>
     </div>
 
