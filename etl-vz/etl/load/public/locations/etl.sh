@@ -4,9 +4,21 @@ PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
-#${PSQL} -a -f $DIR/load_households.sql
 
-#${PSQL} -a -f $DIR/load_towers.sql
+# Force Functoins to reload data
+# Create the functions to load partitioned businesses
+${PSQL} -a -f $DIR/load_businesses.sql
+
+# Create the functions to load partitioned towers
+${PSQL} -a -f $DIR/load_towers.sql
+
+# Create the functions to load partitioned locations
+${PSQL} -a -f $DIR/load_locations.sql
+
+# Create the functions to update industry codes
+#${PSQL} -a -f $DIR/load_industries.sql
+
+##
 
 # Below for loading TAM and Customer data only. 
 #declare -a STATE_ARRAY=( 'fl' 'il' 'mo' 'wa' 'wi' )

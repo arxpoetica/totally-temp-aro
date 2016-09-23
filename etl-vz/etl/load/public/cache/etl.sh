@@ -16,9 +16,9 @@ ${PSQL} -a -f $DIR/load_business_install_costs.sql
 
 ${PSQL} -a -f $DIR/load_location_entry_fees.sql
 
-${PSQL} -a -f $DIR/load_locations_carriers.sql
+${PSQL} -a -f $DIR/load_location_carriers.sql
 
-${PSQL} -a -f $DIR/locations_distance_to_carrier.sql
+${PSQL} -a -f $DIR/location_distance_to_carrier.sql
 
 ${PSQL} -a -f $DIR/calculate_aro_locations_totals.sql
 

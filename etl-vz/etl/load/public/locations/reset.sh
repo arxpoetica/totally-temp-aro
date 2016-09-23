@@ -18,4 +18,4 @@ ${PSQL} -a -f $DIR/load_towers.sql
 ${PSQL} -a -f $DIR/load_locations.sql
 
 # Create the functions to update industry codes
-${PSQL} -a -f $DIR/load_industries.sql
+#${PSQL} -a -f $DIR/load_industries.sql

@@ -1,4 +1,3 @@
-TRUNCATE client.locations_distance_to_carrier CASCADE;
 TRUNCATE client.locations_carriers CASCADE;
 TRUNCATE client.location_entry_fees CASCADE;
 TRUNCATE client.location_entry_fees CASCADE;
