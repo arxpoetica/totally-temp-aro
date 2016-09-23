@@ -1,10 +1,3 @@
-TRUNCATE client.locations_carriers CASCADE;
-TRUNCATE client.location_entry_fees CASCADE;
-TRUNCATE client.location_entry_fees CASCADE;
 DROP TABLE IF EXISTS client.household_install_costs CASCADE;
-TRUNCATE client.household_category_mappings CASCADE;
-TRUNCATE client.business_customer_types CASCADE;
-TRUNCATE client.household_customer_types CASCADE;
-TRUNCATE client.tower_customer_types CASCADE;
-TRUNCATE client.analysis_area_assignment CASCADE;
-TRUNCATE client.business_category_mappings CASCADE;
+
+
