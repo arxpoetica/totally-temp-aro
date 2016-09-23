@@ -62,17 +62,18 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	public NetworkData getNetworkData(NetworkDataRequest request) {
 
 		NetworkData networkData = new NetworkData();
-		Collection<String> states = networkDataDAO.getServiceAreaStates(request.getServiceAreaId().get());
+		Collection<String> statesUSPS = networkDataDAO.getServiceAreaStates(request.getServiceAreaId().get());
+		Collection<String> statesFips = networkDataDAO.getServiceAreaStatesFips(request.getServiceAreaId().get());
 		Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap = getLocationDemand(request);
 
 		networkData.setCompetitiveDemandMapping(new CompetitiveDemandMapping(
 				demandByLocationIdMap));
 
 		// TODO Simplify Locations
-		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap, states));
+		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap, statesUSPS, statesFips));
 
-		networkData.setFiberSources(getFiberSourceNetworkAssignments(request));
-		networkData.setRoadEdges(getRoadEdges(request));
+		networkData.setFiberSources(getFiberSourceNetworkAssignments(request, statesUSPS));
+		networkData.setRoadEdges(getRoadEdges(request, statesFips));
 		networkData.setCableConduitEdges(queryCableConduitEdges(request));
 
 		return networkData;
@@ -81,9 +82,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	private NetworkAssignmentModel getNetworkLocations(
 			NetworkDataRequest request,
-			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap, Collection<String> states) {
+			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap, Collection<String> states, Collection<String> statesFips) {
 
-		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request, states);
+		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request, states, statesFips);
 
 		List<Long> selectedRoadLocations = networkDataDAO.selectedRoadLocationIds(
 				request.getPlanId(), roadLocationByLocationIdMap);
@@ -140,9 +141,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 
 	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(
-			NetworkDataRequest networkConfiguration, Collection<String> states) {
+			NetworkDataRequest networkConfiguration, Collection<String> states, Collection<String> statesFips) {
 		return networkDataDAO
-				.queryRoadLocations(networkConfiguration.getServiceAreaId().get(), states)
+				.queryRoadLocations(networkConfiguration.getServiceAreaId().get(), states, statesFips)
 				.getId2location();
 	}
 
@@ -151,15 +152,15 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 
 	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(
-			NetworkDataRequest networkConfiguration) {
-		return networkDataDAO.queryFiberSources(networkConfiguration.getPlanId());
+			NetworkDataRequest networkConfiguration, Collection<String> statesUSPS) {
+		return networkDataDAO.queryFiberSources(networkConfiguration.getPlanId(), statesUSPS);
 	}
 
 
 	private Collection<RoadEdge> getRoadEdges(
-			NetworkDataRequest networkConfiguration) {
+			NetworkDataRequest networkConfiguration, Collection<String> stateFips) {
 		return networkDataDAO
-				.getRoadEdges(networkConfiguration.getServiceAreaId().get())
+				.getRoadEdges(networkConfiguration.getServiceAreaId().get(), stateFips)
 				.getRoadEdges();
 	}
 

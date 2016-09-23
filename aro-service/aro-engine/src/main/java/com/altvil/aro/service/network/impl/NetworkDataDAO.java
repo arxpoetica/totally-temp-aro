@@ -67,8 +67,8 @@ public class NetworkDataDAO implements ComputeServiceApi{
                 .setVersionTypes(EnumSet.of(VersionType.SERVICE))
                 .setCacheLoaderFunc(
                         (cacheQuery) -> () -> _getRoadEdges(
-                                cacheQuery.getServiceAreaId()
-                        ))
+                                cacheQuery.getServiceAreaId(),
+                                cacheQuery.getParam("statesFips", Collection.class)))
                 .build();
         serviceAreaRoadLocations = computeUnitService
                 .build( ServiceAreaRoadLocations.class, this.getClass())
@@ -79,7 +79,9 @@ public class NetworkDataDAO implements ComputeServiceApi{
                 .setCacheLoaderFunc(
                         (cacheQuery) -> () -> _queryRoadLocations(
                                 cacheQuery.getServiceAreaId(),
-                                cacheQuery.getParam("states", Collection.class)
+                                cacheQuery.getParam("states", Collection.class),
+                                cacheQuery.getParam("statesFips", Collection.class)
+
 
                         ))
                 .build();
@@ -94,8 +96,8 @@ public class NetworkDataDAO implements ComputeServiceApi{
                                 cacheQuery.getServiceAreaId(),
                                 cacheQuery.getParam("year", Integer.class),
                                 cacheQuery.getParam("mrc", Double.class),
-                                cacheQuery.getParam("selectedTypes", Set.class)
-                        ))
+                                cacheQuery.getParam("selectedTypes", Set.class),
+                                cacheQuery.getParam("states", Collection.class)))
                 .build();
 
     }
@@ -129,9 +131,9 @@ public class NetworkDataDAO implements ComputeServiceApi{
     }
 
 
-    private ServiceAreaLocationDemand _queryFiberDemand(int serviceAreaId, int year, double mrc, Set<LocationEntityType> selectedTypes) {
+    private ServiceAreaLocationDemand _queryFiberDemand(int serviceAreaId, int year, double mrc, Set<LocationEntityType> selectedTypes, Collection<String> stateUsps) {
         return  ServiceAreaLocationDemand.build()
-                .setMapping(assembleMapping(planRepository.queryAllFiberDemand(serviceAreaId, year, mrc)))
+                .setMapping(assembleMapping(planRepository.queryAllFiberDemand(serviceAreaId, year, mrc, stateUsps)))
                 .filterBySelectedTypes(selectedTypes)
                 .build();
     }
@@ -174,15 +176,17 @@ public class NetworkDataDAO implements ComputeServiceApi{
         return map;
     }
 
-    public ServiceAreaRoadLocations queryRoadLocations(int serviceAreaId, Collection<String> states) {
+    public ServiceAreaRoadLocations queryRoadLocations(int serviceAreaId, Collection<String> states, Collection<String> statesFips) {
         return serviceAreaRoadLocations.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId)
                 .add("states", (Serializable) states)
+                .add("statesFips", (Serializable)statesFips)
                 .build());
     }
-    private ServiceAreaRoadLocations _queryRoadLocations(int serviceAreaId, Collection<String> states) {
+
+    private ServiceAreaRoadLocations _queryRoadLocations(int serviceAreaId, Collection<String> states, Collection<String> statesFips) {
         Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
         planRepository
-                .queryAllLocationsByServiceAreaId(serviceAreaId, states)
+                .queryAllLocationsByServiceAreaId(serviceAreaId, states, statesFips)
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
                 .forEach(
@@ -214,10 +218,10 @@ public class NetworkDataDAO implements ComputeServiceApi{
         return new ServiceAreaRoadLocations(roadLocationsMap);
     }
 
-    public Collection<NetworkAssignment> queryFiberSources(long planId) {
+    public Collection<NetworkAssignment> queryFiberSources(long planId, Collection<String> statesUSPS) {
 
         return planRepository
-                .querySourceLocations(planId)
+                .querySourceLocations(planId, statesUSPS)
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
                 .map(result -> {
@@ -252,16 +256,18 @@ public class NetworkDataDAO implements ComputeServiceApi{
     }
 
     public ServiceAreaRoadEdges getRoadEdges(
-            int serviceAreaId) {
-        return serviceAreaRoadEdges.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId).build());
+            int serviceAreaId, Collection<String> stateFips) {
+        return serviceAreaRoadEdges.gridLoad(Priority.HIGH, CacheQuery.build(serviceAreaId)
+                .add("stateFips", (Serializable) stateFips)
+                        .build());
     }
 
 
     private ServiceAreaRoadEdges _getRoadEdges(
-            int serviceAreaId) {
+            int serviceAreaId, Collection<String> stateFips) {
         return new ServiceAreaRoadEdges(
                 planRepository
-                .queryRoadEdgesbyServiceAreaId(serviceAreaId)
+                .queryRoadEdgesbyServiceAreaId(serviceAreaId, stateFips)
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
                 .map(result -> {
@@ -346,6 +352,10 @@ public class NetworkDataDAO implements ComputeServiceApi{
 
     public Collection<String> getServiceAreaStates(Integer serviceAreaId) {
         return planRepository.getServiceAreaStates(serviceAreaId);
+    }
+
+    public Collection<String> getServiceAreaStatesFips(Integer serviceAreaId) {
+        return planRepository.getServiceAreaFips(serviceAreaId);
     }
 
 
