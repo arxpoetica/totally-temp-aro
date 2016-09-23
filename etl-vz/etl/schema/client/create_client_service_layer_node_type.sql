@@ -90,8 +90,8 @@ VALUES (
 	(SELECT id FROM client.service_layer where name = 'cran'),
 	(SELECT id FROM client.network_node_types where name = 'central_office'),
 	'cran_central_office',
-	'Central Office',
-	'Central Office'
+	'CRAN Hub',
+	'CRAN Hub'
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -158,8 +158,8 @@ VALUES (
 	(SELECT id FROM client.service_layer where name = 'directional_facility'),
 	(SELECT id FROM client.network_node_types where name = 'central_office'),
 	'df_cran_central_office',
-	'Central Office',
-	'Central Office'
+	'Directional Facility',
+	'Directional Facility'
 ) ;
 
 INSERT INTO client.service_layer_node_type
