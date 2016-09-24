@@ -189,7 +189,7 @@ public interface NetworkPlanRepository extends
 			"		JOIN  aro.edges  e on e.gid = ll.gid\n" + 
 			"		ORDER BY gid, intersect_position\n" + 
 			"	limit 200", nativeQuery = true)
-	List<Object[]> querySourceLocations(@Param("planId") long planId, @Param("stateFips") Collection<String> stateFips );
+	List<Object[]> querySourceLocations(@Param("planId") long planId, @Param("stateFips") String stateFips );
 
 	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
 			+ "from client.service_area w \n"

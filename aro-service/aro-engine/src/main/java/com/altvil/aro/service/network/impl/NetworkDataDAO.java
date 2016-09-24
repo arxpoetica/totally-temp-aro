@@ -222,7 +222,7 @@ public class NetworkDataDAO implements ComputeServiceApi{
     public Collection<NetworkAssignment> queryFiberSources(long planId, Collection<String> statesUSPS) {
 
         return planRepository
-                .querySourceLocations(planId, statesUSPS)
+                .querySourceLocations(planId, statesUSPS.iterator().next())
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
                 .map(result -> {
