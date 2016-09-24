@@ -350,17 +350,12 @@ public interface NetworkPlanRepository extends
 	@Query(value = "select wirecenter_id from client.plan where id = :planId", nativeQuery = true)
 	int getPlanServiceAreaId(@Param("planId") long planId);
 
-	@Query(value = "select st.stusps \n" +
+	@Query(value = "select st.stusps, st.statefp \n" +
 			"    from client.service_area sa \n" +
 			"    inner join tiger_data.state st \n" +
 			"    on ST_Intersects(sa.geom, st.the_geom) \n" +
 			"        and sa.id =:serviceAreaId", nativeQuery = true)
-	Collection<String> getServiceAreaStates(@Param("serviceAreaId") Integer serviceAreaId);
+	Collection<Object[]> getServiceAreaStates(@Param("serviceAreaId") Integer serviceAreaId);
 
-	@Query(value = "select st.statefp \n" +
-			"    from client.service_area sa \n" +
-			"    inner join tiger_data.state st \n" +
-			"    on ST_Intersects(sa.geom, st.the_geom) \n" +
-			"        and sa.id =:serviceAreaId", nativeQuery = true)
-	Collection<String> getServiceAreaFips(@Param("serviceAreaId") Integer serviceAreaId);
+	
 }

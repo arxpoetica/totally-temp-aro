@@ -18,6 +18,11 @@
       <pattern>%-4relative [%thread] %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
+  
+  
+  <logger name="org.hibernate.type" level="ALL" />
+  <logger name="org.hibernate" level="DEBUG" />
+  
 
   <!-- LevelChangePropagator ensures efficiency if libraries are still using java util logging -->
   <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">

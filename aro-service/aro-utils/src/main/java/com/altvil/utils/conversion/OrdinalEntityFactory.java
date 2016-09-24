@@ -59,7 +59,7 @@ public class OrdinalEntityFactory {
 
 		@Override
 		public String getString(OrdinalAccessor index) {
-			return ((Number) get(index)).toString() ;
+			return (String) get(index) ;
 		}
 		
 	}
