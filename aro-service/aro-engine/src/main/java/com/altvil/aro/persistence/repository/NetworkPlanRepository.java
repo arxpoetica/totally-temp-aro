@@ -95,7 +95,7 @@ public interface NetworkPlanRepository extends
 			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
 			"  join client.business_summary e on e.location_id = l.id and  ((e.entity_type = 3 and monthly_recurring_cost>=:mrc) or e.entity_type !=3) " +
-			"  and e.state in stateUSPS" +
+			"  and e.state in :stateUSPS" +
 			"   where year = :year\n" + 
 			"),\n" + 
 			"hs as (\n" + 
