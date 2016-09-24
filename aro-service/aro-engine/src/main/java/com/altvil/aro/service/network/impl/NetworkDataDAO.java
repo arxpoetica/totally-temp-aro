@@ -134,7 +134,7 @@ public class NetworkDataDAO implements ComputeServiceApi{
 
     private ServiceAreaLocationDemand _queryFiberDemand(int serviceAreaId, int year, double mrc, Set<LocationEntityType> selectedTypes, Collection<String> stateUsps) {
         return  ServiceAreaLocationDemand.build()
-                .setMapping(assembleMapping(planRepository.queryAllFiberDemand(serviceAreaId, year, mrc, stateUsps)))
+                .setMapping(assembleMapping(planRepository.queryAllFiberDemand(serviceAreaId, year, mrc, stateUsps.iterator().next())))
                 .filterBySelectedTypes(selectedTypes)
                 .build();
     }
@@ -187,7 +187,7 @@ public class NetworkDataDAO implements ComputeServiceApi{
     private ServiceAreaRoadLocations _queryRoadLocations(int serviceAreaId, Collection<String> states, Collection<String> statesFips) {
         Map<Long, RoadLocation> roadLocationsMap = new HashMap<>();
         planRepository
-                .queryAllLocationsByServiceAreaId(serviceAreaId, states, statesFips)
+                .queryAllLocationsByServiceAreaId(serviceAreaId, states.iterator().next(), statesFips.iterator().next())
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
                 .forEach(
@@ -268,7 +268,7 @@ public class NetworkDataDAO implements ComputeServiceApi{
             int serviceAreaId, Collection<String> stateFips) {
         return new ServiceAreaRoadEdges(
                 planRepository
-                .queryRoadEdgesbyServiceAreaId(serviceAreaId, stateFips)
+                .queryRoadEdgesbyServiceAreaId(serviceAreaId, stateFips.iterator().next())
                 .stream()
                 .map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
                 .map(result -> {
