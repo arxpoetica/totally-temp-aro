@@ -15,6 +15,10 @@ public class StateCode implements Serializable {
 		super();
 		this.state = state;
 		this.fipsCode = fipsCode;
+		
+		if( state == null || fipsCode == null ) {
+			throw new NullPointerException() ;
+		}
 	}
 	public String getState() {
 		return state;

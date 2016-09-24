@@ -303,7 +303,7 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 		return serviceAreaRoadEdges.gridLoad(
 				Priority.HIGH,
 				CacheQuery.build(serviceAreaId)
-						.add("stateFips", (Serializable) ctx).build());
+						.add("serviceAreaContext", (Serializable) ctx).build());
 	}
 
 	private ServiceAreaRoadEdges _getRoadEdges(int serviceAreaId,
