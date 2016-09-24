@@ -35,11 +35,17 @@ public class CashFlow extends AbstractStreamFunction {
 
 	@Override
 	public double calc(CalcContext ctx) {
+		
+		//Temp Roic fix to ensure cost in the first Period
+		
+		if( ctx.getPeriod() == 0 ) {
+			return -networkCost.getValue(ctx.getResultStream()) ;
+		}
+		
 		return revenue.getValue(ctx.getResultStream())
 				- maintenance.getValue(ctx.getResultStream())
 				- opEx.getValue(ctx.getResultStream())
-				- newConnections.getValue(ctx.getResultStream())
-				- networkCost.getValue(ctx.getResultStream());
+				- newConnections.getValue(ctx.getResultStream());
 	}
 
 	@Override
