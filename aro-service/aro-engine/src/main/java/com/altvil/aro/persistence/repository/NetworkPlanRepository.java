@@ -106,7 +106,7 @@ public interface NetworkPlanRepository extends
 			"ct as (\n" + 
 			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.celltower_summary cts e on e.location_id = l.id and cts.state in :stateUSPS \n" +
+			"  join client.celltower_summary cts on cts.location_id = l.id and cts.state in :stateUSPS \n" +
 			")\n" + 
 			"select * from  bs\n" + 
 			"UNION\n" + 
