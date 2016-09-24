@@ -224,17 +224,13 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 		public CashFlows computeCashFlow(NetworkFinancialInput finacialInputs,
 				int periods) {
 
-			log.info("Compute Cashflow aprox " + periods + " "
-					+ finacialInputs.getLocationDemand());
-
+			
 			Map<LocationEntityType, StreamFunction> penetrationMap = createPenetrationCurveMap(finacialInputs
 					.getLocationDemand());
 
 			CashFlows cf = new CashFlowGenerator(map, penetrationMap,
 					finacialInputs.getLocationDemand(),
 					finacialInputs.getFixedCosts()).createCashFlow(periods);
-
-			log.info("Computed Cashflow aprox");
 
 			return cf;
 
@@ -295,16 +291,17 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 		}
 
 		public CashFlows createCashFlow(int periods) {
-			SimpleCalcContext ctx = new SimpleCalcContext(2016, periods);
+			
+			//Temp ROIC Fix to ensure negative value
+			
 			double[] result = new double[periods];
-			for (int i = 0; i < periods; i++) {
+			result[0] = -capex ;
+			
+			SimpleCalcContext ctx = new SimpleCalcContext(2016, periods-1);
+			for (int i = 1; i < periods; i++) {
 				double cashFlow = computeCashFlow(ctx);
-				if (i == 0) {
-					cashFlow -= capex;
-				}
 				result[i] = cashFlow;
 				ctx.inc();
-
 			}
 			return new CashFlowsImpl(result);
 		}
