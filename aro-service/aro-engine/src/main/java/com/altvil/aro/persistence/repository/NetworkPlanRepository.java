@@ -194,7 +194,7 @@ public interface NetworkPlanRepository extends
 	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
 			+ "from client.service_area w \n"
 			+ "join aro.edges a on "
-			+ "w.id in :serviceAreaId and a.statefp in :stateFips "
+			+ "w.id = :serviceAreaId and a.statefp in :stateFips "
 			+ "and st_intersects(edge_buffer, a.geom)", nativeQuery = true)
 	List<Object[]> queryRoadEdgesbyServiceAreaId(@Param("serviceAreaId") int serviceAreaId, @Param("stateFips") Collection<String> stateFips);
 
