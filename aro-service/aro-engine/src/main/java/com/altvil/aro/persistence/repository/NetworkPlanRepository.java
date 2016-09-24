@@ -362,5 +362,5 @@ public interface NetworkPlanRepository extends
 			"    inner join aro.states st \n" +
 			"    on ST_Intersects(sa.geom, st.geom) \n" +
 			"        and sa.id =:serviceAreaId", nativeQuery = true)
-	Collection<String> getServiceAreaFips(Integer serviceAreaId);
+	Collection<String> getServiceAreaFips(@Param("serviceAreaId") Integer serviceAreaId);
 }
