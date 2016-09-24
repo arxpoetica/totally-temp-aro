@@ -3,7 +3,10 @@ package com.altvil.aro.service.network;
 import java.io.Serializable;
 import java.util.Collection;
 
-public class ServiceAreaContext implements Serializable {
+import com.altvil.aro.service.cu.cache.query.FingerprintWriter;
+import com.altvil.aro.service.cu.cache.query.Fingerprintable;
+
+public class ServiceAreaContext implements Serializable, Fingerprintable {
 
 	/**
 	 * 
@@ -26,5 +29,14 @@ public class ServiceAreaContext implements Serializable {
 	public Collection<String> getFipsCodes() {
 		return fipsCodes;
 	}
+
+	@Override
+	public void appendFingerprint(FingerprintWriter writer) {
+		for(String s : stateCodes) {
+			writer.append(s);
+		}
+	}
+	
+	
 
 }
