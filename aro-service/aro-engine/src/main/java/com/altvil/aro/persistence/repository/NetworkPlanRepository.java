@@ -63,11 +63,11 @@ public interface NetworkPlanRepository extends
 			"      cast(l.geom as geography)) AS distance \n" +
 			"    FROM aro.edges \n" +
 			"    WHERE st_intersects(w.geom, aro.edges.geom) \n" +
-			"\tand aro.edges.statefp in (:statesFips)\n" +
+			"\tand aro.edges.statefp in :statesFips)\n" +
 			"    ORDER BY l.geom <#> aro.edges.geom LIMIT 5 \n" +
 			"    ) AS index_query ORDER BY distance LIMIT 1\n" +
 			"  ) as gid\n" +
-			"FROM  client.service_area w join aro.locations l on st_contains(w.geom, l.geom)  and l.state in (:states) and w.id = :serviceAreaId )\n" +
+			"FROM  client.service_area w join aro.locations l on st_contains(w.geom, l.geom)  and l.state in states and w.id = :serviceAreaId )\n" +
 			"select\n" +
 			"ll.id as location_id,\n" +
 			"ll.gid,\n" +
@@ -78,7 +78,7 @@ public interface NetworkPlanRepository extends
 			"st_distance(cast(ll.point as geography), cast(st_closestpoint(e.geom, ll.point) as geography)) as distance \n" +
 			"from linked_locations ll\n" +
 			"join aro.edges e on e.gid = ll.gid\n" +
-			"\tand e.statefp in (:statesFips)\n" +
+			"\tand e.statefp in statesFips\n" +
 			"order by gid, intersect_position limit 80000", nativeQuery = true) // KG debugging
 	List<Object[]> queryAllLocationsByServiceAreaId(@Param("serviceAreaId") int serviceAreaId, @Param("states") Collection<String> states, @Param("statesFips")Collection<String> statesFips) ;
 
@@ -87,15 +87,15 @@ public interface NetworkPlanRepository extends
 			"with selected_locations as (\n" + 
 			"select l.id, b.gid as block_id, case when c.strength is null then 0 else c.strength end as competitor_strength\n" + 
 			"   from client.service_area w \n" +
-			"	join aro.locations l on w.id = :serviceAreaId and st_contains(w.geom, l.geom) and l.state in (:stateUSPS) \n" +
+			"	join aro.locations l on w.id = :serviceAreaId and st_contains(w.geom, l.geom) and l.state in :stateUSPS \n" +
 			"	join aro.census_blocks b on st_contains(b.geom, l.geom)\n" + 
-			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3 and c.state in (:stateUSPS) \n" +
+			"	left join client.summarized_competitors_strength c on c.location_id = l.id and c.entity_type = 3 and c.state in :stateUSPS \n" +
 			"),\n" + 
 			"bs as (\n" + 
 			"  select l.id, l.block_id, e.entity_type, e.count, e.monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
 			"  join client.business_summary e on e.location_id = l.id and  ((e.entity_type = 3 and monthly_recurring_cost>=:mrc) or e.entity_type !=3) " +
-			"  and e.state in (:stateUSPS)" +
+			"  and e.state in stateUSPS" +
 			"   where year = :year\n" + 
 			"),\n" + 
 			"hs as (\n" + 
