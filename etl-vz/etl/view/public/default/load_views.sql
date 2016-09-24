@@ -41,8 +41,7 @@ SELECT
 b.*, 
 c.id AS entity_type,
 e.id AS employee_count_id,
-m.industry_id AS industry_cat_id,
-b.state
+m.industry_id AS industry_cat_id
 FROM aro.businesses b
 JOIN client.business_categories c 
 	ON b.number_of_employees >= c.min_value
