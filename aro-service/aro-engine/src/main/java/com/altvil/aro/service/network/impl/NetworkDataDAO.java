@@ -260,7 +260,7 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 			ServiceAreaContext ctx) {
 
 		return planRepository
-				.querySourceLocations(planId, ctx.getStateCodes().iterator().next())
+				.querySourceLocations(planId, ctx.getFipsCodes())
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 				.map(result -> {

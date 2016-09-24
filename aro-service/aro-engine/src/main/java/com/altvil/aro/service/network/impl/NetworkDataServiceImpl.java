@@ -72,8 +72,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		// TODO Simplify Locations
 		networkData.setRoadLocations(getNetworkLocations(request, demandByLocationIdMap,ctx));
 
-		networkData.setFiberSources(getFiberSourceNetworkAssignments(request, ctx));
-		networkData.setRoadEdges(getRoadEdges(request, ctx));
+		networkData.setFiberSources(networkDataDAO.queryFiberSources(request.getPlanId(), ctx));
+		networkData.setRoadEdges(networkDataDAO
+				.getRoadEdges(request.getServiceAreaId().get(), ctx)
+				.getRoadEdges());
 		networkData.setCableConduitEdges(queryCableConduitEdges(request));
 
 		return networkData;
@@ -155,10 +157,6 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 
 
-	private Collection<NetworkAssignment> getFiberSourceNetworkAssignments(
-			NetworkDataRequest networkConfiguration, ServiceAreaContext ctx) {
-		return networkDataDAO.queryFiberSources(networkConfiguration.getPlanId(), ctx);
-	}
 
 
 	private Collection<RoadEdge> getRoadEdges(

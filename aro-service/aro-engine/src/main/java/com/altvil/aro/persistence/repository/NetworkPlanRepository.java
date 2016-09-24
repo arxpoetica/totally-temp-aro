@@ -172,7 +172,7 @@ public interface NetworkPlanRepository extends
 			"			-- Draw line connecting network_cos to edge.\n" + 
 			"			(SELECT gid\n" + 
 			"				FROM ( SELECT  aro.edges.gid, ST_Distance(cast(aro.edges.geom as geography), cast(l.geom as geography)) AS distance\n" + 
-			"					  FROM aro.edges where aro.edges.statefp = :stateFips and st_intersects(l.buffer_geom, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" +
+			"					  FROM aro.edges where aro.edges.statefp in :stateFips and st_intersects(l.buffer_geom, aro.edges.geom) ORDER BY l.geom <#> aro.edges.geom LIMIT 5 ) AS index_query ORDER BY distance LIMIT 1\n" +
 			"			) as gid\n" + 
 			"			FROM nodes l\n" + 
 			"		)\n" + 
@@ -189,7 +189,7 @@ public interface NetworkPlanRepository extends
 			"		JOIN  aro.edges  e on e.gid = ll.gid\n" + 
 			"		ORDER BY gid, intersect_position\n" + 
 			"	limit 200", nativeQuery = true)
-	List<Object[]> querySourceLocations(@Param("planId") long planId, @Param("stateFips") String stateFips );
+	List<Object[]> querySourceLocations(@Param("planId") long planId, @Param("stateFips") Collection<String> stateFips );
 
 	@Query(value = "select  a.gid,  a.tlid, a.tnidf,  a.tnidt, st_astext(st_linemerge(a.geom)), edge_length\n"
 			+ "from client.service_area w \n"
