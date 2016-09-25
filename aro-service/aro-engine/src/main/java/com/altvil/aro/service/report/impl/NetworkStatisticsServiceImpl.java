@@ -310,9 +310,7 @@ public class NetworkStatisticsServiceImpl implements NetworkStatisticsService {
 
 		public static NetworkStatistic create(NetworkStatisticType type,
 				Supplier<Double> supplier) {
-			log.info("generating network stat") ;
 			NetworkStatistic stat =  new DefaultNetworkStatistic(type, eval(supplier));
-			log.info("generated network stat "  + stat.toString());
 			return stat ;
 		}
 
