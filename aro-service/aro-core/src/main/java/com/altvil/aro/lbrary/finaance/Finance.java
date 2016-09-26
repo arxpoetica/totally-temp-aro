@@ -1,5 +1,8 @@
 package com.altvil.aro.lbrary.finaance;
 
+import org.jgrapht.util.ArrayUnenforcedSet;
+
+import java.util.Arrays;
 import java.util.function.Function;
 
 //Reference Library https://github.com/essamjoubori/finance.js/blob/master/finance.js#L44
@@ -34,13 +37,15 @@ public class Finance {
 	
 	private static class Counter {
 		private int maxCount ;
+		private double[] cfs;
 		private int currentCount = 0;
 		
 		
 		
-		public Counter(int maxCount) {
+		public Counter(int maxCount, double[] cfs) {
 			super();
 			this.maxCount = maxCount;
+			this.cfs = cfs;
 		}
 
 
@@ -48,7 +53,7 @@ public class Finance {
 		public int inc() {
 			currentCount++ ;
 			if( currentCount > maxCount) {
-				throw new RuntimeException("Failed to converge") ;
+				throw new RuntimeException("Failed to converge with cash flows = " + Arrays.asList(cfs)) ;
 			}
 			return currentCount;
 		}
@@ -56,7 +61,7 @@ public class Finance {
 
 	public static double irr(double[] cfs) {
 		
-		Counter counter = new Counter(1000) ;
+		Counter counter = new Counter(1000, cfs) ;
 		
 		return Math.round(seekZero((rate) -> {
 			counter.inc() ;
