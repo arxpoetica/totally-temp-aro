@@ -19,6 +19,8 @@ done
 
 ${PSQL} -a -f $DIR/load_cosub.sql
 
+${PSQL} -a -f $DIR/load_aro_states.sql
+
 ${PSQL} -a -f $DIR/load_census_blocks.sql
 
 ${PSQL} -a -f $DIR/load_cities.sql
