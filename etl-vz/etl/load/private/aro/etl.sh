@@ -23,3 +23,7 @@ ${PSQL} -a -f $DIR/load_census_blocks.sql
 
 ${PSQL} -a -f $DIR/load_cities.sql
 
+${PSQL} -a -c "ANALYZE aro.edges;"
+
+${PSQL} -a -c "ANALYZE aro.census_blocks;"
+

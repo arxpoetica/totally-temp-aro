@@ -40,4 +40,6 @@ do
 
 done
 
+${PSQL} -a -c "ANALYZE aro.locations;"
+${PSQL} -a -c "ANALYZE aro.businesses;"
 
