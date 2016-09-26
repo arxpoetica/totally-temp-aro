@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS client.plan_targets;
 CREATE TABLE client.plan_targets
 (
   id SERIAL,
-  location_id bigint REFERENCES aro.locations,
+  location_id bigint,
   plan_id bigint REFERENCES client.plan ON DELETE CASCADE,
   CONSTRAINT client_plan_targets_pkey PRIMARY KEY (id)
 );
