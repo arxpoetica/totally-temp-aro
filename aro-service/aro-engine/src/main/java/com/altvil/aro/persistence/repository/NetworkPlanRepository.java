@@ -354,7 +354,8 @@ public interface NetworkPlanRepository extends
 			"    from client.service_area sa \n" +
 			"    inner join tiger_data.state st \n" +
 			"    on ST_Intersects(sa.geom, st.the_geom) \n" +
-			"        and sa.id =:serviceAreaId", nativeQuery = true)
+			"        and sa.id =:serviceAreaId" +
+			"    order by stusps", nativeQuery = true)
 	Collection<Object[]> getServiceAreaStates(@Param("serviceAreaId") Integer serviceAreaId);
 
 	
