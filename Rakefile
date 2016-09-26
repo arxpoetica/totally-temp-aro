@@ -1,7 +1,9 @@
-# require 'standalone_migrations'
 require 'active_record_migrations'
 require 'activerecord-postgis-adapter'
 
-# StandaloneMigrations::Tasks.load_tasks
+unless Rails.env.production?
+  require 'seed_dump'
+  # SeedDump.load_tasks
+end
 
 ActiveRecordMigrations.load_tasks

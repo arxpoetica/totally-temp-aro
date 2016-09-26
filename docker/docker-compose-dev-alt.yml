@@ -39,7 +39,7 @@ services:
             PGUSER: aro
             PGDATABASE: aro
             ARO_DATA_ROOT: /srv/www/aro/db/data
-            DATABASE_URL: postgres://aro:aro@arodb/aro
+            RAILS_ENV: development
             ARO_CLIENT: aro
         working_dir: /srv/www/aro
         command: bash -c "/usr/sbin/sshd -D"
