@@ -104,11 +104,11 @@
 }
 
 .btn-success, .btn-success:hover, .btn-success:active, .btn-success:focus, .btn-primary:hover {
-  background-color: red;
+  background-color: #CB0C1A;
 }
 
 .btn-success.active:hover {
-  background-color: red;
+  background-color: #CB0C1A;
 }
 
 
@@ -135,9 +135,17 @@
 #brand {
   background: url(data:image/png;base64,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);
   background-repeat: no-repeat;
-  width: 200px;
+  width: 400px;
   height: 50px;
   margin: 10px;
+}
+
+#brand:after {
+  content: 'One Fiber Strategic Planning';
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 25px;
+  display: block;
 }
 
 #map-canvas-wrapper {
@@ -163,4 +171,8 @@
 
 #map-extras {
   position:fixed; right: 10px; top: 200px;
+}
+
+.caret {
+  color: #CB0C1A;
 }
