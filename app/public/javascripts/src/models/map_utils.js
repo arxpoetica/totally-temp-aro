@@ -30,29 +30,25 @@ app.service('map_utils', ($rootScope, $http) => {
       }
     }
 
-    var mmouseover = marker.addListener('mouseover', () => updateCounter(1))
-    var mmouseout = marker.addListener('mouseout', () => updateCounter(-1))
+    marker.addListener('mouseover', () => updateCounter(1))
+    marker.addListener('mouseout', () => updateCounter(-1))
 
-    var mouseout = layer.addListener('mouseout', (e) => {
+    layer.addListener('mouseout', (e) => {
       if (e.feature !== feature) return
       updateCounter(-1)
     })
 
-    var mouseover = layer.addListener('mouseover', (e) => {
+    layer.addListener('mouseover', (e) => {
       if (e.feature !== feature) return
       layer.overrideStyle(feature, hoverStyle)
       marker.setPosition(centroid)
       updateCounter(1)
     })
 
-    var removefeature = layer.addListener('removefeature', (e) => {
+    layer.addListener('removefeature', (e) => {
       if (e.feature !== feature) return
-      layer.removeListener(mouseout)
-      layer.removeListener(mouseover)
-      layer.removeListener(removefeature)
-      marker.removeListener(mmouseover)
-      marker.removeListener(mmouseout)
       timer && clearTimeout(timer)
+      marker.setMap(null)
       marker = null
     })
 

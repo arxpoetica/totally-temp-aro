@@ -354,6 +354,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.plan = plan
 
     // unselect all entity types
+    $scope.show_towers = false
     $scope.show_businesses = false
     $scope.show_households = false
     $scope.business_categories_selected = {}
