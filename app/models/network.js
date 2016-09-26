@@ -83,7 +83,6 @@ module.exports = class Network {
           ${database.intersects(viewport, 'fp.geom', 'AND')}
           WHERE c.route_type=$1
           GROUP BY c.id
-          LIMIT 1
         )
 
         SELECT carriers.id, carriers.name, carriers.color
