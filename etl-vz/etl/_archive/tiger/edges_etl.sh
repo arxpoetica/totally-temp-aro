@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 GISROOT=/gisdata
 TMPDIR=/gisdata/temp/

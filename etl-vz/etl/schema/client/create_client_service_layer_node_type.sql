@@ -35,7 +35,7 @@ VALUES (
 	'wirecenter_splice_point',
 	'Splice Point',
 	'Splice Point',
-	0
+	false	
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -78,7 +78,7 @@ VALUES (
 	'wirecenter_bulk_distribution_consumer',
 	'Direct Feeder',
 	'Direct Feeder',
-	0
+	false	
 ) ;
 
 -- cran
@@ -102,7 +102,7 @@ VALUES (
 	'cran_splice_point',
 	'Splice Point',
 	'Splice Point',
-	0
+	false
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -145,7 +145,7 @@ VALUES (
 	'cran_bulk_distribution_consumer',
 	'bulk_distribution_consumer',
 	'bulk_distribution_consumer',
-	0
+	false
 ) ;
 
 
@@ -170,7 +170,7 @@ VALUES (
 	'df_splice_point',
 	'Splice Point',
 	'Splice Point',
-	0
+	false
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -206,12 +206,12 @@ VALUES (
 ) ;
 
 INSERT INTO client.service_layer_node_type
-	(service_layer_id, network_node_type_id, code, name, description, 0)
+	(service_layer_id, network_node_type_id, code, name, description, is_displayed)
 VALUES (
 	(SELECT id FROM client.service_layer where name = 'directional_facility'),
 	(SELECT id FROM client.network_node_types where name = 'bulk_distribution_consumer'),
 	'df_bulk_distribution_consumer',
 	'bulk_distribution_consumer',
 	'bulk_distribution_consumer',
-	0
+	false
 ) ;

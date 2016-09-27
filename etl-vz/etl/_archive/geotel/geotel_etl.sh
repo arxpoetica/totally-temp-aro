@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
@@ -13,7 +15,7 @@ cd $GISROOT;
 
 # 1. Load Fiber 
 
-declare -a FIBER_STATE_ARRAY=( 'fl' 'il' 'mo' 'wa' )
+declare -a FIBER_STATE_ARRAY=(  'wa' )
 fiber_state_array_len=${#FIBER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table
@@ -40,7 +42,7 @@ fi
 
 # 2. Load Wirecenters
 
-declare -a WIRECENTER_STATE_ARRAY=( 'fl' 'il' 'mo' 'wa' )
+declare -a WIRECENTER_STATE_ARRAY=( 'wa' )
 wirecenter_state_array_len=${#WIRECENTER_STATE_ARRAY[@]}
 
 # If there is only one state, download the file and create the table

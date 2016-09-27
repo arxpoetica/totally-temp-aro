@@ -9,13 +9,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.apache.ignite:ignite-core:1.7.0" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.ignite:ignite-spring:1.7.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.ignite:ignite-indexing:1.7.0" level="project" />
-    <orderEntry type="library" name="Maven: com.h2database:h2:1.4.191" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.ignite:ignite-slf4j:1.7.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.ignite:ignite-jta:1.7.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:3.8.1" level="project" />
     <orderEntry type="module" module-name="aro-engine" />
     <orderEntry type="module" module-name="aro-interfaces" />

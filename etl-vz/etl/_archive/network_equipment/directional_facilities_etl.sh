@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql

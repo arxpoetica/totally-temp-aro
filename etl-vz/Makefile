@@ -27,8 +27,8 @@ reset_view:
 load_view:
 	(cd etl/view/public && make load)
 
-reset_all: reset_schema reset_stage_reference reset_view  
-load_all: load_schema load_stage_reference load_view load_public 
+reset_all: reset_schema load_schema reset_stage_reference reset_view reset_public
+load_all:  load_stage_reference load_view load_public 
 
 etl_reload_all: reset_all load_all
 
@@ -43,7 +43,7 @@ test:
 	(cd ../app && npm test)
 
 webserver:
-	(cd ../app && ARO_CLIENT=aro node app.js)
+	(cd ../app && ARO_CLIENT=verizon node app.js)
 
 register_user:
 	node ../app/cli/register_user -f Marty -l McFly -e aro@example.com -p password

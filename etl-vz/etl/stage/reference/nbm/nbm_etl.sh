@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 GISROOT=/gisdata
@@ -18,7 +20,9 @@ for STATE_CODE in "${STATE_ARRAY[@]}"
 do
 	STATE="${STATE_CODE,,}"
 	rm -f ${TMPDIR}/*.*
-	aws s3 cp s3://public.aro/nbm/${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip $GISROOT/${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip
+	if [ ! -f $GISROOT/${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip ]; then
+		aws s3 cp s3://public.aro/nbm/${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip $GISROOT/${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip
+	fi
 	$UNZIPTOOL -p ${STATE}-NBM-CBLOCK-CSV-JUN-2014.zip | ${PSQL} -a -c "COPY nbm.blocks FROM STDIN DELIMITER '|' CSV HEADER;" 
 done
 

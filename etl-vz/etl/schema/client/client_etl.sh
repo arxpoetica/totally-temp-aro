@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 
@@ -88,7 +90,8 @@ ${PSQL} -a -f $DIR/create_client_service_layer.sql
 ${PSQL} -a -f $DIR/create_client_service_area.sql
 
 # Create  plan_head
-${PSQL} -a -f $DIR/create_client_plan_head.sql
+
+#${PSQL} -a -f $DIR/create_client_plan_head.sql
 
 # Create analysis_layer
 ${PSQL} -a -f $DIR/create_client_analysis_layer.sql

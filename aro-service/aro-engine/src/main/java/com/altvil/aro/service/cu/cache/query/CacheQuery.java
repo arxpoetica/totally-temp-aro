@@ -109,7 +109,7 @@ public class CacheQuery implements Serializable {
 	}
 
 	public Long getDeploymentPlanId() {
-		return aroKey.getDeploymentPlanId();
+		return aroKey.getPlanId();
 	}
 
 	public String getExtentionKey() {

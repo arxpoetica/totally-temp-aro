@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 # TODO: move environment variables to configuration recipes so they can be set in a single location
 export PGDATABASE=aro
