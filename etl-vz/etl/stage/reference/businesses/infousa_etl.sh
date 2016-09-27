@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 GISROOT=/gisdata
@@ -16,8 +18,10 @@ cd $GISROOT;
 
 for STATE in "${STATE_ARRAY[@]}"
 do
-	rm -f ${TMPDIR}/*.*
-	aws s3 cp s3://public.aro/infousa/businesses_${STATE}.zip $GISROOT/businesses_${STATE}.zip
+	rm -rf ${TMPDIR}/*
+	if [ ! -f $GISROOT/businesses_${STATE}.zip ]; then
+		aws s3 cp s3://public.aro/infousa/businesses_${STATE}.zip $GISROOT/businesses_${STATE}.zip
+	fi
 	$UNZIPTOOL businesses_${STATE}.zip -d ${TMPDIR}
 	${PSQL} -a -c "SELECT create_infousa_businesses_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
 	cat /$TMPDIR/businesses_${STATE}.csv | ${PSQL} -a -c "COPY ${TARGET_SCHEMA_NAME}.infousa_businesses_${STATE} FROM STDIN DELIMITER ',' CSV HEADER;"

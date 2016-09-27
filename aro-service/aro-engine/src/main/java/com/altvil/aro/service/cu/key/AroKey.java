@@ -11,7 +11,7 @@ public interface AroKey {
 	@AffinityKeyMapped
 	Integer getServiceAreaId();
 
-	Long getDeploymentPlanId();
+	Long getPlanId();
 
 	String getCompositeKey();
 

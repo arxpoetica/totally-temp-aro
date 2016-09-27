@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 # TODO: Create a loop to run through all states/areas rather than copy-pasting the code
 

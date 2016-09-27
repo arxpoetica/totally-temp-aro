@@ -12,7 +12,7 @@ public class DefaultCacheStrategy implements CacheStrategy {
 	@Override
 	public CacheQuery toCacheQuery(AroKey key) {
 		return CacheQuery.build(key.getServiceAreaId(),
-				key.getDeploymentPlanId()).build();
+				key.getPlanId()).build();
 	}
 
 	@Override

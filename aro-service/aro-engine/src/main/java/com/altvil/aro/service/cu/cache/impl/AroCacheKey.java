@@ -12,20 +12,20 @@ public class AroCacheKey implements Serializable, AroKey {
 		return new AroCacheKey(serviceAreaId, -1L);
 	}
 
-	public static AroKey create(Integer serviceAreaId, Long deploymentPlanId) {
-		return new AroCacheKey(serviceAreaId, deploymentPlanId);
+	public static AroKey create(Integer serviceAreaId, Long planId) {
+		return new AroCacheKey(serviceAreaId, planId);
 	}
 
 	/**
 	 * 
 	 */
 	private Integer serviceAreaId;
-	private Long deploymentPlanId;
+	private Long planId;
 	private int hashCode;
 
-	public AroCacheKey(Integer serviceAreaId, Long deploymentPlanId) {
+	public AroCacheKey(Integer serviceAreaId, Long planId) {
 		this.serviceAreaId = serviceAreaId;
-		this.deploymentPlanId = deploymentPlanId;
+		this.planId = planId;
 		hashCode = calcHash();
 	}
 
@@ -33,8 +33,8 @@ public class AroCacheKey implements Serializable, AroKey {
 	public AroKey toKey(VersionType vt) {
 
 		if (vt == VersionType.NETWORK) {
-			if (this.getDeploymentPlanId() == null
-					|| this.getDeploymentPlanId() == -1) {
+			if (this.getPlanId() == null
+					|| this.getPlanId() == -1) {
 				return new AroCacheKey(this.getServiceAreaId(), 0L);
 			}
 			return this;
@@ -48,8 +48,8 @@ public class AroCacheKey implements Serializable, AroKey {
 		int result = Long.hashCode(serviceAreaId);
 		result = 31
 				* result
-				+ (deploymentPlanId == null ? 0 : Long
-						.hashCode(deploymentPlanId));
+				+ (planId == null ? 0 : Long
+						.hashCode(planId));
 		return result;
 
 	}
@@ -67,11 +67,11 @@ public class AroCacheKey implements Serializable, AroKey {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.altvil.service.api.version.BsaKey#getDeploymentPlanId()
+	 * @see com.altvil.service.api.version.BsaKey#getPlanId()
 	 */
 	@Override
-	public Long getDeploymentPlanId() {
-		return deploymentPlanId;
+	public Long getPlanId() {
+		return planId;
 	}
 
 	@Override
@@ -91,8 +91,8 @@ public class AroCacheKey implements Serializable, AroKey {
 		if (obj instanceof AroKey) {
 			AroKey other = (AroKey) obj;
 			return this.getServiceAreaId().equals(other.getServiceAreaId())
-					&& equals(this.getDeploymentPlanId(),
-							other.getDeploymentPlanId());
+					&& equals(this.getPlanId(),
+							other.getPlanId());
 		}
 		return false;
 	}
@@ -100,9 +100,14 @@ public class AroCacheKey implements Serializable, AroKey {
 	
 	@Override
 	public String getCompositeKey() {
-		return serviceAreaId + "_" + deploymentPlanId;
+		return serviceAreaId + "_" + planId;
 	}
 
-	
-
+	@Override
+	public String toString() {
+		return "AroCacheKey{" +
+				"serviceAreaId=" + serviceAreaId +
+				", planId=" + planId +
+				'}';
+	}
 }

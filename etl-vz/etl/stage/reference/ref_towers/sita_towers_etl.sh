@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e;
+
 
 PSQL="${PGBIN}/psql -v ON_ERROR_STOP=1"
 SHP2PGSQL=${PGBIN}/shp2pgsql
@@ -14,10 +16,12 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 ##################
 
 ${PSQL} -a -f $DIR/create_sita_towers.sql
-
+echo fetching towers
 cd $GISROOT;
 rm -f ${TMPDIR}/*.*
-aws s3 cp s3://public.aro/towers/SITA_DATA_TOWER_13MAR10.zip $GISROOT/SITA_DATA_TOWER_13MAR10.zip
+if [ ! -f $GISROOT/SITA_DATA_TOWER_13MAR10.zip ]; then
+	aws s3 cp s3://public.aro/towers/SITA_DATA_TOWER_13MAR10.zip $GISROOT/SITA_DATA_TOWER_13MAR10.zip
+fi
 $UNZIPTOOL SITA_DATA_TOWER_13MAR10.zip -d ${TMPDIR}
 
 # Remove the header from the text file, since you can't ignore a header in the COPY command

@@ -7,7 +7,7 @@ module.exports = class AROService {
 
   static request (req) {
     if (process.env.NODE_ENV === 'test') return Promise.resolve({})
-    req.timeout = req.timeout || 30 * 60 * 1000 // 30min
+    req.timeout = req.timeout || 60 * 60 * 1000 // 30min
     console.log('Sending request to aro-service', JSON.stringify(req, null, 2))
     return request(req).then((result) => {
       var res = result[0]

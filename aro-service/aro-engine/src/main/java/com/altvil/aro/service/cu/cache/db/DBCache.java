@@ -52,7 +52,7 @@ public class DBCache implements SimpleCache {
 
 	private PlanCacheKey createKey(CacheKey key) {
 		return new PlanCacheKey(key.getServiceAreaId(), key
-				.getBsaKey().getDeploymentPlanId(),
+				.getBsaKey().getPlanId(),
 				key.getCacheTypeExtendedKey());
 	}
 
@@ -159,7 +159,7 @@ public class DBCache implements SimpleCache {
 			AroKey bsaKey = key.getBsaKey();
 
 			byte[] blob = cacheEntityRepository.queryBlobData(
-					bsaKey.getServiceAreaId(), bsaKey.getDeploymentPlanId(),
+					bsaKey.getServiceAreaId(), bsaKey.getPlanId(),
 					key.getCacheTypeExtendedKey());
 			try (ObjectInputStream in = new ObjectInputStream(
 					new GZIPInputStream(new ByteArrayInputStream(blob)))) {
@@ -192,7 +192,7 @@ public class DBCache implements SimpleCache {
 
 			//
 			// deploymentPlanCacheRepository.updateDeploymentPlanCacheEntity(
-			// bsaKey.getServiceAreaId(), bsaKey.getDeploymentPlanId(),
+			// bsaKey.getServiceAreaId(), bsaKey.getPlanId(),
 			// key, deploymentCacheEntity.getOptiLock(),
 			// deploymentCacheEntity.getVersion(),
 			// deploymentCacheEntity.getLocationVersion(),
@@ -209,8 +209,8 @@ public class DBCache implements SimpleCache {
 			params.put("blob", cacheData);
 			params.put("serviceAreaId", key.getServiceAreaId());
 			params.put("deploymentPlanId", key.getBsaKey()
-					.getDeploymentPlanId() == null ? -1 : key.getBsaKey()
-					.getDeploymentPlanId());
+					.getPlanId() == null ? -1 : key.getBsaKey()
+					.getPlanId());
 
 			params.put("serviceAreaVersion", deploymentCacheEntity.getServiceAreaVersion());
 

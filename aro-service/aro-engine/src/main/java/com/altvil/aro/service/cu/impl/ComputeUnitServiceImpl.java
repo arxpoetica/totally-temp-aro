@@ -285,7 +285,7 @@ public class ComputeUnitServiceImpl  implements ComputeUnitService {
 		private boolean canPreCache(VersionEvent versionEvent) {
 			if (versionEvent.getVersionType() == VersionType.LOCATION
 					&& executorContext.getVersionTypes().size() == 1) {
-				Long id = versionEvent.getKey().getDeploymentPlanId();
+				Long id = versionEvent.getKey().getPlanId();
 				if (!(id == null || id == -1)) {
 					return false;
 				}

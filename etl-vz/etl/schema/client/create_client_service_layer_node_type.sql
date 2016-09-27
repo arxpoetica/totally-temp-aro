@@ -215,3 +215,4 @@ VALUES (
 	'bulk_distribution_consumer',
 	FALSE
 ) ;
+

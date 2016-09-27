@@ -151,7 +151,6 @@
           </a>
         </div>
         <label class="pull-right">
-          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_households"></span>
           <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
         <label style="margin-left:25px">Residential</label>
@@ -162,10 +161,8 @@
             <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px;margin-right:10px">
           </div>
           <label class="pull-right" style="margin-right: 22px">
-            <!--
+            <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="household_categories_selected[category.name]"></span>
             <input type="checkbox" ng-model="household_categories_selected[category.name]" ng-change="changeLocationsLayer()" ng-disabled="!show_households">
-            -->
-            <input type="checkbox" ng-model="show_households" disabled>
           </label>
           <label style="font-weight:normal">{{category.description}}</label>
         </div>

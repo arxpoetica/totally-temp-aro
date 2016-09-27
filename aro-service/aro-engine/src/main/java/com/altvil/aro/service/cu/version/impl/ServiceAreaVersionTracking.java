@@ -51,7 +51,7 @@ public class ServiceAreaVersionTracking implements VersionTrackingPersistence {
 
 	@Override
 	public Collection<AroKey> getAffectedKeys(AroKey bsaKey) {
-//		List<BsaKey> list = versionRepository.getChildPlans(bsaKey.getDeploymentPlanId()).stream()
+//		List<BsaKey> list = versionRepository.getChildPlans(bsaKey.getPlanId()).stream()
 //				.map(childPlanId -> keyService.createDeploymentKey(bsaKey.getServiceAreaId(), childPlanId))
 //				.collect(Collectors.toList());
 		return Collections.singleton(bsaKey) ;
@@ -97,7 +97,7 @@ public class ServiceAreaVersionTracking implements VersionTrackingPersistence {
 
 	private ServiceAreaAndPlanVersionKey toKey(AroKey bsaKey) {
 		ServiceAreaAndPlanVersionKey key = new ServiceAreaAndPlanVersionKey();
-		key.setDeploymentPlanId(bsaKey.getDeploymentPlanId());
+		key.setDeploymentPlanId(bsaKey.getPlanId());
 		key.setServiceAreaId(bsaKey.getServiceAreaId());
 		return key;
 	}

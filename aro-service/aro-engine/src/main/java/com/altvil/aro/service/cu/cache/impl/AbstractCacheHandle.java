@@ -30,7 +30,7 @@ public abstract class AbstractCacheHandle implements CacheHandle {
 	}
 
 	public Long getDeploymentPlanId() {
-		return cacheKey.getBsaKey().getDeploymentPlanId();
+		return cacheKey.getBsaKey().getPlanId();
 	}
 
 }
