@@ -237,7 +237,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $scope.business_categories_selected['medium'] = false
     }
     if (!$scope.show_households) {
-      // TODO
+      $scope.household_categories_selected['small'] = false
+      $scope.household_categories_selected['medium'] = false
     }
 
     const subcategories = (key) => {
