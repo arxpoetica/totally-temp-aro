@@ -59,7 +59,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $(document).ready(() => {
     map.ready(() => {
-      $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)) // clone
+      $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)).filter((layer) => layer.show_in_assets)
       if ($scope.serviceLayers.length > 0) {
         var layer = $scope.serviceLayers[0]
         // layer.enabled = true

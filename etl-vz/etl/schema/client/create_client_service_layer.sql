@@ -26,3 +26,9 @@ ALTER TABLE client.service_layer ADD COLUMN show_in_boundaries BOOL NOT NULL DEF
 UPDATE client.service_layer SET show_in_boundaries=FALSE WHERE name='wirecenter';
 
 UPDATE client.service_layer SET show_in_boundaries=FALSE WHERE name='directional_facility';
+
+ALTER TABLE client.service_layer ADD COLUMN show_in_assets BOOL NOT NULL DEFAULT TRUE;
+
+UPDATE client.service_layer SET show_in_assets=FALSE WHERE name='wirecenter';
+
+UPDATE client.service_layer SET show_in_assets=FALSE WHERE name='directional_facility';
