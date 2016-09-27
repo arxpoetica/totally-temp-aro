@@ -119,8 +119,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
   ]
 
+  var wirecentersLayer
   globalServiceLayers.forEach((serviceLayer) => {
-    if (!serviceLayer.show_in_boundaries) return
+    var isWirecenter = serviceLayer.name === 'wirecenter'
+    if (!serviceLayer.show_in_boundaries && !isWirecenter) return
     var color = serviceLayersColors.shift() || 'black'
     var layer = new MapLayer({
       name: serviceLayer.description,
@@ -144,7 +146,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       minZoom: 6,
       hoverField: 'name'
     })
-    $scope.areaLayers.push(layer)
+    if (isWirecenter) wirecentersLayer = layer
+    if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
   })
 
   var drawingManager = new google.maps.drawing.DrawingManager({
@@ -461,7 +464,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $rootScope.$on('financial_profile_changed_mode', (e, mode) => {
     if (mode === 'area') {
-      // wirecentersLayer && wirecentersLayer.show()
+      wirecentersLayer && wirecentersLayer.show()
     }
   })
 
