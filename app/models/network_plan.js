@@ -582,11 +582,11 @@ module.exports = class NetworkPlan {
           arr.push(edge)
         })
         Object.keys(types).forEach((type) => {
-          kml_output += `<GroundOverlay><name>${escape(type)}</name>`
+          kml_output += `<Folder><name>${escape(type)}</name>`
           types[type].forEach((edge) => {
             kml_output += `<Placemark><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
           })
-          kml_output += '</GroundOverlay>'
+          kml_output += '</Folder>'
         })
 
         var sql = `
