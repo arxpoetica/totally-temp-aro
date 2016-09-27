@@ -561,18 +561,32 @@ module.exports = class NetworkPlan {
         `
 
         var sql = `
-          SELECT ST_AsKML(fiber_route.geom) AS geom
+          SELECT ST_AsKML(fiber_route.geom) AS geom, (frt.description || ' ' || cct.description) AS fiber_type
           FROM client.plan r
           JOIN client.plan mp ON mp.parent_plan_id = r.id
           JOIN client.plan p ON p.parent_plan_id = mp.id
           JOIN client.fiber_route ON fiber_route.plan_id = p.id
+          JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
+          JOIN client.fiber_route_segment seg ON seg.fiber_route_id = fiber_route.id
+          JOIN client.cable_construction_type cct ON cct.id = seg.cable_construction_type_id
           WHERE r.id=$1
         `
         return database.query(sql, [plan_id])
       })
       .then((edges) => {
+        var types = {}
         edges.forEach((edge) => {
-          kml_output += `<Placemark><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
+          var type = edge.fiber_type
+          var arr = types[type]
+          if (!arr) types[type] = arr = []
+          arr.push(edge)
+        })
+        Object.keys(types).forEach((type) => {
+          kml_output += `<GroundOverlay><name>${escape(type)}</name>`
+          types[type].forEach((edge) => {
+            kml_output += `<Placemark><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
+          })
+          kml_output += '</GroundOverlay>'
         })
 
         var sql = `
