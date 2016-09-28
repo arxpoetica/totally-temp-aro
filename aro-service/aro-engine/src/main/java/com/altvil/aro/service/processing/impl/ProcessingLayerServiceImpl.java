@@ -1,5 +1,7 @@
 package com.altvil.aro.service.processing.impl;
 
+import java.io.Reader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.aro.service.processing.UserProcessingLayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +32,7 @@ import com.altvil.utils.StreamUtil;
 import com.altvil.utils.reference.VolatileReference;
 
 @Service
-public class ProcessingLayerServiceImpl implements ProcessingLayerService {
+public class ProcessingLayerServiceImpl implements ProcessingLayerService, UserProcessingLayerService {
 
 	// private static final String RULE = "system_defaults";
 
@@ -72,6 +75,35 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 	public Collection<ServiceLayer> getServiceLayers(
 			Collection<Integer> serviceLayersIds) {
 		return systemRuleRef.get().getServiceLayers(serviceLayersIds);
+	}
+
+	@Override
+	public Collection<ServiceLayer> getUserServiceLayers(int userId) {
+		return serviceLayerRepository.findByUserId(userId);
+	}
+
+	@Override
+	public ServiceLayer getUserServiceLayers(int userId, int id) {
+		return serviceLayerRepository.findByUserIdAndId(userId, id);
+	}
+
+	@Override
+	public ServiceLayer addUserServiceLayer(int userId, String layerName, String layerDescription) {
+		ServiceLayer serviceLayer = new ServiceLayer();
+		serviceLayer.setUserId(userId);
+		serviceLayer.setName(layerName);
+		serviceLayer.setDescription(layerDescription);
+		return serviceLayerRepository.save(serviceLayer);
+	}
+
+	@Override
+	public void writeUserServiceLayerEntitiesCSV(int id, Writer responseWriter) {
+
+	}
+
+	@Override
+	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader) {
+
 	}
 
 	private class SystemRule implements ProcessingLayerService {

@@ -1,13 +1,11 @@
 package com.altvil.aro.model;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import java.io.Serializable;
+import java.util.Set;
+
+import javax.persistence.*;
 
 @SuppressWarnings("serial")
 @Entity
@@ -15,9 +13,12 @@ import javax.persistence.Table;
 public class ServiceLayer extends ComparableModel implements Serializable  {
 
 	private Integer id;
+	private Integer userId;
 	private String name;
 	private String description;
 	private boolean userDefined;
+
+	private DataSourceEntity dataSource;
 	
 	@Override
 	protected Serializable idKey() {
@@ -61,6 +62,23 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 	public void setUserDefined(boolean userDefined) {
 		this.userDefined = userDefined;
 	}
-	
 
+	@Column(name = "user_id")
+	public Integer getUserId() {
+		return userId;
+	}
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "data_source_id")
+	public DataSourceEntity getDataSource() {
+		return dataSource;
+	}
+
+	public void setDataSource(DataSourceEntity dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
 }

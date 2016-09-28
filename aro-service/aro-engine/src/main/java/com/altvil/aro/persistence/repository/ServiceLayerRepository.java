@@ -1,12 +1,16 @@
 package com.altvil.aro.persistence.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.altvil.aro.model.ServiceLayer;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface ServiceLayerRepository extends
 		JpaRepository<ServiceLayer, Integer> {
 
@@ -32,5 +36,10 @@ public interface ServiceLayerRepository extends
 			"	ON r.id = c.system_rule_id \n" + 
 			"WHERE name='system_defaults'", nativeQuery = true)
 	List<Object[]> queryMappedPriorities() ;
-	
+
+
+	Collection<ServiceLayer> findByUserId(int userId);
+
+
+	ServiceLayer findByUserIdAndId(int userId, int id);
 }

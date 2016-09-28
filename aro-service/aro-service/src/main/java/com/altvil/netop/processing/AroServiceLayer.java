@@ -1,10 +1,21 @@
 package com.altvil.netop.processing;
 
+import com.altvil.aro.model.ServiceLayer;
+
 public class AroServiceLayer {
     private Integer id;
     private String name;
     private String description;
     private boolean userDefined;
+
+    public AroServiceLayer(){}
+
+    public AroServiceLayer(ServiceLayer serviceLayer){
+        this.id = serviceLayer.getId();
+        this.name = serviceLayer.getName();
+        this.description = serviceLayer.getDescription();
+        this.userDefined = serviceLayer.isUserDefined();
+    }
 
 
     public Integer getId() {

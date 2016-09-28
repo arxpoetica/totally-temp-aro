@@ -1,0 +1,19 @@
+package com.altvil.aro.service.processing;
+
+import com.altvil.aro.model.ServiceLayer;
+
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Collection;
+
+public interface UserProcessingLayerService {
+
+    Collection<ServiceLayer> getUserServiceLayers(int userId) ;
+    ServiceLayer getUserServiceLayers(int userId, int id) ;
+
+    ServiceLayer addUserServiceLayer(int userId, String layerName, String layerDescription);
+
+    void writeUserServiceLayerEntitiesCSV(int id, Writer responseWriter);
+
+    void saveUserServiceLayerEntitiesCSV(int id, Reader reader);
+}
