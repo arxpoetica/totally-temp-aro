@@ -1,11 +1,21 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', '$timeout', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions, $timeout) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
   $scope.selected_tool = false
   $scope.boundaries = []
+
+  $scope.userDefinedBoundaries = [
+    { name: 'Boundary 1', id: 1 },
+    { name: 'Boundary 2', id: 2 },
+    { name: 'Boundary 3', id: 3 },
+    { name: 'Boundary 4', id: 4 },
+    { name: 'Boundary 5', id: 5 },
+    { name: 'Boundary 6', id: 6 },
+    { name: 'Boundary 7', id: 7 }
+  ]
 
   // selected regions
   $scope.selectedRegions = []
@@ -471,5 +481,45 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.toggleVisibility = (layer) => {
     layer.toggleVisibility()
     regions.setSearchOption(layer.type, layer.visible)
+  }
+
+  $scope.createUserDefinedBoundary = () => {
+    swal({
+      title: 'Give it a name',
+      text: 'How do you want to name this boundary?',
+      type: 'input',
+      showCancelButton: true,
+      closeOnConfirm: true,
+      animation: 'slide-from-top',
+      inputPlaceholder: 'Boundary name'
+    }, (name) => {
+      if (!name) return
+
+      $timeout(() => {
+        var boundary = {
+          id: Date.now(),
+          name: name
+        }
+        $scope.userDefinedBoundaries.push(boundary)
+        $scope.selectedUserDefinedBoundary = boundary
+        var select = document.getElementById('userDefinedBoundaries')
+        select.scrollTop = select.scrollHeight
+      }, 0)
+      // if (!name) {
+      //   return overlay.setMap(null)
+      // }
+      // var data = {
+      //   name: name || 'Untitled boundary',
+      //   geom: JSON.stringify(toGeoJson(overlay))
+      // }
+      //
+      // $http.post('/boundary/' + $scope.plan.id + '/create', data)
+      //   .success((boundary) => {
+      //     $scope.boundaries.push(boundary)
+      //     boundary.overlay = overlay
+      //     makeBoundaryEditable(boundary)
+      //     updateTooltips()
+      //   })
+    })
   }
 }])
