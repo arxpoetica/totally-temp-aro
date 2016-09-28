@@ -484,42 +484,23 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $scope.createUserDefinedBoundary = () => {
-    swal({
-      title: 'Give it a name',
-      text: 'How do you want to name this boundary?',
-      type: 'input',
-      showCancelButton: true,
-      closeOnConfirm: true,
-      animation: 'slide-from-top',
-      inputPlaceholder: 'Boundary name'
-    }, (name) => {
-      if (!name) return
-
-      $timeout(() => {
-        var boundary = {
-          id: Date.now(),
-          name: name
-        }
-        $scope.userDefinedBoundaries.push(boundary)
-        $scope.selectedUserDefinedBoundary = boundary
-        var select = document.getElementById('userDefinedBoundaries')
-        select.scrollTop = select.scrollHeight
-      }, 0)
-      // if (!name) {
-      //   return overlay.setMap(null)
-      // }
-      // var data = {
-      //   name: name || 'Untitled boundary',
-      //   geom: JSON.stringify(toGeoJson(overlay))
-      // }
-      //
-      // $http.post('/boundary/' + $scope.plan.id + '/create', data)
-      //   .success((boundary) => {
-      //     $scope.boundaries.push(boundary)
-      //     boundary.overlay = overlay
-      //     makeBoundaryEditable(boundary)
-      //     updateTooltips()
-      //   })
-    })
+    $rootScope.$broadcast('edit_user_defined_boundary', null)
   }
+
+  $scope.editUserDefinedBoundary = (boundary) => {
+    $rootScope.$broadcast('edit_user_defined_boundary', $scope.selectedUserDefinedBoundary)
+  }
+
+  $rootScope.$on('saved_user_defined_boundary', (e, boundary) => {
+    var existing = $scope.userDefinedBoundaries.find((item) => item.id === boundary.id)
+    if (existing) {
+      existing.name = boundary.name
+      $scope.selectedUserDefinedBoundary = existing
+    } else {
+      $scope.userDefinedBoundaries.push(boundary)
+      $scope.selectedUserDefinedBoundary = boundary
+      var select = document.getElementById('userDefinedBoundariesSelect')
+      select.scrollTop = select.scrollHeight
+    }
+  })
 }])
