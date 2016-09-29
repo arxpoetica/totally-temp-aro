@@ -28,6 +28,7 @@ services:
         volumes:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db
+            - ../../aro-etl-vz:/srv/www/aro/db/data/private
         ports:
             - "8000:8000"
         links:
@@ -39,7 +40,7 @@ services:
             PGUSER: aro
             PGDATABASE: aro
             ARO_DATA_ROOT: /srv/www/aro/db/data
-            DATABASE_URL: postgres://aro:aro@arodb/aro
+            RAILS_ENV: development
             ARO_CLIENT: aro
         working_dir: /srv/www/aro
         command: bash -c "/usr/sbin/sshd -D"
