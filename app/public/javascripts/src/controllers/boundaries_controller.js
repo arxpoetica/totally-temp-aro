@@ -1,11 +1,21 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', '$timeout', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions, $timeout) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
   $scope.selected_tool = false
   $scope.boundaries = []
+
+  $scope.userDefinedBoundaries = [
+    { name: 'Boundary 1', id: 1 },
+    { name: 'Boundary 2', id: 2 },
+    { name: 'Boundary 3', id: 3 },
+    { name: 'Boundary 4', id: 4 },
+    { name: 'Boundary 5', id: 5 },
+    { name: 'Boundary 6', id: 6 },
+    { name: 'Boundary 7', id: 7 }
+  ]
 
   // selected regions
   $scope.selectedRegions = []
@@ -472,4 +482,25 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     layer.toggleVisibility()
     regions.setSearchOption(layer.type, layer.visible)
   }
+
+  $scope.createUserDefinedBoundary = () => {
+    $rootScope.$broadcast('edit_user_defined_boundary', null)
+  }
+
+  $scope.editUserDefinedBoundary = (boundary) => {
+    $rootScope.$broadcast('edit_user_defined_boundary', $scope.selectedUserDefinedBoundary)
+  }
+
+  $rootScope.$on('saved_user_defined_boundary', (e, boundary) => {
+    var existing = $scope.userDefinedBoundaries.find((item) => item.id === boundary.id)
+    if (existing) {
+      existing.name = boundary.name
+      $scope.selectedUserDefinedBoundary = existing
+    } else {
+      $scope.userDefinedBoundaries.push(boundary)
+      $scope.selectedUserDefinedBoundary = boundary
+      var select = document.getElementById('userDefinedBoundariesSelect')
+      select.scrollTop = select.scrollHeight
+    }
+  })
 }])
