@@ -2,14 +2,7 @@ package com.altvil.aro.persistence.repository.user_data;
 
 import java.util.Set;
 
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -25,6 +18,9 @@ public class DataSourceEntity {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "data_source_id_seq")
+    @SequenceGenerator(name = "data_source_id_seq", schema = "user_data", sequenceName = "data_source_id_seq", allocationSize = 1)
     public Long getId() {
         return id;
     }
@@ -87,13 +83,13 @@ public class DataSourceEntity {
 		this.userId = userId;
 	}
 
-	@Override
+    @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
+        int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (userId != null ? userId.hashCode() : 0);
+        result = 31 * result + (sourceLocationEntities != null ? sourceLocationEntities.hashCode() : 0);
         return result;
     }
-    
-    
 }

@@ -1,13 +1,6 @@
 package com.altvil.aro.persistence.repository.user_data;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -24,6 +17,9 @@ public class SourceLocationEntity {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "source_location_entity_id_seq")
+    @SequenceGenerator(name = "source_location_entity_id_seq", schema = "user_data", sequenceName = "source_location_entity_id_seq", allocationSize = 1)
     public Long getId() {
         return id;
     }
@@ -90,13 +86,11 @@ public class SourceLocationEntity {
 
     @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
+        int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (entityCategoryId != null ? entityCategoryId.hashCode() : 0);
         result = 31 * result + (lat != null ? lat.hashCode() : 0);
         result = 31 * result + (longitude != null ? longitude.hashCode() : 0);
         return result;
     }
-
-
 
 }

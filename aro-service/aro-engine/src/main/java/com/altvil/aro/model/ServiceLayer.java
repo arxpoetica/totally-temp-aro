@@ -2,15 +2,7 @@ package com.altvil.aro.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.altvil.aro.persistence.repository.user_data.DataSourceEntity;
 
@@ -34,7 +26,9 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 
 	@Id
 	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE,
+			generator = "service_layer_id_seq")
+	@SequenceGenerator(name = "service_layer_id_seq", schema = "client", sequenceName = "service_layer_id_seq", allocationSize = 1)
 	public Integer getId() {
 		return id;
 	}

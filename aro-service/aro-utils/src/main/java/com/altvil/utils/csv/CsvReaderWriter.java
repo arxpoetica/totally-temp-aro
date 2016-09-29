@@ -1,5 +1,7 @@
 package com.altvil.utils.csv;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
@@ -17,8 +19,12 @@ public class CsvReaderWriter<T> {
 		this.mapping = mapping;
 	}
 
-	public List<T> parse(Reader reader) {
-		return new CsvToBean<T>().parse(mapping, reader);
+	public List<T> parse(Reader reader) throws IOException {
+		//skip first line
+
+		BufferedReader bufferedReader = new BufferedReader(reader);
+		bufferedReader.readLine();
+		return new CsvToBean<T>().parse(mapping, bufferedReader);
 	}
 
 	public void write(Writer writer, List<T> values) {

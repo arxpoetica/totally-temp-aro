@@ -1,5 +1,6 @@
 package com.altvil.aro.service.processing.impl;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
@@ -42,7 +43,7 @@ public class UserProcessingLayerServiceImpl implements
 	@PostConstruct
 	void PostConstruct() {
 		csvReaderWriter = CsvReaderWriterFactory.FACTORY
-				.create(EntityDataRow.class);
+				.create(EntityDataRow.class, "entityCategoryId","lat","longitude");
 	}
 
 	@Override
@@ -83,7 +84,7 @@ public class UserProcessingLayerServiceImpl implements
 
 	@Override
 	@Transactional
-	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader) {
+	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader) throws IOException {
 
 		DataSourceEntity ds = serviceLayerRepository.getOne(id).getDataSource();
 
@@ -122,33 +123,33 @@ public class UserProcessingLayerServiceImpl implements
 	
 	public static class EntityDataRow {
 		@CsvBind
-		private Integer entityCategoryId;
+		private int entityCategoryId;
 		@CsvBind
-		private Double lat;
+		private double lat;
 		@CsvBind
-		private Double longitude;
+		private double longitude;
 
-		public Integer getEntityCategoryId() {
+		public int getEntityCategoryId() {
 			return entityCategoryId;
 		}
 
-		public void setEntityCategoryId(Integer entityCategoryId) {
+		public void setEntityCategoryId(int entityCategoryId) {
 			this.entityCategoryId = entityCategoryId;
 		}
 
-		public Double getLat() {
+		public double  getLat() {
 			return lat;
 		}
 
-		public void setLat(Double lat) {
+		public void setLat(double lat) {
 			this.lat = lat;
 		}
 
-		public Double getLongitude() {
+		public double getLongitude() {
 			return longitude;
 		}
 
-		public void setLongitude(Double longitude) {
+		public void setLongitude(double longitude) {
 			this.longitude = longitude;
 		}
 

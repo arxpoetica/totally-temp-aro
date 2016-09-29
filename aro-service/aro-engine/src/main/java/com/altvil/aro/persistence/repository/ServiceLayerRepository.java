@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.altvil.aro.model.ServiceLayer;
@@ -27,10 +28,10 @@ public interface ServiceLayerRepository extends
 	List<Object[]> queryMappedPriorities();
 
 	@Query( "select sl from ServiceLayer sl where sl.dataSource.userId = :userId")
-	Collection<ServiceLayer> getByUserId(int userId);
+	Collection<ServiceLayer> getByUserId(@Param("userId") int userId);
 
 	@Query( "select sl from ServiceLayer sl where sl.dataSource.userId = :userId and sl.id = :id")
-	ServiceLayer getByUserIdAndId(int userId, int id);
+	ServiceLayer getByUserIdAndId(@Param("userId") int userId, @Param("id") int id);
 
 	Collection<ServiceLayer> findByUserDefined(boolean userDefined);
 

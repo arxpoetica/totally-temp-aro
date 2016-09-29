@@ -21,7 +21,7 @@ public class CsvReaderWriterFactory {
 		return strat;
 	}
 
-	public <T> CsvReaderWriter<T> create(Class<T> clz, String[] columns) {
+	public <T> CsvReaderWriter<T> create(Class<T> clz, String... columns) {
 		return new CsvReaderWriter<T>(createMapping(clz, columns));
 	}
 
