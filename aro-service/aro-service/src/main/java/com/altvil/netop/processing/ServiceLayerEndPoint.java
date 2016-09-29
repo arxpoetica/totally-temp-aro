@@ -1,19 +1,22 @@
 package com.altvil.netop.processing;
 
-import com.altvil.aro.model.ServiceLayer;
-import com.altvil.aro.service.processing.UserProcessingLayerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import static java.util.stream.Collectors.toList;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.altvil.aro.service.processing.UserProcessingLayerService;
 
 @RestController
 public class ServiceLayerEndPoint {
@@ -50,7 +53,7 @@ public class ServiceLayerEndPoint {
 
     @RequestMapping(value = "/serviceLayers/{id}/entities.csv", method = RequestMethod.GET, produces = "text/csv")
     public void getServiceLayerEntitesCSV(@PathVariable int id, Writer responseWriter){
-        service.writeUserServiceLayerEntitiesCSV(id, responseWriter);
+        service.loadUserServiceLayerEntitiesCSV(id, responseWriter);
     }
 
 

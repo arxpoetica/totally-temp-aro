@@ -1,25 +1,35 @@
-package com.altvil.aro.model;
+package com.altvil.aro.persistence.repository.user_data;
+
+import java.util.Set;
+
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "data_source", schema = "user_data", catalog = "aro")
 public class DataSourceEntity {
-    private long id;
+    private Long id;
     private String name;
     private String description;
+    private Long userId ;
     private Set<SourceLocationEntity> sourceLocationEntities;
 
     @Id
     @Column(name = "id")
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -67,11 +77,23 @@ public class DataSourceEntity {
     public void setSourceLocationEntities(Set<SourceLocationEntity> sourceLocationEntities) {
         this.sourceLocationEntities = sourceLocationEntities;
     }
-    @Override
+    
+    @Column(name="user_id")
+    public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	@Override
     public int hashCode() {
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         return result;
     }
+    
+    
 }

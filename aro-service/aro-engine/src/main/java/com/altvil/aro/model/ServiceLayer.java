@@ -1,11 +1,18 @@
 package com.altvil.aro.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import java.io.Serializable;
-import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.altvil.aro.persistence.repository.user_data.DataSourceEntity;
 
 @SuppressWarnings("serial")
 @Entity
@@ -13,7 +20,7 @@ import javax.persistence.*;
 public class ServiceLayer extends ComparableModel implements Serializable  {
 
 	private Integer id;
-	private Integer userId;
+	//private Integer userId;
 	private String name;
 	private String description;
 	private boolean userDefined;
@@ -63,12 +70,12 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 		this.userDefined = userDefined;
 	}
 
-	@Column(name = "user_id")
-	public Integer getUserId() {
-		return userId;
-	}
+//	@Column(name = "user_id")
+//	public Integer getUserId() {
+//		return userId;
+//	}
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "data_source_id")
 	public DataSourceEntity getDataSource() {
 		return dataSource;
@@ -78,7 +85,7 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 		this.dataSource = dataSource;
 	}
 
-	public void setUserId(Integer userId) {
-		this.userId = userId;
-	}
+//	public void setUserId(Integer userId) {
+//		this.userId = userId;
+//	}
 }

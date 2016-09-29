@@ -1,7 +1,5 @@
 package com.altvil.aro.service.processing.impl;
 
-import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,7 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import com.altvil.aro.service.processing.UserProcessingLayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +29,11 @@ import com.altvil.utils.StreamUtil;
 import com.altvil.utils.reference.VolatileReference;
 
 @Service
-public class ProcessingLayerServiceImpl implements ProcessingLayerService, UserProcessingLayerService {
+public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 	// private static final String RULE = "system_defaults";
 
-	private VolatileReferenceService volatileReferenceService ;
+	private VolatileReferenceService volatileReferenceService;
 	private ServiceLayerRepository serviceLayerRepository;
 	private VolatileReference<SystemRule> systemRuleRef;
 
@@ -46,7 +43,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService, UserP
 			VolatileReferenceService volatileReferenceService) {
 		super();
 		this.serviceLayerRepository = serviceLayerRepository;
-		this.volatileReferenceService = volatileReferenceService ;
+		this.volatileReferenceService = volatileReferenceService;
 	}
 
 	@Override
@@ -61,8 +58,8 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService, UserP
 
 	@PostConstruct
 	void postConstruct() {
-		systemRuleRef = volatileReferenceService.createVolatileReference(ReferenceType.SERVICE_LAYER_INPUTS,
-				this::loadSystemRule) ;
+		systemRuleRef = volatileReferenceService.createVolatileReference(
+				ReferenceType.SERVICE_LAYER_INPUTS, this::loadSystemRule);
 	}
 
 	@Override
@@ -76,35 +73,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService, UserP
 			Collection<Integer> serviceLayersIds) {
 		return systemRuleRef.get().getServiceLayers(serviceLayersIds);
 	}
-
-	@Override
-	public Collection<ServiceLayer> getUserServiceLayers(int userId) {
-		return serviceLayerRepository.findByUserId(userId);
-	}
-
-	@Override
-	public ServiceLayer getUserServiceLayers(int userId, int id) {
-		return serviceLayerRepository.findByUserIdAndId(userId, id);
-	}
-
-	@Override
-	public ServiceLayer addUserServiceLayer(int userId, String layerName, String layerDescription) {
-		ServiceLayer serviceLayer = new ServiceLayer();
-		serviceLayer.setUserId(userId);
-		serviceLayer.setName(layerName);
-		serviceLayer.setDescription(layerDescription);
-		return serviceLayerRepository.save(serviceLayer);
-	}
-
-	@Override
-	public void writeUserServiceLayerEntitiesCSV(int id, Writer responseWriter) {
-
-	}
-
-	@Override
-	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader) {
-
-	}
+	
 
 	private class SystemRule implements ProcessingLayerService {
 
@@ -112,7 +81,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService, UserP
 		private LinkedHashMap<ServiceLayer, Set<LocationEntityType>> layerAssignmentMap;
 
 		public SystemRule construct() {
-			serviceLayerMap = StreamUtil.hash(serviceLayerRepository.findAll(),
+			serviceLayerMap = StreamUtil.hash(serviceLayerRepository.findByUserDefined(false),
 					ServiceLayer::getId);
 
 			layerAssignmentMap = createLayerAssignmentMap(
@@ -205,12 +174,11 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService, UserP
 										.intValue()), ((Number) a[1])
 										.intValue());
 							});
-			
-			
-			int priroty = 40 ;
-			for(ServiceLayer sl : serviceLayerMap.values()) {
-				if( result.get(sl) == null ) {
-					result.put(sl, priroty++) ;
+
+			int priroty = 40;
+			for (ServiceLayer sl : serviceLayerMap.values()) {
+				if (result.get(sl) == null) {
+					result.put(sl, priroty++);
 				}
 			}
 
@@ -252,4 +220,5 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService, UserP
 
 	}
 
+	
 }

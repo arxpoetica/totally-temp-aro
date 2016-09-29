@@ -1,25 +1,34 @@
-package com.altvil.aro.model;
+package com.altvil.aro.persistence.repository.user_data;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import javax.persistence.*;
 
 @Entity
 @Table(name = "source_location_entity", schema = "user_data", catalog = "aro")
 public class SourceLocationEntity {
-    private long id;
-    private Integer entityCategoryId;
-    private DataSourceEntity dataSource;
-    private Double lat;
+    
+	private Long id;
+	private DataSourceEntity dataSource;
+	
+	private Integer entityCategoryId;
+	private Double lat;
     private Double longitude;
 
     @Id
     @Column(name = "id")
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
