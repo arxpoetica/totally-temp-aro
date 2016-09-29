@@ -2,12 +2,9 @@ package com.altvil.aro.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
+import com.altvil.aro.persistence.repository.user_data.DataSourceEntity;
 
 @SuppressWarnings("serial")
 @Entity
@@ -15,9 +12,12 @@ import javax.persistence.Table;
 public class ServiceLayer extends ComparableModel implements Serializable  {
 
 	private Integer id;
+	//private Integer userId;
 	private String name;
 	private String description;
 	private boolean userDefined;
+
+	private DataSourceEntity dataSource;
 	
 	@Override
 	protected Serializable idKey() {
@@ -26,7 +26,9 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 
 	@Id
 	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE,
+			generator = "service_layer_id_seq")
+	@SequenceGenerator(name = "service_layer_id_seq", schema = "client", sequenceName = "service_layer_id_seq", allocationSize = 1)
 	public Integer getId() {
 		return id;
 	}
@@ -61,6 +63,23 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 	public void setUserDefined(boolean userDefined) {
 		this.userDefined = userDefined;
 	}
-	
 
+//	@Column(name = "user_id")
+//	public Integer getUserId() {
+//		return userId;
+//	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "data_source_id")
+	public DataSourceEntity getDataSource() {
+		return dataSource;
+	}
+
+	public void setDataSource(DataSourceEntity dataSource) {
+		this.dataSource = dataSource;
+	}
+
+//	public void setUserId(Integer userId) {
+//		this.userId = userId;
+//	}
 }

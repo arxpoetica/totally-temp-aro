@@ -30,6 +30,7 @@
     <orderEntry type="library" name="Maven: com.google.inject:guice:3.0" level="project" />
     <orderEntry type="library" name="Maven: javax.inject:javax.inject:1" level="project" />
     <orderEntry type="library" name="Maven: aopalliance:aopalliance:1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.opencsv:opencsv:3.7" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-remoting:2.0.8" level="project" />
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.1" level="project" />
     <orderEntry type="library" name="Maven: logkit:logkit:1.0.1" level="project" />

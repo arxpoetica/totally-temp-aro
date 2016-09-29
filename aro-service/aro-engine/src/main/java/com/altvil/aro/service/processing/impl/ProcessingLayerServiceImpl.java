@@ -33,7 +33,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 	// private static final String RULE = "system_defaults";
 
-	private VolatileReferenceService volatileReferenceService ;
+	private VolatileReferenceService volatileReferenceService;
 	private ServiceLayerRepository serviceLayerRepository;
 	private VolatileReference<SystemRule> systemRuleRef;
 
@@ -43,7 +43,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 			VolatileReferenceService volatileReferenceService) {
 		super();
 		this.serviceLayerRepository = serviceLayerRepository;
-		this.volatileReferenceService = volatileReferenceService ;
+		this.volatileReferenceService = volatileReferenceService;
 	}
 
 	@Override
@@ -58,8 +58,8 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 	@PostConstruct
 	void postConstruct() {
-		systemRuleRef = volatileReferenceService.createVolatileReference(ReferenceType.SERVICE_LAYER_INPUTS,
-				this::loadSystemRule) ;
+		systemRuleRef = volatileReferenceService.createVolatileReference(
+				ReferenceType.SERVICE_LAYER_INPUTS, this::loadSystemRule);
 	}
 
 	@Override
@@ -73,6 +73,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 			Collection<Integer> serviceLayersIds) {
 		return systemRuleRef.get().getServiceLayers(serviceLayersIds);
 	}
+	
 
 	private class SystemRule implements ProcessingLayerService {
 
@@ -80,7 +81,7 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 		private LinkedHashMap<ServiceLayer, Set<LocationEntityType>> layerAssignmentMap;
 
 		public SystemRule construct() {
-			serviceLayerMap = StreamUtil.hash(serviceLayerRepository.findAll(),
+			serviceLayerMap = StreamUtil.hash(serviceLayerRepository.findByUserDefined(false),
 					ServiceLayer::getId);
 
 			layerAssignmentMap = createLayerAssignmentMap(
@@ -173,12 +174,11 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 										.intValue()), ((Number) a[1])
 										.intValue());
 							});
-			
-			
-			int priroty = 40 ;
-			for(ServiceLayer sl : serviceLayerMap.values()) {
-				if( result.get(sl) == null ) {
-					result.put(sl, priroty++) ;
+
+			int priroty = 40;
+			for (ServiceLayer sl : serviceLayerMap.values()) {
+				if (result.get(sl) == null) {
+					result.put(sl, priroty++);
 				}
 			}
 
@@ -220,4 +220,5 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 
 	}
 
+	
 }

@@ -1,19 +1,36 @@
 package com.altvil.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.postgresql.geometric.PGpoint;
+
 import com.vividsolutions.jts.algorithm.Angle;
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineSegment;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
 import com.vividsolutions.jts.operation.distance.GeometryLocation;
-import org.postgresql.geometric.PGpoint;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
 
 public class GeometryUtil {
 
@@ -51,6 +68,32 @@ public class GeometryUtil {
 
 		return FACTORY.createMultiPolygon(polygons);
 	}
+	
+	
+	 public static MathTransform getGeographyTransform(Point point) {
+	        org.opengis.referencing.crs.CoordinateReferenceSystem auto = null;
+	        try {
+	            auto = CRS.decode("AUTO:42001," + point.getCoordinate().x + ',' + point.getCoordinate().y);
+
+	            return CRS.findMathTransform(DefaultGeographicCRS.WGS84, auto);
+
+	        } catch (FactoryException e) {
+	            throw new RuntimeException(e);
+	        }
+	    }
+
+	public static MathTransform getGeometryTransform(Point point) {
+		org.opengis.referencing.crs.CoordinateReferenceSystem auto = null;
+		try {
+			auto = CRS.decode("AUTO:42001," + point.getCoordinate().x + ',' + point.getCoordinate().y);
+
+			return CRS.findMathTransform(auto, DefaultGeographicCRS.WGS84 );
+
+		} catch (FactoryException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 
 	public static LineString asLineString(LineString lineString) {
 		return FACTORY.createLineString(lineString.getCoordinates());
@@ -257,4 +300,34 @@ public class GeometryUtil {
 		return null;
 	}
 
+	public static Collection<Coordinate> asCoordinates(Collection<Point> points) {
+		return points
+				.stream()
+				.map(Point::getCoordinate)
+				.collect(Collectors.toList());
+	}
+
+	public static <T extends Geometry> Collection<T> transformGeometriesToGeographies(Collection<T> geometries, Point centroid) {
+		MathTransform transform = getGeographyTransform(centroid);
+		return geometries.stream()
+				.map(geom -> transformGeometry(transform, geom))
+				.collect(Collectors.toList());
+
+	}
+	private static <T extends Geometry> T transformGeometry(MathTransform coordinatesProjection, T shapeTrimmed) {
+		try {
+			return (T)org.geotools.geometry.jts.JTS.transform(shapeTrimmed, coordinatesProjection);
+		} catch (TransformException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public static <T extends Geometry> Collection<T> transformGeographiesToGeometries(Collection<T> geographies, Point centroid) {
+		MathTransform transform = getGeometryTransform(centroid);
+		return geographies.stream()
+				.map(geom -> transformGeometry(transform, geom))
+				.collect(Collectors.toList());
+
+	}
 }

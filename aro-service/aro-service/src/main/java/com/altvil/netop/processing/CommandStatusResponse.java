@@ -4,6 +4,10 @@ public class CommandStatusResponse {
 
     private int numberOfAreasGenerated;
 
+    public CommandStatusResponse(int  numberOfAreasGenerated) {
+        this.numberOfAreasGenerated = numberOfAreasGenerated;
+    }
+
     public int getNumberOfAreasGenerated() {
         return numberOfAreasGenerated;
     }

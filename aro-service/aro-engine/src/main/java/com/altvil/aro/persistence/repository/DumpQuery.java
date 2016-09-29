@@ -57,7 +57,7 @@ public class DumpQuery {
 		int lastPeriod = METHOD.lastIndexOf('.');
 		String className = METHOD.substring(0, lastPeriod);
 		String methodSignature = METHOD.substring(lastPeriod + 1);
-		
+
 		Class<?> cls = Class.forName(className);
 		for(Method method : cls.getDeclaredMethods()) {
 			StringBuilder key = new StringBuilder();

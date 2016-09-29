@@ -27,7 +27,6 @@ import com.altvil.aro.service.plan.NetworkAssignmentModelFactory;
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
-import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
 
 @Service
@@ -155,16 +154,12 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 
 
-
-
-
-
-	private Collection<RoadEdge> getRoadEdges(
-			NetworkDataRequest networkConfiguration, ServiceAreaContext ctx) {
-		return networkDataDAO
-				.getRoadEdges(networkConfiguration.getServiceAreaId().get(), ctx)
-				.getRoadEdges();
-	}
+//	private Collection<RoadEdge> getRoadEdges(
+//			NetworkDataRequest networkConfiguration, ServiceAreaContext ctx) {
+//		return networkDataDAO
+//				.getRoadEdges(networkConfiguration.getServiceAreaId().get(), ctx)
+//				.getRoadEdges();
+//	}
 
 //	private enum ConduitEdgeMap implements OrdinalAccessor {
 //		gid, constructionType, startRatio, endRatio
