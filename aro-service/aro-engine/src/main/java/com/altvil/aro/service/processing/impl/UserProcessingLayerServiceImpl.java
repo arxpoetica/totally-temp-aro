@@ -75,8 +75,8 @@ public class UserProcessingLayerServiceImpl implements
 		
 		DataSourceEntity dse = new DataSourceEntity() ;
 		
-		dse.setName("ServiceLayerData");
-		dse.setDescription("User Service Layer Data") ;
+		dse.setName(layerName);
+		dse.setDescription(layerDescription) ;
 		dse.setUserId(userId) ;
 		
 		this.dataSourceEntityRepository.save(dse) ;
