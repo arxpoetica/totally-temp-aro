@@ -79,6 +79,7 @@ public class UserProcessingLayerServiceImpl implements
 		dse.setDescription("User Service Layer Data") ;
 		dse.setUserId(userId) ;
 		
+		this.dataSourceEntityRepository.save(dse) ;
 		serviceLayer.setDataSource(dse) ;
 		
 		
