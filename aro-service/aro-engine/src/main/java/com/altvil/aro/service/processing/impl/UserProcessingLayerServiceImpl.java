@@ -71,6 +71,7 @@ public class UserProcessingLayerServiceImpl implements
 		ServiceLayer serviceLayer = new ServiceLayer();
 		serviceLayer.setName(layerName);
 		serviceLayer.setDescription(layerDescription);
+		serviceLayer.setUserDefined(true);
 		
 		DataSourceEntity dse = new DataSourceEntity() ;
 		
