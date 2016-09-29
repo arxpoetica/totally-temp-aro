@@ -1,20 +1,35 @@
 package com.altvil.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.MathTransform;
+import org.postgresql.geometric.PGpoint;
+
 import com.vividsolutions.jts.algorithm.Angle;
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineSegment;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
 import com.vividsolutions.jts.operation.distance.GeometryLocation;
-import org.postgresql.geometric.PGpoint;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class GeometryUtil {
 
@@ -51,6 +66,39 @@ public class GeometryUtil {
 		}
 
 		return FACTORY.createMultiPolygon(polygons);
+	}
+	
+	
+	 public static MathTransform getTransform(Point point) {
+	        org.opengis.referencing.crs.CoordinateReferenceSystem auto = null;
+	        try {
+	            auto = CRS.decode("AUTO:42001," + point.getCoordinate().x + ',' + point.getCoordinate().y);
+
+	            return CRS.findMathTransform(DefaultGeographicCRS.WGS84, auto);
+
+	        } catch (FactoryException e) {
+	            throw new RuntimeException(e);
+	        }
+	    }
+	
+	public static Object x() {
+		MathTransform coordinatesProjection = getTransform(saCentroid);
+
+	       long startTime = System.currentTimeMillis();
+	       STRtree stRtree = new STRtree();
+	       routes.stream()
+	               .filter(route -> !route.getDeploymentDate().after(options.getDeploymentDate()))
+	               .filter(route -> route.getFiberType() == FiberType.DISTRIBUTION).forEach(route -> {
+	           for (FiberSegment routeSegment : route.getFiberSegments()) {
+
+	               Geometry shapeTrimmed = routeSegment.getShapeTrimmed();
+	               Geometry shape = transformGeometry(coordinatesProjection, shapeTrimmed);
+	               if (shape != null && shape.getLength() != 0) {
+	                   Geometry bufferedShape = shape.buffer(fiberOptions.getDistanceThreshold());
+	                   stRtree.insert(bufferedShape.getEnvelopeInternal(), route);
+	               }
+	           }
+	       });
 	}
 
 	public static LineString asLineString(LineString lineString) {

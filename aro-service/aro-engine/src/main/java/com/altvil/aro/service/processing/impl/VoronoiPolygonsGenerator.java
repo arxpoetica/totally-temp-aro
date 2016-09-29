@@ -38,6 +38,7 @@ public class VoronoiPolygonsGenerator {
     }
 
     private Envelope computeEnvelope(Collection<Point> points) {
-        return null;
+    	GeometryUtil.factory().buildGeometry(points).buffer(maxDistanceMeters) ;
+    	return null;
     }
 }
