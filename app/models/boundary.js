@@ -4,6 +4,8 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var config = helpers.config
+var models = require('../models')
 
 module.exports = class Boundary {
 
@@ -55,6 +57,37 @@ module.exports = class Boundary {
       FROM client.boundaries WHERE plan_id=$1
     `
     return database.query(sql, [plan_id])
+  }
+
+  static findUserDefinedBoundaries (user) {
+    return database.query('SELECT * FROM user_data.data_source WHERE user_id=$1', [user.id])
+  }
+
+  static editUserDefinedBoundary (user, id, name) {
+    return Promise.resolve()
+      .then(() => {
+        if (!id) {
+          var req = {
+            method: 'POST',
+            url: config.aro_service_url + '/rest/serviceLayers',
+            body: {
+              layerDescription: name,
+              layerName: name,
+              userId: user.id
+            },
+            json: true
+          }
+          return models.AROService.request(req)
+        } else {
+          return database.execute('UPDATE user_data.data_source SET name=$1 description=$1 WHERE id=$2', [name, id])
+        }
+      })
+      .then((res) => {
+        console.log('done', res)
+      })
+      .then(() => {
+
+      })
   }
 
 }

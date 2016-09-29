@@ -40,4 +40,31 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  // Create a user-defined boundary
+  api.post('/boundary/user_defined', (request, response, next) => {
+    var name = request.params.name
+    var user = request.user
+    models.Boundary.editUserDefinedBoundary(user, null, name)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Edit a user-defined boundary
+  api.post('/boundary/user_defined/:id', (request, response, next) => {
+    var name = request.params.name
+    var id = request.params.id
+    var user = request.user
+    models.Boundary.editUserDefinedBoundary(user, id, name)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Find the user-defined boundaries of a user
+  api.get('/boundary/user_defined', (request, response, next) => {
+    var user = request.user
+    models.Boundary.findUserDefinedBoundaries(user)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

@@ -7,15 +7,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.selected_tool = false
   $scope.boundaries = []
 
-  $scope.userDefinedBoundaries = [
-    { name: 'Boundary 1', id: 1 },
-    { name: 'Boundary 2', id: 2 },
-    { name: 'Boundary 3', id: 3 },
-    { name: 'Boundary 4', id: 4 },
-    { name: 'Boundary 5', id: 5 },
-    { name: 'Boundary 6', id: 6 },
-    { name: 'Boundary 7', id: 7 }
-  ]
+  $scope.userDefinedBoundaries = []
   $scope.selectedUserDefinedBoundary = null
 
   // selected regions
@@ -239,6 +231,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
           updateTooltips()
         })
       })
+
+    $scope.selectedUserDefinedBoundary = null
+    if ($scope.userDefinedBoundaries.length === 0) {
+      $http.get('/boundary/user_defined')
+        .success((response) => {
+          $scope.userDefinedBoundaries = response
+        })
+    }
   })
 
   function updateTooltips () {
