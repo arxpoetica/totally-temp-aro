@@ -5,14 +5,15 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.aro.model.ServiceArea;
+import com.altvil.aro.persistence.repository.ServiceAreaRepository;
 import com.altvil.utils.GeometryUtil;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,16 +33,20 @@ public class UserProcessingLayerServiceImpl implements
 		UserProcessingLayerService {
 	private ServiceLayerRepository serviceLayerRepository;
 	private DataSourceEntityRepository dataSourceEntityRepository;
+	private ServiceAreaRepository serviceAreaRepository;
 
 	private CsvReaderWriter<EntityDataRow> csvReaderWriter;
 
 	@Autowired
 	public UserProcessingLayerServiceImpl(
 			ServiceLayerRepository serviceLayerRepository,
-			DataSourceEntityRepository dataSourceEntityRepository) {
+			DataSourceEntityRepository dataSourceEntityRepository,
+			ServiceAreaRepository serviceAreaRepository
+			) {
 		super();
 		this.serviceLayerRepository = serviceLayerRepository;
 		this.dataSourceEntityRepository = dataSourceEntityRepository;
+		this.serviceAreaRepository = serviceAreaRepository;
 	}
 
 	@PostConstruct
@@ -110,8 +115,31 @@ public class UserProcessingLayerServiceImpl implements
 	@Override
 	public int createAreasFromPoints(int serviceLayerId, double maxDistanceMeters) {
 		ServiceLayer serviceLayer = serviceLayerRepository.getOne(serviceLayerId);
+		VoronoiPolygonsGenerator polygonsGenerator  = new VoronoiPolygonsGenerator(maxDistanceMeters);
+		Collection<ServiceArea> generatedAreas = polygonsGenerator.generatePolygons(serviceLayer
+				.getDataSource()
+				.getSourceLocationEntities()
+				.stream()
+				.map(SourceLocationEntity::getPoint)
+				.collect(Collectors.toSet())
+		).stream()
+				.map(polygon -> createServiceArea(polygon, serviceLayer))
+				.collect(Collectors.toSet());
 
+		List<ServiceArea> savedAreas = serviceAreaRepository.save(generatedAreas);
+		return savedAreas.size();
+	}
 
+	private ServiceArea createServiceArea(Polygon polygon, ServiceLayer serviceLayer) {
+		Polygon polygons[] = {polygon};
+		MultiPolygon multiPolygon = GeometryUtil.factory().createMultiPolygon(polygons);
+		ServiceArea sa = new ServiceArea();
+		sa.setGeog(multiPolygon);
+		sa.setGeom(multiPolygon);
+		sa.setSourceId("autogen");
+		sa.setCode("autogen_" + System.currentTimeMillis() +'_' +  Math.random());
+		sa.setLayer(serviceLayer);
+		return sa;
 	}
 
 	//

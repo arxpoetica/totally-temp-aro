@@ -54,6 +54,22 @@ public class UserProcessingLayerServiceTest {
     }
 
     @Test
+    public void testGenerateAreas() throws IOException {
+
+        ServiceLayer serviceLayer = layerService.addUserServiceLayer(6, "loadTestLayer", "loadTestLayer description");
+
+
+        StringReader reader = new StringReader(csvData);
+
+        layerService.saveUserServiceLayerEntitiesCSV(serviceLayer.getId(), reader);
+        ServiceLayer modifiedLayer = layerService.getUserServiceLayers(6, serviceLayer.getId());
+
+        int numOfAreas = layerService.createAreasFromPoints(serviceLayer.getId(), 100000);
+        System.out.println(modifiedLayer);
+
+    }
+
+    @Test
     public void testCSVload() throws IOException {
 
         ServiceLayer serviceLayer = layerService.addUserServiceLayer(6, "loadTestLayer", "loadTestLayer description");
@@ -66,6 +82,5 @@ public class UserProcessingLayerServiceTest {
         layerService.loadUserServiceLayerEntitiesCSV(serviceLayer.getId(), responseWriter);
         String response = responseWriter.toString();
         System.out.println(response);
-
     }
 }
