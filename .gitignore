@@ -120,3 +120,4 @@ bin/
 #aro-service git ignores
 
 aro-service
+aro-service/
