@@ -17,4 +17,10 @@ public interface UserProcessingLayerService {
     void loadUserServiceLayerEntitiesCSV(int id, Writer responseWriter);
 
     void saveUserServiceLayerEntitiesCSV(int id, Reader reader) throws IOException;
+
+    /**
+     *
+     * @return number of areas generated
+     */
+    int createAreasFromPoints(int id, double maxDistanceMeters);
 }

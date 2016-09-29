@@ -3,6 +3,7 @@ package com.altvil.aro.persistence.repository.user_data;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.vividsolutions.jts.geom.Point;
 
 @Entity
 @Table(name = "source_location_entity", schema = "user_data", catalog = "aro")
@@ -14,6 +15,8 @@ public class SourceLocationEntity {
 	private Integer entityCategoryId;
 	private Double lat;
     private Double longitude;
+
+    private Point point;
 
     @Id
     @Column(name = "id")
@@ -68,6 +71,16 @@ public class SourceLocationEntity {
     public void setDataSource(DataSourceEntity dataSource) {
         this.dataSource = dataSource;
     }
+
+
+    public Point getPoint() {
+        return point;
+    }
+
+    public void setPoint(Point point) {
+        this.point = point;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,5 +105,6 @@ public class SourceLocationEntity {
         result = 31 * result + (longitude != null ? longitude.hashCode() : 0);
         return result;
     }
+
 
 }

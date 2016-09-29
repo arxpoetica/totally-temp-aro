@@ -73,9 +73,9 @@ public class ServiceLayerEndPoint {
     }
 
     @RequestMapping(value = "/serviceLayers/{id}/command", method = RequestMethod.POST)
-    public CommandStatusResponse processCommand(@RequestBody ServiceLayerCommand command){
+    public CommandStatusResponse processCommand(@PathVariable int id, @RequestBody ServiceLayerCommand command){
 
-        return null;
+        return new CommandStatusResponse(service.createAreasFromPoints(id, command.getMaxDistanceMeters()));
     }
 
 

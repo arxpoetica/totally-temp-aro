@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.utils.GeometryUtil;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,11 +98,19 @@ public class UserProcessingLayerServiceImpl implements
 					sl.setDataSource(ds);
 					sl.setLat(r.getLat());
 					sl.setLongitude(r.getLongitude());
+					sl.setPoint(GeometryUtil.asPoint(new Coordinate(r.getLongitude(),r.getLat())));
 					sl.setEntityCategoryId(r.getEntityCategoryId());
 					return sl;
 				}).collect(Collectors.toSet()));
 
 		dataSourceEntityRepository.save(ds);
+
+	}
+
+	@Override
+	public int createAreasFromPoints(int serviceLayerId, double maxDistanceMeters) {
+		ServiceLayer serviceLayer = serviceLayerRepository.getOne(serviceLayerId);
+
 
 	}
 
