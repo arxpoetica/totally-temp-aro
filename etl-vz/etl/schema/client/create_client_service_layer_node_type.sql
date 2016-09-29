@@ -35,7 +35,7 @@ VALUES (
 	'wirecenter_splice_point',
 	'Splice Point',
 	'Splice Point',
-	false	
+	FALSE
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -78,7 +78,7 @@ VALUES (
 	'wirecenter_bulk_distribution_consumer',
 	'Direct Feeder',
 	'Direct Feeder',
-	false	
+	FALSE
 ) ;
 
 -- cran
@@ -102,7 +102,7 @@ VALUES (
 	'cran_splice_point',
 	'Splice Point',
 	'Splice Point',
-	false
+	FALSE
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -145,7 +145,7 @@ VALUES (
 	'cran_bulk_distribution_consumer',
 	'bulk_distribution_consumer',
 	'bulk_distribution_consumer',
-	false
+	FALSE
 ) ;
 
 
@@ -170,7 +170,7 @@ VALUES (
 	'df_splice_point',
 	'Splice Point',
 	'Splice Point',
-	false
+	FALSE
 ) ;
 
 INSERT INTO client.service_layer_node_type
@@ -213,5 +213,6 @@ VALUES (
 	'df_bulk_distribution_consumer',
 	'bulk_distribution_consumer',
 	'bulk_distribution_consumer',
-	false
+	FALSE
 ) ;
+

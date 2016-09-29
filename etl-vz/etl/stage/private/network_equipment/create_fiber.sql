@@ -12,10 +12,10 @@ SELECT AddGeometryColumn('network_equipment', 'fiber', 'geom', 4326, 'MULTILINES
 INSERT INTO network_equipment.fiber(geom)
 	SELECT
 		the_geom
-	FROM network_equipment.shp_ves_fiber;
+	FROM network_equipment.vzb_fiber_part1;
 
 -- Merge in KML fiber
 INSERT INTO network_equipment.fiber(geom)
 	SELECT
 		the_geom
-	FROM network_equipment.kml_ves_fiber;
+	FROM network_equipment.vzb_fiber_part2;
