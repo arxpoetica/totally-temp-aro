@@ -10,6 +10,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 import org.postgresql.geometric.PGpoint;
 
 import com.vividsolutions.jts.algorithm.Angle;
@@ -69,7 +70,7 @@ public class GeometryUtil {
 	}
 	
 	
-	 public static MathTransform getTransform(Point point) {
+	 public static MathTransform getGeographyTransform(Point point) {
 	        org.opengis.referencing.crs.CoordinateReferenceSystem auto = null;
 	        try {
 	            auto = CRS.decode("AUTO:42001," + point.getCoordinate().x + ',' + point.getCoordinate().y);
@@ -80,26 +81,19 @@ public class GeometryUtil {
 	            throw new RuntimeException(e);
 	        }
 	    }
-	
-	public static Object x() {
-		MathTransform coordinatesProjection = getTransform(saCentroid);
 
-	       long startTime = System.currentTimeMillis();
-	       STRtree stRtree = new STRtree();
-	       routes.stream()
-	               .filter(route -> !route.getDeploymentDate().after(options.getDeploymentDate()))
-	               .filter(route -> route.getFiberType() == FiberType.DISTRIBUTION).forEach(route -> {
-	           for (FiberSegment routeSegment : route.getFiberSegments()) {
+	public static MathTransform getGeometryTransform(Point point) {
+		org.opengis.referencing.crs.CoordinateReferenceSystem auto = null;
+		try {
+			auto = CRS.decode("AUTO:42001," + point.getCoordinate().x + ',' + point.getCoordinate().y);
 
-	               Geometry shapeTrimmed = routeSegment.getShapeTrimmed();
-	               Geometry shape = transformGeometry(coordinatesProjection, shapeTrimmed);
-	               if (shape != null && shape.getLength() != 0) {
-	                   Geometry bufferedShape = shape.buffer(fiberOptions.getDistanceThreshold());
-	                   stRtree.insert(bufferedShape.getEnvelopeInternal(), route);
-	               }
-	           }
-	       });
+			return CRS.findMathTransform(auto, DefaultGeographicCRS.WGS84 );
+
+		} catch (FactoryException e) {
+			throw new RuntimeException(e);
+		}
 	}
+	
 
 	public static LineString asLineString(LineString lineString) {
 		return FACTORY.createLineString(lineString.getCoordinates());
@@ -311,5 +305,29 @@ public class GeometryUtil {
 				.stream()
 				.map(Point::getCoordinate)
 				.collect(Collectors.toList());
+	}
+
+	public static <T extends Geometry> Collection<T> transformGeometriesToGeographies(Collection<T> geometries, Point centroid) {
+		MathTransform transform = getGeographyTransform(centroid);
+		return geometries.stream()
+				.map(geom -> transformGeometry(transform, geom))
+				.collect(Collectors.toList());
+
+	}
+	private static <T extends Geometry> T transformGeometry(MathTransform coordinatesProjection, T shapeTrimmed) {
+		try {
+			return (T)org.geotools.geometry.jts.JTS.transform(shapeTrimmed, coordinatesProjection);
+		} catch (TransformException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public static <T extends Geometry> Collection<T> transformGeographiesToGeometries(Collection<T> geographies, Point centroid) {
+		MathTransform transform = getGeometryTransform(centroid);
+		return geographies.stream()
+				.map(geom -> transformGeometry(transform, geom))
+				.collect(Collectors.toList());
+
 	}
 }

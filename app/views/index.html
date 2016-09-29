@@ -479,11 +479,11 @@
     })
 
     function calculatePanelHeight () {
-      var maxHeight = $(document).height() - 400
-      $('.panel-collapse > .panel-body').css('max-height', maxHeight)
+      var maxHeight = $(document).height() - $('#map-tools-accordion').offset().top - $('#map-tools-accordion').height() - 100
+      $('#map-tools-accordion .panel-collapse > .panel-body').css('max-height', maxHeight)
     }
 
-    calculatePanelHeight()
+    $(document).ready(calculatePanelHeight)
     $(window).resize(calculatePanelHeight)
 
     $("#share-plan-search").select2({

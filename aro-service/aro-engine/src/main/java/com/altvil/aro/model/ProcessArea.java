@@ -2,17 +2,7 @@ package com.altvil.aro.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.annotations.DiscriminatorOptions;
 
@@ -33,8 +23,6 @@ public class ProcessArea extends ComparableModel {
 	private String sourceId;
 	private String code;
 
-	private String state;
-	
 	private MultiPolygon geog;
 	private MultiPolygon geom;
 
@@ -46,7 +34,9 @@ public class ProcessArea extends ComparableModel {
 
 	@Id
 	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE,
+			generator = "service_area_id_seq")
+	@SequenceGenerator(name = "service_area_id_seq", schema = "client", sequenceName = "service_area_id_seq", allocationSize = 1)
 	public Integer getId() {
 		return id;
 	}
@@ -84,14 +74,6 @@ public class ProcessArea extends ComparableModel {
 		this.code = code;
 	}
 
-	@Column(name = "state")
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
-	}
 
 	@Column(name = "geog")
 	@JsonDeserialize(using = GeometryJsonDeserializer.class)

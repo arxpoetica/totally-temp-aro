@@ -16,6 +16,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     { name: 'Boundary 6', id: 6 },
     { name: 'Boundary 7', id: 7 }
   ]
+  $scope.selectedUserDefinedBoundary = null
 
   // selected regions
   $scope.selectedRegions = []
@@ -30,6 +31,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   var countySubdivisionsLayer
   var censusBlocksLayer
   var cmaBoundariesLayer
+  var userDefinedLayer
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
     countySubdivisionsLayer = new MapLayer({
@@ -89,6 +91,30 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       hoverField: 'name'
     })
   }
+
+  $scope.userDefinedLayer = userDefinedLayer = new MapLayer({
+    short_name: 'UD',
+    name: 'User-defined boundaries',
+    type: 'user_defined',
+    api_endpoint: '/county_subdivisions/36',
+    highlighteable: true,
+    style_options: {
+      normal: {
+        fillColor: 'green',
+        strokeColor: 'green',
+        strokeWeight: 2
+      },
+      highlight: {
+        fillColor: 'green',
+        strokeColor: 'green',
+        strokeWeight: 2
+      }
+    },
+    reload: 'always',
+    threshold: 0,
+    minZoom: 9,
+    hoverField: 'name'
+  })
 
   $scope.areaLayers = [
     censusBlocksLayer,
@@ -159,6 +185,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     if (isWirecenter) wirecentersLayer = layer
     if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
   })
+
+  $scope.areaLayers.push(userDefinedLayer)
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
