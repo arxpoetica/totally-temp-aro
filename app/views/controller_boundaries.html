@@ -1,15 +1,18 @@
 <div>
   <div ng-show="areaLayers.length > 0 || boundaries.length > 0">
     <div ng-repeat="layer in areaLayers">
-      <div class="checkbox" ng-attr-id="map_layers_toggle_{{key}}" ng-class="{ 'disabled': layer.disabled }">
-        <!--
+      <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
         <div class="pull-right">
-          <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
+          <input type="checkbox" ng-click="toggleVisibility(layer)" ng-disabled="layer.disabled">
         </div>
-        -->
-        <label class="eye-control">
-          <input type="checkbox" ng-click="layer.toggleVisibility()" ng-disabled="layer.disabled"> {{layer.name}}
-          <div class="eye-indicator"></div>
+        <div class="pull-right" style="margin-right: 30px">
+          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
+          <!--
+          <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
+          -->
+        </div>
+        <label>
+          {{layer.name}}
         </label>
       </div>
     </div>
@@ -39,14 +42,35 @@
           </a>
           <% } %>
         </div>
-        <label class="eye-control">
+        <label>
           <input type="checkbox" ng-click="toggleBoundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
-          <div class="eye-indicator"></div>
         </label>
       </div>
     </div>
     <hr>
   </div>
+
+  <p>
+    <p class="pull-right">
+      <button class="btn btn-primary btn-xs" ng-click="createUserDefinedBoundary()">
+        <span class="fa fa-plus"></span>
+      </button>
+    </p>
+    <strong>User-defined boundaries</strong>
+  </p>
+
+  <select class="form-control" size="5" ng-model="selectedUserDefinedBoundary" ng-options="boundary as boundary.name for boundary in userDefinedBoundaries track by boundary.id" id="userDefinedBoundariesSelect">
+    <option style="display:none"></option>
+  </select>
+
+  <br>
+  <p ng-show="selectedUserDefinedBoundary">
+    <button class="btn btn-primary btn-sm" ng-click="editUserDefinedBoundary()">
+      <span class="fa fa-pencil"></span> &nbsp; Edit selected user-defined boundary
+    </button>
+  </p>
+
+  <hr>
 
   <% if (config.ARO_CLIENT === 'verizon') { %>
   <p><strong>Search or Click Geographies</strong></p>
@@ -67,10 +91,12 @@
   <hr>
   <% } %>
 
+  <!--
   <div ng-show="plan.owner_id === user_id">
     <h2>Build</h2>
     <p>
       <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggleTool()">Custom</a>
     </p>
   </div>
+  -->
 </div>

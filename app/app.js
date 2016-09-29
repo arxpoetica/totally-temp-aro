@@ -56,5 +56,5 @@ app.use(api)
 if (module.id === require.main.id) {
   var port = process.env.PORT || 8000
   var server = app.listen(port)
-  server.timeout = 30 * 60 * 1000 // 30min
+  server.timeout = 60 * 60 * 1000 // 30min
 }

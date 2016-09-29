@@ -16,10 +16,17 @@
           <% include controller_locations.html %>
         </div>
       </div>
-      <div style="position:fixed; right: 10px; top: 128px">
-        <button class="btn" ng-class="{'btn-success': heatmapOn, 'btn-primary': !heatmapOn}" ng-click="toggleHeatmap()">
-          <span class="fa fa-fire"></span>
-        </button>
+      <div id="map-extras">
+        <p>
+          <button class="btn" ng-class="{'btn-success': heatmapOn, 'btn-primary': !heatmapOn}" ng-click="toggleHeatmap()" style="width: 39px">
+            <span class="fa fa-fire"></span>
+          </button>
+        <p>
+        </p>
+          <button class="btn" ng-class="{'btn-success': roadLayer.visible, 'btn-primary': !roadLayer.visible}" ng-click="roadLayer.toggleVisibility()" style="width: 39px">
+            <span class="fa fa-road map-layer-spinner map-layer-spinner-road_segments"></span>
+          </button>
+        </p>
       </div>
     </div>
 

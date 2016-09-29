@@ -1,0 +1,56 @@
+ 
+ aro.towers
+ 	=> towers.sita_towers 
+
+ client.service_area
+ 	=> geotel.wirecenters
+
+
+ (Replaced By View X)
+ client.locations_carriers 
+ 	-> aro.locations
+ 	-> aro.census_blocks
+ 	-> nbm.blocks
+ 	-> aro.carriers
+
+ client.location_entry_fees
+ 	&^&&^&& ->
+
+ aro.industries
+ 	-> businesses.infousa
+
+aro.households
+	-> aro.locations
+	-> aro.wirecenter_subset
+	=> aro.temp_households
+
+client.plan(H)
+	client.service.area(*) =>
+
+aro.fiber_plant
+	geotel.fiber_plant =>
+
+client.network_nodes
+	client.plan(H) =>
+	client.service_layer =>
+
+aro.arriers
+	() -> 
+
+aro.business
+  businesses.infousa =>
+  aro.locations ->
+
+AnalysisAreas
+	boundaries.cma => 
+
+
+Cache
+	
+	business_category_mappings
+		aro.businesses -> 
+	
+	client.household_category_mappings, aro.locations
+		aro.households ->
+	
+

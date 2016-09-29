@@ -45,6 +45,13 @@ app.service('map_utils', ($rootScope, $http) => {
       updateCounter(1)
     })
 
+    layer.addListener('removefeature', (e) => {
+      if (e.feature !== feature) return
+      timer && clearTimeout(timer)
+      marker.setMap(null)
+      marker = null
+    })
+
     // var listener = (e) => {
     //   if (e.feature === feature) {
     //     marker.setMap(null)

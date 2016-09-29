@@ -1,4 +1,6 @@
 var models = require('../models')
+var helpers = require('../helpers')
+var cache = helpers.cache
 
 exports.configure = (app, middleware) => {
   var check_admin = middleware.check_admin
@@ -14,6 +16,12 @@ exports.configure = (app, middleware) => {
     var options = request.body
     models.Settings.update(options)
       .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  app.post('/admin/settings/refresh_cache', check_admin, (request, response, next) => {
+    cache.refresh()
+      .then(() => response.redirect('/'))
       .catch(next)
   })
 }

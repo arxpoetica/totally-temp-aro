@@ -1,6 +1,7 @@
 var nodemailer = require('nodemailer')
 var ses = require('nodemailer-ses-transport')
 var AWS = require('aws-sdk')
+var config = require('./config')
 
 var region = process.env.AWS_REGION
 if (!region) {
@@ -9,18 +10,21 @@ if (!region) {
 }
 AWS.config.update({ region: region })
 
-var transporter = process.env.NODE_ENV === 'production'
+var transporter = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging'
   ? nodemailer.createTransport(ses({ ses: new AWS.SES() }))
   : nodemailer.createTransport() // direct
 
-var aro_client = process.env.ARO_CLIENT || ''
 exports.sendMail = (options) => {
-  options.from = 'ARO <no-reply@' + aro_client + '.aro.app.altvil.com>'
-  transporter.sendMail(options, (err, info) => {
-    if (err) {
-      return console.log(err)
-    }
-    console.log('Message sent:', info.response)
+  options.from = `ARO <${config.from_email_address}>`
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(options, (err, info) => {
+      if (err) {
+        reject(err)
+        return console.log(err)
+      }
+      console.log('Message sent:', info)
+      resolve()
+    })
   })
 }
 

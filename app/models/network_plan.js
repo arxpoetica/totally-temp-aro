@@ -90,22 +90,62 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static findEdges (plan_id) {
-    var sql = `
+  static copyPlan (plan_id, name, user) {
+    return database.findOne(`
+      INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type, location_types)
       SELECT
-        fiber_route.id,
-        -- ST_Length(geom::geography) * 0.000621371 AS edge_length,
-        ST_AsGeoJSON(fiber_route.geom)::json AS geom,
-        ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid,
-        frt.name AS fiber_type,
-        frt.description AS fiber_name
-      FROM client.plan
-      JOIN client.plan p ON p.parent_plan_id = plan.id
-      JOIN client.fiber_route ON fiber_route.plan_id = p.id
-      JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
-      WHERE plan.id=$1
-    `
-    return database.query(sql, [plan_id])
+        $2 AS name,
+        area_name,
+        area_centroid,
+        area_bounds,
+        NOW() AS created_at,
+        NOW() AS updated_at,
+        'R' AS plan_type,
+        location_types
+      FROM client.plan WHERE id=$1
+      RETURNING id
+    `, [plan_id, name])
+    .then((plan) => {
+      var id = plan.id
+      return Promise.all([
+        database.execute(`
+          INSERT INTO client.selected_regions (plan_id, region_name, region_id, region_type)
+          SELECT $2 AS plan_id, region_name, region_id, region_type FROM client.selected_regions WHERE plan_id = $1
+        `, [plan_id, id]),
+        database.execute(`
+          INSERT INTO client.selected_service_area (plan_id, service_area_id)
+          SELECT $2 AS plan_id, service_area_id FROM client.selected_service_area WHERE plan_id = $1
+        `, [plan_id, id]),
+        database.execute(`
+          INSERT INTO client.selected_analysis_area (plan_id, analysis_area_id)
+          SELECT $2 AS plan_id, analysis_area_id FROM client.selected_analysis_area WHERE plan_id = $1
+        `, [plan_id, id]),
+        database.execute(`
+          INSERT INTO client.plan_sources (plan_id, network_node_id)
+          SELECT $2 AS plan_id, network_node_id FROM client.plan_sources WHERE plan_id = $1
+        `, [plan_id, id]),
+        database.execute(`
+          INSERT INTO client.plan_targets (plan_id, location_id)
+          SELECT $2 AS plan_id, location_id FROM client.plan_targets WHERE plan_id = $1
+        `, [plan_id, id])
+      ])
+      .then(() => models.Permission.grantAccess(id, user.id, 'owner'))
+      .then(() => {
+        var sql = `
+          SELECT
+            $2::text AS carrier_name,
+            plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
+            users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
+            created_at, updated_at
+          FROM
+            client.plan
+          LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
+          LEFT JOIN auth.users ON users.id = permissions.user_id
+          WHERE plan.id=$1
+        `
+        return database.findOne(sql, [id, config.client_carrier_name])
+      })
+    })
   }
 
   static findPlan (plan_id, metadata_only) {
@@ -122,7 +162,8 @@ module.exports = class NetworkPlan {
           $2::text AS carrier_name,
           plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
           users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
-          created_at, updated_at
+          created_at, updated_at, location_types,
+          (SELECT EXISTS(SELECT id FROM client.plan WHERE parent_plan_id=$1 LIMIT 1)) AS ran_optimization
         FROM client.plan
         LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
         LEFT JOIN auth.users ON users.id = permissions.user_id
@@ -228,18 +269,6 @@ module.exports = class NetworkPlan {
 
         output.metadata.total_premises = output.metadata.premises.reduce((total, item) => total + item.value, 0)
 
-        return NetworkPlan.findEdges(plan_id)
-      })
-      .then((edges) => {
-        output.feature_collection.features = edges.map((edge) => ({
-          'type': 'Feature',
-          'geometry': edge.geom,
-          'properties': {
-            'fiber_type': edge.fiber_type,
-            'centroid': edge.centroid
-          }
-        }))
-
         return database.query(`
           SELECT
             region_id AS id, region_name AS name, region_type AS type, ST_AsGeoJSON(geom)::json AS geog
@@ -323,7 +352,7 @@ module.exports = class NetworkPlan {
           FROM client.plan
           LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
           LEFT JOIN auth.users ON users.id = permissions.user_id
-          WHERE plan.plan_type='M'
+          WHERE plan.plan_type='R'
         `
         var params = [config.client_carrier_name]
         if (user) {
@@ -391,7 +420,7 @@ module.exports = class NetworkPlan {
     .then(() => {
       var sql = `
         INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type)
-        VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326), ST_Envelope(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)), NOW(), NOW(), 'M') RETURNING id;
+        VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326), ST_Envelope(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)), NOW(), NOW(), 'R') RETURNING id;
       `
       var params = [
         name,
@@ -489,7 +518,7 @@ module.exports = class NetworkPlan {
         this._deleteTargets(plan_id, changes.deletions && changes.deletions.locations)
       ))
       .then(() => (
-        models.Network.recalculateNodes(plan_id, changes)
+        changes.lazy ? null : models.Network.recalculateNodes(plan_id, changes)
       ))
       .then(() => NetworkPlan.findPlan(plan_id))
   }
@@ -532,17 +561,32 @@ module.exports = class NetworkPlan {
         `
 
         var sql = `
-          SELECT ST_AsKML(fiber_route.geom) AS geom
-          FROM client.plan
-          JOIN client.plan p ON p.parent_plan_id = plan.id
+          SELECT ST_AsKML(fiber_route.geom) AS geom, (frt.description || ' ' || cct.description) AS fiber_type
+          FROM client.plan r
+          JOIN client.plan mp ON mp.parent_plan_id = r.id
+          JOIN client.plan p ON p.parent_plan_id = mp.id
           JOIN client.fiber_route ON fiber_route.plan_id = p.id
-          WHERE plan.id=$1
+          JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
+          JOIN client.fiber_route_segment seg ON seg.fiber_route_id = fiber_route.id
+          JOIN client.cable_construction_type cct ON cct.id = seg.cable_construction_type_id
+          WHERE r.id=$1
         `
         return database.query(sql, [plan_id])
       })
       .then((edges) => {
+        var types = {}
         edges.forEach((edge) => {
-          kml_output += `<Placemark><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
+          var type = edge.fiber_type
+          var arr = types[type]
+          if (!arr) types[type] = arr = []
+          arr.push(edge)
+        })
+        Object.keys(types).forEach((type) => {
+          kml_output += `<Folder><name>${escape(type)}</name>`
+          types[type].forEach((edge) => {
+            kml_output += `<Placemark><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
+          })
+          kml_output += '</Folder>'
         })
 
         var sql = `
@@ -608,28 +652,48 @@ module.exports = class NetworkPlan {
         return database.findOne(sql, [plan_id])
       })
       .then((row) => ({
-        statefp: row.statefp,
-        countyfp: row.countyfp
+        statefp: row && row.statefp,
+        countyfp: row && row.countyfp
       }))
+  }
+
+  static searchBusinesses (text) {
+    var sql = `
+      SELECT
+        name,
+        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
+      FROM aro.businesses
+      WHERE to_tsvector('english', name) @@ plainto_tsquery($1)
+    `
+    return database.query(sql, [text.toLowerCase()])
   }
 
   static searchAddresses (text) {
     var sql = `
       SELECT
-        (CASE WHEN aocn_name IS NULL THEN
-          wirecenter
-        ELSE
-          wirecenter || ' - ' || aocn_name
-        END) AS name,
-        ST_AsGeoJSON(ST_centroid(geom))::json as centroid,
-        ST_AsGeoJSON(ST_envelope(geom))::json as bounds
-      FROM wirecenters
-      WHERE
-        lower(unaccent(aocn_name)) LIKE lower(unaccent($1)) OR
-        lower(unaccent(wirecenter)) LIKE lower(unaccent($1))
-      ORDER BY wirecenter ASC
+        code AS name,
+        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
+        FROM client.service_area
+       WHERE service_layer_id = (
+          SELECT id FROM client.service_layer WHERE name='wirecenter'
+        )
+        AND lower(unaccent(code)) LIKE lower(unaccent($1))
+
+      UNION ALL
+
+      SELECT
+        name,
+        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
+      FROM aro.businesses
+      WHERE to_tsvector('english', name) @@ plainto_tsquery($2)
+
+      ORDER BY name ASC
+      LIMIT 100
     `
-    var wirecenters = database.query(sql, [`%${text}%`])
+    var wirecenters = database.query(sql, [`%${text}%`, text.toLowerCase()])
     var addresses = text.length > 0
       ? request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
       : Promise.resolve(null)

@@ -1,11 +1,21 @@
-/* global $ app user_id swal _ google map config */
+/* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', '$timeout', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions, $timeout) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
   $scope.selected_tool = false
   $scope.boundaries = []
+
+  $scope.userDefinedBoundaries = [
+    { name: 'Boundary 1', id: 1 },
+    { name: 'Boundary 2', id: 2 },
+    { name: 'Boundary 3', id: 3 },
+    { name: 'Boundary 4', id: 4 },
+    { name: 'Boundary 5', id: 5 },
+    { name: 'Boundary 6', id: 6 },
+    { name: 'Boundary 7', id: 7 }
+  ]
 
   // selected regions
   $scope.selectedRegions = []
@@ -17,35 +27,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
   // --
 
-  var wirecentersLayer
   var countySubdivisionsLayer
   var censusBlocksLayer
   var cmaBoundariesLayer
-
-  if (config.ui.map_tools.boundaries.view.indexOf('wirecenters') >= 0) {
-    wirecentersLayer = new MapLayer({
-      short_name: 'WC',
-      name: config.ui.labels.wirecenter,
-      type: 'wirecenter',
-      api_endpoint: '/wirecenters',
-      highlighteable: true,
-      style_options: {
-        normal: {
-          strokeColor: '#00ff00',
-          strokeWeight: 4,
-          fillOpacity: 0
-        },
-        highlight: {
-          strokeColor: '#00ff00',
-          strokeWeight: 6,
-          fillOpacity: 0.1
-        }
-      },
-      reload: 'always',
-      threshold: 0,
-      minZoom: 6
-    })
-  }
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
     countySubdivisionsLayer = new MapLayer({
@@ -68,7 +52,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       },
       reload: 'always',
       threshold: 0,
-      minZoom: 9
+      minZoom: 9,
+      hoverField: 'name'
     })
   }
 
@@ -100,37 +85,80 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       },
       threshold: 13,
       reload: 'dynamic',
-      minZoom: 14
+      minZoom: 14,
+      hoverField: 'name'
     })
   }
-
-  cmaBoundariesLayer = new MapLayer({
-    short_name: 'CM',
-    name: 'CMA boundaries',
-    type: 'cma_boundaries',
-    api_endpoint: '/cma_boundaries',
-    style_options: {
-      normal: {
-        fillColor: 'coral',
-        strokeColor: 'coral',
-        strokeWeight: 2
-      },
-      highlight: {
-        fillColor: 'coral',
-        strokeColor: 'coral',
-        strokeWeight: 2
-      }
-    },
-    reload: 'always',
-    threshold: 0
-  })
 
   $scope.areaLayers = [
     censusBlocksLayer,
     countySubdivisionsLayer,
-    wirecentersLayer,
     cmaBoundariesLayer
   ].filter((layer) => layer)
+
+  var analysisLayersColors = [
+    'coral'
+  ]
+
+  globalAnalysisLayers.forEach((analysisLayer) => {
+    var color = analysisLayersColors.shift() || 'black'
+    var layer = new MapLayer({
+      name: analysisLayer.description,
+      type: analysisLayer.name,
+      api_endpoint: `/analysis_areas/${analysisLayer.name}`,
+      style_options: {
+        normal: {
+          fillColor: color,
+          strokeColor: color,
+          strokeWeight: 2
+        },
+        highlight: {
+          fillColor: color,
+          strokeColor: color,
+          strokeWeight: 2
+        },
+        hoverField: 'name'
+      },
+      reload: 'always',
+      threshold: 0
+    })
+    $scope.areaLayers.push(layer)
+  })
+
+  var serviceLayersColors = [
+    '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
+  ]
+
+  var wirecentersLayer
+  globalServiceLayers.forEach((serviceLayer) => {
+    var isWirecenter = serviceLayer.name === 'wirecenter'
+    if (!serviceLayer.show_in_boundaries && !isWirecenter) return
+    var color = serviceLayersColors.shift() || 'black'
+    var layer = new MapLayer({
+      name: serviceLayer.description,
+      type: serviceLayer.name,
+      api_endpoint: `/service_areas/${serviceLayer.name}`,
+      highlighteable: true,
+      style_options: {
+        normal: {
+          strokeColor: color,
+          strokeWeight: 4,
+          fillOpacity: 0
+        },
+        highlight: {
+          strokeColor: color,
+          strokeWeight: 6,
+          fillOpacity: 0.1
+        }
+      },
+      reload: 'always',
+      threshold: 0,
+      minZoom: 6,
+      hoverField: 'name'
+    })
+    if (isWirecenter) wirecentersLayer = layer
+    if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
+  })
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
@@ -447,6 +475,32 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $rootScope.$on('financial_profile_changed_mode', (e, mode) => {
     if (mode === 'area') {
       wirecentersLayer && wirecentersLayer.show()
+    }
+  })
+
+  $scope.toggleVisibility = (layer) => {
+    layer.toggleVisibility()
+    regions.setSearchOption(layer.type, layer.visible)
+  }
+
+  $scope.createUserDefinedBoundary = () => {
+    $rootScope.$broadcast('edit_user_defined_boundary', null)
+  }
+
+  $scope.editUserDefinedBoundary = (boundary) => {
+    $rootScope.$broadcast('edit_user_defined_boundary', $scope.selectedUserDefinedBoundary)
+  }
+
+  $rootScope.$on('saved_user_defined_boundary', (e, boundary) => {
+    var existing = $scope.userDefinedBoundaries.find((item) => item.id === boundary.id)
+    if (existing) {
+      existing.name = boundary.name
+      $scope.selectedUserDefinedBoundary = existing
+    } else {
+      $scope.userDefinedBoundaries.push(boundary)
+      $scope.selectedUserDefinedBoundary = boundary
+      var select = document.getElementById('userDefinedBoundariesSelect')
+      select.scrollTop = select.scrollHeight
     }
   })
 }])

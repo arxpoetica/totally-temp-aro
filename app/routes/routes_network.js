@@ -62,6 +62,15 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/network/carriers/:plan_id/viewport', middleware.viewport, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var viewport = request.viewport
+    var fiberType = request.query.fiberType || 'fiber'
+    models.Network.carriers(plan_id, fiberType, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   // Network nodes for user client by node type
   api.get('/network/nodes/:node_type', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
@@ -71,12 +80,30 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  // Network nodes of an existing route
   api.get('/network/nodes/:plan_id/find', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = request.params.plan_id
     var node_types = request.query.node_types && request.query.node_types.split(',')
     models.Network.viewNetworkNodes(node_types, plan_id, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/network/nodes/:plan_id/find/:serviceLayer', check_any_permission, middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var plan_id = request.params.plan_id
+    var serviceLayer = request.params.serviceLayer
+    var node_types = request.query.node_types && request.query.node_types.split(',')
+    models.Network.viewNetworkNodes(node_types, plan_id, viewport, serviceLayer)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/network/fiber/:plan_id/find/:serviceLayer', check_any_permission, middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var plan_id = request.params.plan_id
+    var serviceLayer = request.params.serviceLayer
+    models.Network.viewFiber(plan_id, serviceLayer, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -99,7 +126,23 @@ exports.configure = (api, middleware) => {
       file.pipe(fs.createWriteStream(fullpath))
     })
     busboy.on('finish', () => {
-      models.Network.importLocations(plan_id, fullpath)
+      models.Network.importLocationsByCoordinates(plan_id, fullpath)
+        .then(jsonSuccess(response, next))
+        .catch(next)
+    })
+    request.pipe(busboy)
+  })
+
+  api.post('/network/nodes/:plan_id/csvIds', check_owner_permission, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var busboy = new Busboy({ headers: request.headers })
+    var fullpath
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      file.pipe(fs.createWriteStream(fullpath))
+    })
+    busboy.on('finish', () => {
+      models.Network.importLocationsByIds(plan_id, fullpath)
         .then(jsonSuccess(response, next))
         .catch(next)
     })
@@ -132,16 +175,19 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  // Network node types
-  api.get('/network/nodes', (request, response, next) => {
-    models.Network.viewNetworkNodeTypes()
+  api.get('/search/boundaries', middleware.viewport, (request, response, next) => {
+    var text = request.query.text
+    var viewport = request.viewport
+    var types = request.query.types
+    types = (Array.isArray(types) ? types : [types]).filter(Boolean)
+    models.Network.searchBoundaries(text, types, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
-  api.get('/search/boundaries', (request, response, next) => {
-    var text = request.query.text
-    models.Network.searchBoundaries(text)
+  api.get('/network/road_segments', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    models.Network.roadSegments(viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

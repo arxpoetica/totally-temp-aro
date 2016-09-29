@@ -2,12 +2,12 @@
   <p><strong>Optimization Type</strong></p>
   <select ng-model="optimizationType" class="form-control">
     <option value="CAPEX">Full Coverage</option>
-    <option value="MAX_IRR">Maximum IRR</option>
     <!--
+    <option value="MAX_IRR">Maximum IRR</option>
     <option value="TARGET_IRR">IRR Target</option>
-    -->
     <option value="IRR">Budget</option>
     <option value="BUDGET_IRR">Budget and IRR Floor</option>
+    -->
   </select>
   <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
     <br>
@@ -112,12 +112,17 @@
   <form>
     <div class="radio">
       <label>
-        <input type="radio" name="technology" checked> ODN 1.0 (Centralized Split)
+        <input type="radio" name="technology" ng-model="technology" value="direct_routing" checked> Direct Routing
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="technology" ng-model="technology" value="odn1" checked> ODN 1.0 (Centralized Split)
       </label>
     </div>
     <div class="radio disabled">
       <label>
-        <input type="radio" name="technology" disabled> ODN 2.0 (Distributed Split)
+        <input type="radio" name="technology" ng-model="technology" value="odn2" disabled> ODN 2.0 (Distributed Split)
       </label>
     </div>
   </form>

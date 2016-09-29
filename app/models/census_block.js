@@ -10,9 +10,10 @@ module.exports = class CensusBlock {
 
   static findByStatefpAndCountyfp (statefp, countyfp, viewport) {
     var sql = `
-      SELECT gid as id, name, geom
+      SELECT gid as id, name, geom, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
       FROM aro.census_blocks
       WHERE statefp = $1 AND countyfp = $2
+      ${database.intersects(viewport, 'geom', 'AND')}
     `
     var params = [statefp, countyfp]
     return database.polygons(sql, params, true, viewport)
@@ -21,7 +22,9 @@ module.exports = class CensusBlock {
   static findByNbmCarrier (carrier, viewport) {
     var sql = `
       SELECT
-        cb.geom,
+        cb.gid AS id,
+        cb.tabblock_id,
+        ST_AsGeoJSON(cb.geom)::json AS geom,
         cb.name,
         cbc.download_speed,
         cbc.upload_speed,
@@ -44,6 +47,8 @@ module.exports = class CensusBlock {
   static findAllNbmCarriers (viewport) {
     var sql = `
         SELECT DISTINCT ON (cb.gid)
+          cb.gid AS id,
+          cb.tabblock_id,
           ST_AsGeoJSON(cb.geom)::json AS geom,
           cb.name,
           cbc.download_speed,
@@ -59,6 +64,21 @@ module.exports = class CensusBlock {
        ORDER BY cb.gid, cbc.download_speed DESC
     `
     return database.query(sql, [], true)
+  }
+
+  static findCarriers (id) {
+    var sql = `
+      SELECT
+        cbc.census_block_gid AS id,
+        carriers.name AS carrier_name,
+        s.description AS speed
+       FROM client.census_blocks_carriers cbc
+       JOIN carriers ON carriers.id = cbc.carrier_id
+       JOIN client.speeds s ON s.code = cbc.download_speed
+      WHERE cbc.census_block_gid=$1
+      ORDER BY carriers.name ASC
+    `
+    return database.query(sql, [id])
   }
 
 }

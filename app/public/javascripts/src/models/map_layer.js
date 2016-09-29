@@ -1,7 +1,7 @@
-/* global app google map _ encodeURIComponent config document $ */
+/* global app google map _ encodeURIComponent document $ */
 'use strict'
 
-app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
+app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils) => {
   var plan = null
   $rootScope.$on('plan_selected', (e, p) => {
     plan = p
@@ -34,6 +34,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
       this.denisty_hue_to = options.denisty_hue_to
       this.minZoom = options.minZoom
       this.heatmap = options.heatmap
+      this.hoverField = options.hoverField
 
       this.setDeclarativeStyle(options.declarativeStyles)
 
@@ -269,13 +270,19 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
             this._canceler = null
           }
           this._canceler = $q.defer()
+          var spinner = $(`.map-layer-spinner-${this.type}`)
+          spinner.addClass('spin')
           $http({
             url: api_endpoint,
             method: 'GET',
             params: params,
             timeout: this._canceler.promise
           })
+          .error(() => {
+            spinner.removeClass('spin')
+          })
           .success((response) => {
+            spinner.removeClass('spin')
             this.is_loading = false
             var data = response
             // hide layer to change styles "in background"
@@ -300,6 +307,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
             }
             this.metadata = data.metadata
             this.data_loaded = true
+            this._createHovers()
             this.onDataLoaded && this.onDataLoaded(this)
             $rootScope.$broadcast('map_layer_loaded_data', this)
             this.configureFeatureStyles()
@@ -308,6 +316,22 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q) => {
           })
         }
       }
+    }
+
+    _createHovers () {
+      if (!this.hoverField) return
+      var dataLayer = this.data_layer
+      dataLayer.forEach((feature) => {
+        var c = feature.getProperty('centroid')
+        if (!c) {
+          return console.warn('Feature missing centroid')
+        }
+        var p = c.coordinates
+        var centroid = new google.maps.LatLng(p[1], p[0])
+        var marker = map_utils.createCenteredMarker(dataLayer, feature, centroid, {})
+        var text = feature.getProperty(this.hoverField)
+        marker.setIcon('https://chart.googleapis.com/chart?chst=d_text_outline&chld=000000|16|h|FFFFFF|_|' + encodeURIComponent(text))
+      })
     }
 
     setApiEndpoint (api_endpoint, params) {

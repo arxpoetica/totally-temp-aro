@@ -29,6 +29,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     name: $scope.entityTypes[key]
   }))
   $scope.premisesPercentage = 'false'
+  $scope.routeOpportunitiesDistanceThresholds = [
+    { name: 'On Route', value: 30 },
+    { name: '1/4 miles', value: 402.336 },
+    { name: '1/2 miles', value: 804.672 },
+    { name: '1 mile', value: 1609.34 }
+  ]
 
   var dirty = false
 
@@ -133,6 +139,10 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     } else if (href === '#financialProfileOpex') {
       showOpexRecurringChart(force)
       showOpexCostChart(force)
+    } else if (href === '#financialProfileRouteOpportunities') {
+      loadRouteOpportunities()
+    } else if (href === '#financialProfileFiberDetails') {
+      showDistanceToFiber()
     }
   }
   $scope.refreshCurrentTab = refreshCurrentTab
@@ -240,6 +250,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     }
   }
 
+  function showDistanceToFiber () {
+    $http.get(`/financial_profile/${$scope.plan.id}/fiber_details`)
+      .success((response) => {
+        $scope.fiberDetailsAdditional = response
+      })
+  }
+
   function showCashFlowChart (force) {
     var datasets = [
       { key: 'bau', name: 'BAU' },
@@ -256,21 +273,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
       showChart('financial-profile-chart-cash-flow', 'Line', data, options)
-    })
-  }
-
-  function showBudgetChart (force) {
-    var datasets = [
-      { key: 'budget', name: 'Budget' },
-      { key: 'plan', name: 'Plan' }
-    ]
-    request(force, 'budget', {}, (budget) => {
-      var data = buildChartData(budget, datasets)
-      var options = {
-        scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>`, // eslint-disable-line
-        tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, '$', 0) + ' K' %>` // eslint-disable-line
-      }
-      showChart('financial-profile-chart-budget', 'Bar', data, options)
     })
   }
 
@@ -513,6 +515,21 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
+  function loadRouteOpportunities () {
+    var url = `/financial_profile/${$scope.plan.id}/routeopportunities`
+    var params = {
+      distanceThresholds: $scope.routeOpportunitiesDistanceThresholds.map((item) => item.value)
+    }
+    $http({
+      url: url,
+      method: 'GET',
+      params: params
+    })
+    .success((response) => {
+      $scope.routeOpportunities = response
+    })
+  }
+
   $scope.downloadChart = (id, name) => {
     var canvas = document.getElementById(id)
     var element = document.createElement('a')
@@ -522,5 +539,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
+  }
+
+  $scope.downloadBusinesses = () => {
+    window.location.href = `/financial_profile/${$scope.plan.id}/exportBusinesses`
+  }
+
+  $scope.showBuildLease = () => {
+    $('#build-lease').modal('show')
   }
 }])

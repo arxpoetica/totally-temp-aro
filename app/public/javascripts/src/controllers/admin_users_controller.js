@@ -4,6 +4,8 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
   $scope.users = []
   $scope.user_id = user_id
   $scope.new_user = {}
+  $scope.mailSubject = ''
+  $scope.mailBody = ''
 
   $('#manage-users').on('shown.bs.modal', () => {
     loadUsers()
@@ -87,5 +89,23 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
         loadUsers()
       })
     })
+  }
+
+  $scope.downloadCSV = () => {
+    window.location.href = '/admin/users/csv'
+  }
+
+  $scope.openSendMail = () => {
+    $('#manage-users').modal('hide')
+    $('#send-mail').modal('show')
+  }
+
+  $scope.sendMail = () => {
+    $http.post('/admin/users/mail', { subject: $scope.mailSubject, text: $scope.mailBody })
+      .success((response) => {
+        swal({ title: 'Emails sent', type: 'success' })
+        $('#send-mail').modal('hide')
+        $('#manage-users').modal('show')
+      })
   }
 })

@@ -1,4 +1,4 @@
-/* global app _ config user_id $ map google randomColor tinycolor Chart */
+/* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
 app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
   $scope.ARO_CLIENT = config.ARO_CLIENT
@@ -21,6 +21,20 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.overlay = 'none'
   $scope.heatmapVisible = false
   $scope.heatmapOn = true
+  $scope.roadLayer = new MapLayer({
+    short_name: 'RS',
+    name: 'Road Segments',
+    type: 'road_segments',
+    style_options: {
+      normal: {
+        strokeColor: 'teal',
+        strokeWeight: 2
+      }
+    },
+    api_endpoint: '/network/road_segments',
+    threshold: 12,
+    reload: 'always'
+  })
 
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
@@ -36,13 +50,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.show_towers = false
   $scope.new_location_data = null
   $scope.industries = []
-  $scope.business_categories_selected = []
-  $scope.household_categories_selected = []
-  $scope.optimizeBusinesses = true
-  $scope.optimizeSMB = true // special case: optimize small businesses
-  $scope.optimize2kplus = true // yet another special case
-  $scope.optimizeHouseholds = true
-  $scope.optimizeTowers = true
+  $scope.business_categories_selected = {}
+  $scope.household_categories_selected = {}
 
   var locationStyles = {
     normal: {
@@ -62,14 +71,25 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   var declarativeStyles = (feature, styles) => {
     if (styles.icon) return
-    var totalBusinesses = feature.getProperty('total_businesses') || 0
-    var totalHouseholds = feature.getProperty('total_households') || 0
+    var type = 'households'
+    var categories = feature.getProperty('entity_categories')
+    var order = [
+      'b_small', 'b_medium', 'b_large'
+    ]
+    var largestCategory = null
+    var largestIndex = -1
+    if (Array.isArray(categories)) {
+      categories.forEach((category) => {
+        if (category.indexOf('b_') === 0) type = 'businesses'
+        var index = order.indexOf(category)
+        if (index > largestIndex) {
+          largestIndex = index
+          largestCategory = category
+        }
+      })
+    }
     var selected = feature.getProperty('selected') ? 'selected' : 'default'
-    var largestType = feature.getProperty('largest_type')
-    var type = (totalBusinesses && totalHouseholds)
-      ? 'composite_location'
-      : totalBusinesses ? 'businesses' : 'households'
-    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestType}_${selected}.png`
+    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestCategory.substring(2)}_${selected}.png`
   }
 
   var locationsLayer = $scope.locations_layer = new MapLayer({
@@ -151,15 +171,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.business_categories = response.business_categories
     $scope.household_categories = response.household_categories
 
-    $scope.business_categories_selected = []
+    $scope.business_categories_selected = {}
     $scope.business_categories.forEach((category) => {
       $scope.business_categories_selected[category.name] = true
+      category.fullName = `b_${category.name}`
     })
-    $scope.business_categories_selected['2kplus'] = true
+    $scope.business_categories_selected['2kplus'] = false
+    changeOptimization()
 
     $scope.household_categories_selected = []
     $scope.household_categories.forEach((category) => {
       $scope.household_categories_selected[category.name] = true
+      category.fullName = `h_${category.name}`
     })
 
     // industries
@@ -209,6 +232,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
+    if (!$scope.show_businesses) {
+      $scope.business_categories_selected['large'] = false
+      $scope.business_categories_selected['medium'] = false
+    }
+    if (!$scope.show_households) {
+      $scope.household_categories_selected['small'] = false
+      $scope.household_categories_selected['medium'] = false
+    }
+
     const subcategories = (key) => {
       var obj = $scope[`${key}_categories_selected`]
       var categories = Object.keys(obj).filter((key) => obj[key])
@@ -247,6 +279,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $('#locations_controller .business-filter').select2('val', [], true)
       $('#locations_controller .business-filter').prop('disabled', true)
     }
+
+    changeOptimization()
   }
 
   $('#create-location').on('shown.bs.modal', () => {
@@ -320,11 +354,30 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
 
+    // unselect all entity types
+    $scope.show_towers = false
+    $scope.show_businesses = false
+    $scope.show_households = false
+    $scope.business_categories_selected = {}
+    $scope.household_categories_selected = {}
+
     if (plan) {
+      plan.location_types = plan.location_types || []
       map.ready(() => {
         // map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources)
         // locationsLayer.set_always_show_selected($scope.always_shows_targets)
         selectedLocationsLayer.show()
+
+        // select entity types used in optimization
+        if (plan.location_types.indexOf('medium') >= 0) $scope.business_categories_selected['medium'] = true
+        if (plan.location_types.indexOf('large') >= 0) $scope.business_categories_selected['large'] = true
+        $scope.show_businesses = _.size($scope.business_categories_selected) > 0
+        if (plan.location_types.indexOf('small') >= 0) $scope.business_categories_selected['small'] = true
+        if (plan.location_types.indexOf('mrcgte2000') >= 0) $scope.business_categories_selected['2kplus'] = true
+        if (plan.location_types.indexOf('celltower') >= 0) $scope.show_towers = true
+
+        towersLayer.setVisible($scope.show_towers)
+        $scope.changeLocationsLayer()
       })
     }
   })
@@ -395,10 +448,27 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     }
   }
 
-  $scope.changeOptimization = () => {
-    $rootScope.optimizeBusinesses = $scope.optimizeBusinesses
-    $rootScope.optimizeSMB = $scope.optimizeSMB
-    $rootScope.optimizeHouseholds = $scope.optimizeHouseholds
-    $rootScope.optimizeTowers = $scope.optimizeTowers
+  function changeOptimization () {
+    $rootScope.optimizeMedium = $scope.show_businesses && $scope.business_categories_selected['medium']
+    $rootScope.optimizeLarge = $scope.show_businesses && $scope.business_categories_selected['large']
+    $rootScope.optimizeSMB = $scope.business_categories_selected['small']
+    $rootScope.optimizeHouseholds = $scope.show_households
+    $rootScope.optimizeTowers = $scope.show_towers
+    $rootScope.optimize2kplus = $scope.business_categories_selected['2kplus']
   }
+
+  $scope.selectedFilter = null
+  $scope.toggleFilter = (filter) => {
+    $scope.selectedFilter = $scope.selectedFilter === filter ? null : filter
+  }
+
+  $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (layer.type !== 'road_segments') return
+    var feature = event.feature
+    layer.data_layer.revertStyle()
+    layer.data_layer.overrideStyle(feature, {
+      strokeWeight: 4
+    })
+    swal({ title: '', text: `gid: ${feature.getProperty('gid')} tlid: ${feature.getProperty('tlid')}`, type: 'info' })
+  })
 }])

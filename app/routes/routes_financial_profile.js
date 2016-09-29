@@ -1,4 +1,5 @@
 var helpers = require('../helpers')
+var database = helpers.database
 var models = require('../models')
 var moment = require('moment')
 var config = helpers.config
@@ -311,6 +312,179 @@ exports.configure = (api, middleware) => {
     .then(jsonSuccess(response, next))
     .catch(next)
   })
+
+  api.get('/financial_profile/:plan_id/routeopportunities', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    const distanceThresholds = request.query.distanceThresholds.map((value) => +value)
+
+    const groupByKey = (arr) => {
+      var result = []
+      arr.forEach((item) => {
+        var key = item.key
+        var items = result.find((item) => item.key === key)
+        if (!items) {
+          items = { key: key, items: [] }
+          result.push(items)
+        }
+        items.items.push(item)
+      })
+      return result
+    }
+
+    const getTotals = () => {
+      var req = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/businesses/getTotals',
+        body: {
+          distanceThresholds: distanceThresholds,
+          locationSource: 'vz_customers',
+          mrcThreshold: 2000,
+          planId: plan_id
+        },
+        json: true
+      }
+      return models.AROService.request(req)
+    }
+
+    const getBuildingsCountsByBusinessesSizes = () => {
+      var req = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/businesses/getBuildingsCountsByBusinessesSizes',
+        body: {
+          distanceThresholds: distanceThresholds,
+          locationSource: 'tam',
+          mrcThreshold: 0,
+          planId: plan_id
+        },
+        json: true
+      }
+      return models.AROService.request(req)
+    }
+
+    const getBusinessesCountsBySizes = () => {
+      var req = {
+        method: 'POST',
+        url: config.aro_service_url + '/rest/businesses/getBusinessesCountsBySizes',
+        body: {
+          distanceThresholds: distanceThresholds,
+          locationSource: 'tam',
+          mrcThreshold: 0,
+          planId: plan_id
+        },
+        json: true
+      }
+      return models.AROService.request(req)
+    }
+
+    const sizesDict = (arr) => {
+      var dict = {}
+      arr.forEach((item) => {
+        dict[item.size_name] = item
+        item.description = item.max_value === 1
+          ? `${item.size_name} (${item.max_value} employee)`
+          : item.max_value < 1000000
+            ? `${item.size_name} (${item.min_value} - ${item.max_value} employees)`
+            : `${item.size_name} (>${item.min_value} employees)`
+      })
+      return dict
+    }
+
+    const sortByBusinessSize = (arr, sizes) => {
+      return arr.sort((a, b) => sizes[a.key].min_value - sizes[b.key].min_value)
+    }
+
+    return Promise.all([
+      getTotals(),
+      getBuildingsCountsByBusinessesSizes(),
+      getBusinessesCountsBySizes(),
+      database.query('SELECT * FROM client.businesses_sizes')
+    ])
+    .then((results) => {
+      var sizes = sizesDict(results[3])
+      return {
+        totals: groupByKey(results[0]),
+        businesses: sortByBusinessSize(groupByKey(results[1]), sizes),
+        buildings: sortByBusinessSize(groupByKey(results[2]), sizes),
+        businessSizes: sizes
+      }
+    })
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
+  api.get('/financial_profile/:plan_id/exportBusinesses', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var req = {
+      method: 'POST',
+      url: config.aro_service_url + '/rest/businesses',
+      body: {
+        distanceThresholds: [1609.34],
+        locationSource: 'tam',
+        mrcThreshold: 0,
+        planId: plan_id
+      },
+      json: true
+    }
+    return models.AROService.request(req)
+      .then((output) => {
+        response.attachment(`businesses_${moment().format('YYYY-MM-DD_HH:mm:ss')}.csv`)
+        response.send(output)
+      })
+  })
+
+  api.get('/financial_profile/:plan_id/fiber_details', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var sql = `
+        WITH selected_plan AS (
+          SELECT p.*
+          FROM client.plan p
+          WHERE p.id=$1
+        )
+        ,
+        master_plans AS (
+          SELECT mp.id
+          FROM selected_plan rp
+          JOIN client.plan mp
+          ON mp.parent_plan_id = rp.id
+        )
+        ,
+        selected_service_areas AS (
+          SELECT
+          p.id, ST_MakeValid(ST_Union(sa.geom)) AS geom
+          FROM selected_plan p
+          JOIN client.selected_service_area s
+          ON s.plan_id = p.id
+          JOIN client.service_area sa
+          ON sa.id = s.service_area_id
+          GROUP BY p.id
+        )
+        ,
+        selected_analysis_areas AS (
+          SELECT
+          p.id,
+          ST_MakeValid(ST_Union(aa.geom)) AS geom
+          FROM selected_plan p
+          JOIN client.selected_analysis_area s
+          ON s.plan_id = p.id
+          JOIN client.analysis_area aa
+          ON aa.id = s.analysis_area_id
+          GROUP BY p.id
+        ),
+        union_area AS (
+          SELECT ST_MakeValid(ST_Union(u.geom)) AS geom
+          FROM (
+          SELECT geom FROM selected_service_areas
+          UNION
+          SELECT geom FROM selected_analysis_areas
+          ) u
+        )
+        SELECT SUM ( ST_Length (ST_Intersection (ua.geom, ef.geom) ) ) AS length
+        FROM union_area ua, client.existing_fiber ef
+    `
+    return database.findOne(sql, [plan_id])
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }
 
 const requestData = (params, filter) => {
@@ -353,5 +527,30 @@ const requestData = (params, filter) => {
         })
       })
       return chart
+    })
+}
+
+if (module.id === require.main.id) {
+  var req = {
+    method: 'POST',
+    url: config.aro_service_url + '/rest/businesses/getTotals',
+    body: {
+      distanceThresholds: [
+        402.336, // 1/4 miles
+        804.672, // 1/2 miles
+        1609.34 // 1 mile
+      ],
+      locationSource: 'vz_customers',
+      mrcThreshold: 2000,
+      planId: 8
+    },
+    json: true
+  }
+  models.AROService.request(req)
+    .then((response) => {
+      console.log('', JSON.stringify(response, null, 2))
+    })
+    .catch((err) => {
+      console.log('err', err.stack)
     })
 }

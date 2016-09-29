@@ -7,6 +7,7 @@
   "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
   "currency_symbol": "$",
+  "from_email_address": "aro-demo@app.altvil.com",
   "ui": {
     "title": "ARO",
     "layout": "default",

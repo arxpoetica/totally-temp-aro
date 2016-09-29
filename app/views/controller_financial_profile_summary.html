@@ -38,6 +38,7 @@
       <th colspan="3">NPV</th>
       <td colspan="2" class="text-right">{{metadata.npv / 1000 | currency:"$":1}}K</td>
     </tr>
+    <!--
     <tr>
       <th colspan="3">IRR</th>
       <td colspan="2" class="text-right" ng-show="hasIRR()">
@@ -47,6 +48,7 @@
       </td>
       <td colspan="2" class="text-right" ng-hide="hasIRR()">{{metadata.irr}}%</td>
     </tr>
+    -->
   </tbody>
 </table>
 
@@ -54,4 +56,5 @@
 <p class="text-center">
   <button class="btn btn-primary" ng-click="showDetails(true)">Details</button>
   <button class="btn btn-primary" ng-click="download()">Download</button>
+  <button class="btn btn-primary" ng-click="showBuildLease()">Build / Lease</button>
 </p>

@@ -7,20 +7,28 @@ var database = helpers.database
 
 module.exports = class Wirecenter {
 
-  static findAll (viewport) {
+  static findServiceAreas (viewport, type) {
     var sql = `
-      SELECT id, geom, wirecenter AS name
-      FROM aro.wirecenters
+      SELECT service_area.id, geom, code AS name, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
+        FROM client.service_area
+        JOIN client.service_layer
+          ON service_area.service_layer_id = service_layer.id
+        AND service_layer.name=$1
+        ${database.intersects(viewport, 'geom', 'WHERE')}
     `
-    return database.polygons(sql, [], true, viewport)
+    return database.polygons(sql, [type], true, viewport)
   }
 
-  static findAllCMA (viewport) {
+  static findAnalysisAreas (viewport, type) {
     var sql = `
-      SELECT gid AS id, the_geom AS geom, name
-      FROM boundaries.cma
+      SELECT analysis_area.id, geom, code AS name, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
+        FROM client.analysis_area
+        JOIN client.analysis_layer
+          ON analysis_area.analysis_layer_id = analysis_layer.id
+        AND analysis_layer.name=$1
+        ${database.intersects(viewport, 'geom', 'WHERE')}
     `
-    return database.polygons(sql, [], true, viewport)
+    return database.polygons(sql, [type], true, viewport)
   }
 
 }

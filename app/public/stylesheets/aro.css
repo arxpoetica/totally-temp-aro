@@ -6,7 +6,7 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 
 .navbar.navbar-default {
   margin-bottom: 0;
-  z-index: 2;
+  z-index: 9;
   background-image: none;
   background-color: rgb(20, 22, 22);
   border: none;
@@ -98,6 +98,7 @@ html, body, #map-canvas, #map-canvas-wrapper {
   left: 0;
   z-index: 3;
   width: 400px;
+  pointer-events: none;
 }
 
 #left-col {
@@ -511,4 +512,107 @@ footer nav {
   width: 319px;
   top: 53px;
   z-index: 1;
+}
+
+#serviceLayersAccordion div.panel-heading {
+  background: white;
+  padding: 1px 0;
+  color: #666;
+}
+
+#serviceLayersAccordion p.panel-title {
+  font-size: 14px;
+}
+
+#serviceLayersAccordion div.panel {
+  border: none;
+  box-shadow: none;
+}
+
+#serviceLayersAccordion a:hover, #serviceLayersAccordion a:focus {
+  text-decoration: none;
+}
+
+#serviceLayersAccordion input {
+  margin: 0;
+  margin-right: 5px;
+}
+
+#serviceLayersAccordion .panel-body {
+  padding: 5px 10px;
+}
+
+
+.locations-filter {
+  position: fixed;
+  padding: 30px;
+  background: white;
+  left: 370px;
+  width: 300px;
+  border: 1px solid #ddd;
+  border-left-style: none;
+}
+
+.locations-filter-btn, .locations-filter-btn:hover, .locations-filter-btn:focus, .locations-filter-btn:active {
+  margin-left: 3px;
+  background-color: #ddd !important;
+}
+
+.locations-filter-btn .fa {
+  text-shadow: none;
+}
+
+
+[ng-controller=locations_controller] .panel-body {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+[ng-controller=locations_controller] .panel-body .customer-type {
+  padding: 0 10px;
+  padding-top: 3px;
+  margin-top: 2px;
+}
+
+[ng-controller=locations_controller] .panel-body .shaded {
+  background-color: #eee;
+}
+
+[ng-controller=locations_controller] .alert {
+  margin: 10px;
+}
+
+#locations_controller .spin {
+  margin-right: 5px;
+}
+
+.map-layer-spinner.fa-repeat {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.map-layer-spinner.spin {
+  opacity: 1;
+}
+
+a[data-toggle="collapse"].collapsed > .fa-caret-up {
+  display: none
+}
+
+a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
+  display: none
+}
+
+#top-navbar {
+  display: none;
+}
+
+#home-button {
+  float: left;
+  margin-right: 8px;
+  margin-left: 7px;
+}
+
+#map-extras {
+  position:fixed; right: 10px; top: 128px;
 }

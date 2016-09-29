@@ -6,6 +6,7 @@ var nook = require('node-errors').nook
 var NodeCache = require('node-cache')
 var cache = new NodeCache()
 var crypto = require('crypto')
+var querystring = require('querystring')
 
 function cacheable (request, response, next) {
   var obj = {
@@ -140,4 +141,14 @@ module.exports = {
   jsonSuccess: jsonSuccess,
   viewport: viewport,
   cacheable: cacheable
+}
+
+if (module.id === require.main.id) {
+  var req = {
+    query: querystring.parse('nelat=47.682656335625595&nelon=-122.04367968671875&swlat=47.529650773264706&swlon=-122.62046191328125&threshold=11&zoom=12')
+  }
+  viewport(req, null, (err) => {
+    if (err) return console.log('err', err)
+    console.log('viewport', req.viewport.linestring)
+  })
 }

@@ -33,10 +33,12 @@
                   <th colspan="3">Equipment Capex</th>
                   <td colspan="2" class="text-right">{{metadata.equipment_cost / 1000 | currency:"$":1}}K</td>
                 </tr>
+                <!--
                 <tr ng-repeat="cost in metadata.equipment_summary">
                   <td colspan="3"><small> ↳ {{cost.description}} (x{{cost.quantity | number }})</small></td>
                   <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"$":1}}K</td>
                 </tr>
+                -->
                 <tr>
                   <th colspan="3">Total Capex</th>
                   <td colspan="2" class="text-right">{{metadata.total_cost / 1000 | currency:"$":1}}K</td>
@@ -63,11 +65,13 @@
                   <th colspan="3">NPV</th>
                   <td colspan="2" class="text-right">{{metadata.npv / 1000 | currency:"$":1}}K</td>
                 </tr>
+                <!--
                 <tr>
                   <th colspan="3">IRR</th>
                   <td colspan="2" class="text-right" ng-show="hasIRR()">{{metadata.irr * 100 | number: 1}}%</td>
                   <td colspan="2" class="text-right" ng-hide="hasIRR()">{{metadata.irr}}%</td>
                 </tr>
+                -->
               </tbody>
             </table>
           </div>
@@ -301,96 +305,37 @@
           <tbody>
             <tr>
               <th>Telco Buildings - (Off Net VzB buildings incurring > $2K MRCs)</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
-            <tr>
-              <td>Count</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>Total MRC</td>
-              <td class="text-right">{{1000000 | currency:"$":0}}</td>
-              <td class="text-right">{{1000000 | currency:"$":0}}</td>
-              <td class="text-right">{{1000000 | currency:"$":0}}</td>
-            </tr>
-            <tr>
-              <th>Count of Total Buildings by Number of Employees</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
-            </tr>
-            <tr>
-              <td>XS (1 employee)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>S (2-24 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>M (25-49 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>L (50-99 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>XL (>100 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
+            <tr ng-repeat="item in routeOpportunities.totals">
+              <td>
+                <span ng-show="item.key === 'MRC'">Total MRC</span>
+                <span ng-hide="item.key === 'MRC'">{{item.key}}</span>
+              </td>
+              <td class="text-right" ng-repeat="value in item.items">
+                <span ng-show="item.key === 'MRC'">{{value.value | currency:"$":0}}</span>
+                <span ng-hide="item.key === 'MRC'">{{value.value | number}}</span>
+              </td>
             </tr>
             <tr>
               <th>Count of Total Businesses by Number of Employees</th>
-              <th class="text-right">1/4 mile</th>
-              <th class="text-right">1/2 mile</th>
-              <th class="text-right">1 mile</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
+            </tr>
+            <tr ng-repeat="item in routeOpportunities.buildings">
+              <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
+              <td class="text-right" ng-repeat="value in item.items">{{value.value | number}}</td>
             </tr>
             <tr>
-              <td>XS (1 employee)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
+              <th>Count of Total Buildings by Number of Employees</th>
+              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
-            <tr>
-              <td>S (2-24 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>M (25-49 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>L (50-99 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
-            </tr>
-            <tr>
-              <td>XL (>100 employees)</td>
-              <td class="text-right">1</td>
-              <td class="text-right">2</td>
-              <td class="text-right">3</td>
+            <tr ng-repeat="item in routeOpportunities.businesses">
+              <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
+              <td class="text-right" ng-repeat="value in item.items">{{value.value | number}}</td>
             </tr>
           </tbody>
         </table>
+        <button class="btn btn-default" ng-click="downloadBusinesses()">Download all businesses within 1 mile of route</button>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileFiberDetails" style="margin-top: 20px">
         <table class="table">
@@ -430,6 +375,11 @@
               <th class="text-right">{{metadata.fiberTotals.totalCost / (metadata.fiberTotals.totalLength * 0.000621371) | currency:"$":1}}</th>
               <th class="text-right">{{metadata.fiberTotals.totalCost / 1000 | currency:"$":1}}K</th>
               <th></th>
+            </tr>
+            <tr>
+              <th>Existing Fiber</th>
+              <th class="text-right" ng-show="fiberDetailsAdditional">{{fiberDetailsAdditional.length * 0.000621371 | number : 1}} mi</th>
+              <th class="text-right" ng-hide="fiberDetailsAdditional">Calculating...</th>
             </tr>
           </tbody>
         </table>

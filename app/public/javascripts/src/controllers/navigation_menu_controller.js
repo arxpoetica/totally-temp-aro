@@ -1,6 +1,6 @@
 /* global app map config $ user_id google _ swal location */
 // Navigation Menu Controller
-app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state', '$filter', '$timeout', ($scope, $rootScope, $http, map_tools, tracker, $location, state, $filter, $timeout) => {
+app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state', ($scope, $rootScope, $http, map_tools, tracker, $location, state) => {
   // Controller instance variables
   $scope.new_plan_name = 'Untitled Plan'
   $scope.new_plan_area_name = ''
@@ -53,9 +53,9 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     if (selected) {
       $scope.new_plan_area_name = selected.text
       $scope.new_plan_area_bounds = selected.bounds
-      console.log('bounds', JSON.stringify(selected.bounds))
       $scope.new_plan_area_centroid = selected.centroid
-      console.log('centroid', JSON.stringify(selected.centroid))
+      // console.log('bounds', JSON.stringify(selected.bounds))
+      // console.log('centroid', JSON.stringify(selected.centroid))
     }
   })
 
@@ -88,11 +88,16 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         map.setZoom(14)
       }
     }
+  }
+
+  $rootScope.$on('plan_selected', (e, plan) => {
+    $scope.plan = plan
+    state.loadPlan(plan)
     $location.path(plan ? '/plan/' + plan.id : '/')
 
     $scope.market_profile = {}
     $scope.market_profile_current_year = {}
-  }
+  })
 
   $rootScope.$on('route_changed', (e) => {
     if (!$scope.plan) return
@@ -327,7 +332,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       user_id: +$('#share-plan-search').select2('val'), // will be removed in select2 4.1
       message: $('#share-plan textarea').val()
     }
-    $http.post('/permissions/' + $scope.shared_route.id + '/grant', params).success((response) => {
+    $http.post('/permissions/' + $scope.shared_plan.id + '/grant', params).success((response) => {
       swal({
         title: 'Network plan shared successfully',
         type: 'success'
@@ -385,43 +390,4 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $('#build-sequence').on('shown.bs.modal', drawChart)
-
-  function fetchApplicationSettings () {
-    $http.get('/admin/settings')
-      .success((response) => {
-        $scope.applicationSettings = response
-        $scope.applicationSettingsValues = {}
-
-        $timeout(() => {
-          const parseCost = (input) => +(input.val() || '0').match(/[\d\.]/g).join('') || 0
-
-          $('#application-settings .format-currency')
-            .on('focus', function () {
-              var input = $(this)
-              input.val(parseCost(input).toFixed(2))
-            })
-            .on('change', function () {
-              var input = $(this)
-              var id = input.attr('name')
-              $scope.applicationSettingsValues[id] = parseCost(input)
-            })
-            .on('blur', function () {
-              var input = $(this)
-              input.val($filter('number')(parseCost(input), 2))
-            })
-        }, 0)
-      })
-  }
-
-  $('#application-settings').on('shown.bs.modal', fetchApplicationSettings)
-
-  $scope.updateSettings = () => {
-    var values = {}
-    Object.keys($scope.applicationSettingsValues).forEach((key) => {
-      values[key] = $scope.applicationSettingsValues[key]
-    })
-    $http.post('/admin/settings', values).success((response) => {
-      $('#application-settings').modal('hide')
-    })
-  }
 }])

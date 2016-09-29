@@ -1,4 +1,4 @@
-/* global app map google $ config */
+/* global app map google $ config globalServiceLayers globalAnalysisLayers */
 app.service('regions', ($rootScope, $timeout, map_tools) => {
   var regions = { selectedRegions: [] }
   var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
@@ -10,12 +10,21 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     selectionLayer.setStyle({
       fillColor: 'green'
     })
-    selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
+    configureSelectionVisibility()
   }
 
+  var searchOptions = {}
   $(document).ready(() => {
     initSelectionLayer()
-    configureSearch()
+    map.ready(() => {
+      configureSearch()
+    })
+  })
+
+  ;['dragend', 'zoom_changed'].forEach((eventName) => {
+    $rootScope.$on(`map_${eventName}`, () => {
+      configureSearch()
+    })
   })
 
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -39,9 +48,7 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     $rootScope.$broadcast('regions_changed')
   })
 
-  $rootScope.$on('map_tool_changed_visibility', () => {
-    selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
-  })
+  $rootScope.$on('map_tool_changed_visibility', () => configureSelectionVisibility())
 
   regions.removeGeography = (geography) => {
     var index = regions.selectedRegions.indexOf(geography)
@@ -72,9 +79,25 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
 
   var configureSearch = () => {
     var search = $('#area-network-planning-search')
+    var bounds = map.getBounds()
+    var params = {
+      nelat: bounds.getNorthEast().lat(),
+      nelon: bounds.getNorthEast().lng(),
+      swlat: bounds.getSouthWest().lat(),
+      swlon: bounds.getSouthWest().lng(),
+      zoom: map.getZoom(),
+      threshold: 0
+    }
+    var query = Object.keys(params).map((key) => `${key}=${params[key]}`).join('&')
+    Object.keys(searchOptions).forEach((type) => {
+      if (searchOptions[type]) {
+        query += `&types=${type}`
+      }
+    })
+    search.unbind()
     search.select2({
       ajax: {
-        url: '/search/boundaries',
+        url: `/search/boundaries?${query}`,
         dataType: 'json',
         delay: 250,
         data: (term) => ({ text: term }),
@@ -87,8 +110,30 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
             }
           })
 
+          var sections = [
+            { prefix: 'census_block', name: 'Census Blocks' },
+            { prefix: 'county', name: 'County Subdivisions' }
+          ]
+          globalAnalysisLayers.forEach((layer) => {
+            sections.push({
+              prefix: layer.name,
+              name: layer.description
+            })
+          })
+          globalServiceLayers.forEach((layer) => {
+            sections.push({
+              prefix: layer.name,
+              name: layer.description
+            })
+          })
+
+          var results = sections.map((section) => ({
+            text: section.name,
+            children: items.filter((item) => item.id.indexOf(section.prefix) === 0)
+          })).filter((item) => item.children.length > 0)
+
           return {
-            results: items,
+            results: results,
             pagination: {
               more: false
             }
@@ -132,6 +177,22 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
       })
     }
   })
+
+  regions.setSearchOption = (type, enabled) => {
+    searchOptions[type] = enabled
+    configureSearch()
+  }
+
+  regions.getSelectedServiceAreas = () => {
+    return globalServiceLayers.filter((layer) => searchOptions[layer.name])
+  }
+
+  function configureSelectionVisibility () {
+    // selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
+    if (selectionLayer.getMap() !== map) {
+      selectionLayer.setMap(map)
+    }
+  }
 
   return regions
 })

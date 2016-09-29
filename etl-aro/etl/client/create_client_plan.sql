@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS client.plan;
 CREATE TABLE client.plan
 (
   id bigserial,
+  shard_key int4,
   name character varying NOT NULL,
   plan_type character varying NOT NULL,
   parent_plan_id int8 REFERENCES client.plan ON DELETE CASCADE,

@@ -29,6 +29,15 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  // Create a new plan by copying an existing one
+  api.post('/network_plan/:plan_id/copy', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var name = request.body.name
+    models.NetworkPlan.copyPlan(plan_id, name, request.user)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   // Return data of an existing plan
   api.get('/network_plan/:plan_id', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
@@ -97,6 +106,13 @@ exports.configure = (api, middleware) => {
         response.attachment(file_name + '.kml')
         response.send(kml_output)
       })
+      .catch(next)
+  })
+
+  api.get('/search/businesses', (request, response, next) => {
+    var text = request.query.text
+    models.NetworkPlan.searchBusinesses(text)
+      .then(jsonSuccess(response, next))
       .catch(next)
   })
 
