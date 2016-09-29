@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ public class UserProcessingLayerServiceImpl implements
 
 	private CsvReaderWriter<EntityDataRow> csvReaderWriter;
 
+	@Autowired
 	public UserProcessingLayerServiceImpl(
 			ServiceLayerRepository serviceLayerRepository,
 			DataSourceEntityRepository dataSourceEntityRepository) {
@@ -45,16 +47,16 @@ public class UserProcessingLayerServiceImpl implements
 
 	@Override
 	public Collection<ServiceLayer> getUserServiceLayers(int userId) {
-		return serviceLayerRepository.findByUserId(userId);
+		return serviceLayerRepository.getByUserId(userId);
 	}
 
 	@Override
 	public ServiceLayer getUserServiceLayers(int userId, int id) {
-		return serviceLayerRepository.findByUserIdAndId(userId, id);
+		return serviceLayerRepository.getByUserIdAndId(userId, id);
 	}
 
 	@Override
-	public ServiceLayer addUserServiceLayer(Long userId, String layerName,
+	public ServiceLayer addUserServiceLayer(int userId, String layerName,
 			String layerDescription) {
 		ServiceLayer serviceLayer = new ServiceLayer();
 		serviceLayer.setName(layerName);

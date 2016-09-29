@@ -20,7 +20,7 @@ public class DataSourceEntity {
     private Long id;
     private String name;
     private String description;
-    private Long userId ;
+    private Integer userId ;
     private Set<SourceLocationEntity> sourceLocationEntities;
 
     @Id
@@ -79,11 +79,11 @@ public class DataSourceEntity {
     }
     
     @Column(name="user_id")
-    public Long getUserId() {
+    public Integer getUserId() {
 		return userId;
 	}
 
-	public void setUserId(Long userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 

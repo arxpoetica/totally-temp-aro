@@ -26,10 +26,14 @@ public interface ServiceLayerRepository extends
 			+ "WHERE name='system_defaults'", nativeQuery = true)
 	List<Object[]> queryMappedPriorities();
 
-	Collection<ServiceLayer> findByUserId(int userId);
+	@Query( "select sl from ServiceLayer sl where sl.dataSource.userId = :userId")
+	Collection<ServiceLayer> getByUserId(int userId);
+
+	@Query( "select sl from ServiceLayer sl where sl.dataSource.userId = :userId and sl.id = :id")
+	ServiceLayer getByUserIdAndId(int userId, int id);
 
 	Collection<ServiceLayer> findByUserDefined(boolean userDefined);
 
-	ServiceLayer findByUserIdAndId(int userId, int id);
+
 
 }

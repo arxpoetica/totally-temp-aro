@@ -11,7 +11,7 @@ public interface UserProcessingLayerService {
     Collection<ServiceLayer> getUserServiceLayers(int userId) ;
     ServiceLayer getUserServiceLayers(int userId, int id) ;
 
-    ServiceLayer addUserServiceLayer(Long userId, String layerName, String layerDescription);
+    ServiceLayer addUserServiceLayer(int userId, String layerName, String layerDescription);
 
     void loadUserServiceLayerEntitiesCSV(int id, Writer responseWriter);
 
