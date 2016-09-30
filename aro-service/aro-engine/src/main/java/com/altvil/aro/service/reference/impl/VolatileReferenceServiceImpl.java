@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.reference.ReferenceType;
@@ -18,6 +20,11 @@ import com.altvil.utils.reference.VolatileReference;
 @Service
 public class VolatileReferenceServiceImpl implements VolatileReferenceService {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(VolatileReferenceServiceImpl.class.getName());
+
+	
+	
 	private Map<ReferenceType, VolatileReference<?>> map = Collections
 			.synchronizedMap(new HashMap<>());
 
@@ -43,7 +50,8 @@ public class VolatileReferenceServiceImpl implements VolatileReferenceService {
 	public void invalidate(ReferenceType reference) {
 		VolatileReference<?> ref = map.get(reference);
 		if (ref != null) {
-			ref.get();
+			ref.invalidate();
+			log.info("Invalidate Cache " + reference);
 		}
 
 	}

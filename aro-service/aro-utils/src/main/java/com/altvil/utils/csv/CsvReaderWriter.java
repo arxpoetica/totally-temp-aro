@@ -19,12 +19,19 @@ public class CsvReaderWriter<T> {
 		this.mapping = mapping;
 	}
 
-	public List<T> parse(Reader reader) throws IOException {
+//	public List<T> parse(Reader reader) throws IOException {
+//		//skip first line
+//
+//		BufferedReader bufferedReader = new BufferedReader(reader);
+//		bufferedReader.readLine();
+//		return new CsvToBean<T>().parse(mapping, bufferedReader);
+//	}
+	
+	public List<T> parse(BufferedReader reader) throws IOException {
 		//skip first line
 
-		BufferedReader bufferedReader = new BufferedReader(reader);
-		bufferedReader.readLine();
-		return new CsvToBean<T>().parse(mapping, bufferedReader);
+		reader.readLine();
+		return new CsvToBean<T>().parse(mapping, reader);
 	}
 
 	public void write(Writer writer, List<T> values) {

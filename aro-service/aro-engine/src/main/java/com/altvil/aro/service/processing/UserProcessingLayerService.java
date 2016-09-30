@@ -1,11 +1,11 @@
 package com.altvil.aro.service.processing;
 
-import com.altvil.aro.model.ServiceLayer;
-
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
+
+import com.altvil.aro.model.ServiceLayer;
 
 public interface UserProcessingLayerService {
 
@@ -16,7 +16,7 @@ public interface UserProcessingLayerService {
 
     void loadUserServiceLayerEntitiesCSV(int id, Writer responseWriter);
 
-    void saveUserServiceLayerEntitiesCSV(int id, Reader reader) throws IOException;
+    void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader) throws IOException;
 
     /**
      *
