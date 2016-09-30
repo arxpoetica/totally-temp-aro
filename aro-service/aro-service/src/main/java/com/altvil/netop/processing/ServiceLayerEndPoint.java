@@ -61,12 +61,9 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 			@RequestParam("file") MultipartFile file) {
 		update(() -> {
 			if (!file.isEmpty()) {
-				try (BufferedReader reader = new BufferedReader(
-						new InputStreamReader(file.getInputStream(), "UTF-8"))) {
-					service.saveUserServiceLayerEntitiesCSV(id, reader);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(file.getInputStream(), "UTF-8"));
+				service.saveUserServiceLayerEntitiesCSV(id, reader);
 			}
 		});
 	}
