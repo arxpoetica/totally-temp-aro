@@ -52,6 +52,7 @@
        
       <!-- max size of file in memory (in bytes) -->
       <property name="maxInMemorySize" value="1048576" /> <!-- 1MB -->
+     </bean> 
 
 	
 	<mvc:annotation-driven
