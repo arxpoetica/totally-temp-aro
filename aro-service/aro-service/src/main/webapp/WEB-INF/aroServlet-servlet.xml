@@ -43,7 +43,12 @@
 			</map>
 		</property>
 	</bean>
-
+	
+	<bean id ="multipartResolver"
+		class = "org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="500000" /> 
+	</bean>
+	
 	<mvc:annotation-driven
 		content-negotiation-manager="contentManager">
 		<mvc:message-converters>
