@@ -22,4 +22,4 @@ CREATE INDEX client_service_area_geom_gist ON client.service_area USING gist (ge
 CREATE INDEX client_service_area_geog_gist ON client.service_area USING gist (geog);
 CREATE INDEX client_service_area_edge_buffer ON client.service_area USING gist (edge_buffer);
 CREATE INDEX client_service_area_location_edge_buffer ON client.service_area USING gist (location_edge_buffer);
-CREATE INDEX client_service_area_data_source_id ON client.service_area (data_source_id);
+

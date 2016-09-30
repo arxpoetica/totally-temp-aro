@@ -11,6 +11,8 @@ CONSTRAINT client_service_layer_pkey PRIMARY KEY (id)
 WITH (OIDS=FALSE);
 ALTER TABLE "client"."service_layer" OWNER TO "aro";
 
+CREATE INDEX client_service_layer_data_source_id ON client.service_layer (data_source_id);
+
 -- Basic Report Types
 
 INSERT INTO client.service_layer (name, description, is_user_defined)
