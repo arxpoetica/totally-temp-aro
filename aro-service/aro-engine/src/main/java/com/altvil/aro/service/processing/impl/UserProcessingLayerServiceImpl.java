@@ -98,8 +98,9 @@ public class UserProcessingLayerServiceImpl implements
 	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader) throws IOException {
 
 		DataSourceEntity ds = serviceLayerRepository.getOne(id).getDataSource();
-
-		ds.setSourceLocationEntities(csvReaderWriter.parse(reader).stream()
+		ds.getSourceLocationEntities().clear(); 
+		
+		ds.getSourceLocationEntities().addAll(csvReaderWriter.parse(reader).stream()
 				.map(r -> {
 					SourceLocationEntity sl = new SourceLocationEntity();
 					sl.setDataSource(ds);
