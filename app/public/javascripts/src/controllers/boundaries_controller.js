@@ -201,6 +201,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     $scope.boundaries = []
+    $scope.areaLayers.forEach((layer) => {
+      layer.hide()
+      $(`#map_layers_toggle_${layer.type} input`).prop('checked', false)
+    })
     if (!plan) return
 
     if (plan && (countySubdivisionsLayer || censusBlocksLayer)) {
