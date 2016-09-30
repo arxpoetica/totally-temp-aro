@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.List;
 
@@ -67,6 +68,20 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 			}
 		});
 	}
+	
+	@RequestMapping(value = "/serviceLayers/{id}/entities", method = RequestMethod.POST)
+	public void handleEntityUpload(@PathVariable int id,
+			@RequestBody EntityData entityData) {
+		update(() -> {
+			if (!entityData.getData().isEmpty()) {
+				try(BufferedReader reader = new BufferedReader(
+						new StringReader(entityData.getData()))) {
+					service.saveUserServiceLayerEntitiesCSV(id, reader);
+				}
+			}
+		});
+	}
+	
 
 	@RequestMapping(value = "/serviceLayers/{id}/command", method = RequestMethod.POST)
 	public CommandStatusResponse processCommand(@PathVariable int id,
