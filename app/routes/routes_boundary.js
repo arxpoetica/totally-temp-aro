@@ -48,9 +48,13 @@ exports.configure = (api, middleware) => {
   function editUserDefinedBoundary (request, response, next) {
     var busboy = new Busboy({ headers: request.headers })
     var fullpath
+    busboy.on('field', function (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+      request.body[fieldname] = val
+    })
     busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
       fullpath = path.join(os.tmpDir(), String(Date.now()))
       file.pipe(fs.createWriteStream(fullpath))
+      if (!filename) fullpath = null
     })
     busboy.on('finish', () => {
       var name = request.body.name

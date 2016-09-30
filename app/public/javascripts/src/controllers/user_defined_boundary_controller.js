@@ -25,14 +25,13 @@ app.controller('user_defined_boundary_controller', ['$scope', '$rootScope', '$ht
     var xhr = new XMLHttpRequest()
     xhr.open('POST', url, true)
     xhr.addEventListener('error', (err) => {
-      form.reset()
       console.log('error', err)
       swal('Error', err.message, 'error')
     })
     xhr.addEventListener('load', function (e) {
-      form.reset()
       try {
         var data = JSON.parse(this.responseText)
+        if (data.error) return swal('Error', data.error, 'error')
       } catch (e) {
         console.log(e, e)
         return swal('Error', 'Unexpected response from server', 'error')

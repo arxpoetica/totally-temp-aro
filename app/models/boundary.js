@@ -62,10 +62,9 @@ module.exports = class Boundary {
 
   static findUserDefinedBoundaries (user) {
     return database.query(`
-      SELECT ds.id, ds.name, ds.description, sl.name as service_layer_name
-      FROM user_data.data_source ds
-      JOIN client.service_layer sl ON sl.data_source_id = ds.id
-      WHERE user_id=$1
+      SELECT sl.id, sl.name, sl.description
+      FROM client.service_layer sl
+      JOIN user_data.data_source ds ON sl.data_source_id = ds.id AND ds.user_id=$1
     `, [user.id])
   }
 
@@ -85,7 +84,8 @@ module.exports = class Boundary {
           }
           return models.AROService.request(req)
         } else {
-          return database.execute('UPDATE user_data.data_source SET name=$1, description=$1 WHERE id=$2', [name, id])
+          return Promise.resolve()
+          // return database.execute('UPDATE user_data.data_source SET name=$1, description=$1 WHERE id=$2', [name, id])
         }
       })
       .then((res) => {
