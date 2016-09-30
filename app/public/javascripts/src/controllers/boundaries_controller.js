@@ -88,8 +88,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     short_name: 'UD',
     name: 'User-defined boundaries',
     type: 'user_defined',
-    api_endpoint: '/county_subdivisions/36',
-    highlighteable: true,
     style_options: {
       normal: {
         fillColor: 'green',
@@ -250,6 +248,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $scope.toggleBoundary = (boundary) => {
     boundary.overlay.setMap(boundary.overlay.getMap() ? null : map)
+  }
+
+  $scope.changeUserDefinedBoundary = () => {
+    var url = `/service_areas/${$scope.selectedUserDefinedBoundary.service_layer_name}`
+    userDefinedLayer.setApiEndpoint(url)
   }
 
   $scope.toggleTool = () => {

@@ -6,6 +6,7 @@ var helpers = require('../helpers')
 var database = helpers.database
 var config = helpers.config
 var models = require('../models')
+var fs = require('fs')
 
 module.exports = class Boundary {
 
@@ -60,10 +61,15 @@ module.exports = class Boundary {
   }
 
   static findUserDefinedBoundaries (user) {
-    return database.query('SELECT * FROM user_data.data_source WHERE user_id=$1', [user.id])
+    return database.query(`
+      SELECT ds.id, ds.name, ds.description, sl.name as service_layer_name
+      FROM user_data.data_source ds
+      JOIN client.service_layer sl ON sl.data_source_id = ds.id
+      WHERE user_id=$1
+    `, [user.id])
   }
 
-  static editUserDefinedBoundary (user, id, name) {
+  static editUserDefinedBoundary (user, id, name, file, radius) {
     return Promise.resolve()
       .then(() => {
         if (!id) {
@@ -79,11 +85,40 @@ module.exports = class Boundary {
           }
           return models.AROService.request(req)
         } else {
-          return database.execute('UPDATE user_data.data_source SET name=$1 description=$1 WHERE id=$2', [name, id])
+          return database.execute('UPDATE user_data.data_source SET name=$1, description=$1 WHERE id=$2', [name, id])
         }
       })
       .then((res) => {
-        return { id: id || res.id }
+        id = id || res.id
+        if (!file) return { id: id }
+        var req = {
+          method: 'POST',
+          url: config.aro_service_url + `/rest/serviceLayers/${id}/entities.csv`,
+          formData: {
+            file: {
+              value: fs.createReadStream(file),
+              options: {
+                filename: 'entities.csv',
+                contentType: 'text/csv'
+              }
+            }
+          },
+          json: true
+        }
+        return models.AROService.request(req)
+          .then(() => {
+            var req = {
+              method: 'POST',
+              url: config.aro_service_url + `/rest/serviceLayers/${id}/command`,
+              body: {
+                action: 'GENERATE_POLYGONS',
+                maxDistanceMeters: radius
+              },
+              json: true
+            }
+            return models.AROService.request(req)
+              .then(() => ({ id: id }))
+          })
       })
   }
 

@@ -52,6 +52,7 @@
   <div ng-show="userDefinedLayer.visible" style="padding-left: 20px">
     <p>
       <select class="form-control" ng-model="selectedUserDefinedBoundary"
+        ng-change="changeUserDefinedBoundary()"
         ng-options="boundary as boundary.name for boundary in userDefinedBoundaries track by boundary.id"
         id="userDefinedBoundariesSelect">
         <option value="">Select a boundary...</option>
