@@ -5,6 +5,7 @@ id serial,
 "name" varchar(32) UNIQUE,
 "description" varchar(256),
 is_user_defined boolean,
+data_source_id bigint references user_data.data_source(id) on delete cascade,
 CONSTRAINT client_service_layer_pkey PRIMARY KEY (id)
 )
 WITH (OIDS=FALSE);

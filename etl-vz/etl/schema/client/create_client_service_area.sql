@@ -6,7 +6,6 @@ CREATE TABLE client.service_area
 	service_type varchar(1),
 	service_layer_id int4 not null references client.service_layer, 
 	source_id varchar(64),
-	data_source_id bigint references user_data.data_source(id) on delete cascade,
 	state varchar(6),
 	code varchar(64),
 	geog geography('MULTIPOLYGON', 4326),
