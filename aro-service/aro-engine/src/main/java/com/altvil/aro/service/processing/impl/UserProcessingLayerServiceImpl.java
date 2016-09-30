@@ -1,32 +1,33 @@
 package com.altvil.aro.service.processing.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import com.altvil.aro.model.ServiceArea;
-import com.altvil.aro.persistence.repository.ServiceAreaRepository;
-import com.altvil.utils.GeometryUtil;
-import com.vividsolutions.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.altvil.aro.model.ServiceArea;
 import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.persistence.repository.DataSourceEntityRepository;
+import com.altvil.aro.persistence.repository.ServiceAreaRepository;
 import com.altvil.aro.persistence.repository.ServiceLayerRepository;
 import com.altvil.aro.persistence.repository.user_data.DataSourceEntity;
 import com.altvil.aro.persistence.repository.user_data.SourceLocationEntity;
 import com.altvil.aro.service.processing.UserProcessingLayerService;
+import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.csv.CsvReaderWriter;
 import com.altvil.utils.csv.CsvReaderWriterFactory;
 import com.opencsv.bean.CsvBind;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 
 @Service
 public class UserProcessingLayerServiceImpl implements
@@ -95,7 +96,7 @@ public class UserProcessingLayerServiceImpl implements
 
 	@Override
 	@Transactional
-	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader) throws IOException {
+	public void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader) throws IOException {
 
 		DataSourceEntity ds = serviceLayerRepository.getOne(id).getDataSource();
 		ds.getSourceLocationEntities().clear(); 

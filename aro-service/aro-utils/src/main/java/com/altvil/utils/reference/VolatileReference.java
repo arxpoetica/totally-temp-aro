@@ -27,6 +27,11 @@ public class VolatileReference<T> {
 		return value ;
 	}
 	
+	
+	public synchronized void invalidate() {
+		value =  null ;
+	}
+	
 	public synchronized VolatileReferenceInfo getVolatileReferenceInfo() {
         return new VolatileReferenceInfo(timeMillis, value != null);
     }
