@@ -255,8 +255,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $scope.changeUserDefinedBoundary = () => {
-    var url = `/service_areas/${$scope.selectedUserDefinedBoundary.service_layer_name}`
-    userDefinedLayer.setApiEndpoint(url)
+    $rootScope.selectedUserDefinedBoundary = $scope.selectedUserDefinedBoundary
+    if (!$scope.selectedUserDefinedBoundary) {
+      userDefinedLayer.hide()
+    } else {
+      var url = `/service_areas/${$scope.selectedUserDefinedBoundary.service_layer_name}`
+      userDefinedLayer.setApiEndpoint(url)
+      userDefinedLayer.show()
+    }
   }
 
   $scope.toggleTool = () => {
