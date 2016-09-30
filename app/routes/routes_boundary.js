@@ -43,7 +43,7 @@ exports.configure = (api, middleware) => {
 
   // Create a user-defined boundary
   api.post('/boundary/user_defined', (request, response, next) => {
-    var name = request.params.name
+    var name = request.body.name
     var user = request.user
     models.Boundary.editUserDefinedBoundary(user, null, name)
       .then(jsonSuccess(response, next))
@@ -52,7 +52,7 @@ exports.configure = (api, middleware) => {
 
   // Edit a user-defined boundary
   api.post('/boundary/user_defined/:id', (request, response, next) => {
-    var name = request.params.name
+    var name = request.body.name
     var id = request.params.id
     var user = request.user
     models.Boundary.editUserDefinedBoundary(user, id, name)

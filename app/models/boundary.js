@@ -83,10 +83,7 @@ module.exports = class Boundary {
         }
       })
       .then((res) => {
-        console.log('done', res)
-      })
-      .then(() => {
-
+        return { id: id || res.id }
       })
   }
 
