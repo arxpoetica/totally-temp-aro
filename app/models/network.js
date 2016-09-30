@@ -21,7 +21,11 @@ module.exports = class Network {
       SELECT seg.geom
         FROM client.fiber_route_segment seg
         JOIN client.fiber_route fr ON seg.fiber_route_id = fr.id
-       WHERE fr.plan_id IN (SELECT id FROM client.plan WHERE parent_plan_id=$1)
+        WHERE fr.plan_id IN (
+          (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+            (SELECT id FROM client.plan WHERE parent_plan_id=$1)
+          ))
+        )
         AND seg.cable_construction_type_id = (
           SELECT id FROM client.cable_construction_type WHERE name=$2
         )
