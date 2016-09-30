@@ -37,6 +37,50 @@ public interface NetworkPlanRepository extends
 	List<Object[]> querySpeedCategoriesElements(@Param("censusBlockId") int cenusBlock);
 	
 	
+		//TODO Update Plan Head
+		@Query(value = "WITH plan_heads AS (\n" + 
+				"	SELECT p.wirecenter_id\n" + 
+				"	FROM client.plan p\n" + 
+				"	WHERE p.plan_type = 'H'\n" + 
+				"		AND p.wirecenter_id = :wireCenterId\n" + 
+				")\n" + 
+				",\n" + 
+				"missing_plan_heads AS (\n" + 
+				"	SELECT sa.id\n" + 
+				"	FROM client.service_area sa\n" + 
+				"	LEFT JOIN plan_heads p\n" + 
+				"		ON p.wirecenter_id = sa.id\n" + 
+				"	WHERE p.wirecenter_id IS NULL\n" + 
+				"		AND sa.id = :wireCenterId\n" + 
+				")\n" + 
+				",\n" + 
+				"new_plans AS (\n" + 
+				"INSERT INTO client.plan (service_layer_id, name, plan_type, parent_plan_id, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at)\n" + 
+				"SELECT\n" + 
+				"	sa.service_layer_id,\n" + 
+				"	'root_' || code,\n" + 
+				"	'H',\n" + 
+				"	NULL,\n" + 
+				"	sa.id,\n" + 
+				"	sa.code,\n" + 
+				"	st_centroid(geom),\n" + 
+				"	sa.geom,\n" + 
+				"	NOW(),\n" + 
+				"	NOW()\n" + 
+				"FROM client.service_area sa\n" + 
+				"JOIN missing_plan_heads m\n" + 
+				"	ON m.id = sa.id\n" + 
+				"ORDER BY sa.id\n" + 
+				"RETURNING  id, wirecenter_id, area_centroid\n" + 
+				")\n" + 
+				"SELECT COUNT(*)\n" + 
+				"FROM new_plans", nativeQuery = true)
+		@Transactional
+		@Modifying
+		Integer updatePlanHead(@Param("wireCenterId") int wireCenterId);
+
+	
+	
 	//TODO Create Price Repository
 	@Query(value = "select name, uom_name, price from financial.network_price", nativeQuery = true)
 	List<Object[]> queryPriceModelElements();
