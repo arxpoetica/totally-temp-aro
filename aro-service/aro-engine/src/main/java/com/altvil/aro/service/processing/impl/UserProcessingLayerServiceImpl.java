@@ -2,9 +2,11 @@ package com.altvil.aro.service.processing.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -27,6 +29,7 @@ import com.altvil.utils.csv.CsvReaderWriterFactory;
 import com.opencsv.bean.CsvBind;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 @Service
@@ -42,8 +45,7 @@ public class UserProcessingLayerServiceImpl implements
 	public UserProcessingLayerServiceImpl(
 			ServiceLayerRepository serviceLayerRepository,
 			DataSourceEntityRepository dataSourceEntityRepository,
-			ServiceAreaRepository serviceAreaRepository
-			) {
+			ServiceAreaRepository serviceAreaRepository) {
 		super();
 		this.serviceLayerRepository = serviceLayerRepository;
 		this.dataSourceEntityRepository = dataSourceEntityRepository;
@@ -52,8 +54,8 @@ public class UserProcessingLayerServiceImpl implements
 
 	@PostConstruct
 	void PostConstruct() {
-		csvReaderWriter = CsvReaderWriterFactory.FACTORY
-				.create(EntityDataRow.class, "entityCategoryId","lat","longitude");
+		csvReaderWriter = CsvReaderWriterFactory.FACTORY.create(
+				EntityDataRow.class, "entityCategoryId", "lat", "longitude");
 	}
 
 	@Override
@@ -73,18 +75,24 @@ public class UserProcessingLayerServiceImpl implements
 		serviceLayer.setName(layerName);
 		serviceLayer.setDescription(layerDescription);
 		serviceLayer.setUserDefined(true);
-		
-		DataSourceEntity dse = new DataSourceEntity() ;
-		
+
+		DataSourceEntity dse = new DataSourceEntity();
+
 		dse.setName(layerName);
-		dse.setDescription(layerDescription) ;
-		dse.setUserId(userId) ;
-		
-		this.dataSourceEntityRepository.save(dse) ;
-		serviceLayer.setDataSource(dse) ;
-		
-		
+		dse.setDescription(layerDescription);
+		dse.setUserId(userId);
+
+		this.dataSourceEntityRepository.save(dse);
+		serviceLayer.setDataSource(dse);
+
 		return serviceLayerRepository.save(serviceLayer);
+	}
+
+	@Override
+	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader)
+			throws IOException {
+		saveUserServiceLayerEntitiesCSV(id, new BufferedReader(reader));
+
 	}
 
 	@Override
@@ -96,52 +104,90 @@ public class UserProcessingLayerServiceImpl implements
 
 	@Override
 	@Transactional
-	public void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader) throws IOException {
+	public void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader)
+			throws IOException {
 
 		DataSourceEntity ds = serviceLayerRepository.getOne(id).getDataSource();
-		ds.getSourceLocationEntities().clear(); 
-		
-		ds.getSourceLocationEntities().addAll(csvReaderWriter.parse(reader).stream()
-				.map(r -> {
-					SourceLocationEntity sl = new SourceLocationEntity();
-					sl.setDataSource(ds);
-					sl.setLat(r.getLat());
-					sl.setLongitude(r.getLongitude());
-					sl.setPoint(GeometryUtil.asPoint(new Coordinate(r.getLongitude(),r.getLat())));
-					sl.setEntityCategoryId(r.getEntityCategoryId());
-					return sl;
-				}).collect(Collectors.toSet()));
+		ds.getSourceLocationEntities().clear();
+
+		ds.getSourceLocationEntities()
+				.addAll(csvReaderWriter
+						.parse(reader)
+						.stream()
+						.map(r -> {
+							SourceLocationEntity sl = new SourceLocationEntity();
+							sl.setDataSource(ds);
+							sl.setLat(r.getLat());
+							sl.setLongitude(r.getLongitude());
+							sl.setPoint(GeometryUtil.asPoint(new Coordinate(r
+									.getLongitude(), r.getLat())));
+							sl.setEntityCategoryId(r.getEntityCategoryId());
+							return sl;
+						}).collect(Collectors.toSet()));
 
 		dataSourceEntityRepository.save(ds);
 
 	}
 
-	@Override
-	public int createAreasFromPoints(int serviceLayerId, double maxDistanceMeters) {
-		ServiceLayer serviceLayer = serviceLayerRepository.getOne(serviceLayerId);
-		VoronoiPolygonsGenerator polygonsGenerator  = new VoronoiPolygonsGenerator(maxDistanceMeters);
-		Collection<ServiceArea> generatedAreas = polygonsGenerator.generatePolygons(serviceLayer
-				.getDataSource()
-				.getSourceLocationEntities()
-				.stream()
-				.map(SourceLocationEntity::getPoint)
-				.collect(Collectors.toSet())
-		).stream()
+	@Transactional
+	private Set<Point> getPoints(int serviceLayerId) {
+
+		return serviceLayerRepository
+				.querySourceLocationEntityForServiceLayer(serviceLayerId)
+				.stream().map(SourceLocationEntity::getPoint)
+				.collect(Collectors.toSet());
+
+	}
+
+	//TODO ensure @Transactional working
+	@Transactional
+	public Collection<ServiceArea> saveAsServiceAreas(int serviceLayerId,
+			Collection<Polygon> polygons) {
+
+		ServiceLayer serviceLayer = new ServiceLayer();
+		serviceLayer.setId(serviceLayerId);
+
+		Collection<ServiceArea> serviceAreas = polygons.stream()
 				.map(polygon -> createServiceArea(polygon, serviceLayer))
 				.collect(Collectors.toSet());
 
-		List<ServiceArea> savedAreas = serviceAreaRepository.save(generatedAreas);
-		return savedAreas.size();
+		Collection<ServiceArea> updatedServiceAreas = serviceAreaRepository.save(serviceAreas);
+		
+		//Update the Service Area Buffers
+		serviceAreaRepository.updateServiceAreaBuffers(serviceLayerId);
+		
+		//Update the Equipment into Head Plan
+		serviceLayerRepository.updateServiceLayerEquipment(serviceLayerId) ;
+		
+		return updatedServiceAreas ;
+
 	}
 
-	private ServiceArea createServiceArea(Polygon polygon, ServiceLayer serviceLayer) {
-		Polygon polygons[] = {polygon};
-		MultiPolygon multiPolygon = GeometryUtil.factory().createMultiPolygon(polygons);
+	@Override
+	public int createAreasFromPoints(int serviceLayerId,
+			double maxDistanceMeters) {
+
+		VoronoiPolygonsGenerator polygonsGenerator = new VoronoiPolygonsGenerator(
+				maxDistanceMeters);
+
+		Collection<Polygon> polygons = polygonsGenerator
+				.generatePolygons(getPoints(serviceLayerId));
+
+		return saveAsServiceAreas(serviceLayerId, polygons).size();
+
+	}
+
+	private ServiceArea createServiceArea(Polygon polygon,
+			ServiceLayer serviceLayer) {
+		Polygon polygons[] = { polygon };
+		MultiPolygon multiPolygon = GeometryUtil.factory().createMultiPolygon(
+				polygons);
 		ServiceArea sa = new ServiceArea();
 		sa.setGeog(multiPolygon);
 		sa.setGeom(multiPolygon);
 		sa.setSourceId("autogen");
-		sa.setCode("autogen_" + System.currentTimeMillis() +'_' +  Math.random());
+		sa.setCode("autogen_" + System.currentTimeMillis() + '_'
+				+ Math.random());
 		sa.setLayer(serviceLayer);
 		return sa;
 	}
@@ -164,7 +210,7 @@ public class UserProcessingLayerServiceImpl implements
 
 		}).collect(Collectors.toList());
 	}
-	
+
 	public static class EntityDataRow {
 		@CsvBind
 		private int entityCategoryId;
@@ -181,7 +227,7 @@ public class UserProcessingLayerServiceImpl implements
 			this.entityCategoryId = entityCategoryId;
 		}
 
-		public double  getLat() {
+		public double getLat() {
 			return lat;
 		}
 

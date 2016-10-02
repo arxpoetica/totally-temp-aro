@@ -3,8 +3,6 @@ package com.altvil.netop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
-
 public class BaseEndPointHandler {
 	
 	private static final Logger log = LoggerFactory

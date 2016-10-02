@@ -29,10 +29,11 @@ import com.altvil.aro.service.scheduler.SchedulerService;
 import com.altvil.aro.service.strategy.NoSuchStrategy;
 import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.OptimizationType;
+import com.altvil.netop.BaseEndPointHandler;
 import com.altvil.netop.service.AroConversionService;
 
 @RestController
-public class NewOptimizeEndPoint {
+public class NewOptimizeEndPoint extends BaseEndPointHandler {
 
 	@Autowired
 	private AroConversionService aroConversionService;

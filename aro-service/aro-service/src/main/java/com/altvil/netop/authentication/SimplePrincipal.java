@@ -1,4 +1,4 @@
-package com.altvil.authentication;
+package com.altvil.netop.authentication;
 
 import java.security.Principal;
 

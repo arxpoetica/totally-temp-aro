@@ -91,6 +91,32 @@ public interface ServiceAreaRepository extends
 	@Modifying
 	void updateWireCenterPlanLocations(
 			@Param("masterPlanId") long masterPlanId);
+	
+	
+	@Query(value = 
+			"UPDATE client.service_area\n" + 
+			"SET\n" + 
+			"	edge_buffer =\n" + 
+			"		ST_Transform(\n" + 
+			"			cast(\n" + 
+			"				ST_buffer(\n" + 
+			"					cast(ST_Convexhull(geom) AS Geography),\n" + 
+			"				200)\n" + 
+			"				AS Geometry),\n" + 
+			"			 4326),\n" + 
+			"	location_edge_buffer =\n" + 
+			"		ST_Transform(\n" + 
+			"			cast(\n" + 
+			"				ST_Buffer(\n" + 
+			"					cast(ST_Convexhull(geom) AS Geography),\n" + 
+			"				50)\n" + 
+			"			AS Geometry), 4326) \n" + 
+			"WHERE service_layer_id = :serviceLayerId",
+			nativeQuery = true)
+	@Transactional
+	@Modifying
+	void updateServiceAreaBuffers(
+			@Param("serviceLayerId") int serviceLayerId);
 
 
 }

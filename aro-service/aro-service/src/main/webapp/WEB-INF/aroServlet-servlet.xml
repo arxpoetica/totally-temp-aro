@@ -12,8 +12,6 @@
 		http://www.springframework.org/schema/mvc/spring-mvc.xsd
 		http://www.springframework.org/schema/task
 		http://www.springframework.org/schema/task/spring-task.xsd
-		http://www.springframework.org/schema/tx
-		http://www.springframework.org/schema/tx/spring-tx.xsd
 		http://www.springframework.org/schema/data/jpa
 		http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
 		http://www.springframework.org/schema/jdbc
@@ -21,6 +19,10 @@
 
 		http://www.springframework.org/schema/websocket
 		http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<!-- http://www.springframework.org/schema/tx  -->
+		<!--  http://www.springframework.org/schema/tx/spring-tx.xsd -->
+		
 
 	<!-- The property placeholder in aroServices cannot be inherited so repeat it here. -->
 	<context:property-placeholder location="classpath*:/aroConfig.properties,classpath*:/aroServlet.properties" />
@@ -70,7 +72,7 @@
         <websocket:simple-broker prefix="/topic, /queue"/>
     </websocket:message-broker>
 
-	<context:component-scan base-package="com.altvil"/>
+	<context:component-scan base-package="com.altvil.netop"/>
 	<bean
 		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
 		<property name="messageConverters">

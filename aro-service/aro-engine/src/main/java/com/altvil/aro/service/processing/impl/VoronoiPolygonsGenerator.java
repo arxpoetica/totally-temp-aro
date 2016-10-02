@@ -1,16 +1,21 @@
 package com.altvil.aro.service.processing.impl;
 
-import com.altvil.utils.GeometryUtil;
-import com.vividsolutions.jts.algorithm.CentroidPoint;
-import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.triangulate.VoronoiDiagramBuilder;
+import static com.altvil.utils.GeometryUtil.asCoordinates;
+import static com.altvil.utils.GeometryUtil.factory;
+import static com.altvil.utils.GeometryUtil.transformGeographiesToGeometries;
+import static com.altvil.utils.GeometryUtil.transformGeometriesToGeographies;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.altvil.utils.GeometryUtil.*;
+import com.altvil.utils.GeometryUtil;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.triangulate.VoronoiDiagramBuilder;
 
 public class VoronoiPolygonsGenerator {
 

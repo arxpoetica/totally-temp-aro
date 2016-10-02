@@ -62,9 +62,10 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 			@RequestParam("file") MultipartFile file) {
 		update(() -> {
 			if (!file.isEmpty()) {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(file.getInputStream(), "UTF-8"));
-				service.saveUserServiceLayerEntitiesCSV(id, reader);
+				try(BufferedReader reader = new BufferedReader(
+						new InputStreamReader(file.getInputStream(), "UTF-8"))) {
+					service.saveUserServiceLayerEntitiesCSV(id, reader);
+				}
 			}
 		});
 	}
@@ -87,8 +88,10 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 	public CommandStatusResponse processCommand(@PathVariable int id,
 			@RequestBody ServiceLayerCommand command) {
 
-		return new CommandStatusResponse(service.createAreasFromPoints(id,
+		return execute(() ->{
+			return new CommandStatusResponse(service.createAreasFromPoints(id,
 				command.getMaxDistanceMeters()));
-	}
+		}) ;
+	} 
 
 }

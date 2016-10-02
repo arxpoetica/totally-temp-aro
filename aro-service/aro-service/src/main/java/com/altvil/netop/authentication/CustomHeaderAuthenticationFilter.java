@@ -1,4 +1,4 @@
-package com.altvil.authentication;
+package com.altvil.netop.authentication;
 
 import java.io.IOException;
 import java.security.Principal;

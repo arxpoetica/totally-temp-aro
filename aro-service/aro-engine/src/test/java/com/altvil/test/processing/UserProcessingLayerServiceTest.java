@@ -1,10 +1,11 @@
 package com.altvil.test.processing;
 
-import com.altvil.aro.model.ServiceLayer;
-import com.altvil.aro.service.processing.UserProcessingLayerService;
-import com.altvil.aro.service.processing.impl.UserProcessingLayerServiceImpl;
-import com.altvil.utils.csv.CsvReaderWriter;
-import com.altvil.utils.csv.CsvReaderWriterFactory;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.List;
+import com.altvil.aro.model.ServiceLayer;
+import com.altvil.aro.service.processing.UserProcessingLayerService;
+import com.altvil.aro.service.processing.impl.UserProcessingLayerServiceImpl;
+import com.altvil.utils.csv.CsvReaderWriter;
+import com.altvil.utils.csv.CsvReaderWriterFactory;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(value = "/test-config.xml")
@@ -44,7 +46,7 @@ public class UserProcessingLayerServiceTest {
         ServiceLayer serviceLayer = layerService.addUserServiceLayer(6, "loadTestLayer", "loadTestLayer description");
 
 
-        StringReader reader = new StringReader(csvData);
+        BufferedReader reader = new BufferedReader(new StringReader(csvData));
 
         layerService.saveUserServiceLayerEntitiesCSV(serviceLayer.getId(), reader);
         ServiceLayer modifiedLayer = layerService.getUserServiceLayers(6, serviceLayer.getId());
@@ -64,7 +66,7 @@ public class UserProcessingLayerServiceTest {
         layerService.saveUserServiceLayerEntitiesCSV(serviceLayer.getId(), reader);
         ServiceLayer modifiedLayer = layerService.getUserServiceLayers(6, serviceLayer.getId());
 
-        int numOfAreas = layerService.createAreasFromPoints(serviceLayer.getId(), 100000);
+        layerService.createAreasFromPoints(serviceLayer.getId(), 100000);
         System.out.println(modifiedLayer);
 
     }
