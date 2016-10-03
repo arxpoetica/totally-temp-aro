@@ -606,13 +606,16 @@ module.exports = class NetworkPlan {
           kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`
         })
 
-        // TODO: network nodes in child plans
         var sql = `
           SELECT ST_AsKML(network_nodes.geom) AS geom
           FROM client.plan_sources
           JOIN client.network_nodes
             ON plan_sources.network_node_id = network_nodes.id
-          WHERE plan_sources.plan_id=$1
+          WHERE plan_sources.plan_id IN (
+            (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+              (SELECT id FROM client.plan WHERE parent_plan_id=$1)
+            ))
+          )
         `
         return database.query(sql, [plan_id])
       })
