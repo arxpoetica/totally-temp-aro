@@ -278,6 +278,7 @@ module.exports = class Network {
       algorithm: options.algorithm,
       analysisSelectionMode: options.selectionMode,
       fiberNetworkConstraints: options.fiberNetworkConstraints
+      // processLayers
     }
     var req = {
       method: 'POST',
