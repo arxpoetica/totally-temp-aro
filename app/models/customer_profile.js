@@ -22,6 +22,34 @@ module.exports = class CustomerProfile {
     return metadata
   }
 
+  static customerProfileByEntity (plan_id) {
+    return database.query(`
+      (SELECT MAX(c.description) AS name, COUNT(c.id) AS total
+      FROM client.plan_targets t
+      JOIN businesses b ON t.location_id = b.location_id
+      JOIN client.business_categories c ON b.number_of_employees >= c.min_value AND b.number_of_employees < c.max_value
+      JOIN client.employees_by_location e ON (b.number_of_employees >= e.min_value) AND (b.number_of_employees <= e.max_value)
+      WHERE plan_id=$1
+      GROUP BY c.id)
+
+      UNION ALL
+
+      (SELECT MAX(c.description) AS name, COUNT(c.id) AS total
+      FROM client.plan_targets t
+      JOIN households b ON t.location_id = b.location_id
+      JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households < c.max_value
+      WHERE plan_id=$1
+      GROUP BY c.id)
+
+      UNION ALL
+
+      (SELECT 'Towers' AS name, COUNT(*) AS total
+      FROM client.plan_targets t
+      JOIN towers b ON b.location_id=t.location_id
+      WHERE plan_id=$1)
+    `, [plan_id])
+  }
+
   static customerProfileForRoute (plan_id, metadata) {
     var sql = `
       SELECT
