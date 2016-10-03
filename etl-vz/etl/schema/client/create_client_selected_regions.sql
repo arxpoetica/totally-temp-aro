@@ -11,3 +11,5 @@ CREATE TABLE client.selected_regions
   region_type varchar not null,
   geom geometry
 );
+
+ALTER TABLE client.selected_regions ADD COLUMN layer_id bigint;

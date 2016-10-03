@@ -171,7 +171,8 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
           id: feature.getProperty('id'),
           name: name,
           geog: obj.geometry,
-          type: layer.type
+          type: layer.type,
+          layerId: layer.layerId
         })
         $timeout(() => $rootScope.$broadcast('regions_changed'))
       })
