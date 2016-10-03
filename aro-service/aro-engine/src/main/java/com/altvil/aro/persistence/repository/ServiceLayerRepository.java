@@ -2,6 +2,7 @@ package com.altvil.aro.persistence.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -77,6 +78,6 @@ public interface ServiceLayerRepository extends
 
 	Collection<ServiceLayer> findByUserDefined(boolean userDefined);
 
-
-
+	@Query("select sl from ServiceLayer sl where sl.id in :ids")
+	Collection<ServiceLayer> getByIds(@Param("ids") Set<Integer> ids);
 }

@@ -1,17 +1,10 @@
 package com.altvil.aro.service.processing.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -27,6 +20,8 @@ import com.altvil.aro.service.reference.ReferenceType;
 import com.altvil.aro.service.reference.VolatileReferenceService;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.reference.VolatileReference;
+
+import static java.util.function.Function.identity;
 
 @Service
 public class ProcessingLayerServiceImpl implements ProcessingLayerService {
@@ -71,7 +66,25 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 	@Override
 	public Collection<ServiceLayer> getServiceLayers(
 			Collection<Integer> serviceLayersIds) {
-		return systemRuleRef.get().getServiceLayers(serviceLayersIds);
+		Collection<ServiceLayer> cachedLayers = systemRuleRef.get().getServiceLayers(serviceLayersIds);
+
+		Set<Integer> cachedIds = cachedLayers.stream().map(ServiceLayer::getId).collect(Collectors.toSet());
+		Set<Integer> missingIds = serviceLayersIds.stream()
+				.filter(id -> !cachedIds.contains(id))
+				.collect(Collectors.toSet());
+
+		Collection<ServiceLayer> missingLayers = serviceLayerRepository.getByIds(missingIds);
+
+		Map<Integer, ServiceLayer> map = Stream.concat(cachedLayers.stream(), missingLayers.stream())
+				.collect(Collectors.toMap(ServiceLayer::getId, identity()));
+
+		return serviceLayersIds
+				.stream()
+				.map(map::get)
+				.collect(Collectors.toList());
+
+
+
 	}
 	
 
