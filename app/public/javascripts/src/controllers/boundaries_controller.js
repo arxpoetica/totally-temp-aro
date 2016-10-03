@@ -92,12 +92,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       normal: {
         fillColor: 'green',
         strokeColor: 'green',
-        strokeWeight: 2
+        strokeWeight: 2,
+        fillOpacity: 0.1
       },
       highlight: {
         fillColor: 'green',
         strokeColor: 'green',
-        strokeWeight: 2
+        strokeWeight: 2,
+        fillOpacity: 0.1
       }
     },
     reload: 'always',
@@ -259,9 +261,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     if (!$scope.selectedUserDefinedBoundary) {
       userDefinedLayer.hide()
     } else {
-      var url = `/service_areas/${$scope.selectedUserDefinedBoundary.service_layer_name}`
+      var url = `/service_areas/${$scope.selectedUserDefinedBoundary.name}`
       userDefinedLayer.setApiEndpoint(url)
       userDefinedLayer.show()
+      userDefinedLayer.reloadData()
     }
   }
 
@@ -543,5 +546,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       var select = document.getElementById('userDefinedBoundariesSelect')
       select.scrollTop = select.scrollHeight
     }
+    $scope.changeUserDefinedBoundary()
   })
 }])

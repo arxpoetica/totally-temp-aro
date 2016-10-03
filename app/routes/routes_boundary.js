@@ -1,8 +1,7 @@
 var models = require('../models')
-var Busboy = require('busboy')
-var path = require('path')
+var multer = require('multer')
 var os = require('os')
-var fs = require('fs')
+var upload = multer({ dest: os.tmpDir() })
 
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission
@@ -46,33 +45,22 @@ exports.configure = (api, middleware) => {
   })
 
   function editUserDefinedBoundary (request, response, next) {
-    var busboy = new Busboy({ headers: request.headers })
-    var fullpath
-    busboy.on('field', function (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
-      request.body[fieldname] = val
-    })
-    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-      fullpath = path.join(os.tmpDir(), String(Date.now()))
-      file.pipe(fs.createWriteStream(fullpath))
-      if (!filename) fullpath = null
-    })
-    busboy.on('finish', () => {
-      var name = request.body.name
-      var id = request.params.id || null
-      var user = request.user
-      var radius = +request.body.radius || 20000
-      models.Boundary.editUserDefinedBoundary(user, id, name, fullpath, radius)
-        .then(jsonSuccess(response, next))
-        .catch(next)
-    })
-    request.pipe(busboy)
+    var name = request.body.name
+    var id = request.params.id || null
+    var user = request.user
+    var radius = +request.body.radius || 20000
+    console.log('', request.file)
+    var fullpath = request.file && request.file.path
+    models.Boundary.editUserDefinedBoundary(user, id, name, fullpath, radius)
+      .then(jsonSuccess(response, next))
+      .catch(next)
   }
 
   // Create a user-defined boundary
-  api.post('/boundary/user_defined', editUserDefinedBoundary)
+  api.post('/boundary/user_defined', upload.single('file'), editUserDefinedBoundary)
 
   // Edit a user-defined boundary
-  api.post('/boundary/user_defined/:id', editUserDefinedBoundary)
+  api.post('/boundary/user_defined/:id', upload.single('file'), editUserDefinedBoundary)
 
   // Find the user-defined boundaries of a user
   api.get('/boundary/user_defined', (request, response, next) => {

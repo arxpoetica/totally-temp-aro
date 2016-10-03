@@ -95,15 +95,8 @@ module.exports = class Boundary {
           method: 'POST',
           url: config.aro_service_url + `/rest/serviceLayers/${id}/entities.csv`,
           formData: {
-            file: {
-              value: fs.createReadStream(file),
-              options: {
-                filename: 'entities.csv',
-                contentType: 'text/csv'
-              }
-            }
-          },
-          json: true
+            file: fs.createReadStream(file)
+          }
         }
         return models.AROService.request(req)
           .then(() => {
