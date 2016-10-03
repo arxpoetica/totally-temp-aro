@@ -43,16 +43,18 @@ public class VoronoiPolygonsGenerator {
         VoronoiDiagramBuilder diagramBuilder = new VoronoiDiagramBuilder();
 
         diagramBuilder.setSites(asCoordinates(points));
-        diagramBuilder.setClipEnvelope(computeEnvelope(points));
+       // diagramBuilder.setClipEnvelope(computeEnvelope(points));
 
         Geometry diagram = diagramBuilder.getDiagram(factory());
 
-        Geometry clipper = GeometryUtil.factory().createMultiPoint(points.toArray(new Point[0])).buffer(maxDistanceMeters);
+        Geometry clipper = GeometryUtil
+                .factory()
+                .createMultiPoint(points.toArray(new Point[0]))
+                .buffer(maxDistanceMeters);
 
-        Geometry intersectedDiagram = diagram.intersection(clipper);
-
-        return IntStream.range(0, intersectedDiagram.getNumGeometries())
+        return IntStream.range(0, diagram.getNumGeometries())
                 .mapToObj(diagram::getGeometryN)
+                .map(geometry -> geometry.intersection(clipper))
                 .map(geometry -> (Polygon) geometry)
                 .collect(Collectors.toList());
 

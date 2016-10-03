@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.aro.model.ProcessArea;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +70,7 @@ public class UserProcessingLayerServiceImpl implements
 	}
 
 	@Override
+	@Transactional
 	public ServiceLayer addUserServiceLayer(int userId, String layerName,
 			String layerDescription) {
 		ServiceLayer serviceLayer = new ServiceLayer();
@@ -139,19 +141,20 @@ public class UserProcessingLayerServiceImpl implements
 
 	}
 
-	//TODO ensure @Transactional working
-	@Transactional
-	public Collection<ServiceArea> saveAsServiceAreas(int serviceLayerId,
+	private Collection<ServiceArea> saveAsServiceAreas(int serviceLayerId,
 			Collection<Polygon> polygons) {
 
-		ServiceLayer serviceLayer = new ServiceLayer();
-		serviceLayer.setId(serviceLayerId);
+		ServiceLayer serviceLayer = serviceLayerRepository.getOne(serviceLayerId);
+		Set<ProcessArea> processAreas = serviceLayer.getProcessAreas();
 
-		Collection<ServiceArea> serviceAreas = polygons.stream()
+		processAreas.clear();
+		processAreas.addAll(polygons.stream()
 				.map(polygon -> createServiceArea(polygon, serviceLayer))
-				.collect(Collectors.toSet());
+				.collect(Collectors.toSet()));
 
-		Collection<ServiceArea> updatedServiceAreas = serviceAreaRepository.save(serviceAreas);
+
+		Collection<ServiceArea> updatedServiceAreas = castToServiceAreas(serviceLayerRepository.save(serviceLayer).getProcessAreas());
+
 		
 		//Update the Service Area Buffers
 		serviceAreaRepository.updateServiceAreaBuffers(serviceLayerId);
@@ -163,7 +166,12 @@ public class UserProcessingLayerServiceImpl implements
 
 	}
 
+	private Set<ServiceArea> castToServiceAreas(Set<ProcessArea> processAreas) {
+		return processAreas.stream().map(processArea -> (ServiceArea) processArea).collect(Collectors.toSet());
+	}
+
 	@Override
+	@Transactional
 	public int createAreasFromPoints(int serviceLayerId,
 			double maxDistanceMeters) {
 

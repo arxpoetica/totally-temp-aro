@@ -23,10 +23,9 @@
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="Hibernate" />
         <datasource-mapping>
-          <factory-entry name="com.altvil.aro.persistence.postgis" value="8acdfe16-943e-49da-a318-54b744d4ffd3" />
           <factory-entry name="entityManagerFactory" value="8acdfe16-943e-49da-a318-54b744d4ffd3" />
         </datasource-mapping>
-        <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/../aro-engine/src/main/resources/META-INF/persistence.xml" />
+        <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/../aro-engine/src/main/resources/META-INF/_persistence.xml__" />
       </configuration>
     </facet>
   </component>
@@ -45,6 +44,7 @@
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="module" module-name="aro-interfaces" />
     <orderEntry type="module" module-name="aro-utils" />
+    <orderEntry type="library" name="Maven: commons-fileupload:commons-fileupload:1.2.1" level="project" />
     <orderEntry type="module" module-name="aro-core" />
     <orderEntry type="library" name="Maven: org.apache.ignite:ignite-core:1.7.0" level="project" />
     <orderEntry type="library" name="Maven: javax.cache:cache-api:1.0.0" level="project" />

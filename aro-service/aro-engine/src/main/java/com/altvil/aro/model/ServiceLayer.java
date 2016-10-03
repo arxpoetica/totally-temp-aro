@@ -1,10 +1,13 @@
 package com.altvil.aro.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.*;
 
 import com.altvil.aro.persistence.repository.user_data.DataSourceEntity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @SuppressWarnings("serial")
 @Entity
@@ -18,7 +21,8 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 	private boolean userDefined;
 
 	private DataSourceEntity dataSource;
-	
+	private Set<ProcessArea> processAreas = new HashSet<>();
+
 	@Override
 	protected Serializable idKey() {
 		return id;
@@ -78,6 +82,17 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 	public void setDataSource(DataSourceEntity dataSource) {
 		this.dataSource = dataSource;
 	}
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true,  mappedBy = "layer")
+	@JsonManagedReference
+	public Set<ProcessArea> getProcessAreas() {
+		return processAreas;
+	}
+
+	public void setProcessAreas(Set<ProcessArea> serviceAreas) {
+		this.processAreas = serviceAreas;
+	}
+
 
 //	public void setUserId(Integer userId) {
 //		this.userId = userId;
