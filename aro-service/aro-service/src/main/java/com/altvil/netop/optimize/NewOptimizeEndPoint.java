@@ -51,18 +51,18 @@ public class NewOptimizeEndPoint extends BaseEndPointHandler {
 	public @ResponseBody AroRootPlanJobResponse postRecalcMasterPlan(
 			@RequestBody AroOptimizationPlan aroRequest)
 			throws InterruptedException, ExecutionException, NoSuchStrategy {
+		return execute( () -> {
+			Future<OptimizedRootPlan> future = schedulerService.submit(() -> rootOptimizationService
+					.optimize(toOptimizationPlan(aroRequest)));
 
-		Future<OptimizedRootPlan> future = schedulerService.submit(() -> rootOptimizationService
-				.optimize(toOptimizationPlan(aroRequest)));
+			OptimizedRootPlan rootPlan = future.get();
+			rootPlan.getPlanAnalysisReport();
 
-		OptimizedRootPlan rootPlan = future.get() ;
-		rootPlan.getPlanAnalysisReport() ;		
-
-		AroRootPlanJobResponse mpr = new AroRootPlanJobResponse();
-		mpr.setPlanAnalysisReport(aroConversionService
-				.toAroPlanAnalysisReport(rootPlan.getPlanAnalysisReport()));
-		return mpr;
-
+			AroRootPlanJobResponse mpr = new AroRootPlanJobResponse();
+			mpr.setPlanAnalysisReport(aroConversionService
+					.toAroPlanAnalysisReport(rootPlan.getPlanAnalysisReport()));
+			return mpr;
+		});
 	}
 
 	private OptimizationConstraints toOptimizationConstraints(
