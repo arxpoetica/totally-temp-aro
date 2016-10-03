@@ -68,7 +68,12 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 			Collection<Integer> serviceLayersIds) {
 		Collection<ServiceLayer> cachedLayers = systemRuleRef.get().getServiceLayers(serviceLayersIds);
 
-		Set<Integer> cachedIds = cachedLayers.stream().map(ServiceLayer::getId).collect(Collectors.toSet());
+		Set<Integer> cachedIds = cachedLayers
+				.stream()
+				.filter(sl -> sl != null)
+				.map(ServiceLayer::getId)
+				.collect(Collectors.toSet());
+
 		Set<Integer> missingIds = serviceLayersIds.stream()
 				.filter(id -> !cachedIds.contains(id))
 				.collect(Collectors.toSet());
