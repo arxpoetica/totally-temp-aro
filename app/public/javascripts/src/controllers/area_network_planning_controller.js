@@ -87,22 +87,29 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
     if (scope.optimizeTowers) locationTypes.push('celltower')
 
+    var processingLayers = [] // regions.getSelectedServiceAreas().map((layer) => layer.id)
     var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
       geographies: regions.selectedRegions.map((i) => {
-        var info = { name: i.name, id: i.id, type: i.type }
+        var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
         // geography information may be too large so we avoid to send it for known region types
         if (standardTypes.indexOf(i.type) === -1) {
           info.geog = i.geog
+        }
+        if (i.layerId) {
+          processingLayers.push(i.layerId)
         }
         return info
       }),
       algorithm: $scope.optimizationType,
       budget: parseBudget(),
       irrThreshold: $scope.irrThreshold / 100,
-      selectionMode: 'SELECTED_AREAS',
-      processingLayers: regions.getSelectedServiceAreas().map((layer) => layer.id)
+      selectionMode: 'SELECTED_AREAS'
+      // processingLayers: regions.getSelectedServiceAreas().map((layer) => layer.id)
+    }
+    if (processingLayers.length > 0) {
+      changes.processingLayers = processingLayers
     }
 
     if (algorithm === 'CAPEX') {

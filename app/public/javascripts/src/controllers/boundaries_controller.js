@@ -262,6 +262,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       userDefinedLayer.hide()
     } else {
       var url = `/service_areas/${$scope.selectedUserDefinedBoundary.name}`
+      userDefinedLayer.layerId = $scope.selectedUserDefinedBoundary.id
       userDefinedLayer.setApiEndpoint(url)
       userDefinedLayer.show()
       userDefinedLayer.reloadData()

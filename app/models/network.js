@@ -277,8 +277,8 @@ module.exports = class Network {
       locationTypes: options.locationTypes,
       algorithm: options.algorithm,
       analysisSelectionMode: options.selectionMode,
-      fiberNetworkConstraints: options.fiberNetworkConstraints
-      // processLayers
+      fiberNetworkConstraints: options.fiberNetworkConstraints,
+      processLayers: options.processingLayers
     }
     var req = {
       method: 'POST',
@@ -303,7 +303,7 @@ module.exports = class Network {
         options.geographies.forEach((geography) => {
           var type = geography.type
           var id = geography.id
-          var params = [plan_id, geography.name, id, type]
+          var params = [plan_id, geography.name, id, type, geography.layerId || null]
           var queries = {
             'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
             'county_subdivisions': '(SELECT geom FROM cousub WHERE gid=$3::bigint)'
@@ -357,8 +357,8 @@ module.exports = class Network {
           }
           promises.push(database.execute(`
             INSERT INTO client.selected_regions (
-              plan_id, region_name, region_id, region_type, geom
-            ) VALUES ($1, $2, $3, $4, ${query})
+              plan_id, region_name, region_id, region_type, layer_id, geom
+            ) VALUES ($1, $2, $3, $4, $5, ${query})
           `, params))
         })
         return Promise.all(promises)
