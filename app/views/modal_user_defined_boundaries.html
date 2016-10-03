@@ -23,6 +23,12 @@
             <label class="col-sm-4 control-label">Equipment Source Points</label>
             <div class="col-sm-8">
               <input name="file" type="file" name="forcePoints" class="form-control">
+              <p class="help-block">Import file should be a csv with three columns:</p>
+              <ul class="help-block" style="padding: 0 10px">
+                <li><strong>entityCategoryID</strong>: for which all entries should be '1'</li>
+                <li><strong>lat</strong>: which should be the latitude of the CRAN hub</li>
+                <li><strong>longitude</strong>: which should be the longitude of the CRAN hub</li>
+              </ul>
             </div>
           </div>
         </form>
