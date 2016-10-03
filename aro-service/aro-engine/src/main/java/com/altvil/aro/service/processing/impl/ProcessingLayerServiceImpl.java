@@ -116,6 +116,11 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 		@Override
 		public Set<LocationEntityType> getSupportedEntityTypes(
 				ServiceLayer serviceLayer) {
+			
+			if( serviceLayer.isUserDefined() ) {
+				return LocationEntityTypeMapping.MAPPING.entitySet() ;
+			}
+			
 			return layerAssignmentMap.get(serviceLayer);
 		}
 

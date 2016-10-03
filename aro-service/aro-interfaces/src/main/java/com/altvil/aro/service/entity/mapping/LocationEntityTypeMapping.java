@@ -1,5 +1,8 @@
 package com.altvil.aro.service.entity.mapping;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import com.altvil.aro.service.entity.LocationEntityType;
 
 public class LocationEntityTypeMapping {
@@ -10,6 +13,7 @@ public class LocationEntityTypeMapping {
 	private LocationEntityType[] typeMap;
 	private int minType = Integer.MAX_VALUE;
 	private int maxType = Integer.MIN_VALUE;
+	private Set<LocationEntityType> entityTypes;
 
 	private LocationEntityTypeMapping() {
 		init();
@@ -17,6 +21,8 @@ public class LocationEntityTypeMapping {
 
 	private void init() {
 
+		entityTypes = EnumSet.allOf(LocationEntityType.class);
+		
 		for (LocationEntityType type : LocationEntityType.values()) {
 			minType = Math.min(minType, type.getTypeCode());
 			maxType = Math.max(maxType, type.getTypeCode());
@@ -38,6 +44,10 @@ public class LocationEntityTypeMapping {
 
 	public LocationEntityType[] allEntityTypes() {
 		return allTypes;
+	}
+	
+	public Set<LocationEntityType> entitySet() {
+		return entityTypes ;
 	}
 
 }
