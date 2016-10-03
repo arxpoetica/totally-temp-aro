@@ -66,11 +66,14 @@ public class ProcessingLayerServiceImpl implements ProcessingLayerService {
 	@Override
 	public Collection<ServiceLayer> getServiceLayers(
 			Collection<Integer> serviceLayersIds) {
-		Collection<ServiceLayer> cachedLayers = systemRuleRef.get().getServiceLayers(serviceLayersIds);
+		Collection<ServiceLayer> cachedLayers = systemRuleRef.get().getServiceLayers(serviceLayersIds)
+				.stream()
+				.filter(sl -> sl != null)
+				.collect(Collectors.toList());
 
 		Set<Integer> cachedIds = cachedLayers
 				.stream()
-				.filter(sl -> sl != null)
+
 				.map(ServiceLayer::getId)
 				.collect(Collectors.toSet());
 
