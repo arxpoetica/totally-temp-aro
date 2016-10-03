@@ -15,10 +15,22 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.user_id = user_id
   $scope.plan = null
   $scope.technology = 'odn1'
+  $scope.allBoundaries = []
+  $scope.selectedBoundary = null
+
+  function loadBoundaries () {
+    $http.get('/boundary/all')
+      .success((response) => {
+        $scope.allBoundaries = response
+      })
+  }
+
+  $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
 
   const planChanged = (e, plan) => {
     $scope.plan = plan
     checkBudget()
+    loadBoundaries()
   }
   $rootScope.$on('plan_selected', planChanged)
   $rootScope.$on('plan_changed_metadata', planChanged)
@@ -150,6 +162,11 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     changes.lazy = !!lazy
     changes.fiberNetworkConstraints = {
       useDirectRouting: $scope.technology === 'direct_routing'
+    }
+    if ($scope.selectedBoundary && $scope.selectedBoundary.id) {
+      changes.processingLayers = [
+        $scope.selectedBoundary.id
+      ]
     }
 
     updateButton.attr('disabled', 'disabled')

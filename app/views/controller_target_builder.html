@@ -102,6 +102,14 @@
    <li>{{ customerType.name }}: {{customerType.total }}</li>
  </ul>
 
+<p><strong>Optimization Processing Layer</strong></p>
+ <p>
+   <select class="form-control" ng-model="selectedBoundary"
+     ng-options="boundary as boundary.description for boundary in allBoundaries track by boundary.id">
+     <option value="">Default Layer</option>
+   </select>
+ </p>
+
  <p class="pull-right">
    <button class="btn btn-success active"
      ng-click="postChanges({}, false)">Get Results</button>

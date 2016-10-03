@@ -69,4 +69,12 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  // Find both standard and user-defined boundaries
+  api.get('/boundary/all', (request, response, next) => {
+    var user = request.user
+    models.Boundary.findAllBoundaries(user)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

@@ -68,6 +68,20 @@ module.exports = class Boundary {
     `, [user.id])
   }
 
+  static findAllBoundaries (user) {
+    return database.query(`
+      SELECT sl.id, sl.name, sl.description
+      FROM client.service_layer sl
+      WHERE sl.is_user_defined=false
+
+      UNION ALL
+
+      SELECT sl.id, sl.name, sl.description
+      FROM client.service_layer sl
+      JOIN user_data.data_source ds ON sl.data_source_id = ds.id AND ds.user_id=$1
+    `, [user.id])
+  }
+
   static editUserDefinedBoundary (user, id, name, file, radius) {
     return Promise.resolve()
       .then(() => {
