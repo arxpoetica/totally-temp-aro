@@ -1,5 +1,7 @@
 package com.altvil.aro.lbrary.finaance;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -51,7 +53,7 @@ public class Finance {
 		public int inc() {
 			currentCount++ ;
 			if( currentCount > maxCount) {
-				throw new RuntimeException("Failed to converge with cash flows = " + Arrays.asList(cfs)) ;
+				throw new RuntimeException("Failed to converge with cash flows = " + Arrays.asList(ArrayUtils.toObject(cfs))) ;
 			}
 			return currentCount;
 		}
