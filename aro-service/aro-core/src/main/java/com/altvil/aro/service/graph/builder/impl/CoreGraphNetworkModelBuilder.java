@@ -91,7 +91,7 @@ class CoreGraphNetworkModelBuilder {
 		write(leftVertex,
 				rightVertex,
 				re, orderedLoctions,
-				expand(sections, segmentCount - sections.size()),
+				expand(sections, segmentCount),
 				roadEdgeInfo.getNetworkAssignments());
 
 	}
@@ -218,14 +218,17 @@ class CoreGraphNetworkModelBuilder {
 
 	private Collection<RatioSection> expand(Collection<RatioSection> edges,
 			int count) {
-		if (count <= 0) {
-			return edges;
+		
+		if( edges.size() >= count ) {
+			return edges ;
 		}
+		
+		int deltaSize = count - edges.size() + 1 ;
 
 		List<RatioSection> result = new ArrayList<>();
 		Iterator<RatioSection> itr = edges.iterator();
 
-		result.addAll(itr.next().split(count));
+		result.addAll(itr.next().split(deltaSize));
 		while (itr.hasNext()) {
 			result.add(itr.next());
 		}
