@@ -18,17 +18,17 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 cd $DIR/../db
 
-make reset_schema
-make load_schema
+# make reset_schema
+# make load_schema
 
-make reset_stage_reference
-make stage_reference
+# make reset_stage_reference
+# make stage_reference
 
-make reset_view
-make load_view
+# make reset_view
+# make load_view
 
-make reset_stage_private
-make stage_private
+# make reset_stage_private
+# make stage_private
 
 make reset_private
 make load_private
