@@ -15,7 +15,8 @@ module.exports = class Location {
   static findLocations (plan_id, filters, viewport) {
     var businesses = filters.business_categories.map((value) => 'b_' + value)
     var households = filters.household_categories.map((value) => 'h_' + value)
-    var categories = businesses.concat(households)
+    var towers = filters.towers
+    var categories = businesses.concat(households).concat(towers)
 
     var sql = `
       WITH visible_locations AS (
@@ -46,6 +47,11 @@ module.exports = class Location {
             JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households < c.max_value
             WHERE b.location_id = unselected_locations.id
           )
+          ||
+          array(
+            SELECT 'towers'::text FROM towers t
+            WHERE t.location_id = unselected_locations.id
+          )
         ) AS entity_categories
         FROM unselected_locations
       ),
@@ -56,22 +62,6 @@ module.exports = class Location {
       )
     `
     return database.points(sql, [plan_id, categories], true, viewport)
-  }
-
-  /*
-  * Returns all the towers with a flag indicating if they are selected or not
-  */
-  static findTowers (plan_id, viewport) {
-    let sql = `
-        SELECT locations.id, locations.geom, MAX(plan_targets.id) IS NOT NULL AS selected
-          FROM locations
-          JOIN towers ON towers.location_id = locations.id
-     LEFT JOIN client.plan_targets
-            ON plan_targets.location_id=locations.id AND plan_targets.plan_id=$1
-          ${database.intersects(viewport, 'locations.geom', 'WHERE')}
-      GROUP BY locations.id
-    `
-    return database.points(sql, [plan_id], true, viewport)
   }
 
   /*
@@ -106,6 +96,11 @@ module.exports = class Location {
             FROM households b
             JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households < c.max_value
             WHERE b.location_id = unselected_locations.id
+          )
+          ||
+          array(
+            SELECT 'towers'::text FROM towers t
+            WHERE t.location_id = unselected_locations.id
           )
         ) AS entity_categories
         FROM unselected_locations
