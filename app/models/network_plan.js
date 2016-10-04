@@ -318,11 +318,26 @@ module.exports = class NetworkPlan {
 
   static findWirecenterPlan (plan_id, wirecenter_id) {
     var params = [plan_id, wirecenter_id]
-    return database.findOne('SELECT id FROM client.plan WHERE parent_plan_id=$1 AND wirecenter_id=$2', params)
+    return database.findOne(`
+        SELECT id FROM client.plan WHERE parent_plan_id IN (SELECT id from client.plan WHERE parent_plan_id=$1)
+        AND wirecenter_id=$2
+      `, params)
       .then((row) => {
         if (!row) return {}
         return this.findPlan(row.id, true)
       })
+  }
+
+  static findChildPlans (plan_id, viewport) {
+    var params = [plan_id]
+    return database.polygons(`
+      SELECT p.wirecenter_id AS id, sa.geom AS geom, sa.code AS name, ST_AsGeoJSON(ST_Centroid(sa.geom))::json AS centroid
+        FROM client.plan p
+        JOIN client.service_layer sl ON p.service_layer_id = sl.id
+        JOIN client.service_area sa ON p.wirecenter_id = sa.id
+        WHERE plan_type='W' AND parent_plan_id IN (SELECT id from client.plan WHERE parent_plan_id=$1)
+        ${database.intersects(viewport, 'geom', 'AND')}
+    `, params, true, viewport)
   }
 
   static findAll (user, options) {

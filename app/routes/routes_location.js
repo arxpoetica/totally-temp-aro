@@ -8,7 +8,7 @@ exports.configure = (api, middleware) => {
     var plan_id = +request.params.plan_id
 
     var filters = {}
-    var keys = ['business_categories', 'household_categories']
+    var keys = ['business_categories', 'household_categories', 'towers']
     keys.forEach((key) => {
       var value = request.query[key] || []
       if (!Array.isArray(value)) {
@@ -17,15 +17,6 @@ exports.configure = (api, middleware) => {
       filters[key] = value
     })
     models.Location.findLocations(plan_id, filters, viewport)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.get('/towers/:plan_id', middleware.viewport, (request, response, next) => {
-    var viewport = request.viewport
-    var plan_id = +request.params.plan_id
-
-    models.Location.findTowers(plan_id, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

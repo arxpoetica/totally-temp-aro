@@ -195,5 +195,13 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     }
   }
 
+  regions.hide = () => {
+    selectionLayer.setMap(null)
+  }
+
+  regions.show = () => {
+    selectionLayer.setMap(map)
+  }
+
   return regions
 })

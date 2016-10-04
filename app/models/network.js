@@ -309,7 +309,7 @@ module.exports = class Network {
             'county_subdivisions': '(SELECT geom FROM cousub WHERE gid=$3::bigint)'
           }
           var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
-          var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type)
+          var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type) || geography.layerId
           var query
           if (isAnalysisLayer) {
             params.push(type)

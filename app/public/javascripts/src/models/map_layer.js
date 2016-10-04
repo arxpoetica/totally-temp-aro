@@ -395,7 +395,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
       }
     }
 
-    setVisible (visible) {
+    setVisible (visible, bringToFront) {
       visible ? this.show() : this.hide()
     }
 

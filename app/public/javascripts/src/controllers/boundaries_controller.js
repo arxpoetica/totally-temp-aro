@@ -147,10 +147,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
   ]
 
-  var wirecentersLayer
   globalServiceLayers.forEach((serviceLayer) => {
-    var isWirecenter = serviceLayer.name === 'wirecenter'
-    if (!serviceLayer.show_in_boundaries && !isWirecenter) return
+    if (!serviceLayer.show_in_boundaries) return
     var color = serviceLayersColors.shift() || 'black'
     var layer = new MapLayer({
       name: serviceLayer.description,
@@ -174,7 +172,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       minZoom: 6,
       hoverField: 'name'
     })
-    if (isWirecenter) wirecentersLayer = layer
     if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
   })
 
@@ -516,12 +513,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       $rootScope.$broadcast('boundary_selected', obj.geometry, layer.name)
     })
   }
-
-  $rootScope.$on('financial_profile_changed_mode', (e, mode) => {
-    if (mode === 'area') {
-      wirecentersLayer && wirecentersLayer.show()
-    }
-  })
 
   $scope.toggleVisibility = (layer) => {
     layer.toggleVisibility()

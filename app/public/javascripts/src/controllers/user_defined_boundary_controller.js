@@ -1,6 +1,8 @@
 /* global $ app FormData XMLHttpRequest swal */
 app.controller('user_defined_boundary_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
+  var form = $('#user_defined_boundaries_modal form').get(0)
   function initialValues () {
+    $('#user_defined_boundaries_modal input[type=file]').get(0).value = ''
     $scope.editingUserDefinedBoundary = {
       name: '',
       radius: 20000
@@ -17,10 +19,23 @@ app.controller('user_defined_boundary_controller', ['$scope', '$rootScope', '$ht
   })
 
   $scope.saveUserDefiendBoundary = () => {
+    if ($('#user_defined_boundaries_modal input[type=file]').get(0).files.length > 0) {
+      return swal({
+        title: 'Are you sure?',
+        text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        showCancelButton: true,
+        closeOnConfirm: true
+      }, submit)
+    }
+    submit()
+  }
+
+  function submit () {
     var id = $scope.editingUserDefinedBoundary.id
     var url = id ? `/boundary/user_defined/${id}` : '/boundary/user_defined'
-
-    var form = $('#user_defined_boundaries_modal form').get(0)
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
     xhr.open('POST', url, true)
