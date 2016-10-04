@@ -152,9 +152,10 @@ public class UserProcessingLayerServiceImpl implements
 				.map(polygon -> createServiceArea(polygon, serviceLayer))
 				.collect(Collectors.toSet()));
 
+		
+		serviceLayerRepository.save(serviceLayer) ;
 
 		Collection<ServiceArea> updatedServiceAreas = castToServiceAreas(serviceLayerRepository.save(serviceLayer).getProcessAreas());
-
 		
 		//Update the Service Area Buffers
 		serviceAreaRepository.updateServiceAreaBuffers(serviceLayerId);
