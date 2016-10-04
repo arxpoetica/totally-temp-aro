@@ -11,11 +11,12 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import com.altvil.aro.model.ProcessArea;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.altvil.aro.model.ProcessArea;
 import com.altvil.aro.model.ServiceArea;
 import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.persistence.repository.DataSourceEntityRepository;
@@ -151,20 +152,24 @@ public class UserProcessingLayerServiceImpl implements
 		processAreas.addAll(polygons.stream()
 				.map(polygon -> createServiceArea(polygon, serviceLayer))
 				.collect(Collectors.toSet()));
-
 		
-		serviceLayerRepository.save(serviceLayer) ;
-
+		serviceLayerRepository.saveAndFlush(serviceLayer) ;
+		
 		Collection<ServiceArea> updatedServiceAreas = castToServiceAreas(serviceLayerRepository.save(serviceLayer).getProcessAreas());
 		
+		return updatedServiceAreas ;
+
+	}
+	
+	@Transactional
+	@Modifying
+	public void updateServiceArea(int serviceLayerId) {
 		//Update the Service Area Buffers
 		serviceAreaRepository.updateServiceAreaBuffers(serviceLayerId);
 		
 		//Update the Equipment into Head Plan
 		serviceLayerRepository.updateServiceLayerEquipment(serviceLayerId) ;
-		
-		return updatedServiceAreas ;
-
+			
 	}
 
 	private Set<ServiceArea> castToServiceAreas(Set<ProcessArea> processAreas) {
@@ -173,6 +178,7 @@ public class UserProcessingLayerServiceImpl implements
 
 	@Override
 	@Transactional
+	@Modifying
 	public int createAreasFromPoints(int serviceLayerId,
 			double maxDistanceMeters) {
 

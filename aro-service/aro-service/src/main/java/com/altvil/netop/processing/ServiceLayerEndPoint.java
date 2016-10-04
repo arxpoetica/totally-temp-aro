@@ -89,8 +89,10 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 			@RequestBody ServiceLayerCommand command) {
 
 		return execute(() ->{
-			return new CommandStatusResponse(service.createAreasFromPoints(id,
+			CommandStatusResponse csr =  new CommandStatusResponse(service.createAreasFromPoints(id,
 				command.getMaxDistanceMeters()));
+			service.updateServiceArea(id) ;
+			return csr ;
 		}) ;
 	} 
 

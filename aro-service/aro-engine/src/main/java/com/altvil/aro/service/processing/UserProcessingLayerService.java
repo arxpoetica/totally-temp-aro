@@ -20,9 +20,13 @@ public interface UserProcessingLayerService {
     void saveUserServiceLayerEntitiesCSV(int id, Reader reader) throws IOException;
     void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader) throws IOException;
 
+    
+    
     /**
      *
      * @return number of areas generated
      */
     int createAreasFromPoints(int id, double maxDistanceMeters);
+    void updateServiceArea(int serviceLayerId) ;
+    
 }
