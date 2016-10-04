@@ -1,4 +1,4 @@
-FROM ait-docker-registry.cloud.altvil.com/aro/app-base
+FROM ait-docker-registry.cloud.altvil.com/aro/aro-app-base
 
 MAINTAINER nvitucci@altvil.com
 
