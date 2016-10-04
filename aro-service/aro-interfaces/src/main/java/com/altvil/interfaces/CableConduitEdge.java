@@ -1,6 +1,6 @@
 package com.altvil.interfaces;
 
-public interface CableConduitEdge {
+public interface CableConduitEdge  {
 	
 	Long getEdgeId() ;
 	CableConstructionEnum getCableConstructionEnum() ;

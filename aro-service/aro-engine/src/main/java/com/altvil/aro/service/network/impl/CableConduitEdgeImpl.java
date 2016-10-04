@@ -3,7 +3,9 @@ package com.altvil.aro.service.network.impl;
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.CableConstructionEnum;
 
-public class CableConduitEdgeImpl implements CableConduitEdge {
+import java.io.Serializable;
+
+public class CableConduitEdgeImpl implements CableConduitEdge, Serializable {
 
 	
 	public static final CableConduitEdge INVALID_EDGE = new CableConduitEdgeImpl(-1, CableConstructionEnum.UNKNOWN, 0, -1) ;

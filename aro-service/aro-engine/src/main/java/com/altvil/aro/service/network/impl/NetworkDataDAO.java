@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.aro.service.cu.ComputeUnitBuilder;
+import com.altvil.aro.service.network.model.PlanConduitEdges;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,7 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	private ComputeUnit<ServiceAreaRoadEdges> serviceAreaRoadEdges;
 	private ComputeUnit<ServiceAreaRoadLocations> serviceAreaRoadLocations;
 	private ComputeUnit<ServiceAreaLocationDemand> locationDemand;
+	private ComputeUnit<PlanConduitEdges> existingCableConduitEdges;
 
 	@PostConstruct
 	void postConstruct() {
@@ -112,8 +115,17 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 								cacheQuery.getParam("selectedTypes", Set.class),
 								cacheQuery.getParam("serviceAreaContext", ServiceAreaContext.class)))
 				.build();
+		existingCableConduitEdges = computeUnitService
+				.build(PlanConduitEdges.class, this.getClass())
+				.setName("existing_cable_conduitEdges")
+				.setCacheMemorySize(100)
+				.setExecutionCachePolicies(EnumSet.of(ExecutionCachePolicy.MEMORY, ExecutionCachePolicy.PERSISTENCE))
+				.setVersionTypes(EnumSet.of(VersionType.SERVICE))
+				.setCacheLoaderFunc(
+						(cacheQuery) -> () -> _queryExistingCableConduitEdges(cacheQuery
+								.getDeploymentPlanId())).build();
 
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -382,8 +394,19 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	 */
 	@Override
 	public Collection<CableConduitEdge> queryExistingCableConduitEdges(
+			int serviceAreaId, long planId) {
+		return existingCableConduitEdges.gridLoad(
+					Priority.HIGH,
+					CacheQuery.build(serviceAreaId,planId)
+							.build())
+				.getEdges();
+
+	}
+
+	private PlanConduitEdges _queryExistingCableConduitEdges(
 			long planId) {
-		return planRepository
+		return new PlanConduitEdges(
+				planRepository
 				.queryConduitSections(planId)
 				.stream()
 				.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
@@ -393,8 +416,8 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 							cableConstructionEnumMap.get(result
 									.getInteger(ConduitEdgeMap.constructionType)),
 							result.getDouble(ConduitEdgeMap.startRatio), result
-									.getDouble(ConduitEdgeMap.endRatio));
-				}).collect(Collectors.toList());
+							.getDouble(ConduitEdgeMap.endRatio));
+				}).collect(Collectors.toList()));
 
 	}
 
