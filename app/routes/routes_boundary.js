@@ -1,4 +1,7 @@
 var models = require('../models')
+var multer = require('multer')
+var os = require('os')
+var upload = multer({ dest: os.tmpDir() })
 
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission
@@ -37,6 +40,40 @@ exports.configure = (api, middleware) => {
   api.get('/boundary/:plan_id/find', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
     models.Boundary.findBoundary(plan_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  function editUserDefinedBoundary (request, response, next) {
+    var name = request.body.name
+    var id = request.params.id || null
+    var user = request.user
+    var radius = +request.body.radius || 20000
+    console.log('', request.file)
+    var fullpath = request.file && request.file.path
+    models.Boundary.editUserDefinedBoundary(user, id, name, fullpath, radius)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  }
+
+  // Create a user-defined boundary
+  api.post('/boundary/user_defined', upload.single('file'), editUserDefinedBoundary)
+
+  // Edit a user-defined boundary
+  api.post('/boundary/user_defined/:id', upload.single('file'), editUserDefinedBoundary)
+
+  // Find the user-defined boundaries of a user
+  api.get('/boundary/user_defined', (request, response, next) => {
+    var user = request.user
+    models.Boundary.findUserDefinedBoundaries(user)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Find both standard and user-defined boundaries
+  api.get('/boundary/all', (request, response, next) => {
+    var user = request.user
+    models.Boundary.findAllBoundaries(user)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

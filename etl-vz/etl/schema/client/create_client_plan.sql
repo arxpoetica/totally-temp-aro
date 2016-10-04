@@ -14,6 +14,9 @@ area_bounds geometry,
 created_at timestamp NOT NULL,
 updated_at timestamp NOT NULL,
 total_cost float8,
+
+--TODO move columns below to seperate FACT table
+
 "total_revenue" float8,
 "household_revenue" float8,
 "celltower_revenue" float8,
@@ -32,5 +35,8 @@ CONSTRAINT client_plan_pkey PRIMARY KEY (id)
 
 
 CREATE INDEX idx_client_area_bounds ON client.plan USING gist(area_bounds);
+CREATE INDEX idx_client_plan_parent_plan_id ON client.plan(parent_plan_id);
+CREATE INDEX idx_client_plan_plan_type ON client.plan(plan_type);
+
 
 ALTER TABLE client.plan ADD COLUMN location_types character varying[];

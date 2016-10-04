@@ -5,10 +5,13 @@ id serial,
 "name" varchar(32) UNIQUE,
 "description" varchar(256),
 is_user_defined boolean,
+data_source_id bigint references user_data.data_source(id) on delete cascade,
 CONSTRAINT client_service_layer_pkey PRIMARY KEY (id)
 )
 WITH (OIDS=FALSE);
 ALTER TABLE "client"."service_layer" OWNER TO "aro";
+
+CREATE INDEX client_service_layer_data_source_id ON client.service_layer (data_source_id);
 
 -- Basic Report Types
 

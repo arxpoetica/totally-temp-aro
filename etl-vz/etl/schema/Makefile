@@ -1,4 +1,14 @@
 ###################
+# USER_DATA ETL
+###################
+
+reset_user_data:
+	user_data/reset.sh
+
+etl_user_data:
+	user_data/etl.sh
+
+###################
 # User/Auth ETL
 ###################
 
@@ -63,8 +73,8 @@ etl_cache:
 ###################
 
 
-reset: reset_financial reset_client reset_aro reset_cache
-load: etl_aro etl_client etl_financial etl_cache load_utils
+reset: reset_financial reset_client reset_aro reset_cache reset_user_data
+load: etl_user_data etl_aro etl_client etl_financial etl_cache load_utils
 
 etl_reload_auth: reset_auth etl_auth
 etl_reload_all: reset load

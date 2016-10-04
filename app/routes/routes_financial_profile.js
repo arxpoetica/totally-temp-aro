@@ -435,51 +435,18 @@ exports.configure = (api, middleware) => {
   api.get('/financial_profile/:plan_id/fiber_details', (request, response, next) => {
     var plan_id = request.params.plan_id
     var sql = `
-        WITH selected_plan AS (
-          SELECT p.*
-          FROM client.plan p
-          WHERE p.id=$1
+      SELECT SUM(ST_Length(ST_Intersection(s.geom, e.geom)::geography)) AS length
+      FROM client.service_area s
+      JOIN client.existing_fiber e ON ST_Intersects (s.geom, e.geom)
+      WHERE s.id IN (
+        SELECT wirecenter_id
+        FROM client.plan
+        WHERE parent_plan_id IN (
+          SELECT id
+          FROM client.plan
+          WHERE parent_plan_id IN ($1)
         )
-        ,
-        master_plans AS (
-          SELECT mp.id
-          FROM selected_plan rp
-          JOIN client.plan mp
-          ON mp.parent_plan_id = rp.id
-        )
-        ,
-        selected_service_areas AS (
-          SELECT
-          p.id, ST_MakeValid(ST_Union(sa.geom)) AS geom
-          FROM selected_plan p
-          JOIN client.selected_service_area s
-          ON s.plan_id = p.id
-          JOIN client.service_area sa
-          ON sa.id = s.service_area_id
-          GROUP BY p.id
-        )
-        ,
-        selected_analysis_areas AS (
-          SELECT
-          p.id,
-          ST_MakeValid(ST_Union(aa.geom)) AS geom
-          FROM selected_plan p
-          JOIN client.selected_analysis_area s
-          ON s.plan_id = p.id
-          JOIN client.analysis_area aa
-          ON aa.id = s.analysis_area_id
-          GROUP BY p.id
-        ),
-        union_area AS (
-          SELECT ST_MakeValid(ST_Union(u.geom)) AS geom
-          FROM (
-          SELECT geom FROM selected_service_areas
-          UNION
-          SELECT geom FROM selected_analysis_areas
-          ) u
-        )
-        SELECT SUM ( ST_Length (ST_Intersection (ua.geom, ef.geom) ) ) AS length
-        FROM union_area ua, client.existing_fiber ef
+      )
     `
     return database.findOne(sql, [plan_id])
       .then(jsonSuccess(response, next))

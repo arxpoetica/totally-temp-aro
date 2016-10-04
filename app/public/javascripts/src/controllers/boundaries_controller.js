@@ -7,15 +7,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.selected_tool = false
   $scope.boundaries = []
 
-  $scope.userDefinedBoundaries = [
-    { name: 'Boundary 1', id: 1 },
-    { name: 'Boundary 2', id: 2 },
-    { name: 'Boundary 3', id: 3 },
-    { name: 'Boundary 4', id: 4 },
-    { name: 'Boundary 5', id: 5 },
-    { name: 'Boundary 6', id: 6 },
-    { name: 'Boundary 7', id: 7 }
-  ]
+  $scope.userDefinedBoundaries = []
+  $scope.selectedUserDefinedBoundary = null
 
   // selected regions
   $scope.selectedRegions = []
@@ -30,6 +23,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   var countySubdivisionsLayer
   var censusBlocksLayer
   var cmaBoundariesLayer
+  var userDefinedLayer
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
     countySubdivisionsLayer = new MapLayer({
@@ -89,6 +83,30 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       hoverField: 'name'
     })
   }
+
+  $scope.userDefinedLayer = userDefinedLayer = new MapLayer({
+    short_name: 'UD',
+    name: 'User-defined boundaries',
+    type: 'user_defined',
+    style_options: {
+      normal: {
+        fillColor: 'green',
+        strokeColor: 'green',
+        strokeWeight: 2,
+        fillOpacity: 0.1
+      },
+      highlight: {
+        fillColor: 'green',
+        strokeColor: 'green',
+        strokeWeight: 2,
+        fillOpacity: 0.1
+      }
+    },
+    reload: 'always',
+    threshold: 0,
+    minZoom: 9,
+    hoverField: 'name'
+  })
 
   $scope.areaLayers = [
     censusBlocksLayer,
@@ -160,6 +178,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
   })
 
+  $scope.areaLayers.push(userDefinedLayer)
+
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
     drawingControl: false,
@@ -183,6 +203,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     $scope.boundaries = []
+    $scope.areaLayers.forEach((layer) => {
+      layer.hide()
+      $(`#map_layers_toggle_${layer.type} input`).prop('checked', false)
+    })
     if (!plan) return
 
     if (plan && (countySubdivisionsLayer || censusBlocksLayer)) {
@@ -211,6 +235,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
           updateTooltips()
         })
       })
+
+    $scope.selectedUserDefinedBoundary = null
+    if ($scope.userDefinedBoundaries.length === 0) {
+      $http.get('/boundary/user_defined')
+        .success((response) => {
+          $scope.userDefinedBoundaries = response
+        })
+    }
   })
 
   function updateTooltips () {
@@ -222,6 +254,19 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $scope.toggleBoundary = (boundary) => {
     boundary.overlay.setMap(boundary.overlay.getMap() ? null : map)
+  }
+
+  $scope.changeUserDefinedBoundary = () => {
+    $rootScope.selectedUserDefinedBoundary = $scope.selectedUserDefinedBoundary
+    if (!$scope.selectedUserDefinedBoundary) {
+      userDefinedLayer.hide()
+    } else {
+      var url = `/service_areas/${$scope.selectedUserDefinedBoundary.name}`
+      userDefinedLayer.layerId = $scope.selectedUserDefinedBoundary.id
+      userDefinedLayer.setApiEndpoint(url)
+      userDefinedLayer.show()
+      userDefinedLayer.reloadData()
+    }
   }
 
   $scope.toggleTool = () => {
@@ -502,5 +547,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       var select = document.getElementById('userDefinedBoundariesSelect')
       select.scrollTop = select.scrollHeight
     }
+    $scope.changeUserDefinedBoundary()
   })
 }])

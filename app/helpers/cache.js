@@ -4,7 +4,7 @@ exports.serviceLayers = []
 exports.analysisLayers = []
 
 function readServiceLayers () {
-  return database.query('SELECT * FROM client.service_layer ORDER BY id ASC')
+  return database.query('SELECT * FROM client.service_layer WHERE is_user_defined=false ORDER BY id ASC')
     .then((response) => {
       exports.serviceLayers = response
       return database.query(`

@@ -64,9 +64,13 @@
      <button class="btn btn-default btn-sm"
        ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
        ng-click="setSelectedTool('polygon')">Many</button>
-     <span style="display:inline-block; width:30px; position:relative">
-       <button class="btn btn-default btn-sm"><i class="fa fa-file-o"></i></button>
-       <input type="file" name="csv" style="opacity:0; width: 30px; position:absolute; top:0; left:0">
+     <span>
+       <input type="file" name="csv" id="target-builder-upload-csv" style="width:0.1px; height:0.1px; opacity:0; overflow:hidden; position:absolute; z-index:-1">
+       <label for="target-builder-upload-csv">
+         <span class="btn btn-default btn-sm">
+           <i class="fa fa-file-o"></i>
+         </span>
+       </label>
      </span>
    </p>
  </form>
@@ -94,11 +98,17 @@
  <% } %>
 
  <p><strong>Targeted Locations</strong></p>
- <ul style="padding: 0 20px">
-   <li>Businesses: {{plan.metadata.customers_businesses_total}}</li>
-   <li>Households: {{plan.metadata.customers_households_total}}</li>
-   <li>Towers: {{plan.metadata.customers_towers_total}}</li>
+ <ul style="padding: 0 20px" ng-repeat="customerType in plan.metadata.customerTypes">
+   <li>{{ customerType.name }}: {{customerType.total }}</li>
  </ul>
+
+<p><strong>Optimization Processing Layer</strong></p>
+ <p>
+   <select class="form-control" ng-model="selectedBoundary"
+     ng-options="boundary as boundary.description for boundary in allBoundaries track by boundary.id">
+     <option value="">Default Layer</option>
+   </select>
+ </p>
 
  <p class="pull-right">
    <button class="btn btn-success active"

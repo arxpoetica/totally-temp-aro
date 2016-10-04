@@ -21,7 +21,11 @@ module.exports = class Network {
       SELECT seg.geom
         FROM client.fiber_route_segment seg
         JOIN client.fiber_route fr ON seg.fiber_route_id = fr.id
-       WHERE fr.plan_id IN (SELECT id FROM client.plan WHERE parent_plan_id=$1)
+        WHERE fr.plan_id IN (
+          (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+            (SELECT id FROM client.plan WHERE parent_plan_id=$1)
+          ))
+        )
         AND seg.cable_construction_type_id = (
           SELECT id FROM client.cable_construction_type WHERE name=$2
         )
@@ -273,7 +277,8 @@ module.exports = class Network {
       locationTypes: options.locationTypes,
       algorithm: options.algorithm,
       analysisSelectionMode: options.selectionMode,
-      fiberNetworkConstraints: options.fiberNetworkConstraints
+      fiberNetworkConstraints: options.fiberNetworkConstraints,
+      processLayers: options.processingLayers
     }
     var req = {
       method: 'POST',
@@ -298,13 +303,13 @@ module.exports = class Network {
         options.geographies.forEach((geography) => {
           var type = geography.type
           var id = geography.id
-          var params = [plan_id, geography.name, id, type]
+          var params = [plan_id, geography.name, id, type, geography.layerId || null]
           var queries = {
             'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
             'county_subdivisions': '(SELECT geom FROM cousub WHERE gid=$3::bigint)'
           }
           var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
-          var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type)
+          var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type) || geography.layerId
           var query
           if (isAnalysisLayer) {
             params.push(type)
@@ -352,8 +357,8 @@ module.exports = class Network {
           }
           promises.push(database.execute(`
             INSERT INTO client.selected_regions (
-              plan_id, region_name, region_id, region_type, geom
-            ) VALUES ($1, $2, $3, $4, ${query})
+              plan_id, region_name, region_id, region_type, layer_id, geom
+            ) VALUES ($1, $2, $3, $4, $5, ${query})
           `, params))
         })
         return Promise.all(promises)

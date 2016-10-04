@@ -271,22 +271,25 @@ module.exports = class NetworkPlan {
 
         return database.query(`
           SELECT
-            region_id AS id, region_name AS name, region_type AS type, ST_AsGeoJSON(geom)::json AS geog
+            region_id AS id,
+            region_name AS name,
+            region_type AS type,
+            layer_id AS "layerId",
+            ST_AsGeoJSON(geom)::json AS geog
           FROM client.selected_regions WHERE plan_id = $1
         `, [plan_id])
       })
       .then((selectedRegions) => {
         output.metadata.selectedRegions = selectedRegions
-
-        // return config.route_planning.length > 0
-        //   ? models.CustomerProfile.customerProfileForRoute(plan_id, output.metadata)
-        //   : models.CustomerProfile.customerProfileForExistingFiber(plan_id, output.metadata)
-
+        return models.CustomerProfile.customerProfileByEntity(plan_id)
+      })
+      .then((customerTypes) => {
         plan.total_revenue = plan.total_revenue || 0
         plan.total_cost = plan.total_cost || 0
         output.metadata.revenue = plan.total_revenue
         output.metadata.total_cost = plan.total_cost || 0
         output.metadata.profit = output.metadata.revenue - output.metadata.total_cost
+        output.metadata.customerTypes = customerTypes
 
         database.execute(`
             UPDATE client.plan SET
@@ -603,13 +606,16 @@ module.exports = class NetworkPlan {
           kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`
         })
 
-        // TODO: network nodes in child plans
         var sql = `
           SELECT ST_AsKML(network_nodes.geom) AS geom
           FROM client.plan_sources
           JOIN client.network_nodes
             ON plan_sources.network_node_id = network_nodes.id
-          WHERE plan_sources.plan_id=$1
+          WHERE plan_sources.plan_id IN (
+            (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+              (SELECT id FROM client.plan WHERE parent_plan_id=$1)
+            ))
+          )
         `
         return database.query(sql, [plan_id])
       })

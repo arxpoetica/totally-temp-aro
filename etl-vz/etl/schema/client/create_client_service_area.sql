@@ -12,6 +12,7 @@ CREATE TABLE client.service_area
 	CONSTRAINT client_service_area_pkey PRIMARY KEY (id)
 );
 
+
 SELECT AddGeometryColumn('client', 'service_area', 'geom', 4326, 'MULTIPOLYGON', 2);
 SELECT AddGeometryColumn('client', 'service_area', 'edge_buffer', 4326, 'GEOMETRY', 2);
 SELECT AddGeometryColumn('client', 'service_area', 'location_edge_buffer', 4326, 'GEOMETRY', 2);
@@ -21,3 +22,4 @@ CREATE INDEX client_service_area_geom_gist ON client.service_area USING gist (ge
 CREATE INDEX client_service_area_geog_gist ON client.service_area USING gist (geog);
 CREATE INDEX client_service_area_edge_buffer ON client.service_area USING gist (edge_buffer);
 CREATE INDEX client_service_area_location_edge_buffer ON client.service_area USING gist (location_edge_buffer);
+

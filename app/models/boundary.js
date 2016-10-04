@@ -4,6 +4,9 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var config = helpers.config
+var models = require('../models')
+var fs = require('fs')
 
 module.exports = class Boundary {
 
@@ -55,6 +58,75 @@ module.exports = class Boundary {
       FROM client.boundaries WHERE plan_id=$1
     `
     return database.query(sql, [plan_id])
+  }
+
+  static findUserDefinedBoundaries (user) {
+    return database.query(`
+      SELECT sl.id, sl.name, sl.description
+      FROM client.service_layer sl
+      JOIN user_data.data_source ds ON sl.data_source_id = ds.id AND ds.user_id=$1
+    `, [user.id])
+  }
+
+  static findAllBoundaries (user) {
+    return database.query(`
+      SELECT sl.id, sl.name, sl.description
+      FROM client.service_layer sl
+      WHERE sl.is_user_defined=false
+
+      UNION ALL
+
+      SELECT sl.id, sl.name, sl.description
+      FROM client.service_layer sl
+      JOIN user_data.data_source ds ON sl.data_source_id = ds.id AND ds.user_id=$1
+    `, [user.id])
+  }
+
+  static editUserDefinedBoundary (user, id, name, file, radius) {
+    return Promise.resolve()
+      .then(() => {
+        if (!id) {
+          var req = {
+            method: 'POST',
+            url: config.aro_service_url + '/rest/serviceLayers',
+            body: {
+              layerDescription: name,
+              layerName: name,
+              userId: user.id
+            },
+            json: true
+          }
+          return models.AROService.request(req)
+        } else {
+          return Promise.resolve()
+          // return database.execute('UPDATE user_data.data_source SET name=$1, description=$1 WHERE id=$2', [name, id])
+        }
+      })
+      .then((res) => {
+        id = id || res.id
+        if (!file) return { id: id }
+        var req = {
+          method: 'POST',
+          url: config.aro_service_url + `/rest/serviceLayers/${id}/entities.csv`,
+          formData: {
+            file: fs.createReadStream(file)
+          }
+        }
+        return models.AROService.request(req)
+          .then(() => {
+            var req = {
+              method: 'POST',
+              url: config.aro_service_url + `/rest/serviceLayers/${id}/command`,
+              body: {
+                action: 'GENERATE_POLYGONS',
+                maxDistanceMeters: radius
+              },
+              json: true
+            }
+            return models.AROService.request(req)
+              .then(() => ({ id: id }))
+          })
+      })
   }
 
 }
