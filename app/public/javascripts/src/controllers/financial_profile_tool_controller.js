@@ -1,5 +1,5 @@
 /* global app $ Chart */
-app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', 'MapLayer', ($scope, $rootScope, $http, $timeout, map_tools, MapLayer) => {
+app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', 'MapLayer', 'regions', ($scope, $rootScope, $http, $timeout, map_tools, MapLayer, regions) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
   $scope.premisesFilterEntityTypes = { household: true }
@@ -80,7 +80,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
-    if (layer.type !== 'wirecenter') return
+    if (layer.type !== 'child_plans') return
 
     var feature = event.feature
     $scope.selectedArea = {
@@ -489,11 +489,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.showData = true
   $scope.setMode = (mode) => {
     $scope.mode = mode
-    $rootScope.$broadcast('financial_profile_changed_mode', mode)
     $scope.selectedArea = null
     $scope.metadata = $scope.plan.metadata
     $scope.calculateShowData()
     refresh()
+    serviceAreaLayer.setVisible(mode === 'area', true)
+    mode === 'area' ? regions.hide() : regions.show()
   }
 
   $scope.calculateShowData = () => {
@@ -548,4 +549,27 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.showBuildLease = () => {
     $('#build-lease').modal('show')
   }
+
+  var serviceAreaLayer = new MapLayer({
+    name: 'Child Plans',
+    type: 'child_plans',
+    api_endpoint: '/network_plan/:plan_id/child_plans',
+    highlighteable: true,
+    style_options: {
+      normal: {
+        strokeColor: 'cyan',
+        strokeWeight: 4,
+        fillOpacity: 0
+      },
+      highlight: {
+        strokeColor: 'cyan',
+        strokeWeight: 6,
+        fillOpacity: 0.1
+      }
+    },
+    reload: 'always',
+    threshold: 0,
+    minZoom: 6,
+    hoverField: 'name'
+  })
 }])

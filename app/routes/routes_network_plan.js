@@ -123,6 +123,14 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/network_plan/:plan_id/child_plans', check_any_permission, middleware.viewport, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var viewport = request.viewport
+    models.NetworkPlan.findChildPlans(plan_id, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   // Return data of an existing wirecenter plan
   api.get('/network_plan/:plan_id/:wirecenter_id', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
