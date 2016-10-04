@@ -60,6 +60,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $(document).ready(() => {
     map.ready(() => {
       $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)).filter((layer) => layer.show_in_assets)
+      var additionalLayer = {
+        id: 'all',
+        name: 'all',
+        description: 'Optimized equipment',
+        equipment_description: 'Optimized equipment',
+        nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item))
+      }
+      $scope.serviceLayers.push(additionalLayer)
       if ($scope.serviceLayers.length > 0) {
         var layer = $scope.serviceLayers[0]
         // layer.enabled = true

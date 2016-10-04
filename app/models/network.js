@@ -137,20 +137,25 @@ module.exports = class Network {
         }
 
         if (plan_id) {
-          params.push(plan_id)
           if (serviceLayer) {
-            params.push(serviceLayer)
+            var condition = ''
+            if (serviceLayer !== 'all') {
+              params.push(serviceLayer)
+              condition = `AND s.id = $${params.length}`
+            }
+            params.push(plan_id)
             constraints.push(`
               plan_id IN (
                 SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
                   SELECT p.id
                     FROM client.plan p
-                    JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${params.length}
-                    WHERE p.parent_plan_id = $${params.length - 1}
+                    JOIN client.service_layer s ON s.id = p.service_layer_id ${condition}
+                    WHERE p.parent_plan_id = $${params.length}
                 )
               )
             `)
           } else {
+            params.push(plan_id)
             constraints.push(`
               (plan_id IS NULL OR plan_id IN (
                 SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
@@ -182,6 +187,12 @@ module.exports = class Network {
   }
 
   static viewFiber (plan_id, serviceLayer, viewport) {
+    var params = [plan_id]
+    var condition = ''
+    if (serviceLayer !== 'all') {
+      condition = 'AND s.id = $2'
+      params.push(serviceLayer)
+    }
     var sql = `
       SELECT
         fiber_route.id,
@@ -196,14 +207,14 @@ module.exports = class Network {
         SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
           SELECT p.id
             FROM client.plan p
-            JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $2
+            JOIN client.service_layer s ON s.id = p.service_layer_id ${condition}
             WHERE p.parent_plan_id = $1
         )
       )
       AND NOT ST_IsEmpty(fiber_route.geom)
       ${database.intersects(viewport, 'fiber_route.geom', 'AND')}
     `
-    return database.lines(sql, [plan_id, serviceLayer], true, viewport)
+    return database.lines(sql, params, true, viewport)
   }
 
   static _addNodes (plan_id, insertions) {
