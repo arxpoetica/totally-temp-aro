@@ -36,13 +36,11 @@ dependencies:
 
 database:
   override:
-    # - createdb -U ubuntu cmo
-    # - CMO_APP_ENVIRONMENT=TEST CMO_APP_DB_HOST=localhost CMO_APP_DB_USER=ubuntu CMO_APP_DB_PASS= CMO_APP_AGGRESSIVELY_DESTROY_DATABASE=1 bash bootstrap/drop_db.sh
+      - echo "Skipping database section" #needed to disable erroneous circleci inferences
     
 test:
   override:
     # - (cd app && npm test)
-
     - /bin/true
 
 deployment:
