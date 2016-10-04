@@ -121,3 +121,5 @@ bin/
 
 aro-service
 aro-service/
+
+bootstrap/etl.log
