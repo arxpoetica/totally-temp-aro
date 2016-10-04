@@ -2,6 +2,7 @@ general:
   branches:
     only:
       - dockerize
+      - dockerize-vz
 
 machine:
   services:
