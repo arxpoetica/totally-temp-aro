@@ -25,7 +25,13 @@ public interface ServiceLayerRepository extends
 	
 	@Transactional
 	@Modifying
-	@Query(value = "WITH new_plans AS (\n" + 
+	@Query(value = "WITH selected_layer AS (\n" + 
+			"	select *\n" + 
+			"	FROM client.service_layer \n" + 
+			"	WHERE id = :serviceLayerId\n" + 
+			")\n" + 
+			",\n" + 
+			"new_plans AS (\n" + 
 			"INSERT INTO client.plan (service_layer_id, name, plan_type, parent_plan_id, wirecenter_id, area_name, area_centroid, area_bounds, created_at, updated_at)\n" + 
 			"SELECT\n" + 
 			"	sa.service_layer_id,\n" + 
@@ -39,16 +45,28 @@ public interface ServiceLayerRepository extends
 			"	NOW(),\n" + 
 			"	NOW()\n" + 
 			"FROM client.service_area sa\n" + 
-			"WHERE sa.service_layer_id = :serviceLayerId\n" + 
+			"JOIN selected_layer sl\n" + 
+			"	ON sl.id = sa.service_layer_id\n" + 
 			"ORDER BY sa.id\n" + 
-			"RETURNING  id, wirecenter_id, area_centroid\n" + 
+			"RETURNING  id, wirecenter_id, service_layer_id\n" + 
 			")\n" + 
 			",\n" + 
 			"new_cos AS (\n" + 
 			"	INSERT INTO client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
 			"	SELECT\n" + 
-			"		p.id, 1, CAST(p.area_centroid AS Geography), p.area_centroid\n" + 
-			"	FROM new_plans p\n" + 
+			"		np.id, sle.entity_category_id, CAST(sle.point AS Geography), sle.point\n" + 
+			"	FROM selected_layer sl\n" + 
+			"	JOIN user_data.data_source ds\n" + 
+			"		ON ds.id =  sl.data_source_id\n" + 
+			"	JOIN user_data.source_location_entity sle\n" + 
+			"		ON sle.data_source_id = ds.id\n" + 
+			"	JOIN client.service_area sa\n" + 
+			"		ON sa.service_layer_id = sl.id\n" + 
+			"		AND ST_Contains(sa.geom, sle.point)\n" + 
+			"	JOIN new_plans np\n" + 
+			"		ON np.wirecenter_id = sa.id \n" + 
+			"	WHERE sle.entity_category_id=1\n" + 
+			"\n" + 
 			"	RETURNING id, plan_id\n" + 
 			")\n" + 
 			"SELECT id, plan_id FROM new_cos", nativeQuery = true)
