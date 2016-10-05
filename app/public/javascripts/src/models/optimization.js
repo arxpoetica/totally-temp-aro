@@ -16,14 +16,14 @@ app.service('optimization', ($rootScope, $http, $q) => {
       }
       $http(options)
         .success((response) => {
-          plan.ran_optimization = true
+          if (!changes.lazy) plan.ranOptimization = true
           $rootScope.$broadcast('route_planning_changed', response)
           success && success()
         })
         .error(error)
     }
 
-    if (changes.lazy || !plan.ran_optimization) {
+    if (changes.lazy || !plan.ranOptimization) {
       run(plan)
     } else {
       swal({
