@@ -19,7 +19,7 @@ import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.google.common.collect.TreeMultimap;
 
-public class AllShortestPaths<V, E extends AroEdge<?>> {
+public class AllShortestPaths<V, E extends AroEdge<?>> implements SpanningShortestPath<V, E>{
 
 	private V source;
 	private WeightedGraph<V, E> graph;

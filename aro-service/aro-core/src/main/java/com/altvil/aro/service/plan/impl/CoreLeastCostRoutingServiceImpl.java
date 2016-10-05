@@ -1,6 +1,7 @@
 package com.altvil.aro.service.plan.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,9 +26,10 @@ import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.alg.DefaultGraphPathConstraint;
 import com.altvil.aro.service.graph.alg.DistanceGraphPathConstraint;
 import com.altvil.aro.service.graph.alg.GraphPathConstraint;
-import com.altvil.aro.service.graph.alg.RouteBuilder;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SourceRoute;
+import com.altvil.aro.service.graph.alg.stiener.SpanningRouteBuilder;
+import com.altvil.aro.service.graph.alg.stiener.SpanningRouteBuilderFactory;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
@@ -63,7 +65,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 		CoreLeastCostRoutingService {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(PlanServiceImpl.class.getName());
+			.getLogger(CoreLeastCostRoutingServiceImpl.class.getName());
 
 	private GraphTransformerFactory transformFactory;
 	private RoutePlaningService routePlaningService;
@@ -89,7 +91,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 		long startTime = System.currentTimeMillis();
 		try {
 			Optional<CompositeNetworkModel> networkModel = __computeNetworkNodes(
-					 model, context);
+					model, context);
 			log.info("Finished Processing Plan. time taken millis="
 					+ (System.currentTimeMillis() - startTime));
 			return networkModel;
@@ -101,17 +103,12 @@ public class CoreLeastCostRoutingServiceImpl implements
 		}
 	}
 
-	
-
 	private Optional<CompositeNetworkModel> __computeNetworkNodes(
-	
-			GraphNetworkModel model,  LcrContext context)
-			throws PlanException {
 
-		NetworkModelBuilder planning = new NetworkModelBuilder(
-				context);
-		CompositeNetworkModel networkModel = planning.build(
-				model);
+	GraphNetworkModel model, LcrContext context) throws PlanException {
+
+		NetworkModelBuilder planning = new NetworkModelBuilder(context);
+		CompositeNetworkModel networkModel = planning.build(model);
 
 		return networkModel != null ? Optional.of(networkModel) : Optional
 				.empty();
@@ -173,14 +170,12 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 		private LcrContext lcrContext;
 
-		public NetworkModelBuilder(
-				LcrContext lcrContext) {
+		public NetworkModelBuilder(LcrContext lcrContext) {
 			super();
 			this.lcrContext = lcrContext;
 		}
 
-		public CompositeNetworkModel build(
-				GraphNetworkModel networkModel) {
+		public CompositeNetworkModel build(GraphNetworkModel networkModel) {
 
 			if (!networkModel.hasLocations()) {
 				// TODO make it return empty NetworkModel
@@ -221,9 +216,9 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			// Create a tree leading to each AroEdge with a value.
 
-			DAGModel<GeoSegment> dag = transformFactory.createDAG(
-					lcrContext.getClosestFirstSurfaceBuilder(), modifier.build(), rootNode,
-					e -> {
+			DAGModel<GeoSegment> dag = transformFactory.createDAG(lcrContext
+					.getClosestFirstSurfaceBuilder(), modifier.build(),
+					rootNode, e -> {
 						GeoSegment gs = e.getValue();
 						return gs == null ? false : !gs
 								.getGeoSegmentAssignments().isEmpty();
@@ -239,7 +234,8 @@ public class CoreLeastCostRoutingServiceImpl implements
 			DescribeGraph.trace(log, dag.getGraph());
 
 			RootGraphMapping rootGraphMapping = transformFactory
-					.createWirecenterTransformer(lcrContext.getFtthThreshholds()).apply(dag,
+					.createWirecenterTransformer(
+							lcrContext.getFtthThreshholds()).apply(dag,
 							assignedFiberSources);
 
 			dag = dag.removeRootNode(rootNode);
@@ -269,14 +265,14 @@ public class CoreLeastCostRoutingServiceImpl implements
 	private class NetworkModelPlanner {
 
 		private PricingModel pricingModel;
-		private LcrContext lcrContext ;
+		private LcrContext lcrContext;
 		private FiberSourceBinding fiberSourceBinding;
 		private Map<Map<CableConstructionEnum, Double>, RenodedGraph> cache = new HashMap<>();
 
 		public NetworkModelPlanner(LcrContext lcrContex,
 				FiberSourceBinding fiberSourceBinding) {
-			this.lcrContext = lcrContex ;
-			this.pricingModel = lcrContex.getPricingModel() ;
+			this.lcrContext = lcrContex;
+			this.pricingModel = lcrContex.getPricingModel();
 			this.fiberSourceBinding = fiberSourceBinding;
 		}
 
@@ -299,26 +295,28 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			cache.put(
 					priceMap,
-					renoded = renoder.renode()
-							.transform(
-									s -> priceMap.get(s
-											.getCableConstructionCategory()) * s.getLength()));
+					renoded = renoder.renode().transform(
+							s -> priceMap.get(s.getCableConstructionCategory())
+									* s.getLength()));
 
 			DescribeGraph.trace(log, renoded.getGraph().getGraph());
 
 			return renoded;
 
 		}
-		
-		private GraphPathConstraint<GraphNode, AroEdge<GeoSegment>> createConstraint(FiberType fiberType) {
-			Double distanceInMeters = lcrContext.getFtthThreshholds().getMaxFiberLength(fiberType) ;
-			
-			if( distanceInMeters == null || distanceInMeters <100 ) {
-				return new DefaultGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>() ;
+
+		private GraphPathConstraint<GraphNode, AroEdge<GeoSegment>> createConstraint(
+				FiberType fiberType) {
+			Double distanceInMeters = lcrContext.getFtthThreshholds()
+					.getMaxFiberLength(fiberType);
+
+			if (distanceInMeters == null || distanceInMeters < 100) {
+				return new DefaultGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>();
 			}
-			
-			return new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(distanceInMeters) ;
-			
+
+			return new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
+					distanceInMeters);
+
 		}
 
 		public NetworkModel createNetworkModel(GraphContext graphCtx,
@@ -335,8 +333,8 @@ public class CoreLeastCostRoutingServiceImpl implements
 					getRenodedGraph(graphCtx, FiberType.DISTRIBUTION,
 							graphMapping));
 
-//			RenodedGraph rg = getRenodedGraph(graphCtx, FiberType.FEEDER,
-//					graphMapping);
+			// RenodedGraph rg = getRenodedGraph(graphCtx, FiberType.FEEDER,
+			// graphMapping);
 
 			GeneratedFiberRoute feederFiber = planRoute(
 					createConstraint(FiberType.DISTRIBUTION),
@@ -381,9 +379,8 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			Map<GraphAssignment, GeneratedFiberRoute> map = new HashMap<>();
 
-			 GraphPathConstraint<GraphNode, AroEdge<GeoSegment>> constraint = 
-					 createConstraint(FiberType.DISTRIBUTION) ;
-			
+			GraphPathConstraint<GraphNode, AroEdge<GeoSegment>> constraint = createConstraint(FiberType.DISTRIBUTION);
+
 			children.forEach(a -> {
 				if (isDistributionSource(a.getAroEntity())) {
 					map.put(a.getGraphAssignment(),
@@ -402,11 +399,12 @@ public class CoreLeastCostRoutingServiceImpl implements
 			if (log.isDebugEnabled())
 				log.debug("Processing Routes for" + root.getAroEntity());
 
-			SourceRoute<GraphNode, AroEdge<GeoSegment>> sr = new RouteBuilder<GraphNode, AroEdge<GeoSegment>>()
-					.buildSourceRoute(predicate, renoded.getGraph().getGraph(),
-							renoded.getGraphNode(root),
-							StreamUtil.map(nodes, n -> renoded.getGraphNode(n)));
-
+			SourceRoute<GraphNode, AroEdge<GeoSegment>> sr =  SpanningRouteBuilderFactory.FACTORY.create(
+					 renoded.getGraph().getGraph(), 
+					 predicate,
+					 Collections.singleton(renoded.getGraphNode(root)),
+					 StreamUtil.map(nodes, n -> renoded.getGraphNode(n))).build().iterator().next() ;
+			
 			Set<AroEdge<GeoSegment>> edges = sr.createDagModel(
 					transformFactory.createDAGBuilder()).getEdges();
 

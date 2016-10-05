@@ -1,17 +1,22 @@
 package com.altvil.aro.service.optimization.impl;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.altvil.aro.model.*;
-import com.altvil.aro.persistence.repository.WirecenterPlanRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.model.DemandTypeEnum;
+import com.altvil.aro.model.ServiceArea;
+import com.altvil.aro.model.ServiceLayer;
+import com.altvil.aro.model.WirecenterPlan;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.persistence.repository.ServiceAreaRepository;
+import com.altvil.aro.persistence.repository.WirecenterPlanRepository;
 import com.altvil.aro.service.conversion.SerializationService;
 import com.altvil.aro.service.demand.AroDemandService;
 import com.altvil.aro.service.demand.analysis.SpeedCategory;
@@ -29,7 +34,7 @@ import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
+import com.altvil.aro.service.plan.impl.CoreLeastCostRoutingServiceImpl;
 import com.altvil.aro.service.planing.WirecenterNetworkPlan;
 import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.utils.StreamUtil;
@@ -39,7 +44,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
-			.getLogger(PlanServiceImpl.class.getName());
+			.getLogger(CoreLeastCostRoutingServiceImpl.class.getName());
 
 	private NetworkPlanRepository networkPlanRepository;
 	private ServiceAreaRepository serviceAreaRepository;

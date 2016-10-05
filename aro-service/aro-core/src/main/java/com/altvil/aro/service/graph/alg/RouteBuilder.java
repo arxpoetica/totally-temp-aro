@@ -25,7 +25,8 @@ import com.altvil.aro.service.graph.alg.AllShortestPaths.ClosestTargetItr;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 
-public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
+@Deprecated
+class RouteBuilder<V, E extends AroEdge<GeoSegment>>  {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(RouteBuilder.class.getName());
@@ -141,8 +142,6 @@ public class RouteBuilder<V, E extends AroEdge<GeoSegment>> {
 				sourceRoot.add(next, distanceToSource) ;
 				previous = next;
 			}
-
-			
 
 		}
 

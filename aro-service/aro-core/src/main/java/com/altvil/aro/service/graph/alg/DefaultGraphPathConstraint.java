@@ -16,7 +16,7 @@ public class DefaultGraphPathConstraint<V, E extends AroEdge<GeoSegment>>
 	}
 
 	@Override
-	public boolean isValid(SourceRoute<V, E> sourceRoot, GraphPath<V, E> graph) {
+	public boolean isValid(MetricDistance<V> metricDistance, GraphPath<V, E> graph) {
 		return true;
 	}
 }

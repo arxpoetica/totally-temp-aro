@@ -12,8 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphModel;
-import com.altvil.aro.service.graph.alg.RouteBuilder;
 import com.altvil.aro.service.graph.alg.SourceRoute;
+import com.altvil.aro.service.graph.alg.stiener.SpanningRouteBuilder;
+import com.altvil.aro.service.graph.alg.stiener.SpanningRouteBuilderFactory;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
@@ -161,17 +162,10 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 		}
 
 		@Override
-		public Collection<AroEdge<GeoSegment>> planRoute(GraphNode src,
-				Collection<GraphNode> targets) {
-			return new RouteBuilder<GraphNode, AroEdge<GeoSegment>>().build(
-					getModel().getGraph(), null, src, targets);
-		}
-
-		@Override
 		public Collection<SourceRoute<GraphNode, AroEdge<GeoSegment>>> planRoute(
 				Collection<GraphNode> sources, Collection<GraphNode> targets) {
-			return new RouteBuilder<GraphNode, AroEdge<GeoSegment>>().build(
-					getModel().getGraph(), sources, targets);
+			return SpanningRouteBuilderFactory.FACTORY.create(
+					getModel().getGraph(), sources, targets).build();
 		}
 
 		/*

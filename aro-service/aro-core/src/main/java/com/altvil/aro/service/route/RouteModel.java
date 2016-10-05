@@ -13,10 +13,7 @@ import com.altvil.interfaces.Assignment;
 import com.altvil.interfaces.NetworkAssignment;
 
 public interface RouteModel {
-
-	Collection<AroEdge<GeoSegment>> planRoute(GraphNode src,
-			Collection<GraphNode> targets);
-
+	
 	Collection<SourceRoute<GraphNode, AroEdge<GeoSegment>>> planRoute(
 			Collection<GraphNode> sources, Collection<GraphNode> targets);
 

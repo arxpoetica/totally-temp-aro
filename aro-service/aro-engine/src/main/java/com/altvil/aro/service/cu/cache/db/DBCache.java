@@ -29,12 +29,12 @@ import com.altvil.aro.service.cu.cache.query.CacheKey;
 import com.altvil.aro.service.cu.key.AroKey;
 import com.altvil.aro.service.cu.resource.ResourceVersion;
 import com.altvil.aro.service.cu.version.VersionType;
-import com.altvil.aro.service.plan.impl.PlanServiceImpl;
+import com.altvil.aro.service.plan.impl.CoreLeastCostRoutingServiceImpl;
 
 public class DBCache implements SimpleCache {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(PlanServiceImpl.class.getName());
+			.getLogger(CoreLeastCostRoutingServiceImpl.class.getName());
 
 	private CacheEntityRepository cacheEntityRepository;
 	private QueryExecutor queryExecutor;

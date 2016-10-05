@@ -15,11 +15,12 @@ import org.jgrapht.Graphs;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
+import com.altvil.aro.service.graph.alg.GraphPathConstraint.MetricDistance;
 import com.altvil.aro.service.graph.builder.GraphModelBuilder;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 
-public class SourceRoute<V, E extends AroEdge<GeoSegment>> {
+public class SourceRoute<V, E extends AroEdge<GeoSegment>> implements MetricDistance<V> {
 	
 
 	private Graph<V, E> sourceGraph;
