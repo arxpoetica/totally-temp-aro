@@ -28,7 +28,7 @@ services:
         volumes:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db
-            - ../../aro-etl-vz:/srv/www/aro/db/data/private
+            # - ../../aro-etl-vz:/srv/www/aro/db/data/private
         ports:
             - "8000:8000"
         links:
