@@ -152,12 +152,10 @@ public class UserProcessingLayerServiceImpl implements
 		processAreas.addAll(polygons.stream()
 				.map(polygon -> createServiceArea(polygon, serviceLayer))
 				.collect(Collectors.toSet()));
-		
-		serviceLayerRepository.saveAndFlush(serviceLayer) ;
-		
-		Collection<ServiceArea> updatedServiceAreas = castToServiceAreas(serviceLayerRepository.save(serviceLayer).getProcessAreas());
-		
-		return updatedServiceAreas ;
+
+		ServiceLayer savedServiceLayer = serviceLayerRepository.saveAndFlush(serviceLayer);
+
+		return castToServiceAreas(savedServiceLayer.getProcessAreas());
 
 	}
 	
