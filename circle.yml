@@ -11,6 +11,11 @@ machine:
     IMAGE_NAME: ait-docker-registry.cloud.altvil.com/aro/aro-app
     IMAGE_TAG: ${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
     LATEST_TAG: ${IMAGE_NAME}:latest
+    #CONTAINER VERSIONS AND DEPLOYMENT SETTINGS
+    ARO_ETL_IMAGE_NAME:  ait-docker-registry.cloud.altvil.com/aro/aro-etl
+    ARO_ETL_IMAGE_VERSION: "22"
+    ARO_SERVICE_IMAGE_VERSION: "A01"
+    ARO_CLIENT: ARO
   node:
     version: 6.1.0
 
