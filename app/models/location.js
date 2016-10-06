@@ -454,7 +454,16 @@ module.exports = class Location {
       WHERE
         location_id = $1
     `
-    console.log('sql', sql, location_id)
+    return database.query(sql, [location_id])
+  }
+
+  static showTowers (location_id) {
+    var sql = `
+      SELECT
+        sita_number, parcel_address AS address
+       FROM towers
+      WHERE location_id = $1
+    `
     return database.query(sql, [location_id])
   }
 

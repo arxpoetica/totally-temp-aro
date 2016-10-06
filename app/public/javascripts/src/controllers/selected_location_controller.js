@@ -98,6 +98,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
         location.address = business && business.address
       }
     })
+    $scope.towers = null
+    $http.get('/locations/towers/' + location.id).success((response) => {
+      preserveBusinessDetail()
+      $scope.towers = response
+    })
   }
 
   function preserveBusinessDetail () {

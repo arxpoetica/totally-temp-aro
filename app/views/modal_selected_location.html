@@ -64,6 +64,9 @@
           <li role="presentation">
             <a href="#selected_location_businesses" aria-controls="profile" role="tab" data-toggle="tab">Businesses</a>
           </li>
+          <li role="presentation">
+            <a href="#selected_location_towers" aria-controls="profile" role="tab" data-toggle="tab">Cell Sites</a>
+          </li>
         </ul>
 
         <div class="tab-content">
@@ -225,8 +228,8 @@
               <tbody>
                 <tr ng-repeat="business in businesses">
                   <td ng-attr-id="location_business_row_{{ business.id }}"><a href="javascript:void(0)" ng-click="show_market_profile(business)">{{business.name}}</a></th>
-                  <td>{{business.address}}</th>
-                  <td><!--{{business.industry_description}}--></th>
+                  <td>{{business.address}}</td>
+                  <td><!--{{business.industry_description}}--></td>
                   <td class="text-right">{{business.number_of_employees}}</td>
                   <!--
                   <td class="text-right">
@@ -262,6 +265,36 @@
             </table>
           </div>
 
+          <div role="tabpanel" class="tab-pane" id="selected_location_towers">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Site name</th>
+                  <th>SITA number</th>
+                  <th>Address</th>
+                  <th>Site type</th>
+                  <th>AGL</th>
+                  <th>AMSL</th>
+                  <th>Height</th>
+                  <th>Elevation</th>
+                  <th>Site Owner</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="tower in towers">
+                  <td></td>
+                  <td>{{tower.sita_number}}</td>
+                  <td>{{tower.address}}</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
