@@ -303,10 +303,10 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   var customerTypeColorsArray = randomColor({ seed: 1, count: 3 })
   var customerTypeColor = {}
   function showCustomerProfileChart (type) {
-    var customer_types = $scope.location.customer_profile[type]
+    var customerTypes = $scope.location.customer_profile[type]
 
     var data = []
-    customer_types.forEach((customerType) => {
+    customerTypes.forEach((customerType) => {
       var color = customerTypeColor[customerType.name] || customerTypeColorsArray.shift()
       customerTypeColor[customerType.name] = color
       data.push({

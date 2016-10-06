@@ -203,14 +203,18 @@ module.exports = class Location {
 
         sql = `
           SELECT
-            ct.name, COUNT(*)::integer AS total
+            CASE WHEN bs.max_value < 100000000 THEN
+              bs.size_name || ' (' || bs.min_value || ' - ' || bs.max_value || ' employees)'
+            ELSE
+              bs.size_name || ' (+' || bs.min_value || ' employees)'
+            END AS name,
+            COUNT(*)::integer AS total
           FROM businesses b
-          JOIN client.business_customer_types bct
-            ON bct.business_id = b.id
-          JOIN client.customer_types ct
-            ON ct.id = bct.customer_type_id
+          JOIN client.businesses_sizes bs
+            ON b.number_of_employees >= bs.min_value AND b.number_of_employees < bs.max_value
           WHERE b.location_id=$1
-          GROUP BY ct.id
+          GROUP BY bs.size_name
+          ORDER BY bs.min_value ASC
         `
         var businesses = database.query(sql, [location_id])
           .then((values) => add('businesses', values))
