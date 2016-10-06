@@ -224,10 +224,6 @@ public class AllShortestPaths<V, E extends AroEdge<?>> implements SpanningShorte
 		}
 		return result;
 	}
-
-	public GraphPath<V, E> getNewGraphPath(V endVertex) {
-		itr.next()
-	}
 	
 	
 	public GraphPath<V, E> getGraphPath(V endVertex) {
