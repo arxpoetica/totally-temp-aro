@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.GraphPathConstraint;
+import com.altvil.aro.service.graph.alg.GraphPathConstraint.MetricDistance;
 import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -77,9 +78,33 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements Sp
 
 	}
 
-	protected Predicate<V> vertexPredicate(Collection<V> allRoots,
+	protected Predicate<V> createVertexPredicate(Collection<V> allSources,
+			Collection<V> allTargets,
 			GraphPathConstraint<V, E> pathPredicate) {
-		return this.closestRouteStrategy.vertexPredicate(allRoots, pathPredicate) ;
+		MetricDistance<V> md = (V) -> 0.0;
+
+		Map<V, SpanningShortestPath<V, E>> map = new HashMap<>();
+		allTargets.forEach(t -> {
+			map.put(t, this.createSpanningShortestPath(t));
+		});
+
+		return (target) -> {
+			
+			SpanningShortestPath<V, E> ssp = map.get(target) ;
+			
+			for(V source : allSources) {
+				if (ssp.findClosestTarget(source) != null
+						&& pathPredicate.isValid(md, ssp.getGraphPath(source))) {
+					return true;
+				}
+			}
+
+			log.error("Vertex Fails Network Constaint " + target);
+
+			return false;
+		};
+		
+		//return this.closestRouteStrategy.vertexPredicate(allRoots, pathPredicate) ;
 	}
 
 	/* (non-Javadoc)
@@ -101,8 +126,11 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements Sp
 		//
 		// This will also cause the network to fail Vertices Fast
 		//
+		
+		
+		Predicate<V>  predicate = createVertexPredicate(all_roots, targets, pathPredicate) ;
 		targets = targets.stream()
-				.filter(vertexPredicate(targets, pathPredicate))
+				.filter(predicate)
 				.collect(Collectors.toList());
 
 		// Track All Vertices that caused previous network generation to fail.
@@ -165,7 +193,7 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements Sp
 		if (forcedTargets.size() > 0) {
 			Map<V, SpanningShortestPath<V, E>> forcedMap = new HashMap<>();
 			for (V v : forcedTargets) {
-				forcedMap.put(v, forcedMap.remove(v));
+				forcedMap.put(v, targetMap.remove(v));
 			}
 			assemble(forcedMap, forceNetwork);
 		}

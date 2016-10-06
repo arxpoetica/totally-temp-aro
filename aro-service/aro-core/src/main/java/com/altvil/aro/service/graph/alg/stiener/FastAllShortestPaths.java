@@ -2,6 +2,7 @@ package com.altvil.aro.service.graph.alg.stiener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.TreeMap;
 
 import org.jgrapht.GraphPath;
@@ -22,6 +23,14 @@ public class FastAllShortestPaths<V, E extends AroEdge<?>> implements SpanningSh
 		super();
 		this.source = source;
 		this.allShortestPaths = allShortestPaths;
+	}
+
+	
+	
+
+	@Override
+	public V findClosestTarget(V target) {
+		return findClosestTarget(Collections.singleton(target))  ;
 	}
 
 

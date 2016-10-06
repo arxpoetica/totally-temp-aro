@@ -14,7 +14,7 @@ public class SpanningRouteBuilderFactory {
 
 	public static final SpanningRouteBuilderFactory FACTORY = new SpanningRouteBuilderFactory();
 
-	private static int largeStrategyThreshold = 50;
+	private static int largeStrategyThreshold = 1000;
 
 	public <V, E extends AroEdge<GeoSegment>> SpanningRouteBuilder<V, E> create(
 			WeightedGraph<V, E> sourceGraph, Collection<V> sources,
