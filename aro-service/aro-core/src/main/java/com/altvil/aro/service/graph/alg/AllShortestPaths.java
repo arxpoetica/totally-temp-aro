@@ -157,6 +157,11 @@ public class AllShortestPaths<V, E extends AroEdge<?>> implements SpanningShorte
 
 		return targetItr.setTargets(targets);
 	}
+	
+	
+	public V findClosestTarget(V target) {
+		return findClosestTarget(Collections.singleton(target)) ;
+	}
 
 	public V findClosestTarget(Collection<V> targets) {
 		double shortestLength = Double.MAX_VALUE;
@@ -220,6 +225,11 @@ public class AllShortestPaths<V, E extends AroEdge<?>> implements SpanningShorte
 		return result;
 	}
 
+	public GraphPath<V, E> getNewGraphPath(V endVertex) {
+		itr.next()
+	}
+	
+	
 	public GraphPath<V, E> getGraphPath(V endVertex) {
 		List<E> edgeList = new ArrayList<E>();
 
