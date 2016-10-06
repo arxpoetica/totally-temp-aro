@@ -67,6 +67,9 @@
             <a href="#selected_location_businesses" aria-controls="profile" role="tab" data-toggle="tab">Businesses</a>
           </li>
           <li role="presentation">
+            <a href="#selected_location_households" aria-controls="profile" role="tab" data-toggle="tab">Households</a>
+          </li>
+          <li role="presentation">
             <a href="#selected_location_towers" aria-controls="profile" role="tab" data-toggle="tab">Cell Sites</a>
           </li>
         </ul>
@@ -219,7 +222,7 @@
           <div role="tabpanel" class="tab-pane" id="selected_location_businesses">
             <table><tbody></tbody></table><!-- do not remove -->
 
-            <table class="table table-striped">
+            <table class="table table-striped" ng-hide="businesses.length === 0">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -269,10 +272,30 @@
                 </tr>
               </tbody>
             </table>
+            <p class="text-center" ng-show="businesses.length === 0" style="padding: 40px">No businesses at this location</p>
+          </div>
+
+          <div role="tabpanel" class="tab-pane" id="selected_location_households">
+            <p class="text-center" ng-show="households.length === 0" style="padding: 40px">No households at this location</p>
+            <table class="table table-striped" ng-hide="households.length === 0">
+              <thead>
+                <tr>
+                  <th>Address</th>
+                  <th>Demographics</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="household in households">
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div role="tabpanel" class="tab-pane" id="selected_location_towers">
-            <table class="table table-striped">
+            <p class="text-center" ng-show="towers.length === 0" style="padding: 40px">No cell sites at this location</p>
+            <table class="table table-striped" ng-hide="towers.length === 0">
               <thead>
                 <tr>
                   <th>Site name</th>
@@ -301,6 +324,7 @@
               </tbody>
             </table>
           </div>
+
         </div>
       </div>
       <div class="modal-footer">

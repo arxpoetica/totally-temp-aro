@@ -86,7 +86,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
 
     preserveBusinessDetail()
-    $scope.businesses = null
+    $scope.businesses = []
     $scope.selected_business = null
     $http.get('/locations/businesses/' + location.id).success((response) => {
       preserveBusinessDetail()
@@ -98,11 +98,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
         location.address = business && business.address
       }
     })
-    $scope.towers = null
+    $scope.towers = []
     $http.get('/locations/towers/' + location.id).success((response) => {
       preserveBusinessDetail()
       $scope.towers = response
     })
+    $scope.households = []
   }
 
   function preserveBusinessDetail () {
