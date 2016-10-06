@@ -114,9 +114,7 @@ module.exports = class Location {
   }
 
   // Get summary information for a given location
-  //
-  // 1. location_id: integer. ex. 1738
-  static showInformation (location_id) {
+  static showInformation (plan_id, location_id) {
     var info
     return Promise.resolve()
       .then(() => {
@@ -252,14 +250,24 @@ module.exports = class Location {
       .then(() => {
         var sql = `
           SELECT address, ST_AsGeojson(geog)::json AS geog,
-            (SELECT distance FROM client.locations_distance_to_carrier
-              JOIN carriers ON carriers.name = $2
-              WHERE location_id=locations.id
+            (SELECT ST_Distance(existing_fiber.geom::geography, locations.geog)
+              FROM client.existing_fiber
+              ORDER BY existing_fiber.geom <#> locations.geom ASC
               LIMIT 1
-            ) AS distance_to_client_fiber
+            ) AS distance_to_client_fiber,
+            (SELECT ST_Distance(fr.geom::geography, locations.geog)
+              FROM client.fiber_route fr
+              WHERE fr.plan_id IN (
+                (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+                  (SELECT id FROM client.plan WHERE parent_plan_id=$2)
+                ))
+              )
+              ORDER BY fr.geom <#> locations.geom ASC
+              LIMIT 1
+            ) AS distance_to_planned_network
           FROM locations WHERE id=$1
         `
-        return database.findOne(sql, [location_id, config.client_carrier_name])
+        return database.findOne(sql, [location_id, plan_id])
       })
       .then((location) => Object.assign(info, location))
   }

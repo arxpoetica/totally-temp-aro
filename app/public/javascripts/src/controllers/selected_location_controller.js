@@ -36,7 +36,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   })
 
   function openLocation (id) {
-    $http.get('/locations/' + id + '/show').success((response) => {
+    $http.get(`/locations/${$scope.plan.id}/${id}/show`).success((response) => {
       response.id = id
       setSelectedLocation(response)
       $('#selected_location_controller').modal('show')
