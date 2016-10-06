@@ -22,7 +22,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     mediumBusiness: 'Mid-tier',
     largeBusiness: 'Large Enterprise',
     household: 'Households',
-    cellTower: 'Towers'
+    cellTower: 'Cell Sites'
   }
   $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
     key: key,

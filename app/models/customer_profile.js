@@ -43,7 +43,7 @@ module.exports = class CustomerProfile {
 
       UNION ALL
 
-      (SELECT 'Towers' AS name, COUNT(*) AS total
+      (SELECT 'Cell Sites' AS name, COUNT(*) AS total
       FROM client.plan_targets t
       JOIN towers b ON b.location_id=t.location_id
       WHERE plan_id=$1)

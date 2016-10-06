@@ -30,7 +30,7 @@
                   <div class="col-md-6">{{ location.number_of_households }}</div>
                 </div>
                 <div class="row">
-                  <div class="col-md-6"><strong>Towers</strong></div>
+                  <div class="col-md-6"><strong>Cell Sites</strong></div>
                   <div class="col-md-6">{{ location.number_of_towers }}</div>
                 </div>
               </div>
@@ -124,7 +124,7 @@
                 <div id="location_customer_profile_chart_legend_households"></div>
               </div>
               <div class="col-md-4">
-                <p class="text-center">Towers</p>
+                <p class="text-center">Cell Sites</p>
                 <canvas id="location_customer_profile_chart_towers" style="width:100%; height:200px"></canvas>
                 <div id="location_customer_profile_chart_legend_towers"></div>
               </div>
@@ -144,7 +144,7 @@
                       <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
                         <option value="businesses">Businesses</option>
                         <option value="households">Households</option>
-                        <option value="towers">Towers</option>
+                        <option value="towers">Cell Sites</option>
                       </select>
                     </div>
                   </div>
@@ -198,7 +198,7 @@
                     <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
                       <option value="businesses">Businesses</option>
                       <option value="households">Households</option>
-                      <option value="towers">Towers</option>
+                      <option value="towers">Cell Sites</option>
                     </select>
                   </div>
                 </div>
