@@ -38,8 +38,6 @@
                 <address>
                   <strong>Distance From Network</strong><br>
                   {{ location.distance_to_client_fiber | number: 2 }} m<br><br>
-                  <strong>Open For Sale</strong><br>
-                  April 2016<br><br>
                 </address>
               </div>
             </div>
@@ -49,9 +47,11 @@
         <br>
 
         <ul class="nav nav-tabs" role="tablist">
+          <!--
           <li role="presentation" ng-show="config.route_planning.length > 0">
             <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Installation</a>
           </li>
+          -->
           <li role="presentation" class="active">
             <a href="#selected_location_customer_profile" aria-controls="profile" role="tab" data-toggle="tab">Customer profile</a>
           </li>
@@ -72,6 +72,7 @@
         </ul>
 
         <div class="tab-content">
+          <!--
           <div role="tabpanel" class="tab-pane" id="selected_location_costs" ng-show="config.route_planning">
             <table class="locations-table">
               <tbody>
@@ -109,6 +110,7 @@
               </tbody>
             </table>
           </div>
+          -->
           <div role="tabpanel" class="tab-pane active" id="selected_location_customer_profile">
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
