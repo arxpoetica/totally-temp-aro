@@ -216,21 +216,25 @@
                   <th>Name</th>
                   <th>Address</th>
                   <th>Industry</th>
-                  <th class="text-right">#employees</th>
+                  <th class="text-right">Employee Count</th>
+                  <!--
                   <th class="text-right">Type</th>
+                  -->
                 </tr>
               </thead>
               <tbody>
                 <tr ng-repeat="business in businesses">
                   <td ng-attr-id="location_business_row_{{ business.id }}"><a href="javascript:void(0)" ng-click="show_market_profile(business)">{{business.name}}</a></th>
                   <td>{{business.address}}</th>
-                  <td>{{business.industry_description}}</th>
+                  <td><!--{{business.industry_description}}--></th>
                   <td class="text-right">{{business.number_of_employees}}</td>
+                  <!--
                   <td class="text-right">
                     <span class="label label-success"
                       ng-attr-class="label label-{{business.customer_type.toLowerCase() === 'existing' ? 'success' : 'danger'}}">
                       {{business.customer_type}}
                     </span></td>
+                  -->
                 </tr>
                 <tr id="location_business_selected_info" style="display: none">
                   <td colspan="5">

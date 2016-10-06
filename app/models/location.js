@@ -443,17 +443,18 @@ module.exports = class Location {
         ct.name as customer_type
       FROM
         aro.businesses businesses
-      JOIN client.business_install_costs costs
+      LEFT JOIN client.business_install_costs costs
         ON costs.business_id = businesses.id
       LEFT JOIN industries
         ON industries.id = businesses.industry_id
-      JOIN client.business_customer_types bct
+      LEFT JOIN client.business_customer_types bct
         ON bct.business_id = businesses.id
-      JOIN client.customer_types ct
+      LEFT JOIN client.customer_types ct
         ON ct.id = bct.customer_type_id
       WHERE
         location_id = $1
     `
+    console.log('sql', sql, location_id)
     return database.query(sql, [location_id])
   }
 
