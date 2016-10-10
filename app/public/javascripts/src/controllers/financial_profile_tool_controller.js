@@ -86,6 +86,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.selectedArea = {
       id: feature.getProperty('id')
     }
+    MapLayer.recoverLayersVisibility($scope.layersStatus)
+    serviceAreaLayer.hide()
+    regions.show()
     $scope.calculateShowData()
     refresh()
     if (!$scope.$$phase) { $scope.$apply() }
@@ -168,10 +171,21 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     refreshCurrentTab()
   })
 
-  $rootScope.$on('map_tool_changed_visibility', (e) => {
+  $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('financial_profile')) {
       $timeout(dirty ? refresh : refreshCurrentTab, 0)
       dirty = false
+    } else if (tool === 'financial_profile') {
+      $('a[href="#map-tools-financial"]').click()
+
+      if ($scope.layersStatus) {
+        MapLayer.recoverLayersVisibility($scope.layersStatus)
+        serviceAreaLayer.hide()
+        regions.show()
+      }
+      if ($scope.mode === 'area' && !$scope.selectedArea) {
+        $scope.setMode('global')
+      }
     }
   })
 
@@ -493,8 +507,15 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.metadata = $scope.plan.metadata
     $scope.calculateShowData()
     refresh()
-    serviceAreaLayer.setVisible(mode === 'area', true)
-    mode === 'area' ? regions.hide() : regions.show()
+    if (mode === 'area') {
+      $scope.layersStatus = MapLayer.hideAllLayers()
+      serviceAreaLayer.show()
+      regions.hide()
+    } else {
+      MapLayer.recoverLayersVisibility($scope.layersStatus)
+      serviceAreaLayer.hide()
+      regions.show()
+    }
   }
 
   $scope.calculateShowData = () => {

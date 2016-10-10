@@ -7,9 +7,28 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
     plan = p
   })
 
+  var all = []
+
   return class MapLayer {
 
+    static hideAllLayers () {
+      var status = {}
+      all.forEach((layer) => {
+        status[layer.type] = layer.visible
+        layer.hide()
+      })
+      return status
+    }
+
+    static recoverLayersVisibility (status) {
+      all.forEach((layer) => {
+        if (status[layer.type]) layer.show()
+      })
+      return status
+    }
+
     constructor (options) {
+      all.push(this)
       this.name = options.name
       this.short_name = options.short_name
       this.api_endpoint = options.api_endpoint
@@ -395,7 +414,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
       }
     }
 
-    setVisible (visible, bringToFront) {
+    setVisible (visible) {
       visible ? this.show() : this.hide()
     }
 
@@ -484,6 +503,8 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
 
     remove () {
       this.data_layer.setMap(null)
+      var i = all.indexOf(this)
+      if (i >= 0) all.splice(i, 1)
     }
 
     number_of_features () {
