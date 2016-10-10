@@ -181,7 +181,7 @@
           <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px;margin-right:10px">
         </div>
         <label class="pull-right">
-          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-towers"></span>
+          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_towers"></span>
           <input type="checkbox" ng-model="show_towers" value="true" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
         <label>Cell Sites</label>
