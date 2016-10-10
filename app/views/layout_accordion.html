@@ -94,6 +94,24 @@
       </div>
     </div>
 
+    <% if (!config.ui.map_tools.target_builder.disabled) { %>
+    <div class="panel panel-default" ng-controller="target-builder-controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <span class="hide-on-expanded icon icon-network-planning-targeted"></span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-target-builder">
+            Target builder
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-target-builder" class="panel-collapse collapse" role="tabpanel" data-tool="target_builder">
+        <div class="panel-body">
+          <% include controller_target_builder.html %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
     <div ng-controller="financial-profile-tool-controller">
     <div class="panel panel-default" ng-show="plan.metadata.total_cost">
       <div class="panel-heading" role="tab" style="background-color: black">
@@ -133,23 +151,6 @@
     </div>
     </div>
 
-    <% if (!config.ui.map_tools.target_builder.disabled) { %>
-    <div class="panel panel-default" ng-controller="target-builder-controller">
-      <div class="panel-heading" role="tab">
-        <h4 class="panel-title">
-          <span class="hide-on-expanded icon icon-network-planning-targeted"></span>
-          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-target-builder">
-            Target builder
-          </a>
-        </h4>
-      </div>
-      <div id="map-tools-target-builder" class="panel-collapse collapse" role="tabpanel" data-tool="target_builder">
-        <div class="panel-body">
-          <% include controller_target_builder.html %>
-        </div>
-      </div>
-    </div>
-    <% } %>
   </div>
   <div style="float: left; margin-top: 1px">
     <button class="btn btn-sm btn-default" id="expander"><span class="fa fa-chevron-left"></span></button>
