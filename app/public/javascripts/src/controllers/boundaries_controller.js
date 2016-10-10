@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', '$timeout', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions, $timeout) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
