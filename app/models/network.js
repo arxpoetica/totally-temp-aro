@@ -138,26 +138,28 @@ module.exports = class Network {
 
         if (plan_id) {
           if (serviceLayer) {
-            var condition = ''
-            if (serviceLayer !== 'all') {
-              params.push(serviceLayer)
-              condition = `AND s.id = $${params.length}`
-            }
-            params.push(plan_id)
-            constraints.push(`
-              plan_id IN (
-                SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
-                  SELECT p.id
-                    FROM client.plan p
-                    JOIN client.service_layer s ON s.id = p.service_layer_id ${condition}
-                    WHERE p.parent_plan_id = $${params.length}
+            if (serviceLayer === 'all') {
+              params.push(plan_id)
+              constraints.push(`
+                plan_id IN (
+                  SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+                    SELECT p.id
+                      FROM client.plan p
+                      -- JOIN client.service_layer s ON s.id = p.service_layer_id
+                      WHERE p.parent_plan_id = $${params.length}
+                  )
                 )
-                UNION ALL
-                SELECT p.id FROM client.plan p
-                JOIN client.service_layer s ON s.id = p.service_layer_id ${condition}
-                WHERE p.plan_type = 'H'
-              )
-            `)
+              `)
+            } else {
+              params.push(serviceLayer)
+              constraints.push(`
+                plan_id IN (
+                  SELECT p.id FROM client.plan p
+                  JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${params.length}
+                  WHERE p.plan_type = 'H'
+                )
+              `)
+            }
           } else {
             params.push(plan_id)
             constraints.push(`
@@ -191,11 +193,25 @@ module.exports = class Network {
   }
 
   static viewFiber (plan_id, serviceLayer, viewport) {
-    var params = [plan_id]
+    var params = []
     var condition = ''
-    if (serviceLayer !== 'all') {
-      condition = 'AND s.id = $2'
+    if (serviceLayer === 'all') {
+      params.push(plan_id)
+      condition = `
+        SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+          SELECT p.id
+            FROM client.plan p
+            -- JOIN client.service_layer s ON s.id = p.service_layer_id
+            WHERE p.parent_plan_id = $1
+        )
+      `
+    } else {
       params.push(serviceLayer)
+      condition = `
+        SELECT p.id FROM client.plan p
+        JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $1
+        WHERE p.plan_type = 'H'
+      `
     }
     var sql = `
       SELECT
@@ -207,14 +223,7 @@ module.exports = class Network {
       FROM client.plan p
       JOIN client.fiber_route ON fiber_route.plan_id = p.id
       JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
-      WHERE p.id IN (
-        SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
-          SELECT p.id
-            FROM client.plan p
-            JOIN client.service_layer s ON s.id = p.service_layer_id ${condition}
-            WHERE p.parent_plan_id = $1
-        )
-      )
+      WHERE p.id IN (${condition})
       AND NOT ST_IsEmpty(fiber_route.geom)
       ${database.intersects(viewport, 'fiber_route.geom', 'AND')}
     `

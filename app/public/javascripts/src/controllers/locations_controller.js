@@ -350,8 +350,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     if (plan) {
       plan.location_types = plan.location_types || []
       map.ready(() => {
-        // map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources)
-        // locationsLayer.set_always_show_selected($scope.always_shows_targets)
         selectedLocationsLayer.show()
 
         // select entity types used in optimization
