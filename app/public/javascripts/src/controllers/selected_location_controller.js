@@ -1,4 +1,4 @@
-/* global app config $ encodeURIComponent _ tinycolor swal location Chart angular randomColor */
+/* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
 app.controller('selected_location_controller', ($rootScope, $scope, $http, map_layers, tracker, map_tools) => {
   $scope.location = {}
@@ -300,10 +300,16 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     ['households', 'businesses', 'towers'].forEach(showCustomerProfileChart)
   }
 
-  var customerTypeColorsArray = randomColor({ seed: 1, count: 3 })
   var customerTypeColor = {}
   function showCustomerProfileChart (type) {
     var customerTypes = $scope.location.customer_profile[type]
+    var customerTypeColorsArray = [
+      'rgb(242, 252, 148)',
+      'rgb(181, 111, 19)',
+      'rgb(29, 183, 244)',
+      'rgb(59, 86, 186)',
+      'rgb(178, 7, 35)'
+    ]
 
     var data = []
     customerTypes.forEach((customerType) => {

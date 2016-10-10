@@ -5,7 +5,6 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
-var config = helpers.config
 
 module.exports = class Location {
 
@@ -206,11 +205,11 @@ module.exports = class Location {
             ELSE
               bs.size_name || ' (+' || bs.min_value || ' employees)'
             END AS name,
-            COUNT(*)::integer AS total
-          FROM businesses b
-          JOIN client.businesses_sizes bs
+            COUNT(b.id)::integer AS total
+          FROM client.businesses_sizes bs
+          LEFT JOIN businesses b
             ON b.number_of_employees >= bs.min_value AND b.number_of_employees < bs.max_value
-          WHERE b.location_id=$1
+            AND b.location_id=$1
           GROUP BY bs.size_name
           ORDER BY bs.min_value ASC
         `
