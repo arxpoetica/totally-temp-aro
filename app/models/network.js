@@ -152,6 +152,10 @@ module.exports = class Network {
                     JOIN client.service_layer s ON s.id = p.service_layer_id ${condition}
                     WHERE p.parent_plan_id = $${params.length}
                 )
+                UNION ALL
+                SELECT p.id FROM client.plan p
+                JOIN client.service_layer s ON s.id = p.service_layer_id ${condition}
+                WHERE p.plan_type = 'H'
               )
             `)
           } else {
