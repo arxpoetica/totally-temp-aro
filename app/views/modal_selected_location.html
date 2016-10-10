@@ -227,7 +227,7 @@
           <div role="tabpanel" class="tab-pane" id="selected_location_businesses">
             <table><tbody></tbody></table><!-- do not remove -->
 
-            <table class="table table-striped" ng-hide="businesses.length === 0">
+            <table class="table table-striped">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -275,14 +275,15 @@
                     </div>
                   </td>
                 </tr>
+                <tr class="text-center" ng-show="businesses.length === 0">
+                  <td style="padding: 40px" colspan="4">No businesses at this location</td>
+                </tr>
               </tbody>
             </table>
-            <p class="text-center" ng-show="businesses.length === 0" style="padding: 40px">No businesses at this location</p>
           </div>
 
           <div role="tabpanel" class="tab-pane" id="selected_location_households">
-            <p class="text-center" ng-show="households.length === 0" style="padding: 40px">No households at this location</p>
-            <table class="table table-striped" ng-hide="households.length === 0">
+            <table class="table table-striped">
               <thead>
                 <tr>
                   <th>Address</th>
@@ -290,6 +291,9 @@
                 </tr>
               </thead>
               <tbody>
+                <tr class="text-center" ng-show="households.length === 0">
+                  <td style="padding: 40px" colspan="2">No households at this location</td>
+                </tr>
                 <tr ng-repeat="household in households">
                   <td></td>
                   <td></td>
@@ -299,8 +303,7 @@
           </div>
 
           <div role="tabpanel" class="tab-pane" id="selected_location_towers">
-            <p class="text-center" ng-show="towers.length === 0" style="padding: 40px">No cell sites at this location</p>
-            <table class="table table-striped" ng-hide="towers.length === 0">
+            <table class="table table-striped">
               <thead>
                 <tr>
                   <th>Site name</th>
@@ -314,6 +317,9 @@
                 </tr>
               </thead>
               <tbody>
+                <tr class="text-center" ng-show="towers.length === 0">
+                  <td style="padding: 40px" colspan="8">No cell sites at this location</td>
+                </tr>
                 <tr ng-repeat="tower in towers">
                   <td></td>
                   <td>{{tower.address}}</td>
