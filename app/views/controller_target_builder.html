@@ -97,14 +97,6 @@
    </form>
  <% } %>
 
- <p><strong>Targeted Locations</strong></p>
- <p ng-show="plan.metadata.customerTypes.length === 0">
-   No targeted locations
- </p>
- <ul style="padding: 0 20px" ng-repeat="customerType in plan.metadata.customerTypes">
-   <li>{{ customerType.name }}: {{customerType.total }}</li>
- </ul>
-
 <p><strong>Optimization Processing Layer</strong></p>
  <p>
    <select class="form-control" ng-model="selectedBoundary"
@@ -112,6 +104,14 @@
      <option value="">Default Layer</option>
    </select>
  </p>
+
+ <p><strong>Targeted Locations</strong></p>
+ <p ng-show="plan.metadata.customerTypes.length === 0">
+   No targeted locations
+ </p>
+ <ul style="padding: 0 20px" ng-repeat="customerType in plan.metadata.customerTypes">
+   <li>{{ customerType.name }}: {{customerType.total }}</li>
+ </ul>
 
  <p class="pull-right">
    <button class="btn btn-success active"
