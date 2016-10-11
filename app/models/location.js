@@ -203,7 +203,7 @@ module.exports = class Location {
             CASE WHEN bs.max_value < 100000000 THEN
               bs.size_name || ' (' || bs.min_value || ' - ' || bs.max_value || ' employees)'
             ELSE
-              bs.size_name || ' (+' || bs.min_value || ' employees)'
+              bs.size_name || ' (' || bs.min_value || '+ employees)'
             END AS name,
             COUNT(b.id)::integer AS total
           FROM client.businesses_sizes bs
