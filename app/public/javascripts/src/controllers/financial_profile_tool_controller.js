@@ -86,9 +86,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.selectedArea = {
       id: feature.getProperty('id')
     }
-    MapLayer.recoverLayersVisibility($scope.layersStatus)
-    serviceAreaLayer.hide()
-    regions.show()
     $scope.calculateShowData()
     refresh()
     if (!$scope.$$phase) { $scope.$apply() }
@@ -175,17 +172,20 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     if (map_tools.is_visible('financial_profile')) {
       $timeout(dirty ? refresh : refreshCurrentTab, 0)
       dirty = false
+
+      if ($scope.mode === 'area') {
+        $scope.layersStatus = MapLayer.hideAllLayers()
+        serviceAreaLayer.show()
+        regions.hide()
+      }
     } else if (tool === 'financial_profile') {
       $('a[href="#map-tools-financial"]').click()
 
       if ($scope.layersStatus) {
         MapLayer.recoverLayersVisibility($scope.layersStatus)
-        serviceAreaLayer.hide()
-        regions.show()
       }
-      if ($scope.mode === 'area' && !$scope.selectedArea) {
-        $scope.setMode('global')
-      }
+      serviceAreaLayer.hide()
+      regions.show()
     }
   })
 
@@ -508,6 +508,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.calculateShowData()
     refresh()
     if (mode === 'area') {
+      serviceAreaLayer.revertStyles()
       $scope.layersStatus = MapLayer.hideAllLayers()
       serviceAreaLayer.show()
       regions.hide()
@@ -591,6 +592,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     reload: 'always',
     threshold: 0,
     minZoom: 6,
-    hoverField: 'name'
+    hoverField: 'name',
+    single_selection: true,
+    declarativeStyles: (feature, styles) => {
+      var selected = feature.getProperty('selected')
+      if (selected) {
+        styles.fillOpacity = 0.1
+      }
+    }
   })
 }])
