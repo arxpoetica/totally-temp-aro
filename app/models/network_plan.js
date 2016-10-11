@@ -681,6 +681,7 @@ module.exports = class NetworkPlan {
   static searchBusinesses (text) {
     var sql = `
       SELECT
+        id,
         name,
         ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
