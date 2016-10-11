@@ -4,7 +4,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.optimizationType = 'unconstrained'
-  $scope.selectedTool = 'single'
+  $scope.selectedTool = null
   $scope.modes = {
     'single': null,
     'polygon': 'polygon'
@@ -37,7 +37,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (tool === 'target_builder') {
-      $scope.setSelectedTool('single')
+      // $scope.setSelectedTool('single')
       drawingManager.setMap(map_tools.is_visible('target_builder') ? map : null)
     }
   })
@@ -47,9 +47,23 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   }
 
   $scope.setSelectedTool = (name) => {
-    $scope.selectedTool = name
-    drawingManager.oldDrawingMode = name
-    drawingManager.setDrawingMode($scope.modes[name])
+    if (name) {
+      $scope.selectedTool = name
+      drawingManager.oldDrawingMode = name
+      drawingManager.setDrawingMode($scope.modes[name])
+    } else {
+      $scope.selectedTool = null
+      drawingManager.oldDrawingMode = null
+      drawingManager.setDrawingMode(null)
+    }
+  }
+
+  $scope.toggleSelectedTool = (name) => {
+    if ($scope.selectedTool !== name) {
+      $scope.setSelectedTool(name)
+    } else {
+      $scope.setSelectedTool(null)
+    }
   }
 
   var drawingManager = new google.maps.drawing.DrawingManager({
@@ -187,6 +201,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   // $rootScope.$on('towers_layer_changed', () => postChanges({}, false))
 
   $('#target-builder-upload input').change(() => {
+    $scope.setSelectedTool(null)
     var form = $('#target-builder-upload').get(0)
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()

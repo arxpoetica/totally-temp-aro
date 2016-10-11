@@ -52,27 +52,33 @@
  </div>
 
  <br>
- <p><strong>Search, Click or Upload Locations</strong></p>
+ <p><strong>Select Targets</strong></p>
  <input class="form-control select2" type="text" placeholder="Business Name">
  <br><br>
  <form id="target-builder-upload">
    <p>
-     Select:
-     <button class="btn btn-default btn-sm"
-       ng-class="{'btn-success active': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
-       ng-click="setSelectedTool('single')">Single</button>
-     <button class="btn btn-default btn-sm"
-       ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
-       ng-click="setSelectedTool('polygon')">Many</button>
+     <button class="btn btn-primary btn-sm"
+       ng-class="{'btn-success': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
+       ng-click="toggleSelectedTool('single')">Building Select</button>
+     <button class="btn btn-primary btn-sm"
+       ng-class="{'btn-success': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
+       ng-click="toggleSelectedTool('polygon')">Polygon Select</button>
      <span>
        <input type="file" name="csv" id="target-builder-upload-csv" style="width:0.1px; height:0.1px; opacity:0; overflow:hidden; position:absolute; z-index:-1">
-       <label for="target-builder-upload-csv">
-         <span class="btn btn-default btn-sm">
-           <i class="fa fa-file-o"></i>
-         </span>
+       <label for="target-builder-upload-csv" ng-click="setSelectedTool('upload')">
+         <span class="btn btn-primary btn-sm" ng-class="{'btn-success': isToolSelected('upload') }">Upload</span>
        </label>
      </span>
    </p>
+   <div class="alert alert-info text-center" role="alert" ng-show="isToolSelected('single')">
+     Click on buildings on the map to add them to the optimization targets.
+   </div>
+   <div class="alert alert-info text-center" role="alert" ng-show="isToolSelected('polygon')">
+     Click on the map to draw a polygon - all locations in the polygon will be selected as optimization targets.
+   </div>
+   <div class="alert alert-info text-center" role="alert" ng-show="isToolSelected('upload')">
+     Upload csv with single column of location ids - these locations will be selected as optimization targets.
+   </div>
  </form>
 
  <% if (config.ARO_CLIENT === 'verizon') { %>
