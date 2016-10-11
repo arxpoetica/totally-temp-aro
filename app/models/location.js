@@ -35,7 +35,7 @@ module.exports = class Location {
           array(
             SELECT DISTINCT 'b_' || c.name
             FROM businesses b
-            JOIN client.business_categories c ON b.number_of_employees >= c.min_value AND b.number_of_employees < c.max_value
+            JOIN client.business_categories c ON b.number_of_employees >= c.min_value AND b.number_of_employees <= c.max_value
             JOIN client.employees_by_location e ON (b.number_of_employees >= e.min_value) AND (b.number_of_employees <= e.max_value)
             WHERE b.location_id = unselected_locations.id
           )
@@ -43,7 +43,7 @@ module.exports = class Location {
           array(
             SELECT DISTINCT 'h_' || c.name
             FROM households b
-            JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households < c.max_value
+            JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households <= c.max_value
             WHERE b.location_id = unselected_locations.id
           )
           ||
@@ -208,7 +208,7 @@ module.exports = class Location {
             COUNT(b.id)::integer AS total
           FROM client.businesses_sizes bs
           LEFT JOIN businesses b
-            ON b.number_of_employees >= bs.min_value AND b.number_of_employees < bs.max_value
+            ON b.number_of_employees >= bs.min_value AND b.number_of_employees <= bs.max_value
             AND b.location_id=$1
           GROUP BY bs.size_name
           ORDER BY bs.min_value ASC
@@ -451,7 +451,8 @@ module.exports = class Location {
         costs.install_cost::float,
         costs.annual_recurring_cost::float,
         industries.description AS industry_description,
-        ct.name as customer_type
+        ct.name as customer_type,
+        bs.size_name
       FROM
         aro.businesses businesses
       LEFT JOIN client.business_install_costs costs
@@ -462,6 +463,8 @@ module.exports = class Location {
         ON bct.business_id = businesses.id
       LEFT JOIN client.customer_types ct
         ON ct.id = bct.customer_type_id
+      LEFT JOIN client.businesses_sizes bs
+        ON businesses.number_of_employees >= bs.min_value AND businesses.number_of_employees <= bs.max_value
       WHERE
         location_id = $1
     `
