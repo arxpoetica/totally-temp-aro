@@ -2,8 +2,10 @@ var models = require('../models')
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
+  var check_any_permission = middleware.check_any_permission
+  var check_owner_permission = middleware.check_owner_permission
 
-  api.get('/locations/:plan_id', middleware.viewport, (request, response, next) => {
+  api.get('/locations/:plan_id', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = +request.params.plan_id
 
@@ -21,7 +23,7 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/locations/:plan_id/selected', middleware.viewport, (request, response, next) => {
+  api.get('/locations/:plan_id/selected', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = +request.params.plan_id
 
@@ -30,7 +32,7 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/locations/:plan_id/:location_id/show', (request, response, next) => {
+  api.get('/locations/:plan_id/:location_id/show', check_any_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
     var location_id = request.params.location_id
     models.Location.showInformation(plan_id, location_id)
@@ -97,6 +99,21 @@ exports.configure = (api, middleware) => {
   api.get('/search/locations', (request, response, next) => {
     var text = request.query.text
     models.Location.search(text)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/locations/:plan_id/targets', check_any_permission, (request, response, next) => {
+    var planId = +request.params.plan_id
+    models.Location.findTargets(planId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/locations/:plan_id/targets/delete', check_owner_permission, (request, response, next) => {
+    var planId = +request.params.plan_id
+    var locationId = +request.body.locationId
+    models.Location.deleteTarget(planId, locationId)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

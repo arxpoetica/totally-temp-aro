@@ -32,10 +32,18 @@
   </form>
 
   <p><strong>Targeted Locations</strong></p>
-  <p ng-show="plan.metadata.customerTypes.length === 0">
-    No targeted locations
+  <p ng-show="targets.length === 0">
+    <em>No targeted locations</em>
   </p>
-  <ul style="padding: 0 20px" ng-repeat="customerType in plan.metadata.customerTypes">
-    <li>{{ customerType.name }}: {{customerType.total }}</li>
+  <ul style="list-style-type:none; padding:0" ng-repeat="target in targets">
+    <li>
+      <a href="javascript:void(0)" class="text-danger" ng-click="deleteTarget(target)" style="margin-right: 5px">
+        <span class="fa fa-trash-o"></span>
+      </a>
+      {{ target.address }}
+    </li>
   </ul>
+  <p ng-show="targetsTotal - targets.length > 0">
+    {{ targetsTotal - targets.length }} additional targeted locations
+  </p>
 </div>

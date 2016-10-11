@@ -1,4 +1,4 @@
-/* global app user_id google $ map FormData XMLHttpRequest swal _ */
+/* global app user_id google $ map FormData XMLHttpRequest swal */
 // Search Controller
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, $timeout, optimization) => {
   // Controller instance variables
@@ -11,14 +11,26 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.user_id = user_id
   $scope.plan = null
   $scope.locationsHeatmap = false
+  $scope.targets = []
+  $scope.targetsTotal = 0
 
   $rootScope.$on('map_layer_loaded_data', (e, layer) => {
     if (layer.type !== 'locations') return
     $scope.locationsHeatmap = layer.heatmapLayer && layer.heatmapLayer.getMap()
   })
 
-  const planChanged = (e, plan) => {
+  function loadTargets () {
+    $http.get(`/locations/${$scope.plan.id}/targets`)
+      .success((response) => {
+        $scope.targets = response.targets
+        $scope.targetsTotal = response.total
+      })
+  }
+
+  function planChanged (e, plan) {
     $scope.plan = plan
+    if (!plan) return
+    loadTargets()
   }
   $rootScope.$on('plan_selected', planChanged)
 
@@ -178,4 +190,35 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   }
 
   $timeout(configureBusinessesSearch)
+
+  $scope.deleteTarget = (target) => {
+    var config = {
+      url: `/locations/${$scope.plan.id}/targets/delete`,
+      method: 'post',
+      data: {
+        locationId: target.id
+      }
+    }
+    $http(config)
+      .success((response) => {
+        $scope.targets = response.targets
+        $scope.targetsTotal = response.total
+      })
+  }
+
+  $rootScope.$on('map_layer_changed_selection', (e, layer, changes) => {
+    if (!$scope.plan) return
+
+    if (layer.type !== 'locations' &&
+      layer.type !== 'selected_locations' &&
+      layer.type !== 'network_nodes' &&
+      layer.type !== 'towers') return
+
+    postChanges(changes, true)
+  })
+
+  function postChanges (changes) {
+    changes.lazy = true
+    optimization.optimize($scope.plan, changes, loadTargets, () => {})
+  }
 }])
