@@ -42,7 +42,8 @@
 
                 <address>
                   <strong>Distance From Planned Network</strong><br>
-                  {{ location.distance_to_planned_network | number: 0 }} m<br><br>
+                  <span ng-if="location.distance_to_planned_network != null">{{ location.distance_to_planned_network | number: 0 }} m<br><br></span>
+                  <span ng-if="location.distance_to_planned_network == null">No planned network<br><br></span>
                 </address>
               </div>
             </div>
