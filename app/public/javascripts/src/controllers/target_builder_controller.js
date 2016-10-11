@@ -18,6 +18,13 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.allBoundaries = []
   $scope.selectedBoundary = null
 
+  $scope.locationsHeatmap = false
+
+  $rootScope.$on('map_layer_loaded_data', (e, layer) => {
+    if (layer.type !== 'locations') return
+    $scope.locationsHeatmap = layer.heatmapLayer && layer.heatmapLayer.getMap()
+  })
+
   function loadBoundaries () {
     $http.get('/boundary/all')
       .success((response) => {
@@ -43,7 +50,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   })
 
   $scope.isToolSelected = (name) => {
-    return $scope.selectedTool === name
+    return !$scope.locationsHeatmap && $scope.selectedTool === name
   }
 
   $scope.setSelectedTool = (name) => {

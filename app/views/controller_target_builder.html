@@ -79,6 +79,9 @@
    <div class="alert alert-info text-center" role="alert" ng-show="isToolSelected('upload')">
      Upload csv with single column of location ids - these locations will be selected as optimization targets.
    </div>
+   <div class="alert alert-info text-center" role="alert" ng-show="locationsHeatmap">
+     To use this feature, you must be viewing individual locations. Please zoom in or turn off the heatmap button below the zoom buttons.
+   </div>
  </form>
 
  <% if (config.ARO_CLIENT === 'verizon') { %>
