@@ -1,8 +1,4 @@
 <div>
-  <div class="alert alert-info text-center" role="alert" ng-show="locationsHeatmap">
-    To use this feature, you must be viewing individual locations. Please zoom in or turn off the heatmap button below the zoom buttons.
-  </div>
-
   <div class="alert alert-info text-center" role="alert" ng-show="optimizationMode != null && optimizationMode !== 'targets'">
     Optimizations can not be run on both boundaries and targets. Any target selection you make will remove all previously selected boundaries.
   </div>
@@ -25,16 +21,16 @@
        </label>
      </span>
     </p>
-    <div class="alert alert-info text-center" role="alert" ng-show="isToolSelected('single')">
+    <div class="alert alert-info text-center" role="alert" ng-show="!showHeatmapAlert && isToolSelected('single')">
       Click on buildings on the map to add them to the optimization targets.
     </div>
-    <div class="alert alert-info text-center" role="alert" ng-show="isToolSelected('polygon')">
+    <div class="alert alert-info text-center" role="alert" ng-show="!showHeatmapAlert && isToolSelected('polygon')">
       Click on the map to draw a polygon - all locations in the polygon will be selected as optimization targets.
     </div>
     <div class="alert alert-info text-center" role="alert" ng-show="isToolSelected('upload')">
       Upload csv with single column of location ids - these locations will be selected as optimization targets.
     </div>
-    <div class="alert alert-info text-center" role="alert" ng-show="locationsHeatmap">
+    <div class="alert alert-info text-center" role="alert" ng-show="showHeatmapAlert">
       To use this feature, you must be viewing individual locations. Please zoom in or turn off the heatmap button below the zoom buttons.
     </div>
   </form>

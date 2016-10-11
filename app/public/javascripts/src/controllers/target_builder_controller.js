@@ -11,13 +11,19 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.user_id = user_id
   $scope.plan = null
   $scope.locationsHeatmap = false
+  $scope.showHeatmapAlert = false
   $scope.targets = []
   $scope.targetsTotal = 0
 
   $rootScope.$on('map_layer_loaded_data', (e, layer) => {
     if (layer.type !== 'locations') return
     $scope.locationsHeatmap = layer.heatmapLayer && layer.heatmapLayer.getMap()
+    calculateShowHeatmap()
   })
+
+  function calculateShowHeatmap () {
+    $scope.showHeatmapAlert = $scope.locationsHeatmap && ($scope.selectedTool === 'single' || $scope.selectedTool === 'polygon')
+  }
 
   function loadTargets () {
     $http.get(`/locations/${$scope.plan.id}/targets`)
@@ -43,7 +49,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   })
 
   $scope.isToolSelected = (name) => {
-    return !$scope.locationsHeatmap && $scope.selectedTool === name
+    return $scope.selectedTool === name
   }
 
   $scope.setSelectedTool = (name) => {
@@ -56,6 +62,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       drawingManager.oldDrawingMode = null
       drawingManager.setDrawingMode(null)
     }
+    calculateShowHeatmap()
   }
 
   $scope.toggleSelectedTool = (name) => {
