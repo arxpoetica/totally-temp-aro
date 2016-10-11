@@ -147,6 +147,12 @@ module.exports = class Location {
       .then(() => this.findTargets(plan_id))
   }
 
+  static deleteAllTargets (plan_id) {
+    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'
+    return database.query(sql, [plan_id])
+      .then(() => this.findTargets(plan_id))
+  }
+
   // Get summary information for a given location
   static showInformation (plan_id, location_id) {
     var info

@@ -117,4 +117,11 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.post('/locations/:plan_id/targets/delete_all', check_owner_permission, (request, response, next) => {
+    var planId = +request.params.plan_id
+    models.Location.deleteAllTargets(planId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

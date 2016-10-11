@@ -2,6 +2,19 @@
 app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 
+  var mode = null
+  optimization.setMode = (_mode) => {
+    if (mode !== _mode) {
+      mode = _mode
+      console.log('mode', mode)
+      $rootScope.$broadcast('optimization_mode_changed', mode)
+    }
+  }
+
+  optimization.getMode = () => {
+    return mode
+  }
+
   optimization.optimize = (plan, changes, success, error) => {
     var canceler = $q.defer()
 

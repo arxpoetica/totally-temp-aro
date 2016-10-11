@@ -24,6 +24,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       .success((response) => {
         $scope.targets = response.targets
         $scope.targetsTotal = response.total
+        if ($scope.targetsTotal > 0) optimization.setMode('targets')
       })
   }
 
@@ -203,6 +204,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       .success((response) => {
         $scope.targets = response.targets
         $scope.targetsTotal = response.total
+        if ($scope.targetsTotal > 0) optimization.setMode('targets')
       })
   }
 
@@ -215,10 +217,28 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       layer.type !== 'towers') return
 
     postChanges(changes, true)
+    optimization.setMode('targets')
   })
 
   function postChanges (changes) {
     changes.lazy = true
     optimization.optimize($scope.plan, changes, loadTargets, () => {})
   }
+
+  $scope.optimizationMode = optimization.getMode()
+  $rootScope.$on('optimization_mode_changed', (e, mode) => {
+    $scope.optimizationMode = mode
+    if (mode !== 'targets') {
+      var config = {
+        url: `/locations/${$scope.plan.id}/targets/delete_all`,
+        method: 'post',
+        data: {}
+      }
+      $http(config)
+        .success((response) => {
+          $scope.targets = response.targets
+          $scope.targetsTotal = response.total
+        })
+    }
+  })
 }])

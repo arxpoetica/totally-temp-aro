@@ -105,7 +105,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       algorithm: $scope.optimizationType,
       budget: parseBudget(),
       irrThreshold: $scope.irrThreshold / 100,
-      selectionMode: 'SELECTED_AREAS'
+      selectionMode: $scope.optimizationMode === 'boundaries' ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
       // processingLayers: regions.getSelectedServiceAreas().map((layer) => layer.id)
     }
     if (processingLayers.length > 0) {
@@ -134,4 +134,23 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       $scope.calculating = false
     })
   }
+
+  $scope.optimizationMode = optimization.getMode()
+  $rootScope.$on('optimization_mode_changed', (e, mode) => {
+    $scope.optimizationMode = mode
+  })
+
+  // processing layer
+  $scope.allBoundaries = []
+  $scope.selectedBoundary = null
+
+  function loadBoundaries () {
+    $http.get('/boundary/all')
+      .success((response) => {
+        $scope.allBoundaries = response
+      })
+  }
+
+  loadBoundaries()
+  $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
 }])

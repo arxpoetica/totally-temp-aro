@@ -152,6 +152,16 @@
   </form>
   <% } %>
 
+  <div ng-show="optimizationMode === 'targets'">
+    <p><strong>Optimization Processing Layer</strong></p>
+    <p>
+      <select class="form-control" ng-model="selectedBoundary"
+        ng-options="boundary as boundary.description for boundary in allBoundaries track by boundary.id">
+        <option value="">Default Layer</option>
+      </select>
+    </p>
+  </div>
+
   <div>
     <p class="pull-right">
       <button class="btn btn-primary" ng-hide="calculating" ng-click="run()">Get Results</button>

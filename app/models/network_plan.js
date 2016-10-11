@@ -64,6 +64,14 @@ module.exports = class NetworkPlan {
         `
         return database.execute(sql, [location_ids, plan_id])
       })
+      .then(() => {
+        // cannot selet both targets and boundaires
+        return Promise.all([
+          database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
+          database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
+          database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id])
+        ])
+      })
   }
 
   static _deleteSources (plan_id, network_node_ids) {

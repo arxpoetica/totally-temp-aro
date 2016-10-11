@@ -1,4 +1,12 @@
 <div>
+  <div class="alert alert-info text-center" role="alert" ng-show="locationsHeatmap">
+    To use this feature, you must be viewing individual locations. Please zoom in or turn off the heatmap button below the zoom buttons.
+  </div>
+
+  <div class="alert alert-info text-center" role="alert" ng-show="optimizationMode != null && optimizationMode !== 'targets'">
+    Optimizations can not be run on both boundaries and targets. Any target selection you make will remove all previously selected boundaries.
+  </div>
+
   <p><strong>Select Targets</strong></p>
   <input class="form-control select2" type="text" placeholder="Business Name">
   <br><br>

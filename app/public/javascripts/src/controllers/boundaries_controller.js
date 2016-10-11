@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -539,5 +539,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       select.scrollTop = select.scrollHeight
     }
     $scope.changeUserDefinedBoundary()
+  })
+
+  $scope.optimizationMode = optimization.getMode()
+  $rootScope.$on('optimization_mode_changed', (e, mode) => {
+    $scope.optimizationMode = mode
   })
 }])

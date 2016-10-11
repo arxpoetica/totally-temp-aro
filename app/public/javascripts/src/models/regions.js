@@ -1,5 +1,5 @@
 /* global app map google $ config globalServiceLayers globalAnalysisLayers */
-app.service('regions', ($rootScope, $timeout, map_tools) => {
+app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
   var regions = { selectedRegions: [] }
   var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
 
@@ -27,11 +27,13 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     })
   })
 
-  $rootScope.$on('plan_selected', (e, plan) => {
+  function cleanUp () {
     initSelectionLayer()
     regions.selectedRegions = []
     $rootScope.$broadcast('regions_changed')
-  })
+  }
+
+  $rootScope.$on('plan_selected', cleanUp)
 
   $rootScope.$on('plan_changed_metadata', (e, plan) => {
     initSelectionLayer()
@@ -46,6 +48,7 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
       })
     })
     $rootScope.$broadcast('regions_changed')
+    if (regions.selectedRegions.length > 0) optimization.setMode('boundaries')
   })
 
   $rootScope.$on('map_tool_changed_visibility', () => configureSelectionVisibility())
@@ -61,6 +64,12 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
     }
   }
 
+  $rootScope.$on('optimization_mode_changed', (e, mode) => {
+    if (mode === 'targets') {
+      cleanUp()
+    }
+  })
+
   function selectGeography (geography) {
     geography.id = String(geography.id)
     if (regions.selectedRegions.find((geog) => geog.id === geography.id && geog.type === geography.type)) return
@@ -75,6 +84,7 @@ app.service('regions', ($rootScope, $timeout, map_tools) => {
       }
     })
     $rootScope.$broadcast('regions_changed')
+    optimization.setMode('boundaries')
   }
 
   var configureSearch = () => {
