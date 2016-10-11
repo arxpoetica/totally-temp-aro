@@ -80,7 +80,7 @@
           </a>
         </div>
         <label class="pull-right">
-          <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
+          <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer('businesses')" ng-disabled="overlay !== 'none'">
         </label>
         <label style="margin-left:25px">Enterprise</label>
       </div>
@@ -151,7 +151,7 @@
           </a>
         </div>
         <label class="pull-right">
-          <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
+          <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer('households')" ng-disabled="overlay !== 'none'">
         </label>
         <label style="margin-left:25px">Residential</label>
       </div>

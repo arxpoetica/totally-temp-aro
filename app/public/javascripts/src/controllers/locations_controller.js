@@ -211,7 +211,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     })
   })
 
-  $scope.changeLocationsLayer = () => {
+  $scope.changeLocationsLayer = (majorCategory) => {
     tracker.track('Locations / ' + $scope.overlay)
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
@@ -219,10 +219,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     if (!$scope.show_businesses) {
       $scope.business_categories_selected['large'] = false
       $scope.business_categories_selected['medium'] = false
+    } else if (majorCategory === 'businesses') {
+      $scope.business_categories_selected['large'] = true
+      $scope.business_categories_selected['medium'] = true
     }
+
     if (!$scope.show_households) {
       $scope.household_categories_selected['small'] = false
       $scope.household_categories_selected['medium'] = false
+    } else if (majorCategory === 'households') {
+      $scope.household_categories_selected['small'] = true
+      $scope.household_categories_selected['medium'] = true
     }
 
     const subcategories = (key) => {
