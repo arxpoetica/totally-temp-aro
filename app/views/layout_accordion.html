@@ -5,6 +5,10 @@
     <div class="panel panel-default" ng-controller="locations_controller">
       <div class="panel-heading" role="tab">
         <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed">
+            <span class="fa fa-info-circle" data-toggle="popover" data-trigger="hover" data-placement="bottom"
+              data-content="Select customer types to display on the map and include in optimization. Customers selected at time of optimization will be included in optimization. At higher zoom levels, customers will be displayed on the map as a density heatmap."></span>
+          </div>
           <span class="hide-on-expanded fa fa-building"></span>
           <a role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-customers" class="hide-on-collapsed">
             Customers
@@ -33,6 +37,10 @@
     <div class="panel panel-default" ng-controller="fiber_plant_controller">
       <div class="panel-heading" role="tab">
         <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed">
+            <span class="fa fa-info-circle" data-toggle="popover" data-trigger="hover" data-placement="bottom"
+              data-content="Display competitive layers on the map. Fiber routes displays competitive routes on the map from the Geotel data. Broadband coverage shows census block competitors and speed levels from NBM data. Selections do not affect optimization."></span>
+          </div>
           <span class="hide-on-expanded fa fa-pie-chart"></span>
           <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-carriers">
             Competition
@@ -49,6 +57,11 @@
     <div class="panel panel-default" ng-controller="equipment_nodes_controller">
       <div class="panel-heading" role="tab">
         <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed">
+            <span class="fa fa-info-circle" data-toggle="popover" data-trigger="hover" data-placement="bottom"
+              data-content="Select Verizon network assets to display on the map. Existing assets are organized by business unit. Assets placed during optimization are stored in the "Optimized Equipment" section. Selections do not affect optimization."></span>
+          </div>
+
           <span class="hide-on-expanded icon icon-network-equipment"></span>
           <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-network">
             Network
@@ -65,6 +78,11 @@
     <div class="panel panel-default" ng-controller="boundaries_controller">
       <div class="panel-heading" role="tab">
         <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed">
+            <span class="fa fa-info-circle" data-toggle="popover" data-trigger="hover" data-placement="bottom"
+              data-content="Select boundary layers to display on map. Click on boundaries on the map or choose from the search dropdown to include in optimization. Boundaries selected for optimization appear in a list at the bottom of the tab."></span>
+          </div>
+
           <span class="hide-on-expanded icon icon-boundaries"></span>
           <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-boundaries">
             Boundaries
@@ -81,6 +99,11 @@
     <div class="panel panel-default" ng-controller="area-network-planning-controller">
       <div class="panel-heading" role="tab">
         <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed">
+            <span class="fa fa-info-circle" data-toggle="popover" data-trigger="hover" data-placement="bottom"
+              data-content="Select optimization parameters."></span>
+          </div>
+
           <span class="hide-on-expanded icon icon-network-planning"></span>
           <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-modeling">
             Scenario Modeling Tools
@@ -98,6 +121,11 @@
     <div class="panel panel-default" ng-controller="target-builder-controller">
       <div class="panel-heading" role="tab">
         <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed">
+            <span class="fa fa-info-circle" data-toggle="popover" data-trigger="hover" data-placement="bottom"
+              data-content="Select specific locations as targets to route to in optimization by selecting single locations, drawing polygons, or uploading a csv of IDs."></span>
+          </div>
+
           <span class="hide-on-expanded icon icon-network-planning-targeted"></span>
           <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-target-builder">
             Target builder
@@ -116,6 +144,11 @@
     <div class="panel panel-default" ng-show="plan.metadata.total_cost">
       <div class="panel-heading" role="tab" style="background-color: black">
         <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed" style="margin-left: 10px">
+            <span class="fa fa-info-circle" data-toggle="popover" data-trigger="hover" data-placement="bottom"
+              data-content="View output of optimization. Global selection shows output for all areas which were optimized. Area selection allows you to select specific areas and view the results."></span>
+          </div>
+
           <div class="pull-right hide-on-collapsed" style="margin-top: -5px">
             <button class="btn btn-sm btn-primary" ng-class="{'btn-success': mode === 'global'}" ng-click="setMode('global')">Global</button>
             <button class="btn btn-sm btn-primary" ng-class="{'btn-success': mode === 'area'}" ng-click="setMode('area')">Area</button>

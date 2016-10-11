@@ -444,11 +444,16 @@
   <script>app.run(function(loader){})</script>
   <script>
     $(function () {
-      var tooltips = $('#left-col [data-toggle="tooltip"]');
-      tooltips.tooltip();
+      var tooltips = $('#left-col [data-toggle="tooltip"]')
+      tooltips.tooltip()
       tooltips.on('click mouseout', function () {
         $(this).tooltip('hide')
       })
+    })
+
+    $(function () {
+      var popovers = $('#left-col [data-toggle="popover"]')
+      popovers.popover()
     })
 
     var expander = $('#expander')
