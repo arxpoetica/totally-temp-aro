@@ -138,6 +138,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.optimizationMode = optimization.getMode()
   $rootScope.$on('optimization_mode_changed', (e, mode) => {
     $scope.optimizationMode = mode
+    if (mode === 'targets') {
+      $scope.optimizationType = 'CAPEX'
+    }
   })
 
   // processing layer
