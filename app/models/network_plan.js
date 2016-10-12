@@ -607,7 +607,7 @@ module.exports = class NetworkPlan {
         Object.keys(types).forEach((type) => {
           kml_output += `<Folder><name>${escape(type)}</name>`
           types[type].forEach((edge) => {
-            kml_output += `<Placemark><name>${escape(edge.length.toLocaleString())} m</name><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
+            kml_output += `<Placemark><name>${escape(edge.length.toLocaleString('en', { maximumFractionDigits: 1 }))} m</name><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
           })
           kml_output += '</Folder>'
         })
