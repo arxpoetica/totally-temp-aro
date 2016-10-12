@@ -6,7 +6,6 @@ app.service('optimization', ($rootScope, $http, $q) => {
   optimization.setMode = (_mode) => {
     if (mode !== _mode) {
       mode = _mode
-      console.log('mode', mode)
       $rootScope.$broadcast('optimization_mode_changed', mode)
     }
   }
