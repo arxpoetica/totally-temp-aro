@@ -587,7 +587,9 @@ module.exports = class NetworkPlan {
         `
 
         var sql = `
-          SELECT ST_AsKML(fiber_route.geom) AS geom, (frt.description || ' ' || cct.description) AS fiber_type
+          SELECT
+            ST_AsKML(seg.geom) AS geom,
+            (frt.description || ' ' || cct.description) AS fiber_type
           FROM client.plan r
           JOIN client.plan mp ON mp.parent_plan_id = r.id
           JOIN client.plan p ON p.parent_plan_id = mp.id
@@ -630,11 +632,10 @@ module.exports = class NetworkPlan {
         })
 
         var sql = `
-          SELECT ST_AsKML(network_nodes.geom) AS geom
-          FROM client.plan_sources
-          JOIN client.network_nodes
-            ON plan_sources.network_node_id = network_nodes.id
-          WHERE plan_sources.plan_id IN (
+          SELECT ST_AsKML(nn.geom) AS geom
+          FROM client.network_nodes nn
+          -- JOIN client.network_node_types t ON nn.node_type_id = t.id
+          WHERE plan_id IN (
             (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
               (SELECT id FROM client.plan WHERE parent_plan_id=$1)
             ))
