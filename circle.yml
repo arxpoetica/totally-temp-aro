@@ -13,7 +13,7 @@ machine:
     LATEST_TAG: ${IMAGE_NAME}:latest
     #CONTAINER VERSIONS AND DEPLOYMENT SETTINGS
     ARO_ETL_IMAGE_NAME:  ait-docker-registry.cloud.altvil.com/aro/aro-etl-vz
-    ARO_NGINX_IMAGE_VERSION: "7"
+    ARO_NGINX_IMAGE_VERSION: "8"
     ARO_ETL_IMAGE_VERSION: "24"
     ARO_SERVICE_IMAGE_VERSION: "A01"
     ARO_CLIENT: verizon
