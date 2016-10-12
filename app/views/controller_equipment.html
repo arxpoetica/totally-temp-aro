@@ -53,19 +53,19 @@
                 </div>
               </div>
 
-              <div ng-repeat="(key, layer) in equipment_layers" ng-hide="layer.hide_in_ui">
+              <div ng-repeat="layer in existingEquipmentLayers" ng-if="serviceLayer.id !== 'all'">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
                   <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible" ng-disabled="!vztfttp || !serviceLayer.enabled">
                 </div>
-                <div ng-attr-id="map_layers_toggle_{{key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
+                <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
                     {{layer.name}}
                   </label>
                 </div>
               </div>
 
-              <div>
+              <div ng-if="serviceLayer.id === 'all'">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color:blue; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
                   <input type="checkbox" ng-model="serviceLayer.showFeederFiber" ng-change="serviceLayer.changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled">
@@ -77,7 +77,7 @@
                 </div>
               </div>
 
-              <div>
+              <div ng-if="serviceLayer.id === 'all'">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color:red; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
                   <input type="checkbox" ng-model="serviceLayer.showDistributionFiber" ng-change="serviceLayer.changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled">

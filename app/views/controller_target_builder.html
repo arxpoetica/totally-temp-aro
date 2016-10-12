@@ -1,117 +1,53 @@
 <div>
-  <p><strong>Optimization type</strong></p>
-  <select class="form-control" ng-model="optimizationType" ng-change="optimizationTypeChanged()">
-    <option value="unconstrained">Full Coverage</option>
-    <!--
-   <option value="npv">NPV</option>
-    -->
- </select>
- <div ng-show="optimizationType === 'npv'" style="margin-top:5px" id="target-builder-budget">
-   <p>
-     <label style="font-weight: 100; margin-right: 20px">
-       <input type="radio" name="npvType" value="targeted" ng-model="npvType" ng-change="npvTypeChanged()">
-       Targeted
-     </label>
-     <label style="font-weight: 100">
-       <input type="radio" name="npvType" value="untargeted" ng-model="npvType" ng-change="npvTypeChanged()">
-       Untargeted
-     </label>
-   </p>
-   <div ng-show="npvType === 'targeted'">
-     <div class="row">
-       <div class="col-md-7">
-         <p><strong>Total budget</strong></p>
-       </div>
-       <div class="col-md-5">
-         <p class="text-right"><strong>Discount rate</strong></p>
-       </div>
-     </div>
-     <div class="row">
-       <div class="col-md-7">
-         <div class="form-group form-group-sm">
-           <div class="input-group input-group-sm">
-             <div class="input-group-addon">$</div>
-             <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
-           </div>
-         </div>
-       </div>
-       <div class="col-md-5">
-         <div class="form-group form-group-sm">
-           <div class="input-group input-group-sm">
-             <input type="number" class="form-control text-right" ng-model="discountRate" min="0" max="100" step="1" name="discount_rate">
-             <div class="input-group-addon">%</div>
-           </div>
-         </div>
-       </div>
-     </div>
-     <p class="text-danger text-right" ng-show="overbugdet && npvType === 'targeted'">You are over budget. Current cost is {{plan.metadata.total_cost | currency}}</p>
-   </div>
-   <p class="text-right">
-     <button class="btn btn-default btn-small">Update</button>
-   </p>
- </div>
+  <div class="alert alert-info text-center" role="alert" ng-show="optimizationMode != null && optimizationMode !== 'targets'">
+    Optimizations can not be run on both boundaries and targets. Any target selection you make will remove all previously selected boundaries.
+  </div>
 
- <br>
- <p><strong>Search, Click or Upload Locations</strong></p>
- <input class="form-control select2" type="text" placeholder="Business Name">
- <br><br>
- <form id="target-builder-upload">
-   <p>
-     Select:
-     <button class="btn btn-default btn-sm"
-       ng-class="{'btn-success active': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
-       ng-click="setSelectedTool('single')">Single</button>
-     <button class="btn btn-default btn-sm"
-       ng-class="{'btn-success active': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
-       ng-click="setSelectedTool('polygon')">Many</button>
+  <p><strong>Select Targets</strong></p>
+  <input class="form-control select2" type="text" placeholder="Business Name">
+  <br><br>
+  <form id="target-builder-upload">
+    <p>
+     <button class="btn btn-primary btn-sm"
+       ng-class="{'btn-success': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
+       ng-click="toggleSelectedTool('single')">Building Select</button>
+     <button class="btn btn-primary btn-sm"
+       ng-class="{'btn-success': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
+       ng-click="toggleSelectedTool('polygon')">Polygon Select</button>
      <span>
        <input type="file" name="csv" id="target-builder-upload-csv" style="width:0.1px; height:0.1px; opacity:0; overflow:hidden; position:absolute; z-index:-1">
-       <label for="target-builder-upload-csv">
-         <span class="btn btn-default btn-sm">
-           <i class="fa fa-file-o"></i>
-         </span>
+       <label for="target-builder-upload-csv" ng-click="setSelectedTool('upload')">
+         <span class="btn btn-primary btn-sm" ng-class="{'btn-success': isToolSelected('upload') }">Upload</span>
        </label>
      </span>
-   </p>
- </form>
+    </p>
+    <div class="alert alert-info text-center" role="alert" ng-show="!showHeatmapAlert && isToolSelected('single')">
+      Click on buildings on the map to add them to the optimization targets.
+    </div>
+    <div class="alert alert-info text-center" role="alert" ng-show="!showHeatmapAlert && isToolSelected('polygon')">
+      Click on the map to draw a polygon - all locations in the polygon will be selected as optimization targets.
+    </div>
+    <div class="alert alert-info text-center" role="alert" ng-show="isToolSelected('upload')">
+      Upload csv with single column of location ids - these locations will be selected as optimization targets.
+    </div>
+    <div class="alert alert-info text-center" role="alert" ng-show="showHeatmapAlert">
+      To use this feature, you must be viewing individual locations. Please zoom in or turn off the heatmap button below the zoom buttons.
+    </div>
+  </form>
 
- <% if (config.ARO_CLIENT === 'verizon') { %>
-   <br>
-   <p><strong>Technology</strong></p>
-   <form>
-     <div class="radio">
-       <label>
-         <input type="radio" name="technology" ng-model="technology" value="direct_routing" checked> Direct Routing
-       </label>
-     </div>
-     <div class="radio">
-       <label>
-         <input type="radio" name="technology" ng-model="technology" value="odn1" checked> ODN 1.0 (Centralized Split)
-       </label>
-     </div>
-     <div class="radio disabled">
-       <label>
-         <input type="radio" name="technology" ng-model="technology" value="odn2" disabled> ODN 2.0 (Distributed Split)
-       </label>
-     </div>
-   </form>
- <% } %>
-
- <p><strong>Targeted Locations</strong></p>
- <ul style="padding: 0 20px" ng-repeat="customerType in plan.metadata.customerTypes">
-   <li>{{ customerType.name }}: {{customerType.total }}</li>
- </ul>
-
-<p><strong>Optimization Processing Layer</strong></p>
- <p>
-   <select class="form-control" ng-model="selectedBoundary"
-     ng-options="boundary as boundary.description for boundary in allBoundaries track by boundary.id">
-     <option value="">Default Layer</option>
-   </select>
- </p>
-
- <p class="pull-right">
-   <button class="btn btn-success active"
-     ng-click="postChanges({}, false)">Get Results</button>
- </p>
+  <p><strong>Targeted Locations</strong></p>
+  <p ng-show="targets.length === 0">
+    <em>No targeted locations</em>
+  </p>
+  <ul style="list-style-type:none; padding:0" ng-repeat="target in targets">
+    <li>
+      <a href="javascript:void(0)" class="text-danger" ng-click="deleteTarget(target)" style="margin-right: 5px">
+        <span class="fa fa-trash-o"></span>
+      </a>
+      {{ target.address }}
+    </li>
+  </ul>
+  <p ng-show="targetsTotal - targets.length > 0">
+    {{ targetsTotal - targets.length }} additional targeted locations
+  </p>
 </div>

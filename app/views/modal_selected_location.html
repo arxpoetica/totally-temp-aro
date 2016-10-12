@@ -30,16 +30,20 @@
                   <div class="col-md-6">{{ location.number_of_households }}</div>
                 </div>
                 <div class="row">
-                  <div class="col-md-6"><strong>Towers</strong></div>
+                  <div class="col-md-6"><strong>Cell Sites</strong></div>
                   <div class="col-md-6">{{ location.number_of_towers }}</div>
                 </div>
               </div>
               <div class="col-md-6">
                 <address>
-                  <strong>Distance From Network</strong><br>
-                  {{ location.distance_to_client_fiber | number: 2 }} m<br><br>
-                  <strong>Open For Sale</strong><br>
-                  April 2016<br><br>
+                  <strong>Distance From Existing Network</strong><br>
+                  {{ location.distance_to_client_fiber | number: 0 }} m<br><br>
+                </address>
+
+                <address>
+                  <strong>Distance From Planned Network</strong><br>
+                  <span ng-if="location.distance_to_planned_network != null">{{ location.distance_to_planned_network | number: 0 }} m<br><br></span>
+                  <span ng-if="location.distance_to_planned_network == null">No planned network<br><br></span>
                 </address>
               </div>
             </div>
@@ -49,24 +53,35 @@
         <br>
 
         <ul class="nav nav-tabs" role="tablist">
+          <!--
           <li role="presentation" ng-show="config.route_planning.length > 0">
             <a href="#selected_location_costs" aria-controls="home" role="tab" data-toggle="tab">Installation</a>
           </li>
+          -->
           <li role="presentation" class="active">
             <a href="#selected_location_customer_profile" aria-controls="profile" role="tab" data-toggle="tab">Customer profile</a>
           </li>
+          <!--
           <li role="presentation">
             <a href="#selected_location_market_profile" aria-controls="profile" role="tab" data-toggle="tab">Market profile</a>
           </li>
+          -->
           <li role="presentation">
-            <a href="#selected_location_fair_share" aria-controls="profile" role="tab" data-toggle="tab">Fair share</a>
+            <a href="#selected_location_fair_share" aria-controls="profile" role="tab" data-toggle="tab">Competition</a>
           </li>
           <li role="presentation">
             <a href="#selected_location_businesses" aria-controls="profile" role="tab" data-toggle="tab">Businesses</a>
           </li>
+          <li role="presentation">
+            <a href="#selected_location_households" aria-controls="profile" role="tab" data-toggle="tab">Households</a>
+          </li>
+          <li role="presentation">
+            <a href="#selected_location_towers" aria-controls="profile" role="tab" data-toggle="tab">Cell Sites</a>
+          </li>
         </ul>
 
         <div class="tab-content">
+          <!--
           <div role="tabpanel" class="tab-pane" id="selected_location_costs" ng-show="config.route_planning">
             <table class="locations-table">
               <tbody>
@@ -104,6 +119,7 @@
               </tbody>
             </table>
           </div>
+          -->
           <div role="tabpanel" class="tab-pane active" id="selected_location_customer_profile">
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
@@ -117,12 +133,13 @@
                 <div id="location_customer_profile_chart_legend_households"></div>
               </div>
               <div class="col-md-4">
-                <p class="text-center">Towers</p>
+                <p class="text-center">Cell Sites</p>
                 <canvas id="location_customer_profile_chart_towers" style="width:100%; height:200px"></canvas>
                 <div id="location_customer_profile_chart_legend_towers"></div>
               </div>
             </div>
           </div>
+          <!--
           <div role="tabpanel" class="tab-pane" id="selected_location_market_profile">
             <div class="row">
               <div class="col-md-6">
@@ -136,7 +153,7 @@
                       <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
                         <option value="businesses">Businesses</option>
                         <option value="households">Households</option>
-                        <option value="towers">Towers</option>
+                        <option value="towers">Cell Sites</option>
                       </select>
                     </div>
                   </div>
@@ -179,30 +196,18 @@
               </div>
             </div>
           </div>
+          -->
 
           <div role="tabpanel" class="tab-pane" id="selected_location_fair_share" style="margin-top:30px">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group form-group-sm">
-                  <label class="col-sm-3 control-label">Entity Type</label>
-                  <div class="col-sm-9">
-                    <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
-                      <option value="businesses">Businesses</option>
-                      <option value="households">Households</option>
-                      <option value="towers">Towers</option>
-                    </select>
-                  </div>
-                </div>
-                <br><br>
-              </div>
-            </div>
-            <p class="form-control-static text-center" ng-show="fair_share.length === 0">No data available for this location with the selected filters</p>
-            <div class="row">
-              <div class="col-md-8">
-                <canvas id="location_fair_share_chart" style="width:100%; height:200px"></canvas>
+            <div class="row" style="margin-top: 30px">
+              <div class="col-md-4">
+                <p class="text-center">Businesses</p>
               </div>
               <div class="col-md-4">
-                <div id="location_fair_share_chart_legend"></div>
+                <p class="text-center">Households</p>
+              </div>
+              <div class="col-md-4">
+                <p class="text-center">Cell Sites</p>
               </div>
             </div>
           </div>
@@ -216,21 +221,27 @@
                   <th>Name</th>
                   <th>Address</th>
                   <th>Industry</th>
-                  <th class="text-right">#employees</th>
+                  <th class="text-right">Employee Count</th>
+                  <th class="text-right">Category</th>
+                  <!--
                   <th class="text-right">Type</th>
+                  -->
                 </tr>
               </thead>
               <tbody>
                 <tr ng-repeat="business in businesses">
                   <td ng-attr-id="location_business_row_{{ business.id }}"><a href="javascript:void(0)" ng-click="show_market_profile(business)">{{business.name}}</a></th>
-                  <td>{{business.address}}</th>
-                  <td>{{business.industry_description}}</th>
+                  <td>{{business.address}}</td>
+                  <td><!--{{business.industry_description}}--></td>
                   <td class="text-right">{{business.number_of_employees}}</td>
+                  <!--
                   <td class="text-right">
                     <span class="label label-success"
                       ng-attr-class="label label-{{business.customer_type.toLowerCase() === 'existing' ? 'success' : 'danger'}}">
                       {{business.customer_type}}
                     </span></td>
+                  -->
+                  <td class="text-right">{{business.size_name}}</td>
                 </tr>
                 <tr id="location_business_selected_info" style="display: none">
                   <td colspan="5">
@@ -254,6 +265,61 @@
                     </div>
                   </td>
                 </tr>
+                <tr class="text-center" ng-show="businesses.length === 0">
+                  <td style="padding: 40px" colspan="4">No businesses at this location</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div role="tabpanel" class="tab-pane" id="selected_location_households">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Address</th>
+                  <th>Demographics</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="text-center" ng-show="households.length === 0">
+                  <td style="padding: 40px" colspan="2">No households at this location</td>
+                </tr>
+                <tr ng-repeat="household in households">
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div role="tabpanel" class="tab-pane" id="selected_location_towers">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Site name</th>
+                  <th>Address</th>
+                  <th>Site type</th>
+                  <th>AGL</th>
+                  <th>AMSL</th>
+                  <th>Height</th>
+                  <th>Elevation</th>
+                  <th>Site Owner</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="text-center" ng-show="towers.length === 0">
+                  <td style="padding: 40px" colspan="8">No cell sites at this location</td>
+                </tr>
+                <tr ng-repeat="tower in towers">
+                  <td></td>
+                  <td>{{tower.address}}</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -262,8 +328,10 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <!--
         <button type="button" class="btn btn-primary" ng-click="update()" ng-show="show_households">Update</button>
         <button type="button" class="btn btn-primary" ng-click="export()">Export</button>
+        -->
       </div>
     </div>
   </div>

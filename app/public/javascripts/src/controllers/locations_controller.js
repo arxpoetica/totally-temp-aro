@@ -72,7 +72,16 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   var declarativeStyles = (feature, styles) => {
     if (styles.icon) return
     var type = 'households'
+    var target = feature.getProperty('selected')
+    if (target) {
+      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/target.png`
+      return
+    }
     var categories = feature.getProperty('entity_categories')
+    if (categories.indexOf('towers') >= 0) {
+      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/tower.png`
+      return
+    }
     var order = [
       'b_small', 'b_medium', 'b_large'
     ]
@@ -130,26 +139,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     reload: 'always'
   })
 
-  var towersLayer = new MapLayer({
-    name: 'Towers',
-    type: 'towers',
-    changes: 'locations',
-    short_name: 'T',
-    api_endpoint: '/towers/:plan_id',
-    style_options: {
-      normal: {
-        icon: `/images/map_icons/${config.ARO_CLIENT}/tower.png`,
-        visible: true
-      }
-    },
-    threshold: 8,
-    reload: 'always'
-  })
-
   map_layers.addFeatureLayer(locationsLayer)
   map_layers.addFeatureLayer(selectedLocationsLayer)
   map_layers.addFeatureLayer(customerProfileLayer)
-  map_layers.addFeatureLayer(towersLayer)
 
   function whatLocationsAreShowing () {
     if (!$scope.show_businesses && !$scope.show_households) {
@@ -222,12 +214,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     })
   })
 
-  $scope.change_towers_layer = () => {
-    towersLayer.toggleVisibility()
-    $rootScope.$broadcast('towers_layer_changed')
-  }
-
-  $scope.changeLocationsLayer = () => {
+  $scope.changeLocationsLayer = (majorCategory) => {
     tracker.track('Locations / ' + $scope.overlay)
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
@@ -235,10 +222,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     if (!$scope.show_businesses) {
       $scope.business_categories_selected['large'] = false
       $scope.business_categories_selected['medium'] = false
+    } else if (majorCategory === 'businesses') {
+      $scope.business_categories_selected['large'] = true
+      $scope.business_categories_selected['medium'] = true
     }
+
     if (!$scope.show_households) {
       $scope.household_categories_selected['small'] = false
       $scope.household_categories_selected['medium'] = false
+    } else if (majorCategory === 'households') {
+      $scope.household_categories_selected['small'] = true
+      $scope.household_categories_selected['medium'] = true
     }
 
     const subcategories = (key) => {
@@ -257,12 +251,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         householdCategories = []
       }
 
-      if (businessCategories.length === 0 && householdCategories.length === 0) {
+      var towers = $scope.show_towers ? ['towers'] : []
+      if (businessCategories.length === 0 && householdCategories.length === 0 && towers.length === 0) {
         locationsLayer.hide()
       } else {
         var options = {
           business_categories: businessCategories,
-          household_categories: householdCategories
+          household_categories: householdCategories,
+          towers: towers
         }
         locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
@@ -364,8 +360,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     if (plan) {
       plan.location_types = plan.location_types || []
       map.ready(() => {
-        // map_layers.getEquipmentLayer('network_nodes').set_always_show_selected($scope.always_shows_sources)
-        // locationsLayer.set_always_show_selected($scope.always_shows_targets)
         selectedLocationsLayer.show()
 
         // select entity types used in optimization
@@ -376,7 +370,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         if (plan.location_types.indexOf('mrcgte2000') >= 0) $scope.business_categories_selected['2kplus'] = true
         if (plan.location_types.indexOf('celltower') >= 0) $scope.show_towers = true
 
-        towersLayer.setVisible($scope.show_towers)
         $scope.changeLocationsLayer()
       })
     }

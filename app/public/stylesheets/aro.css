@@ -254,7 +254,7 @@ footer nav {
 }
 
 #aro_logo {
-  margin-top: 150px;
+  margin-top: 10px;
   margin-left: -5px;
   margin-bottom: 10px;
   /*width: 500px;*/
@@ -615,4 +615,8 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 #map-extras {
   position:fixed; right: 10px; top: 128px;
+}
+
+.popover-content {
+  color: #444;
 }

@@ -64,6 +64,14 @@ module.exports = class NetworkPlan {
         `
         return database.execute(sql, [location_ids, plan_id])
       })
+      .then(() => {
+        // cannot selet both targets and boundaires
+        return Promise.all([
+          database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
+          database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
+          database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id])
+        ])
+      })
   }
 
   static _deleteSources (plan_id, network_node_ids) {
@@ -163,7 +171,7 @@ module.exports = class NetworkPlan {
           plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
           users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
           created_at, updated_at, location_types,
-          (SELECT EXISTS(SELECT id FROM client.plan WHERE parent_plan_id=$1 LIMIT 1)) AS ran_optimization
+          (SELECT EXISTS(SELECT id FROM client.plan WHERE parent_plan_id=$1 LIMIT 1)) AS "ranOptimization"
         FROM client.plan
         LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
         LEFT JOIN auth.users ON users.id = permissions.user_id
@@ -318,11 +326,26 @@ module.exports = class NetworkPlan {
 
   static findWirecenterPlan (plan_id, wirecenter_id) {
     var params = [plan_id, wirecenter_id]
-    return database.findOne('SELECT id FROM client.plan WHERE parent_plan_id=$1 AND wirecenter_id=$2', params)
+    return database.findOne(`
+        SELECT id FROM client.plan WHERE parent_plan_id IN (SELECT id from client.plan WHERE parent_plan_id=$1)
+        AND wirecenter_id=$2
+      `, params)
       .then((row) => {
         if (!row) return {}
         return this.findPlan(row.id, true)
       })
+  }
+
+  static findChildPlans (plan_id, viewport) {
+    var params = [plan_id]
+    return database.polygons(`
+      SELECT p.wirecenter_id AS id, sa.geom AS geom, sa.code AS name, ST_AsGeoJSON(ST_Centroid(sa.geom))::json AS centroid
+        FROM client.plan p
+        JOIN client.service_layer sl ON p.service_layer_id = sl.id
+        JOIN client.service_area sa ON p.wirecenter_id = sa.id
+        WHERE plan_type='W' AND parent_plan_id IN (SELECT id from client.plan WHERE parent_plan_id=$1)
+        ${database.intersects(viewport, 'geom', 'AND')}
+    `, params, true, viewport)
   }
 
   static findAll (user, options) {
@@ -564,7 +587,10 @@ module.exports = class NetworkPlan {
         `
 
         var sql = `
-          SELECT ST_AsKML(fiber_route.geom) AS geom, (frt.description || ' ' || cct.description) AS fiber_type
+          SELECT
+            ST_AsKML(seg.geom) AS geom,
+            ST_Length(seg.geom::geography) AS length,
+            (frt.description || ' ' || cct.description) AS fiber_type
           FROM client.plan r
           JOIN client.plan mp ON mp.parent_plan_id = r.id
           JOIN client.plan p ON p.parent_plan_id = mp.id
@@ -577,17 +603,11 @@ module.exports = class NetworkPlan {
         return database.query(sql, [plan_id])
       })
       .then((edges) => {
-        var types = {}
-        edges.forEach((edge) => {
-          var type = edge.fiber_type
-          var arr = types[type]
-          if (!arr) types[type] = arr = []
-          arr.push(edge)
-        })
+        var types = _.groupBy(edges, 'fiber_type')
         Object.keys(types).forEach((type) => {
           kml_output += `<Folder><name>${escape(type)}</name>`
           types[type].forEach((edge) => {
-            kml_output += `<Placemark><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
+            kml_output += `<Placemark><name>${escape(edge.length.toLocaleString('en', { maximumFractionDigits: 1 }))} m</name><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
           })
           kml_output += '</Folder>'
         })
@@ -607,11 +627,10 @@ module.exports = class NetworkPlan {
         })
 
         var sql = `
-          SELECT ST_AsKML(network_nodes.geom) AS geom
-          FROM client.plan_sources
-          JOIN client.network_nodes
-            ON plan_sources.network_node_id = network_nodes.id
-          WHERE plan_sources.plan_id IN (
+          SELECT ST_AsKML(nn.geom) AS geom, t.description
+          FROM client.network_nodes nn
+          JOIN client.network_node_types t ON nn.node_type_id = t.id
+          WHERE plan_id IN (
             (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
               (SELECT id FROM client.plan WHERE parent_plan_id=$1)
             ))
@@ -619,9 +638,15 @@ module.exports = class NetworkPlan {
         `
         return database.query(sql, [plan_id])
       })
-      .then((sources) => {
-        sources.forEach((source) => {
-          kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${source.geom}</Placemark>\n`
+      .then((equipmentNodes) => {
+        var types = _.groupBy(equipmentNodes, 'description')
+        Object.keys(types).forEach((type) => {
+          var arr = types[type]
+          kml_output += `<Folder><name>${escape(type)}</name>`
+          arr.forEach((node) => {
+            kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${node.geom}</Placemark>\n`
+          })
+          kml_output += '</Folder>'
         })
 
         var sql = `
@@ -666,11 +691,13 @@ module.exports = class NetworkPlan {
   static searchBusinesses (text) {
     var sql = `
       SELECT
+        id,
         name,
         ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
         ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
       FROM aro.businesses
       WHERE to_tsvector('english', name) @@ plainto_tsquery($1)
+      LIMIT 100
     `
     return database.query(sql, [text.toLowerCase()])
   }

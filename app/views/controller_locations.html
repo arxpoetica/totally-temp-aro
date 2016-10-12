@@ -80,7 +80,7 @@
           </a>
         </div>
         <label class="pull-right">
-          <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
+          <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer('businesses')" ng-disabled="overlay !== 'none'">
         </label>
         <label style="margin-left:25px">Enterprise</label>
       </div>
@@ -151,7 +151,7 @@
           </a>
         </div>
         <label class="pull-right">
-          <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
+          <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer('households')" ng-disabled="overlay !== 'none'">
         </label>
         <label style="margin-left:25px">Residential</label>
       </div>
@@ -181,10 +181,10 @@
           <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px;margin-right:10px">
         </div>
         <label class="pull-right">
-          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-towers"></span>
-          <input type="checkbox" ng-model="show_towers" value="true" ng-change="change_towers_layer()" ng-disabled="overlay !== 'none'">
+          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_towers"></span>
+          <input type="checkbox" ng-model="show_towers" value="true" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
-        <label>Towers</label>
+        <label>Cell Sites</label>
       </div>
     </form>
 

@@ -11,10 +11,17 @@ join client.employees_by_location e on (b.number_of_employees >= e.min_value) an
 join client.industry_mapping m on m.sic4 = b.industry_id ;
 
 drop view if exists client.spend_summary cascade ;
-create view client.spend_summary as
-select city_id, year, s.industry_id, s.employees_by_location_id, sum(monthly_spend) / 4 as monthly_spend
-from client.spend s
-group by city_id, year, industry_id, employees_by_location_id ;
+CREATE VIEW client.spend_summary AS
+ SELECT s.city_id,
+    s.year,
+    s.industry_id,
+    s.employees_by_location_id,
+    (pow( abs(sum(s.monthly_spend)-50), 0.85 )+ 50) ::numeric AS monthly_spend
+   FROM client.spend s
+   inner join client.products p
+   on p.id = s.product_id
+   where p.product_type = 'Wireline Data'
+  GROUP BY s.city_id, s.year, s.industry_id, s.employees_by_location_id;
 
 drop view if exists client.business_summary cascade ;
 create view client.business_summary as 

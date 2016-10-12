@@ -176,3 +176,12 @@
 .caret {
   color: #CB0C1A;
 }
+
+#top_bar_tools {
+  font-size: 120%
+}
+
+#map-canvas-wrapper {
+  padding-top: 125px;
+  margin-top: -125px;
+}
