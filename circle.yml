@@ -15,7 +15,7 @@ machine:
     ARO_ETL_IMAGE_NAME:  ait-docker-registry.cloud.altvil.com/aro/aro-etl-vz
     ARO_NGINX_IMAGE_VERSION: "8"
     ARO_ETL_IMAGE_VERSION: "24"
-    ARO_SERVICE_IMAGE_VERSION: "A01"
+    ARO_SERVICE_IMAGE_VERSION: "A02"
     ARO_CLIENT: verizon
   node:
     version: 6.1.0
