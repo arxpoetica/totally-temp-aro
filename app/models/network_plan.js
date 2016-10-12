@@ -589,6 +589,7 @@ module.exports = class NetworkPlan {
         var sql = `
           SELECT
             ST_AsKML(seg.geom) AS geom,
+            ST_Length(seg.geom) AS length,
             (frt.description || ' ' || cct.description) AS fiber_type
           FROM client.plan r
           JOIN client.plan mp ON mp.parent_plan_id = r.id
@@ -602,17 +603,11 @@ module.exports = class NetworkPlan {
         return database.query(sql, [plan_id])
       })
       .then((edges) => {
-        var types = {}
-        edges.forEach((edge) => {
-          var type = edge.fiber_type
-          var arr = types[type]
-          if (!arr) types[type] = arr = []
-          arr.push(edge)
-        })
+        var types = _.groupBy(edges, 'fiber_type')
         Object.keys(types).forEach((type) => {
           kml_output += `<Folder><name>${escape(type)}</name>`
           types[type].forEach((edge) => {
-            kml_output += `<Placemark><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
+            kml_output += `<Placemark><name>${escape(edge.length.toLocaleString())} m</name><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
           })
           kml_output += '</Folder>'
         })
@@ -632,9 +627,9 @@ module.exports = class NetworkPlan {
         })
 
         var sql = `
-          SELECT ST_AsKML(nn.geom) AS geom
+          SELECT ST_AsKML(nn.geom) AS geom, t.description
           FROM client.network_nodes nn
-          -- JOIN client.network_node_types t ON nn.node_type_id = t.id
+          JOIN client.network_node_types t ON nn.node_type_id = t.id
           WHERE plan_id IN (
             (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
               (SELECT id FROM client.plan WHERE parent_plan_id=$1)
@@ -643,9 +638,15 @@ module.exports = class NetworkPlan {
         `
         return database.query(sql, [plan_id])
       })
-      .then((sources) => {
-        sources.forEach((source) => {
-          kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${source.geom}</Placemark>\n`
+      .then((equipmentNodes) => {
+        var types = _.groupBy(equipmentNodes, 'description')
+        Object.keys(types).forEach((type) => {
+          var arr = types[type]
+          kml_output += `<Folder><name>${escape(type)}</name>`
+          arr.forEach((node) => {
+            kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${node.geom}</Placemark>\n`
+          })
+          kml_output += '</Folder>'
         })
 
         var sql = `
