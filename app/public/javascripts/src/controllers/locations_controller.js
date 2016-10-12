@@ -72,6 +72,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   var declarativeStyles = (feature, styles) => {
     if (styles.icon) return
     var type = 'households'
+    var target = feature.getProperty('selected')
+    if (target) {
+      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/target.png`
+      return
+    }
     var categories = feature.getProperty('entity_categories')
     if (categories.indexOf('towers') >= 0) {
       styles.icon = `/images/map_icons/${config.ARO_CLIENT}/tower.png`
@@ -133,8 +138,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     threshold: 100,
     reload: 'always'
   })
-
-  // `/images/map_icons/${config.ARO_CLIENT}/tower.png`,
 
   map_layers.addFeatureLayer(locationsLayer)
   map_layers.addFeatureLayer(selectedLocationsLayer)

@@ -105,7 +105,7 @@ module.exports = class Location {
         FROM unselected_locations
       ),
       features AS (
-        SELECT categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories
+        SELECT true AS selected, categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories
         FROM categorized_locations
       )
     `

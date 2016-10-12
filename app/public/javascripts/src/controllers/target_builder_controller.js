@@ -43,10 +43,16 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (tool === 'target_builder') {
-      // $scope.setSelectedTool('single')
+      calculateUnaselectable()
       drawingManager.setMap(map_tools.is_visible('target_builder') ? map : null)
     }
   })
+
+  function calculateUnaselectable () {
+    var unselectable = !map_tools.is_visible('target_builder') || $scope.selectedTool !== 'single'
+    map_layers.getFeatureLayer('locations').unselectable = unselectable
+    map_layers.getFeatureLayer('selected_locations').unselectable = unselectable
+  }
 
   $scope.isToolSelected = (name) => {
     return $scope.selectedTool === name
@@ -63,6 +69,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       drawingManager.setDrawingMode(null)
     }
     calculateShowHeatmap()
+    calculateUnaselectable()
   }
 
   $scope.toggleSelectedTool = (name) => {
@@ -212,6 +219,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
         $scope.targets = response.targets
         $scope.targetsTotal = response.total
         if ($scope.targetsTotal > 0) optimization.setMode('targets')
+        map_layers.getFeatureLayer('locations').reloadData(true)
+        map_layers.getFeatureLayer('selected_locations').reloadData(true)
       })
   }
 

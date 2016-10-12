@@ -79,6 +79,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
           this.broadcastChanges(changes)
         } else {
           if (!map_tools.is_visible('target_builder') || !event.feature.getProperty('id') || event.feature.getProperty('unselectable')) return
+          if (this.unselectable) return
           changes = this.createEmptyChanges()
           this.toggleFeature(event.feature, changes)
           this.broadcastChanges(changes)
