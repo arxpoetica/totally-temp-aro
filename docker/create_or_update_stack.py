@@ -43,7 +43,7 @@ with open(TEMPLATE_FILE, 'r') as template_file:
 branch_name = os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
 build_num = os.environ['CIRCLE_BUILD_NUM']
 etl_image_version = os.environ.get('ARO_ETL_IMAGE_VERSION')
-nginx_image_version = 6 # current
+nginx_image_version = os.environ.get('ARO_NGINX_IMAGE_VERSION') 
 aro_service_image_version = os.environ.get('ARO_SERVICE_IMAGE_VERSION')
 domain_name = os.environ.get('ARO_APP_CLIENT_DOMAIN')
 aro_client = os.environ.get('ARO_CLIENT') or 'aro'
