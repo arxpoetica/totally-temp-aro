@@ -589,7 +589,7 @@ module.exports = class NetworkPlan {
         var sql = `
           SELECT
             ST_AsKML(seg.geom) AS geom,
-            ST_Length(seg.geom) AS length,
+            ST_Length(seg.geom::geography) AS length,
             (frt.description || ' ' || cct.description) AS fiber_type
           FROM client.plan r
           JOIN client.plan mp ON mp.parent_plan_id = r.id
