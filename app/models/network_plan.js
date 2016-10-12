@@ -695,6 +695,7 @@ module.exports = class NetworkPlan {
         ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
       FROM aro.businesses
       WHERE to_tsvector('english', name) @@ plainto_tsquery($1)
+      LIMIT 100
     `
     return database.query(sql, [text.toLowerCase()])
   }
