@@ -1,1 +1,0 @@
-CREATE INDEX  tiger_data_state_the_geom ON  tiger_data.state USING gist(the_geom);
