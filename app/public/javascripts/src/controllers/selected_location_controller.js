@@ -289,8 +289,9 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     var options = {
       tooltipTemplate: `<%if (label){%><%=label%>: <%}%><%= value %>%` // eslint-disable-line
     }
-    var ctx = document.getElementById('location_fair_share_chart').getContext('2d')
-    if (!ctx) return
+    var el = document.getElementById('location_fair_share_chart')
+    if (!el) return
+    var ctx = el.getContext('2d')
     destroyFairShareChart()
     fair_share_chart = new Chart(ctx).Pie(data, options)
     document.getElementById('location_fair_share_chart_legend').innerHTML = fair_share_chart.generateLegend()

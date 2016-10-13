@@ -24,7 +24,7 @@ app.service('map_utils', ($rootScope, $http) => {
         layer.overrideStyle(feature, hoverStyle)
       } else {
         timer = setTimeout(() => {
-          marker.setMap(null)
+          marker && marker.setMap(null)
           layer.revertStyle(feature)
         }, timeout || 0)
       }
