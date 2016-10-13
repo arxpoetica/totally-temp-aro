@@ -5,7 +5,6 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
-var config = helpers.config
 
 module.exports = class Location {
 
@@ -15,7 +14,8 @@ module.exports = class Location {
   static findLocations (plan_id, filters, viewport) {
     var businesses = filters.business_categories.map((value) => 'b_' + value)
     var households = filters.household_categories.map((value) => 'h_' + value)
-    var categories = businesses.concat(households)
+    var towers = filters.towers
+    var categories = businesses.concat(households).concat(towers)
 
     var sql = `
       WITH visible_locations AS (
@@ -35,7 +35,7 @@ module.exports = class Location {
           array(
             SELECT DISTINCT 'b_' || c.name
             FROM businesses b
-            JOIN client.business_categories c ON b.number_of_employees >= c.min_value AND b.number_of_employees < c.max_value
+            JOIN client.business_categories c ON b.number_of_employees >= c.min_value AND b.number_of_employees <= c.max_value
             JOIN client.employees_by_location e ON (b.number_of_employees >= e.min_value) AND (b.number_of_employees <= e.max_value)
             WHERE b.location_id = unselected_locations.id
           )
@@ -43,8 +43,13 @@ module.exports = class Location {
           array(
             SELECT DISTINCT 'h_' || c.name
             FROM households b
-            JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households < c.max_value
+            JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households <= c.max_value
             WHERE b.location_id = unselected_locations.id
+          )
+          ||
+          array(
+            SELECT 'towers'::text FROM towers t
+            WHERE t.location_id = unselected_locations.id
           )
         ) AS entity_categories
         FROM unselected_locations
@@ -56,22 +61,6 @@ module.exports = class Location {
       )
     `
     return database.points(sql, [plan_id, categories], true, viewport)
-  }
-
-  /*
-  * Returns all the towers with a flag indicating if they are selected or not
-  */
-  static findTowers (plan_id, viewport) {
-    let sql = `
-        SELECT locations.id, locations.geom, MAX(plan_targets.id) IS NOT NULL AS selected
-          FROM locations
-          JOIN towers ON towers.location_id = locations.id
-     LEFT JOIN client.plan_targets
-            ON plan_targets.location_id=locations.id AND plan_targets.plan_id=$1
-          ${database.intersects(viewport, 'locations.geom', 'WHERE')}
-      GROUP BY locations.id
-    `
-    return database.points(sql, [plan_id], true, viewport)
   }
 
   /*
@@ -107,21 +96,65 @@ module.exports = class Location {
             JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households < c.max_value
             WHERE b.location_id = unselected_locations.id
           )
+          ||
+          array(
+            SELECT 'towers'::text FROM towers t
+            WHERE t.location_id = unselected_locations.id
+          )
         ) AS entity_categories
         FROM unselected_locations
       ),
       features AS (
-        SELECT categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories
+        SELECT true AS selected, categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories
         FROM categorized_locations
       )
     `
     return database.points(sql, [plan_id], true, viewport)
   }
 
+  // Selected locations as a list
+  static findTargets (plan_id) {
+    var sql = `
+      SELECT locations.id, address
+      FROM locations
+      JOIN client.plan_targets
+        ON plan_targets.plan_id = $1
+       AND plan_targets.location_id = locations.id
+     ORDER BY locations.id ASC
+     LIMIT 10
+    `
+    return database.query(sql, [plan_id])
+      .then((targets) => {
+        return database.findOne(`
+          SELECT COUNT(*) AS total
+          FROM locations
+          JOIN client.plan_targets
+            ON plan_targets.plan_id=$1
+           AND plan_targets.location_id = locations.id
+        `, [plan_id])
+          .then((row) => {
+            return {
+              targets: targets,
+              total: row.total
+            }
+          })
+      })
+  }
+
+  static deleteTarget (plan_id, locationId) {
+    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1 AND location_id=$2'
+    return database.query(sql, [plan_id, locationId])
+      .then(() => this.findTargets(plan_id))
+  }
+
+  static deleteAllTargets (plan_id) {
+    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'
+    return database.query(sql, [plan_id])
+      .then(() => this.findTargets(plan_id))
+  }
+
   // Get summary information for a given location
-  //
-  // 1. location_id: integer. ex. 1738
-  static showInformation (location_id) {
+  static showInformation (plan_id, location_id) {
     var info
     return Promise.resolve()
       .then(() => {
@@ -208,14 +241,18 @@ module.exports = class Location {
 
         sql = `
           SELECT
-            ct.name, COUNT(*)::integer AS total
-          FROM businesses b
-          JOIN client.business_customer_types bct
-            ON bct.business_id = b.id
-          JOIN client.customer_types ct
-            ON ct.id = bct.customer_type_id
-          WHERE b.location_id=$1
-          GROUP BY ct.id
+            CASE WHEN bs.max_value < 100000000 THEN
+              bs.size_name || ' (' || bs.min_value || ' - ' || bs.max_value || ' employees)'
+            ELSE
+              bs.size_name || ' (' || bs.min_value || '+ employees)'
+            END AS name,
+            COUNT(b.id)::integer AS total
+          FROM client.businesses_sizes bs
+          LEFT JOIN businesses b
+            ON b.number_of_employees >= bs.min_value AND b.number_of_employees <= bs.max_value
+            AND b.location_id=$1
+          GROUP BY bs.size_name
+          ORDER BY bs.min_value ASC
         `
         var businesses = database.query(sql, [location_id])
           .then((values) => add('businesses', values))
@@ -253,14 +290,24 @@ module.exports = class Location {
       .then(() => {
         var sql = `
           SELECT address, ST_AsGeojson(geog)::json AS geog,
-            (SELECT distance FROM client.locations_distance_to_carrier
-              JOIN carriers ON carriers.name = $2
-              WHERE location_id=locations.id
+            (SELECT ST_Distance(existing_fiber.geom::geography, locations.geog)
+              FROM client.existing_fiber
+              ORDER BY existing_fiber.geom <#> locations.geom ASC
               LIMIT 1
-            ) AS distance_to_client_fiber
+            ) AS distance_to_client_fiber,
+            (SELECT ST_Distance(fr.geom::geography, locations.geog)
+              FROM client.fiber_route fr
+              WHERE fr.plan_id IN (
+                (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+                  (SELECT id FROM client.plan WHERE parent_plan_id=$2)
+                ))
+              )
+              ORDER BY fr.geom <#> locations.geom ASC
+              LIMIT 1
+            ) AS distance_to_planned_network
           FROM locations WHERE id=$1
         `
-        return database.findOne(sql, [location_id, config.client_carrier_name])
+        return database.findOne(sql, [location_id, plan_id])
       })
       .then((location) => Object.assign(info, location))
   }
@@ -445,19 +492,32 @@ module.exports = class Location {
         costs.install_cost::float,
         costs.annual_recurring_cost::float,
         industries.description AS industry_description,
-        ct.name as customer_type
+        ct.name as customer_type,
+        bs.size_name
       FROM
         aro.businesses businesses
-      JOIN client.business_install_costs costs
+      LEFT JOIN client.business_install_costs costs
         ON costs.business_id = businesses.id
       LEFT JOIN industries
         ON industries.id = businesses.industry_id
-      JOIN client.business_customer_types bct
+      LEFT JOIN client.business_customer_types bct
         ON bct.business_id = businesses.id
-      JOIN client.customer_types ct
+      LEFT JOIN client.customer_types ct
         ON ct.id = bct.customer_type_id
+      LEFT JOIN client.businesses_sizes bs
+        ON businesses.number_of_employees >= bs.min_value AND businesses.number_of_employees <= bs.max_value
       WHERE
         location_id = $1
+    `
+    return database.query(sql, [location_id])
+  }
+
+  static showTowers (location_id) {
+    var sql = `
+      SELECT
+        sita_number, parcel_address AS address
+       FROM towers
+      WHERE location_id = $1
     `
     return database.query(sql, [location_id])
   }

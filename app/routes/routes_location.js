@@ -2,13 +2,15 @@ var models = require('../models')
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
+  var check_any_permission = middleware.check_any_permission
+  var check_owner_permission = middleware.check_owner_permission
 
-  api.get('/locations/:plan_id', middleware.viewport, (request, response, next) => {
+  api.get('/locations/:plan_id', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = +request.params.plan_id
 
     var filters = {}
-    var keys = ['business_categories', 'household_categories']
+    var keys = ['business_categories', 'household_categories', 'towers']
     keys.forEach((key) => {
       var value = request.query[key] || []
       if (!Array.isArray(value)) {
@@ -21,16 +23,7 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/towers/:plan_id', middleware.viewport, (request, response, next) => {
-    var viewport = request.viewport
-    var plan_id = +request.params.plan_id
-
-    models.Location.findTowers(plan_id, viewport)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.get('/locations/:plan_id/selected', middleware.viewport, (request, response, next) => {
+  api.get('/locations/:plan_id/selected', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = +request.params.plan_id
 
@@ -39,9 +32,10 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/locations/:location_id/show', (request, response, next) => {
+  api.get('/locations/:plan_id/:location_id/show', check_any_permission, (request, response, next) => {
+    var plan_id = request.params.plan_id
     var location_id = request.params.location_id
-    models.Location.showInformation(location_id)
+    models.Location.showInformation(plan_id, location_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -49,6 +43,13 @@ exports.configure = (api, middleware) => {
   api.get('/locations/businesses/:location_id', (request, response, next) => {
     var location_id = request.params.location_id
     models.Location.showBusinesses(location_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/locations/towers/:location_id', (request, response, next) => {
+    var location_id = request.params.location_id
+    models.Location.showTowers(location_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -98,6 +99,28 @@ exports.configure = (api, middleware) => {
   api.get('/search/locations', (request, response, next) => {
     var text = request.query.text
     models.Location.search(text)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/locations/:plan_id/targets', check_any_permission, (request, response, next) => {
+    var planId = +request.params.plan_id
+    models.Location.findTargets(planId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/locations/:plan_id/targets/delete', check_owner_permission, (request, response, next) => {
+    var planId = +request.params.plan_id
+    var locationId = +request.body.locationId
+    models.Location.deleteTarget(planId, locationId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/locations/:plan_id/targets/delete_all', check_owner_permission, (request, response, next) => {
+    var planId = +request.params.plan_id
+    models.Location.deleteAllTargets(planId)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

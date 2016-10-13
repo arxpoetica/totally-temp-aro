@@ -2,10 +2,10 @@
   <p><strong>Optimization Type</strong></p>
   <select ng-model="optimizationType" class="form-control">
     <option value="CAPEX">Full Coverage</option>
+    <option ng-hide="optimizationMode === 'targets'" value="MAX_IRR">Maximum IRR</option>
+    <option ng-hide="optimizationMode === 'targets'" value="IRR">Budget</option>
+    <option ng-hide="optimizationMode === 'targets'" value="TARGET_IRR">IRR Target</option>
     <!--
-    <option value="MAX_IRR">Maximum IRR</option>
-    <option value="TARGET_IRR">IRR Target</option>
-    <option value="IRR">Budget</option>
     <option value="BUDGET_IRR">Budget and IRR Floor</option>
     -->
   </select>
@@ -102,7 +102,7 @@
   </div>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="optimizeTowers"> Towers
+      <input type="checkbox" ng-model="optimizeTowers"> Cell Sites
     </label>
   </div>
   <% } %>
@@ -151,6 +151,16 @@
     </div>
   </form>
   <% } %>
+
+  <div ng-show="optimizationMode === 'targets'">
+    <p><strong>Optimization Processing Layer</strong></p>
+    <p>
+      <select class="form-control" ng-model="selectedBoundary"
+        ng-options="boundary as boundary.description for boundary in allBoundaries track by boundary.id">
+        <option value="">Default Layer</option>
+      </select>
+    </p>
+  </div>
 
   <div>
     <p class="pull-right">

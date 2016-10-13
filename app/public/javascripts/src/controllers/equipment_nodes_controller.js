@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', '$timeout', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, $timeout) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -10,6 +10,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.vztfttp = true
 
   $scope.serviceLayers = []
+  $scope.existingEquipmentLayers = []
 
   var fiberPlantLayer = new MapLayer({
     name: config.ui.labels.fiber,
@@ -27,9 +28,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     reload: 'always'
   })
 
-  map_layers.addEquipmentLayer(fiberPlantLayer)
-
-  $scope.equipment_layers = map_layers.equipment_layers
+  $scope.existingEquipmentLayers.push(fiberPlantLayer)
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('network_nodes')) {
@@ -60,6 +59,17 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $(document).ready(() => {
     map.ready(() => {
       $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)).filter((layer) => layer.show_in_assets)
+      $scope.serviceLayers.forEach((layer) => {
+
+      })
+      var additionalLayer = {
+        id: 'all',
+        name: 'all',
+        description: 'Optimized equipment',
+        equipment_description: 'Optimized equipment',
+        nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item))
+      }
+      $scope.serviceLayers.push(additionalLayer)
       if ($scope.serviceLayers.length > 0) {
         var layer = $scope.serviceLayers[0]
         // layer.enabled = true
@@ -95,9 +105,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       threshold: 0,
       reload: 'always'
     })
-    routeLayer.hide_in_ui = true
     layer.routeLayer = routeLayer
-    map_layers.addEquipmentLayer(routeLayer)
 
     layer.changedFiberVisibility = () => {
       routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber))
@@ -130,10 +138,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         }
       }
     })
-    networkNodesLayer.hide_in_ui = true
     networkNodesLayer.flat_color = true
     layer.networkNodesLayer = networkNodesLayer
-    map_layers.addEquipmentLayer(networkNodesLayer)
 
     layer.changeNodeTypesVisibility = () => {
       var types = []

@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'map_layers', 'MapLayer', 'tracker', 'regions', '$timeout', ($scope, $rootScope, $http, map_tools, map_utils, map_layers, MapLayer, tracker, regions, $timeout) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -147,10 +147,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
   ]
 
-  var wirecentersLayer
   globalServiceLayers.forEach((serviceLayer) => {
-    var isWirecenter = serviceLayer.name === 'wirecenter'
-    if (!serviceLayer.show_in_boundaries && !isWirecenter) return
+    if (!serviceLayer.show_in_boundaries) return
     var color = serviceLayersColors.shift() || 'black'
     var layer = new MapLayer({
       name: serviceLayer.description,
@@ -174,7 +172,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       minZoom: 6,
       hoverField: 'name'
     })
-    if (isWirecenter) wirecentersLayer = layer
     if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
   })
 
@@ -517,12 +514,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     })
   }
 
-  $rootScope.$on('financial_profile_changed_mode', (e, mode) => {
-    if (mode === 'area') {
-      wirecentersLayer && wirecentersLayer.show()
-    }
-  })
-
   $scope.toggleVisibility = (layer) => {
     layer.toggleVisibility()
     regions.setSearchOption(layer.type, layer.visible)
@@ -548,5 +539,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       select.scrollTop = select.scrollHeight
     }
     $scope.changeUserDefinedBoundary()
+  })
+
+  $scope.optimizationMode = optimization.getMode()
+  $rootScope.$on('optimization_mode_changed', (e, mode) => {
+    $scope.optimizationMode = mode
   })
 }])

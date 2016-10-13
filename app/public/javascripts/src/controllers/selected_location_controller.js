@@ -1,4 +1,4 @@
-/* global app config $ encodeURIComponent _ tinycolor swal location Chart angular randomColor */
+/* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
 app.controller('selected_location_controller', ($rootScope, $scope, $http, map_layers, tracker, map_tools) => {
   $scope.location = {}
@@ -36,7 +36,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   })
 
   function openLocation (id) {
-    $http.get('/locations/' + id + '/show').success((response) => {
+    $http.get(`/locations/${$scope.plan.id}/${id}/show`).success((response) => {
       response.id = id
       setSelectedLocation(response)
       $('#selected_location_controller').modal('show')
@@ -86,7 +86,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
 
     preserveBusinessDetail()
-    $scope.businesses = null
+    $scope.businesses = []
     $scope.selected_business = null
     $http.get('/locations/businesses/' + location.id).success((response) => {
       preserveBusinessDetail()
@@ -98,6 +98,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
         location.address = business && business.address
       }
     })
+    $scope.towers = []
+    $http.get('/locations/towers/' + location.id).success((response) => {
+      preserveBusinessDetail()
+      $scope.towers = response
+    })
+    $scope.households = []
   }
 
   function preserveBusinessDetail () {
@@ -284,6 +290,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
       tooltipTemplate: `<%if (label){%><%=label%>: <%}%><%= value %>%` // eslint-disable-line
     }
     var ctx = document.getElementById('location_fair_share_chart').getContext('2d')
+    if (!ctx) return
     destroyFairShareChart()
     fair_share_chart = new Chart(ctx).Pie(data, options)
     document.getElementById('location_fair_share_chart_legend').innerHTML = fair_share_chart.generateLegend()
@@ -294,13 +301,19 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     ['households', 'businesses', 'towers'].forEach(showCustomerProfileChart)
   }
 
-  var customerTypeColorsArray = randomColor({ seed: 1, count: 3 })
   var customerTypeColor = {}
   function showCustomerProfileChart (type) {
-    var customer_types = $scope.location.customer_profile[type]
+    var customerTypes = $scope.location.customer_profile[type]
+    var customerTypeColorsArray = [
+      'rgb(242, 252, 148)',
+      'rgb(181, 111, 19)',
+      'rgb(29, 183, 244)',
+      'rgb(59, 86, 186)',
+      'rgb(178, 7, 35)'
+    ]
 
     var data = []
-    customer_types.forEach((customerType) => {
+    customerTypes.forEach((customerType) => {
       var color = customerTypeColor[customerType.name] || customerTypeColorsArray.shift()
       customerTypeColor[customerType.name] = color
       data.push({

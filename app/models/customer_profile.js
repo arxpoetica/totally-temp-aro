@@ -43,11 +43,11 @@ module.exports = class CustomerProfile {
 
       UNION ALL
 
-      (SELECT 'Towers' AS name, COUNT(*) AS total
+      (SELECT 'Cell Sites' AS name, COUNT(*) AS total
       FROM client.plan_targets t
       JOIN towers b ON b.location_id=t.location_id
       WHERE plan_id=$1)
-    `, [plan_id])
+    `, [plan_id]).then((result) => result.filter((item) => item.total > 0))
   }
 
   static customerProfileForRoute (plan_id, metadata) {

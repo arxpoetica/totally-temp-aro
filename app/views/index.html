@@ -5,15 +5,15 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/sweetalert.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/select2.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/select2-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/nouislider.min.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/aro.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/layout_<%= config.ui.layout %>.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/client_<%= config.ARO_CLIENT %>.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/select2.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/select2-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/nouislider.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= config.ARO_CLIENT %>.css">
   </head>
   <body>
 
@@ -424,7 +424,6 @@
   <script src="javascripts/lib/controllers/legend_controller.js"></script>
   <script src="javascripts/lib/controllers/global_search_controller.js"></script>
   <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
-  <script src="javascripts/lib/controllers/demand_forecast_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_census_block_controller.js"></script>
   <script src="javascripts/lib/controllers/settings_controller.js"></script>
   <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
@@ -445,11 +444,16 @@
   <script>app.run(function(loader){})</script>
   <script>
     $(function () {
-      var tooltips = $('#left-col [data-toggle="tooltip"]');
-      tooltips.tooltip();
+      var tooltips = $('#left-col [data-toggle="tooltip"]')
+      tooltips.tooltip()
       tooltips.on('click mouseout', function () {
         $(this).tooltip('hide')
       })
+    })
+
+    $(function () {
+      var popovers = $('#left-col [data-toggle="popover"]')
+      popovers.popover()
     })
 
     var expander = $('#expander')
@@ -483,8 +487,10 @@
       $('#map-tools-accordion .panel-collapse > .panel-body').css('max-height', maxHeight)
     }
 
-    $(document).ready(calculatePanelHeight)
-    $(window).resize(calculatePanelHeight)
+    if ($('#map-tools-accordion').size() > 0) {
+      $(document).ready(calculatePanelHeight)
+      $(window).resize(calculatePanelHeight)
+    }
 
     $("#share-plan-search").select2({
       ajax: {

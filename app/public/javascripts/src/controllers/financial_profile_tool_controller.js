@@ -1,5 +1,5 @@
 /* global app $ Chart */
-app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', 'MapLayer', ($scope, $rootScope, $http, $timeout, map_tools, MapLayer) => {
+app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', 'MapLayer', 'regions', ($scope, $rootScope, $http, $timeout, map_tools, MapLayer, regions) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
   $scope.premisesFilterEntityTypes = { household: true }
@@ -22,7 +22,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     mediumBusiness: 'Mid-tier',
     largeBusiness: 'Large Enterprise',
     household: 'Households',
-    cellTower: 'Towers'
+    cellTower: 'Cell Sites'
   }
   $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
     key: key,
@@ -80,7 +80,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
-    if (layer.type !== 'wirecenter') return
+    if (layer.type !== 'child_plans') return
 
     var feature = event.feature
     $scope.selectedArea = {
@@ -168,10 +168,24 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     refreshCurrentTab()
   })
 
-  $rootScope.$on('map_tool_changed_visibility', (e) => {
+  $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('financial_profile')) {
       $timeout(dirty ? refresh : refreshCurrentTab, 0)
       dirty = false
+
+      if ($scope.mode === 'area') {
+        $scope.layersStatus = MapLayer.hideAllLayers()
+        serviceAreaLayer.show()
+        regions.hide()
+      }
+    } else if (tool === 'financial_profile') {
+      $('a[href="#map-tools-financial"]').click()
+
+      if ($scope.layersStatus) {
+        MapLayer.recoverLayersVisibility($scope.layersStatus)
+      }
+      serviceAreaLayer.hide()
+      regions.show()
     }
   })
 
@@ -489,11 +503,20 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.showData = true
   $scope.setMode = (mode) => {
     $scope.mode = mode
-    $rootScope.$broadcast('financial_profile_changed_mode', mode)
     $scope.selectedArea = null
     $scope.metadata = $scope.plan.metadata
     $scope.calculateShowData()
     refresh()
+    if (mode === 'area') {
+      serviceAreaLayer.revertStyles()
+      $scope.layersStatus = MapLayer.hideAllLayers()
+      serviceAreaLayer.show()
+      regions.hide()
+    } else {
+      MapLayer.recoverLayersVisibility($scope.layersStatus)
+      serviceAreaLayer.hide()
+      regions.show()
+    }
   }
 
   $scope.calculateShowData = () => {
@@ -548,4 +571,34 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.showBuildLease = () => {
     $('#build-lease').modal('show')
   }
+
+  var serviceAreaLayer = new MapLayer({
+    name: 'Child Plans',
+    type: 'child_plans',
+    api_endpoint: '/network_plan/:plan_id/child_plans',
+    highlighteable: true,
+    style_options: {
+      normal: {
+        strokeColor: 'cyan',
+        strokeWeight: 4,
+        fillOpacity: 0
+      },
+      highlight: {
+        strokeColor: 'cyan',
+        strokeWeight: 6,
+        fillOpacity: 0.1
+      }
+    },
+    reload: 'always',
+    threshold: 0,
+    minZoom: 6,
+    hoverField: 'name',
+    single_selection: true,
+    declarativeStyles: (feature, styles) => {
+      var selected = feature.getProperty('selected')
+      if (selected) {
+        styles.fillOpacity = 0.1
+      }
+    }
+  })
 }])

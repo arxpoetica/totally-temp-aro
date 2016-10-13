@@ -1,7 +1,7 @@
 <div>
   <div class="panel-body" ng-show="map_tools.is_expanded('financial_profile')" style="max-height: 700px; overflow: auto">
     <p ng-hide="showData" class="text-center" style="margin: 100px 10px">
-      Click on a wirecenter to see its financial summary.
+      Click on an area to see its financial summary.
     </p>
     <div  ng-show="showData">
     <ul class="nav nav-tabs" role="tablist">
@@ -111,7 +111,7 @@
             </div>
             <div class="checkbox" style="margin-left: 10px">
               <label>
-                <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Towers
+                <input type="checkbox" ng-model="capexFilterEntityTypes['businesses']" ng-change="refreshCurrentTab(true)"> Cell Sites
               </label>
             </div>
             -->

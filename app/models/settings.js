@@ -128,9 +128,13 @@ module.exports = class Settings {
       if (Object.keys(serviceLayerEntityCategories).length > 0) {
         invalidation.push('SERVICE_LAYER_INPUTS')
       }
+      if (Object.keys(financialAssumptions).length > 0) {
+        invalidation.push('ROIC_ENGINE_INPUTS')
+        invalidation.push('ROIC_SERVICE_INPUTS')
+      }
       return pync.series(invalidation, (key) => (
         models.AROService.request({
-          url: config.aro_service_url + `/rest/ref-cache/${invalidation}`,
+          url: config.aro_service_url + `/rest/ref-cache/${key}`,
           method: 'DELETE',
           json: true
         })

@@ -12,20 +12,31 @@ exports.configure = (app, middleware) => {
     })
   })
 
-  app.post('/settings/change_password', (request, response, next) => {
+  app.post('/settings/update_settings', (request, response, next) => {
     var user = request.user
-    var old_password = request.body.old_password
-    var password = request.body.password
-    var password_confirm = request.body.password_confirm
+    var firstName = request.body.first_name
+    var lastName = request.body.last_name
+    var email = request.body.email
 
-    if (password !== password_confirm) {
-      request.flash('error', 'Passwords do not match')
-      return response.redirect('/settings/show')
+    var promise = Promise.resolve()
+    if (oldPassword && password && passwordConfirm) {
+      var oldPassword = request.body.old_password
+      var password = request.body.password
+      var passwordConfirm = request.body.password_confirm
+
+      if (password !== passwordConfirm) {
+        request.flash('error', 'Passwords do not match')
+        return response.redirect('/settings/show')
+      }
+
+      promise = models.User.changePassword(user.id, oldPassword, password)
     }
-
-    models.User.changePassword(user.id, old_password, password)
+    promise
+      .then(() => (
+        models.User.updateSettings(user.id, firstName, lastName, email)
+      ))
       .then(() => {
-        request.flash('success', 'Password changed successfully')
+        request.flash('success', 'Settings changed successfully')
         response.redirect('/settings/show')
       })
       .catch((err) => {

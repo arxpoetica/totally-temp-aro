@@ -1,5 +1,7 @@
 var path = require('path')
 var gm = require('gm')
+var fs = require('fs')
+var pync = require('pync')
 
 var helpers = require('../helpers')
 var database = helpers.database
@@ -36,30 +38,28 @@ var nodeTypes = [
 const ARO_CLIENT = process.env.ARO_CLIENT
 const fullPath = (filename) => path.join(__dirname, `../public/images/map_icons/${ARO_CLIENT}`, filename)
 
-database.query('SELECT * FROM client.service_layer ORDER BY description ASC')
+database.query('(SELECT name FROM client.service_layer WHERE is_user_defined=false ORDER BY description ASC) UNION ALL (SELECT \'all\' AS name)')
   .then((serviceLayers) => (
-    Promise.all(
-      serviceLayers.map((layer) => (
-        Promise.all(
-          nodeTypes.map((nodeType) => {
-            var filename = fullPath(`composite/${layer.name}_${nodeType}.png`)
-            return new Promise((resolve, reject) => {
-              gm()
-                .command('composite')
-                .in('-gravity', 'center')
-                .in(fullPath(`${nodeType}.png`))
-                .in(fullPath(`service_layer_${layer.name}.png`))
-                .write(filename, (err) => {
-                  err ? reject(err) : (console.log(filename) || resolve())
-                })
-                // .size('result.png', (err, info) => {
-                //   console.log('info', info)
-                //   err ? reject(err) : resolve()
-                // })
+    pync.series(serviceLayers, (layer) =>
+      pync.series(nodeTypes, (nodeType) => {
+        var filename = fullPath(`composite/${layer.name}_${nodeType}.png`)
+        return new Promise((resolve, reject) => {
+          if (layer.name === 'all') {
+            var buff = fs.readFileSync(fullPath(`${nodeType}.png`))
+            fs.writeFileSync(filename, buff)
+            console.log(filename)
+            return resolve()
+          }
+          gm()
+            .command('composite')
+            .in('-gravity', 'center')
+            .in(fullPath(`${nodeType}.png`))
+            .in(fullPath(`service_layer_${layer.name}.png`))
+            .write(filename, (err) => {
+              err ? reject(err) : (console.log(filename) || resolve())
             })
-          })
-        )
-      ))
+        })
+      })
     )
   ))
   .then(() => process.exit())

@@ -2,6 +2,18 @@
 app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 
+  var mode = null
+  optimization.setMode = (_mode) => {
+    if (mode !== _mode) {
+      mode = _mode
+      $rootScope.$broadcast('optimization_mode_changed', mode)
+    }
+  }
+
+  optimization.getMode = () => {
+    return mode
+  }
+
   optimization.optimize = (plan, changes, success, error) => {
     var canceler = $q.defer()
 
@@ -16,14 +28,14 @@ app.service('optimization', ($rootScope, $http, $q) => {
       }
       $http(options)
         .success((response) => {
-          plan.ran_optimization = true
+          if (!changes.lazy) plan.ranOptimization = true
           $rootScope.$broadcast('route_planning_changed', response)
           success && success()
         })
         .error(error)
     }
 
-    if (changes.lazy || !plan.ran_optimization) {
+    if (changes.lazy || !plan.ranOptimization) {
       run(plan)
     } else {
       swal({
