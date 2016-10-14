@@ -8,4 +8,5 @@ public interface CashFlows {
 
 	double getCashFlow(int period);
 
+	CashFlows subtract(CashFlows c2);
 }

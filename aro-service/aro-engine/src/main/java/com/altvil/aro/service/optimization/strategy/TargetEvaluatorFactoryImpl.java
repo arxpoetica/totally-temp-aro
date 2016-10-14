@@ -60,7 +60,7 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
             return optimizedNetworkMap
                     .entrySet()
                     .stream()
-                    .map(entry -> toPlannedNetwork(entry.getKey(), entry.getValue().getImproved(), entry.getValue().getPrunedNetwork().getCompetitiveDemandMapping()))
+                    .map(entry -> toPlannedNetwork(entry.getKey(), entry.getValue().getImproved().getOptimizedNetwork(), entry.getValue().getSingleAreaAnalysis().getCompetitiveDemandMapping()))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(toList());
@@ -101,36 +101,38 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
 
     private class IRREvaluator extends AbstractOptimizationTargetEvaluator{
 
-        private final int analysisYears;
         double currentCapex = 0;
-        double currentMonthlyIncrementalImpact = 0;
+        double[] currentCashFlow ;
 
         public IRREvaluator(Double threshold, Double capexThreshold, int analysisYears) {
             super(threshold, capexThreshold);
-            this.analysisYears = analysisYears;
+            this.currentCashFlow = new double[analysisYears];
         }
 
         @Override
         public boolean addNetwork(OptimizationImprovement optimizationImprovement) {
             if(currentCapex + optimizationImprovement.getIncrementalCost() > capexThreshold )
                 return false;
-            if(getIRR(currentCapex + optimizationImprovement.getIncrementalCost(), currentMonthlyIncrementalImpact+optimizationImprovement.getIncrementalBeneift()) < threshold)
+
+
+            double irr = Irr.irr(sum(currentCashFlow, optimizationImprovement.getIncrementalCashFlow()));
+            if( irr < threshold)
                 return false;
             setOptimizedNetwork(optimizationImprovement);
             currentCapex += optimizationImprovement.getIncrementalCost();
-            currentMonthlyIncrementalImpact += optimizationImprovement.getIncrementalBeneift();
+            currentCashFlow = sum(currentCashFlow , optimizationImprovement.getIncrementalCashFlow());
             return true;
         }
-        private double getIRR(double cost, double monthlyIncome) {
-            double cashFlows[] = new double[analysisYears +1];
-            Arrays.fill(cashFlows, monthlyIncome * 12);
-            cashFlows[0] = -cost;
-            return Irr.irr(cashFlows);
-        }
+
     }
 
-
-
+    private double[] sum(double[] c1, double[] c2) {
+        double[] result = new double[c1.length];
+        for (int i = 0; i < c1.length; i++) {
+            result[i] = c1[i]+c2[i];
+        }
+        return result;
+    }
 
 
 }

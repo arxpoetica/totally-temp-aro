@@ -112,6 +112,12 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 						return 0 ;
 					}
 
+					@Override
+					public CashFlows subtract(CashFlows c2) {
+						throw new UnsupportedOperationException();
+					}
+
+
 				};
 			}
 		};
@@ -169,6 +175,11 @@ public class PlanAnalysisServiceImpl implements PlanAnalysisService {
 					@Override
 					public double getCashFlow(int period) {
 						return 0;
+					}
+
+					@Override
+					public CashFlows subtract(CashFlows c2) {
+						throw new UnsupportedOperationException();
 					}
 
 				};
