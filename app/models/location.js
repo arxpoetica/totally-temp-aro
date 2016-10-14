@@ -284,6 +284,19 @@ module.exports = class Location {
           WHERE t.location_id=$1
           GROUP BY ct.id
         `
+        sql = `
+          SELECT 'Macro - Existing' as name, 0 as total
+          UNION ALL
+          SELECT 'Macro - Planned' as name, 0 as total
+          UNION ALL
+          SELECT 'Small Cell - Existing' as name, 0 as total
+          UNION ALL
+          SELECT 'Small Cell - Planned' as name, 0 as total
+          UNION ALL
+          SELECT 'Undefined' as name, (
+            SELECT COUNT(*)::integer FROM towers t WHERE t.location_id=$1
+          ) as total
+        `
         var towers = database.query(sql, [location_id])
           .then((values) => add('towers', values))
 
