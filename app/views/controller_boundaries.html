@@ -94,12 +94,12 @@
   <hr>
   <% } %>
 
-  <!--
+  <% if (config.ARO_CLIENT !== 'verizon') { %>
   <div ng-show="plan.owner_id === user_id">
     <h2>Build</h2>
     <p>
       <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggleTool()">Custom</a>
     </p>
   </div>
-  -->
+  <% } %>
 </div>

@@ -104,7 +104,7 @@
   <div ng-show="map_tools.is_visible('financial_profile')" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 1000px">
     <div class="panel-heading">
       {{ map_tools.get_tool_name('financial_profile') }}
-      {{ mode === 'area' && selectedArea ? ' · '+selectedArea.name : '' }}
+      {{ selectedArea ? ' · '+selectedArea.name : '' }}
       <a href="javascript:void(0)" class="pull-right" ng-click="download()">
         <span style="color:white" class="fa fa-download"></span>
       </a>
