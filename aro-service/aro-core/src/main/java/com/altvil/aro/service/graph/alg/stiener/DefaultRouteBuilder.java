@@ -242,9 +242,19 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 
 			}
 
+			//Path from target to source
 			GraphPath<V, E> path = closestSource.getClosestPath();
-
-			// Bind Root
+			
+			//path List from target to source
+			List<V> pathList = Graphs.getPathVertexList(path);
+			
+			//reversed Iterator
+			Iterator<V> itr = new ReverseIterator<V>(pathList);
+			
+			//Pop Virtual Root
+			itr.next() ;
+			
+			// Bind f(v) SourceRoot 
 			SourceRoute<V, E> sourceRoot = sourceRootMap.get(path
 					.getEndVertex());
 
