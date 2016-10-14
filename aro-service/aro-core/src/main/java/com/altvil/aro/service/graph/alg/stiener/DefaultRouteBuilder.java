@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.GraphPathConstraint;
+import com.altvil.aro.service.graph.alg.GraphPathConstraint.MetricDistance;
+import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
 import com.altvil.aro.service.graph.segment.GeoSegment;
@@ -36,7 +38,7 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 	// .getLogger(AbstractRouteBuilder.class.getName());
 
 	private ClosestRouteStrategy<V, E> closestRouteStrategy;
-	private WeightedGraph<V, E> sourceGraph;
+	private SourceGraph<V, E> sourceGraph;
 	private GraphPathConstraint<V, E> pathPredicate = (sourceRoot, path) -> true;
 	private Collection<V> allRoots;
 	private Collection<V> assignedTargets;
@@ -44,7 +46,7 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 	private Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 
 	public DefaultRouteBuilder(ClosestRouteStrategy<V, E> closestRouteStrategy,
-			WeightedGraph<V, E> sourceGraph,
+			SourceGraph<V, E> sourceGraph,
 			GraphPathConstraint<V, E> pathPredicate, Collection<V> allRoots,
 			Collection<V> assignedTargets) {
 		super();
@@ -58,8 +60,13 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 	@Override
 	public Collection<SourceRoute<V, E>> build() {
 
-		try (VirtualRoot vr = createVirtualRoot(sourceGraph, allRoots)) {
-			return this.build(vr, assignedTargets);
+		try (VirtualRoot vr = createVirtualRoot(sourceGraph.getGraph(),
+				allRoots)) {
+
+			SelectedTargets selectedTargets = new SelectedTargets(vr.getRoot(),
+					pathPredicate, sourceGraph.getMarkGraph(), assignedTargets);
+
+			return this.build(vr, selectedTargets);
 		} catch (IOException err) {
 			throw new RuntimeException(err.getMessage(), err);
 		}
@@ -122,7 +129,7 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 
 	@SuppressWarnings("unchecked")
 	private Collection<SourceRoute<V, E>> build(VirtualRoot virtualRoot,
-			Collection<V> targets) {
+			SelectedTargets selectedTargets) {
 
 		// Filter out any vertices that fail Network Constraint
 		// This will simplify network Algorithm as Precondition will be
@@ -138,17 +145,17 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 		// .collect(Collectors.toList());
 
 		// Track All Vertices that caused previous network generation to fail.
-		
+
 		int maxCount = 10;
 		int count = 1;
 		while (count < maxCount) {
 			try {
-				return build(virtualRoot, targets,
-						count == maxCount);
+				return build(virtualRoot, selectedTargets, count == maxCount);
 			} catch (FailedNetworkNode err) {
 				log.info("Failed to route network plan .. rebuilding "
 						+ err.getFailedNodes());
-				virtualRoot.addRejectedTarget((V) err.getFailedNodes().iterator().next());
+				selectedTargets.addFailingTargets((Collection<V>) err
+						.getFailedNodes());
 				count++;
 			}
 		}
@@ -158,35 +165,35 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 	}
 
 	private Collection<SourceRoute<V, E>> build(VirtualRoot virtualRoot,
-			Collection<V> targets,
-			boolean forceNetwork) throws FailedNetworkNode {
+			SelectedTargets selectedTargets, boolean forceNetwork)
+			throws FailedNetworkNode {
 
-		 Collection<V> forcedTargets = new ArrayList<>(virtualRoot.getForcedTargets());
+		Collection<V> forcedTargets = new ArrayList<>(
+				selectedTargets.getFailingVertices());
 
 		// Establish Root Structures
-		Set<V> roots = new HashSet<>(virtualRoot.getConnectedRoots());
+		Set<V> roots = new HashSet<>(virtualRoot.getSources());
 
 		sourceRootMap.clear();
 		roots.forEach(v -> {
-			sourceRootMap.put(v, new SourceRoute<>(sourceGraph, v));
+			sourceRootMap.put(v, new SourceRoute<>(sourceGraph.getGraph(), v));
 		});
 
 		List<SourceRoute<V, E>> originalSources = new ArrayList<>(
 				sourceRootMap.values());
 
 		// Reset Target
-		Map<V, SpanningShortestPath<V, E>> targetMap = new HashMap<>(
-				targets.size());
+		Map<V, SpanningShortestPath<V, E>> targetMap = new HashMap<>();
 
-		for (V target : targets) {
+		for (V target : selectedTargets.getTargets()) {
 			// Exclude any source target match
 
 			if (roots.contains(target)) {
 				// Update Root Structure
 				// Distance still bound at 0
 				sourceRootMap.get(target).add(
-						new GraphPathImpl<V, E>(sourceGraph, target, target,
-								new ArrayList<>(), 0.0));
+						new GraphPathImpl<V, E>(sourceGraph.getGraph(), target,
+								target, new ArrayList<>(), 0.0));
 			} else {
 				SpanningShortestPath<V, E> ssp = createSpanningShortestPath(target);
 				ssp.seedOrigin(virtualRoot.getRoot());
@@ -220,9 +227,8 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 	private void assemble(Map<V, SpanningShortestPath<V, E>> targetMap,
 			boolean force) throws FailedNetworkNode {
 
-		
-		Collection<V> previousTargets = Collections.emptyList() ;
-		
+		Collection<V> previousTargets = Collections.emptyList();
+
 		// Track all Sources
 		while (targetMap.size() > 0) {
 
@@ -242,19 +248,10 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 
 			}
 
-			//Path from target to source
+			// Path from target to source
 			GraphPath<V, E> path = closestSource.getClosestPath();
-			
-			//path List from target to source
-			List<V> pathList = Graphs.getPathVertexList(path);
-			
-			//reversed Iterator
-			Iterator<V> itr = new ReverseIterator<V>(pathList);
-			
-			//Pop Virtual Root
-			itr.next() ;
-			
-			// Bind f(v) SourceRoot 
+
+			// Bind f(v) SourceRoot
 			SourceRoute<V, E> sourceRoot = sourceRootMap.get(path
 					.getEndVertex());
 
@@ -285,7 +282,7 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 				// Update the vertex as bound with Source
 				sourceRootMap.put(next, sourceRoot);
 
-				E e = sourceGraph.getEdge(previous, next);
+				E e = sourceGraph.getGraph().getEdge(previous, next);
 				// TODO remove this condition
 				if (e != null) {
 					distanceToSource += e.getValue().getLength();
@@ -295,20 +292,18 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 				sourceRoot.add(next, distanceToSource);
 				previous = next;
 			}
-			
-			//Assign Previous Targets
-			previousTargets = pathList ;
+
+			// Assign Previous Targets
+			previousTargets = pathList;
 		}
 
 	}
-	
-
 
 	private ClosestTarget<V, E> getClosestSource(Collection<V> deltaSources,
 			Map<V, SpanningShortestPath<V, E>> targetMap) {
 
 		ClosestTarget<V, E> closestSource = new ClosestTarget<>();
-		
+
 		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = new TreeMap<>();
 		for (V target : targetMap.keySet()) {
 			SpanningShortestPath<V, E> ssp = targetMap.get(target);
@@ -438,35 +433,160 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 
 	private VirtualRoot createVirtualRoot(WeightedGraph<V, E> graph,
 			Collection<V> sources) {
-		return null;
+		return new VirtualRoot(graph, sources);
 	}
 
 	private class VirtualRoot implements Closeable {
-		private V root;
-		private Collection<V> connectedRoots;
+		private WeightedGraph<V, E> graph;
+		private Collection<E> virtualEdges;
 
+		private V root;
+		private Collection<V> sources;
+		
+		public VirtualRoot(WeightedGraph<V, E> graph,
+			Collection<V> sources) {
+			this.graph = graph ;
+			this.sources  = sources ;
+			
+			addVirtualRoot(sources);
+		}
+		
 		public V getRoot() {
 			return root;
 		}
-		
-		public Collection<V> getForcedTargets() {
-			return null ;
-		}
-		
-		public void addRejectedTarget(V rejectedTarget) {
-			
-		}
 
-		public Collection<V> getConnectedRoots() {
-			return connectedRoots;
+		public Collection<V> getSources() {
+			return sources;
 		}
 
 		@Override
 		public void close() throws IOException {
-			// TODO Auto-generated method stub
-
+			removeRootEdges(virtualEdges);
+		}
+		
+		private void addVirtualRoot(Collection<V> sources) {
+			root = sourceGraph.createVertex() ;
+			sources.forEach(s -> {
+				E edge = graph.addEdge(s, root) ;
+				graph.setEdgeWeight(edge, 0) ;
+				virtualEdges.add(edge) ;
+			});
 		}
 
+		private void removeRootEdges(Collection<E> edges) {
+			edges.forEach(e -> {
+				graph.removeEdge(e);
+			});
+		}
+
+	}
+
+	private class SelectedTargets implements MetricDistance<V> {
+
+		private V source;
+		private GraphPathConstraint<V, E> pathPredicate;
+		private WeightedGraph<V, E> graph;
+
+		private ScalarClosestFirstSurfaceIterator<V, E> itr;
+		private Map<V, Double> map = new HashMap<>();
+		private Map<V, Double> rejected = new HashMap<>();
+		private TreeMap<Double, V> failingVertices = new TreeMap<>();
+
+		public SelectedTargets(V source,
+				GraphPathConstraint<V, E> pathPredicate,
+				WeightedGraph<V, E> graph, Collection<V> targets) {
+			super();
+			this.source = source;
+			this.pathPredicate = pathPredicate;
+			this.graph = graph;
+
+			this.itr = new ScalarClosestFirstSurfaceIterator<>(graph, source);
+			init(targets);
+		}
+
+		public void addFailingTargets(Collection<V> vertices) {
+			V v = findFurthestVertex(vertices);
+			failingVertices.put(getTargetDistance(v), v);
+		}
+
+		public Collection<V> getFailingVertices() {
+			return failingVertices.values();
+		}
+
+		private V findFurthestVertex(Collection<V> vertices) {
+			double max = Double.POSITIVE_INFINITY;
+			V selected = null;
+
+			for (V v : vertices) {
+				if (selected == null) {
+					selected = v;
+				} else {
+					double distance = map.get(v);
+					if (distance > max) {
+						max = distance;
+						selected = v;
+					}
+				}
+			}
+			return selected;
+		}
+
+		public Collection<V> getTargets() {
+			return map.keySet();
+		}
+
+		public double getTargetDistance(V vertex) {
+			return map.get(vertex);
+		}
+
+		private void init(Collection<V> targets) {
+			targets.forEach(v -> {
+				index(v);
+			});
+		}
+
+		@Override
+		public double getDistance(V vertex) {
+			return 0;
+		}
+
+		private GraphPath<V, E> createGraphPath(V endVertex, double pathLength) {
+			List<E> edgeList = new ArrayList<E>();
+
+			V v = endVertex;
+
+			while (true) {
+				E edge = itr.getSpanningTreeEdge(v);
+
+				if (edge == null) {
+					break;
+				}
+
+				edgeList.add(edge);
+				v = Graphs.getOppositeVertex(graph, edge, v);
+			}
+
+			return new GraphPathImpl<V, E>(graph, endVertex, source, edgeList,
+					pathLength);
+		}
+
+		private void index(V vertex) {
+			double pathLength = find(vertex);
+			if (pathPredicate
+					.isValid(this, createGraphPath(vertex, pathLength))) {
+				map.put(vertex, find(vertex));
+			} else {
+				rejected.put(vertex, pathLength);
+			}
+		}
+
+		private double find(V vertex) {
+			if (!itr.isSeenVertex(vertex)) {
+				while (itr.hasNext() && !(itr.next() == vertex))
+					;
+			}
+			return itr.getShortestPathLength(vertex);
+		}
 	}
 
 	private static final Logger log = LoggerFactory
