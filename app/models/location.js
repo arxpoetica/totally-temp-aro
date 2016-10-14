@@ -233,10 +233,12 @@ module.exports = class Location {
       .then((_info) => {
         info = _info
         info.customer_profile = {}
+        info.customer_profile_totals = {}
         var sql
 
         var add = (type, values) => {
           info.customer_profile[type] = values
+          info.customer_profile_totals[type] = values.reduce((total, item) => total + item.total, 0)
         }
 
         sql = `
