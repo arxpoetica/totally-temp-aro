@@ -286,14 +286,18 @@
               <thead>
                 <tr>
                   <th>Address</th>
-                  <th>Demographics</th>
+                  <th>Income Level</th>
+                  <th>Education Level</th>
+                  <th>Credit Quality</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="text-center" ng-show="households.length === 0">
-                  <td style="padding: 40px" colspan="2">No households at this location</td>
+                  <td style="padding: 40px" colspan="4">No households at this location</td>
                 </tr>
                 <tr ng-repeat="household in households">
+                  <td></td>
+                  <td></td>
                   <td></td>
                   <td></td>
                 </tr>
