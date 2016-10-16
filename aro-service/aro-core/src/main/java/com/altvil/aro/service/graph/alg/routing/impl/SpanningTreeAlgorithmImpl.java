@@ -1,4 +1,4 @@
-package com.altvil.aro.service.graph.alg.stiener;
+package com.altvil.aro.service.graph.alg.routing.impl;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,13 +26,16 @@ import org.slf4j.LoggerFactory;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.GraphPathConstraint;
 import com.altvil.aro.service.graph.alg.GraphPathConstraint.MetricDistance;
+import com.altvil.aro.service.graph.alg.routing.spi.ClosestRouteStrategy;
+import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
+import com.altvil.aro.service.graph.alg.routing.spi.SpanningTreeAlgorithm;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 
-public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
-		SpanningRouteBuilder<V, E> {
+public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> implements
+		SpanningTreeAlgorithm<V, E> {
 
 	// private static final Logger log = LoggerFactory
 	// .getLogger(AbstractRouteBuilder.class.getName());
@@ -49,7 +52,7 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 	
 	private Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 
-	public DefaultRouteBuilder(ClosestRouteStrategy<V, E> closestRouteStrategy,
+	public SpanningTreeAlgorithmImpl(ClosestRouteStrategy<V, E> closestRouteStrategy,
 			SourceGraph<V, E> sourceGraph,
 			GraphPathConstraint<V, E> pathPredicate, Collection<V> allRoots,
 			Collection<V> assignedTargets) {
@@ -596,6 +599,6 @@ public class DefaultRouteBuilder<V, E extends AroEdge<GeoSegment>> implements
 	}
 
 	private static final Logger log = LoggerFactory
-			.getLogger(DefaultRouteBuilder.class.getName());
+			.getLogger(SpanningTreeAlgorithmImpl.class.getName());
 
 }

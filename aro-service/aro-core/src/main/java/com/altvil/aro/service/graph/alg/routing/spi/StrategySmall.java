@@ -1,4 +1,4 @@
-package com.altvil.aro.service.graph.alg.stiener;
+package com.altvil.aro.service.graph.alg.routing.spi;
 
 import org.jgrapht.WeightedGraph;
 import org.slf4j.Logger;
@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
+import com.altvil.aro.service.graph.alg.routing.impl.DefaultShortestSpanningPath;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 

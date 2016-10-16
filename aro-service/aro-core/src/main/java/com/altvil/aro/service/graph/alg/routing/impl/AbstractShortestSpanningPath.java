@@ -1,4 +1,4 @@
-package com.altvil.aro.service.graph.alg.stiener;
+package com.altvil.aro.service.graph.alg.routing.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,6 +10,7 @@ import org.jgrapht.WeightedGraph;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
+import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 
 public abstract class AbstractShortestSpanningPath<V, E extends AroEdge<?>> implements
 		SpanningShortestPath<V, E> {

@@ -1,4 +1,4 @@
-package com.altvil.aro.service.graph.alg.stiener;
+package com.altvil.aro.service.graph.alg.routing.spi;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;

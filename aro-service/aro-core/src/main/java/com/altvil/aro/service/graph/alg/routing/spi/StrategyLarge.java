@@ -1,4 +1,4 @@
-package com.altvil.aro.service.graph.alg.stiener;
+package com.altvil.aro.service.graph.alg.routing.spi;
 
 import org.jgrapht.WeightedGraph;
 import org.slf4j.Logger;
@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
+import com.altvil.aro.service.graph.alg.routing.impl.SpanningTreeAlgorithmImpl;
+import com.altvil.aro.service.graph.alg.routing.impl.LowMemoryShortestSpanningPath;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 
 public class StrategyLarge<V, E extends AroEdge<GeoSegment>> implements
@@ -13,7 +15,7 @@ public class StrategyLarge<V, E extends AroEdge<GeoSegment>> implements
 
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
-			.getLogger(DefaultRouteBuilder.class.getName());
+			.getLogger(SpanningTreeAlgorithmImpl.class.getName());
 
 	private WeightedGraph<V, E> sourceGraph;
 

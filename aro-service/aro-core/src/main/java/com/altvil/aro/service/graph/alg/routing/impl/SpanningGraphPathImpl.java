@@ -1,4 +1,4 @@
-package com.altvil.aro.service.graph.alg.stiener;
+package com.altvil.aro.service.graph.alg.routing.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,8 @@ import java.util.List;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.GraphPathImpl;
+
+import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 
 public class SpanningGraphPathImpl<V, E> extends GraphPathImpl<V, E> implements
 		SpanningGraphPath<V, E> {
