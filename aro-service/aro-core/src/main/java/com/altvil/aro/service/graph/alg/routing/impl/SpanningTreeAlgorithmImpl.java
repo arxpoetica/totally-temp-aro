@@ -1,7 +1,5 @@
 package com.altvil.aro.service.graph.alg.routing.impl;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +26,7 @@ import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
 import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint;
 import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint.MetricDistance;
+import com.altvil.aro.service.graph.alg.routing.VirtualRoot;
 import com.altvil.aro.service.graph.alg.routing.spi.ClosestRouteStrategy;
 import com.altvil.aro.service.graph.alg.routing.spi.MetricEdgeWeight;
 import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
@@ -48,24 +47,24 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	private GraphPathConstraint<V, E> pathPredicate;
 	private boolean isPathPredicateActive;
 	private MetricEdgeWeight<E> metricEdgeWeight;
-	private Collection<V> allRoots;
 	private Collection<V> assignedTargets;
 
+	private VirtualRoot<V, E> virtualRoot ;
 	private WeightedGraph<V, E> analysisGraph;
 	private WeightedGraph<V, E> metricGraph;
-
+	
+	
 	private Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 
 	public SpanningTreeAlgorithmImpl(
 			MetricEdgeWeight<E> metricEdgeWeight,
 			SourceGraph<V, E> sourceGraph,
-			GraphPathConstraint<V, E> pathPredicate, Collection<V> allRoots,
+			GraphPathConstraint<V, E> pathPredicate,
 			Collection<V> assignedTargets) {
 		super();
 		this.metricEdgeWeight = metricEdgeWeight ;
 		this.sourceGraph = sourceGraph;
 		this.pathPredicate = pathPredicate;
-		this.allRoots = allRoots;
 		this.assignedTargets = assignedTargets;
 
 		if (this.pathPredicate == null) {
@@ -90,21 +89,17 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		this.metricGraph = sourceGraph.getMetricGraph();
 
-		try (VirtualRoot vr = createVirtualRoot(metricGraph, allRoots)) {
+		this.analysisGraph = sourceGraph.getAnalysisGraph() ;
 
-			this.analysisGraph = sourceGraph.createAnalysisGraph(metricGraph);
+		SelectedTargets selectedTargets = (isPathPredicateActive) ? 
+				new ConstrainedSelectedTargets(
+				virtualRoot.getRoot(), pathPredicate, metricGraph, assignedTargets)
+				: new UnconstrainedTargets(assignedTargets);
 
-			SelectedTargets selectedTargets = (isPathPredicateActive) ? new ConstrainedSelectedTargets(
-					vr.getRoot(), pathPredicate, metricGraph, assignedTargets)
-					: new UnconstrainedTargets(assignedTargets);
+		this.closestRouteStrategy = createClosestRouteStrategy(
+				this.analysisGraph, selectedTargets.getTargets());
 
-			this.closestRouteStrategy = createClosestRouteStrategy(
-					this.analysisGraph, selectedTargets.getTargets());
-
-			return this.build(vr, selectedTargets);
-		} catch (IOException err) {
-			throw new RuntimeException(err.getMessage(), err);
-		}
+		return this.build(virtualRoot, selectedTargets);
 
 	}
 
@@ -163,7 +158,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	 */
 
 	@SuppressWarnings("unchecked")
-	private Collection<SourceRoute<V, E>> build(VirtualRoot virtualRoot,
+	private Collection<SourceRoute<V, E>> build(VirtualRoot<V,E> virtualRoot,
 			SelectedTargets selectedTargets) {
 
 		// Filter out any vertices that fail Network Constraint
@@ -199,7 +194,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 	}
 
-	private Collection<SourceRoute<V, E>> build(VirtualRoot virtualRoot,
+	private Collection<SourceRoute<V, E>> build(VirtualRoot<V,E> virtualRoot,
 			SelectedTargets selectedTargets, boolean forceNetwork)
 			throws FailedNetworkNode {
 
@@ -258,7 +253,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	}
 
 	@SuppressWarnings("unchecked")
-	private void assemble(VirtualRoot virtualRoot,
+	private void assemble(VirtualRoot<V, E> virtualRoot,
 			Map<V, SpanningShortestPath<V, E>> targetMap, boolean force)
 			throws FailedNetworkNode {
 
@@ -466,56 +461,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	// }
 	//
 	// }
-
-	private VirtualRoot createVirtualRoot(WeightedGraph<V, E> graph,
-			Collection<V> sources) {
-		return new VirtualRoot(graph, sources);
-	}
-
-	private class VirtualRoot implements Closeable {
-		private WeightedGraph<V, E> graph;
-		private Collection<E> virtualEdges;
-
-		private V root;
-		private Collection<V> sources;
-
-		public VirtualRoot(WeightedGraph<V, E> graph, Collection<V> sources) {
-			this.graph = graph;
-			this.sources = sources;
-
-			addVirtualRoot(sources);
-		}
-
-		public V getRoot() {
-			return root;
-		}
-
-		public Collection<V> getSources() {
-			return sources;
-		}
-
-		@Override
-		public void close() throws IOException {
-			removeRootEdges(virtualEdges);
-		}
-
-		private void addVirtualRoot(Collection<V> sources) {
-			root = sourceGraph.getVertexSupplier().get();
-			sources.forEach(s -> {
-				E edge = graph.addEdge(s, root);
-				graph.setEdgeWeight(edge, 0);
-				virtualEdges.add(edge);
-			});
-		}
-
-		private void removeRootEdges(Collection<E> edges) {
-			edges.forEach(e -> {
-				graph.removeEdge(e);
-			});
-		}
-
-	}
-
+	
 	private class UnconstrainedTargets extends SelectedTargets {
 		private Collection<V> targets;
 
@@ -527,7 +473,6 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 		public Collection<V> getTargets() {
 			return targets;
 		}
-
 	}
 
 	private class ConstrainedSelectedTargets extends SelectedTargets implements

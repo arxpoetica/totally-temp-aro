@@ -1,35 +1,33 @@
 package com.altvil.aro.service.graph.alg.routing.impl;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import org.jgrapht.WeightedGraph;
+
+import com.altvil.aro.service.graph.alg.routing.VirtualRoot;
 
 public class SourceGraph<V, E> {
 
-	private WeightedGraph<V, E> graph;
-	private Function<WeightedGraph<V, E>, WeightedGraph<V, E>> f;
-	private Supplier<V> vertexSupplier;
-
-	public SourceGraph(WeightedGraph<V, E> graph,
-			Function<WeightedGraph<V, E>, WeightedGraph<V, E>> f,
-			Supplier<V> vertexSupplier) {
+	private WeightedGraph<V,E> metricGraph ;
+	private WeightedGraph<V,E> analysisGraph ;
+	private VirtualRoot<V, E> virtualRoot ;
+	
+	public SourceGraph(WeightedGraph<V, E> metricGraph,
+			WeightedGraph<V, E> analysisGraph, VirtualRoot<V, E> virtualRoot) {
 		super();
-		this.graph = graph;
-		this.f = f;
-		this.vertexSupplier = vertexSupplier;
-	}
-
-	public Supplier<V> getVertexSupplier() {
-		return vertexSupplier;
+		this.metricGraph = metricGraph;
+		this.analysisGraph = analysisGraph;
+		this.virtualRoot = virtualRoot;
 	}
 
 	public WeightedGraph<V, E> getMetricGraph() {
-		return graph;
+		return metricGraph ;
 	}
 
-	public WeightedGraph<V, E> createAnalysisGraph(WeightedGraph<V, E> g) {
-		return f.apply(g);
+	public WeightedGraph<V, E> getAnalysisGraph() {
+		return analysisGraph;
+	}
+
+	public VirtualRoot<V, E> getVirtualRoot() {
+		return virtualRoot;
 	}
 
 }
