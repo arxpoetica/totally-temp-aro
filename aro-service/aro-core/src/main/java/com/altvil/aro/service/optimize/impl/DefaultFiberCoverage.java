@@ -29,7 +29,7 @@ public class DefaultFiberCoverage implements DemandCoverage {
 			Set<AssignedEntityDemand> locationEntities) {
 		super();
 		this.coverage = coverage;
-		this.locationEntities = new ArrayList(locationEntities);
+		this.locationEntities = new ArrayList<>(locationEntities);
 	}
 
 	@Override

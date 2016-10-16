@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import com.altvil.aro.service.cu.ComputeUnitBuilder;
-import com.altvil.aro.service.network.model.PlanConduitEdges;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +34,7 @@ import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.entity.impl.EntityFactory;
 import com.altvil.aro.service.entity.mapping.LocationEntityTypeMapping;
 import com.altvil.aro.service.network.ServiceAreaContext;
+import com.altvil.aro.service.network.model.PlanConduitEdges;
 import com.altvil.aro.service.network.model.ServiceAreaLocationDemand;
 import com.altvil.aro.service.network.model.ServiceAreaRoadEdges;
 import com.altvil.aro.service.network.model.ServiceAreaRoadLocations;

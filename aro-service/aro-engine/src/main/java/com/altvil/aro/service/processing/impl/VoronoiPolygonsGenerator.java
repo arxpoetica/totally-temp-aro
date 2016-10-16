@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.altvil.utils.GeometryUtil;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -61,12 +60,12 @@ public class VoronoiPolygonsGenerator {
 
     }
 
-    private Envelope computeEnvelope(Collection<Point> points) {
-
-    	return GeometryUtil
-                .factory()
-                .buildGeometry(points)
-                .buffer(maxDistanceMeters)
-                .getEnvelopeInternal();
-    }
+//    private Envelope computeEnvelope(Collection<Point> points) {
+//
+//    	return GeometryUtil
+//                .factory()
+//                .buildGeometry(points)
+//                .buffer(maxDistanceMeters)
+//                .getEnvelopeInternal();
+//    }
 }

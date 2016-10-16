@@ -5,6 +5,7 @@ import com.altvil.interfaces.CableConduitEdge;
 import java.io.Serializable;
 import java.util.Collection;
 
+@SuppressWarnings("serial")
 public class PlanConduitEdges implements Serializable{
     Collection<CableConduitEdge> edges;
 

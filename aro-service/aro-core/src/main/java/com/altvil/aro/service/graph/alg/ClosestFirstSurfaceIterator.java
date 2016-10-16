@@ -40,7 +40,7 @@ public interface ClosestFirstSurfaceIterator<V, E> extends GraphIterator<V, E> {
 	 */
 	E getSpanningTreeEdge(V vertex);
 
-	boolean isSeenVertex(V vertex) ;
+	boolean isTraversedVertex(V vertex) ;
 	
 	boolean isGlobalConstraintMet();
 
