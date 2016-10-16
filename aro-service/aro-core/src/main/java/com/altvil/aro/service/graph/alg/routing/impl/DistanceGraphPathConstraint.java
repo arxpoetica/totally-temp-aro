@@ -1,10 +1,11 @@
-package com.altvil.aro.service.graph.alg;
+package com.altvil.aro.service.graph.alg.routing.impl;
 
 import org.jgrapht.GraphPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.service.graph.AroEdge;
+import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint;
 import com.altvil.aro.service.graph.segment.GeoSegment;
 
 public class DistanceGraphPathConstraint<V, E extends AroEdge<GeoSegment>>

@@ -4,10 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.segment.GeoSegment;
-
-public class TargetRoutes<V, E extends AroEdge<GeoSegment>> {
+public class TargetRoutes<V, E> {
 	
 	private Collection<TargetRoute<V, E>> routes ;
 	

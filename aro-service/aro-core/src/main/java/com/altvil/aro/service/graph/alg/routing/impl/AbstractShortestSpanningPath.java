@@ -7,12 +7,11 @@ import java.util.List;
 import org.jgrapht.Graphs;
 import org.jgrapht.WeightedGraph;
 
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.ClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
 import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 
-public abstract class AbstractShortestSpanningPath<V, E extends AroEdge<?>> implements
+public abstract class AbstractShortestSpanningPath<V, E> implements
 		SpanningShortestPath<V, E> {
 
 	private WeightedGraph<V, E> graph ;

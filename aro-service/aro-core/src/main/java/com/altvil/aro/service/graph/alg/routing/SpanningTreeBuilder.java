@@ -5,11 +5,9 @@ import java.util.function.Function;
 
 import org.jgrapht.WeightedGraph;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.alg.GraphPathConstraint;
-import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.alg.routing.spi.MetricEdgeWeight;
 
-public interface SpanningTreeBuilder<V, E extends AroEdge<GeoSegment>> {
+public interface SpanningTreeBuilder<V, E> {
 
 	SpanningTreeBuilder<V, E> setAnalysisTransform(
 			Function<WeightedGraph<V, E>, WeightedGraph<V, E>> transform);
@@ -21,6 +19,8 @@ public interface SpanningTreeBuilder<V, E extends AroEdge<GeoSegment>> {
 	SpanningTreeBuilder<V, E> setSources(Collection<V> sources);
 
 	SpanningTreeBuilder<V, E> setTargets(Collection<V> targets);
+	
+	SpanningTreeBuilder<V, E> setMetricEdgeWeight(MetricEdgeWeight<E> metricEdgeWeight) ;
 	
 	SpanningTree<V,E> build() ;
 	

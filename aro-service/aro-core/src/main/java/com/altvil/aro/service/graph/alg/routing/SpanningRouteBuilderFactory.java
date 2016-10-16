@@ -5,7 +5,6 @@ import java.util.Collection;
 import org.jgrapht.WeightedGraph;
 
 import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.alg.GraphPathConstraint;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.routing.impl.SpanningTreeAlgorithmImpl;
 import com.altvil.aro.service.graph.alg.routing.spi.ClosestRouteStrategy;

@@ -5,22 +5,26 @@ import java.util.function.Function;
 
 import org.jgrapht.WeightedGraph;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.alg.GraphPathConstraint;
+import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint;
 import com.altvil.aro.service.graph.alg.routing.SpanningTree;
 import com.altvil.aro.service.graph.alg.routing.SpanningTreeBuilder;
-import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.alg.routing.spi.MetricEdgeWeight;
 
-public class SpanningTreeBuilderImpl<V, E extends AroEdge<GeoSegment>>
+public class SpanningTreeBuilderImpl<V, E>
 		implements SpanningTreeBuilder<V, E> {
+	
 
 	private Function<WeightedGraph<V, E>, WeightedGraph<V, E>> transform;
+	private MetricEdgeWeight<E> metricEdgeWeight;
+
 	private WeightedGraph<V, E> weightedGraph;
 	private GraphPathConstraint<V, E> predicate;
 
 	private Collection<V> sources;
 	private Collection<V> targets;
 
+	
+	
 	@Override
 	public SpanningTreeBuilder<V, E> setAnalysisTransform(
 			Function<WeightedGraph<V, E>, WeightedGraph<V, E>> transform) {
@@ -54,8 +58,17 @@ public class SpanningTreeBuilderImpl<V, E extends AroEdge<GeoSegment>>
 	}
 
 	@Override
+	public SpanningTreeBuilder<V, E> setMetricEdgeWeight(
+			MetricEdgeWeight<E> metricEdgeWeight) {
+		this.metricEdgeWeight = metricEdgeWeight;
+		return this;
+	}
+
+	@Override
 	public SpanningTree<V, E> build() {
-		// TODO Auto-generated method stub
+		
+		new SpanningTreeAlgorithmImpl<V,E>(metricEdgeWeight, null,
+				predicate, sources, targets).build() ;
 		return null;
 	}
 

@@ -2,12 +2,10 @@ package com.altvil.aro.service.graph.alg.routing.spi;
 
 import java.util.Collection;
 
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.SourceRoute;
-import com.altvil.aro.service.graph.segment.GeoSegment;
 
 
-public interface SpanningTreeAlgorithm<V, E extends AroEdge<GeoSegment>> {
+public interface SpanningTreeAlgorithm<V, E> {
 
 	public Collection<SourceRoute<V, E>> build() ;
 	

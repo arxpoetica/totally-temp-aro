@@ -4,13 +4,11 @@ import org.jgrapht.WeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
-import com.altvil.aro.service.graph.alg.routing.impl.SpanningTreeAlgorithmImpl;
 import com.altvil.aro.service.graph.alg.routing.impl.LowMemoryShortestSpanningPath;
-import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.alg.routing.impl.SpanningTreeAlgorithmImpl;
 
-public class StrategyLarge<V, E extends AroEdge<GeoSegment>> implements
+public class StrategyLarge<V, E> implements
 		ClosestRouteStrategy<V, E> {
 
 	@SuppressWarnings("unused")

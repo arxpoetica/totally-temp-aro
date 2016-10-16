@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jgrapht.WeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,13 @@ import com.altvil.aro.service.entity.FinancialInputs;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
 import com.altvil.aro.service.graph.GraphModel;
-import com.altvil.aro.service.graph.alg.DefaultGraphPathConstraint;
-import com.altvil.aro.service.graph.alg.DistanceGraphPathConstraint;
-import com.altvil.aro.service.graph.alg.GraphPathConstraint;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SourceRoute;
+import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint;
 import com.altvil.aro.service.graph.alg.routing.SpanningRouteBuilderFactory;
+import com.altvil.aro.service.graph.alg.routing.impl.DefaultGraphPathConstraint;
+import com.altvil.aro.service.graph.alg.routing.impl.DistanceGraphPathConstraint;
+import com.altvil.aro.service.graph.alg.routing.impl.SpanningTreeBuilderImpl;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphAssignmentFactory;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
@@ -276,6 +278,28 @@ public class CoreLeastCostRoutingServiceImpl implements
 		}
 
 		private RenodedGraph getRenodedGraph(GraphContext graphCtx,
+				GraphMapping graphMapping) {
+
+			GraphRenoder renoder = graphRenoderService.createGraphRenoder(
+					graphCtx.getGraphModel(), true);
+
+			renoder.add(extractAssignments(graphMapping).values());
+			renoder.add(assignmentFactory.createVertexAssignment(
+					fiberSourceBinding.getDomain(), graphMapping.getAroEntity()));
+
+			RenodedGraph renoded = renoder.renode();
+
+			DescribeGraph.trace(log, renoded.getGraph().getGraph());
+
+			return renoded;
+
+		}
+
+		private Function<WeightedGraph<GraphNode, AroEdge<GeoSegment>>, WeightedGraph<GraphNode, AroEdge<GeoSegment>>> createAnalysisTransform() {
+			return null ;
+		}
+
+		private RenodedGraph getRenodedGraph(GraphContext graphCtx,
 				FiberType fiberType, GraphMapping graphMapping) {
 
 			Map<CableConstructionEnum, Double> priceMap = createPriceMap(fiberType);
@@ -325,8 +349,10 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			Map<FiberType, RenodedGraph> renodedMap = new EnumMap<>(
 					FiberType.class);
+
 			renodedMap.put(FiberType.FEEDER,
 					getRenodedGraph(graphCtx, FiberType.FEEDER, graphMapping));
+
 			renodedMap.put(
 					FiberType.DISTRIBUTION,
 					getRenodedGraph(graphCtx, FiberType.DISTRIBUTION,
@@ -398,12 +424,20 @@ public class CoreLeastCostRoutingServiceImpl implements
 			if (log.isDebugEnabled())
 				log.debug("Processing Routes for" + root.getAroEntity());
 
-			SourceRoute<GraphNode, AroEdge<GeoSegment>> sr =  SpanningRouteBuilderFactory.FACTORY.create(
-					 renoded.getGraph().getGraph(), 
-					 predicate,
-					 Collections.singleton(renoded.getGraphNode(root)),
-					 StreamUtil.map(nodes, n -> renoded.getGraphNode(n))).build().iterator().next() ;
-			
+			new SpanningTreeBuilderImpl<GraphNode, AroEdge<GeoSegment>>()
+					.setMetricEdgeWeight(null)
+					.setAnalysisTransform(null)
+					.setSources(null)
+					.setTargets(
+							StreamUtil.map(nodes, n -> renoded.getGraphNode(n)))
+					.setGraphPathConstraint(predicate).build();
+
+			SourceRoute<GraphNode, AroEdge<GeoSegment>> sr = SpanningRouteBuilderFactory.FACTORY
+					.create(renoded.getGraph().getGraph(), predicate,
+							Collections.singleton(renoded.getGraphNode(root)),
+							StreamUtil.map(nodes, n -> renoded.getGraphNode(n)))
+					.build().iterator().next();
+
 			Set<AroEdge<GeoSegment>> edges = sr.createDagModel(
 					transformFactory.createDAGBuilder()).getEdges();
 

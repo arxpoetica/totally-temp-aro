@@ -23,59 +23,83 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.alg.GraphPathConstraint;
-import com.altvil.aro.service.graph.alg.GraphPathConstraint.MetricDistance;
-import com.altvil.aro.service.graph.alg.routing.spi.ClosestRouteStrategy;
-import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
-import com.altvil.aro.service.graph.alg.routing.spi.SpanningTreeAlgorithm;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
-import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint;
+import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint.MetricDistance;
+import com.altvil.aro.service.graph.alg.routing.spi.ClosestRouteStrategy;
+import com.altvil.aro.service.graph.alg.routing.spi.MetricEdgeWeight;
+import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
+import com.altvil.aro.service.graph.alg.routing.spi.SpanningTreeAlgorithm;
+import com.altvil.aro.service.graph.alg.routing.spi.StrategyLarge;
+import com.altvil.aro.service.graph.alg.routing.spi.StrategySmall;
 
-public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> implements
+public class SpanningTreeAlgorithmImpl<V, E> implements
 		SpanningTreeAlgorithm<V, E> {
 
 	// private static final Logger log = LoggerFactory
 	// .getLogger(AbstractRouteBuilder.class.getName());
 
+	private static int largeStrategyThreshold = 1000;
+
 	private ClosestRouteStrategy<V, E> closestRouteStrategy;
 	private SourceGraph<V, E> sourceGraph;
 	private GraphPathConstraint<V, E> pathPredicate;
-	
+	private boolean isPathPredicateActive;
+	private MetricEdgeWeight<E> metricEdgeWeight;
 	private Collection<V> allRoots;
 	private Collection<V> assignedTargets;
 
-	private WeightedGraph<V, E> analysisGraph ;
-	private WeightedGraph<V, E> metricGraph ;
-	
+	private WeightedGraph<V, E> analysisGraph;
+	private WeightedGraph<V, E> metricGraph;
+
 	private Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 
-	public SpanningTreeAlgorithmImpl(ClosestRouteStrategy<V, E> closestRouteStrategy,
+	public SpanningTreeAlgorithmImpl(
+			MetricEdgeWeight<E> metricEdgeWeight,
 			SourceGraph<V, E> sourceGraph,
 			GraphPathConstraint<V, E> pathPredicate, Collection<V> allRoots,
 			Collection<V> assignedTargets) {
 		super();
-		this.closestRouteStrategy = closestRouteStrategy;
+		this.metricEdgeWeight = metricEdgeWeight ;
 		this.sourceGraph = sourceGraph;
 		this.pathPredicate = pathPredicate;
 		this.allRoots = allRoots;
 		this.assignedTargets = assignedTargets;
+
+		if (this.pathPredicate == null) {
+			this.pathPredicate = (metric, path) -> true;
+			this.isPathPredicateActive = false;
+		} else {
+			this.isPathPredicateActive = true;
+		}
+
+	}
+
+	private ClosestRouteStrategy<V, E> createClosestRouteStrategy(
+			WeightedGraph<V, E> weightedGraph, Collection<V> targets) {
+		return (targets.size() <= largeStrategyThreshold) ? new StrategySmall<V, E>(
+				weightedGraph, ScalarClosestFirstSurfaceIterator.BUILDER)
+				: new StrategyLarge<V, E>(weightedGraph);
+
 	}
 
 	@Override
 	public Collection<SourceRoute<V, E>> build() {
 
-		this.metricGraph = sourceGraph.getMetricGraph() ;
-		
-		try (VirtualRoot vr = createVirtualRoot(metricGraph,
-				allRoots)) {
-			
-			this.analysisGraph = sourceGraph.createAnalysisGraph(metricGraph) ;
+		this.metricGraph = sourceGraph.getMetricGraph();
 
-			SelectedTargets selectedTargets = new SelectedTargets(vr.getRoot(),
-					pathPredicate, metricGraph, assignedTargets);
+		try (VirtualRoot vr = createVirtualRoot(metricGraph, allRoots)) {
+
+			this.analysisGraph = sourceGraph.createAnalysisGraph(metricGraph);
+
+			SelectedTargets selectedTargets = (isPathPredicateActive) ? new ConstrainedSelectedTargets(
+					vr.getRoot(), pathPredicate, metricGraph, assignedTargets)
+					: new UnconstrainedTargets(assignedTargets);
+
+			this.closestRouteStrategy = createClosestRouteStrategy(
+					this.analysisGraph, selectedTargets.getTargets());
 
 			return this.build(vr, selectedTargets);
 		} catch (IOException err) {
@@ -234,10 +258,12 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 	}
 
 	@SuppressWarnings("unchecked")
-	private void assemble(VirtualRoot virtualRoot, Map<V, SpanningShortestPath<V, E>> targetMap,
-			boolean force) throws FailedNetworkNode {
+	private void assemble(VirtualRoot virtualRoot,
+			Map<V, SpanningShortestPath<V, E>> targetMap, boolean force)
+			throws FailedNetworkNode {
 
-		Collection<V> previousPath = Collections.singleton(virtualRoot.getRoot());
+		Collection<V> previousPath = Collections.singleton(virtualRoot
+				.getRoot());
 
 		// Track all Sources
 		while (targetMap.size() > 0) {
@@ -262,22 +288,23 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 			SpanningGraphPath<V, E> path = closestSource.getClosestPath();
 
 			// Bind f(v) -> SourceRoot
-			SourceRoute<V, E> sourceRoot = sourceRootMap.get(path.getEndVertex());
-			
-			//remove satisfied target
+			SourceRoute<V, E> sourceRoot = sourceRootMap.get(path
+					.getEndVertex());
+
+			// remove satisfied target
 			targetMap.remove(path.getStartVertex());
-		
-			//Track Spanning Path
+
+			// Track Spanning Path
 			sourceRoot.add(path);
-			
+
 			// Filters out all Empty Spanning Paths
 			if (path.getEdgeList().size() == 0) {
 				continue;
 			}
 
 			//
-			List<V> pathList = path.getReverseVertexList() ;
-			Iterator<V> itr = pathList.iterator() ;
+			List<V> pathList = path.getReverseVertexList();
+			Iterator<V> itr = pathList.iterator();
 
 			V endVertex = itr.next();
 			double distanceToSource = sourceRoot.getDistance(endVertex);
@@ -294,7 +321,7 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 				E e = this.analysisGraph.getEdge(previous, next);
 				// TODO remove this condition
 				if (e != null) {
-					distanceToSource += e.getValue().getLength();
+					distanceToSource += metricEdgeWeight.getWeight(e);
 				}
 
 				// Keep Track of distance to source
@@ -379,7 +406,7 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 
 	}
 
-	private static class ClosestTarget<V, E extends AroEdge<GeoSegment>> {
+	private static class ClosestTarget<V, E> {
 
 		private SpanningGraphPath<V, E> closestPath;
 		private TreeMap<Double, V> failedTargets = null;
@@ -417,28 +444,28 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 
 	}
 
-//	private static class ReverseIterator<T> implements Iterator<T> {
-//
-//		private int index;
-//		private List<T> list;
-//
-//		public ReverseIterator(List<T> list) {
-//			super();
-//			this.list = list;
-//			this.index = list.size() - 1;
-//		}
-//
-//		@Override
-//		public boolean hasNext() {
-//			return index >= 0;
-//		}
-//
-//		@Override
-//		public T next() {
-//			return list.get(index--);
-//		}
-//
-//	}
+	// private static class ReverseIterator<T> implements Iterator<T> {
+	//
+	// private int index;
+	// private List<T> list;
+	//
+	// public ReverseIterator(List<T> list) {
+	// super();
+	// this.list = list;
+	// this.index = list.size() - 1;
+	// }
+	//
+	// @Override
+	// public boolean hasNext() {
+	// return index >= 0;
+	// }
+	//
+	// @Override
+	// public T next() {
+	// return list.get(index--);
+	// }
+	//
+	// }
 
 	private VirtualRoot createVirtualRoot(WeightedGraph<V, E> graph,
 			Collection<V> sources) {
@@ -451,15 +478,14 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 
 		private V root;
 		private Collection<V> sources;
-		
-		public VirtualRoot(WeightedGraph<V, E> graph,
-			Collection<V> sources) {
-			this.graph = graph ;
-			this.sources  = sources ;
-			
+
+		public VirtualRoot(WeightedGraph<V, E> graph, Collection<V> sources) {
+			this.graph = graph;
+			this.sources = sources;
+
 			addVirtualRoot(sources);
 		}
-		
+
 		public V getRoot() {
 			return root;
 		}
@@ -472,13 +498,13 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 		public void close() throws IOException {
 			removeRootEdges(virtualEdges);
 		}
-		
+
 		private void addVirtualRoot(Collection<V> sources) {
-			root = sourceGraph.getVertexSupplier().get() ;
+			root = sourceGraph.getVertexSupplier().get();
 			sources.forEach(s -> {
-				E edge = graph.addEdge(s, root) ;
-				graph.setEdgeWeight(edge, 0) ;
-				virtualEdges.add(edge) ;
+				E edge = graph.addEdge(s, root);
+				graph.setEdgeWeight(edge, 0);
+				virtualEdges.add(edge);
 			});
 		}
 
@@ -490,8 +516,22 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 
 	}
 
-	private class SelectedTargets implements MetricDistance<V> {
+	private class UnconstrainedTargets extends SelectedTargets {
+		private Collection<V> targets;
 
+		public UnconstrainedTargets(Collection<V> targets) {
+			this.targets = targets;
+		}
+
+		@Override
+		public Collection<V> getTargets() {
+			return targets;
+		}
+
+	}
+
+	private class ConstrainedSelectedTargets extends SelectedTargets implements
+			MetricDistance<V> {
 		private V source;
 		private GraphPathConstraint<V, E> pathPredicate;
 		private WeightedGraph<V, E> graph;
@@ -501,7 +541,7 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 		private Map<V, Double> rejected = new HashMap<>();
 		private TreeMap<Double, V> failingVertices = new TreeMap<>();
 
-		public SelectedTargets(V source,
+		public ConstrainedSelectedTargets(V source,
 				GraphPathConstraint<V, E> pathPredicate,
 				WeightedGraph<V, E> graph, Collection<V> targets) {
 			super();
@@ -583,7 +623,7 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 			double pathLength = find(vertex);
 			if (pathPredicate
 					.isValid(this, createGraphPath(vertex, pathLength))) {
-				map.put(vertex, find(vertex));
+				map.put(vertex, pathLength);
 			} else {
 				rejected.put(vertex, pathLength);
 			}
@@ -596,6 +636,25 @@ public class SpanningTreeAlgorithmImpl<V, E extends AroEdge<GeoSegment>> impleme
 			}
 			return itr.getShortestPathLength(vertex);
 		}
+	}
+
+	private abstract class SelectedTargets {
+
+		public void addFailingTargets(Collection<V> vertices) {
+		}
+
+		public Collection<V> getFailingVertices() {
+			return Collections.emptySet();
+		}
+
+		public Collection<V> getTargets() {
+			throw new RuntimeException("Unsupported Operation");
+		}
+
+		public double getTargetDistance(V vertex) {
+			return 0;
+		}
+
 	}
 
 	private static final Logger log = LoggerFactory

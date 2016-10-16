@@ -5,14 +5,10 @@ import java.util.function.Supplier;
 
 import org.jgrapht.WeightedGraph;
 
-import com.altvil.aro.service.graph.alg.GraphPathConstraint;
-
 public class SourceGraph<V, E> {
 
 	private WeightedGraph<V, E> graph;
 	private Function<WeightedGraph<V, E>, WeightedGraph<V, E>> f;
-	private  boolean isConstraintSupported ;
-	private GraphPathConstraint<V, E> constraint ;
 	private Supplier<V> vertexSupplier;
 
 	public SourceGraph(WeightedGraph<V, E> graph,
