@@ -2,6 +2,7 @@ package com.altvil.aro.service.plan.impl;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -309,10 +310,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 				GraphMapping graphMapping) {
 
 			FiberSourceMapping fiberMapping = (FiberSourceMapping) graphMapping;
-
-			Map<FiberType, RenodedGraph> renodedMap = new EnumMap<>(
-					FiberType.class);
-
+			
 			AnalysisGraphFactory analysisFactory = new AnalysisGraphFactory(
 					pricingModel, getRenodedGraph(graphCtx, graphMapping),
 					graphNodeFactory.createGraphNode(null), lcrContext);
@@ -328,7 +326,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			return new NetworkRouteModel(
 					fiberSourceBinding.getNetworkAssignment(), null,
-					renodedMap, feederFiber, distributionFiber, fiberMapping);
+					analysisFactory.getRenodedGraphs(), feederFiber, distributionFiber, fiberMapping);
 		}
 
 		private GeneratedFiberRoute planRoute(
@@ -489,6 +487,8 @@ public class CoreLeastCostRoutingServiceImpl implements
 		private GraphNode rootVertex;
 		private Set<GraphNode> matchedVertices;
 		private LcrContext lcrContext;
+		private Map<Map<CableConstructionEnum, Double>, RenodedGraph> cache = new HashMap<>();
+		private Map<FiberType, RenodedGraph> mappedGraphs = new HashMap<>() ;
 
 		public AnalysisGraphFactory(PricingModel pricingModel,
 				RenodedGraph renodedGraph, GraphNode rootVertex,
@@ -500,6 +500,13 @@ public class CoreLeastCostRoutingServiceImpl implements
 			this.lcrContext = lcrContext;
 
 			matchedVertices = extractVertices(LocationEntityType.celltower);
+			
+			mappedGraphs.put(FiberType.DISTRIBUTION, renodedGraph) ;
+			mappedGraphs.put(FiberType.FEEDER, renodedGraph) ;
+		}
+		
+		public Map<FiberType, RenodedGraph> getRenodedGraphs() {
+			return mappedGraphs ;
 		}
 
 		public GraphPathConstraint<GraphNode, AroEdge<GeoSegment>> createConstraint(
@@ -533,8 +540,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 					.collect(Collectors.toSet());
 		}
 
-		private Map<Map<CableConstructionEnum, Double>, RenodedGraph> cache = new HashMap<>();
-
+	
 		public AnalysisBinding createAnalysisBinding(FiberType fiberType) {
 			return new AnalysisBinding() {
 
