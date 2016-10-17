@@ -349,6 +349,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+    if (!$scope.heatmapOn) $scope.toggleHeatmap()
 
     // unselect all entity types
     $scope.show_towers = false
