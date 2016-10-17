@@ -582,7 +582,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 		private RenodedGraph getAnalysisGraph(FiberType fiberType) {
 
 			Map<CableConstructionEnum, Double> priceMap = createPriceMap(fiberType);
-			RenodedGraph analysisGraph = cache.get(priceMap);
+			RenodedGraph analysisGraph = null;//cache.get(priceMap);
 			if (analysisGraph == null) {
 				cache.put(
 						priceMap,
