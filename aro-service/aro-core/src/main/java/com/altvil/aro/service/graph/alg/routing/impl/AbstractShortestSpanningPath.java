@@ -68,7 +68,7 @@ public abstract class AbstractShortestSpanningPath<V, E> implements
 
 		double pathLength = itr.getShortestPathLength(currentTarget);
 
-		return new SpanningGraphPathImpl<V, E>(graph, currentTarget, source,
+		return new SpanningGraphPathImpl<V, E>(graph, source, currentTarget,
 				edgeList, pathLength);
 	}
 

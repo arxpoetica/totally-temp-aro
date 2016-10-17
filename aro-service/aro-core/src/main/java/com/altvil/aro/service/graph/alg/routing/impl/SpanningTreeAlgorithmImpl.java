@@ -49,21 +49,20 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	private MetricEdgeWeight<E> metricEdgeWeight;
 	private Collection<V> assignedTargets;
 
-	private VirtualRoot<V, E> virtualRoot ;
+	private VirtualRoot<V, E> virtualRoot;
 	private WeightedGraph<V, E> analysisGraph;
 	private WeightedGraph<V, E> metricGraph;
-	
-	
+
 	private Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 
-	public SpanningTreeAlgorithmImpl(
-			MetricEdgeWeight<E> metricEdgeWeight,
+	public SpanningTreeAlgorithmImpl(MetricEdgeWeight<E> metricEdgeWeight,
 			SourceGraph<V, E> sourceGraph,
 			GraphPathConstraint<V, E> pathPredicate,
 			Collection<V> assignedTargets) {
 		super();
-		this.metricEdgeWeight = metricEdgeWeight ;
+		this.metricEdgeWeight = metricEdgeWeight;
 		this.sourceGraph = sourceGraph;
+		this.virtualRoot = sourceGraph.getVirtualRoot();
 		this.pathPredicate = pathPredicate;
 		this.assignedTargets = assignedTargets;
 
@@ -89,12 +88,11 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		this.metricGraph = sourceGraph.getMetricGraph();
 
-		this.analysisGraph = sourceGraph.getAnalysisGraph() ;
+		this.analysisGraph = sourceGraph.getAnalysisGraph();
 
-		SelectedTargets selectedTargets = (isPathPredicateActive) ? 
-				new ConstrainedSelectedTargets(
-				virtualRoot.getRoot(), pathPredicate, metricGraph, assignedTargets)
-				: new UnconstrainedTargets(assignedTargets);
+		SelectedTargets selectedTargets = (isPathPredicateActive) ? new ConstrainedSelectedTargets(
+				virtualRoot.getRoot(), pathPredicate, metricGraph,
+				assignedTargets) : new UnconstrainedTargets(assignedTargets);
 
 		this.closestRouteStrategy = createClosestRouteStrategy(
 				this.analysisGraph, selectedTargets.getTargets());
@@ -158,7 +156,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	 */
 
 	@SuppressWarnings("unchecked")
-	private Collection<SourceRoute<V, E>> build(VirtualRoot<V,E> virtualRoot,
+	private Collection<SourceRoute<V, E>> build(VirtualRoot<V, E> virtualRoot,
 			SelectedTargets selectedTargets) {
 
 		// Filter out any vertices that fail Network Constraint
@@ -176,16 +174,24 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		// Track All Vertices that caused previous network generation to fail.
 
-		int maxCount = 10;
+		int maxCount = 15;
 		int count = 1;
+		V lastFailure = null ;
 		while (count < maxCount) {
 			try {
 				return build(virtualRoot, selectedTargets, count == maxCount);
 			} catch (FailedNetworkNode err) {
 				log.info("Failed to route network plan .. rebuilding "
 						+ err.getFailedNodes());
-				selectedTargets.addFailingTargets((Collection<V>) err
-						.getFailedNodes());
+
+				V v  = ((Collection<V>) err.getFailedNodes()).iterator().next() ;
+				if( v == lastFailure ) {
+					selectedTargets.forceFailures(); 
+				} else {
+					selectedTargets.addFailingTargets((Collection<V>) err
+							.getFailedNodes());
+				}
+				lastFailure = v ;
 				count++;
 			}
 		}
@@ -194,7 +200,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 	}
 
-	private Collection<SourceRoute<V, E>> build(VirtualRoot<V,E> virtualRoot,
+	private Collection<SourceRoute<V, E>> build(VirtualRoot<V, E> virtualRoot,
 			SelectedTargets selectedTargets, boolean forceNetwork)
 			throws FailedNetworkNode {
 
@@ -211,6 +217,10 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		List<SourceRoute<V, E>> originalSources = new ArrayList<>(
 				sourceRootMap.values());
+
+		// Track Metric Distance on Root Node
+		sourceRootMap.put(virtualRoot.getRoot(), new SourceRoute<>(
+				this.analysisGraph, virtualRoot.getRoot()));
 
 		// Reset Target
 		Map<V, SpanningShortestPath<V, E>> targetMap = new HashMap<>();
@@ -230,16 +240,18 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			}
 		}
 
+		
 		// Handle rejected Locations
 		if (forcedTargets.size() > 0) {
 			Map<V, SpanningShortestPath<V, E>> forcedMap = new HashMap<>();
 			for (V v : forcedTargets) {
 				forcedMap.put(v, targetMap.remove(v));
 			}
-			assemble(virtualRoot, forcedMap, forceNetwork);
+			assemble(virtualRoot, forcedMap, sourceRootMap.keySet(),
+					forceNetwork);
 		}
 
-		assemble(virtualRoot, targetMap, forceNetwork);
+		assemble(virtualRoot, targetMap, sourceRootMap.keySet(), forceNetwork);
 
 		return originalSources;
 	}
@@ -254,17 +266,14 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 	@SuppressWarnings("unchecked")
 	private void assemble(VirtualRoot<V, E> virtualRoot,
-			Map<V, SpanningShortestPath<V, E>> targetMap, boolean force)
-			throws FailedNetworkNode {
-
-		Collection<V> previousPath = Collections.singleton(virtualRoot
-				.getRoot());
+			Map<V, SpanningShortestPath<V, E>> targetMap,
+			Collection<V> previousPath, boolean force) throws FailedNetworkNode {
 
 		// Track all Sources
 		while (targetMap.size() > 0) {
 
-			ClosestTarget<V, E> closestSource = this.getClosestSource(
-					previousPath, targetMap);
+			ClosestTarget closestSource = this.getClosestTarget(previousPath,
+					targetMap);
 
 			// Boundary Condition
 			// Caused by failure to connect Path OR Invalid Path
@@ -327,13 +336,12 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			// Assign Previous Targets
 			previousPath = pathList;
 		}
-
 	}
 
-	private ClosestTarget<V, E> getClosestSource(Collection<V> deltaSources,
+	private ClosestTarget getClosestTarget(Collection<V> deltaSources,
 			Map<V, SpanningShortestPath<V, E>> targetMap) {
 
-		ClosestTarget<V, E> closestSource = new ClosestTarget<>();
+		ClosestTarget closestSource = new ClosestTarget();
 
 		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = new TreeMap<>();
 		for (V target : targetMap.keySet()) {
@@ -347,7 +355,8 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 				closestSource.assignPath(path);
 				break;
 			} else {
-				closestSource.addFailedTarget(ssp.getWeight(),
+				closestSource.addFailedTarget(
+						ssp.getGraphPath().getWeight(metricEdgeWeight),
 						path.getStartVertex());
 			}
 		}
@@ -401,7 +410,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 	}
 
-	private static class ClosestTarget<V, E> {
+	private class ClosestTarget {
 
 		private SpanningGraphPath<V, E> closestPath;
 		private TreeMap<Double, V> failedTargets = null;
@@ -409,8 +418,13 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 		public ClosestTarget() {
 		}
 
-		public ClosestTarget<V, E> assignPath(SpanningGraphPath<V, E> path) {
+		public ClosestTarget assignPath(SpanningGraphPath<V, E> path) {
+			if (path.getEndVertex().equals(virtualRoot.getRoot())) {
+				path = path.trimTarget();
+			}
+
 			this.closestPath = path;
+
 			return this;
 		}
 
@@ -461,7 +475,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	// }
 	//
 	// }
-	
+
 	private class UnconstrainedTargets extends SelectedTargets {
 		private Collection<V> targets;
 
@@ -503,12 +517,23 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			failingVertices.put(getTargetDistance(v), v);
 		}
 
+		@Override
+		public void forceFailures() {
+			findFurthestVertex(map.keySet());
+			V futhestVertex = findFurthestVertex(map.keySet());
+			failingVertices.put(getDistance(futhestVertex), futhestVertex);
+		}
+
 		public Collection<V> getFailingVertices() {
-			return failingVertices.values();
+			if (failingVertices.isEmpty()) {
+				return failingVertices.values();
+			}
+			return Collections
+					.singleton(failingVertices.lastEntry().getValue());
 		}
 
 		private V findFurthestVertex(Collection<V> vertices) {
-			double max = Double.POSITIVE_INFINITY;
+			double max = 0;
 			V selected = null;
 
 			for (V v : vertices) {
@@ -541,10 +566,12 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		@Override
 		public double getDistance(V vertex) {
-			return 0;
+			Double val = map.get(vertex);
+			return val == null ? 0 : val;
 		}
 
-		private GraphPath<V, E> createGraphPath(V endVertex, double pathLength) {
+		private SpanningGraphPathImpl<V, E> createGraphPath(V endVertex,
+				double pathLength) {
 			List<E> edgeList = new ArrayList<E>();
 
 			V v = endVertex;
@@ -560,8 +587,9 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 				v = Graphs.getOppositeVertex(graph, edge, v);
 			}
 
-			return new GraphPathImpl<V, E>(graph, endVertex, source, edgeList,
-					pathLength);
+			return new SpanningGraphPathImpl<V, E>(graph, source, endVertex,
+					edgeList, pathLength);
+
 		}
 
 		private void index(V vertex) {
@@ -596,8 +624,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			throw new RuntimeException("Unsupported Operation");
 		}
 
-		public double getTargetDistance(V vertex) {
-			return 0;
+		public void forceFailures() {
 		}
 
 	}

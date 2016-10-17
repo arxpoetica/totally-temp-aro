@@ -30,7 +30,7 @@ public class DistanceGraphPathConstraint<V, E extends AroEdge<GeoSegment>>
 		}
 
 		double pathLength = graphPath.getEdgeList().stream()
-				.mapToDouble(e -> e.getValue().getLength()).sum();
+				.mapToDouble(e -> e.getValue() == null ? 0 : e.getValue().getLength()).sum();
 		double distance = metricDistance.getDistance(graphPath.getEndVertex());
 		double totalDistance = distance + pathLength ;
 		

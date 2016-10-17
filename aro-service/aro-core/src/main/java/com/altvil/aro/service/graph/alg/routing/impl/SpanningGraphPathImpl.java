@@ -8,6 +8,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.GraphPathImpl;
 
+import com.altvil.aro.service.graph.alg.routing.spi.MetricEdgeWeight;
 import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 
 public class SpanningGraphPathImpl<V, E> extends GraphPathImpl<V, E> implements
@@ -25,7 +26,7 @@ public class SpanningGraphPathImpl<V, E> extends GraphPathImpl<V, E> implements
 	@Override
 	public List<E> getEdgeList() {
 		if (this.edgeList == null) {
-			this.edgeList = new ArrayList<>(this.edgeList);
+			this.edgeList = new ArrayList<>(this.reversedEdgeList);
 			Collections.reverse(this.edgeList);
 		}
 
@@ -38,16 +39,39 @@ public class SpanningGraphPathImpl<V, E> extends GraphPathImpl<V, E> implements
 	}
 
 	@Override
+	public SpanningGraphPath<V, E> trimTarget() {
+		List<E> list = getReversedEdgeList();
+
+		if (list.size() == 0) {
+			return this;
+		}
+
+		E e = list.get(0);
+		Graph<V, E> g = super.getGraph();
+		double w = super.getGraph().getEdgeWeight(e);
+
+		V v = Graphs.getOppositeVertex(g, e, super.getEndVertex());
+		list = list.subList(1, list.size());
+		return new SpanningGraphPathImpl<>(g, super.getStartVertex(), v, list,
+				super.getWeight() - w);
+	}
+
+	@Override
 	public List<V> getReverseVertexList() {
 		Graph<V, E> g = getGraph();
 		List<V> list = new ArrayList<V>();
-		V v = this.getEndVertex() ;
+		V v = this.getEndVertex();
 		list.add(v);
 		for (E e : getReversedEdgeList()) {
 			v = Graphs.getOppositeVertex(g, e, v);
 			list.add(v);
 		}
 		return list;
+	}
+
+	@Override
+	public double getWeight(MetricEdgeWeight<E> mew) {
+		return getReversedEdgeList().stream().mapToDouble(mew::getWeight).sum();
 	}
 
 }

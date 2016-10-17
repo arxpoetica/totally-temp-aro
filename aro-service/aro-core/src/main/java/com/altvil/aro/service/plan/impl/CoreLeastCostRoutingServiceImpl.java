@@ -481,7 +481,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 	private static class VirtualizedGraph implements Closeable {
 		private RenodedGraph graph;
 		private VirtualRoot<GraphNode, AroEdge<GeoSegment>> root;
-
+		
 		public VirtualizedGraph(RenodedGraph graph,
 				VirtualRoot<GraphNode, AroEdge<GeoSegment>> root) {
 			super();
@@ -589,6 +589,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 		private VirtualizedGraph virtualize(RenodedGraph graph, GraphNode root,
 				Collection<GraphNode> sources) {
+			
 			return new VirtualizedGraph(graph, new VirtualRoot<>(graph
 					.getGraph().getGraph(), root, sources));
 		}
@@ -601,10 +602,10 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			Map<CableConstructionEnum, Double> priceMap = createPriceMap(fiberType);
 			RenodedGraph analysisGraph = cache.get(priceMap);
-			if (cache == null) {
+			if (analysisGraph == null) {
 				cache.put(
 						priceMap,
-						analysisGraph = analysisGraph.transform(s -> priceMap
+						analysisGraph = getMetricGraph().transform(s -> s == null ? 0 : priceMap
 								.get(s.getCableConstructionCategory())
 								* s.getLength()));
 			}
