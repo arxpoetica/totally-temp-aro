@@ -41,7 +41,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	// private static final Logger log = LoggerFactory
 	// .getLogger(AbstractRouteBuilder.class.getName());
 
-	private static int largeStrategyThreshold = 1000;
+	private static int largeStrategyThreshold = 3000;
 
 	private ClosestRouteStrategy<V, E> closestRouteStrategy;
 	private SourceGraph<V, E> sourceGraph;
