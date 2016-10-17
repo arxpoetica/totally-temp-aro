@@ -416,7 +416,7 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 									.getInteger(ConduitEdgeMap.constructionType)),
 							result.getDouble(ConduitEdgeMap.startRatio), result
 							.getDouble(ConduitEdgeMap.endRatio));
-				}).collect(Collectors.toList()));
+				}).filter(ce -> (ce.getEndRatio() - ce.getStartRatio()) > 0.000001).collect(Collectors.toList()));
 
 	}
 
