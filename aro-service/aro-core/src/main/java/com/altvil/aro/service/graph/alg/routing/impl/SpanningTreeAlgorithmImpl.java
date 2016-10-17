@@ -33,6 +33,7 @@ import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 import com.altvil.aro.service.graph.alg.routing.spi.SpanningTreeAlgorithm;
 import com.altvil.aro.service.graph.alg.routing.spi.StrategyLarge;
 import com.altvil.aro.service.graph.alg.routing.spi.StrategySmall;
+import com.google.common.collect.TreeMultimap;
 
 public class SpanningTreeAlgorithmImpl<V, E> implements
 		SpanningTreeAlgorithm<V, E> {
@@ -76,10 +77,11 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	}
 
 	private ClosestRouteStrategy<V, E> createClosestRouteStrategy(
-			WeightedGraph<V, E> weightedGraph, Collection<V> targets) {
+			WeightedGraph<V, E> weightedGraph, WeightedGraph<V, E> metricGraph,
+			Collection<V> targets) {
 		return (targets.size() <= largeStrategyThreshold) ? new StrategySmall<V, E>(
-				weightedGraph, ScalarClosestFirstSurfaceIterator.BUILDER)
-				: new StrategyLarge<V, E>(weightedGraph);
+				weightedGraph, metricGraph) : new StrategyLarge<V, E>(
+				weightedGraph, metricGraph);
 
 	}
 
@@ -87,7 +89,6 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	public Collection<SourceRoute<V, E>> build() {
 
 		this.metricGraph = sourceGraph.getMetricGraph();
-
 		this.analysisGraph = sourceGraph.getAnalysisGraph();
 
 		SelectedTargets selectedTargets = (isPathPredicateActive) ? new ConstrainedSelectedTargets(
@@ -95,7 +96,8 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 				assignedTargets) : new UnconstrainedTargets(assignedTargets);
 
 		this.closestRouteStrategy = createClosestRouteStrategy(
-				this.analysisGraph, selectedTargets.getTargets());
+				this.analysisGraph, this.metricGraph,
+				selectedTargets.getTargets());
 
 		return this.build(virtualRoot, selectedTargets);
 
@@ -117,44 +119,6 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 	}
 
-	// protected Predicate<V> createVertexPredicate(Collection<V> allSources,
-	// Collection<V> allTargets, GraphPathConstraint<V, E> pathPredicate) {
-	// MetricDistance<V> md = (V) -> 0.0;
-	//
-	// Map<V, SpanningShortestPath<V, E>> map = new HashMap<>();
-	// allTargets.forEach(t -> {
-	// map.put(t, this.createSpanningShortestPath(t));
-	// });
-	//
-	// return (target) -> {
-	//
-	// SpanningShortestPath<V, E> ssp = map.get(target);
-	//
-	// for (V source : allSources) {
-	// if (ssp.findClosestTarget(source) != null
-	// && pathPredicate.isValid(md, ssp.getGraphPath(source))) {
-	// return true;
-	// }
-	// }
-	//
-	// log.error("Vertex Fails Network Constaint " + target);
-	//
-	// return false;
-	// };
-	//
-	// // return this.closestRouteStrategy.vertexPredicate(allRoots,
-	// // pathPredicate) ;
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.altvil.aro.service.graph.alg.SpanningRouteBuilder#build(com.altvil
-	 * .aro.service.graph.alg.GraphPathConstraint, org.jgrapht.WeightedGraph,
-	 * java.util.Collection, java.util.Collection)
-	 */
-
 	@SuppressWarnings("unchecked")
 	private Collection<SourceRoute<V, E>> build(VirtualRoot<V, E> virtualRoot,
 			SelectedTargets selectedTargets) {
@@ -174,29 +138,37 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		// Track All Vertices that caused previous network generation to fail.
 
-		int maxCount = 15;
+		int maxCount = 100;
 		int count = 1;
-		V lastFailure = null ;
+		V lastFailure = null;
+		boolean force = false;
 		while (count < maxCount) {
 			try {
-				return build(virtualRoot, selectedTargets, count == maxCount);
+				return build(virtualRoot, selectedTargets, force);
 			} catch (FailedNetworkNode err) {
-				log.info("Failed to route network plan .. rebuilding "
-						+ err.getFailedNodes());
 
-				V v  = ((Collection<V>) err.getFailedNodes()).iterator().next() ;
-				if( v == lastFailure ) {
-					selectedTargets.forceFailures(); 
+				V v = ((Collection<V>) err.getFailedNodes()).iterator().next();
+				if (v == lastFailure) {
+					log.info("Detected Network Loop Failure ... rebuilding forced Network "
+							+ count + " => "
+							+ err.getFailedNodes());
+					lastFailure = null ;
+					force = true;
 				} else {
+					log.info("Failed to route network plan ... rebuilding optimal route  count =  "
+							+ count + " => "
+							+ err.getFailedNodes());
+					
 					selectedTargets.addFailingTargets((Collection<V>) err
 							.getFailedNodes());
 				}
-				lastFailure = v ;
+				lastFailure = v;
 				count++;
 			}
 		}
 
-		throw new RuntimeException("Failed to route network plan");
+		throw new RuntimeException("Failed to route network plan : "
+				+ selectedTargets.getFailingVertices());
 
 	}
 
@@ -204,7 +176,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			SelectedTargets selectedTargets, boolean forceNetwork)
 			throws FailedNetworkNode {
 
-		Collection<V> forcedTargets = new ArrayList<>(
+		Collection<V> forcedTargets = new HashSet<>(
 				selectedTargets.getFailingVertices());
 
 		// Establish Root Structures
@@ -235,12 +207,15 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 						new GraphPathImpl<V, E>(this.analysisGraph, target,
 								target, new ArrayList<>(), 0.0));
 			} else {
-				SpanningShortestPath<V, E> ssp = createSpanningShortestPath(target);
+				
+				SpanningShortestPath<V, E> ssp = (forceNetwork && forcedTargets.contains(target)) ?
+						closestRouteStrategy.createMetricSpanningShortestPath(target) :
+						closestRouteStrategy.createSpanningShortestPath(target) ;
+				
 				targetMap.put(target, ssp);
 			}
 		}
 
-		
 		// Handle rejected Locations
 		if (forcedTargets.size() > 0) {
 			Map<V, SpanningShortestPath<V, E>> forcedMap = new HashMap<>();
@@ -508,6 +483,8 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			this.pathPredicate = pathPredicate;
 			this.graph = graph;
 
+			TreeMultimap.create(Double::compare, null);
+
 			this.itr = new ScalarClosestFirstSurfaceIterator<>(graph, source);
 			init(targets);
 		}
@@ -517,12 +494,12 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			failingVertices.put(getTargetDistance(v), v);
 		}
 
-		@Override
-		public void forceFailures() {
-			findFurthestVertex(map.keySet());
-			V futhestVertex = findFurthestVertex(map.keySet());
-			failingVertices.put(getDistance(futhestVertex), futhestVertex);
-		}
+//		@Override
+//		public void forceFailures() {
+//			findFurthestVertex(map.keySet());
+//			V futhestVertex = findFurthestVertex(map.keySet());
+//			failingVertices.put(getDistance(futhestVertex), futhestVertex);
+//		}
 
 		public Collection<V> getFailingVertices() {
 			if (failingVertices.isEmpty()) {
@@ -611,6 +588,8 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 		}
 	}
 
+	
+
 	private abstract class SelectedTargets {
 
 		public void addFailingTargets(Collection<V> vertices) {
@@ -622,10 +601,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		public Collection<V> getTargets() {
 			throw new RuntimeException("Unsupported Operation");
-		}
-
-		public void forceFailures() {
-		}
+		}		
 
 	}
 
