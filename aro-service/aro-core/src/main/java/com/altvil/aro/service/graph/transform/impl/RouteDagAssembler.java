@@ -28,6 +28,7 @@ public class RouteDagAssembler {
 	public RouteDagAssembler(GraphModelBuilder<GeoSegment> graphBuilder,
 			Graph<GraphNode, AroEdge<GeoSegment>> sourceGraph) {
 		super();
+		this.sourceGraph = sourceGraph ;
 		this.graphBuilder = graphBuilder;
 	}
 

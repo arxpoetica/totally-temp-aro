@@ -2,6 +2,7 @@ package com.altvil.aro.service.graph.alg.routing.impl;
 
 import java.util.Collection;
 
+import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint;
 import com.altvil.aro.service.graph.alg.routing.SpanningTree;
 import com.altvil.aro.service.graph.alg.routing.SpanningTreeBuilder;
@@ -10,7 +11,7 @@ import com.altvil.aro.service.graph.alg.routing.spi.MetricEdgeWeight;
 public class SpanningTreeBuilderImpl<V, E> implements SpanningTreeBuilder<V, E> {
 
 	private SourceGraph<V, E> sourceGraph;
-	
+
 	private MetricEdgeWeight<E> metricEdgeWeight;
 	private GraphPathConstraint<V, E> predicate;
 
@@ -45,10 +46,20 @@ public class SpanningTreeBuilderImpl<V, E> implements SpanningTreeBuilder<V, E> 
 
 	@Override
 	public SpanningTree<V, E> build() {
-		new SpanningTreeAlgorithmImpl<V, E>(metricEdgeWeight, sourceGraph,
-				predicate,  targets)
-				.build();
-		return null;
+		Collection<SourceRoute<V, E>> sourcesRoutes = new SpanningTreeAlgorithmImpl<V, E>(
+				metricEdgeWeight, sourceGraph, predicate, targets).build();
+		return new SpanningTree<V, E>() {
+			@Override
+			public Collection<SourceRoute<V, E>> getSourceRoutes() {
+				return sourcesRoutes;
+			}
+
+			@Override
+			public SourceRoute<V, E> getSourceRoute() {
+				return sourcesRoutes.iterator().next();
+			}
+
+		};
 	}
 
 }
