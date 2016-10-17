@@ -33,7 +33,6 @@ import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 import com.altvil.aro.service.graph.alg.routing.spi.SpanningTreeAlgorithm;
 import com.altvil.aro.service.graph.alg.routing.spi.StrategyLarge;
 import com.altvil.aro.service.graph.alg.routing.spi.StrategySmall;
-import com.google.common.collect.TreeMultimap;
 
 public class SpanningTreeAlgorithmImpl<V, E> implements
 		SpanningTreeAlgorithm<V, E> {
@@ -41,7 +40,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	// private static final Logger log = LoggerFactory
 	// .getLogger(AbstractRouteBuilder.class.getName());
 
-	private static int largeStrategyThreshold = 3000;
+	private static int largeStrategyThreshold = 10000;
 
 	private ClosestRouteStrategy<V, E> closestRouteStrategy;
 	private SourceGraph<V, E> sourceGraph;
