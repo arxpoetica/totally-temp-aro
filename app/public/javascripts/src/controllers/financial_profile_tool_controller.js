@@ -188,7 +188,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         regions.hide()
       }
     } else if (tool === 'financial_profile') {
-      $('a[href="#map-tools-financial"]').click()
+      $('a[href="#map-tools-financial"]:not(.collapsed)').click()
 
       if ($scope.layersStatus) {
         MapLayer.recoverLayersVisibility($scope.layersStatus)
