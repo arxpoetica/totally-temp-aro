@@ -73,7 +73,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     if (styles.icon) return
     var type = 'households'
     var target = feature.getProperty('selected')
-    if (target) {
+    if (target && config.ARO_CLIENT === 'verizon') {
       styles.icon = `/images/map_icons/${config.ARO_CLIENT}/target.png`
       return
     }

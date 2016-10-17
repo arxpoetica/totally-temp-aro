@@ -254,6 +254,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
         .success((response) => {
           $scope.targets = response.targets
           $scope.targetsTotal = response.total
+          map_layers.getFeatureLayer('locations').reloadData()
+          map_layers.getFeatureLayer('selected_locations').reloadData()
         })
     }
   })

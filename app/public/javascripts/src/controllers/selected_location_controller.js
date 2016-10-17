@@ -197,7 +197,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
 
   function destroyCustomerProfileChart (type) {
     customerProfileCharts[type] && customerProfileCharts[type].destroy()
-    $('#location_customer_profile_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
+    $(`#location_customer_profile_chart_${type}`).css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
   function destroyCustomerProfileCharts () {
@@ -218,7 +218,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   function showCurrentChart () {
     var href = $('#selected_location_controller .nav-tabs > .active a').attr('href')
     if (href === '#selected_location_fair_share') {
-      showFaiShareChart()
+      showFairShareChart()
     } else if (href === '#selected_location_market_profile') {
       showMarketProfileCharts()
     } else if (href === '#selected_location_customer_profile') {
@@ -272,7 +272,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   };
 
   var fair_share_chart = null
-  function showFaiShareChart () {
+  function showFairShareChart () {
     $scope.fair_share = $scope.fair_share || []
     var total = $scope.fair_share.reduce((total, carrier) => total + carrier.value, 0)
 

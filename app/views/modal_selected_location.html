@@ -66,9 +66,11 @@
             <a href="#selected_location_market_profile" aria-controls="profile" role="tab" data-toggle="tab">Market profile</a>
           </li>
           -->
+          <!--
           <li role="presentation">
             <a href="#selected_location_fair_share" aria-controls="profile" role="tab" data-toggle="tab">Competition</a>
           </li>
+          -->
           <li role="presentation">
             <a href="#selected_location_businesses" aria-controls="profile" role="tab" data-toggle="tab">Businesses</a>
           </li>
@@ -124,27 +126,33 @@
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
                 <p class="text-center">Businesses</p>
-                <p class="text-center" style="margin-top: 60px" ng-show="location.customer_profile['businesses'].length === 0">
+                <p class="text-center" style="margin-top: 60px" ng-show="location.customer_profile_totals['businesses'] === 0">
                   <em>No businesses at this location</em>
                 </p>
-                <canvas id="location_customer_profile_chart_businesses" style="width:100%; height:200px"></canvas>
-                <div id="location_customer_profile_chart_legend_businesses"></div>
+                <div ng-show="location.customer_profile_totals['businesses'] > 0">
+                  <canvas id="location_customer_profile_chart_businesses" style="width:100%; height:200px"></canvas>
+                  <div id="location_customer_profile_chart_legend_businesses"></div>
+                </div>
               </div>
               <div class="col-md-4">
                 <p class="text-center">Households</p>
-                <p class="text-center" style="margin-top: 60px" ng-show="location.customer_profile['households'].length === 0">
+                <p class="text-center" style="margin-top: 60px" ng-show="location.customer_profile_totals['households'] === 0">
                   <em>No households at this location</em>
                 </p>
-                <canvas id="location_customer_profile_chart_households" style="width:100%; height:200px"></canvas>
-                <div id="location_customer_profile_chart_legend_households"></div>
+                <div ng-show="location.customer_profile_totals['households'] > 0">
+                  <canvas id="location_customer_profile_chart_households" style="width:100%; height:200px"></canvas>
+                  <div id="location_customer_profile_chart_legend_households"></div>
+                </div>
               </div>
               <div class="col-md-4">
                 <p class="text-center">Cell Sites</p>
-                <p class="text-center" style="margin-top: 60px" ng-show="location.customer_profile['towers'].length === 0">
+                <p class="text-center" style="margin-top: 60px" ng-show="location.customer_profile_totals['towers'] === 0">
                   <em>No cell sites at this location</em>
                 </p>
-                <canvas id="location_customer_profile_chart_towers" style="width:100%; height:200px"></canvas>
-                <div id="location_customer_profile_chart_legend_towers"></div>
+                <div ng-show="location.customer_profile_totals['towers'] > 0">
+                  <canvas id="location_customer_profile_chart_towers" style="width:100%; height:200px"></canvas>
+                  <div id="location_customer_profile_chart_legend_towers"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -206,7 +214,7 @@
             </div>
           </div>
           -->
-
+          <!--
           <div role="tabpanel" class="tab-pane" id="selected_location_fair_share" style="margin-top:30px">
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
@@ -220,7 +228,7 @@
               </div>
             </div>
           </div>
-
+          -->
           <div role="tabpanel" class="tab-pane" id="selected_location_businesses">
             <table><tbody></tbody></table><!-- do not remove -->
 
@@ -275,7 +283,7 @@
                   </td>
                 </tr>
                 <tr class="text-center" ng-show="businesses.length === 0">
-                  <td style="padding: 40px" colspan="4">No businesses at this location</td>
+                  <td style="padding: 40px" colspan="5">No businesses at this location</td>
                 </tr>
               </tbody>
             </table>
@@ -286,14 +294,18 @@
               <thead>
                 <tr>
                   <th>Address</th>
-                  <th>Demographics</th>
+                  <th>Income Level</th>
+                  <th>Education Level</th>
+                  <th>Credit Quality</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="text-center" ng-show="households.length === 0">
-                  <td style="padding: 40px" colspan="2">No households at this location</td>
+                  <td style="padding: 40px" colspan="4">No households at this location</td>
                 </tr>
                 <tr ng-repeat="household in households">
+                  <td></td>
+                  <td></td>
                   <td></td>
                   <td></td>
                 </tr>
@@ -308,11 +320,7 @@
                   <th>Site name</th>
                   <th>Address</th>
                   <th>Site type</th>
-                  <th>AGL</th>
-                  <th>AMSL</th>
-                  <th>Height</th>
-                  <th>Elevation</th>
-                  <th>Site Owner</th>
+                  <th>Hub Name</th>
                 </tr>
               </thead>
               <tbody>
@@ -320,14 +328,10 @@
                   <td style="padding: 40px" colspan="8">No cell sites at this location</td>
                 </tr>
                 <tr ng-repeat="tower in towers">
-                  <td></td>
-                  <td>{{tower.address}}</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>Undefined</td>
+                  <td>Undefined{{tower.address}}</td>
+                  <td>Undefined</td>
+                  <td>Undefined</td>
                 </tr>
               </tbody>
             </table>
