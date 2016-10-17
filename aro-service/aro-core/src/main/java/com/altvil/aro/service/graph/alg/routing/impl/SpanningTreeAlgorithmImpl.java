@@ -483,8 +483,6 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			this.pathPredicate = pathPredicate;
 			this.graph = graph;
 
-			TreeMultimap.create(Double::compare, null);
-
 			this.itr = new ScalarClosestFirstSurfaceIterator<>(graph, source);
 			init(targets);
 		}
