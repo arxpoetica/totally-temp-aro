@@ -26,7 +26,7 @@ public class IrrNetoworkComparator extends AbstractNetworkComparator {
     protected double getScore(PlanAnalysis base, PlanAnalysis compared) {
         // negated IRR of a cashflows difference
         return - Irr.irr(
-                subtract(compared.getCashFlows(), (base != null ? base.getCashFlows() : null)));
+                subtract(compared.getRoicCashFlows(), (base != null ? base.getRoicCashFlows() : null)));
 
     }
 
