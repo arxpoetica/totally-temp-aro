@@ -32,7 +32,7 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
     @Override
     public OptimizationTargetEvaluator getTargetEvaluator(ThresholdBudgetConstraint constraints) {
         if(constraints.getOptimizationType() == OptimizationType.IRR)
-            if(constraints.getThreshhold() == Double.NaN && constraints.getCapex() == Double.POSITIVE_INFINITY)
+            if(Double.isNaN(constraints.getThreshhold())&& Double.isInfinite(constraints.getCapex()))
                 return new UnconstrainedIRREvaluator(constraints.getThreshhold(), constraints.getCapex());
             else
                 return new IRREvaluator(constraints.getThreshhold(), constraints.getCapex(), constraints.getYears());
