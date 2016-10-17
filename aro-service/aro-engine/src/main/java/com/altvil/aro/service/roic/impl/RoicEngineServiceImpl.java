@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.aro.service.roic.analysis.op.CashFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -611,6 +612,20 @@ public class RoicEngineServiceImpl implements RoicEngineService {
 		public double getCashFlow(int period) {
 			return cashFlows[period];
 		}
+
+		@Override
+		public CashFlows subtract(CashFlows c2) {
+			if(c2 == null){
+				return new CashFlowsImpl(getAsRawData());
+			}else{
+				double[] result = new double[getPeriods()];
+				for (int i = 0; i < getPeriods(); i++) {
+					result[i] = getCashFlow(i) -c2.getCashFlow(i);
+				}
+				return new CashFlowsImpl(result);
+			}
+		}
+
 
 	}
 

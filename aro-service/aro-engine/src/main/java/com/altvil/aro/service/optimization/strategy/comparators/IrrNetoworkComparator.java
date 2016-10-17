@@ -1,6 +1,8 @@
 package com.altvil.aro.service.optimization.strategy.comparators;
 
+import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
+import com.altvil.aro.service.roic.CashFlows;
 import org.apache.poi.ss.formula.functions.Irr;
 
 import java.util.Arrays;
@@ -14,26 +16,26 @@ public class IrrNetoworkComparator extends AbstractNetworkComparator {
     }
 
     @Override
-    protected double getIncrementalBenefit(OptimizedNetwork base, OptimizedNetwork compared) {
+    protected double getIncrementalBenefit(PlanAnalysis base, PlanAnalysis compared) {
 
-        return  compared.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - (base != null? base.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact():0);
+        return  compared.getOptimizedNetwork().getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - (base != null? base.getOptimizedNetwork().getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact():0);
 
     }
 
     @Override
-    protected double getScore(OptimizedNetwork base, OptimizedNetwork compared) {
+    protected double getScore(PlanAnalysis base, PlanAnalysis compared) {
         // negated IRR of a cashflows difference
-        return - Irr.irr(getCashFlows(getIncrementalCost(base,compared),
-                compared.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact() - (base != null?base.getAnalysisNode().getFiberCoverage().getMonthlyRevenueImpact():0)));
+        return - Irr.irr(
+                subtract(compared.getRoicCashFlows(), (base != null ? base.getRoicCashFlows() : null)));
 
     }
 
-    private double[] getCashFlows(double cost, double monthlyIncome) {
-        double cashFlows[] = new double[analysisYears +1];
-        Arrays.fill(cashFlows, monthlyIncome*12);
-        cashFlows[0] = -cost;
-        return cashFlows;
+    private double[] subtract(CashFlows c1, CashFlows c2) {
+       return  c1.subtract(c2).getAsRawData();
+
     }
+
+
 
 
 }

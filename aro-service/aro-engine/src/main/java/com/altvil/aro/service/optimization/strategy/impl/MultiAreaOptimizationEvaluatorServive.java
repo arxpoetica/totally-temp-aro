@@ -1,5 +1,6 @@
 package com.altvil.aro.service.optimization.strategy.impl;
 
+import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +17,12 @@ import com.altvil.enumerations.OptimizationType;
 public class MultiAreaOptimizationEvaluatorServive implements OptimizationEvaluatorService {
 
     TargetEvaluatorFactory targetEvaluatorFactory;
+    private PlanAnalysisService planAnalysisService;
 
     @Autowired
-    public MultiAreaOptimizationEvaluatorServive(TargetEvaluatorFactory targetEvaluatorFactory) {
+    public MultiAreaOptimizationEvaluatorServive(TargetEvaluatorFactory targetEvaluatorFactory, PlanAnalysisService planAnalysisService) {
         this.targetEvaluatorFactory = targetEvaluatorFactory;
+        this.planAnalysisService = planAnalysisService;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class MultiAreaOptimizationEvaluatorServive implements OptimizationEvalua
                 :new CapexNetworkComparator();
 
 
-        return new MultiAreaEvaluator(comparator, () -> targetEvaluatorFactory.getTargetEvaluator(constraints), constraints.getOptimizationType());
+        return new MultiAreaEvaluator(comparator, () -> targetEvaluatorFactory.getTargetEvaluator(constraints), constraints.getOptimizationType(), planAnalysisService.createPlanAnalysis(constraints.getYears(), constraints.getDiscountRate()));
     }
 
 
