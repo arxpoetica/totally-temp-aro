@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.altvil.aro.service.graph.GraphModel;
@@ -63,6 +64,10 @@ public class RenodedGraph {
 
 	public GraphNode getGraphNode(GraphAssignment ga) {
 		return map.get(ga);
+	}
+	
+	public Set<GraphAssignment> getGraphAssignments() {
+		return map.keySet() ;
 	}
 
 	public GraphModel<GeoSegment> getGraph() {

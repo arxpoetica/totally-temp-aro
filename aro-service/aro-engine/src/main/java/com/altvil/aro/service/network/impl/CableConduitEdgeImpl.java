@@ -5,6 +5,7 @@ import com.altvil.interfaces.CableConstructionEnum;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class CableConduitEdgeImpl implements CableConduitEdge, Serializable {
 
 	

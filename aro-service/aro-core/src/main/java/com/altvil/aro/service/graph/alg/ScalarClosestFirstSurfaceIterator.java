@@ -34,4 +34,11 @@ public class ScalarClosestFirstSurfaceIterator<V, E> extends ClosestFirstIterato
 	public boolean isGlobalConstraintMet() {
 		return true;
 	}
+
+	@Override
+	public boolean isTraversedVertex(V vertex) {
+		return super.isSeenVertex(vertex) ;
+	}
+	
+	
 }
