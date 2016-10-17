@@ -1,26 +1,18 @@
 package com.altvil.aro.service.graph.alg;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.Graphs;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.DAGModel;
-import com.altvil.aro.service.graph.alg.GraphPathConstraint.MetricDistance;
-import com.altvil.aro.service.graph.builder.GraphModelBuilder;
-import com.altvil.aro.service.graph.node.GraphNode;
-import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint.MetricDistance;
 
-public class SourceRoute<V, E extends AroEdge<GeoSegment>> implements MetricDistance<V> {
+public class SourceRoute<V, E> implements MetricDistance<V> {
 	
 
 	private Graph<V, E> sourceGraph;
@@ -37,6 +29,10 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> implements MetricDist
 		this.sourceGraph = sourceGraph ;
 		this.sourceVertex = sourceVertex;
 		distanceToSourceMap.put(sourceVertex, 0.0) ;
+	}
+	
+	public Graph<V, E> getSourceGraph() {
+		return sourceGraph ;
 	}
 
 	public V getSourceVertex() {
@@ -68,11 +64,12 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> implements MetricDist
 	}
 
 	
-	public DAGModel<GeoSegment> createDagModel(GraphModelBuilder<GeoSegment> b) {
-		DagAssembler dagAssembler = new DagAssembler(b) ;
-		this.subRoutes.forEach(dagAssembler::updatePath);
-		return dagAssembler.assemble() ;
-	}
+	// public DAGModel<GeoSegment> createDagModel(GraphModelBuilder<GeoSegment>
+	// b) {
+	// DagAssembler dagAssembler = new DagAssembler(b) ;
+	// this.subRoutes.forEach(dagAssembler::updatePath);
+	// return dagAssembler.assemble() ;
+	// }
 	
 
 	public Set<E> getAllEdges() {
@@ -81,105 +78,59 @@ public class SourceRoute<V, E extends AroEdge<GeoSegment>> implements MetricDist
 		return result;
 	}
 
-//	private static class DagEdgeImpl<E extends AroEdge<GeoSegment>> implements
-//			DagEdge<E> {
+
 //
-//		private GraphNode sourceVertex;
-//		private GraphNode targetVertex;
-//		private Collection<E> edges = new ArrayList<>();
+//	private class DagAssembler {
 //
-//		private Collection<DagEdge<E>> children = Collections.emptyList();
-//
-//		public DagEdgeImpl(GraphNode targetVertex, E edge) {
+//		private GraphModelBuilder<GeoSegment> graphBuilder;
+//		
+//		private Collection<E> seenEdges = new HashSet<>();
+//		
+//		public DagAssembler(GraphModelBuilder<GeoSegment> graphBuilder) {
 //			super();
-//			this.targetVertex = sourceVertex;
-//			this.edges.add(edge);
+//			this.graphBuilder = graphBuilder;
 //		}
 //
-//		@Override
-//		public GraphNode getSourceVertex() {
-//			return sourceVertex;
+//		private void addEdge(E edge, V selectedSource,
+//				V selectedTarget) {
+//			V targetVertex = sourceGraph.getEdgeTarget(edge);
+//			GeoSegment gs = edge.getValue();
+//
+//			if (!selectedTarget.equals(targetVertex)) {
+//				gs = (GeoSegment) gs.reverse();
+//			}
+//
+//			graphBuilder
+//					.add((GraphNode) selectedSource, (GraphNode) selectedTarget, gs, gs.getLength());
+//
 //		}
 //
-//		@Override
-//		public GraphNode getTargetVertex() {
-//			return targetVertex;
+//		public DagAssembler updatePath(TargetRoute<V, E> target) {
+//			
+//			GraphPath<V,E> path = target.getPath() ;
+//			Iterator<V> verticies = Graphs.getPathVertexList(path).iterator() ;
+//			List<E> edgeList = path.getEdgeList() ;
+//			
+//			V start = verticies.next() ;
+//			
+//			for (E e : edgeList) {
+//				V end = verticies.next() ;
+//				if (seenEdges.add(e)) {
+//					addEdge(e, start, end);
+//				}
+//				start = end;
+//			}
+//			
+//			return this ;
 //		}
-//
-//		@Override
-//		public Collection<E> getEdges() {
-//			return edges;
-//		}
-//
-//		@Override
-//		public Collection<DagEdge<E>> getChildren() {
-//			return children;
-//		}
-//
-//		public void setSourceVertex(GraphNode vertex) {
-//			this.sourceVertex = vertex;
-//		}
-//
-//		public void add(E edge) {
-//			this.edges.add(edge);
-//		}
-//
-//		public void setChildren(Collection<DagEdge<E>> children) {
-//			this.children = children;
+//		
+//		public DAGModel<GeoSegment> assemble() {
+//			return graphBuilder.buildDAG() ;
 //		}
 //
 //	}
-
-	private class DagAssembler {
-
-		private GraphModelBuilder<GeoSegment> graphBuilder;
-		
-		private Collection<E> seenEdges = new HashSet<>();
-		
-		public DagAssembler(GraphModelBuilder<GeoSegment> graphBuilder) {
-			super();
-			this.graphBuilder = graphBuilder;
-		}
-
-		private void addEdge(E edge, V selectedSource,
-				V selectedTarget) {
-			V targetVertex = sourceGraph.getEdgeTarget(edge);
-			GeoSegment gs = edge.getValue();
-
-			if (!selectedTarget.equals(targetVertex)) {
-				gs = (GeoSegment) gs.reverse();
-			}
-
-			graphBuilder
-					.add((GraphNode) selectedSource, (GraphNode) selectedTarget, gs, gs.getLength());
-
-		}
-
-		public DagAssembler updatePath(TargetRoute<V, E> target) {
-			
-			GraphPath<V,E> path = target.getPath() ;
-			Iterator<V> verticies = Graphs.getPathVertexList(path).iterator() ;
-			List<E> edgeList = path.getEdgeList() ;
-			
-			V start = verticies.next() ;
-			
-			for (E e : edgeList) {
-				V end = verticies.next() ;
-				if (seenEdges.add(e)) {
-					addEdge(e, start, end);
-				}
-				start = end;
-			}
-			
-			return this ;
-		}
-		
-		public DAGModel<GeoSegment> assemble() {
-			return graphBuilder.buildDAG() ;
-		}
-
-	}
-	
+//
+//	
 //	private static class RoutingModelImpl<V, E extends AroEdge<GeoSegment>> {
 //		private Set<GraphNode> sources ;
 //		private Set<GraphNode> targets ;

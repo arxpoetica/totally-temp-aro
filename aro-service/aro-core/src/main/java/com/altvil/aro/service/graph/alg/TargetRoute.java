@@ -2,10 +2,7 @@ package com.altvil.aro.service.graph.alg;
 
 import org.jgrapht.GraphPath;
 
-import com.altvil.aro.service.graph.AroEdge;
-import com.altvil.aro.service.graph.segment.GeoSegment;
-
-public class TargetRoute<V, E extends AroEdge<GeoSegment>> {
+public class TargetRoute<V, E> {
 
 	private GraphPath<V, E> path;
 	

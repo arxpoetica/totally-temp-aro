@@ -9,8 +9,14 @@ import com.altvil.utils.GeometryUtil;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 
-@SuppressWarnings("serial")
+
+
 public class RoadLocationImpl implements RoadLocation, Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public static Builder build() {
 		return new Builder() ;

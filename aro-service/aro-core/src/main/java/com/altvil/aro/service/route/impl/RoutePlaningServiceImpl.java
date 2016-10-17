@@ -1,5 +1,6 @@
 package com.altvil.aro.service.route.impl;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -13,8 +14,9 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.alg.SourceRoute;
-import com.altvil.aro.service.graph.alg.stiener.SpanningRouteBuilder;
-import com.altvil.aro.service.graph.alg.stiener.SpanningRouteBuilderFactory;
+import com.altvil.aro.service.graph.alg.routing.VirtualRoot;
+import com.altvil.aro.service.graph.alg.routing.impl.SourceGraph;
+import com.altvil.aro.service.graph.alg.routing.impl.SpanningTreeBuilderImpl;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.assigment.impl.GraphAssignmentFactoryImpl;
@@ -25,6 +27,7 @@ import com.altvil.aro.service.graph.impl.AroEdgeFactory;
 import com.altvil.aro.service.graph.node.GraphNode;
 import com.altvil.aro.service.graph.node.GraphNodeFactory;
 import com.altvil.aro.service.graph.segment.GeoSegment;
+import com.altvil.aro.service.graph.segment.GeoSegmentLength;
 import com.altvil.aro.service.graph.segment.PinnedLocation;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.graph.transform.network.GraphRenoder;
@@ -102,7 +105,7 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 
 	}
 
-	private static class DefaultNodedModel implements RouteModel {
+	private class DefaultNodedModel implements RouteModel {
 
 		private GraphNetworkModel graphModel;
 		private GraphModel<GeoSegment> model;
@@ -164,8 +167,24 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 		@Override
 		public Collection<SourceRoute<GraphNode, AroEdge<GeoSegment>>> planRoute(
 				Collection<GraphNode> sources, Collection<GraphNode> targets) {
-			return SpanningRouteBuilderFactory.FACTORY.create(
-					getModel().getGraph(), sources, targets).build();
+
+			try (VirtualRoot<GraphNode, AroEdge<GeoSegment>> vr = new VirtualRoot<>(
+					getModel().getGraph(), vertexFactory.createGraphNode(null),
+					sources)) {
+
+				SourceGraph<GraphNode, AroEdge<GeoSegment>> sg = new SourceGraph<>(
+						getModel().getGraph(), getModel().getGraph(), vr);
+
+				return new SpanningTreeBuilderImpl<GraphNode, AroEdge<GeoSegment>>()
+						.setGraphPathConstraint(null)
+						.setMetricEdgeWeight(GeoSegmentLength.MetricLength)
+						.setSourceGraph(sg).setTargets(targets).build()
+						.getSourceRoutes();
+
+			} catch (IOException err) {
+				throw new RuntimeException(err.getMessage(), err);
+			}
+
 		}
 
 		/*

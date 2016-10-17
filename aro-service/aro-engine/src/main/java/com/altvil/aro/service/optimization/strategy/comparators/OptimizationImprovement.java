@@ -1,23 +1,24 @@
 package com.altvil.aro.service.optimization.strategy.comparators;
 
+import com.altvil.aro.service.optimization.strategy.impl.SingleAreaAnalysis;
+import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
-import com.altvil.aro.service.optimize.OptimizedNetwork;
 
 public class OptimizationImprovement implements Comparable<OptimizationImprovement>{
-    private final PrunedNetwork prunedNetwork;
-    private OptimizedNetwork base;
-    private OptimizedNetwork improved;
+    private final SingleAreaAnalysis singleAreaAnalysis;
+    private PlanAnalysis base;
+    private PlanAnalysis improved;
     private final double score;
     private final double incrementalBeneift;
     private final double incrementalCost;
 
-    OptimizationImprovement(OptimizedNetwork base, OptimizedNetwork improved, double score, double incrementalBeneift, double incrementalCost, PrunedNetwork prunedNetwork) {
+    OptimizationImprovement(PlanAnalysis base, PlanAnalysis improved, double score, double incrementalBeneift, double incrementalCost, SingleAreaAnalysis singleAreaAnalysis) {
         this.base = base;
         this.improved = improved;
         this.score = score;
         this.incrementalBeneift = incrementalBeneift;
         this.incrementalCost = incrementalCost;
-        this.prunedNetwork = prunedNetwork;
+        this.singleAreaAnalysis = singleAreaAnalysis;
     }
 
 
@@ -25,11 +26,11 @@ public class OptimizationImprovement implements Comparable<OptimizationImproveme
         return score;
     }
 
-    public OptimizedNetwork getBase() {
+    public PlanAnalysis getBase() {
         return base;
     }
 
-    public OptimizedNetwork getImproved() {
+    public PlanAnalysis getImproved() {
         return improved;
     }
 
@@ -42,11 +43,11 @@ public class OptimizationImprovement implements Comparable<OptimizationImproveme
     }
 
     public long getPlanId() {
-        return prunedNetwork.getPlanId();
+        return singleAreaAnalysis.getPlanId();
     }
 
-    public PrunedNetwork getPrunedNetwork() {
-        return prunedNetwork;
+    public SingleAreaAnalysis getSingleAreaAnalysis() {
+        return singleAreaAnalysis;
     }
 
     @Override
@@ -55,4 +56,13 @@ public class OptimizationImprovement implements Comparable<OptimizationImproveme
     }
 
 
+    public double[] getIncrementalCashFlow() {
+        if(base == null)
+            return improved.getCashFlows().getAsRawData();
+        else {
+            return improved.getCashFlows()
+                    .subtract(base.getCashFlows())
+                    .getAsRawData();
+        }
+    }
 }

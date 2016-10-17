@@ -4,6 +4,7 @@ import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
 import com.altvil.aro.service.optimization.strategy.comparators.OptimizationImprovement;
 import com.altvil.aro.service.optimization.strategy.OptimizationNetworkComparator;
 import com.altvil.aro.service.optimization.strategy.OptimizationTargetEvaluator;
+import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
@@ -17,7 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -26,25 +29,27 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
     OptimizationNetworkComparator comparator;
     Supplier<OptimizationTargetEvaluator> targetEvaluatorSupplier;
     private OptimizationType optimizationType;
+    private Function<OptimizedNetwork, PlanAnalysis> on2pa;
 
     private final Logger log			 = LoggerFactory.getLogger(this.getClass());
 
-    public MultiAreaEvaluator(OptimizationNetworkComparator comparator, Supplier<OptimizationTargetEvaluator> targetEvaluatorSupplier, OptimizationType optimizationType) {
+    public MultiAreaEvaluator(OptimizationNetworkComparator comparator, Supplier<OptimizationTargetEvaluator> targetEvaluatorSupplier, OptimizationType optimizationType, Function<OptimizedNetwork, PlanAnalysis> on2pa) {
         this.comparator = comparator;
         this.targetEvaluatorSupplier = targetEvaluatorSupplier;
         this.optimizationType = optimizationType;
+        this.on2pa = on2pa;
     }
 
 
 
     private class NetworkOptimizationIterator implements Comparable<NetworkOptimizationIterator>, Iterator<OptimizationImprovement>{
         Optional<OptimizationImprovement> currentBestImprovement = Optional.empty();
-        PrunedNetwork prunedNetwork;
+        SingleAreaAnalysis singleAreaAnalysis;
 
-        public NetworkOptimizationIterator(PrunedNetwork prunedNetwork) {
-            this.prunedNetwork = prunedNetwork;
+        public NetworkOptimizationIterator(SingleAreaAnalysis singleAreaAnalysis) {
+            this.singleAreaAnalysis = singleAreaAnalysis;
 
-            this.currentBestImprovement = getBestImprovement(prunedNetwork, currentBestImprovement);
+            this.currentBestImprovement = getBestImprovement(singleAreaAnalysis, currentBestImprovement);
 
         }
 
@@ -56,7 +61,7 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
         @Override
         public OptimizationImprovement next() {
             OptimizationImprovement prevBestImprovement = currentBestImprovement.get();
-            this.currentBestImprovement = getBestImprovement(prunedNetwork, currentBestImprovement);
+            this.currentBestImprovement = getBestImprovement(singleAreaAnalysis, currentBestImprovement);
             return prevBestImprovement;
         }
 
@@ -65,10 +70,10 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
             return Double.compare(currentBestImprovement.get().getScore(), o.currentBestImprovement.get().getScore());
         }
 
-        private Optional<OptimizationImprovement> getBestImprovement(PrunedNetwork prunedNetwork, Optional<OptimizationImprovement> baseImprovement) {
-            OptimizedNetwork base = baseImprovement.isPresent()? baseImprovement.get().getImproved(): null;
-                return prunedNetwork.getOptimizedNetworks().stream()
-                        .filter(optimizedNetwork -> base == null || getRawCoverage(optimizedNetwork) > getRawCoverage(base))
+        private Optional<OptimizationImprovement> getBestImprovement(SingleAreaAnalysis prunedNetwork, Optional<OptimizationImprovement> baseImprovement) {
+            PlanAnalysis base = baseImprovement.isPresent()? baseImprovement.get().getImproved(): null;
+                return prunedNetwork.getPlanAnalysises().stream()
+                        .filter(planAnalysis -> base == null || getRawCoverage(planAnalysis) > getRawCoverage(base))
                         .map(network -> comparator.calculateImprovement(base, network, prunedNetwork))
                         .min((o1, o2) -> Double.compare(o1.getScore(), o2.getScore()));
         }
@@ -80,6 +85,7 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
         try {
             PriorityQueue<NetworkOptimizationIterator> improvementIterators = analysis
                     .stream()
+                    .map(this::toSingleAreaAnalysis)
                     .map(NetworkOptimizationIterator::new)
                     .filter(NetworkOptimizationIterator::hasNext)
                     .collect(toCollection(PriorityQueue::new));
@@ -103,8 +109,12 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
 
     }
 
-    private double getRawCoverage(OptimizedNetwork optimizedNetwork) {
-        return optimizedNetwork.getAnalysisNode().getFiberCoverage().getRawCoverage();
+    private SingleAreaAnalysis toSingleAreaAnalysis(PrunedNetwork prunedNetwork) {
+        return new SingleAreaAnalysis(prunedNetwork, prunedNetwork.getOptimizedNetworks().stream().map(on2pa).collect(Collectors.toList()));
+    }
+
+    private double getRawCoverage(PlanAnalysis planAnalysis) {
+        return planAnalysis.getOptimizedNetwork().getAnalysisNode().getFiberCoverage().getRawCoverage();
     }
 
 

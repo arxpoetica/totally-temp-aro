@@ -313,9 +313,10 @@ public class GeometryUtil {
 				.collect(Collectors.toList());
 
 	}
+	@SuppressWarnings("unchecked")
 	private static <T extends Geometry> T transformGeometry(MathTransform coordinatesProjection, T shapeTrimmed) {
 		try {
-			return (T)org.geotools.geometry.jts.JTS.transform(shapeTrimmed, coordinatesProjection);
+			return ((T)org.geotools.geometry.jts.JTS.transform(shapeTrimmed, coordinatesProjection));
 		} catch (TransformException e) {
 			throw new RuntimeException(e);
 		}

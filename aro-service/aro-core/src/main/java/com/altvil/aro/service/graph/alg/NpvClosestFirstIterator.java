@@ -356,10 +356,18 @@ public class NpvClosestFirstIterator<V, E extends AroEdge<?>>
 		}
 		super.setCrossComponentTraversal(crossComponentTraversal);
 	}
-
+	
+	
 	@Override
 	public boolean isGlobalConstraintMet() {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public boolean isTraversedVertex(V vertex) {
+		return super.isSeenVertex(vertex) ;
+	}
+	
+	
 }
