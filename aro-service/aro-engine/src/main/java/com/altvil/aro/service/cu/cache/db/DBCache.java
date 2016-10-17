@@ -96,6 +96,22 @@ public class DBCache implements SimpleCache {
 		if (entity == null) {
 			entity = new CacheEntity();
 			entity.setKey(cacheKey);
+			
+			//SUPER UGLY FIX (Data model needs be changed)
+			for(VersionType vt : rv.keys()) {
+				switch( vt ) {
+				case SERVICE :
+					entity.setVersion(rv.getVersion(vt));
+					break ;
+				case NETWORK :
+					entity.setVersion(rv.getVersion(vt));
+					break ;
+				case LOCATION :
+					entity.setLocationVersion(rv.getVersion(vt));
+					break ;
+				}
+			}
+			
 			entity = doSave(entity, 0);
 		}
 		return new CacheHandleImpl(key, entity, rv);
@@ -125,12 +141,15 @@ public class DBCache implements SimpleCache {
 		private boolean matchResourceVersion() {
 			return
 					equals(resourceVersion.getVersion(VersionType.SERVICE),
-							deploymentCacheEntity.getServiceAreaVersion())
-			&& equals(resourceVersion.getVersion(VersionType.LOCATION),
-					deploymentCacheEntity.getLocationVersion())
-					&& equals(
-							resourceVersion.getVersion(VersionType.NETWORK),
-							deploymentCacheEntity.getVersion());
+							deploymentCacheEntity.getServiceAreaVersion()) ;
+			
+			//TODO add Support for location and network
+			
+//			&& equals(resourceVersion.getVersion(VersionType.LOCATION),
+//					deploymentCacheEntity.getLocationVersion())
+//					&& equals(
+//							resourceVersion.getVersion(VersionType.NETWORK),
+//							deploymentCacheEntity.getVersion());
 
 		}
 
