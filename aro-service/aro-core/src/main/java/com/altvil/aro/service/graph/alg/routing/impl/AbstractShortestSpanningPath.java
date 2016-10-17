@@ -14,7 +14,7 @@ import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 public abstract class AbstractShortestSpanningPath<V, E> implements
 		SpanningShortestPath<V, E> {
 
-	private WeightedGraph<V, E> graph ;
+	protected WeightedGraph<V, E> graph ;
 	private V source ;
 	
 	private V currentTarget = null ;

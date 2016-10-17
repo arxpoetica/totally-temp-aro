@@ -11,7 +11,6 @@ import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 public class LowMemoryShortestSpanningPath<V, E> extends
 		AbstractShortestSpanningPath<V, E> {
 
-	private WeightedGraph<V, E> graph ;
 	private V source ;
 	
 	public LowMemoryShortestSpanningPath(WeightedGraph<V, E> graph, V source) {
