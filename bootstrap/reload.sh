@@ -1,13 +1,5 @@
 #!/bin/bash
 
-if [ $# -ne 2 ]; then
-    echo $0: usage: init.sh admin_user_email admin_user_password
-    exit 1
-fi
-
-ADMIN_USER_EMAIL=$1
-ADMIN_USER_PASSWORD=$2
-
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 export ETL_LOG_FILE=$DIR/etl.log
@@ -26,8 +18,6 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 cd $DIR/../db
 
-(cd etl/schema && make etl_reload_auth) # this is a hack for now
-
 make reset_schema
 make load_schema
 
@@ -42,5 +32,3 @@ make stage_private
 
 make reset_private
 make load_private
-
-node ../app/cli/register_user -f Admin -l User -e $ADMIN_USER_EMAIL -p $ADMIN_USER_PASSWORD -r admin
