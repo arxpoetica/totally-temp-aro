@@ -342,6 +342,20 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 		};
 
 	}
+	
+	
+	private TreeMap<Double, SpanningShortestPath<V, E>> updateFastTargets(
+			Collection<V> deltaSources,
+			Map<V, SpanningShortestPath<V, E>> targetMap) {
+		
+		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = new TreeMap<>();
+		targetMap.values().forEach(ssp -> {
+			treeMap.put(ssp.updateNetworkPath(deltaSources), ssp) ;
+		});
+		
+		return treeMap ;
+		
+	}
 
 	private TreeMap<Double, SpanningShortestPath<V, E>> updateTargets(
 			Collection<V> deltaSources,
@@ -378,7 +392,9 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		ClosestTarget closestSource = new ClosestTarget();
 
-		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = updateTargets(deltaSources, targetMap) ;
+		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = closestRouteStrategy.isParallelized() ?
+			updateTargets(deltaSources, targetMap) :
+			updateFastTargets(deltaSources, targetMap);
 		
 		for (SpanningShortestPath<V, E> ssp : treeMap.values()) {
 			SpanningGraphPath<V, E> path = ssp.getGraphPath();

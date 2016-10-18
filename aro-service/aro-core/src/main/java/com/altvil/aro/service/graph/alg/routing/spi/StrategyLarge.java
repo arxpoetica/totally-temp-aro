@@ -39,6 +39,11 @@ public class StrategyLarge<V, E> implements ClosestRouteStrategy<V, E> {
 		metricContext.reset();
 		analysisContext.reset();
 	}
+	
+	@Override
+	public boolean isParallelized() {
+		return true ;
+	}
 
 	@Override
 	public SpanningShortestPath<V, E> createSpanningShortestPath(V source) {

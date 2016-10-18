@@ -28,6 +28,11 @@ public class StrategySmall<V, E> implements ClosestRouteStrategy<V, E> {
 	public void reset() {
 	}
 
+	
+	@Override
+	public boolean isParallelized() {
+		return false ;
+	}
 
 	@Override
 	public SpanningShortestPath<V, E> createSpanningShortestPath(V source) {
