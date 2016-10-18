@@ -12,6 +12,7 @@ public class SpanningTreeBuilderImpl<V, E> implements SpanningTreeBuilder<V, E> 
 
 	private SourceGraph<V, E> sourceGraph;
 
+	private Collection<V> sources ;
 	private MetricEdgeWeight<E> metricEdgeWeight;
 	private GraphPathConstraint<V, E> predicate;
 
@@ -43,11 +44,20 @@ public class SpanningTreeBuilderImpl<V, E> implements SpanningTreeBuilder<V, E> 
 		this.metricEdgeWeight = metricEdgeWeight;
 		return this;
 	}
+	
+	
+	
+
+	@Override
+	public SpanningTreeBuilder<V, E> setSources(Collection<V> sources) {
+		this.sources = sources ;
+		return this;
+	}
 
 	@Override
 	public SpanningTree<V, E> build() {
 		Collection<SourceRoute<V, E>> sourcesRoutes = new SpanningTreeAlgorithmImpl<V, E>(
-				metricEdgeWeight, sourceGraph, predicate, targets).build();
+				metricEdgeWeight, sourceGraph, predicate, sources,  targets).build();
 		return new SpanningTree<V, E>() {
 			@Override
 			public Collection<SourceRoute<V, E>> getSourceRoutes() {

@@ -2,7 +2,6 @@ package com.altvil.aro.service.optimization.strategy.comparators;
 
 import com.altvil.aro.service.optimization.strategy.impl.SingleAreaAnalysis;
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
-import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 
 public class OptimizationImprovement implements Comparable<OptimizationImprovement>{
     private final SingleAreaAnalysis singleAreaAnalysis;

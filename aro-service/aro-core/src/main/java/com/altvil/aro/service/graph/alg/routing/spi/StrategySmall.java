@@ -23,6 +23,11 @@ public class StrategySmall<V, E> implements ClosestRouteStrategy<V, E> {
 		this.graph = graph;
 		this.metricGraph = metricGraph;
 	}
+	
+	@Override
+	public void reset() {
+	}
+
 
 	@Override
 	public SpanningShortestPath<V, E> createSpanningShortestPath(V source) {

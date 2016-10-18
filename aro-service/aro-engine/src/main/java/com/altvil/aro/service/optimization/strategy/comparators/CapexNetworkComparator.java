@@ -1,7 +1,6 @@
 package com.altvil.aro.service.optimization.strategy.comparators;
 
 import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
-import com.altvil.aro.service.optimize.OptimizedNetwork;
 
 public class CapexNetworkComparator extends AbstractNetworkComparator{
     @Override

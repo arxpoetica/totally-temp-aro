@@ -1,6 +1,5 @@
 package com.altvil.aro.service.route.impl;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.alg.SourceRoute;
-import com.altvil.aro.service.graph.alg.routing.VirtualRoot;
 import com.altvil.aro.service.graph.alg.routing.impl.SourceGraph;
 import com.altvil.aro.service.graph.alg.routing.impl.SpanningTreeBuilderImpl;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
@@ -167,24 +165,15 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 		@Override
 		public Collection<SourceRoute<GraphNode, AroEdge<GeoSegment>>> planRoute(
 				Collection<GraphNode> sources, Collection<GraphNode> targets) {
+			
+			SourceGraph<GraphNode, AroEdge<GeoSegment>> sg = new SourceGraph<>(
+					getModel().getGraph(), getModel().getGraph(), () -> vertexFactory.createGraphNode(null));
 
-			try (VirtualRoot<GraphNode, AroEdge<GeoSegment>> vr = new VirtualRoot<>(
-					getModel().getGraph(), vertexFactory.createGraphNode(null),
-					sources)) {
-
-				SourceGraph<GraphNode, AroEdge<GeoSegment>> sg = new SourceGraph<>(
-						getModel().getGraph(), getModel().getGraph(), vr);
-
-				return new SpanningTreeBuilderImpl<GraphNode, AroEdge<GeoSegment>>()
-						.setGraphPathConstraint(null)
-						.setMetricEdgeWeight(GeoSegmentLength.MetricLength)
-						.setSourceGraph(sg).setTargets(targets).build()
-						.getSourceRoutes();
-
-			} catch (IOException err) {
-				throw new RuntimeException(err.getMessage(), err);
-			}
-
+			return new SpanningTreeBuilderImpl<GraphNode, AroEdge<GeoSegment>>()
+					.setGraphPathConstraint(null)
+					.setMetricEdgeWeight(GeoSegmentLength.MetricLength)
+					.setSourceGraph(sg).setTargets(targets).build()
+					.getSourceRoutes();
 		}
 
 		/*
