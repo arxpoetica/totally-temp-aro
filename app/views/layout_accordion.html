@@ -21,12 +21,12 @@
         </div>
       </div>
       <div id="map-extras">
-        <p>
+        <p data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Heat Map">
           <button class="btn" ng-class="{'btn-success': heatmapOn, 'btn-primary': !heatmapOn}" ng-click="toggleHeatmap()" style="width: 39px">
             <span class="fa fa-fire"></span>
           </button>
-        <p>
         </p>
+        <p data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Road Segments">
           <button class="btn" ng-class="{'btn-success': roadLayer.visible, 'btn-primary': !roadLayer.visible}" ng-click="roadLayer.toggleVisibility()" style="width: 39px">
             <span class="fa fa-road map-layer-spinner map-layer-spinner-road_segments"></span>
           </button>
@@ -173,11 +173,11 @@
     <div class="map-tool-wrapper" style="left: 400px; top: 47px">
       <div ng-show="details" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 1000px">
         <div class="panel-heading">
-          {{ map_tools.get_tool_name('financial_profile') }}
-          {{ mode === 'area' && selectedArea ? ' · '+selectedArea.name : '' }}
           <a href="javascript:void(0)" class="pull-right" ng-click="showDetails(false)">
             <span style="color:white" class="fa fa-close"></span>
           </a>
+          {{ map_tools.get_tool_name('financial_profile') }}
+          {{ mode === 'area' && selectedArea ? ' · '+selectedArea.name : '' }}
         </div>
         <% include controller_financial_profile_tool.html %>
       </div>
