@@ -32,7 +32,10 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
     @Override
     public OptimizationTargetEvaluator getTargetEvaluator(ThresholdBudgetConstraint constraints) {
         if(constraints.getOptimizationType() == OptimizationType.IRR)
-            return new IRREvaluator(constraints.getThreshhold(), constraints.getCapex(), constraints.getYears());
+            if(Double.isNaN(constraints.getThreshhold())&& Double.isInfinite(constraints.getCapex()))
+                return new UnconstrainedIRREvaluator(constraints.getThreshhold(), constraints.getCapex());
+            else
+                return new IRREvaluator(constraints.getThreshhold(), constraints.getCapex(), constraints.getYears());
         else
             return new CoverageEvaluator(constraints.getThreshhold(), constraints.getCapex());
     }
@@ -52,6 +55,10 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
 
         protected void setOptimizedNetwork(OptimizationImprovement optimizationImprovement){
             optimizedNetworkMap.put(optimizationImprovement.getPlanId(), optimizationImprovement);
+        }
+
+        protected OptimizationImprovement getOptimizedNetwork(long planId){
+            return optimizedNetworkMap.get(planId);
         }
 
 
@@ -96,6 +103,21 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
             currentCapex += optImprovement.getIncrementalCost();
             currentCoverage += optImprovement.getIncrementalBeneift();
             return currentCoverage >= threshold;
+        }
+    }
+
+    private class UnconstrainedIRREvaluator extends AbstractOptimizationTargetEvaluator{
+
+
+        public UnconstrainedIRREvaluator(Double threshold, Double capexThreshold) {
+            super(threshold, capexThreshold);
+        }
+
+        @Override
+        public boolean addNetwork(OptimizationImprovement optImprovement) {
+            if(getOptimizedNetwork(optImprovement.getPlanId()) == null)
+                setOptimizedNetwork(optImprovement);
+            return true;
         }
     }
 
