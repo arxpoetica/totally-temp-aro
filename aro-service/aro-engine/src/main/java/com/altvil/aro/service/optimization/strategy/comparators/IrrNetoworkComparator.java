@@ -1,11 +1,9 @@
 package com.altvil.aro.service.optimization.strategy.comparators;
 
-import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
-import com.altvil.aro.service.optimize.OptimizedNetwork;
-import com.altvil.aro.service.roic.CashFlows;
 import org.apache.poi.ss.formula.functions.Irr;
 
-import java.util.Arrays;
+import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
+import com.altvil.aro.service.roic.CashFlows;
 
 public class IrrNetoworkComparator extends AbstractNetworkComparator {
 
