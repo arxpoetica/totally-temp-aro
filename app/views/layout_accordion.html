@@ -21,12 +21,12 @@
         </div>
       </div>
       <div id="map-extras">
-        <p>
+        <p data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Heat Map">
           <button class="btn" ng-class="{'btn-success': heatmapOn, 'btn-primary': !heatmapOn}" ng-click="toggleHeatmap()" style="width: 39px">
             <span class="fa fa-fire"></span>
           </button>
-        <p>
         </p>
+        <p data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Road Segments">
           <button class="btn" ng-class="{'btn-success': roadLayer.visible, 'btn-primary': !roadLayer.visible}" ng-click="roadLayer.toggleVisibility()" style="width: 39px">
             <span class="fa fa-road map-layer-spinner map-layer-spinner-road_segments"></span>
           </button>
