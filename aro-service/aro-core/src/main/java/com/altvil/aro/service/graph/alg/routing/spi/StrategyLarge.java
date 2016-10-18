@@ -68,10 +68,10 @@ public class StrategyLarge<V, E> implements ClosestRouteStrategy<V, E> {
 
 		@Override
 		public ClosestFirstSurfaceIterator<V, E> getIterator(V vertex) {
-			ClosestFirstSurfaceIterator<V, E> itr = map.get(vertex);
+			ClosestFirstSurfaceIterator<V, E> itr =map.get(vertex);
 			if (itr == null) {
 				map.put(vertex, itr = new ScalarClosestFirstSurfaceIterator<>(
-						graph));
+						graph, vertex));
 			}
 
 			return itr;
