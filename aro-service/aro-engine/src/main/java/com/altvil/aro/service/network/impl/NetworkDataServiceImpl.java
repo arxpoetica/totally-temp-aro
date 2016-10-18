@@ -188,7 +188,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	private Collection<CableConduitEdge> queryExistingCableConduitEdges(
 			NetworkDataRequest networkConfiguration) {
 		return networkDataDAO
-				.queryExistingCableConduitEdges(networkConfiguration.getServiceAreaId().get(), networkConfiguration.getPlanId());
+				.queryExistingCableConduitEdges(networkConfiguration.getServiceAreaId().get());
 
 	}
 

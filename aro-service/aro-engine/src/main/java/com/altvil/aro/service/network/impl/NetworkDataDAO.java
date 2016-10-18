@@ -130,7 +130,7 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 				.setVersionTypes(EnumSet.of(VersionType.SERVICE))
 				.setCacheLoaderFunc(
 						(cacheQuery) -> () -> _queryExistingCableConduitEdges(cacheQuery
-								.getDeploymentPlanId())).build();
+								.getServiceAreaId())).build();
 
 	}
 
@@ -425,16 +425,16 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	 */
 	@Override
 	public Collection<CableConduitEdge> queryExistingCableConduitEdges(
-			int serviceAreaId, long planId) {
+			int serviceAreaId) {
 		return existingCableConduitEdges.gridLoad(Priority.HIGH,
 				CacheQuery.build(serviceAreaId).build()).getEdges();
 
 	}
 
-	private PlanConduitEdges _queryExistingCableConduitEdges(long planId) {
+	private PlanConduitEdges _queryExistingCableConduitEdges(int wirecenterId) {
 		return new PlanConduitEdges(
 				planRepository
-						.queryConduitSections(planId)
+						.queryConduitSections(wirecenterId)
 						.stream()
 						.map(OrdinalEntityFactory.FACTORY::createOrdinalEntity)
 						.map(result -> {
