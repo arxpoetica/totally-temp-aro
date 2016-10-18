@@ -48,7 +48,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 	private static int largeStrategyThreshold = 500;
 	
-	private static final ExecutorService executorService = Executors.newCachedThreadPool() ;
+	private static final ExecutorService executorService = Executors.newFixedThreadPool(10) ;
 
 	private ClosestRouteStrategy<V, E> closestRouteStrategy;
 	private SourceGraph<V, E> sourceGraph;
