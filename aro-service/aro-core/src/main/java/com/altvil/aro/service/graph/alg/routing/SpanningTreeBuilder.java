@@ -13,6 +13,7 @@ public interface SpanningTreeBuilder<V, E> {
 	SpanningTreeBuilder<V, E> setMetricEdgeWeight(MetricEdgeWeight<E> metricEdgeWeight) ;
 	
 	SpanningTreeBuilder<V, E> setTargets(Collection<V> targets);
+	SpanningTreeBuilder<V, E> setSources(Collection<V> sources);
 	
 	SpanningTree<V,E> build() ;
 	

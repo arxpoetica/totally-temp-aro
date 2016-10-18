@@ -13,10 +13,10 @@ import com.altvil.aro.service.graph.alg.SpanningShortestPath;
 import com.altvil.aro.service.graph.alg.routing.spi.SpanningGraphPath;
 import com.altvil.aro.service.graph.alg.routing.spi.UpdateContext;
 
-public class LowMemoryShortestSpanningPath<V, E>  implements
+public class LowMemoryShortestSpanningPath<V, E> implements
 		SpanningShortestPath<V, E> {
 
-	private UpdateContext<V, E> updateContext ;
+	private UpdateContext<V, E> updateContext;
 	private WeightedGraph<V, E> graph;
 	private V source;
 
@@ -33,15 +33,14 @@ public class LowMemoryShortestSpanningPath<V, E>  implements
 
 	@Override
 	public double getWeight() {
-		return getWeight() ;
+		return getWeight();
 	}
 
 	@Override
-	public double updateNetworkPath(
-			Collection<V> vertices) {
+	public double updateNetworkPath(Collection<V> vertices) {
 
 		for (V v : vertices) {
-			double weight = find(updateContext.getIterator(v));
+			double weight = find(getIterator(v));
 			if (weight < currentWeight) {
 				currentWeight = weight;
 				currentTarget = v;
@@ -50,6 +49,10 @@ public class LowMemoryShortestSpanningPath<V, E>  implements
 
 		return currentWeight;
 
+	}
+
+	private ClosestFirstSurfaceIterator<V, E> getIterator(V vertex) {
+		return updateContext.getIterator(vertex);
 	}
 
 	private double find(ClosestFirstSurfaceIterator<V, E> itr) {
@@ -89,7 +92,7 @@ public class LowMemoryShortestSpanningPath<V, E>  implements
 
 	@Override
 	public SpanningGraphPath<V, E> getGraphPath() {
-		return getGraphPath(updateContext.getIterator(currentTarget)) ;
-	}	
+		return getGraphPath(getIterator(currentTarget));
+	}
 
 }
