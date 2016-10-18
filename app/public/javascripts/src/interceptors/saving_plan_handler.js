@@ -12,12 +12,12 @@ app.config(($httpProvider) => {
       $('#plan-saving').stop().show()
       $('#plan-saving .fa').show()
       if (!interval) {
-        $('#plan-saving .text').text('00:00')
+        $('#plan-saving .text').text('00:00 Runtime')
         interval = setInterval(() => {
           var diff = (Date.now() - time) / 1000
           var min = Math.floor(diff / 60)
           var sec = Math.ceil(diff % 60)
-          $('#plan-saving .text').text(`${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`)
+          $('#plan-saving .text').text(`${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`)
         }, 1000)
       }
     } else {
