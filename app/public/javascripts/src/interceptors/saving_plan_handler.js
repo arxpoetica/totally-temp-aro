@@ -2,7 +2,7 @@
 app.config(($httpProvider) => {
   var operations = 0
 
-  function update_operations (n) {
+  function updateOperations (n) {
     operations += n
     if (operations > 0) {
       $('#plan-saved').stop().hide()
@@ -20,7 +20,7 @@ app.config(($httpProvider) => {
     return {
       request: (config) => {
         if (config.saving_plan) {
-          update_operations(1)
+          updateOperations(1)
         }
         var deferred = $q.defer()
         deferred.resolve(config)
@@ -28,20 +28,20 @@ app.config(($httpProvider) => {
       },
       response: (response) => {
         if (response.config.saving_plan) {
-          update_operations(-1)
+          updateOperations(-1)
         }
         return response
       },
       'requestError': (rejection) => {
         if (rejection.config.saving_plan) {
-          update_operations(-1)
+          updateOperations(-1)
         }
         return $q.reject(rejection)
       },
 
       'responseError': (rejection) => {
         if (rejection.config.saving_plan) {
-          update_operations(-1)
+          updateOperations(-1)
         }
         return $q.reject(rejection)
       }
