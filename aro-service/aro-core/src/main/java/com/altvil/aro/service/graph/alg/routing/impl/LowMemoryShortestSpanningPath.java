@@ -33,7 +33,7 @@ public class LowMemoryShortestSpanningPath<V, E> implements
 
 	@Override
 	public double getWeight() {
-		return getWeight();
+		return currentWeight;
 	}
 	
 	
