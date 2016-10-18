@@ -319,13 +319,13 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 			// Assign Previous Targets
 			previousPath = pathList;
+			this.closestRouteStrategy.reset();
 		}
 	}
 
 	private ClosestTarget getClosestTarget(Collection<V> deltaSources,
 			Map<V, SpanningShortestPath<V, E>> targetMap) {
 
-		this.closestRouteStrategy.reset();
 
 		ClosestTarget closestSource = new ClosestTarget();
 

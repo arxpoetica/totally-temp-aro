@@ -172,7 +172,10 @@ public class RoutePlaningServiceImpl implements RoutePlaningService {
 			return new SpanningTreeBuilderImpl<GraphNode, AroEdge<GeoSegment>>()
 					.setGraphPathConstraint(null)
 					.setMetricEdgeWeight(GeoSegmentLength.MetricLength)
-					.setSourceGraph(sg).setTargets(targets).build()
+					.setSourceGraph(sg)
+					.setTargets(targets)
+					.setSources(sources)
+					.build()
 					.getSourceRoutes();
 		}
 
