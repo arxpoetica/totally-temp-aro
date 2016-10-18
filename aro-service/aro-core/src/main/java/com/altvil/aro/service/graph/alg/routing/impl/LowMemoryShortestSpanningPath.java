@@ -35,6 +35,20 @@ public class LowMemoryShortestSpanningPath<V, E> implements
 	public double getWeight() {
 		return getWeight();
 	}
+	
+	
+	private synchronized void update(V vertex, double weight) {
+		if (weight < currentWeight) {
+			currentWeight = weight;
+			currentTarget = vertex;
+		}
+	}
+	
+
+	@Override
+	public void updateNetworkPath(V vertex) {
+		update(vertex, find(getIterator(vertex)));
+	}
 
 	@Override
 	public double updateNetworkPath(Collection<V> vertices) {

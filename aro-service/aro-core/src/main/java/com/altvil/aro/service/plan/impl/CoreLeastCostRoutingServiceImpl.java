@@ -311,7 +311,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 			AnalysisGraphFactory analysisFactory = new AnalysisGraphFactory(
 					pricingModel, getRenodedGraph(graphCtx, graphMapping),
-					graphNodeFactory.createGraphNode(null), lcrContext);
+					lcrContext);
 
 			GeneratedFiberRoute feederFiber = planRoute(
 					analysisFactory.createAnalysisBinding(FiberType.FEEDER),
@@ -469,19 +469,19 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 		private PricingModel pricingModel;
 		private RenodedGraph renodedGraph;
-		private GraphNode rootVertex;
+		//private GraphNode rootVertex;
 		private Set<GraphNode> matchedVertices;
 		private LcrContext lcrContext;
 		private Map<Map<CableConstructionEnum, Double>, RenodedGraph> cache = new HashMap<>();
 		private Map<FiberType, RenodedGraph> mappedGraphs = new HashMap<>();
 
 		public AnalysisGraphFactory(PricingModel pricingModel,
-				RenodedGraph renodedGraph, GraphNode rootVertex,
+				RenodedGraph renodedGraph,
 				LcrContext lcrContext) {
 			super();
 			this.pricingModel = pricingModel;
 			this.renodedGraph = renodedGraph;
-			this.rootVertex = rootVertex;
+			//this.rootVertex = rootVertex;
 			this.lcrContext = lcrContext;
 
 			matchedVertices = extractVertices(LocationEntityType.celltower);

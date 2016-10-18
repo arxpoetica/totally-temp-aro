@@ -25,6 +25,13 @@ public abstract class AbstractShortestSpanningPath<V, E> implements
 		this.graph = graph;
 		this.source = source;
 	}
+	
+	protected synchronized void update(V vertex, double weight) {
+		if (weight < currentWeight) {
+			currentWeight = weight;
+			currentTarget = vertex;
+		}
+	}
 
 	protected double find(ClosestFirstSurfaceIterator<V, E> itr, V vertex) {
 
@@ -34,6 +41,10 @@ public abstract class AbstractShortestSpanningPath<V, E> implements
 		}
 
 		return itr.getShortestPathLength(vertex);
+	}
+	
+	protected void updateNetworkPath(ClosestFirstSurfaceIterator<V, E> itr, V vertex) {
+		update(vertex, find(itr, vertex));
 	}
 	
 	protected double updateNetworkPath(ClosestFirstSurfaceIterator<V, E> itr, Collection<V> vertices) {
