@@ -92,7 +92,10 @@ public class LowMemoryShortestSpanningPath<V, E> implements
 
 	@Override
 	public SpanningGraphPath<V, E> getGraphPath() {
-		return getGraphPath(getIterator(currentTarget));
+		ClosestFirstSurfaceIterator<V, E> iterator = getIterator(currentTarget);
+		//this is needed so the iterator actually passes the source.
+		find(iterator);
+		return getGraphPath(iterator);
 	}
 
 }
