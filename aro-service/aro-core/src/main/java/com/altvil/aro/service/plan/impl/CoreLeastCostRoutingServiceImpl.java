@@ -368,13 +368,14 @@ public class CoreLeastCostRoutingServiceImpl implements
 			
 			
 			try (AnalysisGraph analysisGraph = analysisBinding
-					.createAnalysisGraph(sources)) {
+					.createAnalysisGraph()) {
 				SourceRoute<GraphNode, AroEdge<GeoSegment>> sr = new SpanningTreeBuilderImpl<GraphNode, AroEdge<GeoSegment>>()
 						.setMetricEdgeWeight(GeoSegmentLength.MetricLength)
 						.setSourceGraph(analysisGraph.getSourceGraph())
 						.setTargets(
 								StreamUtil.map(nodes,
 										n -> renoded.getGraphNode(n)))
+						.setSources(sources)
 						.setGraphPathConstraint(analysisGraph.getConstraint())
 						.build().getSourceRoute();
 
@@ -459,7 +460,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 	}
 
 	private interface AnalysisBinding {
-		public AnalysisGraph createAnalysisGraph(Collection<GraphNode> sources);
+		public AnalysisGraph createAnalysisGraph();
 
 		public RenodedGraph getRenodedGraph();
 	}
@@ -528,9 +529,8 @@ public class CoreLeastCostRoutingServiceImpl implements
 			return new AnalysisBinding() {
 
 				@Override
-				public AnalysisGraph createAnalysisGraph(
-						Collection<GraphNode> sources) {
-					return createSourceGraph(fiberType, sources);
+				public AnalysisGraph createAnalysisGraph() {
+					return createSourceGraph(fiberType);
 				}
 
 				@Override
@@ -542,17 +542,15 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 		}
 
-		private AnalysisGraph createSourceGraph(FiberType fiberType,
-				Collection<GraphNode> sources) {
+		private AnalysisGraph createSourceGraph(FiberType fiberType) {
 
-			return new AnalysisGraph(virtualize(getMetricGraph(), rootVertex,
-					sources), virtualize(getAnalysisGraph(fiberType),
-					rootVertex, sources), createConstraint(fiberType));
+			return new AnalysisGraph(virtualize(getMetricGraph()
+			), virtualize(getAnalysisGraph(fiberType)
+			), createConstraint(fiberType));
 
 		}
 
-		private VirtualizedGraph virtualize(RenodedGraph graph, GraphNode root,
-				Collection<GraphNode> sources) {
+		private VirtualizedGraph virtualize(RenodedGraph graph) {
 			return new VirtualizedGraph(graph);
 		}
 
