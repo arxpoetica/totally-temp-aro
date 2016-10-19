@@ -223,6 +223,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
+  $scope.showReports = () => {
+    $('#reports').modal('show')
+  }
+
   $scope.manageNetworkPlans = () => {
     $scope.loadPlans(1, () => {
       $('#manage-network-plans').modal('show')

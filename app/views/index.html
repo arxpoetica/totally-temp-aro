@@ -17,6 +17,10 @@
   </head>
   <body>
 
+    <div ng-controller="reports_controller">
+      <% include modal_reports.html %>
+    </div>
+
     <div ng-controller="build_lease_controller">
       <% include modal_build_lease.html %>
     </div>
@@ -65,6 +69,10 @@
             </div>
             <div class="col-sm-8">
               <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manageNetworkPlans()">Manage Network Plans</a>
+              <br>
+            </div>
+            <div class="col-sm-8">
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showReports()">Reports</a>
               <br>
             </div>
             <% if (user.rol === 'admin') { %>
@@ -430,6 +438,7 @@
   <script src="javascripts/lib/controllers/settings_controller.js"></script>
   <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
   <script src="javascripts/lib/controllers/user_defined_boundary_controller.js"></script>
+  <script src="javascripts/lib/controllers/reports_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>
