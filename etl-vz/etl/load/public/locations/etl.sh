@@ -49,7 +49,7 @@ do
 	${PSQL} -a -c "UPDATE aro.businesses SET annual_recurring_cost = 0 WHERE annual_recurring_cost IS NULL;"
 
 	${PSQL} -a -c "SELECT aro.create_towers_shard_table('${STATE}', '${TARGET_SCHEMA_NAME}');"
-	${PSQL} -a -c "SELECT aro.load_shard_towers('${TOWERS_SCOPED_SOURCE_TABLE}', '${TARGET_SCHEMA_NAME}', '${STATE}');"
+	${PSQL} -a -c "SELECT aro.load_shard_towers('${TOWERS_SCOPED_SOURCE_TABLE}', '${TARGET_SCHEMA_NAME}', '${STATE}', 1);"
 	
 done
 
