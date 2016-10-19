@@ -249,12 +249,14 @@ module.exports = class NetworkPlan {
           }
         })
 
-        output.metadata.fiber_summary = fiberCosts.map((item) => {
-          var fiberType = cache.fiberTypes.find((i) => i.name === item.fiberType)
+        var groupedFiberCosts = _.groupBy(fiberCosts, 'fiberType')
+        output.metadata.fiber_summary = Object.keys(groupedFiberCosts).map((fiberTypeKey) => {
+          var arr = groupedFiberCosts[fiberTypeKey]
+          var fiberType = cache.fiberTypes.find((i) => i.name === fiberTypeKey)
           return {
-            lengthMeters: item.lengthMeters,
-            totalCost: item.costPerMeter * item.lengthMeters,
-            description: (fiberType && fiberType.description) || item.fiberType
+            lengthMeters: arr.reduce((total, item) => total + item.lengthMeters, 0),
+            totalCost: arr.reduce((total, item) => total + item.costPerMeter * item.lengthMeters, 0),
+            description: (fiberType && fiberType.description) || fiberTypeKey
           }
         })
 
