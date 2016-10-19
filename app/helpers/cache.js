@@ -2,8 +2,14 @@ var database = require('./database')
 
 exports.serviceLayers = []
 exports.analysisLayers = []
+exports.fiberTypes = []
 
-function readServiceLayers () {
+function loadFiberTypes () {
+  return database.query('SELECT * FROM client.fiber_route_type')
+    .then((rows) => { exports.fiberTypes = rows })
+}
+
+function loadServiceLayers () {
   return database.query('SELECT * FROM client.service_layer WHERE is_user_defined=false ORDER BY id ASC')
     .then((response) => {
       exports.serviceLayers = response
@@ -22,7 +28,7 @@ function readServiceLayers () {
     })
 }
 
-function readAnalysisLayers () {
+function loadAnalysisLayers () {
   return database.query('SELECT * FROM client.analysis_layer ORDER BY id ASC')
     .then((response) => {
       exports.analysisLayers = response
@@ -31,8 +37,9 @@ function readAnalysisLayers () {
 
 exports.refresh = () => {
   return Promise.all([
-    readAnalysisLayers(),
-    readServiceLayers()
+    loadAnalysisLayers(),
+    loadServiceLayers(),
+    loadFiberTypes()
   ])
   .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
 }
