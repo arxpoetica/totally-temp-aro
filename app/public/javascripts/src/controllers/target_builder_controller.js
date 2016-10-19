@@ -1,4 +1,4 @@
-/* global app user_id google $ map FormData XMLHttpRequest swal */
+/* global app user_id google $ map FormData XMLHttpRequest swal config */
 // Search Controller
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, $timeout, optimization) => {
   // Controller instance variables
@@ -237,7 +237,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   })
 
   function postChanges (changes) {
-    changes.lazy = true
+    changes.lazy = !config.ui.map_tools.target_builder.eager
     optimization.optimize($scope.plan, changes, loadTargets, () => {})
   }
 

@@ -61,16 +61,14 @@
           <li role="presentation" class="active">
             <a href="#selected_location_customer_profile" aria-controls="profile" role="tab" data-toggle="tab">Customer profile</a>
           </li>
-          <!--
+          <% if (config.ui.locations_modal && config.ui.locations_modal.market_profile) { %>
           <li role="presentation">
             <a href="#selected_location_market_profile" aria-controls="profile" role="tab" data-toggle="tab">Market profile</a>
           </li>
-          -->
-          <!--
           <li role="presentation">
-            <a href="#selected_location_fair_share" aria-controls="profile" role="tab" data-toggle="tab">Competition</a>
+            <a href="#selected_location_fair_share" aria-controls="profile" role="tab" data-toggle="tab">Fair Share</a>
           </li>
-          -->
+          <% } %>
           <li role="presentation">
             <a href="#selected_location_businesses" aria-controls="profile" role="tab" data-toggle="tab">Businesses</a>
           </li>
@@ -156,7 +154,7 @@
               </div>
             </div>
           </div>
-          <!--
+          <% if (config.ui.locations_modal && config.ui.locations_modal.market_profile) { %>
           <div role="tabpanel" class="tab-pane" id="selected_location_market_profile">
             <div class="row">
               <div class="col-md-6">
@@ -195,6 +193,7 @@
                       </select>
                     </div>
                   </div>
+                  <!--
                   <div class="form-group form-group-sm">
                     <label class="col-sm-3 control-label">Customer type</label>
                     <div class="col-sm-9">
@@ -203,6 +202,7 @@
                       </select>
                     </div>
                   </div>
+                  -->
                   <div class="form-group form-group-sm">
                     <div class="col-sm-9 col-sm-offset-3">
                       <p class="form-control-static" ng-show="!loading && market_size.length === 0">No data available for this location with the selected filters</p>
@@ -213,8 +213,6 @@
               </div>
             </div>
           </div>
-          -->
-          <!--
           <div role="tabpanel" class="tab-pane" id="selected_location_fair_share" style="margin-top:30px">
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
@@ -228,7 +226,7 @@
               </div>
             </div>
           </div>
-          -->
+          <% } %>
           <div role="tabpanel" class="tab-pane" id="selected_location_businesses">
             <table><tbody></tbody></table><!-- do not remove -->
 

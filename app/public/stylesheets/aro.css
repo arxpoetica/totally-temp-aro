@@ -624,3 +624,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 #equipment_nodes_controller .panel-title {
   color: #444
 }
+
+.custom-ui {
+  display: none;
+}

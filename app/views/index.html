@@ -493,13 +493,13 @@
       $(this).tab('show')
     })
 
-    var heightDiff = $('#map-tools-accordion').offset().top + $('#map-tools-accordion').height() + 100
-    function calculatePanelHeight () {
-      var maxHeight = $(document).height() - heightDiff
-      $('#map-tools-accordion .panel-collapse > .panel-body').css('max-height', maxHeight)
-    }
-
     if ($('#map-tools-accordion').size() > 0) {
+      var heightDiff = $('#map-tools-accordion').offset().top + $('#map-tools-accordion').height() + 100
+      function calculatePanelHeight () {
+        var maxHeight = $(document).height() - heightDiff
+        $('#map-tools-accordion .panel-collapse > .panel-body').css('max-height', maxHeight)
+      }
+
       $(document).ready(calculatePanelHeight)
       $(window).resize(calculatePanelHeight)
     }

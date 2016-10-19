@@ -5,6 +5,8 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var config = helpers.config
+var models = require('./')
 
 module.exports = class Location {
 
