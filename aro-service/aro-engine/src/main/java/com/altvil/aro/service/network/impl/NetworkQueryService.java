@@ -35,7 +35,7 @@ public interface NetworkQueryService {
 
 	public Collection<CableConduitEdge> queryPlanConditEdges(long planid);
 
-	public Collection<CableConduitEdge> queryExistingCableConduitEdges(int serviceAreaId, long planId);
+	public Collection<CableConduitEdge> queryExistingCableConduitEdges(int serviceAreaId);
 
 	public Collection<StateCode> getServiceAreaCodes(Integer serviceAreaId);
 

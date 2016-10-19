@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
@@ -42,6 +47,8 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	// .getLogger(AbstractRouteBuilder.class.getName());
 
 	private static int largeStrategyThreshold = 500;
+	
+	private static final ExecutorService executorService = Executors.newCachedThreadPool() ;
 
 	private ClosestRouteStrategy<V, E> closestRouteStrategy;
 	private SourceGraph<V, E> sourceGraph;
@@ -54,10 +61,12 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	private VirtualRoot<V, E> virtualRoot;
 	private WeightedGraph<V, E> analysisGraph;
 	private WeightedGraph<V, E> metricGraph;
+	
 
 	private Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 
-	public SpanningTreeAlgorithmImpl(MetricEdgeWeight<E> metricEdgeWeight,
+	public SpanningTreeAlgorithmImpl(
+			MetricEdgeWeight<E> metricEdgeWeight,
 			SourceGraph<V, E> sourceGraph,
 			GraphPathConstraint<V, E> pathPredicate,
 			Collection<V> assignedSources, Collection<V> assignedTargets) {
@@ -88,9 +97,10 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 	@Override
 	public Collection<SourceRoute<V, E>> build() {
-
+		
 		try (VirtualRoot<V, E> vr = this.sourceGraph
 				.createVirutalRoot(this.assignedSources)) {
+			
 			this.virtualRoot = vr;
 			this.metricGraph = sourceGraph.getMetricGraph();
 			this.analysisGraph = sourceGraph.getAnalysisGraph();
@@ -320,21 +330,72 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			// Assign Previous Targets
 			previousPath = pathList;
 			this.closestRouteStrategy.reset();
+
 		}
+	}
+
+	private Callable<Boolean> toCallable(V v,
+			Collection<SpanningShortestPath<V, E>> paths) {
+		return () -> {
+			paths.forEach(ssp -> ssp.updateNetworkPath(v));
+			return Boolean.TRUE ;
+		};
+
+	}
+	
+	
+	private TreeMap<Double, SpanningShortestPath<V, E>> updateFastTargets(
+			Collection<V> deltaSources,
+			Map<V, SpanningShortestPath<V, E>> targetMap) {
+		
+		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = new TreeMap<>();
+		targetMap.values().forEach(ssp -> {
+			treeMap.put(ssp.updateNetworkPath(deltaSources), ssp) ;
+		});
+		
+		return treeMap ;
+		
+	}
+
+	private TreeMap<Double, SpanningShortestPath<V, E>> updateTargets(
+			Collection<V> deltaSources,
+			Map<V, SpanningShortestPath<V, E>> targetMap) {
+
+		try {
+			List<Future<Boolean>> futures = executorService.invokeAll(deltaSources.stream()
+					.map(v -> toCallable(v, targetMap.values()))
+					.collect(Collectors.toList()));
+			
+			futures.forEach(f -> {
+				try {
+					f.get() ;
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			});
+		} catch( Throwable err ) {
+			throw new RuntimeException(err.getMessage(), err) ;
+		}
+		
+		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = new TreeMap<>();
+		
+		targetMap.values().forEach(ssp -> {
+			treeMap.put(ssp.getWeight(), ssp) ;
+		});
+		
+		return treeMap;
+
 	}
 
 	private ClosestTarget getClosestTarget(Collection<V> deltaSources,
 			Map<V, SpanningShortestPath<V, E>> targetMap) {
 
-
 		ClosestTarget closestSource = new ClosestTarget();
 
-		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = new TreeMap<>();
-		for (V target : targetMap.keySet()) {
-			SpanningShortestPath<V, E> ssp = targetMap.get(target);
-			treeMap.put(ssp.updateNetworkPath(deltaSources), ssp);
-		}
-
+		TreeMap<Double, SpanningShortestPath<V, E>> treeMap = closestRouteStrategy.isParallelized() ?
+			updateTargets(deltaSources, targetMap) :
+			updateFastTargets(deltaSources, targetMap);
+		
 		for (SpanningShortestPath<V, E> ssp : treeMap.values()) {
 			SpanningGraphPath<V, E> path = ssp.getGraphPath();
 			if (isValidPath(path)) {

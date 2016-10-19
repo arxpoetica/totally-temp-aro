@@ -33,7 +33,21 @@ public class LowMemoryShortestSpanningPath<V, E> implements
 
 	@Override
 	public double getWeight() {
-		return getWeight();
+		return currentWeight;
+	}
+	
+	
+	private synchronized void update(V vertex, double weight) {
+		if (weight < currentWeight) {
+			currentWeight = weight;
+			currentTarget = vertex;
+		}
+	}
+	
+
+	@Override
+	public void updateNetworkPath(V vertex) {
+		update(vertex, find(getIterator(vertex)));
 	}
 
 	@Override

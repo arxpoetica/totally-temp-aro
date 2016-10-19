@@ -5,10 +5,14 @@ import com.altvil.interfaces.RoadEdge;
 import java.io.Serializable;
 import java.util.Collection;
 
-@SuppressWarnings("serial")
+
 public class ServiceAreaRoadEdges implements Serializable {
 
-    Collection<RoadEdge> roadEdges;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	Collection<RoadEdge> roadEdges;
 
     public ServiceAreaRoadEdges(Collection<RoadEdge> roadEdges) {
         this.roadEdges = roadEdges;

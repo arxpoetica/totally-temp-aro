@@ -16,8 +16,15 @@ public class DefaultShortestSpanningPath<V, E> extends
 		super(graph, source);
 		this.itr = itr ;
 	}
-
 	
+	
+	@Override
+	public void updateNetworkPath(V vertex) {
+		updateNetworkPath(itr, vertex) ;
+	}
+	
+
+
 	@Override
 	public double updateNetworkPath(Collection<V> vertices) {
 		return super.updateNetworkPath(itr, vertices);

@@ -5,10 +5,15 @@ import com.altvil.interfaces.CableConstructionEnum;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
+
 public class CableConduitEdgeImpl implements CableConduitEdge, Serializable {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static final CableConduitEdge INVALID_EDGE = new CableConduitEdgeImpl(-1, CableConstructionEnum.UNKNOWN, 0, -1) ;
 	
 	private long edgeId;
