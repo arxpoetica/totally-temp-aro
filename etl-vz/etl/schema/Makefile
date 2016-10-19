@@ -1,4 +1,14 @@
 ###################
+# ARO ETL
+###################
+
+reset_reference:
+	reference/reset.sh
+
+etl_reference:
+	reference/aro_etl.sh
+
+###################
 # USER_DATA ETL
 ###################
 
@@ -73,8 +83,8 @@ etl_cache:
 ###################
 
 
-reset: reset_financial reset_client reset_aro reset_cache reset_user_data
-load: etl_user_data etl_aro etl_client etl_financial etl_cache load_utils
+reset: reset_financial reset_client reset_aro reset_cache reset_user_data reset_reference
+load: etl_reference etl_user_data etl_aro etl_client etl_financial etl_cache load_utils
 
 etl_reload_auth: reset_auth etl_auth
 etl_reload_all: reset load
