@@ -18,18 +18,14 @@ app.config(($httpProvider) => {
           var min = Math.floor(diff / 60)
           var sec = Math.ceil(diff % 60)
           $('#plan-saving .text').text(`${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`)
-        }, 1000)
+        }, 200)
       }
     } else {
       $('#plan-saving').stop()
       $('#plan-saving .fa').hide()
       time = null
       clearInterval(interval)
-      // $('#plan-saving').stop().hide()
-      // $('#plan-saved').stop().show()
-      // setTimeout(() => {
-      //   $('#plan-saved').fadeOut()
-      // }, 500)
+      interval = null
     }
   }
 

@@ -74,6 +74,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.selectPlan = function (plan) {
     $scope.plan = plan
+    $('#plan-saving').stop().hide()
+    $('#plan-saved').stop().hide()
     state.loadPlan(plan)
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
