@@ -384,6 +384,12 @@ public class EntityFactory {
 			super(objectId);
 			this.assignedEntityDemand = assignedEntityDemand;
 		}
+		
+		@Override
+		public boolean hasDemandFor(LocationEntityType type) {
+			return assignedEntityDemand.getLocationDemand()
+					.getLocationDemand(type).getAtomicUnits() > 0;
+		}
 
 		@Override
 		public Class<? extends AroEntity> getType() {
