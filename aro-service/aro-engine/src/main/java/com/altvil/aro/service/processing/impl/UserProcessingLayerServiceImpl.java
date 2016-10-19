@@ -22,7 +22,7 @@ import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.persistence.repository.DataSourceEntityRepository;
 import com.altvil.aro.persistence.repository.ServiceAreaRepository;
 import com.altvil.aro.persistence.repository.ServiceLayerRepository;
-import com.altvil.aro.persistence.repository.user_data.DataSourceEntity;
+import com.altvil.aro.persistence.repository.user_data.UserDataSource;
 import com.altvil.aro.persistence.repository.user_data.SourceLocationEntity;
 import com.altvil.aro.service.processing.UserProcessingLayerService;
 import com.altvil.utils.GeometryUtil;
@@ -79,7 +79,7 @@ public class UserProcessingLayerServiceImpl implements
 		serviceLayer.setDescription(layerDescription);
 		serviceLayer.setUserDefined(true);
 
-		DataSourceEntity dse = new DataSourceEntity();
+		UserDataSource dse = new UserDataSource();
 
 		dse.setName(layerName);
 		dse.setDescription(layerDescription);
@@ -110,7 +110,7 @@ public class UserProcessingLayerServiceImpl implements
 	public void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader)
 			throws IOException {
 
-		DataSourceEntity ds = serviceLayerRepository.getOne(id).getDataSource();
+		UserDataSource ds = serviceLayerRepository.getOne(id).getDataSource();
 		ds.getSourceLocationEntities().clear();
 
 		ds.getSourceLocationEntities()

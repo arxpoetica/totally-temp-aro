@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.Point;
 public class SourceLocationEntity {
     
 	private Long id;
-	private DataSourceEntity dataSource;
+	private UserDataSource dataSource;
 	
 	private Integer entityCategoryId;
 	private Double lat;
@@ -64,11 +64,11 @@ public class SourceLocationEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "data_source_id", nullable = false)
     @JsonBackReference
-    public DataSourceEntity getDataSource() {
+    public UserDataSource getDataSource() {
         return dataSource;
     }
 
-    public void setDataSource(DataSourceEntity dataSource) {
+    public void setDataSource(UserDataSource dataSource) {
         this.dataSource = dataSource;
     }
 

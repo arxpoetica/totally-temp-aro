@@ -15,6 +15,7 @@ public class NetworkDataRequest {
 	private AnalysisSelectionMode selectionMode;
 	private Set<LocationEntityType> locationEntities;
 	private Optional<Integer> serviceAreaId = Optional.empty();
+	private Integer dataSourceId;
 
 	public NetworkDataRequest(long planId, Integer serviceLayerId,
 			Integer year, AnalysisSelectionMode selectionMode,
@@ -78,5 +79,13 @@ public class NetworkDataRequest {
 
 	public Optional<Integer> getServiceAreaId() {
 		return serviceAreaId;
+	}
+
+	public void setDataSourceId(Integer dataSourceId) {
+		this.dataSourceId = dataSourceId;
+	}
+
+	public Integer getDataSourceId() {
+		return dataSourceId;
 	}
 }

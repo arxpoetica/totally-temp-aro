@@ -19,7 +19,7 @@ public interface NetworkQueryService {
 	public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
 			boolean isFilteringRoadLocationDemandsBySelection,
 			Set<LocationEntityType> selectedTypes, int serviceAreaId,
-			long planId, int year, double mrc, ServiceAreaContext ctx);
+			long planId, int year, double mrc, ServiceAreaContext ctx, int dataSourceId);
 
 	public ServiceAreaRoadLocations queryRoadLocations(int serviceAreaId,
 			ServiceAreaContext ctx);

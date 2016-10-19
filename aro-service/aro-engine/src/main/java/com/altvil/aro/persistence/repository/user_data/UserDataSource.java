@@ -9,12 +9,13 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "data_source", schema = "user_data", catalog = "aro")
-public class DataSourceEntity {
+public class UserDataSource {
     private Long id;
     private String name;
     private String description;
     private Integer userId ;
     private Set<SourceLocationEntity> sourceLocationEntities;
+    private int referenceDataSourceId;
 
     @Id
     @Column(name = "id")
@@ -54,7 +55,7 @@ public class DataSourceEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DataSourceEntity that = (DataSourceEntity) o;
+        UserDataSource that = (UserDataSource) o;
 
         if (id != that.id) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
@@ -73,7 +74,7 @@ public class DataSourceEntity {
     public void setSourceLocationEntities(Set<SourceLocationEntity> sourceLocationEntities) {
         this.sourceLocationEntities = sourceLocationEntities;
     }
-    
+
     @Column(name="user_id")
     public Integer getUserId() {
 		return userId;
@@ -82,6 +83,15 @@ public class DataSourceEntity {
 	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
+
+    @Column(name="user_id")
+    public int getReferenceDataSourceId() {
+        return referenceDataSourceId;
+    }
+
+    public void setReferenceDataSourceId(int referenceDataSourceId) {
+        this.referenceDataSourceId = referenceDataSourceId;
+    }
 
     @Override
     public int hashCode() {

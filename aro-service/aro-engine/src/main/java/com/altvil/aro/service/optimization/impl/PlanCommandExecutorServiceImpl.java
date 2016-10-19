@@ -222,13 +222,20 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	private WirecenterOptimizationRequest createWirecenterOptimizationRequest(
 			MasterOptimizationRequest request, long planId, ServiceLayer sl, int serviceAreaId) {
 
+		NetworkDataRequest networkInputs = request.getNetworkDataRequest()
+				.createRequest(planId, sl.getId())
+				.createRequest(serviceAreaId);
+		Integer dataSourceId = 1;
+		if(sl.getDataSource() != null){
+			dataSourceId = sl.getDataSource().getReferenceDataSourceId();
+		}
+
+		networkInputs.setDataSourceId(dataSourceId);
 		return new WirecenterOptimizationRequest(
 				request.getOptimizationConstraints(),
 				request.getConstraints(),
-				request.getNetworkDataRequest()
-						.createRequest(planId, sl.getId())
-						.createRequest(serviceAreaId),
-				request.getAlgorithmType(), 
+				networkInputs,
+				request.getAlgorithmType(),
 				request.isUsePlanConduit()
 		);
 	}

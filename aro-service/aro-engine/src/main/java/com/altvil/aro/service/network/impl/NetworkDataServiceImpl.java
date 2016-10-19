@@ -140,7 +140,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				networkConfiguration.getPlanId(),
 				networkConfiguration.getYear(),
 				networkConfiguration.getMrc(),
-				ctx);
+				ctx, networkConfiguration.getDataSourceId());
 
 	}
 

@@ -117,9 +117,8 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 								"year", Integer.class), cacheQuery.getParam(
 								"mrc", Double.class), 
 								cacheQuery.getParam("selectedTypes", OrderedSet.class),
-								cacheQuery
-								.getParam("serviceAreaContext",
-										ServiceAreaContext.class))).build();
+								cacheQuery.getParam("serviceAreaContext", ServiceAreaContext.class),
+								cacheQuery.getParam("dataSourceId", Integer.class))).build();
 		existingCableConduitEdges = computeUnitService
 				.build(PlanConduitEdges.class, this.getClass())
 				.setName("existing_cable_conduitEdges")
@@ -146,10 +145,10 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
 			boolean isFilteringRoadLocationDemandsBySelection,
 			Set<LocationEntityType> selectedTypes, int serviceAreaId,
-			long planId, int year, double mrc, ServiceAreaContext ctx) {
+			long planId, int year, double mrc, ServiceAreaContext ctx, int dataSourceId) {
 
 		Map<Long, CompetitiveLocationDemandMapping> locationDemand = queryFiberDemand(
-				serviceAreaId, year, mrc, selectedTypes, ctx)
+				serviceAreaId, year, mrc, selectedTypes, ctx, dataSourceId)
 				.getDemandMapping();
 		if (isFilteringRoadLocationDemandsBySelection) {
 			Set<Long> selectedRoadLocationIds = planRepository
@@ -171,24 +170,26 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 
 	private ServiceAreaLocationDemand queryFiberDemand(int serviceAreaId,
 			int year, double mrc, Set<LocationEntityType> selectedTypes,
-			ServiceAreaContext ctx) {
+			ServiceAreaContext ctx, int dataSourceId) {
 		return locationDemand.gridLoad(
 				Priority.HIGH,
 				CacheQuery.build(serviceAreaId).add("year", year)
 						.add("mrc", mrc)
 						.add("selectedTypes", new OrderedSet<LocationEntityType>(selectedTypes))
-						.add("serviceAreaContext", ctx).build());
+						.add("serviceAreaContext", ctx)
+						.add("dataSourceId", dataSourceId)
+						.build());
 
 	}
 
 	private ServiceAreaLocationDemand _queryFiberDemand(int serviceAreaId,
-			int year, double mrc, Set<LocationEntityType> selectedTypes,
-			ServiceAreaContext ctx) {
+														int year, double mrc, Set<LocationEntityType> selectedTypes,
+														ServiceAreaContext ctx, int dataSourceId) {
 		return ServiceAreaLocationDemand
 				.build()
 				.setMapping(
 						assembleMapping(planRepository.queryAllFiberDemand(
-								serviceAreaId, year, mrc, ctx.getStateCodes())))
+								serviceAreaId, year, mrc, ctx.getStateCodes(), dataSourceId)))
 				.filterBySelectedTypes(selectedTypes).build();
 	}
 

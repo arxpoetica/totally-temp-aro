@@ -6,7 +6,7 @@ import java.util.Set;
 
 import javax.persistence.*;
 
-import com.altvil.aro.persistence.repository.user_data.DataSourceEntity;
+import com.altvil.aro.persistence.repository.user_data.UserDataSource;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @SuppressWarnings("serial")
@@ -20,7 +20,7 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 	private String description;
 	private boolean userDefined;
 
-	private DataSourceEntity dataSource;
+	private UserDataSource dataSource;
 	private Set<ProcessArea> processAreas = new HashSet<>();
 
 	@Override
@@ -75,11 +75,11 @@ public class ServiceLayer extends ComparableModel implements Serializable  {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "data_source_id")
-	public DataSourceEntity getDataSource() {
+	public UserDataSource getDataSource() {
 		return dataSource;
 	}
 
-	public void setDataSource(DataSourceEntity dataSource) {
+	public void setDataSource(UserDataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
