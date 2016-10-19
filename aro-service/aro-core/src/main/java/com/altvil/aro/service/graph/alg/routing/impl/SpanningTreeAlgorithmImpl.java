@@ -157,7 +157,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 		// Track All Vertices that caused previous network generation to fail.
 
-		int maxCount = 100;
+		int maxCount = 500;
 		int count = 1;
 		V lastFailure = null;
 		boolean force = false;
@@ -170,6 +170,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 				if (v == lastFailure) {
 					log.info("Detected Network Loop Failure ... rebuilding forced Network "
 							+ count + " => " + err.getFailedNodes());
+					selectedTargets.removeFailingTarget();
 					lastFailure = null;
 					force = true;
 				} else {
@@ -558,6 +559,13 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			this.itr = new ScalarClosestFirstSurfaceIterator<>(graph, source);
 			init(targets);
 		}
+		
+		@Override
+		public void removeFailingTarget() {
+			if( failingVertices.size() > 0 ) {
+				failingVertices.remove(failingVertices.firstEntry().getKey()) ;
+			}
+		}
 
 		public void addFailingTargets(Collection<V> vertices) {
 			V v = findFurthestVertex(vertices);
@@ -580,12 +588,13 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 		}
 
 		private V findFurthestVertex(Collection<V> vertices) {
-			double max = 0;
+			double max = 0 ;
 			V selected = null;
 
 			for (V v : vertices) {
 				if (selected == null) {
 					selected = v;
+					max = map.get(v);
 				} else {
 					double distance = map.get(v);
 					if (distance > max) {
@@ -634,7 +643,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 				v = Graphs.getOppositeVertex(graph, edge, v);
 			}
 
-			return new SpanningGraphPathImpl<V, E>(graph, source, endVertex,
+			return new SpanningGraphPathImpl<V, E>(graph, endVertex, source,
 					edgeList, pathLength);
 
 		}
@@ -661,6 +670,9 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	private abstract class SelectedTargets {
 
 		public void addFailingTargets(Collection<V> vertices) {
+		}
+		
+		public void removeFailingTarget() {
 		}
 
 		public Collection<V> getFailingVertices() {
