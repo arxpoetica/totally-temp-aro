@@ -749,7 +749,7 @@ module.exports = class NetworkPlan {
             ]}
           }
         })
-        return wirecenters.concat(addresses)
+        return addresses.concat(wirecenters)
       })
   }
 
