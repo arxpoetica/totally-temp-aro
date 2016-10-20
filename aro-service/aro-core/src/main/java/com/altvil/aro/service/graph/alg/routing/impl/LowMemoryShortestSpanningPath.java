@@ -36,6 +36,11 @@ public class LowMemoryShortestSpanningPath<V, E> implements
 		return currentWeight;
 	}
 	
+	@Override
+	public boolean isForced() {
+		return false;
+	}
+	
 	
 	private synchronized void update(V vertex, double weight) {
 		if (weight < currentWeight) {
