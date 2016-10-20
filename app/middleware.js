@@ -1,6 +1,7 @@
 var models = require('./models')
 var helpers = require('./helpers')
 var validate = helpers.validate
+var database = helpers.database
 var _ = require('underscore')
 var nook = require('node-errors').nook
 var NodeCache = require('node-cache')
@@ -145,10 +146,13 @@ module.exports = {
 
 if (module.id === require.main.id) {
   var req = {
-    query: querystring.parse('nelat=47.682656335625595&nelon=-122.04367968671875&swlat=47.529650773264706&swlon=-122.62046191328125&threshold=11&zoom=12')
+    query: querystring.parse('nelat=43.12129441054818&nelon=-89.31565700358885&swlat=42.91470789848055&swlon=-89.66138301677245&threshold=0&zoom=12')
   }
   viewport(req, null, (err) => {
     if (err) return console.log('err', err)
     console.log('viewport', req.viewport.linestring)
+    console.log()
+    console.log()
+    console.log('intersects', database.intersects(req.viewport, 'geom', 'WHERE'))
   })
 }
