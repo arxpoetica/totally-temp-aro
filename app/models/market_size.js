@@ -8,6 +8,7 @@ var _ = require('underscore')
 var moment = require('moment')
 var config = require('../helpers').config
 var Network = require('./network')
+var pync = require('pync')
 
 const emptyArray = (arr) => !Array.isArray(arr) || arr.length === 0
 
@@ -593,42 +594,48 @@ module.exports = class MarketSize {
       })
       .then((market_size) => {
         output.market_size = market_size
+        output.fair_share = {
+          towers: []
+        }
 
-        var table = ['businesses', 'households', 'towers'].indexOf(filters.entity_type) >= 0 ? filters.entity_type : 'businesses'
-        var params = [location_id]
-        var sql = `
-          SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
-            CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
-            ELSE '#' ||
-              to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
-              to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
-            END AS color,
-            (SELECT distance FROM client.locations_distance_to_carrier ldtc
-              WHERE ldtc.carrier_id = c.id
-              AND ldtc.location_id = $1
-            )
-          FROM ${table} biz
-          JOIN locations l ON l.id = biz.location_id AND l.id = $1
-          JOIN client.location_competitors lc ON lc.location_id = biz.location_id
-          JOIN carriers c ON lc.carrier_id = c.id
-            ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
-            ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
-          GROUP BY c.id ORDER BY c.name
-        `
-        return database.query(sql, params)
+        var tables = ['businesses', 'households'] // TODO: towers
+        return pync.series(tables, (table) => {
+          var params = [location_id]
+          var sql = `
+            SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
+              CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
+              ELSE '#' ||
+                to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
+                to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
+              END AS color,
+              (SELECT distance FROM client.locations_distance_to_carrier ldtc
+                WHERE ldtc.carrier_id = c.id
+                AND ldtc.location_id = $1
+              )
+            FROM ${table} biz
+            JOIN locations l ON l.id = biz.location_id AND l.id = $1
+            JOIN client.location_competitors lc ON lc.location_id = biz.location_id
+            JOIN carriers c ON lc.carrier_id = c.id
+              ${table === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
+              ${table === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
+            GROUP BY c.id ORDER BY c.name
+          `
+          return database.query(sql, params)
+            .then((fairShare) => {
+              this._sortFairShare(fairShare)
+              output.fair_share[table] = fairShare
+            })
+        })
       })
-      .then((fair_share) => {
-        this._sortFairShare(fair_share)
-        output.fair_share = fair_share
-
-        var current_carrier = 0
-        var total = output.fair_share.reduce((total, item) => {
-          if (item.name === config.client_carrier_name) {
-            current_carrier = item.value
-          }
-          return item.value + total
-        }, 0)
-        output.share = current_carrier / total
+      .then(() => {
+        // var current_carrier = 0
+        // var total = output.fair_share.reduce((total, item) => {
+        //   if (item.name === config.client_carrier_name) {
+        //     current_carrier = item.value
+        //   }
+        //   return item.value + total
+        // }, 0)
+        // output.share = current_carrier / total
         return output
       })
   }
