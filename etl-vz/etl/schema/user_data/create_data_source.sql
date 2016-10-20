@@ -3,5 +3,5 @@ CREATE TABLE IF NOT EXISTS user_data.data_source(
 	user_id integer references auth.users(id),
 	name varchar, 
 	description varchar,
-	client_data_source_id integer
+	reference_data_source_id integer
 );
