@@ -104,7 +104,7 @@
   <div ng-show="map_tools.is_visible('financial_profile')" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 1000px">
     <div class="panel-heading">
       {{ map_tools.get_tool_name('financial_profile') }}
-      {{ mode === 'area' && selectedArea ? ' · '+selectedArea.name : '' }}
+      {{ selectedArea ? ' · '+selectedArea.name : '' }}
       <a href="javascript:void(0)" class="pull-right" ng-click="download()">
         <span style="color:white" class="fa fa-download"></span>
       </a>
@@ -133,7 +133,8 @@
 
 <div ng-controller="map_tools_controller">
   <div ng-repeat="tool in map_tools.available_tools">
-    <p>
+    <hr ng-if="tool.separator">
+    <p ng-if="!tool.separator">
       <a href="javascript:void(0)" class="btn btn-primary btn-block btn-sm map_tools_button" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
         ng-attr-id="map_tools_toggle_{{tool.id}}"
         ng-class="{'btn-success active': map_tools.is_visible(tool.id), 'disabled': !map_tools.isEnabled(tool.id)}"

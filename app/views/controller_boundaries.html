@@ -1,5 +1,5 @@
 <div>
-  <div class="alert alert-info text-center" role="alert" ng-show="optimizationMode != null && optimizationMode !== 'boundaries'">
+  <div class="custom-ui custom-ui-vz alert alert-info text-center" role="alert" ng-show="optimizationMode != null && optimizationMode !== 'boundaries'">
     Optimizations can not be run on both boundaries and targets. Any boundary selection you make will remove all previously selected targets.
   </div>
 
@@ -81,7 +81,6 @@
     <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
   </div>
 
-  <!-- <p><strong>Selected Geographies</strong></p> -->
   <p ng-hide="selectedRegions.length > 0"><em>No geographies selected</em></p>
   <ul ng-show="selectedRegions.length > 0" style="list-style-type:none; padding:0">
     <li ng-repeat="geography in selectedRegions">
@@ -91,15 +90,18 @@
       {{ geography.name }}
     </li>
   </ul>
+  <p ng-show="selectedRegions.length > 0">
+    <button class="btn btn-primary btn-sm" ng-click="removeAllGeographies()">Remove all boundaries</button>
+  </p>
   <hr>
   <% } %>
 
-  <!--
+  <% if (config.ARO_CLIENT !== 'verizon') { %>
   <div ng-show="plan.owner_id === user_id">
     <h2>Build</h2>
     <p>
       <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool}" ng-click="toggleTool()">Custom</a>
     </p>
   </div>
-  -->
+  <% } %>
 </div>

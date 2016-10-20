@@ -8,6 +8,7 @@ var helpers = require('../helpers')
 var config = helpers.config
 var database = helpers.database
 var validate = helpers.validate
+var cache = helpers.cache
 var models = require('./')
 var _ = require('underscore')
 var pync = require('pync')
@@ -248,12 +249,14 @@ module.exports = class NetworkPlan {
           }
         })
 
-        output.metadata.fiber_summary = fiberCosts.map((item) => {
-          var fiberType = fiberTypes.find((i) => i.name === item.fiberType)
+        var groupedFiberCosts = _.groupBy(fiberCosts, 'fiberType')
+        output.metadata.fiber_summary = Object.keys(groupedFiberCosts).map((fiberTypeKey) => {
+          var arr = groupedFiberCosts[fiberTypeKey]
+          var fiberType = cache.fiberTypes.find((i) => i.name === fiberTypeKey)
           return {
-            lengthMeters: item.lengthMeters,
-            totalCost: item.costPerMeter * item.lengthMeters,
-            description: (fiberType && fiberType.description) || item.fiberType
+            lengthMeters: arr.reduce((total, item) => total + item.lengthMeters, 0),
+            totalCost: arr.reduce((total, item) => total + item.costPerMeter * item.lengthMeters, 0),
+            description: (fiberType && fiberType.description) || fiberTypeKey
           }
         })
 
@@ -749,7 +752,7 @@ module.exports = class NetworkPlan {
             ]}
           }
         })
-        return wirecenters.concat(addresses)
+        return addresses.concat(wirecenters)
       })
   }
 
@@ -757,9 +760,6 @@ module.exports = class NetworkPlan {
 
 var financialCosts = []
 database.query('SELECT * FROM financial.network_cost_code').then((rows) => { financialCosts = rows })
-
-var fiberTypes = []
-database.query('SELECT * FROM client.fiber_route_type').then((rows) => { fiberTypes = rows })
 
 var entityNames = []
 database.query('SELECT * FROM client.entity_category').then((rows) => { entityNames = rows })

@@ -5,6 +5,8 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var config = helpers.config
+var models = require('./')
 
 module.exports = class Location {
 
@@ -233,10 +235,12 @@ module.exports = class Location {
       .then((_info) => {
         info = _info
         info.customer_profile = {}
+        info.customer_profile_totals = {}
         var sql
 
         var add = (type, values) => {
           info.customer_profile[type] = values
+          info.customer_profile_totals[type] = values.reduce((total, item) => total + item.total, 0)
         }
 
         sql = `
@@ -281,6 +285,19 @@ module.exports = class Location {
             ON ct.id = tct.customer_type_id
           WHERE t.location_id=$1
           GROUP BY ct.id
+        `
+        sql = `
+          SELECT 'Macro - Existing' as name, 0 as total
+          UNION ALL
+          SELECT 'Macro - Planned' as name, 0 as total
+          UNION ALL
+          SELECT 'Small Cell - Existing' as name, 0 as total
+          UNION ALL
+          SELECT 'Small Cell - Planned' as name, 0 as total
+          UNION ALL
+          SELECT 'Undefined' as name, (
+            SELECT COUNT(*)::integer FROM towers t WHERE t.location_id=$1
+          ) as total
         `
         var towers = database.query(sql, [location_id])
           .then((values) => add('towers', values))

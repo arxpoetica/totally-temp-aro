@@ -64,6 +64,10 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
     }
   }
 
+  regions.removeAllGeographies = () => {
+    cleanUp()
+  }
+
   $rootScope.$on('optimization_mode_changed', (e, mode) => {
     if (mode === 'targets') {
       cleanUp()

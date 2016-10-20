@@ -31,6 +31,7 @@
         "overlay": ["density"]
       },
       "target_builder": {
+        "eager": true
       }
     },
     "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
@@ -50,6 +51,9 @@
       "create_plan": {
         "select_area_text": "Enter a CLLI Code"
       }
+    },
+    "locations_modal": {
+      "market_profile": true
     }
   }
 }

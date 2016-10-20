@@ -73,7 +73,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     if (styles.icon) return
     var type = 'households'
     var target = feature.getProperty('selected')
-    if (target) {
+    if (target && config.ARO_CLIENT === 'verizon') {
       styles.icon = `/images/map_icons/${config.ARO_CLIENT}/target.png`
       return
     }
@@ -98,7 +98,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       })
     }
     var selected = feature.getProperty('selected') ? 'selected' : 'default'
-    styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestCategory.substring(2)}_${selected}.png`
+    if (largestCategory) {
+      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestCategory.substring(2)}_${selected}.png`
+    } else {
+      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${selected}.png`
+    }
   }
 
   var locationsLayer = $scope.locations_layer = new MapLayer({
@@ -349,6 +353,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+    if (!$scope.heatmapOn) $scope.toggleHeatmap()
 
     // unselect all entity types
     $scope.show_towers = false

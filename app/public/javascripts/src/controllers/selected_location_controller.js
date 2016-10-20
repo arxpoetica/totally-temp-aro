@@ -190,14 +190,17 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     $('#location_market_size_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
-  function destroyFairShareChart () {
-    fair_share_chart && fair_share_chart.destroy()
-    $('#location_fair_share_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
+  var fairShareCharts = {}
+  function destroyFairShareCharts () {
+    Object.keys(fairShareCharts).forEach((key) => {
+      fairShareCharts[key].destroy()
+      $(`#location_fair_share_chart_${key}`).css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
+    })
   }
 
   function destroyCustomerProfileChart (type) {
     customerProfileCharts[type] && customerProfileCharts[type].destroy()
-    $('#location_customer_profile_chart').css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
+    $(`#location_customer_profile_chart_${type}`).css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
   }
 
   function destroyCustomerProfileCharts () {
@@ -206,7 +209,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
 
   function destroyCharts () {
     destroyMarketSizeChart()
-    destroyFairShareChart()
+    destroyFairShareCharts()
     destroyCustomerProfileCharts()
   }
 
@@ -218,7 +221,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   function showCurrentChart () {
     var href = $('#selected_location_controller .nav-tabs > .active a').attr('href')
     if (href === '#selected_location_fair_share') {
-      showFaiShareChart()
+      showFairShareCharts()
     } else if (href === '#selected_location_market_profile') {
       showMarketProfileCharts()
     } else if (href === '#selected_location_customer_profile') {
@@ -271,12 +274,16 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     market_size_chart = new Chart(ctx).Line(data, options)
   };
 
-  var fair_share_chart = null
-  function showFaiShareChart () {
-    $scope.fair_share = $scope.fair_share || []
-    var total = $scope.fair_share.reduce((total, carrier) => total + carrier.value, 0)
+  function showFairShareCharts () {
+    destroyFairShareCharts()
+    ;['households', 'businesses', 'towers'].forEach((key) => showFairShareChart(key))
+  }
 
-    var data = $scope.fair_share.map((carrier) => {
+  function showFairShareChart (type) {
+    var values = ($scope.fair_share || {})[type] || []
+    var total = values.reduce((total, carrier) => total + carrier.value, 0)
+
+    var data = values.map((carrier) => {
       var distance = carrier.distance !== null ? ' (' + angular.injector(['ng']).get('$filter')('number')(carrier.distance, 2) + 'm)' : ''
       return {
         label: carrier.name + distance,
@@ -289,11 +296,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     var options = {
       tooltipTemplate: `<%if (label){%><%=label%>: <%}%><%= value %>%` // eslint-disable-line
     }
-    var ctx = document.getElementById('location_fair_share_chart').getContext('2d')
-    if (!ctx) return
-    destroyFairShareChart()
-    fair_share_chart = new Chart(ctx).Pie(data, options)
-    document.getElementById('location_fair_share_chart_legend').innerHTML = fair_share_chart.generateLegend()
+    var el = document.getElementById(`location_fair_share_chart_${type}`)
+    if (!el) return
+    var ctx = el.getContext('2d')
+    var chart = new Chart(ctx).Pie(data, options)
+    fairShareCharts[type] = chart
+    document.getElementById(`location_fair_share_chart_legend_${type}`).innerHTML = chart.generateLegend()
   }
 
   var customerProfileCharts = {}

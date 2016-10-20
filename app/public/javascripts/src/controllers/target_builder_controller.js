@@ -1,4 +1,4 @@
-/* global app user_id google $ map FormData XMLHttpRequest swal */
+/* global app user_id google $ map FormData XMLHttpRequest swal config */
 // Search Controller
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, $timeout, optimization) => {
   // Controller instance variables
@@ -237,24 +237,30 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   })
 
   function postChanges (changes) {
-    changes.lazy = true
+    changes.lazy = !config.ui.map_tools.target_builder.eager
     optimization.optimize($scope.plan, changes, loadTargets, () => {})
+  }
+
+  $scope.deleteAllTargets = () => {
+    var config = {
+      url: `/locations/${$scope.plan.id}/targets/delete_all`,
+      method: 'post',
+      data: {}
+    }
+    $http(config)
+      .success((response) => {
+        $scope.targets = response.targets
+        $scope.targetsTotal = response.total
+        map_layers.getFeatureLayer('locations').reloadData()
+        map_layers.getFeatureLayer('selected_locations').reloadData()
+      })
   }
 
   $scope.optimizationMode = optimization.getMode()
   $rootScope.$on('optimization_mode_changed', (e, mode) => {
     $scope.optimizationMode = mode
     if (mode !== 'targets') {
-      var config = {
-        url: `/locations/${$scope.plan.id}/targets/delete_all`,
-        method: 'post',
-        data: {}
-      }
-      $http(config)
-        .success((response) => {
-          $scope.targets = response.targets
-          $scope.targetsTotal = response.total
-        })
+      $scope.deleteAllTargets()
     }
   })
 }])

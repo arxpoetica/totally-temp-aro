@@ -4,9 +4,11 @@
     <option value="CAPEX">Full Coverage</option>
     <option ng-hide="optimizationMode === 'targets'" value="MAX_IRR">Maximum IRR</option>
     <option ng-hide="optimizationMode === 'targets'" value="IRR">Budget</option>
-    <option ng-hide="optimizationMode === 'targets'" value="TARGET_IRR">IRR Target</option>
+    <option ng-hide="optimizationMode === 'targets'" value="BUDGET_IRR">IRR Target</option>
     <!--
-    <option value="BUDGET_IRR">Budget and IRR Floor</option>
+    <option ng-hide="optimizationMode === 'targets'" value="TARGET_IRR">IRR Target</option>
+
+    <option ng-hide="optimizationMode === 'targets'" value="BUDGET_IRR">Budget and IRR Floor</option>
     -->
   </select>
   <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
@@ -71,7 +73,6 @@
     <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
   </div>
 
-  <!-- <p><strong>Selected Geographies</strong></p> -->
   <p ng-hide="selectedRegions.length > 0"><em>No geographies selected</em></p>
   <ul ng-show="selectedRegions.length > 0" style="list-style-type:none; padding:0">
     <li ng-repeat="geography in selectedRegions">
@@ -81,6 +82,9 @@
       {{ geography.name }}
     </li>
   </ul>
+  <p ng-show="selectedRegions.length > 0">
+    <button class="btn btn-primary btn-sm" ng-click="removeAllGeographies()">Remove all boundaries</button>
+  </p>
   <% } %>
 
   <% if (!config.ui.eye_checkboxes) { %>

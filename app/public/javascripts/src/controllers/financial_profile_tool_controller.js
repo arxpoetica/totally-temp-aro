@@ -1,4 +1,4 @@
-/* global app $ Chart */
+/* global app $ Chart config */
 app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', 'MapLayer', 'regions', ($scope, $rootScope, $http, $timeout, map_tools, MapLayer, regions) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
@@ -80,11 +80,16 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
-    if (layer.type !== 'child_plans') return
+    if (config.ARO_CLIENT === 'verizon') {
+      if (layer.type !== 'child_plans') return
+    } else {
+      if (layer.type !== 'wirecenter') return
+    }
 
     var feature = event.feature
     $scope.selectedArea = {
-      id: feature.getProperty('id')
+      id: feature.getProperty('id'),
+      name: feature.getProperty('name')
     }
     $scope.calculateShowData()
     refresh()
@@ -170,6 +175,10 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('financial_profile')) {
+      if (config.ARO_CLIENT !== 'verizon') {
+        $scope.selectedArea = null
+        return
+      }
       $timeout(dirty ? refresh : refreshCurrentTab, 0)
       dirty = false
 
@@ -179,7 +188,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         regions.hide()
       }
     } else if (tool === 'financial_profile') {
-      $('a[href="#map-tools-financial"]').click()
+      $('a[href="#map-tools-financial"]:not(.collapsed)').click()
 
       if ($scope.layersStatus) {
         MapLayer.recoverLayersVisibility($scope.layersStatus)
