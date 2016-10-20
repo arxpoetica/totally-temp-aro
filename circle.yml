@@ -3,6 +3,7 @@ general:
     only:
       - dockerize
       - dockerize-vz
+      - master
 
 machine:
   services:
