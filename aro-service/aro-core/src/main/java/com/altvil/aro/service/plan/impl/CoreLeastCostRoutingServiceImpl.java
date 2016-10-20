@@ -20,11 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
-import com.altvil.aro.service.entity.DemandStatistic;
+import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.FinancialInputs;
-import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.DAGModel;
@@ -514,11 +513,8 @@ public class CoreLeastCostRoutingServiceImpl implements
 					.stream()
 					.filter(ga -> {
 						AroEntity ae = ga.getAroEntity();
-						if (ae instanceof LocationEntity) {
-							DemandStatistic ds = ((LocationEntity) ae)
-									.getLocationDemand().getEntityDemands()
-									.get(type);
-							return ds != null && ds.getTotalRevenue() > 0;
+						if (ae instanceof BulkFiberTerminal) {
+							return ((BulkFiberTerminal) ae).hasDemandFor(type) ;
 						}
 						return false;
 					}).map(renodedGraph::getGraphNode)

@@ -10,9 +10,9 @@ import java.util.Set;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 
-import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint.MetricDistance;
+import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint.MetricLinkDistance;
 
-public class SourceRoute<V, E> implements MetricDistance<V> {
+public class SourceRoute<V, E> implements MetricLinkDistance<V> {
 	
 
 	private Graph<V, E> sourceGraph;
@@ -43,7 +43,8 @@ public class SourceRoute<V, E> implements MetricDistance<V> {
 		distanceToSourceMap.put(vertex, distance) ;
 	}
 	
-	public double getDistance(V vertex) {
+	@Override
+	public double getLinkDistance(V vertex) {
 		Double distance = distanceToSourceMap.get(vertex) ;
 		return distance == null ? 0 : distance ;
 	}
