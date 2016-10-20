@@ -51,7 +51,7 @@ public class DefaultNetworkModel implements GraphNetworkModel {
 	}
 
 	@Override
-	public Collection<NetworkAssignment> getAllAssignments() {
+	public Collection<NetworkAssignment> getAssignments() {
 		return allAssignments;
 	}
 

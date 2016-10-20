@@ -15,7 +15,7 @@ public class DefaultNetworkAssignmentModel implements NetworkAssignmentModel {
 		this.selectedTargets = Collections.unmodifiableSet(selectedTargets);
 	}
 
-	public Collection<NetworkAssignment> getAllAssignments() {
+	public Collection<NetworkAssignment> getAssignments() {
 		return knownLocations;
 	}
 

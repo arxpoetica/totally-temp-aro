@@ -79,9 +79,9 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 	}
 
 	private NetworkConstrainer createConstrainer(NetworkData networkData,
-
-			OptimizerContextBuilder ctxBuilder,
-			PruningStrategy pruningStrategy, ScoringStrategy scoringStrategy) {
+												 OptimizerContextBuilder ctxBuilder,
+												 PruningStrategy pruningStrategy,
+												 ScoringStrategy scoringStrategy) {
 
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
 				.create(networkData, ctxBuilder);

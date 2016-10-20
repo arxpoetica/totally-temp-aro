@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,8 @@ import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
 import com.altvil.interfaces.RoadLocation;
+
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
 
 @Service
 public class NetworkDataServiceImpl implements NetworkDataService {
@@ -90,44 +94,69 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(request, ctx);
 
-		List<Long> selectedRoadLocations = networkDataDAO.selectedRoadLocationIds(
-				request.getPlanId(), roadLocationByLocationIdMap);
 
-		if (request.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS) {
+		/*if (request.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS) {
 			roadLocationByLocationIdMap.keySet().retainAll(
 					selectedRoadLocations);
-		}
+		}*/
 
-		return networkAssignmentModel(request.getLocationEntities(), demandByLocationIdMap,
-				roadLocationByLocationIdMap, selectedRoadLocations);
+		return networkAssignmentModel(
+				createTransform(request.getLocationEntities(), demandByLocationIdMap,roadLocationByLocationIdMap),
+				roadLocationByLocationIdMap.keySet(),
+				()->networkDataDAO.selectedRoadLocationIds(request.getPlanId(), roadLocationByLocationIdMap),
+				request.getSelectionMode(),
+				request.getSelectionFilters()) ;
 	}
 
-
-	private NetworkAssignmentModel networkAssignmentModel(Set<LocationEntityType> locationEntities,
-			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap,
-			Map<Long, RoadLocation> roadLocationByLocationIdMap, List<Long> selectedRoadLocations) {
-		NetworkAssignmentModel.Builder factory = new NetworkAssignmentModelFactory();
-
-		roadLocationByLocationIdMap.keySet().stream().forEach(result -> {
-			Long locationId = result;
-
+	Function<Long,NetworkAssignment> createTransform(Set<LocationEntityType> locationEntities, Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap,
+													 Map<Long, RoadLocation> roadLocationByLocationIdMap){
+		return (locationId)->{
 			CompetitiveLocationDemandMapping ldm = demandByLocationIdMap.get(locationId);
 			if (ldm != null && !ldm.isEmpty()) {
 				LocationDemand locationDemand = aroDemandService.createFairShareDemandMapping(ldm)
 						.getFairShareLocationDemand(SpeedCategory.cat7).createLocationDemand(ldm);
-				// .createDemandByCensusBlock(ldm.getBlockId(),
-				// ldm.getldm, SpeedCategory.cat7);
 
 				AroEntity aroEntity = entityFactory.createLocationEntity(locationEntities, locationId, ldm.getBlockId(),
 						ldm.getCompetitiveStrength(), locationDemand);
 
-				NetworkAssignment na = new DefaultNetworkAssignment(aroEntity,
+				return new DefaultNetworkAssignment(aroEntity,
 						roadLocationByLocationIdMap.get(locationId));
-
-				factory.add(na, selectedRoadLocations.contains(locationId));
 			}
-		});
+			return null;
+		};
+	}
+
+	private NetworkAssignmentModel networkAssignmentModel(Function<Long, NetworkAssignment> transform,
+														  Set<Long> allLocationIds,
+														  Supplier<List<Long>> selectedLocationsSupplier,
+														  AnalysisSelectionMode selectionMode,
+														  Set<NetworkAssignmentModel.SelectionFilter> selectionFilters) {
+		NetworkAssignmentModel.Builder factory = new NetworkAssignmentModelFactory();
+
+
+		return getSelectionStrategy(selectionMode)
+				.getFilterSelectionStrategy(selectionFilters).getAssignmentModel(transform);
+
+
+
+
+		roadLocationByLocationIdMap.keySet().stream().forEach(locationId -> {
+				factory.add(transform.apply(locationId), selectedLocationsSupplier.contains(locationId));
+			}
+		);
+
+
 		return factory.build();
+	}
+
+	private interface Transformer<T>{
+
+	}
+	private class X{
+		Collection<Long> allLocations;
+		Collection<Long> selectedLocations;
+
+
 	}
 
 	private Map<Long, CompetitiveLocationDemandMapping> getLocationDemand(

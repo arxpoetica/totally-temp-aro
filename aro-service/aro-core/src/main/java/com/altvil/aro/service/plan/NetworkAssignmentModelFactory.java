@@ -8,27 +8,21 @@ import com.altvil.interfaces.NetworkAssignmentModel;
 
 public class NetworkAssignmentModelFactory implements NetworkAssignmentModel.Builder {
 	private final Set<NetworkAssignment> allAssignments = new HashSet<>();
-	private Set<NetworkAssignment> selectedAssignments = allAssignments;
+	private Set<NetworkAssignment> selectedAssignments = new HashSet<>();
 	
 	public NetworkAssignmentModelFactory() {
 	}
 	
 	public NetworkAssignmentModelFactory(NetworkAssignmentModel model,
 			Predicate<? super NetworkAssignment> thoseRetained) {
-		model.getAllAssignments().stream().filter(thoseRetained).forEach(allAssignments::add);
-		model.getSelectedAssignments().stream().filter(thoseRetained).forEach(selectedAssignments::add);
+		model.getAssignments(NetworkAssignmentModel.SelectionFilter.ALL).stream().filter(thoseRetained).forEach(allAssignments::add);
+		model.getAssignments(NetworkAssignmentModel.SelectionFilter.SELECTED).stream().filter(thoseRetained).forEach(selectedAssignments::add);
 	}
 	
 	@Override
 	public void add(NetworkAssignment networkAssignment, boolean selected) {
-		if (selected) {
-			if (allAssignments != selectedAssignments) {
-				selectedAssignments.add(networkAssignment);
-			}
-		} else if (allAssignments == selectedAssignments) {
-			selectedAssignments = new HashSet<>(allAssignments);
-		}
-
+		if (selected)
+			selectedAssignments.add(networkAssignment);
 		allAssignments.add(networkAssignment);
 	}
 

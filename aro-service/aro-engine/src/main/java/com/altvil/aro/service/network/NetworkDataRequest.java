@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.interfaces.NetworkAssignmentModel;
+import com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter;
 
 public class NetworkDataRequest {
 
@@ -13,6 +15,7 @@ public class NetworkDataRequest {
 	private Integer serviceLayerId;
 	private boolean queryPlanConduit = false;
 	private AnalysisSelectionMode selectionMode;
+	private Set<SelectionFilter> selectionFilters;
 	private Set<LocationEntityType> locationEntities;
 	private Optional<Integer> serviceAreaId = Optional.empty();
 
@@ -78,5 +81,9 @@ public class NetworkDataRequest {
 
 	public Optional<Integer> getServiceAreaId() {
 		return serviceAreaId;
+	}
+
+	public Set<SelectionFilter> getSelectionFilters() {
+		return selectionFilters;
 	}
 }

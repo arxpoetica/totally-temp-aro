@@ -3,11 +3,15 @@ package com.altvil.interfaces;
 import java.util.Collection;
 
 public interface NetworkAssignmentModel {
+	enum SelectionFilter {
+		ALL, SELECTED
+	}
+
 	interface Builder {
 		void add(NetworkAssignment networkAssignment, boolean selected);
 		NetworkAssignmentModel build();
 	}
-	
-	Collection<NetworkAssignment> getAllAssignments();
-	Collection<NetworkAssignment> getSelectedAssignments();
+
+	Collection<NetworkAssignment> getAssignments(SelectionFilter selectionFilter);
+
 }
