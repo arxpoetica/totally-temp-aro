@@ -118,7 +118,7 @@ module.exports = class Network {
         var sql = `
           SELECT
             n.id, geom, t.name AS name,
-            plan_id IS NOT NULL AS draggable,
+            -- plan_id IS NOT NULL AS draggable,
             name <> 'central_office' AS unselectable
           FROM client.network_nodes n
           JOIN client.network_node_types t
