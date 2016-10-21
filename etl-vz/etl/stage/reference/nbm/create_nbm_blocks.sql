@@ -7,23 +7,21 @@
 -- 5. Load a competitor speed category partition
 
 
--- Create paritioned table for NBM blocks from a given state
-CREATE OR REPLACE FUNCTION create_nbm_blocks_table(state_abbrev text, target_schema_name text)
+-- Create master NBM table
+CREATE OR REPLACE FUNCTION create_nbm_blocks_master_table(target_schema_name text)
 RETURNS text AS $scoped_table_name$
 DECLARE
-    base_table_name text;
-    prefix_name text;
-    index_prefix_name text;
+    table_name text;
     scoped_table_name text;
-    state_name text;
+    index_prefix_name text;
+    
 BEGIN
-    state_name := lower(state_abbrev);
-    base_table_name := 'blocks';
-    scoped_table_name := target_schema_name || '.' || base_table_name || '_' || state_name;
-    prefix_name := target_schema_name || '_' || base_table_name || '_' || state_name || '_';
-    index_prefix_name := prefix_name || '_' || state_name || '_';
+		table_name := 'blocks';
+		scoped_table_name := target_schema_name || '.' || table_name;
+		index_prefix_name := target_schema_name || '_' || table_name || '_';
 
     EXECUTE 'DROP TABLE IF EXISTS ' || scoped_table_name || ' CASCADE;';
+
     EXECUTE 'CREATE TABLE ' || scoped_table_name || ' (
 			objectid varchar,
 			frn varchar,
@@ -41,12 +39,39 @@ BEGIN
 			downloadspeed int,
 			uploadspeed int,
 			provider_type int,
-			end_user_cat int,
-			CONSTRAINT ' || index_prefix_name || '_pkey PRIMARY KEY (objectid)
+			end_user_cat varchar,
+			CONSTRAINT ' || index_prefix_name || 'pkey PRIMARY KEY (objectid)
      );';
+
+		EXECUTE 'CREATE INDEX ' || index_prefix_name || 'fullfipsid_index ON ' || scoped_table_name || ' (fullfipsid);';
+
     RETURN scoped_table_name;
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION create_nbm_blocks_partition(state_abbrev text, target_schema_name text)
+RETURNS text AS $scoped_table_name$
+DECLARE
+    base_table_name text;
+    prefix_name text;
+    scoped_table_name text;
+    state_name text;
+    state_name_upper text;
+BEGIN
+    state_name := lower(state_abbrev);
+    state_name_upper := upper(state_abbrev);
+    base_table_name := 'blocks';
+    scoped_table_name := target_schema_name || '.' || base_table_name || '_' || state_name;
+    prefix_name := target_schema_name || '_' || base_table_name || '_' || state_name || '_';
+
+    EXECUTE 'DROP TABLE IF EXISTS ' || scoped_table_name || ' CASCADE;';
+    EXECUTE 'CREATE TABLE ' || scoped_table_name || ' (CHECK (upper(stateabbr) = ''' || state_name_upper || ''')) INHERITS (nbm.blocks);';
+    EXECUTE 'CREATE INDEX ' || prefix_name || 'fullfipsid_index ON ' || scoped_table_name || ' (fullfipsid);';
+    RETURN scoped_table_name;
+END;
+$scoped_table_name$ LANGUAGE plpgsql;
+
 
 -- Index fullfipsid
 CREATE OR REPLACE FUNCTION create_nbm_blocks_indexes(state_abbrev text, target_schema_name text)
@@ -62,12 +87,13 @@ BEGIN
     base_table_name := 'blocks';
     scoped_table_name := target_schema_name || '.' || base_table_name || '_' || state_name;
     prefix_name := target_schema_name || '_' || base_table_name || '_' || state_name || '_';
-    index_prefix_name := prefix_name || '_' || state_name || '_';
+    index_prefix_name := prefix_name || '_';
 
     EXECUTE 'CREATE INDEX ' || index_prefix_name || 'fullfipsid_index ON ' || scoped_table_name || ' (fullfipsid);';
     RETURN scoped_table_name;
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
+
 
 -- Create the competitor speed category master table from which the partitions inherit
 CREATE OR REPLACE FUNCTION create_competitor_speed_category_master_table(target_schema_name text)
@@ -93,6 +119,7 @@ BEGIN
 	RETURN scoped_table_name;
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
+
 
 -- Create competitor speed category partition 
 CREATE OR REPLACE FUNCTION create_competitor_speed_category_partition(state_abbrev text, target_schema_name text)
@@ -120,13 +147,12 @@ BEGIN
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
 
+
 -- Load the competitor speed category partition
 CREATE OR REPLACE FUNCTION load_competitor_speed_category_partition(state_abbrev text, target_schema_name text)
 RETURNS text AS $scoped_table_name$
 DECLARE
 	base_table_name text;
-	prefix_name text;
-	index_prefix_name text;
 	scoped_table_name text;
 	state_name text;
 	state_name_upper text;
@@ -138,8 +164,6 @@ BEGIN
 	state_name_upper := upper(state_abbrev);
 	base_table_name := 'competitor_speed_category';
 	scoped_table_name := target_schema_name || '.' || base_table_name || '_' || state_name;
-	prefix_name := target_schema_name || '_' || base_table_name || '_' || state_name || '_';
-	index_prefix_name := prefix_name || '_' || state_name || '_';
 	blocks_table := 'blocks_' || state_name;
 	scoped_blocks_table_name := target_schema_name || '.' || blocks_table;
 
@@ -169,9 +193,3 @@ BEGIN
 	RETURN scoped_table_name;
 END;
 $scoped_table_name$ LANGUAGE plpgsql;
-
-
-
-
-
-
