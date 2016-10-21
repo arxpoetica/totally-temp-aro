@@ -87,7 +87,7 @@ public class CoreGraphBuilderServiceImpl implements
 
 	@Override
 	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,GraphBuilderContext ctx, NetworkAssignmentModel.SelectionFilter selectionFilter) {
-		return create(createRoadEdgeInfoItr(networkData, ctx), networkData.getRoadLocations().getAssignments(selectionFilter), ctx);
+		return create(createRoadEdgeInfoItr(networkData, ctx), networkData.getRoadLocations().getDefaultAssignments(), ctx);
 	}
 
 	@Override
@@ -256,7 +256,7 @@ public class CoreGraphBuilderServiceImpl implements
 		public RoadEdgeIndexer index(NetworkData networkData) {
 			// NOTE: Include ALL assignments otherwise the generated model won't allocate equipment for them.
 			roadLocationsByTlid = groupLocationsByTlid(networkData
-					.getRoadLocations().getAssignments(ALL));
+					.getRoadLocations().getDefaultAssignments());
 			fiberSources = groupFiberSources(networkData.getFiberSources());
 			cableConduitMap = groupSections(networkData.getCableConduitEdges());
 

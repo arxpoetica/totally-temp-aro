@@ -13,7 +13,8 @@ public interface NetworkAssignmentModel {
 	}
 
 	Collection<NetworkAssignment> getAssignments(SelectionFilter selectionFilter);
-
-	//Collection<NetworkAssignment> getDefaultAssignments();
-
+	Collection<NetworkAssignment> getDefaultAssignments();
+	
+	//NetworkAssignmentModel op(CollectionXXXX)
+	
 }

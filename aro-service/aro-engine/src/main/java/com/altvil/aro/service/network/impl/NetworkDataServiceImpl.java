@@ -98,8 +98,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		return new NetworkAssignmentModelBuilder()
 				.setDemandMapping(demandByLocationIdMap)
-				.setNetworkDataRequest(request)
-				.setServiceAreaContext(ctx)
+				.setNetworkDataRequest(request).setServiceAreaContext(ctx)
 				.build();
 	}
 
@@ -208,6 +207,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 			private Strategy strategy;
 
+			private AnalysisSelectionMode analysisSelectionMode;
 			private Collection<Long> allLocationIds;
 			private Supplier<Set<Long>> selectedIds;
 			private Function<Long, NetworkAssignment> f;
@@ -231,8 +231,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 				strategy.assemble(this);
 
-
-				return new DefaultNetworkAssignmentModel(map);
+				return new DefaultNetworkAssignmentModel(
+						map,
+						analysisSelectionMode == AnalysisSelectionMode.SELECTED_LOCATIONS ? SelectionFilter.SELECTED
+								: SelectionFilter.ALL);
 			}
 
 			public Collection<NetworkAssignment> getNetworkAssignment(
@@ -273,51 +275,54 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		private void init() {
 
-			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
+			register(
+					AnalysisSelectionMode.SELECTED_LOCATIONS,
 					EnumSet.of(SelectionFilter.SELECTED),
-					ctx -> ctx.assign(SelectionFilter.SELECTED, ctx.toNetworkAssignments(ctx.getSelectedIds()))
-			);
+					ctx -> ctx.assign(SelectionFilter.SELECTED,
+							ctx.toNetworkAssignments(ctx.getSelectedIds())));
 
-			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
+			register(
+					AnalysisSelectionMode.SELECTED_LOCATIONS,
 					EnumSet.of(SelectionFilter.ALL),
-					ctx -> ctx.assign(SelectionFilter.ALL,ctx.toNetworkAssignments(ctx.getAllIds())));
+					ctx -> ctx.assign(SelectionFilter.ALL,
+							ctx.toNetworkAssignments(ctx.getAllIds())));
 
-			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
+			register(
+					AnalysisSelectionMode.SELECTED_LOCATIONS,
 					EnumSet.of(SelectionFilter.ALL, SelectionFilter.SELECTED),
 					ctx -> {
-                        Set<Long> ids = ctx.getSelectedIds();
-                        return ctx
-                                .assign(SelectionFilter.ALL,
-										ctx.toNetworkAssignments(ctx
-												.getAllIds()))
-                                .assign(SelectionFilter.SELECTED,
+						Set<Long> ids = ctx.getSelectedIds();
+						return ctx.assign(SelectionFilter.ALL,
+								ctx.toNetworkAssignments(ctx.getAllIds()))
+								.assign(SelectionFilter.SELECTED,
 										ctx.getNetworkAssignment(
 												SelectionFilter.ALL)
 												.stream()
-												.filter(na -> ids
-														.contains(na
-																.getSource()
-																.getObjectId()))
-												.collect(
-														Collectors.toList()));
+												.filter(na -> ids.contains(na
+														.getSource()
+														.getObjectId()))
+												.collect(Collectors.toList()));
 
-                    });
+					});
 
-			register(AnalysisSelectionMode.SELECTED_AREAS,
+			register(
+					AnalysisSelectionMode.SELECTED_AREAS,
 					EnumSet.of(SelectionFilter.SELECTED),
-					ctx -> ctx.assign(SelectionFilter.SELECTED,ctx.toNetworkAssignments(ctx.getAllIds()))
-			);
-			register(AnalysisSelectionMode.SELECTED_AREAS,
+					ctx -> ctx.assign(SelectionFilter.SELECTED,
+							ctx.toNetworkAssignments(ctx.getAllIds())));
+			register(
+					AnalysisSelectionMode.SELECTED_AREAS,
 					EnumSet.of(SelectionFilter.ALL),
-					ctx -> ctx.assign(SelectionFilter.ALL,ctx.toNetworkAssignments(ctx.getAllIds()))
-			);
+					ctx -> ctx.assign(SelectionFilter.ALL,
+							ctx.toNetworkAssignments(ctx.getAllIds())));
 
-			register(AnalysisSelectionMode.SELECTED_AREAS,
+			register(
+					AnalysisSelectionMode.SELECTED_AREAS,
 					EnumSet.of(SelectionFilter.ALL, SelectionFilter.SELECTED),
-					ctx -> ctx
-                            .assign(SelectionFilter.ALL, ctx.toNetworkAssignments(ctx.getAllIds()))
-                            .assign(SelectionFilter.SELECTED, ctx.getNetworkAssignment(SelectionFilter.ALL))
-			);
+					ctx -> ctx.assign(SelectionFilter.ALL,
+							ctx.toNetworkAssignments(ctx.getAllIds())).assign(
+							SelectionFilter.SELECTED,
+							ctx.getNetworkAssignment(SelectionFilter.ALL)));
 		}
 
 	}
@@ -361,6 +366,5 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 						.getServiceAreaId().get());
 
 	}
-
 
 }
