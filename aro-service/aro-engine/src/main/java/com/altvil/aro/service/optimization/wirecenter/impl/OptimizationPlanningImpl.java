@@ -73,8 +73,8 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	private transient CoreLeastCostRoutingService coreLeastCostRoutingService;
 
 	@Autowired
-	private transient SystemPropertyService systemPropertyService ;
-	
+	private transient SystemPropertyService systemPropertyService;
+
 	@Override
 	public Optional<PlannedNetwork> planNetwork(
 			WirecenterOptimizationRequest request) {
@@ -113,11 +113,14 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 
 		GraphNetworkModel model = graphBuilderService.build(networkData)
 				.setPricingModel(pricingModel).build();
-		
-		return StreamUtil.map(coreLeastCostRoutingService.computeNetworkModel(
-				model, LcrContextImpl.create(pricingModel,
-						FiberConstraintUtils.build(request.getConstraints(), systemPropertyService.getConfiguration()),
-						itr)),
+
+		return StreamUtil.map(
+				coreLeastCostRoutingService.computeNetworkModel(model,
+						LcrContextImpl.create(pricingModel,
+								FiberConstraintUtils.build(request
+										.getConstraints(),
+										systemPropertyService
+												.getConfiguration()), itr)),
 				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
 						networkData.getCompetitiveDemandMapping()));
 
@@ -128,20 +131,30 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		// TODO KAMIL ThresholdBudgetConstraint => Change to
 		// OptimizationConstraint
 
-		boolean isLockedPrunning = request.getOptimizationConstraints().getOptimizationType() == OptimizationType.PRUNNING_CAPEX;
+		boolean isLockedPrunning = request.getOptimizationConstraints()
+				.getOptimizationType() == OptimizationType.PRUNNING_CAPEX;
 		NetworkDataRequest networkDataRequest = request.getNetworkDataRequest();
-		if(isLockedPrunning) {
-			networkDataRequest = networkDataRequest.createFilterRequest(EnumSet.of(ALL, SELECTED));
+		
+		NetworkData networkData = null ;
+		
+		if (isLockedPrunning) {
+			// Force all data to be loaded
+			//Track Selected Locations for Forced Pruning
+			networkDataRequest = networkDataRequest.createFilterRequest(EnumSet
+					.of(ALL, SELECTED));
+			
+			//Force Selection Mode to be ALL Locations
+			 networkData = networkService
+					.getNetworkData(networkDataRequest).create(ALL) ;
+		} else {
+			networkData = networkService
+					.getNetworkData(networkDataRequest) ;
 		}
+		
+
 		OptimizationEvaluator evaluator = optimizationEvaluatorService
 				.getOptimizationEvaluator((ThresholdBudgetConstraint) request
 						.getOptimizationConstraints());
-		//we have forced all data to be loaded
-		NetworkData networkData = networkService.getNetworkData(networkDataRequest);
-
-		if(isLockedPrunning) {
-			networkData = networkData.create(ALL);
-		}
 
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
 				networkData, evaluator.getPruningStrategy(),
@@ -173,8 +186,10 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 							PricingContext.create(request
 									.getConstructionRatios()));
 
-			FtthThreshholds threshHolds = FiberConstraintUtils.build(request
-					.getConstraints(), ctx.getBean(SystemPropertyService.class).getConfiguration());
+			FtthThreshholds threshHolds = FiberConstraintUtils
+					.build(request.getConstraints(),
+							ctx.getBean(SystemPropertyService.class)
+									.getConfiguration());
 
 			GraphBuilderContext graphContext = ctx
 					.getBean(GraphNetworkModelService.class).build()
