@@ -50,17 +50,17 @@ public class DefaultNetworkModel implements GraphNetworkModel {
 		return totalNumberOfLocations > 0;
 	}
 
-	@Override
-	public Collection<NetworkAssignment> getAssignments(SelectionFilter selectionFilter) {
-		switch (selectionFilter){
-			case ALL:
-				return allAssignments;
-			case SELECTED:
-				return map.keySet();
-			default:
-				throw new RuntimeException("unknown selection filter" + selectionFilter);
-		}
-
-	}
+//	@Override
+//	public Collection<NetworkAssignment> getAssignments(SelectionFilter selectionFilter) {
+//		switch (selectionFilter){
+//			case ALL:
+//				return allAssignments;
+//			case SELECTED:
+//				return map.keySet();
+//			default:
+//				throw new RuntimeException("unknown selection filter" + selectionFilter);
+//		}
+//
+//	}
 
 }
