@@ -1,9 +1,10 @@
-DROP TABLE IF EXISTS aro.temp_households;
+DROP TABLE IF EXISTS aro.temp_households CASCADE;
 
 CREATE TABLE aro.temp_households
 (
 	id serial,
 	location_id bigint,
+	source_id varchar,
 	address varchar,
 	city varchar,
 	state varchar,
