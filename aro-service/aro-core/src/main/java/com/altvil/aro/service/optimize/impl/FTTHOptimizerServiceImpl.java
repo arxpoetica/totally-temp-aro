@@ -71,7 +71,7 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 	@Override
 	public NetworkPlanner createNetworkPlanner(NetworkData networkData,
 			PruningStrategy pruningStrategy, ScoringStrategy scoringStrategy,
-			OptimizerContextBuilder ctxBuilder, ) {
+			OptimizerContextBuilder ctxBuilder) {
 
 		return DefaultNetworkPlannerImpl.create(createConstrainer(networkData,
 				ctxBuilder, pruningStrategy, scoringStrategy));

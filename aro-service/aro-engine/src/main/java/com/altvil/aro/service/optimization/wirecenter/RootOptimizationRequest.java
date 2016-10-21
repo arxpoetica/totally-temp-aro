@@ -13,7 +13,7 @@ import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.AroOptimizationType;
 import com.altvil.enumerations.OptimizationMode;
 import com.altvil.enumerations.OptimizationType;
-import com.altvil.netop.optimize.FinancialConstraints;
+
 
 public class RootOptimizationRequest extends OptimizationRequest {
 
@@ -105,11 +105,6 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		}
 
 		private OptimizationConstraints getOptimizationConstraints() {
-
-
-			if (financials == null) {
-				financials = new FinancialConstraints();
-			}
 
 			switch (optimizationType) {
 
@@ -216,6 +211,11 @@ public class RootOptimizationRequest extends OptimizationRequest {
 			return this;
 		}
 
+
+		public Builder setFinancialConstraints(FinancialConstraints financialConstraints) {
+			this.financials = financialConstraints;
+			return this;
+		}
 
 	}
 

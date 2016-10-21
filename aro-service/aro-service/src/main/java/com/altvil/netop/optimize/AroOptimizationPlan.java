@@ -21,7 +21,7 @@ public class AroOptimizationPlan {
 	private Double threshold;
 	private boolean usePlanConduit = false ;
 
-	private FinancialConstraints financialConstraints;
+	private FinancialConstraintsImpl financialConstraints =  new FinancialConstraintsImpl();
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
 	private List<Integer> processLayers = new ArrayList<>();
@@ -50,12 +50,12 @@ public class AroOptimizationPlan {
 		this.algorithm = optimizationType;
 	}
 
-	public FinancialConstraints getFinancialConstraints() {
+	public FinancialConstraintsImpl getFinancialConstraints() {
 		return financialConstraints;
 	}
 
 	public void setFinancialConstraints(
-			FinancialConstraints financialConstraints) {
+			FinancialConstraintsImpl financialConstraints) {
 		this.financialConstraints = financialConstraints;
 	}
 
