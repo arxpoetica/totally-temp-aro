@@ -1,11 +1,18 @@
 package com.altvil.aro.service.network.impl;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +36,8 @@ import com.altvil.aro.service.plan.NetworkAssignmentModelFactory;
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
+import com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter;
 import com.altvil.interfaces.RoadLocation;
-
-import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
 
 @Service
 public class NetworkDataServiceImpl implements NetworkDataService {
@@ -102,17 +108,20 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 	}
 
 	private class NetworkAssignmentModelBuilder {
-		Collection<Long> allLocations;
-
+		
 		private NetworkDataRequest request;
 		private ServiceAreaContext ctx;
 		private Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap;
 
-		public NetworkAssignmentModelBuilder set(NetworkDataRequest request) {
+		public NetworkAssignmentModelBuilder setNetworkDataRequest(
+				NetworkDataRequest request) {
+			this.request = request;
 			return this;
 		}
 
-		public NetworkAssignmentModelBuilder set(ServiceAreaContext ctx) {
+		public NetworkAssignmentModelBuilder setServiceAreaContext(
+				ServiceAreaContext ctx) {
+			this.ctx = ctx;
 			return this;
 		}
 
@@ -125,6 +134,16 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 				Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap) {
 			this.demandByLocationIdMap = demandByLocationIdMap;
 			return this;
+		}
+
+		private Collection<Long> getAllLocationIds() {
+			return demandByLocationIdMap.keySet();
+		}
+
+		// TODO KAMIL (Please simplify networkDataDAO.selectedRoadLocationIds.
+		// should only return locations ids)
+		private Set<Long> getSelectedLocationIds() {
+			networkDataDAO.selectedRoadLocationIds(request.getPlanId());
 		}
 
 		private Function<Long, NetworkAssignment> createTransform(
@@ -154,10 +173,184 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		}
 
 		public NetworkAssignmentModel build() {
-			Function<Long, NetworkAssignment> f = 
-					createTransform(getRoadLocationNetworkLocations());
 
-			return null;
+			return TransformerFactory.TRANSFORMER.createTransformer(
+					request.getSelectionMode(), request.getSelectionFilters())
+					.transform(getAllLocationIds(),
+							() -> getSelectedLocationIds(),
+							createTransform(getRoadLocationNetworkLocations()));
+
+		}
+
+	}
+
+	private interface Transformer {
+		public NetworkAssignmentModel transform(
+				Collection<Long> allLocationIds,
+				Supplier<Set<Long>> selectedIds,
+				Function<Long, NetworkAssignment> f);
+	}
+
+	private static class TransformerFactory {
+
+		public static final TransformerFactory TRANSFORMER = new TransformerFactory();
+
+		private Map<AnalysisSelectionMode, Map<Set<SelectionFilter>, Strategy>> map = new EnumMap<>(
+				AnalysisSelectionMode.class);
+
+		private TransformerFactory() {
+			for (AnalysisSelectionMode am : AnalysisSelectionMode.values()) {
+				map.put(am, new HashMap<>());
+			}
+			init();
+		}
+
+		public Transformer createTransformer(
+				AnalysisSelectionMode analysisMode, Set<SelectionFilter> filters) {
+			return new TransformContext(map.get(analysisMode).get(filters));
+		}
+
+		private static class TransformContext implements Transformer {
+
+			private Strategy strategy;
+
+			private Collection<Long> allLocationIds;
+			private Supplier<Set<Long>> selectedIds;
+			private Function<Long, NetworkAssignment> f;
+
+			private Map<SelectionFilter, Collection<NetworkAssignment>> map = new EnumMap<>(
+					SelectionFilter.class);
+
+			public TransformContext(Strategy strategy) {
+				super();
+				this.strategy = strategy;
+			}
+
+			@Override
+			public NetworkAssignmentModel transform(
+					Collection<Long> allLocationIds,
+					Supplier<Set<Long>> selectedIds,
+					Function<Long, NetworkAssignment> f) {
+				this.allLocationIds = allLocationIds;
+				this.selectedIds = selectedIds;
+				this.f = f;
+
+				strategy.assemble(this);
+
+				// TODO wire up return new NetworkAssignmentModel(map) ;
+				return null;
+			}
+
+			public Collection<NetworkAssignment> getNetworkAssignment(
+					SelectionFilter filter) {
+				return map.get(filter);
+			}
+
+			public TransformContext assign(SelectionFilter filter,
+					Collection<NetworkAssignment> assignments) {
+				map.put(filter, assignments);
+				return this;
+			}
+
+			public Collection<NetworkAssignment> toNetworkAssignments(
+					Collection<Long> ids) {
+				return ids.stream().map(f).filter(na -> na != null)
+						.collect(Collectors.toList());
+			}
+
+			public Collection<Long> getAllIds() {
+				return allLocationIds;
+			}
+
+			public Set<Long> getSelectedIds() {
+				return selectedIds.get();
+			}
+
+		}
+
+		private interface Strategy {
+			public TransformContext assemble(TransformContext ctx);
+		}
+
+		private void register(AnalysisSelectionMode selectionMode,
+				Set<SelectionFilter> filters, Strategy strategy) {
+			map.get(selectionMode).put(filters, strategy);
+		}
+
+		private void init() {
+
+			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
+					EnumSet.of(SelectionFilter.SELECTED), new Strategy() {
+						@Override
+						public TransformContext assemble(TransformContext ctx) {
+							return ctx.assign(SelectionFilter.SELECTED, ctx
+									.toNetworkAssignments(ctx.getSelectedIds()));
+						}
+					});
+
+			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
+					EnumSet.of(SelectionFilter.ALL), new Strategy() {
+						@Override
+						public TransformContext assemble(TransformContext ctx) {
+							return ctx.assign(SelectionFilter.ALL,
+									ctx.toNetworkAssignments(ctx.getAllIds()));
+						}
+					});
+
+			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
+					EnumSet.of(SelectionFilter.ALL, SelectionFilter.SELECTED),
+					new Strategy() {
+						@Override
+						public TransformContext assemble(TransformContext ctx) {
+							Set<Long> ids = ctx.getSelectedIds();
+							return ctx
+									.assign(SelectionFilter.ALL,
+											ctx.toNetworkAssignments(ctx
+													.getAllIds()))
+									.assign(SelectionFilter.SELECTED,
+											ctx.getNetworkAssignment(
+													SelectionFilter.ALL)
+													.stream()
+													.filter(na -> ids
+															.contains(na
+																	.getSource()
+																	.getObjectId()))
+													.collect(
+															Collectors.toList()));
+
+						}
+					});
+
+			register(AnalysisSelectionMode.SELECTED_AREAS,
+					EnumSet.of(SelectionFilter.SELECTED), new Strategy() {
+						@Override
+						public TransformContext assemble(TransformContext ctx) {
+							return ctx.assign(SelectionFilter.SELECTED,
+									ctx.toNetworkAssignments(ctx.getAllIds()));
+						}
+					});
+			register(AnalysisSelectionMode.SELECTED_AREAS,
+					EnumSet.of(SelectionFilter.ALL), new Strategy() {
+						@Override
+						public TransformContext assemble(TransformContext ctx) {
+							return ctx.assign(SelectionFilter.ALL,
+									ctx.toNetworkAssignments(ctx.getAllIds()));
+						}
+					});
+
+			register(AnalysisSelectionMode.SELECTED_AREAS,
+					EnumSet.of(SelectionFilter.ALL, SelectionFilter.SELECTED),
+					new Strategy() {
+						@Override
+						public TransformContext assemble(TransformContext ctx) {
+							return ctx
+									.assign(SelectionFilter.ALL,
+											ctx.toNetworkAssignments(ctx
+													.getAllIds()))
+									.assign(SelectionFilter.SELECTED,
+											ctx.getNetworkAssignment(SelectionFilter.ALL));
+						}
+					});
 		}
 
 	}
