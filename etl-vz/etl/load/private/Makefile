@@ -24,6 +24,7 @@ etl_aro:
 ###################
 
 reset_carriers:
+	carriers/reset.sh
 
 # Load
 etl_carriers:
