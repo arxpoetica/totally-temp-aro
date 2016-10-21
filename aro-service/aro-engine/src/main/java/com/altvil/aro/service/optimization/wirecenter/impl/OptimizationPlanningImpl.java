@@ -1,8 +1,12 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Optional;
 
+import com.altvil.aro.service.network.NetworkDataRequest;
+import com.altvil.enumerations.OptimizationType;
+import com.altvil.interfaces.NetworkAssignmentModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +43,9 @@ import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.property.SystemPropertyService;
 import com.altvil.utils.StreamUtil;
+
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.SELECTED;
 
 @Service
 public class OptimizationPlanningImpl implements WirecenterOptimizationService {
@@ -119,16 +126,24 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 
 	@Override
 	public PrunedNetwork pruneNetwork(WirecenterOptimizationRequest request) {
-
 		// TODO KAMIL ThresholdBudgetConstraint => Change to
 		// OptimizationConstraint
 
+		boolean isLockedPrunning = request.getOptimizationConstraints().getOptimizationType() == OptimizationType.PRUNNING_CAPEX;
+		NetworkDataRequest networkDataRequest = request.getNetworkDataRequest();
+		if(isLockedPrunning) {
+			networkDataRequest = networkDataRequest.createFilterRequest(EnumSet.of(ALL, SELECTED));
+		}
 		OptimizationEvaluator evaluator = optimizationEvaluatorService
 				.getOptimizationEvaluator((ThresholdBudgetConstraint) request
 						.getOptimizationConstraints());
+		//we have forced all data to be loaded
+		NetworkData networkData = networkService.getNetworkData(networkDataRequest);
 
-		NetworkData networkData = networkService.getNetworkData(request
-				.getNetworkDataRequest());
+		if(isLockedPrunning) {
+			networkData = networkData.create(ALL);
+		}
+
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
 				networkData, evaluator.getPruningStrategy(),
 				evaluator.getScoringStrategy(),

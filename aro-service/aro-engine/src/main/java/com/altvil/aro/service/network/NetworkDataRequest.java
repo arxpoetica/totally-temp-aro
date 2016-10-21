@@ -15,7 +15,7 @@ public class NetworkDataRequest {
 	private Integer serviceLayerId;
 	private boolean queryPlanConduit = false;
 	private AnalysisSelectionMode selectionMode;
-	private Set<SelectionFilter> selectionFilters = EnumSet.of(SelectionFilter.ALL, SelectionFilter.SELECTED);
+	private Set<SelectionFilter> selectionFilters = EnumSet.of(SelectionFilter.SELECTED);
 	private Set<LocationEntityType> locationEntities;
 	private Optional<Integer> serviceAreaId = Optional.empty();
 
@@ -44,6 +44,12 @@ public class NetworkDataRequest {
 	
 	public NetworkDataRequest createRequest(Set<LocationEntityType> types) {
 		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, types, mrc, queryPlanConduit, serviceAreaId) ;
+	}
+	public NetworkDataRequest createFilterRequest(Set<SelectionFilter> selectionFilters) {
+		NetworkDataRequest networkDataRequest = new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, serviceAreaId);
+		networkDataRequest.selectionFilters = selectionFilters;
+		return networkDataRequest;
+
 	}
 
 	public NetworkDataRequest includePlanConduit() {
@@ -86,4 +92,7 @@ public class NetworkDataRequest {
 	public Set<SelectionFilter> getSelectionFilters() {
 		return selectionFilters;
 	}
+
+
+
 }

@@ -30,4 +30,8 @@ public class DefaultNetworkAssignmentModel implements NetworkAssignmentModel {
 		return map.get(defaultFilter);
 	}
 
+	@Override
+	public NetworkAssignmentModel create(SelectionFilter defaultFilter) {
+		return new DefaultNetworkAssignmentModel(map, defaultFilter);
+	}
 }

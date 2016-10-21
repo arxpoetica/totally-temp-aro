@@ -19,7 +19,15 @@ public class NetworkData extends EdgeData {
 	private CompetitiveDemandMapping competitiveDemandMapping ;
 
 	private Collection<NetworkAssignment> fiberSources;
-	
+
+	public NetworkData(){}
+
+	private NetworkData(NetworkAssignmentModel roadLocations, CompetitiveDemandMapping competitiveDemandMapping, Collection<NetworkAssignment> fiberSources) {
+		this.roadLocations = roadLocations;
+		this.competitiveDemandMapping = competitiveDemandMapping;
+		this.fiberSources = fiberSources;
+	}
+
 	public void setCentralOffice(NetworkAssignment fiberSource) {
 		setFiberSources(Collections.singleton(fiberSource));
 	}
@@ -50,7 +58,10 @@ public class NetworkData extends EdgeData {
 		this.competitiveDemandMapping = competitiveDemandMapping;
 	}
 		
+    public NetworkData create(NetworkAssignmentModel.SelectionFilter defaultFilter){
 
+		return new NetworkData(roadLocations.create(defaultFilter), competitiveDemandMapping, fiberSources);
+	}
 
 	public String toString() {
 		return new ToStringBuilder(this).append("fiberSources", fiberSources)

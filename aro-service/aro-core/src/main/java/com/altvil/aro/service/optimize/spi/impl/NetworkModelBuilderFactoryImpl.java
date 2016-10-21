@@ -3,6 +3,7 @@ package com.altvil.aro.service.optimize.spi.impl;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.altvil.interfaces.NetworkAssignmentModel;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 

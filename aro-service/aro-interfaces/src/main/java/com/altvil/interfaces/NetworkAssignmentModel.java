@@ -14,7 +14,8 @@ public interface NetworkAssignmentModel {
 
 	Collection<NetworkAssignment> getAssignments(SelectionFilter selectionFilter);
 	Collection<NetworkAssignment> getDefaultAssignments();
-	
+
+	NetworkAssignmentModel create( SelectionFilter defaultFilter);
 	//NetworkAssignmentModel op(CollectionXXXX)
 	
 }
