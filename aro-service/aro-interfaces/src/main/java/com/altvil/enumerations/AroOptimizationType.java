@@ -1,6 +1,6 @@
 package com.altvil.enumerations;
 
-public enum OptimizationType {
+public enum AroOptimizationType {
 	
 	
 	UNCONSTRAINED,

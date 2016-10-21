@@ -30,8 +30,7 @@ public interface NetworkQueryService {
 	public ServiceAreaRoadEdges getRoadEdges(int serviceAreaId,
 			ServiceAreaContext ctx);
 
-	public List<Long> selectedRoadLocationIds(long planId,
-			Map<Long, RoadLocation> roadLocationByLocationIdMap);
+	public Set<Long> selectedRoadLocationIds(long planId);
 
 	public Collection<CableConduitEdge> queryPlanConditEdges(long planid);
 

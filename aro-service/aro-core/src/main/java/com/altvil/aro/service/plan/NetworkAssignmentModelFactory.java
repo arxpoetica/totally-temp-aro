@@ -1,7 +1,6 @@
 package com.altvil.aro.service.plan;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
@@ -28,7 +27,10 @@ public class NetworkAssignmentModelFactory implements NetworkAssignmentModel.Bui
 
 	@Override
 	public NetworkAssignmentModel build() {
-		return new DefaultNetworkAssignmentModel(allAssignments, selectedAssignments);
+
+		Map<NetworkAssignmentModel.SelectionFilter, Collection<NetworkAssignment>> map = new HashMap<>();
+
+		return new DefaultNetworkAssignmentModel(map);
 	}
 
 }

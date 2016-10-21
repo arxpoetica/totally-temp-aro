@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.altvil.aro.service.plan.DefaultNetworkAssignmentModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,20 +96,15 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap,
 			ServiceAreaContext ctx) {
 
-		Map<Long, RoadLocation> roadLocationByLocationIdMap = getRoadLocationNetworkLocations(
-				request, ctx);
-
-		return networkAssignmentModel(
-				createTransform(request.getLocationEntities(),
-						demandByLocationIdMap, roadLocationByLocationIdMap),
-				roadLocationByLocationIdMap.keySet(),
-				() -> networkDataDAO.selectedRoadLocationIds(
-						request.getPlanId(), roadLocationByLocationIdMap),
-				request.getSelectionMode(), request.getSelectionFilters());
+		return new NetworkAssignmentModelBuilder()
+				.setDemandMapping(demandByLocationIdMap)
+				.setNetworkDataRequest(request)
+				.setServiceAreaContext(ctx)
+				.build();
 	}
 
-	private class NetworkAssignmentModelBuilder {
-		
+	class NetworkAssignmentModelBuilder {
+
 		private NetworkDataRequest request;
 		private ServiceAreaContext ctx;
 		private Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap;
@@ -140,10 +136,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 			return demandByLocationIdMap.keySet();
 		}
 
-		// TODO KAMIL (Please simplify networkDataDAO.selectedRoadLocationIds.
-		// should only return locations ids)
 		private Set<Long> getSelectedLocationIds() {
-			networkDataDAO.selectedRoadLocationIds(request.getPlanId());
+			return networkDataDAO.selectedRoadLocationIds(request.getPlanId());
 		}
 
 		private Function<Long, NetworkAssignment> createTransform(
@@ -177,7 +171,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 			return TransformerFactory.TRANSFORMER.createTransformer(
 					request.getSelectionMode(), request.getSelectionFilters())
 					.transform(getAllLocationIds(),
-							() -> getSelectedLocationIds(),
+							this::getSelectedLocationIds,
 							createTransform(getRoadLocationNetworkLocations()));
 
 		}
@@ -237,8 +231,8 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 				strategy.assemble(this);
 
-				// TODO wire up return new NetworkAssignmentModel(map) ;
-				return null;
+
+				return new DefaultNetworkAssignmentModel(map);
 			}
 
 			public Collection<NetworkAssignment> getNetworkAssignment(
@@ -280,127 +274,52 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		private void init() {
 
 			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
-					EnumSet.of(SelectionFilter.SELECTED), new Strategy() {
-						@Override
-						public TransformContext assemble(TransformContext ctx) {
-							return ctx.assign(SelectionFilter.SELECTED, ctx
-									.toNetworkAssignments(ctx.getSelectedIds()));
-						}
-					});
+					EnumSet.of(SelectionFilter.SELECTED),
+					ctx -> ctx.assign(SelectionFilter.SELECTED, ctx.toNetworkAssignments(ctx.getSelectedIds()))
+			);
 
 			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
-					EnumSet.of(SelectionFilter.ALL), new Strategy() {
-						@Override
-						public TransformContext assemble(TransformContext ctx) {
-							return ctx.assign(SelectionFilter.ALL,
-									ctx.toNetworkAssignments(ctx.getAllIds()));
-						}
-					});
+					EnumSet.of(SelectionFilter.ALL),
+					ctx -> ctx.assign(SelectionFilter.ALL,ctx.toNetworkAssignments(ctx.getAllIds())));
 
 			register(AnalysisSelectionMode.SELECTED_LOCATIONS,
 					EnumSet.of(SelectionFilter.ALL, SelectionFilter.SELECTED),
-					new Strategy() {
-						@Override
-						public TransformContext assemble(TransformContext ctx) {
-							Set<Long> ids = ctx.getSelectedIds();
-							return ctx
-									.assign(SelectionFilter.ALL,
-											ctx.toNetworkAssignments(ctx
-													.getAllIds()))
-									.assign(SelectionFilter.SELECTED,
-											ctx.getNetworkAssignment(
-													SelectionFilter.ALL)
-													.stream()
-													.filter(na -> ids
-															.contains(na
-																	.getSource()
-																	.getObjectId()))
-													.collect(
-															Collectors.toList()));
+					ctx -> {
+                        Set<Long> ids = ctx.getSelectedIds();
+                        return ctx
+                                .assign(SelectionFilter.ALL,
+										ctx.toNetworkAssignments(ctx
+												.getAllIds()))
+                                .assign(SelectionFilter.SELECTED,
+										ctx.getNetworkAssignment(
+												SelectionFilter.ALL)
+												.stream()
+												.filter(na -> ids
+														.contains(na
+																.getSource()
+																.getObjectId()))
+												.collect(
+														Collectors.toList()));
 
-						}
-					});
+                    });
 
 			register(AnalysisSelectionMode.SELECTED_AREAS,
-					EnumSet.of(SelectionFilter.SELECTED), new Strategy() {
-						@Override
-						public TransformContext assemble(TransformContext ctx) {
-							return ctx.assign(SelectionFilter.SELECTED,
-									ctx.toNetworkAssignments(ctx.getAllIds()));
-						}
-					});
+					EnumSet.of(SelectionFilter.SELECTED),
+					ctx -> ctx.assign(SelectionFilter.SELECTED,ctx.toNetworkAssignments(ctx.getAllIds()))
+			);
 			register(AnalysisSelectionMode.SELECTED_AREAS,
-					EnumSet.of(SelectionFilter.ALL), new Strategy() {
-						@Override
-						public TransformContext assemble(TransformContext ctx) {
-							return ctx.assign(SelectionFilter.ALL,
-									ctx.toNetworkAssignments(ctx.getAllIds()));
-						}
-					});
+					EnumSet.of(SelectionFilter.ALL),
+					ctx -> ctx.assign(SelectionFilter.ALL,ctx.toNetworkAssignments(ctx.getAllIds()))
+			);
 
 			register(AnalysisSelectionMode.SELECTED_AREAS,
 					EnumSet.of(SelectionFilter.ALL, SelectionFilter.SELECTED),
-					new Strategy() {
-						@Override
-						public TransformContext assemble(TransformContext ctx) {
-							return ctx
-									.assign(SelectionFilter.ALL,
-											ctx.toNetworkAssignments(ctx
-													.getAllIds()))
-									.assign(SelectionFilter.SELECTED,
-											ctx.getNetworkAssignment(SelectionFilter.ALL));
-						}
-					});
+					ctx -> ctx
+                            .assign(SelectionFilter.ALL, ctx.toNetworkAssignments(ctx.getAllIds()))
+                            .assign(SelectionFilter.SELECTED, ctx.getNetworkAssignment(SelectionFilter.ALL))
+			);
 		}
 
-	}
-
-	Function<Long, NetworkAssignment> createTransform(
-			Set<LocationEntityType> locationEntities,
-			Map<Long, CompetitiveLocationDemandMapping> demandByLocationIdMap,
-			Map<Long, RoadLocation> roadLocationByLocationIdMap) {
-		return (locationId) -> {
-			CompetitiveLocationDemandMapping ldm = demandByLocationIdMap
-					.get(locationId);
-			if (ldm != null && !ldm.isEmpty()) {
-				LocationDemand locationDemand = aroDemandService
-						.createFairShareDemandMapping(ldm)
-						.getFairShareLocationDemand(SpeedCategory.cat7)
-						.createLocationDemand(ldm);
-
-				AroEntity aroEntity = entityFactory.createLocationEntity(
-						locationEntities, locationId, ldm.getBlockId(),
-						ldm.getCompetitiveStrength(), locationDemand);
-
-				return new DefaultNetworkAssignment(aroEntity,
-						roadLocationByLocationIdMap.get(locationId));
-			}
-			return null;
-		};
-	}
-
-	private NetworkAssignmentModel networkAssignmentModel(
-			Function<Long, NetworkAssignment> transform,
-			Set<Long> allLocationIds,
-			Supplier<List<Long>> selectedLocationsSupplier,
-			AnalysisSelectionMode selectionMode,
-			Set<NetworkAssignmentModel.SelectionFilter> selectionFilters) {
-		NetworkAssignmentModel.Builder factory = new NetworkAssignmentModelFactory();
-
-		return getSelectionStrategy(selectionMode).getFilterSelectionStrategy(
-				selectionFilters).getAssignmentModel(transform);
-
-		roadLocationByLocationIdMap
-				.keySet()
-				.stream()
-				.forEach(
-						locationId -> {
-							factory.add(transform.apply(locationId),
-									selectedLocationsSupplier
-											.contains(locationId));
-						});
-
-		return factory.build();
 	}
 
 	private Map<Long, CompetitiveLocationDemandMapping> getLocationDemand(
@@ -416,24 +335,6 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 						networkConfiguration.getMrc(), ctx);
 
 	}
-
-	private Map<Long, RoadLocation> getRoadLocationNetworkLocations(
-			NetworkDataRequest networkConfiguration, ServiceAreaContext ctx) {
-		return networkDataDAO.queryRoadLocations(
-				networkConfiguration.getServiceAreaId().get(), ctx)
-				.getId2location();
-	}
-
-	// private Collection<RoadEdge> getRoadEdges(
-	// NetworkDataRequest networkConfiguration, ServiceAreaContext ctx) {
-	// return networkDataDAO
-	// .getRoadEdges(networkConfiguration.getServiceAreaId().get(), ctx)
-	// .getRoadEdges();
-	// }
-
-	// private enum ConduitEdgeMap implements OrdinalAccessor {
-	// gid, constructionType, startRatio, endRatio
-	// }
 
 	private Collection<CableConduitEdge> queryCableConduitEdges(
 			NetworkDataRequest networkConfiguration) {
@@ -461,65 +362,5 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 	}
 
-	// private class LocationDemandAnalysisImpl implements
-	// LocationDemandAnalysis {
-	//
-	// private Map<Long, CompetitiveLocationDemandMapping>
-	// locationDemandMappingMap;
-	// private LocationDemand selectedDemand;
-	//
-	// private Map<SpeedCategory, LocationDemand> locationDemandMap = new
-	// EnumMap<>(
-	// SpeedCategory.class);
-	//
-	// @Override
-	// public CompetitiveDemandMapping getCompetitiveDemandMapping() {
-	// return new CompetitiveDemandMapping(locationDemandMappingMap);
-	// }
-	//
-	// public LocationDemandAnalysisImpl(
-	// Map<Long, CompetitiveLocationDemandMapping> locationDemandMappingMap,
-	// LocationDemand selectedDemand) {
-	// super();
-	// this.locationDemandMappingMap = locationDemandMappingMap;
-	// this.selectedDemand = selectedDemand;
-	// }
-	//
-	// @Override
-	// public LocationDemand getSelectedDemand() {
-	// return selectedDemand;
-	// }
-	//
-	// @Override
-	// public LocationDemand getLocationDemand(SpeedCategory speedCategory) {
-	// LocationDemand ld = locationDemandMap.get(speedCategory);
-	// if (ld == null) {
-	// locationDemandMap.put(speedCategory,
-	// ld = aggregateDemandForSpeedCategory(speedCategory));
-	// }
-	// return ld;
-	// }
-	//
-	// private LocationDemand aggregateDemandForSpeedCategory(
-	// SpeedCategory speedCategory) {
-	//
-	// Aggregator<LocationDemand> aggregator = DefaultLocationDemand
-	// .demandAggregate();
-	//
-	// locationDemandMappingMap
-	// .values()
-	// .stream()
-	// .map(ldm -> aroDemandService
-	// .createFairShareDemandMapping(ldm)
-	// .getFairShareLocationDemand(speedCategory)
-	// .createLocationDemand(ldm)).forEach(ld -> {
-	// aggregator.add(ld);
-	// });
-	//
-	// return aggregator.apply();
-	//
-	// }
-	//
-	// }
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.AlgorithmType;
+import com.altvil.enumerations.AroOptimizationType;
 import com.altvil.enumerations.OptimizationMode;
 import com.altvil.enumerations.OptimizationType;
 
@@ -13,7 +14,7 @@ public class AroOptimizationPlan {
 
 	private long planId = 0;
 
-	private OptimizationType algorithm = OptimizationType.UNCONSTRAINED;
+	private AroOptimizationType algorithm = AroOptimizationType.UNCONSTRAINED;
 	private AnalysisSelectionMode analysisSelectionMode = AnalysisSelectionMode.SELECTED_AREAS;
 	private OptimizationMode optimizationMode = OptimizationMode.INTER_WIRECENTER;
 	private AlgorithmType algorithmType = AlgorithmType.DEFAULT;
@@ -41,11 +42,11 @@ public class AroOptimizationPlan {
 		this.planId = planId;
 	}
 
-	public OptimizationType getAlgorithm() {
+	public AroOptimizationType getAlgorithm() {
 		return algorithm;
 	}
 
-	public void setAlgorithm(OptimizationType optimizationType) {
+	public void setAlgorithm(AroOptimizationType optimizationType) {
 		this.algorithm = optimizationType;
 	}
 

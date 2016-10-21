@@ -108,6 +108,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		private Set<LocationEntity> rejectedLocations = new HashSet<>();
 
 		private ExtendededTreeMap<Double, GeneratingNode> treeMap = new ExtendededTreeMap<>();
+		private Set<AroEntity> lockedEntities = Collections.emptySet();
 
 		// private TreeMultimap<Double, GeneratingNode> treeMap = TreeMultimap
 		// .create(Double::compare, GeneratingNodeComparator.COMPARATROR);
@@ -233,6 +234,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		private void regenerate() {
 
 			model = createNetworkModel();
+
 
 			treeMap.clear();
 			rootNode = null;
@@ -383,6 +385,12 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		public SplitterNodeAssignment createSplitterNodeAssignment() {
 			return new SplitterNodeAssignment(null,
 					EntityFactory.FACTORY.createJunctionNode());
+		}
+
+		@Override
+		public boolean isLocked(AroEntity aroEntity) {
+
+			return lockedEntities.contains(aroEntity);
 		}
 
 		public String toString() {

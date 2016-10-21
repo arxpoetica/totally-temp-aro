@@ -1,7 +1,7 @@
 package com.altvil.aro.service.network;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.Collections;
 
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.interfaces.NetworkAssignmentModel;
@@ -15,7 +15,7 @@ public class NetworkDataRequest {
 	private Integer serviceLayerId;
 	private boolean queryPlanConduit = false;
 	private AnalysisSelectionMode selectionMode;
-	private Set<SelectionFilter> selectionFilters;
+	private Set<SelectionFilter> selectionFilters = EnumSet.of(SelectionFilter.ALL, SelectionFilter.SELECTED);
 	private Set<LocationEntityType> locationEntities;
 	private Optional<Integer> serviceAreaId = Optional.empty();
 

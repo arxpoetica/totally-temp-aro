@@ -5,6 +5,7 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.segment.RatioSection;
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.CableConstructionEnum;
+import com.altvil.interfaces.NetworkAssignmentModel;
 
 public interface CoreGraphNetworkModelService {
 
@@ -17,6 +18,9 @@ public interface CoreGraphNetworkModelService {
 			GraphBuilderContext ctx);
 
 	GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
-			GraphBuilderContext ctx);
+											  GraphBuilderContext ctx);
+	
+	GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
+											  GraphBuilderContext ctx, NetworkAssignmentModel.SelectionFilter selectionFilter);
 
 }

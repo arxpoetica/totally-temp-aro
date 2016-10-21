@@ -37,7 +37,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	private List<GeneratingNode> children;
 	private int recalcMode = 0 ;
 	private double score ;
-	
+	private boolean locked;
+
 	protected DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment,
 			FiberAssignment fiberAssignment,
@@ -255,6 +256,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 		if (parent != null) {
 			parent._addChild(this);
+			if (locked)
+				parent.setLocked(locked);
 		}
 
 		return this;
@@ -354,12 +357,21 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	public boolean isJunctionNode() {
 		return equipmentAssigment == null ? false : equipmentAssigment.isJunctionNode();
 	}
-	
+
+	@Override
+	public boolean isLocked() {
+		return locked;
+	}
+
 	public String toString() {
 		return new ToStringBuilder(this).append("capex", capex)
 				.append("coverage", coverage).append("directCoverage", directCoverage)
 				.append("equipmentAssignment", equipmentAssigment).append("fiberAssignment", fiberAssignment)
 				.append("hasParent", parent != null).append("children", children).toString();
+	}
+
+	public void setLocked(boolean locked) {
+		this.locked = locked;
 	}
 
 	public static class BuilderImpl implements Builder {

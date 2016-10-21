@@ -50,6 +50,8 @@ public interface AnalysisContext extends PricingContext {
 	Builder createNode(FiberAssignment fiberAssignment, EquipmentAssignment equipment); ;
 	
 	SplitterNodeAssignment createSplitterNodeAssignment() ;
+
+	boolean isLocked(AroEntity aroEntity);
 	
 	//Builder addSplitterNode(FiberAssignment fiberAssignment, GeneratingNode.Builder parent);
 	

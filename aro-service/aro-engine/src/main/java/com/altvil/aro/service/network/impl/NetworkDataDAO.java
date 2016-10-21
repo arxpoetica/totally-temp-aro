@@ -153,8 +153,8 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 				.getDemandMapping();
 		if (isFilteringRoadLocationDemandsBySelection) {
 			Set<Long> selectedRoadLocationIds = planRepository
-					.querySelectedLocationsByPlanId(planId).stream()
-					.map(BigInteger::longValue).collect(Collectors.toSet());
+					.querySelectedLocationsByPlanId(planId);
+
 			return locationDemand
 					.entrySet()
 					.stream()
@@ -368,21 +368,8 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	 * selectedRoadLocationIds(long, java.util.Map)
 	 */
 	@Override
-	public List<Long> selectedRoadLocationIds(long planId,
-			Map<Long, RoadLocation> roadLocationByLocationIdMap) {
-		List<Long> selectedRoadLocations = planRepository
-				.querySelectedLocationsByPlanId(planId).stream()
-				.mapToLong(bi -> bi.longValue()).boxed()
-				.collect(Collectors.toList());
-
-		if (selectedRoadLocations.isEmpty()) {
-			selectedRoadLocations = new ArrayList<>(
-					roadLocationByLocationIdMap.size());
-
-			selectedRoadLocations.addAll(roadLocationByLocationIdMap.keySet());
-		}
-
-		return selectedRoadLocations;
+	public Set<Long> selectedRoadLocationIds(long planId) {
+		return planRepository.querySelectedLocationsByPlanId(planId);
 	}
 
 	private LocationEntityType toLocationEntityType(int entityTypeCode) {

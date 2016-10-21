@@ -1,5 +1,7 @@
 package com.altvil.aro.service.graph.builder.impl;
 
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.SELECTED;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.altvil.interfaces.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +35,6 @@ import com.altvil.aro.service.graph.segment.impl.DefaultGeoRatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.LocationEntityAssignment;
 import com.altvil.aro.service.graph.segment.impl.RoadLocationImpl;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
-import com.altvil.interfaces.CableConduitEdge;
-import com.altvil.interfaces.CableConstructionEnum;
-import com.altvil.interfaces.NetworkAssignment;
-import com.altvil.interfaces.RoadEdge;
-import com.altvil.interfaces.RoadLocation;
 
 @Service
 public class CoreGraphBuilderServiceImpl implements
@@ -83,9 +81,13 @@ public class CoreGraphBuilderServiceImpl implements
 	}
 
 	@Override
-	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
-			GraphBuilderContext ctx) {
-		return create(createRoadEdgeInfoItr(networkData, ctx), networkData.getRoadLocations().getAssignments(), ctx);
+	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,GraphBuilderContext ctx) {
+		return create(createRoadEdgeInfoItr(networkData, ctx), networkData.getRoadLocations().getAssignments(SELECTED), ctx);
+	}
+
+	@Override
+	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,GraphBuilderContext ctx, NetworkAssignmentModel.SelectionFilter selectionFilter) {
+		return create(createRoadEdgeInfoItr(networkData, ctx), networkData.getRoadLocations().getAssignments(selectionFilter), ctx);
 	}
 
 	@Override
@@ -254,7 +256,7 @@ public class CoreGraphBuilderServiceImpl implements
 		public RoadEdgeIndexer index(NetworkData networkData) {
 			// NOTE: Include ALL assignments otherwise the generated model won't allocate equipment for them.
 			roadLocationsByTlid = groupLocationsByTlid(networkData
-					.getRoadLocations().getAssignments());
+					.getRoadLocations().getAssignments(ALL));
 			fiberSources = groupFiberSources(networkData.getFiberSources());
 			cableConduitMap = groupSections(networkData.getCableConduitEdges());
 
