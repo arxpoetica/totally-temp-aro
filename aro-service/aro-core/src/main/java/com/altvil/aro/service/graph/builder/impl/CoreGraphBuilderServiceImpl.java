@@ -1,6 +1,5 @@
 package com.altvil.aro.service.graph.builder.impl;
 
-import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
 import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.SELECTED;
 import static java.util.stream.Collectors.groupingBy;
 
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.altvil.interfaces.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,12 @@ import com.altvil.aro.service.graph.segment.impl.DefaultGeoRatioSection;
 import com.altvil.aro.service.graph.segment.impl.DefaultSegmentLocations.LocationEntityAssignment;
 import com.altvil.aro.service.graph.segment.impl.RoadLocationImpl;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
+import com.altvil.interfaces.CableConduitEdge;
+import com.altvil.interfaces.CableConstructionEnum;
+import com.altvil.interfaces.NetworkAssignment;
+import com.altvil.interfaces.NetworkAssignmentModel;
+import com.altvil.interfaces.RoadEdge;
+import com.altvil.interfaces.RoadLocation;
 
 @Service
 public class CoreGraphBuilderServiceImpl implements
@@ -71,7 +75,7 @@ public class CoreGraphBuilderServiceImpl implements
 
 		CoreGraphNetworkModelBuilder nb = new CoreGraphNetworkModelBuilder(
 				graphEdgeFactory, vertexFactory,
-				transformFactory.createGraphBuilder(), allAssignments);
+				transformFactory.createGraphBuilder());
 
 		while (itr.hasNext()) {
 			nb.add(itr.next());

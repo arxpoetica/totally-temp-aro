@@ -1,7 +1,6 @@
 package com.altvil.aro.service.network.impl;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +11,6 @@ import com.altvil.aro.service.network.model.ServiceAreaRoadEdges;
 import com.altvil.aro.service.network.model.ServiceAreaRoadLocations;
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.NetworkAssignment;
-import com.altvil.interfaces.RoadLocation;
 
 public interface NetworkQueryService {
 

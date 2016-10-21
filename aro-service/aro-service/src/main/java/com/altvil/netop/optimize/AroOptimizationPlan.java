@@ -8,7 +8,6 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.AroOptimizationType;
 import com.altvil.enumerations.OptimizationMode;
-import com.altvil.enumerations.OptimizationType;
 
 public class AroOptimizationPlan {
 

@@ -1,12 +1,12 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.SELECTED;
+
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Optional;
 
-import com.altvil.aro.service.network.NetworkDataRequest;
-import com.altvil.enumerations.OptimizationType;
-import com.altvil.interfaces.NetworkAssignmentModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,7 @@ import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBu
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
@@ -42,10 +43,8 @@ import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.property.SystemPropertyService;
+import com.altvil.enumerations.OptimizationType;
 import com.altvil.utils.StreamUtil;
-
-import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
-import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.SELECTED;
 
 @Service
 public class OptimizationPlanningImpl implements WirecenterOptimizationService {

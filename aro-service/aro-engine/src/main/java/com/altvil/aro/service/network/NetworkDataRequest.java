@@ -1,10 +1,10 @@
 package com.altvil.aro.service.network;
 
-import java.util.*;
-import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
 
 import com.altvil.aro.service.entity.LocationEntityType;
-import com.altvil.interfaces.NetworkAssignmentModel;
 import com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter;
 
 public class NetworkDataRequest {
