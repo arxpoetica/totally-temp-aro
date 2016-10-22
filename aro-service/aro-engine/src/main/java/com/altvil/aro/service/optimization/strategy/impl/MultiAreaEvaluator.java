@@ -13,12 +13,14 @@ import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 import com.altvil.enumerations.OptimizationType;
+
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -135,6 +137,13 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
             public boolean isCandidatePlan(OptimizedNetwork network) {
                 return true;
             }
+
+			@Override
+			public Predicate<GeneratingNode> getPrunePredicate() {
+				return null;
+			}
+            
+            
         };
     }
 

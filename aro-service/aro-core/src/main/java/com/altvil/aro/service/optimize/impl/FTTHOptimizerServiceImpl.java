@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkConstraint;
@@ -62,26 +63,34 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 				return false;
 			}
 
+			@Override
+			public Predicate<GeneratingNode> getPrunePredicate() {
+				return (node) -> !node.isSourceEquipment() ;
+			}
+			
+			
+
 		};
 
-		return createNetworkPlanner(networkData, strategy, scoringStrategy, ctxBuilder);
+		return createNetworkPlanner(networkData, strategy, scoringStrategy, ctxBuilder, null);
 
 	}
 
 	@Override
 	public NetworkPlanner createNetworkPlanner(NetworkData networkData,
 			PruningStrategy pruningStrategy, ScoringStrategy scoringStrategy,
-			OptimizerContextBuilder ctxBuilder) {
+			OptimizerContextBuilder ctxBuilder, Predicate<GraphEdgeAssignment> lockedPredicate) {
 
 		return DefaultNetworkPlannerImpl.create(createConstrainer(networkData,
-				ctxBuilder, pruningStrategy, scoringStrategy));
+				ctxBuilder, pruningStrategy, scoringStrategy, lockedPredicate));
 
 	}
 
 	private NetworkConstrainer createConstrainer(NetworkData networkData,
 												 OptimizerContextBuilder ctxBuilder,
 												 PruningStrategy pruningStrategy,
-												 ScoringStrategy scoringStrategy) {
+												 ScoringStrategy scoringStrategy,
+												 Predicate<GraphEdgeAssignment> lockedPredicate) {
 
 		NetworkModelBuilder networkModelBuilder = networkModelBuilderFactory
 				.create(networkData, ctxBuilder);
@@ -89,7 +98,7 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 		NetworkAnalysis networkAnalysis = networkAnalysisFactory
 				.createNetworkAnalysis(networkModelBuilder,
 						ctxBuilder.createOptimizerContext(appCtx),
-						scoringStrategy);
+						scoringStrategy, lockedPredicate);
 
 		return NetworkConstrainer.create(networkModelBuilder, pruningStrategy,
 				networkAnalysis);

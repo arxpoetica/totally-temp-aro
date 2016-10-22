@@ -21,7 +21,6 @@ import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 
 public class DefaultGeneratingNode implements GeneratingNode {
 
-	
 	private static final Logger log = LoggerFactory
 			.getLogger(DefaultGeneratingNode.class.getName());
 
@@ -35,14 +34,14 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	private FiberConsumer fiberConsumer;
 	private FiberProducer fiberProducer;
 	private List<GeneratingNode> children;
-	private int recalcMode = 0 ;
-	private double score ;
-	private boolean locked;
+	private int recalcMode = 0;
+	private double score;
+	private boolean locked = false;
+	private boolean nodeLocked = false;
 
 	protected DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment,
-			FiberAssignment fiberAssignment,
-			DefaultGeneratingNode parent,
+			FiberAssignment fiberAssignment, DefaultGeneratingNode parent,
 			List<GeneratingNode> children) {
 
 		this.ctx = ctx;
@@ -51,27 +50,25 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		this.parent = parent;
 		this.children = children;
 		this.directCoverage = equipmentAssigment.getDirectCoverage(ctx);
-		
-		//log.info("direct coverage = " + directCoverage.getDemand());
+		this.nodeLocked = isNodeLocked(equipmentAssigment);
+
+		// log.info("direct coverage = " + directCoverage.getDemand());
 
 	}
-	
-	
 
-	
+	private boolean isNodeLocked(EquipmentAssignment equipment) {
+		return ctx.getLockedPredicate().test(equipment.getGraphAssignment());
+	}
 
 	@Override
 	public boolean isSourceEquipment() {
-		return this.getEquipmentAssignment().isSourceEquipment() || this.getEquipmentAssignment().isRoot() ;
+		return this.getEquipmentAssignment().isSourceEquipment()
+				|| this.getEquipmentAssignment().isRoot();
 	}
-
-
-
-
 
 	@Override
 	public AnalysisContext getAnalysisContext() {
-		return ctx ;
+		return ctx;
 	}
 
 	@Override
@@ -85,18 +82,21 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	}
 
 	public DefaultGeneratingNode(AnalysisContext ctx,
-			EquipmentAssignment equipmentAssigment, FiberAssignment fiberAssignment, DefaultGeneratingNode parent) {
-		this(ctx, equipmentAssigment, fiberAssignment, parent, new ArrayList<>());
+			EquipmentAssignment equipmentAssigment,
+			FiberAssignment fiberAssignment, DefaultGeneratingNode parent) {
+		this(ctx, equipmentAssigment, fiberAssignment, parent,
+				new ArrayList<>());
 	}
-	
+
 	private void add(GeneratingNode node) {
-		children.add(node) ;
-		((DefaultGeneratingNode) node).parent = this ;
+		children.add(node);
+		((DefaultGeneratingNode) node).parent = this;
 	}
 
 	public static Builder build(AnalysisContext ctx,
 			EquipmentAssignment assignment, FiberAssignment fiberAssignment) {
-		return new BuilderImpl(new DefaultGeneratingNode(ctx, assignment,fiberAssignment,   null));
+		return new BuilderImpl(new DefaultGeneratingNode(ctx, assignment,
+				fiberAssignment, null));
 	}
 
 	@Override
@@ -121,20 +121,21 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		 * if (getEquipmentAssignment().rebuildNetwork(this, ctx)) {
 		 * ctx.rebuildRequired(this); } else {
 		 */
-		
-		log.trace("remove {}", this.getEquipmentAssignment().getClass().getName());
+
+		log.trace("remove {}", this.getEquipmentAssignment().getClass()
+				.getName());
 
 		try {
-			recalcMode++ ;
-			 new ArrayList<>(children).forEach(GeneratingNode::remove);
+			recalcMode++;
+			new ArrayList<>(children).forEach(GeneratingNode::remove);
 			ctx.removeFromAnalysis(this);
 			if (parent != null) {
 				parent.removeChild(this);
 			}
 		} finally {
-			recalcMode-- ;
+			recalcMode--;
 		}
-		
+
 	}
 
 	private void _recalc() {
@@ -144,39 +145,55 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		 * required strands) + Math.ceil(direct
 		 * coverage.getCoverage().getFiberDemand()) then change getCapex methods
 		 * so they take required fiber strands instead of demand coverage
-*/
-		
+		 */
+
 		this.fiberConsumer = aggregateIncomingFiberStrands(directCoverage);
 		this.fiberProducer = this.equipmentAssigment.createFiberProducer(ctx,
 				this.getFiberAssignment().getFiberType(), fiberConsumer);
-		
-		if( fiberProducer == null ) {
-			throw new NullPointerException() ;
+
+		if (fiberProducer == null) {
+			throw new NullPointerException();
 		}
 
 		this.coverage = calcFiberCoverage(children);
-		
+
 		double nodeCapex = calculateNodeCapex(fiberConsumer, fiberProducer,
 				this.coverage);
-		
+
 		double childrenCapex = getChildren().stream()
 				.mapToDouble(GeneratingNode::getCapex).sum();
-		
-//		System.out.println("coverage = " + coverage) ;
-//		System.out.println("coverage = " + coverage) ;
-//		
-		
-		if( log.isTraceEnabled() ) {
+
+		// System.out.println("coverage = " + coverage) ;
+		// System.out.println("coverage = " + coverage) ;
+		//
+
+		if (log.isTraceEnabled()) {
 			log.trace("Capex " + nodeCapex + " => "
-				+ (nodeCapex + childrenCapex) + " coverage = "
-							+ coverage.getAtomicUnits() + " fc="
-							+ fiberProducer.getFiberCount());
+					+ (nodeCapex + childrenCapex) + " coverage = "
+					+ coverage.getAtomicUnits() + " fc="
+					+ fiberProducer.getFiberCount());
 		}
 
 		this.capex = nodeCapex + childrenCapex;
-		
-		this.score = ctx.getScoringStrategy().score(this) ;
 
+		this.score = ctx.getScoringStrategy().score(this);
+		
+		this.locked = calcLocked() ;
+
+	}
+	
+	private boolean calcLocked() {
+		if( nodeLocked ) {
+			return true ;
+		}
+		
+		for(GeneratingNode child : children) {
+			if( child.isLocked() ) {
+				return true ;
+			}
+		}
+		
+		return false ;
 	}
 
 	private DemandCoverage calcFiberCoverage(Collection<GeneratingNode> children) {
@@ -186,8 +203,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		if (directCoverage != null) {
 			acc.add(directCoverage);
 		}
-		
-        children.forEach(n -> acc.add(n.getFiberCoverage()));
+
+		children.forEach(n -> acc.add(n.getFiberCoverage()));
 
 		return acc.getResult();
 
@@ -198,17 +215,17 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		children.add(newNode);
 		recalc();
 	}
-	
+
 	private boolean isRecalcMode() {
-		return recalcMode == 0 ;
+		return recalcMode == 0;
 	}
 
 	public void recalc() {
 
-		if( !isRecalcMode() ) {
-			return ;
+		if (!isRecalcMode()) {
+			return;
 		}
-		
+
 		boolean removed = false;
 
 		ctx.changing_start(this);
@@ -227,7 +244,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 				 * ctx.changing_end(newNode);
 				 * 
 				 * removed = true;
-				*/
+				 */
 			}
 		}
 
@@ -256,8 +273,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 		if (parent != null) {
 			parent._addChild(this);
-			if (locked)
-				parent.setLocked(locked);
+//			if (locked)
+//				parent.setLocked(locked);
 		}
 
 		return this;
@@ -297,7 +314,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public double getScore() {
-		return this.score ;
+		return this.score;
 	}
 
 	@Override
@@ -325,10 +342,10 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		return 0;
 	}
 
-    @Override
-    public int compareTo(GeneratingNode o) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public int compareTo(GeneratingNode o) {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public NetworkAnalysis getNetworkAnalysis() {
@@ -355,7 +372,8 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	@Override
 	public boolean isJunctionNode() {
-		return equipmentAssigment == null ? false : equipmentAssigment.isJunctionNode();
+		return equipmentAssigment == null ? false : equipmentAssigment
+				.isJunctionNode();
 	}
 
 	@Override
@@ -365,9 +383,12 @@ public class DefaultGeneratingNode implements GeneratingNode {
 
 	public String toString() {
 		return new ToStringBuilder(this).append("capex", capex)
-				.append("coverage", coverage).append("directCoverage", directCoverage)
-				.append("equipmentAssignment", equipmentAssigment).append("fiberAssignment", fiberAssignment)
-				.append("hasParent", parent != null).append("children", children).toString();
+				.append("coverage", coverage)
+				.append("directCoverage", directCoverage)
+				.append("equipmentAssignment", equipmentAssigment)
+				.append("fiberAssignment", fiberAssignment)
+				.append("hasParent", parent != null)
+				.append("children", children).toString();
 	}
 
 	public void setLocked(boolean locked) {
@@ -377,24 +398,24 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	public static class BuilderImpl implements Builder {
 
 		private DefaultGeneratingNode node;
-		private boolean inited = false ;
+		private boolean inited = false;
 
-		//private List<DefaultGeneratingNode> unresolvedNodes ;
+		// private List<DefaultGeneratingNode> unresolvedNodes ;
 
 		public BuilderImpl(DefaultGeneratingNode node) {
 			super();
 			this.node = node;
 		}
-		
+
 		@Override
 		public GeneratingNode getGeneratingNode() {
-			build() ;
-			return node ;
+			build();
+			return node;
 		}
 
 		@Override
 		public void addChild(Builder child) {
-			node.add(child.getGeneratingNode()) ;
+			node.add(child.getGeneratingNode());
 		}
 
 		@Override
@@ -402,18 +423,16 @@ public class DefaultGeneratingNode implements GeneratingNode {
 			children.forEach(this::addChild);
 		}
 
-				
-        @Override
+		@Override
 		public GeneratingNode build() {
-        	if( !inited ) {
-        		this.inited = true ;
-    			return node.initReclc();
-			} 
-        	
-        	return node ;
-			
-        
-        }
+			if (!inited) {
+				this.inited = true;
+				return node.initReclc();
+			}
+
+			return node;
+
+		}
 
 	}
 

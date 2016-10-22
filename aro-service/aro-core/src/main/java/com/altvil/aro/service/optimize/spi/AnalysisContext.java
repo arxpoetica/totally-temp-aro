@@ -1,6 +1,9 @@
 package com.altvil.aro.service.optimize.spi;
 
+import java.util.function.Predicate;
+
 import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.aro.service.optimize.OptimizerContext;
 import com.altvil.aro.service.optimize.impl.FiberProducerConsumerFactory;
@@ -22,6 +25,8 @@ public interface AnalysisContext extends PricingContext {
 	FiberProducerConsumerFactory getFiberProducerConsumerFactory() ;
 	
 	FiberStrandConverter getFiberStrandConverter() ;
+	
+	Predicate<GraphEdgeAssignment> getLockedPredicate() ;
 
 	OptimizerContext getOptimizerContext();
 

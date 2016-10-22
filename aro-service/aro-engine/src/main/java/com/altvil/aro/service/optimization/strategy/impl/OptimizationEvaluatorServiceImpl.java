@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -135,6 +136,13 @@ public class OptimizationEvaluatorServiceImpl implements
 		public boolean isCandidatePlan(OptimizedNetwork network) {
 			return spiOptimizationStrategy.isValid(network);
 		}
+
+		@Override
+		public Predicate<GeneratingNode> getPrunePredicate() {
+			return (node) -> !node.isSourceEquipment() ;
+		}
+		
+		
 
 	}
 

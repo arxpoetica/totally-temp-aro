@@ -1,6 +1,7 @@
 package com.altvil.interfaces;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 public interface NetworkAssignmentModel {
 	enum SelectionFilter {
@@ -16,6 +17,8 @@ public interface NetworkAssignmentModel {
 	Collection<NetworkAssignment> getDefaultAssignments();
 
 	NetworkAssignmentModel create( SelectionFilter defaultFilter);
+	NetworkAssignmentModel filter(Predicate<NetworkAssignment> filter) ;
+	
 	//NetworkAssignmentModel op(CollectionXXXX)
 	
 }

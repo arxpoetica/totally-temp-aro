@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimize.spi;
 
+import java.util.function.Predicate;
+
 import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 
@@ -13,5 +15,8 @@ public interface PruningStrategy {
 
 	// Can this candidate network be rejected early
 	boolean isCandidatePlan(OptimizedNetwork network);
+	
+	//Can this Node be Pruned
+	Predicate<GeneratingNode> getPrunePredicate() ;
 
 }

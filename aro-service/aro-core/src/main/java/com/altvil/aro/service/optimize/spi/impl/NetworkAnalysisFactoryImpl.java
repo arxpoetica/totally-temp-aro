@@ -84,9 +84,9 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 	@Override
 	public NetworkAnalysis createNetworkAnalysis(
 			NetworkModelBuilder networkModelBuilder, OptimizerContext ctx,
-			ScoringStrategy scoringStrategy) {
+			ScoringStrategy scoringStrategy, Predicate<GraphEdgeAssignment> lockedPredicate) {
 		return new NetworkAnalysisImpl(networkModelBuilder, ctx,
-				scoringStrategy);
+				scoringStrategy, lockedPredicate);
 	}
 
 	public class NetworkAnalysisImpl implements AnalysisContext,
@@ -98,6 +98,7 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		private Optional<CompositeNetworkModel> model = Optional.empty();
 		private NetworkModel networkModel;
 		private ParentResolver parentResolver;
+		private Predicate<GraphEdgeAssignment> lockedPredicate ;
 
 		private GeneratingNode rootNode;
 		private FtthThreshholds ftpThreshholds;
@@ -114,17 +115,26 @@ public class NetworkAnalysisFactoryImpl implements NetworkAnalysisFactory {
 		// .create(Double::compare, GeneratingNodeComparator.COMPARATROR);
 
 		public NetworkAnalysisImpl(NetworkModelBuilder networkModelBuilder,
-				OptimizerContext context, ScoringStrategy scoringStrategy) {
+				OptimizerContext context, ScoringStrategy scoringStrategy, Predicate<GraphEdgeAssignment> lockedPredicate) {
 			super();
 			this.networkModelBuilder = networkModelBuilder;
 			this.context = context;
 			this.ftpThreshholds = context.getFtthThreshholds();
 			this.scoringStrategy = scoringStrategy;
+			this.lockedPredicate = lockedPredicate ;
 
 			init();
 		}
 		
 		
+		
+		
+
+		@Override
+		public Predicate<GraphEdgeAssignment> getLockedPredicate() {
+			return lockedPredicate ;
+		}
+
 
 		@Override
 		public <S> S getService(Class<S> api) {

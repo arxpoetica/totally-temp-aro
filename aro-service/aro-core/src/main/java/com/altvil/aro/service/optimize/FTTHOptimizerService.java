@@ -5,15 +5,16 @@ import java.util.function.Predicate;
 
 import org.springframework.context.ApplicationContext;
 
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
 
 public interface FTTHOptimizerService {
-	
+
 	public interface OptimizerContextBuilder extends Serializable {
-		OptimizerContext createOptimizerContext(ApplicationContext ctx) ;
+		OptimizerContext createOptimizerContext(ApplicationContext ctx);
 	}
 
 	@Deprecated
@@ -24,6 +25,7 @@ public interface FTTHOptimizerService {
 
 	NetworkPlanner createNetworkPlanner(NetworkData networkData,
 			PruningStrategy pruningStrategy, ScoringStrategy scoringStrategy,
-			OptimizerContextBuilder ctxBuilder);
+			OptimizerContextBuilder ctxBuilder,
+			Predicate<GraphEdgeAssignment> lockedPredicate);
 
 }
