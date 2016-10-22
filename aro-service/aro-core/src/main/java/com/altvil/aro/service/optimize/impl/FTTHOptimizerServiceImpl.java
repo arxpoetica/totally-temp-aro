@@ -11,7 +11,6 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.NetworkConstraint;
 import com.altvil.aro.service.optimize.NetworkPlanner;
-import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.model.GeneratingNode;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
 import com.altvil.aro.service.optimize.spi.NetworkAnalysisFactory;
@@ -20,6 +19,7 @@ import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
+import com.altvil.aro.service.optimize.spi.impl.DefaultPruningStrategy;
 import com.google.inject.Inject;
 
 @Service("fttHOptimizerService")
@@ -46,32 +46,7 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 			Predicate<GeneratingNode> generatingNodeConstraint,
 			ScoringStrategy scoringStrategy) {
 
-		PruningStrategy strategy = new PruningStrategy() {
-
-			@Override
-			public boolean isCandidatePlan(OptimizedNetwork network) {
-				return false;
-			}
-
-			@Override
-			public boolean isGeneratingNodeValid(GeneratingNode node) {
-				return true;
-			}
-
-			@Override
-			public boolean isConstraintSatisfied(NetworkAnalysis node) {
-				return false;
-			}
-
-			@Override
-			public Predicate<GeneratingNode> getPrunePredicate() {
-				return (node) -> !node.isSourceEquipment() ;
-			}
-			
-			
-
-		};
-
+		PruningStrategy strategy = DefaultPruningStrategy.STRATEGY ;
 		return createNetworkPlanner(networkData, strategy, scoringStrategy, ctxBuilder, null);
 
 	}

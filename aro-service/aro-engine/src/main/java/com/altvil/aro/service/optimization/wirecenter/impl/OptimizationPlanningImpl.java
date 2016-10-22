@@ -44,12 +44,10 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequ
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService.OptimizerContextBuilder;
-import com.altvil.aro.service.optimize.model.GeneratingNode;
-import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
-import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.NetworkPlanner;
-import com.altvil.aro.service.optimize.OptimizedNetwork;
 import com.altvil.aro.service.optimize.OptimizerContext;
+import com.altvil.aro.service.optimize.spi.PredicateStrategyType;
+import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.plan.impl.LcrContextImpl;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
@@ -171,37 +169,6 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		};
 	}
 
-	private PruningStrategy decoratePruningStrategy(PruningStrategy strategy,
-			Predicate<GeneratingNode> prunePredicate) {
-		Predicate<GeneratingNode> compositePredicate = strategy
-				.getPrunePredicate().and(prunePredicate);
-		
-		//TODO create Default and convert to Predicates
-		return new PruningStrategy() {
-			
-			@Override
-			public boolean isGeneratingNodeValid(GeneratingNode node) {
-				return strategy.isGeneratingNodeValid(node) ;
-			}
-			
-			@Override
-			public boolean isConstraintSatisfied(NetworkAnalysis node) {
-				return strategy.isConstraintSatisfied(node) ;
-			}
-			
-			@Override
-			public boolean isCandidatePlan(OptimizedNetwork network) {
-				return  strategy.isCandidatePlan(network) ;
-			}
-			
-			@Override
-			public Predicate<GeneratingNode> getPrunePredicate() {
-				return compositePredicate ;
-			}
-		};
-
-	}
-
 	@Override
 	public PrunedNetwork pruneNetwork(WirecenterOptimizationRequest request) {
 		// TODO KAMIL ThresholdBudgetConstraint => Change to
@@ -236,13 +203,15 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		OptimizationEvaluator evaluator = optimizationEvaluatorService
 				.getOptimizationEvaluator((ThresholdBudgetConstraint) request
 						.getOptimizationConstraints());
-		
-		PruningStrategy pruningStrategy = decoratePruningStrategy(evaluator.getPruningStrategy(), 
-				(node) -> !node.isLocked()) ;
+
+		PruningStrategy pruningStrategy = evaluator
+				.getPruningStrategy()
+				.modify()
+				.and(PredicateStrategyType.PRUNE_CANDIDATE,
+						(node) -> !node.isLocked()).commit();
 
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
-				networkData, pruningStrategy,
-				evaluator.getScoringStrategy(),
+				networkData, pruningStrategy, evaluator.getScoringStrategy(),
 				new OptimizerContextBuilderImpl(request),
 				createLockedPredicate(lockedTargets));
 
