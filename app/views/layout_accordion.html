@@ -31,6 +31,16 @@
             <span class="fa fa-road map-layer-spinner map-layer-spinner-road_segments"></span>
           </button>
         </p>
+        <p data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Measuring Stick">
+          <button class="btn" ng-class="{'btn-success': measuringStickEnabled, 'btn-primary': !measuringStickEnabled}" ng-click="toggleMeasuringStick()" style="width: 39px">
+            <span class="fa fa-arrows-h"></span>
+          </button>
+        </p>
+      </div>
+      <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="measuredDistance">
+        <div class="panel-heading">
+          Measured distance: {{ measuredDistance | number }} m
+        </div>
       </div>
     </div>
 

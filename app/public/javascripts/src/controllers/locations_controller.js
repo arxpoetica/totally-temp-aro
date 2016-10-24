@@ -469,4 +469,41 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     })
     swal({ title: '', text: `gid: ${feature.getProperty('gid')} tlid: ${feature.getProperty('tlid')}`, type: 'info' })
   })
+
+  var latestOverlay = null
+  var drawingManager = new google.maps.drawing.DrawingManager({
+    drawingMode: google.maps.drawing.OverlayType.POLYLINE,
+    drawingControl: false
+  })
+
+  drawingManager.addListener('overlaycomplete', (e) => {
+    removeLatestOverlay()
+    latestOverlay = e.overlay
+
+    var points = e.overlay.getPath()
+    var total = 0
+    var prev = null
+    points.forEach((point) => {
+      if (prev) {
+        total += google.maps.geometry.spherical.computeDistanceBetween(prev, point)
+      }
+      prev = point
+    })
+    $scope.measuredDistance = total
+    if (!$scope.$$phase) { $scope.$apply() } // refresh UI
+  })
+
+  function removeLatestOverlay () {
+    latestOverlay && latestOverlay.setMap(null)
+    latestOverlay = null
+  }
+
+  $scope.toggleMeasuringStick = () => {
+    var current = drawingManager.getMap()
+    drawingManager.setMap(current ? null : map)
+    map.setOptions({ draggable: !current })
+    removeLatestOverlay()
+    $scope.measuringStickEnabled = !current
+    if (current) $scope.measuredDistance = null
+  }
 }])

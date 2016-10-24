@@ -459,6 +459,12 @@ footer nav {
   right: 10px;
 }
 
+#measuring-stick-result {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+}
+
 
 /* from bootstrap, but applied at any screen size */
 .table-responsive {
