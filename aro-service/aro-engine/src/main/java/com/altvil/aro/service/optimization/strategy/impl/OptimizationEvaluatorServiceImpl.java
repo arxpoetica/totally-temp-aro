@@ -26,10 +26,10 @@ import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
 import com.altvil.aro.service.optimize.OptimizedNetwork;
-import com.altvil.aro.service.optimize.model.GeneratingNode;
-import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
+import com.altvil.aro.service.optimize.spi.PredicateStrategyType;
 import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.optimize.spi.ScoringStrategy;
+import com.altvil.aro.service.optimize.spi.impl.DefaultPruningStrategy;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.enumerations.OptimizationType;
 
@@ -111,33 +111,7 @@ public class OptimizationEvaluatorServiceImpl implements
 
 	}
 
-	private class DefaultPruningStrategy implements PruningStrategy {
-
-		private SpiOptimizationEvaluator spiOptimizationStrategy;
-
-		public DefaultPruningStrategy(
-				SpiOptimizationEvaluator spiOptimizationStrategy) {
-			super();
-			this.spiOptimizationStrategy = spiOptimizationStrategy;
-		}
-
-		@Override
-		public boolean isGeneratingNodeValid(GeneratingNode node) {
-			return true;
-		}
-
-		@Override
-		public boolean isConstraintSatisfied(NetworkAnalysis node) {
-			return false;
-		}
-
-		@Override
-		public boolean isCandidatePlan(OptimizedNetwork network) {
-			return spiOptimizationStrategy.isValid(network);
-		}
-
-	}
-
+	
 	private interface OptimizationStrategyFactory<T extends OptimizationConstraints> {
 		SpiOptimizationEvaluator createOptimizationStrategy(T constraints);
 	}
@@ -269,8 +243,13 @@ public class OptimizationEvaluatorServiceImpl implements
 		}
 		@Override
 		public PruningStrategy getPruningStrategy() {
-			return new DefaultPruningStrategy(
-					createSpiOptimizationStrategy(optimizationConstraints));
+			
+			SpiOptimizationEvaluator evaluator = createSpiOptimizationStrategy(optimizationConstraints) ;
+		
+			return DefaultPruningStrategy.STRATEGY.modify()
+					.and(PredicateStrategyType.CANDIDATE_PLAN,
+							network -> evaluator.isValid(network)).commit() ;
+			
 		}
 
 		@Override
@@ -421,6 +400,7 @@ public class OptimizationEvaluatorServiceImpl implements
 			map.put(OptimizationType.CAPEX,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getFairShareDemand())));
+
 			map.put(OptimizationType.PRUNNING_NPV,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getFairShareDemand())));

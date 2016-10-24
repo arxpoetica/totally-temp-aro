@@ -7,10 +7,13 @@ import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.OptimizationRequest;
-import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
+import com.altvil.aro.service.optimization.constraints.*;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.AlgorithmType;
+import com.altvil.enumerations.AroOptimizationType;
 import com.altvil.enumerations.OptimizationMode;
+import com.altvil.enumerations.OptimizationType;
+
 
 public class RootOptimizationRequest extends OptimizationRequest {
 
@@ -31,20 +34,18 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		private int year = 2015;
 		private Collection<Integer> processingLayers = DEFAULT_PROCESSING_LAYERS;
 
-		private AlgorithmType algorithmType;
+		private AlgorithmType algorithmType = null;
 
 		private Set<LocationEntityType> locationEntities;
 		private FiberNetworkConstraints fiberNetworkConstraints;
-		private OptimizationConstraints optimizationConstraints;
 		private AnalysisSelectionMode locationSelectionMode = AnalysisSelectionMode.SELECTED_LOCATIONS;
 		private OptimizationMode optimizationMode;
 		private boolean usePlanConduit ;
+		private OptimizationType optimizationType;
+		private FinancialConstraints financials;
+		private Double threshold;
+		private boolean forced;
 
-		public Builder setOptimizationConstraints(
-				OptimizationConstraints constraints) {
-			this.optimizationConstraints = constraints;
-			return this;
-		}
 
 		public Builder setAnalysisSelectionMode(
 				AnalysisSelectionMode analysisSelectionMode) {
@@ -100,10 +101,76 @@ public class RootOptimizationRequest extends OptimizationRequest {
 
 		public RootOptimizationRequest build() {
 			return new RootOptimizationRequest(processingLayers,
-					optimizationConstraints, fiberNetworkConstraints,
-					createDataRequest(), optimizationMode, algorithmType, usePlanConduit);
+					getOptimizationConstraints(), fiberNetworkConstraints,
+					createDataRequest(), optimizationMode, inferAlgorithmType(), usePlanConduit);
 		}
-		
+
+		public Builder setForced(boolean forced ){
+			this.forced = forced;
+			return this;
+		}
+
+		private OptimizationConstraints getOptimizationConstraints() {
+
+			boolean forced = isSelectedMode();
+			switch (optimizationType) {
+				case IRR:
+
+					return new IrrConstraints(optimizationType,
+							financials.getYears(), financials.getDiscountRate(),
+							threshold == null ? Double.NaN : threshold, financials.getBudget(),
+							forced);
+				case COVERAGE:
+					return new CoverageConstraints(financials.getYears(),
+							financials.getDiscountRate(),
+							threshold  == null ? Double.NaN : threshold, financials.getBudget(), forced);
+
+				case NPV:
+				case PRUNNING_NPV:
+					return new NpvConstraints(optimizationType,
+							financials.getYears(), financials.getDiscountRate(),
+							threshold  == null ? Double.NaN : threshold , financials.getBudget(), true);
+
+
+				case CAPEX:
+					return new CapexConstraints(OptimizationType.CAPEX,
+							financials.getYears(), financials.getDiscountRate(),
+							threshold  == null ? Double.NaN: threshold, financials.getBudget(), forced);
+				case UNCONSTRAINED:
+				default:
+					return new DefaultConstraints(OptimizationType.UNCONSTRAINED);
+
+			}
+
+		}
+
+		private boolean isSelectedMode() {
+			return locationSelectionMode == AnalysisSelectionMode.SELECTED_LOCATIONS;
+		}
+
+		private AlgorithmType inferAlgorithmType() {
+
+			if (algorithmType != AlgorithmType.DEFAULT) {
+				return algorithmType;
+			}
+
+			if (algorithmType == null) {
+				return AlgorithmType.PLANNING;
+			}
+
+			switch (optimizationType) {
+				case PRUNNING_NPV:
+				case NPV:
+					return AlgorithmType.EXPANDED_ROUTING;
+				case COVERAGE:
+				case IRR:
+					return AlgorithmType.PRUNING;
+				case CAPEX:
+				case UNCONSTRAINED:
+				default:
+					return AlgorithmType.PLANNING;
+			}
+		}
 		
 
 		public Builder setMrc(double mrc) {
@@ -113,6 +180,48 @@ public class RootOptimizationRequest extends OptimizationRequest {
 
 		public Builder setOptimizationMode(OptimizationMode optimizationMode) {
 			this.optimizationMode = optimizationMode;
+			return this;
+		}
+
+		public Builder setOptimizationType(AroOptimizationType optimizationType) {
+			this.optimizationType = toOptimizationType(optimizationType);
+			return this;
+		}
+
+		private OptimizationType toOptimizationType(AroOptimizationType optimizationType) {
+			switch (optimizationType){
+				case UNCONSTRAINED:
+					return OptimizationType.UNCONSTRAINED;
+				case SUPER_LAYER_ROUTING:
+					return OptimizationType.SUPER_LAYER_ROUTING;
+
+				case CAPEX:
+					return OptimizationType.CAPEX;
+
+				case COVERAGE:
+					return OptimizationType.COVERAGE;
+
+				case IRR:
+					return OptimizationType.IRR;
+
+				case NPV:
+					return OptimizationType.NPV;
+				case PRUNNING_NPV:
+					return OptimizationType.PRUNNING_NPV;
+				default:
+					throw new RuntimeException("Unknown AroOptimizationType " + optimizationType);
+			}
+		}
+
+
+		public Builder setThreshold(Double threshold) {
+			this.threshold = threshold;
+			return this;
+		}
+
+
+		public Builder setFinancialConstraints(FinancialConstraints financialConstraints) {
+			this.financials = financialConstraints;
 			return this;
 		}
 

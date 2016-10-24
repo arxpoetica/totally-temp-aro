@@ -33,6 +33,8 @@ public interface GeneratingNode extends AnalysisNode,
 	boolean isValueNode();
 
 	boolean isJunctionNode();
+
+	boolean isLocked();
 	
 	interface Builder {
 		
