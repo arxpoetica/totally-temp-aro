@@ -112,20 +112,18 @@ public class RootOptimizationRequest extends OptimizationRequest {
 
 		private OptimizationConstraints getOptimizationConstraints() {
 
+			boolean forced = isSelectedMode();
 			switch (optimizationType) {
-
 				case IRR:
+
 					return new IrrConstraints(optimizationType,
 							financials.getYears(), financials.getDiscountRate(),
-							threshold == null ? Double.NaN : threshold, financials.getBudget(), false);
-				case PRUNNING_IRR:
-					return new IrrConstraints(OptimizationType.IRR,
-							financials.getYears(), financials.getDiscountRate(),
-							threshold == null ? Double.NaN : threshold, financials.getBudget(), true);
+							threshold == null ? Double.NaN : threshold, financials.getBudget(),
+							forced);
 				case COVERAGE:
 					return new CoverageConstraints(financials.getYears(),
 							financials.getDiscountRate(),
-							threshold  == null ? Double.NaN : threshold, financials.getBudget(), false);
+							threshold  == null ? Double.NaN : threshold, financials.getBudget(), forced);
 
 				case NPV:
 				case PRUNNING_NPV:
@@ -133,17 +131,11 @@ public class RootOptimizationRequest extends OptimizationRequest {
 							financials.getYears(), financials.getDiscountRate(),
 							threshold  == null ? Double.NaN : threshold , financials.getBudget(), true);
 
-				case PRUNNING_CAPEX:
-					return new CapexConstraints(OptimizationType.CAPEX,
-							financials.getYears(), financials.getDiscountRate(),
-							Double.NaN, financials.getBudget(), true);
 
 				case CAPEX:
 					return new CapexConstraints(OptimizationType.CAPEX,
 							financials.getYears(), financials.getDiscountRate(),
-							threshold  == null ? Double.NaN: threshold, financials.getBudget(), false);
-
-
+							threshold  == null ? Double.NaN: threshold, financials.getBudget(), forced);
 				case UNCONSTRAINED:
 				default:
 					return new DefaultConstraints(OptimizationType.UNCONSTRAINED);
@@ -151,6 +143,11 @@ public class RootOptimizationRequest extends OptimizationRequest {
 			}
 
 		}
+
+		private boolean isSelectedMode() {
+			return locationSelectionMode == AnalysisSelectionMode.SELECTED_LOCATIONS;
+		}
+
 		private AlgorithmType inferAlgorithmType() {
 
 			if (algorithmType != AlgorithmType.DEFAULT) {
@@ -167,8 +164,6 @@ public class RootOptimizationRequest extends OptimizationRequest {
 					return AlgorithmType.EXPANDED_ROUTING;
 				case COVERAGE:
 				case IRR:
-				case PRUNNING_CAPEX:
-				case PRUNNING_IRR:
 					return AlgorithmType.PRUNING;
 				case CAPEX:
 				case UNCONSTRAINED:
@@ -208,11 +203,6 @@ public class RootOptimizationRequest extends OptimizationRequest {
 
 				case IRR:
 					return OptimizationType.IRR;
-				case PRUNNING_CAPEX:
-					return OptimizationType.PRUNNING_CAPEX;
-
-				case PRUNNING_IRR:
-					return OptimizationType.PRUNNING_IRR;
 
 				case NPV:
 					return OptimizationType.NPV;
