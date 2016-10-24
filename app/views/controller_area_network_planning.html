@@ -1,15 +1,8 @@
 <div id="area_network_planning_controller">
   <p><strong>Optimization Type</strong></p>
-  <select ng-model="optimizationType" class="form-control">
-    <option value="CAPEX">Full Coverage</option>
-    <option ng-hide="optimizationMode === 'targets'" value="MAX_IRR">Maximum IRR</option>
-    <option ng-hide="optimizationMode === 'targets'" value="IRR">Budget</option>
-    <option ng-hide="optimizationMode === 'targets'" value="BUDGET_IRR">IRR Target</option>
-    <!--
-    <option ng-hide="optimizationMode === 'targets'" value="TARGET_IRR">IRR Target</option>
-
-    <option ng-hide="optimizationMode === 'targets'" value="BUDGET_IRR">Budget and IRR Floor</option>
-    -->
+  <select class="form-control"
+    ng-model="optimizationType"
+    ng-options="item.id as item.label for item in optimizationTypeOptions">
   </select>
   <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
     <br>
