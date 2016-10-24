@@ -13,6 +13,7 @@ public enum AroOptimizationType {
 
 	IRR,
 	PRUNNING_CAPEX,
+	PRUNNING_IRR,
 
 	NPV,
  	PRUNNING_NPV,

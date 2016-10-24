@@ -118,7 +118,10 @@ public class RootOptimizationRequest extends OptimizationRequest {
 					return new IrrConstraints(optimizationType,
 							financials.getYears(), financials.getDiscountRate(),
 							threshold == null ? Double.NaN : threshold, financials.getBudget(), false);
-
+				case PRUNNING_IRR:
+					return new IrrConstraints(OptimizationType.IRR,
+							financials.getYears(), financials.getDiscountRate(),
+							threshold == null ? Double.NaN : threshold, financials.getBudget(), true);
 				case COVERAGE:
 					return new CoverageConstraints(financials.getYears(),
 							financials.getDiscountRate(),
@@ -165,6 +168,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 				case COVERAGE:
 				case IRR:
 				case PRUNNING_CAPEX:
+				case PRUNNING_IRR:
 					return AlgorithmType.PRUNING;
 				case CAPEX:
 				case UNCONSTRAINED:
@@ -206,6 +210,9 @@ public class RootOptimizationRequest extends OptimizationRequest {
 					return OptimizationType.IRR;
 				case PRUNNING_CAPEX:
 					return OptimizationType.PRUNNING_CAPEX;
+
+				case PRUNNING_IRR:
+					return OptimizationType.PRUNNING_IRR;
 
 				case NPV:
 					return OptimizationType.NPV;

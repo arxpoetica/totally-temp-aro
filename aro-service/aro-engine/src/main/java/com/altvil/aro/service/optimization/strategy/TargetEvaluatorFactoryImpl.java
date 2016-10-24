@@ -137,7 +137,7 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
 
 
             double irr = Irr.irr(sum(currentCashFlow, optimizationImprovement.getIncrementalCashFlow()));
-            if( irr < threshold)
+            if( !threshold.isNaN() && irr < threshold)
                 return false;
             setOptimizedNetwork(optimizationImprovement);
             currentCapex += optimizationImprovement.getIncrementalCost();
