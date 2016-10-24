@@ -39,7 +39,7 @@
       </div>
       <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="measuredDistance">
         <div class="panel-heading">
-          Measured distance: {{ measuredDistance | number }} m
+          Measured distance: {{ measuredDistance * 0.000621371 | number: 2 }} mi
         </div>
       </div>
     </div>
