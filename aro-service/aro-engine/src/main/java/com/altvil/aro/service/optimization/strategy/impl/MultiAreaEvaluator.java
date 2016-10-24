@@ -1,28 +1,32 @@
 package com.altvil.aro.service.optimization.strategy.impl;
 
-import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
-import com.altvil.aro.service.optimization.strategy.comparators.OptimizationImprovement;
-import com.altvil.aro.service.optimization.strategy.OptimizationNetworkComparator;
-import com.altvil.aro.service.optimization.strategy.OptimizationTargetEvaluator;
-import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
-import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
-import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
-import com.altvil.aro.service.optimize.OptimizedNetwork;
-import com.altvil.aro.service.optimize.model.GeneratingNode;
-import com.altvil.aro.service.optimize.spi.NetworkAnalysis;
-import com.altvil.aro.service.optimize.spi.PruningStrategy;
-import com.altvil.aro.service.optimize.spi.ScoringStrategy;
-import com.altvil.enumerations.OptimizationType;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toCollection;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
+import com.altvil.aro.service.optimization.strategy.OptimizationNetworkComparator;
+import com.altvil.aro.service.optimization.strategy.OptimizationTargetEvaluator;
+import com.altvil.aro.service.optimization.strategy.comparators.OptimizationImprovement;
+import com.altvil.aro.service.optimization.strategy.spi.PlanAnalysis;
+import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
+import com.altvil.aro.service.optimization.wirecenter.PrunedNetwork;
+import com.altvil.aro.service.optimize.OptimizedNetwork;
+import com.altvil.aro.service.optimize.spi.PruningStrategy;
+import com.altvil.aro.service.optimize.spi.ScoringStrategy;
+import com.altvil.aro.service.optimize.spi.impl.DefaultPruningStrategy;
+import com.altvil.enumerations.OptimizationType;
 
 public class MultiAreaEvaluator implements OptimizationEvaluator {
 
@@ -120,22 +124,7 @@ public class MultiAreaEvaluator implements OptimizationEvaluator {
 
     @Override
     public PruningStrategy getPruningStrategy() {
-        return new PruningStrategy() {
-            @Override
-            public boolean isGeneratingNodeValid(GeneratingNode node) {
-                return true;
-            }
-
-            @Override
-            public boolean isConstraintSatisfied(NetworkAnalysis node) {
-                return false;
-            }
-
-            @Override
-            public boolean isCandidatePlan(OptimizedNetwork network) {
-                return true;
-            }
-        };
+        return DefaultPruningStrategy.STRATEGY ;
     }
 
     @Override

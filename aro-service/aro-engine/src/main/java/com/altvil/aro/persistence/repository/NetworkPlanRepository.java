@@ -1,8 +1,8 @@
 package com.altvil.aro.persistence.repository;
 
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -162,7 +162,7 @@ public interface NetworkPlanRepository extends
 
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
 			"WHERE pt.plan_id = :planId", nativeQuery = true)
-	List<BigInteger> querySelectedLocationsByPlanId(@Param("planId") long planId);
+	Set<Number> querySelectedLocationsByPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n"
 			+ "SELECT\n"

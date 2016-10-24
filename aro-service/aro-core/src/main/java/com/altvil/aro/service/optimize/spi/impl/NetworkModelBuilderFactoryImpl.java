@@ -22,13 +22,11 @@ import com.altvil.aro.service.plan.impl.LcrContextImpl;
 public class NetworkModelBuilderFactoryImpl implements
 		NetworkModelBuilderFactory {
 
-	
 	public NetworkModelBuilderFactoryImpl() {
 		super();
 	}
 
 	@Override
-
 	public NetworkModelBuilder create(NetworkData networkData,
 			OptimizerContextBuilder constraintBuilder) {
 		return new NetworkModelBuilderImpl(networkData, constraintBuilder);
@@ -52,11 +50,14 @@ public class NetworkModelBuilderFactoryImpl implements
 			if (rejectedLocations.size() == 0) {
 				return networkData;
 			}
-			
+
 			NetworkData nd = new NetworkData();
 			nd.setFiberSources(networkData.getFiberSources());
 			nd.setRoadEdges(networkData.getRoadEdges());
-			nd.setRoadLocations(new NetworkAssignmentModelFactory(networkData.getRoadLocations(), na -> !rejectedLocations.contains(na.getSource().getObjectId())).build());
+			nd.setRoadLocations(
+					networkData.getRoadLocations()
+							.filter(na -> !rejectedLocations.contains(na.getSource().getObjectId()))
+			);
 			nd.setCableConduitEdges(networkData.getCableConduitEdges());
 
 			return nd;
@@ -83,9 +84,11 @@ public class NetworkModelBuilderFactoryImpl implements
 							createNetworkData(rejectedLocations),
 							ctx.getGraphBuilderContext());
 
-			return appCtx
-					.getBean(CoreLeastCostRoutingService.class)
-					.computeNetworkModel(networkModel, LcrContextImpl.create(ctx.getPricingModel(), ctx.getFtthThreshholds()));
+			return appCtx.getBean(CoreLeastCostRoutingService.class)
+					.computeNetworkModel(
+							networkModel,
+							LcrContextImpl.create(ctx.getPricingModel(),
+									ctx.getFtthThreshholds()));
 
 		}
 	}

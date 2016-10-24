@@ -7,5 +7,6 @@ public interface OptimizationConstraints {
 	OptimizationType getOptimizationType();
 	int getYears() ;
 	double getDiscountRate() ;
+	boolean isForced();
 
 }

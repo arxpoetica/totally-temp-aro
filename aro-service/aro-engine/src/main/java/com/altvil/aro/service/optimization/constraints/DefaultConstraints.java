@@ -5,7 +5,7 @@ import com.altvil.enumerations.OptimizationType;
 public class DefaultConstraints extends AbstractOptimizationConstraint {
 
 	public DefaultConstraints(OptimizationType optimizationType) {
-		super(optimizationType, 15, 0.06);
+		super(optimizationType, 15, 0.06, false);
 	}
 
 }

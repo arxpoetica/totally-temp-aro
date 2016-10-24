@@ -5,8 +5,8 @@ import com.altvil.enumerations.OptimizationType;
 public class IrrConstraints extends ThresholdBudgetConstraint {
 
 	public IrrConstraints(OptimizationType optimizationType, int years,
-			double discountRate, double threshhold, double capex) {
-		super(optimizationType, years, discountRate, threshhold, capex);
+			double discountRate, double threshhold, double capex, boolean forced) {
+		super(optimizationType, years, discountRate, threshhold, capex, forced);
 	}	
 
 }

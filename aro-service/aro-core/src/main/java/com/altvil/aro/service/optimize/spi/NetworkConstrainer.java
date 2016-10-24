@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,28 +26,35 @@ public class NetworkConstrainer {
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkConstrainer.class.getName());
 
-	//private NetworkModelBuilder networkModelBuilder;
 	private PruningStrategy pruningStrategy;
 	private NetworkAnalysis networkAnalysis;
 
-	private NetworkConstrainer(NetworkModelBuilder networkModelBuilder,
-			PruningStrategy pruningStrategy, NetworkAnalysis networkAnalysis) {
+	private NetworkConstrainer(PruningStrategy pruningStrategy, NetworkAnalysis networkAnalysis) {
 		super();
-		//this.networkModelBuilder = networkModelBuilder;
 		this.pruningStrategy = pruningStrategy;
 		this.networkAnalysis = networkAnalysis;
 
 	}
 
 	public static NetworkConstrainer create(
-			NetworkModelBuilder networkModelBuilder,
 			PruningStrategy pruningStrategy, NetworkAnalysis networkAnalysis) {
-		return new NetworkConstrainer(networkModelBuilder, pruningStrategy,
+		return new NetworkConstrainer(pruningStrategy,
 				networkAnalysis);
 	}
 
 	public List<OptimizedNetwork> constrainNetwork() {
 		ResultAssembler resultAssembler = new ResultAssembler();
+
+		Predicate<OptimizedNetwork> candiatePlanPredicate = pruningStrategy
+				.getPredicate(PredicateStrategyType.CANDIDATE_PLAN);
+		
+		Predicate<NetworkAnalysis>  constraintSatisfiedPredicate = pruningStrategy
+		.getPredicate(PredicateStrategyType.CONSTRAINT_STATISFIED);
+
+		Predicate<GeneratingNode> pruneCandidatePredicate = pruningStrategy
+				.getPredicate(PredicateStrategyType.PRUNE_CANDIDATE);
+
+
 		if (networkAnalysis != null) {
 			{
 				// Remove nodes that do not satisfy the generating node
@@ -56,8 +64,8 @@ public class NetworkConstrainer {
 				GeneratingNode node;
 
 				while ((node = networkAnalysis
-						.getMinimumNode(gn -> !pruningStrategy
-								.isGeneratingNodeValid(gn))) != null) {
+						.getMinimumNode(pruningStrategy
+								.getPredicate(PredicateStrategyType.INITIAL_PRUNE_CANDIDATE))) != null) {
 					node.remove();
 				}
 			}
@@ -87,8 +95,7 @@ public class NetworkConstrainer {
 							.getLocations().isEmpty();
 					if (isAnalysisEmpty) {
 						optimized = true;
-					} else if (pruningStrategy
-							.isConstraintSatisfied(networkAnalysis)) {
+					} else if (constraintSatisfiedPredicate.test(networkAnalysis)) {
 						if (resultAssembler.isEmpty()) {
 							resultAssembler.add(optimizedNetwork);
 						}
@@ -100,8 +107,7 @@ public class NetworkConstrainer {
 						// Filter out all other types of optimizations until the
 						// persistence layer can be changed
 
-						if (pruningStrategy
-								.isCandidatePlan(optimizedNetwork)
+						if (candiatePlanPredicate.test(optimizedNetwork)
 								&& verifyDifferentNetwork
 										.isDifferent(optimizedNetwork)) {
 							resultAssembler.add(optimizedNetwork);
@@ -116,9 +122,9 @@ public class NetworkConstrainer {
 						// TODO after adding support of multiple fiber sources.
 						// maybe
 						// USE GeneratingNode::isValueNode or get rid of it
+
 						GeneratingNode node = networkAnalysis
-								.getMinimumNode(generatingNode -> !(generatingNode
-										.isSourceEquipment()));
+								.getMinimumNode(pruneCandidatePredicate);
 
 						if (node == null) {
 							optimized = true;
@@ -147,7 +153,6 @@ public class NetworkConstrainer {
 
 	private static class ResultAssembler {
 
-		
 		private List<OptimizedNetwork> result = new ArrayList<OptimizedNetwork>();
 
 		public ResultAssembler() {

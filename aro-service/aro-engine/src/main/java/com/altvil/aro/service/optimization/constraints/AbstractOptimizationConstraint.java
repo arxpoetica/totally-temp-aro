@@ -7,14 +7,16 @@ public class AbstractOptimizationConstraint implements OptimizationConstraints {
 	private OptimizationType optimizationType ;
 	private int years ;
 	private double discountRate ;
-	
-	
+	private boolean forced;
+
+
 	public AbstractOptimizationConstraint(OptimizationType optimizationType,
-			int years, double discountRate) {
+										  int years, double discountRate, boolean forced) {
 		super();
 		this.optimizationType = optimizationType;
 		this.years = years;
 		this.discountRate = discountRate;
+		this.forced = forced;
 	}
 
 	@Override
@@ -31,7 +33,10 @@ public class AbstractOptimizationConstraint implements OptimizationConstraints {
 	public double getDiscountRate() {
 		return discountRate;
 	}
-	
-	
+
+	@Override
+	public boolean isForced() {
+		return forced;
+	}
 
 }
