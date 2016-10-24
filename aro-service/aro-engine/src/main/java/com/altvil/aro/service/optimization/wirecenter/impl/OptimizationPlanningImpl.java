@@ -151,11 +151,15 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				.collect(Collectors.toSet());
 
 		return (edgeAssignment) -> {
-			if (edgeAssignment instanceof BulkFiberTerminal) {
-				BulkFiberTerminal bft = (BulkFiberTerminal) edgeAssignment;
+			if(edgeAssignment == null)
+				return false;
+			AroEntity aroEntity = edgeAssignment.getAroEntity();
+
+			if (aroEntity instanceof BulkFiberTerminal) {
+				BulkFiberTerminal bft = (BulkFiberTerminal) aroEntity;
 				return lockedLocationIds.contains(bft.getLocationEntity()
 						.getObjectId());
-			} else if (edgeAssignment instanceof FDTEquipment) {
+			} else if (aroEntity instanceof FDTEquipment) {
 				FDTEquipment fdt = (FDTEquipment) edgeAssignment.getAroEntity();
 				for (LocationDropAssignment a : fdt.getDropAssignments()) {
 					if (lockedLocationIds.contains(a.getLocationEntity()
@@ -175,11 +179,11 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 		// OptimizationConstraint
 
 		boolean isLockedPrunning = request.getOptimizationConstraints()
-				.getOptimizationType() == OptimizationType.PRUNNING_CAPEX;
+				.isForced();
 
 		NetworkDataRequest networkDataRequest = request.getNetworkDataRequest();
 
-		NetworkData networkData = null;
+		NetworkData networkData;
 
 		Collection<NetworkAssignment> lockedTargets = Collections.emptySet();
 
@@ -208,7 +212,8 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				.getPruningStrategy()
 				.modify()
 				.and(PredicateStrategyType.PRUNE_CANDIDATE,
-						(node) -> !node.isLocked()).commit();
+						(node) -> !node.isLocked()
+				).commit();
 
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
 				networkData, pruningStrategy, evaluator.getScoringStrategy(),

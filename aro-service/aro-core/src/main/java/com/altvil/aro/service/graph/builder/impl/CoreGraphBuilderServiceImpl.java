@@ -86,11 +86,6 @@ public class CoreGraphBuilderServiceImpl implements
 
 	@Override
 	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,GraphBuilderContext ctx) {
-		return create(createRoadEdgeInfoItr(networkData, ctx), networkData.getRoadLocations().getAssignments(SELECTED), ctx);
-	}
-
-	@Override
-	public GraphNetworkModel createGraphNetworkModel(NetworkData networkData,GraphBuilderContext ctx, NetworkAssignmentModel.SelectionFilter selectionFilter) {
 		return create(createRoadEdgeInfoItr(networkData, ctx), networkData.getRoadLocations().getDefaultAssignments(), ctx);
 	}
 

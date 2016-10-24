@@ -44,6 +44,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		private OptimizationType optimizationType;
 		private FinancialConstraints financials;
 		private Double threshold;
+		private boolean forced;
 
 
 		public Builder setAnalysisSelectionMode(
@@ -104,6 +105,11 @@ public class RootOptimizationRequest extends OptimizationRequest {
 					createDataRequest(), optimizationMode, inferAlgorithmType(), usePlanConduit);
 		}
 
+		public Builder setForced(boolean forced ){
+			this.forced = forced;
+			return this;
+		}
+
 		private OptimizationConstraints getOptimizationConstraints() {
 
 			switch (optimizationType) {
@@ -111,24 +117,29 @@ public class RootOptimizationRequest extends OptimizationRequest {
 				case IRR:
 					return new IrrConstraints(optimizationType,
 							financials.getYears(), financials.getDiscountRate(),
-							threshold == null ? Double.NaN : threshold, financials.getBudget());
+							threshold == null ? Double.NaN : threshold, financials.getBudget(), false);
 
 				case COVERAGE:
 					return new CoverageConstraints(financials.getYears(),
 							financials.getDiscountRate(),
-							threshold  == null ? Double.NaN : threshold, financials.getBudget());
+							threshold  == null ? Double.NaN : threshold, financials.getBudget(), false);
 
 				case NPV:
-
 				case PRUNNING_NPV:
 					return new NpvConstraints(optimizationType,
 							financials.getYears(), financials.getDiscountRate(),
-							threshold  == null ? Double.NaN : threshold , financials.getBudget());
+							threshold  == null ? Double.NaN : threshold , financials.getBudget(), true);
+
+				case PRUNNING_CAPEX:
+					return new CapexConstraints(OptimizationType.CAPEX,
+							financials.getYears(), financials.getDiscountRate(),
+							Double.NaN, financials.getBudget(), true);
 
 				case CAPEX:
 					return new CapexConstraints(OptimizationType.CAPEX,
 							financials.getYears(), financials.getDiscountRate(),
-							Double.NaN, financials.getBudget());
+							threshold  == null ? Double.NaN: threshold, financials.getBudget(), false);
+
 
 				case UNCONSTRAINED:
 				default:

@@ -12,6 +12,14 @@ public class EdgeData implements Serializable {
 	private Collection<RoadEdge> roadEdges;
 	private Collection<CableConduitEdge> cableConduitEdges;
 
+
+	public EdgeData(){}
+
+	protected EdgeData(Collection<RoadEdge> roadEdges, Collection<CableConduitEdge> cableConduitEdges) {
+		this.roadEdges = roadEdges;
+		this.cableConduitEdges = cableConduitEdges;
+	}
+
 	public Collection<RoadEdge> getRoadEdges() {
 		return roadEdges;
 	}

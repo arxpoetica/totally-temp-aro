@@ -37,7 +37,7 @@ public class DefaultGeneratingNode implements GeneratingNode {
 	private int recalcMode = 0;
 	private double score;
 	private boolean locked = false;
-	private boolean nodeLocked = false;
+	private final boolean nodeLocked;
 
 	protected DefaultGeneratingNode(AnalysisContext ctx,
 			EquipmentAssignment equipmentAssigment,
@@ -50,14 +50,9 @@ public class DefaultGeneratingNode implements GeneratingNode {
 		this.parent = parent;
 		this.children = children;
 		this.directCoverage = equipmentAssigment.getDirectCoverage(ctx);
-		this.nodeLocked = isNodeLocked(equipmentAssigment);
+		this.nodeLocked =  ctx.getLockedPredicate()
+				.test(equipmentAssigment.getGraphAssignment());
 
-		// log.info("direct coverage = " + directCoverage.getDemand());
-
-	}
-
-	private boolean isNodeLocked(EquipmentAssignment equipment) {
-		return ctx.getLockedPredicate().test(equipment.getGraphAssignment());
 	}
 
 	@Override

@@ -162,7 +162,7 @@ public interface NetworkPlanRepository extends
 
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
 			"WHERE pt.plan_id = :planId", nativeQuery = true)
-	Set<Long> querySelectedLocationsByPlanId(@Param("planId") long planId);
+	Set<Number> querySelectedLocationsByPlanId(@Param("planId") long planId);
 	
 	@Query(value = "with linked_locations as (\n"
 			+ "SELECT\n"

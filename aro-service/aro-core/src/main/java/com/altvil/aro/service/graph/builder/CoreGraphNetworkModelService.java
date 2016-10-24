@@ -19,8 +19,5 @@ public interface CoreGraphNetworkModelService {
 
 	GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
 											  GraphBuilderContext ctx);
-	
-	GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
-											  GraphBuilderContext ctx, NetworkAssignmentModel.SelectionFilter selectionFilter);
 
 }

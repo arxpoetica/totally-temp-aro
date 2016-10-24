@@ -143,29 +143,12 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	 */
 	@Override
 	public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
-			boolean isFilteringRoadLocationDemandsBySelection,
 			Set<LocationEntityType> selectedTypes, int serviceAreaId,
 			long planId, int year, double mrc, ServiceAreaContext ctx) {
 
-		Map<Long, CompetitiveLocationDemandMapping> locationDemand = queryFiberDemand(
+		return queryFiberDemand(
 				serviceAreaId, year, mrc, selectedTypes, ctx)
 				.getDemandMapping();
-		if (isFilteringRoadLocationDemandsBySelection) {
-			Set<Long> selectedRoadLocationIds = planRepository
-					.querySelectedLocationsByPlanId(planId);
-
-			return locationDemand
-					.entrySet()
-					.stream()
-					.filter(entry -> selectedRoadLocationIds.contains(entry
-							.getKey()))
-					.collect(
-							Collectors.toMap(Map.Entry::getKey,
-									Map.Entry::getValue));
-		} else {
-			return locationDemand;
-		}
-
 	}
 
 	private ServiceAreaLocationDemand queryFiberDemand(int serviceAreaId,
@@ -364,11 +347,14 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.altvil.aro.service.network.impl.NetworkQueryService#
-	 * selectedRoadLocationIds(long, java.util.Map)
+	 * getSelectedRoadLocationIds(long, java.util.Map)
 	 */
 	@Override
-	public Set<Long> selectedRoadLocationIds(long planId) {
-		return planRepository.querySelectedLocationsByPlanId(planId);
+	public Set<Long> getSelectedRoadLocationIds(long planId) {
+		return planRepository.querySelectedLocationsByPlanId(planId)
+				.stream()
+				.map(Number::longValue)
+				.collect(Collectors.toSet());
 	}
 
 	private LocationEntityType toLocationEntityType(int entityTypeCode) {

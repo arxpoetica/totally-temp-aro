@@ -54,9 +54,10 @@ public class NetworkModelBuilderFactoryImpl implements
 			NetworkData nd = new NetworkData();
 			nd.setFiberSources(networkData.getFiberSources());
 			nd.setRoadEdges(networkData.getRoadEdges());
-			nd.setRoadLocations(new NetworkAssignmentModelFactory(networkData
-					.getRoadLocations(), na -> !rejectedLocations.contains(na
-					.getSource().getObjectId())).build());
+			nd.setRoadLocations(
+					networkData.getRoadLocations()
+							.filter(na -> !rejectedLocations.contains(na.getSource().getObjectId()))
+			);
 			nd.setCableConduitEdges(networkData.getCableConduitEdges());
 
 			return nd;

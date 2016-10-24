@@ -26,23 +26,19 @@ public class NetworkConstrainer {
 	private static final Logger log = LoggerFactory
 			.getLogger(NetworkConstrainer.class.getName());
 
-	// private NetworkModelBuilder networkModelBuilder;
 	private PruningStrategy pruningStrategy;
 	private NetworkAnalysis networkAnalysis;
 
-	private NetworkConstrainer(NetworkModelBuilder networkModelBuilder,
-			PruningStrategy pruningStrategy, NetworkAnalysis networkAnalysis) {
+	private NetworkConstrainer(PruningStrategy pruningStrategy, NetworkAnalysis networkAnalysis) {
 		super();
-		// this.networkModelBuilder = networkModelBuilder;
 		this.pruningStrategy = pruningStrategy;
 		this.networkAnalysis = networkAnalysis;
 
 	}
 
 	public static NetworkConstrainer create(
-			NetworkModelBuilder networkModelBuilder,
 			PruningStrategy pruningStrategy, NetworkAnalysis networkAnalysis) {
-		return new NetworkConstrainer(networkModelBuilder, pruningStrategy,
+		return new NetworkConstrainer(pruningStrategy,
 				networkAnalysis);
 	}
 
@@ -54,6 +50,10 @@ public class NetworkConstrainer {
 		
 		Predicate<NetworkAnalysis>  constraintSatisfiedPredicate = pruningStrategy
 		.getPredicate(PredicateStrategyType.CONSTRAINT_STATISFIED);
+
+		Predicate<GeneratingNode> pruneCandidatePredicate = pruningStrategy
+				.getPredicate(PredicateStrategyType.PRUNE_CANDIDATE);
+
 
 		if (networkAnalysis != null) {
 			{
@@ -122,9 +122,9 @@ public class NetworkConstrainer {
 						// TODO after adding support of multiple fiber sources.
 						// maybe
 						// USE GeneratingNode::isValueNode or get rid of it
+
 						GeneratingNode node = networkAnalysis
-								.getMinimumNode(generatingNode -> !(generatingNode
-										.isSourceEquipment()));
+								.getMinimumNode(pruneCandidatePredicate);
 
 						if (node == null) {
 							optimized = true;

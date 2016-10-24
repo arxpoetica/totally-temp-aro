@@ -12,7 +12,7 @@ public class DefaultPruningStrategy implements PruningStrategy {
 	public static final PruningStrategy STRATEGY = new ModifierImpl(
 			new HashMap<>())
 			.replace(PredicateStrategyType.INITIAL_PRUNE_CANDIDATE,
-					(node) -> true)
+					(node) -> false)
 			.replace(PredicateStrategyType.PRUNE_CANDIDATE,
 					(node) -> !node.isSourceEquipment())
 			.replace(PredicateStrategyType.CONSTRAINT_STATISFIED,

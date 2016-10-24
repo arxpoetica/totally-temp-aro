@@ -131,7 +131,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 		}
 
 		private Set<Long> getSelectedLocationIds() {
-			return networkDataDAO.selectedRoadLocationIds(request.getPlanId());
+			return networkDataDAO.getSelectedRoadLocationIds(request.getPlanId());
 		}
 
 		private Function<Long, NetworkAssignment> createTransform(
@@ -195,7 +195,7 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		public Transformer createTransformer(
 				AnalysisSelectionMode analysisMode, Set<SelectionFilter> filters) {
-			return new TransformContext(map.get(analysisMode).get(filters));
+			return new TransformContext(map.get(analysisMode).get(filters), analysisMode);
 		}
 
 		private static class TransformContext implements Transformer {
@@ -210,9 +210,10 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 			private Map<SelectionFilter, Collection<NetworkAssignment>> map = new EnumMap<>(
 					SelectionFilter.class);
 
-			public TransformContext(Strategy strategy) {
+			public TransformContext(Strategy strategy, AnalysisSelectionMode analysisMode) {
 				super();
 				this.strategy = strategy;
+				this.analysisSelectionMode = analysisMode;
 			}
 
 			@Override
@@ -327,7 +328,6 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 
 		return networkDataDAO
 				.queryLocationDemand(
-						networkConfiguration.getSelectionMode() == AnalysisSelectionMode.SELECTED_LOCATIONS,
 						networkConfiguration.getLocationEntities(),
 						networkConfiguration.getServiceAreaId().get(),
 						networkConfiguration.getPlanId(),

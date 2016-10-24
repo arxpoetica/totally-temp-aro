@@ -2,6 +2,9 @@ package com.altvil.aro.service.graph.model;
 
 import java.util.Collection;
 import java.util.Collections;
+
+import com.altvil.interfaces.CableConduitEdge;
+import com.altvil.interfaces.RoadEdge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
@@ -22,7 +25,8 @@ public class NetworkData extends EdgeData {
 
 	public NetworkData(){}
 
-	private NetworkData(NetworkAssignmentModel roadLocations, CompetitiveDemandMapping competitiveDemandMapping, Collection<NetworkAssignment> fiberSources) {
+	private NetworkData(NetworkAssignmentModel roadLocations, CompetitiveDemandMapping competitiveDemandMapping, Collection<NetworkAssignment> fiberSources, Collection<RoadEdge> roadEdges, Collection<CableConduitEdge> cableConduitEdges) {
+		super(roadEdges, cableConduitEdges);
 		this.roadLocations = roadLocations;
 		this.competitiveDemandMapping = competitiveDemandMapping;
 		this.fiberSources = fiberSources;
@@ -60,7 +64,7 @@ public class NetworkData extends EdgeData {
 		
     public NetworkData create(NetworkAssignmentModel.SelectionFilter defaultFilter){
 
-		return new NetworkData(roadLocations.create(defaultFilter), competitiveDemandMapping, fiberSources);
+		return new NetworkData(roadLocations.create(defaultFilter), competitiveDemandMapping, fiberSources, getRoadEdges(), getCableConduitEdges());
 	}
 
 	public String toString() {

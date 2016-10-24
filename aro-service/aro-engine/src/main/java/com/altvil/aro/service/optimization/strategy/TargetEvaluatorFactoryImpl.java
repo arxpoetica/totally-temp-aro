@@ -101,7 +101,7 @@ public class TargetEvaluatorFactoryImpl implements TargetEvaluatorFactory{
             setOptimizedNetwork(optImprovement);
             currentCapex += optImprovement.getIncrementalCost();
             currentCoverage += optImprovement.getIncrementalBeneift();
-            return currentCoverage >= threshold;
+            return threshold.isNaN() || currentCoverage >= threshold;
         }
     }
 

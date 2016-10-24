@@ -75,8 +75,7 @@ public class FTTHOptimizerServiceImpl implements FTTHOptimizerService {
 						ctxBuilder.createOptimizerContext(appCtx),
 						scoringStrategy, lockedPredicate);
 
-		return NetworkConstrainer.create(networkModelBuilder, pruningStrategy,
-				networkAnalysis);
+		return NetworkConstrainer.create(pruningStrategy,networkAnalysis);
 	}
 
 

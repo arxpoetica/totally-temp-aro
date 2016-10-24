@@ -400,6 +400,7 @@ public class OptimizationEvaluatorServiceImpl implements
 			map.put(OptimizationType.CAPEX,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getFairShareDemand())));
+
 			map.put(OptimizationType.PRUNNING_NPV,
 					(node) -> -(divide(node.getCapex(), node.getFiberCoverage()
 							.getFairShareDemand())));

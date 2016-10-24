@@ -15,7 +15,6 @@ import com.altvil.interfaces.NetworkAssignment;
 public interface NetworkQueryService {
 
 	public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
-			boolean isFilteringRoadLocationDemandsBySelection,
 			Set<LocationEntityType> selectedTypes, int serviceAreaId,
 			long planId, int year, double mrc, ServiceAreaContext ctx);
 
@@ -28,7 +27,7 @@ public interface NetworkQueryService {
 	public ServiceAreaRoadEdges getRoadEdges(int serviceAreaId,
 			ServiceAreaContext ctx);
 
-	public Set<Long> selectedRoadLocationIds(long planId);
+	public Set<Long> getSelectedRoadLocationIds(long planId);
 
 	public Collection<CableConduitEdge> queryPlanConditEdges(long planid);
 
