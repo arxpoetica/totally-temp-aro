@@ -15,6 +15,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   }
   // --
 
+  $scope.entityTypes = [
+    { id: 'optimizeSMB', value: 'SMB' },
+    { id: 'optimizeMedium', value: 'Mid-tier' },
+    { id: 'optimizeLarge', value: 'Large Enterprise' },
+    { id: 'optimizeHouseholds', value: 'Residential' },
+    { id: 'optimizeTowers', value: 'Cell Sites' }
+  ]
+  $scope.entityTypesTargeted = {}
+
   $scope.calculating = false
 
   $scope.optimizeHouseholds = true
@@ -45,6 +54,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+
+    $scope.entityTypes.forEach((entity) => {
+      $scope.entityTypesTargeted[entity.id] = true
+    })
   })
 
   $scope.irrThresholdRangeChanged = () => {
@@ -80,6 +93,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.run = () => {
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
+
+    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+      scope = $scope.entityTypesTargeted
+    }
 
     if (scope.optimizeHouseholds) locationTypes.push('household')
     if (scope.optimizeBusinesses) locationTypes.push('businesses')
