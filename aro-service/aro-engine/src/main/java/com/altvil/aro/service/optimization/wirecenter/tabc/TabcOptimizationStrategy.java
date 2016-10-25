@@ -1,9 +1,8 @@
 package com.altvil.aro.service.optimization.wirecenter.tabc;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
@@ -13,7 +12,17 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationServ
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.plan.CoreLeastCostRoutingService.LcrContext;
+import com.altvil.aro.service.plan.GeneratedFiberRoute;
+import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
+import com.altvil.interfaces.RoadLocation;
+import com.altvil.utils.GeometryUtil;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.prep.PreparedGeometry;
+import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
+import org.opengis.referencing.operation.MathTransform;
 
 public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 
@@ -57,7 +66,26 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 
 	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
 			CompositeNetworkModel network, double bufferDistance) {
-		return null;
+		Collection<LineString> geometries = network.getNetworkModels().stream()
+				.map(NetworkModel::getCentralOfficeFeederFiber)
+				.map(GeneratedFiberRoute::getEdges)
+				.flatMap(Collection::stream)
+				.map(geoSegmentAroEdge -> (LineString) geoSegmentAroEdge.getValue().getLineString())
+				.collect(Collectors.toList());
+		MultiLineString routeGeom= GeometryUtil.createMultiLineString(geometries);
+		MathTransform transform = GeometryUtil.getGeographyTransform(routeGeom.getCentroid());
+		MultiLineString routeGeography = GeometryUtil.transformGeometry(transform, routeGeom);
+
+		PreparedGeometry preparedRouteBuffer = PreparedGeometryFactory.prepare(routeGeography.buffer(bufferDistance));
+
+		Set<NetworkAssignment> assginmentsWithinDistance = networkData.getRoadLocations().getDefaultAssignments()
+				.stream()
+				.filter(assignment -> preparedRouteBuffer.contains(GeometryUtil.transformGeometry(transform, assignment.getDomain().getLocationPoint())))
+				.collect(Collectors.toSet());
+
+		return assginmentsWithinDistance::contains;
+
+
 	}
 
 	
