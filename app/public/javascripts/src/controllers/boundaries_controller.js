@@ -21,9 +21,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.removeAllGeographies = () => {
     regions.removeAllGeographies()
   }
-  $scope.removeAllGeographies = () => {
-    regions.removeAllGeographies()
-  }
   // --
 
   var countySubdivisionsLayer

@@ -13,6 +13,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.removeGeography = (geography) => {
     regions.removeGeography(geography)
   }
+  $scope.removeAllGeographies = () => {
+    regions.removeAllGeographies()
+  }
   // --
 
   $scope.entityTypes = [
