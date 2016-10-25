@@ -57,7 +57,7 @@ BEGIN
     	SELECT
     		gid,
     		carrier AS carrier_name,
-    		(SELECT id FROM aro.carriers WHERE carriers.name = carrier) AS carrier_name,
+    		(SELECT id FROM aro.carriers WHERE carriers.name = carrier) AS carrier_id,
     		cbsa,
     		''' || state_name_upper || ''' AS state,
     		type AS plant_type,
@@ -66,7 +66,7 @@ BEGIN
     		ST_GeometryN(ST_Force_2D(the_geom),1) AS geom
     	FROM ' || scoped_source_table || ';';
 
-    EXECUTE 'UPDATE ' || scoped_table_name || ' SET buffer_geom=ST_Buffer(geog, 152.4)::geometry;';
+    EXECUTE 'UPDATE ' || scoped_table_name || ' SET buffer_geom=ST_Buffer(geog, 200)::geometry;';
 
     RETURN scoped_table_name;
 END;

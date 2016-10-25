@@ -101,14 +101,15 @@ DROP VIEW IF EXISTS client.location_competitors CASCADE ;
 CREATE VIEW client.location_competitors AS
 SELECT
 	l.id AS location_id, 
-	b.entity_type, r.carrier_id,
+	b.entity_type, 
+	r.carrier_id,
 	1.0 AS strength,
-	b.state as state
+	l.state as state
 FROM client.classified_business b
 JOIN aro.locations l
 	ON l.id = b.location_id AND b.state = l.state
-JOIN geotel.buffered_routes r 
-	ON st_contains(r.geom, l.geom)
+JOIN aro.fiber_plant r 
+	ON st_contains(r.buffer_geom, l.geom) AND r.state = l.state
 GROUP BY l.id, b.entity_type, carrier_id, b.state ;
 
 --summarized_competitors_strength
