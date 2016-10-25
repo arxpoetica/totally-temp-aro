@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimization;
 
+import java.util.Map;
+
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
@@ -12,6 +14,7 @@ public class OptimizationRequest {
 	protected NetworkDataRequest networkDataRequest;
 	protected AlgorithmType algorithmType;
 	protected boolean usePlanConduit ;
+	protected Map<String, Object> extendedAttributes ;
 	
 	public OptimizationRequest(OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints,

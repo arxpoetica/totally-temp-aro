@@ -2,6 +2,7 @@ package com.altvil.netop.optimize;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
@@ -24,6 +25,7 @@ public class AroOptimizationPlan {
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
 	private List<Integer> processLayers = new ArrayList<>();
+	private CustomOptimization customOptimization ;
 
 	public long getPlanId() {
 		return planId;
@@ -115,5 +117,15 @@ public class AroOptimizationPlan {
 	public void setUsePlanConduit(boolean usePlanConduit) {
 		this.usePlanConduit = usePlanConduit;
 	}
+
+	public CustomOptimization getCustomOptimization() {
+		return customOptimization;
+	}
+
+	public void setCustomOptimization(CustomOptimization customOptimization) {
+		this.customOptimization = customOptimization;
+	}
+	
+	
 	
 }

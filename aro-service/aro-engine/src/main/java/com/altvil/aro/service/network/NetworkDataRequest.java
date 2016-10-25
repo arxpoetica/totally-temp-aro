@@ -30,7 +30,7 @@ public class NetworkDataRequest {
 		public Modifier updateSelectionFilters(
 				Set<SelectionFilter> selectionFilters) {
 			this.modified.selectionFilters = selectionFilters;
-			return tjis;
+			return this;
 		}
 
 		public Modifier update(AnalysisSelectionMode selectionMode) {

@@ -44,6 +44,8 @@ import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
 
 public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 
+	
+
 	private WirecenterOptimizationRequest wirecenterOptimizationRequest;
 	private Collection<String> strategies;
 
@@ -56,6 +58,13 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 
 	private Collection<GenerationStrategy> generationStrategies;
 	private GenerationTracker generationTracker;
+	
+	
+	public TabcOptimizationStrategy(
+			WirecenterOptimizationRequest wirecenterOptimizationRequest) {
+		super();
+		this.wirecenterOptimizationRequest = wirecenterOptimizationRequest;
+	}
 
 	public void initialize(ApplicationContext appContext) {
 		this.wirecenterOptimizationService = appContext
@@ -225,7 +234,7 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 		private NetworkData getNetworkData(
 				Predicate<NetworkAssignment> predicate) {
 			return networkData.createNetworkData(networkData.getRoadLocations()
-					.filter(predicate).create(SelectionFilter.ALL));
+					.filter(predicate).create(NetworkAssignmentModel.SelectionFilter.ALL));
 		}
 
 	}
