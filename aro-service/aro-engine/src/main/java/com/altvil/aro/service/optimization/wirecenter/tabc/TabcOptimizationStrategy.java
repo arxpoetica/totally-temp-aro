@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.altvil.utils.BufferedGeographyMatcher;
 import org.opengis.referencing.operation.MathTransform;
 import org.springframework.context.ApplicationContext;
 
@@ -111,24 +112,22 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 
 	
 	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
-			CompositeNetworkModel network, double bufferDistance) {
-	
-		Collection<LineString> geometries = network.getNetworkModels().stream()
+			Optional<PlannedNetwork> network, double bufferDistance) {
+		if(!network.isPresent())
+			return (assignment)-> false;
+
+		CompositeNetworkModel plannedNetwork = network.get().getPlannedNetwork();
+		Collection<LineString> geometries = plannedNetwork.getNetworkModels().stream()
 				.map(NetworkModel::getCentralOfficeFeederFiber)
 				.map(GeneratedFiberRoute::getEdges)
 				.flatMap(Collection::stream)
 				.map(geoSegmentAroEdge -> (LineString) geoSegmentAroEdge.getValue().getLineString())
 				.collect(Collectors.toList());
-		
-		MultiLineString routeGeom= GeometryUtil.createMultiLineString(geometries);
-		MathTransform transform = GeometryUtil.getGeographyTransform(routeGeom.getCentroid());
-		MultiLineString routeGeography = GeometryUtil.transformGeometry(transform, routeGeom);
-
-		PreparedGeometry preparedRouteBuffer = PreparedGeometryFactory.prepare(routeGeography.buffer(bufferDistance));
+		BufferedGeographyMatcher matcher = new BufferedGeographyMatcher(geometries, bufferDistance);
 
 		Set<NetworkAssignment> assginmentsWithinDistance = networkData.getRoadLocations().getDefaultAssignments()
 				.stream()
-				.filter(assignment -> preparedRouteBuffer.contains(GeometryUtil.transformGeometry(transform, assignment.getDomain().getLocationPoint())))
+				.filter(assignment -> matcher.covers(assignment.getDomain().getLocationPoint()))
 				.collect(Collectors.toSet());
 
 		return assginmentsWithinDistance::contains;
@@ -144,7 +143,7 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 	}
 
 	private NetworkData getNetworkData(GenerationStrategy strategy,
-			Predicate<NetworkAssignment> predicate) {
+									   Predicate<NetworkAssignment> predicate) {
 		NetworkData networkData = networkDataHandler.getNetworkData(predicate);
 		generationTracker.update(strategy, networkData);
 		return networkData;
