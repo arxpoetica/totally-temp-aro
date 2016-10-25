@@ -27,11 +27,11 @@ app.config(($httpProvider) => {
     } else {
       $('#plan-saving').stop()
       $('#plan-saving .fa').hide()
-      $('#plan-saving-progress').hide()
       $('#plan-saving-progress .progress-bar').css('width', '100%')
       setTimeout(() => {
-        $('#plan-saving-progress .progress-bar').css('width', '0%').stop().hide()
-      }, 400)
+        $('#plan-saving-progress').hide()
+        $('#plan-saving-progress .progress-bar').css('width', '0%').stop()
+      }, 600)
       time = null
       clearInterval(interval)
       interval = null
