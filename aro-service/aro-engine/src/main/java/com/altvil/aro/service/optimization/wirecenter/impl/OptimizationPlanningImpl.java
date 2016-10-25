@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -116,27 +117,37 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				new NpvClosestFirstIterator.Builder(financialInputs));
 	}
 
-	private Optional<PlannedNetwork> planNetwork(
-			WirecenterOptimizationRequest request, NetworkData networkData,
-			ClosestFirstSurfaceBuilder itr) {
+	@Override
+	public Function<NetworkData, Optional<PlannedNetwork>> bindRequest(
+			WirecenterOptimizationRequest request) {
 
 		PricingModel pricingModel = pricingService.getPricingModel("*",
 				new Date(),
 				PricingContext.create(request.getConstructionRatios()));
 
-		GraphNetworkModel model = graphBuilderService.build(networkData)
-				.setPricingModel(pricingModel).build();
+		return networkData -> {
 
-		return StreamUtil.map(
-				coreLeastCostRoutingService.computeNetworkModel(model,
-						LcrContextImpl.create(pricingModel,
-								FiberConstraintUtils.build(request
-										.getConstraints(),
-										systemPropertyService
-												.getConfiguration()), itr)),
-				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
-						networkData.getCompetitiveDemandMapping()));
+			GraphNetworkModel model = graphBuilderService.build(networkData)
+					.setPricingModel(pricingModel).build();
 
+			return StreamUtil.map(coreLeastCostRoutingService
+					.computeNetworkModel(model, LcrContextImpl.create(
+							pricingModel, FiberConstraintUtils.build(
+									request.getConstraints(),
+									systemPropertyService.getConfiguration()),
+							ScalarClosestFirstSurfaceIterator.BUILDER)),
+					n -> new DefaultPlannedNetwork(request.getPlanId(), n,
+							networkData.getCompetitiveDemandMapping()));
+		};
+
+	}
+
+	private Optional<PlannedNetwork> planNetwork(
+			WirecenterOptimizationRequest request, NetworkData networkData,
+			ClosestFirstSurfaceBuilder itr) {
+
+		return bindRequest(request).apply(networkData);
+	
 	}
 
 	private Predicate<GraphEdgeAssignment> createLockedPredicate(
@@ -151,7 +162,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				.collect(Collectors.toSet());
 
 		return (edgeAssignment) -> {
-			if(edgeAssignment == null)
+			if (edgeAssignment == null)
 				return false;
 			AroEntity aroEntity = edgeAssignment.getAroEntity();
 
@@ -212,8 +223,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				.getPruningStrategy()
 				.modify()
 				.and(PredicateStrategyType.PRUNE_CANDIDATE,
-						(node) -> !node.isLocked()
-				).commit();
+						(node) -> !node.isLocked()).commit();
 
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
 				networkData, pruningStrategy, evaluator.getScoringStrategy(),
