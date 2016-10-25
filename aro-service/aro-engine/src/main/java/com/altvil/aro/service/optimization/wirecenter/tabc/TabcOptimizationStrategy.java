@@ -1,8 +1,10 @@
 package com.altvil.aro.service.optimization.wirecenter.tabc;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -21,7 +23,6 @@ import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WircenterOptimizationStrategy;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
-import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter;
 import com.altvil.utils.StreamUtil;
@@ -30,8 +31,8 @@ import com.altvil.utils.UnitUtils;
 public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 
 	private WirecenterOptimizationRequest wirecenterOptimizationRequest;
-	private Collection<String> strategies ;
-	
+	private Collection<String> strategies;
+
 	private WirecenterOptimizationService wirecenterOptimizationService;
 	private NetworkDataService networkDataService;
 
@@ -40,20 +41,22 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 	private Function<NetworkData, Optional<PlannedNetwork>> networkGenerator;
 
 	private Collection<GenerationStrategy> generationStrategies;
-	
-	
+	private GenerationTracker generationTracker;
+
 	public void initialize(ApplicationContext appContext) {
-		this.wirecenterOptimizationService = appContext.getBean(WirecenterOptimizationService.class) ;
-		this.networkDataService = appContext.getBean(NetworkDataService.class) ;
+		this.wirecenterOptimizationService = appContext
+				.getBean(WirecenterOptimizationService.class);
+		this.networkDataService = appContext.getBean(NetworkDataService.class);
+
 		init(strategies);
 	}
 
 	private void init(Collection<String> strategies) {
 		generationStrategies = createStrategyPlan(strategies);
-		
+
 		networkGenerator = wirecenterOptimizationService
 				.bindRequest(wirecenterOptimizationRequest);
-		
+
 		NetworkDataRequest networkDataRequest = wirecenterOptimizationRequest
 				.getNetworkDataRequest()
 				.modify()
@@ -61,13 +64,14 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 						EnumSet.of(LocationEntityType.celltower,
 								LocationEntityType.large))
 				.updateSelectionFilters(EnumSet.of(SelectionFilter.ALL))
-				.updateMrc(2000)
-				.update(AnalysisSelectionMode.SELECTED_AREAS).commit();
+				.updateMrc(2000).update(AnalysisSelectionMode.SELECTED_AREAS)
+				.commit();
 
 		this.networkDataHandler = new NetworkDataHandler(
 				networkDataService.getNetworkData(networkDataRequest));
 
-		
+		this.generationTracker = new GenerationTracker();
+
 	}
 
 	@Override
@@ -76,6 +80,7 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 		Optional<PlannedNetwork> network = null;
 		for (GenerationStrategy strategy : generationStrategies) {
 			network = strategy.generate(network);
+			generationTracker.update(strategy, network);
 		}
 
 		return network;
@@ -88,25 +93,31 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 
 	}
 
+	private NetworkData getNetworkData(GenerationStrategy strategy,
+			Predicate<NetworkAssignment> predicate) {
+		NetworkData networkData = networkDataHandler.getNetworkData(predicate);
+		generationTracker.update(strategy, networkData);
+		return networkData;
+	}
+
 	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
 			Optional<PlannedNetwork> network, double bufferDistance) {
 		return null;
 	}
 
-	
 	private interface GenerationStrategy {
 		String geId();
 
 		Optional<PlannedNetwork> generate(Optional<PlannedNetwork> network);
 	}
 
-	private static class InitialTargetStratgey implements GenerationStrategy {
+	private static class InitialTargetStrategy implements GenerationStrategy {
 
 		private TabcOptimizationStrategy tabcOptimizationStrategy;
 		private String id;
 		private Predicate<NetworkAssignment> predicate;
 
-		public InitialTargetStratgey(
+		public InitialTargetStrategy(
 				TabcOptimizationStrategy tabcOptimizationStrategy, String id,
 				Predicate<NetworkAssignment> predicate) {
 			super();
@@ -124,8 +135,8 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 		public Optional<PlannedNetwork> generate(
 				Optional<PlannedNetwork> network) {
 			return tabcOptimizationStrategy.networkGenerator
-					.apply(tabcOptimizationStrategy.networkDataHandler
-							.getNetworkData(predicate));
+					.apply(tabcOptimizationStrategy.getNetworkData(this,
+							predicate));
 		}
 
 	}
@@ -151,10 +162,9 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 		@Override
 		public Optional<PlannedNetwork> generate(Optional<PlannedNetwork> model) {
 
-			NetworkData networkData = tabcOptimization.networkDataHandler
-					.getNetworkData(tabcOptimization
-							.createNetworkAssignmentPredicate(model,
-									bufferDistance));
+			NetworkData networkData = tabcOptimization.getNetworkData(this,
+					tabcOptimization.createNetworkAssignmentPredicate(model,
+							bufferDistance));
 
 			return tabcOptimization.networkGenerator.apply(networkData);
 
@@ -170,22 +180,51 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 			this.networkData = networkData;
 		}
 
-		public NetworkData getNetworkData(Predicate<NetworkAssignment> predicate) {
+		private NetworkData getNetworkData(
+				Predicate<NetworkAssignment> predicate) {
 			return networkData.createNetworkData(networkData.getRoadLocations()
 					.filter(predicate).create(SelectionFilter.ALL));
 		}
 
 	}
 
+	private static class LocationTracking {
+		@SuppressWarnings("unused")
+		private NetworkAssignment networkAssignment;
+		private List<GenerationStrategy> trackingStrategy = new ArrayList<>(3);
+
+		public LocationTracking(NetworkAssignment networkAssignment) {
+			super();
+			this.networkAssignment = networkAssignment;
+		}
+
+		public void update(GenerationStrategy strategy) {
+			this.trackingStrategy.add(strategy);
+		}
+
+	}
+
 	private class GenerationTracker {
 
-		public void update(GenerationStrategy strategy,
-				Collection<NetworkAssignment> assignments) {
+		private Map<NetworkAssignment, LocationTracking> map = new HashMap<>(
+				10000);
 
+		public void update(GenerationStrategy strategy, NetworkData networkData) {
+
+			networkData.roadLocations.getDefaultAssignments().forEach(na -> {
+				LocationTracking lt = map.get(na);
+
+				if (lt == null) {
+					map.put(na, lt = new LocationTracking(na));
+				}
+
+				lt.update(strategy);
+
+			});
 		}
 
 		public void update(GenerationStrategy strategy,
-				CompositeNetworkModel networkModel) {
+				Optional<PlannedNetwork> networkModel) {
 		}
 
 	}
@@ -218,7 +257,7 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 		}
 
 		private void init() {
-			map.put("T", ctx -> new InitialTargetStratgey(ctx, "T",
+			map.put("T", ctx -> new InitialTargetStrategy(ctx, "T",
 					createPredicate(LocationEntityType.celltower)));
 
 			map.put("A",
