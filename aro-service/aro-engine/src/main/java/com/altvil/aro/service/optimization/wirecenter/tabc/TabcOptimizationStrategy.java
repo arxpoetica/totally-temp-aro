@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter.tabc;
 
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -7,9 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.opengis.referencing.operation.MathTransform;
 import org.springframework.context.ApplicationContext;
 
 import com.altvil.aro.service.entity.AroEntity;
@@ -23,10 +28,19 @@ import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WircenterOptimizationStrategy;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
+import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.aro.service.plan.GeneratedFiberRoute;
+import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
-import com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter;
+import com.altvil.interfaces.NetworkAssignmentModel;
+import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.UnitUtils;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.prep.PreparedGeometry;
+import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
+
 
 public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 
@@ -63,7 +77,7 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 				.updateLocationTypes(
 						EnumSet.of(LocationEntityType.celltower,
 								LocationEntityType.large))
-				.updateSelectionFilters(EnumSet.of(SelectionFilter.ALL))
+				.updateSelectionFilters(EnumSet.of(NetworkAssignmentModel.SelectionFilter.ALL))
 				.updateMrc(2000).update(AnalysisSelectionMode.SELECTED_AREAS)
 				.commit();
 
@@ -86,6 +100,33 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 		return network;
 	}
 
+	
+	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
+			CompositeNetworkModel network, double bufferDistance) {
+	
+		Collection<LineString> geometries = network.getNetworkModels().stream()
+				.map(NetworkModel::getCentralOfficeFeederFiber)
+				.map(GeneratedFiberRoute::getEdges)
+				.flatMap(Collection::stream)
+				.map(geoSegmentAroEdge -> (LineString) geoSegmentAroEdge.getValue().getLineString())
+				.collect(Collectors.toList());
+		
+		MultiLineString routeGeom= GeometryUtil.createMultiLineString(geometries);
+		MathTransform transform = GeometryUtil.getGeographyTransform(routeGeom.getCentroid());
+		MultiLineString routeGeography = GeometryUtil.transformGeometry(transform, routeGeom);
+
+		PreparedGeometry preparedRouteBuffer = PreparedGeometryFactory.prepare(routeGeography.buffer(bufferDistance));
+
+		Set<NetworkAssignment> assginmentsWithinDistance = networkData.getRoadLocations().getDefaultAssignments()
+				.stream()
+				.filter(assignment -> preparedRouteBuffer.contains(GeometryUtil.transformGeometry(transform, assignment.getDomain().getLocationPoint())))
+				.collect(Collectors.toSet());
+
+		return assginmentsWithinDistance::contains;
+
+	}
+	
+	
 	private Collection<GenerationStrategy> createStrategyPlan(
 			Collection<String> strategies) {
 		return StreamUtil.map(strategies,
@@ -99,6 +140,7 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 		generationTracker.update(strategy, networkData);
 		return networkData;
 	}
+	
 
 	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
 			Optional<PlannedNetwork> network, double bufferDistance) {

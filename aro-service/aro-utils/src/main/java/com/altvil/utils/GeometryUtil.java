@@ -308,13 +308,18 @@ public class GeometryUtil {
 
 	public static <T extends Geometry> Collection<T> transformGeometriesToGeographies(Collection<T> geometries, Point centroid) {
 		MathTransform transform = getGeographyTransform(centroid);
+		return transformGeometries(geometries, transform);
+
+	}
+
+	public static <T extends Geometry> List<T> transformGeometries(Collection<T> geometries, MathTransform transform) {
 		return geometries.stream()
 				.map(geom -> transformGeometry(transform, geom))
 				.collect(Collectors.toList());
-
 	}
+
 	@SuppressWarnings("unchecked")
-	private static <T extends Geometry> T transformGeometry(MathTransform coordinatesProjection, T shapeTrimmed) {
+	public static <T extends Geometry> T transformGeometry(MathTransform coordinatesProjection, T shapeTrimmed) {
 		try {
 			return ((T)org.geotools.geometry.jts.JTS.transform(shapeTrimmed, coordinatesProjection));
 		} catch (TransformException e) {
