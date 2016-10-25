@@ -56,8 +56,8 @@ import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.property.SystemPropertyService;
-import com.altvil.enumerations.OptimizationType;
 import com.altvil.interfaces.NetworkAssignment;
+import com.altvil.interfaces.NetworkAssignmentModel;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -147,7 +147,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 			ClosestFirstSurfaceBuilder itr) {
 
 		return bindRequest(request).apply(networkData);
-	
+
 	}
 
 	private Predicate<GraphEdgeAssignment> createLockedPredicate(
@@ -204,9 +204,11 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 			networkDataRequest = networkDataRequest.createFilterRequest(EnumSet
 					.of(ALL, SELECTED));
 
+			NetworkData nd = networkService.getNetworkData(networkDataRequest);
+			
 			// Force Selection Mode to be ALL Locations
-			networkData = networkService.getNetworkData(networkDataRequest)
-					.create(ALL);
+			networkData = nd.createNetworkData(nd.getRoadLocations().create(
+					NetworkAssignmentModel.SelectionFilter.ALL));
 
 			lockedTargets = networkData.getRoadLocations().getAssignments(
 					SELECTED);

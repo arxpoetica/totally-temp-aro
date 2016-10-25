@@ -1,6 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.OptimizationRequest;
@@ -17,9 +18,9 @@ public class WirecenterOptimizationRequest extends OptimizationRequest {
 	public WirecenterOptimizationRequest(
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints networkConstraints,
-			NetworkDataRequest networkDataRequest, AlgorithmType algorithmType, boolean usePlanConduit) {
+			NetworkDataRequest networkDataRequest, AlgorithmType algorithmType, boolean usePlanConduit,  Map<String, String> extendedAttributes) {
 		super(optimizationConstraints, networkConstraints, networkDataRequest,
-				algorithmType, usePlanConduit);
+				algorithmType, usePlanConduit, extendedAttributes);
 	}
 
 	public ConstructionRatios getConstructionRatios() {

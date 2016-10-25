@@ -9,13 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import com.altvil.utils.BufferedGeographyMatcher;
-import org.opengis.referencing.operation.MathTransform;
 import org.springframework.context.ApplicationContext;
 
 import com.altvil.aro.service.entity.AroEntity;
@@ -26,24 +22,16 @@ import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
-import com.altvil.aro.service.optimization.wirecenter.WircenterOptimizationStrategy;
+import com.altvil.aro.service.optimization.wirecenter.WireCenterOptimizationStrategy;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
-import com.altvil.aro.service.plan.CompositeNetworkModel;
-import com.altvil.aro.service.plan.GeneratedFiberRoute;
-import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
-import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.UnitUtils;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.prep.PreparedGeometry;
-import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
 
 
-public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
+public class TabcOptimizationStrategy implements WireCenterOptimizationStrategy {
 
 	
 
@@ -60,11 +48,12 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 	private Collection<GenerationStrategy> generationStrategies;
 	private GenerationTracker generationTracker;
 	
-	
 	public TabcOptimizationStrategy(
-			WirecenterOptimizationRequest wirecenterOptimizationRequest) {
+			WirecenterOptimizationRequest wirecenterOptimizationRequest,
+			Collection<String> strategies) {
 		super();
 		this.wirecenterOptimizationRequest = wirecenterOptimizationRequest;
+		this.strategies = strategies;
 	}
 
 	public void initialize(ApplicationContext appContext) {
@@ -111,28 +100,29 @@ public class TabcOptimizationStrategy implements WircenterOptimizationStrategy {
 	}
 
 	
-	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
-			Optional<PlannedNetwork> network, double bufferDistance) {
-		if(!network.isPresent())
-			return (assignment)-> false;
-
-		CompositeNetworkModel plannedNetwork = network.get().getPlannedNetwork();
-		Collection<LineString> geometries = plannedNetwork.getNetworkModels().stream()
-				.map(NetworkModel::getCentralOfficeFeederFiber)
-				.map(GeneratedFiberRoute::getEdges)
-				.flatMap(Collection::stream)
-				.map(geoSegmentAroEdge -> (LineString) geoSegmentAroEdge.getValue().getLineString())
-				.collect(Collectors.toList());
-		BufferedGeographyMatcher matcher = new BufferedGeographyMatcher(geometries, bufferDistance);
-
-		Set<NetworkAssignment> assginmentsWithinDistance = networkData.getRoadLocations().getDefaultAssignments()
-				.stream()
-				.filter(assignment -> matcher.covers(assignment.getDomain().getLocationPoint()))
-				.collect(Collectors.toSet());
-
-		return assginmentsWithinDistance::contains;
-
-	}
+//	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
+//			Optional<PlannedNetwork> network, double bufferDistance) {
+//		if(!network.isPresent())
+//			return (assignment)-> false;
+//
+//		CompositeNetworkModel plannedNetwork = network.get().getPlannedNetwork();
+//		Collection<LineString> geometries = plannedNetwork.getNetworkModels().stream()
+//				.map(NetworkModel::getCentralOfficeFeederFiber)
+//				.map(GeneratedFiberRoute::getEdges)
+//				.flatMap(Collection::stream)
+//				.map(geoSegmentAroEdge -> (LineString) geoSegmentAroEdge.getValue().getLineString())
+//				.collect(Collectors.toList());
+//		BufferedGeographyMatcher matcher = new BufferedGeographyMatcher(geometries, bufferDistance);
+//
+//		Set<NetworkAssignment> assginmentsWithinDistance = 
+//				networkData.getRoadLocations().getDefaultAssignments()
+//				.stream()
+//				.filter(assignment -> matcher.covers(assignment.getDomain().getLocationPoint()))
+//				.collect(Collectors.toSet());
+//
+//		return assginmentsWithinDistance::contains;
+//
+//	}
 	
 	
 	private Collection<GenerationStrategy> createStrategyPlan(

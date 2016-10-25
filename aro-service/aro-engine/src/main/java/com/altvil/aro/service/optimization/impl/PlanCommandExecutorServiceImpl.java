@@ -229,7 +229,8 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 						.createRequest(planId, sl.getId())
 						.createRequest(serviceAreaId),
 				request.getAlgorithmType(), 
-				request.isUsePlanConduit()
+				request.isUsePlanConduit(),
+				request.getExtendedAttributes()
 		);
 	}
 

@@ -17,9 +17,6 @@ public enum OptimizationType {
  	PRUNNING_NPV,
  	
  	
- 	SCENARIO_T,
- 	SCENARIO_TA,
- 	SCENARIO_TAB,
- 	SCENARIO_TABC
+ 	CUSTOM
  	
 }

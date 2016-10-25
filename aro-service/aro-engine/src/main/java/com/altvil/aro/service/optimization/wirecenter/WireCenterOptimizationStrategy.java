@@ -2,7 +2,7 @@ package com.altvil.aro.service.optimization.wirecenter;
 
 import java.util.Optional;
 
-public interface WircenterOptimizationStrategy {
+public interface WireCenterOptimizationStrategy {
 	
 	Optional<PlannedNetwork> optimize() ;
 

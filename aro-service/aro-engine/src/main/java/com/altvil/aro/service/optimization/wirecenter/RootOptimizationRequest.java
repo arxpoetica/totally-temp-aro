@@ -16,6 +16,8 @@ import com.altvil.enumerations.OptimizationType;
 
 
 public class RootOptimizationRequest extends OptimizationRequest {
+	
+	
 
 	private final OptimizationMode optimizationMode;
 	private Collection<Integer> processingLayers = new ArrayList<>() ;
@@ -44,8 +46,8 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		private OptimizationType optimizationType;
 		private FinancialConstraints financials;
 		private Double threshold;
-		private boolean forced;
-
+		private Map<String, String> extendedAttributes;
+		
 
 		public Builder setAnalysisSelectionMode(
 				AnalysisSelectionMode analysisSelectionMode) {
@@ -66,6 +68,20 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		public Builder setFiberNetworkConstraints(
 				FiberNetworkConstraints constraints) {
 			this.fiberNetworkConstraints = constraints;
+			return this;
+		}
+		
+		public Builder setCustomOptimization(String name, Map<String, String> map) {
+			
+			Map<String, String> mapped = new HashMap<>() ;
+			
+			map.put(CUSTOM_OPTIMIZATION_KEY, name) ;
+			
+			if( map != null ) {
+				mapped.putAll(map) ;
+			}
+			
+			this.extendedAttributes = mapped ;
 			return this;
 		}
 
@@ -102,7 +118,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		public RootOptimizationRequest build() {
 			return new RootOptimizationRequest(processingLayers,
 					getOptimizationConstraints(), fiberNetworkConstraints,
-					createDataRequest(), optimizationMode, inferAlgorithmType(), usePlanConduit);
+					createDataRequest(), optimizationMode, inferAlgorithmType(), usePlanConduit, extendedAttributes);
 		}
 
 		public Builder setForced(boolean forced ){
@@ -136,6 +152,8 @@ public class RootOptimizationRequest extends OptimizationRequest {
 					return new CapexConstraints(OptimizationType.CAPEX,
 							financials.getYears(), financials.getDiscountRate(),
 							threshold  == null ? Double.NaN: threshold, financials.getBudget(), forced);
+				case CUSTOM:
+					return new DefaultConstraints(OptimizationType.CUSTOM);
 				case UNCONSTRAINED:
 				default:
 					return new DefaultConstraints(OptimizationType.UNCONSTRAINED);
@@ -208,6 +226,8 @@ public class RootOptimizationRequest extends OptimizationRequest {
 					return OptimizationType.NPV;
 				case PRUNNING_NPV:
 					return OptimizationType.PRUNNING_NPV;
+				case CUSTOM :
+					return OptimizationType.CUSTOM ;
 				default:
 					throw new RuntimeException("Unknown AroOptimizationType " + optimizationType);
 			}
@@ -230,19 +250,19 @@ public class RootOptimizationRequest extends OptimizationRequest {
 	public RootOptimizationRequest(Collection<Integer> processingLayers,
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
-			OptimizationMode optimizationMode, AlgorithmType algorithmType, boolean usePlanConduit) {
-		super(optimizationConstraints, constraints, request, algorithmType, usePlanConduit);
+			OptimizationMode optimizationMode, AlgorithmType algorithmType, boolean usePlanConduit,  Map<String, String> extendedAttributes) {
+		super(optimizationConstraints, constraints, request, algorithmType, usePlanConduit, extendedAttributes);
 		this.processingLayers = processingLayers;
 		this.optimizationMode = optimizationMode;
 	}
 
 	public MasterOptimizationRequest toMasterOptimizationRequest(
-			MasterPlan masterPlan, Set<LocationEntityType> types) {
+			MasterPlan masterPlan, Set<LocationEntityType> types,  Map<String, String> extendedAttributes) {
 		return new MasterOptimizationRequest(masterPlan.getServiceLayer(),
 				optimizationConstraints, constraints,
 				networkDataRequest.createRequest(masterPlan.getId(), masterPlan
 						.getServiceLayer().getId()).createRequest(types), optimizationMode,
-				algorithmType, usePlanConduit);
+				algorithmType, usePlanConduit, extendedAttributes);
 	}
 
 	public Collection<Integer> getProcessingLayers() {

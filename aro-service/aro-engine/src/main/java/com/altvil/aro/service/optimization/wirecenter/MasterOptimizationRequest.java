@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
+import java.util.Map;
+
 import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.OptimizationRequest;
@@ -16,8 +18,8 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 	public MasterOptimizationRequest(ServiceLayer processingLayer,
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
-			OptimizationMode optimizationMode, AlgorithmType algorithmType, boolean usePlanConduit) {
-		super(optimizationConstraints, constraints, request, algorithmType, usePlanConduit);
+			OptimizationMode optimizationMode, AlgorithmType algorithmType, boolean usePlanConduit,  Map<String, String> extendedAttributes) {
+		super(optimizationConstraints, constraints, request, algorithmType, usePlanConduit, extendedAttributes);
 		this.processingLayer = processingLayer;
 		this.optimizationMode = optimizationMode;
 	}
@@ -25,7 +27,7 @@ public class MasterOptimizationRequest extends OptimizationRequest {
 	public MasterOptimizationRequest includePlanConduit() {
 		return new MasterOptimizationRequest(processingLayer,
 				optimizationConstraints, constraints, getNetworkDataRequest()
-						.includePlanConduit(), optimizationMode, algorithmType, usePlanConduit);
+						.includePlanConduit(), optimizationMode, algorithmType, usePlanConduit, extendedAttributes);
 	}
 
 	public ServiceLayer getProcessingLayer() {

@@ -8,25 +8,29 @@ import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.AlgorithmType;
 
 public class OptimizationRequest {
+	
+	public static final String CUSTOM_OPTIMIZATION_KEY = "$OPTIMIZATION$" ;
 
 	protected OptimizationConstraints optimizationConstraints;
 	protected FiberNetworkConstraints constraints;
 	protected NetworkDataRequest networkDataRequest;
 	protected AlgorithmType algorithmType;
 	protected boolean usePlanConduit ;
-	protected Map<String, Object> extendedAttributes ;
+	protected Map<String, String> extendedAttributes ;
 	
 	public OptimizationRequest(OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints,
 			NetworkDataRequest networkDataRequest,
 			AlgorithmType algorithmType,
-			boolean usePlanConduit) {
+			boolean usePlanConduit,
+			Map<String, String> extendedAttributes) {
 		super();
 		this.optimizationConstraints = optimizationConstraints;
 		this.constraints = constraints;
 		this.networkDataRequest = networkDataRequest;
 		this.algorithmType = algorithmType ;
 		this.usePlanConduit = usePlanConduit ;
+		this.extendedAttributes = extendedAttributes ;
 	}
 
 	public AlgorithmType getAlgorithmType() {
@@ -52,5 +56,11 @@ public class OptimizationRequest {
 	public boolean isUsePlanConduit() {
 		return usePlanConduit;
 	}
+
+	public Map<String, String> getExtendedAttributes() {
+		return extendedAttributes;
+	}
+	
+	
 	
 }
