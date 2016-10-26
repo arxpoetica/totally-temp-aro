@@ -22,7 +22,7 @@ public class NetworkDataRequest {
 	public NetworkDataRequest(long planId, Integer serviceLayerId,
 			Integer year, AnalysisSelectionMode selectionMode,
 			Set<LocationEntityType> locationEntities, double mrc,
-			boolean queryPlanConduit, Optional<Integer> serviceAreaId) {
+			boolean queryPlanConduit, Optional<Integer> serviceAreaId, Set<SelectionFilter> selectionFilters) {
 
 		super();
 		this.planId = planId;
@@ -33,20 +33,21 @@ public class NetworkDataRequest {
 		this.locationEntities = locationEntities;
 		this.mrc = mrc;
 		this.serviceAreaId = serviceAreaId;
+		this.selectionFilters = selectionFilters ;
 	}
 	
 	public NetworkDataRequest createRequest(long planId, int serviceLayerId) {
-		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, serviceAreaId) ;
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, serviceAreaId, selectionFilters) ;
 	}
 	public NetworkDataRequest createRequest(int serviceAreaId) {
-		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, Optional.of(serviceAreaId));
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, Optional.of(serviceAreaId), selectionFilters);
 	}
 	
 	public NetworkDataRequest createRequest(Set<LocationEntityType> types) {
-		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, types, mrc, queryPlanConduit, serviceAreaId) ;
+		return new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, types, mrc, queryPlanConduit, serviceAreaId, selectionFilters) ;
 	}
 	public NetworkDataRequest createFilterRequest(Set<SelectionFilter> selectionFilters) {
-		NetworkDataRequest networkDataRequest = new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, serviceAreaId);
+		NetworkDataRequest networkDataRequest = new NetworkDataRequest(planId, serviceLayerId, year, selectionMode, locationEntities, mrc, queryPlanConduit, serviceAreaId, selectionFilters);
 		networkDataRequest.selectionFilters = selectionFilters;
 		return networkDataRequest;
 
@@ -54,7 +55,7 @@ public class NetworkDataRequest {
 
 	public NetworkDataRequest includePlanConduit() {
 		return new NetworkDataRequest(planId, serviceLayerId, year,
-				selectionMode, locationEntities, mrc, true, serviceAreaId);
+				selectionMode, locationEntities, mrc, true, serviceAreaId, selectionFilters);
 	}
 
 	public Integer getServiceLayerId() {

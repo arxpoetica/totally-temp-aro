@@ -61,7 +61,25 @@ INSERT INTO towers.towers(city, lat, lon, geog, geom)
 	FROM towers.vz_il_towers
 	WHERE NOT (lat IS NULL AND long IS NULL);
 
+INSERT INTO towers.towers(city, lat, lon, geog, geom)
+	SELECT
+		city,
+		lat,
+		long,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
+	FROM towers.vz_fl_towers
+	WHERE NOT (lat IS NULL AND long IS NULL);
 
+INSERT INTO towers.towers(city, lat, lon, geog, geom)
+	SELECT
+		city,
+		lat,
+		long,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography AS geog,
+		ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geom
+	FROM towers.vz_ga_towers
+	WHERE NOT (lat IS NULL AND long IS NULL);
 
 CREATE INDEX  towers_towers_geom ON  towers.towers USING gist(geom);
 
