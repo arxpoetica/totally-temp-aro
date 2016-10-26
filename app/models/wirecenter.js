@@ -8,7 +8,7 @@ var database = helpers.database
 module.exports = class Wirecenter {
 
   static findServiceAreas (viewport, type) {
-    var geom = viewport ? 'geom' : 'ST_AsGeoJSON(geom)::json'
+    var geom = viewport ? 'geom' : 'ST_AsGeoJSON(geom)::json AS geom'
     var sql = `
       SELECT service_area.id, ${geom}, code AS name, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
         FROM client.service_area
