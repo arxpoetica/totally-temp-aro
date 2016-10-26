@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import org.springframework.context.ApplicationContext;
 
 import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.AssignedEntityDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.graph.model.NetworkData;
@@ -254,8 +255,9 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		}
 
 		@Override
-		public NetworkAssignment getNetworkAssignment() {
-			return networkAssignment ;
+		public AssignedEntityDemand getAssignedEntityDemand() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 
 		@Override
@@ -290,8 +292,8 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		}
 		
 		@Override
-		public Map<NetworkAssignment, LinkedLocation> getLinkedLocationMap() {
-			return map;
+		public Collection<LinkedLocation> getLinkedLocations() {
+			return map.values();
 		}
 
 
