@@ -16,21 +16,21 @@ public class OptimizationRequest {
 	protected NetworkDataRequest networkDataRequest;
 	protected AlgorithmType algorithmType;
 	protected boolean usePlanConduit ;
-	protected Map<String, String> extendedAttributes ;
+	protected CustomOptimization customOptimization ;
 	
 	public OptimizationRequest(OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints,
 			NetworkDataRequest networkDataRequest,
 			AlgorithmType algorithmType,
 			boolean usePlanConduit,
-			Map<String, String> extendedAttributes) {
+			CustomOptimization customOptimization) {
 		super();
 		this.optimizationConstraints = optimizationConstraints;
 		this.constraints = constraints;
 		this.networkDataRequest = networkDataRequest;
 		this.algorithmType = algorithmType ;
 		this.usePlanConduit = usePlanConduit ;
-		this.extendedAttributes = extendedAttributes ;
+		this.customOptimization = customOptimization ;
 	}
 
 	public AlgorithmType getAlgorithmType() {
@@ -57,9 +57,11 @@ public class OptimizationRequest {
 		return usePlanConduit;
 	}
 
-	public Map<String, String> getExtendedAttributes() {
-		return extendedAttributes;
+	public CustomOptimization getCustomOptimization() {
+		return customOptimization;
 	}
+
+	
 	
 	
 	

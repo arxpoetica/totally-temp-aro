@@ -1,4 +1,4 @@
-package com.altvil.aro.service.optimization.wirecenter.tabc;
+package com.altvil.aro.service.optimization.factory.impl;
 
 
 
@@ -21,8 +21,8 @@ import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
+import com.altvil.aro.service.optimization.factory.WireCenterPlanningStrategy;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
-import com.altvil.aro.service.optimization.wirecenter.WireCenterOptimizationStrategy;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
 import com.altvil.interfaces.NetworkAssignment;
@@ -31,7 +31,7 @@ import com.altvil.utils.StreamUtil;
 import com.altvil.utils.UnitUtils;
 
 
-public class TabcOptimizationStrategy implements WireCenterOptimizationStrategy {
+public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 
 	
 

@@ -6,6 +6,7 @@ import com.altvil.aro.model.MasterPlan;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
+import com.altvil.aro.service.optimization.CustomOptimization;
 import com.altvil.aro.service.optimization.OptimizationRequest;
 import com.altvil.aro.service.optimization.constraints.*;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
@@ -46,7 +47,7 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		private OptimizationType optimizationType;
 		private FinancialConstraints financials;
 		private Double threshold;
-		private Map<String, String> extendedAttributes;
+		private CustomOptimization customOptimization;
 		
 
 		public Builder setAnalysisSelectionMode(
@@ -71,17 +72,8 @@ public class RootOptimizationRequest extends OptimizationRequest {
 			return this;
 		}
 		
-		public Builder setCustomOptimization(String name, Map<String, String> map) {
-			
-			Map<String, String> mapped = new HashMap<>() ;
-			
-			map.put(CUSTOM_OPTIMIZATION_KEY, name) ;
-			
-			if( map != null ) {
-				mapped.putAll(map) ;
-			}
-			
-			this.extendedAttributes = mapped ;
+		public Builder setCustomOptimization(CustomOptimization customOptimization) {
+			this.customOptimization = customOptimization ;
 			return this;
 		}
 
@@ -118,13 +110,10 @@ public class RootOptimizationRequest extends OptimizationRequest {
 		public RootOptimizationRequest build() {
 			return new RootOptimizationRequest(processingLayers,
 					getOptimizationConstraints(), fiberNetworkConstraints,
-					createDataRequest(), optimizationMode, inferAlgorithmType(), usePlanConduit, extendedAttributes);
+					createDataRequest(), optimizationMode, inferAlgorithmType(), usePlanConduit, customOptimization);
 		}
 
-		public Builder setForced(boolean forced ){
-			this.forced = forced;
-			return this;
-		}
+		
 
 		private OptimizationConstraints getOptimizationConstraints() {
 
@@ -250,19 +239,19 @@ public class RootOptimizationRequest extends OptimizationRequest {
 	public RootOptimizationRequest(Collection<Integer> processingLayers,
 			OptimizationConstraints optimizationConstraints,
 			FiberNetworkConstraints constraints, NetworkDataRequest request,
-			OptimizationMode optimizationMode, AlgorithmType algorithmType, boolean usePlanConduit,  Map<String, String> extendedAttributes) {
-		super(optimizationConstraints, constraints, request, algorithmType, usePlanConduit, extendedAttributes);
+			OptimizationMode optimizationMode, AlgorithmType algorithmType, boolean usePlanConduit, CustomOptimization customOptimization) {
+		super(optimizationConstraints, constraints, request, algorithmType, usePlanConduit, customOptimization);
 		this.processingLayers = processingLayers;
 		this.optimizationMode = optimizationMode;
 	}
 
 	public MasterOptimizationRequest toMasterOptimizationRequest(
-			MasterPlan masterPlan, Set<LocationEntityType> types,  Map<String, String> extendedAttributes) {
+			MasterPlan masterPlan, Set<LocationEntityType> types,  CustomOptimization customOptimization) {
 		return new MasterOptimizationRequest(masterPlan.getServiceLayer(),
 				optimizationConstraints, constraints,
 				networkDataRequest.createRequest(masterPlan.getId(), masterPlan
 						.getServiceLayer().getId()).createRequest(types), optimizationMode,
-				algorithmType, usePlanConduit, extendedAttributes);
+				algorithmType, usePlanConduit, customOptimization);
 	}
 
 	public Collection<Integer> getProcessingLayers() {

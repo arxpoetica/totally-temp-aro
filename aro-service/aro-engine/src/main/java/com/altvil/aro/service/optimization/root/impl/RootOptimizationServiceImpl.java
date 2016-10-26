@@ -92,7 +92,7 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 				.stream()
 				.map(mp -> request.toMasterOptimizationRequest(mp,
 						serviceLayerRequests.get(mp.getServiceLayer()),
-						request.getExtendedAttributes()))
+						request.getCustomOptimization()))
 				.collect(Collectors.toList());
 
 		return doOptimize(request, masterRequests);

@@ -230,7 +230,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 						.createRequest(serviceAreaId),
 				request.getAlgorithmType(), 
 				request.isUsePlanConduit(),
-				request.getExtendedAttributes()
+				request.getCustomOptimization()
 		);
 	}
 
