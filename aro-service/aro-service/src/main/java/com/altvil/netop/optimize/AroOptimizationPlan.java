@@ -25,7 +25,7 @@ public class AroOptimizationPlan {
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
 	private List<Integer> processLayers = new ArrayList<>();
-	private CustomOptimization customOptimization ;
+	private AroCustomOptimization customOptimization ;
 
 	public long getPlanId() {
 		return planId;
@@ -118,11 +118,11 @@ public class AroOptimizationPlan {
 		this.usePlanConduit = usePlanConduit;
 	}
 
-	public CustomOptimization getCustomOptimization() {
+	public AroCustomOptimization getCustomOptimization() {
 		return customOptimization;
 	}
 
-	public void setCustomOptimization(CustomOptimization customOptimization) {
+	public void setCustomOptimization(AroCustomOptimization customOptimization) {
 		this.customOptimization = customOptimization;
 	}
 	

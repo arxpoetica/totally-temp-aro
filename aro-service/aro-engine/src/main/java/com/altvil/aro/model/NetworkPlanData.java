@@ -12,8 +12,8 @@ import org.opengis.geometry.Geometry;
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@Entity
-@Table(name = "network_plan_data", schema = "client")
+//@Entity
+//@Table(name = "network_plan_data", schema = "client")
 public class NetworkPlanData {
 
 	private NetworkPlanDataKey networkPlanDataKey;

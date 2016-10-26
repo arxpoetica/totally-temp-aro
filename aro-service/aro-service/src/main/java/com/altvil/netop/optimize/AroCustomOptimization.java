@@ -1,5 +1,6 @@
 package com.altvil.netop.optimize;
 
+import java.util.Collections;
 import java.util.Map;
 
 import com.altvil.aro.service.optimization.CustomOptimization;
@@ -9,11 +10,8 @@ public class AroCustomOptimization implements CustomOptimization {
 
 
 	private String name;
-	private Map<String, String> map;
+	private Map<String, String> map = Collections.emptyMap();
 
-	/* (non-Javadoc)
-	 * @see com.altvil.netop.optimize.CustomOptimization#getName()
-	 */
 	@Override
 	public String getName() {
 		return name;
@@ -23,9 +21,6 @@ public class AroCustomOptimization implements CustomOptimization {
 		this.name = name;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.altvil.netop.optimize.CustomOptimization#getMap()
-	 */
 	@Override
 	public Map<String, String> getMap() {
 		return map;
