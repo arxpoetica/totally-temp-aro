@@ -8,8 +8,10 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationContext;
 
@@ -29,10 +31,15 @@ import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedData;
 import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedNetworkData;
 import com.altvil.aro.service.optimization.wirecenter.generated.LinkedLocation;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
+import com.altvil.aro.service.plan.CompositeNetworkModel;
+import com.altvil.aro.service.plan.GeneratedFiberRoute;
+import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
+import com.altvil.utils.BufferedGeographyMatcher;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.UnitUtils;
+import com.vividsolutions.jts.geom.LineString;
 
 
 public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
@@ -108,29 +115,29 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 	}
 
 	
-//	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
-//			Optional<PlannedNetwork> network, double bufferDistance) {
-//		if(!network.isPresent())
-//			return (assignment)-> false;
-//
-//		CompositeNetworkModel plannedNetwork = network.get().getPlannedNetwork();
-//		Collection<LineString> geometries = plannedNetwork.getNetworkModels().stream()
-//				.map(NetworkModel::getCentralOfficeFeederFiber)
-//				.map(GeneratedFiberRoute::getEdges)
-//				.flatMap(Collection::stream)
-//				.map(geoSegmentAroEdge -> (LineString) geoSegmentAroEdge.getValue().getLineString())
-//				.collect(Collectors.toList());
-//		BufferedGeographyMatcher matcher = new BufferedGeographyMatcher(geometries, bufferDistance);
-//
-//		Set<NetworkAssignment> assginmentsWithinDistance = 
-//				networkData.getRoadLocations().getDefaultAssignments()
-//				.stream()
-//				.filter(assignment -> matcher.covers(assignment.getDomain().getLocationPoint()))
-//				.collect(Collectors.toSet());
-//
-//		return assginmentsWithinDistance::contains;
-//
-//	}
+	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
+			Optional<PlannedNetwork> network, double bufferDistance) {
+		if(!network.isPresent())
+			return (assignment)-> false;
+
+		CompositeNetworkModel plannedNetwork = network.get().getPlannedNetwork();
+		Collection<LineString> geometries = plannedNetwork.getNetworkModels().stream()
+				.map(NetworkModel::getCentralOfficeFeederFiber)
+				.map(GeneratedFiberRoute::getEdges)
+				.flatMap(Collection::stream)
+				.map(geoSegmentAroEdge -> (LineString) geoSegmentAroEdge.getValue().getLineString())
+				.collect(Collectors.toList());
+		BufferedGeographyMatcher matcher = new BufferedGeographyMatcher(geometries, bufferDistance);
+
+		Set<NetworkAssignment> assginmentsWithinDistance = 
+				networkData.getRoadLocations().getDefaultAssignments()
+				.stream()
+				.filter(assignment -> matcher.covers(assignment.getDomain().getLocationPoint()))
+				.collect(Collectors.toSet());
+
+		return assginmentsWithinDistance::contains;
+
+	}
 	
 	
 	private Collection<GenerationStrategy> createStrategyPlan(
@@ -148,10 +155,6 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 	}
 	
 
-	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
-			Optional<PlannedNetwork> network, double bufferDistance) {
-		return null;
-	}
 
 	private interface GenerationStrategy {
 		String getId();
@@ -307,7 +310,7 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 
 
 		public void update(GenerationStrategy strategy,
-				Optional<PlannedNetwork> networkModel) {
+				Optional<PlannedNetwork> networkModel) { 
 		}
 
 	}
