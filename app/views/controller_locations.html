@@ -234,7 +234,34 @@
         </label>
         <label>Cell Sites</label>
       </div>
+      <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
+        <div class="locations-filter" ng-show="selectedFilter === 'addCustomers'">
+          <form>
+            <div class="form-group">
+              <label>asdfasdf</label>
+              <select class="form-control" disabled>
+                <option>adfs</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="pull-right" style="visibility:hidden">
+          <a href="javascript:;" ng-click="toggleFilter('addCustomers')" class="btn btn-default btn-xs locations-filter-btn">
+            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'addCustomers'"></span>
+            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'addCustomers'"></span>
+          </a>
+        </div>
+        <label class="pull-right">
+          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_towers"></span>
+          <input type="checkbox" ng-model="show_towers" value="true" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
+        </label>
+        <label style="margin-left:25px">Uploaded Customers 1</label>
+      </div>
     </form>
+
+    <p style="padding: 10px">
+      <button class="btn btn-sm btn-primary"><span class="fa fa-plus"></span> Add customers</button>
+    </p>
 
     <div class="alert alert-info text-center" role="alert" ng-show="heatmapVisible">
       To see individual locations, zoom in or turn off the heatmap button below the zoom buttons

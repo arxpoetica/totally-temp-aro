@@ -202,6 +202,8 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
     return globalServiceLayers.filter((layer) => searchOptions[layer.name])
   }
 
+  regions.selectGeography = selectGeography
+
   function configureSelectionVisibility () {
     // selectionLayer.setMap(map_tools.is_visible(tool) ? map : null)
     if (selectionLayer.getMap() !== map) {
