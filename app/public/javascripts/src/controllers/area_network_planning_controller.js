@@ -19,11 +19,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   // --
 
   $scope.entityTypes = [
-    { id: 'optimizeSMB', value: 'SMB' },
-    { id: 'optimizeMedium', value: 'Mid-tier' },
-    { id: 'optimizeLarge', value: 'Large Enterprise' },
-    { id: 'optimizeHouseholds', value: 'Residential' },
-    { id: 'optimizeTowers', value: 'Cell Sites' }
+    { id: 'optimizeSMB', value: 'SMB', name: 'small' },
+    { id: 'optimizeMedium', value: 'Mid-tier', name: 'medium' },
+    { id: 'optimizeLarge', value: 'Large Enterprise', name: 'large' },
+    { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
+    { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
   ]
   $scope.entityTypesTargeted = {}
 
@@ -150,8 +150,22 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       useDirectRouting: $scope.technology === 'direct_routing'
     }
 
+    var selectLocationTypes = []
+    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+      selectLocationTypes = Object.keys($scope.entityTypesTargeted)
+        .map((key) => {
+          return $scope.entityTypesTargeted[key]
+            ? $scope.entityTypes.find((type) => type.id === key).name
+            : null
+        })
+        .filter((val) => val)
+    }
+
     canceler = optimization.optimize($scope.plan, changes, () => {
       $scope.calculating = false
+      if (selectLocationTypes.length > 0) {
+        $rootScope.$broadcast('select_locations', selectLocationTypes)
+      }
     }, () => {
       $scope.calculating = false
     })
