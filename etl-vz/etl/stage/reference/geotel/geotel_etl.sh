@@ -44,6 +44,3 @@ ${PSQL} -a -f $DIR/geotel_carrier.sql
 
 # create a alias table (This will be moved at some point)
 ${PSQL} -a -f $DIR/geotel_carrier_alias.sql
-
-# Buffer Geotel routes and index into carrier table
-${PSQL} -a -f $DIR/buffered_routes.sql
