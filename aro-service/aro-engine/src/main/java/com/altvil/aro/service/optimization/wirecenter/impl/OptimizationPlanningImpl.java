@@ -130,7 +130,7 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 			GraphNetworkModel model = graphBuilderService.build(networkData)
 					.setPricingModel(pricingModel).build();
 
-			return StreamUtil.map(coreLeastCostRoutingService
+			return StreamUtil.optional(coreLeastCostRoutingService
 					.computeNetworkModel(model, LcrContextImpl.create(
 							pricingModel, FiberConstraintUtils.build(
 									request.getConstraints(),

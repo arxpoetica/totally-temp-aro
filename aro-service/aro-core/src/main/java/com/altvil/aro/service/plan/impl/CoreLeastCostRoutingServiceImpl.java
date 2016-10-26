@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.AssignedEntityDemand;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FiberType;
@@ -469,7 +470,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 		private PricingModel pricingModel;
 		private RenodedGraph renodedGraph;
 		//private GraphNode rootVertex;
-		private Set<GraphNode> matchedVertices;
+		private Map<GraphNode, AssignedEntityDemand> matchedVertices;
 		private LcrContext lcrContext;
 		private Map<Map<CableConstructionEnum, Double>, RenodedGraph> cache = new HashMap<>();
 		private Map<FiberType, RenodedGraph> mappedGraphs = new HashMap<>();
@@ -503,22 +504,31 @@ public class CoreLeastCostRoutingServiceImpl implements
 			}
 
 			return new DistanceGraphPathConstraint<GraphNode, AroEdge<GeoSegment>>(
-					matchedVertices, distanceInMeters);
+					matchedVertices.keySet(), distanceInMeters);
 
 		}
 
-		private Set<GraphNode> extractVertices(LocationEntityType type) {
-			return renodedGraph
-					.getGraphAssignments()
-					.stream()
-					.filter(ga -> {
-						AroEntity ae = ga.getAroEntity();
-						if (ae instanceof BulkFiberTerminal) {
-							return ((BulkFiberTerminal) ae).hasDemandFor(type) ;
-						}
-						return false;
-					}).map(renodedGraph::getGraphNode)
-					.collect(Collectors.toSet());
+		private Map<GraphNode, AssignedEntityDemand> extractVertices(LocationEntityType type) {
+			
+			Map<GraphNode, AssignedEntityDemand> map = new HashMap<>() ;
+			
+			 renodedGraph
+			.getGraphAssignments()
+			.stream()
+			.forEach(ga -> {
+				AroEntity ae = ga.getAroEntity();
+				if (ae instanceof BulkFiberTerminal) {
+					BulkFiberTerminal bft = (BulkFiberTerminal) ae ;
+					if( bft.hasDemandFor(type) )  {
+						map.put(renodedGraph.getGraphNode(ga), bft.getAssignedEntityDemand()) ;
+					};
+				}
+				
+			}) ;
+			 
+			 return map ;
+			
+			
 		}
 
 		public AnalysisBinding createAnalysisBinding(FiberType fiberType) {

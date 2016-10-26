@@ -2,11 +2,10 @@ package com.altvil.aro.service.optimization.factory.impl;
 
 
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -25,6 +24,10 @@ import com.altvil.aro.service.optimization.factory.WireCenterPlanningStrategy;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
+import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedData;
+import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedNetworkData;
+import com.altvil.aro.service.optimization.wirecenter.generated.LinkedLocation;
+import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
 import com.altvil.utils.StreamUtil;
@@ -95,6 +98,10 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 			network = strategy.generate(network);
 			generationTracker.update(strategy, network);
 		}
+		
+		if( network.isPresent() ) {
+			network = Optional.of(new DefaultPlannedNetwork(network.get(), generationTracker)) ;
+		}
 
 		return network;
 	}
@@ -146,7 +153,7 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 	}
 
 	private interface GenerationStrategy {
-		String geId();
+		String getId();
 
 		Optional<PlannedNetwork> generate(Optional<PlannedNetwork> network);
 	}
@@ -167,7 +174,7 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		}
 
 		@Override
-		public String geId() {
+		public String getId() {
 			return id;
 		}
 
@@ -195,7 +202,7 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		}
 
 		@Override
-		public String geId() {
+		public String getId() {
 			return id;
 		}
 
@@ -228,10 +235,9 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 
 	}
 
-	private static class LocationTracking {
-		@SuppressWarnings("unused")
+	private static class LocationTracking implements LinkedLocation {
 		private NetworkAssignment networkAssignment;
-		private List<GenerationStrategy> trackingStrategy = new ArrayList<>(3);
+		private StringBuffer trackingStrategy = new StringBuffer();
 
 		public LocationTracking(NetworkAssignment networkAssignment) {
 			super();
@@ -239,20 +245,40 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		}
 
 		public void update(GenerationStrategy strategy) {
-			this.trackingStrategy.add(strategy);
+			this.trackingStrategy.append(strategy.getId());
+		}
+
+		@Override
+		public Long getLocationId() {
+			return networkAssignment.getSource().getObjectId() ;
+		}
+
+		@Override
+		public NetworkAssignment getNetworkAssignment() {
+			return networkAssignment ;
+		}
+
+		@Override
+		public LinkType getLinkType() {
+			return LinkType.LINKED;
+		}
+
+		@Override
+		public String getExtendedInfo() {
+			return trackingStrategy.toString();
 		}
 
 	}
 
-	private class GenerationTracker {
+	private class GenerationTracker implements GeneratedData {
 
-		private Map<NetworkAssignment, LocationTracking> map = new HashMap<>(
+		private Map<NetworkAssignment, LinkedLocation> map = new HashMap<>(
 				10000);
 
 		public void update(GenerationStrategy strategy, NetworkData networkData) {
 
 			networkData.roadLocations.getDefaultAssignments().forEach(na -> {
-				LocationTracking lt = map.get(na);
+				LocationTracking lt = (LocationTracking)  map.get(na);
 
 				if (lt == null) {
 					map.put(na, lt = new LocationTracking(na));
@@ -262,6 +288,21 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 
 			});
 		}
+		
+		@Override
+		public Map<NetworkAssignment, LinkedLocation> getLinkedLocationMap() {
+			return map;
+		}
+
+
+
+		@Override
+		public Collection<GeneratedNetworkData> getGeneratedNetworkData() {
+			//track generated tacking
+			return Collections.emptyList() ;
+		}
+
+
 
 		public void update(GenerationStrategy strategy,
 				Optional<PlannedNetwork> networkModel) {

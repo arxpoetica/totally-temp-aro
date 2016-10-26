@@ -24,7 +24,7 @@ import com.altvil.utils.func.Aggregator;
 
 public class StreamUtil {
 
-	public static <S, D> Optional<D> map(Optional<S> optional, Function<S, D> f) {
+	public static <S, D> Optional<D> optional(Optional<S> optional, Function<S, D> f) {
 		if (!optional.isPresent()) {
 			return Optional.empty();
 		}
