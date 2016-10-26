@@ -165,8 +165,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     $scope.optimizationType = 'CAPEX'
     if (mode === 'targets') {
       $scope.optimizationTypeOptions = [
-        { id: 'CAPEX', label: 'Target Only Routing' },
-        { id: 'IRR', label: 'Targets and High Value Opportunity' }
+        { id: 'CAPEX', label: 'Full Coverage' },
+        { id: 'IRR', label: 'Budget' }
       ]
     } else {
       $scope.optimizationTypeOptions = [
