@@ -563,4 +563,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $rootScope.$on('optimization_mode_changed', (e, mode) => {
     $scope.optimizationMode = mode
   })
+
+  $('#locationsUploadedCustomersSelect').select2({
+    placeholder: 'Select one or more datasets'
+  })
 }])

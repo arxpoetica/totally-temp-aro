@@ -511,4 +511,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $scope.toggleMeasuringStick()
     }
   })
+
+  $scope.addCustomers = () => {
+    $rootScope.$broadcast('upload_customers')
+  }
 }])
