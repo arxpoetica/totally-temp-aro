@@ -1,4 +1,4 @@
-/* global app swal */
+/* global app swal config */
 app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 

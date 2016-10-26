@@ -1,7 +1,5 @@
 package com.altvil.aro.service.optimization;
 
-import java.util.Map;
-
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;

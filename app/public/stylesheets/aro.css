@@ -634,3 +634,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .custom-ui {
   display: none;
 }
+
+#plan-saving-progress {
+  display: none;
+}

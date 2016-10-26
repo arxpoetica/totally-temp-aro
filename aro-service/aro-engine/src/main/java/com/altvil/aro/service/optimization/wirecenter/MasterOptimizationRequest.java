@@ -1,7 +1,5 @@
 package com.altvil.aro.service.optimization.wirecenter;
 
-import java.util.Map;
-
 import com.altvil.aro.model.ServiceLayer;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.optimization.CustomOptimization;

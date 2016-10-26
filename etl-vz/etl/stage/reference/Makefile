@@ -49,7 +49,7 @@ reset_households:
 	households/reset.sh
 
 etl_households:
-	households/reset.sh
+	households/infousa_households_etl.sh
 
 #TODO Add  Households
 #households/infousa_households_etl.sh

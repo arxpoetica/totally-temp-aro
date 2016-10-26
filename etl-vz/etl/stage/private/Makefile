@@ -22,13 +22,16 @@ etl_directional_facilities_boundaries:
 reset_network_equipment:
 	network_equipment/reset.sh
 
-etl_network_equipment: etl_hubs etl_ves_fiber etl_directional_facilities
+etl_network_equipment: etl_hubs etl_ves_fiber etl_conduit etl_directional_facilities 
 
 etl_hubs:
 	network_equipment/hubs_etl.sh
 
 etl_ves_fiber:
 	network_equipment/ves_fiber_etl.sh
+
+etl_conduit:
+	network_equipment/conduit_etl.sh
 
 etl_directional_facilities:
 	network_equipment/directional_facilities_etl.sh
@@ -63,6 +66,16 @@ etl_tam:
 etl_vz_customers:
 	businesses/vz_customers_etl.sh
 
+
+#######################################
+# Households ETL
+#######################################
+
+reset_households:
+	households/reset.sh
+
+etl_households:
+	households/etl.sh
 
 
 ###################

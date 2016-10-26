@@ -5,6 +5,7 @@ CREATE TABLE client.existing_fiber
 	id serial,
 	source_fiber_segment_id bigint,
 	source_name varchar,
+  is_partner_carrier boolean,
 	CONSTRAINT client_existing_fiber_pkey PRIMARY KEY (id)
 );
 

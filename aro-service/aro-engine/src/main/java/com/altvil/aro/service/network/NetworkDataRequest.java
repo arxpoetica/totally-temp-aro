@@ -48,6 +48,11 @@ public class NetworkDataRequest {
 			return this;
 		}
 
+		public Modifier updateServiceLayerId(int serviceLayerId) {
+			this.modified.serviceLayerId = serviceLayerId;
+			return this;
+		}
+
 		public Modifier updatePlanId(long planId) {
 			this.modified.planId = planId;
 			return this;
@@ -73,7 +78,8 @@ public class NetworkDataRequest {
 	public NetworkDataRequest(long planId, Integer serviceLayerId,
 			Integer year, AnalysisSelectionMode selectionMode,
 			Set<LocationEntityType> locationEntities, double mrc,
-			boolean queryPlanConduit, Optional<Integer> serviceAreaId) {
+			boolean queryPlanConduit, Optional<Integer> serviceAreaId,
+			Set<SelectionFilter> selectionFilters) {
 
 		super();
 		this.planId = planId;
@@ -84,36 +90,40 @@ public class NetworkDataRequest {
 		this.locationEntities = locationEntities;
 		this.mrc = mrc;
 		this.serviceAreaId = serviceAreaId;
+		this.selectionFilters = selectionFilters;
 	}
 
 	public Modifier modify() {
 		return new Modifier(new NetworkDataRequest(planId, serviceLayerId,
 				year, selectionMode, locationEntities, mrc, queryPlanConduit,
-				serviceAreaId));
+				serviceAreaId, selectionFilters));
 	}
 
 	public NetworkDataRequest createRequest(long planId, int serviceLayerId) {
-		return new NetworkDataRequest(planId, serviceLayerId, year,
-				selectionMode, locationEntities, mrc, queryPlanConduit,
-				serviceAreaId);
+
+		return modify().updatePlanId(planId)
+				.updateServiceLayerId(serviceLayerId).commit();
+
 	}
 
 	public NetworkDataRequest createRequest(int serviceAreaId) {
 		return modify().updateServiceAreaId(serviceAreaId).commit();
+
 	}
 
 	public NetworkDataRequest createRequest(Set<LocationEntityType> types) {
-		return modify().updateLocationTypes(types).commit() ;
+		return modify().updateLocationTypes(types).commit();
 	}
 
 	public NetworkDataRequest createFilterRequest(
 			Set<SelectionFilter> selectionFilters) {
-		return modify().updateSelectionFilters(selectionFilters).commit() ;
-		
+		return modify().updateSelectionFilters(selectionFilters).commit();
+
 	}
 
 	public NetworkDataRequest includePlanConduit() {
-		return modify().updateQueryPlanConduit(true).commit() ;
+		return modify().updateQueryPlanConduit(true).commit();
+
 	}
 
 	public Integer getServiceLayerId() {

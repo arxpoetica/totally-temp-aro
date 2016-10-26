@@ -1,14 +1,12 @@
 package com.altvil.utils;
 
+import java.util.Collection;
+import java.util.List;
+
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
 import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class BufferedGeographyMatcher {
     PreparedGeometry preparedGeometry;

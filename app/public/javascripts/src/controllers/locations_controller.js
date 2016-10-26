@@ -501,9 +501,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.toggleMeasuringStick = () => {
     var current = drawingManager.getMap()
     drawingManager.setMap(current ? null : map)
-    map.setOptions({ draggable: !current })
     removeLatestOverlay()
     $scope.measuringStickEnabled = !current
     if (current) $scope.measuredDistance = null
   }
+
+  $(document).keydown(function (e) {
+    if (e.keyCode === 27 && $scope.measuringStickEnabled) {
+      $scope.toggleMeasuringStick()
+    }
+  })
 }])
