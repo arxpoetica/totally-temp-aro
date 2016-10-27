@@ -144,6 +144,13 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     } else if (algorithm === 'IRR') {
       delete changes.irrThreshold
     } else if (algorithm === 'BUDGET_IRR') {
+    } else if (algorithm === 'TABC') {
+      changes.customOptimization = {
+        name: 'TABC',
+        map: {
+          generations: 'T,A,B,C'
+        }
+      }
     }
 
     changes.fiberNetworkConstraints = {
@@ -187,7 +194,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         { id: 'CAPEX', label: 'Full Coverage' },
         { id: 'MAX_IRR', label: 'Maximum IRR' },
         { id: 'IRR', label: 'Budget' },
-        { id: 'BUDGET_IRR', label: 'IRR Target' }
+        { id: 'BUDGET_IRR', label: 'IRR Target' },
+        { id: 'TABC', label: 'TABC analysis' }
         // { id: 'TARGET_IRR', label: 'IRR Target' },
         // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
       ]
