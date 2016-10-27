@@ -11,6 +11,7 @@ public interface SpanningTreeBuilder<V, E> {
 	
 	SpanningTreeBuilder<V, E> setGraphPathConstraint(GraphPathConstraint<V, E> predicate) ;
 	SpanningTreeBuilder<V, E> setMetricEdgeWeight(MetricEdgeWeight<E> metricEdgeWeight) ;
+	SpanningTreeBuilder<V, E> setEventListener(SpanningTreeEventListener<V> eventListener) ;
 	
 	SpanningTreeBuilder<V, E> setTargets(Collection<V> targets);
 	SpanningTreeBuilder<V, E> setSources(Collection<V> sources);

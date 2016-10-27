@@ -2,10 +2,12 @@ package com.altvil.aro.service.plan.impl;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -20,8 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.altvil.aro.service.entity.AroEntity;
-import com.altvil.aro.service.entity.AssignedEntityDemand;
-import com.altvil.aro.service.entity.BulkFiberTerminal;
+import com.altvil.aro.service.entity.EquipmentLinker;
 import com.altvil.aro.service.entity.FDHEquipment;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.entity.FinancialInputs;
@@ -32,6 +33,7 @@ import com.altvil.aro.service.graph.GraphModel;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint;
+import com.altvil.aro.service.graph.alg.routing.SpanningTreeEventListener;
 import com.altvil.aro.service.graph.alg.routing.impl.DefaultGraphPathConstraint;
 import com.altvil.aro.service.graph.alg.routing.impl.DistanceGraphPathConstraint;
 import com.altvil.aro.service.graph.alg.routing.impl.SourceGraph;
@@ -325,7 +327,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 			return new NetworkRouteModel(
 					fiberSourceBinding.getNetworkAssignment(), null,
 					analysisFactory.getRenodedGraphs(), feederFiber,
-					distributionFiber, fiberMapping);
+					distributionFiber, fiberMapping, analysisFactory.getRejectedEquipmentLinkers());
 		}
 
 		private GeneratedFiberRoute planRoute(AnalysisBinding analysisBinding,
@@ -376,6 +378,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 								StreamUtil.map(nodes,
 										n -> renoded.getGraphNode(n)))
 						.setSources(sources)
+						.setEventListener(analysisBinding.getEventListener())
 						.setGraphPathConstraint(analysisGraph.getConstraint())
 						.build().getSourceRoute();
 
@@ -461,8 +464,8 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 	private interface AnalysisBinding {
 		public AnalysisGraph createAnalysisGraph();
-
 		public RenodedGraph getRenodedGraph();
+		public SpanningTreeEventListener<GraphNode> getEventListener() ;
 	}
 
 	private class AnalysisGraphFactory {
@@ -470,11 +473,12 @@ public class CoreLeastCostRoutingServiceImpl implements
 		private PricingModel pricingModel;
 		private RenodedGraph renodedGraph;
 		//private GraphNode rootVertex;
-		private Map<GraphNode, AssignedEntityDemand> matchedVertices;
+		private Map<GraphNode, EquipmentLinker> matchedVertices;
 		private LcrContext lcrContext;
 		private Map<Map<CableConstructionEnum, Double>, RenodedGraph> cache = new HashMap<>();
 		private Map<FiberType, RenodedGraph> mappedGraphs = new HashMap<>();
-
+		private List<EquipmentLinker> rejectedLinkers = new ArrayList<>() ;
+		
 		public AnalysisGraphFactory(PricingModel pricingModel,
 				RenodedGraph renodedGraph,
 				LcrContext lcrContext) {
@@ -493,6 +497,23 @@ public class CoreLeastCostRoutingServiceImpl implements
 		public Map<FiberType, RenodedGraph> getRenodedGraphs() {
 			return mappedGraphs;
 		}
+		
+		
+		public Collection<EquipmentLinker> getRejectedEquipmentLinkers() {
+			return rejectedLinkers ;
+		}
+		
+		public SpanningTreeEventListener<GraphNode> getSpanningTreeEventListener() {
+			return new SpanningTreeEventListener<GraphNode>() {
+				@Override
+				public void onConstraintViolated(GraphNode vertex) {
+					EquipmentLinker el = matchedVertices.get(vertex) ;
+					if( el != null ) {
+						rejectedLinkers.add(matchedVertices.get(vertex));
+					}
+				}
+			} ;
+		}
 
 		public GraphPathConstraint<GraphNode, AroEdge<GeoSegment>> createConstraint(
 				FiberType fiberType) {
@@ -508,19 +529,19 @@ public class CoreLeastCostRoutingServiceImpl implements
 
 		}
 
-		private Map<GraphNode, AssignedEntityDemand> extractVertices(LocationEntityType type) {
+		private Map<GraphNode, EquipmentLinker> extractVertices(LocationEntityType type) {
 			
-			Map<GraphNode, AssignedEntityDemand> map = new HashMap<>() ;
+			Map<GraphNode, EquipmentLinker> map = new HashMap<>() ;
 			
 			 renodedGraph
 			.getGraphAssignments()
 			.stream()
 			.forEach(ga -> {
 				AroEntity ae = ga.getAroEntity();
-				if (ae instanceof BulkFiberTerminal) {
-					BulkFiberTerminal bft = (BulkFiberTerminal) ae ;
+				if (ae instanceof EquipmentLinker) {
+					EquipmentLinker bft = (EquipmentLinker) ae ;
 					if( bft.hasDemandFor(type) )  {
-						map.put(renodedGraph.getGraphNode(ga), bft.getAssignedEntityDemand()) ;
+						map.put(renodedGraph.getGraphNode(ga), bft) ;
 					};
 				}
 				
@@ -543,6 +564,12 @@ public class CoreLeastCostRoutingServiceImpl implements
 				public RenodedGraph getRenodedGraph() {
 					return renodedGraph;
 				}
+
+				@Override
+				public SpanningTreeEventListener<GraphNode> getEventListener() {
+					return getSpanningTreeEventListener() ;
+				}
+				
 
 			};
 
@@ -605,7 +632,7 @@ public class CoreLeastCostRoutingServiceImpl implements
 			this.dagModel = dagModel;
 			this.graphModel = graphModel;
 		}
-
+		
 		@SuppressWarnings("unused")
 		public DAGModel<GeoSegment> getDagModel() {
 			return dagModel;

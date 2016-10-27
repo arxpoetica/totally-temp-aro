@@ -29,6 +29,7 @@ import com.altvil.aro.service.entity.RemoteTerminal;
 import com.altvil.aro.service.entity.RootEntity;
 import com.altvil.aro.service.entity.SplicePoint;
 import com.altvil.utils.EntityDoubleSum;
+import com.altvil.utils.StreamUtil;
 
 public class EntityFactory {
 
@@ -41,10 +42,10 @@ public class EntityFactory {
 
 	public LocationEntity createLocationEntity(
 			Set<LocationEntityType> entityMask, long locationId,
-			int censusBlockId,
-			double strength,
+			int censusBlockId, double strength,
 			LocationDemand coverageAggregateStatistic) {
-		return new LocationEntityImpl(locationId, censusBlockId, strength, coverageAggregateStatistic);
+		return new LocationEntityImpl(locationId, censusBlockId, strength,
+				coverageAggregateStatistic);
 	}
 
 	public BulkFiberTerminal createBulkFiberTerminal(
@@ -116,6 +117,25 @@ public class EntityFactory {
 		}
 
 		@Override
+		public boolean hasDemandFor(LocationEntityType type) {
+			return dropAssignments.stream().anyMatch(
+					da -> da.getAssignedEntityDemand().getLocationDemand()
+							.getEntityDemands().get(type).getAtomicUnits() > 0);
+		}
+
+		@Override
+		public Collection<LocationEntity> getLocationEntities() {
+			return StreamUtil.map(dropAssignments,
+					LocationDropAssignment::getLocationEntity);
+		}
+
+		@Override
+		public Collection<AssignedEntityDemand> getAssignedDemands() {
+			return StreamUtil.map(dropAssignments,
+					LocationDropAssignment::getAssignedEntityDemand);
+		}
+
+		@Override
 		public DropCableSummary getDropCableSummary() {
 			if (dropCableSummary == null) {
 				dropCableSummary = calcDropCableSummary();
@@ -184,10 +204,11 @@ public class EntityFactory {
 		public int getSplitterCount() {
 			return splitterCount;
 		}
-		
+
 		@Override
 		public String toString() {
-			return new ToStringBuilder(this).appendSuper(super.toString()).append("splitterCount", splitterCount).toString();
+			return new ToStringBuilder(this).appendSuper(super.toString())
+					.append("splitterCount", splitterCount).toString();
 		}
 	}
 
@@ -361,12 +382,14 @@ public class EntityFactory {
 			visitor.visit(this);
 
 		}
-		
+
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this).appendSuper(super.toString())
-					.append("dropCable", dropCable).append("dropLengthInMeters", dropLengthInMeters)
-					.append("assignedEntityDemand", assignedEntityDemand).toString();
+					.append("dropCable", dropCable)
+					.append("dropLengthInMeters", dropLengthInMeters)
+					.append("assignedEntityDemand", assignedEntityDemand)
+					.toString();
 		}
 	}
 
@@ -384,11 +407,22 @@ public class EntityFactory {
 			super(objectId);
 			this.assignedEntityDemand = assignedEntityDemand;
 		}
-		
+
 		@Override
 		public boolean hasDemandFor(LocationEntityType type) {
 			return assignedEntityDemand.getLocationDemand()
 					.getLocationDemand(type).getAtomicUnits() > 0;
+		}
+		
+
+		@Override
+		public Collection<LocationEntity> getLocationEntities() {
+			return Collections.singleton(assignedEntityDemand.getLocationEntity());
+		}
+
+		@Override
+		public Collection<AssignedEntityDemand> getAssignedDemands() {
+			return Collections.singleton(assignedEntityDemand) ;
 		}
 
 		@Override
@@ -415,11 +449,12 @@ public class EntityFactory {
 		public double getTotalFiberDemand() {
 			return assignedEntityDemand.getLocationDemand().getAtomicUnits();
 		}
-		
+
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this).appendSuper(super.toString())
-					.append("assignedEntityDemand", assignedEntityDemand).toString();
+					.append("assignedEntityDemand", assignedEntityDemand)
+					.toString();
 		}
 	}
 
@@ -431,39 +466,27 @@ public class EntityFactory {
 		 */
 		private static final long serialVersionUID = 1L;
 		private LocationDemand coverageAggregateStatistic;
-		private int censusBlockId ;
-		private double strength ;
+		private int censusBlockId;
+		private double strength;
 
-		public LocationEntityImpl(Long id,
-				int censusBlockId ,
-				double strength,
+		public LocationEntityImpl(Long id, int censusBlockId, double strength,
 				LocationDemand coverageAggregateStatistic) {
 			super(id);
-			this.strength = strength ;
+			this.strength = strength;
 			this.censusBlockId = censusBlockId;
 			this.coverageAggregateStatistic = coverageAggregateStatistic;
 		}
-		
-		
-
-		
 
 		@Override
 		public double getCompetitiveStrength() {
-			return strength ;
+			return strength;
 		}
-
-
-
-
 
 		@Override
 		public Class<? extends AroEntity> getType() {
 			return LocationEntity.class;
 		}
 
-		
-		
 		@Override
 		public int getCensusBlockId() {
 			return censusBlockId;
@@ -478,11 +501,13 @@ public class EntityFactory {
 		public LocationDemand getLocationDemand() {
 			return coverageAggregateStatistic;
 		}
-		
+
 		@Override
 		public String toString() {
-			return new ToStringBuilder(this).appendSuper(super.toString())
-					.append("coverageAggregateStatistic", coverageAggregateStatistic).toString();
+			return new ToStringBuilder(this)
+					.appendSuper(super.toString())
+					.append("coverageAggregateStatistic",
+							coverageAggregateStatistic).toString();
 		}
 	}
 }

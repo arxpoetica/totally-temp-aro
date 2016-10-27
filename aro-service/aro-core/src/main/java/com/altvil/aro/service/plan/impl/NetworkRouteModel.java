@@ -1,11 +1,13 @@
 package com.altvil.aro.service.plan.impl;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.EquipmentLinker;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
@@ -31,14 +33,16 @@ public class NetworkRouteModel implements NetworkModel {
 
 	private Map<AroEntity, GraphAssignment> entityToAssignment = new HashMap<>();
 	private Map<GraphAssignment, GraphMapping> assignmentToMapping = new HashMap<>();
-
+	private Collection<EquipmentLinker> rejectedLinkers ;
+	
 	public NetworkRouteModel(
 			NetworkAssignment fiberSourceAssignment,
 			LocationModel locationModel,
 			Map<FiberType, RenodedGraph> renodedGraphsMap,
 			GeneratedFiberRoute feederFiber,
 			Map<GraphAssignment, GeneratedFiberRoute> distributionFiber,
-			FiberSourceMapping networkPlan) {
+			FiberSourceMapping networkPlan,
+			Collection<EquipmentLinker> rejectedLinkers) {
 		super();
 		this.fiberSourceAssignment = fiberSourceAssignment;
 		
@@ -52,6 +56,11 @@ public class NetworkRouteModel implements NetworkModel {
 		init(networkPlan);
 	}
 
+
+	@Override
+	public Collection<EquipmentLinker> getRejectedEquipmentLinkers() {
+		return rejectedLinkers;
+	}
 
 
 	private void register(GraphMapping gm) {

@@ -1,6 +1,8 @@
 package com.altvil.aro.service.optimization.wirecenter.generated;
 
-import org.opengis.geometry.Geometry;
+import com.vividsolutions.jts.geom.Geometry;
+
+
 
 public interface GeneratedNetworkData {
 	

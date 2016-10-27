@@ -4,7 +4,7 @@ import java.util.Collection;
 
 public interface GeneratedData {
 	
-	Collection<LinkedLocation> getLinkedLocations() ;
+	Collection<EquipmentLinkedLocation> getLinkedLocations() ;
 	Collection<GeneratedNetworkData> getGeneratedNetworkData() ;
 	
 }

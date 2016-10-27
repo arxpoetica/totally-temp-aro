@@ -31,6 +31,7 @@ import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
 import com.altvil.aro.service.graph.alg.SourceRoute;
 import com.altvil.aro.service.graph.alg.SpanningShortestPath;
 import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint;
+import com.altvil.aro.service.graph.alg.routing.SpanningTreeEventListener;
 import com.altvil.aro.service.graph.alg.routing.GraphPathConstraint.MetricLinkDistance;
 import com.altvil.aro.service.graph.alg.routing.VirtualRoot;
 import com.altvil.aro.service.graph.alg.routing.spi.ClosestRouteStrategy;
@@ -51,6 +52,7 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 	private static final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 
+	private SpanningTreeEventListener<V> spanningTreeEventListener;
 	private ClosestRouteStrategy<V, E> closestRouteStrategy;
 	private SourceGraph<V, E> sourceGraph;
 	private GraphPathConstraint<V, E> pathPredicate;
@@ -65,11 +67,14 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 
 	private Map<V, SourceRoute<V, E>> sourceRootMap = new HashMap<>();
 
-	public SpanningTreeAlgorithmImpl(MetricEdgeWeight<E> metricEdgeWeight,
+	public SpanningTreeAlgorithmImpl(
+			SpanningTreeEventListener<V> spanningTreeEventListener,
+			MetricEdgeWeight<E> metricEdgeWeight,
 			SourceGraph<V, E> sourceGraph,
 			GraphPathConstraint<V, E> pathPredicate,
 			Collection<V> assignedSources, Collection<V> assignedTargets) {
 		super();
+		this.spanningTreeEventListener = spanningTreeEventListener;
 		this.metricEdgeWeight = metricEdgeWeight;
 		this.sourceGraph = sourceGraph;
 		this.pathPredicate = pathPredicate;
@@ -110,7 +115,11 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 					virtualRoot.getRoot(), pathPredicate, metricGraph,
 					assignedTargets)
 					: new UnconstrainedTargets(assignedTargets);
-
+					
+					
+			Collection<V> rejected = selectedTargets.getRejectedTargets() ;
+			rejected.forEach(spanningTreeEventListener::onConstraintViolated);
+			
 			this.closestRouteStrategy = createClosestRouteStrategy(
 					selectedTargets.getMetricLengthDistance(),
 					this.analysisGraph, this.metricGraph,
@@ -557,14 +566,14 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 			init(targets);
 		}
 		
-		
+		public Collection<V> getRejectedTargets() {
+			return rejected.keySet() ;
+		}
 
 		@Override
 		public MetricLinkDistance<V> getMetricLengthDistance() {
-			return this ;
+			return this;
 		}
-
-
 
 		public void addFailingTargets(Collection<V> vertices) {
 
@@ -686,14 +695,18 @@ public class SpanningTreeAlgorithmImpl<V, E> implements
 		public int getFailingCount(V vertex) {
 			return 0;
 		}
-		
+
 		public MetricLinkDistance<V> getMetricLengthDistance() {
 			return new MetricLinkDistance<V>() {
 				@Override
 				public double getLinkDistance(V vertex) {
 					return 0;
 				}
-			} ;
+			};
+		}
+		
+		public Collection<V> getRejectedTargets() {
+			return Collections.emptyList() ;
 		}
 
 		public Collection<V> getFailingVertices() {

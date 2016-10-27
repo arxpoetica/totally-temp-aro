@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.altvil.aro.service.network.AnalysisSelectionMode;
-import com.altvil.aro.service.optimization.CustomOptimization;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.AlgorithmType;
 import com.altvil.enumerations.AroOptimizationType;

@@ -1,26 +1,35 @@
 package com.altvil.aro.service.optimization.factory.impl;
 
-
-
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
+import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.AssignedEntityDemand;
+import com.altvil.aro.service.entity.BulkFiberTerminal;
+import com.altvil.aro.service.entity.DemandStatistic;
+import com.altvil.aro.service.entity.EquipmentLinker;
+import com.altvil.aro.service.entity.FDTEquipment;
+import com.altvil.aro.service.entity.LocationDemand;
 import com.altvil.aro.service.entity.LocationEntity;
 import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.graph.AroEdge;
 import com.altvil.aro.service.graph.model.NetworkData;
+import com.altvil.aro.service.graph.segment.GeoSegment;
 import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
@@ -28,9 +37,11 @@ import com.altvil.aro.service.optimization.factory.WireCenterPlanningStrategy;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
+import com.altvil.aro.service.optimization.wirecenter.generated.EquipmentLinkedLocation;
+import com.altvil.aro.service.optimization.wirecenter.generated.EquipmentLinkedLocation.LinkType;
 import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedData;
 import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedNetworkData;
-import com.altvil.aro.service.optimization.wirecenter.generated.LinkedLocation;
+import com.altvil.aro.service.optimization.wirecenter.generatedmpl.i.GeneratedNetworkDataImpl;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.GeneratedFiberRoute;
@@ -38,12 +49,20 @@ import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
 import com.altvil.utils.BufferedGeographyMatcher;
+import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.StreamUtil;
 import com.altvil.utils.UnitUtils;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-
+import com.vividsolutions.jts.geom.MultiLineString;
 
 public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
+
+	private static final Logger log = LoggerFactory
+			.getLogger(TabcOptimizationStrategy.class.getName());
+
+	private static InternedSet<NetworkNodeType> internedSet = InternedSet
+			.create(NetworkNodeType.class);
 
 	private WirecenterOptimizationRequest wirecenterOptimizationRequest;
 	private Collection<String> strategies;
@@ -57,7 +76,7 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 
 	private Collection<GenerationStrategy> generationStrategies;
 	private GenerationTracker generationTracker;
-	
+
 	public TabcOptimizationStrategy(
 			WirecenterOptimizationRequest wirecenterOptimizationRequest,
 			Collection<String> strategies) {
@@ -83,7 +102,8 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		NetworkDataRequest networkDataRequest = wirecenterOptimizationRequest
 				.getNetworkDataRequest()
 				.modify()
-				.updateSelectionFilters(EnumSet.of(NetworkAssignmentModel.SelectionFilter.ALL))
+				.updateSelectionFilters(
+						EnumSet.of(NetworkAssignmentModel.SelectionFilter.ALL))
 				.updateMrc(0).update(AnalysisSelectionMode.SELECTED_AREAS)
 				.commit();
 
@@ -102,33 +122,38 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 			network = strategy.generate(network);
 			generationTracker.update(strategy, network);
 		}
-		
-		if( network.isPresent() ) {
-			network = Optional.of(new DefaultPlannedNetwork(network.get(), generationTracker)) ;
+
+		if (network.isPresent()) {
+			network = Optional.of(new DefaultPlannedNetwork(network.get(),
+					generationTracker));
 		}
 
 		return network;
 	}
 
-	
 	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
 			Optional<PlannedNetwork> network, double bufferDistance) {
 
-		if(!network.isPresent()) {
+		if (!network.isPresent()) {
 			return (assignment) -> false;
 		}
 
-		CompositeNetworkModel plannedNetwork = network.get().getPlannedNetwork();
-		Collection<Geometry> geometries = plannedNetwork.getNetworkModels().stream()
-				//TODO: add distribution fiber handling
+		CompositeNetworkModel plannedNetwork = network.get()
+				.getPlannedNetwork();
+		Collection<Geometry> geometries = plannedNetwork
+				.getNetworkModels()
+				.stream()
+				// TODO: add distribution fiber handling
 				.map(NetworkModel::getCentralOfficeFeederFiber)
 				.map(GeneratedFiberRoute::getEdges)
 				.flatMap(Collection::stream)
-				.map(geoSegmentAroEdge -> geoSegmentAroEdge.getValue().getLineString())
-				.collect(Collectors.toList());
+				.map(geoSegmentAroEdge -> geoSegmentAroEdge.getValue()
+						.getLineString()).collect(Collectors.toList());
 
-		BufferedGeographyMatcher matcher = new BufferedGeographyMatcher(geometries, bufferDistance);
-		return assignment -> matcher.covers(assignment.getDomain().getLocationPoint());
+		BufferedGeographyMatcher matcher = new BufferedGeographyMatcher(
+				geometries, bufferDistance);
+		return assignment -> matcher.covers(assignment.getDomain()
+				.getLocationPoint());
 	}
 
 	private Collection<GenerationStrategy> createStrategyPlan(
@@ -139,13 +164,11 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 	}
 
 	private NetworkData getNetworkData(GenerationStrategy strategy,
-									   Predicate<NetworkAssignment> predicate) {
+			Predicate<NetworkAssignment> predicate) {
 		NetworkData networkData = networkDataHandler.getNetworkData(predicate);
 		generationTracker.update(strategy, networkData);
 		return networkData;
 	}
-	
-
 
 	private interface GenerationStrategy {
 		String getId();
@@ -225,41 +248,103 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		private NetworkData getNetworkData(
 				Predicate<NetworkAssignment> predicate) {
 			return networkData.createNetworkData(networkData.getRoadLocations()
-					.filter(predicate).create(NetworkAssignmentModel.SelectionFilter.ALL));
+					.filter(predicate)
+					.create(NetworkAssignmentModel.SelectionFilter.ALL));
 		}
 
 	}
 
-	private static class LocationTracking implements LinkedLocation {
+	private static class ProxyEquipmentLinkedLocation implements
+			EquipmentLinkedLocation {
+
+		private LocationEntityType locationEntityType;
+		private LocationTracking locationTracking;
+		private DemandStatistic demandStatistic;
+
+		public ProxyEquipmentLinkedLocation(
+				LocationEntityType locationEntityType,
+				LocationTracking locationTracking,
+				DemandStatistic demandStatistic) {
+			super();
+			this.locationEntityType = locationEntityType;
+			this.locationTracking = locationTracking;
+			this.demandStatistic = demandStatistic;
+		}
+
+		@Override
+		public Long getLocationId() {
+			return locationTracking.getLocationId();
+		}
+
+		@Override
+		public LinkType getLinkType() {
+			return locationTracking.getLinkType();
+		}
+
+		@Override
+		public LocationEntityType getLocationEntityType() {
+			return locationEntityType;
+		}
+
+		@Override
+		public DemandStatistic getDemandStatistic() {
+			return demandStatistic;
+		}
+
+		@Override
+		public String getExtendedInfo() {
+			return locationTracking.getExtendedInfo();
+		}
+
+	}
+
+	private static class LocationTracking {
 		private NetworkAssignment networkAssignment;
 		private StringBuffer trackingStrategy = new StringBuffer();
+		private Set<NetworkNodeType> networkLinkTypes = internedSet
+				.getEmptySet();
+		private LinkType linkType = LinkType.LINKED;
 
 		public LocationTracking(NetworkAssignment networkAssignment) {
 			super();
 			this.networkAssignment = networkAssignment;
 		}
 
+		public void assemble(List<EquipmentLinkedLocation> linkedLocations) {
+			LocationDemand ld = getLocationEntity().getLocationDemand();
+			ld.getEntityDemands()
+					.entrySet()
+					.stream()
+					.filter(e -> e.getValue().getAtomicUnits() > 0)
+					.map(e -> {
+						return (EquipmentLinkedLocation) new ProxyEquipmentLinkedLocation(
+								e.getKey(), this, e.getValue());
+					}).forEach(ll -> linkedLocations.add(ll));
+
+		}
+
 		public void update(GenerationStrategy strategy) {
 			this.trackingStrategy.append(strategy.getId());
 		}
 
-		@Override
 		public Long getLocationId() {
-			return networkAssignment.getSource().getObjectId() ;
+			return getLocationEntity().getObjectId();
 		}
 
-		@Override
-		public AssignedEntityDemand getAssignedEntityDemand() {
-			// TODO Auto-generated method stub
-			return null;
+		public void update(GenerationStrategy strategy,
+				AssignedEntityDemand assignedDemand, NetworkNodeType nodeType) {
+			trackingStrategy.append(strategy.getId());
+			internedSet.append(networkLinkTypes, nodeType);
 		}
 
-		@Override
+		public LocationEntity getLocationEntity() {
+			return (LocationEntity) networkAssignment.getSource();
+		}
+
 		public LinkType getLinkType() {
-			return LinkType.LINKED;
+			return linkType;
 		}
 
-		@Override
 		public String getExtendedInfo() {
 			return trackingStrategy.toString();
 		}
@@ -268,40 +353,105 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 
 	private class GenerationTracker implements GeneratedData {
 
-		private Map<NetworkAssignment, LinkedLocation> map = new HashMap<>(
-				10000);
+		private Map<Long, LocationTracking> map = new HashMap<>(10000);
+		private List<GeneratedNetworkData> generatedData = new ArrayList<>();
 
 		public void update(GenerationStrategy strategy, NetworkData networkData) {
 
 			networkData.roadLocations.getDefaultAssignments().forEach(na -> {
-				LocationTracking lt = (LocationTracking)  map.get(na);
+				LocationTracking lt = map.get(na);
 
 				if (lt == null) {
-					map.put(na, lt = new LocationTracking(na));
+					lt = new LocationTracking(na);
+					map.put(lt.getLocationId(), new LocationTracking(na));
 				}
 
 				lt.update(strategy);
 
 			});
 		}
-		
+
 		@Override
-		public Collection<LinkedLocation> getLinkedLocations() {
-			return map.values();
+		public Collection<EquipmentLinkedLocation> getLinkedLocations() {
+			List<EquipmentLinkedLocation> result = new ArrayList<>();
+			map.values().forEach(l -> l.assemble(result));
+			return result;
 		}
 
+		private MultiLineString createMultiLineString(
+				Collection<AroEdge<GeoSegment>> segments) {
 
+			return GeometryUtil.createMultiLineString(StreamUtil.map(segments,
+					s -> (LineString) s.getValue().getLineString()));
+		}
+
+		private NetworkNodeType toEquipmentNodeType(EquipmentLinker linker) {
+			Class<?> clz = linker.getType();
+			if (BulkFiberTerminal.class.isAssignableFrom(clz)) {
+				return NetworkNodeType.bulk_distrubution_terminal;
+			}
+			if (FDTEquipment.class.isAssignableFrom(clz)) {
+				return NetworkNodeType.fiber_distribution_hub;
+			}
+
+			throw new RuntimeException("Unknown EquipmentLinker Type " + clz);
+		}
+
+		private void updateRejectedLinks(GenerationStrategy strategy,
+				EquipmentLinker linker) {
+			NetworkNodeType nt = toEquipmentNodeType(linker);
+			linker.getAssignedDemands()
+					.forEach(
+							ad -> {
+								Long locationId = ad.getLocationEntity()
+										.getObjectId();
+								LocationTracking lt = (LocationTracking) map
+										.get(locationId);
+								if (lt == null) {
+									log.error("Failed to map LocationTracking location id ="
+											+ locationId);
+								} else {
+									lt.update(strategy, ad, nt);
+								}
+
+							});
+		}
+
+		private void updateFiberPath(GenerationStrategy strategy,
+				CompositeNetworkModel network) {
+
+			// TODO Add distribution Fiber
+			Geometry geometry = createMultiLineString(network
+					.getNetworkModels()
+					.stream()
+					.flatMap(
+							nm -> nm.getCentralOfficeFeederFiber().getEdges()
+									.stream()).collect(Collectors.toList()));
+
+			generatedData.add(new GeneratedNetworkDataImpl("fiber_route_"
+					+ strategy.getId(), geometry));
+
+		}
+
+		private void updateNetwork(GenerationStrategy strategy,
+				CompositeNetworkModel network) {
+
+			updateFiberPath(strategy, network);
+			network.getNetworkModels().stream()
+					.flatMap(nm -> nm.getRejectedEquipmentLinkers().stream())
+					.forEach(linker -> updateRejectedLinks(strategy, linker));
+		}
+
+		public void update(GenerationStrategy strategy,
+				Optional<PlannedNetwork> networkModel) {
+			if (networkModel.isPresent()) {
+				updateNetwork(strategy, networkModel.get().getPlannedNetwork());
+			}
+		}
 
 		@Override
 		public Collection<GeneratedNetworkData> getGeneratedNetworkData() {
-			//track generated tacking
-			return Collections.emptyList() ;
-		}
-
-
-
-		public void update(GenerationStrategy strategy,
-				Optional<PlannedNetwork> networkModel) { 
+			return generatedData;
 		}
 
 	}
@@ -354,6 +504,41 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		public GenerationStrategy createStrategy(String strategyName,
 				TabcOptimizationStrategy ctx) {
 			return map.get(strategyName).apply(ctx);
+		}
+
+	}
+
+	private static class InternedSet<T> {
+
+		public static <T extends Enum<T>> InternedSet<T> create(Class<T> clz) {
+			return new InternedSet<T>(() -> EnumSet.noneOf(clz));
+		}
+
+		private Supplier<Set<T>> setSupplier;
+		private Map<Set<T>, Set<T>> map = new HashMap<>();
+		private final Set<T> emptySet;
+
+		public InternedSet(Supplier<Set<T>> setSupplier) {
+			super();
+			this.setSupplier = setSupplier;
+			emptySet = setSupplier.get();
+			map.put(emptySet, emptySet);
+		}
+
+		public Set<T> getEmptySet() {
+			return emptySet;
+		}
+
+		public Set<T> append(Set<T> set, T value) {
+			Set<T> updatedSet = setSupplier.get();
+			updatedSet.addAll(set);
+
+			Set<T> interned = map.get(updatedSet);
+			if (interned == null) {
+				map.put(updatedSet, interned = updatedSet);
+			}
+
+			return interned;
 		}
 
 	}

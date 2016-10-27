@@ -3,7 +3,6 @@ package com.altvil.aro.service.optimization.wirecenter.impl;
 import com.altvil.aro.service.demand.mapping.CompetitiveDemandMapping;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedData;
-import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedNetworkData;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 
 public class DefaultPlannedNetwork implements PlannedNetwork {
