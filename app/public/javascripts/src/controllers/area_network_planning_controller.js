@@ -145,6 +145,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       delete changes.irrThreshold
     } else if (algorithm === 'BUDGET_IRR') {
     } else if (algorithm === 'TABC') {
+      delete changes.budget
+      delete changes.irrThreshold
       changes.customOptimization = {
         name: 'TABC',
         map: {
