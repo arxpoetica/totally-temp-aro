@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.model.NetworkPlanData;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
 import com.altvil.interfaces.FiberCableConstructionType;
 
@@ -15,6 +16,7 @@ public interface PlanModifications<T> {
 	public PlanModifications<T> setDemandCoverage(DemandCoverage demandCoverage) ;
 	public PlanModifications<T> setEquipmentLocationMappings(Collection<EquipmentLocationMapping> mappedLocations) ;
 	public PlanModifications<T> setFiberLengths(Map<FiberCableConstructionType, Double> map) ;
+	public PlanModifications<T> add(NetworkPlanData planData) ;
 	
 	public T commit() ;
 	
