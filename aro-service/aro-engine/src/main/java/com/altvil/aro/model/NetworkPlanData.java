@@ -5,16 +5,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.opengis.geometry.Geometry;
-
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.vividsolutions.jts.geom.Geometry;
 
 //@Entity
 //@Table(name = "network_plan_data", schema = "client")
 public class NetworkPlanData {
 
-	private NetworkPlanDataKey networkPlanDataKey;
+	private NetworkPlanDataKey id;
 
 	private NetworkPlan networkPlan;
 
@@ -24,12 +23,12 @@ public class NetworkPlanData {
 
 	@Id
 	@Column(name = "id")
-	public NetworkPlanDataKey getNetworkPlanDataKey() {
-		return networkPlanDataKey;
+	public NetworkPlanDataKey getId() {
+		return id;
 	}
 
-	public void setNetworkPlanDataKey(NetworkPlanDataKey networkPlanDataKey) {
-		this.networkPlanDataKey = networkPlanDataKey;
+	public void setId(NetworkPlanDataKey networkPlanDataKey) {
+		this.id = networkPlanDataKey;
 	}
 
 	@JoinColumn(name = "network_plan_id", referencedColumnName = "id", insertable = false, updatable = false)

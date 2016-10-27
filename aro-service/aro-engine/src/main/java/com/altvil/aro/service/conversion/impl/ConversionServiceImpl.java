@@ -49,7 +49,7 @@ public class ConversionServiceImpl implements SerializationService {
 
 		if (model.isPresent()) {
 			new NetworkPlanSerializer<WirecenterNetworkPlan>(resolver, planId)
-					.serialize(model.get(), mods);
+					.serialize(planNetwork, mods);
 		}
 
 		return mods.commit();

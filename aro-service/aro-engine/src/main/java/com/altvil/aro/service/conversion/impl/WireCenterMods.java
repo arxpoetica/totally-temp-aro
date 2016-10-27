@@ -2,6 +2,7 @@ package com.altvil.aro.service.conversion.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.model.NetworkPlanData;
+import com.altvil.aro.model.PlanLocationLink;
 import com.altvil.aro.service.conversion.EquipmentLocationMapping;
 import com.altvil.aro.service.conversion.PlanModifications;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
@@ -30,6 +33,8 @@ public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> 
 	private DemandCoverage demandCoverage = null;
 	private Collection<EquipmentLocationMapping> equipmentLocationMappings;
 	private Map<FiberCableConstructionType, Double> fiberLengthMap;
+	private Collection<NetworkPlanData> networkPlanData = new ArrayList<>() ;
+	private Collection<PlanLocationLink> locationLinks = Collections.emptyList();
 
 	public WireCenterMods(long planId) {
 		super();
@@ -71,10 +76,28 @@ public class WireCenterMods implements PlanModifications<WirecenterNetworkPlan> 
 	}
 
 	@Override
+	public PlanModifications<WirecenterNetworkPlan> addNetworkPlanData(
+			NetworkPlanData planData) {
+		networkPlanData.add(planData) ;
+		return this;
+	}
+
+	@Override
+	public PlanModifications<WirecenterNetworkPlan> addLocationLinks(
+			Collection<PlanLocationLink> locationLinks) {
+		this.locationLinks = locationLinks ;
+		return this;
+	}
+	
+	@Override
 	public WirecenterNetworkPlan commit() {
 		return new DefaultWirecenterNetworkPlan(planId, networkNodes,
 				fiberRoutes, demandCoverage, equipmentLocationMappings,
-				fiberLengthMap);
+				fiberLengthMap, networkPlanData, locationLinks);
 	}
+
+
+	
+	
 
 }

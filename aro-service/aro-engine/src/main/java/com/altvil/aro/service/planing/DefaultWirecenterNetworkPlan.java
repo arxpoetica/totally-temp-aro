@@ -7,6 +7,8 @@ import java.util.Set;
 
 import com.altvil.aro.model.FiberRoute;
 import com.altvil.aro.model.NetworkNode;
+import com.altvil.aro.model.NetworkPlanData;
+import com.altvil.aro.model.PlanLocationLink;
 import com.altvil.aro.service.conversion.EquipmentLocationMapping;
 import com.altvil.aro.service.optimize.impl.DefaultFiberCoverage;
 import com.altvil.aro.service.optimize.model.DemandCoverage;
@@ -17,34 +19,41 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 	private long planId;
 	private Collection<NetworkNode> networkNodes;
 	private Collection<FiberRoute> fiberRoutes;
-	private DemandCoverage demandCoverage ;
-	private Map<FiberCableConstructionType, Double> fiberLengthMap ;
-	private Collection<EquipmentLocationMapping> equipmentLocationMappings ;
+	private DemandCoverage demandCoverage;
+	private Map<FiberCableConstructionType, Double> fiberLengthMap;
+	private Collection<EquipmentLocationMapping> equipmentLocationMappings;
+	private Collection<NetworkPlanData> networkPlanData;
+	private Collection<PlanLocationLink> locationLinks;
 
 	public DefaultWirecenterNetworkPlan(long planId,
 			Collection<NetworkNode> networkNodes,
-			Collection<FiberRoute> fiberRoutes,
-			DemandCoverage demandCoverage,
+			Collection<FiberRoute> fiberRoutes, DemandCoverage demandCoverage,
 			Collection<EquipmentLocationMapping> equipmentLocationMappings,
-			Map<FiberCableConstructionType, Double> fiberLengthMap) {
+			Map<FiberCableConstructionType, Double> fiberLengthMap,
+			Collection<NetworkPlanData> networkPlanData,
+			Collection<PlanLocationLink> locationLinks) {
 		super();
 		this.planId = planId;
 		this.networkNodes = networkNodes;
 		this.fiberRoutes = fiberRoutes;
-		this.demandCoverage = demandCoverage == null ? DefaultFiberCoverage.accumulate().getResult() : demandCoverage;
-		this.equipmentLocationMappings =equipmentLocationMappings ;
-		this.fiberLengthMap = fiberLengthMap == null ? Collections.emptyMap() : fiberLengthMap ;
+		this.demandCoverage = demandCoverage == null ? DefaultFiberCoverage
+				.accumulate().getResult() : demandCoverage;
+		this.equipmentLocationMappings = equipmentLocationMappings;
+		this.fiberLengthMap = fiberLengthMap == null ? Collections.emptyMap()
+				: fiberLengthMap;
+		this.networkPlanData = networkPlanData;
+		this.locationLinks = locationLinks;
 	}
-	
+
 	@Override
 	public double getFiberLengthInMeters(FiberCableConstructionType fiberType) {
-		Double length = fiberLengthMap.get(fiberType) ;
-		return length == null ? 0 : length ;
+		Double length = fiberLengthMap.get(fiberType);
+		return length == null ? 0 : length;
 	}
-	
+
 	@Override
 	public Set<FiberCableConstructionType> getFiberCableConstructionTypes() {
-		return fiberLengthMap.keySet() ;
+		return fiberLengthMap.keySet();
 	}
 
 	@Override
@@ -64,13 +73,22 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 
 	@Override
 	public DemandCoverage getDemandCoverage() {
-		return demandCoverage ;
+		return demandCoverage;
 	}
 
 	@Override
 	public Collection<EquipmentLocationMapping> getEquipmentLocationMappings() {
-		return equipmentLocationMappings ;
-	}	
-	
+		return equipmentLocationMappings;
+	}
+
+	@Override
+	public Collection<NetworkPlanData> networkPlanData() {
+		return networkPlanData;
+	}
+
+	@Override
+	public Collection<PlanLocationLink> getPlanLocationLinks() {
+		return locationLinks;
+	}
 
 }
