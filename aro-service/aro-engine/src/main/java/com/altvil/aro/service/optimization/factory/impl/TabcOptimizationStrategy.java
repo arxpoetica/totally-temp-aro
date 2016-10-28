@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.altvil.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -48,10 +49,6 @@ import com.altvil.aro.service.plan.GeneratedFiberRoute;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
-import com.altvil.utils.BufferedGeographyMatcher;
-import com.altvil.utils.GeometryUtil;
-import com.altvil.utils.StreamUtil;
-import com.altvil.utils.UnitUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -150,7 +147,7 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 				.map(geoSegmentAroEdge -> geoSegmentAroEdge.getValue()
 						.getLineString()).collect(Collectors.toList());
 
-		BufferedGeographyMatcher matcher = new BufferedGeographyMatcher(
+		BufferedSTRGeographyMatcher matcher = new BufferedSTRGeographyMatcher(
 				geometries, bufferDistance);
 		return assignment -> matcher.covers(assignment.getDomain()
 				.getLocationPoint());
