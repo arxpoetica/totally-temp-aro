@@ -193,10 +193,12 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     } else if (algorithm === 'TABC') {
       delete changes.budget
       delete changes.irrThreshold
+      var values = $scope.routeGenerationOptionsValues
+      var generations = Object.keys(values).filter((id) => values[id])
       changes.customOptimization = {
         name: 'TABC',
         map: {
-          generations: 'T,A,B,C'
+          generations: generations.join(',')
         }
       }
     }
