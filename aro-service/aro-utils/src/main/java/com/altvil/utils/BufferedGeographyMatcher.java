@@ -3,6 +3,8 @@ package com.altvil.utils;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -24,13 +26,14 @@ public class BufferedGeographyMatcher {
         Collection<T> geographies = GeometryUtil.transformGeometriesToGeographies(geometriesFiltered, centroid);
         List<Geometry> bufferedGeographies = geographies.stream()
                 .map(geometry -> geometry.buffer(bufferDistance))
-                .map(geometry -> {
+                .flatMap(geometry -> {
                             if (geometry instanceof MultiPolygon) {
-                                return geometry;
+                                return IntStream.range(0,geometry.getNumGeometries())
+                                        .mapToObj(geometry::getGeometryN);
                             } if (geometry instanceof Polygon) {
-                                return GeometryUtil.factory().createMultiPolygon(new Polygon[]{(Polygon) geometry});
+                                return Stream.of(geometry);
                             }
-                            return null;
+                            return Stream.empty();
                         }
                 )
                 .filter(geometry -> geometry != null && ! geometry.isEmpty())
