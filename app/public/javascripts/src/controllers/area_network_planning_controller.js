@@ -39,6 +39,22 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.budget = 10000000
   $scope.technology = 'odn1'
 
+  $scope.routeGenerationOptions = [
+    { id: 'T', value: 'T Route' },
+    { id: 'A', value: 'A Route' },
+    { id: 'B', value: 'B Route' },
+    { id: 'C', value: 'C Route' }
+  ]
+  $scope.routeGenerationOptionsValues = {}
+
+  $scope.reportGenerationOptions = [
+    { id: 'kml', value: 'Route KMLs' },
+    { id: 'summary', value: 'Route Summary' },
+    { id: 'tower', value: 'Dropped Tower Details' },
+    { id: 'routed', value: 'Routed Customer Details' }
+  ]
+  $scope.reportGenerationOptionsValues = {}
+
   $scope.optimizationTypeOptions = []
 
   var budgetInput = $('#area_network_planning_controller input[name=budget]')
@@ -58,10 +74,40 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
 
+    if (plan) {
+      $scope.reportName = plan.name
+    }
+
+    $scope.routeGenerationOptions.forEach((option) => {
+      $scope.routeGenerationOptionsValues[option.id] = true
+    })
+
+    $scope.reportGenerationOptions.forEach((option) => {
+      $scope.reportGenerationOptionsValues[option.id] = true
+    })
+
     $scope.entityTypes.forEach((entity) => {
       $scope.entityTypesTargeted[entity.id] = true
     })
   })
+
+  $scope.routeGenerationOptionsChanged = (id) => {
+    if ($scope.routeGenerationOptionsValues[id]) {
+      // check all above
+      $scope.routeGenerationOptions.some((option) => {
+        if (option.id === id) return true
+        $scope.routeGenerationOptionsValues[option.id] = true
+        return false
+      })
+    } else {
+      // uncheck all below
+      $scope.routeGenerationOptions.slice(0).reverse().some((option) => {
+        if (option.id === id) return true
+        $scope.routeGenerationOptionsValues[option.id] = false
+        return false
+      })
+    }
+  }
 
   $scope.irrThresholdRangeChanged = () => {
     $scope.irrThreshold = +$scope.irrThresholdRange
