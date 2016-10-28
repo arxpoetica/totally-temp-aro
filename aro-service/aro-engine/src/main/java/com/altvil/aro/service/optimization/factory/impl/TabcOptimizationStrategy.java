@@ -359,11 +359,11 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		public void update(GenerationStrategy strategy, NetworkData networkData) {
 
 			networkData.roadLocations.getDefaultAssignments().forEach(na -> {
-				LocationTracking lt = map.get(na);
+				LocationTracking lt = map.get(na.getSource().getObjectId());
 
 				if (lt == null) {
 					lt = new LocationTracking(na);
-					map.put(lt.getLocationId(), new LocationTracking(na));
+					map.put(lt.getLocationId(), lt);
 				}
 
 				lt.update(strategy);

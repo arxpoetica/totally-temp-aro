@@ -82,7 +82,7 @@ public class DefaultWirecenterNetworkPlan implements WirecenterNetworkPlan {
 	}
 
 	@Override
-	public Collection<NetworkPlanData> networkPlanData() {
+	public Collection<NetworkPlanData> getNetworkPlanData() {
 		return networkPlanData;
 	}
 

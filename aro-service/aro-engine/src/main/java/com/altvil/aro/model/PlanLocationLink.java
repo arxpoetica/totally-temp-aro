@@ -1,11 +1,11 @@
 package com.altvil.aro.model;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
+import javax.persistence.*;
 
-//@Entity
-//@Table(name = "plan_location_link", schema = "client")
+@Entity
+@Table(name = "plan_location_link", schema = "client")
 public class PlanLocationLink {
+	private Long id;
 
 	private Long planId;
 
@@ -22,9 +22,23 @@ public class PlanLocationLink {
 	private double monthlyRevenueImpact ;
 	private double penetration ;
 	private double fairShareDemand ;
-	
+
+
 	@Id
-	@Column(unique = true, nullable = false)
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE,
+			generator = "plan_location_link_id_seq")
+	@SequenceGenerator(name = "plan_location_link_id_seq", schema = "client", sequenceName = "plan_location_link_id_seq", allocationSize = 1000)
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+	@Column(name = "plan_id")
 	public Long getPlanId() {
 		return planId;
 	}
@@ -71,7 +85,7 @@ public class PlanLocationLink {
 		this.linkingState = linkingState;
 	}
 
-	@Column(name="attribute")
+	@Column(name="attr")
 	public String getAttribute() {
 		return attribute;
 	}

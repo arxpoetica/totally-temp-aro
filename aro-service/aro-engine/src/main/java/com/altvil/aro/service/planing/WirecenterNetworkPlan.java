@@ -26,7 +26,7 @@ public interface WirecenterNetworkPlan {
 	Set<FiberCableConstructionType> getFiberCableConstructionTypes() ;
 	double getFiberLengthInMeters(FiberCableConstructionType fiberType);
 	
-	Collection<NetworkPlanData>  networkPlanData() ;
+	Collection<NetworkPlanData> getNetworkPlanData() ;
 	Collection<PlanLocationLink> getPlanLocationLinks() ;
 	
 

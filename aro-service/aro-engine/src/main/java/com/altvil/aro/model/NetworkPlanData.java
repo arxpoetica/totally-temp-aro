@@ -1,16 +1,13 @@
 package com.altvil.aro.model;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.Geometry;
 
-//@Entity
-//@Table(name = "network_plan_data", schema = "client")
+@Entity
+@Table(name = "network_plan_data", schema = "client")
 public class NetworkPlanData {
 
 	private NetworkPlanDataKey id;
@@ -31,7 +28,7 @@ public class NetworkPlanData {
 		this.id = networkPlanDataKey;
 	}
 
-	@JoinColumn(name = "network_plan_id", referencedColumnName = "id", insertable = false, updatable = false)
+	/*@JoinColumn(name = "network_plan_id", referencedColumnName = "id", insertable = false, updatable = false)
 	@ManyToOne(optional = false)
 	public NetworkPlan getNetworkPlan() {
 		return networkPlan;
@@ -40,7 +37,7 @@ public class NetworkPlanData {
 	public void setNetworkPlan(NetworkPlan parentPlan) {
 		this.networkPlan = parentPlan;
 	}
-
+*/
 	@Column(name = "geom")
 	@JsonDeserialize(using = GeometryJsonDeserializer.class)
 	public Geometry getGeometry() {

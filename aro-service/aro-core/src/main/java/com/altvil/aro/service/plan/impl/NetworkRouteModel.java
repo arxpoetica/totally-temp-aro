@@ -52,7 +52,7 @@ public class NetworkRouteModel implements NetworkModel {
 		this.feederFiber = feederFiber;
 		this.distributionFiber = distributionFiber;
 		this.networkPlan = networkPlan;
-		
+		this.rejectedLinkers = rejectedLinkers;
 		init(networkPlan);
 	}
 

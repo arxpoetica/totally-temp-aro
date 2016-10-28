@@ -12,6 +12,8 @@ public class NetworkPlanDataKey implements Serializable {
 	private long planId;
 	private String key;
 
+	public NetworkPlanDataKey() {}
+
 	public NetworkPlanDataKey(long planId, String key) {
 		super();
 		this.planId = planId;

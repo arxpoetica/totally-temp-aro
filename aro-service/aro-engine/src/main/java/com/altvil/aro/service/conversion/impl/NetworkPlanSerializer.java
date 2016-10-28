@@ -58,7 +58,8 @@ public class NetworkPlanSerializer<T> {
 				PlanLocationLink pl = new PlanLocationLink();
 				DemandStatistic ds = ll.getDemandStatistic();
 
-				pl.setPlanId(ll.getLocationId());
+				pl.setPlanId(planId);
+				pl.setLocationId(ll.getLocationId());
 				pl.setAttribute(ll.getExtendedInfo());
 				pl.setLinkingState(ll.getLinkType().ordinal());
 				pl.setState("66"); // TODO derive STATE
@@ -69,6 +70,7 @@ public class NetworkPlanSerializer<T> {
 					pl.setMonthlyRevenueImpact(ds.getMonthlyRevenueImpact());
 					pl.setPenetration(ds.getPenetration());
 					pl.setRawCoverage(ds.getRawCoverage());
+					pl.setTotalRevenue(ds.getTotalRevenue());
 
 					return pl;
 

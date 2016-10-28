@@ -1,5 +1,7 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
+import com.altvil.aro.persistence.repository.NetworkPlanDataRepository;
+import com.altvil.aro.persistence.repository.PlanLocationLinkRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import com.altvil.aro.service.optimization.wirecenter.WirecenterPlanningService;
 import com.altvil.aro.service.report.GeneratedPlan;
 import com.altvil.aro.service.report.NetworkReportService;
 import com.altvil.aro.service.report.PlanAnalysisReportService;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WirecenterPlanningServiceImpl implements WirecenterPlanningService {
@@ -25,18 +28,22 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 	private FiberRouteRepository fiberRouteRepository;
 	private NetworkReportService networkReportService;
 	private PlanAnalysisReportService planAnalysisReportService;
+	private NetworkPlanDataRepository networkPlanDataRepository;
+	private PlanLocationLinkRepository planLocationLinkRepository;
 
 	@Autowired
 	public WirecenterPlanningServiceImpl(
 			NetworkNodeRepository networkNodeRepository,
 			FiberRouteRepository fiberRouteRepository,
 			NetworkReportService networkReportService,
-			PlanAnalysisReportService planAnalysisReportService) {
+			PlanAnalysisReportService planAnalysisReportService, NetworkPlanDataRepository networkPlanDataRepository, PlanLocationLinkRepository planLocationLinkRepository) {
 		super();
 		this.networkNodeRepository = networkNodeRepository;
 		this.fiberRouteRepository = fiberRouteRepository;
 		this.networkReportService = networkReportService;
 		this.planAnalysisReportService = planAnalysisReportService;
+		this.networkPlanDataRepository = networkPlanDataRepository;
+		this.planLocationLinkRepository = planLocationLinkRepository;
 	}
 
 
@@ -48,19 +55,20 @@ public class WirecenterPlanningServiceImpl implements WirecenterPlanningService 
 	}
 
 	@Override
+	@Transactional
 	public void save(GeneratedPlan plan) {
-		
 		networkNodeRepository.save(plan.getWirecenterNetworkPlan()
 				.getNetworkNodes());
 		
 		fiberRouteRepository.save(plan.getWirecenterNetworkPlan()
 				.getFiberRoutes());
-		
-		//TODO Save Generated Data as required
-	
+
+		networkPlanDataRepository.save(plan.getWirecenterNetworkPlan().getNetworkPlanData());
+		planLocationLinkRepository.save(plan.getWirecenterNetworkPlan().getPlanLocationLinks());
 	}
 
 	@Override
+	@Transactional
 	public void save(OptimizedPlan optimizedPlan) {
 		save(optimizedPlan.getGeneratedPlan()) ;
 		networkReportService.saveNetworkReport(optimizedPlan);

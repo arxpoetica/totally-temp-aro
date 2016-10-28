@@ -6,6 +6,7 @@ import com.altvil.aro.service.entity.LocationEntityType;
 public interface EquipmentLinkedLocation {
 	
 	public enum LinkType {
+		UNDEFINED,
 		LINKED,
 		FAILED,
 		UNREACHABLE 
