@@ -2,6 +2,7 @@ package com.altvil.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -308,13 +309,18 @@ public class GeometryUtil {
 
 	public static <T extends Geometry> Collection<T> transformGeometriesToGeographies(Collection<T> geometries, Point centroid) {
 		MathTransform transform = getGeographyTransform(centroid);
+		return transformGeometries(geometries, transform);
+
+	}
+
+	public static <T extends Geometry> List<T> transformGeometries(Collection<T> geometries, MathTransform transform) {
 		return geometries.stream()
 				.map(geom -> transformGeometry(transform, geom))
 				.collect(Collectors.toList());
-
 	}
+
 	@SuppressWarnings("unchecked")
-	private static <T extends Geometry> T transformGeometry(MathTransform coordinatesProjection, T shapeTrimmed) {
+	public static <T extends Geometry> T transformGeometry(MathTransform coordinatesProjection, T shapeTrimmed) {
 		try {
 			return ((T)org.geotools.geometry.jts.JTS.transform(shapeTrimmed, coordinatesProjection));
 		} catch (TransformException e) {
@@ -322,7 +328,10 @@ public class GeometryUtil {
 		}
 
 	}
+	public static <T extends Geometry> T transformGeographiesToGeometries(T geography, Point centroid) {
+		return transformGeographiesToGeometries(Collections.singleton(geography), centroid).iterator().next();
 
+	}
 	public static <T extends Geometry> Collection<T> transformGeographiesToGeometries(Collection<T> geographies, Point centroid) {
 		MathTransform transform = getGeometryTransform(centroid);
 		return geographies.stream()

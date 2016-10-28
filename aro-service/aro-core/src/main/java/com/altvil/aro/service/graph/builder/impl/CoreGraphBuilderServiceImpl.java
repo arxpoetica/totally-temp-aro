@@ -1,6 +1,5 @@
 package com.altvil.aro.service.graph.builder.impl;
 
-import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.SELECTED;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import com.altvil.aro.service.graph.transform.GraphTransformerFactory;
 import com.altvil.interfaces.CableConduitEdge;
 import com.altvil.interfaces.CableConstructionEnum;
 import com.altvil.interfaces.NetworkAssignment;
-import com.altvil.interfaces.NetworkAssignmentModel;
 import com.altvil.interfaces.RoadEdge;
 import com.altvil.interfaces.RoadLocation;
 

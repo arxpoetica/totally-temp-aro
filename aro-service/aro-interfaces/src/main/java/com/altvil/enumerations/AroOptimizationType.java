@@ -16,4 +16,8 @@ public enum AroOptimizationType {
 	NPV,
  	PRUNNING_NPV,
  	
+ 	
+ 	CUSTOM,
+ 	
+ 	
 }

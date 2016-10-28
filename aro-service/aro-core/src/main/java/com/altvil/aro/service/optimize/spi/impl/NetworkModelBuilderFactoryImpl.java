@@ -15,7 +15,6 @@ import com.altvil.aro.service.optimize.spi.NetworkModelBuilder;
 import com.altvil.aro.service.optimize.spi.NetworkModelBuilderFactory;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
-import com.altvil.aro.service.plan.NetworkAssignmentModelFactory;
 import com.altvil.aro.service.plan.impl.LcrContextImpl;
 
 @Service

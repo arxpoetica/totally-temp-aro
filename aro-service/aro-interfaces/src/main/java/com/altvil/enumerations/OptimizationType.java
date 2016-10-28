@@ -16,4 +16,7 @@ public enum OptimizationType {
 	NPV,
  	PRUNNING_NPV,
  	
+ 	
+ 	CUSTOM
+ 	
 }

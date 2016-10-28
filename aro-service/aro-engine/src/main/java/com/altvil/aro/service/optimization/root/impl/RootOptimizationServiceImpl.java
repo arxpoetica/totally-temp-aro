@@ -91,7 +91,8 @@ public class RootOptimizationServiceImpl implements RootOptimizationService {
 		Collection<MasterOptimizationRequest> masterRequests = masterPlans
 				.stream()
 				.map(mp -> request.toMasterOptimizationRequest(mp,
-						serviceLayerRequests.get(mp.getServiceLayer())))
+						serviceLayerRequests.get(mp.getServiceLayer()),
+						request.getCustomOptimization()))
 				.collect(Collectors.toList());
 
 		return doOptimize(request, masterRequests);

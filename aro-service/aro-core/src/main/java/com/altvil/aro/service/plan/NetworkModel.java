@@ -1,5 +1,8 @@
 package com.altvil.aro.service.plan;
 
+import java.util.Collection;
+
+import com.altvil.aro.service.entity.EquipmentLinker;
 import com.altvil.aro.service.entity.FiberType;
 import com.altvil.aro.service.graph.assigment.GraphAssignment;
 import com.altvil.aro.service.graph.assigment.GraphMapping;
@@ -18,6 +21,8 @@ public interface NetworkModel {
 	
 	public GeneratedFiberRoute getCentralOfficeFeederFiber() ;
 	public GeneratedFiberRoute getFiberRouteForFdh(GraphAssignment ga) ;
+	
+	public Collection<EquipmentLinker> getRejectedEquipmentLinkers() ;
 	
 	
 			

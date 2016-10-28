@@ -19,6 +19,7 @@ import com.altvil.aro.service.optimization.OptimizedPlan;
 import com.altvil.aro.service.optimization.ProcessLayerCommand;
 import com.altvil.aro.service.optimization.constraints.OptimizationConstraints;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
+import com.altvil.aro.service.optimization.factory.PlanningOptimizationFactory;
 import com.altvil.aro.service.optimization.impl.type.NpvPlanningOptimizer;
 import com.altvil.aro.service.optimization.master.GeneratedMasterPlan;
 import com.altvil.aro.service.optimization.master.MasterPlanningService;
@@ -48,6 +49,7 @@ public class OptimizationPlannerServiceImpl implements
 
 	private OptimizationEvaluatorFactory strategyService;
 	private WirecenterOptimizationService wirecenterOptimizationService;
+	private PlanningOptimizationFactory planningOptimizationFactory ;
 	private OptimizationExecutorService optimizationExecutorService;
 
 	private MasterPlanningService masterPlanningService;
@@ -64,7 +66,8 @@ public class OptimizationPlannerServiceImpl implements
 			WirecenterOptimizationService wirecenterOptimizationService,
 			OptimizationExecutorService optimizationExecutorService,
 			MasterPlanningService masterPlanningService,
-			NpvPlanningOptimizer npvPlanningOptimizer) {
+			NpvPlanningOptimizer npvPlanningOptimizer,
+			PlanningOptimizationFactory planningOptimizationFactory) {
 		super();
 		this.planCommandExecutorService = planCommandExecutorService;
 		this.strategyService = strategyService;
@@ -72,6 +75,7 @@ public class OptimizationPlannerServiceImpl implements
 		this.optimizationExecutorService = optimizationExecutorService;
 		this.masterPlanningService = masterPlanningService;
 		this.npvPlanningOptimizer = npvPlanningOptimizer;
+		this.planningOptimizationFactory = planningOptimizationFactory ;
 	}
 
 	@PostConstruct
@@ -195,7 +199,7 @@ public class OptimizationPlannerServiceImpl implements
 			return () -> {
 				try {
 					return new DefaultOptimizationResult<>(request,
-							wirecenterOptimizationService.planNetwork(request));
+							planningOptimizationFactory.create(request).optimize()) ;
 				} catch (Throwable err) {
 					log.error(err.getMessage(), err);
 					return new DefaultOptimizationResult<>(request,

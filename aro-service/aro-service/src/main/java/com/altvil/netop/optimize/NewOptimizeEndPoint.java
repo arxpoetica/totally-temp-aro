@@ -77,6 +77,7 @@ public class NewOptimizeEndPoint extends BaseEndPointHandler {
 				.setOptimizationMode(plan.getOptimizationMode())
 				.setThreshold(plan.getThreshold())
 				.setFinancialConstraints(plan.getFinancialConstraints())
+				.setCustomOptimization(plan.getCustomOptimization())
 				.build();
 	}
 

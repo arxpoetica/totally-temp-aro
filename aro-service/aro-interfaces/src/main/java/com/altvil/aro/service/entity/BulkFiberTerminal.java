@@ -1,9 +1,8 @@
 package com.altvil.aro.service.entity;
 
 
-public interface BulkFiberTerminal extends AroEntity {
+public interface BulkFiberTerminal extends EquipmentLinker  {
 
-	boolean hasDemandFor(LocationEntityType type) ;
 	LocationEntity getLocationEntity() ;
 	AssignedEntityDemand getAssignedEntityDemand() ;
 	double getTotalFiberDemand() ;
