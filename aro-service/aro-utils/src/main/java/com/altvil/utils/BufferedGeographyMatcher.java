@@ -12,9 +12,12 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
 import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BufferedGeographyMatcher {
     PreparedGeometry preparedGeometry;
+    private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
     public <T extends Geometry> BufferedGeographyMatcher(Collection<T > geometries, double bufferDistance){
 
@@ -28,15 +31,17 @@ public class BufferedGeographyMatcher {
                 .map(geometry -> geometry.buffer(bufferDistance))
                 .flatMap(geometry -> {
                             if (geometry instanceof MultiPolygon) {
-                                return IntStream.range(0,geometry.getNumGeometries())
+                                return IntStream.range(0, geometry.getNumGeometries())
                                         .mapToObj(geometry::getGeometryN);
-                            } if (geometry instanceof Polygon) {
+                            }
+                            if (geometry instanceof Polygon) {
                                 return Stream.of(geometry);
                             }
+                            log.warn("Geometry type " + geometry.getClass().getName() + " was skipped ");
                             return Stream.empty();
                         }
                 )
-                .filter(geometry -> geometry != null && ! geometry.isEmpty())
+                .filter(geometry -> geometry != null && !geometry.isEmpty())
                 .collect(Collectors.toList());
 
         Collection<Geometry> bufferedGeometries = GeometryUtil.transformGeographiesToGeometries(bufferedGeographies, centroid);

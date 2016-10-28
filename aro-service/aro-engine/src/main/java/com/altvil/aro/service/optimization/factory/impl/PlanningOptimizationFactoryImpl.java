@@ -59,8 +59,9 @@ public class PlanningOptimizationFactoryImpl implements
 		map.put("TABC",
 				request -> {
 					TabcOptimizationStrategy strategy =  new TabcOptimizationStrategy(request,
-							parseStringList(request.getCustomOptimization()
-									.getMap().get("generations"),
+							parseStringList("T"
+									//request.getCustomOptimization()									.getMap().get("generations")
+									,
 									tabcGenerations));
 					strategy.initialize(appContext);
 					return strategy ;
