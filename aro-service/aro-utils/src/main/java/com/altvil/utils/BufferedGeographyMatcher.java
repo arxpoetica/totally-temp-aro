@@ -2,6 +2,7 @@ package com.altvil.utils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -12,8 +13,12 @@ public class BufferedGeographyMatcher {
     PreparedGeometry preparedGeometry;
 
     public <T extends Geometry> BufferedGeographyMatcher(Collection<T > geometries, double bufferDistance){
-        Point centroid = GeometryUtil.factory().buildGeometry(geometries).getCentroid();
-        Collection<T> geographies = GeometryUtil.transformGeometriesToGeographies(geometries, centroid);
+
+        Collection<T> geometriesFiltered = geometries.stream()
+                .filter(geometry -> ! geometry.isEmpty())
+                .collect(Collectors.toList());
+        Point centroid = GeometryUtil.factory().buildGeometry(geometriesFiltered).getCentroid();
+        Collection<T> geographies = GeometryUtil.transformGeometriesToGeographies(geometriesFiltered, centroid);
         List<Geometry> bufferedGeographies = StreamUtil.map(geographies, geometry -> geometry.buffer(bufferDistance));
         Collection<Geometry> bufferedGeometries = GeometryUtil.transformGeographiesToGeometries(bufferedGeographies, centroid);
         preparedGeometry = PreparedGeometryFactory.prepare(GeometryUtil.factory().buildGeometry(bufferedGeometries));
