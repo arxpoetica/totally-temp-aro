@@ -366,19 +366,31 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       plan.location_types = plan.location_types || []
       map.ready(() => {
         selectedLocationsLayer.show()
-
         // select entity types used in optimization
-        if (plan.location_types.indexOf('medium') >= 0) $scope.business_categories_selected['medium'] = true
-        if (plan.location_types.indexOf('large') >= 0) $scope.business_categories_selected['large'] = true
-        $scope.show_businesses = _.size($scope.business_categories_selected) > 0
-        if (plan.location_types.indexOf('small') >= 0) $scope.business_categories_selected['small'] = true
-        if (plan.location_types.indexOf('mrcgte2000') >= 0) $scope.business_categories_selected['2kplus'] = true
-        if (plan.location_types.indexOf('celltower') >= 0) $scope.show_towers = true
-
-        $scope.changeLocationsLayer()
+        selectLocations(plan.location_types)
       })
     }
   })
+
+  $rootScope.$on('select_locations', (e, locationTypes) => {
+    selectLocations(locationTypes)
+  })
+
+  function selectLocations (locationTypes) {
+    var businessTypes = {
+      medium: 'medium',
+      large: 'large',
+      small: 'small',
+      mrcgte2000: '2kplus'
+    }
+    Object.keys(businessTypes).forEach((type) => {
+      if (locationTypes.indexOf(type) >= 0) $scope.business_categories_selected[businessTypes[type]] = true
+    })
+    if (locationTypes.indexOf('celltower') >= 0) $scope.show_towers = true
+    if (locationTypes.indexOf('household') >= 0) $scope.show_households = true
+    $scope.show_businesses = _.size($scope.business_categories_selected) > 0
+    $scope.changeLocationsLayer()
+  }
 
   $scope.overlay_is_loading = () => {
     return customerProfileLayer.is_loading
@@ -511,4 +523,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $scope.toggleMeasuringStick()
     }
   })
+
+  $scope.addCustomers = () => {
+    $rootScope.$broadcast('upload_customers')
+  }
 }])

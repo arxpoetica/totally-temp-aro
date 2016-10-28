@@ -41,6 +41,10 @@
       <% include modal_user_defined_boundaries.html %>
     </div>
 
+    <div ng-controller="upload_customers_controller">
+      <% include modal_upload_customers.html %>
+    </div>
+
     <% if (user.rol === 'admin') { %>
       <div ng-controller="admin_users_controller">
         <% include modal_manage_users.html %>
@@ -439,6 +443,7 @@
   <script src="javascripts/lib/controllers/settings_controller.js"></script>
   <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
   <script src="javascripts/lib/controllers/user_defined_boundary_controller.js"></script>
+  <script src="javascripts/lib/controllers/upload_customers_controller.js"></script>
   <script src="javascripts/lib/controllers/reports_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>

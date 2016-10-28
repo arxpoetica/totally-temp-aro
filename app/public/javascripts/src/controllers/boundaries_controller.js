@@ -259,7 +259,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.changeUserDefinedBoundary = () => {
     $rootScope.selectedUserDefinedBoundary = $scope.selectedUserDefinedBoundary
     if (!$scope.selectedUserDefinedBoundary) {
-      userDefinedLayer.hide()
+      userDefinedLayer.setApiEndpoint(null)
     } else {
       var url = `/service_areas/${$scope.selectedUserDefinedBoundary.name}`
       userDefinedLayer.layerId = $scope.selectedUserDefinedBoundary.id
@@ -530,6 +530,21 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     $rootScope.$broadcast('edit_user_defined_boundary', $scope.selectedUserDefinedBoundary)
   }
 
+  $scope.selectAllInLayer = () => {
+    $http.get(`/service_areas/${$scope.selectedUserDefinedBoundary.name}/all`)
+      .success((response) => {
+        response.feature_collection.features.forEach((boundary) => {
+          regions.selectGeography({
+            id: boundary.properties.id,
+            name: boundary.properties.name,
+            geog: boundary.geometry,
+            type: userDefinedLayer.type,
+            layerId: userDefinedLayer.layerId
+          })
+        })
+      })
+  }
+
   $rootScope.$on('saved_user_defined_boundary', (e, boundary) => {
     var existing = $scope.userDefinedBoundaries.find((item) => item.id === boundary.id)
     if (existing) {
@@ -547,5 +562,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.optimizationMode = optimization.getMode()
   $rootScope.$on('optimization_mode_changed', (e, mode) => {
     $scope.optimizationMode = mode
+  })
+
+  $('#locationsUploadedCustomersSelect').select2({
+    placeholder: 'Select one or more datasets'
   })
 }])

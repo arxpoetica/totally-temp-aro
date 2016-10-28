@@ -11,7 +11,7 @@ module.exports = class AROService {
     return new Promise((resolve, reject) => {
       var formData = req.formData
       delete req.formData
-      console.log('req', req)
+      console.log('req', JSON.stringify(req, null, 2))
       var r = request(req, (err, res, body) => {
         if (err) return reject(err)
         console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))

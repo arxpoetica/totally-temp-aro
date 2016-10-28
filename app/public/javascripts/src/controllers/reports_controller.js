@@ -1,4 +1,4 @@
-/* global app _ */
+/* global app _ $ */
 app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
   $scope.reports = [
     {
@@ -27,6 +27,17 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
     }
   ]
 
+  $scope.analysis = [
+    {
+      name: 'File name 1',
+      createdAt: '10/19/2016'
+    },
+    {
+      name: 'File name 2',
+      createdAt: '10/19/2016'
+    }
+  ]
+
   $scope.sortBy = (field, descending) => {
     $scope.reports = _.sortBy($scope.reports, (report) => {
       return report[field] || ''
@@ -35,4 +46,13 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
       $scope.reports = $scope.reports.reverse()
     }
   }
+
+  $scope.openReport = () => {
+    $('#reports').modal('hide')
+    $('#reports-folder').modal('show')
+  }
+
+  $('#reports-folder').on('hidden.bs.modal', () => {
+    $('#reports').modal('show')
+  })
 }])

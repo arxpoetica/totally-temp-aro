@@ -19,11 +19,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   // --
 
   $scope.entityTypes = [
-    { id: 'optimizeSMB', value: 'SMB' },
-    { id: 'optimizeMedium', value: 'Mid-tier' },
-    { id: 'optimizeLarge', value: 'Large Enterprise' },
-    { id: 'optimizeHouseholds', value: 'Residential' },
-    { id: 'optimizeTowers', value: 'Cell Sites' }
+    { id: 'optimizeSMB', value: 'SMB', name: 'small' },
+    { id: 'optimizeMedium', value: 'Mid-tier', name: 'medium' },
+    { id: 'optimizeLarge', value: 'Large Enterprise', name: 'large' },
+    { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
+    { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
   ]
   $scope.entityTypesTargeted = {}
 
@@ -144,14 +144,37 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     } else if (algorithm === 'IRR') {
       delete changes.irrThreshold
     } else if (algorithm === 'BUDGET_IRR') {
+    } else if (algorithm === 'TABC') {
+      delete changes.budget
+      delete changes.irrThreshold
+      changes.customOptimization = {
+        name: 'TABC',
+        map: {
+          generations: 'T,A,B,C'
+        }
+      }
     }
 
     changes.fiberNetworkConstraints = {
       useDirectRouting: $scope.technology === 'direct_routing'
     }
 
+    var selectLocationTypes = []
+    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+      selectLocationTypes = Object.keys($scope.entityTypesTargeted)
+        .map((key) => {
+          return $scope.entityTypesTargeted[key]
+            ? $scope.entityTypes.find((type) => type.id === key).name
+            : null
+        })
+        .filter((val) => val)
+    }
+
     canceler = optimization.optimize($scope.plan, changes, () => {
       $scope.calculating = false
+      if (selectLocationTypes.length > 0) {
+        $rootScope.$broadcast('select_locations', selectLocationTypes)
+      }
     }, () => {
       $scope.calculating = false
     })
@@ -173,7 +196,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         { id: 'CAPEX', label: 'Full Coverage' },
         { id: 'MAX_IRR', label: 'Maximum IRR' },
         { id: 'IRR', label: 'Budget' },
-        { id: 'BUDGET_IRR', label: 'IRR Target' }
+        { id: 'BUDGET_IRR', label: 'IRR Target' },
+        { id: 'TABC', label: 'TABC analysis' }
         // { id: 'TARGET_IRR', label: 'IRR Target' },
         // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
       ]

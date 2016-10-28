@@ -292,7 +292,8 @@ module.exports = class Network {
       'MAX_IRR': 'IRR',
       'TARGET_IRR': 'IRR',
       'BUDGET_IRR': 'IRR',
-      'IRR': 'IRR'
+      'IRR': 'IRR',
+      'TABC': 'CUSTOM'
     }
     options.algorithm = algorithms[options.algorithm] || options.algorithm
     options.locationTypes = Array.isArray(options.locationTypes) ? options.locationTypes : []
@@ -302,7 +303,8 @@ module.exports = class Network {
       algorithm: options.algorithm,
       analysisSelectionMode: options.selectionMode,
       fiberNetworkConstraints: options.fiberNetworkConstraints,
-      processLayers: options.processingLayers
+      processLayers: options.processingLayers,
+      customOptimization: options.customOptimization
     }
     var req = {
       method: 'POST',
