@@ -7,11 +7,11 @@ CREATE TABLE client.plan_location_link
     state character varying,
     entity_type_id integer,
     linking_state_id integer, 
-    attribute character varying,
-    rawCoverage double precision,
-    atomicUnits double precision,
-    totalRevenue double precision,
-    monthlyRevenueImpact double precision,
+    attr character varying,
+    raw_coverage double precision,
+    atomic_units double precision,
+    total_revenue double precision,
+    monthly_revenue double precision,
     penetration double precision,
-    fairShareDemand double precision
+    fairshare_demand double precision
 );
