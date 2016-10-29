@@ -1,6 +1,9 @@
 package com.altvil.aro.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -12,7 +15,7 @@ public class NetworkPlanData {
 
 	private NetworkPlanDataKey id;
 
-	private NetworkPlan networkPlan;
+	//private NetworkPlan networkPlan;
 
 	private Geometry geometry;
 	private String dataField;
