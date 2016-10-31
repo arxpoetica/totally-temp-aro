@@ -10,9 +10,13 @@ public enum OptimizationType {
 	CAPEX,
 	
 	COVERAGE,
-	
+
 	IRR,
+
 	NPV,
  	PRUNNING_NPV,
+ 	
+ 	
+ 	CUSTOM
  	
 }

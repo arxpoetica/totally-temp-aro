@@ -25,5 +25,8 @@ ${PSQL} -a -f $DIR/load_locations.sql
 # Create the functions to load partitioned towers
 ${PSQL} -a -f $DIR/load_towers.sql
 
+# Create the functions to load partitioned towers
+${PSQL} -a -f $DIR/load_households.sql
+
 
 

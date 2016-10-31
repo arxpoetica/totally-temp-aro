@@ -8,8 +8,8 @@ public class ThresholdBudgetConstraint extends AbstractOptimizationConstraint {
 	private double capex;
 
 	public ThresholdBudgetConstraint(OptimizationType optimizationType,
-			int years, double discountRate, double threshhold, double capex) {
-		super(optimizationType, years, discountRate);
+			int years, double discountRate, double threshhold, double capex, boolean forced) {
+		super(optimizationType, years, discountRate, forced);
 		this.threshhold = threshhold;
 		this.capex = capex;
 	}

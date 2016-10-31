@@ -138,7 +138,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
         api_endpoint: endpoint,
         style_options: {
           normal: {
-            strokeColor: '#d3d3d3',
+            strokeColor: 'purple',
             strokeWeight: 1,
             fillColor: 'blue'
           },

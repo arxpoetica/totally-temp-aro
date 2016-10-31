@@ -27,7 +27,7 @@ public class DistanceGraphPathConstraint<V, E extends AroEdge<GeoSegment>>
 	}
 
 	@Override
-	public boolean isValid(MetricDistance<V> metricDistance,
+	public boolean isValid(MetricLinkDistance<V> metricDistance,
 			GraphPath<V, AroEdge<GeoSegment>> graphPath) {
 
 		if (graphPath == null
@@ -41,7 +41,7 @@ public class DistanceGraphPathConstraint<V, E extends AroEdge<GeoSegment>>
 				.mapToDouble(
 						e -> e.getValue() == null ? 0 : e.getValue()
 								.getLength()).sum();
-		double distance = metricDistance.getDistance(graphPath.getEndVertex());
+		double distance = metricDistance.getLinkDistance(graphPath.getEndVertex());
 		double totalDistance = distance + pathLength;
 
 		if (log.isInfoEnabled() && totalDistance >= distanceInMeters) {

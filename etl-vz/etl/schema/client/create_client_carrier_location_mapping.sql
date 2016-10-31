@@ -41,6 +41,7 @@ ALTER TABLE client.locations_distance_to_carrier ADD PRIMARY KEY (location_id, c
 DROP TABLE IF EXISTS "client"."census_blocks_carriers";
 CREATE TABLE "client"."census_blocks_carriers" (
 	"census_block_gid" int4 NOT NULL,
+	"state" varchar,
 	"carrier_id" int4 NOT NULL,
 	"download_speed" int4,
 	"upload_speed" int4

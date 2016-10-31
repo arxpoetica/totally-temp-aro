@@ -17,6 +17,6 @@ public interface CoreGraphNetworkModelService {
 			GraphBuilderContext ctx);
 
 	GraphNetworkModel createGraphNetworkModel(NetworkData networkData,
-			GraphBuilderContext ctx);
+											  GraphBuilderContext ctx);
 
 }

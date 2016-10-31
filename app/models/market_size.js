@@ -8,6 +8,7 @@ var _ = require('underscore')
 var moment = require('moment')
 var config = require('../helpers').config
 var Network = require('./network')
+var pync = require('pync')
 
 const emptyArray = (arr) => !Array.isArray(arr) || arr.length === 0
 
@@ -52,7 +53,7 @@ module.exports = class MarketSize {
     if (type === 'all') {
       return `
         WITH biz AS (
-          SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
+          SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog, b.geom
           FROM businesses b
           ${customerTypeFilter()} ${boundaryConstraint()}
         )
@@ -314,11 +315,11 @@ module.exports = class MarketSize {
         to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
       END AS color
       FROM biz
-      JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
-      JOIN carriers c ON lc.carrier_id = c.id
-      JOIN locations l
-        ON l.id = lc.location_id
-        ${database.intersects(options.viewport, 'l.geom', 'WHERE')}
+      -- JOIN client.location_competitors lc ON lc.location_id = biz.location_id
+      -- JOIN carriers c ON lc.carrier_id = c.id
+      JOIN geotel.buffered_routes r ON st_contains(r.geom, biz.geom)
+      JOIN carriers c ON r.carrier_id = c.id
+      JOIN locations l ON l.id = biz.location_id
         ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
         ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
         GROUP BY c.id ORDER BY c.name
@@ -548,8 +549,8 @@ module.exports = class MarketSize {
           SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
           FROM aro.locations locations
           JOIN businesses b ON locations.id = b.location_id
-          JOIN client.business_customer_types bct ON bct.business_id = b.id
-          JOIN client.customer_types ct ON ct.id=bct.customer_type_id
+          -- JOIN client.business_customer_types bct ON bct.business_id = b.id
+          -- JOIN client.customer_types ct ON ct.id=bct.customer_type_id
         `
         if (filters.customer_type) {
           params.push(filters.customer_type)
@@ -593,42 +594,48 @@ module.exports = class MarketSize {
       })
       .then((market_size) => {
         output.market_size = market_size
+        output.fair_share = {
+          towers: []
+        }
 
-        var table = ['businesses', 'households', 'towers'].indexOf(filters.entity_type) >= 0 ? filters.entity_type : 'businesses'
-        var params = [location_id]
-        var sql = `
-          SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
-            CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
-            ELSE '#' ||
-              to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
-              to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
-            END AS color,
-            (SELECT distance FROM client.locations_distance_to_carrier ldtc
-              WHERE ldtc.carrier_id = c.id
-              AND ldtc.location_id = $1
-            )
-          FROM ${table} biz
-          JOIN locations l ON l.id = biz.location_id AND l.id = $1
-          JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
-          JOIN carriers c ON lc.carrier_id = c.id
-            ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
-            ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
-          GROUP BY c.id ORDER BY c.name
-        `
-        return database.query(sql, params)
+        var tables = ['businesses', 'households'] // TODO: towers
+        return pync.series(tables, (table) => {
+          var params = [location_id]
+          var sql = `
+            SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
+              CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
+              ELSE '#' ||
+                to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
+                to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
+              END AS color,
+              (SELECT distance FROM client.locations_distance_to_carrier ldtc
+                WHERE ldtc.carrier_id = c.id
+                AND ldtc.location_id = $1
+              )
+            FROM ${table} biz
+            JOIN locations l ON l.id = biz.location_id AND l.id = $1
+            JOIN client.location_competitors lc ON lc.location_id = biz.location_id
+            JOIN carriers c ON lc.carrier_id = c.id
+              ${table === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
+              ${table === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
+            GROUP BY c.id ORDER BY c.name
+          `
+          return database.query(sql, params)
+            .then((fairShare) => {
+              this._sortFairShare(fairShare)
+              output.fair_share[table] = fairShare
+            })
+        })
       })
-      .then((fair_share) => {
-        this._sortFairShare(fair_share)
-        output.fair_share = fair_share
-
-        var current_carrier = 0
-        var total = output.fair_share.reduce((total, item) => {
-          if (item.name === config.client_carrier_name) {
-            current_carrier = item.value
-          }
-          return item.value + total
-        }, 0)
-        output.share = current_carrier / total
+      .then(() => {
+        // var current_carrier = 0
+        // var total = output.fair_share.reduce((total, item) => {
+        //   if (item.name === config.client_carrier_name) {
+        //     current_carrier = item.value
+        //   }
+        //   return item.value + total
+        // }, 0)
+        // output.share = current_carrier / total
         return output
       })
   }
@@ -644,8 +651,8 @@ module.exports = class MarketSize {
           SELECT spend.year, SUM(spend.monthly_spend * 12)::float as total
           FROM aro.locations locations
           JOIN businesses b ON locations.id = b.location_id
-          JOIN client.business_customer_types bct ON bct.business_id = b.id
-          JOIN client.customer_types ct ON ct.id=bct.customer_type_id
+          -- JOIN client.business_customer_types bct ON bct.business_id = b.id
+          -- JOIN client.customer_types ct ON ct.id=bct.customer_type_id
           JOIN client.industry_mapping m ON m.sic4 = b.industry_id
           JOIN client.spend ON spend.industry_id = m.industry_id
         `
@@ -680,7 +687,7 @@ module.exports = class MarketSize {
         var sql = `
           SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
           JOIN locations l ON l.id = biz.location_id AND l.id = 1
-          JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+          JOIN client.location_competitors lc ON lc.location_id = biz.location_id
           JOIN carriers c ON lc.carrier_id = c.id
           WHERE biz.id = $1
           GROUP BY c.id
@@ -703,13 +710,13 @@ module.exports = class MarketSize {
 
           , (SELECT COUNT(*)::integer FROM businesses biz
           JOIN locations ON fishnet.geom && locations.geom
-          JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+          JOIN client.location_competitors lc ON lc.location_id = biz.location_id
           JOIN carriers c ON lc.carrier_id = c.id AND c.id = $1
           WHERE biz.location_id = locations.id) AS carrier_current
 
           , (SELECT COUNT(*)::integer FROM businesses biz
           JOIN locations ON fishnet.geom && locations.geom
-          JOIN client.locations_carriers lc ON lc.location_id = biz.location_id
+          JOIN client.location_competitors lc ON lc.location_id = biz.location_id
           JOIN carriers c ON lc.carrier_id = c.id
           WHERE biz.location_id = locations.id) AS carrier_total
 

@@ -1,7 +1,17 @@
 package com.altvil.aro.service.optimization.wirecenter.impl;
 
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.SELECTED;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,15 +20,21 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.altvil.aro.service.entity.AroEntity;
+import com.altvil.aro.service.entity.BulkFiberTerminal;
+import com.altvil.aro.service.entity.FDTEquipment;
 import com.altvil.aro.service.entity.FinancialInputs;
+import com.altvil.aro.service.entity.LocationDropAssignment;
 import com.altvil.aro.service.graph.GraphNetworkModelService;
 import com.altvil.aro.service.graph.alg.NpvClosestFirstIterator;
 import com.altvil.aro.service.graph.alg.ScalarClosestFirstSurfaceIterator;
+import com.altvil.aro.service.graph.assigment.GraphEdgeAssignment;
 import com.altvil.aro.service.graph.builder.ClosestFirstSurfaceBuilder;
 import com.altvil.aro.service.graph.builder.CoreGraphNetworkModelService.GraphBuilderContext;
 import com.altvil.aro.service.graph.builder.GraphNetworkModel;
 import com.altvil.aro.service.graph.model.NetworkData;
 import com.altvil.aro.service.graph.transform.ftp.FtthThreshholds;
+import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.optimization.constraints.ThresholdBudgetConstraint;
 import com.altvil.aro.service.optimization.strategy.OptimizationEvaluator;
@@ -31,6 +47,8 @@ import com.altvil.aro.service.optimize.FTTHOptimizerService;
 import com.altvil.aro.service.optimize.FTTHOptimizerService.OptimizerContextBuilder;
 import com.altvil.aro.service.optimize.NetworkPlanner;
 import com.altvil.aro.service.optimize.OptimizerContext;
+import com.altvil.aro.service.optimize.spi.PredicateStrategyType;
+import com.altvil.aro.service.optimize.spi.PruningStrategy;
 import com.altvil.aro.service.plan.CoreLeastCostRoutingService;
 import com.altvil.aro.service.plan.impl.LcrContextImpl;
 import com.altvil.aro.service.planning.FiberConstraintUtils;
@@ -38,6 +56,8 @@ import com.altvil.aro.service.price.PricingContext;
 import com.altvil.aro.service.price.PricingModel;
 import com.altvil.aro.service.price.PricingService;
 import com.altvil.aro.service.property.SystemPropertyService;
+import com.altvil.interfaces.NetworkAssignment;
+import com.altvil.interfaces.NetworkAssignmentModel;
 import com.altvil.utils.StreamUtil;
 
 @Service
@@ -67,8 +87,8 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 	private transient CoreLeastCostRoutingService coreLeastCostRoutingService;
 
 	@Autowired
-	private transient SystemPropertyService systemPropertyService ;
-	
+	private transient SystemPropertyService systemPropertyService;
+
 	@Override
 	public Optional<PlannedNetwork> planNetwork(
 			WirecenterOptimizationRequest request) {
@@ -97,42 +117,120 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 				new NpvClosestFirstIterator.Builder(financialInputs));
 	}
 
-	private Optional<PlannedNetwork> planNetwork(
-			WirecenterOptimizationRequest request, NetworkData networkData,
-			ClosestFirstSurfaceBuilder itr) {
+	@Override
+	public Function<NetworkData, Optional<PlannedNetwork>> bindRequest(
+			WirecenterOptimizationRequest request) {
 
 		PricingModel pricingModel = pricingService.getPricingModel("*",
 				new Date(),
 				PricingContext.create(request.getConstructionRatios()));
 
-		GraphNetworkModel model = graphBuilderService.build(networkData)
-				.setPricingModel(pricingModel).build();
-		
-		return StreamUtil.map(coreLeastCostRoutingService.computeNetworkModel(
-				model, LcrContextImpl.create(pricingModel,
-						FiberConstraintUtils.build(request.getConstraints(), systemPropertyService.getConfiguration()),
-						itr)),
-				n -> new DefaultPlannedNetwork(request.getPlanId(), n,
-						networkData.getCompetitiveDemandMapping()));
+		return networkData -> {
 
+			GraphNetworkModel model = graphBuilderService.build(networkData)
+					.setPricingModel(pricingModel).build();
+
+			return StreamUtil.optional(coreLeastCostRoutingService
+					.computeNetworkModel(model, LcrContextImpl.create(
+							pricingModel, FiberConstraintUtils.build(
+									request.getConstraints(),
+									systemPropertyService.getConfiguration()),
+							ScalarClosestFirstSurfaceIterator.BUILDER)),
+					n -> new DefaultPlannedNetwork(request.getPlanId(), n,
+							networkData.getCompetitiveDemandMapping()));
+		};
+
+	}
+
+	private Optional<PlannedNetwork> planNetwork(
+			WirecenterOptimizationRequest request, NetworkData networkData,
+			ClosestFirstSurfaceBuilder itr) {
+
+		return bindRequest(request).apply(networkData);
+
+	}
+
+	private Predicate<GraphEdgeAssignment> createLockedPredicate(
+			Collection<NetworkAssignment> lockedTargets) {
+
+		if (lockedTargets == null || lockedTargets.size() == 0) {
+			return (na) -> true;
+		}
+
+		Set<Long> lockedLocationIds = lockedTargets.stream()
+				.map(NetworkAssignment::getSource).map(AroEntity::getObjectId)
+				.collect(Collectors.toSet());
+
+		return (edgeAssignment) -> {
+			if (edgeAssignment == null)
+				return false;
+			AroEntity aroEntity = edgeAssignment.getAroEntity();
+
+			if (aroEntity instanceof BulkFiberTerminal) {
+				BulkFiberTerminal bft = (BulkFiberTerminal) aroEntity;
+				return lockedLocationIds.contains(bft.getLocationEntity()
+						.getObjectId());
+			} else if (aroEntity instanceof FDTEquipment) {
+				FDTEquipment fdt = (FDTEquipment) edgeAssignment.getAroEntity();
+				for (LocationDropAssignment a : fdt.getDropAssignments()) {
+					if (lockedLocationIds.contains(a.getLocationEntity()
+							.getObjectId())) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		};
 	}
 
 	@Override
 	public PrunedNetwork pruneNetwork(WirecenterOptimizationRequest request) {
-
 		// TODO KAMIL ThresholdBudgetConstraint => Change to
 		// OptimizationConstraint
+
+		boolean isLockedPrunning = request.getOptimizationConstraints()
+				.isForced();
+
+		NetworkDataRequest networkDataRequest = request.getNetworkDataRequest();
+
+		NetworkData networkData;
+
+		Collection<NetworkAssignment> lockedTargets = Collections.emptySet();
+
+		if (isLockedPrunning) {
+			// Force all data to be loaded
+			// Track Selected Locations for Forced Pruning
+			networkDataRequest = networkDataRequest.createFilterRequest(EnumSet
+					.of(ALL, SELECTED));
+
+			NetworkData nd = networkService.getNetworkData(networkDataRequest);
+			
+			// Force Selection Mode to be ALL Locations
+			networkData = nd.createNetworkData(nd.getRoadLocations().create(
+					NetworkAssignmentModel.SelectionFilter.ALL));
+
+			lockedTargets = networkData.getRoadLocations().getAssignments(
+					SELECTED);
+
+		} else {
+			networkData = networkService.getNetworkData(networkDataRequest);
+		}
 
 		OptimizationEvaluator evaluator = optimizationEvaluatorService
 				.getOptimizationEvaluator((ThresholdBudgetConstraint) request
 						.getOptimizationConstraints());
 
-		NetworkData networkData = networkService.getNetworkData(request
-				.getNetworkDataRequest());
+		PruningStrategy pruningStrategy = evaluator
+				.getPruningStrategy()
+				.modify()
+				.and(PredicateStrategyType.PRUNE_CANDIDATE,
+						(node) -> !node.isLocked()).commit();
+
 		NetworkPlanner planner = optimizerService.createNetworkPlanner(
-				networkData, evaluator.getPruningStrategy(),
-				evaluator.getScoringStrategy(),
-				new OptimizerContextBuilderImpl(request));
+				networkData, pruningStrategy, evaluator.getScoringStrategy(),
+				new OptimizerContextBuilderImpl(request),
+				createLockedPredicate(lockedTargets));
 
 		return new PrunedNetworkImpl(request.getPlanId(),
 				planner.getOptimizedPlans(),
@@ -159,8 +257,10 @@ public class OptimizationPlanningImpl implements WirecenterOptimizationService {
 							PricingContext.create(request
 									.getConstructionRatios()));
 
-			FtthThreshholds threshHolds = FiberConstraintUtils.build(request
-					.getConstraints(), ctx.getBean(SystemPropertyService.class).getConfiguration());
+			FtthThreshholds threshHolds = FiberConstraintUtils
+					.build(request.getConstraints(),
+							ctx.getBean(SystemPropertyService.class)
+									.getConfiguration());
 
 			GraphBuilderContext graphContext = ctx
 					.getBean(GraphNetworkModelService.class).build()

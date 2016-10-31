@@ -1,4 +1,4 @@
-/* global app swal */
+/* global app swal config */
 app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 
@@ -35,7 +35,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
         .error(error)
     }
 
-    if (changes.lazy || !plan.ranOptimization) {
+    if (changes.lazy || !plan.ranOptimization || config.ui.map_tools.target_builder.eager) {
       run(plan)
     } else {
       swal({

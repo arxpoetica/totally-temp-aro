@@ -30,6 +30,12 @@ ${PSQL} -a -f $DIR/create_vz_wi_towers.sql
 # Create and load vz madison, wi table
 ${PSQL} -a -f $DIR/create_vz_il_towers.sql
 
+# Create and load vz madison, wi table
+${PSQL} -a -f $DIR/create_vz_fl_towers.sql
+
+# Create and load vz madison, wi table
+${PSQL} -a -f $DIR/create_vz_ga_towers.sql
+
 # file_name:table_name
 # Assumes files end in .csv
 IFS=',' read -a TOWER_DATA_FILES <<< "${TOWER_CODES}"
@@ -40,7 +46,11 @@ cd $GISROOT;
 for TOWER_DATA_FILE in "${TOWER_DATA_FILES[@]}"
 do
 	tower_code_lookup TOWER_TABLE $TOWER_DATA_FILE
-	aws s3 cp s3://public.aro/towers/${TOWER_DATA_FILE}.csv $GISROOT/${TOWER_DATA_FILE}.csv
+	
+	if [ ! -f ${TOWER_DATA_FILE}.csv ]; then
+		aws s3 cp s3://public.aro/towers/${TOWER_DATA_FILE}.csv $GISROOT/${TOWER_DATA_FILE}.csv
+	fi
+
 	cat /$GISROOT/${TOWER_DATA_FILE}.csv | ${PSQL} -a -c "COPY towers.${TOWER_TABLE} FROM STDIN DELIMITER ',' CSV HEADER ENCODING 'Latin1';"
 done
 

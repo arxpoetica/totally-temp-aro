@@ -1,7 +1,6 @@
 package com.altvil.aro.service.network.impl;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -143,29 +142,12 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	 */
 	@Override
 	public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
-			boolean isFilteringRoadLocationDemandsBySelection,
 			Set<LocationEntityType> selectedTypes, int serviceAreaId,
 			long planId, int year, double mrc, ServiceAreaContext ctx, int dataSourceId) {
 
-		Map<Long, CompetitiveLocationDemandMapping> locationDemand = queryFiberDemand(
+		return queryFiberDemand(
 				serviceAreaId, year, mrc, selectedTypes, ctx, dataSourceId)
 				.getDemandMapping();
-		if (isFilteringRoadLocationDemandsBySelection) {
-			Set<Long> selectedRoadLocationIds = planRepository
-					.querySelectedLocationsByPlanId(planId).stream()
-					.map(BigInteger::longValue).collect(Collectors.toSet());
-			return locationDemand
-					.entrySet()
-					.stream()
-					.filter(entry -> selectedRoadLocationIds.contains(entry
-							.getKey()))
-					.collect(
-							Collectors.toMap(Map.Entry::getKey,
-									Map.Entry::getValue));
-		} else {
-			return locationDemand;
-		}
-
 	}
 
 	private ServiceAreaLocationDemand queryFiberDemand(int serviceAreaId,
@@ -366,24 +348,14 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.altvil.aro.service.network.impl.NetworkQueryService#
-	 * selectedRoadLocationIds(long, java.util.Map)
+	 * getSelectedRoadLocationIds(long, java.util.Map)
 	 */
 	@Override
-	public List<Long> selectedRoadLocationIds(long planId,
-			Map<Long, RoadLocation> roadLocationByLocationIdMap) {
-		List<Long> selectedRoadLocations = planRepository
-				.querySelectedLocationsByPlanId(planId).stream()
-				.mapToLong(bi -> bi.longValue()).boxed()
-				.collect(Collectors.toList());
-
-		if (selectedRoadLocations.isEmpty()) {
-			selectedRoadLocations = new ArrayList<>(
-					roadLocationByLocationIdMap.size());
-
-			selectedRoadLocations.addAll(roadLocationByLocationIdMap.keySet());
-		}
-
-		return selectedRoadLocations;
+	public Set<Long> getSelectedRoadLocationIds(long planId) {
+		return planRepository.querySelectedLocationsByPlanId(planId)
+				.stream()
+				.map(Number::longValue)
+				.collect(Collectors.toSet());
 	}
 
 	private LocationEntityType toLocationEntityType(int entityTypeCode) {

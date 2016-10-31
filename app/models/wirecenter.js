@@ -8,15 +8,18 @@ var database = helpers.database
 module.exports = class Wirecenter {
 
   static findServiceAreas (viewport, type) {
+    var geom = viewport ? 'geom' : 'ST_AsGeoJSON(geom)::json AS geom'
     var sql = `
-      SELECT service_area.id, geom, code AS name, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
+      SELECT service_area.id, ${geom}, code AS name, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
         FROM client.service_area
         JOIN client.service_layer
           ON service_area.service_layer_id = service_layer.id
         AND service_layer.name=$1
         ${database.intersects(viewport, 'geom', 'WHERE')}
     `
-    return database.polygons(sql, [type], true, viewport)
+    return viewport
+      ? database.polygons(sql, [type], true, viewport)
+      : database.query(sql, [type], true)
   }
 
   static findAnalysisAreas (viewport, type) {

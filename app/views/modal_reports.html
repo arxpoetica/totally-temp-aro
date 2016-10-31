@@ -1,0 +1,96 @@
+<div class="modal" id="reports" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Reports</h4>
+      </div>
+      <div class="modal-body">
+        <p class="pull-right clearfix">
+          <button class="btn btn-primary btn-sm"><span class="fa fa-plus"></span> Add New Analysis Folder</button>
+        </p>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>
+                Analysis
+                <a href="javascript:void(0)" ng-click="sortBy('name', true)">↓</a>
+                <a href="javascript:void(0)" ng-click="sortBy('name', false)">↑</a>
+              </th>
+              <th>
+                Type
+                <a href="javascript:void(0)" ng-click="sortBy('type', true)">↓</a>
+                <a href="javascript:void(0)" ng-click="sortBy('type', false)">↑</a>
+              </th>
+              <th>
+                Date Created
+                <a href="javascript:void(0)" ng-click="sortBy('createdAt', true)">↓</a>
+                <a href="javascript:void(0)" ng-click="sortBy('createdAt', false)">↑</a>
+              </th>
+              <th>
+                Owner
+                <a href="javascript:void(0)" ng-click="sortBy('owner', true)">↓</a>
+                <a href="javascript:void(0)" ng-click="sortBy('owner', false)">↑</a>
+              </th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="report in reports">
+              <td>
+                <a href="javascript:;" ng-click="openReport(report, true)">{{ report.name }}</a>
+              </td>
+              <td>{{ report.type }}</td>
+              <td>{{ report.createdAt }}</td>
+              <td>{{ report.owner }}</td>
+              <td>
+                <button class="btn btn-primary btn-xs"><span class="fa fa-share"></span></button>
+                <button class="btn btn-primary btn-xs"><span class="fa fa-trash"></span></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="reports-folder" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Reports</h4>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>File Type</th>
+              <th>Date Created</th>
+              <th class="col-md-1"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="file in analysis">
+              <td>{{ file.name }}</td>
+              <td>{{ file.type }}</td>
+              <td>{{ file.createdAt }}</td>
+              <td>
+                <button class="btn btn-primary btn-xs" disabled><span class="fa fa-download"></span> Download</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" disabled>Download all reports</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

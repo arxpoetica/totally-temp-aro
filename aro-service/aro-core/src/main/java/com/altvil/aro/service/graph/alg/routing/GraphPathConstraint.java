@@ -4,10 +4,10 @@ import org.jgrapht.GraphPath;
 
 public interface GraphPathConstraint<V, E> {
 
-	public interface MetricDistance<V> {
-		double getDistance(V vertex) ;
+	public interface MetricLinkDistance<V> {
+		double getLinkDistance(V vertex) ;
 	}
 	
-	boolean isValid(MetricDistance<V> metricDistance, GraphPath<V, E> graph);
+	boolean isValid(MetricLinkDistance<V> metricDistance, GraphPath<V, E> graph);
 
 }

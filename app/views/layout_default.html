@@ -133,7 +133,8 @@
 
 <div ng-controller="map_tools_controller">
   <div ng-repeat="tool in map_tools.available_tools">
-    <p>
+    <hr ng-if="tool.separator">
+    <p ng-if="!tool.separator">
       <a href="javascript:void(0)" class="btn btn-primary btn-block btn-sm map_tools_button" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
         ng-attr-id="map_tools_toggle_{{tool.id}}"
         ng-class="{'btn-success active': map_tools.is_visible(tool.id), 'disabled': !map_tools.isEnabled(tool.id)}"

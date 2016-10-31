@@ -74,6 +74,9 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.selectPlan = function (plan) {
     $scope.plan = plan
+    $('#plan-saving').stop().hide()
+    $('#plan-saved').stop().hide()
+    $('#plan-saving-progress').hide()
     state.loadPlan(plan)
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
@@ -112,6 +115,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   // --
   function recalculateMarketProfile () {
+    if (config.ARO_CLIENT === 'verizon') return
     $scope.market_profile_calculating = true
     map.ready(() => {
       var bounds = map.getBounds()
@@ -219,6 +223,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       $('#plan-combo').modal('show')
       tracker.track('Open Analysis')
     })
+  }
+
+  $scope.showReports = () => {
+    $('#reports').modal('show')
   }
 
   $scope.manageNetworkPlans = () => {
@@ -338,6 +346,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         type: 'success'
       })
     })
+  }
+
+  $scope.openReport = (plan) => {
+    $('#select-plan').modal('hide')
+    $rootScope.$broadcast('open-report', plan)
   }
 
   // var nonLinearSlider = document.getElementById('year-slider')

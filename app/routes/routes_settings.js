@@ -19,11 +19,11 @@ exports.configure = (app, middleware) => {
     var email = request.body.email
 
     var promise = Promise.resolve()
-    if (oldPassword && password && passwordConfirm) {
-      var oldPassword = request.body.old_password
-      var password = request.body.password
-      var passwordConfirm = request.body.password_confirm
+    var oldPassword = request.body.old_password
+    var password = request.body.password
+    var passwordConfirm = request.body.password_confirm
 
+    if (oldPassword && password && passwordConfirm) {
       if (password !== passwordConfirm) {
         request.flash('error', 'Passwords do not match')
         return response.redirect('/settings/show')

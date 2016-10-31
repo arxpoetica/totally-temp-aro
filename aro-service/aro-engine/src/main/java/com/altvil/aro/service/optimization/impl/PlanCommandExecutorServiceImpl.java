@@ -2,7 +2,6 @@ package com.altvil.aro.service.optimization.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -159,7 +158,7 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 	public GeneratedPlan reifyPlan(OptimizationConstraints constraints,
 			PlannedNetwork plan) {
 		WirecenterNetworkPlan reifiedPlan = conversionService.convert(
-				plan.getPlanId(), Optional.of(plan.getPlannedNetwork()));
+				plan.getPlanId(), plan);
 
 		NetworkDemandSummary demandSummary = toNetworkDemandSummary(
 				reifiedPlan.getDemandCoverage(),
@@ -236,7 +235,8 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 				request.getConstraints(),
 				networkInputs,
 				request.getAlgorithmType(),
-				request.isUsePlanConduit()
+				request.isUsePlanConduit(),
+				request.getCustomOptimization()
 		);
 	}
 

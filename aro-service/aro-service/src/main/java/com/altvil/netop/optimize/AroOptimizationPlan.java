@@ -6,24 +6,25 @@ import java.util.List;
 import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.plan.FiberNetworkConstraints;
 import com.altvil.enumerations.AlgorithmType;
+import com.altvil.enumerations.AroOptimizationType;
 import com.altvil.enumerations.OptimizationMode;
-import com.altvil.enumerations.OptimizationType;
 
 public class AroOptimizationPlan {
 
 	private long planId = 0;
 
-	private OptimizationType algorithm = OptimizationType.UNCONSTRAINED;
+	private AroOptimizationType algorithm = AroOptimizationType.UNCONSTRAINED;
 	private AnalysisSelectionMode analysisSelectionMode = AnalysisSelectionMode.SELECTED_AREAS;
 	private OptimizationMode optimizationMode = OptimizationMode.INTER_WIRECENTER;
 	private AlgorithmType algorithmType = AlgorithmType.DEFAULT;
 	private Double threshold;
 	private boolean usePlanConduit = false ;
 
-	private FinancialConstraints financialConstraints;
+	private FinancialConstraintsImpl financialConstraints =  new FinancialConstraintsImpl();
 	private FiberNetworkConstraints fiberNetworkConstraints;
 	private List<AroLocationEntityType> locationTypes = new ArrayList<>();
 	private List<Integer> processLayers = new ArrayList<>();
+	private AroCustomOptimization customOptimization ;
 
 	public long getPlanId() {
 		return planId;
@@ -41,20 +42,20 @@ public class AroOptimizationPlan {
 		this.planId = planId;
 	}
 
-	public OptimizationType getAlgorithm() {
+	public AroOptimizationType getAlgorithm() {
 		return algorithm;
 	}
 
-	public void setAlgorithm(OptimizationType optimizationType) {
+	public void setAlgorithm(AroOptimizationType optimizationType) {
 		this.algorithm = optimizationType;
 	}
 
-	public FinancialConstraints getFinancialConstraints() {
+	public FinancialConstraintsImpl getFinancialConstraints() {
 		return financialConstraints;
 	}
 
 	public void setFinancialConstraints(
-			FinancialConstraints financialConstraints) {
+			FinancialConstraintsImpl financialConstraints) {
 		this.financialConstraints = financialConstraints;
 	}
 
@@ -115,5 +116,15 @@ public class AroOptimizationPlan {
 	public void setUsePlanConduit(boolean usePlanConduit) {
 		this.usePlanConduit = usePlanConduit;
 	}
+
+	public AroCustomOptimization getCustomOptimization() {
+		return customOptimization;
+	}
+
+	public void setCustomOptimization(AroCustomOptimization customOptimization) {
+		this.customOptimization = customOptimization;
+	}
+	
+	
 	
 }

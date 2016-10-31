@@ -109,6 +109,9 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       icon: 'icon icon-boundaries'
     },
     {
+      separator: true
+    },
+    {
       id: 'financial_profile',
       name: 'Financial Profile',
       short_name: 'F',

@@ -1,5 +1,5 @@
 <div>
-  <div class="alert alert-info text-center" role="alert" ng-show="optimizationMode != null && optimizationMode !== 'boundaries'">
+  <div class="custom-ui custom-ui-vz alert alert-info text-center" role="alert" ng-show="optimizationMode != null && optimizationMode !== 'boundaries'">
     Optimizations can not be run on both boundaries and targets. Any boundary selection you make will remove all previously selected targets.
   </div>
 
@@ -65,6 +65,11 @@
     <p ng-show="selectedUserDefinedBoundary">
       <button class="btn btn-primary btn-sm btn-block" ng-click="editUserDefinedBoundary()">
         <span class="fa fa-pencil"></span> &nbsp; Edit selected layer
+      </button>
+    </p>
+    <p ng-show="selectedUserDefinedBoundary">
+      <button class="btn btn-primary btn-sm btn-block" ng-click="selectAllInLayer()">
+        <span class="fa fa-hand-pointer-o"></span> &nbsp; Select All in Layer
       </button>
     </p>
     <p>

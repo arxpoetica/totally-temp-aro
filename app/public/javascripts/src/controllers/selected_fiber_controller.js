@@ -1,5 +1,4 @@
 /* global app $ */
-// Equipment Nodes Controller
 app.controller('selected_fiber_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     var fiberType = event.feature.getProperty('fiber_type')

@@ -20,6 +20,11 @@ public class SpanningGraphPathImpl<V, E> extends GraphPathImpl<V, E> implements
 	public SpanningGraphPathImpl(Graph<V, E> graph, V startVertex, V endVertex,
 			List<E> reversedEdgeList, double weight) {
 		super(graph, startVertex, endVertex, null, weight);
+		
+		if( startVertex == null || endVertex == null ) {
+			throw new NullPointerException() ;
+		}
+		
 		this.reversedEdgeList = reversedEdgeList;
 	}
 

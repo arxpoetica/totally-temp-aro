@@ -99,12 +99,13 @@ module.exports = class Database {
           COUNT(*) AS density,
           ${
             viewport.heatmap
-            ? 'ST_AsGeoJSON(ST_Centroid(ST_Collect( geom )))::json AS geom,'
-            : 'ST_AsGeoJSON(ST_ConvexHull(ST_Collect( geom )))::json AS geom,'
+            ? 'ST_AsGeoJSON(ST_Centroid(ST_Collect(f.geom)))::json AS geom,'
+            : 'ST_AsGeoJSON(ST_ConvexHull(ST_Collect(f.geom)))::json AS geom,'
           }
           '{ "path": 0, "scale": 3, "strokeColor": "blue" }'::json AS icon
-        FROM features
-        GROUP BY ST_SnapToGrid(geom, $${params.length + 1})
+        FROM features f
+        -- INNER JOIN aro.states st ON ST_Intersects(f.geom, st.geom)
+        GROUP BY ST_SnapToGrid(f.geom, $${params.length + 1})
       `
       params.push(viewport.buffer * 3)
     }

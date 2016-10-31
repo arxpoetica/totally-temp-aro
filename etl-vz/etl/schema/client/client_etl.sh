@@ -135,10 +135,13 @@ ${PSQL} -a -f $DIR/create_client_plan_fiber_conduit.sql
 # Create _businesses_sizes (used by Kamil reporting)
 ${PSQL} -a -f $DIR/create_client_businesses_sizes.sql
 
+# Create network_plan_data (Extended Data Reporting)
+${PSQL} -a -f $DIR/create_client_network_plan_data.sql
+
+# Create plan_location_link (AKA Coverage : part of extended generated plan data)
+${PSQL} -a -f $DIR/create_client_plan_location_link.sql
 
 
-#Views (These will be moved into their own VIEW Directory)
-#${PSQL} -a -f $DIR/create_client_views.sql
 
 
 

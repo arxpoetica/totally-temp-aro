@@ -11,6 +11,13 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/service_areas/:type/all', (request, response, next) => {
+    var type = request.params.type
+    models.Wirecenter.findServiceAreas(null, type)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/analysis_areas/:type', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var type = request.params.type

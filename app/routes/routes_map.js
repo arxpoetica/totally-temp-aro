@@ -11,7 +11,8 @@ exports.configure = (api, middleware) => {
       user: request.user,
       config: public_config,
       serviceLayers: cache.serviceLayers,
-      analysisLayers: cache.analysisLayers
+      analysisLayers: cache.analysisLayers,
+      googleMapsKey: process.env.GOOGLE_MAPS_API_KEY
     })
   })
 }

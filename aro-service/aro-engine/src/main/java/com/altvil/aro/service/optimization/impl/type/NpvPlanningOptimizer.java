@@ -49,6 +49,9 @@ import com.altvil.aro.service.report.PlanAnalysisReportService;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
 
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.ALL;
+import static com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter.SELECTED;
+
 @Service
 public class NpvPlanningOptimizer  {
 	// Locations appear to have a high minimum cost even when their demand and
@@ -114,10 +117,10 @@ public class NpvPlanningOptimizer  {
 
 		Map<Long, CompetitiveLocationDemandMapping> parametricCompetitiveLocationDemandMapping = new HashMap<>();
 
-		Collection<NetworkAssignment> selected = networkData.getRoadLocations().getSelectedAssignments();
+		Collection<NetworkAssignment> selected = networkData.getRoadLocations().getAssignments(SELECTED);
 		NetworkAssignmentModel.Builder factory = new NetworkAssignmentModelFactory();
 		
-		for (NetworkAssignment rlNetworkAssignment : networkData.getRoadLocations().getAllAssignments()) {
+		for (NetworkAssignment rlNetworkAssignment : networkData.getRoadLocations().getAssignments(ALL)) {
 			LocationEntity locationEntity = (LocationEntity) rlNetworkAssignment.getSource();
 			Long locationId = locationEntity.getObjectId();
 
