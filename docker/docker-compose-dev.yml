@@ -28,6 +28,7 @@ services:
         volumes:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db
+            - ../../aro-data:/srv/www/aro/data
         ports:
             - "8000:8000"
         links:
@@ -38,7 +39,7 @@ services:
             PGPASSWORD: aro
             PGUSER: aro
             PGDATABASE: aro
-            ARO_DATA_ROOT: /srv/www/aro/db/data
+            ARO_DATA_ROOT: /srv/www/aro/data
             DATABASE_URL: postgres://aro:aro@arodb/aro
             ARO_CLIENT: aro
             RAILS_ENV: development
