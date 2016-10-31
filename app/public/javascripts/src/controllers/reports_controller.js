@@ -29,6 +29,11 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
 
   $scope.analysis = [
     {
+      name: 'TABC Summary Stats',
+      type: '.csv',
+      createdAt: '10/19/2016'
+    },
+    {
       name: 'T Route',
       type: '.kml',
       createdAt: '10/19/2016'
@@ -55,7 +60,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
     },
     {
       name: 'Dropped Tower Details',
-      type: '.kml',
+      type: '.csv',
       createdAt: '10/19/2016'
     }
   ]
