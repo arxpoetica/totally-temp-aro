@@ -63,7 +63,7 @@ public class NetworkPlanSerializer<T> {
 				pl.setAttribute(ll.getExtendedInfo());
 				pl.setLinkingState(ll.getLinkType().ordinal());
 				pl.setState("66"); // TODO derive STATE
-					pl.setEntityTypeId(ll.getLocationEntityType().ordinal());
+					pl.setEntityTypeId(ll.getLocationEntityType().getTypeCode());
 
 					pl.setAtomicUnits(ds.getAtomicUnits());
 					pl.setFairShareDemand(ds.getFairShareDemand());
