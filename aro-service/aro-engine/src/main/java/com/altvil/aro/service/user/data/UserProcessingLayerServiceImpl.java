@@ -53,7 +53,6 @@ public class UserProcessingLayerServiceImpl implements
 
 	@PostConstruct
 	void PostConstruct() {
-
 	}
 
 	@Override

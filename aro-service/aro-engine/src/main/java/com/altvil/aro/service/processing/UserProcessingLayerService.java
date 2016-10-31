@@ -29,5 +29,6 @@ public interface UserProcessingLayerService {
      */
     int createAreasFromPoints(int id, double maxDistanceMeters);
     void updateServiceArea(int serviceLayerId) ;
+    void updateCellTowers(int serviceLayerId) ;
     
 }

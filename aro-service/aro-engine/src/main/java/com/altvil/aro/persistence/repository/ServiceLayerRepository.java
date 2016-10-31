@@ -73,6 +73,58 @@ public interface ServiceLayerRepository extends
 	public List<Object[]> updateServiceLayerEquipment(@Param("serviceLayerId") int serviceLayerId);
 	
 	
+	@Transactional
+	@Modifying
+	@Query(value = "WITH selected_service_layer AS (\n" + 
+			"	SELECT *\n" + 
+			"	FROM client.service_layer \n" + 
+			"	WHERE id = -1\n" + 
+			")\n" + 
+			",\n" + 
+			"user_towers as(\n" + 
+			" SELECT nextval('aro.locations_id_seq'::regclass) as location_id,  nextval('aro.towers_id_seq'::regclass) as tower_id, sle.*, st.statefp \n" + 
+			" FROM selected_service_layer sl\n" + 
+			"	user_data.source_location_entity sle on sle.data_source_id = sl.data_source_id\n" + 
+			"    inner join aro.states st\n" + 
+			"    on\n" + 
+			"        ST_CONTAINS(st.geom, sle.point)\n" + 
+			"        and sle.location_class = 2     \n" + 
+			"        and sle.data_source_id = -1\n" + 
+			")\n" + 
+			",\n" + 
+			"locations AS (\n" + 
+			"    INSERT INTO aro.locations(\n" + 
+			"      id, \n" + 
+			"      state,\n" + 
+			"      lat,\n" + 
+			"      lon,\n" + 
+			"      geog,\n" + 
+			"      total_towers,\n" + 
+			"      geom),\n" + 
+			"    ) select location_id, statefp, lat, \"long\", cast(point as geography), 1, point  from user_towers ut\n" + 
+			")    \n" + 
+			"INSERT INTO aro.towers ( \n" + 
+			" id,\n" + 
+			"  location_id,\n" + 
+			"  parcel_state,\n" + 
+			"  lat,\n" + 
+			"  lon,\n" + 
+			"  geog,\n" + 
+			"  geom,\n" + 
+			"  data_source_id--integer\n" + 
+			"  )\n" + 
+			"SELECT \n" + 
+			"	tower_id,\n" + 
+			"	statefp,\n" + 
+			"	lat,\n" + 
+			"	\"long\",\n" + 
+			"	cast(point as geography),\n" + 
+			"	point, data_source_id\n" + 
+			"FROM user_towers ut\n" + 
+			"  ", nativeQuery = true)
+	public void updateServiceLayerTowers(@Param("dataSourceId") int dataSourceId, @Param("locationClassId") int locationClassId);
+	
+	
 	
 	
 	@Query(value = "SELECT\n" + "	service_layer_id,\n"
