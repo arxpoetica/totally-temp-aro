@@ -32,7 +32,7 @@ public class UserProcessingLayerServiceTest {
             "1,47.0529584,-122.4769104\n"+
                     "1,47.0429584,-122.4769104\n"+
                     "1,47.0429584,-122.4869104\n";
-    private LocationClass locationClass = LocationClass.PRODUCER;
+    private LocationClass locationClass = LocationClass.producer;
 
     @Test
     public void testCSVsave() throws IOException {

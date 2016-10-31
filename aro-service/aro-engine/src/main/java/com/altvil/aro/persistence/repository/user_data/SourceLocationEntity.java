@@ -83,7 +83,7 @@ public class SourceLocationEntity {
         this.dataSource = dataSource;
     }
 
-
+    @Basic
     public Point getPoint() {
         return point;
     }

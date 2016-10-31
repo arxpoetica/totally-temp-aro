@@ -9,4 +9,6 @@ import com.altvil.aro.persistence.repository.user_data.UserDataSource;
 public interface DataSourceEntityRepository extends
 		JpaRepository<UserDataSource, Long> {
 
+
+
 }
