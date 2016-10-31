@@ -27,43 +27,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
     }
   ]
 
-  $scope.analysis = [
-    {
-      name: 'TABC Summary Stats',
-      type: '.csv',
-      createdAt: '10/19/2016'
-    },
-    {
-      name: 'T Route',
-      type: '.kml',
-      createdAt: '10/19/2016'
-    },
-    {
-      name: 'A Route',
-      type: '.kml',
-      createdAt: '10/19/2016'
-    },
-    {
-      name: 'B Route',
-      type: '.kml',
-      createdAt: '10/19/2016'
-    },
-    {
-      name: 'C Route',
-      type: '.kml',
-      createdAt: '10/19/2016'
-    },
-    {
-      name: 'All TABC Endpoints',
-      type: '.csv',
-      createdAt: '10/19/2016'
-    },
-    {
-      name: 'Dropped Tower Details',
-      type: '.csv',
-      createdAt: '10/19/2016'
-    }
-  ]
+  $scope.analysis = []
 
   $scope.sortBy = (field, descending) => {
     $scope.reports = _.sortBy($scope.reports, (report) => {
@@ -87,7 +51,44 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
     }
   })
 
+  $scope.plan = null
   $rootScope.$on('open-report', (e, plan) => {
+    $scope.plan = plan
+    $scope.analysis = [
+      {
+        name: 'TABC Summary Stats',
+        type: '.csv',
+        url: `/reports/tabc/${plan.id}/summary`
+      },
+      {
+        name: 'T Route',
+        type: '.kml',
+        url: `/reports/tabc/${plan.id}/kml/T`
+      },
+      {
+        name: 'A Route',
+        type: '.kml',
+        url: `/reports/tabc/${plan.id}/kml/A`
+      },
+      {
+        name: 'B Route',
+        type: '.kml',
+        url: `/reports/tabc/${plan.id}/kml/B`
+      },
+      {
+        name: 'C Route',
+        type: '.kml',
+        url: `/reports/tabc/${plan.id}/kml/C`
+      },
+      {
+        name: 'All TABC Endpoints',
+        type: '.csv'
+      },
+      {
+        name: 'Dropped Tower Details',
+        type: '.csv'
+      }
+    ]
     $scope.openReport(null, false)
   })
 }])

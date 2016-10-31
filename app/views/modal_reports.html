@@ -79,9 +79,11 @@
             <tr ng-repeat="file in analysis">
               <td>{{ file.name }}</td>
               <td>{{ file.type }}</td>
-              <td>{{ file.createdAt }}</td>
+              <td>{{ plan.updated_at | date:'shortDate' }}</td>
               <td>
-                <button class="btn btn-primary btn-xs" disabled><span class="fa fa-download"></span> Download</button>
+                <a ng-show="file.url" href="{{ file.url }}" class="btn btn-primary btn-xs">
+                  <span class="fa fa-download"></span> Download
+                </a>
               </td>
             </tr>
           </tbody>

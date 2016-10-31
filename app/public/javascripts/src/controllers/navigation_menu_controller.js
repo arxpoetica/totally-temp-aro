@@ -350,6 +350,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.openReport = (plan) => {
     $('#select-plan').modal('hide')
+    $('#plan-combo').modal('hide')
     $rootScope.$broadcast('open-report', plan)
   }
 

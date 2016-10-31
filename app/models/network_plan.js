@@ -552,8 +552,10 @@ module.exports = class NetworkPlan {
       .then(() => NetworkPlan.findPlan(plan_id))
   }
 
-  static exportKml (plan_id) {
+  static exportKml (plan_id, planQuery) {
     var kml_output = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
+
+    planQuery = planQuery || '= $1'
 
     var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -601,7 +603,7 @@ module.exports = class NetworkPlan {
           JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
           JOIN client.fiber_route_segment seg ON seg.fiber_route_id = fiber_route.id
           JOIN client.cable_construction_type cct ON cct.id = seg.cable_construction_type_id
-          WHERE r.id=$1
+          WHERE r.id ${planQuery}
         `
         return database.query(sql, [plan_id])
       })
@@ -620,7 +622,7 @@ module.exports = class NetworkPlan {
           FROM client.plan_targets
           JOIN locations
             ON plan_targets.location_id = locations.id
-          WHERE plan_targets.plan_id=$1
+          WHERE plan_targets.plan_id ${planQuery}
         `
         return database.query(sql, [plan_id])
       })
@@ -635,7 +637,7 @@ module.exports = class NetworkPlan {
           JOIN client.network_node_types t ON nn.node_type_id = t.id
           WHERE plan_id IN (
             (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
-              (SELECT id FROM client.plan WHERE parent_plan_id=$1)
+              (SELECT id FROM client.plan WHERE parent_plan_id ${planQuery})
             ))
           )
         `
@@ -656,7 +658,7 @@ module.exports = class NetworkPlan {
           SELECT ST_AsKML(geom) AS geom
           FROM client.network_nodes
           WHERE plan_id IN (
-            SELECT id FROM client.plan WHERE parent_plan_id=$1
+            SELECT id FROM client.plan WHERE parent_plan_id ${planQuery}
             UNION ALL
             SELECT $1
           )
