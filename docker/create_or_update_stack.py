@@ -35,7 +35,12 @@ TEMPLATE_URLS = {
     'PRODUCTION': 'https://cf-templates.altvil.com.s3.amazonaws.com/P-ARO.template'
 }
 
-TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json'
+if environment == 'PROD':
+    TEMPLATE_FILE = os.path.dirname(__file__) + '/P-ARO-template.yml'
+elif environment == 'QA':
+    TEMPLATE_FILE = os.path.dirname(__file__) + '/S-ARO-QA-template.yml'
+else:
+    TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json' 
 with open(TEMPLATE_FILE, 'r') as template_file:
     TEMPLATE_BODY=template_file.read()
 
