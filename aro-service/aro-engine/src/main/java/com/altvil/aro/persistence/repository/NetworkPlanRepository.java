@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import com.altvil.aro.service.network.DataSourceScope;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -150,7 +151,7 @@ public interface NetworkPlanRepository extends
 			"ct as (\n" + 
 			"  select l.id, l.block_id, 5 as entity_type, e.count, e.count*500 as monthly_spend, l.competitor_strength\n" + 
 			"  from selected_locations l\n" + 
-			"  join client.celltower_summary e on e.location_id = l.id and e.state in :stateUSPS and e.data_source_id = :dataSourceId\n" +
+			"  join client.celltower_summary e on e.location_id = l.id and e.state in :stateUSPS and e.data_source_id in :towersSourceIds\n" +
 			")\n" + 
 			"select * from  bs\n" + 
 			"UNION\n" + 
@@ -158,7 +159,7 @@ public interface NetworkPlanRepository extends
 			"UNION\n" +
 			"select * from ct\n" +
 			"limit 200000", nativeQuery = true)
-	List<Object[]> queryAllFiberDemand(@Param("serviceAreaId") int serviceAreaId, @Param("year") int year, @Param("mrc") double mrc, @Param("stateUSPS") Collection<String> stateUSPS, @Param("dataSourceId")int dataSourceId);
+	List<Object[]> queryAllFiberDemand(@Param("serviceAreaId") int serviceAreaId, @Param("year") int year, @Param("mrc") double mrc, @Param("stateUSPS") Collection<String> stateUSPS, @Param("towersSourceIds")Set<Long> towersSourceIds);
 
 	@Query(value = "SELECT location_id FROM client.plan_targets pt\n" +
 			"WHERE pt.plan_id = :planId", nativeQuery = true)

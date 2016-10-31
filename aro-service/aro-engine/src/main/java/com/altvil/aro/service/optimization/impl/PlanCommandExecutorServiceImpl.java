@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.network.DataSourceScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -224,12 +226,19 @@ public class PlanCommandExecutorServiceImpl implements PlanCommandService {
 		NetworkDataRequest networkInputs = request.getNetworkDataRequest()
 				.createRequest(planId, sl.getId())
 				.createRequest(serviceAreaId);
-		Integer dataSourceId = 1;
-		if(sl.getDataSource() != null){
-			dataSourceId = sl.getDataSource().getReferenceDataSourceId();
-		}
 
-		networkInputs.setDataSourceId(dataSourceId);
+		DataSourceScope scope = networkInputs.getDataSourceScope();
+		if(sl.getDataSource() != null){
+			scope = scope
+					.modify()
+					.extendScope(LocationEntityType.celltower, sl.getDataSource().getId())
+					.resolve();
+		}
+		networkInputs = networkInputs
+				.modify()
+				.updateDataSourceScope(scope)
+				.commit();
+
 		return new WirecenterOptimizationRequest(
 				request.getOptimizationConstraints(),
 				request.getConstraints(),

@@ -9,6 +9,7 @@ import com.altvil.interfaces.NetworkAssignmentModel.SelectionFilter;
 
 public class NetworkDataRequest {
 
+
 	public static class Modifier {
 		private NetworkDataRequest modified;
 
@@ -58,6 +59,11 @@ public class NetworkDataRequest {
 			return this;
 		}
 
+		public Modifier updateDataSourceScope(DataSourceScope scope) {
+			this.modified.dataSourceScope =scope;
+			return this;
+		}
+
 		public NetworkDataRequest commit() {
 			return modified;
 		}
@@ -74,13 +80,13 @@ public class NetworkDataRequest {
 			.of(SelectionFilter.SELECTED);
 	private Set<LocationEntityType> locationEntities;
 	private Optional<Integer> serviceAreaId = Optional.empty();
-	private Integer dataSourceId;
+	private DataSourceScope dataSourceScope;
 
 	public NetworkDataRequest(long planId, Integer serviceLayerId,
-			Integer year, AnalysisSelectionMode selectionMode,
-			Set<LocationEntityType> locationEntities, double mrc,
-			boolean queryPlanConduit, Optional<Integer> serviceAreaId,
-			Set<SelectionFilter> selectionFilters) {
+							  Integer year, AnalysisSelectionMode selectionMode,
+							  Set<LocationEntityType> locationEntities, double mrc,
+							  boolean queryPlanConduit, Optional<Integer> serviceAreaId,
+							  Set<SelectionFilter> selectionFilters, DataSourceScope dataSourceScope) {
 
 		super();
 		this.planId = planId;
@@ -92,12 +98,13 @@ public class NetworkDataRequest {
 		this.mrc = mrc;
 		this.serviceAreaId = serviceAreaId;
 		this.selectionFilters = selectionFilters;
+		this.dataSourceScope = dataSourceScope;
 	}
 
 	public Modifier modify() {
 		return new Modifier(new NetworkDataRequest(planId, serviceLayerId,
 				year, selectionMode, locationEntities, mrc, queryPlanConduit,
-				serviceAreaId, selectionFilters));
+				serviceAreaId, selectionFilters, dataSourceScope));
 	}
 
 	public NetworkDataRequest createRequest(long planId, int serviceLayerId) {
@@ -159,12 +166,8 @@ public class NetworkDataRequest {
 		return serviceAreaId;
 	}
 
-	public void setDataSourceId(Integer dataSourceId) {
-		this.dataSourceId = dataSourceId;
-	}
-
-	public Integer getDataSourceId() {
-		return dataSourceId;
+	public DataSourceScope getDataSourceScope() {
+		return dataSourceScope;
 	}
 
 	public Set<SelectionFilter> getSelectionFilters() {

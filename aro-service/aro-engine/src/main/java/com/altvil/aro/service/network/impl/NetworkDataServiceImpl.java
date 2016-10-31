@@ -332,7 +332,9 @@ public class NetworkDataServiceImpl implements NetworkDataService {
 						networkConfiguration.getServiceAreaId().get(),
 						networkConfiguration.getPlanId(),
 						networkConfiguration.getYear(),
-						networkConfiguration.getMrc(), ctx);
+						networkConfiguration.getMrc(),
+						ctx,
+						networkConfiguration.getDataSourceScope());
 
 	}
 

@@ -10,7 +10,9 @@ import java.util.Set;
 import com.altvil.aro.model.MasterPlan;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.network.AnalysisSelectionMode;
+import com.altvil.aro.service.network.DataSourceScope;
 import com.altvil.aro.service.network.NetworkDataRequest;
+import com.altvil.aro.service.network.impl.DefaultDataSourceScope;
 import com.altvil.aro.service.optimization.CustomOptimization;
 import com.altvil.aro.service.optimization.OptimizationRequest;
 import com.altvil.aro.service.optimization.constraints.CapexConstraints;
@@ -120,11 +122,13 @@ public class RootOptimizationRequest extends OptimizationRequest {
 					locationEntities,
 					mrc,
 					false,
-					Optional.<Integer> empty(),
+					Optional.<Integer>empty(),
 					this.locationSelectionMode == AnalysisSelectionMode.SELECTED_AREAS ? EnumSet
 							.of(NetworkAssignmentModel.SelectionFilter.ALL)
 							: EnumSet
-									.of(NetworkAssignmentModel.SelectionFilter.SELECTED));
+							.of(NetworkAssignmentModel.SelectionFilter.SELECTED),
+					DefaultDataSourceScope.SCOPE
+					);
 		}
 
 		public RootOptimizationRequest build() {
