@@ -38,11 +38,9 @@ exports.configure = (api, middleware) => {
 
     var planQuery = `
       IN (
-        (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+        (SELECT p.id FROM client.plan p WHERE plan_type ${type} AND name='T' AND p.parent_plan_id IN (
           (SELECT r.id FROM client.plan r WHERE r.parent_plan_id IN (
-            SELECT id FROM client.plan
-            WHERE parent_plan_id=$1
-            AND name ${type}
+            SELECT id FROM client.plan WHERE parent_plan_id=$1
           ))
         ))
       )
