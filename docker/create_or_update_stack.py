@@ -60,6 +60,8 @@ db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
 docker_pass = os.environ['DOCKER_PASS']
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
+app_default_admin_email = os.environ['ARO_APP_DEFAULT_ADMIN_EMAIL']
+app_default_admin_password = os.environ['ARO_APP_DEFAULT_ADMIN_PASSWORD']
 
 session = Session(region_name='us-east-1')
 
@@ -155,7 +157,9 @@ def provision_stack(cloudformation_stack):
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='m4.large'
+        instance_type='m4.large',
+        app_initial_email=app_default_admin_email,
+        app_initial_password=app_default_admin_password
     )
 
 

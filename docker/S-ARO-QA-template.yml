@@ -44,10 +44,10 @@ Parameters:
     Default: "50"
   SshKeyName:
     Type: "AWS::EC2::KeyPair::KeyName"
-    Default: "nvitucci-ec2"
+    Default: "aro-qa-2016"
   SslCertificateArn:
     Type: String
-    Default: "  arn:aws:acm:us-east-1:976168524097:certificate/23c5a5c8-49c9-4823-83b4-46657a323162"
+    Default: "arn:aws:acm:us-east-1:976168524097:certificate/b7189445-e5c4-4d94-b875-376b39d063e1"
   ConfigRepoBranch:
     Type: String
     Default: "master"
