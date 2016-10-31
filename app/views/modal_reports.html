@@ -81,7 +81,7 @@
               <td>{{ file.type }}</td>
               <td>{{ plan.updated_at | date:'shortDate' }}</td>
               <td>
-                <a ng-show="file.url" href="{{ file.url }}" class="btn btn-primary btn-xs">
+                <a ng-show="file.url" href="{{ file.url }}" class="btn btn-primary btn-xs" download>
                   <span class="fa fa-download"></span> Download
                 </a>
               </td>

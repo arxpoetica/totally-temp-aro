@@ -87,6 +87,11 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
       {
         name: 'Dropped Tower Details',
         type: '.csv'
+      },
+      {
+        name: 'TABC Summary Formatted',
+        type: '.xlsx',
+        url: '/csv/TABC Summary Formatted.xlsx'
       }
     ]
     $scope.openReport(null, false)
