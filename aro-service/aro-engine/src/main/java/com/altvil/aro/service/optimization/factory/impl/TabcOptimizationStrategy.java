@@ -159,8 +159,9 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		GenerationPlan  gp = new GenerationPlan() ;
 		gp.setParentPlan(wirecenterPlanPlaceHolder) ;
 		gp.setName(strategy.getId());
-		gp.setCreateAt(new Date());
 		gp.setCentroid(gp.getCentroid()) ;
+		gp.setCreateAt(new Date());
+		gp.setUpdateAt(new Date());
 		networkPlanRepository.save(gp) ;
 		
 		return gp ;
