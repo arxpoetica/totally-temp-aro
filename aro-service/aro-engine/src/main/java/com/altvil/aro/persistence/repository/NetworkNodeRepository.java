@@ -31,6 +31,7 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 	public Double getTotalCost(@Param("planId") long planId) ;
 	
 	@Transactional
+	@Modifying
 	@Query(value = "insert into client.network_nodes (plan_id, lat, lon, node_type_id, geog, geom)\n" + 
 			"select gp.id, n.lat, n.lon, node_type_id, geog, geom  \n" + 
 			"from client.network_nodes n,\n" + 
