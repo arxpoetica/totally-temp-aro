@@ -33,6 +33,7 @@ public class QueryExecutor {
 				try (ResultSet rs = ps.executeQuery()) {
 					csvWriter.writeAll(rs, true);
 				}
+				csvWriter.flush(); 
 			});
 		}
 
