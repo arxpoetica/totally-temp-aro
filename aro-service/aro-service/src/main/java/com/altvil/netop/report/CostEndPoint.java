@@ -33,7 +33,7 @@ public class CostEndPoint {
 	@Autowired
 	private AroConversionService aroConversionService;
 
-	@RequestMapping(value = "/report-extended/{name}/{plan_id}.csv", method = RequestMethod.GET, produces = "text/csv")
+	@RequestMapping(value = "/report-extended/{name}/{planId}.csv", method = RequestMethod.GET, produces = "text/csv")
 	public void getExtendedReport(@PathVariable String name,
 			@PathVariable long planId, Writer responseWriter)
 			throws SQLException, IOException {
