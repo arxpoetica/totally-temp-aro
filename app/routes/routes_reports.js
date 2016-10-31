@@ -1,6 +1,7 @@
 var helpers = require('../helpers')
 var models = require('../models')
 var config = helpers.config
+var database = helpers.database
 
 exports.configure = (api, middleware) => {
   api.get('/reports/tabc/:plan_id/summary', (request, response, next) => {
@@ -9,17 +10,20 @@ exports.configure = (api, middleware) => {
       method: 'GET',
       url: config.aro_service_url + `/rest/report-extended/tabc/${plan_id}.csv`
     }
-    models.AROService.request(req)
-      .then((output) => {
-        response.attachment('tabc.csv')
-        response.send(output)
+
+    database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
+      .then((plan) => {
+        return models.AROService.request(req)
+          .then((output) => {
+            response.attachment(`TABC Summary Stats ${plan.name}.csv`)
+            response.send(output)
+          })
       })
       .catch(next)
   })
 
   api.get('/reports/tabc/:plan_id/kml/:type', (request, response, next) => {
     var plan_id = request.params.plan_id
-    var file_name = 'foo'
     var types = ['T', 'A', 'B', 'C']
     var type = request.params.type
     if (types.indexOf(type) === -1) {
@@ -43,10 +47,13 @@ exports.configure = (api, middleware) => {
         ))
       )
     `
-    models.NetworkPlan.exportKml(plan_id, planQuery)
-      .then((kml_output) => {
-        response.attachment(file_name + '.kml')
-        response.send(kml_output)
+    database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
+      .then((plan) => {
+        return models.NetworkPlan.exportKml(plan_id, planQuery)
+          .then((kml_output) => {
+            response.attachment(`TABC ${request.params.type} ${plan.name}.kml`)
+            response.send(kml_output)
+          })
       })
       .catch(next)
   })
