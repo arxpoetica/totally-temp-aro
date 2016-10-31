@@ -47,14 +47,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   ]
   $scope.routeGenerationOptionsValues = {}
 
-  $scope.reportGenerationOptions = [
-    { id: 'kml', value: 'Route KMLs' },
-    { id: 'summary', value: 'Route Summary' },
-    { id: 'tower', value: 'Dropped Tower Details' },
-    { id: 'routed', value: 'Routed Customer Details' }
-  ]
-  $scope.reportGenerationOptionsValues = {}
-
   $scope.optimizationTypeOptions = []
 
   var budgetInput = $('#area_network_planning_controller input[name=budget]')
@@ -80,10 +72,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
     $scope.routeGenerationOptions.forEach((option) => {
       $scope.routeGenerationOptionsValues[option.id] = true
-    })
-
-    $scope.reportGenerationOptions.forEach((option) => {
-      $scope.reportGenerationOptionsValues[option.id] = true
     })
 
     $scope.entityTypes.forEach((entity) => {

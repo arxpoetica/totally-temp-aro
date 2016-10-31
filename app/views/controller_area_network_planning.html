@@ -114,14 +114,6 @@
   <% } %>
 
   <% if (config.ARO_CLIENT === 'verizon') { %>
-  <div ng-show="optimizationType === 'TABC'">
-    <p><strong>Report Name</strong></p>
-
-    <p>
-      <input type="text" class="form-control" ng-model="reportName">
-    </p>
-  </div>
-
   <p><strong>Technology</strong></p>
   <form>
     <div class="radio">
@@ -177,16 +169,6 @@
       </div>
     </form>
 
-    <p><strong>Report Generation Options</strong></p>
-    <form>
-      <div class="checkbox disabled" ng-repeat="option in reportGenerationOptions">
-        <label>
-          <input type="checkbox" disabled
-            ng-model="reportGenerationOptionsValues[option.id]"
-            ng-click="reportGenerationOptionsChanged(option.id)"> {{ option.value }}
-        </label>
-      </div>
-    </form>
   </div>
 
   <% } %>
