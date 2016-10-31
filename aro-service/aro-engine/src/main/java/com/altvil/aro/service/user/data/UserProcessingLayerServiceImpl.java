@@ -1,5 +1,28 @@
 package com.altvil.aro.service.user.data;
 
+import com.altvil.aro.model.ProcessArea;
+import com.altvil.aro.model.ServiceArea;
+import com.altvil.aro.model.ServiceLayer;
+import com.altvil.aro.persistence.repository.DataSourceEntityRepository;
+import com.altvil.aro.persistence.repository.ServiceAreaRepository;
+import com.altvil.aro.persistence.repository.ServiceLayerRepository;
+import com.altvil.aro.persistence.repository.user_data.LocationClass;
+import com.altvil.aro.persistence.repository.user_data.SourceLocationEntity;
+import com.altvil.aro.persistence.repository.user_data.UserDataSource;
+import com.altvil.aro.service.processing.UserProcessingLayerService;
+import com.altvil.aro.service.processing.impl.VoronoiPolygonsGenerator;
+import com.altvil.utils.GeometryUtil;
+import com.opencsv.CSVReader;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -9,32 +32,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import javax.annotation.PostConstruct;
-
-import com.altvil.aro.persistence.repository.user_data.LocationClass;
-import com.altvil.aro.service.processing.impl.VoronoiPolygonsGenerator;
-import com.opencsv.CSVReader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.altvil.aro.model.ProcessArea;
-import com.altvil.aro.model.ServiceArea;
-import com.altvil.aro.model.ServiceLayer;
-import com.altvil.aro.persistence.repository.DataSourceEntityRepository;
-import com.altvil.aro.persistence.repository.ServiceAreaRepository;
-import com.altvil.aro.persistence.repository.ServiceLayerRepository;
-import com.altvil.aro.persistence.repository.user_data.UserDataSource;
-import com.altvil.aro.persistence.repository.user_data.SourceLocationEntity;
-import com.altvil.aro.service.processing.UserProcessingLayerService;
-import com.altvil.utils.GeometryUtil;
-import com.altvil.utils.csv.CsvReaderWriter;
-import com.altvil.utils.csv.CsvReaderWriterFactory;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 @Service
 public class UserProcessingLayerServiceImpl implements
@@ -201,6 +198,7 @@ public class UserProcessingLayerServiceImpl implements
 			try {
 				Collection<SourceLocationEntity> result = new ArrayList<>();
 				Function<String[], SourceLocationEntity> rowMapper = createColumnDefinitions().bindHeader(reader.readNext(), createSupplier(dataSource, locationClass));
+				rowMapper = postProcessEntity(rowMapper);
 				String[] line;
 
 				while(null != (line = reader.readNext())) {
@@ -213,6 +211,15 @@ public class UserProcessingLayerServiceImpl implements
 			}
 
 		}
+
+		private Function<String[], SourceLocationEntity> postProcessEntity(Function<String[], SourceLocationEntity> rowMapper) {
+			return (t) -> {
+				SourceLocationEntity entity = rowMapper.apply(t);
+				entity.setPoint(GeometryUtil.asPoint(new Coordinate(entity.getLongitude(), entity.getLat())));
+				return entity;
+			};
+		}
+
 
 		private Supplier<SourceLocationEntity> createSupplier(UserDataSource dataSource, LocationClass locationClass) {
 			return ()-> {
