@@ -63,13 +63,14 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Analysis</h4>
+        <h4 class="modal-title">Reports</h4>
       </div>
       <div class="modal-body">
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>File name</th>
+              <th>File Name</th>
+              <th>File Type</th>
               <th>Date Created</th>
               <th class="col-md-1"></th>
             </tr>
@@ -77,15 +78,17 @@
           <tbody>
             <tr ng-repeat="file in analysis">
               <td>{{ file.name }}</td>
+              <td>{{ file.type }}</td>
               <td>{{ file.createdAt }}</td>
               <td>
-                <button class="btn btn-primary btn-xs"><span class="fa fa-download"></span> Download</button>
+                <button class="btn btn-primary btn-xs" disabled><span class="fa fa-download"></span> Download</button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="modal-footer">
+        <button type="button" class="btn btn-default" disabled>Download all reports</button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>

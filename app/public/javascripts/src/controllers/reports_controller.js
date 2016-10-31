@@ -29,11 +29,33 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
 
   $scope.analysis = [
     {
-      name: 'File name 1',
+      name: 'T Route',
+      type: '.kml',
       createdAt: '10/19/2016'
     },
     {
-      name: 'File name 2',
+      name: 'A Route',
+      type: '.kml',
+      createdAt: '10/19/2016'
+    },
+    {
+      name: 'B Route',
+      type: '.kml',
+      createdAt: '10/19/2016'
+    },
+    {
+      name: 'C Route',
+      type: '.kml',
+      createdAt: '10/19/2016'
+    },
+    {
+      name: 'All TABC Endpoints',
+      type: '.csv',
+      createdAt: '10/19/2016'
+    },
+    {
+      name: 'Dropped Tower Details',
+      type: '.kml',
       createdAt: '10/19/2016'
     }
   ]
