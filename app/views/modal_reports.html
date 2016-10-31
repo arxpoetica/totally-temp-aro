@@ -38,7 +38,7 @@
           <tbody>
             <tr ng-repeat="report in reports">
               <td>
-                <a href="javascript:;" ng-click="openReport(report)">{{ report.name }}</a>
+                <a href="javascript:;" ng-click="openReport(report, true)">{{ report.name }}</a>
               </td>
               <td>{{ report.type }}</td>
               <td>{{ report.createdAt }}</td>

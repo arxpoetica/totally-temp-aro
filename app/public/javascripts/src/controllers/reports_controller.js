@@ -47,12 +47,20 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
     }
   }
 
-  $scope.openReport = () => {
+  var backToReports = true
+  $scope.openReport = (report, back) => {
+    backToReports = back
     $('#reports').modal('hide')
     $('#reports-folder').modal('show')
   }
 
   $('#reports-folder').on('hidden.bs.modal', () => {
-    $('#reports').modal('show')
+    if (backToReports) {
+      $('#reports').modal('show')
+    }
+  })
+
+  $rootScope.$on('open-report', (e, plan) => {
+    $scope.openReport(null, false)
   })
 }])

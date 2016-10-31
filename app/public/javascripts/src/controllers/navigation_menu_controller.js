@@ -348,6 +348,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
+  $scope.openReport = (plan) => {
+    $('#select-plan').modal('hide')
+    $rootScope.$broadcast('open-report', plan)
+  }
+
   // var nonLinearSlider = document.getElementById('year-slider')
   // noUiSlider.create(nonLinearSlider, {
   //   behaviour: 'tap',
