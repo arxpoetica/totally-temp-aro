@@ -3,23 +3,19 @@ package com.altvil.utils;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.prep.PreparedGeometry;
-import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
-import com.vividsolutions.jts.index.strtree.STRtree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 public class BufferedSTRGeographyMatcher {
     private final STRtree stRtree;
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    @SuppressWarnings("unused")
+	private final Logger log = LoggerFactory.getLogger(BufferedSTRGeographyMatcher.class.getName());
 
     public <T extends Geometry> BufferedSTRGeographyMatcher(Collection<T > geometries, double bufferDistance){
 
@@ -48,7 +44,8 @@ public class BufferedSTRGeographyMatcher {
     }
 
 
-    public boolean covers(Geometry geometry){
+    @SuppressWarnings("unchecked")
+	public boolean covers(Geometry geometry){
 
 
         return ((List<Geometry>) stRtree.query(geometry.getEnvelopeInternal()))
