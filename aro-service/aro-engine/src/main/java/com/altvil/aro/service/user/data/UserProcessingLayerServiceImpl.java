@@ -1,16 +1,20 @@
-package com.altvil.aro.service.processing.impl;
+package com.altvil.aro.service.user.data;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.aro.persistence.repository.user_data.LocationClass;
+import com.altvil.aro.service.processing.impl.VoronoiPolygonsGenerator;
+import com.opencsv.CSVReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
@@ -28,8 +32,6 @@ import com.altvil.aro.service.processing.UserProcessingLayerService;
 import com.altvil.utils.GeometryUtil;
 import com.altvil.utils.csv.CsvReaderWriter;
 import com.altvil.utils.csv.CsvReaderWriterFactory;
-import com.opencsv.bean.CsvBind;
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -40,8 +42,6 @@ public class UserProcessingLayerServiceImpl implements
 	private ServiceLayerRepository serviceLayerRepository;
 	private DataSourceEntityRepository dataSourceEntityRepository;
 	private ServiceAreaRepository serviceAreaRepository;
-
-	private CsvReaderWriter<EntityDataRow> csvReaderWriter;
 
 	@Autowired
 	public UserProcessingLayerServiceImpl(
@@ -56,8 +56,7 @@ public class UserProcessingLayerServiceImpl implements
 
 	@PostConstruct
 	void PostConstruct() {
-		csvReaderWriter = CsvReaderWriterFactory.FACTORY.create(
-				EntityDataRow.class, "entityCategoryId", "lat", "longitude");
+
 	}
 
 	@Override
@@ -92,41 +91,31 @@ public class UserProcessingLayerServiceImpl implements
 	}
 
 	@Override
-	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader)
+	public void saveUserServiceLayerEntitiesCSV(int id, Reader reader, LocationClass locationClass)
 			throws IOException {
-		saveUserServiceLayerEntitiesCSV(id, new BufferedReader(reader));
+		saveUserServiceLayerEntitiesCSV(id, new BufferedReader(reader), locationClass);
 
 	}
 
 	@Override
 	@Transactional
 	public void loadUserServiceLayerEntitiesCSV(int id, Writer writer) {
-		csvReaderWriter.write(writer, toEntityDataRows(serviceLayerRepository
-				.getOne(id).getDataSource().getSourceLocationEntities()));
+		throw new UnsupportedOperationException();
+		//csvReaderWriter.write(writer, toEntityDataRows(serviceLayerRepository
+		//		.getOne(id).getDataSource().getSourceLocationEntities()));
 	}
 
 	@Override
 	@Transactional
-	public void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader)
+	public void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader, LocationClass locationClass)
 			throws IOException {
 
 		UserDataSource ds = serviceLayerRepository.getOne(id).getDataSource();
-		ds.getSourceLocationEntities().clear();
+		//ds.getSourceLocationEntities().clear();
+		CSVReader csvReader = new CSVReader(reader);
 
 		ds.getSourceLocationEntities()
-				.addAll(csvReaderWriter
-						.parse(reader)
-						.stream()
-						.map(r -> {
-							SourceLocationEntity sl = new SourceLocationEntity();
-							sl.setDataSource(ds);
-							sl.setLat(r.getLat());
-							sl.setLongitude(r.getLongitude());
-							sl.setPoint(GeometryUtil.asPoint(new Coordinate(r
-									.getLongitude(), r.getLat())));
-							sl.setEntityCategoryId(r.getEntityCategoryId());
-							return sl;
-						}).collect(Collectors.toSet()));
+				.addAll(new SourceLocationsCSVReader().readSourceLocations(csvReader, ds, locationClass));
 
 		dataSourceEntityRepository.save(ds);
 
@@ -205,9 +194,140 @@ public class UserProcessingLayerServiceImpl implements
 		return sa;
 	}
 
+
+	private class SourceLocationsCSVReader{
+
+		Collection<SourceLocationEntity> readSourceLocations(CSVReader reader, UserDataSource dataSource, LocationClass locationClass)  {
+			try {
+				Collection<SourceLocationEntity> result = new ArrayList<>();
+				Function<String[], SourceLocationEntity> rowMapper = createColumnDefinitions().bindHeader(reader.readNext(), createSupplier(dataSource, locationClass));
+				String[] line;
+
+				while(null != (line = reader.readNext())) {
+                	result.add(rowMapper.apply(line));
+                }
+
+				return result;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+
+		}
+
+		private Supplier<SourceLocationEntity> createSupplier(UserDataSource dataSource, LocationClass locationClass) {
+			return ()-> {
+				SourceLocationEntity sle = new SourceLocationEntity();
+				sle.setDataSource(dataSource);
+				sle.setLocationClass(locationClass);
+				return sle;
+			};
+		}
+
+		ColumnDefinitions<SourceLocationEntity> createColumnDefinitions(){
+			ColumnDefinitions<SourceLocationEntity> columnDefinitions = new ColumnDefinitions<>();
+			columnDefinitions.add("entity_category_id", (value, bean) -> bean.setEntityCategoryId(TypeConverterFactory.FACTORY.getConverter(Integer.class).convert(value)));
+			columnDefinitions.add("lat", (value, bean) -> bean.setLat(TypeConverterFactory.FACTORY.getConverter(Double.class).convert(value)));
+			columnDefinitions.add("long", (value, bean) -> bean.setLongitude(TypeConverterFactory.FACTORY.getConverter(Double.class).convert(value)));
+
+			columnDefinitions.setDefault(columnName -> (String value, SourceLocationEntity bean) -> bean.getCustomAttributes().put(columnName,value));
+			return columnDefinitions;
+		}
+
+
+	}
+
+
+
+	interface BoundColumn<T>{
+		void update(String value, T bean);
+	}
+
+	static class ColumnDefinitions<T>{
+		private Map<String, BoundColumn<T>> mappings = new HashMap<>();
+		private Function<String, BoundColumn<T>> defaultBinding;
+
+		void add(String value, BoundColumn<T> boundColumn){
+			mappings.put(value, boundColumn);
+		}
+
+		void setDefault(Function<String, BoundColumn<T>> defaultBinding){
+
+			this.defaultBinding = defaultBinding;
+		}
+
+		BoundColumn<T> getMapping(String columnName){
+			if(mappings.containsKey(columnName)) {
+				return mappings.get(columnName);
+			}else {
+				return defaultBinding.apply(columnName);
+			}
+		}
+
+		Function<String[], T> bindHeader(String[] header, Supplier<T> t){
+			CSVMapper<T> tcsvMapper = new CSVMapper<>(Arrays.stream(header)
+					.map(this::getMapping)
+					.collect(Collectors.toList()), t);
+			return tcsvMapper::mapRow;
+
+		}
+	}
+
+
+
+
+	static class TypeConverterFactory{
+		private Map<Class<?>, TypeConverter<?>> map = new HashMap<>();
+
+		static TypeConverterFactory FACTORY = new TypeConverterFactory();
+
+		private  TypeConverterFactory(){
+			init();
+		}
+
+		private void init() {
+			map.put(Double.class, s -> s == null ?  null : Double.parseDouble(s));
+			map.put(String.class, s -> s );
+			map.put(Integer.class, s -> s == null ?  null : Integer.parseInt(s));
+			map.put(Long.class, s -> s == null ?  null : Long.parseLong(s));
+		}
+
+		<T> TypeConverter<T> getConverter(Class<T> tClass){
+			return (TypeConverter<T>) map.get(tClass);
+		}
+	}
+	interface TypeConverter<T>{
+		T convert(String s);
+	}
+
+
+
+	static class CSVMapper<T>{
+		List<BoundColumn<T>> mappedColumns;
+		Supplier<T> beanSupplier;
+
+		public CSVMapper(List<BoundColumn<T>> mappedColumns, Supplier<T> beanSupplier) {
+			this.mappedColumns = mappedColumns;
+			this.beanSupplier = beanSupplier;
+		}
+
+		T mapRow(String[] rawData){
+			T bean = beanSupplier.get();
+			IntStream.range(0, rawData.length)
+					.forEach(
+							idx -> mappedColumns
+									.get(idx)
+									.update(rawData[idx], bean)
+					);
+			return bean;
+		}
+
+
+	}
+
 	//
 	//
 	//
+	/*
 
 	private List<EntityDataRow> toEntityDataRows(
 			Collection<SourceLocationEntity> sourceEntities) {
@@ -258,4 +378,5 @@ public class UserProcessingLayerServiceImpl implements
 
 	}
 
+	*/
 }
