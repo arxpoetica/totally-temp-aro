@@ -76,17 +76,17 @@ public class NetworkPlanSerializer<T> {
 
 				}));
 
-			StreamUtil.map(
-					planNetwork.getGeneratedData().getGeneratedNetworkData(),
-					d -> {
-						NetworkPlanData pd = new NetworkPlanData();
-						pd.setId(new NetworkPlanDataKey(
-								planNetwork.getPlanId(), d.getId()));
-						pd.setGeometry(d.getGeometry());
-						return pd;
-					}).forEach(planData -> {
-				planMods.addNetworkPlanData(planData);
-			});
+//			StreamUtil.map(
+//					planNetwork.getGeneratedData().getGeneratedNetworkData(),
+//					d -> {
+//						NetworkPlanData pd = new NetworkPlanData();
+//						pd.setId(new NetworkPlanDataKey(
+//								planNetwork.getPlanId(), d.getId()));
+//						pd.setGeometry(d.getGeometry());
+//						return pd;
+//					}).forEach(planData -> {
+//				planMods.addNetworkPlanData(planData);
+//			});
 			;
 
 		}

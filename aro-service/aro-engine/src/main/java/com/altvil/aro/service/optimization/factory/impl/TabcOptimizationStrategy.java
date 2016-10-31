@@ -2,6 +2,7 @@ package com.altvil.aro.service.optimization.factory.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -13,12 +14,15 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.altvil.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.altvil.aro.model.GenerationPlan;
 import com.altvil.aro.model.NetworkNodeType;
+import com.altvil.aro.model.WirecenterPlan;
+import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.AssignedEntityDemand;
 import com.altvil.aro.service.entity.BulkFiberTerminal;
@@ -35,6 +39,7 @@ import com.altvil.aro.service.network.AnalysisSelectionMode;
 import com.altvil.aro.service.network.NetworkDataRequest;
 import com.altvil.aro.service.network.NetworkDataService;
 import com.altvil.aro.service.optimization.factory.WireCenterPlanningStrategy;
+import com.altvil.aro.service.optimization.impl.PlanCommandService;
 import com.altvil.aro.service.optimization.wirecenter.PlannedNetwork;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationRequest;
 import com.altvil.aro.service.optimization.wirecenter.WirecenterOptimizationService;
@@ -42,13 +47,16 @@ import com.altvil.aro.service.optimization.wirecenter.generated.EquipmentLinkedL
 import com.altvil.aro.service.optimization.wirecenter.generated.EquipmentLinkedLocation.LinkType;
 import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedData;
 import com.altvil.aro.service.optimization.wirecenter.generated.GeneratedNetworkData;
-import com.altvil.aro.service.optimization.wirecenter.generatedmpl.i.GeneratedNetworkDataImpl;
 import com.altvil.aro.service.optimization.wirecenter.impl.DefaultPlannedNetwork;
 import com.altvil.aro.service.plan.CompositeNetworkModel;
 import com.altvil.aro.service.plan.GeneratedFiberRoute;
 import com.altvil.aro.service.plan.NetworkModel;
 import com.altvil.interfaces.NetworkAssignment;
 import com.altvil.interfaces.NetworkAssignmentModel;
+import com.altvil.utils.BufferedSTRGeographyMatcher;
+import com.altvil.utils.GeometryUtil;
+import com.altvil.utils.StreamUtil;
+import com.altvil.utils.UnitUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -64,8 +72,11 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 	private WirecenterOptimizationRequest wirecenterOptimizationRequest;
 	private Collection<String> strategies;
 
+	private NetworkPlanRepository networkPlanRepository ;
+	private PlanCommandService planCommandService;
 	private WirecenterOptimizationService wirecenterOptimizationService;
 	private NetworkDataService networkDataService;
+	private WirecenterPlan wirecenterPlanPlaceHolder ;
 
 	// Initially ALL Data = CellTowers + 2K data
 	private NetworkDataHandler networkDataHandler;
@@ -80,13 +91,19 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		super();
 		this.wirecenterOptimizationRequest = wirecenterOptimizationRequest;
 		this.strategies = strategies;
+		
+		this.wirecenterPlanPlaceHolder = new WirecenterPlan() ;
+		this.wirecenterPlanPlaceHolder.setId(wirecenterOptimizationRequest.getPlanId()) ;
 	}
 
 	public void initialize(ApplicationContext appContext) {
 		this.wirecenterOptimizationService = appContext
 				.getBean(WirecenterOptimizationService.class);
 		this.networkDataService = appContext.getBean(NetworkDataService.class);
+		this.planCommandService = appContext.getBean(PlanCommandService.class);
+		this.networkPlanRepository = appContext.getBean(NetworkPlanRepository.class) ;
 
+		
 		init(strategies);
 	}
 
@@ -95,7 +112,7 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 
 		networkGenerator = wirecenterOptimizationService
 				.bindRequest(wirecenterOptimizationRequest);
-
+		
 		NetworkDataRequest networkDataRequest = wirecenterOptimizationRequest
 				.getNetworkDataRequest()
 				.modify()
@@ -114,10 +131,19 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 	@Override
 	public Optional<PlannedNetwork> optimize() {
 
+		GenerationStrategy previousStrategy = null ;
 		Optional<PlannedNetwork> network = Optional.empty();
 		for (GenerationStrategy strategy : generationStrategies) {
+
+			if (previousStrategy != null) {
+				saveGeneration(previousStrategy, network.get());
+			}
+
 			network = strategy.generate(network);
 			generationTracker.update(strategy, network);
+			
+			previousStrategy = strategy ;
+			
 		}
 
 		if (network.isPresent()) {
@@ -126,6 +152,31 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		}
 
 		return network;
+	}
+
+	@Transactional
+	private GenerationPlan createGenerationAndSavePlan(GenerationStrategy strategy) {
+		GenerationPlan  gp = new GenerationPlan() ;
+		gp.setParentPlan(wirecenterPlanPlaceHolder) ;
+		gp.setName(strategy.getId());
+		gp.setCreateAt(new Date());
+		gp.setCentroid(gp.getCentroid()) ;
+		networkPlanRepository.save(gp) ;
+		
+		return gp ;
+	}
+
+	private PlannedNetwork toGenerationPlannedNetwork(GenerationPlan gp,
+			PlannedNetwork pn) {
+		return new DefaultPlannedNetwork(gp.getId(), pn.getPlannedNetwork(),
+				pn.getCompetitiveDemandMapping());
+	}
+
+	private void saveGeneration(GenerationStrategy strategy, PlannedNetwork curentGeneration) {
+		this.planCommandService.reifyPlanSummarizeAndSave(
+				wirecenterOptimizationRequest.getOptimizationConstraints(),
+				toGenerationPlannedNetwork(createGenerationAndSavePlan(strategy),
+						curentGeneration));
 	}
 
 	private Predicate<NetworkAssignment> createNetworkAssignmentPredicate(
@@ -414,26 +465,25 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 							});
 		}
 
-		private void updateFiberPath(GenerationStrategy strategy,
-				CompositeNetworkModel network) {
-
-			// TODO Add distribution Fiber
-			Geometry geometry = createMultiLineString(network
-					.getNetworkModels()
-					.stream()
-					.flatMap(
-							nm -> nm.getCentralOfficeFeederFiber().getEdges()
-									.stream()).collect(Collectors.toList()));
-
-			generatedData.add(new GeneratedNetworkDataImpl("fiber_route_"
-					+ strategy.getId(), geometry));
-
-		}
+//		private void updateFiberPath(GenerationStrategy strategy,
+//				CompositeNetworkModel network) {
+//
+//			// TODO Add distribution Fiber
+//			Geometry geometry = createMultiLineString(network
+//					.getNetworkModels()
+//					.stream()
+//					.flatMap(
+//							nm -> nm.getCentralOfficeFeederFiber().getEdges()
+//									.stream()).collect(Collectors.toList()));
+//
+//			generatedData.add(new GeneratedNetworkDataImpl("fiber_route_"
+//					+ strategy.getId(), geometry));
+//
+//		}
 
 		private void updateNetwork(GenerationStrategy strategy,
 				CompositeNetworkModel network) {
 
-			updateFiberPath(strategy, network);
 			network.getNetworkModels().stream()
 					.flatMap(nm -> nm.getRejectedEquipmentLinkers().stream())
 					.forEach(linker -> updateRejectedLinks(strategy, linker));
