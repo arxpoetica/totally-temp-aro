@@ -67,6 +67,11 @@
         <span class="fa fa-pencil"></span> &nbsp; Edit selected layer
       </button>
     </p>
+    <p ng-show="selectedUserDefinedBoundary">
+      <button class="btn btn-primary btn-sm btn-block" ng-click="selectAllInLayer()">
+        <span class="fa fa-hand-pointer-o"></span> &nbsp; Select All in Layer
+      </button>
+    </p>
     <p>
       <button class="btn btn-primary btn-sm btn-block" ng-click="createUserDefinedBoundary()">
         <span class="fa fa-plus"></span> &nbsp; Create a new layer

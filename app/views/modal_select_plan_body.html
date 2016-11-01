@@ -47,41 +47,14 @@
             <a href="javascript:void(0)" ng-click="sortBy('updated_at', false)">↑</a>
           </th>
           <th>Owner</th>
-          <th>
+          <th class="text-right">
             Total Cost
             <a href="javascript:void(0)" ng-click="sortBy('total_cost', true)">↓</a>
             <a href="javascript:void(0)" ng-click="sortBy('total_cost', false)">↑</a>
           </th>
-          <th>
-            Total Revenue
-            <a href="javascript:void(0)" ng-click="sortBy('total_revenue', true)">↓</a>
-            <a href="javascript:void(0)" ng-click="sortBy('total_revenue', false)">↑</a>
-          </th>
-          <th>
-            Incremental IRR
-            <a href="javascript:void(0)" ng-click="sortBy('irr', true)">↓</a>
-            <a href="javascript:void(0)" ng-click="sortBy('irr', false)">↑</a>
-          </th>
-          <th>
-            Incremental NPV
-            <a href="javascript:void(0)" ng-click="sortBy('npv', true)">↓</a>
-            <a href="javascript:void(0)" ng-click="sortBy('npv', false)">↑</a>
-          </th>
-          <th>Premises enabled</th>
-          <th>Fiber Miles Aug</th>
-          <th>
-            Fiber Miles New
-            <a href="javascript:void(0)" ng-click="sortBy('fiber_length', true)">↓</a>
-            <a href="javascript:void(0)" ng-click="sortBy('fiber_length', false)">↑</a>
-          </th>
-          <th>Prem Ct 4G LTE</th>
-          <th>Prem Ct 5G</th>
-          <th>Prem Ct FiOS</th>
-          <th>Prem Ct Core</th>
-          <th>Cost/Prem 4G LTE</th>
-          <th>Cost/Prem 5G</th>
-          <th>Cost/Prem FiOS</th>
-          <th>Cost/Prem Core</th>
+          <th>Status</th>
+          <th>Optimization Type</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -91,24 +64,13 @@
           <td>{{plan.created_at | date:'shortDate'}}</td>
           <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
           <td class="text-right">{{plan.total_cost | currency}}</td>
-          <td class="text-right">{{plan.total_revenue | currency}}</td>
-          <td class="text-right">
-            <!--
-            {{plan.irr * 100 | number: 1}}%
-            -->
+          <td></td>
+          <td></td>
+          <td>
+            <a class="btn btn-sm btn-primary" ng-click="openReport(plan)"><span class="fa fa-folder"></span></a>
+            <a class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>
+            <a class="btn btn-sm btn-danger" ng-click="deletePlan(plan)" ng-show="plan.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
           </td>
-          <td class="text-right">{{plan.npv / 1000 | currency:"$":1}}K</td>
-          <td class="text-right">{{plan.total_count | number}}</td>
-          <td class="text-right"></td>
-          <td class="text-right">{{plan.fiber_length | number: 0}} mi</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td class="text-right">{{plan.total_count | number}}</td>
-          <td></td>
         </tr>
       </tbody>
     </table>

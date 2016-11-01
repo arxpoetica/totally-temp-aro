@@ -37,7 +37,9 @@
           </thead>
           <tbody>
             <tr ng-repeat="report in reports">
-              <td>{{ report.name }}</td>
+              <td>
+                <a href="javascript:;" ng-click="openReport(report, true)">{{ report.name }}</a>
+              </td>
               <td>{{ report.type }}</td>
               <td>{{ report.createdAt }}</td>
               <td>{{ report.owner }}</td>
@@ -50,6 +52,45 @@
         </table>
       </div>
       <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="reports-folder" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Reports</h4>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>File Type</th>
+              <th>Date Created</th>
+              <th class="col-md-1"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="file in analysis">
+              <td>{{ file.name }}</td>
+              <td>{{ file.type }}</td>
+              <td>{{ plan.updated_at | date:'shortDate' }}</td>
+              <td>
+                <a ng-show="file.url" href="{{ file.url }}" class="btn btn-primary btn-xs" download>
+                  <span class="fa fa-download"></span> Download
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" disabled>Download all reports</button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>

@@ -366,19 +366,31 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       plan.location_types = plan.location_types || []
       map.ready(() => {
         selectedLocationsLayer.show()
-
         // select entity types used in optimization
-        if (plan.location_types.indexOf('medium') >= 0) $scope.business_categories_selected['medium'] = true
-        if (plan.location_types.indexOf('large') >= 0) $scope.business_categories_selected['large'] = true
-        $scope.show_businesses = _.size($scope.business_categories_selected) > 0
-        if (plan.location_types.indexOf('small') >= 0) $scope.business_categories_selected['small'] = true
-        if (plan.location_types.indexOf('mrcgte2000') >= 0) $scope.business_categories_selected['2kplus'] = true
-        if (plan.location_types.indexOf('celltower') >= 0) $scope.show_towers = true
-
-        $scope.changeLocationsLayer()
+        selectLocations(plan.location_types)
       })
     }
   })
+
+  $rootScope.$on('select_locations', (e, locationTypes) => {
+    selectLocations(locationTypes)
+  })
+
+  function selectLocations (locationTypes) {
+    var businessTypes = {
+      medium: 'medium',
+      large: 'large',
+      small: 'small',
+      mrcgte2000: '2kplus'
+    }
+    Object.keys(businessTypes).forEach((type) => {
+      if (locationTypes.indexOf(type) >= 0) $scope.business_categories_selected[businessTypes[type]] = true
+    })
+    if (locationTypes.indexOf('celltower') >= 0) $scope.show_towers = true
+    if (locationTypes.indexOf('household') >= 0) $scope.show_households = true
+    $scope.show_businesses = _.size($scope.business_categories_selected) > 0
+    $scope.changeLocationsLayer()
+  }
 
   $scope.overlay_is_loading = () => {
     return customerProfileLayer.is_loading
@@ -469,4 +481,50 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     })
     swal({ title: '', text: `gid: ${feature.getProperty('gid')} tlid: ${feature.getProperty('tlid')}`, type: 'info' })
   })
+
+  var latestOverlay = null
+  var drawingManager = new google.maps.drawing.DrawingManager({
+    drawingMode: google.maps.drawing.OverlayType.POLYLINE,
+    drawingControl: false
+  })
+
+  drawingManager.addListener('overlaycomplete', (e) => {
+    removeLatestOverlay()
+    latestOverlay = e.overlay
+
+    var points = e.overlay.getPath()
+    var total = 0
+    var prev = null
+    points.forEach((point) => {
+      if (prev) {
+        total += google.maps.geometry.spherical.computeDistanceBetween(prev, point)
+      }
+      prev = point
+    })
+    $scope.measuredDistance = total
+    if (!$scope.$$phase) { $scope.$apply() } // refresh UI
+  })
+
+  function removeLatestOverlay () {
+    latestOverlay && latestOverlay.setMap(null)
+    latestOverlay = null
+  }
+
+  $scope.toggleMeasuringStick = () => {
+    var current = drawingManager.getMap()
+    drawingManager.setMap(current ? null : map)
+    removeLatestOverlay()
+    $scope.measuringStickEnabled = !current
+    if (current) $scope.measuredDistance = null
+  }
+
+  $(document).keydown(function (e) {
+    if (e.keyCode === 27 && $scope.measuringStickEnabled) {
+      $scope.toggleMeasuringStick()
+    }
+  })
+
+  $scope.addCustomers = () => {
+    $rootScope.$broadcast('upload_customers')
+  }
 }])

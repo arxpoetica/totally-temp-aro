@@ -72,10 +72,15 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   var newPlanMap
 
+  $rootScope.$on('go-home', () => {
+    $scope.selectPlan(null)
+  })
+
   $scope.selectPlan = function (plan) {
     $scope.plan = plan
     $('#plan-saving').stop().hide()
     $('#plan-saved').stop().hide()
+    $('#plan-saving-progress').hide()
     state.loadPlan(plan)
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
@@ -345,6 +350,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         type: 'success'
       })
     })
+  }
+
+  $scope.openReport = (plan) => {
+    $('#select-plan').modal('hide')
+    $('#plan-combo').modal('hide')
+    $rootScope.$broadcast('open-report', plan)
   }
 
   // var nonLinearSlider = document.getElementById('year-slider')

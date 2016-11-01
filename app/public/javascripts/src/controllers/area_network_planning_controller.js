@@ -13,7 +13,19 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.removeGeography = (geography) => {
     regions.removeGeography(geography)
   }
+  $scope.removeAllGeographies = () => {
+    regions.removeAllGeographies()
+  }
   // --
+
+  $scope.entityTypes = [
+    { id: 'optimizeSMB', value: 'SMB', name: 'small' },
+    { id: 'optimizeMedium', value: 'Mid-tier', name: 'medium' },
+    { id: 'optimizeLarge', value: 'Large Enterprise', name: 'large' },
+    { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
+    { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
+  ]
+  $scope.entityTypesTargeted = {}
 
   $scope.calculating = false
 
@@ -26,6 +38,16 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
   $scope.technology = 'odn1'
+
+  $scope.routeGenerationOptions = [
+    { id: 'T', value: 'T Route' },
+    { id: 'A', value: 'A Route' },
+    { id: 'B', value: 'B Route' },
+    { id: 'C', value: 'C Route' }
+  ]
+  $scope.routeGenerationOptionsValues = {}
+
+  $scope.optimizationTypeOptions = []
 
   var budgetInput = $('#area_network_planning_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
@@ -43,7 +65,37 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+
+    if (plan) {
+      $scope.reportName = plan.name
+    }
+
+    $scope.routeGenerationOptions.forEach((option) => {
+      $scope.routeGenerationOptionsValues[option.id] = true
+    })
+
+    $scope.entityTypes.forEach((entity) => {
+      $scope.entityTypesTargeted[entity.id] = true
+    })
   })
+
+  $scope.routeGenerationOptionsChanged = (id) => {
+    if ($scope.routeGenerationOptionsValues[id]) {
+      // check all above
+      $scope.routeGenerationOptions.some((option) => {
+        if (option.id === id) return true
+        $scope.routeGenerationOptionsValues[option.id] = true
+        return false
+      })
+    } else {
+      // uncheck all below
+      $scope.routeGenerationOptions.slice(0).reverse().some((option) => {
+        if (option.id === id) return true
+        $scope.routeGenerationOptionsValues[option.id] = false
+        return false
+      })
+    }
+  }
 
   $scope.irrThresholdRangeChanged = () => {
     $scope.irrThreshold = +$scope.irrThresholdRange
@@ -78,6 +130,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.run = () => {
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
+
+    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+      scope = $scope.entityTypesTargeted
+    }
 
     if (scope.optimizeHouseholds) locationTypes.push('household')
     if (scope.optimizeBusinesses) locationTypes.push('businesses')
@@ -122,26 +178,68 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     } else if (algorithm === 'IRR') {
       delete changes.irrThreshold
     } else if (algorithm === 'BUDGET_IRR') {
+    } else if (algorithm === 'TABC') {
+      delete changes.budget
+      delete changes.irrThreshold
+      var values = $scope.routeGenerationOptionsValues
+      var generations = Object.keys(values).filter((id) => values[id])
+      changes.customOptimization = {
+        name: 'TABC',
+        map: {
+          generations: generations.join(',')
+        }
+      }
     }
 
     changes.fiberNetworkConstraints = {
       useDirectRouting: $scope.technology === 'direct_routing'
     }
 
+    var selectLocationTypes = []
+    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+      selectLocationTypes = Object.keys($scope.entityTypesTargeted)
+        .map((key) => {
+          return $scope.entityTypesTargeted[key]
+            ? $scope.entityTypes.find((type) => type.id === key).name
+            : null
+        })
+        .filter((val) => val)
+    }
+
     canceler = optimization.optimize($scope.plan, changes, () => {
       $scope.calculating = false
+      if (selectLocationTypes.length > 0) {
+        $rootScope.$broadcast('select_locations', selectLocationTypes)
+      }
     }, () => {
       $scope.calculating = false
     })
   }
 
   $scope.optimizationMode = optimization.getMode()
-  $rootScope.$on('optimization_mode_changed', (e, mode) => {
+  $rootScope.$on('optimization_mode_changed', optimizationModeChanged)
+
+  function optimizationModeChanged (e, mode) {
     $scope.optimizationMode = mode
+    $scope.optimizationType = 'CAPEX'
     if (mode === 'targets') {
-      $scope.optimizationType = 'CAPEX'
+      $scope.optimizationTypeOptions = [
+        { id: 'CAPEX', label: 'Full Coverage' },
+        { id: 'IRR', label: 'Budget' }
+      ]
+    } else {
+      $scope.optimizationTypeOptions = [
+        { id: 'CAPEX', label: 'Full Coverage' },
+        { id: 'MAX_IRR', label: 'Maximum IRR' },
+        { id: 'IRR', label: 'Budget' },
+        { id: 'BUDGET_IRR', label: 'IRR Target' },
+        { id: 'TABC', label: 'TABC analysis' }
+        // { id: 'TARGET_IRR', label: 'IRR Target' },
+        // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
+      ]
     }
-  })
+  }
+  optimizationModeChanged(null, optimization.getMode())
 
   // processing layer
   $scope.allBoundaries = []

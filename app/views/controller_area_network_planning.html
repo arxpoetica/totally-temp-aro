@@ -1,15 +1,8 @@
 <div id="area_network_planning_controller">
   <p><strong>Optimization Type</strong></p>
-  <select ng-model="optimizationType" class="form-control">
-    <option value="CAPEX">Full Coverage</option>
-    <option ng-hide="optimizationMode === 'targets'" value="MAX_IRR">Maximum IRR</option>
-    <option ng-hide="optimizationMode === 'targets'" value="IRR">Budget</option>
-    <option ng-hide="optimizationMode === 'targets'" value="BUDGET_IRR">IRR Target</option>
-    <!--
-    <option ng-hide="optimizationMode === 'targets'" value="TARGET_IRR">IRR Target</option>
-
-    <option ng-hide="optimizationMode === 'targets'" value="BUDGET_IRR">Budget and IRR Floor</option>
-    -->
+  <select class="form-control"
+    ng-model="optimizationType"
+    ng-options="item.id as item.label for item in optimizationTypeOptions">
   </select>
   <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
     <br>
@@ -62,6 +55,15 @@
       <div style="float:left; width:20%">
         <label class="text-right" style="display:block">Year 5</label>
         <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+      </div>
+    </div>
+    <div ng-show="optimizationMode === 'targets' && optimizationType === 'IRR'">
+      <br>
+      <p><strong>Non-Targeted Customers</strong></p>
+      <div class="checkbox" ng-repeat="entity in entityTypes">
+        <label>
+          <input type="checkbox" ng-model="entityTypesTargeted[entity.id]"> {{ entity.value }}
+        </label>
       </div>
     </div>
   </div>
@@ -154,6 +156,21 @@
       </label>
     </div>
   </form>
+
+  <div ng-show="optimizationType === 'TABC'">
+    <p><strong>Route Generation Options</strong></p>
+    <form>
+      <div class="checkbox" ng-repeat="option in routeGenerationOptions">
+        <label>
+          <input type="checkbox"
+            ng-model="routeGenerationOptionsValues[option.id]"
+            ng-click="routeGenerationOptionsChanged(option.id)"> {{ option.value }}
+        </label>
+      </div>
+    </form>
+
+  </div>
+
   <% } %>
 
   <div ng-show="optimizationMode === 'targets'">

@@ -1,4 +1,4 @@
-/* global app swal */
+/* global app swal config */
 app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 
@@ -17,7 +17,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
   optimization.optimize = (plan, changes, success, error) => {
     var canceler = $q.defer()
 
-    function run (plan) {
+    function run () {
       var url = '/network_plan/' + plan.id + '/edit'
       var options = {
         url: url,
@@ -28,15 +28,45 @@ app.service('optimization', ($rootScope, $http, $q) => {
       }
       $http(options)
         .success((response) => {
-          if (!changes.lazy) plan.ranOptimization = true
-          $rootScope.$broadcast('route_planning_changed', response)
-          success && success()
+          if (plan) {
+            if (!changes.lazy) plan.ranOptimization = true
+            $rootScope.$broadcast('route_planning_changed', response)
+            success && success()
+          }
         })
         .error(error)
     }
 
+    function checkNumberOfAreas () {
+      if (changes.algorithm === 'TABC' && changes.geographies.length >= 15) {
+        var timing = 30 * changes.geographies.length
+        swal({
+          title: '',
+          text: `You are running a TABC analysis covering ${changes.geographies.length} service areas. While optimization is running, you will be sent back to the homescreen. Expected timing is ${timing}.`,
+          type: 'info',
+          confirmButtonColor: '#b9b9b9',
+          confirmButtonText: 'Run Optimization',
+          cancelButtonText: 'Cancel',
+          cancelButtonColor: '#DD6B55',
+          showCancelButton: true,
+          closeOnCancel: true,
+          closeOnConfirm: true
+        }, (confirmed) => {
+          if (confirmed) {
+            changes.lazy = true
+            run()
+            $rootScope.$broadcast('go-home')
+            plan = null
+          }
+        })
+      } else {
+        swal.close()
+        run()
+      }
+    }
+
     if (changes.lazy || !plan.ranOptimization || config.ui.map_tools.target_builder.eager) {
-      run(plan)
+      checkNumberOfAreas()
     } else {
       swal({
         title: '',
@@ -47,10 +77,10 @@ app.service('optimization', ($rootScope, $http, $q) => {
         cancelButtonText: 'Replace',
         cancelButtonColor: '#DD6B55',
         showCancelButton: true,
-        closeOnCancel: true,
+        closeOnCancel: false,
         closeOnConfirm: false
       }, (create) => {
-        if (!create) return run(plan)
+        if (!create) return checkNumberOfAreas(plan)
 
         swal({
           title: 'New Plan name',
@@ -71,7 +101,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
           $http(options)
             .success((plan) => {
               $rootScope.$broadcast('plan_selected', plan)
-              run(plan)
+              checkNumberOfAreas()
             })
             .error(error)
         })
