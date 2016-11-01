@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS aro.towers;
 CREATE TABLE aro.towers
 (
 	id serial,
-	data_source_id integer references reference.data_source,
+	data_source_id integer default 1,
 	source_id varchar,
 	location_id int4 references aro.locations,
 	sita_number bigint,
@@ -13,6 +13,7 @@ CREATE TABLE aro.towers
 	lat double precision,
 	lon double precision,
 	geog geography(POINT, 4326),
+	attributes hstore,
 	CONSTRAINT aro_towers_pkey PRIMARY KEY (id)
 );
 
