@@ -56,36 +56,36 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
     $scope.plan = plan
     $scope.analysis = [
       {
-        name: 'TABC Summary Stats',
+        name: `TABC Summary Stats ${plan.name}`,
         type: '.csv',
         url: `/reports/tabc/${plan.id}/summary`
       },
       {
-        name: 'T Route',
+        name: `T Route ${plan.name}`,
         type: '.kml',
         url: `/reports/tabc/${plan.id}/kml/T`
       },
       {
-        name: 'A Route',
+        name: `A Route ${plan.name}`,
         type: '.kml',
         url: `/reports/tabc/${plan.id}/kml/A`
       },
       {
-        name: 'B Route',
+        name: `B Route ${plan.name}`,
         type: '.kml',
         url: `/reports/tabc/${plan.id}/kml/B`
       },
       {
-        name: 'C Route',
+        name: `C Route ${plan.name}`,
         type: '.kml',
         url: `/reports/tabc/${plan.id}/kml/C`
       },
       {
-        name: 'All TABC Endpoints',
+        name: `All TABC Endpoints ${plan.name}`,
         type: '.csv'
       },
       {
-        name: 'Dropped Tower Details',
+        name: `Dropped Tower Details ${plan.name}`,
         type: '.csv'
       },
       {
