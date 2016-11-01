@@ -1,5 +1,6 @@
 package com.altvil.aro.service.network.impl;
 
+import com.altvil.aro.service.cu.cache.query.FingerprintWriter;
 import com.altvil.aro.service.entity.LocationEntityType;
 import com.altvil.aro.service.network.DataSourceScope;
 
@@ -27,6 +28,20 @@ public class DefaultDataSourceScope implements DataSourceScope {
     @Override
     public Modifier modify() {
         return new ScopeModifier();
+    }
+
+    @Override
+    public void appendFingerprint(FingerprintWriter writer) {
+        map.keySet().stream().sorted().forEach(key -> appendEntry(key, writer));
+
+    }
+
+    private void appendEntry(LocationEntityType key, FingerprintWriter writer) {
+        writer.append(key.name());
+        map.get(key).stream()
+                .sorted()
+                .map(Object::toString)
+                .forEach(writer::append);
     }
 
     private class ScopeModifier implements Modifier {
