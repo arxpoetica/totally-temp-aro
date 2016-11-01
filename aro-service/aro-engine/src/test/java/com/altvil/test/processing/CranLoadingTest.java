@@ -23,7 +23,7 @@ import com.altvil.utils.csv.CsvReaderWriterFactory;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(value = "/test-config.xml")
 @Transactional
-public class UserProcessingLayerServiceTest {
+public class CranLoadingTest {
 
     @Autowired
     UserProcessingLayerService layerService;
@@ -37,7 +37,7 @@ public class UserProcessingLayerServiceTest {
     @Test
     public void testCSVsave() throws IOException {
 
-        ServiceLayer serviceLayer = layerService.addUserServiceLayer(6, "loadTestLayer", "loadTestLayer description");
+        ServiceLayer serviceLayer = layerService.addUserServiceLayer(6, "loadTestLayer4343", "loadTestLayer description");
 
 
         BufferedReader reader = new BufferedReader(new StringReader(csvData));
@@ -52,7 +52,7 @@ public class UserProcessingLayerServiceTest {
     @Test
     public void testGenerateAreas() throws IOException {
 
-        ServiceLayer serviceLayer = layerService.addUserServiceLayer(6, "loadTestLayer", "loadTestLayer description");
+        ServiceLayer serviceLayer = layerService.addUserServiceLayer(6, "loadTestLayer1212", "loadTestLayer description");
 
 
         StringReader reader = new StringReader(csvData);

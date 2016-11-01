@@ -1,5 +1,6 @@
 package com.altvil.aro.persistence.repository.user_data;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -14,7 +15,7 @@ public class UserDataSource {
     private String name;
     private String description;
     private Integer userId ;
-    private Set<SourceLocationEntity> sourceLocationEntities;
+    private Set<SourceLocationEntity> sourceLocationEntities = new HashSet<>();
     private int referenceDataSourceId;
 
     @Id
@@ -84,7 +85,7 @@ public class UserDataSource {
 		this.userId = userId;
 	}
 
-    @Column(name="user_id")
+    @Column(name="reference_data_source_id")
     public int getReferenceDataSourceId() {
         return referenceDataSourceId;
     }

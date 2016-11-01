@@ -172,7 +172,9 @@ public class UserProcessingLayerServiceImpl implements
 	@Override
 	@Transactional
 	public void updateCellTowers(int serviceLayerId) {
-		serviceLayerRepository.updateServiceLayerTowers(serviceLayerId);
+		serviceLayerRepository.updateServiceLayerTowers1(serviceLayerId);
+		serviceLayerRepository.updateServiceLayerTowers2();
+		serviceLayerRepository.updateServiceLayerTowers3();
 	}
 
 	@Override
@@ -249,7 +251,7 @@ public class UserProcessingLayerServiceImpl implements
 			ColumnDefinitions<SourceLocationEntity> columnDefinitions = new ColumnDefinitions<>();
 			columnDefinitions.add("entity_category_id", (value, bean) -> bean.setEntityCategoryId(TypeConverterFactory.FACTORY.getConverter(Integer.class).convert(value)));
 			columnDefinitions.add("lat", (value, bean) -> bean.setLat(TypeConverterFactory.FACTORY.getConverter(Double.class).convert(value)));
-			columnDefinitions.add("long", (value, bean) -> bean.setLongitude(TypeConverterFactory.FACTORY.getConverter(Double.class).convert(value)));
+			columnDefinitions.add("longitude", (value, bean) -> bean.setLongitude(TypeConverterFactory.FACTORY.getConverter(Double.class).convert(value)));
 
 			columnDefinitions.setDefault(columnName -> (String value, SourceLocationEntity bean) -> bean.getCustomAttributes().put(columnName,value));
 			return columnDefinitions;

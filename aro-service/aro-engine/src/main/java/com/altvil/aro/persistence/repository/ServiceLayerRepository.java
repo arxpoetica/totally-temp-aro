@@ -52,9 +52,9 @@ public interface ServiceLayerRepository extends
 			")\n" + 
 			",\n" + 
 			"new_cos AS (\n" + 
-			"	INSERT INTO client.network_nodes (plan_id, node_type_id, geog, geom)\n" + 
+			"	INSERT INTO client.network_nodes (plan_id, node_type_id, geog, geom, attributes)\n" +
 			"	SELECT\n" + 
-			"		np.id, sle.entity_category_id, CAST(sle.point AS Geography), sle.point\n" + 
+			"		np.id, sle.entity_category_id, CAST(sle.point AS Geography), sle.point, custom_attributes\n" +
 			"	FROM selected_layer sl\n" + 
 			"	JOIN user_data.data_source ds\n" + 
 			"		ON ds.id =  sl.data_source_id\n" + 
@@ -65,7 +65,8 @@ public interface ServiceLayerRepository extends
 			"		AND ST_Contains(sa.geom, sle.point)\n" + 
 			"	JOIN new_plans np\n" + 
 			"		ON np.wirecenter_id = sa.id \n" + 
-			"	WHERE sle.entity_category_id=1\n" + 
+			"	WHERE sle.entity_category_id=1 " +
+			"		and sle.location_class = 1 \n" +
 			"\n" + 
 			"	RETURNING id, plan_id\n" + 
 			")\n" + 
@@ -75,60 +76,68 @@ public interface ServiceLayerRepository extends
 	
 	@Transactional
 	@Modifying
-	@Query(value = "WITH selected_service_layer AS (\n" + 
-			"	SELECT *\n" + 
-			"	FROM client.service_layer \n" + 
-			"	WHERE id = :serviceLayerId\n" +
-			")\n" + 
-			",\n" + 
-			"user_towers as(\n" + 
-			" SELECT nextval('aro.locations_id_seq'::regclass) as location_id,  nextval('aro.towers_id_seq'::regclass) as tower_id, sle.*, st.statefp \n" + 
-			" FROM selected_service_layer sl\n" + 
-			"	user_data.source_location_entity sle on sle.data_source_id = sl.data_source_id\n" + 
-			"    inner join aro.states st\n" + 
-			"    on\n" + 
-			"        ST_CONTAINS(st.geom, sle.point)\n" + 
-			"        and sle.location_class = 2     \n" + 
+	@Query(value = "\n" +
+			"create temp table user_towers as \n" +
+			"WITH selected_service_layer AS (\n" +
+			"\tSELECT *\n" +
+			"\tFROM client.service_layer \n" +
+			"\tWHERE id = :serviceLayerId \n" +
 			")\n" +
-			",\n" + 
-			"locations AS (\n" + 
-			"    INSERT INTO aro.locations(\n" + 
-			"      id, \n" + 
-			"      state,\n" + 
-			"      lat,\n" + 
-			"      lon,\n" + 
-			"      geog,\n" + 
-			"      total_towers,\n" + 
-			"      geom),\n" + 
-			"    ) select location_id, statefp, lat, \"long\", cast(point as geography), 1, point  from user_towers ut\n" + 
-			")    \n" + 
-			"INSERT INTO aro.towers ( \n" + 
-			" id,\n" + 
-			"  location_id,\n" + 
-			"  parcel_state,\n" + 
-			"  lat,\n" + 
-			"  lon,\n" + 
-			"  geog,\n" + 
-			"  geom,\n" + 
+			"\n" +
+			" SELECT nextval(cast ('aro.locations_id_seq' as regclass)) as location_id,  nextval(cast ('aro.towers_id_seq' as regclass)) as tower_id, sle.*, st.statefp \n" +
+			" FROM selected_service_layer sl\n" +
+			"\tinner join\n" +
+			"\tuser_data.source_location_entity sle \n" +
+			"\ton sle.data_source_id = sl.data_source_id\n" +
+			"    inner join aro.states st\n" +
+			"    on\n" +
+			"        ST_CONTAINS(st.geom, sle.point)\n" +
+			"        and sle.location_class = 2     \n" +
+			"        and sle.entity_category_id = 5     \n", nativeQuery = true)
+	void updateServiceLayerTowers1(@Param("serviceLayerId") int serviceLayerId);
+
+	@Transactional
+	@Modifying
+	@Query(value = " INSERT INTO aro.locations(\n" +
+			"      id, \n" +
+			"      state,\n" +
+			"      lat,\n" +
+			"      lon,\n" +
+			"      geog,\n" +
+			"      total_towers,\n" +
+			"      geom\n" +
+			"    ) select location_id, statefp, lat, \"long\", cast(point as geography), 1, point  from user_towers ut\n", nativeQuery = true)
+	void updateServiceLayerTowers2();
+
+	@Transactional
+	@Modifying
+	@Query(value = "INSERT INTO aro.towers ( \n" +
+			" id,\n" +
+			"  location_id,\n" +
+			"  parcel_state,\n" +
+			"  lat,\n" +
+			"  lon,\n" +
+			"  geog,\n" +
+			"  geom,\n" +
 			"  data_source_id, --integer\n" +
-			" attributes " +
-			"  )\n" + 
-			"SELECT \n" + 
-			"	tower_id,\n" + 
-			"	statefp,\n" + 
-			"	lat,\n" + 
-			"	\"long\",\n" + 
-			"	cast(point as geography),\n" + 
-			"	point, " +
-			"data_source_id," +
-			"custom_attributes \n" +
-			"FROM user_towers ut\n" + 
-			"  ", nativeQuery = true)
-	void updateServiceLayerTowers(@Param("serviceLayerId") int serviceLayerId);
-	
-	
-	
-	
+			" attributes   )\n" +
+			"SELECT \n" +
+			"\ttower_id,\n" +
+			"\tlocation_id,\n" +
+			"\tstatefp,\n" +
+			"\tlat,\n" +
+			"\t\"long\",\n" +
+			"\tcast(point as geography),\n" +
+			"\tpoint,\n" +
+			"\t data_source_id,\n" +
+			"\tcustom_attributes \n" +
+			"FROM user_towers ut", nativeQuery = true)
+	void updateServiceLayerTowers3();
+
+
+
+
+
 	@Query(value = "SELECT\n" + "	service_layer_id,\n"
 			+ "	entity_category_id\n" + "FROM\n"
 			+ "	client.service_layer_entity_category c\n"

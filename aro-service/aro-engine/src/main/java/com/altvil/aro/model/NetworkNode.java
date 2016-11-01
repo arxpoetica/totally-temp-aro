@@ -1,6 +1,8 @@
 package com.altvil.aro.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,12 +14,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.altvil.aro.persistence.HstoreUserType;
 import com.altvil.aro.util.json.GeometryJsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.Point;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 @Entity
 @Table(name = "network_nodes", schema = "client")
+@TypeDef(name = "hstore", typeClass = HstoreUserType.class)
 public class NetworkNode extends ComparableModel {
 
 	private Long id;
@@ -34,6 +40,9 @@ public class NetworkNode extends ComparableModel {
 	private double atomicUnit;
 
 	private long routeId;
+
+	Map<String,String> attributes = new HashMap<>();
+
 
 	@Transient
 	@Override
@@ -150,6 +159,15 @@ public class NetworkNode extends ComparableModel {
 
 	public void setRouteId(long routeId) {
 		this.routeId = routeId;
+	}
+
+	@Type(type = "hstore")
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(Map<String, String> attributes) {
+		this.attributes = attributes;
 	}
 
 	// @Column(name = "state_fips_code")
