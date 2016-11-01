@@ -19,7 +19,8 @@ The ARO platform has been restructured into several different components, most o
   - `aro-app-base` is an Ubuntu 14.04 image with all the packages and components required to run the application compiled and installed. In local development environments, we run a container based on this image with the application code and (optionally) the ETL scripts/data mounted as volumes.
   - `aro-app` is the `aro-app-base` image with the application code already installed into it, as well as a startup command to start the PM2 service which runs the application. This is used in staging and production environments.
   - `aro-service` is the Java service that handles routing and optimization. In staging and production it is run as a separate Docker container. In local development, it is run as a separate Docker container by default, but it can be run direclty from its code for those brave souls who are Java developers. Its codebase has been moved (or will be moved shortly) to a seaprate Git repository, since it is largely independent of the Nodejs application.
-  - `aro-etl` contains all source data (TIGER and other shapefiles, demographic data, client-provided data) and the bash/sql/python scripts that load it into a database. In staging and production it is attached as a Docker container with its volumes made available and shared with the app container. In local development, the checked out Git repository is made available to the app as a volume. **git-lfs is required before cloning this reppository.** More details are available in the [README for the aro-etl repository](http://octocat.altvil.com/AIT/aro-etl).
+  - `aro-etl` contains all bash/sql/python scripts that load source data into a database. In staging and production it is attached as a Docker container with its volumes made available and shared with the app container. In local development, the checked out Git repository is made available to the app as a volume.
+  - `aro-data` contains all source data (TIGER and other shapefiles, demographic data, client-provided data) **git-lfs is required before cloning this reppository.** More details are available in the [README for the aro-data repository](http://octocat.altvil.com/AIT/aro-data).
   - `aro-app-nginx` is an nginx web server image modified with the appropriate configuration to serve as a reverse-proxy to the PM2 service running the app and to serve static content. It is only used in staging and production environments.
   - In local development, the database is provided by a docker container. In staging and production we use Amazon RDS. The various docker-compose configuration files ensure that we are using the same versions of Postgres and PostGIS across all environments.
 
@@ -49,7 +50,8 @@ $ git lfs install
 ... prints some stuff ...
 ```
 ***
-Once the prerequesites are installed, clone this (`aro-platform`) repository as well as the `aro-etl` repository in the same parent folder on your machine. Once complete, your directory structure should similar to this:
+Once the prerequesites are installed, clone this (`aro-platform`) repository as well as the `aro-etl` and `aro-data` repositories in the same parent folder on your machine. Make sure you only clone the `develop` branch of `aro-data`. This is the default, but it ensures you only download source data for a single state rather than the entire country. For cloning `aro-data` use the following command: `git lfs clone -b develop git@octocat.altvil.com:AIT/aro-data`.  
+Once complete, your directory structure should similar to this:
 ```
 ├-- project_root
     ├-- ARO-Platform
@@ -58,11 +60,15 @@ Once the prerequesites are installed, clone this (`aro-platform`) repository as 
     |   ├-- ..
     |   ├-- ..
     |   └-- (etc)
-    └-- aro-etl
-        ├-- data
-        ├-- python
-        ├-- sql
-        ├-- .. 
+    ├-- aro-etl
+    |   ├-- etl
+    |   ├-- lib
+    |   ├-- ..
+    |   └-- (etc)
+    └-- aro-data
+        ├-- geotel
+        ├-- infousa
+        ├-- ..
         └-- (etc)
 ```
 
@@ -86,7 +92,9 @@ More stuff here
 ## Initial application setup
 Before running the application the first time in local development, the application must be be initialized (node modules and libraries installed) and the databse must be populated. To do this we will first bring up the dev stack, then connect into the running application container and run the initialization scripts and ETL scripts. This can be accomplished as follows (from the root of the local `ARO-Platform` repository):
 ```shell
-$ docker-compose -f docker/docker-compose-dev.yml up -d
+$ cd docker 
+$ cp docker-compose-dev.yml docker-compose.yml
+$ docker-compose up -d
 ...
 ... this will create the containers (first downloading the images if necessary)
 ```
@@ -112,11 +120,20 @@ public/javascripts/src/models/state.js -> public/javascripts/lib/models/state.js
 public/javascripts/src/models/tracker.js -> public/javascripts/lib/models/tracker.js
 ```
 ***
-Next, to populate the database (running the full ETL based on the local version of your `aro-etl` repository) and create an initial user, use the following command:
+First, run a couple of initiallization scripts to prepare things. The first one may return a warning that some extensions are already installed. This is expected.
 ```shell
-root@9e501c4758d4:/srv/www/aro# etl/etl_initial_setup.sh
+root@9e501c4758d4:/srv/www/aro# bootstrap/_install_db_extensions.sh
+...
+...
+root@9e501c4758d4:/srv/www/aro# bootstrap/_quiet_db.sh
+...
+...
 ```
-This will generate LOTS of output and can take anywhere from 40 - 60 minutes (or longer, depending on system specs) to complete.
+Next, to populate the database (running the full ETL based on the local version of your `aro-etl` repository and source data) and create an initial user, use the following command:
+```shell
+root@9e501c4758d4:/srv/www/aro# bootstrap/init.sh <admin_email_address> <admin_password>
+```
+This will generate output detailing the task's progress, and can take around 20 minutes (or longer, depending on system specs) to complete.
 
 ## Running the application in development
 As described earlier, in local development, your checked out version of the `ARO-Platform` repository is mapped into the `aro-app-base` container, so that code changes you make locally are immediately reflected in the running application. 
@@ -125,7 +142,7 @@ First run `docker ps` to ensure you don't have any duplicate or old versions of 
 
 To start the standard development environment (if it isn't already running), run the `docker-compose-dev` configuration as follows:
 ```shell
-$ docker-compose -f docker/docker-compose-dev.yml up -d
+$ docker-compose up -d
 ```
 This will start containers for all parts of the application, including the `aro-service` and run them in the background. However, the applciation server itself is not yet running. To start the application in local/debug mode, use the following command:
 ```shell
@@ -136,7 +153,7 @@ This will start the nodejs application and keep the debug log in the foreground.
 ## Pulling in updates to Docker images (aro-service and aro-app-base)
 Occasionally these images are updated. To incorporate the newest versions of the images into your local environment, you need to first bring down the environment and remove the current containers. This can be accomplished as follows:
 ```shell
-$ docker-compose -f docker/docker-compose-dev.yml down
+$ docker-compose down
 Stopping docker_app_1 ...
 Stopping docker_service_1 ...
 Stopping docker_db_1 ...
@@ -144,7 +161,7 @@ Removing docker_app_1 ... done
 Removing docker_service_1 ...
 Removing docker_db_1 ...
 Removing network docker_default
-$ docker-compose -f docker/docker-compose-dev.yml pull
+$ docker-compose pull
 ```
 Any changes to the underlying images will be pulled down and used the next time you bring up the environment. The database itself is always preserved, even if the database container/image is replaced, as we are using an external volume to store the actual data.
 
