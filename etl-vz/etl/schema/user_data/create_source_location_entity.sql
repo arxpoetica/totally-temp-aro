@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS user_data.source_location_entity(
 	entity_category_id integer,
 	lat double precision,
 	long double precision,
-	point geometry
+	point geometry,
+	custom_attributes hstore
 );
 
 
