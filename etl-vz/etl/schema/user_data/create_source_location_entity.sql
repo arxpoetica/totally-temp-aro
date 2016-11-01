@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS user_data.source_location_entity(
 	id bigserial PRIMARY KEY,
 	data_source_id bigint REFERENCES user_data.data_source(id) ,
+	location_class int,
 	entity_category_id integer,
 	lat double precision,
 	long double precision,
