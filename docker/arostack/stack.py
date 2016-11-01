@@ -257,7 +257,8 @@ def provision_aro_stack(opsworks_stack_id=None,
                 'Name': 'execute_recipes',
                 'Args': {
                     'recipes' : ['aro_ops::compose-initialize']
-                }
+                },
+            CustomJson="{\"app_initialization\": {\"admin_email\": \"" + app_initial_email + "\", \"admin_password\": \"" + app_initial_password + "\"} }"
             })
         return deploy_response
 

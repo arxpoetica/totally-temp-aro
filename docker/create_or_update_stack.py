@@ -50,6 +50,7 @@ build_num = os.environ['CIRCLE_BUILD_NUM']
 etl_image_version = os.environ.get('ARO_ETL_IMAGE_VERSION')
 nginx_image_version = os.environ.get('ARO_NGINX_IMAGE_VERSION') 
 aro_service_image_version = os.environ.get('ARO_SERVICE_IMAGE_VERSION')
+aro_data_image_version = os.environ.get('ARO_DATA_IMAGE_VERSION')
 domain_name = os.environ.get('ARO_APP_CLIENT_DOMAIN')
 aro_client = os.environ.get('ARO_CLIENT') or 'aro'
 env_slug = branch_name
@@ -185,6 +186,7 @@ def _set_environment():
             { 'Key': 'etl_container_tag', 'Value': str(etl_image_version), 'Secure': False },
             { 'Key': 'nginx_container_tag', 'Value': str(nginx_image_version), 'Secure': False },
             { 'Key': 'aro_service_container_tag', 'Value': str(aro_service_image_version), 'Secure': False },
+            { 'Key': 'aro_data_container_tag', 'Value': str(aro_data_image_version), 'Secure': False },
             # { 'Key': 'database_url', 'Value': str(database_url), 'Secure': True },
             { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
             { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
