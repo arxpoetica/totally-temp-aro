@@ -72,6 +72,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   var newPlanMap
 
+  $rootScope.$on('go-home', () => {
+    $scope.selectPlan(null)
+  })
+
   $scope.selectPlan = function (plan) {
     $scope.plan = plan
     $('#plan-saving').stop().hide()
