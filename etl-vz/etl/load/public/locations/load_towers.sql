@@ -34,7 +34,7 @@ $table_name$ LANGUAGE plpgsql;
 
 -- Load VZ TAM businesses into aro.locations and aro.businesses tables
 -- source_table = 'businesses.tam_ny', target_schema_name = 'aro_location_data', state_abbrev = 'NY'
-CREATE OR REPLACE FUNCTION aro.load_shard_towers(scoped_source_table text, target_schema text, state_abbrev text)
+CREATE OR REPLACE FUNCTION aro.load_shard_towers(scoped_source_table text, target_schema text, state_abbrev text, data_source_id int)
 RETURNS integer AS $records_loaded_count$
 DECLARE
   records_loaded_count int;
@@ -68,7 +68,7 @@ BEGIN
 
   EXECUTE 'DROP TABLE IF EXISTS ' || missing_entities_table || ';';
   missing_expr :=
-  'CREATE TABLE ' || missing_entities_table || ' as 
+  'CREATE TEMP TABLE ' || missing_entities_table || ' as
     select min(sita_number) as id, array_agg(sita_number) as sita_numbers, latitude, longitude, 
     ST_SetSRID(ST_Point(t.longitude, t.latitude),4326) as geom,
     ST_SetSRID(ST_Point(t.longitude, t.latitude),4326)::geography as geog,
@@ -151,7 +151,7 @@ mapped_entity_location as (
 )
 ,
 updated_towers as (
-    insert into ' || scoped_target_table || ' (location_id, sita_number, parcel_address, parcel_city, parcel_state, lat, lon, geog, geom)
+    insert into ' || scoped_target_table || ' (location_id, sita_number, parcel_address, parcel_city, parcel_state, lat, lon, geog, geom, data_source_id)
     (
         select
         mel.location_id,
@@ -161,7 +161,8 @@ updated_towers as (
         latitude,
         longitude,
         geog,
-        geom
+        geom,
+        ' || data_source_id || ' as
         from ' || scoped_source_table || ' t
         join mapped_entity_location mel on t.sita_number = any(mel.sita_numbers)
     )

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.altvil.aro.service.demand.mapping.CompetitiveLocationDemandMapping;
 import com.altvil.aro.service.entity.LocationEntityType;
+import com.altvil.aro.service.network.DataSourceScope;
 import com.altvil.aro.service.network.ServiceAreaContext;
 import com.altvil.aro.service.network.model.ServiceAreaRoadEdges;
 import com.altvil.aro.service.network.model.ServiceAreaRoadLocations;
@@ -16,7 +17,7 @@ public interface NetworkQueryService {
 
 	public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
 			Set<LocationEntityType> selectedTypes, int serviceAreaId,
-			long planId, int year, double mrc, ServiceAreaContext ctx);
+			long planId, int year, double mrc, ServiceAreaContext ctx, DataSourceScope dataSourceScope);
 
 	public ServiceAreaRoadLocations queryRoadLocations(int serviceAreaId,
 			ServiceAreaContext ctx);

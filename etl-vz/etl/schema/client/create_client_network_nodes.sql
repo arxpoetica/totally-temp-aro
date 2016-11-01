@@ -13,7 +13,7 @@ CREATE TABLE client.network_nodes
 	business_count double precision default 0,
 	celltower_count double precision default 0,
 	atomic_count double precision default 0,
-
+  attributes hstore,
 	CONSTRAINT network_nodes_pkey PRIMARY KEY (id)
 );
 

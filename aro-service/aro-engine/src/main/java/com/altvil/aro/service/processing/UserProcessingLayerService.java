@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.util.Collection;
 
 import com.altvil.aro.model.ServiceLayer;
+import com.altvil.aro.persistence.repository.user_data.LocationClass;
 
 public interface UserProcessingLayerService {
 
@@ -17,8 +18,10 @@ public interface UserProcessingLayerService {
 
     void loadUserServiceLayerEntitiesCSV(int id, Writer responseWriter);
 
-    void saveUserServiceLayerEntitiesCSV(int id, Reader reader) throws IOException;
-    void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader) throws IOException;
+    void saveUserServiceLayerEntitiesCSV(int id, Reader reader, LocationClass locationClass) throws IOException;
+    void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader, LocationClass locationClass) throws IOException;
+
+    void postProcessServiceLayerData(int serviceLayerId, LocationClass locationClass);
 
     
     
@@ -28,5 +31,6 @@ public interface UserProcessingLayerService {
      */
     int createAreasFromPoints(int id, double maxDistanceMeters);
     void updateServiceArea(int serviceLayerId) ;
+    void updateCellTowers(int serviceLayerId) ;
     
 }

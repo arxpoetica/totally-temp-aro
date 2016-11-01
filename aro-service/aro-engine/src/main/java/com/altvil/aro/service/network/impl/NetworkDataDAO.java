@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.altvil.aro.service.network.DataSourceScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,9 +117,8 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 								"year", Integer.class), cacheQuery.getParam(
 								"mrc", Double.class), 
 								cacheQuery.getParam("selectedTypes", OrderedSet.class),
-								cacheQuery
-								.getParam("serviceAreaContext",
-										ServiceAreaContext.class))).build();
+								cacheQuery.getParam("serviceAreaContext", ServiceAreaContext.class),
+								cacheQuery.getParam("dataSourceScope", DataSourceScope.class))).build();
 		existingCableConduitEdges = computeUnitService
 				.build(PlanConduitEdges.class, this.getClass())
 				.setName("existing_cable_conduitEdges")
@@ -144,33 +144,35 @@ public class NetworkDataDAO implements ComputeServiceApi, NetworkQueryService {
 	@Override
 	public Map<Long, CompetitiveLocationDemandMapping> queryLocationDemand(
 			Set<LocationEntityType> selectedTypes, int serviceAreaId,
-			long planId, int year, double mrc, ServiceAreaContext ctx) {
+			long planId, int year, double mrc, ServiceAreaContext ctx, DataSourceScope dataSourceScope) {
 
 		return queryFiberDemand(
-				serviceAreaId, year, mrc, selectedTypes, ctx)
+				serviceAreaId, year, mrc, selectedTypes, ctx, dataSourceScope)
 				.getDemandMapping();
 	}
 
 	private ServiceAreaLocationDemand queryFiberDemand(int serviceAreaId,
 			int year, double mrc, Set<LocationEntityType> selectedTypes,
-			ServiceAreaContext ctx) {
+			ServiceAreaContext ctx, DataSourceScope dataSourceScope) {
 		return locationDemand.gridLoad(
 				Priority.HIGH,
 				CacheQuery.build(serviceAreaId).add("year", year)
 						.add("mrc", mrc)
 						.add("selectedTypes", new OrderedSet<LocationEntityType>(selectedTypes))
-						.add("serviceAreaContext", ctx).build());
+						.add("serviceAreaContext", ctx)
+						.add("dataSourceScope", dataSourceScope)
+						.build());
 
 	}
 
 	private ServiceAreaLocationDemand _queryFiberDemand(int serviceAreaId,
-			int year, double mrc, Set<LocationEntityType> selectedTypes,
-			ServiceAreaContext ctx) {
+														int year, double mrc, Set<LocationEntityType> selectedTypes,
+														ServiceAreaContext ctx, DataSourceScope dataSourceScope) {
 		return ServiceAreaLocationDemand
 				.build()
 				.setMapping(
 						assembleMapping(planRepository.queryAllFiberDemand(
-								serviceAreaId, year, mrc, ctx.getStateCodes())))
+								serviceAreaId, year, mrc, ctx.getStateCodes(), dataSourceScope.getDataSourceIds(LocationEntityType.celltower))))
 				.filterBySelectedTypes(selectedTypes).build();
 	}
 

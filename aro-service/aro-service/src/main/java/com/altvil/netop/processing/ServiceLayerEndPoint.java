@@ -8,6 +8,7 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.util.List;
 
+import com.altvil.aro.persistence.repository.user_data.LocationClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,27 +58,28 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 		service.loadUserServiceLayerEntitiesCSV(id, responseWriter);
 	}
 
-	@RequestMapping(value = "/serviceLayers/{id}/entities.csv", method = RequestMethod.POST)
-	public void handleFileUpload(@PathVariable int id,
+	@RequestMapping(value = "/serviceLayers/{id}/{locationClass}/entities.csv", method = RequestMethod.POST)
+	public void handleFileUpload(@PathVariable int id, @PathVariable LocationClass locationClass,
 			@RequestParam("file") MultipartFile file) {
 		update(() -> {
 			if (!file.isEmpty()) {
 				try(BufferedReader reader = new BufferedReader(
 						new InputStreamReader(file.getInputStream(), "UTF-8"))) {
-					service.saveUserServiceLayerEntitiesCSV(id, reader);
+					service.saveUserServiceLayerEntitiesCSV(id, reader, locationClass);
+					service.postProcessServiceLayerData(id, locationClass);
 				}
 			}
 		});
 	}
 	
-	@RequestMapping(value = "/serviceLayers/{id}/entities", method = RequestMethod.POST)
-	public void handleEntityUpload(@PathVariable int id,
+	@RequestMapping(value = "/serviceLayers/{id}/{locationClass}/entities", method = RequestMethod.POST)
+	public void handleEntityUpload(@PathVariable int id, @PathVariable LocationClass locationClass,
 			@RequestBody EntityData entityData) {
 		update(() -> {
 			if (!entityData.getData().isEmpty()) {
 				try(BufferedReader reader = new BufferedReader(
 						new StringReader(entityData.getData()))) {
-					service.saveUserServiceLayerEntitiesCSV(id, reader);
+					service.saveUserServiceLayerEntitiesCSV(id, reader, locationClass);
 				}
 			}
 		});
@@ -94,6 +96,8 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 			service.updateServiceArea(id) ;
 			return csr ;
 		}) ;
-	} 
+	}
+
+
 
 }

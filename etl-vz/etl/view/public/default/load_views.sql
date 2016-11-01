@@ -89,6 +89,7 @@ CREATE VIEW client.celltower_summary AS
 SELECT
 	t.parcel_state as state,
 	location_id,
+	data_source_id
 	sum(1) as count
 FROM aro.towers t
 GROUP BY location_id, t.parcel_state ;

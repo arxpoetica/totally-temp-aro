@@ -2,21 +2,32 @@ package com.altvil.aro.persistence.repository.user_data;
 
 import javax.persistence.*;
 
+import com.altvil.aro.persistence.HstoreUserType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.vividsolutions.jts.geom.Point;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "source_location_entity", schema = "user_data", catalog = "aro")
+@TypeDef(name = "hstore", typeClass = HstoreUserType.class)
 public class SourceLocationEntity {
     
 	private Long id;
-	private DataSourceEntity dataSource;
-	
+	private UserDataSource dataSource;
+
+    private LocationClass locationClass;
+
 	private Integer entityCategoryId;
 	private Double lat;
     private Double longitude;
 
     private Point point;
+
+    private Map<String,String> customAttributes = new HashMap<>();
 
     @Id
     @Column(name = "id")
@@ -64,21 +75,43 @@ public class SourceLocationEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "data_source_id", nullable = false)
     @JsonBackReference
-    public DataSourceEntity getDataSource() {
+    public UserDataSource getDataSource() {
         return dataSource;
     }
 
-    public void setDataSource(DataSourceEntity dataSource) {
+    public void setDataSource(UserDataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-
+    @Basic
     public Point getPoint() {
         return point;
     }
 
     public void setPoint(Point point) {
         this.point = point;
+    }
+
+    @Basic
+    @Column(name = "custom_attributes")
+    @Type(type = "hstore")
+    public Map<String, String> getCustomAttributes() {
+        return customAttributes;
+    }
+
+    public void setCustomAttributes(Map<String, String> customAttributes) {
+        this.customAttributes = customAttributes;
+    }
+
+
+    @Column(name="location_class")
+    @Enumerated(EnumType.ORDINAL)
+    public LocationClass getLocationClass() {
+        return locationClass;
+    }
+
+    public void setLocationClass(LocationClass locationClass) {
+        this.locationClass = locationClass;
     }
 
     @Override
