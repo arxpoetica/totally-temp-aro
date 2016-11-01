@@ -21,6 +21,8 @@ public interface UserProcessingLayerService {
     void saveUserServiceLayerEntitiesCSV(int id, Reader reader, LocationClass locationClass) throws IOException;
     void saveUserServiceLayerEntitiesCSV(int id, BufferedReader reader, LocationClass locationClass) throws IOException;
 
+    void postProcessServiceLayerData(int serviceLayerId, LocationClass locationClass);
+
     
     
     /**

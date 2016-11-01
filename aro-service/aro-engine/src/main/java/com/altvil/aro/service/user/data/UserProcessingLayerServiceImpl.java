@@ -93,6 +93,8 @@ public class UserProcessingLayerServiceImpl implements
 
 	}
 
+
+
 	@Override
 	@Transactional
 	public void loadUserServiceLayerEntitiesCSV(int id, Writer writer) {
@@ -114,6 +116,14 @@ public class UserProcessingLayerServiceImpl implements
 				.addAll(new SourceLocationsCSVReader().readSourceLocations(csvReader, ds, locationClass));
 
 		dataSourceEntityRepository.save(ds);
+
+	}
+
+	@Override
+	public void postProcessServiceLayerData(int serviceLayerId, LocationClass locationClass) {
+		if(locationClass == LocationClass.consumer){
+			this.updateCellTowers(serviceLayerId);
+		}
 
 	}
 
@@ -157,6 +167,12 @@ public class UserProcessingLayerServiceImpl implements
 
 	private Set<ServiceArea> castToServiceAreas(Set<ProcessArea> processAreas) {
 		return processAreas.stream().map(processArea -> (ServiceArea) processArea).collect(Collectors.toSet());
+	}
+
+	@Override
+	@Transactional
+	public void updateCellTowers(int serviceLayerId) {
+		serviceLayerRepository.updateServiceLayerTowers(serviceLayerId);
 	}
 
 	@Override

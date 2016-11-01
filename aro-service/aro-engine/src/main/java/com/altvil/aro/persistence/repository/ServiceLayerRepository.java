@@ -78,7 +78,7 @@ public interface ServiceLayerRepository extends
 	@Query(value = "WITH selected_service_layer AS (\n" + 
 			"	SELECT *\n" + 
 			"	FROM client.service_layer \n" + 
-			"	WHERE id = -1\n" + 
+			"	WHERE id = :serviceLayerId\n" +
 			")\n" + 
 			",\n" + 
 			"user_towers as(\n" + 
@@ -89,8 +89,7 @@ public interface ServiceLayerRepository extends
 			"    on\n" + 
 			"        ST_CONTAINS(st.geom, sle.point)\n" + 
 			"        and sle.location_class = 2     \n" + 
-			"        and sle.data_source_id = -1\n" + 
-			")\n" + 
+			")\n" +
 			",\n" + 
 			"locations AS (\n" + 
 			"    INSERT INTO aro.locations(\n" + 
@@ -111,7 +110,8 @@ public interface ServiceLayerRepository extends
 			"  lon,\n" + 
 			"  geog,\n" + 
 			"  geom,\n" + 
-			"  data_source_id--integer\n" + 
+			"  data_source_id, --integer\n" +
+			" attributes " +
 			"  )\n" + 
 			"SELECT \n" + 
 			"	tower_id,\n" + 
@@ -119,10 +119,12 @@ public interface ServiceLayerRepository extends
 			"	lat,\n" + 
 			"	\"long\",\n" + 
 			"	cast(point as geography),\n" + 
-			"	point, data_source_id\n" + 
+			"	point, " +
+			"data_source_id," +
+			"custom_attributes \n" +
 			"FROM user_towers ut\n" + 
 			"  ", nativeQuery = true)
-	public void updateServiceLayerTowers(@Param("dataSourceId") int dataSourceId, @Param("locationClassId") int locationClassId);
+	void updateServiceLayerTowers(@Param("serviceLayerId") int serviceLayerId);
 	
 	
 	

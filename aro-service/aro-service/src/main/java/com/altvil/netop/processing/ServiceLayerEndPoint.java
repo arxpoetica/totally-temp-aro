@@ -66,6 +66,7 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 				try(BufferedReader reader = new BufferedReader(
 						new InputStreamReader(file.getInputStream(), "UTF-8"))) {
 					service.saveUserServiceLayerEntitiesCSV(id, reader, locationClass);
+					service.postProcessServiceLayerData(id, locationClass);
 				}
 			}
 		});
@@ -95,6 +96,8 @@ public class ServiceLayerEndPoint extends BaseEndPointHandler {
 			service.updateServiceArea(id) ;
 			return csr ;
 		}) ;
-	} 
+	}
+
+
 
 }
