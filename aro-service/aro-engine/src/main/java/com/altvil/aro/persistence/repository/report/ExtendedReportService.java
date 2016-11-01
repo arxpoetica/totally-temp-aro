@@ -38,6 +38,148 @@ public class ExtendedReportService {
 
 	@PostConstruct
 	void postConstruct() {
+		
+		sqlQueryMap.put("tower_details", "WITH wp_plan AS (\n" + 
+				"SELECT wp.id\n" + 
+				"FROM client.plan rp\n" + 
+				"JOIN client.plan mp ON rp.id = mp.parent_plan_id\n" + 
+				"JOIN client.plan wp ON mp.id = wp.parent_plan_id\n" + 
+				"WHERE rp.id = ?\n" + 
+				")\n" + 
+				"\n" + 
+				"SELECT DISTINCT\n" + 
+				"  t.parcel_address,\n" + 
+				"  t.parcel_city,\n" + 
+				"  t.parcel_state,\n" + 
+				"  lat,\n" + 
+				"  lon, \n" + 
+				"  (CASE\n" + 
+				"    WHEN t.attribute -> 'type' IN ('Towers (current)','Towers (planned)','Small Cells (current)','Small Cells (planned)') THEN t.attribute -> 'type' \n" + 
+				"    ELSE 'Towers (undefined)'\n" + 
+				"    END\n" + 
+				"  ) as site_category,\n" + 
+				"  (CASE \n" + 
+				"    WHEN linking_state_id = 1 THEN 'Routed'\n" + 
+				"    WHEN linking_state_id = 2 THEN 'Failed due to 15km constraint'\n" + 
+				"    WHEN linking_state_id = 3 THEN 'Failed due to no path to reach tower'\n" + 
+				"   END) as coverage_state\n" + 
+				"FROM wp_plan wp\n" + 
+				"JOIN client.plan_location_link p ON wp.id = p.plan_id\n" + 
+				"JOIN aro.towers t ON p.location_id = t.location_id") ;
+		
+		sqlQueryMap.put("master_output_producer","WITH wp_plan AS (\n" + 
+				"SELECT wp.id\n" + 
+				"FROM client.plan rp\n" + 
+				"JOIN client.plan mp ON rp.id = mp.parent_plan_id\n" + 
+				"JOIN client.plan wp ON mp.id = wp.parent_plan_id\n" + 
+				"WHERE rp.id = ?\n" + 
+				"),\n" + 
+				"\n" + 
+				"--businesses\n" + 
+				"business_output AS (\n" + 
+				"SELECT DISTINCT\n" + 
+				"  b.source,\n" + 
+				"  NULL::int as duns_number,\n" + 
+				"  NULL::int as total_tam_2015,\n" + 
+				"  NULL::int as emp_tot,\n" + 
+				"  b.number_of_employees as emp_here,\n" + 
+				"  b.name as business_nm,\n" + 
+				"  b.address as street_addr,\n" + 
+				"  NULL::varchar as city,\n" + 
+				"  b.state,\n" + 
+				"  NULL::varchar as zip_cd,\n" + 
+				"  NULL::varchar as bemfab,\n" + 
+				"  NULL::varchar as cottage_file_ind,\n" + 
+				"  ST_Y(b.geom) as latitude,\n" + 
+				"  ST_X(b.geom) as longitude,\n" + 
+				"  b.geom,\n" + 
+				"  b.monthly_recurring_cost,\n" + 
+				"  NULL::varchar as site_category_type,\n" + 
+				"  NULL::varchar as site_secondary_category,\n" + 
+				"  NULL::varchar as site_name,\n" + 
+				"  NULL::int as fiber_count_at_turn_up,\n" + 
+				"  NULL::int as lateral_fiber_count,\n" + 
+				"  (CASE \n" + 
+				"    WHEN p.attr IN ('TABC', 'ABC') THEN 1\n" + 
+				"    ELSE 0\n" + 
+				"    END\n" + 
+				"  ) as in_a,\n" + 
+				"  (CASE \n" + 
+				"    WHEN p.attr IN ('TABC', 'ABC', 'BC') THEN 1\n" + 
+				"    ELSE 0\n" + 
+				"    END\n" + 
+				"  ) as in_b,\n" + 
+				"  (CASE \n" + 
+				"    WHEN p.attr IN ('TABC', 'ABC', 'BC', 'C') THEN 1\n" + 
+				"    ELSE 0\n" + 
+				"    END\n" + 
+				"  ) as in_c,\n" + 
+				"  NULL::varchar as cran_hub,\n" + 
+				"  ST_Y(n.geom) as hub_lat,\n" + 
+				"  ST_X(n.geom) as hub_long\n" + 
+				"FROM wp_plan wp \n" + 
+				"JOIN client.plan_location_link p ON wp.id = p.plan_id AND p.linking_state_id = 1\n" + 
+				"JOIN aro.businesses b ON p.location_id = b.location_id\n" + 
+				"JOIN client.plan cp ON wp.id = cp.id\n" + 
+				"JOIN client.plan hp ON cp.wirecenter_id = hp.wirecenter_id AND hp.plan_type = 'H'\n" + 
+				"JOIN client.network_nodes n ON hp.id = n.plan_id AND n.node_type_id = 1\n" + 
+				"),\n" + 
+				"\n" + 
+				"--towers\n" + 
+				"tower_output AS (\n" + 
+				"SELECT DISTINCT\n" + 
+				"  'tower'::varchar as source,\n" + 
+				"  NULL::int as duns_number,\n" + 
+				"  NULL::int as total_tam_2015,\n" + 
+				"  NULL::int as emp_tot,\n" + 
+				"  NULL::int as emp_here,\n" + 
+				"  NULL::varchar as business_nm,\n" + 
+				"  b.parcel_address as street_addr,\n" + 
+				"  b.parcel_city as city,\n" + 
+				"  b.parcel_state as state,\n" + 
+				"  NULL::varchar as zip_cd,\n" + 
+				"  NULL::varchar as bemfab,\n" + 
+				"  NULL::varchar as cottage_file_ind,\n" + 
+				"  b.lat as latitude,\n" + 
+				"  b.lon as longitude,\n" + 
+				"  b.geom,\n" + 
+				"  NULL::float8 as monthly_recurring_cost,\n" + 
+				"  (b.attribute -> 'type')::varchar as site_category_type,\n" + 
+				"  NULL::varchar as site_secondary_category,\n" + 
+				"  NULL::varchar as site_name,\n" + 
+				"  NULL::int as fiber_count_at_turn_up,\n" + 
+				"  NULL::int as lateral_fiber_count,\n" + 
+				"  (CASE \n" + 
+				"    WHEN p.attr IN ('TABC', 'ABC') THEN 1\n" + 
+				"    ELSE 0\n" + 
+				"    END\n" + 
+				"  ) as in_a,\n" + 
+				"  (CASE \n" + 
+				"    WHEN p.attr IN ('TABC', 'ABC', 'BC') THEN 1\n" + 
+				"    ELSE 0\n" + 
+				"    END\n" + 
+				"  ) as in_b,\n" + 
+				"  (CASE \n" + 
+				"    WHEN p.attr IN ('TABC', 'ABC', 'BC', 'C') THEN 1\n" + 
+				"    ELSE 0\n" + 
+				"    END\n" + 
+				"  ) as in_c,\n" + 
+				"  NULL::varchar as cran_hub,\n" + 
+				"  ST_Y(n.geom) as hub_lat,\n" + 
+				"  ST_X(n.geom) as hub_long\n" + 
+				"FROM wp_plan wp \n" + 
+				"JOIN client.plan_location_link p ON wp.id = p.plan_id AND p.linking_state_id = 1\n" + 
+				"JOIN aro.towers b ON p.location_id = b.location_id\n" + 
+				"JOIN client.plan cp ON wp.id = cp.id\n" + 
+				"JOIN client.plan hp ON cp.wirecenter_id = hp.wirecenter_id AND hp.plan_type = 'H'\n" + 
+				"JOIN client.network_nodes n ON hp.id = n.plan_id AND n.node_type_id = 1\n" + 
+				")\n" + 
+				"\n" + 
+				"SELECT * FROM business_output\n" + 
+				"UNION\n" + 
+				"SELECT * FROM tower_output") ;
+		
+		
 		sqlQueryMap.put("tabc", "WITH wp_plan AS (\n" + 
 				"SELECT wp.id\n" + 
 				"FROM client.plan rp\n" + 
