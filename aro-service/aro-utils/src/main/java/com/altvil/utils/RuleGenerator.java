@@ -12,6 +12,18 @@ public class RuleGenerator {
 	private static String template = "CREATE RULE ${SRC_SCHEMA}_${PARENT_TBL}_${STATE_LOWER} AS ON INSERT TO ${SRC_SCHEMA}.${PARENT_TBL} WHERE (state = '${STATE}')\n"
 			+ "    DO INSTEAD INSERT INTO ${PARTITION_TBL}_${STATE_LOWER} VALUES (NEW.*);";
 
+	
+	
+	public String locationRule() {
+		return process("aro", "locations",
+				"aro_location_data.locations") ;
+	}
+	
+	public String towerRule() {
+		return process("aro", "towers",
+				"aro_location_data.towers") ;
+	}
+
 	public String process(String srcSchema, String srcName, String targetName) {
 		StringBuilder sb = new StringBuilder();
 		for (String state : states) {
@@ -29,8 +41,7 @@ public class RuleGenerator {
 
 	public static void main(String[] args) {
 
-		System.out.println(new RuleGenerator().process("aro", "locations",
-				"aro_location_data.locations"));
+		System.out.println(new RuleGenerator().towerRule());
 
 	}
 
