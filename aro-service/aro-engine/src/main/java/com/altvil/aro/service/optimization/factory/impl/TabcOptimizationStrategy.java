@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.altvil.aro.model.GenerationPlan;
 import com.altvil.aro.model.NetworkNodeType;
 import com.altvil.aro.model.WirecenterPlan;
+import com.altvil.aro.persistence.repository.NetworkNodeRepository;
 import com.altvil.aro.persistence.repository.NetworkPlanRepository;
 import com.altvil.aro.service.entity.AroEntity;
 import com.altvil.aro.service.entity.AssignedEntityDemand;
@@ -77,7 +78,8 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 	private WirecenterOptimizationService wirecenterOptimizationService;
 	private NetworkDataService networkDataService;
 	private WirecenterPlan wirecenterPlanPlaceHolder ;
-
+	private NetworkNodeRepository networkNodeRepository ;
+	
 	// Initially ALL Data = CellTowers + 2K data
 	private NetworkDataHandler networkDataHandler;
 	private Function<NetworkData, Optional<PlannedNetwork>> networkGenerator;
@@ -102,7 +104,7 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		this.networkDataService = appContext.getBean(NetworkDataService.class);
 		this.planCommandService = appContext.getBean(PlanCommandService.class);
 		this.networkPlanRepository = appContext.getBean(NetworkPlanRepository.class) ;
-
+		this.networkNodeRepository = appContext.getBean(NetworkNodeRepository.class) ;
 		
 		init(strategies);
 	}
@@ -159,9 +161,14 @@ public class TabcOptimizationStrategy implements WireCenterPlanningStrategy {
 		GenerationPlan  gp = new GenerationPlan() ;
 		gp.setParentPlan(wirecenterPlanPlaceHolder) ;
 		gp.setName(strategy.getId());
-		gp.setCreateAt(new Date());
 		gp.setCentroid(gp.getCentroid()) ;
+		gp.setCreateAt(new Date());
+		gp.setUpdateAt(new Date());
 		networkPlanRepository.save(gp) ;
+		
+		networkNodeRepository.insertGenerationalEquipment(
+				wirecenterOptimizationRequest.getPlanId(),
+				gp.getId());
 		
 		return gp ;
 	}

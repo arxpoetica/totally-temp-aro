@@ -30,6 +30,16 @@ public interface NetworkNodeRepository extends JpaRepository<NetworkNode, Intege
 	@Query(value = "select total_cost from client.plan where id =:planId", nativeQuery=true)
 	public Double getTotalCost(@Param("planId") long planId) ;
 	
+	@Transactional
+	@Modifying
+	@Query(value = "insert into client.network_nodes (plan_id, lat, lon, node_type_id, geog, geom)\n" + 
+			"select gp.id, n.lat, n.lon, node_type_id, geog, geom  \n" + 
+			"from client.network_nodes n,\n" + 
+			"client.plan gp\n" + 
+			"where n.plan_id = :wirecenterPlanId \n" + 
+			"and gp.id = :generationPlanId", nativeQuery=true)
+	public void insertGenerationalEquipment(@Param("wirecenterPlanId") long wirecenterPlanId, @Param("generationPlanId") long generationPlanId) ;
+	
 	
 		
 	@Query(value = "update client.plan set total_count = :totalCount \n " +

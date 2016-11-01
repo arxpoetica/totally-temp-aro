@@ -33,6 +33,7 @@ public class QueryExecutor {
 				try (ResultSet rs = ps.executeQuery()) {
 					csvWriter.writeAll(rs, true);
 				}
+				csvWriter.flush(); 
 			});
 		}
 
@@ -40,7 +41,7 @@ public class QueryExecutor {
 	
 	public void execute(String sql, PreparedStatementAction action) throws SQLException {
 		try {
-			try(PreparedStatement ps = dataSource.getConnection().prepareStatement("")) {
+			try(PreparedStatement ps = dataSource.getConnection().prepareStatement(sql)) {
 				action.doAction(ps);
 			}
 		} catch( SQLException e) {

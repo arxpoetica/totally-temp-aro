@@ -68,17 +68,15 @@
               <br>
             </div>
             <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showPlans()">Open Network Plan</a>
+              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showPlans()">Existing Plans</a>
               <br>
             </div>
-            <div class="col-sm-8">
-              <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="manageNetworkPlans()">Manage Network Plans</a>
-              <br>
-            </div>
+            <!--
             <div class="col-sm-8">
               <a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showReports()">Reports</a>
               <br>
             </div>
+            -->
             <% if (user.rol === 'admin') { %>
               <div class="col-sm-8">
                 <a href="#manage-users" class="btn btn-primary btn-block" data-toggle="modal">Manage Users</a>
@@ -94,8 +92,6 @@
       </div>
 
       <% include modal_select_plan.html %>
-
-      <% include modal_manage_network_plans.html %>
 
       <% include modal_new_plan.html %>
 
