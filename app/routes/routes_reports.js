@@ -4,21 +4,15 @@ var config = helpers.config
 var database = helpers.database
 
 exports.configure = (api, middleware) => {
-  api.get('/reports/tabc/:plan_id/summary', (request, response, next) => {
+  api.get('/reports/tabc/:plan_id/:name', (request, response, next) => {
+    var name = request.params.name
     var plan_id = request.params.plan_id
     var req = {
       method: 'GET',
-      url: config.aro_service_url + `/rest/report-extended/tabc/${plan_id}.csv`
+      url: config.aro_service_url + `/rest/report-extended/${name}/${plan_id}.csv`
     }
-
-    database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
-      .then((plan) => {
-        return models.AROService.request(req)
-          .then((output) => {
-            response.attachment(`TABC Summary Stats ${plan.name}.csv`)
-            response.send(output)
-          })
-      })
+    return models.AROService.request(req)
+      .then((output) => response.send(output))
       .catch(next)
   })
 

@@ -62,7 +62,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
       {
         name: `TABC Summary Stats ${plan.name}`,
         type: '.csv',
-        url: `/reports/tabc/${plan.id}/summary`
+        url: `/reports/tabc/${plan.id}/tabc`
       },
       {
         name: `T Route ${plan.name}`,
@@ -86,11 +86,13 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
       },
       {
         name: `All TABC Endpoints ${plan.name}`,
-        type: '.csv'
+        type: '.csv',
+        url: `/reports/tabc/${plan.id}/master_output_producer`
       },
       {
         name: `Dropped Tower Details ${plan.name}`,
-        type: '.csv'
+        type: '.csv',
+        url: `/reports/tabc/${plan.id}/tower_details`
       },
       {
         name: 'TABC Summary Formatted',
