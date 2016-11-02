@@ -1,8 +1,6 @@
 general:
   branches:
     only:
-      - dockerize
-      - dockerize-vz
       - master
 
 machine:
