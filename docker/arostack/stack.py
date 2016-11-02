@@ -146,7 +146,9 @@ def provision_aro_stack(opsworks_stack_id=None,
                         opsworks_client=None,
                         logs_client=None,
                         iam_client=None,
-                        instance_type=''):
+                        instance_type='',
+                        app_initial_email='',
+                        app_initial_password=''):
     """Provision a newly created OpsWorks stack by hooking up the app and RDS"""
     opsworks_client = opsworks_client or boto3.client('opsworks', region_name='us-east-1')
     logs_client = logs_client or boto3.client('logs', region_name='us-east-1')
@@ -257,9 +259,10 @@ def provision_aro_stack(opsworks_stack_id=None,
                 'Name': 'execute_recipes',
                 'Args': {
                     'recipes' : ['aro_ops::compose-initialize']
-                },
+                }
+            },
             CustomJson="{\"app_initialization\": {\"admin_email\": \"" + app_initial_email + "\", \"admin_password\": \"" + app_initial_password + "\"} }"
-            })
+        )
         return deploy_response
 
 
