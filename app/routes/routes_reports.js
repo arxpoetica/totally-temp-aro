@@ -29,23 +29,29 @@ exports.configure = (api, middleware) => {
     if (types.indexOf(type) === -1) {
       return next(new Error(`Unknown report type ${type}`))
     }
+    var planQuery = null
     if (type === 'C') {
-      type = ['T', 'A', 'B'].map((t) => `'${t}'`).join(', ')
-      type = `IN (${type})`
-    } else {
-      type = `= '${type}'`
-    }
-
-    var planQuery = `
-      p.id IN (
-        (SELECT r.id FROM client.plan r
-          WHERE name ${type} AND plan_type='G' AND r.parent_plan_id IN (
-          (SELECT q.id FROM client.plan q WHERE q.parent_plan_id IN (
+      planQuery = `
+        p.id IN (
+          (SELECT r.id FROM client.plan r
+            WHERE plan_type='W' AND r.parent_plan_id IN (
             (SELECT id FROM client.plan WHERE parent_plan_id = $1)
           ))
-        ))
-      )
-    `
+        )
+      `
+    } else {
+      planQuery = `
+        p.id IN (
+          (SELECT r.id FROM client.plan r
+            WHERE name = '${type}' AND plan_type='G' AND r.parent_plan_id IN (
+            (SELECT q.id FROM client.plan q WHERE q.parent_plan_id IN (
+              (SELECT id FROM client.plan WHERE parent_plan_id = $1)
+            ))
+          ))
+        )
+      `
+    }
+
     database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
       .then((plan) => {
         return models.NetworkPlan.exportKml(plan_id, planQuery)

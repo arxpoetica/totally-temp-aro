@@ -48,11 +48,15 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
   $('#reports-folder').on('hidden.bs.modal', () => {
     if (backToReports) {
       $('#reports').modal('show')
+    } else if (latestModal) {
+      $(latestModal).modal('show')
     }
   })
 
+  var latestModal = null
   $scope.plan = null
-  $rootScope.$on('open-report', (e, plan) => {
+  $rootScope.$on('open-report', (e, plan, modal) => {
+    latestModal = modal
     $scope.plan = plan
     $scope.analysis = [
       {
