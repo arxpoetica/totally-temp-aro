@@ -1,8 +1,6 @@
 general:
   branches:
     only:
-      - dockerize
-      - dockerize-vz
       - master
 
 machine:
@@ -13,10 +11,10 @@ machine:
     IMAGE_TAG: ${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
     LATEST_TAG: ${IMAGE_NAME}:latest
     #CONTAINER VERSIONS AND DEPLOYMENT SETTINGS
-    ARO_ETL_IMAGE_NAME:  ait-docker-registry.cloud.altvil.com/aro/aro-etl
-    ARO_NGINX_IMAGE_VERSION: "7"
-    ARO_ETL_IMAGE_VERSION: "22"
-    ARO_SERVICE_IMAGE_VERSION: "A01"
+    # ARO_NGINX_IMAGE_VERSION: "8"
+    # ARO_ETL_IMAGE_VERSION: "44"
+    # ARO_DATA_IMAGE_VERSION: "3"
+    # ARO_SERVICE_IMAGE_VERSION: "3"
     ARO_CLIENT: ARO
   node:
     version: 6.1.0
@@ -57,18 +55,18 @@ deployment:
     commands:
       - docker push ${IMAGE_TAG}
       - docker push ${LATEST_TAG}
-      # - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
-      # - chmod 400 opsworks_ssh_key
-      # - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update staging
-      # - rm -f opsworks_ssh_key
-  staging:
-    branch: [dockerize]
-    owner: AIT
-    commands:
-      - docker push ${IMAGE_TAG}
-      - docker push ${LATEST_TAG}
       - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
       - chmod 400 opsworks_ssh_key
-      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update staging
+      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
       - rm -f opsworks_ssh_key
+  # staging:
+  #   branch: [dockerize]
+  #   owner: AIT
+  #   commands:
+  #     - docker push ${IMAGE_TAG}
+  #     - docker push ${LATEST_TAG}
+  #     - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
+  #     - chmod 400 opsworks_ssh_key
+  #     - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update staging
+  #     - rm -f opsworks_ssh_key
   
