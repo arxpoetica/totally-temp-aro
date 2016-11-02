@@ -77,7 +77,7 @@ elif environment == 'STAGING':
     host_name = branch_name + '.aro.staging.app.altvil.com'
 else:
     host_name = branch_name + '.aro.qa.app.altvil.com'
-
+app_base_url = 'https://' + host_name
 
 cloudformation_client = boto3.client('cloudformation', region_name='us-east-1')
 cloudformation = session.resource('cloudformation')
@@ -160,7 +160,7 @@ def provision_stack(cloudformation_stack):
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='m4.large',
+        instance_type='m4.xlarge',
         app_initial_email=app_default_admin_email,
         app_initial_password=app_default_admin_password
     )
@@ -194,7 +194,8 @@ def _set_environment():
             # { 'Key': 'database_url', 'Value': str(database_url), 'Secure': True },
             { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
             { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
-            { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False }]
+            { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False },
+            { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False }]
 
 
 
