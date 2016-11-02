@@ -11,7 +11,7 @@ import time
 # Config Constants
 AWS_ACCOUNT_ID = '976168524097'  # avco
 # ARN of the group that should be granted Manage rights on the stack
-DEVELOPER_GROUP_NAME = 'truplan-developers'
+DEVELOPER_GROUP_NAME = 'aro-developers'
 DEVELOPER_GROUP_ARN = 'arn:aws:iam::976168524097:group/' + DEVELOPER_GROUP_NAME
 CREATE_POLL_INTERVAL = 10  # seconds
 # This seems like a really long time but in fact RDS instance creation is very slow
@@ -38,25 +38,25 @@ def aws_hashify(m, key_key='Key', value_key='Value'):
     return [{key_key: k, value_key: v} for (k, v) in m.iteritems()]
 
 
-# def add_developer_group_to_stack(stack_id, opsworks_client, iam_client, environment='PRODUCTION'):
-#     """
-#     Given an OpsWorks stack id, add the members of the TruPlan developers group to it with
-#     'Manage' and 'ssh/sudo' permissions enabled. Sadly we cannot attach the group itself; we
-#     must attach individual users.
-#     """
-#     permission_level = 'manage' if environment == 'QA' else 'deploy'
-#     group_response = iam_client.get_group(GroupName=DEVELOPER_GROUP_NAME)
-#     if 'Users' not in group_response:
-#         raise StandardError("no Users in response to IAM group call: %s"
-#                             % pprint.pformat(group_response))
-#     for user in group_response['Users']:
-#         opsworks_client.set_permission(
-#             StackId=stack_id,
-#             IamUserArn=user['Arn'],
-#             AllowSsh=True,
-#             AllowSudo=True,
-#             Level=permission_level
-#         )
+def add_developer_group_to_stack(stack_id, opsworks_client, iam_client, environment='PRODUCTION'):
+    """
+    Given an OpsWorks stack id, add the members of the TruPlan developers group to it with
+    'Manage' and 'ssh/sudo' permissions enabled. Sadly we cannot attach the group itself; we
+    must attach individual users.
+    """
+    permission_level = 'deploy' if environment == 'QA' else 'deploy'
+    group_response = iam_client.get_group(GroupName=DEVELOPER_GROUP_NAME)
+    if 'Users' not in group_response:
+        raise StandardError("no Users in response to IAM group call: %s"
+                            % pprint.pformat(group_response))
+    for user in group_response['Users']:
+        opsworks_client.set_permission(
+            StackId=stack_id,
+            IamUserArn=user['Arn'],
+            AllowSsh=True,
+            AllowSudo=True,
+            Level=permission_level
+        )
 
 
 def create_aro_cfn_stack(stack_name,
