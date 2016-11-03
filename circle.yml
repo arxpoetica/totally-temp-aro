@@ -15,7 +15,7 @@ machine:
     # ARO_ETL_IMAGE_VERSION: "44"
     # ARO_DATA_IMAGE_VERSION: "3"
     # ARO_SERVICE_IMAGE_VERSION: "3"
-    ARO_CLIENT: ARO
+    ARO_CLIENT: aro
   node:
     version: 6.1.0
 
