@@ -35,7 +35,12 @@ TEMPLATE_URLS = {
     'PRODUCTION': 'https://cf-templates.altvil.com.s3.amazonaws.com/P-ARO.template'
 }
 
-TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json'
+if environment == 'PROD':
+    TEMPLATE_FILE = os.path.dirname(__file__) + '/P-ARO-template.yml'
+elif environment == 'QA':
+    TEMPLATE_FILE = os.path.dirname(__file__) + '/S-ARO-QA-template.yml'
+else:
+    TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json' 
 with open(TEMPLATE_FILE, 'r') as template_file:
     TEMPLATE_BODY=template_file.read()
 
@@ -43,8 +48,11 @@ with open(TEMPLATE_FILE, 'r') as template_file:
 branch_name = os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
 build_num = os.environ['CIRCLE_BUILD_NUM']
 etl_image_version = os.environ.get('ARO_ETL_IMAGE_VERSION')
+aro_etl_image_name = os.environ.get('ARO_ETL_IMAGE_NAME') or 'aro-etl'
 nginx_image_version = os.environ.get('ARO_NGINX_IMAGE_VERSION') 
 aro_service_image_version = os.environ.get('ARO_SERVICE_IMAGE_VERSION')
+aro_data_image_version = os.environ.get('ARO_DATA_IMAGE_VERSION')
+aro_data_image_name = os.environ.get('ARO_DATA_IMAGE_NAME') or 'aro-data'
 domain_name = os.environ.get('ARO_APP_CLIENT_DOMAIN')
 aro_client = os.environ.get('ARO_CLIENT') or 'aro'
 env_slug = branch_name
@@ -55,6 +63,8 @@ db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
 docker_pass = os.environ['DOCKER_PASS']
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
+app_default_admin_email = os.environ['ARO_APP_DEFAULT_ADMIN_EMAIL']
+app_default_admin_password = os.environ['ARO_APP_DEFAULT_ADMIN_PASSWORD']
 
 session = Session(region_name='us-east-1')
 
@@ -67,7 +77,7 @@ elif environment == 'STAGING':
     host_name = branch_name + '.aro.staging.app.altvil.com'
 else:
     host_name = branch_name + '.aro.qa.app.altvil.com'
-
+app_base_url = 'https://' + host_name
 
 cloudformation_client = boto3.client('cloudformation', region_name='us-east-1')
 cloudformation = session.resource('cloudformation')
@@ -140,17 +150,19 @@ def provision_stack(cloudformation_stack):
         # internal_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ExtraInternalLayer'),
         rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance'),
         environment=environment,
-        name='ARO-APP',
+        name='ARO',
         name_component=real_name_component,
         db={'user': db_user, 'pass': db_pass},
         docker_pass=docker_pass,
         environment_vars=_set_environment(),
         start_stack=True,
-        initialize_database=True,
+        initialize_database = True if environment == 'qa' else False,
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='m4.large'
+        instance_type='m4.xlarge',
+        app_initial_email=app_default_admin_email,
+        app_initial_password=app_default_admin_password
     )
 
 
@@ -176,10 +188,14 @@ def _set_environment():
             { 'Key': 'etl_container_tag', 'Value': str(etl_image_version), 'Secure': False },
             { 'Key': 'nginx_container_tag', 'Value': str(nginx_image_version), 'Secure': False },
             { 'Key': 'aro_service_container_tag', 'Value': str(aro_service_image_version), 'Secure': False },
+            { 'Key': 'aro_data_container_tag', 'Value': str(aro_data_image_version), 'Secure': False },
+            { 'Key': 'aro_data_image_name', 'Value': str(aro_data_image_name), 'Secure': False },
+            { 'Key': 'aro_etl_image_name', 'Value': str(aro_etl_image_name), 'Secure': False },
             # { 'Key': 'database_url', 'Value': str(database_url), 'Secure': True },
             { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
             { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
-            { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False }]
+            { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False },
+            { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False }]
 
 
 

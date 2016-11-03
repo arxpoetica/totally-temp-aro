@@ -10,12 +10,15 @@ pp = pprint.PrettyPrinter(indent=4)
 parser = argparse.ArgumentParser(description="Parse env type for deleting a stack.")
 parser.add_argument('env_type', metavar='E', type=str)
 args = parser.parse_args()
-if args.env_type.lower() != 'staging':
+if (args.env_type.lower() != 'staging') and (args.env_type.lower() != 'qa'):
     raise StandardError("Can only tear down staging stacks via the console.  Please specify 'staging' or go to AWS.")
 
-PROJECT_BASE_NAME = 'S-ARO-'
+environment = args.env_type.upper()
+PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-',
+                     'PRODUCTION': 'P-ARO-',
+                     'STAGING': 'S-ARO-'}
 branch_name = os.environ['CIRCLE_BRANCH']
-cloudformation_stack_name = PROJECT_BASE_NAME + branch_name
+cloudformation_stack_name = PROJECT_BASE_NAME[environment] + branch_name
 
 session = Session(region_name='us-east-1')
 cloudformation_client = boto3.client('cloudformation', region_name='us-east-1')

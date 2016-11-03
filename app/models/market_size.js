@@ -315,9 +315,7 @@ module.exports = class MarketSize {
         to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
       END AS color
       FROM biz
-      -- JOIN client.location_competitors lc ON lc.location_id = biz.location_id
-      -- JOIN carriers c ON lc.carrier_id = c.id
-      JOIN geotel.buffered_routes r ON st_contains(r.geom, biz.geom)
+      JOIN aro.fiber_plant r ON st_contains(r.buffer_geom, biz.geom)
       JOIN carriers c ON r.carrier_id = c.id
       JOIN locations l ON l.id = biz.location_id
         ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
