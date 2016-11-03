@@ -63,7 +63,7 @@ deployment:
           environment:
             VZ_QA_MASTER: true
             ARO_DATA_IMAGE_NAME: aro-data-vz
-            ARO_DATA_IMAGE_VERSION: "31"
+            ARO_DATA_IMAGE_VERSION: "7"
             ARO_CLIENT: verizon
 
 
