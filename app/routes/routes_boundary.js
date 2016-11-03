@@ -49,7 +49,6 @@ exports.configure = (api, middleware) => {
     var id = request.params.id || null
     var user = request.user
     var radius = +request.body.radius || 20000
-    console.log('', request.file)
     var fullpath = request.file && request.file.path
     models.Boundary.editUserDefinedBoundary(user, id, name, fullpath, radius)
       .then(jsonSuccess(response, next))

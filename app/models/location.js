@@ -5,6 +5,9 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var config = helpers.config
+var models = require('../models')
+var fs = require('fs')
 
 module.exports = class Location {
 
@@ -635,4 +638,44 @@ module.exports = class Location {
     return database.query(sql, [`%${text}%`])
   }
 
+  static editUserDefinedCustomers (user, id, name, file) {
+    return Promise.resolve()
+      .then(() => {
+        if (!id) {
+          var req = {
+            method: 'POST',
+            url: config.aro_service_url + '/rest/user-entites',
+            body: {
+              name: name,
+              userId: user.id
+            },
+            json: true
+          }
+          return models.AROService.request(req)
+        } else {
+          return Promise.resolve()
+        }
+      })
+      .then((res) => {
+        id = id || res.id
+        if (!file) return { id: id }
+        var req = {
+          method: 'POST',
+          url: config.aro_service_url + `/rest/user-entites/data/${id}/entities.csv`,
+          formData: {
+            file: fs.createReadStream(file)
+          }
+        }
+        return models.AROService.request(req)
+          .then(() => ({ id: id }))
+      })
+  }
+
+  static towersByDataSource (dataSourceId, viewport) {
+    return database.points(`
+      SELECT geom FROM towers
+      WHERE data_source_id = $1
+      ${database.intersects(viewport, 'geom', 'AND')}
+    `, [dataSourceId], true, viewport)
+  }
 }
