@@ -2,6 +2,7 @@ general:
   branches:
     only:
       - master
+      - vz-qa-deployment
 
 machine:
   services:
