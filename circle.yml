@@ -50,14 +50,20 @@ test:
 
 deployment:
   qa:
-    branch: [master]
+    branch: [vz-qa-deployment]
     owner: AIT
     commands:
       - docker push ${IMAGE_TAG}
-      - docker push ${LATEST_TAG}
+      # - docker push ${LATEST_TAG}
       - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
       - chmod 400 opsworks_ssh_key
-      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
+      # - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
+      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa:
+          environment:
+            VZ_QA_MASTER: TRUE
+            ARO_DATA_IMAGE_NAME: aro-data-vz
+            ARO_CLIENT: verizon
+
       - rm -f opsworks_ssh_key
   # staging:
   #   branch: [dockerize]
