@@ -129,6 +129,22 @@
     </div>
     <% } %>
 
+    <div class="panel panel-default" ng-controller="backhaul-controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <span class="hide-on-expanded icon icon-network-planning-targeted"></span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-backhaul">
+            Backhaul
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-backhaul" class="panel-collapse collapse" role="tabpanel" data-tool="target_builder">
+        <div class="panel-body">
+          <% include controller_backhaul.html %>
+        </div>
+      </div>
+    </div>
+
     <div class="panel panel-default" ng-controller="area-network-planning-controller">
       <div class="panel-heading" role="tab">
         <h4 class="panel-title">
