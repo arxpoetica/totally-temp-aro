@@ -124,8 +124,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     short_name: 'SL',
     api_endpoint: '/locations/:plan_id/selected',
     style_options: locationStyles,
-    threshold: 15,
-    reload: 'always',
+    // threshold: 15,
+    // reload: 'always',
     declarativeStyles: declarativeStyles
   })
 

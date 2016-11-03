@@ -19,7 +19,9 @@ app.controller('user_defined_boundary_controller', ['$scope', '$rootScope', '$ht
   })
 
   $scope.saveUserDefiendBoundary = () => {
-    if ($('#user_defined_boundaries_modal input[type=file]').get(0).files.length > 0) {
+    var existing = !!$scope.editingUserDefinedBoundary.id
+    var hasFile = $('#user_defined_boundaries_modal input[type=file]').get(0).files.length > 0
+    if (existing && hasFile) {
       return swal({
         title: 'Are you sure?',
         text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',

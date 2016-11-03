@@ -353,9 +353,14 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $scope.openReport = (plan) => {
-    $('#select-plan').modal('hide')
-    $('#plan-combo').modal('hide')
-    $rootScope.$broadcast('open-report', plan)
+    var modal = null
+    ;['#select-plan', '#plan-combo'].forEach((id) => {
+      if (($(id).data('bs.modal') || {}).isShown) {
+        modal = id
+        $(id).modal('hide')
+      }
+    })
+    $rootScope.$broadcast('open-report', plan, modal)
   }
 
   // var nonLinearSlider = document.getElementById('year-slider')

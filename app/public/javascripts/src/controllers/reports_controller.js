@@ -48,17 +48,21 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
   $('#reports-folder').on('hidden.bs.modal', () => {
     if (backToReports) {
       $('#reports').modal('show')
+    } else if (latestModal) {
+      $(latestModal).modal('show')
     }
   })
 
+  var latestModal = null
   $scope.plan = null
-  $rootScope.$on('open-report', (e, plan) => {
+  $rootScope.$on('open-report', (e, plan, modal) => {
+    latestModal = modal
     $scope.plan = plan
     $scope.analysis = [
       {
         name: `TABC Summary Stats ${plan.name}`,
         type: '.csv',
-        url: `/reports/tabc/${plan.id}/summary`
+        url: `/reports/tabc/${plan.id}/tabc`
       },
       {
         name: `T Route ${plan.name}`,
@@ -82,11 +86,13 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
       },
       {
         name: `All TABC Endpoints ${plan.name}`,
-        type: '.csv'
+        type: '.csv',
+        url: `/reports/tabc/${plan.id}/master_output_producer`
       },
       {
         name: `Dropped Tower Details ${plan.name}`,
-        type: '.csv'
+        type: '.csv',
+        url: `/reports/tabc/${plan.id}/tower_details`
       },
       {
         name: 'TABC Summary Formatted',
