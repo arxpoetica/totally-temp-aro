@@ -46,7 +46,7 @@ with open(TEMPLATE_FILE, 'r') as template_file:
 
 # Config from environment
 vz_qa_master = os.environ.get('VZ_QA_MASTER')
-branch_name = 'vz-master' if vz_qa_master == 'TRUE' else os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
+branch_name = 'vz-master' if vz_qa_master == 'true' else os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
 build_num = os.environ['CIRCLE_BUILD_NUM']
 etl_image_version = os.environ.get('ARO_ETL_IMAGE_VERSION')
 aro_etl_image_name = os.environ.get('ARO_ETL_IMAGE_NAME') or 'aro-etl'
