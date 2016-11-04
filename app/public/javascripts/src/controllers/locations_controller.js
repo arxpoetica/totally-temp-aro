@@ -36,6 +36,29 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     reload: 'always'
   })
 
+  $scope.uploadedCustomersLayer = new MapLayer({
+    short_name: 'UC',
+    name: 'Uploaded customers',
+    type: 'uploaded_customers',
+    style_options: {
+      normal: {
+        icon: `/images/map_icons/${config.ARO_CLIENT}/tower.png`
+      }
+    },
+    api_endpoint: null,
+    threshold: 12,
+    reload: 'always'
+  })
+
+  $scope.selectedDatasourceChaned = function () {
+    if ($scope.selectedDatasource) {
+      $scope.uploadedCustomersLayer.setApiEndpoint(`/towers/${$scope.selectedDatasource}`)
+      $scope.uploadedCustomersLayer.show()
+    } else {
+      $scope.uploadedCustomersLayer.hide()
+    }
+  }
+
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
   })
@@ -351,6 +374,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       })
   })
 
+  $scope.datasources = []
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     if (!$scope.heatmapOn) $scope.toggleHeatmap()
@@ -370,7 +394,27 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         selectLocations(plan.location_types)
       })
     }
+
+    $scope.selectedDatasource = null
+    $scope.selectedDatasourceChaned()
+    reloadDatasources()
   })
+
+  function reloadDatasources () {
+    $http.get('/datasources').success((response) => {
+      $scope.datasources = response
+    })
+  }
+
+  $rootScope.$on('uploaded_customers', (e, info) => {
+    $scope.selectedDatasource = info && info.id
+    $scope.selectedDatasourceChaned()
+    reloadDatasources()
+  })
+
+  $scope.showUploadedCustomersChanged = () => {
+    $scope.showUploadedCustomers ? $scope.uploadedCustomersLayer.show() : $scope.uploadedCustomersLayer.hide()
+  }
 
   $rootScope.$on('select_locations', (e, locationTypes) => {
     selectLocations(locationTypes)

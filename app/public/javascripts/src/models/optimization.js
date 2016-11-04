@@ -39,10 +39,10 @@ app.service('optimization', ($rootScope, $http, $q) => {
 
     function checkNumberOfAreas () {
       if (changes.algorithm === 'TABC' && changes.geographies.length >= 15) {
-        var timing = 30 * changes.geographies.length
+        var timing = changes.geographies.length
         swal({
           title: '',
-          text: `You are running a TABC analysis covering ${changes.geographies.length} service areas. While optimization is running, you will be sent back to the homescreen. Expected timing is ${timing}.`,
+          text: `You are running a TABC analysis covering ${changes.geographies.length} service areas. While optimization is running, you will be sent back to the homescreen. Expected timing of optimization is ${timing} minutes.`,
           type: 'info',
           confirmButtonColor: '#b9b9b9',
           confirmButtonText: 'Run Optimization',

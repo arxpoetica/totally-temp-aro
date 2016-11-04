@@ -33,10 +33,8 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
   }
 
   function submit () {
-    return $('#upload_customers_modal').modal('hide')
-    /*
     var id = $scope.editingDataset.id
-    var url = id ? `/boundary/user_defined/${id}` : '/boundary/user_defined'
+    var url = id ? `/locations/user_defined/${id}` : '/locations/user_defined'
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
     xhr.open('POST', url, true)
@@ -60,6 +58,5 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
       $('#upload_customers_modal').modal('hide')
     })
     xhr.send(formData)
-    */
   }
 }])
