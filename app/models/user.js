@@ -76,6 +76,10 @@ module.exports = class User {
     return database.execute('DELETE FROM auth.users WHERE id=$1', [user_id])
   }
 
+  static makeAdmin (user_id) {
+    return database.execute('UPDATE auth.users SET rol=\'admin\' WHERE id=$1', [user_id])
+  }
+
   static register (user) {
     var code = user.password ? null : this.randomCode()
 
