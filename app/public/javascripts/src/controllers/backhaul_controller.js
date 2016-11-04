@@ -14,6 +14,13 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
 
   function recalculateLines () {
     line.setPath($scope.selectedEquipment.map((equipment) => equipment.point))
+    $scope.selectedEquipment.forEach((equipment, i) => {
+      var url = `https://chart.googleapis.com/chart?chst=d_bubble_text_small_withshadow&chld=bb|${encodeURIComponent(String(i + 1))}|FF8|000`
+      equipment.marker.setIcon({
+        anchor: new google.maps.Point(10, 40),
+        url: url
+      })
+    })
   }
 
   $scope.selectedEquipment = []
@@ -24,7 +31,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
   $scope.removeEquipment = (equipment) => {
     var i = $scope.selectedEquipment.indexOf(equipment)
     if (i >= 0) {
-      $scope.selectedEquipment.splice(i, 1)
+      $scope.selectedEquipment.splice(i, 1)[0].marker.setMap(null)
     }
     recalculateLines()
   }
@@ -35,22 +42,31 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     var id = event.feature.getProperty('id')
     var equipment = $scope.selectedEquipment.find((item) => item.id === id)
     if (equipment) return
+    var point = event.feature.getGeometry().get()
     $scope.selectedEquipment.push({
       name: 'node',
       id: id,
-      point: event.feature.getGeometry().get()
+      point: point,
+      marker: new google.maps.Marker({
+        map: map,
+        position: point
+      })
     })
     recalculateLines()
     if (!$rootScope.$$phase) { $rootScope.$apply() }
   })
 
   $rootScope.$on('map_tool_changed_visibility', () => {
-    line.setMap(map_tools.is_visible('backhaul') ? map : null)
+    var m = map_tools.is_visible('backhaul') ? map : null
+    line.setMap(m)
+    $scope.selectedEquipment.forEach((equipment) => equipment.marker.setMap(m))
   })
 
   $(document).keydown((e) => {
     if (e.keyCode === 27 && map_tools.is_visible('backhaul')) {
-      line.setMap(line.getMap() ? null : map)
+      var m = line.getMap() ? null : map
+      line.setMap(m)
+      $scope.selectedEquipment.forEach((equipment) => equipment.marker.setMap(m))
     }
   })
 }])
