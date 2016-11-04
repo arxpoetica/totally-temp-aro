@@ -622,4 +622,27 @@ module.exports = class Network {
     `, [], true, viewport)
   }
 
+  static backhaulLinks (plan_id) {
+    return database.query(`
+      SELECT nn.id AS id, ST_AsGeoJSON(geom)::json AS geom, 'node' AS name
+      FROM client.plan_links
+      JOIN client.network_nodes nn ON nn.id = plan_links.from_link_id
+      WHERE plan_links.plan_id = $1
+      ORDER BY plan_links.id ASC
+    `, [plan_id])
+  }
+
+  static saveBackhaulLinks (plan_id, ids) {
+    return database.execute('DELETE FROM client.plan_links WHERE client.plan_links.plan_id = $1', [plan_id])
+      .then(() => {
+        if (ids.length < 2) return
+        var prev = ids[0]
+        return pync.series(ids.slice(1), (id) => {
+          var params = [prev, id, plan_id]
+          prev = id
+          return database.execute('INSERT INTO client.plan_links (from_link_id, to_link_id, plan_id) VALUES ($1, $2, $3)', params)
+        })
+      })
+  }
+
 }

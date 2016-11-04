@@ -116,7 +116,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       type: 'network_nodes',
       name: 'Network Nodes',
       short_name: 'NN',
-      type: 'network_nodes',
       style_options: {
         normal: {
           fillColor: 'brown',

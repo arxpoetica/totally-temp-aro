@@ -191,4 +191,20 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.get('/backhaul/:plan_id/links', (request, response, next) => {
+    var plan_id = +request.params.plan_id
+    models.Network.backhaulLinks(plan_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/backhaul/:plan_id/links', check_owner_permission, (request, response, next) => {
+    var plan_id = +request.params.plan_id
+    var ids = request.body.ids
+    console.log('ids', ids)
+    models.Network.saveBackhaulLinks(plan_id, ids)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

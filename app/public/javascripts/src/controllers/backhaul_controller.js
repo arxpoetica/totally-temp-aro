@@ -1,14 +1,33 @@
 /* global app google map $ */
 app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
-  var line = null
-  $rootScope.$on('plan_selected', () => {
-    if (line) return line.setPath([])
-    line = new google.maps.Polyline({
-      path: [],
-      strokeColor: '#FF0000',
-      strokeOpacity: 1.0,
-      strokeWeight: 2,
-      map: map
+  var line = new google.maps.Polyline({
+    path: [],
+    strokeColor: '#FF0000',
+    strokeOpacity: 1.0,
+    strokeWeight: 2
+  })
+  $scope.plan = null
+  $rootScope.$on('plan_selected', (e, plan) => {
+    $scope.plan = plan
+    line.setPath([])
+    if (!plan) return
+    var m = map_tools.is_visible('backhaul') ? map : null
+    line.setMap(m)
+    $http.get(`/backhaul/${plan.id}/links`).success((response) => {
+      response.forEach((item) => {
+        var coordinates = item.geom.coordinates
+        var point = { lat: coordinates[1], lng: coordinates[0] }
+        $scope.selectedEquipment.push({
+          name: item.name,
+          id: item.id,
+          point: point,
+          marker: new google.maps.Marker({
+            map: m,
+            position: point
+          })
+        })
+      })
+      recalculateLines()
     })
   })
 
@@ -34,6 +53,15 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       $scope.selectedEquipment.splice(i, 1)[0].marker.setMap(null)
     }
     recalculateLines()
+  }
+
+  $scope.createLinks = () => {
+    var data = {
+      ids: $scope.selectedEquipment.map((equipment) => equipment.id)
+    }
+    $http.post(`/backhaul/${$scope.plan.id}/links`, data).success((response) => {
+      console.log('response', response)
+    })
   }
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
