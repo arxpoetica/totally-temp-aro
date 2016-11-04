@@ -91,6 +91,22 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
     })
   }
 
+  $scope.makeAdmin = (user) => {
+    swal({
+      title: 'Are you sure?',
+      text: 'This user will have admin access after this action',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, () => {
+      $http.post('/admin/users/make_admin', { user: user.id }).success((response) => {
+        loadUsers()
+      })
+    })
+  }
+
   $scope.downloadCSV = () => {
     window.location.href = '/admin/users/csv'
   }

@@ -24,6 +24,13 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
+  app.post('/admin/users/make_admin', check_admin, (request, response, next) => {
+    var user_id = request.body.user
+    models.User.makeAdmin(user_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   app.post('/admin/users/resend', check_admin, (request, response, next) => {
     var user_id = request.body.user
     models.User.resendLink(user_id)
