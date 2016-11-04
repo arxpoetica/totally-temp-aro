@@ -62,7 +62,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
       {
         name: `TABC Summary Stats ${plan.name}`,
         type: '.csv',
-        url: `/reports/tabc/${plan.id}/tabc`
+        url: `/reports/tabc/${plan.id}/summary_query`
       },
       {
         name: `T Route ${plan.name}`,
