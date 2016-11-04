@@ -1,4 +1,4 @@
-/* global app google map */
+/* global app google map $ */
 app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
   var line = null
   $rootScope.$on('plan_selected', () => {
@@ -46,5 +46,11 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
 
   $rootScope.$on('map_tool_changed_visibility', () => {
     line.setMap(map_tools.is_visible('backhaul') ? map : null)
+  })
+
+  $(document).keydown((e) => {
+    if (e.keyCode === 27 && map_tools.is_visible('backhaul')) {
+      line.setMap(line.getMap() ? null : map)
+    }
   })
 }])
