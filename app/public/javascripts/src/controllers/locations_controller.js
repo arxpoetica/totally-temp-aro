@@ -36,29 +36,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     reload: 'always'
   })
 
-  $scope.uploadedCustomersLayer = new MapLayer({
-    short_name: 'UC',
-    name: 'Uploaded customers',
-    type: 'uploaded_customers',
-    style_options: {
-      normal: {
-        icon: `/images/map_icons/${config.ARO_CLIENT}/tower.png`
-      }
-    },
-    api_endpoint: null,
-    threshold: 12,
-    reload: 'always'
-  })
-
-  $scope.selectedDatasourceChaned = function () {
-    if ($scope.selectedDatasource) {
-      $scope.uploadedCustomersLayer.setApiEndpoint(`/towers/${$scope.selectedDatasource}`)
-      $scope.uploadedCustomersLayer.show()
-    } else {
-      $scope.uploadedCustomersLayer.hide()
-    }
-  }
-
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
   })
@@ -278,15 +255,21 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         householdCategories = []
       }
 
-      var towers = $scope.show_towers ? ['towers'] : []
-      if (businessCategories.length === 0 && householdCategories.length === 0 && towers.length === 0) {
+      var towers = ($scope.show_towers || ($scope.showUploadedCustomers && $scope.selectedDatasource)) ? ['towers'] : []
+      var dataSources = $scope.show_towers ? [1] : []
+      if ($scope.showUploadedCustomers && $scope.selectedDatasource) {
+        dataSources.push($scope.selectedDatasource)
+      }
+      if (businessCategories.length === 0 && householdCategories.length === 0 && towers.length === 0 && dataSources.length === 0) {
         locationsLayer.hide()
       } else {
         var options = {
           business_categories: businessCategories,
           household_categories: householdCategories,
-          towers: towers
+          towers: towers,
+          dataSources: dataSources
         }
+        console.log('options', options)
         locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
       }
@@ -396,7 +379,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     }
 
     $scope.selectedDatasource = null
-    $scope.selectedDatasourceChaned()
+    $scope.changeLocationsLayer()
     reloadDatasources()
   })
 
@@ -408,13 +391,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
   $rootScope.$on('uploaded_customers', (e, info) => {
     $scope.selectedDatasource = info && info.id
-    $scope.selectedDatasourceChaned()
+    $scope.changeLocationsLayer()
     reloadDatasources()
   })
-
-  $scope.showUploadedCustomersChanged = () => {
-    $scope.showUploadedCustomers ? $scope.uploadedCustomersLayer.show() : $scope.uploadedCustomersLayer.hide()
-  }
 
   $rootScope.$on('select_locations', (e, locationTypes) => {
     selectLocations(locationTypes)
