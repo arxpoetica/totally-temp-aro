@@ -17,6 +17,8 @@ app.service('optimization', ($rootScope, $http, $q) => {
   optimization.optimize = (plan, changes, success, error) => {
     var canceler = $q.defer()
 
+    changes.entityDataSources = optimization.datasources
+
     function run () {
       var url = '/network_plan/' + plan.id + '/edit'
       var options = {

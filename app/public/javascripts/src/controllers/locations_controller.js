@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization) => {
   $scope.ARO_CLIENT = config.ARO_CLIENT
   $scope.map_tools = map_tools
   $scope.selected_tool = null
@@ -241,6 +241,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $scope.household_categories_selected['medium'] = true
     }
 
+    var selectedDatasources = uploadedCustomersSelect.select2('val')
+    optimization.datasources = selectedDatasources.map((id) => {
+      return $scope.datasources.find((data) => data.dataSourceId === +id)
+    })
+
     const subcategories = (key) => {
       var obj = $scope[`${key}_categories_selected`]
       var categories = Object.keys(obj).filter((key) => obj[key])
@@ -257,7 +262,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         householdCategories = []
       }
 
-      var selectedDatasources = uploadedCustomersSelect.select2('val')
       var towers = ($scope.show_towers || ($scope.showUploadedCustomers && selectedDatasources.length > 0)) ? ['towers'] : []
       var dataSources = $scope.show_towers ? [1] : []
       if ($scope.showUploadedCustomers) {
@@ -363,6 +367,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     if (!$scope.heatmapOn) $scope.toggleHeatmap()
+    $scope.datasources = []
+    optimization.datasources = []
 
     // unselect all entity types
     $scope.show_towers = false
@@ -391,16 +397,16 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       uploadedCustomersSelect.select2({
         placeholder: 'Select one or more datasets',
         escapeMarkup: (m) => m,
-        data: $scope.datasources.map((item) => ({ id: item.dataSourceId, text: item.name })),
+        data: response.map((item) => ({ id: item.dataSourceId, text: item.name })),
         multiple: true
       })
-      callback && callback()
+      callback && callback(response)
     })
   }
 
   $rootScope.$on('uploaded_customers', (e, info) => {
-    reloadDatasources(() => {
-      var dataset = $scope.datasources.find((item) => item.id === info.id)
+    reloadDatasources((response) => {
+      var dataset = response.find((item) => item.id === info.id)
       if (!dataset) return
       var val = uploadedCustomersSelect.select2('val')
       val.push(String(dataset.dataSourceId))

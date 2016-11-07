@@ -304,7 +304,8 @@ module.exports = class Network {
       analysisSelectionMode: options.selectionMode,
       fiberNetworkConstraints: options.fiberNetworkConstraints,
       processLayers: options.processingLayers,
-      customOptimization: options.customOptimization
+      customOptimization: options.customOptimization,
+      entityDataSources: options.entityDataSources
     }
     var req = {
       method: 'POST',
