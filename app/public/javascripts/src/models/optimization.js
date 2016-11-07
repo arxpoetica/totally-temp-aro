@@ -19,12 +19,12 @@ app.service('optimization', ($rootScope, $http, $q) => {
 
     changes.entityDataSources = optimization.datasources
 
-    function run () {
+    function run (hideProgressBar) {
       var url = '/network_plan/' + plan.id + '/edit'
       var options = {
         url: url,
         method: 'post',
-        saving_plan: !changes.lazy,
+        saving_plan: !hideProgressBar && !changes.lazy,
         data: changes,
         timeout: canceler.promise
       }
@@ -55,8 +55,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
           closeOnConfirm: true
         }, (confirmed) => {
           if (confirmed) {
-            changes.lazy = true
-            run()
+            run(true)
             $rootScope.$broadcast('go-home')
             plan = null
           }
