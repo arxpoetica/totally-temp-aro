@@ -624,11 +624,14 @@ module.exports = class Network {
 
   static backhaulLinks (plan_id) {
     return database.query(`
-      SELECT nn.id AS id, ST_AsGeoJSON(geom)::json AS geom, 'node' AS name
+      SELECT
+        plan_links.id AS id,
+        ST_AsGeoJSON(nn1.geom)::json AS from_geom,
+        ST_AsGeoJSON(nn2.geom)::json AS to_geom
       FROM client.plan_links
-      JOIN client.network_nodes nn ON nn.id = plan_links.from_link_id
+      JOIN client.network_nodes nn1 ON nn1.id = plan_links.from_link_id
+      JOIN client.network_nodes nn2 ON nn2.id = plan_links.to_link_id
       WHERE plan_links.plan_id = $1
-      ORDER BY plan_links.id ASC
     `, [plan_id])
   }
 
