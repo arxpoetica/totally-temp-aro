@@ -53,6 +53,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.business_categories_selected = {}
   $scope.household_categories_selected = {}
 
+  var uploadedCustomersSelect = $('#uploadedCustomersSelect')
+
   var locationStyles = {
     normal: {
       visible: true,
@@ -255,10 +257,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         householdCategories = []
       }
 
-      var towers = ($scope.show_towers || ($scope.showUploadedCustomers && $scope.selectedDatasource)) ? ['towers'] : []
+      var selectedDatasources = uploadedCustomersSelect.select2('val')
+      var towers = ($scope.show_towers || ($scope.showUploadedCustomers && selectedDatasources.length > 0)) ? ['towers'] : []
       var dataSources = $scope.show_towers ? [1] : []
-      if ($scope.showUploadedCustomers && $scope.selectedDatasource) {
-        dataSources.push($scope.selectedDatasource)
+      if ($scope.showUploadedCustomers) {
+        dataSources = dataSources.concat(selectedDatasources)
       }
       if (businessCategories.length === 0 && householdCategories.length === 0 && towers.length === 0 && dataSources.length === 0) {
         locationsLayer.hide()
@@ -269,7 +272,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
           towers: towers,
           dataSources: dataSources
         }
-        console.log('options', options)
         locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
       }
@@ -378,21 +380,32 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       })
     }
 
-    $scope.selectedDatasource = null
+    uploadedCustomersSelect.select2('val', [])
     $scope.changeLocationsLayer()
     reloadDatasources()
   })
 
-  function reloadDatasources () {
+  function reloadDatasources (callback) {
     $http.get('/datasources').success((response) => {
       $scope.datasources = response
+      uploadedCustomersSelect.select2({
+        placeholder: 'Select one or more datasets',
+        escapeMarkup: (m) => m,
+        data: $scope.datasources.map((item) => ({ id: item.dataSourceId, text: item.name })),
+        multiple: true
+      })
+      callback && callback()
     })
   }
 
   $rootScope.$on('uploaded_customers', (e, info) => {
-    $scope.selectedDatasource = info && info.id
-    $scope.changeLocationsLayer()
-    reloadDatasources()
+    reloadDatasources(() => {
+      var dataset = $scope.datasources.find((item) => item.id === info.id)
+      if (!dataset) return
+      var val = uploadedCustomersSelect.select2('val')
+      val.push(String(dataset.dataSourceId))
+      uploadedCustomersSelect.select2('val', val, true)
+    })
   })
 
   $rootScope.$on('select_locations', (e, locationTypes) => {

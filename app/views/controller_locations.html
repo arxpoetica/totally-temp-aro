@@ -258,12 +258,9 @@
       </div>
     </form>
     <div ng-show="showUploadedCustomers" style="padding:10px; margin-left:25px; margin-right:30px">
-      <select class="form-control"
+      <input class="form-control" id="uploadedCustomersSelect"
           ng-change="changeLocationsLayer()"
-          ng-model="selectedDatasource"
-          ng-options="datasource.dataSourceId as datasource.name for datasource in datasources">
-          <option value="">Select a datasource</option>
-      </select>
+          ng-model="selectedDatasource">
       <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addCustomers()">
         <span class="fa fa-plus"></span> Add customers
       </button>
