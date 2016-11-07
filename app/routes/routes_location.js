@@ -15,7 +15,7 @@ exports.configure = (api, middleware) => {
     var plan_id = +request.params.plan_id
 
     var filters = {}
-    var keys = ['business_categories', 'household_categories', 'towers']
+    var keys = ['business_categories', 'household_categories', 'towers', 'dataSources']
     keys.forEach((key) => {
       var value = request.query[key] || []
       if (!Array.isArray(value)) {

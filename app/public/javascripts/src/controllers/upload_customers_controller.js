@@ -18,7 +18,8 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
   })
 
   $scope.save = () => {
-    if ($('#upload_customers_modal input[type=file]').get(0).files.length > 0) {
+    var files = $('#upload_customers_modal input[type=file]').get(0).files
+    if ($scope.editingDataset.id && files.length > 0) {
       return swal({
         title: 'Are you sure?',
         text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',

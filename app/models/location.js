@@ -19,6 +19,7 @@ module.exports = class Location {
     var households = filters.household_categories.map((value) => 'h_' + value)
     var towers = filters.towers
     var categories = businesses.concat(households).concat(towers)
+    var dataSources = (filters.dataSources || []).map((id) => +id || -1)
 
     var sql = `
       WITH visible_locations AS (
@@ -31,7 +32,16 @@ module.exports = class Location {
         LEFT JOIN client.plan_targets
           ON plan_targets.plan_id = $1
          AND plan_targets.location_id = visible_locations.id
-        WHERE plan_targets.location_id IS NULL
+      ),
+      datasource_locations AS (
+        SELECT *, (
+          array(
+            SELECT DISTINCT data_source_id
+            FROM towers t
+            WHERE t.location_id = unselected_locations.id
+          )
+        ) AS data_source_ids
+        FROM unselected_locations
       ),
       categorized_locations AS (
         SELECT *, (
@@ -40,30 +50,34 @@ module.exports = class Location {
             FROM businesses b
             JOIN client.business_categories c ON b.number_of_employees >= c.min_value AND b.number_of_employees <= c.max_value
             JOIN client.employees_by_location e ON (b.number_of_employees >= e.min_value) AND (b.number_of_employees <= e.max_value)
-            WHERE b.location_id = unselected_locations.id
+            WHERE b.location_id = datasource_locations.id
           )
           ||
           array(
             SELECT DISTINCT 'h_' || c.name
             FROM households b
             JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households <= c.max_value
-            WHERE b.location_id = unselected_locations.id
+            WHERE b.location_id = datasource_locations.id
           )
           ||
           array(
             SELECT 'towers'::text FROM towers t
-            WHERE t.location_id = unselected_locations.id
+            WHERE t.location_id = datasource_locations.id
           )
         ) AS entity_categories
-        FROM unselected_locations
+        FROM datasource_locations
+        WHERE
+          array_length(data_source_ids, 1) IS NULL -- no towers
+          OR ARRAY[$3]::integer[] && data_source_ids
       ),
       features AS (
-        SELECT categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories
+        SELECT categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories, data_source_ids AS data_source_id
         FROM categorized_locations
         WHERE ARRAY[$2]::text[] && entity_categories
       )
     `
-    return database.points(sql, [plan_id, categories], true, viewport)
+    var params = [plan_id, categories, dataSources]
+    return database.points(sql, params, true, viewport)
   }
 
   /*
@@ -677,5 +691,6 @@ module.exports = class Location {
       WHERE data_source_id = $1
       ${database.intersects(viewport, 'geom', 'AND')}
     `, [dataSourceId], true, viewport)
+    .then((foo) => console.log('foo', foo) || foo)
   }
 }
