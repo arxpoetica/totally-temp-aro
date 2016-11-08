@@ -1,4 +1,4 @@
-/* global app swal $ config globalServiceLayers */
+/* global app swal $ config globalServiceLayers _ */
 // Search Controller
 app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', 'optimization', ($scope, $rootScope, $http, $q, map_tools, regions, optimization) => {
   // Controller instance variables
@@ -167,7 +167,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       processingLayers.push($rootScope.selectedUserDefinedBoundary.id)
     }
     if (processingLayers.length > 0) {
-      changes.processingLayers = processingLayers
+      changes.processingLayers = _.uniq(processingLayers)
     }
 
     if (algorithm === 'CAPEX') {
