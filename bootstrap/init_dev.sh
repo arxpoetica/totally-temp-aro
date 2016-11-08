@@ -1,12 +1,16 @@
 #!/bin/bash
 
-if [ $# -ne 2 ]; then
-    echo $0: usage: init.sh admin_user_email admin_user_password
+if [ $# -lt 2 ]; then
+    echo $0: usage: init.sh admin_user_email admin_user_password [state_codes]
     exit 1
 fi
 
 ADMIN_USER_EMAIL=$1
 ADMIN_USER_PASSWORD=$2
+
+if [ $# -eq 3 ]; then
+  export STATE_CODES=$3
+fi
 
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
@@ -20,11 +24,9 @@ exec 3>&1 1>>${ETL_LOG_FILE} 2> >(tee /dev/fd/3)  # I think it works, though psq
 
 source ${DIR}/../db/lib/lookup_codes.sh
 
-export STATE_CODES='wa' ;
-export CRAN_CODES='wa';
-export TOWER_CODES='towers_seattle_wa' ;
-export SHP_FIBER_CODES='wa'
-
+if [ -z "$STATE_CODES" ]; then
+  export STATE_CODES='ak,al,ar,az,ca,co,ct,de,fl,ga,hi,ia,id,il,in,ks,ky,la,ma,md,me,mi,mn,mo,ms,mt,nc,nd,ne,nh,nj,nm,nv,ny,oh,ok,or,pa,ri,sc,sd,tn,tx,ut,va,vt,wa,wi,wv,wy'
+fi
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 
