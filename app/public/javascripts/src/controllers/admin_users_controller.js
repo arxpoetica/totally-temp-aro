@@ -53,6 +53,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
     }
     $http.post('/admin/users/register', $scope.new_user)
       .success((response) => {
+        $scope.new_user = {}
         swal({ title: 'User registered', type: 'success' })
         $('#new-user').modal('hide')
         $('#manage-users').modal('show')
