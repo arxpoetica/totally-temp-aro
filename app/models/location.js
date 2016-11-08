@@ -15,68 +15,59 @@ module.exports = class Location {
   * Returns the businesses and households locations except the selected ones
   */
   static findLocations (plan_id, filters, viewport) {
-    var businesses = filters.business_categories.map((value) => 'b_' + value)
-    var households = filters.household_categories.map((value) => 'h_' + value)
-    var towers = filters.towers
-    var categories = businesses.concat(households).concat(towers)
+    var businesses = filters.business_categories
+    var households = filters.household_categories
     var dataSources = (filters.dataSources || []).map((id) => +id || -1)
 
+    if (businesses.length === 0) businesses = ['']
+    if (households.length === 0) households = ['']
+    if (dataSources.length === 0) dataSources = [-1]
+
     var sql = `
-      WITH visible_locations AS (
-        SELECT locations.* FROM locations
-        INNER JOIN aro.states st ON ST_Intersects(locations.geom, st.geom)
-        ${database.intersects(viewport, 'locations.geom', 'WHERE')}
-      ),
-      unselected_locations AS (
-        SELECT visible_locations.* FROM visible_locations
-        LEFT JOIN client.plan_targets
-          ON plan_targets.plan_id = $1
-         AND plan_targets.location_id = visible_locations.id
-      ),
-      datasource_locations AS (
-        SELECT *, (
-          array(
-            SELECT DISTINCT data_source_id
-            FROM towers t
-            WHERE t.location_id = unselected_locations.id
-          )
-        ) AS data_source_ids
-        FROM unselected_locations
-      ),
-      categorized_locations AS (
-        SELECT *, (
-          array(
-            SELECT DISTINCT 'b_' || c.name
-            FROM businesses b
-            JOIN client.business_categories c ON b.number_of_employees >= c.min_value AND b.number_of_employees <= c.max_value
-            JOIN client.employees_by_location e ON (b.number_of_employees >= e.min_value) AND (b.number_of_employees <= e.max_value)
-            WHERE b.location_id = datasource_locations.id
-          )
-          ||
-          array(
-            SELECT DISTINCT 'h_' || c.name
-            FROM households b
-            JOIN client.household_categories c ON b.number_of_households >= c.min_value AND b.number_of_households <= c.max_value
-            WHERE b.location_id = datasource_locations.id
-          )
-          ||
-          array(
-            SELECT 'towers'::text FROM towers t
-            WHERE t.location_id = datasource_locations.id
-          )
-        ) AS entity_categories
-        FROM datasource_locations
-        WHERE
-          array_length(data_source_ids, 1) IS NULL -- no towers
-          OR ARRAY[$3]::integer[] && data_source_ids
+      WITH view_window as (
+          select ST_SetSRID(ST_MakePolygon(ST_GeomFromText('${viewport.linestring}')), 4326) as geog
+        ),
+        states AS (
+        SELECT st.stusps
+        FROM aro.states st
+            JOIN view_window vw
+                ON st_intersects(cast(vw.geog AS GEOMETRY), st.geom)
       ),
       features AS (
-        SELECT categorized_locations.id, categorized_locations.geom, total_businesses, total_households, entity_categories, data_source_ids AS data_source_id
-        FROM categorized_locations
-        WHERE ARRAY[$2]::text[] && entity_categories
+        SELECT l.id, l.geom,
+          array_remove(array_agg(DISTINCT 'b_' || b.category_name::text)
+            || array_agg(DISTINCT 'h_' || h.category_name::text)
+            || array_agg(distinct case when t.id is null then null else 'towers' end),
+          null) AS entity_categories
+        FROM aro.locations l
+          INNER JOIN states st
+              on st.stusps = l.state
+          inner join
+          view_window vw on
+            ST_Intersects(vw.geog, l.geog)
+        and l.state in (select stusps from states)
+
+        left join client.plan_targets pt
+          ON pt.location_id = l.id
+          AND pt.plan_id = $1
+
+        left join aro.towers t
+          on t.location_id = l.id
+          and t.data_source_id in ($2)
+
+        left join client.basic_classified_business b
+          on b.location_id = l.id
+          and b.category_name in ($3)
+
+        left join client.basic_classified_household h
+          on h.location_id = l.id
+          and h.category_name in ($4)
+
+        where (t.id is not null or b.id is not null or h.id is not null) and pt.location_id is null
+        GROUP BY 1,2
       )
     `
-    var params = [plan_id, categories, dataSources]
+    var params = [plan_id, dataSources, businesses, households]
     return database.points(sql, params, true, viewport)
   }
 
