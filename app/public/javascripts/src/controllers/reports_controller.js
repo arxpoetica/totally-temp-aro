@@ -94,6 +94,11 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           name: 'TABC Summary Formatted',
           type: '.xlsx',
           url: '/csv/TABC Summary Formatted.xlsx'
+        },
+        {
+          name: `Analysis Polygons ${plan.name}`,
+          type: '.kml',
+          url: `/reports/user_defined/${plan.id}/kml`
         }
       ])
       $scope.analysis = analysis

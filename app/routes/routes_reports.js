@@ -25,6 +25,43 @@ function listTABC (plan_id) {
 }
 
 exports.configure = (api, middleware) => {
+  api.get('/reports/user_defined/:plan_id/kml', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    return database.query(`
+        SELECT ST_ASKML(sa.geom) AS geom
+        FROM client.service_layer sl
+        JOIN user_data.data_source ds ON sl.data_source_id = ds.id AND ds.user_id=$2
+        JOIN client.service_area sa ON sa.service_layer_id = sl.id
+        JOIN client.selected_service_area ssa ON ssa.plan_id = $1
+      `, [plan_id, request.user.id])
+      .then((rows) => {
+        var kmlOutput = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
+        var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+        return Promise.resolve()
+          .then(() => (
+            database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
+          ))
+          .then((plan) => {
+            kmlOutput += `<name>${escape(plan.name)}</name>
+              <Style id="shapeColor">
+               <LineStyle>
+                 <color>ff0000ff</color>
+                 <width>4</width>
+               </LineStyle>
+              </Style>
+            `
+            rows.forEach((row) => {
+              kmlOutput += `<Placemark><styleUrl>#shapeColor</styleUrl>${row.geom}</Placemark>\n`
+            })
+            kmlOutput += '</Document></kml>'
+            return kmlOutput
+          })
+      })
+      .then((output) => response.send(output))
+      .catch(next)
+  })
+
   api.get('/reports/tabc/:plan_id/list', (request, response, next) => {
     var plan_id = request.params.plan_id
     return listTABC(plan_id)
@@ -78,9 +115,9 @@ exports.configure = (api, middleware) => {
       return database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
         .then((plan) => {
           return models.NetworkPlan.exportKml(plan_id, planQuery)
-            .then((kml_output) => {
+            .then((kmlOutput) => {
               response.attachment(`TABC ${request.params.type} ${plan.name}.kml`)
-              response.send(kml_output)
+              response.send(kmlOutput)
             })
         })
     })
