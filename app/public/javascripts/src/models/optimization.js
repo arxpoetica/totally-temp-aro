@@ -1,4 +1,4 @@
-/* global app swal config */
+/* global app swal config _ */
 app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 
@@ -18,6 +18,9 @@ app.service('optimization', ($rootScope, $http, $q) => {
     var canceler = $q.defer()
 
     changes.entityDataSources = optimization.datasources
+    if (changes.entityDataSources) {
+      changes.locationTypes = _.uniq(changes.locationTypes.concat(['celltower']))
+    }
 
     function run (hideProgressBar) {
       var url = '/network_plan/' + plan.id + '/edit'
