@@ -143,7 +143,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
     if (scope.optimizeTowers) locationTypes.push('celltower')
 
-    var processingLayers = [] // regions.getSelectedServiceAreas().map((layer) => layer.id)
+    var processingLayers = []
     var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
@@ -162,7 +162,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       budget: parseBudget(),
       irrThreshold: $scope.irrThreshold / 100,
       selectionMode: $scope.optimizationMode === 'boundaries' ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
-      // processingLayers: regions.getSelectedServiceAreas().map((layer) => layer.id)
+    }
+    if ($rootScope.selectedUserDefinedBoundary) {
+      processingLayers.push($rootScope.selectedUserDefinedBoundary.id)
     }
     if (processingLayers.length > 0) {
       changes.processingLayers = processingLayers
