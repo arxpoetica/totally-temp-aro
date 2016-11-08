@@ -62,8 +62,8 @@ deployment:
       - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa:
           environment:
             VZ_QA_MASTER: true
-            ARO_DATA_IMAGE_NAME: aro-data-vz
-            ARO_DATA_IMAGE_VERSION: "7"
+            ARO_DATA_PRIVATE_IMAGE_NAME: aro-data-vz
+            ARO_DATA_PRIVATE_IMAGE_VERSION: "3"
             ARO_CLIENT: verizon
 
 
