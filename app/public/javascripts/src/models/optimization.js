@@ -18,7 +18,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
     var canceler = $q.defer()
 
     changes.entityDataSources = optimization.datasources
-    if (changes.entityDataSources && changes.entityDataSources.length > 0) {
+    if (changes.entityDataSources.length > 0) {
       changes.locationTypes = _.uniq(changes.locationTypes.concat(['celltower']))
     }
 
