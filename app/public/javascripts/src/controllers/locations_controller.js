@@ -242,9 +242,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     }
 
     var selectedDatasources = uploadedCustomersSelect.select2('val')
-    optimization.datasources = selectedDatasources.map((id) => {
-      return $scope.datasources.find((data) => data.dataSourceId === +id)
-    })
+    var dataSources = $scope.show_towers ? [1] : []
+    if ($scope.showUploadedCustomers) {
+      dataSources = dataSources.concat(selectedDatasources)
+    }
+    optimization.datasources = dataSources.map((id) => +id)
 
     const subcategories = (key) => {
       var obj = $scope[`${key}_categories_selected`]
@@ -263,10 +265,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       }
 
       var towers = ($scope.show_towers || ($scope.showUploadedCustomers && selectedDatasources.length > 0)) ? ['towers'] : []
-      var dataSources = $scope.show_towers ? [1] : []
-      if ($scope.showUploadedCustomers) {
-        dataSources = dataSources.concat(selectedDatasources)
-      }
       if (businessCategories.length === 0 && householdCategories.length === 0 && towers.length === 0 && dataSources.length === 0) {
         locationsLayer.hide()
       } else {
