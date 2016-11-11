@@ -201,9 +201,9 @@ exports.configure = (api, middleware) => {
 
   api.post('/backhaul/:plan_id/links', check_owner_permission, (request, response, next) => {
     var plan_id = +request.params.plan_id
-    var ids = request.body.ids
-    console.log('ids', ids)
-    models.Network.saveBackhaulLinks(plan_id, ids)
+    var fromIds = request.body.from_ids
+    var toIds = request.body.to_ids
+    models.Network.saveBackhaulLinks(plan_id, fromIds, toIds)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
