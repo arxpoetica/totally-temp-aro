@@ -53,6 +53,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
     }
     $http.post('/admin/users/register', $scope.new_user)
       .success((response) => {
+        $scope.new_user = {}
         swal({ title: 'User registered', type: 'success' })
         $('#new-user').modal('hide')
         $('#manage-users').modal('show')
@@ -86,6 +87,22 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
       closeOnConfirm: true
     }, () => {
       $http.post('/admin/users/delete', { user: user.id }).success((response) => {
+        loadUsers()
+      })
+    })
+  }
+
+  $scope.makeAdmin = (user) => {
+    swal({
+      title: 'Are you sure?',
+      text: 'This user will have admin access after this action',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, () => {
+      $http.post('/admin/users/make_admin', { user: user.id }).success((response) => {
         loadUsers()
       })
     })

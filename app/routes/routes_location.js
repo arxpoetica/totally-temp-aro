@@ -1,4 +1,9 @@
+var helpers = require('../helpers')
+var config = helpers.config
 var models = require('../models')
+var multer = require('multer')
+var os = require('os')
+var upload = multer({ dest: os.tmpDir() })
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
@@ -10,7 +15,7 @@ exports.configure = (api, middleware) => {
     var plan_id = +request.params.plan_id
 
     var filters = {}
-    var keys = ['business_categories', 'household_categories', 'towers']
+    var keys = ['business_categories', 'household_categories', 'towers', 'dataSources']
     keys.forEach((key) => {
       var value = request.query[key] || []
       if (!Array.isArray(value)) {
@@ -121,6 +126,43 @@ exports.configure = (api, middleware) => {
   api.post('/locations/:plan_id/targets/delete_all', check_owner_permission, (request, response, next) => {
     var planId = +request.params.plan_id
     models.Location.deleteAllTargets(planId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  function editUserDefinedCustomers (request, response, next) {
+    var name = request.body.name
+    var id = request.params.id || null
+    var user = request.user
+    var fullpath = request.file && request.file.path
+    models.Location.editUserDefinedCustomers(user, id, name, fullpath)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  }
+
+  // Create a user-defined customers
+  api.post('/locations/user_defined', upload.single('file'), editUserDefinedCustomers)
+
+  // Edit a user-defined customers
+  api.post('/locations/user_defined/:id', upload.single('file'), editUserDefinedCustomers)
+
+  api.get('/datasources', (request, response, next) => {
+    var userId = request.user.id
+    var req = {
+      method: 'GET',
+      url: config.aro_service_url + `/rest/user-entites/user/${userId}`,
+      json: true
+    }
+    return models.AROService.request(req)
+      .then((output) => console.log('', output) || response.send(output))
+      .catch(next)
+  })
+
+  api.get('/towers/:dataSourceId', middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var dataSourceId = request.params.dataSourceId
+
+    models.Location.towersByDataSource(dataSourceId, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

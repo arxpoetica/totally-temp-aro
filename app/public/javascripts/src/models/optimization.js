@@ -1,4 +1,4 @@
-/* global app swal config */
+/* global app swal config _ */
 app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 
@@ -17,12 +17,17 @@ app.service('optimization', ($rootScope, $http, $q) => {
   optimization.optimize = (plan, changes, success, error) => {
     var canceler = $q.defer()
 
-    function run () {
+    changes.entityDataSources = optimization.datasources
+    if (changes.entityDataSources.length > 0) {
+      changes.locationTypes = _.uniq(changes.locationTypes.concat(['celltower']))
+    }
+
+    function run (hideProgressBar) {
       var url = '/network_plan/' + plan.id + '/edit'
       var options = {
         url: url,
         method: 'post',
-        saving_plan: !changes.lazy,
+        saving_plan: !hideProgressBar && !changes.lazy,
         data: changes,
         timeout: canceler.promise
       }
@@ -39,10 +44,10 @@ app.service('optimization', ($rootScope, $http, $q) => {
 
     function checkNumberOfAreas () {
       if (changes.algorithm === 'TABC' && changes.geographies.length >= 15) {
-        var timing = 30 * changes.geographies.length
+        var timing = changes.geographies.length
         swal({
           title: '',
-          text: `You are running a TABC analysis covering ${changes.geographies.length} service areas. While optimization is running, you will be sent back to the homescreen. Expected timing is ${timing}.`,
+          text: `You are running a TABC analysis covering ${changes.geographies.length} service areas. While optimization is running, you will be sent back to the homescreen. Expected timing of optimization is ${timing} minutes.`,
           type: 'info',
           confirmButtonColor: '#b9b9b9',
           confirmButtonText: 'Run Optimization',
@@ -53,8 +58,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
           closeOnConfirm: true
         }, (confirmed) => {
           if (confirmed) {
-            changes.lazy = true
-            run()
+            run(true)
             $rootScope.$broadcast('go-home')
             plan = null
           }

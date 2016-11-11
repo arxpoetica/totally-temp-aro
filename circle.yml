@@ -2,6 +2,7 @@ general:
   branches:
     only:
       - master
+      - vz-qa-deployment
 
 machine:
   services:
@@ -58,6 +59,12 @@ deployment:
       - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
       - chmod 400 opsworks_ssh_key
       - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
+      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa:
+          environment:
+            VZ_QA_MASTER: true
+            ARO_PRIVATE_DATA_IMAGE_NAME: aro-data-vz
+            ARO_PRIVATE_DATA_IMAGE_VERSION: "6"
+            ARO_CLIENT: verizon
       - rm -f opsworks_ssh_key
   # staging:
   #   branch: [dockerize]

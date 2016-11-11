@@ -58,48 +58,51 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
   $rootScope.$on('open-report', (e, plan, modal) => {
     latestModal = modal
     $scope.plan = plan
-    $scope.analysis = [
-      {
-        name: `TABC Summary Stats ${plan.name}`,
-        type: '.csv',
-        url: `/reports/tabc/${plan.id}/tabc`
-      },
-      {
-        name: `T Route ${plan.name}`,
-        type: '.kml',
-        url: `/reports/tabc/${plan.id}/kml/T`
-      },
-      {
-        name: `A Route ${plan.name}`,
-        type: '.kml',
-        url: `/reports/tabc/${plan.id}/kml/A`
-      },
-      {
-        name: `B Route ${plan.name}`,
-        type: '.kml',
-        url: `/reports/tabc/${plan.id}/kml/B`
-      },
-      {
-        name: `C Route ${plan.name}`,
-        type: '.kml',
-        url: `/reports/tabc/${plan.id}/kml/C`
-      },
-      {
-        name: `All TABC Endpoints ${plan.name}`,
-        type: '.csv',
-        url: `/reports/tabc/${plan.id}/master_output_producer`
-      },
-      {
-        name: `Dropped Tower Details ${plan.name}`,
-        type: '.csv',
-        url: `/reports/tabc/${plan.id}/tower_details`
-      },
-      {
-        name: 'TABC Summary Formatted',
-        type: '.xlsx',
-        url: '/csv/TABC Summary Formatted.xlsx'
-      }
-    ]
+    $scope.analysis = []
+    $http.get(`/reports/tabc/${plan.id}/list`).success((response) => {
+      if ($scope.plan.id !== plan.id) return
+      var names = ['T', 'A', 'B', 'C']
+      var analysis = [
+        {
+          name: `TABC Summary Stats ${plan.name}`,
+          type: '.csv',
+          url: `/reports/tabc/${plan.id}/summary_query`
+        }
+      ]
+      var kml = names
+        .filter((name) => response.indexOf(name) >= 0)
+        .map((name) => {
+          return {
+            name: `${name} Route ${plan.name}`,
+            type: '.kml',
+            url: `/reports/tabc/${plan.id}/kml/${name}`
+          }
+        })
+      analysis = analysis.concat(kml)
+      analysis = analysis.concat([
+        {
+          name: `All TABC Endpoints ${plan.name}`,
+          type: '.csv',
+          url: `/reports/tabc/${plan.id}/master_output_producer`
+        },
+        {
+          name: `Dropped Tower Details ${plan.name}`,
+          type: '.csv',
+          url: `/reports/tabc/${plan.id}/tower_details`
+        },
+        {
+          name: 'TABC Summary Formatted',
+          type: '.xlsx',
+          url: '/csv/TABC Summary Formatted.xlsx'
+        },
+        {
+          name: `Analysis Polygons ${plan.name}`,
+          type: '.kml',
+          url: `/reports/user_defined/${plan.id}/kml`
+        }
+      ])
+      $scope.analysis = analysis
+    })
     $scope.openReport(null, false)
   })
 }])

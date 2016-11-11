@@ -18,7 +18,8 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
   })
 
   $scope.save = () => {
-    if ($('#upload_customers_modal input[type=file]').get(0).files.length > 0) {
+    var files = $('#upload_customers_modal input[type=file]').get(0).files
+    if ($scope.editingDataset.id && files.length > 0) {
       return swal({
         title: 'Are you sure?',
         text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
@@ -33,10 +34,8 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
   }
 
   function submit () {
-    return $('#upload_customers_modal').modal('hide')
-    /*
     var id = $scope.editingDataset.id
-    var url = id ? `/boundary/user_defined/${id}` : '/boundary/user_defined'
+    var url = id ? `/locations/user_defined/${id}` : '/locations/user_defined'
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
     xhr.open('POST', url, true)
@@ -60,6 +59,5 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
       $('#upload_customers_modal').modal('hide')
     })
     xhr.send(formData)
-    */
   }
 }])

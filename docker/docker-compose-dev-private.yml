@@ -29,6 +29,7 @@ services:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db
             - ../../aro-data:/srv/www/aro/data
+            - ../../aro-data-vz:/srv/www/aro/data/private
         ports:
             - "8000:8000"
         links:

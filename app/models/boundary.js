@@ -107,7 +107,7 @@ module.exports = class Boundary {
         if (!file) return { id: id }
         var req = {
           method: 'POST',
-          url: config.aro_service_url + `/rest/serviceLayers/${id}/entities.csv`,
+          url: config.aro_service_url + `/rest/serviceLayers/${id}/producer/entities.csv`,
           formData: {
             file: fs.createReadStream(file)
           }

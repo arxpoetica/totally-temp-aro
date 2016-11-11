@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization) => {
   $scope.ARO_CLIENT = config.ARO_CLIENT
   $scope.map_tools = map_tools
   $scope.selected_tool = null
@@ -52,6 +52,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.industries = []
   $scope.business_categories_selected = {}
   $scope.household_categories_selected = {}
+
+  var uploadedCustomersSelect = $('#uploadedCustomersSelect')
 
   var locationStyles = {
     normal: {
@@ -239,6 +241,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       $scope.household_categories_selected['medium'] = true
     }
 
+    var selectedDatasources = uploadedCustomersSelect.select2('val')
+    var dataSources = $scope.show_towers ? [1] : []
+    if ($scope.showUploadedCustomers) {
+      dataSources = dataSources.concat(selectedDatasources)
+    }
+    optimization.datasources = dataSources.map((id) => +id)
+
     const subcategories = (key) => {
       var obj = $scope[`${key}_categories_selected`]
       var categories = Object.keys(obj).filter((key) => obj[key])
@@ -255,14 +264,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         householdCategories = []
       }
 
-      var towers = $scope.show_towers ? ['towers'] : []
-      if (businessCategories.length === 0 && householdCategories.length === 0 && towers.length === 0) {
+      var towers = ($scope.show_towers || ($scope.showUploadedCustomers && selectedDatasources.length > 0)) ? ['towers'] : []
+      if (businessCategories.length === 0 && householdCategories.length === 0 && towers.length === 0 && dataSources.length === 0) {
         locationsLayer.hide()
       } else {
         var options = {
           business_categories: businessCategories,
           household_categories: householdCategories,
-          towers: towers
+          towers: towers,
+          dataSources: dataSources
         }
         locationsLayer.setApiEndpoint('/locations/:plan_id', options)
         locationsLayer.show()
@@ -351,9 +361,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       })
   })
 
+  $scope.datasources = []
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     if (!$scope.heatmapOn) $scope.toggleHeatmap()
+    $scope.datasources = []
+    optimization.datasources = []
 
     // unselect all entity types
     $scope.show_towers = false
@@ -370,6 +383,33 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
         selectLocations(plan.location_types)
       })
     }
+
+    uploadedCustomersSelect.select2('val', [])
+    $scope.changeLocationsLayer()
+    reloadDatasources()
+  })
+
+  function reloadDatasources (callback) {
+    $http.get('/datasources').success((response) => {
+      $scope.datasources = response
+      uploadedCustomersSelect.select2({
+        placeholder: 'Select one or more datasets',
+        escapeMarkup: (m) => m,
+        data: response.map((item) => ({ id: item.dataSourceId, text: item.name })),
+        multiple: true
+      })
+      callback && callback(response)
+    })
+  }
+
+  $rootScope.$on('uploaded_customers', (e, info) => {
+    reloadDatasources((response) => {
+      var dataset = response.find((item) => item.id === info.id)
+      if (!dataset) return
+      var val = uploadedCustomersSelect.select2('val')
+      val.push(String(dataset.dataSourceId))
+      uploadedCustomersSelect.select2('val', val, true)
+    })
   })
 
   $rootScope.$on('select_locations', (e, locationTypes) => {
