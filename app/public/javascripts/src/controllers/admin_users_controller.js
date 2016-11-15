@@ -25,6 +25,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
             })
             e.clearSelection()
           })
+          $('#manage-users [data-toggle="tooltip"]').tooltip()
         }, 1)
       })
   }
