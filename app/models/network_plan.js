@@ -631,9 +631,11 @@ module.exports = class NetworkPlan {
         return database.query(sql, [plan_id])
       })
       .then((targets) => {
+        kml_output += `<Folder><name>${escape('Targets')}</name>`
         targets.forEach((target) => {
           kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`
         })
+        kml_output += '</Folder>'
 
         var sql = `
           SELECT ST_AsKML(nn.geom) AS geom, t.description
@@ -653,19 +655,6 @@ module.exports = class NetworkPlan {
             kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${node.geom}</Placemark>\n`
           })
           kml_output += '</Folder>'
-        })
-
-        var sql = `
-          SELECT ST_AsKML(nn.geom) AS geom
-          FROM client.network_nodes nn
-          JOIN client.plan p ON nn.plan_id = p.id
-          WHERE ${planQuery}
-        `
-        return database.query(sql, [plan_id])
-      })
-      .then((nodes) => {
-        nodes.forEach((source) => {
-          kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${source.geom}</Placemark>\n`
         })
 
         kml_output += '</Document></kml>'
