@@ -18,11 +18,14 @@
             <div class="col-sm-8">
               <input name="file" type="file" name="dataset" class="form-control">
               <br>
-              <div>
-                Upload a set of customers to include in your analysis - currently only cell sites are supported. The data must include the following categories: entity_category_id, lat, longitude. See the example file for reference. Entity_category_id must be a value of 5 to specify cell site. You may also include other columns which will be stored in a hstore field such as "type" for the cell site type.
-                <br><br>
-                <a class="btn btn-primary btn-sm" href="/csv/example_upload_customers.csv" download="example_upload_customers.csv">Download example file</a>
-              </div>
+              <p class="help-block">Upload a set of customers to include in your analysis - currently only cell sites are supported. The data must include the following categories:</p>
+              <ul class="help-block" style="padding: 0 10px">
+                <li><strong>entity_category_id</strong>: all values should be '5'</li>
+                <li><strong>lat</strong>: latitude of the tower</li>
+                <li><strong>longitude</strong>: longitude of the tower</li>
+              </ul>
+              <p class="help-block">You may also include other columns which will be stored in a hstore field such as "type" for the cell site type.</p>
+              <a class="btn btn-primary btn-sm" href="/csv/example_upload_customers.csv" download="example_upload_customers.csv">Download example file</a>
             </div>
           </div>
         </form>
