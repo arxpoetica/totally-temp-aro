@@ -359,6 +359,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   function showArpuChart (force) {
+    if (!$scope.arpuFilter) return
     var datasets = [
       { key: 'bau', name: 'BAU' },
       { key: 'plan', name: 'Plan' }
@@ -462,6 +463,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.showSubscribersChart = showSubscribersChart
 
   function showPenetrationChart (force) {
+    if (!$scope.penetrationFilter.entityType) return
     var datasets = [
       { key: 'bau', name: 'BAU' },
       { key: 'plan', name: 'Plan' }
@@ -499,6 +501,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.showOpexRecurringChart = showOpexRecurringChart
 
   function showOpexCostChart (force) {
+    if (!$scope.opexCostFilter) return
     var datasets = [
       { key: 'bau', name: 'BAU' },
       { key: 'plan', name: 'Plan' }
