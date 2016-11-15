@@ -26,6 +26,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
   var entityTypesMapping = {
     household: 'household',
+    small: 'smallBusiness',
     medium: 'mediumBusiness',
     large: 'largeBusiness',
     celltower: 'cellTower'
