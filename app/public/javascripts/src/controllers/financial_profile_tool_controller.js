@@ -24,6 +24,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     household: 'Households',
     cellTower: 'Cell Sites'
   }
+  var entityTypesMapping = {
+    household: 'household',
+    medium: 'mediumBusiness',
+    large: 'largeBusiness',
+    celltower: 'cellTower'
+  }
   $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
     key: key,
     name: $scope.entityTypes[key]
@@ -158,6 +164,26 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.plan = plan
     $scope.mode = 'global'
     $scope.metadata = plan.metadata
+
+    $scope.premisesFilterEntityTypes = {}
+    $scope.subscribersFilterEntityTypes = {}
+    $scope.connectCapexFilterEntityTypes = {}
+    $scope.opexRecurringFilterEntityTypes = {}
+    $scope.penetrationFilter = {}
+    $scope.capexFilterEntityTypes = {}
+
+    plan.location_types.forEach((type) => {
+      type = entityTypesMapping[type]
+      if (!type) return
+      $scope.premisesFilterEntityTypes[type] = true
+      $scope.subscribersFilterEntityTypes[type] = true
+      $scope.connectCapexFilterEntityTypes[type] = true
+      $scope.opexRecurringFilterEntityTypes[type] = true
+      $scope.penetrationFilter = { entityType: type }
+      $scope.capexFilterEntityTypes[type] = true
+      $scope.arpuFilter = type
+      $scope.opexCostFilter = type
+    })
   })
 
   $rootScope.$on('plan_changed_metadata', (e, plan) => {
