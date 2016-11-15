@@ -14,10 +14,11 @@ module.exports = class AROService {
       console.log('req', JSON.stringify(req, null, 2))
       var r = request(req, (err, res, body) => {
         if (err) return reject(err)
-        console.log('ARO-service responded with', res.statusCode) // JSON.stringify(body, null, 2)
         if (res.statusCode && res.statusCode >= 400) {
+          console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
           return reject(new Error(`ARO-service returned status code ${res.statusCode}`))
         }
+        console.log('ARO-service responded with', res.statusCode)
         return resolve(body)
       })
       if (formData) {

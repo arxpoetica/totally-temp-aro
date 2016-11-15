@@ -32,7 +32,7 @@ exports.configure = (api, middleware) => {
         FROM client.service_layer sl
         JOIN user_data.data_source ds ON sl.data_source_id = ds.id AND ds.user_id=$2
         JOIN client.service_area sa ON sa.service_layer_id = sl.id
-        JOIN client.selected_service_area ssa ON ssa.plan_id = $1
+        JOIN client.selected_service_area ssa ON ssa.service_area_id = sa.id AND ssa.plan_id = $1
       `, [plan_id, request.user.id])
       .then((rows) => {
         var kmlOutput = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
