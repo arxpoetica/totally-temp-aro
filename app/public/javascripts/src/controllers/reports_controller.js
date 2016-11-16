@@ -66,7 +66,8 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
         {
           name: `TABC Summary Stats ${plan.name}`,
           type: '.csv',
-          url: `/reports/tabc/${plan.id}/summary_query`
+          url: `/reports/tabc/${plan.id}/summary_query`,
+          ajax: true
         }
       ]
       var kml = names
@@ -75,7 +76,8 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           return {
             name: `${name} Route ${plan.name}`,
             type: '.kml',
-            url: `/reports/tabc/${plan.id}/kml/${name}`
+            url: `/reports/tabc/${plan.id}/kml/${name}`,
+            ajax: true
           }
         })
       analysis = analysis.concat(kml)
@@ -83,12 +85,14 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
         {
           name: `All TABC Endpoints ${plan.name}`,
           type: '.csv',
-          url: `/reports/tabc/${plan.id}/master_output_producer`
+          url: `/reports/tabc/${plan.id}/master_output_producer`,
+          ajax: true
         },
         {
           name: `Dropped Tower Details ${plan.name}`,
           type: '.csv',
-          url: `/reports/tabc/${plan.id}/tower_details`
+          url: `/reports/tabc/${plan.id}/tower_details`,
+          ajax: true
         },
         {
           name: 'TABC Summary Formatted',
@@ -98,11 +102,29 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
         {
           name: `Analysis Polygons ${plan.name}`,
           type: '.kml',
-          url: `/reports/user_defined/${plan.id}/kml`
+          url: `/reports/user_defined/${plan.id}/kml`,
+          ajax: true
         }
       ])
       $scope.analysis = analysis
     })
     $scope.openReport(null, false)
   })
+
+  $scope.download = (report) => {
+    var filename = report.name + report.type
+    report.downloading = true
+    $http.get(report.url).success((response) => {
+      report.downloading = false
+
+      console.log('download', filename, response)
+      var a = document.createElement('a')
+      a.setAttribute('href', response)
+      a.setAttribute('download', filename)
+      a.style.display = 'none'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    })
+  }
 }])
