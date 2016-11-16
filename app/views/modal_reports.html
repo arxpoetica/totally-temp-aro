@@ -81,11 +81,8 @@
               <td>{{ file.type }}</td>
               <td>{{ plan.updated_at | date:'shortDate' }}</td>
               <td>
-                <a ng-if="!file.ajax" href="{{ file.url }}" class="btn btn-primary btn-xs" download="{{ file.name }}{{ file.type }}">
+                <a ng-show="file.url" href="{{ file.url }}" class="btn btn-primary btn-xs" download="{{ file.name }}{{ file.type }}">
                   <span class="fa fa-download"></span> Download
-                </a>
-                <a ng-if="file.ajax" class="btn btn-primary btn-xs" ng-click="download(file)">
-                  <span class="fa {{ file.downloading ? 'fa-circle-o-notch fa-spin' : 'fa-download' }}"></span> Download
                 </a>
               </td>
             </tr>

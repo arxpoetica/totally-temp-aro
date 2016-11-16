@@ -3,10 +3,6 @@ var models = require('../models')
 var config = helpers.config
 var database = helpers.database
 
-function toDataURL (data) {
-  return `data:application/octet-stream;base64,${new Buffer(data).toString('base64')}`
-}
-
 function listTABC (plan_id) {
   var names = ['T', 'A', 'B', 'C']
   return database.query(`
@@ -61,14 +57,14 @@ exports.configure = (api, middleware) => {
             return kmlOutput
           })
       })
-      .then((output) => response.send(toDataURL(output)))
+      .then((output) => response.send(output))
       .catch(next)
   })
 
   api.get('/reports/tabc/:plan_id/list', (request, response, next) => {
     var plan_id = request.params.plan_id
     return listTABC(plan_id)
-      .then((output) => response.json(output))
+      .then((output) => response.send(output))
       .catch(next)
   })
 
@@ -80,7 +76,7 @@ exports.configure = (api, middleware) => {
       url: config.aro_service_url + `/rest/report-extended/${name}/${plan_id}.csv`
     }
     return models.AROService.request(req)
-      .then((output) => response.send(toDataURL(output)))
+      .then((output) => response.send(output))
       .catch(next)
   })
 
@@ -120,7 +116,7 @@ exports.configure = (api, middleware) => {
           return models.NetworkPlan.exportKml(plan_id, planQuery)
             .then((kmlOutput) => {
               response.attachment(`TABC ${request.params.type} ${plan.name}.kml`)
-              response.send(toDataURL(kmlOutput))
+              response.send(kmlOutput)
             })
         })
     })
