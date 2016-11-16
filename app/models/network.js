@@ -626,7 +626,6 @@ module.exports = class Network {
   static backhaulLinks (plan_id) {
     return database.query(`
       SELECT
-        plan_links.id AS id,
         plan_links.from_link_id,
         plan_links.to_link_id,
         ST_AsGeoJSON(nn1.geom)::json AS from_geom,

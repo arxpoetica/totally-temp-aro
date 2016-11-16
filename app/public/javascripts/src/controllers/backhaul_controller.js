@@ -79,6 +79,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (layer.type !== 'network_nodes') return
     if (!map_tools.is_visible('backhaul')) return
+    if (!event.feature.getProperty('id')) return
     if (!previousFeature) {
       previousFeature = event.feature
       return
