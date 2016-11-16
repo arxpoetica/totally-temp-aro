@@ -15,19 +15,20 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
     $http.get('/admin/users')
       .success((response) => {
         $scope.users = response
-        $timeout(() => {
-          var clipboard = new Clipboard('#manage-users [data-clipboard-text]') // eslint-disable-line
-          clipboard.on('success', (e) => {
-            var el = $(e.trigger)
-            el.tooltip('show')
-            el.one('hidden.bs.tooltip', () => {
-              el.tooltip('destroy')
-            })
-            e.clearSelection()
-          })
-          $('#manage-users [data-toggle="tooltip"]').tooltip()
-        }, 1)
       })
+  }
+
+  $scope.copyLink = (user) => {
+    var input = $(`#resend-link-input-${user.id}`)
+    input.select()
+    var success = document.execCommand('copy')
+    if (success) {
+      var el = $(`#resend-link-button-${user.id}`)
+      el.tooltip('show')
+      el.one('hidden.bs.tooltip', () => {
+        el.tooltip('destroy')
+      })
+    }
   }
 
   $scope.sortBy = (key, descending) => {
