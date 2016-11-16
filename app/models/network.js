@@ -623,4 +623,32 @@ module.exports = class Network {
     `, [], true, viewport)
   }
 
+  static backhaulLinks (plan_id) {
+    return database.query(`
+      SELECT
+        plan_links.from_link_id,
+        plan_links.to_link_id,
+        ST_AsGeoJSON(nn1.geom)::json AS from_geom,
+        ST_AsGeoJSON(nn2.geom)::json AS to_geom
+      FROM client.plan_links
+      JOIN client.network_nodes nn1 ON nn1.id = plan_links.from_link_id
+      JOIN client.network_nodes nn2 ON nn2.id = plan_links.to_link_id
+      WHERE plan_links.plan_id = $1
+    `, [plan_id])
+  }
+
+  static saveBackhaulLinks (plan_id, fromIds, toIds) {
+    if (fromIds.length !== toIds.length) {
+      return Promise.reject(new Error('fromIds and toIds should have the same length'))
+    }
+    return database.execute('DELETE FROM client.plan_links WHERE client.plan_links.plan_id = $1', [plan_id])
+      .then(() => {
+        var i = 0
+        return pync.series(fromIds, (id) => {
+          var params = [id, toIds[i++], plan_id]
+          return database.execute('INSERT INTO client.plan_links (from_link_id, to_link_id, plan_id) VALUES ($1, $2, $3)', params)
+        })
+      })
+  }
+
 }
