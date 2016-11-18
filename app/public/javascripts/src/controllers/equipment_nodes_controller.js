@@ -349,9 +349,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         if (!serviceLayer.showDistributionFiber) {
           styles.visible = false
         }
-      } else if (type === 'distribution') {
+      } else if (type === 'backhaul') {
         styles.strokeColor = 'black'
-        styles.strokeWeight = 2
+        styles.strokeWeight = 4
         if (!serviceLayer.showBackhaulFiber) {
           styles.visible = false
         }
