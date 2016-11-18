@@ -1,10 +1,28 @@
-/* global app google map $ */
-app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
+/* global app google map $ swal */
+app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', ($scope, $rootScope, $http, map_tools, MapLayer) => {
   $scope.plan = null
+  $scope.addingLinks = false
+  $scope.isEquipmentVisible = false
+
+  var lineSymbol = {
+    path: 'M 0,-1 0,1',
+    strokeOpacity: 1,
+    strokeColor: '#FF0000',
+    scale: 4
+  }
+
+  function cleanEquipment () {
+    $scope.selectedEquipment.forEach((equipment) => {
+      equipment.line.setMap(null)
+      equipment.marker.setMap(null)
+    })
+    $scope.selectedEquipment = []
+  }
+
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
-    $scope.selectedEquipment = []
-    previousFeature = null
+    cleanEquipment()
+    cleanMarkers()
     recalculateLines()
     if (!plan) return
     $http.get(`/backhaul/${plan.id}/links`).success((response) => {
@@ -19,14 +37,18 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
           id: item.id,
           line: new google.maps.Polyline({
             path: [pointFrom, pointTo],
-            strokeColor: '#FF0000',
-            strokeOpacity: 1.0,
-            strokeWeight: 2
+            icons: [{
+              icon: lineSymbol,
+              offset: '0',
+              repeat: '20px'
+            }],
+            strokeOpacity: 0
           }),
           points: [pointFrom, pointTo],
           marker: new google.maps.Marker({ map: m, position: center(pointFrom, pointTo) }),
           from_link_id: item.from_link_id,
-          to_link_id: item.to_link_id
+          to_link_id: item.to_link_id,
+          planId: item.plan_id
         })
       })
       recalculateLines()
@@ -37,8 +59,8 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     $scope.selectedEquipment.forEach((equipment, i) => {
       equipment.name = `link ${i + 1}`
       equipment.marker.setIcon({
-        anchor: new google.maps.Point(10, 40),
-        url: `https://chart.googleapis.com/chart?chst=d_bubble_text_small_withshadow&chld=bb|${encodeURIComponent(String(i + 1))}|FF8|000`
+        anchor: new google.maps.Point(10, 45),
+        url: `https://chart.googleapis.com/chart?chst=d_bubble_text_small_withshadow&chld=bb|${encodeURIComponent(String(i + 1))}|FFF|000`
       })
     })
   }
@@ -56,9 +78,15 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       eq.marker.setMap(null)
     }
     recalculateLines()
+    saveChanges()
   }
 
-  $scope.createLinks = () => {
+  $scope.toggle = () => {
+    $scope.addingLinks = !$scope.addingLinks
+    if (!$scope.addingLinks) cleanMarkers()
+  }
+
+  function saveChanges () {
     var data = {
       from_ids: $scope.selectedEquipment.map((equipment) => equipment.from_link_id),
       to_ids: $scope.selectedEquipment.map((equipment) => equipment.to_link_id)
@@ -76,37 +104,105 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
   }
 
   var previousFeature = null
+  var previousMarker = null
+  var currentMarker = null
+  var timeout
+  function cleanMarkers () {
+    previousMarker && previousMarker.setMap(null)
+    currentMarker && currentMarker.setMap(null)
+    previousMarker = null
+    currentMarker = null
+    previousFeature = null
+    clearTimeout(timeout)
+  }
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (layer.type !== 'network_nodes') return
+    if (!$scope.addingLinks) return
     if (!map_tools.is_visible('backhaul')) return
     if (!event.feature.getProperty('id')) return
     if (!previousFeature) {
+      cleanMarkers()
       previousFeature = event.feature
+      previousMarker = new google.maps.Marker({
+        position: previousFeature.getGeometry().get(),
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          strokeColor: '#FF0000',
+          fillColor: '#FF0000',
+          scale: 10
+        },
+        draggable: true,
+        map: map
+      })
       return
     }
     var feature = event.feature
     var pointFrom = previousFeature.getGeometry().get()
     var pointTo = feature.getGeometry().get()
-    $scope.selectedEquipment.push({
-      name: '',
-      line: new google.maps.Polyline({
-        path: [pointFrom, pointTo],
-        strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
-        strokeWeight: 2,
+    var planId = feature.getProperty('plan_id')
+    if (pointFrom === pointTo) return
+    if (planId !== event.feature.getProperty('plan_id')) return
+    var createLink = () => {
+      $scope.selectedEquipment.push({
+        name: '',
+        line: new google.maps.Polyline({
+          path: [pointFrom, pointTo],
+          icons: [{
+            icon: lineSymbol,
+            offset: '0',
+            repeat: '20px'
+          }],
+          strokeOpacity: 0,
+          map: map,
+          planId: planId
+        }),
+        points: [pointFrom, pointTo],
+        marker: new google.maps.Marker({ map: map, position: center(pointFrom, pointTo) }),
+        from_link_id: previousFeature.getProperty('id'),
+        to_link_id: feature.getProperty('id')
+      })
+      currentMarker = new google.maps.Marker({
+        position: feature.getGeometry().get(),
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          strokeColor: '#FF0000',
+          fillColor: '#FF0000',
+          scale: 10
+        },
+        draggable: true,
         map: map
-      }),
-      points: [pointFrom, pointTo],
-      marker: new google.maps.Marker({ map: map, position: center(pointFrom, pointTo) }),
-      from_link_id: previousFeature.getProperty('id'),
-      to_link_id: feature.getProperty('id')
-    })
-    recalculateLines()
-    previousFeature = null
-    if (!$rootScope.$$phase) { $rootScope.$apply() }
+      })
+      timeout = setTimeout(cleanMarkers, 1000)
+      recalculateLines()
+      saveChanges()
+      previousFeature = null
+      if (!$rootScope.$$phase) { $rootScope.$apply() }
+    }
+    console.log('', $scope.selectedEquipment[0].planId, planId)
+    if ($scope.selectedEquipment.length > 0 && $scope.selectedEquipment[0].planId !== planId) {
+      swal({
+        title: 'Warning',
+        text: 'You are attempting a link with equipment from a different service layer than the other links. Backhaul can only be run across one service layer. If you proceed, it will remove all previous links.',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Proceed',
+        showCancelButton: true,
+        closeOnConfirm: true
+      }, (confirm) => {
+        if (!confirm) return
+        cleanEquipment()
+        createLink()
+      })
+    } else {
+      createLink()
+    }
   })
 
-  $rootScope.$on('map_tool_changed_visibility', () => {
+  $rootScope.$on('map_tool_changed_visibility', (e, name) => {
+    if (name === 'backhaul' && map_tools.is_visible('backhaul')) {
+      $scope.isEquipmentVisible = MapLayer.isEquipmentVisible()
+      if (!$rootScope.$$phase) { $rootScope.$apply() }
+    }
     var m = map_tools.is_visible('backhaul') ? map : null
     $scope.selectedEquipment.forEach((equipment) => {
       equipment.line.setMap(m)

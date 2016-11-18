@@ -89,6 +89,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   function configureServiceLayer (layer) {
     layer.showFeederFiber = true
     layer.showDistributionFiber = true
+    layer.showBackhaulFiber = true
     layer.enabled = true
 
     var routeLayer = new MapLayer({
@@ -108,7 +109,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     layer.routeLayer = routeLayer
 
     layer.changedFiberVisibility = () => {
-      routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber))
+      routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber || layer.showBackhaulFiber))
       routeLayer.setDeclarativeStyle(routeStyles(layer))
     }
 
@@ -319,10 +320,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
-      } else {
+      } else if (type === 'distribution') {
         styles.strokeColor = 'red'
         styles.strokeWeight = 2
         if (!serviceLayer.showDistributionFiber) {
+          styles.visible = false
+        }
+      } else if (type === 'distribution') {
+        styles.strokeColor = 'black'
+        styles.strokeWeight = 2
+        if (!serviceLayer.showBackhaulFiber) {
           styles.visible = false
         }
       }

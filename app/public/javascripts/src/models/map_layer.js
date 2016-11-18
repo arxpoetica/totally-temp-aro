@@ -11,6 +11,12 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
 
   return class MapLayer {
 
+    static isEquipmentVisible () {
+      return all.some((layer) => {
+        return layer.type === 'network_nodes' && layer.visible && layer.http_params
+      })
+    }
+
     static hideAllLayers () {
       var status = {}
       all.forEach((layer) => {
