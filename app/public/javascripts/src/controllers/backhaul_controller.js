@@ -78,6 +78,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
 
   $scope.toggle = () => {
     $scope.addingLinks = !$scope.addingLinks
+    if (!$scope.addingLinks) cleanMarkers()
   }
 
   function saveChanges () {
@@ -99,19 +100,24 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
 
   var previousFeature = null
   var previousMarker = null
+  var currentMarker = null
   var timeout
+  function cleanMarkers () {
+    previousMarker && previousMarker.setMap(null)
+    currentMarker && currentMarker.setMap(null)
+    previousMarker = null
+    currentMarker = null
+    previousFeature = null
+    clearTimeout(timeout)
+  }
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (layer.type !== 'network_nodes') return
     if (!$scope.addingLinks) return
     if (!map_tools.is_visible('backhaul')) return
     if (!event.feature.getProperty('id')) return
     if (!previousFeature) {
+      cleanMarkers()
       previousFeature = event.feature
-      previousMarker && previousMarker.setMap(null)
-      currentMarker && currentMarker.setMap(null)
-      previousMarker = null
-      currentMarker = null
-      clearTimeout(timeout)
       previousMarker = new google.maps.Marker({
         position: previousFeature.getGeometry().get(),
         icon: {
@@ -128,6 +134,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     var feature = event.feature
     var pointFrom = previousFeature.getGeometry().get()
     var pointTo = feature.getGeometry().get()
+    if (pointFrom === pointTo) return
     $scope.selectedEquipment.push({
       name: '',
       line: new google.maps.Polyline({
@@ -145,7 +152,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       from_link_id: previousFeature.getProperty('id'),
       to_link_id: feature.getProperty('id')
     })
-    var currentMarker = new google.maps.Marker({
+    currentMarker = new google.maps.Marker({
       position: feature.getGeometry().get(),
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
@@ -156,12 +163,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       draggable: true,
       map: map
     })
-    timeout = setTimeout(() => {
-      previousMarker && previousMarker.setMap(null)
-      currentMarker && currentMarker.setMap(null)
-      previousMarker = null
-      currentMarker = null
-    }, 1000)
+    timeout = setTimeout(cleanMarkers, 1000)
     recalculateLines()
     saveChanges()
     previousFeature = null
