@@ -178,7 +178,6 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       previousFeature = null
       if (!$rootScope.$$phase) { $rootScope.$apply() }
     }
-    console.log('', $scope.selectedEquipment[0].planId, planId)
     if ($scope.selectedEquipment.length > 0 && $scope.selectedEquipment[0].planId !== planId) {
       swal({
         title: 'Warning',
