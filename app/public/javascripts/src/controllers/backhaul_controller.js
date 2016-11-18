@@ -54,8 +54,8 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     $scope.selectedEquipment.forEach((equipment, i) => {
       equipment.name = `link ${i + 1}`
       equipment.marker.setIcon({
-        anchor: new google.maps.Point(10, 40),
-        url: `https://chart.googleapis.com/chart?chst=d_bubble_text_small_withshadow&chld=bb|${encodeURIComponent(String(i + 1))}|FF8|000`
+        anchor: new google.maps.Point(10, 45),
+        url: `https://chart.googleapis.com/chart?chst=d_bubble_text_small_withshadow&chld=bb|${encodeURIComponent(String(i + 1))}|FFF|000`
       })
     })
   }
