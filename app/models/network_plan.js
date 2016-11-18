@@ -215,7 +215,7 @@ module.exports = class NetworkPlan {
         ]
 
         output.metadata.fiberTotals = { types: {}, totalLength: 0, totalCost: 0 }
-        var fiberTypes = ['distribution', 'feeder', 'backhaul']
+        var fiberTypes = ['distribution', 'feeder', 'backbone']
         fiberTypes.forEach((fiberType) => {
           output.metadata.fiberTotals.types[fiberType] = { totalLength: 0, totalCost: 0 }
         })
