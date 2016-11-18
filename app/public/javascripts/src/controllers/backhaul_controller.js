@@ -4,6 +4,13 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
   $scope.addingLinks = false
   $scope.isEquipmentVisible = false
 
+  var lineSymbol = {
+    path: 'M 0,-1 0,1',
+    strokeOpacity: 1,
+    strokeColor: '#FF0000',
+    scale: 4
+  }
+
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     $scope.selectedEquipment.forEach((equipment) => {
@@ -26,9 +33,12 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
           id: item.id,
           line: new google.maps.Polyline({
             path: [pointFrom, pointTo],
-            strokeColor: '#FF0000',
-            strokeOpacity: 1.0,
-            strokeWeight: 2
+            icons: [{
+              icon: lineSymbol,
+              offset: '0',
+              repeat: '20px'
+            }],
+            strokeOpacity: 0
           }),
           points: [pointFrom, pointTo],
           marker: new google.maps.Marker({ map: m, position: center(pointFrom, pointTo) }),
