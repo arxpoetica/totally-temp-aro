@@ -98,6 +98,8 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
   }
 
   var previousFeature = null
+  var previousMarker = null
+  var timeout
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (layer.type !== 'network_nodes') return
     if (!$scope.addingLinks) return
@@ -105,6 +107,22 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     if (!event.feature.getProperty('id')) return
     if (!previousFeature) {
       previousFeature = event.feature
+      previousMarker && previousMarker.setMap(null)
+      currentMarker && currentMarker.setMap(null)
+      previousMarker = null
+      currentMarker = null
+      clearTimeout(timeout)
+      previousMarker = new google.maps.Marker({
+        position: previousFeature.getGeometry().get(),
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          strokeColor: '#FF0000',
+          fillColor: '#FF0000',
+          scale: 10
+        },
+        draggable: true,
+        map: map
+      })
       return
     }
     var feature = event.feature
@@ -114,9 +132,12 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       name: '',
       line: new google.maps.Polyline({
         path: [pointFrom, pointTo],
-        strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
-        strokeWeight: 2,
+        icons: [{
+          icon: lineSymbol,
+          offset: '0',
+          repeat: '20px'
+        }],
+        strokeOpacity: 0,
         map: map
       }),
       points: [pointFrom, pointTo],
@@ -124,6 +145,23 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       from_link_id: previousFeature.getProperty('id'),
       to_link_id: feature.getProperty('id')
     })
+    var currentMarker = new google.maps.Marker({
+      position: feature.getGeometry().get(),
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        strokeColor: '#FF0000',
+        fillColor: '#FF0000',
+        scale: 10
+      },
+      draggable: true,
+      map: map
+    })
+    timeout = setTimeout(() => {
+      previousMarker && previousMarker.setMap(null)
+      currentMarker && currentMarker.setMap(null)
+      previousMarker = null
+      currentMarker = null
+    }, 1000)
     recalculateLines()
     saveChanges()
     previousFeature = null
