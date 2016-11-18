@@ -210,7 +210,8 @@ module.exports = class NetworkPlan {
           { name: 'underground', description: 'Underground' },
           { name: 'obstacle', description: 'Other' },
           { name: 'conduit', description: 'Augmented Conduit' },
-          { name: 'estimated', description: 'Estimated Medium' }
+          { name: 'estimated', description: 'Estimated Medium' },
+          { name: 'planned_conduit', description: 'Overlaid on Fronthaul' }
         ]
 
         output.metadata.fiberTotals = { types: {}, totalLength: 0, totalCost: 0 }
