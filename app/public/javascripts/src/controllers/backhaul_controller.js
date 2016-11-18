@@ -3,6 +3,10 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
+    $scope.selectedEquipment.forEach((equipment) => {
+      equipment.line.setMap(null)
+      equipment.marker.setMap(null)
+    })
     $scope.selectedEquipment = []
     previousFeature = null
     recalculateLines()
