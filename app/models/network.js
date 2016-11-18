@@ -207,6 +207,9 @@ module.exports = class Network {
         )
       `
     } else {
+      if (+serviceLayer !== serviceLayer) {
+        return Promise.resolve([])
+      }
       params.push(serviceLayer)
       condition = `
         SELECT p.id FROM client.plan p

@@ -178,7 +178,8 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       previousFeature = null
       if (!$rootScope.$$phase) { $rootScope.$apply() }
     }
-    if ($scope.selectedEquipment.length > 0 && $scope.selectedEquipment[0].planId !== planId) {
+    // $scope.selectedEquipment.length > 0 && $scope.selectedEquipment[0].planId !== planId
+    if (false) {
       swal({
         title: 'Warning',
         text: 'You are attempting a link with equipment from a different service layer than the other links. Backhaul can only be run across one service layer. If you proceed, it will remove all previous links.',
