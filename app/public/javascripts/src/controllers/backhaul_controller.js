@@ -1,6 +1,8 @@
 /* global app google map $ */
 app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
   $scope.plan = null
+  $scope.addingLinks = false
+
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     $scope.selectedEquipment.forEach((equipment) => {
@@ -60,9 +62,14 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       eq.marker.setMap(null)
     }
     recalculateLines()
+    saveChanges()
   }
 
-  $scope.createLinks = () => {
+  $scope.toggle = () => {
+    $scope.addingLinks = !$scope.addingLinks
+  }
+
+  $scope.saveChanges = () => {
     var data = {
       from_ids: $scope.selectedEquipment.map((equipment) => equipment.from_link_id),
       to_ids: $scope.selectedEquipment.map((equipment) => equipment.to_link_id)
@@ -82,6 +89,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
   var previousFeature = null
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (layer.type !== 'network_nodes') return
+    if (!$scope.addingLinks) return
     if (!map_tools.is_visible('backhaul')) return
     if (!event.feature.getProperty('id')) return
     if (!previousFeature) {
@@ -106,6 +114,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       to_link_id: feature.getProperty('id')
     })
     recalculateLines()
+    saveChanges()
     previousFeature = null
     if (!$rootScope.$$phase) { $rootScope.$apply() }
   })
