@@ -118,6 +118,7 @@ module.exports = class Network {
         var sql = `
           SELECT
             n.id, geom, t.name AS name,
+            n.plan_id,
             -- plan_id IS NOT NULL AS draggable,
             name <> 'central_office' AS unselectable
           FROM client.network_nodes n
@@ -626,6 +627,7 @@ module.exports = class Network {
   static backhaulLinks (plan_id) {
     return database.query(`
       SELECT
+        nn1.plan_id AS plan_id,
         plan_links.from_link_id,
         plan_links.to_link_id,
         ST_AsGeoJSON(nn1.geom)::json AS from_geom,
