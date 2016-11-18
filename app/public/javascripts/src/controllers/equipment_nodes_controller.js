@@ -349,7 +349,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         if (!serviceLayer.showDistributionFiber) {
           styles.visible = false
         }
-      } else if (type === 'backhaul') {
+      } else if (type === 'backbone') {
         styles.strokeColor = 'black'
         styles.strokeWeight = 4
         if (!serviceLayer.showBackhaulFiber) {
