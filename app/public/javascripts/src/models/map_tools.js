@@ -9,7 +9,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
   accordion.on('click', '[data-parent="#map-tools-accordion"]', (e) => {
     e.preventDefault()
   })
-  accordion.on('shown.bs.collapse', (e) => {
+  accordion.on('show.bs.collapse', (e) => {
     var tool = $(e.target).attr('data-tool')
     tools.show(tool)
   })

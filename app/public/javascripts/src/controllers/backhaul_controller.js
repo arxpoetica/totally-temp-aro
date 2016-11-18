@@ -1,7 +1,8 @@
 /* global app google map $ */
-app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_tools', ($scope, $rootScope, $http, map_tools) => {
+app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', ($scope, $rootScope, $http, map_tools, MapLayer) => {
   $scope.plan = null
   $scope.addingLinks = false
+  $scope.isEquipmentVisible = false
 
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
@@ -69,7 +70,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     $scope.addingLinks = !$scope.addingLinks
   }
 
-  $scope.saveChanges = () => {
+  function saveChanges () {
     var data = {
       from_ids: $scope.selectedEquipment.map((equipment) => equipment.from_link_id),
       to_ids: $scope.selectedEquipment.map((equipment) => equipment.to_link_id)
@@ -119,7 +120,11 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     if (!$rootScope.$$phase) { $rootScope.$apply() }
   })
 
-  $rootScope.$on('map_tool_changed_visibility', () => {
+  $rootScope.$on('map_tool_changed_visibility', (e, name) => {
+    if (name === 'backhaul' && map_tools.is_visible('backhaul')) {
+      $scope.isEquipmentVisible = MapLayer.isEquipmentVisible()
+      if (!$rootScope.$$phase) { $rootScope.$apply() }
+    }
     var m = map_tools.is_visible('backhaul') ? map : null
     $scope.selectedEquipment.forEach((equipment) => {
       equipment.line.setMap(m)

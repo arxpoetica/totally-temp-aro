@@ -72,7 +72,7 @@
                 </div>
                 <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
-                    Feeder fiber
+                    Feeder Fiber
                   </label>
                 </div>
               </div>
@@ -84,7 +84,19 @@
                 </div>
                 <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
-                    Distribution fiber
+                    Distribution Fiber
+                  </label>
+                </div>
+              </div>
+
+              <div ng-if="serviceLayer.id === 'all'">
+                <div class="pull-left" style="margin-right: 5px"><span style="background-color:black; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
+                <div class="pull-right">
+                  <input type="checkbox" ng-model="serviceLayer.showBackhaulFiber" ng-change="serviceLayer.changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                </div>
+                <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
+                  <label style="font-weight:normal">
+                    Backhaul Fiber
                   </label>
                 </div>
               </div>
