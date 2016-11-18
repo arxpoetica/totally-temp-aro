@@ -28,7 +28,7 @@
     </div>
     <div class="col-md-10">
       <div class="panel-group" id="serviceLayersAccordion" role="tablist" aria-multiselectable="true" style="margin-top: 9px">
-        <div class="panel panel-default" ng-repeat="serviceLayer in serviceLayers">
+        <div class="panel panel-default" ng-repeat="serviceLayer in serviceLayers" ng-if="!serviceLayer.hidden">
           <div class="panel-heading" role="tab">
             <p class="panel-title" style="background-color:#eee; padding-left:10px">
               <input type="checkbox" ng-model="serviceLayer.enabled" ng-change="serviceLayer.changedAvailability()">
@@ -53,7 +53,7 @@
                 </div>
               </div>
 
-              <div ng-repeat="layer in existingEquipmentLayers" ng-if="serviceLayer.id !== 'all'">
+              <div ng-repeat="layer in existingEquipmentLayers" ng-if="!serviceLayer.additional">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
                   <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible" ng-disabled="!vztfttp || !serviceLayer.enabled">
@@ -101,7 +101,7 @@
                 </div>
               </div>
 
-              <div class="disabled">
+              <div class="disabled" ng-if="!serviceLayer.userDefined">
                 <div class="pull-right">
                   <input type="checkbox" disabled>
                 </div>

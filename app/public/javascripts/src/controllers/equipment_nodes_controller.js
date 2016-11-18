@@ -32,9 +32,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('network_nodes')) {
+      userDefinedLayer.hidden = !$rootScope.selectedUserDefinedBoundary
+      var value = ($rootScope.selectedUserDefinedBoundary && $rootScope.selectedUserDefinedBoundary.id) || 'user_defined'
+      if (userDefinedLayer.id !== value) {
+        userDefinedLayer.id = value
+        userDefinedLayer.changeNodeTypesVisibility()
+      }
       $scope.serviceLayers.forEach((layer) => {
         layer.networkNodesLayer.show()
       })
+      if (!$rootScope.$$phase) { $rootScope.$apply() }
     } else if (tool === 'network_nodes') {
       $scope.selected_tool = null
       map.setOptions({ draggableCursor: null })
@@ -56,17 +63,33 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' })
   }
 
+  var userDefinedLayer = {
+    id: 'user_defined',
+    name: 'user_defined',
+    description: 'User-Uploaded',
+    equipment_description: 'User-Uploaded',
+    additional: true,
+    nodeTypes: [{
+      description: 'Central Office',
+      id: 1,
+      name: 'central_office',
+      service_layer_id: -1,
+      service_layer_node_name: 'Central Office'
+    }],
+    hidden: true,
+    userDefined: true
+  }
+
   $(document).ready(() => {
     map.ready(() => {
       $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)).filter((layer) => layer.show_in_assets)
-      $scope.serviceLayers.forEach((layer) => {
-
-      })
+      $scope.serviceLayers.push(userDefinedLayer)
       var additionalLayer = {
         id: 'all',
         name: 'all',
         description: 'Optimized equipment',
         equipment_description: 'Optimized equipment',
+        additional: true,
         nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item))
       }
       $scope.serviceLayers.push(additionalLayer)
