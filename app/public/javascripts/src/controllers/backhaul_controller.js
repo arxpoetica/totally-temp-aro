@@ -153,13 +153,13 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
             repeat: '20px'
           }],
           strokeOpacity: 0,
-          map: map,
-          serviceLayerId: serviceLayerId
+          map: map
         }),
         points: [pointFrom, pointTo],
         marker: new google.maps.Marker({ map: map, position: center(pointFrom, pointTo) }),
         from_link_id: previousFeature.getProperty('id'),
-        to_link_id: feature.getProperty('id')
+        to_link_id: feature.getProperty('id'),
+        serviceLayerId: serviceLayerId
       })
       currentMarker = new google.maps.Marker({
         position: feature.getGeometry().get(),
