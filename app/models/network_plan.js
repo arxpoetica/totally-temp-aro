@@ -623,19 +623,77 @@ module.exports = class NetworkPlan {
         })
 
         var sql = `
-          SELECT ST_AsKML(locations.geom) AS geom
+          SELECT
+            locations.id AS id,
+            ST_AsKML(locations.geom) AS geom,
+            t.id AS tower_id,
+            b.category_name AS business_category,
+            h.category_name AS household_category
           FROM client.plan_targets
           JOIN locations
             ON plan_targets.location_id = locations.id
+          LEFT JOIN aro.towers t
+            ON t.location_id = plan_targets.location_id
+          LEFT JOIN client.basic_classified_business b
+            ON b.location_id = plan_targets.location_id
+          LEFT JOIN client.basic_classified_household h
+            ON h.location_id = plan_targets.location_id
           WHERE plan_targets.plan_id = $1
         `
         return database.query(sql, [plan_id])
       })
       .then((targets) => {
         kml_output += `<Folder><name>${escape('Targets')}</name>`
-        targets.forEach((target) => {
-          kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`
-        })
+        var towers = targets.filter((target) => target['tower_id'])
+        var businesses = targets.filter((target) => target['business_category'])
+        var households = targets.filter((target) => target['household_category'])
+        var categories = null
+        var names = {
+          'b_large': 'Large Enterprise',
+          'b_medium': 'Mid-tier',
+          'b_small': 'SMB',
+          'h_small': 'SFU',
+          'h_medium': 'MDU'
+        }
+
+        var removeDuplicates = (arr) => {
+          var ids = {}
+          return arr.filter((obj) => {
+            if (ids[obj.id]) return false
+            ids[obj.id] = obj
+            return true
+          })
+        }
+
+        if (towers.length > 0) {
+          kml_output += '<Folder><name>Cell Sites</name>'
+          towers.forEach((target) => {
+            kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`
+          })
+          kml_output += '</Folder>'
+        }
+        if (businesses.length > 0) {
+          categories = _.groupBy(businesses, 'business_category')
+          Object.keys(categories).forEach((category) => {
+            var arr = removeDuplicates(categories[category])
+            kml_output += `<Folder><name>${names[escape('b_' + category)]}</name>`
+            arr.forEach((target) => {
+              kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`
+            })
+            kml_output += '</Folder>'
+          })
+        }
+        if (households.length > 0) {
+          categories = _.groupBy(households, 'household_category')
+          Object.keys(categories).forEach((category) => {
+            var arr = removeDuplicates(categories[category])
+            kml_output += `<Folder><name>${names[escape('b_' + category)]}</name>`
+            arr.forEach((target) => {
+              kml_output += `<Placemark><styleUrl>#targetColor</styleUrl>${target.geom}</Placemark>\n`
+            })
+            kml_output += '</Folder>'
+          })
+        }
         kml_output += '</Folder>'
 
         var sql = `

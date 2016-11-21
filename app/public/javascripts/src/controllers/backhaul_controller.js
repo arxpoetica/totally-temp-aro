@@ -48,7 +48,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
           marker: new google.maps.Marker({ map: m, position: center(pointFrom, pointTo) }),
           from_link_id: item.from_link_id,
           to_link_id: item.to_link_id,
-          planId: item.plan_id
+          serviceLayerId: item.service_layer_id
         })
       })
       recalculateLines()
@@ -139,9 +139,9 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     var feature = event.feature
     var pointFrom = previousFeature.getGeometry().get()
     var pointTo = feature.getGeometry().get()
-    var planId = feature.getProperty('plan_id')
+    var serviceLayerId = feature.getProperty('service_layer_id')
     if (pointFrom === pointTo) return
-    if (planId !== event.feature.getProperty('plan_id')) return
+    if (serviceLayerId !== event.feature.getProperty('service_layer_id')) return
     var createLink = () => {
       $scope.selectedEquipment.push({
         name: '',
@@ -154,7 +154,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
           }],
           strokeOpacity: 0,
           map: map,
-          planId: planId
+          serviceLayerId: serviceLayerId
         }),
         points: [pointFrom, pointTo],
         marker: new google.maps.Marker({ map: map, position: center(pointFrom, pointTo) }),
@@ -178,8 +178,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       previousFeature = null
       if (!$rootScope.$$phase) { $rootScope.$apply() }
     }
-    // $scope.selectedEquipment.length > 0 && $scope.selectedEquipment[0].planId !== planId
-    if (false) {
+    if ($scope.selectedEquipment.length > 0 && $scope.selectedEquipment[0].serviceLayerId !== serviceLayerId) {
       swal({
         title: 'Warning',
         text: 'You are attempting a link with equipment from a different service layer than the other links. Backhaul can only be run across one service layer. If you proceed, it will remove all previous links.',

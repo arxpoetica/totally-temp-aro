@@ -117,11 +117,13 @@ module.exports = class Network {
       .then(() => {
         var sql = `
           SELECT
+            p.service_layer_id AS service_layer_id,
             n.id, geom, t.name AS name,
             n.plan_id,
             -- plan_id IS NOT NULL AS draggable,
-            name <> 'central_office' AS unselectable
+            t.name <> 'central_office' AS unselectable
           FROM client.network_nodes n
+          LEFT JOIN client.plan p ON p.id = n.plan_id
           JOIN client.network_node_types t
             ON n.node_type_id = t.id
         `
@@ -632,7 +634,7 @@ module.exports = class Network {
   static backhaulLinks (plan_id) {
     return database.query(`
       SELECT
-        nn1.plan_id AS plan_id,
+        p.service_layer_id AS service_layer_id,
         plan_links.from_link_id,
         plan_links.to_link_id,
         ST_AsGeoJSON(nn1.geom)::json AS from_geom,
@@ -640,6 +642,7 @@ module.exports = class Network {
       FROM client.plan_links
       JOIN client.network_nodes nn1 ON nn1.id = plan_links.from_link_id
       JOIN client.network_nodes nn2 ON nn2.id = plan_links.to_link_id
+      JOIN client.plan p ON p.id = nn1.plan_id
       WHERE plan_links.plan_id = $1
     `, [plan_id])
   }

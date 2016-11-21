@@ -127,7 +127,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     api_endpoint: '/locations/:plan_id/selected',
     style_options: locationStyles,
     // threshold: 15,
-    // reload: 'always',
+    reload: 'always',
     declarativeStyles: declarativeStyles
   })
 
@@ -379,6 +379,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       plan.location_types = plan.location_types || []
       map.ready(() => {
         selectedLocationsLayer.show()
+        selectedLocationsLayer.reloadData()
         // select entity types used in optimization
         selectLocations(plan.location_types)
       })
@@ -424,11 +425,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       mrcgte2000: '2kplus'
     }
     Object.keys(businessTypes).forEach((type) => {
-      if (locationTypes.indexOf(type) >= 0) $scope.business_categories_selected[businessTypes[type]] = true
+      $scope.business_categories_selected[businessTypes[type]] = locationTypes.indexOf(type) >= 0
     })
-    if (locationTypes.indexOf('celltower') >= 0) $scope.show_towers = true
-    if (locationTypes.indexOf('household') >= 0) $scope.show_households = true
-    $scope.show_businesses = _.size($scope.business_categories_selected) > 0
+    $scope.show_towers = locationTypes.indexOf('celltower') >= 0
+    $scope.show_households = locationTypes.indexOf('household') >= 0
+    $scope.show_businesses = Object.keys($scope.business_categories_selected).reduce((total, item) => total || $scope.business_categories_selected[item], false)
     $scope.changeLocationsLayer()
   }
 

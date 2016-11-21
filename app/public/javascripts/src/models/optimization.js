@@ -19,7 +19,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
 
     changes.entityDataSources = optimization.datasources
     if (changes.entityDataSources.length > 0) {
-      changes.locationTypes = _.uniq(changes.locationTypes.concat(['celltower']))
+      changes.locationTypes = _.uniq((changes.locationTypes || []).concat(['celltower']))
     }
 
     function run (hideProgressBar) {
