@@ -37,33 +37,33 @@ module.exports = class Location {
         SELECT l.id, l.geom,
           array_remove(array_agg(DISTINCT 'b_' || b.category_name::text)
             || array_agg(DISTINCT 'h_' || h.category_name::text)
-            || array_agg(distinct case when t.id is null then null else 'towers' end),
-          null) AS entity_categories
+            || array_agg(distinct CASE WHEN t.id IS NULL THEN NULL ELSE 'towers' END),
+          NULL) AS entity_categories
         FROM aro.locations l
           INNER JOIN states st
-              on st.stusps = l.state
-          inner join
-          view_window vw on
+              ON st.stusps = l.state
+          INNER JOIN
+          view_window vw ON
             ST_Intersects(vw.geog, l.geog)
-        and l.state in (select stusps from states)
+        AND l.state IN (select stusps from states)
 
-        left join client.plan_targets pt
+        LEFT JOIN client.plan_targets pt
           ON pt.location_id = l.id
           AND pt.plan_id = $1
 
-        left join aro.towers t
-          on t.location_id = l.id
-          and t.data_source_id in ($2)
+        LEFT JOIN aro.towers t
+          ON t.location_id = l.id
+          AND t.data_source_id IN ($2)
 
-        left join client.basic_classified_business b
-          on b.location_id = l.id
-          and b.category_name in ($3)
+        LEFT JOIN client.basic_classified_business b
+          ON b.location_id = l.id
+          AND b.category_name IN ($3)
 
-        left join client.basic_classified_household h
-          on h.location_id = l.id
-          and h.category_name in ($4)
+        LEFT JOIN client.basic_classified_household h
+          ON h.location_id = l.id
+          AND h.category_name IN ($4)
 
-        where (t.id is not null or b.id is not null or h.id is not null) and pt.location_id is null
+        WHERE (t.id IS NOT NULL OR b.id IS NOT NULL OR h.id IS NOT NULL) AND pt.location_id IS NULL
         GROUP BY 1,2
       )
     `
