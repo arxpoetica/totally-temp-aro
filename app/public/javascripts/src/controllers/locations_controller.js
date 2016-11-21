@@ -127,7 +127,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     api_endpoint: '/locations/:plan_id/selected',
     style_options: locationStyles,
     // threshold: 15,
-    // reload: 'always',
+    reload: 'always',
     declarativeStyles: declarativeStyles
   })
 
@@ -379,6 +379,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       plan.location_types = plan.location_types || []
       map.ready(() => {
         selectedLocationsLayer.show()
+        selectedLocationsLayer.reloadData()
         // select entity types used in optimization
         selectLocations(plan.location_types)
       })
