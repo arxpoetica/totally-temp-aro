@@ -84,24 +84,16 @@ exports.configure = (api, middleware) => {
     var plan_id = request.params.plan_id
     var type = request.params.type
     listTABC(plan_id).then((names) => {
-      if (names.indexOf(type) === -1 && type !== 'layer') {
+      if (names.indexOf(type) === -1) {
         return next(new Error(`Unknown report type ${type}, or report not available`))
       }
       var planQuery = null
       if (type === names[names.length - 1]) {
+        // plan_type='W' AND
         planQuery = `
           p.id IN (
             (SELECT r.id FROM client.plan r
-              WHERE plan_type='W' AND r.parent_plan_id IN (
-              (SELECT id FROM client.plan WHERE parent_plan_id = $1)
-            ))
-          )
-        `
-      } else if (type === 'layer') {
-        planQuery = `
-          p.id IN (
-            (SELECT r.id FROM client.plan r
-              WHERE plan_type='B' AND r.parent_plan_id IN (
+              WHERE r.parent_plan_id IN (
               (SELECT id FROM client.plan WHERE parent_plan_id = $1)
             ))
           )
