@@ -613,14 +613,17 @@ module.exports = class NetworkPlan {
         return database.query(sql, [plan_id])
       })
       .then((edges) => {
+        kml_output += '<Folder><name>Fiber</name>'
         var types = _.groupBy(edges, 'fiber_type')
         Object.keys(types).forEach((type) => {
+          if (types[type].length === 0) return
           kml_output += `<Folder><name>${escape(type)}</name>`
           types[type].forEach((edge) => {
             kml_output += `<Placemark><name>${escape(edge.length.toLocaleString('en', { maximumFractionDigits: 1 }))} m</name><styleUrl>#routeColor</styleUrl>${edge.geom}</Placemark>\n`
           })
           kml_output += '</Folder>'
         })
+        kml_output += '</Folder>'
 
         var sql = `
           SELECT
@@ -707,14 +710,17 @@ module.exports = class NetworkPlan {
       })
       .then((equipmentNodes) => {
         var types = _.groupBy(equipmentNodes, 'description')
+        kml_output += '<Folder><name>Equipment</name>'
         Object.keys(types).forEach((type) => {
           var arr = types[type]
+          if (arr.length === 0) return
           kml_output += `<Folder><name>${escape(type)}</name>`
           arr.forEach((node) => {
             kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${node.geom}</Placemark>\n`
           })
           kml_output += '</Folder>'
         })
+        kml_output += '</Folder>'
 
         kml_output += '</Document></kml>'
         return kml_output
