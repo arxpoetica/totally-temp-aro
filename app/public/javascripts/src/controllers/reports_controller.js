@@ -81,11 +81,6 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
       analysis = analysis.concat(kml)
       analysis = analysis.concat([
         {
-          name: `Backhaul layer ${plan.name}`,
-          type: '.kml',
-          url: `/reports/tabc/${plan.id}/kml/layer`
-        },
-        {
           name: `All TABC Endpoints ${plan.name}`,
           type: '.csv',
           url: `/reports/tabc/${plan.id}/master_output_producer`
