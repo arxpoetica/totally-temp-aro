@@ -175,7 +175,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           types.push(nodeType.id)
         }
       })
-      if (types.length === 0) {
+      if (types.length === 0 || layer.id === 'user_defined') {
         networkNodesLayer.hide()
       } else {
         networkNodesLayer.threshold = types.length === 1 && types[0] === 1 ? 8 : 12
