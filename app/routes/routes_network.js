@@ -207,4 +207,19 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.get('/data_sources/list', (request, response, next) => {
+    var userId = request.user.id
+    models.Network.dataSources(userId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/data_sources/delete', (request, response, next) => {
+    var userId = request.user.id
+    var dataSourceId = request.body.dataSource
+    models.Network.deleteDataSource(userId, dataSourceId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }
