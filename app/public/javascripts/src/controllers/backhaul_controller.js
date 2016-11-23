@@ -129,7 +129,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
           path: google.maps.SymbolPath.CIRCLE,
           strokeColor: '#FF0000',
           fillColor: '#FF0000',
-          scale: 10
+          scale: 5
         },
         draggable: true,
         map: map
@@ -167,12 +167,12 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
           path: google.maps.SymbolPath.CIRCLE,
           strokeColor: '#FF0000',
           fillColor: '#FF0000',
-          scale: 10
+          scale: 5
         },
         draggable: true,
         map: map
       })
-      timeout = setTimeout(cleanMarkers, 1000)
+      timeout = setTimeout(cleanMarkers, 500)
       recalculateLines()
       saveChanges()
       previousFeature = null

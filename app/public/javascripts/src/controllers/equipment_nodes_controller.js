@@ -156,7 +156,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       declarativeStyles: (feature, styles) => {
         var name = feature.getProperty('name')
         if (name) {
-          styles.icon = `/images/map_icons/${config.ARO_CLIENT}/composite/${layer.name}_${name}.png`
+          styles.icon = {
+            anchor: new google.maps.Point(15, 15),
+            url: `/images/map_icons/${config.ARO_CLIENT}/composite/${layer.name}_${name}.png`
+          }
         } else {
           styles.icon = { path: 0, scale: 3, strokeColor: 'brown' }
         }
