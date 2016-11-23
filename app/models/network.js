@@ -294,6 +294,7 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
+    var optimizationType = options.algorithm
     var algorithms = {
       'MAX_IRR': 'IRR',
       'TARGET_IRR': 'IRR',
@@ -329,7 +330,8 @@ module.exports = class Network {
       database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id]),
-      database.execute('UPDATE client.plan SET location_types=ARRAY[$2]::varchar[] WHERE id=$1', [plan_id, options.locationTypes])
+      database.execute('UPDATE client.plan SET optimization_type=$3, location_types=ARRAY[$2]::varchar[] WHERE id=$1',
+        [plan_id, options.locationTypes, optimizationType])
     ])
     .then((results) => {
       body.backhaulOptimizationType = results[0] ? 'LINKED_NODES' : 'UNDEFINED'

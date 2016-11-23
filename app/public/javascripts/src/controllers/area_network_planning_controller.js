@@ -68,6 +68,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
     if (plan) {
       $scope.reportName = plan.name
+      var optimizationType = plan.optimization_type
+      if (!optimizationType || optimizationType === 'UNCONSTRAINED') optimizationType = 'CAPEX'
+      $scope.optimizationType = optimizationType
     }
 
     $scope.routeGenerationOptions.forEach((option) => {

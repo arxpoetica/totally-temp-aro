@@ -101,7 +101,7 @@ module.exports = class NetworkPlan {
 
   static copyPlan (plan_id, name, user) {
     return database.findOne(`
-      INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type, location_types)
+      INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type, location_types, optimization_type)
       SELECT
         $2 AS name,
         area_name,
@@ -110,7 +110,8 @@ module.exports = class NetworkPlan {
         NOW() AS created_at,
         NOW() AS updated_at,
         'R' AS plan_type,
-        location_types
+        location_types,
+        optimization_type
       FROM client.plan WHERE id=$1
       RETURNING id
     `, [plan_id, name])
@@ -171,7 +172,7 @@ module.exports = class NetworkPlan {
           $2::text AS carrier_name,
           plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
           users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
-          created_at, updated_at, location_types,
+          created_at, updated_at, location_types, optimization_type,
           (SELECT EXISTS(SELECT id FROM client.plan WHERE parent_plan_id=$1 LIMIT 1)) AS "ranOptimization"
         FROM client.plan
         LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
