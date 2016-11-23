@@ -17,6 +17,10 @@
   </head>
   <body>
 
+    <div ng-controller="data_management_controller">
+      <% include modal_data_management.html %>
+    </div>
+
     <div ng-controller="reports_controller">
       <% include modal_reports.html %>
     </div>
@@ -87,6 +91,11 @@
                 <br>
               </div>
             <% } %>
+
+            <div class="col-sm-8">
+              <a href="#data-management" class="btn btn-primary btn-block" data-toggle="modal">Data Management</a>
+              <br>
+            </div>
           </div>
         </div>
       </div>
@@ -447,6 +456,7 @@
   <script src="javascripts/lib/controllers/upload_customers_controller.js"></script>
   <script src="javascripts/lib/controllers/reports_controller.js"></script>
   <script src="javascripts/lib/controllers/backhaul_controller.js"></script>
+  <script src="javascripts/lib/controllers/data_management_controller.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>
   <script src="javascripts/lib/models/map_layer.js"></script>

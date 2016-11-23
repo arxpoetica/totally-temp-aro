@@ -700,7 +700,9 @@ module.exports = class NetworkPlan {
         kml_output += '</Folder>'
 
         var sql = `
-          SELECT ST_AsKML(nn.geom) AS geom, t.description
+          SELECT
+            ST_AsKML(nn.geom) AS geom, t.description,
+            hstore_to_json(nn.attributes) as attributes
           FROM client.network_nodes nn
           JOIN client.network_node_types t ON nn.node_type_id = t.id
           JOIN client.plan p ON nn.plan_id = p.id
@@ -716,7 +718,8 @@ module.exports = class NetworkPlan {
           if (arr.length === 0) return
           kml_output += `<Folder><name>${escape(type)}</name>`
           arr.forEach((node) => {
-            kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl>${node.geom}</Placemark>\n`
+            var name = (node.attributes || {}).name || ''
+            kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl><name>${escape(name)}</name>${node.geom}</Placemark>\n`
           })
           kml_output += '</Folder>'
         })

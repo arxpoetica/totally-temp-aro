@@ -23,11 +23,16 @@
             <label class="col-sm-4 control-label">Equipment Source Points</label>
             <div class="col-sm-8">
               <input name="file" type="file" name="forcePoints" class="form-control">
-              <p class="help-block">Import file should be a csv with three columns:</p>
+              <p class="help-block">Import file must be a csv:</p>
               <ul class="help-block" style="padding: 0 10px">
                 <li><strong>entity_category_id</strong>: all entries should be '1'</li>
                 <li><strong>lat</strong>: latitude of CRAN hub</li>
                 <li><strong>longitude</strong>: longitude of CRAN hub"</li>
+              </ul>
+              <p class="help-block">Import file can include any additional columns specified by user:</p>
+              <ul class="help-block" style="padding: 0 10px">
+                <li><strong>name</strong>: this will give the CRAN hub a name when it is exported</li>
+                <li>any other column with data you want to store for that equipment (e.g. "year", "capacity", etc.)</li>
               </ul>
               <p><a class="btn btn-primary btn-sm" href="/csv/example_cran_hub_upload.csv" download="example_cran_hub_upload.csv">Download example file</a></p>
             </div>
