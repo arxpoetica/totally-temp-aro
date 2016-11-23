@@ -294,6 +294,7 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
+    var optimizationType = options.algorithm
     var algorithms = {
       'MAX_IRR': 'IRR',
       'TARGET_IRR': 'IRR',
@@ -329,7 +330,8 @@ module.exports = class Network {
       database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id]),
-      database.execute('UPDATE client.plan SET location_types=ARRAY[$2]::varchar[] WHERE id=$1', [plan_id, options.locationTypes])
+      database.execute('UPDATE client.plan SET optimization_type=$3, location_types=ARRAY[$2]::varchar[] WHERE id=$1',
+        [plan_id, options.locationTypes, optimizationType])
     ])
     .then((results) => {
       body.backhaulOptimizationType = results[0] ? 'LINKED_NODES' : 'UNDEFINED'
@@ -658,6 +660,40 @@ module.exports = class Network {
           var params = [id, toIds[i++], plan_id]
           return database.execute('INSERT INTO client.plan_links (from_link_id, to_link_id, plan_id) VALUES ($1, $2, $3)', params)
         })
+      })
+  }
+
+  static dataSources (userId) {
+    return database.query('SELECT * FROM user_data.data_source WHERE user_id=$1', [userId])
+  }
+
+  static deleteDataSource (userId, dataSourceId) {
+    return Promise.resolve()
+      .then(() => {
+        return database.execute(`
+          DELETE FROM user_data.user_entity_data_source
+          WHERE data_source_id=$1
+        `, [dataSourceId])
+      })
+      .then(() => {
+        return database.execute(`
+          DELETE FROM user_data.source_location_entity
+          WHERE data_source_id=$1
+        `, [dataSourceId])
+      })
+      .then(() => {
+        return database.execute(`
+          DELETE FROM client.service_area
+          WHERE service_layer_id=(
+            SELECT id FROM client.service_layer WHERE data_source_id=$1
+          )
+        `, [dataSourceId])
+      })
+      .then(() => {
+        return database.execute('DELETE FROM client.service_layer WHERE data_source_id=$1', [dataSourceId])
+      })
+      .then(() => {
+        return database.execute('DELETE FROM user_data.data_source WHERE user_id=$1 AND id=$2', [userId, dataSourceId])
       })
   }
 
