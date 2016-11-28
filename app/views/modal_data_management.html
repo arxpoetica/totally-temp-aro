@@ -7,11 +7,11 @@
       </div>
       <div class="modal-body">
         <ul class="nav nav-tabs" role="tablist">
-          <li role="presentation" class="active"><a href="#dataManagementCellSites" role="tab" data-toggle="tab">Cell Sites</a></li>
-          <li role="presentation"><a href="#dataManagementHubs" role="tab" data-toggle="tab">Hubs/Polygons</a></li>
+          <li role="presentation" class="active"><a href="#dataManagementUserEntities" role="tab" data-toggle="tab">Cell Sites</a></li>
+          <li role="presentation"><a href="#dataManagementUserDefinedBoundaries" role="tab" data-toggle="tab">Hubs/Polygons</a></li>
         </ul>
         <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="dataManagementCellSites" style="margin-top: 20px">
+          <div role="tabpanel" class="tab-pane active" id="dataManagementUserEntities" style="margin-top: 20px">
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -22,20 +22,42 @@
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="dataSource in dataSources">
+                <tr ng-repeat="entities in userEntities">
                   <td>
-                    {{dataSource.name}}
+                    {{entities.name}}
                   </td>
                   <td>
                     <p class="pull-right">
-                      <button class="btn btn-primary btn-sm" ng-click="deleteDataSource(dataSource)"><span class="fa fa-trash"></span></button>
+                      <button class="btn btn-primary btn-sm" ng-click="deleteUserEntities(entities)"><span class="fa fa-trash"></span></button>
                     </p>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div role="tabpanel" class="tab-pane active" id="dataManagementHubs" style="margin-top: 20px">
+          <div role="tabpanel" class="tab-pane" id="dataManagementUserDefinedBoundaries" style="margin-top: 20px">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>
+                    Name
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="boundaries in userBoundaries">
+                  <td>
+                    {{boundaries.name}}
+                  </td>
+                  <td>
+                    <p class="pull-right">
+                      <button class="btn btn-primary btn-sm" ng-click="deleteUserBoundaries(boundaries)"><span class="fa fa-trash"></span></button>
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

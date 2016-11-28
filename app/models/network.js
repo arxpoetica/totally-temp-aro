@@ -662,39 +662,4 @@ module.exports = class Network {
         })
       })
   }
-
-  static dataSources (userId) {
-    return database.query('SELECT * FROM user_data.data_source WHERE user_id=$1', [userId])
-  }
-
-  static deleteDataSource (userId, dataSourceId) {
-    return Promise.resolve()
-      .then(() => {
-        return database.execute(`
-          DELETE FROM user_data.user_entity_data_source
-          WHERE data_source_id=$1
-        `, [dataSourceId])
-      })
-      .then(() => {
-        return database.execute(`
-          DELETE FROM user_data.source_location_entity
-          WHERE data_source_id=$1
-        `, [dataSourceId])
-      })
-      .then(() => {
-        return database.execute(`
-          DELETE FROM client.service_area
-          WHERE service_layer_id=(
-            SELECT id FROM client.service_layer WHERE data_source_id=$1
-          )
-        `, [dataSourceId])
-      })
-      .then(() => {
-        return database.execute('DELETE FROM client.service_layer WHERE data_source_id=$1', [dataSourceId])
-      })
-      .then(() => {
-        return database.execute('DELETE FROM user_data.data_source WHERE user_id=$1 AND id=$2', [userId, dataSourceId])
-      })
-  }
-
 }
