@@ -32,15 +32,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('network_nodes')) {
+      $scope.serviceLayers.forEach((layer) => {
+        layer.networkNodesLayer.show()
+      })
       userDefinedLayer.hidden = !$rootScope.selectedUserDefinedBoundary
       var value = ($rootScope.selectedUserDefinedBoundary && $rootScope.selectedUserDefinedBoundary.id) || 'user_defined'
       if (userDefinedLayer.id !== value) {
         userDefinedLayer.id = value
         userDefinedLayer.changeNodeTypesVisibility()
       }
-      $scope.serviceLayers.forEach((layer) => {
-        layer.networkNodesLayer.show()
-      })
       if (!$rootScope.$$phase) { $rootScope.$apply() }
     } else if (tool === 'network_nodes') {
       $scope.selected_tool = null

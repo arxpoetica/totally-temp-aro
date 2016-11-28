@@ -27,32 +27,61 @@ function listTABC (plan_id) {
 exports.configure = (api, middleware) => {
   api.get('/reports/user_defined/:plan_id/kml', (request, response, next) => {
     var plan_id = request.params.plan_id
-    return database.query(`
-        SELECT ST_ASKML(sa.geom) AS geom
-        FROM client.selected_service_area ssa
-        JOIN client.service_area sa ON ssa.service_area_id = sa.id
-        WHERE ssa.plan_id = $1
-      `, [plan_id])
-      .then((rows) => {
-        var kmlOutput = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
+    return database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
+      .then((plan) => {
         var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-
-        return Promise.resolve()
-          .then(() => (
-            database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
-          ))
-          .then((plan) => {
-            kmlOutput += `<name>${escape(plan.name)}</name>
+        var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2">
+          <Document>
+            <name>${escape(plan.name)}</name>
               <Style id="shapeColor">
                <LineStyle>
                  <color>ff0000ff</color>
                  <width>4</width>
                </LineStyle>
+               <PolyStyle>
+                 <fill>0</fill>
+                 <outline>1</outline>
+               </PolyStyle>
               </Style>
-            `
-            rows.forEach((row) => {
-              kmlOutput += `<Placemark><styleUrl>#shapeColor</styleUrl>${row.geom}</Placemark>\n`
+        `
+
+        return Promise.resolve()
+          .then(() => {
+            return database.query(`
+              SELECT ST_AsKML(sa.geom) AS geom, n.attributes -> 'name' AS name
+              FROM client.plan rp
+              JOIN client.plan mp ON rp.id = mp.parent_plan_id
+              JOIN client.plan wp ON mp.id = wp.parent_plan_id
+              JOIN client.plan hp ON wp.wirecenter_id = hp.wirecenter_id AND hp.plan_type = 'H'
+              JOIN client.network_nodes n ON hp.id = n.plan_id
+              JOIN client.service_area sa ON wp.wirecenter_id = sa.id
+              WHERE rp.id = $1
+                AND n.node_type_id = 1
+            `, [plan_id])
+          })
+          .then((polygons) => {
+            kmlOutput += '<Folder><name>Polygons</name>'
+            polygons.forEach((polygon) => {
+              kmlOutput += `<Placemark><name>${escape(polygon.name || 'NULL')}</name><styleUrl>#shapeColor</styleUrl>${polygon.geom}</Placemark>\n`
             })
+            kmlOutput += '</Folder>'
+            return database.query(`
+              SELECT ST_AsKML(n.geom) AS geom, n.attributes -> 'name' AS name
+              FROM client.plan rp
+              JOIN client.plan mp ON rp.id = mp.parent_plan_id
+              JOIN client.plan wp ON mp.id = wp.parent_plan_id
+              JOIN client.plan hp ON wp.wirecenter_id = hp.wirecenter_id AND hp.plan_type = 'H'
+              JOIN client.network_nodes n ON hp.id = n.plan_id
+              WHERE rp.id = $1
+                AND n.node_type_id = 1
+            `, [plan_id])
+          })
+          .then((hubs) => {
+            kmlOutput += '<Folder><name>Hubs</name>'
+            hubs.forEach((hub) => {
+              kmlOutput += `<Placemark><name>${escape(hub.name || 'NULL')}</name><styleUrl>#shapeColor</styleUrl>${hub.geom}</Placemark>\n`
+            })
+            kmlOutput += '</Folder>'
             kmlOutput += '</Document></kml>'
             return kmlOutput
           })

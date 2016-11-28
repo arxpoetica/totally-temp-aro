@@ -1,33 +1,65 @@
 <div class="modal" id="data-management" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Data management</h4>
       </div>
       <div class="modal-body">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>
-                Name
-              </th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr ng-repeat="dataSource in dataSources">
-              <td>
-                {{dataSource.name}}
-              </td>
-              <td>
-                <p class="pull-right">
-                  <button class="btn btn-primary btn-sm" ng-click="deleteDataSource(dataSource)"><span class="fa fa-trash"></span></button>
-                </p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <ul class="nav nav-tabs" role="tablist">
+          <li role="presentation" class="active"><a href="#dataManagementUserEntities" role="tab" data-toggle="tab">Cell Sites</a></li>
+          <li role="presentation"><a href="#dataManagementUserDefinedBoundaries" role="tab" data-toggle="tab">Hubs/Polygons</a></li>
+        </ul>
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="dataManagementUserEntities" style="margin-top: 20px">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>
+                    Name
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="entities in userEntities">
+                  <td>
+                    {{entities.name}}
+                  </td>
+                  <td>
+                    <p class="pull-right">
+                      <button class="btn btn-primary btn-sm" ng-click="deleteUserEntities(entities)"><span class="fa fa-trash"></span></button>
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="dataManagementUserDefinedBoundaries" style="margin-top: 20px">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>
+                    Name
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="boundaries in userBoundaries">
+                  <td>
+                    {{boundaries.name}}
+                  </td>
+                  <td>
+                    <p class="pull-right">
+                      <button class="btn btn-primary btn-sm" ng-click="deleteUserBoundaries(boundaries)"><span class="fa fa-trash"></span></button>
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

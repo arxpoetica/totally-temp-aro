@@ -1,4 +1,6 @@
 var models = require('../models')
+var helpers = require('../helpers')
+var config = helpers.config
 var Busboy = require('busboy')
 var path = require('path')
 var os = require('os')
@@ -208,17 +210,48 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/data_sources/list', (request, response, next) => {
+  api.get('/user_entities/list', (request, response, next) => {
     var userId = request.user.id
-    models.Network.dataSources(userId)
+    var req = {
+      url: config.aro_service_url + `/rest/user-entites/user/${userId}`,
+      json: true
+    }
+    models.AROService.request(req)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
-  api.post('/data_sources/delete', (request, response, next) => {
+  api.post('/user_entities/delete', (request, response, next) => {
+    var id = request.body.userEntities
+    var req = {
+      method: 'DELETE',
+      url: config.aro_service_url + `/rest/user-entites/${id}`,
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/user_boundaries/list', (request, response, next) => {
     var userId = request.user.id
-    var dataSourceId = request.body.dataSource
-    models.Network.deleteDataSource(userId, dataSourceId)
+    var req = {
+      url: config.aro_service_url + `/rest/serviceLayers/${userId}`,
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/user_boundaries/delete', (request, response, next) => {
+    var id = request.body.userBoundaries
+    var req = {
+      method: 'DELETE',
+      url: config.aro_service_url + `/rest/serviceLayers/${id}`,
+      json: true
+    }
+    models.AROService.request(req)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
