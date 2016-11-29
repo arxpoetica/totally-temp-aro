@@ -211,6 +211,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         .filter((val) => val)
     }
 
+    if ($scope.selectedBoundary) {
+      changes.processingLayers = [$scope.selectedBoundary.id]
+    }
+
     canceler = optimization.optimize($scope.plan, changes, () => {
       $scope.calculating = false
       if (selectLocationTypes.length > 0) {
