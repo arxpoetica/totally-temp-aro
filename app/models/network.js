@@ -368,17 +368,30 @@ module.exports = class Network {
               `, [plan_id, id])
             )
           } else if (isServiceLayer) {
-            params.push(type)
-            query = `
-              (
-                SELECT geom
-                FROM client.service_area
-                JOIN client.service_layer
-                  ON service_area.service_layer_id = service_layer.id
-                AND service_layer.name=$${params.length}
-                WHERE service_area.id=$3::bigint
-              )
-            `
+            if (type === 'user_defined') {
+              query = `
+                (
+                  SELECT geom
+                  FROM client.service_area
+                  JOIN client.service_layer
+                    ON service_area.service_layer_id = service_layer.id
+                  AND service_layer.id=$5::bigint
+                  WHERE service_area.id=$3::bigint
+                )
+              `
+            } else {
+              params.push(type)
+              query = `
+                (
+                  SELECT geom
+                  FROM client.service_area
+                  JOIN client.service_layer
+                    ON service_area.service_layer_id = service_layer.id
+                  AND service_layer.name=$${params.length}
+                  WHERE service_area.id=$3::bigint
+                )
+              `
+            }
             promises.push(
               database.execute(`
                 INSERT INTO client.selected_service_area (
