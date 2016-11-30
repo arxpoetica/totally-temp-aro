@@ -41,7 +41,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     { id: 'CAPEX', label: 'Full Coverage' },
     { id: 'IRR', label: 'ROI Routing' }
   ]
-  var budgetInput = $('#area_network_planning_controller input[name=budget]')
+  var budgetInput = $('#target_builder_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
 
   const parseBudget = () => +(budgetInput.val() || '0').match(/\d+/g).join('') || 0
