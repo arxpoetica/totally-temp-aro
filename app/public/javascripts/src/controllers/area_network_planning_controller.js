@@ -241,11 +241,13 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         { id: 'CAPEX', label: 'Full Coverage' },
         { id: 'MAX_IRR', label: 'Maximum IRR' },
         { id: 'IRR', label: 'Budget' },
-        { id: 'BUDGET_IRR', label: 'IRR Target' },
-        { id: 'TABC', label: 'TABC analysis' }
-        // { id: 'TARGET_IRR', label: 'IRR Target' },
-        // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
+        { id: 'BUDGET_IRR', label: 'IRR Target' }
       ]
+      if (config.ARO_CLIENT === 'verizon') {
+        $scope.optimizationTypeOptions.push({ id: 'TABC', label: 'TABC analysis' })
+      }
+      // { id: 'TARGET_IRR', label: 'IRR Target' },
+      // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
     }
   }
   optimizationModeChanged(null, optimization.getMode())
