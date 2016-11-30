@@ -132,6 +132,23 @@
       </label>
     </div>
   </form>
+  <% } else { %>
+  <p><strong>Route Type</strong></p>
+  <form>
+    <div class="radio">
+      <label>
+        <input type="radio" name="technology" ng-model="technology" value="direct_routing" checked> Unsplit Routing
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="technology" ng-model="technology" value="odn1" checked> Split Routing
+      </label>
+    </div>
+  </form>
+  <% } %>
+
+  <% if (config.ARO_CLIENT === 'verizon') { %>
 
   <p><strong>Product</strong></p>
   <form>
@@ -188,19 +205,5 @@
       <button class="btn btn-primary" ng-hide="calculating" ng-click="run()">Get Results</button>
       <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
     </p>
-    <!--
-    <div class="row" ng-repeat="geography in selectedRegions">
-      <div class="col-md-4">
-        {{geography.name}}
-      </div>
-      <div class="col-md-8">
-        <div class="progress">
-          <div class="progress-bar"
-            ng-class="{'active progress-bar-striped': calculating}"
-            role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
-        </div>
-      </div>
-    </div>
-    -->
   </div>
 </div>

@@ -3,9 +3,81 @@
     Optimizations can not be run on both boundaries and targets. Any target selection you make will remove all previously selected boundaries.
   </div>
 
+  <% if (config.ARO_CLIENT !== 'verizon') { %>
+    <p><strong>Optimization Type</strong></p>
+    <select class="form-control"
+      ng-model="optimizationType"
+      ng-options="item.id as item.label for item in optimizationTypeOptions">
+    </select>
+    <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
+      <br>
+      <p><strong>IRR Threshold</strong></p>
+      <div class="row">
+        <div class="col-md-7">
+          <input type="range" min="0" max="100" step="1" value="10" ng-model="irrThresholdRange" style="margin-top: 10px" ng-change="irrThresholdRangeChanged()">
+        </div>
+        <div class="col-md-5">
+          <div class="form-group form-group-sm">
+            <div class="input-group input-group-sm">
+              <input type="number" min="0" max="100" step="1" ng-model="irrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
+              <div class="input-group-addon">%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div ng-show="optimizationType === 'BUDGET_IRR' || optimizationType === 'IRR'">
+      <br>
+      <p><strong>Target Capital</strong></p>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group form-group-sm">
+            <div class="input-group input-group-sm">
+              <div class="input-group-addon">$</div>
+              <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+            </div>
+          </div>
+        </div>
+      </div>
+      <p><strong>Budget Allocation</strong></p>
+      <div class="clearfix">
+        <div style="float:left; width:20%">
+          <label class="text-right" style="display:block">Year 1</label>
+          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="100%">
+        </div>
+        <div style="float:left; width:20%">
+          <label class="text-right" style="display:block">Year 2</label>
+          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+        </div>
+        <div style="float:left; width:20%">
+          <label class="text-right" style="display:block">Year 3</label>
+          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+        </div>
+        <div style="float:left; width:20%">
+          <label class="text-right" style="display:block">Year 4</label>
+          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+        </div>
+        <div style="float:left; width:20%">
+          <label class="text-right" style="display:block">Year 5</label>
+          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
+        </div>
+      </div>
+      <div ng-show="optimizationMode === 'targets' && optimizationType === 'IRR'">
+        <br>
+        <p><strong>Non-Targeted Customers</strong></p>
+        <div class="checkbox" ng-repeat="entity in entityTypes">
+          <label>
+            <input type="checkbox" ng-model="entityTypesTargeted[entity.id]"> {{ entity.value }}
+          </label>
+        </div>
+      </div>
+    </div>
+    <br>
+  <% } %>
+
   <p><strong>Select Targets</strong></p>
   <input class="form-control select2" type="text" placeholder="Business Name">
-  <br><br>
+  <br>
   <form id="target-builder-upload">
     <p>
      <button class="btn btn-primary btn-sm"
@@ -55,4 +127,24 @@
   <p ng-show="targets.length > 0">
     <button class="btn btn-primary btn-sm" ng-click="deleteAllTargets()">Remove all targets</button>
   </p>
+
+  <% if (config.ARO_CLIENT !== 'verizon') { %>
+    <div>
+      <p><strong>Optimization Processing Layer</strong></p>
+      <p>
+        <select class="form-control" ng-model="selectedBoundary"
+          ng-options="boundary as boundary.description for boundary in allBoundaries track by boundary.id">
+          <option value="">Default Layer</option>
+        </select>
+      </p>
+    </div>
+
+    <div>
+      <p class="pull-right">
+        <button class="btn btn-primary" ng-hide="calculating" ng-click="run()">Get Results</button>
+        <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
+      </p>
+    </div>
+  <% } %>
+
 </div>
