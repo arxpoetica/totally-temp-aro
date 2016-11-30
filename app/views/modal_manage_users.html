@@ -36,8 +36,9 @@
                 <td>{{user.rol}}</th>
                 <td>
                   <div class="pull-right">
-                    <a ng-show="user.resend_link" title="Link copied to the clipboard"
-                       class="btn btn-sm btn-default" data-clipboard-text="{{user.resend_link}}"><span class="glyphicon glyphicon-link"></span></a>
+                    <input type="text" id="resend-link-input-{{ user.id }}" value="{{user.resend_link}}" style="position: absolute; margin-left: -999999px">
+                    <a ng-show="user.resend_link" title="Link copied to the clipboard" id="resend-link-button-{{ user.id }}"
+                       class="btn btn-sm btn-default" ng-click="copyLink(user)"><span class="glyphicon glyphicon-link"></span></a>
                     <a class="btn btn-sm btn-primary" ng-click="resendLink(user)" ng-show="user.id !== user_id"><span class="glyphicon glyphicon-send"></span></a>
                     <a class="btn btn-sm btn-danger" ng-click="deleteUser(user)" ng-show="user.id !== user_id"><span class="glyphicon glyphicon-trash"></span></a>
                     <a class="btn btn-sm btn-danger" ng-click="makeAdmin(user)" ng-show="user.id !== user_id && user.rol !== 'admin'" data-toggle="tooltip" data-placement="bottom" title="Make user an admin"><span class="fa fa-user-secret"></span></a>
