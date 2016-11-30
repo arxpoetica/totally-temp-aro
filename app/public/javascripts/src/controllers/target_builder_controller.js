@@ -1,4 +1,4 @@
-/* global app user_id google $ map FormData XMLHttpRequest swal config */
+/* global app user_id google $ map FormData XMLHttpRequest swal config _ */
 // Search Controller
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, $timeout, optimization) => {
   // Controller instance variables
@@ -14,6 +14,166 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.showHeatmapAlert = false
   $scope.targets = []
   $scope.targetsTotal = 0
+
+  // ARO version
+  $scope.optimizationMode = 'targets'
+  $scope.entityTypes = [
+    { id: 'optimizeSMB', value: 'SMB', name: 'small' },
+    { id: 'optimizeMedium', value: 'Mid-tier', name: 'medium' },
+    { id: 'optimizeLarge', value: 'Large Enterprise', name: 'large' },
+    { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
+    { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
+  ]
+  $scope.entityTypesTargeted = {}
+
+  $scope.calculating = false
+
+  $scope.optimizeHouseholds = true
+  $scope.optimizeBusinesses = true
+  $scope.optimizeSMB = true // special case
+  $scope.optimizeTowers = true
+
+  $scope.optimizationType = 'CAPEX'
+  $scope.irrThreshold = $scope.irrThresholdRange = 10
+  $scope.budget = 10000000
+  $scope.technology = 'direct_routing' // 'odn1'
+  $scope.optimizationTypeOptions = [
+    { id: 'CAPEX', label: 'Full Coverage' },
+    { id: 'IRR', label: 'ROI Routing' }
+  ]
+  var budgetInput = $('#area_network_planning_controller input[name=budget]')
+  budgetInput.val($scope.budget.toLocaleString())
+
+  const parseBudget = () => +(budgetInput.val() || '0').match(/\d+/g).join('') || 0
+
+  budgetInput.on('focus', () => {
+    budgetInput.val(String(parseBudget()))
+  })
+
+  budgetInput.on('blur', () => {
+    budgetInput.val(parseBudget().toLocaleString())
+  })
+
+  $rootScope.$on('plan_selected', (e, plan) => {
+    if (plan) {
+      $scope.entityTypes.forEach((entity) => {
+        $scope.entityTypesTargeted[entity.id] = true
+      })
+    }
+  })
+
+  $scope.irrThresholdRangeChanged = () => {
+    $scope.irrThreshold = +$scope.irrThresholdRange
+  }
+
+  $scope.irrThresholdChanged = () => {
+    $scope.irrThresholdRange = $scope.irrThreshold
+  }
+
+  var canceler = null
+  $scope.cancel = () => {
+    swal({
+      title: 'Are you sure?',
+      text: 'Are you sure you want to cancel?',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, cancel it',
+      cancelButtonText: 'Keep Going',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, () => {
+      canceler.resolve()
+      canceler = null
+    })
+  }
+
+  $scope.run = () => {
+    var locationTypes = []
+    var scope = config.ui.eye_checkboxes ? $rootScope : $scope
+
+    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+      scope = $scope.entityTypesTargeted
+    }
+
+    if (scope.optimizeHouseholds) locationTypes.push('household')
+    if (scope.optimizeBusinesses) locationTypes.push('businesses')
+    if (scope.optimizeMedium) locationTypes.push('medium')
+    if (scope.optimizeLarge) locationTypes.push('large')
+    if (scope.optimizeSMB) locationTypes.push('small')
+    if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
+    if (scope.optimizeTowers) locationTypes.push('celltower')
+
+    var processingLayers = []
+    var algorithm = $scope.optimizationType
+    var changes = {
+      locationTypes: locationTypes,
+      algorithm: $scope.optimizationType,
+      budget: parseBudget(),
+      irrThreshold: $scope.irrThreshold / 100,
+      selectionMode: 'SELECTED_LOCATIONS'
+    }
+    if ($rootScope.selectedUserDefinedBoundary) {
+      processingLayers.push($rootScope.selectedUserDefinedBoundary.id)
+    }
+    if (processingLayers.length > 0) {
+      changes.processingLayers = _.uniq(processingLayers)
+    }
+
+    if (algorithm === 'CAPEX') {
+      algorithm = 'UNCONSTRAINED'
+      delete changes.budget
+      delete changes.irrThreshold
+    } else if (algorithm === 'MAX_IRR') {
+      delete changes.budget
+      delete changes.irrThreshold
+    } else if (algorithm === 'IRR') {
+      delete changes.irrThreshold
+    } else if (algorithm === 'BUDGET_IRR') {
+    }
+
+    changes.fiberNetworkConstraints = {
+      useDirectRouting: $scope.technology === 'direct_routing'
+    }
+
+    var selectLocationTypes = []
+    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+      selectLocationTypes = Object.keys($scope.entityTypesTargeted)
+        .map((key) => {
+          return $scope.entityTypesTargeted[key]
+            ? $scope.entityTypes.find((type) => type.id === key).name
+            : null
+        })
+        .filter((val) => val)
+    }
+
+    if ($scope.selectedBoundary) {
+      changes.processingLayers = [$scope.selectedBoundary.id]
+    }
+
+    canceler = optimization.optimize($scope.plan, changes, () => {
+      $scope.calculating = false
+      if (selectLocationTypes.length > 0) {
+        $rootScope.$broadcast('select_locations', selectLocationTypes)
+      }
+    }, () => {
+      $scope.calculating = false
+    })
+  }
+
+  // processing layer
+  $scope.allBoundaries = []
+  $scope.selectedBoundary = null
+
+  function loadBoundaries () {
+    $http.get('/boundary/all')
+      .success((response) => {
+        $scope.allBoundaries = response
+      })
+  }
+
+  loadBoundaries()
+  $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
+  // --
 
   $rootScope.$on('map_layer_loaded_data', (e, layer) => {
     if (layer.type !== 'locations') return
