@@ -156,6 +156,22 @@
 </div>
 <% } %>
 
+<div class="map-tool-wrapper" ng-controller="backhaul-controller">
+  <div ng-show="map_tools.is_visible('backhaul')" class="map-tool panel panel-primary">
+    <div class="panel-heading" ng-bind="map_tools.get_tool_name('backhaul')">
+      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('backhaul')" ng-click="map_tools.collapse('backhaul')">
+        <span style="color:white" class="fa fa-chevron-up"></span>
+      </a>
+      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('backhaul')" ng-click="map_tools.expand('backhaul')">
+        <span style="color:white" class="fa fa-chevron-down"></span>
+      </a>
+    </div>
+    <div class="panel-body" ng-show="map_tools.is_expanded('backhaul')">
+      <% include controller_backhaul.html %>
+    </div>
+  </div>
+</div>
+
 <div ng-controller="map_tools_controller">
   <div ng-repeat="tool in map_tools.available_tools">
     <hr ng-if="tool.separator">

@@ -3,6 +3,7 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
   $scope.plan = null
   $scope.addingLinks = false
   $scope.isEquipmentVisible = false
+  $scope.map_tools = map_tools
 
   var lineSymbol = {
     path: 'M 0,-1 0,1',
