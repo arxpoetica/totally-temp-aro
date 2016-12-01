@@ -238,12 +238,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
     $scope.selectedUserDefinedBoundary = null
     $rootScope.selectedUserDefinedBoundary = null
-    if ($scope.userDefinedBoundaries.length === 0) {
-      $http.get('/boundary/user_defined')
-        .success((response) => {
-          $scope.userDefinedBoundaries = response
-        })
-    }
+    $http.get('/boundary/user_defined')
+      .success((response) => {
+        $scope.userDefinedBoundaries = response
+      })
   })
 
   function updateTooltips () {
