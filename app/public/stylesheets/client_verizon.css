@@ -189,3 +189,7 @@
 .custom-ui-vz {
   display: block;
 }
+
+#measuring-stick-result {
+  left: 10px;
+}
