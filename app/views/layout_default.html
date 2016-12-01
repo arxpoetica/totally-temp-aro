@@ -38,6 +38,11 @@
       </button>
     </p>
   </div>
+  <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="measuredDistance">
+    <div class="panel-heading">
+      Measured distance: {{ measuredDistance * 0.000621371 | number: 2 }} mi
+    </div>
+  </div>
 
 <div class="map-tool-wrapper">
   <div ng-show="map_tools.is_visible('locations')" class="map-tool panel panel-primary">
