@@ -129,6 +129,13 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
   }
 
   tools.available_tools.push({
+    id: 'backhaul',
+    name: 'Backhaul',
+    short_name: 'BH',
+    icon: 'icon icon-network-planning-targeted'
+  })
+
+  tools.available_tools.push({
     id: 'financial_profile',
     name: 'Financial Profile',
     short_name: 'F',
