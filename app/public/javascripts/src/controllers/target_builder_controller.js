@@ -39,7 +39,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.technology = 'direct_routing' // 'odn1'
   $scope.optimizationTypeOptions = [
     { id: 'CAPEX', label: 'Full Coverage' },
-    { id: 'IRR', label: 'ROI Routing' }
+    { id: 'IRR', label: 'ROI Routing' },
+    { id: 'MAX_IRR', label: 'Maximum IRR' }
   ]
   var budgetInput = $('#target_builder_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
