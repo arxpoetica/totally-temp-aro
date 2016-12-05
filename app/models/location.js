@@ -118,6 +118,12 @@ module.exports = class Location {
       )
     `
     return database.points(sql, [plan_id], true, viewport)
+      .then((output) => {
+        if (output.feature_collection.features.length < 200) return output
+        viewport.threshold = 100
+        viewport.buffer *= 10
+        return database.points(sql, [plan_id], true, viewport, true)
+      })
   }
 
   // Selected locations as a list
