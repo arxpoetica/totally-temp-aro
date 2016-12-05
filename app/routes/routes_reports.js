@@ -109,6 +109,17 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/reports/fiber_zone_summary/:plan_id', (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var req = {
+      method: 'GET',
+      url: config.aro_service_url + `/rest/report-extended/fiber_zone_summary/${plan_id}.csv`
+    }
+    return models.AROService.request(req)
+      .then((output) => response.send(output))
+      .catch(next)
+  })
+
   api.get('/reports/tabc/:plan_id/kml/:type', (request, response, next) => {
     var plan_id = request.params.plan_id
     var type = request.params.type

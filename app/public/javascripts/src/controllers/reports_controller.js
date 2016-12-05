@@ -1,42 +1,6 @@
-/* global app _ $ */
+/* global app $ */
 app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
-  $scope.reports = [
-    {
-      name: 'My new report',
-      type: 'User-created',
-      createdAt: '10/19/2016',
-      owner: 'Dan Huntington'
-    },
-    {
-      name: 'Test',
-      type: 'Analysis-generated',
-      createdAt: '10/19/2016',
-      owner: 'Dan Huntington'
-    },
-    {
-      name: 'My new report',
-      type: 'User-created',
-      createdAt: '10/19/2016',
-      owner: 'Dan Huntington'
-    },
-    {
-      name: 'Test',
-      type: 'Analysis-generated',
-      createdAt: '10/19/2016',
-      owner: 'Dan Huntington'
-    }
-  ]
-
   $scope.analysis = []
-
-  $scope.sortBy = (field, descending) => {
-    $scope.reports = _.sortBy($scope.reports, (report) => {
-      return report[field] || ''
-    })
-    if (descending) {
-      $scope.reports = $scope.reports.reverse()
-    }
-  }
 
   var backToReports = true
   $scope.openReport = (report, back) => {
@@ -99,6 +63,15 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           name: `Analysis Polygons ${plan.name}`,
           type: '.kml',
           url: `/reports/user_defined/${plan.id}/kml`
+        },
+        {
+          name: `Municipality Stats ${plan.name}`,
+          type: '.kml'
+        },
+        {
+          name: `Fibre zone summary ${plan.name}`,
+          type: '.csv',
+          url: `/reports/fiber_zone_summary/${plan.id}`
         }
       ])
       $scope.analysis = analysis
