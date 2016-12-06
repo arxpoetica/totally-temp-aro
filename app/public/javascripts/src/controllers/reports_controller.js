@@ -69,10 +69,6 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           url: `/reports/user_defined/${plan.id}/kml`
         },
         {
-          name: `${prefix(8)} Municipality Stats`,
-          type: '.kml'
-        },
-        {
           name: `${prefix(10)}_Fiber_Zone_summary`,
           type: '.csv',
           url: `/reports/fiber_zone_summary/${plan.id}`
