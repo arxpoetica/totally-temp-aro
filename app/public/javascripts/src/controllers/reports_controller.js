@@ -71,7 +71,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
         {
           name: `${prefix(10)}_Fiber_Zone_summary`,
           type: '.csv',
-          url: `/reports/fiber_zone_summary/${plan.id}`
+          url: `/reports/tabc/${plan.id}/fiber_zone_summary`
         },
         {
           name: `${prefix(12)}_T_route_400m_prem_passed`,
