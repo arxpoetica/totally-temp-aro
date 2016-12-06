@@ -154,10 +154,7 @@ exports.configure = (api, middleware) => {
       return database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
         .then((plan) => {
           return models.NetworkPlan.exportKml(plan_id, planQuery)
-            .then((kmlOutput) => {
-              response.attachment(`TABC ${request.params.type} ${plan.name}.kml`)
-              response.send(kmlOutput)
-            })
+            .then((kmlOutput) => response.send(kmlOutput))
         })
     })
     .catch(next)
