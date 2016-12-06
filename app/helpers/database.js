@@ -81,7 +81,7 @@ module.exports = class Database {
     return `${prefix} ST_Intersects(ST_SetSRID(ST_MakePolygon(ST_GeomFromText('${viewport.linestring}')), 4326), ${column})`
   }
 
-  static points (sql, params, asFeatureCollection, viewport) {
+  static points (sql, params, asFeatureCollection, viewport, noDensity) {
     var finalSql
     var prefix = sql.trim().indexOf('WITH') === 0 ? sql : `WITH features AS (${sql})`
     if (viewport.zoom > viewport.threshold) {
@@ -96,7 +96,7 @@ module.exports = class Database {
       finalSql = `
         ${prefix}
         SELECT
-          COUNT(*) AS density,
+          ${!noDensity ? 'COUNT(*) AS density,' : ''}
           ${
             viewport.heatmap
             ? 'ST_AsGeoJSON(ST_Centroid(ST_Collect(f.geom)))::json AS geom,'

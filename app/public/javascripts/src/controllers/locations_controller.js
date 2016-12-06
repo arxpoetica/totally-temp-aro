@@ -58,9 +58,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   var locationStyles = {
     normal: {
       visible: true,
-      fillColor: 'blue',
-      strokeColor: 'blue',
-      strokeWeight: 1
+      fillColor: 'white',
+      strokeColor: 'red',
+      strokeWeight: 1,
+      fillOpacity: 0.7
     },
     selected: {
       visible: true,

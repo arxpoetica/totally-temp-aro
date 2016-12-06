@@ -299,6 +299,10 @@ footer nav {
   background: url(/images/button_icons/boundaries.png);
 }
 
+.icon-backhaul {
+  background: url(/images/button_icons/backhaul.png);
+}
+
 .icon-locations {
   width: 17px;
   width: 6px;

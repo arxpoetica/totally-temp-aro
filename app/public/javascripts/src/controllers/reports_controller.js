@@ -1,42 +1,6 @@
-/* global app _ $ */
+/* global app $ */
 app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
-  $scope.reports = [
-    {
-      name: 'My new report',
-      type: 'User-created',
-      createdAt: '10/19/2016',
-      owner: 'Dan Huntington'
-    },
-    {
-      name: 'Test',
-      type: 'Analysis-generated',
-      createdAt: '10/19/2016',
-      owner: 'Dan Huntington'
-    },
-    {
-      name: 'My new report',
-      type: 'User-created',
-      createdAt: '10/19/2016',
-      owner: 'Dan Huntington'
-    },
-    {
-      name: 'Test',
-      type: 'Analysis-generated',
-      createdAt: '10/19/2016',
-      owner: 'Dan Huntington'
-    }
-  ]
-
   $scope.analysis = []
-
-  $scope.sortBy = (field, descending) => {
-    $scope.reports = _.sortBy($scope.reports, (report) => {
-      return report[field] || ''
-    })
-    if (descending) {
-      $scope.reports = $scope.reports.reverse()
-    }
-  }
 
   var backToReports = true
   $scope.openReport = (report, back) => {
@@ -61,44 +25,62 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
     $scope.analysis = []
     $http.get(`/reports/tabc/${plan.id}/list`).success((response) => {
       if ($scope.plan.id !== plan.id) return
-      var names = ['T', 'A', 'B', 'C']
+      var twoDigits = (d) => d > 9 ? String(d) : '0' + d
+      var date = new Date()
+      var now = `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`
+      var prefix = (reportId) => `${now}_${plan.id}_${twoDigits(reportId)}_${plan.area_name}`
+      var tabcNames = [
+        { name: 'T', id: 1, description: 'A_ring' },
+        { name: 'A', id: 2, description: 'B_ring' },
+        { name: 'B', id: 3, description: 'C_ring' },
+        { name: 'C', id: 4, description: 'D_ring' }
+      ]
       var analysis = [
         {
-          name: `TABC Summary Stats ${plan.name}`,
+          name: `${prefix(0)}_ABCD_summary`,
           type: '.csv',
           url: `/reports/tabc/${plan.id}/summary_query`
         }
       ]
-      var kml = names
-        .filter((name) => response.indexOf(name) >= 0)
-        .map((name) => {
+      var kml = tabcNames
+        .filter((tabcName) => response.indexOf(tabcName.name) >= 0)
+        .map((tabcName) => {
           return {
-            name: `${name} Route ${plan.name}`,
+            name: `${prefix(tabcName.id)}_${tabcName.description}`,
             type: '.kml',
-            url: `/reports/tabc/${plan.id}/kml/${name}`
+            url: `/reports/tabc/${plan.id}/kml/${tabcName.name}`
           }
         })
       analysis = analysis.concat(kml)
       analysis = analysis.concat([
         {
-          name: `All TABC Endpoints ${plan.name}`,
+          name: `${prefix(5)}_endpoints_CRAN_maps`,
           type: '.csv',
           url: `/reports/tabc/${plan.id}/master_output_producer`
         },
         {
-          name: `Dropped Tower Details ${plan.name}`,
+          name: `${prefix(6)}_dropped_included_towers_list`,
           type: '.csv',
           url: `/reports/tabc/${plan.id}/tower_details`
+        },
+        {
+          name: `${prefix(7)}_Thiessen_Polygons`,
+          type: '.kml',
+          url: `/reports/user_defined/${plan.id}/kml`
+        },
+        {
+          name: `${prefix(10)}_Fiber_Zone_summary`,
+          type: '.csv',
+          url: `/reports/tabc/${plan.id}/fiber_zone_summary`
+        },
+        {
+          name: `${prefix(12)}_T_route_400m_prem_passed`,
+          type: '.csv'
         },
         {
           name: 'TABC Summary Formatted',
           type: '.xlsx',
           url: '/csv/TABC Summary Formatted.xlsx'
-        },
-        {
-          name: `Analysis Polygons ${plan.name}`,
-          type: '.kml',
-          url: `/reports/user_defined/${plan.id}/kml`
         }
       ])
       $scope.analysis = analysis
