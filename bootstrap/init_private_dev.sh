@@ -12,7 +12,6 @@ if [ $# -eq 3 ]; then
   export STATE_CODES=$3
 fi
 
-
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 export ETL_LOG_FILE=$DIR/etl.log
 export PGBIN=/usr/bin
@@ -43,7 +42,10 @@ make stage_reference
 make reset_view
 make load_view
 
-make reset_public
-make load_public
+make reset_stage_private
+make stage_private
+
+make reset_private
+make load_private
 
 node ../app/cli/register_user -f Admin -l User -e $ADMIN_USER_EMAIL -p $ADMIN_USER_PASSWORD -r admin
