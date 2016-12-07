@@ -342,7 +342,7 @@ module.exports = class Network {
           var id = geography.id
           var params = [plan_id, geography.name, id, type, geography.layerId || null]
           var queries = {
-            'census_blocks': '(SELECT geom FROM census_blocks WHERE id=$3::bigint)',
+            'census_blocks': '(SELECT geom FROM census_blocks WHERE gid=$3::bigint)',
             'county_subdivisions': '(SELECT geom FROM cousub WHERE gid=$3::bigint)'
           }
           var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
