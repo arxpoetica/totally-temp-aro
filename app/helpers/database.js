@@ -151,10 +151,9 @@ module.exports = class Database {
       finalSql = `
         WITH features AS (${sql})
         SELECT
-          COUNT(*) AS _density,
-          ST_AsGeoJSON(ST_Envelope( ST_SnapToGrid(geom, $${params.length + 1}) ))::json AS geom
+          features.*,
+          ST_AsGeoJSON(ST_RemoveRepeatedPoints(geom, $${params.length + 1}))::json AS geom
         FROM features
-        GROUP BY ST_SnapToGrid(geom, $${params.length + 1})
       `
       params.push(viewport.buffer * 3)
     }
