@@ -24,14 +24,14 @@ module.exports = class Location {
     if (dataSources.length === 0) dataSources = [-1]
 
     var sql = `
-      WITH view_window as (
-          select ST_SetSRID(ST_MakePolygon(ST_GeomFromText('${viewport.linestring}')), 4326) as geog
-        ),
-        states AS (
+      WITH view_window AS (
+        SELECT ST_SetSRID(ST_MakePolygon(ST_GeomFromText('${viewport.linestring}')), 4326) AS geog
+      ),
+      states AS (
         SELECT st.stusps
         FROM aro.states st
-            JOIN view_window vw
-                ON st_intersects(cast(vw.geog AS GEOMETRY), st.geom)
+        JOIN view_window vw
+          ON ST_Intersects(cast(vw.geog AS GEOMETRY), st.geom)
       ),
       features AS (
         SELECT l.id, l.geom,
