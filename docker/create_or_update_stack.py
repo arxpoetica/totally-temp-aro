@@ -155,7 +155,7 @@ def provision_stack(cloudformation_stack):
         # internal_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ExtraInternalLayer'),
         rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance'),
         environment=environment,
-        name='ARO',
+        name='ARO-' + SERVICE_TAG,
         name_component=real_name_component,
         db={'user': db_user, 'pass': db_pass, 'host': db_host },
         dbpass=db_pass,
