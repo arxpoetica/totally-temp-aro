@@ -28,7 +28,7 @@ PROJECT_TAG = 'AIT:ARO'
 PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-',
                      'PRODUCTION': 'P-ARO-',
                      'STAGING': 'S-ARO-'}
-SERVICE_TAG = 'aro-app'
+SERVICE_TAG = 'APP'
 TEMPLATE_URLS = {
     'QA': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
     'STAGING': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
@@ -38,7 +38,7 @@ TEMPLATE_URLS = {
 if environment == 'PROD':
     TEMPLATE_FILE = os.path.dirname(__file__) + '/P-ARO-template.yml'
 elif environment == 'QA':
-    TEMPLATE_FILE = os.path.dirname(__file__) + '/S-ARO-QA-template.yml'
+    TEMPLATE_FILE = os.path.dirname(__file__) + '/S-ARO-APP-QA-template.yml'
 else:
     TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json' 
 with open(TEMPLATE_FILE, 'r') as template_file:
@@ -63,7 +63,7 @@ name_component = os.environ.get('ARO_APP_NAME_COMPONENT') if environment == 'PRO
 decrypt_key = os.environ.get('ARO_APP_DECRYPT_KEY')
 token_key = os.environ.get('ARO_APP_TOKEN_KEY')
 db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
-db_pass = os.environ.get('ARO_APP_DB_PASS')
+db_pass = os.environ['ARO_APP_DB_PASS']
 docker_pass = os.environ['DOCKER_PASS']
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
 app_default_admin_email = os.environ['ARO_APP_DEFAULT_ADMIN_EMAIL']
@@ -71,7 +71,7 @@ app_default_admin_password = os.environ['ARO_APP_DEFAULT_ADMIN_PASSWORD']
 
 session = Session(region_name='us-east-1')
 
-cloudformation_stack_name = PROJECT_BASE_NAME[environment] + name_component
+cloudformation_stack_name = PROJECT_BASE_NAME[environment] + SERVICE_TAG + '-' + name_component
 # host_name = domain_name + '.aro.app.altvil.com' if environment == 'PRODUCTION' else branch_name + '.aro.staging.app.altvil.com'
 
 if environment == 'PRODUCTION':
@@ -81,6 +81,8 @@ elif environment == 'STAGING':
 else:
     host_name = branch_name + '.aro.qa.app.altvil.com'
 app_base_url = 'https://' + host_name
+aro_service_url = os.environ.get('ARO_SERVICE_URL') or 'http://service.' + host_name + '/aro-service'
+db_host = os.environ.get('ARO_DB_HOST')
 
 cloudformation_client = boto3.client('cloudformation', region_name='us-east-1')
 cloudformation = session.resource('cloudformation')
@@ -94,7 +96,7 @@ cloudwatch_client = boto3.client('cloudwatch', region_name='us-east-1')
 def create_new_stack():
     """Create a new Staging CloudFormation stack (and OpsWorks stack)"""
     parameters = {
-        'RdsFlag': 'yes',
+        # 'RdsFlag': 'yes',
         'DBUsername': db_user,
         'DBPassword': db_pass,
         # 'StackBranchName': branch_name,
@@ -155,7 +157,10 @@ def provision_stack(cloudformation_stack):
         environment=environment,
         name='ARO',
         name_component=real_name_component,
-        db={'user': db_user, 'pass': db_pass},
+        db={'user': db_user, 'pass': db_pass, 'host': db_host },
+        dbpass=db_pass,
+        dbhost=db_host,
+        dbuser=db_user,
         docker_pass=docker_pass,
         environment_vars=_set_environment(),
         start_stack=True,
@@ -163,7 +168,7 @@ def provision_stack(cloudformation_stack):
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='m4.xlarge',
+        instance_type='t2.large',
         app_initial_email=app_default_admin_email,
         app_initial_password=app_default_admin_password
     )
@@ -180,7 +185,11 @@ def update_stack(outputs):
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
         docker_pass=docker_pass,
         environment_vars=_set_environment(),
-        opsworks_client=opsworks_client
+        opsworks_client=opsworks_client,
+        dbhost=db_host,
+        dbpass=db_pass,
+        dbuser=db_user
+        
     )
     # re-enable alarms
     cloudwatch_client.enable_alarm_actions(AlarmNames=[http_alarm, elb_alarm])
@@ -200,7 +209,8 @@ def _set_environment():
             { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
             { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
             { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False },
-            { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False }]
+            { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False },
+            { 'Key': 'ARO_SERVICE_URL', 'Value': str(aro_service_url), 'Secure': False }]
 
 
 

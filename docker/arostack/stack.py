@@ -139,6 +139,9 @@ def provision_aro_stack(opsworks_stack_id=None,
                         name='',
                         name_component='',
                         db={},
+                        dbuser='',
+                        dbhost='',
+                        dbpass='',
                         docker_pass='',
                         environment_vars=[],
                         start_stack=False,
@@ -158,31 +161,34 @@ def provision_aro_stack(opsworks_stack_id=None,
     INSTANCE_CREATE_DELAY = 10
 
     # Attach RDS instance to OpsWorks stack if provided
-    if db:
-        rds_instance_arn = "arn:aws:rds:us-east-1:%s:db:%s" % (AWS_ACCOUNT_ID, rds_instance_identifier)
-        rds_response = opsworks_client.register_rds_db_instance(
-            StackId=opsworks_stack_id,
-            RdsDbInstanceArn=rds_instance_arn,
-            DbUser=db['user'],
-            DbPassword=db['pass']
-        )
+    # if db:
+    #     rds_instance_arn = "arn:aws:rds:us-east-1:%s:db:%s" % (AWS_ACCOUNT_ID, rds_instance_identifier)
+    #     rds_response = opsworks_client.register_rds_db_instance(
+    #         StackId=opsworks_stack_id,
+    #         RdsDbInstanceArn=rds_instance_arn,
+    #         DbUser=db['user'],
+    #         DbPassword=db['pass']
+    #     )
 
     # Add an app and an instance
-    data_sources = [
-            { 'Type': 'RdsDbInstance',
-              'Arn': rds_instance_arn,
-              'DatabaseName': db.get('name') or 'aro' }
-        ] if db else []
+    # data_sources = [
+    #         { 'Type': 'RdsDbInstance',
+    #           'Arn': rds_instance_arn,
+    #           'DatabaseName': db.get('name') or 'aro' }
+    #     ] if db else []
     app_response = opsworks_client.create_app(
         StackId=opsworks_stack_id,
         Shortname='aro',
         Name='aro',
-        DataSources=data_sources,
+        # DataSources=data_sources,
         Type='other',
         EnableSsl=False,
-        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True } ] + environment_vars
+        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True },
+                      { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
+                      { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
+                      { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': True} ] + environment_vars
     )
-    ids = [opsworks_layer_id, internal_layer_id]
+    ids = [opsworks_layer_id]
     instance_response = opsworks_client.create_instance(
         StackId=opsworks_stack_id,
         LayerIds=[id for id in ids if id],
@@ -270,7 +276,10 @@ def provision_aro_stack(opsworks_stack_id=None,
 def deploy_aro_stack(opsworks_stack_id=None,
                      docker_pass='',
                      environment_vars=[],
-                     opsworks_client=None):
+                     opsworks_client=None,
+                     dbpass='',
+                     dbuser='',
+                     dbhost=''):
     """Update a previously created and provisioned stack"""
     opsworks_client = opsworks_client or boto3.client('opsworks', region='us-east-1')
 
@@ -278,7 +287,11 @@ def deploy_aro_stack(opsworks_stack_id=None,
     app_id = apps_response['Apps'][0]['AppId']
     update_response = opsworks_client.update_app(
         AppId=app_id,
-        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True } ] + environment_vars
+        # Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True } ] + environment_vars
+        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True },
+                      { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
+                      { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
+                      { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': False} ] + environment_vars
     )
 
     deploy_response = opsworks_client.create_deployment(
