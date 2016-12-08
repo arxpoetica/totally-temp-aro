@@ -139,7 +139,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     if (scope.optimizeHouseholds) locationTypes.push('household')
-    if (scope.optimizeBusinesses) locationTypes.push('businesses')
+    if (scope.optimizeBusinesses) {
+      // locationTypes.push('businesses')
+      locationTypes.push('large')
+      locationTypes.push('medium')
+    }
     if (scope.optimizeMedium) locationTypes.push('medium')
     if (scope.optimizeLarge) locationTypes.push('large')
     if (scope.optimizeSMB) locationTypes.push('small')

@@ -255,7 +255,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
 
     var data = {
       labels: [],
-      datasets: [dataset, carrierDataset]
+      datasets: [dataset] // carrierDataset
     }
 
     $scope.market_size.forEach((row) => {
