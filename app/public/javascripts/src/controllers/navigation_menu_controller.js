@@ -294,7 +294,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.save_changes = () => {
     $scope.plan.name = $scope.edit_plan_name
-    $http.post('/network_plan/' + $scope.plan.id + '/save', $scope.plan).success((response) => {
+    $http.post('/network_plan/' + $scope.plan.id + '/save', { name: $scope.plan.name }).success((response) => {
       $('#edit-plan').modal('hide')
     })
   }
