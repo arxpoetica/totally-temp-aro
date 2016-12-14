@@ -53,18 +53,6 @@
                 </div>
               </div>
 
-              <div ng-repeat="layer in serviceLayer.layers">
-                <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
-                <div class="pull-right">
-                  <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible" ng-disabled="!vztfttp || !serviceLayer.enabled">
-                </div>
-                <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
-                  <label style="font-weight:normal">
-                    {{layer.name}}
-                  </label>
-                </div>
-              </div>
-
               <div ng-if="serviceLayer.id === 'all'">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color:blue; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
@@ -111,6 +99,40 @@
                 </label>
               </div>
               -->
+
+              <div ng-repeat="layer in serviceLayer.layers">
+                <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
+                <div class="pull-right">
+                  <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                </div>
+                <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
+                  <label style="font-weight:normal">
+                    {{layer.name}}
+                  </label>
+                </div>
+              </div>
+
+              <div ng-show="serviceLayer.id === 'existing_fiber'">
+                <div class="pull-left" style="margin-right: 5px"><span style="background-color: #eee; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
+                <div class="pull-right">
+                  <input type="checkbox" ng-click="toggleShowUploadedFiber()" ng-checked="showUploadedFiber">
+                </div>
+                <div ng-attr-id="map_layers_toggle_{{layer.key}}">
+                  <label style="font-weight:normal">
+                    Uploaded Fiber
+                  </label>
+                </div>
+              </div>
+
+              <div ng-show="serviceLayer.id === 'existing_fiber' && showUploadedFiber">
+                <input class="form-control" id="uploadedFiberSelect"
+                    ng-change="changeFibersLayer()"
+                    ng-model="selectedDatasource">
+                <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
+                  <span class="fa fa-plus"></span> Add fiber
+                </button>
+              </div>
+
             </div>
           </div>
         </div>

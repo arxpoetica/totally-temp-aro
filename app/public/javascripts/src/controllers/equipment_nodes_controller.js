@@ -388,4 +388,28 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   accordion.on('click', '[data-parent="#serviceLayersAccordion"]', (e) => {
     e.preventDefault()
   })
+
+  var uploadedFiberSelect = $('#uploadedFiberSelect')
+  $scope.showUploadedFiber = false
+  $scope.toggleShowUploadedFiber = () => {
+    $scope.showUploadedFiber = !$scope.showUploadedFiber
+  }
+
+  function reloadDatasources (callback) {
+    // Work in progress
+    $http.get('/datasources').success((response) => {
+      $scope.datasources = response
+      uploadedFiberSelect.select2({
+        placeholder: 'Select one or more datasets',
+        escapeMarkup: (m) => m,
+        data: response.map((item) => ({ id: item.dataSourceId, text: item.name })),
+        multiple: true
+      })
+      callback && callback(response)
+    })
+  }
+
+  $scope.addFiber = () => {
+    $('#upload_fiber_modal').modal('show')
+  }
 }])
