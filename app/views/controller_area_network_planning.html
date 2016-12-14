@@ -77,13 +77,16 @@
 
   <p ng-hide="selectedRegions.length > 0"><em>No geographies selected</em></p>
   <ul ng-show="selectedRegions.length > 0" style="list-style-type:none; padding:0">
-    <li ng-repeat="geography in selectedRegions">
+    <li ng-repeat="geography in selectedRegions | limitTo:5">
       <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
         <span class="fa fa-trash-o"></span>
       </a>
       {{ geography.name }}
     </li>
   </ul>
+  <p ng-show="selectedRegions.length > 5">
+    {{ selectedRegions.length - 5 }} additional boundaries
+  </p>
   <p ng-show="selectedRegions.length > 0">
     <button class="btn btn-primary btn-sm" ng-click="removeAllGeographies()">Remove all boundaries</button>
   </p>
