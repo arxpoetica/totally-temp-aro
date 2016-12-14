@@ -155,7 +155,7 @@ module.exports = class Database {
           ST_AsGeoJSON(ST_RemoveRepeatedPoints(geom, $${params.length + 1}))::json AS geom
         FROM features
       `
-      params.push(viewport.buffer * 3)
+      params.push(viewport.buffer * 100)
     }
     return this.query(finalSql, params, asFeatureCollection)
   }

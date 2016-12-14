@@ -3,6 +3,7 @@ var database = require('./database')
 exports.serviceLayers = []
 exports.analysisLayers = []
 exports.fiberTypes = []
+exports.existingFiberSourceNames = []
 
 function loadFiberTypes () {
   return database.query('SELECT * FROM client.fiber_route_type')
@@ -35,11 +36,19 @@ function loadAnalysisLayers () {
     })
 }
 
+function loadExistingFiberSourceNames () {
+  return database.query('SELECT DISTINCT(source_name) AS source_name FROM client.existing_fiber')
+    .then((names) => {
+      exports.existingFiberSourceNames = names.map((row) => row.source_name)
+    })
+}
+
 exports.refresh = () => {
   return Promise.all([
     loadAnalysisLayers(),
     loadServiceLayers(),
-    loadFiberTypes()
+    loadFiberTypes(),
+    loadExistingFiberSourceNames()
   ])
   .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
 }

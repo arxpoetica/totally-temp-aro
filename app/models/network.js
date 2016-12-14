@@ -35,12 +35,14 @@ module.exports = class Network {
   }
 
   // View existing fiber plant for the current carrier
-  static viewFiberPlantForCurrentCarrier (viewport) {
+  static viewFiberPlantForCurrentCarrier (viewport, sourceName) {
     var sql = `
       SELECT geom FROM client.existing_fiber
-      ${database.intersects(viewport, 'geom', 'WHERE')}
+      WHERE source_name=$1
+      ${database.intersects(viewport, 'geom', 'AND')}
     `
-    return database.lines(sql, [], true, viewport)
+    console.log('sql', sourceName)
+    return database.lines(sql, [sourceName], true, viewport)
   }
 
   // View existing fiber plant for a carrier
