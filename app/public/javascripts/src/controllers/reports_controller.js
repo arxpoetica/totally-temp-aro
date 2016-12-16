@@ -78,9 +78,9 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           type: '.csv'
         },
         {
-          name: 'TABC Summary Formatted',
+          name: 'ABCD Summary Formatted',
           type: '.xlsx',
-          url: '/csv/TABC Summary Formatted.xlsx'
+          url: '/csv/ABCD Summary Formatted.xlsx'
         }
       ])
       $scope.analysis = analysis
