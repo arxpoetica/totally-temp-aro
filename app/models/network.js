@@ -302,7 +302,7 @@ module.exports = class Network {
       'TARGET_IRR': 'IRR',
       'BUDGET_IRR': 'IRR',
       'IRR': 'IRR',
-      'TABC': 'CUSTOM'
+      'ABCD': 'CUSTOM'
     }
     options.algorithm = algorithms[options.algorithm] || options.algorithm
     options.locationTypes = Array.isArray(options.locationTypes) ? options.locationTypes : []

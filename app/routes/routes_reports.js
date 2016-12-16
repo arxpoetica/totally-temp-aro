@@ -3,7 +3,7 @@ var models = require('../models')
 var config = helpers.config
 var database = helpers.database
 
-function listTABC (plan_id) {
+function listABCD (plan_id) {
   var names = ['T', 'A', 'B', 'C']
   return database.query(`
       SELECT name FROM client.plan r
@@ -90,14 +90,14 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/reports/tabc/:plan_id/list', (request, response, next) => {
+  api.get('/reports/abcd/:plan_id/list', (request, response, next) => {
     var plan_id = request.params.plan_id
-    return listTABC(plan_id)
+    return listABCD(plan_id)
       .then((output) => response.send(output))
       .catch(next)
   })
 
-  api.get('/reports/tabc/:plan_id/:name', (request, response, next) => {
+  api.get('/reports/abcd/:plan_id/:name', (request, response, next) => {
     var name = request.params.name
     var plan_id = request.params.plan_id
     var req = {
@@ -109,10 +109,10 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/reports/tabc/:plan_id/kml/:type', (request, response, next) => {
+  api.get('/reports/abcd/:plan_id/kml/:type', (request, response, next) => {
     var plan_id = request.params.plan_id
     var type = request.params.type
-    listTABC(plan_id).then((names) => {
+    listABCD(plan_id).then((names) => {
       if (names.indexOf(type) === -1) {
         return next(new Error(`Unknown report type ${type}, or report not available`))
       }
