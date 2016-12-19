@@ -226,6 +226,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $http.get('/network_plan/' + plan.id).success((response) => {
       redrawRoute(response)
     })
+    reloadDatasources()
   })
 
   $rootScope.$on('plan_cleared', () => {
@@ -397,12 +398,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   function reloadDatasources (callback) {
     // Work in progress
-    $http.get('/datasources').success((response) => {
+    $http.get('/user_fiber/list').success((response) => {
       $scope.datasources = response
       uploadedFiberSelect.select2({
         placeholder: 'Select one or more datasets',
         escapeMarkup: (m) => m,
-        data: response.map((item) => ({ id: item.dataSourceId, text: item.name })),
+        data: response.map((item) => ({
+          id: item.systemId, text: item.description
+        })),
         multiple: true
       })
       callback && callback(response)

@@ -256,4 +256,18 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.get('/user_fiber/list', (request, response, next) => {
+    var userId = request.user.id
+    var req = {
+      url: config.aro_service_url + '/installed/fiber/metadata',
+      qs: {
+        'user-id': userId
+      },
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }
