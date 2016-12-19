@@ -150,7 +150,7 @@ exports.configure = (api, middleware) => {
     var userId = request.user.id
     var req = {
       method: 'GET',
-      url: config.aro_service_url + `/rest/user-entites/user/${userId}`,
+      url: config.aro_service_url + `/user-entites/user/${userId}`,
       json: true
     }
     return models.AROService.request(req)

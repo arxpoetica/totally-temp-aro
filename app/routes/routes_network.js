@@ -214,7 +214,7 @@ exports.configure = (api, middleware) => {
   api.get('/user_entities/list', (request, response, next) => {
     var userId = request.user.id
     var req = {
-      url: config.aro_service_url + `/rest/user-entites/user/${userId}`,
+      url: config.aro_service_url + `/user-entites/user/${userId}`,
       json: true
     }
     models.AROService.request(req)
@@ -226,7 +226,7 @@ exports.configure = (api, middleware) => {
     var id = request.body.userEntities
     var req = {
       method: 'DELETE',
-      url: config.aro_service_url + `/rest/user-entites/${id}`,
+      url: config.aro_service_url + `/user-entites/${id}`,
       json: true
     }
     models.AROService.request(req)
@@ -237,7 +237,7 @@ exports.configure = (api, middleware) => {
   api.get('/user_boundaries/list', (request, response, next) => {
     var userId = request.user.id
     var req = {
-      url: config.aro_service_url + `/rest/serviceLayers/${userId}`,
+      url: config.aro_service_url + `/serviceLayers/${userId}`,
       json: true
     }
     models.AROService.request(req)
@@ -249,7 +249,7 @@ exports.configure = (api, middleware) => {
     var id = request.body.userBoundaries
     var req = {
       method: 'DELETE',
-      url: config.aro_service_url + `/rest/serviceLayers/${id}`,
+      url: config.aro_service_url + `/serviceLayers/${id}`,
       json: true
     }
     models.AROService.request(req)

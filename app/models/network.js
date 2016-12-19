@@ -318,7 +318,7 @@ module.exports = class Network {
     }
     var req = {
       method: 'POST',
-      url: `${config.aro_service_url}/rest/optimize/masterplan`,
+      url: `${config.aro_service_url}/optimize/masterplan`,
       json: true,
       body: body
     }
@@ -422,7 +422,7 @@ module.exports = class Network {
 
   static planSummary (plan_id) {
     var req = {
-      url: config.aro_service_url + `/rest/report/plan/${plan_id}`,
+      url: config.aro_service_url + `/report/plan/${plan_id}`,
       json: true
     }
     return this._callService(req)
@@ -430,7 +430,7 @@ module.exports = class Network {
 
   static irrAndNpv (plan_id) {
     var req = {
-      url: config.aro_service_url + `/rest/roic/models/${plan_id}`,
+      url: config.aro_service_url + `/roic/models/${plan_id}`,
       qs: { '$select': 'incremental.network.cashflow' },
       json: true
     }

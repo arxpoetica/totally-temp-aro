@@ -15,7 +15,7 @@ exports.configure = (api, middleware) => {
 
   api.get('/financial_profile/:plan_id/export', (request, response, next) => {
     var req = {
-      url: config.aro_service_url + `/rest/roic/models/${request.params.plan_id}.csv`
+      url: config.aro_service_url + `/roic/models/${request.params.plan_id}.csv`
     }
     return models.AROService.request(req)
       .then((output) => {
@@ -334,7 +334,7 @@ exports.configure = (api, middleware) => {
     const getTotals = () => {
       var req = {
         method: 'POST',
-        url: config.aro_service_url + '/rest/businesses/getTotals',
+        url: config.aro_service_url + '/businesses/getTotals',
         body: {
           distanceThresholds: distanceThresholds,
           locationSource: 'vz_customers',
@@ -349,7 +349,7 @@ exports.configure = (api, middleware) => {
     const getBuildingsCountsByBusinessesSizes = () => {
       var req = {
         method: 'POST',
-        url: config.aro_service_url + '/rest/businesses/getBuildingsCountsByBusinessesSizes',
+        url: config.aro_service_url + '/businesses/getBuildingsCountsByBusinessesSizes',
         body: {
           distanceThresholds: distanceThresholds,
           locationSource: 'tam',
@@ -364,7 +364,7 @@ exports.configure = (api, middleware) => {
     const getBusinessesCountsBySizes = () => {
       var req = {
         method: 'POST',
-        url: config.aro_service_url + '/rest/businesses/getBusinessesCountsBySizes',
+        url: config.aro_service_url + '/businesses/getBusinessesCountsBySizes',
         body: {
           distanceThresholds: distanceThresholds,
           locationSource: 'tam',
@@ -416,7 +416,7 @@ exports.configure = (api, middleware) => {
     var plan_id = request.params.plan_id
     var req = {
       method: 'POST',
-      url: config.aro_service_url + '/rest/businesses',
+      url: config.aro_service_url + '/businesses',
       body: {
         distanceThresholds: [1609.34],
         locationSource: 'tam',
@@ -469,7 +469,7 @@ const requestData = (params, filter) => {
     return Promise.resolve(chart)
   }
   var req = {
-    url: config.aro_service_url + `/rest/roic/models/${params.plan_id}`,
+    url: config.aro_service_url + `/roic/models/${params.plan_id}`,
     qs: { '$select': select.join(',') },
     json: true
   }
@@ -500,7 +500,7 @@ const requestData = (params, filter) => {
 if (module.id === require.main.id) {
   var req = {
     method: 'POST',
-    url: config.aro_service_url + '/rest/businesses/getTotals',
+    url: config.aro_service_url + '/businesses/getTotals',
     body: {
       distanceThresholds: [
         402.336, // 1/4 miles

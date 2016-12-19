@@ -65,7 +65,7 @@ module.exports = class Boundary {
       SELECT sl.id, sl.name, sl.description
       FROM client.service_layer sl
       JOIN user_data.data_source ds ON sl.data_source_id = ds.id AND ds.user_id=$1
-      WHERE deleted=false
+      WHERE ds.deleted=false
     `, [user.id])
   }
 
@@ -74,14 +74,14 @@ module.exports = class Boundary {
       SELECT sl.id, sl.name, sl.description
       FROM client.service_layer sl
       WHERE sl.is_user_defined=false
-      AND deleted=false
+      AND sl.deleted=false
 
       UNION ALL
 
       SELECT sl.id, sl.name, sl.description
       FROM client.service_layer sl
       JOIN user_data.data_source ds ON sl.data_source_id = ds.id AND ds.user_id=$1
-      WHERE deleted=false
+      WHERE ds.deleted=false
     `, [user.id])
   }
 
@@ -91,7 +91,7 @@ module.exports = class Boundary {
         if (!id) {
           var req = {
             method: 'POST',
-            url: config.aro_service_url + '/rest/serviceLayers',
+            url: config.aro_service_url + '/serviceLayers',
             body: {
               layerDescription: name,
               layerName: name,
@@ -110,7 +110,7 @@ module.exports = class Boundary {
         if (!file) return { id: id }
         var req = {
           method: 'POST',
-          url: config.aro_service_url + `/rest/serviceLayers/${id}/producer/entities.csv`,
+          url: config.aro_service_url + `/serviceLayers/${id}/producer/entities.csv`,
           formData: {
             file: fs.createReadStream(file)
           }
@@ -119,7 +119,7 @@ module.exports = class Boundary {
           .then(() => {
             var req = {
               method: 'POST',
-              url: config.aro_service_url + `/rest/serviceLayers/${id}/command`,
+              url: config.aro_service_url + `/serviceLayers/${id}/command`,
               body: {
                 action: 'GENERATE_POLYGONS',
                 maxDistanceMeters: radius
