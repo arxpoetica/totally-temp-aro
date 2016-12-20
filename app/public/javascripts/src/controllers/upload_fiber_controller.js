@@ -47,6 +47,8 @@ app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($sc
       try {
         var data = JSON.parse(this.responseText)
         if (data.error) return swal('Error', data.error, 'error')
+        $rootScope.$broadcast('uploaded_fiber', data)
+        $('#upload_fiber_modal').modal('hide')
       } catch (e) {
         console.log(e, e)
         return swal('Error', 'Unexpected response from server', 'error')
@@ -54,9 +56,6 @@ app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($sc
       if (this.status !== 200) {
         return swal('Error', data.error || 'Unknown error', 'error')
       }
-      $scope.editingDataset.id = data.id
-      $rootScope.$broadcast('uploaded_fiber', $scope.editingDataset)
-      $('#upload_fiber_modal').modal('hide')
     })
     xhr.send(formData)
   }

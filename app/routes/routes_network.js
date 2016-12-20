@@ -20,6 +20,14 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/network/fiber_plant/datasource/:datasource', middleware.viewport, (request, response, next) => {
+    var datasource = request.params.datasource
+    var viewport = request.viewport
+    models.Network.viewFiberPlantForDatasource(datasource, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/network/fiber_plant/current_carrier/:sourceName', middleware.viewport, (request, response, next) => {
     var sourceName = request.params.sourceName
     var viewport = request.viewport

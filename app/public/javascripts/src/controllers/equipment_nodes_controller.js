@@ -395,6 +395,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.showUploadedFiber = !$scope.showUploadedFiber
   }
 
+  var fiberLayers = []
   function reloadDatasources (callback) {
     $http.get('/user_fiber/list').success((response) => {
       $scope.datasources = response
@@ -410,10 +411,30 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         })
         .on('change', (e) => {
           if (e.added) {
-
+            var datasource = e.added
+            var layer = new MapLayer({
+              name: datasource.text,
+              type: 'fiber_plant',
+              short_name: 'F',
+              api_endpoint: `/network/fiber_plant/datasource/${datasource.id}`,
+              style_options: {
+                normal: {
+                  strokeColor: config.ui.colors.fiber,
+                  strokeWeight: 2,
+                  fillColor: config.ui.colors.fiber
+                }
+              },
+              threshold: 0,
+              reload: 'always'
+            })
+            layer.show()
+            fiberLayers[String(datasource.id)] = layer
           }
           if (e.removed) {
-
+            let datasource = e.removed
+            let layer = fiberLayers[String(datasource.id)]
+            layer.remove()
+            fiberLayers[String(datasource.id)]
           }
         })
         callback && callback(response)
@@ -424,11 +445,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('uploaded_fiber', (e, info) => {
     var uploadedFiberSelect = $('.uploadedFiberSelect')
     reloadDatasources((response) => {
-      var dataset = response.find((item) => item.id === info.id)
-      if (!dataset) return
+      /*
+      var datasource = response.find((item) => item.systemId === info.systemId)
+      if (!datasource) return
       var val = uploadedFiberSelect.select2('val')
-      val.push(String(dataset.systemId))
+      console.log('val', val)
+      val.push({
+        id: info.systemId, text: info.name
+      })
       uploadedFiberSelect.select2('val', val, true)
+      */
     })
   })
 
