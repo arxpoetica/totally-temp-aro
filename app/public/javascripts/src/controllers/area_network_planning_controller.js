@@ -40,10 +40,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.technology = 'direct_routing' // 'odn1'
 
   $scope.routeGenerationOptions = [
+    { id: 'T', value: 'T Route' },
     { id: 'A', value: 'A Route' },
     { id: 'B', value: 'B Route' },
-    { id: 'C', value: 'C Route' },
-    { id: 'D', value: 'D Route' }
+    { id: 'C', value: 'C Route' }
   ]
   $scope.routeGenerationOptionsValues = {}
 
@@ -187,13 +187,13 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     } else if (algorithm === 'IRR') {
       delete changes.irrThreshold
     } else if (algorithm === 'BUDGET_IRR') {
-    } else if (algorithm === 'ABCD') {
+    } else if (algorithm === 'TABC') {
       delete changes.budget
       delete changes.irrThreshold
       var values = $scope.routeGenerationOptionsValues
       var generations = Object.keys(values).filter((id) => values[id])
       changes.customOptimization = {
-        name: 'ABCD',
+        name: 'TABC',
         map: {
           generations: generations.join(',')
         }
@@ -248,7 +248,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         { id: 'BUDGET_IRR', label: 'IRR Target' }
       ]
       if (config.ARO_CLIENT === 'verizon') {
-        $scope.optimizationTypeOptions.push({ id: 'ABCD', label: 'ABCD analysis' })
+        $scope.optimizationTypeOptions.push({ id: 'TABC', label: 'TABC analysis' })
       }
       // { id: 'TARGET_IRR', label: 'IRR Target' },
       // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
