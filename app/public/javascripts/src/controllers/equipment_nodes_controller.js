@@ -390,27 +390,47 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     e.preventDefault()
   })
 
-  var uploadedFiberSelect = $('#uploadedFiberSelect')
   $scope.showUploadedFiber = false
   $scope.toggleShowUploadedFiber = () => {
     $scope.showUploadedFiber = !$scope.showUploadedFiber
   }
 
   function reloadDatasources (callback) {
-    // Work in progress
     $http.get('/user_fiber/list').success((response) => {
       $scope.datasources = response
-      uploadedFiberSelect.select2({
-        placeholder: 'Select one or more datasets',
-        escapeMarkup: (m) => m,
-        data: response.map((item) => ({
-          id: item.systemId, text: item.description
-        })),
-        multiple: true
+      var data = response.map((item) => ({
+        id: item.systemId, text: item.name
+      }))
+      $timeout(() => {
+        var uploadedFiberSelect = $('.uploadedFiberSelect')
+        uploadedFiberSelect.select2({
+          placeholder: 'Select one or more datasets',
+          data: data,
+          multiple: true
+        })
+        .on('change', (e) => {
+          if (e.added) {
+
+          }
+          if (e.removed) {
+
+          }
+        })
+        callback && callback(response)
       })
-      callback && callback(response)
     })
   }
+
+  $rootScope.$on('uploaded_fiber', (e, info) => {
+    var uploadedFiberSelect = $('.uploadedFiberSelect')
+    reloadDatasources((response) => {
+      var dataset = response.find((item) => item.id === info.id)
+      if (!dataset) return
+      var val = uploadedFiberSelect.select2('val')
+      val.push(String(dataset.systemId))
+      uploadedFiberSelect.select2('val', val, true)
+    })
+  })
 
   $scope.addFiber = () => {
     $('#upload_fiber_modal').modal('show')

@@ -18,7 +18,6 @@ app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($sc
   })
 
   $scope.save = () => {
-    return swal({ title: 'Not implemented... yet', type: 'error' })
     var files = $('#upload_fiber_modal input[type=file]').get(0).files
     if ($scope.editingDataset.id && files.length > 0) {
       return swal({
@@ -35,8 +34,8 @@ app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($sc
   }
 
   function submit () {
-    var id = $scope.editingDataset.id
-    var url = id ? `/locations/user_defined/${id}` : '/locations/user_defined'
+    // var id = $scope.editingDataset.id
+    var url = '/user_fiber/upload'
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
     xhr.open('POST', url, true)

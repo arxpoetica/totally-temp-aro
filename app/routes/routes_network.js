@@ -270,4 +270,31 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.post('/user_fiber/upload', (request, response, next) => {
+    var userId = request.user.id
+    var busboy = new Busboy({ headers: request.headers })
+    var fullpath
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      file.pipe(fs.createWriteStream(fullpath))
+    })
+    busboy.on('finish', () => {
+      var req = {
+        url: config.aro_service_url + '/installed/fiber/files',
+        qs: {
+          'user-id': userId
+        },
+        method: 'POST',
+        formData: {
+          file: fs.createReadStream(fullpath)
+        },
+        json: true
+      }
+      models.AROService.request(req)
+        .then(jsonSuccess(response, next))
+        .catch(next)
+    })
+    request.pipe(busboy)
+  })
 }

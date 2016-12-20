@@ -125,9 +125,7 @@
               </div>
 
               <div ng-show="serviceLayer.id === 'existing_fiber' && showUploadedFiber">
-                <input class="form-control" id="uploadedFiberSelect"
-                    ng-change="changeFibersLayer()"
-                    ng-model="selectedDatasource">
+                <input class="form-control uploadedFiberSelect">
                 <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
                   <span class="fa fa-plus"></span> Add fiber
                 </button>
