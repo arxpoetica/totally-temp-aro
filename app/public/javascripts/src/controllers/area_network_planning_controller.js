@@ -40,10 +40,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.technology = 'direct_routing' // 'odn1'
 
   $scope.routeGenerationOptions = [
-    { id: 'T', value: 'T Route' },
-    { id: 'A', value: 'A Route' },
-    { id: 'B', value: 'B Route' },
-    { id: 'C', value: 'C Route' }
+    { id: 'T', value: 'A Route' },
+    { id: 'A', value: 'B Route' },
+    { id: 'B', value: 'C Route' },
+    { id: 'C', value: 'D Route' }
   ]
   $scope.routeGenerationOptionsValues = {}
 
@@ -248,7 +248,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         { id: 'BUDGET_IRR', label: 'IRR Target' }
       ]
       if (config.ARO_CLIENT === 'verizon') {
-        $scope.optimizationTypeOptions.push({ id: 'TABC', label: 'TABC analysis' })
+        $scope.optimizationTypeOptions.push({ id: 'TABC', label: 'ABCD analysis' })
       }
       // { id: 'TARGET_IRR', label: 'IRR Target' },
       // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
