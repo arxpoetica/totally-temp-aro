@@ -413,4 +413,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $('#build-sequence').on('shown.bs.modal', drawChart)
+
+  $scope.openReports = () => {
+    $rootScope.$broadcast('open-report', $scope.plan)
+  }
 }])
