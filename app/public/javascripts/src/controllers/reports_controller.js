@@ -1,4 +1,4 @@
-/* global app $ */
+/* global app $ globalUser */
 app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
   $scope.analysis = []
 
@@ -83,6 +83,19 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           url: '/csv/ABCD Summary Formatted.xlsx'
         }
       ])
+      if (globalUser.rol === 'biz-dev') {
+        analysis = analysis.concat([
+          {
+            name: `${prefix(13)}_BVB_Summary_Output`,
+            type: '.csv'
+          },
+          {
+            name: `${prefix(14)}_BVB_Summary_Formatted`,
+            type: '.csv',
+            url: '/csv/BVB Summary Formatted.xlsx'
+          }
+        ])
+      }
       $scope.analysis = analysis
     })
     $scope.openReport(null, false)
