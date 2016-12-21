@@ -36,6 +36,7 @@
             <a href="javascript:void(0)" ng-click="sortBy('name', true)">↓</a>
             <a href="javascript:void(0)" ng-click="sortBy('name', false)">↑</a>
           </th>
+          <th></th>
           <th>
             Created at
             <a href="javascript:void(0)" ng-click="sortBy('created_at', true)">↓</a>
@@ -54,23 +55,22 @@
           </th>
           <th>Status</th>
           <th>Optimization Type</th>
-          <th></th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="plan in plans">
           <td><a href="javascript:void(0)" ng-click="selectPlan(plan)">{{plan.name}}</a></td>
+          <td>
+            <a class="btn btn-sm btn-primary" ng-click="openReport(plan)"><span class="fa fa-folder"></span></a>
+            <a class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>
+            <a class="btn btn-sm btn-danger" ng-click="deletePlan(plan)" ng-show="plan.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
+          </td>
           <td>{{plan.updated_at | date:'shortDate'}}</td>
           <td>{{plan.created_at | date:'shortDate'}}</td>
           <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
           <td class="text-right">{{plan.total_cost | currency}}</td>
           <td></td>
           <td></td>
-          <td>
-            <a class="btn btn-sm btn-primary" ng-click="openReport(plan)"><span class="fa fa-folder"></span></a>
-            <a class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>
-            <a class="btn btn-sm btn-danger" ng-click="deletePlan(plan)" ng-show="plan.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
-          </td>
         </tr>
       </tbody>
     </table>
