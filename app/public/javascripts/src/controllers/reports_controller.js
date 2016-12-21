@@ -74,8 +74,19 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           url: `/reports/tabc/${plan.id}/fiber_zone_summary`
         },
         {
-          name: `${prefix(12)}_A_route_400m_prem_passed`,
-          type: '.csv'
+          name: prefix(12) + '_A_route_400m_prem_passed',
+          type: '.csv',
+          url: '/reports/tabc/' + plan.id + '/a_route_400m_prem_passed'
+        },
+        {
+          name: prefix(13) + '_A_route_150m_prem',
+          type: '.csv',
+          url: '/reports/tabc/' + plan.id + '/a_route_150m_prem'
+        },
+        {
+          name: prefix(13) + '_Fiber_Miles_by_UACE',
+          type: '.csv',
+          url: '/reports/tabc/' + plan.id + '/fiber_miles_uace'
         },
         {
           name: 'ABCD Summary Formatted',
