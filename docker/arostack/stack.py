@@ -215,61 +215,61 @@ def provision_aro_stack(opsworks_stack_id=None,
         start_response = opsworks_client.start_stack(StackId=opsworks_stack_id)
 
     # Here is where we need to initialize the database
-    if initialize_database:
-        print "Initializing and populating database..."
+    # if initialize_database:
+    #     print "Initializing and populating database..."
 
-        # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
-        # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `online`
-        # Any error along the way will generate a failure. Successful attainment of `online` status proceeds 
+    #     # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
+    #     # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `online`
+    #     # Any error along the way will generate a failure. Successful attainment of `online` status proceeds 
 
-        # TODO: actually add error handling other than the timeout
+    #     # TODO: actually add error handling other than the timeout
 
-        # populate array of instances
-        instances_response = opsworks_client.describe_instances(StackId=opsworks_stack_id)
-        instances = []
-        for inst in instances_response['Instances']:
-            id = inst['InstanceId']
-            instances.append(id)
-        delay = 0
-        # start wait loop until they reach 'running' status
-        while delay < TIMEOUT:
-            print "Sleeping for %d seconds (%d so far) for instance startup..." \
-                % (INSTANCE_CREATE_DELAY, delay)
-            time.sleep(INSTANCE_CREATE_DELAY)
-            described_instances = opsworks_client.describe_instances(InstanceIds=instances)['Instances']
-            inst_names = [described_instances[i]['Hostname'] for i in range(len(instances))]
-            print "Waiting for instances: %s to reach running status" % ", ".join(i for i in inst_names)
+    #     # populate array of instances
+    #     instances_response = opsworks_client.describe_instances(StackId=opsworks_stack_id)
+    #     instances = []
+    #     for inst in instances_response['Instances']:
+    #         id = inst['InstanceId']
+    #         instances.append(id)
+    #     delay = 0
+    #     # start wait loop until they reach 'running' status
+    #     while delay < TIMEOUT:
+    #         print "Sleeping for %d seconds (%d so far) for instance startup..." \
+    #             % (INSTANCE_CREATE_DELAY, delay)
+    #         time.sleep(INSTANCE_CREATE_DELAY)
+    #         described_instances = opsworks_client.describe_instances(InstanceIds=instances)['Instances']
+    #         inst_names = [described_instances[i]['Hostname'] for i in range(len(instances))]
+    #         print "Waiting for instances: %s to reach running status" % ", ".join(i for i in inst_names)
 
-            for inst in described_instances:
-                status = inst['Status']
-                name = inst['Hostname']
-                id = inst['InstanceId']
-                if status == 'online':
-                    print "Instance %s is online" % name
-                    instances.remove(id)
+    #         for inst in described_instances:
+    #             status = inst['Status']
+    #             name = inst['Hostname']
+    #             id = inst['InstanceId']
+    #             if status == 'online':
+    #                 print "Instance %s is online" % name
+    #                 instances.remove(id)
 
-            if not instances:
-                break
+    #         if not instances:
+    #             break
 
-            delay += INSTANCE_CREATE_DELAY
-            if delay >= TIMEOUT:
-                raise StandardError("Instance creation timeout exhausted")
+    #         delay += INSTANCE_CREATE_DELAY
+    #         if delay >= TIMEOUT:
+    #             raise StandardError("Instance creation timeout exhausted")
 
         # Run the opsworks/chef recipe that will handle the various commands required to configure the database and run ETL
         # I don't think we should wait for the deployment to actually complate, since it can take over an hour to run
 
-        deploy_response = opsworks_client.create_deployment(
-            StackId=opsworks_stack_id,
-            AppId=app_response['AppId'],
-            Command={
-                'Name': 'execute_recipes',
-                'Args': {
-                    'recipes' : ['aro_ops::compose-initialize']
-                }
-            },
-            CustomJson="{\"app_initialization\": {\"admin_email\": \"" + app_initial_email + "\", \"admin_password\": \"" + app_initial_password + "\"} }"
-        )
-        return deploy_response
+        # deploy_response = opsworks_client.create_deployment(
+        #     StackId=opsworks_stack_id,
+        #     AppId=app_response['AppId'],
+        #     Command={
+        #         'Name': 'execute_recipes',
+        #         'Args': {
+        #             'recipes' : ['aro_ops::compose-initialize']
+        #         }
+        #     },
+        #     CustomJson="{\"app_initialization\": {\"admin_email\": \"" + app_initial_email + "\", \"admin_password\": \"" + app_initial_password + "\"} }"
+        # )
+        # return deploy_response
 
 
 
