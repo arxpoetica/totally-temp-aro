@@ -392,6 +392,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.showUploadedFiber = false
   $scope.toggleShowUploadedFiber = () => {
+    var uploadedFiberSelect = $('.uploadedFiberSelect')
+    uploadedFiberSelect.find('ul.select2-choices').sortable({
+      containment: 'parent',
+      start: () => uploadedFiberSelect.select2('onSortStart'),
+      update: () => uploadedFiberSelect.select2('onSortEnd')
+    })
     $scope.showUploadedFiber = !$scope.showUploadedFiber
   }
 
