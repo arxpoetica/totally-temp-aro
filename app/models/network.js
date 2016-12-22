@@ -61,7 +61,7 @@ module.exports = class Network {
     var sql = `
       SELECT geom
       FROM client.existing_fiber
-      WHERE data_source_id = $1
+      WHERE fiber_source_id = $1
       ${database.intersects(viewport, 'geom', 'AND')}
     `
     return database.lines(sql, [datasource], true, viewport)
