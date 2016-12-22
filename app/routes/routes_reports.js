@@ -30,7 +30,7 @@ exports.configure = (api, middleware) => {
     return database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
       .then((plan) => {
         var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2">
+        var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
           <Document>
             <name>${escape(plan.name)}</name>
               <Style id="shapeColor">
