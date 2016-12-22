@@ -12,6 +12,7 @@ exports.configure = (api, middleware) => {
       config: public_config,
       serviceLayers: cache.serviceLayers,
       analysisLayers: cache.analysisLayers,
+      existingFiberSourceNames: cache.existingFiberSourceNames,
       googleMapsKey: process.env.GOOGLE_MAPS_API_KEY
     })
   })

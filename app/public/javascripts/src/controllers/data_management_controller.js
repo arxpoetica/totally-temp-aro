@@ -27,7 +27,7 @@ app.controller('data_management_controller', ['$scope', '$rootScope', '$http', (
   $scope.deleteUserEntities = (userEntities) => {
     swal({
       title: 'Are you sure?',
-      text: 'This acction cannot be undone',
+      text: 'This action cannot be undone',
       type: 'warning',
       confirmButtonColor: '#DD6B55',
       confirmButtonText: 'Yes, delete it',
@@ -43,7 +43,7 @@ app.controller('data_management_controller', ['$scope', '$rootScope', '$http', (
   $scope.deleteUserBoundaries = (userBoundaries) => {
     swal({
       title: 'Are you sure?',
-      text: 'This acction cannot be undone',
+      text: 'This action cannot be undone',
       type: 'warning',
       confirmButtonColor: '#DD6B55',
       confirmButtonText: 'Yes, delete it',

@@ -1,4 +1,4 @@
-/* global $ app user_id swal _ Clipboard */
+/* global $ app user_id swal _ */
 // Admin users controller
 app.controller('admin_users_controller', ($scope, $http, $timeout) => {
   $scope.users = []

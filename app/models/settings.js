@@ -134,7 +134,7 @@ module.exports = class Settings {
       }
       return pync.series(invalidation, (key) => (
         models.AROService.request({
-          url: config.aro_service_url + `/rest/ref-cache/${key}`,
+          url: config.aro_service_url + `/ref-cache/${key}`,
           method: 'DELETE',
           json: true
         })
@@ -156,7 +156,7 @@ module.exports = class Settings {
         info: { lastTouchedInMillis: 300000, valuePresent: false } } ]
     */
     var req = {
-      url: config.aro_service_url + '/rest/ref-cache',
+      url: config.aro_service_url + '/ref-cache',
       json: true
     }
     models.AROService.request(req)

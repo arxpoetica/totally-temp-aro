@@ -1,4 +1,4 @@
-/* global app $ */
+/* global app $ globalUser */
 app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
   $scope.analysis = []
 
@@ -74,15 +74,39 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           url: `/reports/tabc/${plan.id}/fiber_zone_summary`
         },
         {
-          name: `${prefix(12)}_T_route_400m_prem_passed`,
-          type: '.csv'
+          name: prefix(12) + '_A_route_400m_prem_passed',
+          type: '.csv',
+          url: '/reports/tabc/' + plan.id + '/a_route_400m_prem_passed'
         },
         {
-          name: 'TABC Summary Formatted',
+          name: prefix(13) + '_A_route_150m_prem',
+          type: '.csv',
+          url: '/reports/tabc/' + plan.id + '/a_route_150m_prem'
+        },
+        {
+          name: prefix(13) + '_Fiber_Miles_by_UACE',
+          type: '.csv',
+          url: '/reports/tabc/' + plan.id + '/fiber_miles_uace'
+        },
+        {
+          name: 'ABCD Summary Formatted',
           type: '.xlsx',
-          url: '/csv/TABC Summary Formatted.xlsx'
+          url: '/csv/ABCD Summary Formatted.xlsx'
         }
       ])
+      if (globalUser.rol === 'biz-dev') {
+        analysis = analysis.concat([
+          {
+            name: `${prefix(13)}_BVB_Summary_Output`,
+            type: '.csv'
+          },
+          {
+            name: `${prefix(14)}_BVB_Summary_Formatted`,
+            type: '.csv',
+            url: '/csv/BVB Summary Formatted.xlsx'
+          }
+        ])
+      }
       $scope.analysis = analysis
     })
     $scope.openReport(null, false)

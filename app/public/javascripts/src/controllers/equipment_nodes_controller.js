@@ -1,4 +1,4 @@
-/* global app user_id config map _ google swal config $ globalServiceLayers */
+/* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
 // Equipment Nodes Controller
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout) => {
   // Controller instance variables
@@ -10,25 +10,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.vztfttp = true
 
   $scope.serviceLayers = []
-  $scope.existingEquipmentLayers = []
-
-  var fiberPlantLayer = new MapLayer({
-    name: config.ui.labels.fiber,
-    type: 'fiber_plant',
-    short_name: 'F',
-    api_endpoint: '/network/fiber_plant/current_carrier',
-    style_options: {
-      normal: {
-        strokeColor: config.ui.colors.fiber,
-        strokeWeight: 2,
-        fillColor: config.ui.colors.fiber
-      }
-    },
-    threshold: 0,
-    reload: 'always'
-  })
-
-  $scope.existingEquipmentLayers.push(fiberPlantLayer)
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('network_nodes')) {
@@ -93,6 +74,31 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item))
       }
       $scope.serviceLayers.push(additionalLayer)
+      var existingFiberLayer = {
+        id: 'existing_fiber',
+        name: 'existing_fiber',
+        description: 'Existing Fiber',
+        equipment_description: 'Existing Fiber',
+        additional: true,
+        layers: globalExistingFiberSourceNames.map((name) => {
+          return new MapLayer({
+            name: name,
+            type: 'fiber_plant',
+            short_name: 'F',
+            api_endpoint: `/network/fiber_plant/current_carrier/${name}`,
+            style_options: {
+              normal: {
+                strokeColor: config.ui.colors.fiber,
+                strokeWeight: 2,
+                fillColor: config.ui.colors.fiber
+              }
+            },
+            threshold: 0,
+            reload: 'always'
+          })
+        })
+      }
+      $scope.serviceLayers.push(existingFiberLayer)
       if ($scope.serviceLayers.length > 0) {
         var layer = $scope.serviceLayers[0]
         // layer.enabled = true
@@ -110,9 +116,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   function configureServiceLayer (layer) {
-    layer.showFeederFiber = true
-    layer.showDistributionFiber = true
-    layer.showBackhaulFiber = true
+    layer.showFeederFiber = false
+    layer.showDistributionFiber = false
+    layer.showBackhaulFiber = false
     layer.enabled = true
 
     var routeLayer = new MapLayer({
@@ -220,6 +226,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $http.get('/network_plan/' + plan.id).success((response) => {
       redrawRoute(response)
     })
+    reloadDatasources()
   })
 
   $rootScope.$on('plan_cleared', () => {
@@ -382,4 +389,82 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   accordion.on('click', '[data-parent="#serviceLayersAccordion"]', (e) => {
     e.preventDefault()
   })
+
+  $scope.showUploadedFiber = false
+  $scope.toggleShowUploadedFiber = () => {
+    var uploadedFiberSelect = $('.uploadedFiberSelect')
+    uploadedFiberSelect.find('ul.select2-choices').sortable({
+      containment: 'parent',
+      start: () => uploadedFiberSelect.select2('onSortStart'),
+      update: () => uploadedFiberSelect.select2('onSortEnd')
+    })
+    $scope.showUploadedFiber = !$scope.showUploadedFiber
+  }
+
+  var fiberLayers = []
+  function reloadDatasources (callback) {
+    $http.get('/user_fiber/list').success((response) => {
+      $scope.datasources = response
+      var data = response.map((item) => ({
+        id: item.systemId, text: item.name
+      }))
+      $timeout(() => {
+        var uploadedFiberSelect = $('.uploadedFiberSelect')
+        uploadedFiberSelect.select2({
+          placeholder: 'Select one or more datasets',
+          data: data,
+          multiple: true
+        })
+        .on('change', (e) => {
+          if (e.added) {
+            var datasource = e.added
+            var layer = new MapLayer({
+              name: datasource.text,
+              type: 'fiber_plant',
+              short_name: 'F',
+              api_endpoint: `/network/fiber_plant/datasource/${datasource.id}`,
+              style_options: {
+                normal: {
+                  strokeColor: config.ui.colors.fiber,
+                  strokeWeight: 2,
+                  fillColor: config.ui.colors.fiber
+                }
+              },
+              threshold: 0,
+              reload: 'always'
+            })
+            layer.show()
+            fiberLayers[String(datasource.id)] = layer
+          }
+          if (e.removed) {
+            let datasource = e.removed
+            let layer = fiberLayers[String(datasource.id)]
+            layer.remove()
+            fiberLayers[String(datasource.id)]
+          }
+        })
+        callback && callback(response)
+      })
+    })
+  }
+
+  $rootScope.$on('uploaded_fiber', (e, info) => {
+    var uploadedFiberSelect = $('.uploadedFiberSelect')
+    reloadDatasources((response) => {
+      /*
+      var datasource = response.find((item) => item.systemId === info.systemId)
+      if (!datasource) return
+      var val = uploadedFiberSelect.select2('val')
+      console.log('val', val)
+      val.push({
+        id: info.systemId, text: info.name
+      })
+      uploadedFiberSelect.select2('val', val, true)
+      */
+    })
+  })
+
+  $scope.addFiber = () => {
+    $('#upload_fiber_modal').modal('show')
+  }
 }])

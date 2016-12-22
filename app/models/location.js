@@ -655,7 +655,7 @@ module.exports = class Location {
         if (!id) {
           var req = {
             method: 'POST',
-            url: config.aro_service_url + '/rest/user-entites',
+            url: config.aro_service_url + '/user-entites',
             body: {
               name: name,
               userId: user.id
@@ -672,7 +672,7 @@ module.exports = class Location {
         if (!file) return { id: id }
         var req = {
           method: 'POST',
-          url: config.aro_service_url + `/rest/user-entites/data/${id}/entities.csv`,
+          url: config.aro_service_url + `/user-entites/data/${id}/entities.csv`,
           formData: {
             file: fs.createReadStream(file)
           }

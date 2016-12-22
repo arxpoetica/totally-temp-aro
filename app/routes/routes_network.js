@@ -20,9 +20,18 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/network/fiber_plant/current_carrier', middleware.viewport, (request, response, next) => {
+  api.get('/network/fiber_plant/datasource/:datasource', middleware.viewport, (request, response, next) => {
+    var datasource = request.params.datasource
     var viewport = request.viewport
-    models.Network.viewFiberPlantForCurrentCarrier(viewport)
+    models.Network.viewFiberPlantForDatasource(datasource, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/network/fiber_plant/current_carrier/:sourceName', middleware.viewport, (request, response, next) => {
+    var sourceName = request.params.sourceName
+    var viewport = request.viewport
+    models.Network.viewFiberPlantForCurrentCarrier(viewport, sourceName)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -213,7 +222,7 @@ exports.configure = (api, middleware) => {
   api.get('/user_entities/list', (request, response, next) => {
     var userId = request.user.id
     var req = {
-      url: config.aro_service_url + `/rest/user-entites/user/${userId}`,
+      url: config.aro_service_url + `/user-entites/user/${userId}`,
       json: true
     }
     models.AROService.request(req)
@@ -225,7 +234,7 @@ exports.configure = (api, middleware) => {
     var id = request.body.userEntities
     var req = {
       method: 'DELETE',
-      url: config.aro_service_url + `/rest/user-entites/${id}`,
+      url: config.aro_service_url + `/user-entites/${id}`,
       json: true
     }
     models.AROService.request(req)
@@ -236,7 +245,7 @@ exports.configure = (api, middleware) => {
   api.get('/user_boundaries/list', (request, response, next) => {
     var userId = request.user.id
     var req = {
-      url: config.aro_service_url + `/rest/serviceLayers/${userId}`,
+      url: config.aro_service_url + `/serviceLayers/${userId}`,
       json: true
     }
     models.AROService.request(req)
@@ -248,11 +257,52 @@ exports.configure = (api, middleware) => {
     var id = request.body.userBoundaries
     var req = {
       method: 'DELETE',
-      url: config.aro_service_url + `/rest/serviceLayers/${id}`,
+      url: config.aro_service_url + `/serviceLayers/${id}`,
       json: true
     }
     models.AROService.request(req)
       .then(jsonSuccess(response, next))
       .catch(next)
+  })
+
+  api.get('/user_fiber/list', (request, response, next) => {
+    var userId = request.user.id
+    var req = {
+      url: config.aro_service_url + '/installed/fiber/metadata',
+      qs: {
+        'user-id': userId
+      },
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/user_fiber/upload', (request, response, next) => {
+    var userId = request.user.id
+    var busboy = new Busboy({ headers: request.headers })
+    var fullpath
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      file.pipe(fs.createWriteStream(fullpath))
+    })
+    busboy.on('finish', () => {
+      var req = {
+        url: config.aro_service_url + '/installed/fiber/files',
+        qs: {
+          'user-id': userId
+        },
+        method: 'POST',
+        formData: {
+          file: fs.createReadStream(fullpath)
+        },
+        json: true
+      }
+      models.AROService.request(req)
+        .then(jsonSuccess(response, next))
+        .catch(next)
+    })
+    request.pipe(busboy)
   })
 }
