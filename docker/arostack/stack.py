@@ -139,6 +139,9 @@ def provision_aro_stack(opsworks_stack_id=None,
                         name='',
                         name_component='',
                         db={},
+                        dbuser='',
+                        dbhost='',
+                        dbpass='',
                         docker_pass='',
                         environment_vars=[],
                         start_stack=False,
@@ -158,31 +161,34 @@ def provision_aro_stack(opsworks_stack_id=None,
     INSTANCE_CREATE_DELAY = 10
 
     # Attach RDS instance to OpsWorks stack if provided
-    if db:
-        rds_instance_arn = "arn:aws:rds:us-east-1:%s:db:%s" % (AWS_ACCOUNT_ID, rds_instance_identifier)
-        rds_response = opsworks_client.register_rds_db_instance(
-            StackId=opsworks_stack_id,
-            RdsDbInstanceArn=rds_instance_arn,
-            DbUser=db['user'],
-            DbPassword=db['pass']
-        )
+    # if db:
+    #     rds_instance_arn = "arn:aws:rds:us-east-1:%s:db:%s" % (AWS_ACCOUNT_ID, rds_instance_identifier)
+    #     rds_response = opsworks_client.register_rds_db_instance(
+    #         StackId=opsworks_stack_id,
+    #         RdsDbInstanceArn=rds_instance_arn,
+    #         DbUser=db['user'],
+    #         DbPassword=db['pass']
+    #     )
 
     # Add an app and an instance
-    data_sources = [
-            { 'Type': 'RdsDbInstance',
-              'Arn': rds_instance_arn,
-              'DatabaseName': db.get('name') or 'aro' }
-        ] if db else []
+    # data_sources = [
+    #         { 'Type': 'RdsDbInstance',
+    #           'Arn': rds_instance_arn,
+    #           'DatabaseName': db.get('name') or 'aro' }
+    #     ] if db else []
     app_response = opsworks_client.create_app(
         StackId=opsworks_stack_id,
         Shortname='aro',
         Name='aro',
-        DataSources=data_sources,
+        # DataSources=data_sources,
         Type='other',
         EnableSsl=False,
-        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True } ] + environment_vars
+        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True },
+                      { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
+                      { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
+                      { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': True} ] + environment_vars
     )
-    ids = [opsworks_layer_id, internal_layer_id]
+    ids = [opsworks_layer_id]
     instance_response = opsworks_client.create_instance(
         StackId=opsworks_stack_id,
         LayerIds=[id for id in ids if id],
@@ -209,68 +215,71 @@ def provision_aro_stack(opsworks_stack_id=None,
         start_response = opsworks_client.start_stack(StackId=opsworks_stack_id)
 
     # Here is where we need to initialize the database
-    if initialize_database:
-        print "Initializing and populating database..."
+    # if initialize_database:
+    #     print "Initializing and populating database..."
 
-        # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
-        # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `online`
-        # Any error along the way will generate a failure. Successful attainment of `online` status proceeds 
+    #     # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
+    #     # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `online`
+    #     # Any error along the way will generate a failure. Successful attainment of `online` status proceeds 
 
-        # TODO: actually add error handling other than the timeout
+    #     # TODO: actually add error handling other than the timeout
 
-        # populate array of instances
-        instances_response = opsworks_client.describe_instances(StackId=opsworks_stack_id)
-        instances = []
-        for inst in instances_response['Instances']:
-            id = inst['InstanceId']
-            instances.append(id)
-        delay = 0
-        # start wait loop until they reach 'running' status
-        while delay < TIMEOUT:
-            print "Sleeping for %d seconds (%d so far) for instance startup..." \
-                % (INSTANCE_CREATE_DELAY, delay)
-            time.sleep(INSTANCE_CREATE_DELAY)
-            described_instances = opsworks_client.describe_instances(InstanceIds=instances)['Instances']
-            inst_names = [described_instances[i]['Hostname'] for i in range(len(instances))]
-            print "Waiting for instances: %s to reach running status" % ", ".join(i for i in inst_names)
+    #     # populate array of instances
+    #     instances_response = opsworks_client.describe_instances(StackId=opsworks_stack_id)
+    #     instances = []
+    #     for inst in instances_response['Instances']:
+    #         id = inst['InstanceId']
+    #         instances.append(id)
+    #     delay = 0
+    #     # start wait loop until they reach 'running' status
+    #     while delay < TIMEOUT:
+    #         print "Sleeping for %d seconds (%d so far) for instance startup..." \
+    #             % (INSTANCE_CREATE_DELAY, delay)
+    #         time.sleep(INSTANCE_CREATE_DELAY)
+    #         described_instances = opsworks_client.describe_instances(InstanceIds=instances)['Instances']
+    #         inst_names = [described_instances[i]['Hostname'] for i in range(len(instances))]
+    #         print "Waiting for instances: %s to reach running status" % ", ".join(i for i in inst_names)
 
-            for inst in described_instances:
-                status = inst['Status']
-                name = inst['Hostname']
-                id = inst['InstanceId']
-                if status == 'online':
-                    print "Instance %s is online" % name
-                    instances.remove(id)
+    #         for inst in described_instances:
+    #             status = inst['Status']
+    #             name = inst['Hostname']
+    #             id = inst['InstanceId']
+    #             if status == 'online':
+    #                 print "Instance %s is online" % name
+    #                 instances.remove(id)
 
-            if not instances:
-                break
+    #         if not instances:
+    #             break
 
-            delay += INSTANCE_CREATE_DELAY
-            if delay >= TIMEOUT:
-                raise StandardError("Instance creation timeout exhausted")
+    #         delay += INSTANCE_CREATE_DELAY
+    #         if delay >= TIMEOUT:
+    #             raise StandardError("Instance creation timeout exhausted")
 
         # Run the opsworks/chef recipe that will handle the various commands required to configure the database and run ETL
         # I don't think we should wait for the deployment to actually complate, since it can take over an hour to run
 
-        deploy_response = opsworks_client.create_deployment(
-            StackId=opsworks_stack_id,
-            AppId=app_response['AppId'],
-            Command={
-                'Name': 'execute_recipes',
-                'Args': {
-                    'recipes' : ['aro_ops::compose-initialize']
-                }
-            },
-            CustomJson="{\"app_initialization\": {\"admin_email\": \"" + app_initial_email + "\", \"admin_password\": \"" + app_initial_password + "\"} }"
-        )
-        return deploy_response
+        # deploy_response = opsworks_client.create_deployment(
+        #     StackId=opsworks_stack_id,
+        #     AppId=app_response['AppId'],
+        #     Command={
+        #         'Name': 'execute_recipes',
+        #         'Args': {
+        #             'recipes' : ['aro_ops::compose-initialize']
+        #         }
+        #     },
+        #     CustomJson="{\"app_initialization\": {\"admin_email\": \"" + app_initial_email + "\", \"admin_password\": \"" + app_initial_password + "\"} }"
+        # )
+        # return deploy_response
 
 
 
 def deploy_aro_stack(opsworks_stack_id=None,
                      docker_pass='',
                      environment_vars=[],
-                     opsworks_client=None):
+                     opsworks_client=None,
+                     dbpass='',
+                     dbuser='',
+                     dbhost=''):
     """Update a previously created and provisioned stack"""
     opsworks_client = opsworks_client or boto3.client('opsworks', region='us-east-1')
 
@@ -278,7 +287,11 @@ def deploy_aro_stack(opsworks_stack_id=None,
     app_id = apps_response['Apps'][0]['AppId']
     update_response = opsworks_client.update_app(
         AppId=app_id,
-        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True } ] + environment_vars
+        # Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True } ] + environment_vars
+        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True },
+                      { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
+                      { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
+                      { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': False} ] + environment_vars
     )
 
     deploy_response = opsworks_client.create_deployment(

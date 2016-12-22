@@ -16,13 +16,19 @@ services:
             - "8080"
         links:
             - db:arodb
+            - zookeeper
         environment:
-            CATALINA_OPTS: -Xmx1g
+            _JAVA_OPTS: "-Xms512m -Xmx1g"
             PGUSER: aro
             PGPASSWORD: aro
             PGDATABASE: aro
             PGHOST: arodb
             ARO_THREAD_COUNT: 5
+            IGNITE_PROFILE: ignite_debug
+            ZK_HOST: zookeeper
+
+     zookeeper:
+        image: zookeeper
     app:
         image: ait-docker-registry.cloud.altvil.com/aro/aro-app-base-dev:latest
         volumes:
