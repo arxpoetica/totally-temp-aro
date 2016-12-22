@@ -396,10 +396,22 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   var fiberLayers = []
   function reloadDatasources () {
     $http.get('/user_fiber/list').success((response) => {
+      response.forEach((ds) => {
+        ds.name = `${ds.name} (${ds.libraryId ? 'user' : 'global'})`
+      })
       $scope.showingDatasources = $scope.showingDatasources
         .map((ds) => response.find((item) => item.systemId === ds.systemId))
         .filter(Boolean)
       $scope.remainingDatasources = response.filter((ds) => $scope.showingDatasources.indexOf(ds) === -1)
+
+      /*
+      $scope.remainingDatasources.forEach((ds) => {
+        if (ds.libraryId) return
+        $scope.fiber.selected = ds
+        $scope.changeSelectedFiberDatasource()
+      })
+      */
+
       updateOptimizationFiber()
     })
   }
