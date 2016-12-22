@@ -555,7 +555,7 @@ module.exports = class NetworkPlan {
   }
 
   static exportKml (plan_id, planQuery) {
-    var kml_output = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
+    var kml_output = '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><Document>'
 
     planQuery = planQuery || `
       p.id IN (

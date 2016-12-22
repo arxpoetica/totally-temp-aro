@@ -173,6 +173,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $scope.penetrationFilter = {}
     $scope.capexFilterEntityTypes = {}
 
+    if (!Array.isArray(plan.location_types)) {
+      return console.warn('plan.location_types is not an array')
+    }
     plan.location_types.forEach((type) => {
       type = entityTypesMapping[type]
       if (!type) return
