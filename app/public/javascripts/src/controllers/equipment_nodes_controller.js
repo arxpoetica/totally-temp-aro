@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -400,6 +400,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         .map((ds) => response.find((item) => item.systemId === ds.systemId))
         .filter(Boolean)
       $scope.remainingDatasources = response.filter((ds) => $scope.showingDatasources.indexOf(ds) === -1)
+      updateOptimizationFiber()
     })
   }
 
@@ -431,6 +432,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
     layer.show()
     fiberLayers[String(datasource.id)] = layer
+    updateOptimizationFiber()
 
     $('#fiberDatasources').sortable({
       update: () => {
@@ -442,9 +444,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           if (ds) arr.push(ds)
         })
         $scope.showingDatasources = arr
+        updateOptimizationFiber()
       }
     })
     $('#fiberDatasources').disableSelection()
+  }
+
+  function updateOptimizationFiber () {
+    optimization.setFiberSourceIds(
+      $scope.showingDatasources.map((ds) => ds.systemId)
+    )
   }
 
   $scope.removeDatasource = (datasource) => {
@@ -453,6 +462,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     var index = $scope.showingDatasources.indexOf(datasource)
     $scope.showingDatasources.splice(index, 1)
     $scope.remainingDatasources.push(datasource)
+    updateOptimizationFiber()
   }
 
   $scope.addFiber = () => {

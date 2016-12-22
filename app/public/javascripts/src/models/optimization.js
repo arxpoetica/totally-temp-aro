@@ -3,6 +3,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 
   var mode = null
+  var fiberSourceIds = []
   optimization.setMode = (_mode) => {
     if (mode !== _mode) {
       mode = _mode
@@ -14,6 +15,10 @@ app.service('optimization', ($rootScope, $http, $q) => {
     return mode
   }
 
+  optimization.setFiberSourceIds = (ids) => {
+    fiberSourceIds = ids || []
+  }
+
   optimization.optimize = (plan, changes, success, error) => {
     var canceler = $q.defer()
 
@@ -21,6 +26,8 @@ app.service('optimization', ($rootScope, $http, $q) => {
     if (changes.entityDataSources.length > 0) {
       changes.locationTypes = _.uniq((changes.locationTypes || []).concat(['celltower']))
     }
+
+    changes.fiberSourceIds = fiberSourceIds
 
     function run (hideProgressBar) {
       var url = '/network_plan/' + plan.id + '/edit'
