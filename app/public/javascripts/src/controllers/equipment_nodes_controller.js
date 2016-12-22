@@ -390,79 +390,70 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     e.preventDefault()
   })
 
-  $scope.showUploadedFiber = false
-  $scope.toggleShowUploadedFiber = () => {
-    var uploadedFiberSelect = $('.uploadedFiberSelect')
-    uploadedFiberSelect.find('ul.select2-choices').sortable({
-      containment: 'parent',
-      start: () => uploadedFiberSelect.select2('onSortStart'),
-      update: () => uploadedFiberSelect.select2('onSortEnd')
-    })
-    $scope.showUploadedFiber = !$scope.showUploadedFiber
-  }
+  $scope.showingDatasources = []
+  $scope.remainingDatasources = []
 
   var fiberLayers = []
-  function reloadDatasources (callback) {
+  function reloadDatasources () {
     $http.get('/user_fiber/list').success((response) => {
-      $scope.datasources = response
-      var data = response.map((item) => ({
-        id: item.systemId, text: item.name
-      }))
-      $timeout(() => {
-        var uploadedFiberSelect = $('.uploadedFiberSelect')
-        uploadedFiberSelect.select2({
-          placeholder: 'Select one or more datasets',
-          data: data,
-          multiple: true
-        })
-        .on('change', (e) => {
-          if (e.added) {
-            var datasource = e.added
-            var layer = new MapLayer({
-              name: datasource.text,
-              type: 'fiber_plant',
-              short_name: 'F',
-              api_endpoint: `/network/fiber_plant/datasource/${datasource.id}`,
-              style_options: {
-                normal: {
-                  strokeColor: config.ui.colors.fiber,
-                  strokeWeight: 2,
-                  fillColor: config.ui.colors.fiber
-                }
-              },
-              threshold: 0,
-              reload: 'always'
-            })
-            layer.show()
-            fiberLayers[String(datasource.id)] = layer
-          }
-          if (e.removed) {
-            let datasource = e.removed
-            let layer = fiberLayers[String(datasource.id)]
-            layer.remove()
-            fiberLayers[String(datasource.id)]
-          }
-        })
-        callback && callback(response)
-      })
+      $scope.showingDatasources = $scope.showingDatasources
+        .map((ds) => response.find((item) => item.systemId === ds.systemId))
+        .filter(Boolean)
+      $scope.remainingDatasources = response.filter((ds) => $scope.showingDatasources.indexOf(ds) === -1)
     })
   }
 
   $rootScope.$on('uploaded_fiber', (e, info) => {
-    var uploadedFiberSelect = $('.uploadedFiberSelect')
-    reloadDatasources((response) => {
-      /*
-      var datasource = response.find((item) => item.systemId === info.systemId)
-      if (!datasource) return
-      var val = uploadedFiberSelect.select2('val')
-      console.log('val', val)
-      val.push({
-        id: info.systemId, text: info.name
-      })
-      uploadedFiberSelect.select2('val', val, true)
-      */
-    })
+    reloadDatasources()
   })
+
+  $scope.fiber = { selected: null }
+  $scope.changeSelectedFiberDatasource = () => {
+    var datasource = $scope.fiber.selected
+    var index = $scope.remainingDatasources.indexOf(datasource)
+    $scope.remainingDatasources.splice(index, 1)
+    $scope.showingDatasources.push(datasource)
+    $scope.fiber.selected = null
+    var layer = new MapLayer({
+      name: datasource.text,
+      type: 'fiber_plant',
+      short_name: 'F',
+      api_endpoint: `/network/fiber_plant/datasource/${datasource.systemId}`,
+      style_options: {
+        normal: {
+          strokeColor: config.ui.colors.fiber,
+          strokeWeight: 2,
+          fillColor: config.ui.colors.fiber
+        }
+      },
+      threshold: 0,
+      reload: 'always'
+    })
+    layer.show()
+    fiberLayers[String(datasource.id)] = layer
+
+    $('#fiberDatasources').sortable({
+      update: () => {
+        var arr = []
+        $('#fiberDatasources > div').each(function () {
+          var id = $(this).attr('id')
+          var systemId = id.substring('fiberDatasources-'.length)
+          var ds = $scope.showingDatasources.find((ds) => String(ds.systemId) === systemId)
+          if (ds) arr.push(ds)
+        })
+        $scope.showingDatasources = arr
+      }
+    })
+    $('#fiberDatasources').disableSelection()
+  }
+
+  $scope.removeDatasource = (datasource) => {
+    var layer = fiberLayers[String(datasource.id)]
+    layer.remove()
+    var index = $scope.showingDatasources.indexOf(datasource)
+    $scope.showingDatasources.splice(index, 1)
+    $scope.remainingDatasources.push(datasource)
+  }
 
   $scope.addFiber = () => {
     $('#upload_fiber_modal').modal('show')
