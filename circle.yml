@@ -63,7 +63,7 @@ deployment:
           environment:
             VZ_QA_MASTER: true
             ARO_PRIVATE_DATA_IMAGE_NAME: aro-data-vz
-            ARO_PRIVATE_DATA_IMAGE_VERSION: "6"
+            ARO_PRIVATE_DATA_IMAGE_VERSION: "9"
             ARO_CLIENT: verizon
             ARO_DB_HOST: db.vz-master.aro.qa.app.altvil.com
       - rm -f opsworks_ssh_key
