@@ -476,7 +476,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $scope.removeDatasource = (datasource) => {
-    var layer = fiberLayers[String(datasource.id)]
+    var layer = fiberLayers[String(datasource.systemId)]
     layer.remove()
     var index = $scope.showingDatasources.indexOf(datasource)
     $scope.showingDatasources.splice(index, 1)
