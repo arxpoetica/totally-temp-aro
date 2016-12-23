@@ -396,22 +396,39 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   var fiberLayers = []
   function reloadDatasources () {
     $http.get('/user_fiber/list').success((response) => {
-      response.forEach((ds) => {
-        ds.name = `${ds.name} (${ds.libraryId ? 'user' : 'global'})`
-      })
       $scope.showingDatasources = $scope.showingDatasources
-        .map((ds) => response.find((item) => item.systemId === ds.systemId))
+        .map((ds) => response.find((item) => item.libraryId && item.systemId === ds.systemId))
         .filter(Boolean)
+        .concat(response.filter((ds) => !ds.libraryId))
       $scope.remainingDatasources = response.filter((ds) => $scope.showingDatasources.indexOf(ds) === -1)
 
-      /*
-      $scope.remainingDatasources.forEach((ds) => {
-        if (ds.libraryId) return
-        $scope.fiber.selected = ds
-        $scope.changeSelectedFiberDatasource()
+      response.forEach((datasource) => {
+        var key = String(datasource.systemId)
+        var layer = fiberLayers[key]
+        if (layer) return
+        layer = new MapLayer({
+          name: datasource.text,
+          type: 'fiber_plant',
+          short_name: 'F',
+          api_endpoint: `/network/fiber_plant/datasource/${datasource.systemId}`,
+          style_options: {
+            normal: {
+              strokeColor: config.ui.colors.fiber,
+              strokeWeight: 2,
+              fillColor: config.ui.colors.fiber
+            }
+          },
+          threshold: 0,
+          reload: 'always'
+        })
+        fiberLayers[key] = layer
+        datasource.layer = layer
+        datasource.visible = false
+        datasource.toggleVisibility = () => {
+          layer.toggleVisibility()
+          datasource.visible = layer.visible
+        }
       })
-      */
-
       updateOptimizationFiber()
     })
   }
@@ -422,28 +439,18 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.fiber = { selected: null }
   $scope.changeSelectedFiberDatasource = () => {
-    var datasource = $scope.fiber.selected
+    selectFiberDatasource($scope.fiber.selected, true)
+    $scope.fiber.selected = null
+  }
+
+  function selectFiberDatasource (datasource, show) {
     var index = $scope.remainingDatasources.indexOf(datasource)
     $scope.remainingDatasources.splice(index, 1)
     $scope.showingDatasources.push(datasource)
-    $scope.fiber.selected = null
-    var layer = new MapLayer({
-      name: datasource.text,
-      type: 'fiber_plant',
-      short_name: 'F',
-      api_endpoint: `/network/fiber_plant/datasource/${datasource.systemId}`,
-      style_options: {
-        normal: {
-          strokeColor: config.ui.colors.fiber,
-          strokeWeight: 2,
-          fillColor: config.ui.colors.fiber
-        }
-      },
-      threshold: 0,
-      reload: 'always'
-    })
-    layer.show()
-    fiberLayers[String(datasource.id)] = layer
+    if (show) {
+      fiberLayers[String(datasource.systemId)].show()
+      datasource.visible = true
+    }
     updateOptimizationFiber()
 
     $('#fiberDatasources').sortable({

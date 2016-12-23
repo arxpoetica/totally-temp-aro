@@ -284,7 +284,7 @@ exports.configure = (api, middleware) => {
     var busboy = new Busboy({ headers: request.headers })
     var fullpath
     busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      fullpath = path.join(os.tmpDir(), filename) // String(Date.now()
       file.pipe(fs.createWriteStream(fullpath))
     })
     busboy.on('finish', () => {
