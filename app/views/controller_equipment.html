@@ -117,9 +117,10 @@
                   <div ng-repeat="datasource in showingDatasources" ng-attr-id="fiberDatasources-{{datasource.systemId}}">
                     <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                     <div class="pull-right">
-                      <a href="javascript:;" ng-click="removeDatasource(datasource)">
+                      <a href="javascript:;" ng-click="removeDatasource(datasource)" ng-if="datasource.libraryId">
                         <span class="fa fa-trash-o"></span>
                       </a>
+                      <input type="checkbox" ng-model="datasource.visible" ng-change="datasource.toggleVisibility()">
                     </div>
                     <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                       <label style="font-weight:normal">
