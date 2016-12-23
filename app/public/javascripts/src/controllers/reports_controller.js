@@ -98,7 +98,8 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
         analysis = analysis.concat([
           {
             name: `${prefix(13)}_BVB_Summary_Output`,
-            type: '.csv'
+            type: '.csv',
+            url: `/reports/tabc/${plan.id}/build_vs_buy_summary`
           },
           {
             name: `${prefix(14)}_BVB_Summary_Formatted`,
