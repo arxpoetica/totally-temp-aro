@@ -427,6 +427,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         datasource.toggleVisibility = () => {
           layer.toggleVisibility()
           datasource.visible = layer.visible
+          updateOptimizationFiber()
         }
       })
       updateOptimizationFiber()
@@ -470,9 +471,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   function updateOptimizationFiber () {
-    optimization.setFiberSourceIds(
-      $scope.showingDatasources.map((ds) => ds.systemId)
-    )
+    var ids = $scope.showingDatasources.filter((ds) => ds.visible).map((ds) => ds.systemId)
+    optimization.setFiberSourceIds(ids)
   }
 
   $scope.removeDatasource = (datasource) => {
