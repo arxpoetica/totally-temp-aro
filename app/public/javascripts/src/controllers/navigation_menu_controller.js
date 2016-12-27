@@ -351,6 +351,13 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     tracker.track('Manage Analyses / Share Analysis')
   }
 
+  $scope.stopOptimization = (plan) => {
+    $http.post(`/optimization/stop/${plan.id}`)
+      .success((response) => {
+        $scope.loadPlans($scope.currentPage)
+      })
+  }
+
   $scope.sharePlan = () => {
     $('#share-plan').modal('hide')
     var params = {

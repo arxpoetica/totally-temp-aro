@@ -37,7 +37,7 @@
             <a href="javascript:void(0)" ng-click="sortBy('name', false)">↑</a>
           </th>
           <th>Status</th>
-          <th></th>
+          <th>Actions</th>
           <th>
             Created at
             <a href="javascript:void(0)" ng-click="sortBy('created_at', true)">↓</a>
@@ -70,9 +70,10 @@
             </div>
           </td>
           <td>
-            <a class="btn btn-sm btn-primary" ng-click="openReport(plan)"><span class="fa fa-folder"></span></a>
-            <a class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>
-            <a class="btn btn-sm btn-danger" ng-click="deletePlan(plan)" ng-show="plan.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
+            <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="stopOptimization(plan)"><span class="fa fa-stop"></span></a>
+            <a ng-if="!plan.progress" class="btn btn-sm btn-primary" ng-click="openReport(plan)"><span class="fa fa-folder"></span></a>
+            <a ng-if="!plan.progress" class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>
+            <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="deletePlan(plan)" ng-show="plan.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
           </td>
           <td>{{plan.updated_at | date:'shortDate'}}</td>
           <td>{{plan.created_at | date:'shortDate'}}</td>
