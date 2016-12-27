@@ -130,6 +130,7 @@
                   </div>
                 </div>
 
+                <% if (user.rol === 'biz-dev') { %>
                 <select class="form-control" ng-model="fiber.selected"
                   ng-change="changeSelectedFiberDatasource()"
                   ng-options="datasource as datasource.name for datasource in remainingDatasources track by datasource.systemId">
@@ -138,6 +139,7 @@
                 <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
                   <span class="fa fa-plus"></span> Add fiber
                 </button>
+                <% } %>
               </div>
 
             </div>
