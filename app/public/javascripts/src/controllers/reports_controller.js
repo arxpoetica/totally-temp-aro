@@ -97,13 +97,13 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
       if (globalUser.rol === 'biz-dev') {
         analysis = analysis.concat([
           {
-            name: `${prefix(13)}_BVB_Summary_Output`,
+            name: `${now}_${plan.id}_${plan.area_name}_BVB_Summary_Output`,
             type: '.csv',
             url: `/reports/tabc/${plan.id}/build_vs_buy_summary`
           },
           {
-            name: `${prefix(14)}_BVB_Summary_Formatted`,
-            type: '.csv',
+            name: `${now}_${plan.id}_${plan.area_name}_BVB_Summary_Formatted`,
+            type: '.xlsx',
             url: '/csv/BVB Summary Formatted.xlsx'
           }
         ])
