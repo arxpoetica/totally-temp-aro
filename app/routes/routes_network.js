@@ -317,4 +317,27 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.get('/optimization/running', (request, response, next) => {
+    var req = {
+      url: config.aro_service_url + '/optimization/running',
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/optimization/running/:plan_id', (request, response, next) => {
+    var req = {
+      qs: {
+        'rootPlanId': +request.params.plan_id
+      },
+      url: config.aro_service_url + '/optimization/running',
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

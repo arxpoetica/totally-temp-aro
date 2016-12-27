@@ -36,6 +36,7 @@
             <a href="javascript:void(0)" ng-click="sortBy('name', true)">↓</a>
             <a href="javascript:void(0)" ng-click="sortBy('name', false)">↑</a>
           </th>
+          <th>Status</th>
           <th></th>
           <th>
             Created at
@@ -53,13 +54,21 @@
             <a href="javascript:void(0)" ng-click="sortBy('total_cost', true)">↓</a>
             <a href="javascript:void(0)" ng-click="sortBy('total_cost', false)">↑</a>
           </th>
-          <th>Status</th>
           <th>Optimization Type</th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="plan in plans">
           <td><a href="javascript:void(0)" ng-click="selectPlan(plan)">{{plan.name}}</a></td>
+          <td>
+            <div ng-if="plan.progress">
+              <div style="float:left; width:200px">
+                <div class="progress" style="margin:0">
+                  <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: {{ plan.progress * 100 }}%">{{ plan.progressString }}</div>
+                </div>
+              </div>
+            </div>
+          </td>
           <td>
             <a class="btn btn-sm btn-primary" ng-click="openReport(plan)"><span class="fa fa-folder"></span></a>
             <a class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>
@@ -69,7 +78,6 @@
           <td>{{plan.created_at | date:'shortDate'}}</td>
           <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
           <td class="text-right">{{plan.total_cost | currency}}</td>
-          <td></td>
           <td></td>
         </tr>
       </tbody>
