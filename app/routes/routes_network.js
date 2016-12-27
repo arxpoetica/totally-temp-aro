@@ -5,6 +5,9 @@ var Busboy = require('busboy')
 var path = require('path')
 var os = require('os')
 var fs = require('fs')
+var multer = require('multer')
+var upload = multer({ dest: os.tmpDir() })
+var pync = require('pync')
 
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission
@@ -279,30 +282,86 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.post('/user_fiber/upload', (request, response, next) => {
+  api.post('/user_fiber/upload', upload.single('file'), (request, response, next) => {
     var userId = request.user.id
-    var busboy = new Busboy({ headers: request.headers })
-    var fullpath
-    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-      fullpath = path.join(os.tmpDir(), filename) // String(Date.now()
-      file.pipe(fs.createWriteStream(fullpath))
-    })
-    busboy.on('finish', () => {
-      var req = {
-        url: config.aro_service_url + '/installed/fiber/files',
-        qs: {
-          'user-id': userId
-        },
-        method: 'POST',
-        formData: {
-          file: fs.createReadStream(fullpath)
-        },
-        json: true
-      }
-      models.AROService.request(req)
-        .then(jsonSuccess(response, next))
-        .catch(next)
-    })
-    request.pipe(busboy)
+    var name = request.body.name
+    var fullpath = request.file && request.file.path
+    var req = {
+      url: config.aro_service_url + '/installed/fiber/files',
+      qs: {
+        'user-id': userId
+      },
+      method: 'POST',
+      formData: {
+        file: fs.createReadStream(fullpath),
+        name: name
+      },
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/user_fiber/delete', (request, response, next) => {
+    var userId = request.user.id
+    var id = request.body.userFiber
+    var req = {
+      method: 'DELETE',
+      qs: {
+        'user-id': userId
+      },
+      url: config.aro_service_url + `/installed/fiber/metadata/${id}`,
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/optimization/running', (request, response, next) => {
+    var req = {
+      url: config.aro_service_url + '/optimization/running',
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/optimization/running/:plan_id', (request, response, next) => {
+    var req = {
+      qs: {
+        'rootPlanId': +request.params.plan_id
+      },
+      url: config.aro_service_url + '/optimization/running',
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/optimization/stop/:plan_id', (request, response, next) => {
+    var req = {
+      qs: {
+        'rootPlanId': +request.params.plan_id
+      },
+      url: config.aro_service_url + '/optimization/running',
+      json: true
+    }
+    models.AROService.request(req)
+      .then((response) => {
+        return pync.series(response, (info) => {
+          var req = {
+            method: 'DELETE',
+            url: config.aro_service_url + `/optimization/${info.optimizationIdentifier}`,
+            json: true
+          }
+          return models.AROService.request(req)
+        })
+      })
+      .then(jsonSuccess(response, next))
+      .catch(next)
   })
 }

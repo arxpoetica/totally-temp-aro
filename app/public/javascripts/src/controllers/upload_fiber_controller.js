@@ -47,6 +47,7 @@ app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($sc
       try {
         var data = JSON.parse(this.responseText)
         if (data.error) return swal('Error', data.error, 'error')
+        console.log('data', data)
         $rootScope.$broadcast('uploaded_fiber', data)
         $('#upload_fiber_modal').modal('hide')
       } catch (e) {

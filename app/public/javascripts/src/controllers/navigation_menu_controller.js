@@ -202,7 +202,20 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $http(options).success((response) => {
       $scope.plans = response.plans
       $scope.pages = response.pages
-      callback && callback()
+      $http.get('/optimization/running').success((response) => {
+        $scope.plans.forEach((plan) => {
+          var info = response.find((status) => status.planId === +plan.id)
+          if (info) {
+            var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
+            var min = Math.floor(diff / 60)
+            var sec = Math.ceil(diff % 60)
+            plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
+            plan.progress = info.progress
+            plan.startDate = info.startDate
+          }
+        })
+        callback && callback()
+      })
     })
   }
 
@@ -336,6 +349,13 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $('#share-plan').modal('show')
     $('#share-plan .modal-title').text(`Share "${plan.name}"`)
     tracker.track('Manage Analyses / Share Analysis')
+  }
+
+  $scope.stopOptimization = (plan) => {
+    $http.post(`/optimization/stop/${plan.id}`)
+      .success((response) => {
+        $scope.loadPlans($scope.currentPage)
+      })
   }
 
   $scope.sharePlan = () => {
