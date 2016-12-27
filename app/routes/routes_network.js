@@ -301,4 +301,20 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.post('/user_fiber/delete', (request, response, next) => {
+    var userId = request.user.id
+    var id = request.body.userFiber
+    var req = {
+      method: 'DELETE',
+      qs: {
+        'user-id': userId
+      },
+      url: config.aro_service_url + `/installed/fiber/metadata/${id}`,
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }
