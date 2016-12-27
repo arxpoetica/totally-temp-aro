@@ -5,6 +5,8 @@ var Busboy = require('busboy')
 var path = require('path')
 var os = require('os')
 var fs = require('fs')
+var multer = require('multer')
+var upload = multer({ dest: os.tmpDir() })
 
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission
@@ -279,30 +281,24 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.post('/user_fiber/upload', (request, response, next) => {
+  api.post('/user_fiber/upload', upload.single('file'), (request, response, next) => {
     var userId = request.user.id
-    var busboy = new Busboy({ headers: request.headers })
-    var fullpath
-    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-      fullpath = path.join(os.tmpDir(), filename) // String(Date.now()
-      file.pipe(fs.createWriteStream(fullpath))
-    })
-    busboy.on('finish', () => {
-      var req = {
-        url: config.aro_service_url + '/installed/fiber/files',
-        qs: {
-          'user-id': userId
-        },
-        method: 'POST',
-        formData: {
-          file: fs.createReadStream(fullpath)
-        },
-        json: true
-      }
-      models.AROService.request(req)
-        .then(jsonSuccess(response, next))
-        .catch(next)
-    })
-    request.pipe(busboy)
+    var name = request.body.name
+    var fullpath = request.file && request.file.path
+    var req = {
+      url: config.aro_service_url + '/installed/fiber/files',
+      qs: {
+        'user-id': userId
+      },
+      method: 'POST',
+      formData: {
+        file: fs.createReadStream(fullpath),
+        name: name
+      },
+      json: true
+    }
+    models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
   })
 }
