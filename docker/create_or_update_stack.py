@@ -81,7 +81,7 @@ elif environment == 'STAGING':
 else:
     host_name = branch_name + '.aro.qa.app.altvil.com'
 app_base_url = 'https://' + host_name
-aro_service_url = os.environ.get('ARO_SERVICE_URL') or 'http://service.' + host_name + '/aro-service'
+aro_service_url = os.environ.get('ARO_SERVICE_URL') or 'http://service.' + host_name 
 db_host = os.environ.get('ARO_DB_HOST')
 
 cloudformation_client = boto3.client('cloudformation', region_name='us-east-1')
