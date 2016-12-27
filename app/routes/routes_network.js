@@ -7,6 +7,7 @@ var os = require('os')
 var fs = require('fs')
 var multer = require('multer')
 var upload = multer({ dest: os.tmpDir() })
+var pync = require('pync')
 
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission
@@ -337,6 +338,29 @@ exports.configure = (api, middleware) => {
       json: true
     }
     models.AROService.request(req)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.post('/optimization/stop/:plan_id', (request, response, next) => {
+    var req = {
+      qs: {
+        'rootPlanId': +request.params.plan_id
+      },
+      url: config.aro_service_url + '/optimization/running',
+      json: true
+    }
+    models.AROService.request(req)
+      .then((response) => {
+        return pync.series(response, (info) => {
+          var req = {
+            method: 'DELETE',
+            url: config.aro_service_url + `/optimization/${info.optimizationIdentifier}`,
+            json: true
+          }
+          return models.AROService.request(req)
+        })
+      })
       .then(jsonSuccess(response, next))
       .catch(next)
   })

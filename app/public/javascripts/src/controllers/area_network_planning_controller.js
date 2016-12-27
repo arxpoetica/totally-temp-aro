@@ -122,6 +122,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }, () => {
       canceler.resolve()
       canceler = null
+      $http.post(`/optimization/stop/${$scope.plan.id}`)
+        .success((response) => {
+          console.log('stopped')
+        })
     })
   }
 
@@ -219,6 +223,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       changes.processingLayers = [$scope.selectedBoundary.id]
     }
 
+    $scope.calculating = true
     canceler = optimization.optimize($scope.plan, changes, () => {
       $scope.calculating = false
       if (selectLocationTypes.length > 0) {
