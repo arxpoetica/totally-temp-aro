@@ -192,15 +192,14 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.loadPlans = function (page, callback) {
     clearInterval(interval)
-    var load = (page, callback) => {
-      page = page || 1
-      $scope.currentPage = page
+    $scope.currentPage = page || 1
+    var load = (callback) => {
       var options = {
         url: '/network_plan/find_all',
         method: 'GET',
         params: {
           text: $scope.search_text,
-          page: page || 1,
+          page: $scope.currentPage,
           sortField: $scope.sortField,
           sortOrder: $scope.sortOrder,
           minimumCost: $scope.minimumCost,
@@ -226,8 +225,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         })
       })
     }
-    load(page, callback)
-    interval = setInterval(() => load($scope.currentPage), 1000)
+    load(callback)
+    interval = setInterval(load, 1000)
   }
 
   // load plan depending on the URL
