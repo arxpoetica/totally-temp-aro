@@ -184,39 +184,50 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
+  var interval = null
+
+  $('#select-plan').on('hidden.bs.modal', () => {
+    clearInterval(interval)
+  })
+
   $scope.loadPlans = function (page, callback) {
-    page = page || 1
-    $scope.currentPage = page
-    var options = {
-      url: '/network_plan/find_all',
-      method: 'GET',
-      params: {
-        text: $scope.search_text,
-        page: page || 1,
-        sortField: $scope.sortField,
-        sortOrder: $scope.sortOrder,
-        minimumCost: $scope.minimumCost,
-        maximumCost: $scope.maximumCost
+    clearInterval(interval)
+    var load = (page, callback) => {
+      page = page || 1
+      $scope.currentPage = page
+      var options = {
+        url: '/network_plan/find_all',
+        method: 'GET',
+        params: {
+          text: $scope.search_text,
+          page: page || 1,
+          sortField: $scope.sortField,
+          sortOrder: $scope.sortOrder,
+          minimumCost: $scope.minimumCost,
+          maximumCost: $scope.maximumCost
+        }
       }
-    }
-    $http(options).success((response) => {
-      $scope.plans = response.plans
-      $scope.pages = response.pages
-      $http.get('/optimization/running').success((response) => {
-        $scope.plans.forEach((plan) => {
-          var info = response.find((status) => status.planId === +plan.id)
-          if (info) {
-            var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
-            var min = Math.floor(diff / 60)
-            var sec = Math.ceil(diff % 60)
-            plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
-            plan.progress = info.progress
-            plan.startDate = info.startDate
-          }
+      $http(options).success((response) => {
+        $scope.plans = response.plans
+        $scope.pages = response.pages
+        $http.get('/optimization/running').success((response) => {
+          $scope.plans.forEach((plan) => {
+            var info = response.find((status) => status.planId === +plan.id)
+            if (info) {
+              var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
+              var min = Math.floor(diff / 60)
+              var sec = Math.ceil(diff % 60)
+              plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
+              plan.progress = info.progress
+              plan.startDate = info.startDate
+            }
+          })
+          callback && callback()
         })
-        callback && callback()
       })
-    })
+    }
+    load(page, callback)
+    interval = setInterval(() => load($scope.currentPage), 1000)
   }
 
   // load plan depending on the URL
