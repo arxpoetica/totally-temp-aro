@@ -1,5 +1,7 @@
 /* global $ app FormData XMLHttpRequest swal */
 app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
+  $scope.uploading = false
+
   var form = $('#upload_fiber_modal form').get(0)
   function initialValues () {
     $('#upload_fiber_modal input[type=file]').get(0).value = ''
@@ -34,6 +36,7 @@ app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($sc
   }
 
   function submit () {
+    $scope.uploading = true
     // var id = $scope.editingDataset.id
     var url = '/user_fiber/upload'
     var formData = new FormData(form)
@@ -46,6 +49,7 @@ app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($sc
       swal('Error', err.message, 'error')
     })
     xhr.addEventListener('load', function (e) {
+      $scope.uploading = false
       try {
         var data = JSON.parse(this.responseText)
         if (data.error) return swal('Error', data.error, 'error')
