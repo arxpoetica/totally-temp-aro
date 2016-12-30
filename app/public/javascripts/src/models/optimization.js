@@ -20,6 +20,10 @@ app.service('optimization', ($rootScope, $http, $q) => {
     fiberSourceIds = ids || []
   }
 
+  $rootScope.$on('plan_selected', () => {
+    stopPolling()
+  })
+
   function stopPolling () {
     var wait = 0
     setTimeout(() => {
