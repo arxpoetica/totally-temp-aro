@@ -41,7 +41,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" ng-click="saveUserDefiendBoundary()">Save</button>
+        <button ng-hide="uploading" type="button" class="btn btn-primary" ng-click="saveUserDefiendBoundary()">Save</button>
+        <button ng-show="uploading" type="button" class="btn btn-primary btn-success"><span class="spin fa fa-repeat"></span> Uploading</button>
       </div>
     </div>
   </div>

@@ -207,11 +207,9 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         }
       }
       $http(options).success((response) => {
-        $scope.plans = response.plans
-        $scope.pages = response.pages
-        $http.get('/optimization/running').success((response) => {
-          $scope.plans.forEach((plan) => {
-            var info = response.find((status) => status.planId === +plan.id)
+        $http.get('/optimization/running').success((running) => {
+          response.plans.forEach((plan) => {
+            var info = running.find((status) => status.planId === +plan.id)
             if (info) {
               var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
               var min = Math.floor(diff / 60)
@@ -221,6 +219,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
               plan.startDate = info.startDate
             }
           })
+          $scope.plans = response.plans
+          $scope.pages = response.pages
           callback && callback()
         })
       })

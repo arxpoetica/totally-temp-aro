@@ -68,6 +68,13 @@
                 </div>
               </div>
             </div>
+            <div ng-if="!plan.progress && plan.ranOptimization">
+              <div style="float:left; width:200px">
+                <div class="progress" style="margin:0">
+                  <div class="progress-bar progress-bar-success" role="progressbar" style="width: 100%">Complete</div>
+                </div>
+              </div>
+            </div>
           </td>
           <td>
             <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="stopOptimization(plan)"><span class="fa fa-stop"></span></a>

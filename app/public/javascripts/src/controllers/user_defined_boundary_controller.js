@@ -35,17 +35,21 @@ app.controller('user_defined_boundary_controller', ['$scope', '$rootScope', '$ht
     submit()
   }
 
+  $scope.uploading = false
   function submit () {
+    $scope.uploading = true
     var id = $scope.editingUserDefinedBoundary.id
     var url = id ? `/boundary/user_defined/${id}` : '/boundary/user_defined'
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
     xhr.open('POST', url, true)
     xhr.addEventListener('error', (err) => {
+      $scope.uploading = false
       console.log('error', err)
       swal('Error', err.message, 'error')
     })
     xhr.addEventListener('load', function (e) {
+      $scope.uploading = false
       try {
         var data = JSON.parse(this.responseText)
         if (data.error) return swal('Error', data.error, 'error')
