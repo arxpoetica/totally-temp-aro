@@ -130,7 +130,7 @@
                   </div>
                 </div>
 
-                <% if (user.rol === 'biz-dev') { %>
+                <% if (user.rol === 'biz-dev' || globalUser.rol === 'admin') { %>
                 <select class="form-control" ng-model="fiber.selected"
                   ng-change="changeSelectedFiberDatasource()"
                   ng-options="datasource as datasource.name for datasource in remainingDatasources track by datasource.systemId">
