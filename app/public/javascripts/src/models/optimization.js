@@ -5,6 +5,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
   var mode = null
   var fiberSourceIds = []
   var interval
+  var currentPlan = null
   optimization.setMode = (_mode) => {
     if (mode !== _mode) {
       mode = _mode
@@ -20,7 +21,8 @@ app.service('optimization', ($rootScope, $http, $q) => {
     fiberSourceIds = ids || []
   }
 
-  $rootScope.$on('plan_selected', () => {
+  $rootScope.$on('plan_selected', (e, plan) => {
+    currentPlan = plan
     stopPolling()
   })
 
@@ -86,10 +88,12 @@ app.service('optimization', ($rootScope, $http, $q) => {
         .success((response) => {
           if (plan) {
             if (!changes.lazy) plan.ranOptimization = true
-            if (!hideProgressBar && !changes.lazy) {
+            if (!hideProgressBar && !changes.lazy && currentPlan && plan.id === currentPlan.id) {
               startPolling(plan.id)
             }
-            $rootScope.$broadcast('route_planning_changed', response)
+            if (currentPlan) {
+              $rootScope.$broadcast('route_planning_changed', response)
+            }
             success && success()
           }
         })
