@@ -94,7 +94,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           url: '/csv/ABCD Summary Formatted.xlsx'
         }
       ])
-      if (globalUser.rol === 'biz-dev') {
+      if (globalUser.rol === 'biz-dev' || globalUser.rol === 'admin') {
         analysis = analysis.concat([
           {
             name: `${now}_${plan.id}_${plan.area_name}_BVB_Summary_Output`,

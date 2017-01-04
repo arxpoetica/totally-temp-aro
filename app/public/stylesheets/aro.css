@@ -645,6 +645,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .fiber-label {
   text-overflow: ellipsis;
-  max-width: 80%;
+  max-width: 75%;
   overflow: hidden;
 }
