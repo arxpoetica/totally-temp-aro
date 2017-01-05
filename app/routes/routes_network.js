@@ -341,22 +341,21 @@ exports.configure = (api, middleware) => {
 
   api.post('/optimization/stop/:plan_id', (request, response, next) => {
     var req = {
-      qs: {
-        'rootPlanId': +request.params.plan_id
-      },
-      url: config.aro_service_url + '/optimization/running',
+      url: config.aro_service_url + '/optimization/processes',
       json: true
     }
     models.AROService.request(req)
       .then((response) => {
-        return pync.series(response, (info) => {
-          var req = {
-            method: 'DELETE',
-            url: config.aro_service_url + `/optimization/${info.optimizationIdentifier}`,
-            json: true
-          }
-          return models.AROService.request(req)
-        })
+        var planId = request.params.plan_id
+        var info = response.find((status) => status.planId === planId)
+        if (!info) return {}
+        var req = {
+          method: 'DELETE',
+          url: config.aro_service_url + `/optimization/processes/${info.optimizationIdentifier}`,
+          json: true
+        }
+        return models.AROService.request(req)
+          .then(() => ({}))
       })
       .then(jsonSuccess(response, next))
       .catch(next)
