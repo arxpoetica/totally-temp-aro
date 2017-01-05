@@ -217,6 +217,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
               plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
               plan.progress = info.progress
               plan.startDate = info.startDate
+              plan.optimizationState = info.optimizationState
             }
           })
           $scope.plans = response.plans
