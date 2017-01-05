@@ -151,15 +151,22 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       changes.processingLayers = [$scope.selectedBoundary.id]
     }
 
-    canceler = optimization.optimize($scope.plan, changes, () => {
-      $scope.calculating = false
-      if (selectLocationTypes.length > 0) {
-        $rootScope.$broadcast('select_locations', selectLocationTypes)
-      }
-    }, () => {
-      $scope.calculating = false
-    })
+    $scope.selectLocationTypes = selectLocationTypes
+    canceler = optimization.optimize($scope.plan, changes)
   }
+
+  $rootScope.$on('optimization_started_polling', () => {
+    $scope.calculating = true
+    if ($scope.selectLocationTypes && $scope.selectLocationTypes.length > 0) {
+      $rootScope.$broadcast('select_locations', $scope.selectLocationTypes)
+    }
+  })
+
+  $rootScope.$on('optimization_stopped_polling', () => {
+    $scope.calculating = false
+    $scope.selectLocationTypes = null
+  })
+
 
   // processing layer
   $scope.allBoundaries = []

@@ -552,7 +552,15 @@ module.exports = class NetworkPlan {
       .then(() => (
         changes.lazy ? null : models.Network.recalculateNodes(plan_id, changes)
       ))
-      .then(() => NetworkPlan.findPlan(plan_id))
+      .then((data) => {
+        return NetworkPlan.findPlan(plan_id)
+          .then((plan) => {
+            if (data) {
+              plan.optimizationIdentifier = data.optimizationIdentifier
+            }
+            return plan
+          })
+      })
   }
 
   static exportKml (plan_id, planQuery) {

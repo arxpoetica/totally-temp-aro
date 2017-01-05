@@ -429,7 +429,6 @@ module.exports = class Network {
       }
     })
     .then(() => this._callService(req))
-    .then(() => ({}))
   }
 
   static planSummary (plan_id) {
