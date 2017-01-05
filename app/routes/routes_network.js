@@ -346,7 +346,7 @@ exports.configure = (api, middleware) => {
     }
     models.AROService.request(req)
       .then((response) => {
-        var planId = request.params.plan_id
+        var planId = +request.params.plan_id
         var info = response.find((status) => status.planId === planId)
         if (!info) return {}
         var req = {

@@ -27,27 +27,30 @@ app.service('optimization', ($rootScope, $http, $q) => {
     $('#plan-saving-progress').hide()
   })
 
-  function stopPolling (success) {
+  function stopPolling (success, text) {
     var wait = 0
     setTimeout(() => {
       $('#plan-saving').stop()
       $('#plan-saving .fa').hide()
       $('#plan-saving-progress .progress-bar')
+        .css('width', '100%')
         .removeClass('progress-bar-striped')
         .removeClass('progress-bar-success')
         .removeClass('progress-bar-danger')
         .addClass(success ? 'progress-bar-success' : 'progress-bar-danger')
       if (success) {
-        $('#plan-saving-progress .progress-bar').css('width', '100%')
         if (currentPlan) {
           $http.get('/network_plan/' + currentPlan.id).success((response) => {
             $rootScope.$broadcast('route_planning_changed', response)
           })
         }
+      } else {
+        $('#plan-saving-progress .progress-bar').text(text)
       }
       clearInterval(interval)
       interval = null
       $rootScope.$broadcast('optimization_stopped_polling')
+      if (!$rootScope.$$phase) { $rootScope.$apply() }
     }, wait)
   }
 
@@ -64,8 +67,8 @@ app.service('optimization', ($rootScope, $http, $q) => {
     interval = setInterval(() => {
       $http.get('/optimization/processes/' + optimizationIdentifier).success((response) => {
         if (response.optimizationState === 'COMPLETED') return stopPolling(true)
-        if (response.optimizationState === 'CANCELED') return stopPolling(false)
-        if (response.optimizationState === 'FAILED') return stopPolling(false)
+        if (response.optimizationState === 'CANCELED') return stopPolling(false, 'Cancelled')
+        if (response.optimizationState === 'FAILED') return stopPolling(false, 'Failed')
         var diff = (Date.now() - new Date(response.startDate).getTime()) / 1000
         var min = Math.floor(diff / 60)
         var sec = Math.ceil(diff % 60)
