@@ -24,23 +24,34 @@ app.service('optimization', ($rootScope, $http, $q) => {
   $rootScope.$on('plan_selected', (e, plan) => {
     currentPlan = plan
     stopPolling()
+    $('#plan-saving-progress').hide()
   })
 
-  function stopPolling () {
+  function stopPolling (success) {
     var wait = 0
     setTimeout(() => {
       $('#plan-saving').stop()
       $('#plan-saving .fa').hide()
       $('#plan-saving-progress .progress-bar')
-        .css('width', '100%')
         .removeClass('progress-bar-striped')
-        .addClass('progress-bar-success')
+        .removeClass('progress-bar-success')
+        .removeClass('progress-bar-danger')
+        .addClass(success ? 'progress-bar-success' : 'progress-bar-danger')
+      if (success) {
+        $('#plan-saving-progress .progress-bar').css('width', '100%')
+        if (currentPlan) {
+          $http.get('/network_plan/' + currentPlan.id).success((response) => {
+            $rootScope.$broadcast('route_planning_changed', response)
+          })
+        }
+      }
       clearInterval(interval)
       interval = null
+      $rootScope.$broadcast('optimization_stopped_polling')
     }, wait)
   }
 
-  function startPolling (planId) {
+  function startPolling (optimizationIdentifier) {
     clearInterval(interval)
     $('#plan-saved').stop().hide()
     $('#plan-saving').stop().show()
@@ -49,20 +60,20 @@ app.service('optimization', ($rootScope, $http, $q) => {
     $('#plan-saving-progress .progress-bar').css('width', '0%').stop().text('00:00 Runtime')
       .addClass('progress-bar-striped')
       .removeClass('progress-bar-success')
+      .removeClass('progress-bar-danger')
     interval = setInterval(() => {
-      $http.get('/optimization/running/' + planId).success((response) => {
-        var info = response[0]
-        if (info) {
-          var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
-          var min = Math.floor(diff / 60)
-          var sec = Math.ceil(diff % 60)
-          var per = info.progress * 100
-          $('#plan-saving-progress .progress-bar').css('width', per + '%').text(`${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`)
-        } else {
-          stopPolling()
-        }
+      $http.get('/optimization/processes/' + optimizationIdentifier).success((response) => {
+        if (response.optimizationState === 'COMPLETED') return stopPolling(true)
+        if (response.optimizationState === 'CANCELED') return stopPolling(false)
+        if (response.optimizationState === 'FAILED') return stopPolling(false)
+        var diff = (Date.now() - new Date(response.startDate).getTime()) / 1000
+        var min = Math.floor(diff / 60)
+        var sec = Math.ceil(diff % 60)
+        var per = response.progress * 100
+        $('#plan-saving-progress .progress-bar').css('width', per + '%').text(`${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`)
       })
     }, 400)
+    $rootScope.$broadcast('optimization_started_polling')
   }
 
   optimization.optimize = (plan, changes, success, error) => {
@@ -89,7 +100,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
           if (plan) {
             if (!changes.lazy) plan.ranOptimization = true
             if (!hideProgressBar && !changes.lazy && currentPlan && plan.id === currentPlan.id) {
-              startPolling(plan.id)
+              startPolling(response.optimizationIdentifier)
             }
             if (currentPlan) {
               $rootScope.$broadcast('route_planning_changed', response)

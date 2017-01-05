@@ -207,7 +207,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         }
       }
       $http(options).success((response) => {
-        $http.get('/optimization/running').success((running) => {
+        $http.get('/optimization/processes').success((running) => {
           response.plans.forEach((plan) => {
             var info = running.find((status) => status.planId === +plan.id)
             if (info) {

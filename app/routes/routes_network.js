@@ -319,9 +319,9 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/optimization/running', (request, response, next) => {
+  api.get('/optimization/processes', (request, response, next) => {
     var req = {
-      url: config.aro_service_url + '/optimization/running',
+      url: config.aro_service_url + '/optimization/processes',
       json: true
     }
     models.AROService.request(req)
@@ -329,12 +329,9 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/optimization/running/:plan_id', (request, response, next) => {
+  api.get('/optimization/processes/:optimizationIdentifier', (request, response, next) => {
     var req = {
-      qs: {
-        'rootPlanId': +request.params.plan_id
-      },
-      url: config.aro_service_url + '/optimization/running',
+      url: config.aro_service_url + `/optimization/processes/${request.params.optimizationIdentifier}`,
       json: true
     }
     models.AROService.request(req)
