@@ -120,7 +120,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       showCancelButton: true,
       closeOnConfirm: true
     }, () => {
-      canceler.resolve()
+      canceler && canceler.resolve()
       canceler = null
       $http.post(`/optimization/stop/${$scope.plan.id}`)
         .success((response) => {
