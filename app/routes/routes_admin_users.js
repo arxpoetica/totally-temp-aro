@@ -24,9 +24,10 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
-  app.post('/admin/users/make_admin', check_admin, (request, response, next) => {
-    var user_id = request.body.user
-    models.User.makeAdmin(user_id)
+  app.post('/admin/users/change_rol', check_admin, (request, response, next) => {
+    var userId = request.body.user
+    var rol = request.body.rol
+    models.User.changeRol(userId, rol)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

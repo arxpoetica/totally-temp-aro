@@ -6,6 +6,16 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
   $scope.new_user = {}
   $scope.mailSubject = ''
   $scope.mailBody = ''
+  $scope.userTypes = [
+    {
+      name: 'Admin',
+      rol: 'admin'
+    },
+    {
+      name: 'Biz-dev',
+      rol: 'biz-dev'
+    }
+  ]
 
   $('#manage-users').on('shown.bs.modal', () => {
     loadUsers()
@@ -15,6 +25,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
     $http.get('/admin/users')
       .success((response) => {
         $scope.users = response
+        $scope.sortBy('first_name', false)
       })
   }
 
@@ -94,17 +105,17 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
     })
   }
 
-  $scope.makeAdmin = (user) => {
+  $scope.changeRol = (user) => {
     swal({
       title: 'Are you sure?',
-      text: 'This user will have admin access after this action',
       type: 'warning',
       confirmButtonColor: '#DD6B55',
       confirmButtonText: 'Yes',
       showCancelButton: true,
       closeOnConfirm: true
-    }, () => {
-      $http.post('/admin/users/make_admin', { user: user.id }).success((response) => {
+    }, (confirmation) => {
+      if (!confirmation) return loadUsers()
+      $http.post('/admin/users/change_rol', { user: user.id, rol: user.rol }).success((response) => {
         loadUsers()
       })
     })
