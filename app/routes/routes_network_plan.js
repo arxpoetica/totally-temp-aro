@@ -13,7 +13,8 @@ exports.configure = (api, middleware) => {
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
       minimumCost: +request.query.minimumCost,
-      maximumCost: +request.query.maximumCost
+      maximumCost: +request.query.maximumCost,
+      allPlans: request.query.allPlans === 'true'
     }
     models.NetworkPlan.findAll(request.user, options)
       .then(jsonSuccess(response, next))
