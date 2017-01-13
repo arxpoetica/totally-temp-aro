@@ -129,7 +129,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     })
   }
 
-  var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions']
+  var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions', 'user_defined']
   globalServiceLayers.forEach((layer) => {
     standardTypes.push(layer.name)
   })
