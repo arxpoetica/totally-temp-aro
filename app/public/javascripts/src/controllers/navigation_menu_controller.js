@@ -8,6 +8,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.new_plan_area_centroid
   $scope.new_plan_area_bounds
   $scope.edit_plan_name
+  $scope.allPlans = false
 
   $scope.currentPage = 1
   $scope.pages = [1]
@@ -203,7 +204,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
           sortField: $scope.sortField,
           sortOrder: $scope.sortOrder,
           minimumCost: $scope.minimumCost,
-          maximumCost: $scope.maximumCost
+          maximumCost: $scope.maximumCost,
+          allPlans: $scope.allPlans
         }
       }
       $http(options).success((response) => {

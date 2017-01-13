@@ -7,7 +7,6 @@ var os = require('os')
 var fs = require('fs')
 var multer = require('multer')
 var upload = multer({ dest: os.tmpDir() })
-var pync = require('pync')
 
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission

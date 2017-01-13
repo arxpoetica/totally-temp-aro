@@ -76,8 +76,8 @@ module.exports = class User {
     return database.execute('DELETE FROM auth.users WHERE id=$1', [user_id])
   }
 
-  static makeAdmin (user_id) {
-    return database.execute('UPDATE auth.users SET rol=\'admin\' WHERE id=$1', [user_id])
+  static changeRol (user_id, rol) {
+    return database.execute('UPDATE auth.users SET rol=$2 WHERE id=$1', [user_id, rol])
   }
 
   static register (user) {

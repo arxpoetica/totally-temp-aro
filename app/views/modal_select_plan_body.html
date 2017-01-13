@@ -21,6 +21,17 @@
       </div>
     </div>
   </div>
+  <% if (user.rol === 'admin') { %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="allPlans" ng-change="$scope.loadPlans()"> Show plans of all users
+          </label>
+        </div>
+      </div>
+    </div>
+  <% } %>
   <hr>
 </form>
 <p ng-show="plans.length < 1" class="text-center">
