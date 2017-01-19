@@ -48,7 +48,7 @@ exports.configure = (api, middleware) => {
         return Promise.resolve()
           .then(() => {
             return database.query(`
-              SELECT ST_AsKML(sa.geom) AS geom, n.attributes -> 'name' AS name
+              SELECT ST_AsKML(sa.geom) AS geom, n.attributes -> 'hub_name' AS name
               FROM client.plan rp
               JOIN client.plan mp ON rp.id = mp.parent_plan_id
               JOIN client.plan wp ON mp.id = wp.parent_plan_id
@@ -66,7 +66,7 @@ exports.configure = (api, middleware) => {
             })
             kmlOutput += '</Folder>'
             return database.query(`
-              SELECT ST_AsKML(n.geom) AS geom, n.attributes -> 'name' AS name
+              SELECT ST_AsKML(n.geom) AS geom, n.attributes -> 'hub_name' AS name
               FROM client.plan rp
               JOIN client.plan mp ON rp.id = mp.parent_plan_id
               JOIN client.plan wp ON mp.id = wp.parent_plan_id
