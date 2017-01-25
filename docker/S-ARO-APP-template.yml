@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: ARO Stack - APP - QA Environment
+Description: ARO Stack - APP - Staging Environment
 
 Parameters:
   VpcId:
@@ -29,7 +29,7 @@ Parameters:
     Default: "S-ARO-SHARED-01"
   PrimaryAvailabilityZone:
     Type: "AWS::EC2::AvailabilityZone::Name"
-    Default: "us-east-1b"
+    Default: "us-east-1d"
   EnvSlug: 
     Type: String
     Default: "DEV"
@@ -47,7 +47,7 @@ Parameters:
     Default: "aro-qa-2016"
   SslCertificateArn:
     Type: String
-    Default: "arn:aws:acm:us-east-1:976168524097:certificate/b7189445-e5c4-4d94-b875-376b39d063e1"
+    Default: "arn:aws:acm:us-east-1:976168524097:certificate/ef51a231-d186-4ab2-9c13-94934d3bfdcd"
   ConfigRepoBranch:
     Type: String
     Default: "master"
@@ -111,7 +111,7 @@ Resources:
   AppSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
-      GroupDescription: !Sub "S-ARO-QA-${EnvSlug}-APP-SERVERS"
+      GroupDescription: !Sub "S-ARO-APP-${EnvSlug}-SERVERS"
       VpcId: !Ref VpcId
       SecurityGroupIngress:
         - CidrIp: "0.0.0.0/0"
@@ -120,7 +120,7 @@ Resources:
           ToPort: "22"
       Tags:
         - Key: Name
-          Value: !Sub "S-ARO-QA-${EnvSlug}-APP"
+          Value: !Sub "S-ARO-APP-${EnvSlug}-SERVERS"
         - Key: Project
           Value: !Ref ProjectTag
 
@@ -157,8 +157,8 @@ Resources:
   PublicElbDnsRecordSet:
     Type: "AWS::Route53::RecordSet"
     Properties:
-      HostedZoneId: !FindInMap [ DNSZoneMap, QA, Public ]
-      Name: !Sub "${ClientSlug}.aro.qa.app.altvil.com"
+      HostedZoneId: !FindInMap [ DNSZoneMap, Staging, Public ]
+      Name: !Sub "${ClientSlug}.aro.staging.app.altvil.com"
       Type: "CNAME"
       TTL: "300"
       ResourceRecords: 
@@ -167,7 +167,7 @@ Resources:
   LoadBalancerSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
-      GroupDescription: !Sub "S-ARO-QA-${EnvSlug}-ELB"
+      GroupDescription: !Sub "S-ARO-APP-${EnvSlug}-ELB"
       VpcId: !Ref VpcId
       SecurityGroupIngress:
         - CidrIp: "0.0.0.0/0"
@@ -180,7 +180,7 @@ Resources:
           ToPort: "80"
       Tags:
         - Key: Name
-          Value: !Sub "S-ARO-QA-${EnvSlug}-ELB-SG"
+          Value: !Sub "S-ARO-${EnvSlug}-ELB-SG"
         - Key: Project
           Value: !Ref ProjectTag
 
@@ -190,10 +190,10 @@ Resources:
       SecurityGroups: 
         - !Ref LoadBalancerSecurityGroup
       Subnets:
-        - !GetAtt SharedNetworkInfo.AppSubnetB
         - !GetAtt SharedNetworkInfo.AppSubnetC
         - !GetAtt SharedNetworkInfo.AppSubnetD
         - !GetAtt SharedNetworkInfo.AppSubnetE
+
       Listeners:
         - LoadBalancerPort: '443'
           Protocol: "HTTPS"
@@ -214,7 +214,7 @@ Resources:
         IdleTimeout: 3600
       Tags:
         - Key: Name
-          Value: !Sub "S-ARO-QA-${EnvSlug}-ELB"
+          Value: !Sub "S-ARO-${EnvSlug}-ELB"
         - Key: Project
           Value: !Ref ProjectTag
 
@@ -222,7 +222,7 @@ Resources:
     Type: "AWS::EC2::SecurityGroup"
     Condition: RdsEnabled
     Properties:
-      GroupDescription: !Sub "S-ARO-QA-${EnvSlug}-DB"
+      GroupDescription: !Sub "S-ARO-${EnvSlug}-DB"
       SecurityGroupIngress:
         - SourceSecurityGroupId: !Ref AppSecurityGroup
           IpProtocol: "tcp"
@@ -231,7 +231,7 @@ Resources:
       VpcId: !Ref VpcId
       Tags:
         - Key: Name
-          Value: !Sub "S-ARO-QA-${EnvSlug}-DB-SG"
+          Value: !Sub "S-ARO-${EnvSlug}-DB-SG"
         - Key: Project
           Value: !Ref ProjectTag
 
@@ -242,7 +242,7 @@ Resources:
       DBName: !Ref DBName
       AllocatedStorage: !Ref DBVolumeSize
       DBInstanceClass: !Ref DBInstanceType
-      DBInstanceIdentifier: !Sub "S-ARO-QA-${EnvSlug}-DB"
+      DBInstanceIdentifier: !Sub "S-ARO-${EnvSlug}-DB"
       Engine: "postgres"
       MultiAZ: "false"
       AvailabilityZone: !Ref PrimaryAvailabilityZone
@@ -255,7 +255,7 @@ Resources:
       StorageType: "gp2"
       Tags:
         - Key: Name
-          Value: !Sub "S-ARO-QA-${EnvSlug}-DB"
+          Value: !Sub "S-ARO-${EnvSlug}-DB"
         - Key: Project
           Value: !Ref ProjectTag
 
@@ -263,8 +263,8 @@ Resources:
     Type: "AWS::Route53::RecordSet"
     Condition: RdsEnabled
     Properties:
-      HostedZoneId: !FindInMap [ DNSZoneMap, QA, Public ]
-      Name: !Sub "db.${ClientSlug}.aro.qa.app.altvil.com"
+      HostedZoneId: !FindInMap [ DNSZoneMap, Staging, Public ]
+      Name: !Sub "db.${ClientSlug}.aro.staging.app.altvil.com"
       Type: "CNAME"
       TTL: "300"
       ResourceRecords:
@@ -274,8 +274,8 @@ Resources:
     Type: "AWS::Route53::RecordSet"
     Condition: RdsEnabled
     Properties:
-      HostedZoneId: !FindInMap [ DNSZoneMap, QA, Private ]
-      Name: !Sub "db.${ClientSlug}.aro.qa.app.altvil.com"
+      HostedZoneId: !FindInMap [ DNSZoneMap, Staging, Private ]
+      Name: !Sub "db.${ClientSlug}.aro.staging.app.altvil.com"
       Type: "CNAME"
       TTL: "300"
       ResourceRecords:
@@ -301,7 +301,7 @@ Resources:
     Properties:
       Roles:
         - !Ref StackRole
-      PolicyName: !Sub "S-ARO-QA-${EnvSlug}-CWLOGS-POLICY"
+      PolicyName: !Sub "S-ARO-APP-${EnvSlug}-CWLOGS-POLICY"
       PolicyDocument: {
         "Version": "2012-10-17",
         "Statement": [ {
@@ -321,7 +321,7 @@ Resources:
     Properties:
       Roles:
         - !Ref StackRole
-      PolicyName: !Sub "S-ARO-QA-${EnvSlug}-SEND-EMAIL-POLICY" 
+      PolicyName: !Sub "S-ARO-APP-${EnvSlug}-SEND-EMAIL-POLICY" 
       PolicyDocument: {
         "Version": "2012-10-17",
         "Statement": [ {
@@ -344,9 +344,9 @@ Resources:
   OpsWorksStack:
     Type: "AWS::OpsWorks::Stack"
     Properties:
-      Name: !Sub "S-ARO-APP-QA-${EnvSlug}"
+      Name: !Sub "S-ARO-APP-${EnvSlug}"
       VpcId: !Ref VpcId
-      DefaultSubnetId: !GetAtt SharedNetworkInfo.AppSubnetB
+      DefaultSubnetId: !GetAtt SharedNetworkInfo.AppSubnetD
       DefaultOs: "Ubuntu 14.04 LTS"
       DefaultRootDeviceType: "ebs"
       ServiceRoleArn: "arn:aws:iam::976168524097:role/aws-opsworks-service-role"
@@ -397,6 +397,118 @@ Resources:
     Properties:
       ElasticLoadBalancerName: !Ref LoadBalancer
       LayerId: !Ref DockerComposeAppLayer
+
+
+  ServiceLoadBalancerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: !Sub "S-ARO-SERVICE-QA-${EnvSlug}-ELB"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - CidrIp: "10.103.39.0/24"
+          IpProtocol: "tcp"
+          FromPort: "80"
+          ToPort: "80"
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-SERVICE-QA-${EnvSlug}-ELB-SG"
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  ServiceLoadBalancer:
+    Type: "AWS::ElasticLoadBalancing::LoadBalancer"
+    Properties:
+      SecurityGroups: 
+        - !Ref ServiceLoadBalancerSecurityGroup
+      Subnets:
+        - !GetAtt SharedNetworkInfo.AppSubnetC
+        - !GetAtt SharedNetworkInfo.AppSubnetD
+        - !GetAtt SharedNetworkInfo.AppSubnetE
+      Scheme: internal
+      Listeners:
+        - LoadBalancerPort: '80'
+          Protocol: 'HTTP'
+          InstancePort: '8080'
+          InstanceProtocol: 'HTTP'
+      HealthCheck:
+        Target: "HTTP:8080/version"
+        HealthyThreshold: "3"
+        UnhealthyThreshold: "5"
+        Interval: "30"
+        Timeout: "5"
+      ConnectionSettings:
+        IdleTimeout: 3600
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-SERVICE-QA-${EnvSlug}-ELB"
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  PrivateServiceElbDnsRecordSet:
+    Type: "AWS::Route53::RecordSet"
+    Properties:
+      HostedZoneId: !FindInMap [ DNSZoneMap, Staging, Private ]
+      Name: !Sub "service.${ClientSlug}.aro.staging.app.altvil.com"
+      Type: "CNAME"
+      TTL: "300"
+      ResourceRecords: 
+        - !GetAtt ServiceLoadBalancer.DNSName
+
+
+  PrivateZookeeperElbDnsRecordSet:
+    Type: "AWS::Route53::RecordSet"
+    Properties:
+      HostedZoneId: !FindInMap [ DNSZoneMap, Staging, Private ]
+      Name: !Sub "zookeeper.${ClientSlug}.aro.staging.app.altvil.com"
+      Type: "CNAME"
+      TTL: "300"
+      ResourceRecords: 
+        - !GetAtt ZookeeperLoadBalancer.DNSName
+
+  ZookeeperLoadBalancerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: !Sub "S-ARO-SERVICE-${EnvSlug}-ZK-ELB"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - CidrIp: "10.103.39.0/24"
+          IpProtocol: "tcp"
+          FromPort: "2181"
+          ToPort: "2181"
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-SERVICE-${EnvSlug}-ZK-ELB-SG"
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  ZookeeperLoadBalancer:
+    Type: "AWS::ElasticLoadBalancing::LoadBalancer"
+    Properties:
+      SecurityGroups: 
+        - !Ref ZookeeperLoadBalancerSecurityGroup
+      Subnets:
+        - !GetAtt SharedNetworkInfo.AppSubnetC
+        - !GetAtt SharedNetworkInfo.AppSubnetD
+        - !GetAtt SharedNetworkInfo.AppSubnetE
+      Scheme: internal
+      Listeners:
+        - LoadBalancerPort: '2181'
+          Protocol: 'TCP'
+          InstancePort: '2181'
+          InstanceProtocol: 'TCP'
+      HealthCheck:
+        Target: "TCP:2181"
+        HealthyThreshold: "3"
+        UnhealthyThreshold: "5"
+        Interval: "30"
+        Timeout: "5"
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-SERVICE-${EnvSlug}-ZK-ELB"
+        - Key: Project
+          Value: !Ref ProjectTag  
+
+
 
 Outputs:
   Stack:
