@@ -48,7 +48,6 @@ with open(TEMPLATE_FILE, 'r') as template_file:
 vz_qa_master = os.environ.get('VZ_QA_MASTER')
 branch_name = 'vz-master' if vz_qa_master == 'true' else os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
 build_num = os.environ['CIRCLE_BUILD_NUM']
-etl_image_version = os.environ.get('ARO_ETL_IMAGE_VERSION')
 aro_etl_image_name = os.environ.get('ARO_ETL_IMAGE_NAME') or 'aro-etl'
 nginx_image_version = os.environ.get('ARO_NGINX_IMAGE_VERSION') 
 aro_service_image_version = os.environ.get('ARO_SERVICE_IMAGE_VERSION')
@@ -63,11 +62,14 @@ name_component = os.environ.get('ARO_APP_NAME_COMPONENT') if environment == 'PRO
 decrypt_key = os.environ.get('ARO_APP_DECRYPT_KEY')
 token_key = os.environ.get('ARO_APP_TOKEN_KEY')
 db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
-db_pass = os.environ['ARO_APP_DB_PASS']
-docker_pass = os.environ['DOCKER_PASS']
+db_pass = os.environ.get('ARO_APP_DB_PASS')
+docker_pass = os.environ.get('DOCKER_PASS')
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
-app_default_admin_email = os.environ['ARO_APP_DEFAULT_ADMIN_EMAIL']
-app_default_admin_password = os.environ['ARO_APP_DEFAULT_ADMIN_PASSWORD']
+aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
+ecr_path = os.environ.get('ECR_PATH')
+aro_environment = os.environ.get('ARO_ENVIRONMENT') or 'ait-master'
+
+etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') 
 
 session = Session(region_name='us-east-1')
 
