@@ -10,6 +10,7 @@ import os
 import string
 import sys
 from arostack import stack
+from arostack import versioning
 import pprint
 import argparse
 
