@@ -38,9 +38,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.premisesPercentage = 'false'
   $scope.routeOpportunitiesDistanceThresholds = [
     { name: 'On Route', value: 30 },
-    { name: '1/4 miles', value: 402.336 },
-    { name: '1/2 miles', value: 804.672 },
-    { name: '1 mile', value: 1609.34 }
+    { name: '1/4 ' + config.length.length_units, value: config.length.length_units_to_meters / 4 },
+    { name: '1/2 ' + config.length.length_units, value: config.length.length_units_to_meters / 2 },
+    { name: '1 ' + config.length.length_units, value: config.length.length_units_to_meters / 1 }
   ]
 
   var dirty = false

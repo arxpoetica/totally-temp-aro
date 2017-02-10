@@ -6,6 +6,7 @@ var public_config = _.pick(config,
   'ui',
   'currency_symbol',
   'client_carrier_name',
+  'length',
   'displayable_client_carrier_name')
 public_config.ARO_CLIENT = process.env.ARO_CLIENT
 
