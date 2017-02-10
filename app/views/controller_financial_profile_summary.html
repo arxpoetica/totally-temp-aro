@@ -2,15 +2,15 @@
   <tbody>
     <tr>
       <th colspan="3">Total Cost</th>
-      <td colspan="2" class="text-right">{{metadata.total_cost / 1000 | currency:"$":1}}K</td>
+      <td colspan="2" class="text-right">{{metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
     </tr>
     <tr>
       <th colspan="3">Fiber Cost</th>
-      <td colspan="2" class="text-right">{{metadata.fiber_cost / 1000 | currency:"$":1}}K</td>
+      <td colspan="2" class="text-right">{{metadata.fiber_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
     </tr>
     <tr>
       <th colspan="3">Equipment Cost</th>
-      <td colspan="2" class="text-right">{{metadata.equipment_cost / 1000 | currency:"$":1}}K</td>
+      <td colspan="2" class="text-right">{{metadata.equipment_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
     </tr>
   </tbody>
 </table>
@@ -26,8 +26,8 @@
       <td colspan="2" class="text-right">{{premise.value | number}}</td>
     </tr>
     <tr>
-      <th colspan="3">$ / Premises Passed</th>
-      <td colspan="2" class="text-right">{{metadata.total_cost / metadata.total_premises | currency:"$":0}}</td>
+      <th colspan="3"><%- config.currency_symbol %> / Premises Passed</th>
+      <td colspan="2" class="text-right">{{metadata.total_cost / metadata.total_premises | currency:"<%- config.currency_symbol %>":0}}</td>
     </tr>
   </tbody>
 </table>
@@ -36,7 +36,7 @@
   <tbody>
     <tr>
       <th colspan="3">NPV</th>
-      <td colspan="2" class="text-right">{{metadata.npv / 1000 | currency:"$":1}}K</td>
+      <td colspan="2" class="text-right">{{metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
     </tr>
     <!--
     <tr>
