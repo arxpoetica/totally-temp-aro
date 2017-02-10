@@ -37,12 +37,12 @@ function loadAnalysisLayers () {
 }
 
 function loadExistingFiberSourceNames () {
-  /*
+  
   return database.query('SELECT DISTINCT(source_name) AS source_name FROM client.existing_fiber')
     .then((names) => {
       exports.existingFiberSourceNames = names.map((row) => row.source_name)
     })
-  */
+  
 }
 
 exports.refresh = () => {

@@ -25,7 +25,7 @@ exec 3>&1 1>>${ETL_LOG_FILE} 2> >(tee /dev/fd/3)  # I think it works, though psq
 source ${DIR}/../db/lib/lookup_codes.sh
 
 if [ -z "$STATE_CODES" ]; then
-  export STATE_CODES='wa'
+  export STATE_CODES='mh'
 fi
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
@@ -33,6 +33,8 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 cd $DIR/../db
 
 (cd etl/schema && make etl_reload_auth) # this is a hack for now
+
+cd $DIR/../db
 
 make reset_schema
 make load_schema
@@ -45,5 +47,8 @@ make load_view
 
 make reset_public
 make load_public
+
+make reset_private
+make load_private
 
 node ../app/cli/register_user -f Admin -l User -e $ADMIN_USER_EMAIL -p $ADMIN_USER_PASSWORD -r admin
