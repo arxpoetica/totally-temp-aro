@@ -23,25 +23,25 @@
               <tbody>
                 <tr>
                   <th colspan="3">Fiber Capex ({{metadata.fiber_length * 0.000621371 | number : 0}} mi)</th>
-                  <td colspan="2" class="text-right">{{metadata.fiber_cost / 1000 | currency:"$":1}}K</td>
+                  <td colspan="2" class="text-right">{{metadata.fiber_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 <tr ng-repeat="cost in metadata.fiber_summary">
                   <td colspan="3"><small> ↳ {{cost.description}} ({{cost.lengthMeters * 0.000621371 | number : 0}} mi)</small></td>
-                  <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"$":1}}K</td>
+                  <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 <tr>
                   <th colspan="3">Equipment Capex</th>
-                  <td colspan="2" class="text-right">{{metadata.equipment_cost / 1000 | currency:"$":1}}K</td>
+                  <td colspan="2" class="text-right">{{metadata.equipment_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 <!--
                 <tr ng-repeat="cost in metadata.equipment_summary">
                   <td colspan="3"><small> ↳ {{cost.description}} (x{{cost.quantity | number }})</small></td>
-                  <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"$":1}}K</td>
+                  <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 -->
                 <tr>
                   <th colspan="3">Total Capex</th>
-                  <td colspan="2" class="text-right">{{metadata.total_cost / 1000 | currency:"$":1}}K</td>
+                  <td colspan="2" class="text-right">{{metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
               </tbody>
             </table>
@@ -58,12 +58,12 @@
                   <td colspan="2" class="text-right">{{premise.value | number}}</td>
                 </tr>
                 <tr>
-                  <th colspan="3">$ / Premises Passed</th>
-                  <td colspan="2" class="text-right">{{metadata.total_cost / metadata.total_premises | currency:"$":0}}</td>
+                  <th colspan="3"><%- config.currency_symbol %> / Premises Passed</th>
+                  <td colspan="2" class="text-right">{{metadata.total_cost / metadata.total_premises | currency:"<%- config.currency_symbol %>":0}}</td>
                 </tr>
                 <tr>
                   <th colspan="3">NPV</th>
-                  <td colspan="2" class="text-right">{{metadata.npv / 1000 | currency:"$":1}}K</td>
+                  <td colspan="2" class="text-right">{{metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 <!--
                 <tr>
@@ -304,7 +304,7 @@
         <table class="table">
           <tbody>
             <tr>
-              <th>Telco Buildings - (Off Net VzB buildings incurring > $2K MRCs)</th>
+              <th>Telco Buildings - (Off Net VzB buildings incurring > <%- config.currency_symbol %>2K MRCs)</th>
               <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
             </tr>
             <tr ng-repeat="item in routeOpportunities.totals">
@@ -313,7 +313,7 @@
                 <span ng-hide="item.key === 'MRC'">{{item.key}}</span>
               </td>
               <td class="text-right" ng-repeat="value in item.items">
-                <span ng-show="item.key === 'MRC'">{{value.value | currency:"$":0}}</span>
+                <span ng-show="item.key === 'MRC'">{{value.value | currency:"<%- config.currency_symbol %>":0}}</span>
                 <span ng-hide="item.key === 'MRC'">{{value.value | number}}</span>
               </td>
             </tr>
@@ -335,7 +335,7 @@
             </tr>
           </tbody>
         </table>
-        <button class="btn btn-default" ng-click="downloadBusinesses()">Download all businesses within 1 mile of route</button>
+        <button class="btn btn-default" ng-click="downloadBusinesses()">Download all businesses within 1 <%- config.length.length_units %> of route</button>
       </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileFiberDetails" style="margin-top: 20px">
         <table class="table">
@@ -344,20 +344,20 @@
             <th class="text-right">Distribution Fiber</th>
             <th class="text-right">Feeder Fiber</th>
             <th class="text-right">Backhaul Fiber</th>
-            <th class="text-right">Total miles</th>
-            <th class="text-right">Cost per Mile</th>
+            <th class="text-right">Total <%- config.length.length_units %></th>
+            <th class="text-right">Cost per <%- config.length.length_units %></th>
             <th class="text-right">Total cost</th>
             <th></th>
           </thead>
           <tbody>
             <tr ng-repeat="fiberDetail in metadata.fiberDetails">
               <td>{{fiberDetail.description}}</td>
-              <td class="text-right">{{fiberDetail.types['distribution'].totalLength * 0.000621371 | number : 1}} mi</td>
-              <td class="text-right">{{fiberDetail.types['feeder'].totalLength * 0.000621371 | number : 1}} mi</td>
-              <td class="text-right">{{fiberDetail.types['backbone'].totalLength * 0.000621371 | number : 1}} mi</td>
-              <td class="text-right">{{fiberDetail.totalLength * 0.000621371 | number : 1}} mi</td>
-              <td class="text-right">{{fiberDetail.totalCost / (fiberDetail.totalLength * 0.000621371) | currency:"$":1}}</td>
-              <td class="text-right">{{fiberDetail.totalCost / 1000 | currency:"$":1}}K</td>
+              <td class="text-right">{{fiberDetail.types['distribution'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></td>
+              <td class="text-right">{{fiberDetail.types['feeder'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></td>
+              <td class="text-right">{{fiberDetail.types['backbone'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></td>
+              <td class="text-right">{{fiberDetail.totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></td>
+              <td class="text-right">{{fiberDetail.totalCost / (fiberDetail.totalLength * <%- config.length.meters_to_length_units %>) | currency:"<%- config.currency_symbol %>":1}}</td>
+              <td class="text-right">{{fiberDetail.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
               <th>
                 <a href="javascript:void(0)"
                   style="color: {{ fiberDetailLayers[fiberDetail.name] && fiberDetailLayers[fiberDetail.name].visible ? fiberDetailColors[fiberDetail.name] : 'red' }}"
@@ -368,17 +368,17 @@
             </tr>
             <tr>
               <th>Total</th>
-              <th class="text-right">{{metadata.fiberTotals.types['distribution'].totalLength * 0.000621371 | number : 1}} mi</th>
-              <th class="text-right">{{metadata.fiberTotals.types['feeder'].totalLength * 0.000621371 | number : 1}} mi</th>
-              <th class="text-right">{{metadata.fiberTotals.types['backbone'].totalLength * 0.000621371 | number : 1}} mi</th>
-              <th class="text-right">{{metadata.fiberTotals.totalLength * 0.000621371 | number : 1}} mi</th>
-              <th class="text-right">{{metadata.fiberTotals.totalCost / (metadata.fiberTotals.totalLength * 0.000621371) | currency:"$":1}}</th>
-              <th class="text-right">{{metadata.fiberTotals.totalCost / 1000 | currency:"$":1}}K</th>
+              <th class="text-right">{{metadata.fiberTotals.types['distribution'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></th>
+              <th class="text-right">{{metadata.fiberTotals.types['feeder'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></th>
+              <th class="text-right">{{metadata.fiberTotals.types['backbone'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></th>
+              <th class="text-right">{{metadata.fiberTotals.totalLength * 0.000621371 | number : 1}} <%- config.length.length_units %></th>
+              <th class="text-right">{{metadata.fiberTotals.totalCost / (metadata.fiberTotals.totalLength * <%- config.length.meters_to_length_units %>) | currency:"<%- config.currency_symbol %>":1}}</th>
+              <th class="text-right">{{metadata.fiberTotals.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</th>
               <th></th>
             </tr>
             <tr>
               <th>Existing Fiber</th>
-              <th class="text-right" ng-show="fiberDetailsAdditional">{{fiberDetailsAdditional.length * 0.000621371 | number : 1}} mi</th>
+              <th class="text-right" ng-show="fiberDetailsAdditional">{{fiberDetailsAdditional.length * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></th>
               <th class="text-right" ng-hide="fiberDetailsAdditional">Calculating...</th>
             </tr>
           </tbody>

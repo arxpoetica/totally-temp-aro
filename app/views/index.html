@@ -11,9 +11,9 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
+    <!-- <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css"> -->
     <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= config.ARO_CLIENT %>.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
   </head>
   <body>
 
@@ -181,10 +181,10 @@
 
             <p ng-show="plan" class="navbar-text" id="top_bar_tools">
               <span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
-                <span class="fa fa-usd"></span>
-                <span class="label label-info" ng-show="plan.ranOptimization">{{plan.metadata.npv / 1000 | currency:"$":0}}K NPV</span>
-                <span class="label label-info" ng-hide="plan.ranOptimization">$0K NPV</span>
-                <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost / 1000 | currency:"$":0}}K CapEx</span>
+                <span class="fa fa-inr"></span>
+                <span class="label label-info" ng-show="plan.ranOptimization">{{plan.metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":0}}K NPV</span>
+                <span class="label label-info" ng-hide="plan.ranOptimization"><%- config.currency_symbol %>0K NPV</span>
+                <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
               </span>
               <!--
               <span data-toggle="modal" ng-click="openCustomerProfile()" style="cursor:pointer" ng-show="show_customer_profile">

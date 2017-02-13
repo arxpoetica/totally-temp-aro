@@ -10,13 +10,13 @@
     </div>
     <div class="col-md-3">
       <div class="input-group">
-        <span class="input-group-addon">$</span>
+        <span class="input-group-addon"><%- config.currency_symbol %></span>
         <input type="text" class="form-control" placeholder="Minimum cost" ng-model="minimumCost" ng-change="loadPlans()">
       </div>
     </div>
     <div class="col-md-3">
       <div class="input-group">
-        <span class="input-group-addon">$</span>
+        <span class="input-group-addon"><%- config.currency_symbol %></span>
         <input type="text" class="form-control" placeholder="Maximum cost" ng-model="maximumCost" ng-change="loadPlans()">
       </div>
     </div>
@@ -96,7 +96,7 @@
           <td>{{plan.updated_at | date:'shortDate'}}</td>
           <td>{{plan.created_at | date:'shortDate'}}</td>
           <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
-          <td class="text-right">{{plan.total_cost | currency}}</td>
+          <td class="text-right">{{plan.total_cost | currency:"<%- config.currency_symbol %>"}}</td>
           <td></td>
         </tr>
       </tbody>

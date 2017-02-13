@@ -503,9 +503,9 @@ if (module.id === require.main.id) {
     url: config.aro_service_url + '/businesses/getTotals',
     body: {
       distanceThresholds: [
-        402.336, // 1/4 miles
-        804.672, // 1/2 miles
-        1609.34 // 1 mile
+        config.length.length_units_to_meters / 4, // 1/4 miles
+        config.length.length_units_to_meters / 2, // 1/2 miles
+        config.length.length_units_to_meters / 1 // 1 mile
       ],
       locationSource: 'vz_customers',
       mrcThreshold: 2000,

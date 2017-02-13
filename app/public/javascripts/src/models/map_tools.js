@@ -139,7 +139,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     id: 'financial_profile',
     name: 'Financial Profile',
     short_name: 'F',
-    icon: 'fa fa-usd'
+    icon: 'fa fa-inr'
   })
 
   if (config.ARO_CLIENT === 'demo') {

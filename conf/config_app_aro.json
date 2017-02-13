@@ -8,6 +8,11 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "from_email_address": "aro-demo@app.altvil.com",
+  "length": {
+		"length_units": "miles",
+		"length_units_to_meters": "1609.34",
+		"meters_to_length_units": "0.000621371"
+  },
   "ui": {
     "title": "ARO",
     "layout": "default",

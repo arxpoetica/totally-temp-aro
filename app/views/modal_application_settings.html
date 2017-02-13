@@ -37,7 +37,7 @@
                   <label class="col-sm-4 control-label">{{ setting.name }}</label>
                   <div class="col-sm-5">
                     <div class="input-group">
-                      <div class="input-group-addon">$</div>
+                      <div class="input-group-addon"><%- config.currency_symbol %></div>
                       <input type="text" class="form-control format-currency"
                         data-id="{{setting.id}}" value="{{setting.cost | number:2}}"
                         data-tab="networkCosts" data-field="cost">
