@@ -135,11 +135,12 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     icon: 'icon icon-backhaul'
   })
 
+  var iconClass = (config.ARO_CLIENT === 'reliance') ? 'fa fa-inr' : 'fa fa-usd'
   tools.available_tools.push({
     id: 'financial_profile',
     name: 'Financial Profile',
     short_name: 'F',
-    icon: 'fa fa-inr'
+    icon: iconClass
   })
 
   if (config.ARO_CLIENT === 'demo') {
