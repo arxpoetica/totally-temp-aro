@@ -1,0 +1,13 @@
+{
+  "metaData":
+  [
+    {
+      "layer": "fdh",
+      "icon": "img/icons/fdh_icon.png"
+    },
+    {
+      "layer": "fdt",
+      "icon": "img/icons/fdt_icon.png"
+    }
+  ]
+}
