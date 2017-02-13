@@ -6,12 +6,12 @@
   "displayable_client_carrier_name": "ENA",
   "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
-  "currency_symbol": "$",
+  "currency_symbol": "&#8377;",
   "from_email_address": "aro-demo@app.altvil.com",
   "length": {
-		"length_units": "miles",
-		"length_units_to_meters": "1609.34",
-		"meters_to_length_units": "0.000621371"
+		"length_units": "Km",
+		"length_units_to_meters": "1000",
+		"meters_to_length_units": "0.001"
   },
   "ui": {
     "title": "ARO",
