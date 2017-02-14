@@ -328,6 +328,9 @@ module.exports = class Network {
       entityDataSources: options.entityDataSources,
       fiberSourceIds: options.fiberSourceIds
     }
+    if (config.hardcodeFiberSourceId) {
+      body.fiberSourceIds = [1]
+    }
     var req = {
       method: 'POST',
       url: `${config.aro_service_url}/optimize/masterplan`,
