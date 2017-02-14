@@ -137,11 +137,7 @@
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected['small']"></span>
           <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()">
         </label>
-        <% if (config.ui.map_tools.locations && config.ui.map_tools.locations.lowrise) { %>        
-        <label>Low-Rise</label>
-        <% } else { %>
-        <label>SMB</label>
-        <% } %>
+        <label><%- config.ui.map_tools.locations.smallBusinessLabel %></label>
       </div>
       <!-- / Special case -->
 

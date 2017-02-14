@@ -21,7 +21,7 @@
         "view": ["commercial", "residential"],
         "overlay": ["density"],
         "build": ["commercial", "residential", "combo"],
-        "lowrise": true
+        "smallBusinessLabel": "Low-Rise"
       },
       "boundaries": {
         "view": ["census_blocks", "county_subdivisions", "wirecenters"],
@@ -62,7 +62,8 @@
       "market_profile": true,
       "businesses": {
     	  "floor": true
-      }
+      },
+      "countLabel": "Floor"
     }
   }
 }

@@ -256,11 +256,7 @@
                 <tr>
                   <th>Name</th>
                   <th>Address</th>
-                  <% if (config.ui.locations_modal && config.ui.locations_modal.businesses && config.ui.locations_modal.businesses.floor) { %>
-                  <th class="text-right">Floor Count</th>
-                  <% } else { %>
-                  <th class="text-right">Employee Count</th>
-                  <% } %>
+                  <th class="text-right"><%- config.ui.locations_modal.countLabel %> Count</th>
                   <th class="text-right">Category</th>
                   <!--
                   <th class="text-right">Type</th>
