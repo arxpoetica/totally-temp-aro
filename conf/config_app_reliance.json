@@ -20,7 +20,8 @@
       "locations": {
         "view": ["commercial", "residential"],
         "overlay": ["density"],
-        "build": ["commercial", "residential", "combo"]
+        "build": ["commercial", "residential", "combo"],
+        "lowrise": true
       },
       "boundaries": {
         "view": ["census_blocks", "county_subdivisions", "wirecenters"],
@@ -58,7 +59,10 @@
       }
     },
     "locations_modal": {
-      "market_profile": true
+      "market_profile": true,
+      "businesses": {
+    	  "floor": true
+      }
     }
   }
 }
