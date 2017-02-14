@@ -13,6 +13,7 @@
 		"length_units_to_meters": "1000",
 		"meters_to_length_units": "0.001"
   },
+  "hardcodeFiberSourceId": true,
   "ui": {
     "title": "ARO",
     "layout": "default",
