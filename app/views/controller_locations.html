@@ -137,7 +137,11 @@
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected['small']"></span>
           <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()">
         </label>
+        <% if (config.ARO_CLIENT === 'reliance') { %>
+        <label>Low-Rise</label>
+        <% } else { %>
         <label>SMB</label>
+        <% } %>
       </div>
       <!-- / Special case -->
 
