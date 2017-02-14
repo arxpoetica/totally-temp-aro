@@ -256,7 +256,11 @@
                 <tr>
                   <th>Name</th>
                   <th>Address</th>
+                  <% if (config.ARO_CLIENT === 'reliance') { %>
+                  <th class="text-right">Floor Count</th>
+                  <% } else { %>
                   <th class="text-right">Employee Count</th>
+                  <% } %>
                   <th class="text-right">Category</th>
                   <!--
                   <th class="text-right">Type</th>
