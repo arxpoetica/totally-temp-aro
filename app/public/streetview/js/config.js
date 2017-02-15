@@ -24,12 +24,12 @@ function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
                 },
                 metadata: function ($rootScope, $http) {
                     return $http.get("app/metadata.json").then(function (response) {
-                        $rootScope.METADATA = response.data;
+                       return $rootScope.METADATA = response.data;
                     });
                 },
                 data: function ($rootScope, $http) {
-                    $http.get("app/back_bay.json").then(function (response) {
-                        $rootScope.DATA = response.data;
+                    return $http.get("app/back_bay.json").then(function (response) {
+                       return $rootScope.DATA = response.data;
                     });
                 }
             }
