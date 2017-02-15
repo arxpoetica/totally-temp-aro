@@ -17,7 +17,7 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
         },
         initMap : function () {
            $timeout(function () {
-               var astorPlace = this.mapCenter = {lat: 42.351573, lng: -71.080591};
+               var astorPlace = this.mapCenter = {lat: 42.343156, lng: -71.087586};
                this.map = new google.maps.Map(document.getElementById('mapView'), {
                    center: astorPlace,
                    zoom: 18,
