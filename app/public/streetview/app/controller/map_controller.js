@@ -17,7 +17,7 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
         },
         initMap : function () {
            $timeout(function () {
-               var astorPlace = this.mapCenter = {lat: 42.356592, lng: -71.053956};
+               var astorPlace = this.mapCenter = {lat: 42.351573, lng: -71.080591};
                this.map = new google.maps.Map(document.getElementById('mapView'), {
                    center: astorPlace,
                    zoom: 18,
@@ -49,9 +49,6 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
             var panControl = '<div><button class="btn btn-md btn-toggleView" ng-click="maps.toggleStreetView()"> Toggle MapView</button>' + template.trim()+'</div>';
             this.streetView.controls[google.maps.ControlPosition.TOP_RIGHT].push($compile($(panControl))($scope)[0]);
 
-
-
-
         },
         _generateStreetView: function () {
             var panorama = this.streetView = this.map.getStreetView();
@@ -60,9 +57,7 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
                 heading: 265,
                 pitch: 0
             }));
-            panorama.setVisible(false);
-
-
+            panorama.setVisible(true);
         },
         toStreetView : function () {
             this.streetView.setVisible(true);

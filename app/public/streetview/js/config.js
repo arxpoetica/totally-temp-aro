@@ -28,7 +28,7 @@ function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
                     });
                 },
                 data: function ($rootScope, $http) {
-                    $http.get("app/simulated.json").then(function (response) {
+                    $http.get("app/back_bay.json").then(function (response) {
                         $rootScope.DATA = response.data;
                     });
                 }
