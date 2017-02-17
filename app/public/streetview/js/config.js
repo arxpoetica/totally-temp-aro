@@ -28,8 +28,8 @@ function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
                     });
                 },
                 data: function ($rootScope, $http) {
-                    return $http.get("app/back_bay.json").then(function (response) {
-                       return $rootScope.DATA = response.data;
+                    $http.get("app/waltham.json").then(function (response) {
+                        $rootScope.DATA = response.data;
                     });
                 }
             }
