@@ -24,7 +24,7 @@ function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
                 },
                 metadata: function ($rootScope, $http) {
                     return $http.get("app/metadata.json").then(function (response) {
-                        $rootScope.METADATA = response.data;
+                       return $rootScope.METADATA = response.data;
                     });
                 },
                 data: function ($rootScope, $http) {

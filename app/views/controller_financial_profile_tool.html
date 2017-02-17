@@ -22,11 +22,11 @@
             <table class="table">
               <tbody>
                 <tr>
-                  <th colspan="3">Fiber Capex ({{metadata.fiber_length * 0.000621371 | number : 0}} mi)</th>
+                  <th colspan="3">Fiber Capex ({{metadata.fiber_length * <%- config.length.meters_to_length_units %> | number : 0}} <%- config.length.length_units %>)</th>
                   <td colspan="2" class="text-right">{{metadata.fiber_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 <tr ng-repeat="cost in metadata.fiber_summary">
-                  <td colspan="3"><small> ↳ {{cost.description}} ({{cost.lengthMeters * 0.000621371 | number : 0}} mi)</small></td>
+                  <td colspan="3"><small> ↳ {{cost.description}} ({{cost.lengthMeters * <%- config.length.meters_to_length_units %> | number : 0}} <%- config.length.length_units %>)</small></td>
                   <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 <tr>
@@ -371,7 +371,7 @@
               <th class="text-right">{{metadata.fiberTotals.types['distribution'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></th>
               <th class="text-right">{{metadata.fiberTotals.types['feeder'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></th>
               <th class="text-right">{{metadata.fiberTotals.types['backbone'].totalLength * <%- config.length.meters_to_length_units %> | number : 1}} <%- config.length.length_units %></th>
-              <th class="text-right">{{metadata.fiberTotals.totalLength * 0.000621371 | number : 1}} <%- config.length.length_units %></th>
+              <th class="text-right">{{metadata.fiberTotals.totalLength * <%- config.length.meters_to_length_units %> | number : 2}} <%- config.length.length_units %></th>
               <th class="text-right">{{metadata.fiberTotals.totalCost / (metadata.fiberTotals.totalLength * <%- config.length.meters_to_length_units %>) | currency:"<%- config.currency_symbol %>":1}}</th>
               <th class="text-right">{{metadata.fiberTotals.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</th>
               <th></th>

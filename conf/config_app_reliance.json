@@ -13,6 +13,7 @@
 		"length_units_to_meters": "1000",
 		"meters_to_length_units": "0.001"
   },
+  "hardcodeFiberSourceId": true,
   "ui": {
     "title": "ARO",
     "layout": "default",
@@ -20,7 +21,8 @@
       "locations": {
         "view": ["commercial", "residential"],
         "overlay": ["density"],
-        "build": ["commercial", "residential", "combo"]
+        "build": ["commercial", "residential", "combo"],
+        "smallBusinessLabel": "Low-Rise"
       },
       "boundaries": {
         "view": ["census_blocks", "county_subdivisions", "wirecenters"],
@@ -45,7 +47,7 @@
       "market_profile": "fa fa-briefcase"
     },
     "colors": {
-      "fiber": "red",
+      "fiber": "green",
       "fair_share": "blue"
     },
     "labels": {
@@ -58,7 +60,11 @@
       }
     },
     "locations_modal": {
-      "market_profile": true
+      "market_profile": true,
+      "businesses": {
+    	  "floor": true
+      },
+      "countLabel": "Floor"
     }
   }
 }

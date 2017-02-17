@@ -255,12 +255,29 @@ module.exports = class Location {
           info.customer_profile_totals[type] = values.reduce((total, item) => total + item.total, 0)
         }
 
+        var condition1 = ''
+        var condition2 = ''	
+        if (config.ui.locations_modal && config.ui.locations_modal.businesses && config.ui.locations_modal.businesses.floor) {
+        	condition1 = `
+        		bs.size_name || ' (' || bs.min_value || ' - ' || bs.max_value || ' floors)'
+        	`
+        	condition2 = `
+        		bs.size_name || ' (' || bs.min_value || '+ floors)'
+        	`
+        } else {
+        condition1 = `
+    		bs.size_name || ' (' || bs.min_value || ' - ' || bs.max_value || ' employees)'
+    	`
+    	condition2 = `
+    		bs.size_name || ' (' || bs.min_value || '+ employees)'
+    	`
+        }
         sql = `
           SELECT
             CASE WHEN bs.max_value < 100000000 THEN
-              bs.size_name || ' (' || bs.min_value || ' - ' || bs.max_value || ' employees)'
+            	(${condition1})
             ELSE
-              bs.size_name || ' (' || bs.min_value || '+ employees)'
+            	(${condition2})
             END AS name,
             COUNT(b.id)::integer AS total
           FROM client.businesses_sizes bs
