@@ -94,6 +94,26 @@
 
   <% if (!config.ui.eye_checkboxes) { %>
   <p><strong>Customers to Optimize For</strong></p>
+  <!-- Using ARO_CLIENT here as we are in a rush. To be refactored -->
+  <% if (config.ARO_CLIENT === 'reliance') { %>
+  <!-- For reliance, we want the business categories separate -->
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="optimizeLarge"> Very-High-Rise
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="optimizeMedium"> High-Rise
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="optimizeSMB"> Low-Rise
+    </label>
+  </div>
+  <% } else { %>
+  <!-- For all other clients, we want to club medium and large size businesses in one checkbox -->
   <div class="checkbox">
     <label>
       <input type="checkbox" ng-model="optimizeBusinesses"> Enterprise
@@ -104,6 +124,7 @@
       <input type="checkbox" ng-model="optimizeSMB"> SMB
     </label>
   </div>
+  <% } %>
   <div class="checkbox">
     <label>
       <input type="checkbox" ng-model="optimizeHouseholds"> Households

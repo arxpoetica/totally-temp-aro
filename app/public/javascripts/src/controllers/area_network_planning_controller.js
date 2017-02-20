@@ -30,7 +30,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.calculating = false
 
   $scope.optimizeHouseholds = true
-  $scope.optimizeBusinesses = true
+  $scope.optimizeBusinesses = false
+  $scope.optimizeLarge = true
+  $scope.optimizeMedium = true
   $scope.optimizeSMB = true // special case
   $scope.optimizeTowers = true
 
