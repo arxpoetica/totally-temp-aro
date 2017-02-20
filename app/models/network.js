@@ -325,7 +325,7 @@ module.exports = class Network {
       fiberNetworkConstraints: options.fiberNetworkConstraints,
       processLayers: options.processingLayers,
       customOptimization: options.customOptimization,
-      entityDataSources: options.entityDataSources,
+      locationDataSources: {business : options.entityDataSources},
       fiberSourceIds: options.fiberSourceIds
     }
     if (config.hardcodeFiberSourceId) {

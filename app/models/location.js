@@ -672,31 +672,23 @@ module.exports = class Location {
         if (!id) {
           var req = {
             method: 'POST',
-            url: config.aro_service_url + '/user-entites',
-            body: {
-              name: name,
-              userId: user.id
+            url: config.aro_service_url + '/installed/consumer/files',
+            headers:{
+              "Accept":"*/*"
             },
-            json: true
+            qs: {
+              'name': name,
+              'user-id': user.id
+            },
+            formData: {
+              file: fs.createReadStream(file)
+            }
           }
           return models.AROService.request(req)
         } else {
           return Promise.resolve()
         }
-      })
-      .then((res) => {
-        id = id || res.id
-        if (!file) return { id: id }
-        var req = {
-          method: 'POST',
-          url: config.aro_service_url + `/user-entites/data/${id}/entities.csv`,
-          formData: {
-            file: fs.createReadStream(file)
-          }
-        }
-        return models.AROService.request(req)
-          .then(() => ({ id: id }))
-      })
+      });
   }
 
   static towersByDataSource (dataSourceId, viewport) {
