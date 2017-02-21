@@ -60,8 +60,12 @@ STREET_APP.service("MapLayer" , [function () {
             var marker = new google.maps.Marker({
                 position:  new google.maps.LatLng(child.lat,child.lon),
                 map: map,
+                draggable: true,
                 icon: this.getLayerIcon(),
                 title: this.getLayerName()
+            });
+            google.maps.event.addListener(marker, 'dragend', function(event) {
+                console.log(marker.getPosition().lat() + ", " + marker.getPosition().lng());
             });
             this.children.push(marker);
         },

@@ -16,6 +16,10 @@
     {
       "layer": "pole",
       "icon": "img/icons/pole_icon_small.png"
+    },
+    {
+      "layer": "test",
+      "icon": "img/icons/test.png"
     }
   ]
 }
