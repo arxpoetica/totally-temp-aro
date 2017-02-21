@@ -32,9 +32,6 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the scrip
 
 cd $DIR/../db
 
-# Hack to get all .sh files to be executable. Files were created in Windows and don't seem to "remember" the flag after cloning
-find . -type f -name "*.sh" -exec chmod +x {} \
-
 (cd etl/schema && make etl_reload_auth) # this is a hack for now
 
 make reset_schema
