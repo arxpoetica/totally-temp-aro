@@ -83,8 +83,9 @@ app.service('optimization', ($rootScope, $http, $q) => {
     var canceler = $q.defer()
 
     changes.entityDataSources = optimization.datasources
+    //To get the uploaded business routing to work skip appending celltower to location types
     if (changes.entityDataSources.length > 0) {
-      changes.locationTypes = _.uniq((changes.locationTypes || []).concat(['celltower']))
+      changes.locationTypes = _.uniq((changes.locationTypes || []))  //.concat(['celltower']))
     }
 
     changes.fiberSourceIds = fiberSourceIds
