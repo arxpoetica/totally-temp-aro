@@ -2,7 +2,7 @@
  * Created by saneesh on 13/2/17.
  */
 
-STREET_APP.service("MapLayer" , [function () {
+STREET_APP.service("MapLayer" , ['$rootScope', function ($rootScope) {
 
     function MapLayerLocal(Data) {
         this.children = [];
@@ -47,22 +47,21 @@ STREET_APP.service("MapLayer" , [function () {
         addChild : function (child) {
             var map = this.map;
 
-            // var image = {
-            //     url: this.getLayerIcon(),
-            //     // This marker is 20 pixels wide by 32 pixels high.
-            //     size: new google.maps.Size(25, 25),
-            //     // The origin for this image is (0, 0).
-            //     origin: new google.maps.Point(0, 0),
-            //     // The anchor for this image is the base of the flagpole at (0, 32).
-            //     scaledSize: new google.maps.Size(25, 25)
-            // };
-
             var marker = new google.maps.Marker({
                 position:  new google.maps.LatLng(child.lat,child.lon),
                 map: map,
                 draggable: true,
                 icon: this.getLayerIcon(),
                 title: this.getLayerName()
+            });
+
+            // When the marker is clicked, fire an event with the lat long coordinates
+            marker.addListener('click', function() {
+                $rootScope.$broadcast('marker_clicked', {
+                    title: marker.getTitle(),
+                    lat: marker.getPosition().lat(),
+                    lng: marker.getPosition().lng()
+                });
             });
             google.maps.event.addListener(marker, 'dragend', function(event) {
                 console.log(marker.getPosition().lat() + ", " + marker.getPosition().lng());

@@ -5,6 +5,11 @@
 function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templateCache){
 
     $scope.toggleView = false;
+    $scope.selectedMarkerDetails = null;
+    $rootScope.$on('marker_clicked', function( event, markerDetails ) {
+        $scope.selectedMarkerDetails = markerDetails;
+        $scope.$apply();
+    });
     var ctx = {
         mapLayers:[],
         toggleStreetView : function () {

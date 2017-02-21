@@ -1,5 +1,29 @@
 <div class="maps-wrapper" ng-controller="MapController as maps">
     <div id="mapView" ng-init="maps.initMap()"></div>
+    <div class="layer-container" style="position:absolute;top:10px;right:200px;z-index:2000;padding:10px">
+        <strong>Marker Details</strong>
+        <p ng-if="!selectedMarkerDetails">
+            (click marker for details)
+        </p>
+        <p>
+            <table ng-if="selectedMarkerDetails">
+                <tbody>
+                    <tr>
+                        <td>Title:</td>
+                        <td> {{selectedMarkerDetails.title}}</td>
+                    </tr>
+                    <tr>
+                        <td>Latitude:</td>
+                        <td> {{selectedMarkerDetails.lat | number : 6}}</td>
+                    </tr>
+                    <tr>
+                        <td>Longitude:</td>
+                        <td> {{selectedMarkerDetails.lng | number : 6}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+    </div>
 </div>
 
 
