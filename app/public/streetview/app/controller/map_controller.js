@@ -27,9 +27,9 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
                    center: astorPlace,
                    zoom: 18,
                    disableDefaultUI: true, // a way to quickly hide all controls
-                   mapTypeControl: false,
+                   mapTypeControl: true,
                    scaleControl: false,
-                   zoomControl: false,
+                   zoomControl: true,
                    streetViewControl: false,
                    zoomControlOptions: {
                        style: google.maps.ZoomControlStyle.LARGE
