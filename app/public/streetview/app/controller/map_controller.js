@@ -51,7 +51,7 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push($compile($(toggelControl))($scope)[0]);
 
             //add panorama controls
-            var panControl = '<div><button class="btn btn-md btn-toggleView" ng-click="maps.toggleStreetView()"> Toggle MapView</button>' + template.trim()+'</div>';
+            var panControl = '<div class="pad10"><button class="btn btn-md btn-primary" ng-click="maps.toggleStreetView()"> Toggle MapView</button>' + template.trim()+'</div>';
             this.streetView.controls[google.maps.ControlPosition.TOP_RIGHT].push($compile($(panControl))($scope)[0]);
 
         },

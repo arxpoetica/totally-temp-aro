@@ -1,39 +1,34 @@
 <div class="maps-wrapper" ng-controller="MapController as maps">
     <div id="mapView" ng-init="maps.initMap()"></div>
-    <div class="layer-container" style="position:absolute;top:10px;right:200px;z-index:2000;padding:10px">
-        <strong>Marker Details</strong>
-        <p ng-if="!selectedMarkerDetails">
-            (click marker for details)
-        </p>
-        <p>
-            <table ng-if="selectedMarkerDetails">
+ 
+    <div class="panel panel-primary" style="position:absolute;top:80px;left:20px;z-index:2000;">
+        <div class="panel-heading">Marker Details</div>
+        <div class="panel-body">
+            <p ng-if="!selectedMarkerDetails">
+                (click marker for details)
+            </p>
+            <table ng-if="selectedMarkerDetails" class="table table-bordered">
                 <tbody>
-                    <tr>
-                        <td>Title:</td>
-                        <td> {{selectedMarkerDetails.title}}</td>
-                    </tr>
-                    <tr>
-                        <td>Latitude:</td>
-                        <td> {{selectedMarkerDetails.lat | number : 6}}</td>
-                    </tr>
-                    <tr>
-                        <td>Longitude:</td>
-                        <td> {{selectedMarkerDetails.lng | number : 6}}</td>
+                    <tr ng-repeat="(key,val) in selectedMarkerDetails">
+                        <td>{{key}}</td>
+                        <td>{{val}}</td>
                     </tr>
                 </tbody>
             </table>
-        </p>
+        </div>
     </div>
 </div>
 
-
 <script type="text/ng-template" id="layertoggle.html">
-    <div class="layer-container">
-        <span class="toggle-text">Toggle Layers</span>
-        <ul>
-            <li ng-repeat="layer in maps.mapLayers">
-                <input type="checkbox" ng-model="layer.layerChecked" ng-checked="layer.layerChecked" ng-click="layer.showHideLayer()"> <span>{{layer.getLayerName()}}</span>
-            </li>
-        </ul>
+    <div class="pad10">
+        <div class="panel panel-success">
+            <div class="panel-heading">Toggle Layers</div>
+            <div class="panel-body">
+                <span ng-repeat="layer in maps.mapLayers">
+                    <input type="checkbox" ng-model="layer.layerChecked" ng-checked="layer.layerChecked" ng-click="layer.showHideLayer()"> <span>{{layer.getLayerName()}}</span>
+                    <br>
+                </span>
+            </div>
+        </div>
     </div>
 </script>

@@ -52,16 +52,13 @@ STREET_APP.service("MapLayer" , ['$rootScope', function ($rootScope) {
                 map: map,
                 draggable: true,
                 icon: this.getLayerIcon(),
-                title: this.getLayerName()
+                title: this.getLayerName(),
+                rawObject: child    // Used to display child properties in the UI
             });
 
             // When the marker is clicked, fire an event with the lat long coordinates
             marker.addListener('click', function() {
-                $rootScope.$broadcast('marker_clicked', {
-                    title: marker.getTitle(),
-                    lat: marker.getPosition().lat(),
-                    lng: marker.getPosition().lng()
-                });
+                $rootScope.$broadcast('marker_clicked', marker.rawObject);
             });
             google.maps.event.addListener(marker, 'dragend', function(event) {
                 console.log(marker.getPosition().lat() + ", " + marker.getPosition().lng());

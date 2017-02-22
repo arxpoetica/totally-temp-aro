@@ -12,12 +12,6 @@
     background: white;
     color: black;
 }
-.toggle-text{
-    font-size: 15px;
-    color: #5b5b5b;
-    padding-top: 10px;
-    font-weight: bold;
-}
 
 .layer-container {
     background: white;
@@ -36,7 +30,6 @@
     display: inline;
 }
 
-.layer-container > ul li > span{
-    display: inline;
-    font-size: 15px;
+.pad10 {
+    padding: 10px;
 }
