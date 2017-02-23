@@ -64,6 +64,7 @@ STREET_APP.service("MapLayer" , ['$rootScope', function ($rootScope) {
                 console.log(marker.getPosition().lat() + ", " + marker.getPosition().lng());
             });
             this.children.push(marker);
+            return marker;
         },
         setMap :function (map) {
             this.map = map;

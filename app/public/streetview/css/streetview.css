@@ -33,3 +33,10 @@
 .pad10 {
     padding: 10px;
 }
+.add_btn {
+    z-index: 9999;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

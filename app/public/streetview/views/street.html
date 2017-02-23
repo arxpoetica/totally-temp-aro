@@ -31,4 +31,24 @@
             </div>
         </div>
     </div>
+
+    <div class="layer-add">
+        <button ng-click="maps.showDialog()" class="btn btn-primary btn-block">Add marker</button>
+        <div class="add-toggle" ng-show="maps.showAddDialog">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    Add Marker type
+                </div>
+                <div class="panel-body">
+                    <select class="marker_type" ng-model="maps.markerType" ng-change="maps.markerTypeChanged()">
+                        <option value="manhole" selected>manhole</option>
+                        <option value="pole">pole</option>
+                    </select>
+                    <br>
+                    <button ng-click="maps.saveMarker()">Save</button>
+                    <button ng-click="maps.cancelMarker()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </script>
