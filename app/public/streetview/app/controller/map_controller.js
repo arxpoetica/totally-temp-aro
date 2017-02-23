@@ -5,8 +5,15 @@
 function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templateCache){
 
     $scope.toggleView = false;
+    $scope.selectedMarkerDetails = null;
+    $rootScope.$on('marker_clicked', function( event, markerDetails ) {
+        $scope.selectedMarkerDetails = markerDetails;
+        $scope.$apply();
+    });
     var ctx = {
         mapLayers:[],
+        showAddDialog: false,
+        markerType:'manhole',
         toggleStreetView : function () {
             $scope.toggleView = !$scope.toggleView;
             if($scope.toggleView){
@@ -17,14 +24,14 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
         },
         initMap : function () {
            $timeout(function () {
-               var astorPlace = this.mapCenter = {lat: 42.376178, lng: -71.238991};
+               var astorPlace = this.mapCenter = {lat: 42.376178, lng: -71.238991}; // WALTHAM
                this.map = new google.maps.Map(document.getElementById('mapView'), {
                    center: astorPlace,
                    zoom: 18,
                    disableDefaultUI: true, // a way to quickly hide all controls
-                   mapTypeControl: false,
+                   mapTypeControl: true,
                    scaleControl: false,
-                   zoomControl: false,
+                   zoomControl: true,
                    streetViewControl: false,
                    zoomControlOptions: {
                        style: google.maps.ZoomControlStyle.LARGE
@@ -46,7 +53,7 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push($compile($(toggelControl))($scope)[0]);
 
             //add panorama controls
-            var panControl = '<div><button class="btn btn-md btn-toggleView" ng-click="maps.toggleStreetView()"> Toggle MapView</button>' + template.trim()+'</div>';
+            var panControl = '<div class="pad10"><button class="btn btn-md btn-primary" ng-click="maps.toggleStreetView()"> Toggle MapView</button>' + template.trim()+'</div>';
             this.streetView.controls[google.maps.ControlPosition.TOP_RIGHT].push($compile($(panControl))($scope)[0]);
 
         },
@@ -83,6 +90,64 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
                 $scope.$apply();
             }
 
+        },
+        addMarker : function () {
+            var panorama = this.streetView;
+            var heading  = panorama.getPov().heading;
+            var distance = 40 * 0.0000089; //feet
+            var position = panorama.getPosition();
+
+            console.log("Heading : " + heading);
+            console.log("Position : " +  position);
+
+            var xy = findNewPoint(position.lat() , position.lng() , heading , distance);
+            var layer = this.getMapLayer(this.markerType)[0];
+            this.addTempMarker(xy , layer);
+
+        },
+        showDialog : function () {
+            if(this.showAddDialog){
+                this.showAddDialog = false;
+
+                this.cancelMarker();
+                return;
+            }
+           this.showAddDialog = true;
+
+            this.addMarker();
+        },
+        saveMarker : function () {
+            this.showAddDialog = false;
+            this.removeTempMarker();
+        },
+        cancelMarker : function () {
+            this.showAddDialog = false;
+            this.tempMarker.setMap(null);
+
+            this.removeTempMarker();
+        },
+        getMapLayer : function (name) {
+           return  this.mapLayers.filter(function (layer) {
+                return layer.getLayerName() == name;
+            })
+        },
+        markerTypeChanged : function () {
+            this.tempMarker.setMap(null);
+            var layer = this.getMapLayer(this.markerType)[0];
+            this.addTempMarker(this.tempMarkerLoc , layer);
+
+        },
+        removeTempMarker : function () {
+            delete this.tempMarker;
+            delete this.tempMarkerLoc;
+        },
+        addTempMarker : function (xy , layer) {
+            this.tempMarkerLoc = xy;
+            this.tempMarker = layer.addChild({
+                layer: this.markerType,
+                lat: xy.x,
+                lon: xy.y
+            })
         }
     };
 
@@ -90,3 +155,12 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
 }
 
 STREET_APP.controller("MapController", MapsController);
+
+function findNewPoint(x, y, angle, distance) {
+    var result = {};
+
+    result.x = distance * Math.cos((angle * Math.PI)/180) + x;
+    result.y = distance * Math.sin((angle * Math.PI)/180) + y;
+
+    return result;
+}
