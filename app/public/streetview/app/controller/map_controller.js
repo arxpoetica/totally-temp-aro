@@ -12,6 +12,8 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
     });
     var ctx = {
         mapLayers:[],
+        showAddDialog: false,
+        markerType:'manhole',
         toggleStreetView : function () {
             $scope.toggleView = !$scope.toggleView;
             if($scope.toggleView){
@@ -88,6 +90,64 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
                 $scope.$apply();
             }
 
+        },
+        addMarker : function () {
+            var panorama = this.streetView;
+            var heading  = panorama.getPov().heading;
+            var distance = 40 * 0.0000089; //feet
+            var position = panorama.getPosition();
+
+            console.log("Heading : " + heading);
+            console.log("Position : " +  position);
+
+            var xy = findNewPoint(position.lat() , position.lng() , heading , distance);
+            var layer = this.getMapLayer(this.markerType)[0];
+            this.addTempMarker(xy , layer);
+
+        },
+        showDialog : function () {
+            if(this.showAddDialog){
+                this.showAddDialog = false;
+
+                this.cancelMarker();
+                return;
+            }
+           this.showAddDialog = true;
+
+            this.addMarker();
+        },
+        saveMarker : function () {
+            this.showAddDialog = false;
+            this.removeTempMarker();
+        },
+        cancelMarker : function () {
+            this.showAddDialog = false;
+            this.tempMarker.setMap(null);
+
+            this.removeTempMarker();
+        },
+        getMapLayer : function (name) {
+           return  this.mapLayers.filter(function (layer) {
+                return layer.getLayerName() == name;
+            })
+        },
+        markerTypeChanged : function () {
+            this.tempMarker.setMap(null);
+            var layer = this.getMapLayer(this.markerType)[0];
+            this.addTempMarker(this.tempMarkerLoc , layer);
+
+        },
+        removeTempMarker : function () {
+            delete this.tempMarker;
+            delete this.tempMarkerLoc;
+        },
+        addTempMarker : function (xy , layer) {
+            this.tempMarkerLoc = xy;
+            this.tempMarker = layer.addChild({
+                layer: this.markerType,
+                lat: xy.x,
+                lon: xy.y
+            })
         }
     };
 
@@ -95,3 +155,12 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
 }
 
 STREET_APP.controller("MapController", MapsController);
+
+function findNewPoint(x, y, angle, distance) {
+    var result = {};
+
+    result.x = distance * Math.cos((angle * Math.PI)/180) + x;
+    result.y = distance * Math.sin((angle * Math.PI)/180) + y;
+
+    return result;
+}
