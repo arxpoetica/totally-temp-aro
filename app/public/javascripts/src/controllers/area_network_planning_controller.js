@@ -162,7 +162,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       var selectedDatasources = uploadedCustomersSelect.select2('val')
       var dataSources = [];
       dataSources = dataSources.concat(selectedDatasources)
-      optimization.datasources = dataSources.map((id) => +id)
+      var posSources = dataSources.map((id) => +id);
+      optimization.datasources = _.uniq(optimization.datasources.concat(posSources));
     }
 
 
