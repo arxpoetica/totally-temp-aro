@@ -157,9 +157,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
     if (scope.optimizeTowers) locationTypes.push('celltower')
 
+    optimization.datasources = [];
+    if(locationTypes.length > 0){
+      optimization.datasources.push(1);
+    }
+
     if(scope.optimizeUploaded){
       var uploadedCustomersSelect = $(".uploadCustomersAreaPlanning")
       var selectedDatasources = uploadedCustomersSelect.select2('val')
+
       var dataSources = [];
       dataSources = dataSources.concat(selectedDatasources)
       var posSources = dataSources.map((id) => +id);
