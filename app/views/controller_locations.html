@@ -194,8 +194,13 @@
         <label class="pull-right">
           <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer('households')" ng-disabled="overlay !== 'none'">
         </label>
+        <% if (config.ARO_CLIENT === 'reliance') { %>
+        <label style="margin-left:25px">5G</label>
+        <% } else { %>
         <label style="margin-left:25px">Residential</label>
+        <% } %>
       </div>
+      <% if (config.ARO_CLIENT !== 'reliance') { %>
       <div class="customer-type">
         <div ng-repeat="category in household_categories" style="clear:both">
           <div class="pull-left">
@@ -208,6 +213,7 @@
           <label style="font-weight:normal">{{category.description}}</label>
         </div>
       </div>
+      <% } %>
       <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'towers'">
           <form>

@@ -125,11 +125,19 @@
     </label>
   </div>
   <% } %>
+  <% if (config.ARO_CLIENT === 'reliance') { %>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="optimizeHouseholds"> 5G
+    </label>
+  </div>
+  <% } else { %>
   <div class="checkbox">
     <label>
       <input type="checkbox" ng-model="optimizeHouseholds"> Households
     </label>
   </div>
+  <% } %>
   <div class="checkbox">
     <label>
       <input type="checkbox" ng-model="optimizeTowers"> Cell Sites
