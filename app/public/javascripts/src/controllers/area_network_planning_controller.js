@@ -35,7 +35,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.optimizeMedium = true
   $scope.optimizeSMB = true // special case
   $scope.optimizeTowers = true
-  $scope.optimizeUploaded = true
+  $scope.optimizeUploaded = false
 
   $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = $scope.irrThresholdRange = 10
