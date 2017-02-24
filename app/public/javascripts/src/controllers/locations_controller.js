@@ -53,7 +53,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.business_categories_selected = {}
   $scope.household_categories_selected = {}
 
-  var uploadedCustomersSelect = $('#uploadedCustomersSelect')
+  var uploadedCustomersSelect = $('.uploadedCustomersSelect')
 
   var locationStyles = {
     normal: {

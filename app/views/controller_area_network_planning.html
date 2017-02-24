@@ -135,6 +135,16 @@
       <input type="checkbox" ng-model="optimizeTowers"> Cell Sites
     </label>
   </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="optimizeUploaded"> Uploaded Businesses
+
+      <div ng-show="optimizeUploaded" style="width: 200px">
+        <input class="form-control uploadedCustomersSelect uploadCustomersAreaPlanning" class="uploadedCustomersSelect"
+               ng-model="selectedDatasource">
+      </div>
+    </label>
+  </div>
   <% } %>
 
   <% if (config.ARO_CLIENT === 'verizon') { %>

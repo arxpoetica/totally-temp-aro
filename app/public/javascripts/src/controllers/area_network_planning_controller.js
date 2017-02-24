@@ -35,6 +35,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.optimizeMedium = true
   $scope.optimizeSMB = true // special case
   $scope.optimizeTowers = true
+  $scope.optimizeUploaded = true
 
   $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = $scope.irrThresholdRange = 10
@@ -155,6 +156,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (scope.optimizeSMB) locationTypes.push('small')
     if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
     if (scope.optimizeTowers) locationTypes.push('celltower')
+
+    if(scope.optimizeUploaded){
+      var uploadedCustomersSelect = $(".uploadCustomersAreaPlanning")
+      var selectedDatasources = uploadedCustomersSelect.select2('val')
+      var dataSources = [];
+      dataSources = dataSources.concat(selectedDatasources)
+      optimization.datasources = dataSources.map((id) => +id)
+    }
+
 
     var processingLayers = []
     var algorithm = $scope.optimizationType
@@ -278,7 +288,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         $scope.allBoundaries = response
       })
   }
-
+  
   loadBoundaries()
   $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
 }])
