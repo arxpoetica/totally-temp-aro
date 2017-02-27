@@ -93,7 +93,7 @@
         <label class="pull-right">
           <input type="checkbox" ng-model="show_businesses" value="businesses" ng-change="changeLocationsLayer('businesses')" ng-disabled="overlay !== 'none'">
         </label>
-        <label style="margin-left:25px">Enterprise</label>
+        <label style="margin-left:25px">{{ARO_CLIENT=='reliance' ? 'Buildings':'Enterprise'}}</label>
       </div>
       <div class="customer-type">
         <div ng-repeat="category in business_categories" ng-if="category.name !== 'small'" style="clear:both">
@@ -238,7 +238,7 @@
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_towers"></span>
           <input type="checkbox" ng-model="show_towers" value="true" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
-        <label>Cell Sites</label>
+        <label>{{ARO_CLIENT=='reliance' ? 'Enterprise':'Cell Sites'}}</label>
       </div>
       <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'addCustomers'">
