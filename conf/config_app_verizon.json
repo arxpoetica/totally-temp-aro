@@ -8,15 +8,21 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "from_email_address": "vz-one-fiber@app.altvil.com",
+  "length": {
+    "length_units": "miles",
+    "length_units_to_meters": "1609.34",
+    "meters_to_length_units": "0.000621371"
+  },,
+  "hardcodeFiberSourceId": true,
   "ui": {
     "title": "OneFiber",
-    "eye_checkboxes": true,
     "layout": "accordion",
     "map_tools": {
       "locations": {
-        "view": ["commercial", "residential"],
+        "view": ["commercial", "residential", "combo"],
         "overlay": ["density"],
-        "build": ["commercial", "residential", "combo"]
+        "build": ["commercial", "residential", "combo"],
+        "smallBusinessLabel": "Low-Rise"
       },
       "boundaries": {
         "view": ["census_blocks", "county_subdivisions", "wirecenters"],
@@ -32,7 +38,7 @@
         "overlay": ["density"]
       },
       "target_builder": {
-        "disabled": false
+        "eager": false
       }
     },
     "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
@@ -52,6 +58,13 @@
       "create_plan": {
         "select_area_text": "Enter a CLLI Code"
       }
+    },
+    "locations_modal": {
+      "market_profile": true,
+      "businesses": {
+        "floor": true
+      },
+      "countLabel": "Floor"
     }
   }
 }
