@@ -164,7 +164,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     if (!plan) return
     $scope.plan = plan
     $scope.mode = 'global'
-    $scope.metadata = plan.metadata
+    updateMetadataLabels(plan.metadata);
 
     $scope.premisesFilterEntityTypes = {}
     $scope.subscribersFilterEntityTypes = {}
@@ -193,7 +193,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $rootScope.$on('plan_changed_metadata', (e, plan) => {
     $scope.plan = plan
     if ($scope.mode === 'global') {
-      $scope.metadata = plan.metadata
+      updateMetadataLabels(plan.metadata);
     }
     refresh()
   })
@@ -546,7 +546,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.setMode = (mode) => {
     $scope.mode = mode
     $scope.selectedArea = null
-    $scope.metadata = $scope.plan.metadata
+    updateMetadataLabels($scope.plan.metadata);
     $scope.calculateShowData()
     refresh()
     if (mode === 'area') {
@@ -575,7 +575,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       // Check if the user has changed to another wirectenter, to global mode or to another plan
       if (url === calculateURL() && $scope.mode === 'area') {
         console.log('loaded wirecenter data')
-        $scope.metadata = response.metadata
+        updateMetadataLabels(response.metadata);
       }
     })
   }
@@ -612,6 +612,18 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $scope.showBuildLease = () => {
     $('#build-lease').modal('show')
+  }
+
+  function updateMetadataLabels(metadata) {
+
+     metadata.premises.map(function (premise) {
+      if(config.ARO_CLIENT == 'reliance'){
+        if(premise.name === 'Household') premise.name = '5G Node'
+        if(premise.name === 'Tower') premise.name = 'Enterprise'
+      }
+    });
+
+    $scope.metadata = metadata;
   }
 
   var serviceAreaLayer = new MapLayer({

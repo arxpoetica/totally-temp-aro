@@ -4,6 +4,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.regions = regions
+  $scope.ARO_CLIENT = config.ARO_CLIENT
 
   // selected regions
   $scope.selectedRegions = []
