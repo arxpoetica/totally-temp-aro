@@ -33,6 +33,7 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
                    scaleControl: false,
                    zoomControl: true,
                    streetViewControl: false,
+                   rotateControl: true,
                    zoomControlOptions: {
                        style: google.maps.ZoomControlStyle.LARGE
                    }

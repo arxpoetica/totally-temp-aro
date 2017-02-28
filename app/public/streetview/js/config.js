@@ -28,7 +28,7 @@ function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
                     });
                 },
                 data: function ($rootScope, $http) {
-                    $http.get("app/waltham.json").then(function (response) {
+                    $http.get("app/new_fim.json").then(function (response) {
                         $rootScope.DATA = response.data;
                     });
                 }
