@@ -30,7 +30,6 @@ function MapsController($scope, $rootScope , $timeout , $compile, $uibModal, Map
         });
     };
     $rootScope.$on('marker_clicked', function( event, markerDetails ) {
-        console.log(mapsControllerScope.getMapLayer(markerDetails.layer));
         $scope.selectedMarkerDetails = markerDetails;
         $scope.$apply();
     });
@@ -75,13 +74,45 @@ function MapsController($scope, $rootScope , $timeout , $compile, $uibModal, Map
             }));
             panorama.setVisible(true);
         },
+        setIconSize: function(smallIcons) {
+            // Sets the icon size to small, or removes all sizing info from icons (in which case the 
+            // size will be whatever the size of the icon file is).
+            // Used to scale down icons for map view, and use the default size for street view.
+
+            // Go through all map layers
+            for (var iLayer = 0; iLayer < this.mapLayers.length; ++iLayer) {
+
+                // Go through all children (markers) in this layer
+                var children = this.mapLayers[iLayer].children;
+                for (var iChild = 0; iChild < children.length; ++iChild) {
+                    var marker = children[iChild];
+                    var icon = marker.getIcon();
+                    // If a scaled size has not been set, "icon" is just a url string. Else it contains a .url property.
+                    var iconUrl = icon.url ? icon.url : icon;
+                    if (smallIcons) {
+                        // We want "small" icons
+                        marker.setIcon({
+                            url: iconUrl,
+                            scaledSize: new google.maps.Size(20, 20)
+                        });
+                    } else {
+                        // We want to remove size scaling from the icon
+                        marker.setIcon({
+                            url: iconUrl,
+                        });
+                    }
+                }
+            }
+        },
         toStreetView : function () {
             this.streetView.setVisible(true);
             this.toggleView = true;
+            this.setIconSize(false);
         },
         toMapView : function () {
             this.streetView.setVisible(false);
             this.toggleView = false;
+            this.setIconSize(true);
         },
         _generateLayers : function () {
             var layers = $rootScope.METADATA.metaData;
@@ -162,7 +193,6 @@ function MapsController($scope, $rootScope , $timeout , $compile, $uibModal, Map
     };
 
     angular.extend(this,ctx);
-    console.log($scope);
 }
 
 STREET_APP.controller("MapController", MapsController);
