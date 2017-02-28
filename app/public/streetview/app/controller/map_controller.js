@@ -2,11 +2,35 @@
  * Created by saneesh on 13/2/17.
  */
 
-function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templateCache){
+function MapsController($scope, $rootScope , $timeout , $compile, $uibModal, MapLayer, $templateCache){
 
-    $scope.toggleView = false;
     $scope.selectedMarkerDetails = null;
+
+    var mapsControllerScope = this;
+
+    layersModal = null;
+    $scope.openLayersModal = function() {
+        layersModal = $uibModal.open({
+            templateUrl: 'views/layers_modal.html',
+            controller: function($scope, $rootScope) {
+                $scope.mapLayers = mapsControllerScope.mapLayers;
+                $scope.lobDescriptions = [
+                    'VzT',
+                    'VzB',
+                    'VzW',
+                    'XO'
+                ];
+                $scope.closeModal = function() {
+                    if (layersModal) {
+                        layersModal.close();
+                        layersModal = null;
+                    }
+                }
+            }
+        });
+    };
     $rootScope.$on('marker_clicked', function( event, markerDetails ) {
+        console.log(mapsControllerScope.getMapLayer(markerDetails.layer));
         $scope.selectedMarkerDetails = markerDetails;
         $scope.$apply();
     });
@@ -14,14 +38,6 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
         mapLayers:[],
         showAddDialog: false,
         markerType:'manhole',
-        toggleStreetView : function () {
-            $scope.toggleView = !$scope.toggleView;
-            if($scope.toggleView){
-                this.toStreetView();
-            }else{
-                this.toMapView();
-            }
-        },
         initMap : function () {
            $timeout(function () {
                var astorPlace = this.mapCenter = {lat: 42.376178, lng: -71.238991}; // WALTHAM
@@ -41,6 +57,7 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
                this._generateLayers();
 
                this._createControls();
+               this.toggleView = true;
            }.bind(this), 100);
         },
         _createControls : function () {
@@ -48,14 +65,6 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
 
             //add togglelayers to botn
             var template = $templateCache.get('layertoggle.html');
-
-            var toggelControl = '<div>'+'<button class="btn btn-md btn-toggleView" ng-click="maps.toggleStreetView()"> Toggle StreetView</button>' + template.trim()+'</div>';
-            map.controls[google.maps.ControlPosition.TOP_RIGHT].push($compile($(toggelControl))($scope)[0]);
-
-            //add panorama controls
-            var panControl = '<div class="pad10"><button class="btn btn-md btn-primary" ng-click="maps.toggleStreetView()"> Toggle MapView</button>' + template.trim()+'</div>';
-            this.streetView.controls[google.maps.ControlPosition.TOP_RIGHT].push($compile($(panControl))($scope)[0]);
-
         },
         _generateStreetView: function () {
             var panorama = this.streetView = this.map.getStreetView();
@@ -68,9 +77,11 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
         },
         toStreetView : function () {
             this.streetView.setVisible(true);
+            this.toggleView = true;
         },
         toMapView : function () {
             this.streetView.setVisible(false);
+            this.toggleView = false;
         },
         _generateLayers : function () {
             var layers = $rootScope.METADATA.metaData;
@@ -89,7 +100,6 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
                 this.mapLayers.push(mapLayer);
                 $scope.$apply();
             }
-
         },
         addMarker : function () {
             var panorama = this.streetView;
@@ -129,11 +139,11 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
         getMapLayer : function (name) {
            return  this.mapLayers.filter(function (layer) {
                 return layer.getLayerName() == name;
-            })
+            })[0]
         },
         markerTypeChanged : function () {
             this.tempMarker.setMap(null);
-            var layer = this.getMapLayer(this.markerType)[0];
+            var layer = this.getMapLayer(this.markerType);
             this.addTempMarker(this.tempMarkerLoc , layer);
 
         },
@@ -152,6 +162,7 @@ function MapsController($scope,$rootScope , $timeout , $compile ,MapLayer,$templ
     };
 
     angular.extend(this,ctx);
+    console.log($scope);
 }
 
 STREET_APP.controller("MapController", MapsController);
