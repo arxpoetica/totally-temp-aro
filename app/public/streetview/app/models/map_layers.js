@@ -50,7 +50,7 @@ STREET_APP.service("MapLayer" , ['$rootScope', function ($rootScope) {
             var marker = new google.maps.Marker({
                 position:  new google.maps.LatLng(child.lat,child.lon),
                 map: map,
-                // draggable: true,
+                draggable: true,
                 icon: this.getLayerIcon(),
                 title: this.getLayerName(),
                 rawObject: child    // Used to display child properties in the UI
