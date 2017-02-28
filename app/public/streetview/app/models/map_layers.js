@@ -28,14 +28,14 @@ STREET_APP.service("MapLayer" , ['$rootScope', function ($rootScope) {
             var children = this.children;
             for (var i = 0; i < children.length; i++) {
                 var child = children[i];
-                child.setVisible(true);
+                child.setMap(this.map);
             }
         },
         hide : function () {
             var children = this.children;
             for (var i = 0; i < children.length; i++) {
                 var child = children[i];
-                child.setVisible(false);
+                child.setMap(null);
             }
         },
         getLayerName : function () {
@@ -50,7 +50,7 @@ STREET_APP.service("MapLayer" , ['$rootScope', function ($rootScope) {
             var marker = new google.maps.Marker({
                 position:  new google.maps.LatLng(child.lat,child.lon),
                 map: map,
-                draggable: true,
+                // draggable: true,
                 icon: this.getLayerIcon(),
                 title: this.getLayerName(),
                 rawObject: child    // Used to display child properties in the UI
