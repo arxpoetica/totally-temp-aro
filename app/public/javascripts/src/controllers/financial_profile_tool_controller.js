@@ -615,7 +615,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   }
 
   function updateMetadataLabels(metadata) {
-
+     if(!metadata || !metadata.premises) return;
      metadata.premises.map(function (premise) {
       if(config.ARO_CLIENT == 'reliance'){
         if(premise.name === 'Household') premise.name = '5G Node'

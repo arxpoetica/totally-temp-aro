@@ -224,8 +224,21 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       }
     }
 
-    changes.fiberNetworkConstraints = {
-      useDirectRouting: $scope.technology === 'direct_routing'
+    changes.fiberNetworkConstraints={};
+    changes.networkTypes = [];
+
+    switch ($scope.technology){
+        case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
+            break;
+        case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
+             break;
+        case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
+                     changes.networkTypes.push("FiveG");
+             break;
+    }
+
+    if($scope.technology != 'odn2'){
+        changes.networkTypes.push("Fiber");
     }
 
     var selectLocationTypes = []
