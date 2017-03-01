@@ -31,6 +31,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       {id:'Fiber' , label : 'Fiber'},
       {id:'FiveG' , label : 'Fixed Wireless'}
   ]
+
+  $scope.cellNodeConstraints = {
+      cellGranularityRatio : 0,
+      cellRadius: config.ui.map_tools.area_planning.cell_radius
+  }
   $scope.coverageThreshold = config.ui.map_tools.area_planning.coverage_threshold;
   $scope.entityTypesTargeted = {}
 
@@ -240,8 +245,16 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     changes.fiberNetworkConstraints={};
     changes.networkTypes = [];
 
+     changes.networkTypes = $scope.selectedTechType;
+    if($scope.selectedTechType.indexOf("FiveG")!=-1){
+        if($scope.cellNodeConstraints.cellRadius == ""){
+            $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
+        }
 
-    changes.networkTypes = $scope.selectedTechType;
+        changes.fiberNetworkConstraints.cellNodeConstraints = {
+            cellRadius : $scope.cellNodeConstraints.cellRadius
+        };
+    }
 
     var selectLocationTypes = []
     if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
