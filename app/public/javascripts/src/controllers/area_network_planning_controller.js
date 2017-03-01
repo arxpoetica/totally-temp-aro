@@ -28,7 +28,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   ]
 
   $scope.technologyTypes = [
-      {id:'Fiber' , label : 'Fiber'},
+      {id:'Fiber' , label : 'Fiber' , selected :true},
       {id:'FiveG' , label : 'Fixed Wireless'}
   ]
 
@@ -337,7 +337,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       })
   }
 
-  $scope.selectedTechType = [];
+  $scope.selectedTechType = ['Fiber'];
   $scope.toggleTechType = function (type , checked) {
     if(checked){
       $scope.selectedTechType.push(type);
