@@ -28,7 +28,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   ]
 
   $scope.technologyTypes = [
-      'Fiber' , 'Fixed Wireless'
+      {id:'Fiber' , label : 'Fiber'},
+      {id:'FiveG' , label : 'Fixed Wireless'}
   ]
   $scope.coverageThreshold = config.ui.map_tools.area_planning.coverage_threshold;
   $scope.entityTypesTargeted = {}
@@ -315,10 +316,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.selectedTechType = [];
   $scope.toggleTechType = function (type , checked) {
-     if(type == 'Fixed Wireless'){
-          type ='FiveG'
-     }
-
     if(checked){
       $scope.selectedTechType.push(type);
     }else{

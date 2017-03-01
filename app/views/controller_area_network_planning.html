@@ -184,11 +184,9 @@
     <label>
       <input
               type="checkbox"
-              value="{{type}}"
               ng-model="isChecked"
-              ng-checked="selection.indexOf(type) > -1"
-              ng-click="toggleTechType(type , isChecked)"
-      > {{type}}
+              ng-click="toggleTechType(type.id , isChecked)"
+      > {{type.label}}
     </label>
   </div>
 
