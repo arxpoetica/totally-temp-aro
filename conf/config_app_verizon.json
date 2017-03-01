@@ -12,7 +12,7 @@
     "length_units": "miles",
     "length_units_to_meters": "1609.34",
     "meters_to_length_units": "0.000621371"
-  },,
+  },
   "hardcodeFiberSourceId": true,
   "ui": {
     "title": "OneFiber",
@@ -39,6 +39,9 @@
       },
       "target_builder": {
         "eager": false
+      },
+      "area_planning":{
+        "coverage_threshold":95
       }
     },
     "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
