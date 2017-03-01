@@ -183,16 +183,13 @@
   <% } else { %>
   <p><strong>Route Type</strong></p>
   <form>
-    <div class="radio">
-      <label>
-        <input type="radio" name="technology" ng-model="technology" value="direct_routing" checked> Unsplit Routing
-      </label>
-    </div>
-    <div class="radio">
-      <label>
-        <input type="radio" name="technology" ng-model="technology" value="odn1" checked> Split Routing
-      </label>
-    </div>
+
+    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="technology" >
+      <option value="direct_routing">Unsplit Routing</option>
+      <option value="odn1" >Split Routing</option>
+      <option value="odn2" >5G</option>
+    </select>
+
   </form>
   <% } %>
 
