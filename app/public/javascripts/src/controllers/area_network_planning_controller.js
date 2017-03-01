@@ -239,21 +239,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     changes.fiberNetworkConstraints={};
     changes.networkTypes = [];
 
-    switch ($scope.technology){
-        case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
-            break;
-        case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
-             break;
-        case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
-                     changes.networkTypes.push("FiveG");
-             break;
-    }
 
-    if($scope.technology != 'odn2'){
-        changes.networkTypes.push("Fiber");
-    }
-
-    changes.technology = $scope.selectedTechType;
+    changes.networkTypes = $scope.selectedTechType;
 
     var selectLocationTypes = []
     if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
@@ -328,6 +315,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.selectedTechType = [];
   $scope.toggleTechType = function (type , checked) {
+     if(type == 'Fixed Wireless'){
+          type ='FiveG'
+     }
+
     if(checked){
       $scope.selectedTechType.push(type);
     }else{
