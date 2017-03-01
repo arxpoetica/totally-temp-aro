@@ -245,6 +245,16 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     changes.fiberNetworkConstraints={};
     changes.networkTypes = [];
 
+      switch ($scope.technology){
+          case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
+              break;
+          case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
+              break;
+          case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
+              break;
+      }
+
+
      changes.networkTypes = $scope.selectedTechType;
     if($scope.selectedTechType.indexOf("FiveG")!=-1){
         if($scope.cellNodeConstraints.cellRadius == ""){
