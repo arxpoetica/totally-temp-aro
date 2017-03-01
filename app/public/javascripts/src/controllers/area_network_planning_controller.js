@@ -26,6 +26,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
     { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
   ]
+
+  $scope.technologyTypes = [
+      'Fiber' , 'Fixed Wireless'
+  ]
+  $scope.coverageThreshold = config.ui.map_tools.area_planning.coverage_threshold;
   $scope.entityTypesTargeted = {}
 
   $scope.calculating = false
@@ -222,6 +227,13 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
           generations: generations.join(',')
         }
       }
+    }else if(algorithm === "CTAR"){
+      delete changes.budget
+      delete changes.irrThreshold
+
+      changes.customOptimization = {
+        coverage_threshold : $scope.coverageThreshold
+      }
     }
 
     changes.fiberNetworkConstraints={};
@@ -240,6 +252,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if($scope.technology != 'odn2'){
         changes.networkTypes.push("Fiber");
     }
+
+    changes.technology = $scope.selectedTechType;
 
     var selectLocationTypes = []
     if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
@@ -296,6 +310,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       // { id: 'TARGET_IRR', label: 'IRR Target' },
       // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
     }
+
+    $scope.optimizationTypeOptions.push({ id: 'CTAR', label: 'Coverage Target' });
   }
   optimizationModeChanged(null, optimization.getMode())
 
@@ -309,7 +325,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         $scope.allBoundaries = response
       })
   }
-  
+
+  $scope.selectedTechType = [];
+  $scope.toggleTechType = function (type , checked) {
+    if(checked){
+      $scope.selectedTechType.push(type);
+    }else{
+      $scope.selectedTechType.splice($scope.selectedTechType.indexOf(type) , 1);
+    }
+  };
   loadBoundaries()
   $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
 }])
