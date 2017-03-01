@@ -227,7 +227,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
           generations: generations.join(',')
         }
       }
-    }else if(algorithm === "CTAR"){
+    }else if(algorithm === "DEFAULT"){
       delete changes.budget
       delete changes.irrThreshold
 
@@ -311,7 +311,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
     }
 
-    $scope.optimizationTypeOptions.push({ id: 'CTAR', label: 'Coverage Target' });
+    $scope.optimizationTypeOptions.push({ id: 'DEFAULT', label: 'Coverage Target' });
   }
   optimizationModeChanged(null, optimization.getMode())
 
