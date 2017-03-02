@@ -73,6 +73,14 @@ function MapsController($scope, $rootScope , $timeout , $compile, $uibModal, Map
                 heading: 265,
                 pitch: 0
             }));
+            panorama.setOptions({
+                disableDefaultUI: true,
+                mapTypeControl: true,
+                scaleControl: true,
+                zoomControl: true,
+                rotateControl: true,
+                fullscreenControl: true
+            });
             panorama.setVisible(true);
         },
         setIconSize: function(smallIcons) {
