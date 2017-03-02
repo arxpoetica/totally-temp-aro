@@ -67,6 +67,22 @@
       </div>
     </div>
   </div>
+  <div ng-show="optimizationType === 'DEFAULT'">
+    <br>
+    <p><strong>Coverage Target</strong></p>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group form-group-sm">
+          <div class="input-group input-group-sm">
+            <div class="input-group-addon">%</div>
+            <input type="text" class="form-control text-right" placeholder="Percentage" ng-model="coverageThreshold" name="coverage_target">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 
   <br>
   <% if (config.ARO_CLIENT !== 'verizon') { %>
@@ -93,7 +109,7 @@
   <% } %>
 
   <% if (!config.ui.eye_checkboxes) { %>
-  <p><strong>Customers to Optimize For</strong></p>
+  <p><strong>Endpoints</strong></p>
   <!-- Using ARO_CLIENT here as we are in a rush. To be refactored -->
   <% if (config.ARO_CLIENT === 'reliance') { %>
   <!-- For reliance, we want the business categories separate -->
@@ -116,12 +132,17 @@
   <!-- For all other clients, we want to club medium and large size businesses in one checkbox -->
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="optimizeBusinesses"> Enterprise
+      <input type="checkbox" ng-model="optimizeSMB"> Small Businesses
     </label>
   </div>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="optimizeSMB"> SMB
+      <input type="checkbox" ng-model="optimizeMedium"> Medium Businesses
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="optimizeLarge"> Large Businesses
     </label>
   </div>
   <% } %>
@@ -140,12 +161,10 @@
   <% } %>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="optimizeTowers"> {{ARO_CLIENT=='reliance' ? 'Enterprise':'Cell Sites'}}
+      <input type="checkbox" ng-model="optimizeTowers"> {{ARO_CLIENT=='reliance' ? 'Enterprise':'Cell Towers'}}
     </label>
   </div>
-
   <% if (config.ARO_CLIENT === 'reliance') { %>
-
   <div class="checkbox">
     <label>
       <input type="checkbox" ng-model="optimizeUploaded"> Uploaded Businesses
@@ -156,68 +175,54 @@
       </div>
     </label>
   </div>
-
+  <% } %>
   <% } %>
 
-  <% } %>
-
-  <% if (config.ARO_CLIENT === 'verizon') { %>
   <p><strong>Technology</strong></p>
-  <form>
-    <div class="radio">
-      <label>
-        <input type="radio" name="technology" ng-model="technology" value="direct_routing" checked> Direct Routing
-      </label>
+
+  <div class="checkbox" ng-repeat="type in technologyTypes">
+    <label>
+     <div style="display: inline-block">
+         <input
+                 type="checkbox"
+                 ng-model="isChecked"
+                 ng-checked="type.selected"
+                 ng-click="toggleTechType(type.id , isChecked)"
+         > {{type.label}}
+     </div>
+    <div  ng-show="type.id == 'FiveG' && isChecked" style="display: inline-block">
+       <span>
+           <input
+                   type="text"
+                   ng-model="cellNodeConstraints.cellRadius"
+                   placeholder="Cell Radius"
+                   style="width: 85px;margin-left: 50px"
+           >
+           <span><b>m</b></span>
+       </span>
     </div>
-    <div class="radio">
-      <label>
-        <input type="radio" name="technology" ng-model="technology" value="odn1" checked> ODN 1.0 (Centralized Split)
-      </label>
-    </div>
-    <div class="radio disabled">
-      <label>
-        <input type="radio" name="technology" ng-model="technology" value="odn2" disabled> ODN 2.0 (Distributed Split)
-      </label>
-    </div>
-  </form>
-  <% } else { %>
-  <p><strong>Route Type</strong></p>
+    </label>
+
+  </div>
+
+  <p><strong>{{ARO_CLIENT == 'verizon' ?'Technology' : 'Network Construction'}}</strong></p>
   <form>
 
     <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="technology" >
-      <option value="direct_routing">Unsplit Routing</option>
-      <option value="odn1" >Split Routing</option>
-      <option value="odn2" >5G</option>
+      <option value="direct_routing">Unsplit Routing - (Direct Routing)</option>
+      <option value="odn1" >Hub-Only Split - (ODN 1.0 (Centralized Split))</option>
+      <% if (config.ARO_CLIENT === 'reliance') { %>
+      <option value="odn2" >5G - (ODN 2.0 (Distributed Split))</option>
+      <% } else {%>
+      <option value="odn2" >Hub-Distribution Split - (ODN 2.0 (Distributed Split))</option>
+      <% } %>
     </select>
 
   </form>
-  <% } %>
+
+
 
   <% if (config.ARO_CLIENT === 'verizon') { %>
-
-  <p><strong>Product</strong></p>
-  <form>
-    <div class="radio disabled">
-      <label>
-        <input type="radio" name="product" disabled> 4G LTE
-      </label>
-    </div>
-    <div class="radio disabled">
-      <label>
-        <input type="radio" name="product" disabled> 5G
-      </label>
-    </div>
-    <div class="radio">
-      <label>
-        <input type="radio" name="product" checked> Fiber
-      </label>
-    </div>
-    <div class="radio disabled">
-      <label>
-        <input type="radio" name="product" disabled> Core
-      </label>
-    </div>
-  </form>
 
   <div ng-show="optimizationType === 'TABC'">
     <p><strong>Route Generation Options</strong></p>

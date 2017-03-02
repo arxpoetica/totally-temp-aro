@@ -26,6 +26,17 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
     { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
   ]
+
+  $scope.technologyTypes = [
+      {id:'Fiber' , label : 'Fiber' , selected :true},
+      {id:'FiveG' , label : 'Fixed Wireless'}
+  ]
+
+  $scope.cellNodeConstraints = {
+      cellGranularityRatio : 0,
+      cellRadius: config.ui.map_tools.area_planning.cell_radius
+  }
+  $scope.coverageThreshold = config.ui.map_tools.area_planning.coverage_threshold;
   $scope.entityTypesTargeted = {}
 
   $scope.calculating = false
@@ -222,23 +233,37 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
           generations: generations.join(',')
         }
       }
+    }else if(algorithm === "DEFAULT"){
+      delete changes.budget
+      delete changes.irrThreshold
+
+      changes.customOptimization = {
+        coverage_threshold : $scope.coverageThreshold
+      }
     }
 
     changes.fiberNetworkConstraints={};
     changes.networkTypes = [];
 
-    switch ($scope.technology){
-        case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
-            break;
-        case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
-             break;
-        case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
-                     changes.networkTypes.push("FiveG");
-             break;
-    }
+      switch ($scope.technology){
+          case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
+              break;
+          case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
+              break;
+          case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
+              break;
+      }
 
-    if($scope.technology != 'odn2'){
-        changes.networkTypes.push("Fiber");
+
+     changes.networkTypes = $scope.selectedTechType;
+    if($scope.selectedTechType.indexOf("FiveG")!=-1){
+        if($scope.cellNodeConstraints.cellRadius == ""){
+            $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
+        }
+
+        changes.fiberNetworkConstraints.cellNodeConstraints = {
+            cellRadius : $scope.cellNodeConstraints.cellRadius
+        };
     }
 
     var selectLocationTypes = []
@@ -296,6 +321,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       // { id: 'TARGET_IRR', label: 'IRR Target' },
       // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
     }
+
+    $scope.optimizationTypeOptions.push({ id: 'DEFAULT', label: 'Coverage Target' });
   }
   optimizationModeChanged(null, optimization.getMode())
 
@@ -309,7 +336,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         $scope.allBoundaries = response
       })
   }
-  
+
+  $scope.selectedTechType = ['Fiber'];
+  $scope.toggleTechType = function (type , checked) {
+    if(checked){
+      $scope.selectedTechType.push(type);
+    }else{
+      $scope.selectedTechType.splice($scope.selectedTechType.indexOf(type) , 1);
+    }
+  };
   loadBoundaries()
   $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
 }])
