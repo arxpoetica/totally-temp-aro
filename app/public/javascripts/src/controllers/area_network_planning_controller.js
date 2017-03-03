@@ -233,13 +233,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
           generations: generations.join(',')
         }
       }
-    }else if(algorithm === "DEFAULT"){
+    }else if(algorithm === "COVERAGE"){
       delete changes.budget
       delete changes.irrThreshold
 
-      changes.customOptimization = {
-        coverage_threshold : $scope.coverageThreshold
-      }
+      changes.threshold = $scope.coverageThreshold;
     }
 
     changes.fiberNetworkConstraints={};
@@ -322,7 +320,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
     }
 
-    $scope.optimizationTypeOptions.push({ id: 'DEFAULT', label: 'Coverage Target' });
+    $scope.optimizationTypeOptions.push({ id: 'COVERAGE', label: 'Coverage Target' });
   }
   optimizationModeChanged(null, optimization.getMode())
 
