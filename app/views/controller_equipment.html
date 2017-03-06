@@ -1,32 +1,6 @@
 <div id="equipment_nodes_controller">
   <div class="row">
-    <div class="col-md-2">
-      <p style="margin-top: 10px"><strong>Asset Type</strong></p>
-    </div>
-    <div class="col-md-10">
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> Aerial
-        </label>
-      </div>
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> Underground
-        </label>
-      </div>
-      <div class="checkbox disabled">
-        <label>
-          <input type="checkbox" disabled> Buried
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-2">
-      <p style="margin-top: 10px"><strong>Assets</strong></p>
-    </div>
-    <div class="col-md-10">
+    <div class="col-md-12">
       <div class="panel-group" id="serviceLayersAccordion" role="tablist" aria-multiselectable="true" style="margin-top: 9px">
         <div class="panel panel-default" ng-repeat="serviceLayer in serviceLayers" ng-if="!serviceLayer.hidden">
           <div class="panel-heading" role="tab">
@@ -157,19 +131,4 @@
     <span id="equipment_nodes_controller_number_of_features">{{number_of_features}}</span>
   <% } %>
 
-  <!--
-  <div ng-show="plan.owner_id === user_id && (build_node_types.length > 0 || show_recalculate)">
-    <hr>
-    <h2>Build</h2>
-    <div class="row">
-      <p></p>
-    </div>
-    <div class="row">
-      <div class="col-sm-12" ng-repeat="node in build_node_types">
-        <a class="btn btn-block btn-default btn-sm" ng-class="{'btn-success active': selected_tool === node.name}" ng-click="select_tool(node.name)">{{node.description}}</a>
-        <br>
-      </div>
-    </div>
-  </div>
-  -->
 </div>
