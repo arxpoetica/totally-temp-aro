@@ -205,16 +205,16 @@
 
   </div>
 
-  <p><strong>{{ARO_CLIENT == 'verizon' ?'Technology' : 'Network Construction'}}</strong></p>
+  <p><strong>Network Construction</strong></p>
   <form>
 
     <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="technology" >
-      <option value="direct_routing">Unsplit Routing - (Direct Routing)</option>
-      <option value="odn1" >Hub-Only Split - (ODN 1.0 (Centralized Split))</option>
+      <option value="direct_routing">Unsplit Routing</option>
+      <option value="odn1" >Hub-Only Split</option>
       <% if (config.ARO_CLIENT === 'reliance') { %>
-      <option value="odn2" >5G - (ODN 2.0 (Distributed Split))</option>
+      <option value="odn2" > 5G </option>
       <% } else {%>
-      <option value="odn2" >Hub-Distribution Split - (ODN 2.0 (Distributed Split))</option>
+      <option value="odn2" >Hub-Distribution Split</option>
       <% } %>
     </select>
 
