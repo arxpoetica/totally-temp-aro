@@ -371,7 +371,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
 
     // unselect all entity types
     $scope.show_towers = false
-    $scope.show_businesses = false
+    $scope.show_businesses = true
     $scope.show_households = false
     $scope.business_categories_selected = {}
     $scope.household_categories_selected = {}
@@ -430,7 +430,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     })
     $scope.show_towers = locationTypes.indexOf('celltower') >= 0
     $scope.show_households = locationTypes.indexOf('household') >= 0
-    $scope.show_businesses = Object.keys($scope.business_categories_selected).reduce((total, item) => total || $scope.business_categories_selected[item], false)
+    //$scope.show_businesses = Object.keys($scope.business_categories_selected).reduce((total, item) => total || $scope.business_categories_selected[item], false)
     $scope.changeLocationsLayer()
   }
 

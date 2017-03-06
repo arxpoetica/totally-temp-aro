@@ -22,7 +22,7 @@
         "view": ["commercial", "residential", "combo"],
         "overlay": ["density"],
         "build": ["commercial", "residential", "combo"],
-        "smallBusinessLabel": "Low-Rise"
+        "smallBusinessLabel": "Small Businesses"
       },
       "boundaries": {
         "view": ["census_blocks", "county_subdivisions", "wirecenters"],
