@@ -18,13 +18,26 @@
               <div ng-repeat="nodeType in serviceLayer.nodeTypes">
                 <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/composite/{{serviceLayer.name}}_{{nodeType.name}}.png" style="width:16px"></div>
                 <div class="pull-right">
-                  <input type="checkbox" ng-model="nodeType.visible" ng-change="serviceLayer.changeNodeTypesVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  <input type="checkbox" ng-model="nodeType.visible" ng-change="serviceLayer.changeNodeTypesVisibility(nodeType)" ng-disabled="!vztfttp || !serviceLayer.enabled">
                 </div>
                 <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
                     {{nodeType.service_layer_node_name}}
                   </label>
                 </div>
+
+                <div ng-if="serviceLayer.name == 'all' && nodeType.name =='cell_5g'">
+                  <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/service_layer_cran.png" style="width:16px"></div>
+                  <div class="pull-right">
+                    <input type="checkbox" ng-model="nodeType.coverage_visible" ng-change="serviceLayer.fixedWirelessVisibilityChanged(serviceLayer , nodeType)" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  </div>
+                  <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
+                    <label style="font-weight:normal">
+                      Fixed Wireless Coverage
+                    </label>
+                  </div>
+                </div>
+
               </div>
 
               <div ng-if="serviceLayer.id === 'all'">

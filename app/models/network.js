@@ -133,6 +133,7 @@ module.exports = class Network {
             p.service_layer_id AS service_layer_id,
             n.id, geom, t.name AS name,
             n.plan_id,
+            ST_AsGeoJSON(n.coverage_geom)::json as coverage_geom,
             -- plan_id IS NOT NULL AS draggable,
             t.name <> 'central_office' AS unselectable
           FROM client.network_nodes n

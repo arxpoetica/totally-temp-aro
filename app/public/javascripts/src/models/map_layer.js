@@ -328,7 +328,35 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
               )
               this.heatmapLayer.setMap(map)
             } else {
-              this.addGeoJson(data.feature_collection)
+              var covArr = [];
+
+              var featureCollection = data.feature_collection;
+              //handle coverage_geom in the api call if needed
+              if(this.is_coverage){
+
+                //iterate through features
+                featureCollection.features.map((feature) => {
+                  var temp = {};
+                  //copy the actual data in case #passbyreference
+                  angular.copy(feature , temp);
+
+                  //extract the coverage_geom
+                  var geom = temp.properties.coverage_geom;
+                  delete temp.properties.coverage_geom;
+
+                  if(geom){
+                    var _fet = {
+                        geometry : geom,
+                        properties: temp.properties,
+                        type: 'Feature'
+                    }
+                    covArr.push(_fet);
+                  }
+                })
+                // create a geoJSON for secondary geometry
+                featureCollection = {features : covArr , type : "FeatureCollection"}
+              }
+              this.addGeoJson(featureCollection)
               this.heatmapLayer && this.heatmapLayer.setMap(null)
             }
             this.metadata = data.metadata
