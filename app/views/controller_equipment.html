@@ -53,7 +53,7 @@
                 </div>
 
                 <div ng-if="serviceLayer.name == 'all' && nodeType.name =='cell_5g'">
-                  <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/composite/fxArea.png" style="width:16px"></div>
+                  <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/service_layer_cran.png" style="width:16px"></div>
                   <div class="pull-right">
                     <input type="checkbox" ng-model="nodeType.coverage_visible" ng-change="serviceLayer.fixedWirelessVisibilityChanged(serviceLayer , nodeType)" ng-disabled="!vztfttp || !serviceLayer.enabled">
                   </div>
