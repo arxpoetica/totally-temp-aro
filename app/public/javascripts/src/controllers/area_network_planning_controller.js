@@ -237,7 +237,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       delete changes.budget
       delete changes.irrThreshold
 
-      changes.threshold = $scope.coverageThreshold;
+      changes.threshold = $scope.coverageThreshold / 100;
     }
 
     changes.fiberNetworkConstraints={};
