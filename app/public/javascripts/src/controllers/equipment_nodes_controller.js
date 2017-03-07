@@ -196,6 +196,54 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       layer.changedFiberVisibility()
     }
     layer.changedAvailability()
+
+    var coverageLayer = new MapLayer({
+      type: 'wireless_coverage',
+      name: 'Wireless Coverage',
+      short_name: 'FWC',
+      style_options: {
+        normal: {
+          fillColor: 'green',
+          strokeWeight: 1,
+          opacity: 0.8,
+          visible: true
+        },
+        selected: {
+          visible: true
+        }
+      },
+      threshold: 12,
+      reload: 'always',
+      declarativeStyles: (feature, styles) => {
+        var name = feature.getProperty('name')
+        if (name) {
+          styles.icon = {
+            anchor: new google.maps.Point(15, 15),
+            url: `/images/map_icons/${config.ARO_CLIENT}/composite/${layer.name}_${name}.png`
+          }
+        } else {
+          styles.icon = { path: 0, scale: 3, strokeColor: 'green' }
+        }
+      }
+    })
+    coverageLayer.flat_color = true
+    layer.fixedWirelessCoverage = coverageLayer
+
+    layer.fixedWirelessVisibilityChanged = (serviceLayer , node) => {
+      if(node.coverage_visible){
+        coverageLayer.show()
+        coverageLayer.is_coverage = true;
+        coverageLayer.setApiEndpoint(`/network/nodes/:plan_id/find/${layer.id}`, {
+          node_types: [node.id].join(',')
+        })
+      }else {
+        coverageLayer.clearData();
+        coverageLayer.hide();
+
+      }
+    }
+
+
   }
 
   function emptyChanges () {

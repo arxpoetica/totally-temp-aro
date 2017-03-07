@@ -328,6 +328,25 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
               )
               this.heatmapLayer.setMap(map)
             } else {
+              var covArr = [];
+              if(this.is_coverage){
+                data.feature_collection.features.map((feature) => {
+                  var temp = {};
+                  angular.copy(feature , temp);
+                  var geom = temp.properties.coverage_geom;
+                  delete temp.properties.coverage_geom;
+                  if(geom){
+                    var _fet = {
+                        geometry : geom,
+                        properties: temp.properties,
+                        type: 'Feature'
+                    }
+                    covArr.push(_fet);
+                  }
+
+                  data.feature_collection = {features : covArr , type : "FeatureCollection"}
+                })
+              }
               this.addGeoJson(data.feature_collection)
               this.heatmapLayer && this.heatmapLayer.setMap(null)
             }
