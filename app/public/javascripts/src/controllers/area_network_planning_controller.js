@@ -29,7 +29,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.technologyTypes = [
       {id:'Fiber' , label : 'Fiber' , selected :true},
-      {id:'FiveG' , label : 'Fixed Wireless'}
+      {id:'FiveG' , label : '5G'}
   ]
 
   $scope.cellNodeConstraints = {
