@@ -259,6 +259,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       $scope.serviceLayers.forEach((layer) => {
         layer.networkNodesLayer.clearData()
         layer.routeLayer.clearData()
+        layer.fixedWirelessCoverage.clearData()
       })
       return
     }
