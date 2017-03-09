@@ -67,7 +67,8 @@
     "supertest": "^1.1.0",
     "temp": "^0.8.3",
     "underscore": "^1.8.3",
-    "yargs": "^3.24.0"
+    "yargs": "^3.24.0",
+    "json2csv":"^3.7.3"
   },
   "devDependencies": {
     "angular": "^1.4.3",

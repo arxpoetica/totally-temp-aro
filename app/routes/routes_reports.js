@@ -148,4 +148,32 @@ exports.configure = (api, middleware) => {
     })
     .catch(next)
   })
+
+  api.get("/reports/:plan_id/network/csv/nodes" , function (request, response, next) {
+    var plan_id = request.params.plan_id
+    var planQ = `SELECT
+                  nn. ID,
+                  NAME,
+                  description,
+                  st_x (geom) AS lat,
+                  st_y (geom) AS long
+              FROM
+                  client.network_nodes nn
+              JOIN client.network_node_types nt ON nt. ID = nn.node_type_id
+              WHERE
+                  nn.plan_id IN (
+                      (
+                          SELECT r. ID FROM client.plan r WHERE r.parent_plan_id IN ((SELECT ID FROM client.plan WHERE parent_plan_id = ${plan_id}))
+                      )
+                  )`;
+
+
+       database.query(planQ).then(function (neq) {
+         var json2csv = require("json2csv");
+         var result = json2csv({data:neq });
+          response.send(result)
+       })
+
+  });
+
 }
