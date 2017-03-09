@@ -92,6 +92,11 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           name: 'ABCD Summary Formatted',
           type: '.xlsx',
           url: '/csv/ABCD Summary Formatted.xlsx'
+        },
+        {
+          name : 'Equipment Summary',
+          type: '.csv',
+          url: '/reports/'+plan.id+'/network/csv/nodes'
         }
       ])
       if (globalUser.rol === 'biz-dev' || globalUser.rol === 'admin') {
