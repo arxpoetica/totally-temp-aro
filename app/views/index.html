@@ -188,6 +188,7 @@
                 <% } %>
                 <span class="label label-info" ng-show="plan.ranOptimization">{{plan.metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":0}}K NPV</span>
                 <span class="label label-info" ng-hide="plan.ranOptimization"><%- config.currency_symbol %>0K NPV</span>
+                <span class="label label-info" ng-show="plan.ranOptimization">{{(plan.metadata.irr * 100) | number : 1}}% IRR</span>
                 <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
               </span>
               <!--
