@@ -242,7 +242,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
       }
     }
-
+    $scope.$on('new-plan-started', function(event, args) {
+    	if(coverageLayer) {
+    		coverageLayer.clearData();
+            coverageLayer.hide();
+    	}
+    });
 
   }
 
