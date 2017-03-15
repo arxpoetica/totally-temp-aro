@@ -150,6 +150,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   })
 
   $scope.run = () => {
+	$rootScope.$broadcast('new-plan-started');  
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
 
