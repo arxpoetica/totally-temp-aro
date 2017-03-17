@@ -32,6 +32,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   $scope.optimizeBusinesses = true
   $scope.optimizeSMB = true // special case
   $scope.optimizeTowers = true
+  $scope.optimizeUploaded = false
 
   $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = $scope.irrThresholdRange = 10
@@ -87,6 +88,19 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       canceler = null
     })
   }
+  
+  $scope.changeDatasource = () => {
+	  if($scope.optimizeUploaded){
+	      var uploadedCustomersSelect = $('.uploadCustomersTargetBuilding')
+	      var selectedDatasources = uploadedCustomersSelect.select2('val')
+	
+	      var dataSources = [];
+	      dataSources = dataSources.concat(selectedDatasources)
+	      var posSources = dataSources.map((id) => +id);
+	      optimization.datasources = _.uniq(optimization.datasources.concat(posSources));
+	      changeSelectionForFeaturesMatching(dataSources)
+	  }
+  }
 
   $scope.run = () => {
     var locationTypes = []
@@ -103,6 +117,17 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     if (scope.optimizeSMB) locationTypes.push('small')
     if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
     if (scope.optimizeTowers) locationTypes.push('celltower')
+
+    if(scope.optimizeUploaded){
+      var uploadedCustomersSelect = $('.uploadCustomersTargetBuilding')
+      var selectedDatasources = uploadedCustomersSelect.select2('val')
+
+      var dataSources = [];
+      dataSources = dataSources.concat(selectedDatasources)
+      var posSources = dataSources.map((id) => +id);
+      optimization.datasources = _.uniq(optimization.datasources.concat(posSources));
+      //changeSelectionForFeaturesMatching(dataSources)
+    }
 
     var processingLayers = []
     var algorithm = $scope.optimizationType
@@ -188,6 +213,35 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     $scope.locationsHeatmap = layer.heatmapLayer && layer.heatmapLayer.getMap()
     calculateShowHeatmap()
   })
+  
+  function changeSelectionForFeaturesMatching(dataSources) {
+    var layer = map_layers.getFeatureLayer('locations')
+    var changes = layer.createEmptyChanges()
+
+    if(dataSources.length > 0) {	
+      var config = {
+        url: `/locations/visible/${$scope.plan.id}`,
+        method: 'post',
+        data: {
+          uploaded_datasources: dataSources,
+        }
+      }
+      $http(config)
+        .success((response) => {
+          response.feature_collection.features.forEach((feature) => {
+            var prop = feature.properties
+
+            var type = layer.changes || layer.type
+            var id = prop.id
+            if (changes.insertions[type].indexOf(id) === -1) {
+                changes.insertions[type].push(id)
+            }
+            if (!$rootScope.$$phase) { $rootScope.$apply() }
+          })
+          layer.broadcastChanges(changes)
+        })
+     }
+  }
 
   function calculateShowHeatmap () {
     $scope.showHeatmapAlert = $scope.locationsHeatmap && ($scope.selectedTool === 'single' || $scope.selectedTool === 'polygon')
