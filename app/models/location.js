@@ -77,6 +77,35 @@ module.exports = class Location {
     var params = [plan_id, dataSources, businesses, households, default_businesses_datasource]
     return database.points(sql, params, true, viewport)
   }
+  
+  static findVisibleLocations(plan_id, filters) {
+
+	 var uploadedDataSources = filters.uploaded_datasources
+	 if (uploadedDataSources.length === 0) uploadedDataSources = [-1]
+	  var sql = `
+	      WITH locations_datasource AS (
+	        SELECT l.*
+	        FROM aro.locations l
+	        JOIN aro.businesses b
+	        on b.location_id = l.id and b.source is null and b.data_source_id in ($1)
+	        
+	        UNION
+	        
+	        SELECT l.*
+	        FROM aro.locations l
+	        JOIN aro.towers t
+	        ON t.location_id = l.id
+	        AND t.data_source_id IN ($1)
+		  ),
+		  features AS (
+		    SELECT l.id, l.geom
+		    FROM locations_datasource l
+		    GROUP BY 1,2
+		  )
+		 `
+	    var params = [uploadedDataSources]
+	    return database.visiblepoints(sql, params, true)
+	}
 
   /*
   * Returns the selected locations with businesses and households on them
