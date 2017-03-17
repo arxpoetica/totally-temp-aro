@@ -1,0 +1,35 @@
+{
+	"entities": {
+		"businesses": {
+			"user_upload": {
+				"active": true,
+				"label": "User Uploaded Customers"
+			},
+			"segments": {
+				"small": {
+					"label": "Small Businesses"
+				},
+				"medium": {
+					"label": "SMB"
+				},
+				"large": {
+					"label": "Enterprise"
+				}
+			}
+		},
+		"households": {
+			"segments": {
+				"large": {
+					"label": "Apartment Buildings"
+				}
+			}
+		},
+		"towers": {
+			"segments": {
+				"towers": {
+					"label": "Cell Towers"
+				}
+			}
+		}
+	}
+}
