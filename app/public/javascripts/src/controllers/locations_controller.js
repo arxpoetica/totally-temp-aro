@@ -86,7 +86,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
       return
     }
     var order = [
-      'b_small', 'b_medium', 'b_large'
+      'b_small', 'b_medium', 'b_large', 'b_uploaded'
     ]
     var largestCategory = null
     var largestIndex = -1

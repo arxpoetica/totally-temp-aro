@@ -18,6 +18,7 @@ module.exports = class Location {
     var businesses = filters.business_categories
     var households = filters.household_categories
     var dataSources = (filters.dataSources || []).map((id) => +id || -1)
+    var default_businesses_datasource = 1
 
     if (businesses.length === 0) businesses = ['']
     if (households.length === 0) households = ['']
@@ -37,7 +38,8 @@ module.exports = class Location {
         SELECT l.id, l.geom,
           array_remove(array_agg(DISTINCT 'b_' || b.category_name::text)
             || array_agg(DISTINCT 'h_' || h.category_name::text)
-            || array_agg(distinct CASE WHEN t.id IS NULL THEN NULL ELSE 'towers' END),
+            || array_agg(distinct CASE WHEN t.id IS NULL THEN NULL ELSE 'towers' END)
+            || array_agg(distinct case when bu.data_source_id is null then null else 'b_uploaded' end),
           NULL) AS entity_categories
         FROM aro.locations l
           INNER JOIN states st
@@ -57,17 +59,22 @@ module.exports = class Location {
 
         LEFT JOIN client.basic_classified_business b
           ON b.location_id = l.id
-          AND b.category_name IN ($3)
+          AND b.category_name IN ($3) and b.data_source_id IN ($5)
+
+       LEFT JOIN client.basic_classified_business bu
+          ON bu.location_id = l.id
+          AND bu.data_source_id > $5 
+          AND bu.data_source_id IN ($2)   
 
         LEFT JOIN client.basic_classified_household h
           ON h.location_id = l.id
           AND h.category_name IN ($4)
 
-        WHERE (t.id IS NOT NULL OR b.id IS NOT NULL OR h.id IS NOT NULL) AND pt.location_id IS NULL
+        WHERE (t.id IS NOT NULL OR b.id IS NOT NULL OR bu.id IS NOT NULL OR h.id IS NOT NULL) AND pt.location_id IS NULL
         GROUP BY 1,2
       )
     `
-    var params = [plan_id, dataSources, businesses, households]
+    var params = [plan_id, dataSources, businesses, households, default_businesses_datasource]
     return database.points(sql, params, true, viewport)
   }
 
