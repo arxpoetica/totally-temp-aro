@@ -74,7 +74,7 @@ function MapsController($scope, $rootScope , $timeout , $compile, $uibModal, Map
                 pitch: 0
             }));
             panorama.setOptions({
-                disableDefaultUI: true,
+                //disableDefaultUI: true, // if this is on, it breaks marker updates between street and satellite views
                 mapTypeControl: true,
                 scaleControl: true,
                 zoomControl: true,
