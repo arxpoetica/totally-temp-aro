@@ -177,8 +177,18 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     } else if (algorithm === 'BUDGET_IRR') {
     }
 
-    changes.fiberNetworkConstraints = {
+    /*changes.fiberNetworkConstraints = {
       useDirectRouting: $scope.technology === 'direct_routing'
+    }*/
+    changes.fiberNetworkConstraints={};
+    
+    switch ($scope.technology){
+	    case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
+	        break;
+	    case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
+	        break;
+	    case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
+	        break;
     }
 
     changes.networkTypes = $scope.selectedTechType;

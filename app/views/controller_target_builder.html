@@ -167,6 +167,21 @@
 
   </div>
   
+  <p><strong>Network Construction</strong></p>
+  <form>
+
+    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="technology" >
+      <option value="direct_routing">Unsplit Routing</option>
+      <option value="odn1" >Hub-Only Split</option>
+      <% if (config.ARO_CLIENT === 'reliance') { %>
+      <option value="odn2" > 5G </option>
+      <% } else {%>
+      <option value="odn2" >Hub-Distribution Split</option>
+      <% } %>
+    </select>
+
+  </form>
+    
   <% if (config.ARO_CLIENT !== 'verizon') { %>
     <div>
       <p><strong>Optimization Processing Layer</strong></p>
