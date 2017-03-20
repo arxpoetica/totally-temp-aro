@@ -111,6 +111,19 @@ module.exports = class Database {
     }
     return this.query(finalSql, params, asFeatureCollection)
   }
+  
+  static visiblepoints(sql, params, asFeatureCollection) {
+	var finalSql
+	var prefix = sql.trim().indexOf('WITH') === 0 ? sql : `WITH features AS (${sql})`
+	finalSql = `
+	   ${prefix}
+	   SELECT
+	   features.*,
+	   ST_AsGeoJSON(geom)::json AS geom
+	   FROM features
+	 `
+	return this.query(finalSql, params, asFeatureCollection)
+  }
 
   static polygons (sql, params, asFeatureCollection, viewport) {
     var finalSql

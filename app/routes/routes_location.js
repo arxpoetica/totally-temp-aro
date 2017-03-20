@@ -27,6 +27,15 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+  
+  api.post('/locations/visible/:plan_id', (request, response, next) => {
+    var filters = {}
+    filters['uploaded_datasources'] = request.body.uploaded_datasources || []
+    var plan_id = +request.params.plan_id
+    models.Location.findVisibleLocations(plan_id,filters)
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
 
   api.get('/locations/:plan_id/selected', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
