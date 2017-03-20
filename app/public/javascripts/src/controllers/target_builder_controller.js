@@ -97,7 +97,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 	      var dataSources = [];
 	      dataSources = dataSources.concat(selectedDatasources)
 	      var posSources = dataSources.map((id) => +id);
-	      optimization.datasources = _.uniq(optimization.datasources.concat(posSources));
+	      optimization.datasources = _.uniq(posSources);
 	      changeSelectionForFeaturesMatching(dataSources)
 	  }
   }
@@ -295,6 +295,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
   }
 
   $scope.toggleSelectedTool = (name) => {
+	optimization.datasources = _.uniq(optimization.datasources.concat(1));  
     if ($scope.selectedTool !== name) {
       $scope.setSelectedTool(name)
     } else {
