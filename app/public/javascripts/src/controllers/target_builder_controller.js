@@ -147,6 +147,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 
     if (algorithm === 'CAPEX') {
       algorithm = 'UNCONSTRAINED'
+      changes.algorithm = algorithm	  
       delete changes.budget
       delete changes.irrThreshold
     } else if (algorithm === 'MAX_IRR') {
