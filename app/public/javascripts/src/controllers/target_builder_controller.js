@@ -24,6 +24,26 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
     { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
   ]
+  
+  $scope.technologyTypes = [
+    {id:'Fiber' , label : 'Fiber' , selected :true},
+    {id:'FiveG' , label : '5G'}
+  ]
+  
+  $scope.cellNodeConstraints = {
+	cellGranularityRatio : 0,
+	cellRadius: config.ui.map_tools.area_planning.cell_radius
+  }
+  
+  $scope.selectedTechType = ['Fiber'];
+  $scope.toggleTechType = function (type , checked) {
+    if(checked){
+      $scope.selectedTechType.push(type);
+    }else{
+      $scope.selectedTechType.splice($scope.selectedTechType.indexOf(type) , 1);
+    }
+  }
+  
   $scope.entityTypesTargeted = {}
 
   $scope.calculating = false
@@ -158,10 +178,31 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     } else if (algorithm === 'BUDGET_IRR') {
     }
 
-    changes.fiberNetworkConstraints = {
+    /*changes.fiberNetworkConstraints = {
       useDirectRouting: $scope.technology === 'direct_routing'
+    }*/
+    changes.fiberNetworkConstraints={};
+    
+    switch ($scope.technology){
+	    case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
+	        break;
+	    case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
+	        break;
+	    case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
+	        break;
     }
 
+    changes.networkTypes = $scope.selectedTechType;
+    if($scope.selectedTechType.indexOf("FiveG")!=-1){
+        if($scope.cellNodeConstraints.cellRadius == ""){
+            $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
+        }
+
+        changes.fiberNetworkConstraints.cellNodeConstraints = {
+            cellRadius : $scope.cellNodeConstraints.cellRadius
+        }
+    }
+    
     var selectLocationTypes = []
     if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
       selectLocationTypes = Object.keys($scope.entityTypesTargeted)
