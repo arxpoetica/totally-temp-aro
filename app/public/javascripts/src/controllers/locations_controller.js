@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', ($scope, $rootScope, $http, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization) => {
   $scope.ARO_CLIENT = config.ARO_CLIENT
   $scope.map_tools = map_tools
   $scope.selected_tool = null
@@ -52,6 +52,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.industries = []
   $scope.business_categories_selected = {}
   $scope.household_categories_selected = {}
+  $scope.households_description = ''
 
   var uploadedCustomersSelect = $('.uploadedCustomersSelect')
 
@@ -169,6 +170,35 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     $scope.employees_by_location = response.employees_by_location
     $scope.business_categories = response.business_categories
     $scope.household_categories = response.household_categories
+
+    // Replace description in business categories with the description we get from our configuration service
+    $scope.business_categories.forEach((businessCategory, index) => {
+      var segmentInfo = configuration.locations_layer.entities.businesses.segments
+      var matchingSegment = null
+      for (var prop in segmentInfo) {
+        if (prop === businessCategory.name) {
+          matchingSegment = segmentInfo[prop]
+          break;
+        }
+      }
+      $scope.business_categories[index].description = matchingSegment.label
+    })
+
+    // Replace description in household categories with the description we get from our configuration service
+    $scope.household_categories.forEach((householdCategory, index) => {
+      var segmentInfo = configuration.locations_layer.entities.households.segments
+      var matchingSegment = null
+      for (var prop in segmentInfo) {
+        if (prop === householdCategory.name) {
+          matchingSegment = segmentInfo[prop]
+          break;
+        }
+      }
+      $scope.household_categories[index].description = matchingSegment.label
+    })
+    $scope.households_description = configuration.locations_layer.entities.households.description
+
+    $scope.env_is_test = configuration.locations_layer.env_is_test
 
     $scope.business_categories_selected = {}
     $scope.business_categories.forEach((category) => {

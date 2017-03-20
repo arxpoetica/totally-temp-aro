@@ -18,9 +18,13 @@
 			}
 		},
 		"households": {
+			"description": "Residential",
 			"segments": {
-				"large": {
-					"label": "Apartment Buildings"
+				"small": {
+					"label": "SFU"
+				},
+				"medium": {
+					"label": "MDU"
 				}
 			}
 		},
@@ -31,5 +35,6 @@
 				}
 			}
 		}
-	}
+	},
+	"env_is_test": false
 }

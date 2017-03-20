@@ -7,21 +7,27 @@
 			},
 			"segments": {
 				"small": {
-					"label": "Low Rise"
+					"label": "Small Businesses"
 				},
 				"medium": {
-					"label": "High Rise"
+					"label": "SMB"
 				},
 				"large": {
-					"label": "Very High Rise"
+					"label": "Enterprise"
 				}
 			}
 		},
 		"households": {
-			"description": "5G",
 			"segments": {
 				"large": {
 					"label": "Apartment Buildings"
+				}
+			}
+		},
+		"towers": {
+			"segments": {
+				"towers": {
+					"label": "Cell Towers"
 				}
 			}
 		}

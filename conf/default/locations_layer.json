@@ -1,3 +1,29 @@
 {
-
+	"entities": {
+		"businesses": {
+			"user_upload": {
+				"active": false
+			},
+			"segments": {
+				"small": {
+					"label": "ARO_CLIENT not set"
+				}
+			}
+		},
+		"households": {
+			"description": "ARO_CLIENT not set",
+			"segments": {
+				"large": {
+					"label": "ARO_CLIENT not set"
+				}
+			}
+		},
+		"towers": {
+			"segments": {
+				"towers": {
+					"label": "ARO_CLIENT not set"
+				}
+			}
+		}
+	}
 }
