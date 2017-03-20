@@ -140,6 +140,33 @@
     <button class="btn btn-primary btn-sm" ng-click="deleteAllTargets()">Remove all targets</button>
   </p>
 
+  <p><strong>Technology</strong></p>
+
+  <div class="checkbox" ng-repeat="type in technologyTypes">
+    <label>
+     <div style="display: inline-block">
+         <input
+                 type="checkbox"
+                 ng-model="isChecked"
+                 ng-checked="type.selected"
+                 ng-click="toggleTechType(type.id , isChecked)"
+         > {{type.label}}
+     </div>
+    <div  ng-show="type.id == 'FiveG' && isChecked" style="display: inline-block">
+       <span>
+           <input
+                   type="text"
+                   ng-model="cellNodeConstraints.cellRadius"
+                   placeholder="Cell Radius"
+                   style="width: 85px;margin-left: 50px"
+           >
+           <span><b>m</b></span>
+       </span>
+    </div>
+    </label>
+
+  </div>
+  
   <% if (config.ARO_CLIENT !== 'verizon') { %>
     <div>
       <p><strong>Optimization Processing Layer</strong></p>
