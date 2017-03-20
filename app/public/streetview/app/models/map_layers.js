@@ -28,14 +28,14 @@ STREET_APP.service("MapLayer" , ['$rootScope', function ($rootScope) {
             var children = this.children;
             for (var i = 0; i < children.length; i++) {
                 var child = children[i];
-                child.setVisible(true);
+                child.setMap(this.map);
             }
         },
         hide : function () {
             var children = this.children;
             for (var i = 0; i < children.length; i++) {
                 var child = children[i];
-                child.setVisible(false);
+                child.setMap(null);
             }
         },
         getLayerName : function () {
