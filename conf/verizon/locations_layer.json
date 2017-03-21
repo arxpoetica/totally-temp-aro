@@ -11,28 +11,29 @@
 			},
 			"medium": {
 				"show": true,
-				"label": "SMB"
+				"label": "Medium Businesses"
 			},
 			"large": {
 				"show": true,
-				"label": "Enterprise"
+				"label": "Large Businesses"
 			}
 		}
 	},
 	"households": {
+		"description": "Residential",
 		"segments": {
-			"large": {
+			"small": {
 				"show": true,
-				"label": "Apartment Buildings"
+				"label": "SFU"
+			},
+			"medium": {
+				"show": true,
+				"label": "MDU"
 			}
 		}
 	},
 	"towers": {
-		"segments": {
-			"towers": {
-				"show": true,
-				"label": "Cell Towers"
-			}
-		}
+		"show": true,
+		"label": "Cell Sites"
 	}
 }

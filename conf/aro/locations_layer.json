@@ -11,11 +11,11 @@
 			},
 			"medium": {
 				"show": true,
-				"label": "SMB"
+				"label": "Medium Businesses"
 			},
 			"large": {
 				"show": true,
-				"label": "Enterprise"
+				"label": "Large Businesses"
 			}
 		}
 	},

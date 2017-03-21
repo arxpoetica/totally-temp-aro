@@ -7,32 +7,33 @@
 		"segments": {
 			"small": {
 				"show": true,
-				"label": "Low Rise"
+				"label": "SMB"
 			},
 			"medium": {
 				"show": true,
-				"label": "High Rise"
+				"label": "Medium Businesses"
 			},
 			"large": {
 				"show": true,
-				"label": "Very High Rise"
+				"label": "Large Businesses"
 			}
 		}
 	},
 	"households": {
-		"description": "5G",
+		"description": "Residential",
 		"segments": {
 			"small": {
-				"show": false,
-				"label": "Apartment Buildings - small"
+				"show": true,
+				"label": "SFU"
 			},
 			"medium": {
-				"show": false,
-				"label": "Apartment Buildings - medium"
+				"show": true,
+				"label": "MDU"
 			}
 		}
 	},
 	"towers": {
-		"show": false
+		"show": true,
+    "label": "Cell Sites"
 	}
 }
