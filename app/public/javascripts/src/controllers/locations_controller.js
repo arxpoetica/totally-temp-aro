@@ -41,8 +41,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   })
 
   // Load the location filters only after the configuration has been loaded
+  $scope.isLoadingConfiguration = true
   $rootScope.$on('configuration_loaded', () => {
     $scope.loadLocationFilters()
+    $scope.isLoadingConfiguration = false
   })
 
   $scope.user_id = user_id

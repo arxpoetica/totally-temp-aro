@@ -1,5 +1,4 @@
 <div>
-
   <div class="modal" id="create-location" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -67,7 +66,7 @@
   </div>
 
   <!-- Locations layer modal -->
-  <div id="locations_controller">
+  <div id="locations_controller" ng-if="!isLoadingConfiguration">
 
     <!-- Businesses -->
     <form ng-hide="show_commercial && !show_residential">
@@ -222,6 +221,17 @@
     </div>
 
     <a ng-if="env_is_test" href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">Test</a>
+  </div>
 
+  <!-- Spinner that will be shown while the configuration is being loaded from the server -->
+  <div style="margin:30px;text-align:center;" ng-if="isLoadingConfiguration">
+    <p>Loading locations layer</p>
+    <div class="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
   </div>
 </div>
