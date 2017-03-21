@@ -1,40 +1,40 @@
 {
-	"entities": {
-		"businesses": {
-			"user_upload": {
-				"active": true,
-				"label": "User Uploaded Customers"
+	"businesses": {
+		"user_upload": {
+			"active": true,
+			"label": "User Uploaded Customers"
+		},
+		"segments": {
+			"small": {
+				"show": true,
+				"label": "Small Businesses"
 			},
-			"segments": {
-				"small": {
-					"label": "Small Businesses"
-				},
-				"medium": {
-					"label": "SMB"
-				},
-				"large": {
-					"label": "Enterprise"
-				}
-			}
-		},
-		"households": {
-			"description": "Residential",
-			"segments": {
-				"small": {
-					"label": "SFU"
-				},
-				"medium": {
-					"label": "MDU"
-				}
-			}
-		},
-		"towers": {
-			"segments": {
-				"towers": {
-					"label": "Cell Towers"
-				}
+			"medium": {
+				"show": true,
+				"label": "SMB"
+			},
+			"large": {
+				"show": true,
+				"label": "Enterprise"
 			}
 		}
+	},
+	"households": {
+		"description": "Residential",
+		"segments": {
+			"small": {
+				"show": true,
+				"label": "SFU"
+			},
+			"medium": {
+				"show": true,
+				"label": "MDU"
+			}
+		}
+	},
+	"towers": {
+		"show": true,
+		"label": "Cell Sites"
 	},
 	"env_is_test": false
 }

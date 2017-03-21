@@ -1,34 +1,37 @@
 {
-	"entities": {
-		"businesses": {
-			"user_upload": {
-				"active": true,
-				"label": "User Uploaded Customers"
+	"businesses": {
+		"user_upload": {
+			"active": true,
+			"label": "User Uploaded Customers"
+		},
+		"segments": {
+			"small": {
+				"show": true,
+				"label": "Small Businesses"
 			},
-			"segments": {
-				"small": {
-					"label": "Small Businesses"
-				},
-				"medium": {
-					"label": "SMB"
-				},
-				"large": {
-					"label": "Enterprise"
-				}
+			"medium": {
+				"show": true,
+				"label": "SMB"
+			},
+			"large": {
+				"show": true,
+				"label": "Enterprise"
 			}
-		},
-		"households": {
-			"segments": {
-				"large": {
-					"label": "Apartment Buildings"
-				}
+		}
+	},
+	"households": {
+		"segments": {
+			"large": {
+				"show": true,
+				"label": "Apartment Buildings"
 			}
-		},
-		"towers": {
-			"segments": {
-				"towers": {
-					"label": "Cell Towers"
-				}
+		}
+	},
+	"towers": {
+		"segments": {
+			"towers": {
+				"show": true,
+				"label": "Cell Towers"
 			}
 		}
 	}

@@ -157,7 +157,7 @@
       <!-- END Households -->
 
       <!-- CellTowers -->
-      <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
+      <div ng-if="towers.showInUi" ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'towers'">
           <form>
             <div class="form-group">
@@ -181,7 +181,7 @@
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_towers"></span>
           <input type="checkbox" ng-model="show_towers" value="true" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
-        <label>{{ARO_CLIENT=='reliance' ? 'Enterprise':'Cell Sites'}}</label>
+        <label>{{towers.label}}</label>
       </div>
       <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'addCustomers'">

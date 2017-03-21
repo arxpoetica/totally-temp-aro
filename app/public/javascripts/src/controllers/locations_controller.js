@@ -168,12 +168,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     $scope.industries = response.industries
     $scope.customer_types = response.customer_types
     $scope.employees_by_location = response.employees_by_location
-    $scope.business_categories = response.business_categories
-    $scope.household_categories = response.household_categories
+    var business_categories = response.business_categories
+    var household_categories = response.household_categories
+
+    $scope.towers = {
+      showInUi: configuration.locations_layer.towers.show,
+      label: configuration.locations_layer.towers.label
+    }
 
     // Replace description in business categories with the description we get from our configuration service
-    $scope.business_categories.forEach((businessCategory, index) => {
-      var segmentInfo = configuration.locations_layer.entities.businesses.segments
+    $scope.business_categories = []
+    business_categories.forEach((businessCategory, index) => {
+      var segmentInfo = configuration.locations_layer.businesses.segments
       var matchingSegment = null
       for (var prop in segmentInfo) {
         if (prop === businessCategory.name) {
@@ -181,12 +187,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
           break;
         }
       }
-      $scope.business_categories[index].description = matchingSegment.label
+      if (matchingSegment.show) {
+        // Only add items if the "show" flag is on
+        business_categories[index].description = matchingSegment.label
+        $scope.business_categories.push(business_categories[index])
+      }
     })
 
     // Replace description in household categories with the description we get from our configuration service
-    $scope.household_categories.forEach((householdCategory, index) => {
-      var segmentInfo = configuration.locations_layer.entities.households.segments
+    $scope.household_categories = []
+    household_categories.forEach((householdCategory, index) => {
+      var segmentInfo = configuration.locations_layer.households.segments
       var matchingSegment = null
       for (var prop in segmentInfo) {
         if (prop === householdCategory.name) {
@@ -194,9 +205,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
           break;
         }
       }
-      $scope.household_categories[index].description = matchingSegment.label
+      if (matchingSegment.show) {
+        // Only add items if the "show" flag is on
+        household_categories[index].description = matchingSegment.label
+        $scope.household_categories.push(household_categories[index])
+      }
     })
-    $scope.households_description = configuration.locations_layer.entities.households.description
+    $scope.households_description = configuration.locations_layer.households.description
 
     $scope.env_is_test = configuration.locations_layer.env_is_test
 

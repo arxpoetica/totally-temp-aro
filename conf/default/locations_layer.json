@@ -1,29 +1,26 @@
 {
-	"entities": {
-		"businesses": {
-			"user_upload": {
-				"active": false
-			},
-			"segments": {
-				"small": {
-					"label": "ARO_CLIENT not set"
-				}
-			}
+	"businesses": {
+		"user_upload": {
+			"active": false
 		},
-		"households": {
-			"description": "ARO_CLIENT not set",
-			"segments": {
-				"large": {
-					"label": "ARO_CLIENT not set"
-				}
-			}
-		},
-		"towers": {
-			"segments": {
-				"towers": {
-					"label": "ARO_CLIENT not set"
-				}
+		"segments": {
+			"small": {
+				"show": true,
+				"label": "ARO_CLIENT not set"
 			}
 		}
+	},
+	"households": {
+		"description": "ARO_CLIENT not set",
+		"segments": {
+			"large": {
+				"show": true,
+				"label": "ARO_CLIENT not set"
+			}
+		}
+	},
+	"towers": {
+		"show": true,
+		"label": "ARO_CLIENT not set"
 	}
 }
