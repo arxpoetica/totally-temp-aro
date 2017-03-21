@@ -40,3 +40,16 @@
     margin-top: 5px;
     margin-bottom: 5px;
 }
+.marker-details-left {
+    text-align: right;
+    font-weight: bold;
+    border-right: 2px solid darkgray;
+    border-top: none !important;
+    border-bottom: none !important;
+    padding: 3px !important;
+}
+.marker-details-right {
+    border-top: none !important;
+    border-bottom: none !important;
+    padding: 3px !important;
+}

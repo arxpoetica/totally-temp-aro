@@ -16,10 +16,6 @@
     {
       "layer": "pole",
       "icon": "img/icons/pole_icon_tall.png"
-    },
-    {
-      "layer": "test",
-      "icon": "img/icons/test.png"
     }
   ]
 }
