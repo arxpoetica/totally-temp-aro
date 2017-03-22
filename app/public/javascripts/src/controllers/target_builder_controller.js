@@ -109,6 +109,15 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     })
   }
   
+  $rootScope.$on('datasource_selected_location_modal', (e, selectedDatasource) => {
+    if (selectedDatasource.length > 0) {
+    	var dataSources = [];
+	    dataSources = dataSources.concat(selectedDatasource)
+	    var posSources = dataSources.map((id) => +id);
+	    optimization.datasources = _.uniq(posSources);
+    }
+  })
+  
   $scope.changeDatasource = () => {
 	  if($scope.optimizeUploaded){
 	      var uploadedCustomersSelect = $('.uploadCustomersTargetBuilding')
