@@ -7,15 +7,15 @@
 		"segments": {
 			"small": {
 				"show": true,
-				"label": "Small Businesses"
+				"label": "SMB"
 			},
 			"medium": {
 				"show": true,
-				"label": "Medium Businesses"
+				"label": "Mid-tier"
 			},
 			"large": {
 				"show": true,
-				"label": "Large Businesses"
+				"label": "Large Enterprise"
 			}
 		}
 	},
