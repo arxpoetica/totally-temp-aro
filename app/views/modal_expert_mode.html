@@ -1,0 +1,18 @@
+<div class="modal" id="selected_expert_mode" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Expert Mode</h4>
+      </div>
+      <div class="modal-body">
+      	<textarea rows="10" cols="100" id="expert_mode_body"> 
+		</textarea>
+      </div>
+      <div class="modal-footer">
+      	<button class="btn btn-primary" ng-click="runexpertmode()">Run</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="refreshexpertmode()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

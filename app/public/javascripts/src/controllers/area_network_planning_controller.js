@@ -76,6 +76,18 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   budgetInput.on('blur', () => {
     budgetInput.val(parseBudget().toLocaleString())
   })
+  
+  $scope.runExpertMode = () => {
+	  $scope.prerun().then(function(changes){
+		  $('#selected_expert_mode').modal('show')
+		  $('#expert_mode_body').val(JSON.stringify(changes))
+	  });
+  }
+  
+  $rootScope.$on('expert-mode-plan-edited', (e, changes) => {
+	  canceler = optimization.optimize($scope.plan, JSON.parse(changes))
+	  $('#selected_expert_mode').modal('hide')
+  })
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -149,7 +161,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     standardTypes.push(layer.name)
   })
 
-  $scope.run = () => {
+  $scope.prerun = () => {
+	  
+	var defer=$q.defer();
+	  
 	$rootScope.$broadcast('new-plan-started');  
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
@@ -282,7 +297,16 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     $scope.selectLocationTypes = selectLocationTypes
-    canceler = optimization.optimize($scope.plan, changes)
+    
+    defer.resolve(changes);
+    return defer.promise;
+    /*canceler = optimization.optimize($scope.plan, changes)*/
+  }
+
+  $scope.run = () => {
+	  $scope.prerun().then(function(changes){
+		  canceler = optimization.optimize($scope.plan, changes)
+	  });
   }
 
   $rootScope.$on('optimization_started_polling', () => {
