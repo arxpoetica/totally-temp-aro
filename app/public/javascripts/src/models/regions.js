@@ -8,7 +8,8 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
     selectionLayer && selectionLayer.setMap(null)
     selectionLayer = new google.maps.Data()
     selectionLayer.setStyle({
-      fillColor: 'green'
+      fillColor: 'green',
+      zIndex: 2
     })
     configureSelectionVisibility()
   }
