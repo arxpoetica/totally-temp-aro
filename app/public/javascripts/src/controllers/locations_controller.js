@@ -300,6 +300,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     var dataSources = $scope.show_towers ? [1] : []
     if ($scope.showUploadedCustomers) {
       dataSources = dataSources.concat(selectedDatasources)
+      $rootScope.$broadcast('datasource_selected_location_modal',dataSources)
     }
     optimization.datasources = dataSources.map((id) => +id)
 

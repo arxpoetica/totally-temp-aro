@@ -80,7 +80,7 @@
   <br>
   <div class="checkbox">
     <label>
-      <input type="checkbox" ng-model="optimizeUploaded"> Uploaded Businesses
+      <input type="checkbox" ng-model="optimizeUploaded"> Uploaded Locations
 
       <div ng-show="optimizeUploaded" style="width: 200px">
         <input class="form-control uploadedCustomersSelect uploadCustomersTargetBuilding" class="uploadedCustomersSelect"
@@ -153,6 +153,13 @@
          > {{type.label}}
      </div>
     <div  ng-show="type.id == 'FiveG' && isChecked" style="display: inline-block">
+     <label>
+     <div style="display: inline-block">
+         <input
+                 type="checkbox"
+         > Fiber Proximity Placement
+     </div>
+     <div style="display: inline-block"> Radius
        <span>
            <input
                    type="text"
@@ -162,6 +169,8 @@
            >
            <span><b>m</b></span>
        </span>
+     </div>
+     </label>
     </div>
     </label>
 
