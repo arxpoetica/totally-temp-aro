@@ -80,7 +80,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.runExpertMode = () => {
 	  $scope.prerun().then(function(changes){
 		  $('#selected_expert_mode').modal('show')
-		  $('#expert_mode_body').val(JSON.stringify(changes))
+		  $('#expert_mode_body').val(JSON.stringify(changes, undefined, 4))
 	  });
   }
   
@@ -297,6 +297,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     $scope.selectLocationTypes = selectLocationTypes
+    changes.entityDataSources = optimization.datasources
     
     defer.resolve(changes);
     return defer.promise;
