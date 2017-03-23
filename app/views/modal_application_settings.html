@@ -15,6 +15,9 @@
               <a href="#applicationSettingsEndpointDemand" aria-controls="profile" role="tab" data-toggle="tab">Endpoint Demand</a>
             </li>
             <li role="presentation">
+              <a href="#applicationSettingsBusinessProducts" aria-controls="profile" role="tab" data-toggle="tab">Business Products</a>
+            </li>
+            <li role="presentation">
               <a href="#applicationSettingsFinancialAssumptions" aria-controls="profile" role="tab" data-toggle="tab">Financial Assumptions</a>
             </li>
             <li role="presentation">
@@ -49,6 +52,28 @@
             </div>
             <div role="tabpanel" class="tab-pane" id="applicationSettingsEndpointDemand" style="padding-top: 20px">
               <p class="text-center">...</p>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="applicationSettingsBusinessProducts" style="padding-top: 20px">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <th>Product Type</th>
+                    <th>Product Name</th>
+                    <th class="text-right">Arpu</th>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr ng-repeat="setting in applicationSettings.businessProducts">
+                    <td>{{ setting.product_type }}</td>
+                    <td>{{ setting.product_name }}</td>
+                    <td>
+                      <input type="text" class="form-control input-sm format-currency text-right"
+                        data-tab="businessProducts" data-field="arpu_weight"
+                        data-id="{{setting.dimension_id}}" value="{{setting.arpu_weight | number:2}}">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
             <div role="tabpanel" class="tab-pane" id="applicationSettingsFinancialAssumptions" style="padding-top: 20px">
               <table class="table">
