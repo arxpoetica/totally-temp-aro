@@ -1,4 +1,4 @@
-app.service('configuration', ($location, $http, $rootScope) => {
+app.service('configuration',['$location', '$http', '$rootScope', ($location, $http, $rootScope) => {
 
     var config = {}
     var configBaseUrl = 'http://' + $location.host() + ':' + $location.port()
@@ -25,4 +25,4 @@ app.service('configuration', ($location, $http, $rootScope) => {
       .catch((reason) => console.log('Promise.all() failed, ' + reason))
 
     return config
-})
+}])
