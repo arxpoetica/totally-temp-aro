@@ -54,6 +54,12 @@ module.exports = class Settings {
         SELECT system_rule_id || ':' || property_field_id AS id, name, type, description, string_value FROM client.system_property sp
         JOIN client.system_property_field spf ON  spf.id = sp.property_field_id
         ORDER BY description ASC
+      `),
+      database.query(`
+        SELECT s.dimension_id as dimension_id, product_type, product_name, arpu_weight FROM client.spend_matrix_selection s
+        JOIN client.products p ON s.dimension_id = p.id
+        WHERE dimension_type = 'product'
+        ORDER BY product_type
       `)
     ])
     .then((results) => ({
@@ -61,7 +67,8 @@ module.exports = class Settings {
       financialAssumptions: results[1],
       serviceLayerPriorities: results[2],
       serviceLayerEntityCategories: results[3],
-      systemProperties: results[4]
+      systemProperties: results[4],
+      businessProducts: results[5]
     }))
   }
 
@@ -71,6 +78,7 @@ module.exports = class Settings {
     var serviceLayerPriorities = options.serviceLayerPriorities || {}
     var serviceLayerEntityCategories = options.serviceLayerEntityCategories || {}
     var systemProperties = options.systemProperties || {}
+    var businessProducts = options.businessProducts || {}
     var financialFields = [
       'arpu',
       'entity_growth',
@@ -78,6 +86,9 @@ module.exports = class Settings {
       'opex_percent',
       'maintenance_expenses',
       'connection_cost'
+    ]
+    var businessProductsFields = [
+      'arpu_weight'
     ]
     return Promise.all([
       pync.series(Object.keys(networkCosts), (key) => (
@@ -112,6 +123,15 @@ module.exports = class Settings {
           UPDATE client.system_property
           SET string_value=$1 WHERE (system_rule_id || ':' || property_field_id) =$2
         `, [systemProperties[key].string_value, key])
+      )),
+      pync.series(Object.keys(businessProducts), (key) => (	  
+    	pync.series(businessProductsFields, (field) => (
+    	  businessProducts[key][field] != null &&
+    	  database.execute(`
+    	    UPDATE client.spend_matrix_selection
+    	    SET ${field}=$1 WHERE dimension_id=$2 and dimension_type=$3
+    	   `, [businessProducts[key][field], key, 'product'])
+    	))
       ))
     ])
     .then(() => {
