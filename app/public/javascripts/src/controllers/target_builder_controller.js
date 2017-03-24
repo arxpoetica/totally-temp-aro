@@ -1,6 +1,6 @@
 /* global app user_id google $ map FormData XMLHttpRequest swal config _ */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, $timeout, optimization) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, optimization) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.selectedTool = null
@@ -83,6 +83,18 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
       })
     }
   })
+  
+  $scope.runExpertMode = () => {
+	$scope.prerun().then(function(changes){
+	  $('#selected_expert_mode').modal('show')
+	  $('#expert_mode_body').val(JSON.stringify(changes, undefined, 4))
+	});
+  }
+  
+  $rootScope.$on('expert-mode-plan-edited', (e, changes) => {
+	canceler = optimization.optimize($scope.plan, JSON.parse(changes))
+	$('#selected_expert_mode').modal('hide')
+  })
 
   $scope.irrThresholdRangeChanged = () => {
     $scope.irrThreshold = +$scope.irrThresholdRange
@@ -131,7 +143,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
 	  }
   }
 
-  $scope.run = () => {
+  $scope.prerun = () => {
+	  
+	var defer=$q.defer()  
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
 
@@ -228,7 +242,17 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', 'm
     }
 
     $scope.selectLocationTypes = selectLocationTypes
-    canceler = optimization.optimize($scope.plan, changes)
+    changes.entityDataSources = optimization.datasources
+    
+    defer.resolve(changes)
+    return defer.promise
+    //canceler = optimization.optimize($scope.plan, changes)
+  }
+  
+  $scope.run = () => {
+	$scope.prerun().then(function(changes){
+	  canceler = optimization.optimize($scope.plan, changes)
+    });
   }
 
   $rootScope.$on('optimization_started_polling', () => {
