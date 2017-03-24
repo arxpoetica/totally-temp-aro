@@ -229,7 +229,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       })
     }
     load(callback)
-    interval = setInterval(load, 1000)
+    interval = setInterval(load, 100000)
   }
 
   // load plan depending on the URL

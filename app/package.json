@@ -85,6 +85,13 @@
     "phantomjs": "^1.9.17",
     "protractor": "^2.1.0",
     "standard": "^6.0.7",
+    "wdio-dot-reporter": "0.0.8",
+    "wdio-firefox-profile-service": "0.0.2",
+    "wdio-jasmine-framework": "^0.3.0",
+    "wdio-junit-reporter": "^0.3.0",
+    "wdio-phantomjs-service": "^0.2.2",
+    "wdio-selenium-standalone-service": "0.0.8",
+    "webdriverio": "^4.6.2",
     "xml2js": "^0.4.10"
   }
 }
