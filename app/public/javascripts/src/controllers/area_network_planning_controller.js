@@ -88,6 +88,97 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	  canceler = optimization.optimize($scope.plan, JSON.parse(changes))
 	  $('#selected_expert_mode').modal('hide')
   })
+  
+  $scope.FiveGProps = true
+  $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges) => {
+	var expertChanges = JSON.parse(expertModeChanges)
+	
+	/*saving LocationTypes*/ 
+	expertChanges.locationTypes.indexOf('household') > -1 ? $scope.optimizeHouseholds = true : $scope.optimizeHouseholds = false
+	expertChanges.locationTypes.indexOf('medium') > -1 ? $scope.optimizeMedium = true : $scope.optimizeMedium = false 
+	expertChanges.locationTypes.indexOf('large') > -1 ? $scope.optimizeLarge = true : $scope.optimizeLarge = false
+	expertChanges.locationTypes.indexOf('small') > -1 ? $scope.optimizeSMB = true : $scope.optimizeSMB = false
+	expertChanges.locationTypes.indexOf('celltower') > -1 ? $scope.optimizeTowers = true : $scope.optimizeTowers = false
+
+	/*saving technology*/
+	$scope.selectedTechType.forEach(function(prevSelectedTechId) {
+		$('#'+prevSelectedTechId).prop('checked', false)
+	})
+	$scope.selectedTechType = []	
+	expertChanges.networkTypes.forEach(function(techId) {
+		$scope.toggleTechType(techId,true)
+		$('#'+techId).prop('checked', true)
+		if (techId == 'FiveG') {
+			$scope.cellNodeConstraints.cellRadius = expertChanges.fiberNetworkConstraints.cellNodeConstraints.cellRadius
+		}
+	});
+	
+	/*saving network construction*/
+	switch (expertChanges.fiberNetworkConstraints.routingMode.toUpperCase()){
+    case "DIRECT_ROUTING" :  $scope.technology = "direct_routing";
+        break;
+    case "ODN_1": $scope.technology = "odn1";
+        break;
+    case "ODN_2": $scope.technology = "odn2";
+        break;
+	}
+			
+	/*saving optimization type*/
+	if (expertChanges.algorithm === 'UNCONSTRAINED')
+		$scope.optimizationType = 'CAPEX'
+	else
+		$scope.optimizationType = expertChanges.algorithm
+		
+	/*saving regions*/	
+	regions.removeAllGeographies()
+	/*$scope.selectedRegions = expertChanges.geographies.map((i) => {
+	var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
+	// geography information may be too large so we avoid to send it for known region types
+	if (standardTypes.indexOf(i.type) === -1) {
+		info.geog = i.geog
+	}
+	if (i.layerId) {
+		processingLayers.push(i.layerId)
+	}
+	return info
+	})*/
+			
+	regions.selectedRegions = expertChanges.geographies.map((i) => {
+	var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
+	// geography information may be too large so we avoid to send it for known region types
+	if (standardTypes.indexOf(i.type) === -1) {
+		info.geog = i.geog
+	}
+	if (i.layerId) {
+		processingLayers.push(i.layerId)
+	}
+	return info
+	})
+	$rootScope.$broadcast('regions_changed')
+		
+	/*getting geom from regions.selectedRegions as we dont have geom information*/
+	/*var expertSelectedRegions = expertChanges.geographies.map((i) => {
+	var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
+	if (standardTypes.indexOf(i.type) === -1) {
+		info.geog = i.geog
+	}
+	if (i.layerId) {
+		processingLayers.push(i.layerId)
+	}
+	return info
+	})
+	var expertSelectedRegionsGeog
+	regions.selectedRegions.forEach((region) => {
+		if (region.id == expertSelectedRegions.id) {
+			expertSelectedRegionsGeog = region
+		}
+	})	
+	
+	regions.selectedRegions = expertSelectedRegionsGeog
+	$rootScope.$broadcast('regions_changed')*/	
+		
+	$('#selected_expert_mode').modal('hide')
+  })
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
