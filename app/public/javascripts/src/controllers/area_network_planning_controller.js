@@ -89,7 +89,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	  $('#selected_expert_mode').modal('hide')
   })
   
-  $scope.FiveGProps = true
   $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges) => {
 	var expertChanges = JSON.parse(expertModeChanges)
 	
@@ -129,56 +128,46 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	else
 		$scope.optimizationType = expertChanges.algorithm
 		
-	/*saving regions*/	
+	/*saving regions*/		
 	regions.removeAllGeographies()
-	/*$scope.selectedRegions = expertChanges.geographies.map((i) => {
-	var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
-	// geography information may be too large so we avoid to send it for known region types
-	if (standardTypes.indexOf(i.type) === -1) {
-		info.geog = i.geog
-	}
-	if (i.layerId) {
-		processingLayers.push(i.layerId)
-	}
-	return info
-	})*/
-			
-	regions.selectedRegions = expertChanges.geographies.map((i) => {
-	var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
-	// geography information may be too large so we avoid to send it for known region types
-	if (standardTypes.indexOf(i.type) === -1) {
-		info.geog = i.geog
-	}
-	if (i.layerId) {
-		processingLayers.push(i.layerId)
-	}
-	return info
+	var expertSelectedWirecenters = []
+	expertChanges.geographies.forEach((wirecenter) => {
+		expertSelectedWirecenters.push(wirecenter.id)
 	})
-	$rootScope.$broadcast('regions_changed')
-		
-	/*getting geom from regions.selectedRegions as we dont have geom information*/
-	/*var expertSelectedRegions = expertChanges.geographies.map((i) => {
-	var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
-	if (standardTypes.indexOf(i.type) === -1) {
-		info.geog = i.geog
-	}
-	if (i.layerId) {
-		processingLayers.push(i.layerId)
-	}
-	return info
-	})
-	var expertSelectedRegionsGeog
-	regions.selectedRegions.forEach((region) => {
-		if (region.id == expertSelectedRegions.id) {
-			expertSelectedRegionsGeog = region
-		}
-	})	
 	
-	regions.selectedRegions = expertSelectedRegionsGeog
-	$rootScope.$broadcast('regions_changed')*/	
-		
+	$scope.fetchWirecentersInfo(expertSelectedWirecenters).then(function(wirecentersInfo){
+		wirecentersInfo.map((boundary) => {
+		    var n = boundary.id.indexOf(':')
+		    var type = boundary.id.substring(0, n)
+		    var id = boundary.id.substring(n + 1)
+
+            regions.selectGeography({
+                id: id,
+                name: boundary.name,
+                geog: boundary.geog,
+                type: type
+            })
+        })
+	});
+	 
 	$('#selected_expert_mode').modal('hide')
   })
+  
+  $scope.fetchWirecentersInfo = (expertSelectedWirecenters) => { 
+	var defer=$q.defer();	
+	var params = {
+		expertSelectedWirecenters: expertSelectedWirecenters
+	} 
+	$http({
+		url: '/boundary/info',
+		method: 'GET',
+        params: params
+    })
+	.success((response) => {
+		defer.resolve(response); 	  
+	})
+	return defer.promise; 
+  }
 
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
