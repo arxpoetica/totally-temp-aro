@@ -186,6 +186,7 @@
                  ng-model="isChecked"
                  ng-checked="type.selected"
                  ng-click="toggleTechType(type.id , isChecked)"
+                 id="{{ type.id }}"
          > {{type.label}}
      </div>
     <div  ng-show="type.id == 'FiveG' && isChecked" style="display: inline-block">

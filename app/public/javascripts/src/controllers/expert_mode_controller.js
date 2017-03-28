@@ -11,4 +11,10 @@ app.controller('expert_mode_controller', ($rootScope, $scope, $http, map_layers,
 		
 		$('#expert_mode_body').val("");  
 	}
+	
+	$scope.saveExpertmode = () => {
+		
+		$rootScope.$broadcast('expert-mode-plan-save',$('#expert_mode_body').val());  
+	}
+
 })
