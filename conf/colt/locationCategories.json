@@ -1,4 +1,5 @@
 {
+	"mapIconFolder": "/images/map_icons/colt/",
 	"businesses": {
 		"user_upload": {
 			"active": true,

@@ -1,4 +1,5 @@
 {
+	"mapIconFolder": "/images/map_icons/ufinet/",
 	"businesses": {
 		"user_upload": {
 			"active": true,
