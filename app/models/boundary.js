@@ -131,5 +131,18 @@ module.exports = class Boundary {
           })
       })
   }
+  
+  static getBoundariesInfo (serviceareas) {
+	  
+	  var sql = `
+      SELECT 'wirecenter' || ':' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
+      FROM client.service_area
+      JOIN client.service_layer
+        ON service_area.service_layer_id = service_layer.id
+      AND service_layer.name='wirecenter'
+      WHERE service_area.id in ($1)
+	  `
+	  return database.query(sql, [serviceareas])
+  }
 
 }
