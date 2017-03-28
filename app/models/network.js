@@ -326,7 +326,7 @@ module.exports = class Network {
       fiberNetworkConstraints: options.fiberNetworkConstraints,
       processLayers: options.processingLayers,
       customOptimization: options.customOptimization,
-      locationDataSources: {business : options.entityDataSources,celltower : options.entityDataSources},
+      locationDataSources: {business : options.entityDataSources,celltower : options.entityDataSources, household : options.entityDataSources},
       fiberSourceIds: options.fiberSourceIds,
       networkTypes:options.networkTypes,
       threshold : options.threshold
