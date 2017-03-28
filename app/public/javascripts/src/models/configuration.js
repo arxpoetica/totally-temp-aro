@@ -4,10 +4,10 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
     var configBaseUrl = 'http://' + $location.host() + ':' + $location.port()
     var configurationPromises = []  // Configuration is said to be "loaded" when all promises are resolved
 
-    // Get locations layer configuration
+    // Get location categories configuration
     configurationPromises.push(
       new Promise((resolve, reject) => {
-        $http.get(configBaseUrl + '/uiConfiguration/locations_layer')
+        $http.get(configBaseUrl + '/uiConfiguration/locationCategories')
           .success((response) => {
             config.locations_layer = response
             resolve()
