@@ -9,7 +9,7 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
       new Promise((resolve, reject) => {
         $http.get(configBaseUrl + '/uiConfiguration/locationCategories')
           .success((response) => {
-            config.locations_layer = response
+            config.locationCategories = response
             resolve()
           })
           .error(reject)

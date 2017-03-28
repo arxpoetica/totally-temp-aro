@@ -1,5 +1,5 @@
 /* global app config */
-app.controller('legend-controller', ['$scope', '$http', ($scope, $http) => {
+app.controller('legend-controller', ['$scope', '$rootScope', '$http', 'configuration', ($scope, $rootScope, $http, configuration) => {
   $scope.expanded = false
   $scope.ARO_CLIENT = config.ARO_CLIENT
 
@@ -8,4 +8,11 @@ app.controller('legend-controller', ['$scope', '$http', ($scope, $http) => {
   }
 
   $scope.view_node_types = []
+
+  $scope.isLoadingConfiguration = true
+  $rootScope.$on('configuration_loaded', () => {
+    $scope.locationCategories = configuration.locationCategories
+    $scope.isLoadingConfiguration = false
+  })
+
 }])

@@ -180,14 +180,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       var household_categories = response.household_categories
 
       $scope.towers = {
-        showInUi: configuration.locations_layer.towers.show,
-        label: configuration.locations_layer.towers.label
+        showInUi: configuration.locationCategories.towers.show,
+        label: configuration.locationCategories.towers.label
       }
 
       // Replace description in business categories with the description we get from our configuration service
       $scope.business_categories = []
       business_categories.forEach((businessCategory, index) => {
-        var segmentInfo = configuration.locations_layer.businesses.segments
+        var segmentInfo = configuration.locationCategories.businesses.segments
         var matchingSegment = null
         for (var prop in segmentInfo) {
           if (prop === businessCategory.name) {
@@ -205,7 +205,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       // Replace description in household categories with the description we get from our configuration service
       $scope.household_categories = []
       household_categories.forEach((householdCategory, index) => {
-        var segmentInfo = configuration.locations_layer.households.segments
+        var segmentInfo = configuration.locationCategories.households.segments
         var matchingSegment = null
         for (var prop in segmentInfo) {
           if (prop === householdCategory.name) {
@@ -219,9 +219,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
           $scope.household_categories.push(household_categories[index])
         }
       })
-      $scope.households_description = configuration.locations_layer.households.description
+      $scope.households_description = configuration.locationCategories.households.description
 
-      $scope.env_is_test = configuration.locations_layer.env_is_test
+      $scope.env_is_test = configuration.locationCategories.env_is_test
 
       $scope.business_categories_selected = {}
       $scope.business_categories.forEach((category) => {
