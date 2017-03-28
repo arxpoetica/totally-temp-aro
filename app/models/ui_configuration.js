@@ -4,8 +4,6 @@
 'use strict'
 
 var fs = require('fs')
-var merge = require('deepmerge')  // Used to deep-merge two javascript objects
-var aro_client = process.env.ARO_CLIENT || ''
 
 module.exports = class UIConfiguration {
 
@@ -20,13 +18,8 @@ module.exports = class UIConfiguration {
     
     if (!this.configurations[configSet]) {
       // This configuration set has not been loaded. Load it from disk now.
-      // First load the "default" configuration set that will be the parent set.
-      var defaultConfigSet = require('../../conf/default/' + configSet + '.json')
-      // Then load the configuration set for the specific ARO_CLIENT
-      var clientConfigSet = require('../../conf/' + aro_client + '/' + configSet + '.json')
-
-      // Inherit from defaultConfigSet, then overwrite any values present in clientConfigSet
-      this.configurations[configSet] = merge(defaultConfigSet, clientConfigSet)
+      var clientConfigFile = '../../conf/' + process.env.ARO_CLIENT + '/' + configSet + '.json'
+      this.configurations[configSet] = require(clientConfigFile)
     }
 
     return this.configurations[configSet]
