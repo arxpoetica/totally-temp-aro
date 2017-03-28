@@ -79,14 +79,17 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   
   $scope.runExpertMode = () => {
 	  $scope.prerun().then(function(changes){
+		  $rootScope.enableExpertSave.show = true
+		  $rootScope.isNetworkPlanning = true
 		  $('#selected_expert_mode').modal('show')
 		  $('#expert_mode_body').val(JSON.stringify(changes, undefined, 4))
 	  });
   }
   
-  $rootScope.$on('expert-mode-plan-edited', (e, changes) => {
-	  canceler = optimization.optimize($scope.plan, JSON.parse(changes))
-	  $('#selected_expert_mode').modal('hide')
+  $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
+	  if(isNetworkPlanning)
+		  canceler = optimization.optimize($scope.plan, JSON.parse(changes))
+		  $('#selected_expert_mode').modal('hide')
   })
   
   $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges) => {
