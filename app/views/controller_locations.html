@@ -98,7 +98,7 @@
               <input type="checkbox" ng-model="business_categories_selected[category.name]" ng-change="changeLocationsLayer()">
             </label>
             <div class="pull-left">
-              <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_{{category.name}}_default.png" style="width:16px;margin-right:10px">
+              <img ng-src="{{mapIconFolder + 'businesses_' + category.name + '_default.png'}}" style="width:16px;margin-right:10px">
             </div>
             <label>{{category.description}}</label>
           </div>
@@ -144,7 +144,7 @@
       <div class="customer-type">
         <div ng-repeat="category in household_categories" style="clear:both">
           <div class="pull-left">
-            <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px;margin-right:10px">
+            <img ng-src="{{mapIconFolder + 'households_' + category.name + '_default.png'}}" style="width:16px;margin-right:10px">
           </div>
           <label class="pull-right" style="margin-right: 22px">
             <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="household_categories_selected[category.name]"></span>
@@ -174,7 +174,7 @@
           </a>
         </div>
         <div class="pull-left">
-          <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px;margin-right:10px">
+          <img ng-src="{{mapIconFolder + 'tower.png'}}" style="width:16px;margin-right:10px">
         </div>
         <label class="pull-right">
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_towers"></span>

@@ -1,7 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
 app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', ($scope, $rootScope, $http, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization) => {
-  $scope.ARO_CLIENT = config.ARO_CLIENT
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [
@@ -85,12 +84,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     var type = 'households'
     var target = feature.getProperty('selected')
     if (target) {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/target.png`
+      styles.icon = configuration.locationCategories.mapIconFolder + 'target.png'
       return
     }
     var categories = feature.getProperty('entity_categories')
     if (categories.indexOf('towers') >= 0) {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/tower.png`
+      styles.icon = configuration.locationCategories.mapIconFolder + 'tower.png'
       return
     }
     var order = [
@@ -110,9 +109,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     }
     var selected = feature.getProperty('selected') ? 'selected' : 'default'
     if (largestCategory) {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestCategory.substring(2)}_${selected}.png`
+      styles.icon = configuration.locationCategories.mapIconFolder + `${type}_${largestCategory.substring(2)}_${selected}.png`
     } else {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${selected}.png`
+      styles.icon = configuration.locationCategories.mapIconFolder + `${type}_${selected}.png`
     }
   }
 
@@ -221,6 +220,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       })
       $scope.households_description = configuration.locationCategories.households.description
 
+      $scope.mapIconFolder = configuration.locationCategories.mapIconFolder
       $scope.env_is_test = configuration.locationCategories.env_is_test
 
       $scope.business_categories_selected = {}
