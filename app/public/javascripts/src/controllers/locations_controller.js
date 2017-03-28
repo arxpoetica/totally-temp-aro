@@ -44,6 +44,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   $rootScope.$on('configuration_loaded', () => {
     $scope.loadLocationFilters()
     $scope.isLoadingConfiguration = false
+    // If we have a plan loaded in scope, reload selected locations layer as we now have icons for selected locations
+    if ($scope.plan) {
+      map.ready(() => {
+        selectedLocationsLayer.show()
+        selectedLocationsLayer.reloadData()
+        // select entity types used in optimization
+        selectLocations($scope.plan.location_types)
+      })
+    }
   })
 
   $scope.user_id = user_id
@@ -80,6 +89,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   }
 
   var declarativeStyles = (feature, styles) => {
+    // NOTE: Even if configuration.locationCategories.mapIconFolder is not defined at this point,
+    //       every time we call map layer show/hide, it calls this function.
     if (styles.icon) return
     var type = 'households'
     var target = feature.getProperty('selected')
