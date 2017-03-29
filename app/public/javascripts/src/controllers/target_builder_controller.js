@@ -1,6 +1,6 @@
 /* global app user_id google $ map FormData XMLHttpRequest swal config _ */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, optimization) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', '$window', 'optimization', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, $window, optimization) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.selectedTool = null
@@ -83,6 +83,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       })
     }
   })
+  
+  $('.map-tool-wrapper').css('max-height', $window.innerHeight - 100)
   
   $scope.runExpertMode = () => {
 	$scope.prerun().then(function(changes){
