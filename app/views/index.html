@@ -263,8 +263,17 @@
             <div style="font-size: 15px; padding-left: 20px; line-height: 50px; color: #aaaaaa"><span class="fa fa-map-marker" style="padding-right: 10px;"></span>{{plan.area_name}}</div>
           </div>
           <div style="flex: 1 1 auto;">
-            <p ng-show="plan" class="pull-right" id="top_bar_tools" style="line-height: 50px; margin-right: 10px">
-              <span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
+            <p ng-show="plan" class="pull-right" id="top_bar_tools" style="line-height: 50px; margin-right: 10px; font-size: 16px">
+
+              <span ng-show="plan.ranOptimization" style="color: #6060ff; padding-right: 5px; padding-left: 5px">{{plan.metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":0}}K NPV</span>
+              <span ng-hide="plan.ranOptimization" style="color: #6060ff; padding-right: 5px; padding-left: 5px"><%- config.currency_symbol %>0K NPV</span>
+              |
+              <span ng-show="plan.ranOptimization" style="color: #6060ff; padding-right: 5px; padding-left: 5px">{{(plan.metadata.irr * 100) | number : 1}}% IRR</span>
+              <span ng-hide="plan.ranOptimization" style="color: #6060ff; padding-right: 5px; padding-left: 5px">0% IRR</span>
+              |
+              <span id="shortest_path_total_cost" style="color: #ff6060; padding-right: 5px; padding-left: 5px">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
+
+              <!--<span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
                 <% if (config.ARO_CLIENT === 'reliance') { %>
                   <span class="fa fa-inr"></span>
                 <% } else { %>
@@ -291,7 +300,7 @@
                   <span class="label label-info"><span>Market Share</span>{{ market_profile_share*100 | number:2 }}%</span>
                 </span>
               </span>
-              <% } %>
+              <% } %>-->
             </p>
           </div>
       </div>
