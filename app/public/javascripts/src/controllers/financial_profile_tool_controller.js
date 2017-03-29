@@ -87,7 +87,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
-    if (config.ARO_CLIENT === 'verizon') {
+    if (config.ARO_CLIENT === 'verizon' || config.ARO_CLIENT === 'aro') {
       if (layer.type !== 'child_plans') return
     } else {
       if (layer.type !== 'wirecenter') return
