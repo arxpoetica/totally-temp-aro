@@ -176,49 +176,11 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <button ng-show="plan" type="button" id="home-button" class="btn btn-sm navbar-btn" ng-click="selectPlan(null)"><span class="fa fa-home"></span></button>
-            <a href="javascript:void(0)" class="navbar-brand" ng-click="showCombo()">{{plan.name}}</a>
-
-            <p ng-show="plan" class="navbar-text" id="top_bar_tools">
-              <span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
-                <% if (config.ARO_CLIENT === 'reliance') { %>
-                  <span class="fa fa-inr"></span>
-                <% } else { %>
-                  <span class="fa fa-usd"></span>
-                <% } %>
-                <span class="label label-info" ng-show="plan.ranOptimization">{{plan.metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":0}}K NPV</span>
-                <span class="label label-info" ng-hide="plan.ranOptimization"><%- config.currency_symbol %>0K NPV</span>
-                <span class="label label-info" ng-show="plan.ranOptimization">{{(plan.metadata.irr * 100) | number : 1}}% IRR</span>
-                <span class="label label-info" ng-hide="plan.ranOptimization">0% IRR</span>
-                <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
-              </span>
-              <!--
-              <span data-toggle="modal" ng-click="openCustomerProfile()" style="cursor:pointer" ng-show="show_customer_profile">
-                <span class="fa fa-users"></span>
-                  {{ plan.metadata.customers_businesses_total | number }} businesses,
-                  {{ plan.metadata.customers_households_total | number }} households,
-                  {{ plan.metadata.customers_towers_total | number }} towers
-                  covered
-              </span>
-              -->
-
-              <% if (config.ui.layout === 'default') { %>
-              <span data-toggle="modal" ng-click="openMarketProfile()" style="cursor:pointer" ng-show="show_market_profile">
-                <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
-                <span ng-show="market_profile_current_year.total">
-                  <span class="label label-success"><span>Market Size</span>
-                    {{ market_profile_current_year.total / market_size_scale_n | currency }}{{ market_size_scale_s }}
-                  </span>
-                  <span class="label label-info" style="background-color: <%- config.ui.colors.fair_share %>"><span>
-                    <%- config.displayable_client_carrier_name || config.client_carrier_name %> revenue</span>
-                    {{ market_profile_fair_share_current_year_total / market_size_scale_n | currency }}{{ market_size_scale_s }}
-                  </span>
-                  <span class="label label-info"><span>Market Share</span>{{ market_profile_share*100 | number:2 }}%</span>
-                </span>
-              </span>
-              <% } %>
-            </p>
-
+            <!-- Navbar brand. Hacky solution to get everything vertically centered -->
+            <a class="navbar-brand" style="padding: 0px" href="#">
+              <span style="line-height: 50px"><img src="images/logos/aro/logo_navbar.png" style="margin-top: -4px"></span>
+              ARO
+            </a>
           </div>
 
           <div class="collapse navbar-collapse">
@@ -290,56 +252,48 @@
         </div>
       </nav>
       <div id="aro-header">
-      <table>
-        <tbody>
-          <tr>
-            <td><a href="#" ng-click="selectPlan(null)"><span class="fa fa-caret-left fa-2x" style="color: black; padding-left: 10px; line-height: 50px"></span></a></td>
-            <td><div style="font-size: 25px; padding-left: 20px" class="ng-binding">{{plan.name}}</div></td>
-            <td><div style="font-size: 15px; padding-left: 20px; color: #aaaaaa"><span class="fa fa-map-marker" style="padding-right: 10px;"></span>{{plan.area_name}}</div></td>
-            <td>
-              <p ng-show="plan" class="navbar-text pull-right" id="top_bar_tools">
-                <span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
-                  <% if (config.ARO_CLIENT === 'reliance') { %>
-                    <span class="fa fa-inr"></span>
-                  <% } else { %>
-                    <span class="fa fa-usd"></span>
-                  <% } %>
-                  <span class="label label-info" ng-show="plan.ranOptimization">{{plan.metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":0}}K NPV</span>
-                  <span class="label label-info" ng-hide="plan.ranOptimization"><%- config.currency_symbol %>0K NPV</span>
-                  <span class="label label-info" ng-show="plan.ranOptimization">{{(plan.metadata.irr * 100) | number : 1}}% IRR</span>
-                  <span class="label label-info" ng-hide="plan.ranOptimization">0% IRR</span>
-                  <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
-                </span>
-                <!--
-                <span data-toggle="modal" ng-click="openCustomerProfile()" style="cursor:pointer" ng-show="show_customer_profile">
-                  <span class="fa fa-users"></span>
-                    {{ plan.metadata.customers_businesses_total | number }} businesses,
-                    {{ plan.metadata.customers_households_total | number }} households,
-                    {{ plan.metadata.customers_towers_total | number }} towers
-                    covered
-                </span>
-                -->
-
-                <% if (config.ui.layout === 'default') { %>
-                <span data-toggle="modal" ng-click="openMarketProfile()" style="cursor:pointer" ng-show="show_market_profile">
-                  <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
-                  <span ng-show="market_profile_current_year.total">
-                    <span class="label label-success"><span>Market Size</span>
-                      {{ market_profile_current_year.total / market_size_scale_n | currency }}{{ market_size_scale_s }}
-                    </span>
-                    <span class="label label-info" style="background-color: <%- config.ui.colors.fair_share %>"><span>
-                      <%- config.displayable_client_carrier_name || config.client_carrier_name %> revenue</span>
-                      {{ market_profile_fair_share_current_year_total / market_size_scale_n | currency }}{{ market_size_scale_s }}
-                    </span>
-                    <span class="label label-info"><span>Market Share</span>{{ market_profile_share*100 | number:2 }}%</span>
-                  </span>
-                </span>
+        <div style="display:flex; width:100%; height:100%">
+          <div style="flex: 0 1 auto; height: 100%">
+            <a href="#" ng-click="selectPlan(null)"><span class="fa fa-caret-left fa-2x" style="color: black; padding-left: 10px; line-height: 50px"></span></a>
+          </div>
+          <div style="flex: 0 1 auto;">
+            <div style="font-size: 25px; padding-left: 20px; line-height: 50px" class="ng-binding">{{plan.name}}</div>
+          </div>
+          <div style="flex: 0 1 auto;">
+            <div style="font-size: 15px; padding-left: 20px; line-height: 50px; color: #aaaaaa"><span class="fa fa-map-marker" style="padding-right: 10px;"></span>{{plan.area_name}}</div>
+          </div>
+          <div style="flex: 1 1 auto;">
+            <p ng-show="plan" class="pull-right" id="top_bar_tools" style="line-height: 50px; margin-right: 10px">
+              <span ng-click="openFinancialProfile()" style="cursor:pointer" ng-show="show_financial_profile">
+                <% if (config.ARO_CLIENT === 'reliance') { %>
+                  <span class="fa fa-inr"></span>
+                <% } else { %>
+                  <span class="fa fa-usd"></span>
                 <% } %>
-              </p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <span class="label label-info" ng-show="plan.ranOptimization">{{plan.metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":0}}K NPV</span>
+                <span class="label label-info" ng-hide="plan.ranOptimization"><%- config.currency_symbol %>0K NPV</span>
+                <span class="label label-info" ng-show="plan.ranOptimization">{{(plan.metadata.irr * 100) | number : 1}}% IRR</span>
+                <span class="label label-info" ng-hide="plan.ranOptimization">0% IRR</span>
+                <span class="label label-danger" id="shortest_path_total_cost">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
+              </span>
+
+              <% if (config.ui.layout === 'default') { %>
+              <span data-toggle="modal" ng-click="openMarketProfile()" style="cursor:pointer" ng-show="show_market_profile">
+                <span class="<%= config.ui.icons.market_profile %>" ng-class="{'spin': market_profile_calculating}"></span>
+                <span ng-show="market_profile_current_year.total">
+                  <span class="label label-success"><span>Market Size</span>
+                    {{ market_profile_current_year.total / market_size_scale_n | currency }}{{ market_size_scale_s }}
+                  </span>
+                  <span class="label label-info" style="background-color: <%- config.ui.colors.fair_share %>"><span>
+                    <%- config.displayable_client_carrier_name || config.client_carrier_name %> revenue</span>
+                    {{ market_profile_fair_share_current_year_total / market_size_scale_n | currency }}{{ market_size_scale_s }}
+                  </span>
+                  <span class="label label-info"><span>Market Share</span>{{ market_profile_share*100 | number:2 }}%</span>
+                </span>
+              </span>
+              <% } %>
+            </p>
+          </div>
       </div>
     </div>
 
