@@ -70,6 +70,7 @@ html, body {
   top: 75px;
   left: 75px;
   z-index: 1;
+  overflow-y: auto;
 }
 
 .map-tool {

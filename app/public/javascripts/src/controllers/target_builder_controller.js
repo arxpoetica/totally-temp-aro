@@ -1,6 +1,6 @@
 /* global app user_id google $ map FormData XMLHttpRequest swal config _ */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', 'optimization', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, optimization) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', '$window', 'optimization', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, $window, optimization) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.selectedTool = null
@@ -84,16 +84,21 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     }
   })
   
+  $('.map-tool-wrapper').css('max-height', $window.innerHeight - 100)
+  
   $scope.runExpertMode = () => {
 	$scope.prerun().then(function(changes){
+	  $rootScope.enableExpertSave.show = false
+	  $rootScope.isNetworkPlanning = false
 	  $('#selected_expert_mode').modal('show')
 	  $('#expert_mode_body').val(JSON.stringify(changes, undefined, 4))
 	});
   }
   
-  $rootScope.$on('expert-mode-plan-edited', (e, changes) => {
-	canceler = optimization.optimize($scope.plan, JSON.parse(changes))
-	$('#selected_expert_mode').modal('hide')
+  $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
+	if(!isNetworkPlanning)  
+		canceler = optimization.optimize($scope.plan, JSON.parse(changes))
+		$('#selected_expert_mode').modal('hide')
   })
 
   $scope.irrThresholdRangeChanged = () => {
