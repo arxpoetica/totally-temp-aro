@@ -60,9 +60,9 @@ html, body {
 .map-tools-buttons-container {
   position:absolute;
   left: 0px;
-  bottom: 0px;
+  top: 0px;
   padding-left: 10px;
-  padding-bottom: 20px;
+  padding-top: 10px;
 }
 
 .map-tool-wrapper {
