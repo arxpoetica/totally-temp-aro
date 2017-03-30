@@ -664,6 +664,12 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   color: #ff6060;
 }
 
+.plan-progress {
+  margin-left:20px;
+  margin-top:15px;
+  width: 200px
+}
+
 /* Map tool buttons */
 
 .map-tools-button {

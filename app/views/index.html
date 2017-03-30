@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css">
-     <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= config.ARO_CLIENT %>.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
   </head>
@@ -195,11 +195,11 @@
             </div>
             -->
 
-            <div style="float:left; width:200px" id="plan-saving-progress">
+            <!--<div style="float:left; width:200px" id="plan-saving-progress">
               <div class="progress" style="margin-bottom:0; margin-top:19px;">
                 <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 0%"></div>
               </div>
-            </div>
+            </div>-->
 
 <!--             <p class="navbar-text" ng-show="plan">
               <a style="cursor:pointer; color:white" data-target="#build-sequence" data-toggle="modal"><small>Build Sequence</small></a>
@@ -261,6 +261,11 @@
           </div>
           <div class="header-column-child-width">
             <div class="header-plan-location"><span class="fa fa-map-marker pad10"></span>{{plan.area_name}}</div>
+          </div>
+          <div class="header-column-child-width" id="plan-saving-progress">
+            <div class="progress plan-progress">
+              <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 0%"></div>
+            </div>
           </div>
           <div class="header-column-fill-width">
             <p ng-show="plan" class="pull-right header-financials-container" id="top_bar_tools">
