@@ -131,8 +131,12 @@
       {{ map_tools.get_tool_name('financial_profile') }}
       {{ selectedArea ? ' · '+selectedArea.name : '' }}
       <a href="javascript:void(0)" class="pull-right" ng-click="download()">
-        <span style="color:white" class="fa fa-download"></span>
+        <span style="color:white;margin-left: 1em;" class="fa fa-download"></span>
       </a>
+	  <button class="pull-right btn btn-sm btn-primary-us" style="margin-left: 1em;"
+	   	ng-class="{'btn-success-us': mode === 'area'}" ng-click="setMode('area')">Area</button>
+	  <button class="pull-right btn btn-sm btn-primary-us" style="margin-left: 1em;"
+   	   	ng-class="{'btn-success-us': mode === 'global'}" ng-click="setMode('global')">Global</button> 	
     </div>
     <% include controller_financial_profile_tool.html %>
   </div>
