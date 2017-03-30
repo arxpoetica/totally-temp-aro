@@ -77,6 +77,14 @@ html, body {
   width: 320px;
   margin: 0;
 }
+
+.map-tool.ng-hide-remove {
+    animation: fadeInLeft 0.5s;
+}
+
+.map-tool.ng-hide-add {
+    animation: fadeOutLeft 0.5s;
+}
 /*
 .btn-success:active, .btn-success.active, .open>.dropdown-toggle.btn-success {
   background-color: rgb(0, 117, 109);

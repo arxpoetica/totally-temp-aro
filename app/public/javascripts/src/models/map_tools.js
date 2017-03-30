@@ -100,7 +100,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       id: 'fiber_plant',
       name: 'Competitor Networks',
       short_name: 'F',
-      icon: 'fa fa-bomb fa-2x'
+      icon: 'fa fa-flag-checkered fa-2x'
     },
     {
       id: 'boundaries',
