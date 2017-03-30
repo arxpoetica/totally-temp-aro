@@ -88,25 +88,25 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       id: 'locations',
       name: 'Locations',
       short_name: 'L',
-      icon: 'fa fa-building'
+      icon: 'fa fa-building fa-2x'
     },
     {
       id: 'network_nodes',
       name: 'Network Equipment',
       short_name: 'E',
-      icon: 'icon icon-network-equipment'
+      icon: 'fa fa-sitemap fa-2x'
     },
     {
       id: 'fiber_plant',
       name: 'Competitor Networks',
       short_name: 'F',
-      icon: 'fa fa-pie-chart'
+      icon: 'fa fa-bomb fa-2x'
     },
     {
       id: 'boundaries',
       name: 'Boundaries',
       short_name: 'B',
-      icon: 'icon icon-boundaries'
+      icon: 'fa fa-th fa-2x'
     },
     {
       separator: true
@@ -115,7 +115,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       id: 'area_network_planning',
       name: 'Area Network Planning',
       short_name: 'A',
-      icon: 'icon icon-network-planning'
+      icon: 'fa fa-legal fa-2x'
     }
   ]
 
@@ -124,7 +124,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       id: 'target_builder',
       name: 'Target builder',
       short_name: 'TB',
-      icon: 'icon icon-network-planning-targeted'
+      icon: 'fa fa-bullseye fa-2x'
     })
   }
 
@@ -132,10 +132,10 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     id: 'backhaul',
     name: 'Backhaul',
     short_name: 'BH',
-    icon: 'icon icon-backhaul'
+    icon: 'fa fa-undo fa-2x'
   })
 
-  var iconClass = (config.ARO_CLIENT === 'reliance') ? 'fa fa-inr' : 'fa fa-usd'
+  var iconClass = 'fa fa-line-chart fa-2x'
   tools.available_tools.push({
     id: 'financial_profile',
     name: 'Financial Profile',
