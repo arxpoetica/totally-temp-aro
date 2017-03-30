@@ -134,6 +134,13 @@
         <span style="color:white" class="fa fa-download"></span>
       </a>
     </div>
+    <br>
+    <div class="pull-center">
+   	  	<button class="btn btn-sm btn-primary-us" 
+   	    	ng-class="{'btn-success-us': mode === 'global'}" ng-click="setMode('global')">Global</button>
+	  	<button class="btn btn-sm btn-primary-us" 
+	    	ng-class="{'btn-success-us': mode === 'area'}" ng-click="setMode('area')">Area</button>
+  	</div>
     <% include controller_financial_profile_tool.html %>
   </div>
 </div>
