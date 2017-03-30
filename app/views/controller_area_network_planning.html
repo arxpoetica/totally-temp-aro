@@ -190,24 +190,28 @@
          > {{type.label}}
      </div>
     <div  ng-show="type.id == 'FiveG' && isChecked" style="display: inline-block">
-     <label>
-     <div style="display: inline-block">
-         <input
-                 type="checkbox"
-         > Fiber Proximity Placement
-     </div>
-     <div style="display: inline-block"> Radius
-       <span>
-           <input
-                   type="text"
-                   ng-model="cellNodeConstraints.cellRadius"
-                   placeholder="Cell Radius"
-                   style="width: 85px;margin-left: 50px"
-           >
-           <span><b>m</b></span>
-       </span>
-     </div>
-     </label>
+    <label>
+      <span>Polygon Type</span>
+      <select class="form-control" ng-model="polygonOptions.polygonStrategy">
+        <option value="FIXED_RADIUS">Fixed Radius</option>
+        <option value="AVERAGE_RADIUS">Average Radius</option>
+        <option value="RAY_TRACING">Ray Tracing</option>
+      </select>
+      <div style="display: inline-block">
+          <input type="checkbox"> Fiber Proximity Placement
+      </div>
+      <div style="display: inline-block"> Radius
+        <span>
+            <input
+                    type="text"
+                    ng-model="cellNodeConstraints.cellRadius"
+                    placeholder="Cell Radius"
+                    style="width: 85px;margin-left: 50px"
+            >
+            <span><b>m</b></span>
+        </span>
+      </div>
+    </label>
     </div>
     </label>
 
