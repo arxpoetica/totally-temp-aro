@@ -34,7 +34,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.cellNodeConstraints = {
       cellGranularityRatio : 0,
-      cellRadius: config.ui.map_tools.area_planning.cell_radius
+      cellRadius: config.ui.map_tools.area_planning.cell_radius,
+      polygonStrategy: 'FIXED_RADIUS'
   }
   $scope.coverageThreshold = config.ui.map_tools.area_planning.coverage_threshold;
   $scope.entityTypesTargeted = {}

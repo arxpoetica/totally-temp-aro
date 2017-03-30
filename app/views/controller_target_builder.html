@@ -154,6 +154,12 @@
      </div>
     <div  ng-show="type.id == 'FiveG' && isChecked" style="display: inline-block">
      <label>
+      <span>Polygon Type</span>
+      <select class="form-control" ng-model="polygonOptions.polygonStrategy">
+        <option value="FIXED_RADIUS">Fixed Radius</option>
+        <option value="AVERAGE_RADIUS">Average Radius</option>
+        <option value="RAY_TRACING">Ray Tracing</option>
+      </select>
      <div style="display: inline-block">
          <input
                  type="checkbox"
