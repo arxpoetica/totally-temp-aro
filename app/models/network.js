@@ -329,7 +329,6 @@ module.exports = class Network {
       locationDataSources: {business : options.entityDataSources,celltower : options.entityDataSources, household : options.entityDataSources},
       fiberSourceIds: options.fiberSourceIds,
       networkTypes:options.networkTypes,
-      polygonStrategy: options.polygonStrategy,
       threshold : options.threshold
     }
     if (config.hardcodeFiberSourceId) {

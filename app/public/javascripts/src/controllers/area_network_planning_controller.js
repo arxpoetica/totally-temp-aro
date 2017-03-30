@@ -55,7 +55,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.technology = 'direct_routing' // 'odn1'
   // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
   $scope.polygonOptions = {
-    polygonStrategy: 'AVERAGE_RADIUS'  // 'Fixed Radius'
+    polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
   }
 
   $scope.routeGenerationOptions = [
@@ -359,8 +359,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
               break;
       }
 
-      changes.polygonStrategy = $scope.polygonOptions.polygonStrategy
-
      changes.networkTypes = $scope.selectedTechType;
     if($scope.selectedTechType.indexOf("FiveG")!=-1){
         if($scope.cellNodeConstraints.cellRadius == ""){
@@ -368,7 +366,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         }
 
         changes.fiberNetworkConstraints.cellNodeConstraints = {
-            cellRadius : $scope.cellNodeConstraints.cellRadius
+            cellRadius : $scope.cellNodeConstraints.cellRadius,
+            polygonStrategy: $scope.polygonOptions.polygonStrategy
         };
     }
 
