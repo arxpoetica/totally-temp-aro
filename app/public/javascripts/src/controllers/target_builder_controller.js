@@ -31,8 +31,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   ]
   
   $scope.cellNodeConstraints = {
-	cellGranularityRatio : 0,
-	cellRadius: config.ui.map_tools.area_planning.cell_radius
+    cellGranularityRatio : 0,
+    cellRadius: config.ui.map_tools.area_planning.cell_radius,
+    polygonStrategy: 'FIXED_RADIUS'
   }
   
   $scope.selectedTechType = ['Fiber'];
@@ -58,6 +59,10 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
   $scope.technology = 'direct_routing' // 'odn1'
+  // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
+  $scope.polygonOptions = {
+    polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
+  }
   $scope.optimizationTypeOptions = [
     { id: 'CAPEX', label: 'Full Coverage' },
     { id: 'IRR', label: 'ROI Routing' },
@@ -227,7 +232,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
         }
 
         changes.fiberNetworkConstraints.cellNodeConstraints = {
-            cellRadius : $scope.cellNodeConstraints.cellRadius
+            cellRadius : $scope.cellNodeConstraints.cellRadius,
+            polygonStrategy: $scope.polygonOptions.polygonStrategy
         }
     }
     
