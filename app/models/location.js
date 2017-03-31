@@ -742,13 +742,9 @@ module.exports = class Location {
         if (!id) {
           var req = {
             method: 'POST',
-            url: config.aro_service_url + '/tile-system-debug',
+            url: config.aro_service_url + '/tile-system/1/files',
             headers:{
               "Accept":"*/*"
-            },
-            qs: {
-              'name': name,
-              'user-id': user.id
             },
             formData: {
               file: fs.createReadStream(file)
