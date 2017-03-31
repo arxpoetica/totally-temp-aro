@@ -735,4 +735,29 @@ module.exports = class Location {
     `, [dataSourceId], true, viewport)
     .then((foo) => console.log('foo', foo) || foo)
   }
+
+  static saveMorphology (user, id, name, file) {
+    return Promise.resolve()
+      .then(() => {
+        if (!id) {
+          var req = {
+            method: 'POST',
+            url: config.aro_service_url + '/tile-system-debug',
+            headers:{
+              "Accept":"*/*"
+            },
+            qs: {
+              'name': name,
+              'user-id': user.id
+            },
+            formData: {
+              file: fs.createReadStream(file)
+            }
+          }
+          return models.AROService.request(req)
+        } else {
+          return Promise.resolve()
+        }
+      });
+  }
 }
