@@ -34,7 +34,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.cellNodeConstraints = {
       cellGranularityRatio : 0,
-      cellRadius: config.ui.map_tools.area_planning.cell_radius
+      cellRadius: config.ui.map_tools.area_planning.cell_radius,
+      polygonStrategy: 'FIXED_RADIUS'
   }
   $scope.coverageThreshold = config.ui.map_tools.area_planning.coverage_threshold;
   $scope.entityTypesTargeted = {}
@@ -53,6 +54,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
   $scope.technology = 'direct_routing' // 'odn1'
+  // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
+  $scope.polygonOptions = {
+    polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
+  }
 
   $scope.routeGenerationOptions = [
     { id: 'T', value: 'A Route' },
@@ -124,7 +129,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     case "ODN_2": $scope.technology = "odn2";
         break;
 	}
-			
+
+  /*saving polygon type*/
+  $scope.polygonOptions.polygonStrategy = expertChanges.fiberNetworkConstraints.polygonStrategy.toUpperCase()
+
 	/*saving optimization type*/
 	if (expertChanges.algorithm === 'UNCONSTRAINED')
 		$scope.optimizationType = 'CAPEX'
@@ -352,7 +360,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
               break;
       }
 
-
      changes.networkTypes = $scope.selectedTechType;
     if($scope.selectedTechType.indexOf("FiveG")!=-1){
         if($scope.cellNodeConstraints.cellRadius == ""){
@@ -360,7 +367,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         }
 
         changes.fiberNetworkConstraints.cellNodeConstraints = {
-            cellRadius : $scope.cellNodeConstraints.cellRadius
+            cellRadius : $scope.cellNodeConstraints.cellRadius,
+            polygonStrategy: $scope.polygonOptions.polygonStrategy
         };
     }
 
