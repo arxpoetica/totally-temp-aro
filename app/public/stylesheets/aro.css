@@ -711,3 +711,34 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   padding: 0px;
   text-align: center;
 }
+
+/* Selected locations */
+.selected-locations-header {
+  width:868px;
+  height:220px;
+}
+
+.selected-locations-map-overlay {
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  position:relative;
+  left:0px;
+  top:-220px;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  padding-top: 40px;
+}
+
+.selected-location-label {
+  font-size: 12px;
+}
+
+.selected-location-value {
+  font-size: 22px;
+}
+
+.selected-location-address {
+  font-size: 30px;
+  padding: 10px;
+}

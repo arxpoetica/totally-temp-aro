@@ -77,7 +77,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     var params = {
       center: coordinates,
       zoom: 13,
-      size: '400x150',
+      size: '434x110',  // We want an image with size '868x220' but our free license only allows a max size of 640x640
+      scale: 2,         // So we set scale = 2 and size of '434x110'
       maptype: 'roadmap',
       markers: 'color:red|label:L|' + coordinates,
       key: google_maps_key

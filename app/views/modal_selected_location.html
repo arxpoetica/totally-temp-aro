@@ -2,54 +2,41 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Location details</h4>
-      </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-md-6">
-            <img ng-attr-src="{{ map_url }}">
-          </div>
-          <div class="col-md-6">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="row">
-                  <div class="col-md-12">
-                    <address>
-                      <strong>Address</strong><br>
-                      {{ location.address }}<br><br>
-                    </address>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6"><strong>Businesses</strong></div>
-                  <div class="col-md-6">{{ location.number_of_businesses }}</div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6"><strong>Households</strong></div>
-                  <div class="col-md-6">{{ location.number_of_households }}</div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6"><strong>Cell Sites</strong></div>
-                  <div class="col-md-6">{{ location.number_of_towers }}</div>
-                </div>
+        <div class="selected-locations-header">
+          <!-- The map that is shown in the header -->
+          <img ng-attr-src="{{map_url}}">
+          <!-- A div that is overlaid on the map image to make it appear darker -->
+          <div class="selected-locations-map-overlay">
+            <div class="selected-location-address">
+              {{location.address}}
+            </div>
+            <div style="display:flex; width: 100%;">
+              <div style="flex: 0 1 auto; padding: 10px;">
+                <div class="selected-location-value">{{location.number_of_businesses}}</div>
+                <div class="selected-location-label">Businesses</div>
               </div>
-              <div class="col-md-6">
-                <address>
-                  <strong>Distance From Existing Network</strong><br>
-                  {{ location.distance_to_client_fiber | number: 0 }} m<br><br>
-                </address>
-
-                <address>
-                  <strong>Distance From Planned Network</strong><br>
-                  <span ng-if="location.distance_to_planned_network != null">{{ location.distance_to_planned_network | number: 0 }} m<br><br></span>
-                  <span ng-if="location.distance_to_planned_network == null">No planned network<br><br></span>
-                </address>
+              <div style="flex: 0 1 auto; padding: 10px;">
+                <div class="selected-location-value">{{location.number_of_households}}</div>
+                <div class="selected-location-label">Households</div>
+              </div>
+              <div style="flex: 0 1 auto; padding: 10px;">
+                <div class="selected-location-value">{{location.number_of_towers}}</div>
+                <div class="selected-location-label">TODO Towers</div>
+              </div>
+              <div style="flex: 0 1 auto; padding: 10px;">
+                <div class="selected-location-value">{{location.distance_to_client_fiber | number: 0}} m</div>
+                <div class="selected-location-label">Distance from existing network</div>
+              </div>
+              <div style="flex: 1 1 auto; padding: 10px;">
+                <div ng-if="location.distance_to_planned_network" class="selected-location-value">{{ location.distance_to_planned_network | number: 0 }} m</div>
+                <div ng-if="!location.distance_to_planned_network" class="selected-location-value">No planned network</div>
+                <div class="selected-location-label">Distance to planned network</div>
               </div>
             </div>
           </div>
         </div>
-
+      </div>
+      <div class="modal-body">
         <br>
 
         <ul class="nav nav-tabs" role="tablist">
