@@ -211,6 +211,14 @@
             <span><b>m</b></span>
         </span>
       </div>
+      <div>
+      <span>Tile System</span>
+      <select class="form-control ng-pristine ng-valid ng-touched"
+        ng-model="tileselected"
+        ng-change="changeTileSelected(tileselected)"
+        ng-options="tile_system.id as tile_system.name for tile_system in tile_systems">
+	  </select>
+	  </div>
     </label>
     </div>
     </label>

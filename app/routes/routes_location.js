@@ -186,6 +186,7 @@ exports.configure = (api, middleware) => {
       .catch(next)
   }
 
-  // Create a user-defined customers
   api.post('/locations/morphology', upload.single('file'), saveMorphology)
+  
+  api.post('/locations/morphology/:id', upload.single('file'), saveMorphology)
 }

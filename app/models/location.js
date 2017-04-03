@@ -739,10 +739,10 @@ module.exports = class Location {
   static saveMorphology (user, id, name, file) {
     return Promise.resolve()
       .then(() => {
-        if (!id) {
+        if (id) {
           var req = {
             method: 'POST',
-            url: config.aro_service_url + '/tile-system/1/files',
+            url: config.aro_service_url + '/tile-system/' + id +'/files',
             headers:{
               "Accept":"*/*"
             },
