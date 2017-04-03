@@ -359,4 +359,10 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+  
+  api.get('/morphology/tiles', (request, response, next) => {
+	models.Network.fetchMorphologyTilesInfo()
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

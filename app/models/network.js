@@ -694,4 +694,11 @@ module.exports = class Network {
         })
       })
   }
+  
+  static fetchMorphologyTilesInfo () {
+	  
+	  var sql = `select id, name from morphology.tile_system`
+	  return database.query(sql)
+  }
+
 }

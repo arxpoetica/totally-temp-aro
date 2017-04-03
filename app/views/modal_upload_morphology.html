@@ -28,6 +28,15 @@
               <a class="btn btn-primary btn-sm" href="/csv/example_upload_customers.csv" download="example_upload_customers.csv">Download example file</a> -->
             </div>
           </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Tile System</label>
+            <div class="col-sm-8">
+   		    <select class="form-control ng-pristine ng-valid ng-touched"
+        		ng-model="tileselected"
+        		ng-options="tile_system.id as tile_system.name for tile_system in tile_systems">
+			</select>
+   		    </div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">

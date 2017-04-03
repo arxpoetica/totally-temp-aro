@@ -15,27 +15,29 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
     $scope.editingDataset.name = (dataset && dataset.name) || ''
     $scope.editingDataset.id = dataset && dataset.id
     $('#upload_morphology_modal').modal('show')
-  })
+  })  
+  
+  getTiles()
+  
+  function getTiles () {
+	  $http({
+		url: '/morphology/tiles',
+		method: 'GET'
+	  })
+	  .success((response) => {
+		  $scope.tile_systems = response
+		  $scope.tileselected = $scope.tile_systems[0].id;
+   	  })
+  }
 
   $scope.save = () => {
     var files = $('#upload_morphology_modal input[type=file]').get(0).files
-    if ($scope.editingDataset.id && files.length > 0) {
-      return swal({
-        title: 'Are you sure?',
-        text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
-        type: 'warning',
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'Yes',
-        showCancelButton: true,
-        closeOnConfirm: true
-      }, submit)
-    }
     submit()
   }
 
   function submit () {
-    var id = $scope.editingDataset.id
-    var url = id ? `/locations/user_defined/${id}` : '/locations/morphology'
+    var id = $scope.tileselected
+    var url = id ? `/locations/morphology/${id}` : '/locations/morphology'
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
     xhr.open('POST', url, true)
