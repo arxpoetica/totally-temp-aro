@@ -1,0 +1,39 @@
+{
+	"mapIconFolder": "/images/map_icons/reliance/",
+	"businesses": {
+		"user_upload": {
+			"active": true,
+			"label": "User Uploaded Customers"
+		},
+		"segments": {
+			"small": {
+				"show": true,
+				"label": "Low Rise"
+			},
+			"medium": {
+				"show": true,
+				"label": "High Rise"
+			},
+			"large": {
+				"show": true,
+				"label": "Very High Rise"
+			}
+		}
+	},
+	"households": {
+		"description": "5G",
+		"segments": {
+			"small": {
+				"show": false,
+				"label": "Apartment Buildings - small"
+			},
+			"medium": {
+				"show": false,
+				"label": "Apartment Buildings - medium"
+			}
+		}
+	},
+	"towers": {
+		"show": false
+	}
+}

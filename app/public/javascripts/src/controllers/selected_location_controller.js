@@ -1,10 +1,26 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, map_layers, tracker, map_tools) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, configuration, map_layers, tracker, map_tools) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
   $scope.entityType = 'businesses'
+
+  var chartColors = {
+    fillColor: 'rgba(77,153,229,0.0)',
+    strokeColor: 'rgba(77,153,229,1)',
+    pointColor: '#fff',
+    pointStrokeColor: 'rgba(77,153,229,1)',
+    pointHighlightFill: 'rgba(77,153,229,1)',
+    pointHighlightStroke: 'rgba(77,153,229,1)'
+  }
+
+  $scope.isLoadingConfiguration = true;
+  $rootScope.$on('configuration_loaded', function () {
+    $scope.cellTowerLabel = configuration.locationCategories.towers.label;
+    $scope.isLoadingConfiguration = false;
+  });
+
 
   $scope.select_random_location = () => {
     var map_layer = map_layers.getFeatureLayer('locations')
@@ -77,7 +93,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     var params = {
       center: coordinates,
       zoom: 13,
-      size: '400x150',
+      size: '434x110',  // We want an image with size '868x220' but our free license only allows a max size of 640x640
+      scale: 2,         // So we set scale = 2 and size of '434x110'
       maptype: 'roadmap',
       markers: 'color:red|label:L|' + coordinates,
       key: google_maps_key
@@ -110,7 +127,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
     $('#selected_location_businesses tbody:first').append($('#location_business_selected_info').hide())
   }
 
-  $('#selected_location_controller .nav-tabs a').click((e) => {
+  $('#selected_location_controller .nav-pills a').click((e) => {
     e.preventDefault()
     $(this).tab('show')
     tracker.track('Location selected / ' + $(this).text())
@@ -219,7 +236,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   }
 
   function showCurrentChart () {
-    var href = $('#selected_location_controller .nav-tabs > .active a').attr('href')
+    var href = $('#selected_location_controller .nav-pills > .active a').attr('href')
     if (href === '#selected_location_fair_share') {
       showFairShareCharts()
     } else if (href === '#selected_location_market_profile') {
@@ -233,12 +250,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   function showMarketProfileCharts () {
     var dataset = {
       label: 'Market size',
-      fillColor: 'rgba(151,187,205,0.2)',
-      strokeColor: 'rgba(151,187,205,1)',
-      pointColor: 'rgba(151,187,205,1)',
-      pointStrokeColor: '#fff',
-      pointHighlightFill: '#fff',
-      pointHighlightStroke: 'rgba(151,187,205,1)',
+      fillColor: chartColors.fillColor,
+      strokeColor: chartColors.strokeColor,
+      pointColor: chartColors.pointColor,
+      pointStrokeColor: chartColors.pointStrokeColor,
+      pointHighlightFill: chartColors.pointHighlightFill,
+      pointHighlightStroke: chartColors.pointHighlightStroke,
       data: []
     }
 
@@ -378,12 +395,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, map_l
   function showBusinessChart () {
     var dataset = {
       label: 'Market size',
-      fillColor: 'rgba(151,187,205,0.2)',
-      strokeColor: 'rgba(151,187,205,1)',
-      pointColor: 'rgba(151,187,205,1)',
-      pointStrokeColor: '#fff',
-      pointHighlightFill: '#fff',
-      pointHighlightStroke: 'rgba(151,187,205,1)',
+      fillColor: chartColors.fillColor,
+      strokeColor: chartColors.strokeColor,
+      pointColor: chartColors.pointColor,
+      pointStrokeColor: chartColors.pointStrokeColor,
+      pointHighlightFill: chartColors.pointHighlightFill,
+      pointHighlightStroke: chartColors.pointHighlightStroke,
       data: []
     }
 

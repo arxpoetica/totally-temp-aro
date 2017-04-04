@@ -1,0 +1,40 @@
+{
+	"mapIconFolder": "/images/map_icons/verizon/",
+	"businesses": {
+		"user_upload": {
+			"active": true,
+			"label": "User Uploaded Customers"
+		},
+		"segments": {
+			"small": {
+				"show": true,
+				"label": "SMB"
+			},
+			"medium": {
+				"show": true,
+				"label": "Mid-tier"
+			},
+			"large": {
+				"show": true,
+				"label": "Large Enterprise"
+			}
+		}
+	},
+	"households": {
+		"description": "Residential",
+		"segments": {
+			"small": {
+				"show": true,
+				"label": "SFU"
+			},
+			"medium": {
+				"show": true,
+				"label": "MDU"
+			}
+		}
+	},
+	"towers": {
+		"show": true,
+		"label": "Cell Sites"
+	}
+}

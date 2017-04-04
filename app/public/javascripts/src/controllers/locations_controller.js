@@ -1,7 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', ($scope, $rootScope, $http, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization) => {
-  $scope.ARO_CLIENT = config.ARO_CLIENT
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', ($scope, $rootScope, $http, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization) => {
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [
@@ -40,6 +39,22 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
   })
 
+  // Load the location filters only after the configuration has been loaded
+  $scope.isLoadingConfiguration = true
+  $rootScope.$on('configuration_loaded', () => {
+    $scope.loadLocationFilters()
+    $scope.isLoadingConfiguration = false
+    // If we have a plan loaded in scope, reload selected locations layer as we now have icons for selected locations
+    if ($scope.plan) {
+      map.ready(() => {
+        selectedLocationsLayer.show()
+        selectedLocationsLayer.reloadData()
+        // select entity types used in optimization
+        selectLocations($scope.plan.location_types)
+      })
+    }
+  })
+
   $scope.user_id = user_id
 
   $scope.show_commercial = config.ui.map_tools.locations.view.indexOf('commercial') >= 0
@@ -52,6 +67,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   $scope.industries = []
   $scope.business_categories_selected = {}
   $scope.household_categories_selected = {}
+  $scope.households_description = ''
 
   var uploadedCustomersSelect = $('.uploadedCustomersSelect')
 
@@ -73,16 +89,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   }
 
   var declarativeStyles = (feature, styles) => {
+    // NOTE: Even if configuration.locationCategories.mapIconFolder is not defined at this point,
+    //       every time we call map layer show/hide, it calls this function.
     if (styles.icon) return
     var type = 'households'
     var target = feature.getProperty('selected')
     if (target) {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/target.png`
+      styles.icon = configuration.locationCategories.mapIconFolder + 'target.png'
       return
     }
     var categories = feature.getProperty('entity_categories')
     if (categories.indexOf('towers') >= 0) {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/tower.png`
+      styles.icon = configuration.locationCategories.mapIconFolder + 'tower.png'
       return
     }
     var order = [
@@ -102,9 +120,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
     }
     var selected = feature.getProperty('selected') ? 'selected' : 'default'
     if (largestCategory) {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${largestCategory.substring(2)}_${selected}.png`
+      styles.icon = configuration.locationCategories.mapIconFolder + `${type}_${largestCategory.substring(2)}_${selected}.png`
     } else {
-      styles.icon = `/images/map_icons/${config.ARO_CLIENT}/${type}_${selected}.png`
+      styles.icon = configuration.locationCategories.mapIconFolder + `${type}_${selected}.png`
     }
   }
 
@@ -163,63 +181,110 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'map_to
   }
   whatLocationsAreShowing()
 
-  $http.get('/locations_filters').success((response) => {
-    $scope.industries = response.industries
-    $scope.customer_types = response.customer_types
-    $scope.employees_by_location = response.employees_by_location
-    $scope.business_categories = response.business_categories
-    $scope.household_categories = response.household_categories
+  $scope.loadLocationFilters = function() {
+    $http.get('/locations_filters').success((response) => {
+      $scope.industries = response.industries
+      $scope.customer_types = response.customer_types
+      $scope.employees_by_location = response.employees_by_location
+      var business_categories = response.business_categories
+      var household_categories = response.household_categories
 
-    $scope.business_categories_selected = {}
-    $scope.business_categories.forEach((category) => {
-      $scope.business_categories_selected[category.name] = true
-      category.fullName = `b_${category.name}`
-    })
-    $scope.business_categories_selected['2kplus'] = false
-    changeOptimization()
+      $scope.towers = {
+        showInUi: configuration.locationCategories.towers.show,
+        label: configuration.locationCategories.towers.label
+      }
 
-    $scope.household_categories_selected = []
-    $scope.household_categories.forEach((category) => {
-      $scope.household_categories_selected[category.name] = true
-      category.fullName = `h_${category.name}`
-    })
+      // Replace description in business categories with the description we get from our configuration service
+      $scope.business_categories = []
+      business_categories.forEach((businessCategory, index) => {
+        var segmentInfo = configuration.locationCategories.businesses.segments
+        var matchingSegment = null
+        for (var prop in segmentInfo) {
+          if (prop === businessCategory.name) {
+            matchingSegment = segmentInfo[prop]
+            break;
+          }
+        }
+        if (matchingSegment.show) {
+          // Only add items if the "show" flag is on
+          business_categories[index].description = matchingSegment.label
+          $scope.business_categories.push(business_categories[index])
+        }
+      })
 
-    // industries
-    $('#create-location select.industries').select2({ placeholder: 'Select an industry' })
+      // Replace description in household categories with the description we get from our configuration service
+      $scope.household_categories = []
+      household_categories.forEach((householdCategory, index) => {
+        var segmentInfo = configuration.locationCategories.households.segments
+        var matchingSegment = null
+        for (var prop in segmentInfo) {
+          if (prop === householdCategory.name) {
+            matchingSegment = segmentInfo[prop]
+            break;
+          }
+        }
+        if (matchingSegment.show) {
+          // Only add items if the "show" flag is on
+          household_categories[index].description = matchingSegment.label
+          $scope.household_categories.push(household_categories[index])
+        }
+      })
+      $scope.households_description = configuration.locationCategories.households.description
 
-    // customer_types
-    $('#create-location select.households_customer_types').select2({ placeholder: 'Select a customer type' })
-    $('#create-location select.businesses_customer_types').select2({ placeholder: 'Select a customer type' })
+      $scope.mapIconFolder = configuration.locationCategories.mapIconFolder
+      $scope.env_is_test = configuration.locationCategories.env_is_test
 
-    // filters
-    $scope.industries.forEach((industry) => {
-      industry.text = industry.industry_name
-    })
-    $scope.customer_types.forEach((customer_type) => {
-      customer_type.text = customer_type.name
-    })
-    $scope.employees_by_location.forEach((employee_by_location) => {
-      employee_by_location.text = employee_by_location.value_range
-    })
+      $scope.business_categories_selected = {}
+      $scope.business_categories.forEach((category) => {
+        $scope.business_categories_selected[category.name] = true
+        category.fullName = `b_${category.name}`
+      })
+      $scope.business_categories_selected['2kplus'] = false
+      changeOptimization()
 
-    $('#locations_controller .select2-industries').select2({
-      placeholder: 'Any industry',
-      multiple: true,
-      data: $scope.industries
-    })
+      $scope.household_categories_selected = []
+      $scope.household_categories.forEach((category) => {
+        $scope.household_categories_selected[category.name] = true
+        category.fullName = `h_${category.name}`
+      })
 
-    $('#locations_controller .select2-customer-types').select2({
-      placeholder: 'Any customer type',
-      multiple: true,
-      data: $scope.customer_types
-    })
+      // industries
+      $('#create-location select.industries').select2({ placeholder: 'Select an industry' })
 
-    $('#locations_controller .select2-number-of-employees').select2({
-      placeholder: 'Any number of employees',
-      multiple: true,
-      data: $scope.employees_by_location
+      // customer_types
+      $('#create-location select.households_customer_types').select2({ placeholder: 'Select a customer type' })
+      $('#create-location select.businesses_customer_types').select2({ placeholder: 'Select a customer type' })
+
+      // filters
+      $scope.industries.forEach((industry) => {
+        industry.text = industry.industry_name
+      })
+      $scope.customer_types.forEach((customer_type) => {
+        customer_type.text = customer_type.name
+      })
+      $scope.employees_by_location.forEach((employee_by_location) => {
+        employee_by_location.text = employee_by_location.value_range
+      })
+
+      $('#locations_controller .select2-industries').select2({
+        placeholder: 'Any industry',
+        multiple: true,
+        data: $scope.industries
+      })
+
+      $('#locations_controller .select2-customer-types').select2({
+        placeholder: 'Any customer type',
+        multiple: true,
+        data: $scope.customer_types
+      })
+
+      $('#locations_controller .select2-number-of-employees').select2({
+        placeholder: 'Any number of employees',
+        multiple: true,
+        data: $scope.employees_by_location
+      })
     })
-  })
+  }
 
   $scope.changeLocationsLayer = (majorCategory) => {
     tracker.track('Locations / ' + $scope.overlay)

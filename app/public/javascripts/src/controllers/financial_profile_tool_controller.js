@@ -1,5 +1,5 @@
 /* global app $ Chart config */
-app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', 'MapLayer', 'regions', ($scope, $rootScope, $http, $timeout, map_tools, MapLayer, regions) => {
+app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'configuration', 'map_tools', 'MapLayer', 'regions', ($scope, $rootScope, $http, $timeout, configuration, map_tools, MapLayer, regions) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
   $scope.premisesFilterEntityTypes = { household: true }
@@ -17,13 +17,26 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.arpuFilter = 'household'
   $scope.opexCostFilter = 'household'
 
-  $scope.entityTypes = {
-    smallBusiness: 'SMB',
-    mediumBusiness: 'Mid-tier',
-    largeBusiness: 'Large Enterprise',
-    household: 'Households',
-    cellTower: 'Cell Sites'
-  }
+
+  // Load the location filters only after the configuration has been loaded
+  $scope.isLoadingConfiguration = true
+  $rootScope.$on('configuration_loaded', () => {
+
+    $scope.entityTypes = {
+      smallBusiness: configuration.locationCategories.businesses.segments.small.label,
+      mediumBusiness: configuration.locationCategories.businesses.segments.medium.label,
+      largeBusiness: configuration.locationCategories.businesses.segments.large.label,
+      household: configuration.locationCategories.households.description
+    }
+    if (configuration.locationCategories.towers.show) {
+      $scope.entityTypes.cellTower = configuration.locationCategories.towers.label
+    }
+    $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
+      key: key,
+      name: $scope.entityTypes[key]
+    }))
+    $scope.isLoadingConfiguration = false
+  })
   var entityTypesMapping = {
     household: 'household',
     small: 'smallBusiness',
@@ -31,10 +44,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     large: 'largeBusiness',
     celltower: 'cellTower'
   }
-  $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
-    key: key,
-    name: $scope.entityTypes[key]
-  }))
   $scope.premisesPercentage = 'false'
   $scope.routeOpportunitiesDistanceThresholds = [
     { name: 'On Route', value: 30 },

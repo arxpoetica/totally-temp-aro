@@ -1,5 +1,4 @@
 <div>
-
   <div class="modal" id="create-location" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -67,49 +66,12 @@
   </div>
 
   <!-- Locations layer modal -->
-  <div id="locations_controller">
+  <div id="locations_controller" ng-show="!isLoadingConfiguration">
 
-
-
-
+    <!-- Businesses -->
     <form ng-hide="show_commercial && !show_residential">
-
-      <!-- Special case -->
-      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial" class="customer-type shaded">
-        <div class="locations-filter" ng-show="selectedFilter === 'smb'">
-          <form>
-            <div class="form-group">
-              <label>Industry</label>
-              <select class="form-control" disabled>
-                <option>Select an industry</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Employee count</label>
-              <input type="range" disabled>
-            </div>
-          </form>
-        </div>
-        <div class="pull-right">
-          <a href="javascript:;" ng-click="toggleFilter('smb')" class="btn btn-default btn-xs locations-filter-btn">
-            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'smb'"></span>
-            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'smb'"></span>
-          </a>
-        </div>
-        <div class="pull-left">
-          <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_small_default.png" style="width:16px;margin-right:10px">
-        </div>
-        <label class="pull-right">
-          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected['small']"></span>
-          <input type="checkbox" ng-model="business_categories_selected['small']" ng-change="changeLocationsLayer()">
-        </label>
-        <label><%- config.ui.map_tools.locations.smallBusinessLabel %></label>
-      </div>
-      <!-- / Special case -->
-
       <div>
-        <div ng-repeat="category in business_categories" ng-if="category.name !== 'small'" style="clear:both" class="customer-type shaded">
-
+        <div ng-repeat="category in business_categories" style="clear:both" class="customer-type shaded">
           <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
             <div class="locations-filter" ng-show="selectedFilter === 'f_'+category.name">
               <form>
@@ -136,15 +98,15 @@
               <input type="checkbox" ng-model="business_categories_selected[category.name]" ng-change="changeLocationsLayer()">
             </label>
             <div class="pull-left">
-              <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/businesses_{{category.name}}_default.png" style="width:16px;margin-right:10px">
+              <img ng-src="{{mapIconFolder + 'businesses_' + category.name + '_default.png'}}" style="width:16px;margin-right:10px">
             </div>
-            <label>{{category.name == 'medium' ? 'Medium Businesses' : 'Large Businesses'}}</label>
+            <label>{{category.description}}</label>
           </div>
-
-
         </div>
       </div>
+      <!-- END Businesses -->
 
+      <!-- Households -->
       <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'residential'">
           <form>
@@ -177,17 +139,12 @@
         <label class="pull-right">
           <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayer('households')" ng-disabled="overlay !== 'none'">
         </label>
-        <% if (config.ARO_CLIENT === 'reliance') { %>
-        <label style="margin-left:25px">Households</label>
-        <% } else { %>
-        <label style="margin-left:25px">Residential</label>
-        <% } %>
+        <label style="margin-left:25px">{{households_description}}</label>
       </div>
-      <% if (config.ARO_CLIENT !== 'reliance') { %>
       <div class="customer-type">
         <div ng-repeat="category in household_categories" style="clear:both">
           <div class="pull-left">
-            <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/households_{{category.name}}_default.png" style="width:16px;margin-right:10px">
+            <img ng-src="{{mapIconFolder + 'households_' + category.name + '_default.png'}}" style="width:16px;margin-right:10px">
           </div>
           <label class="pull-right" style="margin-right: 22px">
             <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="household_categories_selected[category.name]"></span>
@@ -196,8 +153,10 @@
           <label style="font-weight:normal">{{category.description}}</label>
         </div>
       </div>
-      <% } %>
-      <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
+      <!-- END Households -->
+
+      <!-- CellTowers -->
+      <div ng-if="towers.showInUi" ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'towers'">
           <form>
             <div class="form-group">
@@ -215,13 +174,13 @@
           </a>
         </div>
         <div class="pull-left">
-          <img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/tower.png" style="width:16px;margin-right:10px">
+          <img ng-src="{{mapIconFolder + 'tower.png'}}" style="width:16px;margin-right:10px">
         </div>
         <label class="pull-right">
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_towers"></span>
           <input type="checkbox" ng-model="show_towers" value="true" ng-change="changeLocationsLayer()" ng-disabled="overlay !== 'none'">
         </label>
-        <label>{{ARO_CLIENT=='reliance' ? 'Enterprise':'Cell Sites'}}</label>
+        <label>{{towers.label}}</label>
       </div>
       <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
         <div class="locations-filter" ng-show="selectedFilter === 'addCustomers'">
@@ -245,7 +204,7 @@
         </label>
         <label style="margin-left:25px">Uploaded Customers</label>
       </div>
-
+      <!-- END CellTowers -->
     </form>
 
     <div ng-show="showUploadedCustomers" style="padding:10px; margin-left:25px; margin-right:30px">
@@ -261,9 +220,18 @@
       To see individual locations, zoom in or turn off the heatmap button below the zoom buttons
     </div>
 
-    <% if (env_is_test) { %>
-      <a href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">.</a>
-    <% } %>
+    <a ng-if="env_is_test" href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">Test</a>
+  </div>
 
+  <!-- Spinner that will be shown while the configuration is being loaded from the server -->
+  <div style="margin:30px;text-align:center;" ng-if="isLoadingConfiguration">
+    <p>Loading location categories</p>
+    <div class="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
   </div>
 </div>

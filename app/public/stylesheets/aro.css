@@ -4,80 +4,12 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   font-family: 'Lato', sans-serif !important;
 }
 
-.navbar.navbar-default {
-  margin-bottom: 0;
-  z-index: 9;
-  background-image: none;
-  background-color: rgb(20, 22, 22);
-  border: none;
-  border-radius: 0px;
-}
-
-.navbar-container {
-  padding-left: 5px;
-}
-
-.navbar-brand {
-  font-weight: bold;
-  font-size: 24px;
-}
-
-.navbar-default .navbar-text {
-  color: #fff;
-}
-
-.navbar>.container .navbar-brand, .navbar>.container-fluid .navbar-brand {
-  margin-left: -10px;
-  color: #fff;
-}
-
-.span.fa.fa-users {
-  margin-right: 5px;
-}
-
-.navbar-right {
-  margin-top: -3px;
-}
-
-.navbar-default .navbar-nav>li>a {
-  color: #fff;
-}
-
-.btn, .btn-sm, .btn-group-sm>.btn {
-  border-radius: 2px;
-  /*background-color: #fff;*/
-}
-
-.btn-primary, .btn-default, .btn-success, .btn-danger, .btn-primary:hover, .btn-default:hover, .btn-success:hover, .btn-danger:hover {
-  background-image: none;
-  /*background-color: rgb(0, 117, 109);*/
-  border: none;
-}
-
-.modal-content, .panel {
-  border-radius: 2px;
-}
-
-.panel-heading {
-  border-top-right-radius: 2px;
-  border-top-left-radius: 2px;
-}
-
-.btn-primary, .panel-primary>.panel-heading {
-  background-color: rgb(0, 164, 153);
-  border: none;
-}
-
 /* -- */
 
-html, body, #map-canvas, #map-canvas-wrapper {
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-}
-
-.map_tools_button span {
-  pointer-events: none;
 }
 
 .boundary-options a {
@@ -85,15 +17,32 @@ html, body, #map-canvas, #map-canvas-wrapper {
 }
 
 #map-canvas-wrapper {
-  padding-top: 50px;
-  margin-top: -50px;
-  margin-left: 0;
-  padding-bottom: 0; /* footer height */
+  position: absolute;
+  top: 100px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+#aro-header {
+  background-color: white;
+  box-shadow: 0px 3px 15px #888888;
+  z-index: 1; /* This is needed to show the "box-shadow" on top of the google map */
+  position:absolute;
+  top: 50px;
+  left: 0px;
+  height: 50px;
+  right: 0px;
+}
+
+#map-canvas {
+  height: 100%;
+  width: 100%;
 }
 
 #left-col-wrapper {
   position: absolute;
-  top: 50px;
+  top: 100px;
   bottom: 0px; /* footer height */
   left: 0;
   z-index: 3;
@@ -102,10 +51,18 @@ html, body, #map-canvas, #map-canvas-wrapper {
 }
 
 #left-col {
-  padding: 10px;
+  padding: 0px;
   height: 100%;
   max-height: 100%;
   overflow: hidden;
+}
+
+.map-tools-buttons-container {
+  position:absolute;
+  left: 0px;
+  top: 0px;
+  padding-left: 10px;
+  padding-top: 10px;
 }
 
 .map-tool-wrapper {
@@ -122,6 +79,14 @@ html, body, #map-canvas, #map-canvas-wrapper {
   margin: 0;
 }
 
+.map-tool.ng-hide-remove {
+    animation: fadeInLeft 0.5s;
+}
+
+.map-tool.ng-hide-add {
+    animation: fadeOutLeft 0.5s;
+}
+/*
 .btn-success:active, .btn-success.active, .open>.dropdown-toggle.btn-success {
   background-color: rgb(0, 117, 109);
   border: none;
@@ -129,7 +94,7 @@ html, body, #map-canvas, #map-canvas-wrapper {
 
 .btn-success:active:hover, .btn-success.active:hover, .open>.dropdown-toggle.btn-success:hover, .btn-success:active:focus, .btn-success.active:focus, .open>.dropdown-toggle.btn-success:focus, .btn-success:active.focus, .btn-success.active.focus, .open>.dropdown-toggle.btn-success.focus {
   background-color: rgb(0, 117, 109);
-}
+}*/
 
 .loader {
   margin: 60px auto;
@@ -521,7 +486,7 @@ footer nav {
   position: absolute;
   left: 76px;
   width: 319px;
-  top: 53px;
+  top: 105px;
   z-index: 1;
 }
 
@@ -625,7 +590,9 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 }
 
 #map-extras {
-  position:fixed; right: 10px; top: 128px;
+  position:fixed;
+  right: 10px;
+  top: 180px;
 }
 
 .popover-content {
@@ -648,4 +615,173 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   text-overflow: ellipsis;
   max-width: 75%;
   overflow: hidden;
+}
+
+/* The header bar, where we display plan name, location, IRR, etc */
+.header-container {
+  display:flex;
+  width:100%;
+  height:100%;
+}
+
+.header-column-child-width {
+  flex: 0 1 auto; /* Takes the width of the child elements */
+  height: 100%;
+}
+
+.header-column-fill-width {
+  flex: 1 1 auto; /* Fills the remaining width of the flex box */
+  height: 100%;
+}
+
+.header-back-button {
+  color: black;
+  padding-left: 10px;
+  line-height: 50px
+}
+
+.header-plan {
+  font-size: 25px;
+  padding-left: 20px;
+  line-height: 50px;
+}
+
+.header-plan-location {
+  font-size: 15px;
+  padding-left: 20px;
+  line-height: 50px;
+  color: #aaaaaa;
+}
+
+.pad10 {
+   padding-right: 10px;
+}
+
+.header-financials-container {
+  line-height: 50px;
+  margin-right: 10px;
+  font-size: 16px
+}
+
+.header-financials-item {
+  color: #6060ff;
+  padding-right: 5px;
+  padding-left: 5px
+}
+
+.header-financials-capex {
+  color: #ff6060;
+}
+
+.plan-progress {
+  margin-left:20px;
+  margin-top:15px;
+  width: 200px
+}
+
+/* Map tool buttons */
+
+.map-tools-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  background-color: #333;
+  border: none;
+  padding: 0px;
+  opacity: 0.7;
+}
+
+.map-tools-button:hover {
+  background-color: #4d99e5;
+  opacity: 1.0;
+}
+
+.map-tools-button.active {
+  background-color: #4d99e5;
+  opacity: 1.0;
+}
+
+.map-tools-button span {
+  pointer-events: none;
+}
+
+.map-tools-button-icon {
+  line-height: 48px;  /* Hack to get fontawesome icons centered */
+  margin: 0px;
+  padding: 0px;
+  text-align: center;
+}
+
+/* Selected locations */
+.selected-locations-header {
+  width:868px;
+  height:220px;
+}
+
+.selected-locations-map-overlay {
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  position:relative;
+  left:0px;
+  top:-220px;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  padding-top: 40px;
+}
+
+.selected-location-label {
+  font-size: 12px;
+}
+
+.selected-location-value {
+  font-size: 22px;
+}
+
+.selected-location-address {
+  font-size: 30px;
+  padding: 10px;
+}
+
+.selected-location-empty-chart {
+  text-align:center;
+  width:200px;
+  height:200px;
+  border: 1px dashed #a0a0a0;
+  border-radius: 100px;
+  line-height:200px;
+  color:#a0a0a0;
+  margin: 0 auto;
+}
+
+.selected-location-pill-padding {
+  padding: 4px 10px!important;
+}
+
+.selected-modal-table-header {
+  font-weight: 300;
+  color: #a0a0a0;
+}
+
+.selected-modal-table-row {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Override Select2 css */
+.select2-container {
+  border: solid 1px #e0e0e0;
+}
+
+.select2-container-multi .select2-choices {
+  background: #e0e0e0;
+}
+
+.select2-container-multi .select2-choices .select2-search-choice {
+  background: #4d99e5;
+  padding-top: 6px;
+  padding-bottom: 7px;
+  padding-right: 6px;
+  border: none;
+  color: white;
 }

@@ -26,6 +26,7 @@ var middleware = require('./middleware')
 require('./routes/routes_authentication').configure(app, middleware)
 
 var api = express.Router()
+require('./routes/routes_ui_configuration').configure(api, middleware)  // No authentication for these routes
 var routes = [
   'status',
   'api',
@@ -53,6 +54,12 @@ routes.forEach((route) => {
 require('./routes/routes_errors').configure(api, middleware)
 require('./routes/routes_errors').configure(app, middleware)
 app.use(api)
+
+// Do not start app if ARO_CLIENT is not set
+if (!process.env.ARO_CLIENT) {
+  console.log('**** Error: The ARO_CLIENT environment variable must be set before starting the application.')
+  process.exit(1)
+}
 
 if (module.id === require.main.id) {
   var port = process.env.PORT || 8000
