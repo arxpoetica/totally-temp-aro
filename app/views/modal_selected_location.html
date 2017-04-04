@@ -199,7 +199,7 @@
           <div role="tabpanel" class="tab-pane" id="selected_location_businesses">
             <table><tbody></tbody></table><!-- do not remove -->
 
-            <table class="table table-striped">
+            <table class="table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -212,37 +212,34 @@
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="business in businesses">
-                  <td ng-attr-id="location_business_row_{{ business.id }}"><a href="javascript:void(0)" ng-click="show_market_profile(business)">{{business.name}}</a></th>
+                <tr ng-repeat="business in businesses" style="cursor:pointer" ng-click="show_market_profile(business)">
+                  <td ng-attr-id="location_business_row_{{ business.id }}">
+                    <!-- Show right arrow when [1] no business is selected OR [2] selected business is not this business -->
+                    <span class="fa fa-chevron-right" ng-show="!selected_business || (business.id !== selected_business.id)">&nbsp;</span>
+                    <!-- Show down arrow when this business is the selected business -->
+                    <span class="fa fa-chevron-down" ng-show="selected_business && (business.id === selected_business.id)">&nbsp;</span>
+                    <span>{{business.name}}</span>
+                  </td>
                   <td>{{business.address}}</td>
                   <td class="text-right">{{business.number_of_employees}}</td>
-                  <!--
-                  <td class="text-right">
-                    <span class="label label-success"
-                      ng-attr-class="label label-{{business.customer_type.toLowerCase() === 'existing' ? 'success' : 'danger'}}">
-                      {{business.customer_type}}
-                    </span></td>
-                  -->
                   <td class="text-right">{{business.size_name}}</td>
                 </tr>
                 <tr id="location_business_selected_info" style="display: none">
-                  <td colspan="5">
+                  <td colspan="5" style="border-top: none">
                     <div class="row">
-                      <div class="col-md-8">
+                      <div class="col-md-4">
+                      <div class="form-group">
+                        <label class="control-label">Product</label>
+                        <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products"
+                          ng-model="product" ng-change="calculate_business_market_size()" multiple data-placeholder="All products">
+                        </select>
+                      </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-12">
                         <p ng-show="business_market_size && business_market_size.length === 0" class="text-center" style="margin-top: 30px">No data available for the selected business</p>
                         <canvas id="business_market_size_chart" style="width:100%; height:200px"></canvas>
-                      </div>
-                      <div class="col-md-4">
-                        <form class="form-horizontal" style="margin-top: 30px">
-                          <div class="form-group form-group-sm">
-                            <label class="col-sm-3 control-label">Product</label>
-                            <div class="col-sm-9">
-                              <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products"
-                                ng-model="product" ng-change="calculate_business_market_size()" multiple data-placeholder="All products">
-                              </select>
-                            </div>
-                          </div>
-                        </form>
                       </div>
                     </div>
                   </td>
