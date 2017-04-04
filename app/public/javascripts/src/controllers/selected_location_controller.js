@@ -6,6 +6,15 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
   $scope.config = config
   $scope.entityType = 'businesses'
 
+  var chartColors = {
+    fillColor: 'rgba(77,153,229,0.0)',
+    strokeColor: 'rgba(77,153,229,1)',
+    pointColor: '#fff',
+    pointStrokeColor: 'rgba(77,153,229,1)',
+    pointHighlightFill: 'rgba(77,153,229,1)',
+    pointHighlightStroke: 'rgba(77,153,229,1)'
+  }
+
   $scope.isLoadingConfiguration = true;
   $rootScope.$on('configuration_loaded', function () {
     $scope.cellTowerLabel = configuration.locationCategories.towers.label;
@@ -243,12 +252,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
   function showMarketProfileCharts () {
     var dataset = {
       label: 'Market size',
-      fillColor: 'rgba(151,187,205,0.2)',
-      strokeColor: 'rgba(151,187,205,1)',
-      pointColor: 'rgba(151,187,205,1)',
-      pointStrokeColor: '#fff',
-      pointHighlightFill: '#fff',
-      pointHighlightStroke: 'rgba(151,187,205,1)',
+      fillColor: chartColors.fillColor,
+      strokeColor: chartColors.strokeColor,
+      pointColor: chartColors.pointColor,
+      pointStrokeColor: chartColors.pointStrokeColor,
+      pointHighlightFill: chartColors.pointHighlightFill,
+      pointHighlightStroke: chartColors.pointHighlightStroke,
       data: []
     }
 
@@ -388,12 +397,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
   function showBusinessChart () {
     var dataset = {
       label: 'Market size',
-      fillColor: 'rgba(151,187,205,0.2)',
-      strokeColor: 'rgba(151,187,205,1)',
-      pointColor: 'rgba(151,187,205,1)',
-      pointStrokeColor: '#fff',
-      pointHighlightFill: '#fff',
-      pointHighlightStroke: 'rgba(151,187,205,1)',
+      fillColor: chartColors.fillColor,
+      strokeColor: chartColors.strokeColor,
+      pointColor: chartColors.pointColor,
+      pointStrokeColor: chartColors.pointStrokeColor,
+      pointHighlightFill: chartColors.pointHighlightFill,
+      pointHighlightStroke: chartColors.pointHighlightStroke,
       data: []
     }
 
