@@ -273,7 +273,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	  
 	var defer=$q.defer();
 	  
-	$rootScope.$broadcast('new-plan-started');  
     var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
 

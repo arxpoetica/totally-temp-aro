@@ -96,7 +96,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
     if (!map_tools.is_visible('financial_profile')) return
-    if (config.ARO_CLIENT === 'verizon' || config.ARO_CLIENT === 'aro') {
+    if (config.ARO_CLIENT === 'verizon' || config.ui.map_tools.financial_profile.per_wirecenter) {
       if (layer.type !== 'child_plans') return
     } else {
       if (layer.type !== 'wirecenter') return
@@ -627,7 +627,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
      if(!metadata || !metadata.premises) return;
      metadata.premises.map(function (premise) {
       if(config.ARO_CLIENT == 'reliance'){
-        if(premise.name === 'Household') premise.name = '5G Node'
         if(premise.name === 'Tower') premise.name = 'Enterprise'
       }
     });
