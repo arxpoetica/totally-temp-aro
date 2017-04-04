@@ -1,7 +1,7 @@
 app.service('configuration',['$location', '$http', '$rootScope', ($location, $http, $rootScope) => {
 
     var config = {}
-    var configBaseUrl = 'http://' + $location.host() + ':' + $location.port()
+    var configBaseUrl = 'https://' + $location.host() + ':' + $location.port()
     var configurationPromises = []  // Configuration is said to be "loaded" when all promises are resolved
 
     // Get location categories configuration
