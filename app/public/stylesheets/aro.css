@@ -757,3 +757,13 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .selected-location-pill-padding {
   padding: 4px 10px!important;
 }
+
+.selected-modal-table-header {
+  font-weight: 300;
+  color: #a0a0a0;
+}
+
+.selected-modal-table-row {
+  font-size: 12px;
+  font-weight: 700;
+}

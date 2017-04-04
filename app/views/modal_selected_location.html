@@ -202,17 +202,14 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Address</th>
-                  <th class="text-right"><%- config.ui.locations_modal.countLabel %> Count</th>
-                  <th class="text-right">Category</th>
-                  <!--
-                  <th class="text-right">Type</th>
-                  -->
+                  <th class="selected-modal-table-header">Name</th>
+                  <th class="selected-modal-table-header">Address</th>
+                  <th class="text-right selected-modal-table-header"><%- config.ui.locations_modal.countLabel %> Count</th>
+                  <th class="text-right selected-modal-table-header">Category</th>
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="business in businesses" style="cursor:pointer" ng-click="show_market_profile(business)">
+                <tr ng-repeat="business in businesses" class="selected-modal-table-row" style="cursor:pointer" ng-click="show_market_profile(business)">
                   <td ng-attr-id="location_business_row_{{ business.id }}">
                     <!-- Show right arrow when [1] no business is selected OR [2] selected business is not this business -->
                     <span class="fa fa-chevron-right" ng-show="!selected_business || (business.id !== selected_business.id)">&nbsp;</span>
