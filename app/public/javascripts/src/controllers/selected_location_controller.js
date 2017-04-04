@@ -118,7 +118,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     $('#selected_location_businesses tbody:first').append($('#location_business_selected_info').hide())
   }
 
-  $('#selected_location_controller .nav-tabs a').click((e) => {
+  $('#selected_location_controller .nav-pills a').click((e) => {
+    console.log('in function 1')
     e.preventDefault()
     $(this).tab('show')
     tracker.track('Location selected / ' + $(this).text())
@@ -227,7 +228,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
   }
 
   function showCurrentChart () {
-    var href = $('#selected_location_controller .nav-tabs > .active a').attr('href')
+    var href = $('#selected_location_controller .nav-pills > .active a').attr('href')
+    console.log('showCurrentChart()')
     if (href === '#selected_location_fair_share') {
       showFairShareCharts()
     } else if (href === '#selected_location_market_profile') {

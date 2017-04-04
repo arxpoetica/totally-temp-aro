@@ -753,3 +753,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   color:#a0a0a0;
   margin: 0 auto;
 }
+
+.selected-location-pill-padding {
+  padding: 4px 10px!important;
+}
