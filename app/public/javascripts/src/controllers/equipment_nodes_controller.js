@@ -15,6 +15,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     if (map_tools.is_visible('network_nodes')) {
       $scope.serviceLayers.forEach((layer) => {
         layer.networkNodesLayer.show()
+        layer.fixedWirelessCoverage.show()
       })
       userDefinedLayer.hidden = !$rootScope.selectedUserDefinedBoundary
       var value = ($rootScope.selectedUserDefinedBoundary && $rootScope.selectedUserDefinedBoundary.id) || 'user_defined'
@@ -32,6 +33,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('route_planning_changed', () => {
     $scope.serviceLayers.forEach((layer) => {
       layer.networkNodesLayer.reloadData(true)
+      layer.fixedWirelessCoverage.reloadData(true)
     })
   })
 
@@ -227,9 +229,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
     })
     coverageLayer.flat_color = true
+    coverageLayer.is_coverage = true;
     layer.fixedWirelessCoverage = coverageLayer
 
-    layer.fixedWirelessVisibilityChanged = (serviceLayer , node) => {
+    /*layer.fixedWirelessVisibilityChanged = (serviceLayer , node) => {
       if(node.coverage_visible){
         coverageLayer.show()
         coverageLayer.is_coverage = true;
@@ -241,14 +244,30 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         coverageLayer.hide();
 
       }
+    }*/
+    
+    layer.fixedWirelessVisibilityChanged = () => {
+        var types = []
+        layer.nodeTypes.forEach((nodeType) => {
+          if (nodeType.coverage_visible) {
+            types.push(nodeType.id)
+          }
+        })
+        if (types.length === 0 || layer.id === 'user_defined') {
+        	coverageLayer.hide()
+        } else {
+          coverageLayer.threshold = types.length === 1 && types[0] === 1 ? 8 : 12
+          coverageLayer.show()
+          coverageLayer.setApiEndpoint(`/network/nodes/:plan_id/find/${layer.id}`, {
+            node_types: types.join(',')
+          })
+        }
+      }
+    
+    layer.changedWirelessCoverageAvailability = function () {
+    	coverageLayer.setVisible(layer.enabled)
     }
-    $scope.$on('new-plan-started', function(event, args) {
-    	if(coverageLayer) {
-    		coverageLayer.clearData();
-            coverageLayer.hide();
-    	}
-    });
-
+    layer.changedWirelessCoverageAvailability()
   }
 
   function emptyChanges () {
@@ -274,6 +293,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       $scope.serviceLayers.forEach((layer) => {
         layer.networkNodesLayer.reloadData()
         layer.routeLayer.reloadData()
+        layer.fixedWirelessCoverage.reloadData()
       })
     })
 
@@ -287,6 +307,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.serviceLayers.forEach((layer) => {
       layer.networkNodesLayer.reloadData()
       layer.routeLayer.clearData()
+      layer.fixedWirelessCoverage.clearData()
     })
   })
 
@@ -296,6 +317,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         // For insertions we need to get the ids so they can be selected
         $scope.serviceLayers.forEach((layer) => {
           layer.networkNodesLayer.reloadData()
+          layer.fixedWirelessCoverage.reloadData()
         })
       }
       changes = emptyChanges()
