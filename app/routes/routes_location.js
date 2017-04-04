@@ -175,4 +175,18 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  function saveMorphology (request, response, next) {
+    var name = request.body.name
+    var id = request.params.id || null
+    var user = request.user
+    var fullpath = request.file && request.file.path
+    models.Location.saveMorphology(user, id, name, fullpath)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  }
+
+  api.post('/locations/morphology', upload.single('file'), saveMorphology)
+  
+  api.post('/locations/morphology/:id', upload.single('file'), saveMorphology)
 }

@@ -179,7 +179,24 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	})
 	return defer.promise; 
   }
-
+  
+  getTiles()
+  
+  function getTiles () {
+	$http({
+	 url: '/morphology/tiles',
+	 method: 'GET'
+	})
+	.success((response) => {
+	  $scope.tile_systems = response
+	  $scope.tileselected = $scope.tile_systems[0].id;
+	})
+  }
+  
+  $scope.changeTileSelected = (tile_system_id) => {
+	  $scope.tileselected = tile_system_id
+  }
+  
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
@@ -368,7 +385,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
         changes.fiberNetworkConstraints.cellNodeConstraints = {
             cellRadius : $scope.cellNodeConstraints.cellRadius,
-            polygonStrategy: $scope.polygonOptions.polygonStrategy
+            polygonStrategy: $scope.polygonOptions.polygonStrategy,
+            tileSystemId: $scope.tileselected
         };
     }
 

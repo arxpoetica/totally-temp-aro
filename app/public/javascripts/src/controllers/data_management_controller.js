@@ -97,4 +97,8 @@ app.controller('data_management_controller', ['$scope', '$rootScope', '$http', (
         .error(errorHandler)
     })
   }
+  
+  $scope.addMorphology = () => {
+	  $rootScope.$broadcast('upload_morphology')
+  }
 }])
