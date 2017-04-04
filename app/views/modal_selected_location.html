@@ -168,9 +168,9 @@
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
                 <p class="text-center">Businesses</p>
-                <p class="text-center" style="margin-top: 60px" ng-show="fair_share['businesses'].length === 0">
-                  <em>No businesses at this location</em>
-                </p>
+                <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['businesses'] === 0">
+                  No businesses at this location
+                </div>
                 <div ng-show="fair_share['businesses'].length > 0">
                   <canvas id="location_fair_share_chart_businesses" style="width:100%; height:200px"></canvas>
                   <div id="location_fair_share_chart_legend_businesses"></div>
@@ -178,9 +178,9 @@
               </div>
               <div class="col-md-4">
                 <p class="text-center">Households</p>
-                <p class="text-center" style="margin-top: 60px" ng-show="fair_share['households'].length === 0">
-                  <em>No households at this location</em>
-                </p>
+                <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['households'] === 0">
+                  No households at this location
+                </div>
                 <div ng-show="fair_share['households'].length > 0">
                   <canvas id="location_fair_share_chart_businesses" style="width:100%; height:200px"></canvas>
                   <div id="location_fair_share_chart_legend_businesses"></div>
@@ -188,9 +188,9 @@
               </div>
               <div class="col-md-4">
                 <p class="text-center">Cell Sites</p>
-                <p class="text-center" style="margin-top: 60px" ng-show="fair_share['towers'].length === 0">
-                  <em>No towers at this location</em>
-                </p>
+                <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['towers'] === 0">
+                  No {{cellTowerLabel}} at this location
+                </div>
                 <div ng-show="fair_share['towers'].length > 0">
                   <canvas id="location_fair_share_chart_businesses" style="width:100%; height:200px"></canvas>
                   <div id="location_fair_share_chart_legend_businesses"></div>
