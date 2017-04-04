@@ -1,10 +1,17 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, map_layers, tracker, map_tools) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, configuration, map_layers, tracker, map_tools) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
   $scope.entityType = 'businesses'
+
+  $scope.isLoadingConfiguration = true;
+  $rootScope.$on('configuration_loaded', function () {
+    $scope.cellTowerLabel = configuration.locationCategories.towers.label;
+    $scope.isLoadingConfiguration = false;
+  });
+
 
   $scope.select_random_location = () => {
     var map_layer = map_layers.getFeatureLayer('locations')

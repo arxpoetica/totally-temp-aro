@@ -21,7 +21,7 @@
               </div>
               <div style="flex: 0 1 auto; padding: 10px;">
                 <div class="selected-location-value">{{location.number_of_towers}}</div>
-                <div class="selected-location-label">TODO Towers</div>
+                <div class="selected-location-label">{{cellTowerLabel}}</div>
               </div>
               <div style="flex: 0 1 auto; padding: 10px;">
                 <div class="selected-location-value">{{location.distance_to_client_fiber | number: 0}} m</div>
@@ -63,7 +63,7 @@
             <a href="#selected_location_households" aria-controls="profile" role="tab" data-toggle="tab">Households</a>
           </li>
           <li role="presentation">
-            <a href="#selected_location_towers" aria-controls="profile" role="tab" data-toggle="tab">Cell Sites</a>
+            <a href="#selected_location_towers" aria-controls="profile" role="tab" data-toggle="tab">{{cellTowerLabel}}</a>
           </li>
         </ul>
 
@@ -132,7 +132,7 @@
               <div class="col-md-4">
                 <p class="text-center">Cell Sites</p>
                 <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['towers'] === 0">
-                  No TODOCELLT at this location
+                  No {{cellTowerLabel}} at this location
                 </div>
                 <div ng-show="location.customer_profile_totals['towers'] > 0">
                   <canvas id="location_customer_profile_chart_towers" style="width:100%; height:200px"></canvas>
