@@ -68,45 +68,6 @@
         </ul>
 
         <div class="tab-content">
-          <!--
-          <div role="tabpanel" class="tab-pane" id="selected_location_costs" ng-show="config.route_planning">
-            <table class="locations-table">
-              <tbody>
-                <tr>
-                  <th>Entry fee</th>
-                  <td colspan="2" class="text-right">N/A</td>
-                </tr>
-                <tr>
-                  <th>Number of businesses</th>
-                  <td colspan="2" class="text-right">{{location.number_of_businesses}}</td>
-                </tr>
-                <tr>
-                  <th>Business install costs</th>
-                  <td colspan="2" class="text-right">N/A</td>
-                </tr>
-                <tr ng-show="show_households">
-                  <th>Number of households</th>
-                  <td></td>
-                  <td class="text-right">
-                    <input type="text" class="form-control input-sm" style="text-align:right" ng-model="location.number_of_households">
-                  </td>
-                </tr>
-                <tr ng-show="show_households">
-                  <th>Household install costs</th>
-                  <td colspan="2" class="text-right">N/A</td>
-                </tr>
-                <tr>
-                  <th>Planned Fiber Strands</th>
-                  <td colspan="2" class="text-right">N/A</td>
-                </tr>
-                <tr>
-                  <th>Total costs</th>
-                  <td colspan="2" class="text-right">N/A</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          -->
           <div role="tabpanel" class="tab-pane active" id="selected_location_customer_profile">
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
@@ -144,60 +105,62 @@
           <% if (config.ui.locations_modal && config.ui.locations_modal.market_profile) { %>
           <div role="tabpanel" class="tab-pane" id="selected_location_market_profile">
             <div class="row">
-              <div class="col-md-6">
-                <canvas id="location_market_size_chart" style="width:100%; height:200px"></canvas>
+              <!-- Entity type dropdown -->
+              <div class="col-md-3">
+                <div class="form-group form-group-sm">
+                  <label class="control-label">Entity Type</label>
+                  <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
+                    <option value="businesses">Businesses</option>
+                    <option value="households">Households</option>
+                    <option value="towers">Cell Sites</option>
+                  </select>
+                </div>
               </div>
-              <div class="col-md-6">
-                <form class="form-horizontal" style="margin-top: 30px">
-                  <div class="form-group form-group-sm">
-                    <label class="col-sm-3 control-label">Entity Type</label>
-                    <div class="col-sm-9">
-                      <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
-                        <option value="businesses">Businesses</option>
-                        <option value="households">Households</option>
-                        <option value="towers">Cell Sites</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
-                    <label class="col-sm-3 control-label">Industry</label>
-                    <div class="col-sm-9">
-                      <select class="form-control" ng-options="industry.industry_name for industry in filters.industries" ng-model="industry" ng-change="calculateMarketSize()" multiple data-placeholder="All industries">
-                      </select>
-                    </div>
-                  </div>
-                  <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
-                    <label class="col-sm-3 control-label">Product</label>
-                    <div class="col-sm-9">
-                      <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculateMarketSize()" multiple data-placeholder="All products">
-                      </select>
-                    </div>
-                  </div>
-                  <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
-                    <label class="col-sm-3 control-label">Business size</label>
-                    <div class="col-sm-9">
-                      <select class="form-control" ng-options="range.value_range for range in filters.employees_by_location" ng-model="employees_range" ng-change="calculateMarketSize()" multiple data-placeholder="All business sizes">
-                      </select>
-                    </div>
-                  </div>
-                  <!--
-                  <div class="form-group form-group-sm">
-                    <label class="col-sm-3 control-label">Customer type</label>
-                    <div class="col-sm-9">
-                      <select class="form-control" ng-options="customer_type.name for customer_type in filters.customer_types" ng-model="customer_type" ng-change="calculateMarketSize()">
-                        <option value="">Any customer type</option>
-                      </select>
-                    </div>
-                  </div>
-                  -->
-                  <div class="form-group form-group-sm">
+
+              <!-- Industry dropdown -->
+              <div class="col-md-3">
+                <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
+                  <label class="control-label">Industry</label>
+                  <select class="form-control" ng-options="industry.industry_name for industry in filters.industries" ng-model="industry" ng-change="calculateMarketSize()" multiple data-placeholder="All industries">
+                  </select>
+                </div>
+              </div>
+
+              <!-- Product dropdown -->
+              <div class="col-md-3">
+                <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
+                  <label class="control-label">Product</label>
+                  <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculateMarketSize()" multiple data-placeholder="All products">
+                  </select>
+                </div>
+              </div>
+
+              <!-- Business size dropdown -->
+              <div class="col-md-3">
+                <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
+                  <label class="control-label">Business size</label>
+                  <select class="form-control" ng-options="range.value_range for range in filters.employees_by_location" ng-model="employees_range" ng-change="calculateMarketSize()" multiple data-placeholder="All business sizes">
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <canvas id="location_market_size_chart" style="width:100%; height:200px"></canvas>
+                <p class="form-control-static"
+                   ng-show="!loading && market_size.length === 0"
+                   style="position:relative;top:-100px; text-align:center">
+                   No data available for this location with the selected filters
+                </p>
+                <p class="form-control-static" ng-show="loading">Loading...</p>
+              </div>
+                  <!--<div class="form-group form-group-sm">
                     <div class="col-sm-9 col-sm-offset-3">
                       <p class="form-control-static" ng-show="!loading && market_size.length === 0">No data available for this location with the selected filters</p>
                       <p class="form-control-static" ng-show="loading">Loading...</p>
                     </div>
-                  </div>
-                </form>
-              </div>
+                  </div>-->
+
             </div>
           </div>
           <% } %>
