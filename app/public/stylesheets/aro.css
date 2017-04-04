@@ -767,3 +767,21 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   font-size: 12px;
   font-weight: 700;
 }
+
+/* Override Select2 css */
+.select2-container {
+  border: solid 1px #e0e0e0;
+}
+
+.select2-container-multi .select2-choices {
+  background: #e0e0e0;
+}
+
+.select2-container-multi .select2-choices .select2-search-choice {
+  background: #4d99e5;
+  padding-top: 6px;
+  padding-bottom: 7px;
+  padding-right: 6px;
+  border: none;
+  color: white;
+}
