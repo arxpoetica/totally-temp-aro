@@ -88,7 +88,7 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <p class="text-center">Cell Sites</p>
+                <p class="text-center">{{cellTowerLabel}}</p>
                 <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['towers'] === 0">
                   No {{cellTowerLabel}} at this location
                 </div>
@@ -110,7 +110,7 @@
                   <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
                     <option value="businesses">Businesses</option>
                     <option value="households">Households</option>
-                    <option value="towers">Cell Sites</option>
+                    <option value="towers">{{cellTowerLabel}}</option>
                   </select>
                 </div>
               </div>
@@ -185,7 +185,7 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <p class="text-center">Cell Sites</p>
+                <p class="text-center">{{cellTowerLabel}}</p>
                 <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['towers'] === 0">
                   No {{cellTowerLabel}} at this location
                 </div>
@@ -284,7 +284,7 @@
               </thead>
               <tbody>
                 <tr class="text-center" ng-show="towers.length === 0">
-                  <td style="padding: 40px" colspan="8">No cell sites at this location</td>
+                  <td style="padding: 40px" colspan="8">No {{cellTowerLabel}} at this location</td>
                 </tr>
                 <tr ng-repeat="tower in towers">
                   <td>Undefined</td>
