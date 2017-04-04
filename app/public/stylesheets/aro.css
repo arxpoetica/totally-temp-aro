@@ -742,3 +742,14 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   font-size: 30px;
   padding: 10px;
 }
+
+.selected-location-empty-chart {
+  text-align:center;
+  width:200px;
+  height:200px;
+  border: 1px dashed #a0a0a0;
+  border-radius: 100px;
+  line-height:200px;
+  color:#a0a0a0;
+  margin: 0 auto;
+}
