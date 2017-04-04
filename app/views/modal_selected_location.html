@@ -166,7 +166,7 @@
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
                 <p class="text-center">Businesses</p>
-                <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['businesses'] === 0">
+                <div class="selected-location-empty-chart" ng-show="fair_share['businesses'].length === 0">
                   No businesses at this location
                 </div>
                 <div ng-show="fair_share['businesses'].length > 0">
@@ -176,7 +176,7 @@
               </div>
               <div class="col-md-4">
                 <p class="text-center">Households</p>
-                <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['households'] === 0">
+                <div class="selected-location-empty-chart" ng-show="fair_share['households'].length === 0">
                   No households at this location
                 </div>
                 <div ng-show="fair_share['households'].length > 0">
@@ -186,7 +186,7 @@
               </div>
               <div class="col-md-4">
                 <p class="text-center">{{cellTowerLabel}}</p>
-                <div class="selected-location-empty-chart" ng-show="location.customer_profile_totals['towers'] === 0">
+                <div class="selected-location-empty-chart" ng-show="fair_share['towers'].length === 0">
                   No {{cellTowerLabel}} at this location
                 </div>
                 <div ng-show="fair_share['towers'].length > 0">
