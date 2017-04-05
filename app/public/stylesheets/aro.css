@@ -70,7 +70,6 @@ html, body {
   top: 75px;
   left: 75px;
   z-index: 1;
-  overflow-y: auto;
 }
 
 .map-tool {
@@ -710,6 +709,12 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   margin: 0px;
   padding: 0px;
   text-align: center;
+}
+
+/* Map tools panels */
+.map-tool-panel-body {
+  overflow-y: auto;
+  max-height: 670px;
 }
 
 /* Selected locations */

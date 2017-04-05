@@ -93,17 +93,70 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   
   $scope.runExpertMode = () => {
 	$scope.prerun().then(function(changes){
-	  $rootScope.enableExpertSave.show = false
 	  $rootScope.isNetworkPlanning = false
 	  $('#selected_expert_mode').modal('show')
 	  $('#expert_mode_body').val(JSON.stringify(changes, undefined, 4))
 	});
   }
   
+  function saveExpertMode (expertModeChanges) {
+	  var expertChanges = JSON.parse(expertModeChanges)
+	  
+	/* saving technology */
+	$scope.selectedTechType.forEach(function(prevSelectedTechId) {
+		$('#'+ 'T' +prevSelectedTechId).prop('checked', false)
+	})
+	$scope.selectedTechType = []	
+	expertChanges.networkTypes.forEach(function(techId) {
+		$scope.toggleTechType(techId,true)
+		$('#'+ 'T' +techId).prop('checked', true)
+		if (techId == 'FiveG') {
+			$scope.cellNodeConstraints.cellRadius = expertChanges.fiberNetworkConstraints.cellNodeConstraints.cellRadius
+			
+			/* saving polygon type */
+			$scope.polygonOptions.polygonStrategy = expertChanges.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy.toUpperCase()
+		}
+	});
+	  
+	/* saving network construction */
+	switch (expertChanges.fiberNetworkConstraints.routingMode.toUpperCase()){
+	   case "DIRECT_ROUTING" :  $scope.technology = "direct_routing";
+	       break;
+	   case "ODN_1": $scope.technology = "odn1";
+	       break;
+	   case "ODN_2": $scope.technology = "odn2";
+	       break;
+	}  
+	
+	/* saving optimization type */
+	if (expertChanges.algorithm === 'UNCONSTRAINED')
+		$scope.optimizationType = 'CAPEX'
+	else
+		$scope.optimizationType = expertChanges.algorithm	
+	  
+	/* saving Optimization Process Layer */
+	$scope.selectedBoundary = null
+	if (expertChanges.processingLayers) {
+		$scope.allBoundaries.forEach((boundary) => {
+			if (boundary.id == expertChanges.processingLayers)
+				$scope.selectedBoundary = boundary
+		})
+	}
+  }	  
+  
   $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
-	if(!isNetworkPlanning)  
+	if(!isNetworkPlanning) {
+		saveExpertMode(changes)
 		canceler = optimization.optimize($scope.plan, JSON.parse(changes))
 		$('#selected_expert_mode').modal('hide')
+	}	
+  })
+  
+  $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges, isNetworkPlanning) => {
+	if (!isNetworkPlanning) {
+	  saveExpertMode(expertModeChanges)
+	  $('#selected_expert_mode').modal('hide')  
+	}
   })
 
   $scope.irrThresholdRangeChanged = () => {

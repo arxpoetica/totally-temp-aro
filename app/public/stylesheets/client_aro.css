@@ -8,11 +8,7 @@
   top: 0;
   left: 0;
   z-index: 4;
-  background-color: black;
-  background: url(/images/backgrounds/aro/fiber_1_reverse.jpg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background-color: white;
 }
 
 #home_screen h1 {
