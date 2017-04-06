@@ -171,7 +171,6 @@ module.exports = class Location {
         ON plan_targets.plan_id = $1
        AND plan_targets.location_id = locations.id
      ORDER BY locations.id ASC
-     LIMIT 10
     `
     return database.query(sql, [plan_id])
       .then((targets) => {
