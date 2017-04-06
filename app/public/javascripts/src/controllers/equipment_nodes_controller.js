@@ -562,6 +562,28 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.remainingDatasources.push(datasource)
     updateOptimizationFiber()
   }
+  
+  $scope.setVisibleFibers = (servicelayer, selectedlayer) => {
+    var ids = []
+    var fiberSourceIdsMap = $scope.fiberSourceIdsMapping
+    if (!selectedlayer.visible) {
+      ids.push(fiberSourceIdsMap[selectedlayer.name])
+    }
+    servicelayer.layers.forEach((layer) => {
+      if (layer.visible && selectedlayer.name !== layer.name) {
+        ids.push(fiberSourceIdsMap[layer.name])
+      }
+    })
+    optimization.setFiberSourceIds(ids)
+    selectedlayer.toggleVisibility();
+  }
+  
+  $scope.fiberSourceIdsMapping = {}
+  $http.get('/network/fiber_plant/sourceid_mapping').success((response) => {
+    response.forEach((fibdetails) => {
+      $scope.fiberSourceIdsMapping[fibdetails.source_name] = fibdetails.fiber_source_id
+    });
+  })
 
   $scope.addFiber = () => {
     $('#upload_fiber_modal').modal('show')

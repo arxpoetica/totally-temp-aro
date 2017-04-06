@@ -90,7 +90,7 @@
               <div ng-repeat="layer in serviceLayer.layers">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
-                  <input type="checkbox" ng-click="layer.toggleVisibility()" ng-checked="layer.visible" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  <input type="checkbox" ng-click="setVisibleFibers(serviceLayer,layer)" ng-checked="layer.visible" ng-disabled="!vztfttp || !serviceLayer.enabled">
                 </div>
                 <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">

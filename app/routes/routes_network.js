@@ -37,6 +37,12 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+  
+  api.get('/network/fiber_plant/sourceid_mapping', (request, response, next) => {
+   models.Network.getFiberSourceIdMapping()
+     .then(jsonSuccess(response, next))
+     .catch(next)
+ })
 
   api.get('/network/fiber_plant/:carrier_name', middleware.viewport, (request, response, next) => {
     var carrier_name = request.params.carrier_name
