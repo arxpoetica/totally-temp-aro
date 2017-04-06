@@ -188,4 +188,11 @@ module.exports = class Settings {
       })
   }
 
+  static refreshDBCache () {
+     var sql = 'TRUNCATE cache.cache_entries; ' + 
+               'TRUNCATE cache.service_area_versions;'
+
+     return database.execute(sql);
+  }
+
 }
