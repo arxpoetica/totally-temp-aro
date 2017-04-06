@@ -361,7 +361,7 @@ module.exports = class NetworkPlan {
     var minimumCost = options.minimumCost
     var maximumCost = options.maximumCost
 
-    var num = 20
+    var numPlansPerPage = 8
     var sortFields = [
       'name', 'created_at', 'updated_at',
       'total_cost', 'total_revenue', 'irr', 'npv', 'fiber_length'
@@ -415,7 +415,7 @@ module.exports = class NetworkPlan {
           params.push(maximumCost)
           sql += ` AND total_cost <= $${params.length}`
         }
-        sql += ` ORDER BY ${sortField} ${sortOrder} LIMIT ${num} OFFSET ${(page - 1) * num}`
+        sql += ` ORDER BY ${sortField} ${sortOrder} LIMIT ${numPlansPerPage} OFFSET ${(page - 1) * numPlansPerPage}`
         return database.query(sql, params)
       })
       .then((plans) => {
@@ -430,7 +430,7 @@ module.exports = class NetworkPlan {
             var count = result.count
             var pages = []
             var i = 0
-            while (i * num < count) {
+            while (i * numPlansPerPage < count) {
               i++
               pages.push(i)
             }
