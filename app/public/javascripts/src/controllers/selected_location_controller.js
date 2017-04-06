@@ -282,6 +282,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     })
 
     var options = {
+      scaleBeginAtZero: 1,
       scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
@@ -415,6 +416,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     })
 
     var options = {
+      scaleBeginAtZero: 1,
       scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
       tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
     }
