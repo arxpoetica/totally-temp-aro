@@ -636,18 +636,31 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .header-back-button {
   color: black;
   padding-left: 10px;
-  line-height: 50px
+  padding-right: 10px;
+  line-height: 50px;
+  cursor: pointer;
+}
+
+.header-back-button:hover {
+  background-color: #d0e0f0;
 }
 
 .header-plan {
   font-size: 25px;
-  padding-left: 20px;
-  line-height: 50px;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 100%;
+  line-height: 46px;
+  cursor: pointer;
+}
+
+.header-plan:hover {
+  background-color: #d0e0f0;
 }
 
 .header-plan-location {
   font-size: 15px;
-  padding-left: 20px;
+  padding-left: 10px;
   line-height: 50px;
   color: #aaaaaa;
 }
