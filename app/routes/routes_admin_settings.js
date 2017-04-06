@@ -24,4 +24,11 @@ exports.configure = (app, middleware) => {
       .then(() => response.redirect('/'))
       .catch(next)
   })
+
+  app.post('/admin/settings/refresh_db_cache', check_admin, (request, response, next) => {
+    models.Settings.refreshDBCache();
+    cache.refresh()
+      .then(() => response.redirect('/'))
+      .catch(next)
+  })  
 }
