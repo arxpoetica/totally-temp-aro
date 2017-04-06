@@ -345,60 +345,6 @@
       </ul>
     </div>
 
-    <div ng-controller="legend-controller" id="legend-controller">
-      <div class="map-tool panel panel-primary">
-        <div ng-show="expanded" style="padding: 10px">
-          <p><strong>Locations</strong></p>
-          <!-- Businesses -->
-          <div ng-if="!isLoadingConfiguration">
-            <p ng-repeat="(businessSegmentKey, businessSegmentValue) in locationCategories.businesses.segments" ng-if="businessSegmentValue.show">
-              <img ng-src="{{locationCategories.mapIconFolder + 'businesses_' + businessSegmentKey + '_default.png'}}" style="width:16px"> = {{businessSegmentValue.label}}
-            </p>
-          </div>
-          <!-- Households -->
-          <div ng-if="!isLoadingConfiguration">
-            <p ng-repeat="(householdSegmentKey, householdSegmentValue) in locationCategories.households.segments" ng-if="householdSegmentValue.show">
-              <img ng-src="{{locationCategories.mapIconFolder + 'households_' + householdSegmentKey + '_default.png'}}" style="width:16px"> = {{householdSegmentValue.label}}
-            </p>
-          </div>
-          <!-- Cell towers -->
-          <div ng-if="!isLoadingConfiguration && locationCategories.towers.show">
-            <p>
-              <img ng-src="{{locationCategories.mapIconFolder + 'tower.png'}}" style="width:16px"> = {{locationCategories.towers.label}}
-            </p>
-          </div>
-          <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-          <div style="margin:30px;text-align:center;" ng-if="isLoadingConfiguration">
-            <p>Loading location categories</p>
-            <div class="spinner">
-              <div class="rect1"></div>
-              <div class="rect2"></div>
-              <div class="rect3"></div>
-              <div class="rect4"></div>
-              <div class="rect5"></div>
-            </div>
-          </div>
-          <hr>
-          <p><strong>Network</strong></p>
-          <div ng-repeat="node_type in view_node_types">
-            <p><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/{{node_type.name}}.png" style="width:16px"> = {{node_type.description}}</p>
-          </div>
-
-          <ul class="pie-legend">
-            <li><span style="background-color:blue"></span> = Feeder Fiber</li>
-            <li><span style="background-color:red"></span> = Distribution Fiber</li>
-          </ul>
-        </div>
-        <div class="panel-heading">
-          Legend
-          <div class="pull-right">
-            <a href="javascript:void(0)" ng-click="toggle()" ng-hide="expanded"><span style="color:white" class="fa fa-chevron-up"></span></a>
-            <a href="javascript:void(0)" ng-click="toggle()" ng-show="expanded"><span style="color:white" class="fa fa-chevron-down"></span></a>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div id="loader-wrapper"><div class="loader"></div></div>
 
   </body>
