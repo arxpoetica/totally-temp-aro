@@ -18,11 +18,11 @@ app.service('optimization', ($rootScope, $http, $q) => {
   }
 
   optimization.setFiberSourceIds = (ids) => {
-	if (fiberSourceIds.length > 0){
-		fiberSourceIds.concat(ids)
-	}  else {
-		fiberSourceIds = ids || []
-	}
+	  fiberSourceIds = ids || []
+  }
+  
+  optimization.getFiberSourceIds = () => {
+	  return fiberSourceIds
   }
 
   $rootScope.$on('plan_selected', (e, plan) => {
