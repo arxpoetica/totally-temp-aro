@@ -551,7 +551,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   function updateOptimizationFiber () {
     var ids = $scope.showingDatasources.filter((ds) => ds.visible).map((ds) => ds.systemId)
-    optimization.setFiberSourceIds(ids)
+    optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(ids))
   }
 
   $scope.removeDatasource = (datasource) => {
@@ -562,6 +562,30 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.remainingDatasources.push(datasource)
     updateOptimizationFiber()
   }
+  
+  $scope.selectedExistingFiberIds = []
+  $scope.setVisibleFibers = (servicelayer, selectedlayer) => {
+	$scope.selectedExistingFiberIds = []
+    var fiberSourceIdsMap = $scope.fiberSourceIdsMapping
+    if (!selectedlayer.visible) {
+    	$scope.selectedExistingFiberIds.push(fiberSourceIdsMap[selectedlayer.name])
+    }
+    servicelayer.layers.forEach((layer) => {
+      if (layer.visible && selectedlayer.name !== layer.name) {
+    	$scope.selectedExistingFiberIds.push(fiberSourceIdsMap[layer.name])
+      }
+    })
+    var fiberSourceids = $scope.showingDatasources.filter((ds) => ds.visible).map((ds) => ds.systemId)
+    optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(fiberSourceids))
+    selectedlayer.toggleVisibility();
+  }
+  
+  $scope.fiberSourceIdsMapping = {}
+  $http.get('/network/fiber_plant/sourceid_mapping').success((response) => {
+    response.forEach((fibdetails) => {
+      $scope.fiberSourceIdsMapping[fibdetails.source_name] = fibdetails.fiber_source_id
+    });
+  })
 
   $scope.addFiber = () => {
     $('#upload_fiber_modal').modal('show')

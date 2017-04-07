@@ -45,6 +45,17 @@ module.exports = class Network {
     console.log('sql', sourceName)
     return database.lines(sql, [sourceName], true, viewport)
   }
+  
+  //get fiber source id mapping for all carrier
+  static getFiberSourceIdMapping() {
+    var output = {}
+    return Promise.resolve()
+      .then(() => database.query('SELECT distinct(source_name),fiber_source_id FROM client.existing_fiber'))
+      .then((rows) => {
+        output = rows
+        return output
+    })
+  }  
 
   // View existing fiber plant for a carrier
   static viewFiberPlantForCarrier (carrier_name, viewport) {

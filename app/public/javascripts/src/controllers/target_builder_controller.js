@@ -308,6 +308,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     $scope.selectLocationTypes = selectLocationTypes
     changes.entityDataSources = optimization.datasources
     
+    var fiberSourceIds = optimization.getFiberSourceIds
+    changes.fiberSourceIds = fiberSourceIds()
+    
     defer.resolve(changes)
     return defer.promise
     //canceler = optimization.optimize($scope.plan, changes)
