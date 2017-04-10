@@ -121,21 +121,21 @@
     </div>
   </form>
 
-  <p><strong>Targeted Locations</strong></p>
+  <p><strong>Targeted Locations</strong><strong ng-show="targetsTotal > 5" class="ng-binding;" style="float:right;">Total: {{targetsTotal}}</strong></p>
   <p ng-show="targets.length === 0">
     <em>No targeted locations</em>
   </p>
-  <ul style="list-style-type:none; padding:0" ng-repeat="target in targets">
-    <li>
-      <a href="javascript:void(0)" class="text-danger" ng-click="deleteTarget(target)" style="margin-right: 5px">
-        <span class="fa fa-trash-o"></span>
-      </a>
-      {{ target.address }}
-    </li>
-  </ul>
-  <p ng-show="targetsTotal - targets.length > 0">
-    {{ targetsTotal - targets.length }} additional targeted locations
-  </p>
+  <div style="min-height: 0px; max-height: 150px; overflow: auto;">
+    <ul style="list-style-type:none; padding:0" ng-repeat="target in targets">
+      <li>
+        <a href="javascript:void(0)" class="text-danger" ng-click="deleteTarget(target)" style="margin-right: 5px">
+          <span class="fa fa-trash-o"></span>
+        </a>
+        {{ target.address }}
+      </li>
+    </ul>
+  </div>
+
   <p ng-show="targets.length > 0">
     <button class="btn btn-primary btn-sm" ng-click="deleteAllTargets()">Remove all targets</button>
   </p>

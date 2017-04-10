@@ -18,7 +18,11 @@ app.service('optimization', ($rootScope, $http, $q) => {
   }
 
   optimization.setFiberSourceIds = (ids) => {
-    fiberSourceIds = ids || []
+	  fiberSourceIds = ids || []
+  }
+  
+  optimization.getFiberSourceIds = () => {
+	  return fiberSourceIds
   }
 
   $rootScope.$on('plan_selected', (e, plan) => {
