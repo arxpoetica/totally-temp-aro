@@ -17,6 +17,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       name: 'Combo'
     }
   ]
+
+
+
+
   $scope.overlay = 'none'
   $scope.heatmapVisible = false
   $scope.heatmapOn = true
@@ -60,7 +64,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   $scope.show_commercial = config.ui.map_tools.locations.view.indexOf('commercial') >= 0
   $scope.show_residential = config.ui.map_tools.locations.view.indexOf('residential') >= 0
 
-  $scope.show_businesses = $scope.show_commercial
+  $scope.show_businesses =  $scope.show_commercial
   $scope.show_households = $scope.show_residential
   $scope.show_towers = false
   $scope.new_location_data = null
@@ -68,6 +72,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   $scope.business_categories_selected = {}
   $scope.household_categories_selected = {}
   $scope.households_description = ''
+
 
   var uploadedCustomersSelect = $('.uploadedCustomersSelect')
 
@@ -236,7 +241,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
       $scope.business_categories_selected = {}
       $scope.business_categories.forEach((category) => {
-        $scope.business_categories_selected[category.name] = true
+        //$scope.business_categories_selected[category.name] = true
         category.fullName = `b_${category.name}`
       })
       $scope.business_categories_selected['2kplus'] = false
@@ -244,7 +249,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
       $scope.household_categories_selected = []
       $scope.household_categories.forEach((category) => {
-        $scope.household_categories_selected[category.name] = true
+        //$scope.household_categories_selected[category.name] = true
         category.fullName = `h_${category.name}`
       })
 
@@ -341,7 +346,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
           towers: towers,
           dataSources: dataSources
         }
-        locationsLayer.setApiEndpoint('/locations/:plan_id', options)
+        locationsLayer.setApiEndpoint('/locations', options)
         locationsLayer.show()
       }
     } else {
