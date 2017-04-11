@@ -21,17 +21,8 @@
 		}
 	},
 	"households": {
-		"description": "Households",
-		"segments": {
-			"small": {
-				"show": false,
-				"label": "Apartment Buildings - small"
-			},
-			"medium": {
-				"show": false,
-				"label": "Apartment Buildings - medium"
-			}
-		}
+		"show": true,
+		"label": "5G"
 	},
 	"towers": {
 		"show": true,

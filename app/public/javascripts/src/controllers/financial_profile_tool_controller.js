@@ -26,7 +26,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       smallBusiness: configuration.locationCategories.businesses.segments.small.label,
       mediumBusiness: configuration.locationCategories.businesses.segments.medium.label,
       largeBusiness: configuration.locationCategories.businesses.segments.large.label,
-      household: configuration.locationCategories.households.description
+      household: configuration.locationCategories.households.label
     }
     if (configuration.locationCategories.towers.show) {
       $scope.entityTypes.cellTower = configuration.locationCategories.towers.label

@@ -21,17 +21,8 @@
 		}
 	},
 	"households": {
-		"description": "Residential",
-		"segments": {
-			"small": {
-				"show": true,
-				"label": "SFU"
-			},
-			"medium": {
-				"show": true,
-				"label": "MDU"
-			}
-		}
+		"show": true,
+		"label": "Residential"
 	},
 	"towers": {
 		"show": true,

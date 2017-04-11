@@ -68,6 +68,41 @@
   <!-- Locations layer modal -->
   <div id="locations_controller" ng-show="!isLoadingConfiguration">
 
+    <form>
+      <!-- Businesses -->
+      <div ng-repeat="locationType in planState.locations.types" style="clear:both" class="customer-type shaded">
+        <div class="locations-filter" ng-show="selectedFilter === 'f_'+locationType.key">
+          <form>
+            <div class="form-group">
+              <label>Industry</label>
+              <select class="form-control" disabled>
+                <option>Select an industry</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Employee count</label>
+              <input type="range" disabled>
+            </div>
+          </form>
+        </div>
+        <div class="pull-right">
+          <a href="javascript:;" ng-click="toggleFilter('f_'+locationType.key)" class="btn btn-default btn-xs locations-filter-btn">
+            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'f_'+locationType.key"></span>
+            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'f_'+locationType.key"></span>
+          </a>
+        </div>
+        <label class="pull-right">
+          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected[locationType.key]"></span>
+          <input type="checkbox" ng-model="locationType.checked" ng-change="changeLocationsLayer()">
+        </label>
+        <div class="pull-left">
+          <img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px">
+        </div>
+        <label>{{locationType.label}}</label>
+      </div>
+    </form>
+    end of new implementation
+
     <!-- Businesses -->
     <form ng-hide="show_commercial && !show_residential">
       <div>

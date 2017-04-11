@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', ($scope, $rootScope, $http, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [
@@ -43,6 +43,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
   })
 
+  //TODO: DELETE
   // Load the location filters only after the configuration has been loaded
   $scope.isLoadingConfiguration = true
   $rootScope.$on('configuration_loaded', () => {
@@ -58,6 +59,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       })
     }
   })
+  //END TODO: DELETE
+
+  // The state.locations object will be updated after the configuration is loaded
+  $scope.planState = state;
 
   $scope.user_id = user_id
 
@@ -219,22 +224,23 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
       // Replace description in household categories with the description we get from our configuration service
       $scope.household_categories = []
-      household_categories.forEach((householdCategory, index) => {
-        var segmentInfo = configuration.locationCategories.households.segments
-        var matchingSegment = null
-        for (var prop in segmentInfo) {
-          if (prop === householdCategory.name) {
-            matchingSegment = segmentInfo[prop]
-            break;
-          }
-        }
-        if (matchingSegment.show) {
-          // Only add items if the "show" flag is on
-          household_categories[index].description = matchingSegment.label
-          $scope.household_categories.push(household_categories[index])
-        }
-      })
-      $scope.households_description = configuration.locationCategories.households.description
+      // TODO: this is all going away
+      // household_categories.forEach((householdCategory, index) => {
+      //   var segmentInfo = configuration.locationCategories.households.segments
+      //   var matchingSegment = null
+      //   for (var prop in segmentInfo) {
+      //     if (prop === householdCategory.name) {
+      //       matchingSegment = segmentInfo[prop]
+      //       break;
+      //     }
+      //   }
+      //   if (matchingSegment.show) {
+      //     // Only add items if the "show" flag is on
+      //     household_categories[index].description = matchingSegment.label
+      //     $scope.household_categories.push(household_categories[index])
+      //   }
+      // })
+      // $scope.households_description = configuration.locationCategories.households.label
 
       $scope.mapIconFolder = configuration.locationCategories.mapIconFolder
       $scope.env_is_test = configuration.locationCategories.env_is_test
