@@ -803,3 +803,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   border: none;
   color: white;
 }
+
+.cursor_disabled {
+  pointer-events: none;
+}

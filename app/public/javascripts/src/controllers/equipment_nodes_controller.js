@@ -73,7 +73,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         description: 'Optimized equipment',
         equipment_description: 'Optimized equipment',
         additional: true,
-        nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item))
+        nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item)),
+        needsPlan : true
       }
       $scope.serviceLayers.push(additionalLayer)
       var existingFiberLayer = {
