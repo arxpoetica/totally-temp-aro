@@ -141,14 +141,14 @@ module.exports = class Network {
       .then(() => {
         var sql = `
           SELECT
-            p.service_layer_id AS service_layer_id,
+            ${plan_id ? 'p.service_layer_id' : serviceLayer} AS service_layer_id,
             n.id, geom, t.name AS name,
             n.plan_id,
             ST_AsGeoJSON(n.coverage_geom)::json as coverage_geom,
             -- plan_id IS NOT NULL AS draggable,
             t.name <> 'central_office' AS unselectable
           FROM client.network_nodes n
-          LEFT JOIN client.plan p ON p.id = n.plan_id
+          ${plan_id ? 'LEFT JOIN client.plan p ON p.id = n.plan_id' : ''}
           JOIN client.network_node_types t
             ON n.node_type_id = t.id
         `
@@ -197,9 +197,11 @@ module.exports = class Network {
                 SELECT $${params.length}
               ))`)
           }
-        } else {
-          constraints.push('plan_id IS NULL')
         }
+        //plans can be empty now so this is no longer needed, think ?
+          // else {
+        //   constraints.push('plan_id IS NULL')
+        // }
 
         if (constraints.length > 0) {
           sql += ` WHERE ${constraints.join(' AND ')} ${database.intersects(viewport, 'geom', 'AND')}`
