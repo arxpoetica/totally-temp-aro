@@ -9,6 +9,15 @@ exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
   var check_any_permission = middleware.check_any_permission
   var check_owner_permission = middleware.check_owner_permission
+  var check_loggedin = middleware.check_loggedin
+
+  function findLocation(plan_id , filters , viewport) {
+      if (plan_id){
+          return models.Location.findLocations(plan_id, filters, viewport);
+      }else {
+          return models.Location.findLocationsNoPlan(filters, viewport);
+      }
+  }
 
   api.get('/locations/:plan_id', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
@@ -23,10 +32,28 @@ exports.configure = (api, middleware) => {
       }
       filters[key] = value
     })
-    models.Location.findLocations(plan_id, filters, viewport)
+      findLocation(plan_id , filters , viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+    api.get('/locations', check_loggedin, middleware.viewport, (request, response, next) => {
+        var viewport = request.viewport
+        var filters = {}
+        var keys = ['business_categories', 'household_categories', 'towers', 'dataSources']
+        keys.forEach((key) => {
+            var value = request.query[key] || []
+            if (!Array.isArray(value)) {
+                value = [value]
+            }
+            filters[key] = value
+        });
+
+         findLocation(false , filters , viewport)
+            .then(jsonSuccess(response, next))
+            .catch(next)
+    })
+
   
   api.post('/locations/visible/:plan_id', (request, response, next) => {
     var filters = {}

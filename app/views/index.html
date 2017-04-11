@@ -241,6 +241,12 @@
                   <li><a href="javascript:;" ng-click="openReports()">Reports…</a></li>
                   <li><a href="javascript:void(0)" ng-click="save_as()" ng-show="plan.owner_id === user_id">Save as…</a></li>
                   <li role="separator" class="divider" ng-show="plan.owner_id === user_id"></li>
+                    <% if (user.rol === 'admin') { %>
+                    <li><a href="#manage-users"  data-toggle="modal">Manage Users</a></li>
+                    <li> <a href="#application-settings" data-toggle="modal">Application Settings</a></li>
+                    <% } %>
+                    <li>  <a href="#data-management" data-toggle="modal">Data Management</a></li>
+                  <li role="separator" class="divider" ng-show="plan.owner_id === user_id"></li>
                   <li><a href="javascript:void(0)" ng-click="clearPlan()"
                     <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Clear plan</a></li>
                   <li><a href="javascript:void(0)" ng-click="delete_plan(plan)"
