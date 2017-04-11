@@ -14,11 +14,10 @@ module.exports = class CountySubdivision {
   static findByStatefp (statefp, viewport) {
     var sql = `
       SELECT gid AS id, name, geom, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
-      FROM aro.cousub
-      WHERE statefp = $1
-      ${database.intersects(viewport, 'geom', 'AND')}
+      FROM aro.cousub WHERE
+      ${database.intersects(viewport, 'geom', '')}
     `
-    var params = [statefp]
+    var params = []
     return database.polygons(sql, params, true, viewport)
   }
 
