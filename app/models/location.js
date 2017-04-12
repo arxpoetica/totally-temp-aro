@@ -309,17 +309,17 @@ module.exports = class Location {
         }
         sql = `
           SELECT
-            CASE WHEN bs.max_value < 100000000 THEN
-            	(${condition1})
+            CASE WHEN bs.max_value < 9999999 THEN
+            (initcap(bs.name) || ' (' || bs.min_value || ' - ' || bs.max_value || ' employees)')
             ELSE
-            	(${condition2})
+            (initcap(bs.name) || ' (' || bs.min_value || '+ employees)')
             END AS name,
             COUNT(b.id)::integer AS total
-          FROM client.businesses_sizes bs
+          FROM client.business_categories bs
           LEFT JOIN businesses b
             ON b.number_of_employees >= bs.min_value AND b.number_of_employees <= bs.max_value
             AND b.location_id=$1
-          GROUP BY bs.size_name
+          GROUP BY bs.name,bs.max_value,bs.min_value
           ORDER BY bs.min_value ASC
         `
         var businesses = database.query(sql, [location_id])

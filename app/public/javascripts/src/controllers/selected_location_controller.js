@@ -351,7 +351,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     })
 
     var options = {
-      tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value %>'
+      tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value %>',
+      tooltipFontSize : 12
     }
     var ctx = document.getElementById('location_customer_profile_chart_' + type).getContext('2d')
     destroyCustomerProfileChart(type)
