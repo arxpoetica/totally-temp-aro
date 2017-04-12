@@ -244,11 +244,6 @@ footer nav {
   text-align: center;
 }
 
-#top_bar_tools > span:not(.ng-hide) + span:not(.ng-hide)::before {
-  content: ' | ';
-  padding: 0 10px;
-}
-
 .icon {
   background-repeat: no-repeat;
   background-position: center;
@@ -359,15 +354,6 @@ footer nav {
     transform: scaleY(1.0);
     -webkit-transform: scaleY(1.0);
   }
-}
-
-#top_bar_tools .label {
-  display: inline-block;
-  margin-top: -10px;
-}
-
-#top_bar_tools .label span {
-  display: block;
 }
 
 .popover {
@@ -825,8 +811,16 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 	color:#fff
 }
 
+.navbar-default .navbar-brand,
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+	color:#fff;
+  padding: 0px 0px 0px 15px;
+}
+
 .navbar-default {
 	background-color:#4d99e5;
+  border-radius: 0px;
 }
 
 .navbar-default .navbar-nav>li>a {
