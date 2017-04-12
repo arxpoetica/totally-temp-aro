@@ -825,8 +825,16 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 	color:#fff
 }
 
+.navbar-default .navbar-brand,
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+	color:#fff;
+  padding: 0px 0px 0px 15px;
+}
+
 .navbar-default {
 	background-color:#4d99e5;
+  border-radius: 0px;
 }
 
 .navbar-default .navbar-nav>li>a {
