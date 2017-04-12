@@ -179,6 +179,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $scope.plan = null
         state.loadPlan(null)
         $rootScope.$broadcast('plan_selected', null)
+        delete $rootScope.currentPlan;
       }
       $http.post('/network_plan/' + plan.id + '/delete').success((response) => {
         $scope.loadPlans()
@@ -450,5 +451,9 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.openReports = () => {
     $rootScope.$broadcast('open-report', $scope.plan)
+  }
+
+  $scope.paneClicked = function (view) {
+    $scope.planView = view;
   }
 }])
