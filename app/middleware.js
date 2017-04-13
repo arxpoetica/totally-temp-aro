@@ -77,6 +77,14 @@ function check_admin (request, response, next) {
   }
   next()
 }
+function check_loggedin(request, response, next) {
+  if(!request.user){
+    response.status(403).json({
+      error: 'Forbidden'
+    })
+  }
+  next()
+}
 
 function viewport (request, response, next) {
   var query = request.query
@@ -133,11 +141,11 @@ function viewport (request, response, next) {
 
 var check_any_permission = check_permission(null)
 var check_owner_permission = check_permission('owner')
-
 module.exports = {
   check_any_permission: check_any_permission,
   check_owner_permission: check_owner_permission,
   check_admin: check_admin,
+  check_loggedin : check_loggedin,
   jsonHandler: jsonHandler,
   jsonSuccess: jsonSuccess,
   viewport: viewport,

@@ -11,6 +11,7 @@ var upload = multer({ dest: os.tmpDir() })
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission
   var check_owner_permission = middleware.check_owner_permission
+  var check_loggedin = middleware.check_loggedin;
   var jsonSuccess = middleware.jsonSuccess
 
   api.get('/network/fiber_type/:plan_id/:type', middleware.viewport, (request, response, next) => {
@@ -116,6 +117,15 @@ exports.configure = (api, middleware) => {
     models.Network.viewNetworkNodes(node_types, plan_id, viewport, serviceLayer)
       .then(jsonSuccess(response, next))
       .catch(next)
+  })
+
+  api.get('/network/nodes/find/:serviceLayer', check_loggedin, middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var serviceLayer = request.params.serviceLayer
+    var node_types = request.query.node_types && request.query.node_types.split(',')
+    models.Network.viewNetworkNodes(node_types, false, viewport, serviceLayer)
+        .then(jsonSuccess(response, next))
+        .catch(next)
   })
 
   api.get('/network/fiber/:plan_id/find/:serviceLayer', check_any_permission, middleware.viewport, (request, response, next) => {

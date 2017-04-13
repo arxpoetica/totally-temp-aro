@@ -73,7 +73,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         description: 'Optimized equipment',
         equipment_description: 'Optimized equipment',
         additional: true,
-        nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item))
+        nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item)),
+        needsPlan : true
       }
       $scope.serviceLayers.push(additionalLayer)
       var existingFiberLayer = {
@@ -188,7 +189,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       } else {
         networkNodesLayer.threshold = types.length === 1 && types[0] === 1 ? 8 : 12
         networkNodesLayer.show()
-        networkNodesLayer.setApiEndpoint(`/network/nodes/:plan_id/find/${layer.id}`, {
+        networkNodesLayer.setApiEndpoint(`/network/nodes/find/${layer.id}`, {
           node_types: types.join(',')
         })
       }
