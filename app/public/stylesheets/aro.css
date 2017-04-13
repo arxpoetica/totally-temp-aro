@@ -804,6 +804,75 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   color: white;
 }
 
+.modal-content {
+  border-radius:0px;
+}
+
+.nav-pills>li>a {
+	background-color:#999;
+	border-radius:0
+}
+
+.nav-pills>li+li {
+	margin-left:1px
+}
+
+.nav>li>a:focus {
+	color:#222;
+}
+
+.navbar-text {
+	color:#fff
+}
+
+.navbar-default {
+	background-color:#4d99e5;
+}
+
+.navbar-default .navbar-nav>li>a {
+	color:#fff
+}
+
+/* .navbar-default .navbar-nav .open .dropdown-menu>li>a {
+	color:#fff
+} */
+
+.navbar-default .navbar-link {
+	color:#fff
+}
+
+.navbar-default .btn-link {
+	color:#fff
+}
+
+.navbar-default .navbar-nav>li>a:focus, .navbar-default .navbar-nav>li>a:hover {
+	color:#fff;
+}
+
+/* .navbar-default .navbar-nav .open .dropdown-menu>li>a:focus, .navbar-default .navbar-nav .open .dropdown-menu>li>a:hover {
+	color:#fff;
+} */
+
+.navbar-default .navbar-link:hover {
+	color:#fff
+}
+
+.navbar-default .btn-link:focus,.navbar-default .btn-link:hover {
+	color:#fff
+}
+
+.navbar-default .navbar-nav>.active>a,.navbar-default .navbar-nav>.active>a:focus,.navbar-default .navbar-nav>.active>a:hover {
+	color:#fff;
+}
+
+.navbar-default .navbar-nav>.open>a,.navbar-default .navbar-nav>.open>a:focus,.navbar-default .navbar-nav>.open>a:hover {
+	color:#fff;
+}
+
+.nav>li>a:focus,.nav>li>a:hover {
+	color:#222;
+}
+
 .cursor_disabled {
-  pointer-events: none;
+    pointer-events: none;
 }
