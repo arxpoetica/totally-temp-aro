@@ -297,7 +297,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     })
   }
 
-  $scope.changeLocationsLayer = (majorCategory) => {
+  $scope.changeLocationsLayerOLD_DELETEMETODO = (majorCategory) => {
     tracker.track('Locations / ' + $scope.overlay)
 
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
@@ -369,6 +369,29 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     }
 
     changeOptimization()
+  }
+
+  $scope.changeLocationsLayer = (majorCategory) => {
+    tracker.track('Locations / ' + $scope.overlay)
+    customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
+
+    // Select the business categories
+    var business_categories = []
+    $scope.planState.locations.types.forEach((locationType) => {
+      if ((locationType.type === 'business') && (locationType.checked)) {
+        business_categories.push(locationType.key)
+      }
+    })
+
+    // Set the selected options in the API endpoint that will show locations in the layer
+    var options = {
+      business_categories: business_categories,
+      household_categories: [],
+      towers: [],
+      dataSources: [1]
+    }
+    locationsLayer.setApiEndpoint('/locations/:plan_id', options)
+    locationsLayer.show()
   }
 
   $('#create-location').on('shown.bs.modal', () => {

@@ -24,7 +24,7 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
       types: [],
       dataSources: {
         globalBusinesses: false,
-        globalResidental: false,
+        globalResidential: false,
         globalTowers: false,
         uploaded: []
       }
@@ -36,6 +36,7 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
         var segment = configuration.locationCategories.businesses.segments[key];
         if (segment.show) {
           service.locations.types.push({
+            type: 'business',
             key: key,
             label: segment.label,
             icon: configuration.locationCategories.mapIconFolder + 'businesses_' + key + '_default.png',
@@ -49,9 +50,23 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     if (configuration && configuration.locationCategories && configuration.locationCategories.households) {
       if (configuration.locationCategories.households.show) {
         service.locations.types.push({
+          type: 'household',
           key: 'households',
           label: configuration.locationCategories.households.label,
           icon: configuration.locationCategories.mapIconFolder + 'households_default.png',
+          checked: false
+        })
+      }
+    }
+
+    // Show Towers
+    if (configuration && configuration.locationCategories && configuration.locationCategories.towers) {
+      if (configuration.locationCategories.towers.show) {
+        service.locations.types.push({
+          type: 'tower',
+          key: 'towers',
+          label: configuration.locationCategories.towers.label,
+          icon: configuration.locationCategories.mapIconFolder + 'tower.png',
           checked: false
         })
       }
