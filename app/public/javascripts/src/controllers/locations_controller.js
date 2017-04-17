@@ -377,7 +377,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
     // Select the business categories
     var business_categories = []
-    $scope.planState.locations.types.forEach((locationType) => {
+    $scope.planState.locationTypes.forEach((locationType) => {
       if ((locationType.type === 'business') && (locationType.checked)) {
         business_categories.push(locationType.key)
       }

@@ -19,23 +19,15 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
 
   // Initialize the state of the application
   var initializeState = function() {
-    service.planId = INVALID_PLAN_ID;
-    service.locations = {
-      types: [],
-      dataSources: {
-        globalBusinesses: false,
-        globalResidential: false,
-        globalTowers: false,
-        uploaded: []
-      }
-    }
+    service.planId = INVALID_PLAN_ID
+    service.locationTypes = []
 
     // Iterate over the business segments in the configuration
     if (configuration && configuration.locationCategories && configuration.locationCategories.businesses && configuration.locationCategories.businesses.segments) {
       Object.keys(configuration.locationCategories.businesses.segments).forEach((key) => {
         var segment = configuration.locationCategories.businesses.segments[key];
         if (segment.show) {
-          service.locations.types.push({
+          service.locationTypes.push({
             type: 'business',
             key: key,
             label: segment.label,
@@ -49,7 +41,7 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     // Show residential/household units
     if (configuration && configuration.locationCategories && configuration.locationCategories.households) {
       if (configuration.locationCategories.households.show) {
-        service.locations.types.push({
+        service.locationTypes.push({
           type: 'household',
           key: 'households',
           label: configuration.locationCategories.households.label,
@@ -62,7 +54,7 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     // Show Towers
     if (configuration && configuration.locationCategories && configuration.locationCategories.towers) {
       if (configuration.locationCategories.towers.show) {
-        service.locations.types.push({
+        service.locationTypes.push({
           type: 'tower',
           key: 'towers',
           label: configuration.locationCategories.towers.label,
