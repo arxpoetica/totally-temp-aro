@@ -21,7 +21,7 @@
 		}
 	},
 	"households": {
-		"description": "5G",
+		"description": "Households",
 		"segments": {
 			"small": {
 				"show": false,
@@ -34,6 +34,7 @@
 		}
 	},
 	"towers": {
-		"show": false
+		"show": true,
+		"label": "Enterprises"
 	}
 }
