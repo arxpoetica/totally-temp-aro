@@ -21,7 +21,7 @@
 		}
 	},
 	"households": {
-		"description": "5G",
+		"description": "Households",
 		"segments": {
 			"small": {
 				"show": false,

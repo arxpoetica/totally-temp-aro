@@ -17,6 +17,7 @@
   "ui": {
     "title": "ARO",
     "layout": "default",
+    "defaultSearch":"Mumbai, Maharashtra, India",
     "map_tools": {
       "locations": {
         "view": ["commercial", "residential"],
