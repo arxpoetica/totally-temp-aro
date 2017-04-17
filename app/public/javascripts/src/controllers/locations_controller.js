@@ -18,7 +18,43 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     }
   ]
 
+  // This function is a getter (when newValue is undefined) and setter (when newValue is defined)
+  // for determining whether we use a particular location type in optimization (and show those
+  // locations in the UI)
+  var useGlobalLocationType = (locationType, optimizationOptions, newValue) => {
+    if (typeof newValue === 'undefined') {
+      // Function is called as a getter. Return true if the global datasource ID exists in the array of datasource ids for this locationType
+      return optimizationOptions
+             && optimizationOptions.locationDataSources
+             && optimizationOptions.locationDataSources[locationType]
+             && optimizationOptions.locationDataSources[locationType].indexOf($scope.planState.GLOBAL_DATASOURCE_ID) >= 0
+    } else {
+      // Function is called as a setter
+      // Make sure that we have an array for this locationType in optimization options
+      if (!optimizationOptions.locationDataSources[locationType]) {
+        optimizationOptions.locationDataSources[locationType] = []
+      }
 
+      var indexOfGlobalDataSourceId = optimizationOptions.locationDataSources[locationType].indexOf($scope.planState.GLOBAL_DATASOURCE_ID)
+      if (newValue) {
+        // Add the global data source to the array if it doesn't already exist
+        if (indexOfGlobalDataSourceId < 0) {
+          $scope.planState.optimizationOptions.locationDataSources[locationType].push($scope.planState.GLOBAL_DATASOURCE_ID)
+        }
+      } else {
+        // Remove the global data source to the array if it exists in the array
+        if (indexOfGlobalDataSourceId >= 0) {
+          optimizationOptions.locationDataSources[locationType].splice(indexOfGlobalDataSourceId, 1)
+        }
+      }
+      console.log(optimizationOptions)
+    }
+  }
+
+  // Define getter/setter functions for different business categories
+  $scope.getSetLocationTypes = {
+    business_small: (value) => { return useGlobalLocationType('businesses', $scope.planState.optimizationOptions, value) }
+  }
 
 
   $scope.overlay = 'none'

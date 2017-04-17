@@ -19,8 +19,16 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
 
   // Initialize the state of the application
   var initializeState = function() {
-    service.planId = INVALID_PLAN_ID
-    service.locationTypes = []
+
+    service.planId = INVALID_PLAN_ID    // The plan ID that is currently selected
+    service.GLOBAL_DATASOURCE_ID = 1
+    service.locationTypes = []          // A list of location types to show in the locations layer
+
+    // The optimization options object should be constructed such that it can be passed directly
+    // to the optimization engine
+    service.optimizationOptions = {
+      locationDataSources: {}
+    }
 
     // Iterate over the business segments in the configuration
     if (configuration && configuration.locationCategories && configuration.locationCategories.businesses && configuration.locationCategories.businesses.segments) {
