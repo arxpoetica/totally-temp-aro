@@ -74,26 +74,6 @@
         <label>Locations</label>
       </div>
       <div ng-repeat="locationType in planState.allLocationTypes" style="clear:both" class="customer-type">
-        <div class="locations-filter" ng-show="selectedFilter === 'f_'+locationType.key">
-          <form>
-            <div class="form-group">
-              <label>Industry</label>
-              <select class="form-control" disabled>
-                <option>Select an industry</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Employee count</label>
-              <input type="range" disabled>
-            </div>
-          </form>
-        </div>
-        <div class="pull-right">
-          <a href="javascript:;" ng-click="toggleFilter('f_'+locationType.key)" class="btn btn-default btn-xs locations-filter-btn">
-            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'f_'+locationType.key"></span>
-            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'f_'+locationType.key"></span>
-          </a>
-        </div>
         <label class="pull-right">
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected[locationType.key]"></span>
           <input type="checkbox"
@@ -114,7 +94,7 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="getSetDataSources['businesses']"
+                 ng-model="getSetDataSources['business']"
                  ng-model-options="{ getterSetter: true }">
         </label>
         <label>Global Businesses</label>
@@ -123,7 +103,7 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="getSetDataSources['households']"
+                 ng-model="getSetDataSources['household']"
                  ng-model-options="{ getterSetter: true }">
         </label>
         <label>Global Households</label>
@@ -132,151 +112,11 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="getSetDataSources['towers']"
+                 ng-model="getSetDataSources['celltower']"
                  ng-model-options="{ getterSetter: true }">
         </label>
         <label>Global Towers</label>
       </div>
-    </form>
-    end of new implementation
-
-    <!-- Businesses -->
-    <form ng-hide="show_commercial && !show_residential">
-      <div>
-        <div ng-repeat="category in business_categories" style="clear:both" class="customer-type shaded">
-          <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_commercial">
-            <div class="locations-filter" ng-show="selectedFilter === 'f_'+category.name">
-              <form>
-                <div class="form-group">
-                  <label>Industry</label>
-                  <select class="form-control" disabled>
-                    <option>Select an industry</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Employee count</label>
-                  <input type="range" disabled>
-                </div>
-              </form>
-            </div>
-            <div class="pull-right">
-              <a href="javascript:;" ng-click="toggleFilter('f_'+category.name)" class="btn btn-default btn-xs locations-filter-btn">
-                <span class="fa fa-chevron-left" ng-show="selectedFilter === 'f_'+category.name"></span>
-                <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'f_'+category.name"></span>
-              </a>
-            </div>
-            <label class="pull-right">
-              <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected[category.name]"></span>
-              <input type="checkbox" ng-model="business_categories_selected[category.name]" ng-change="changeLocationsLayerOLD_DELETEMETODO()">
-            </label>
-            <div class="pull-left">
-              <img ng-src="{{mapIconFolder + 'businesses_' + category.name + '_default.png'}}" style="width:16px;margin-right:10px">
-            </div>
-            <label>{{category.description}}</label>
-          </div>
-        </div>
-      </div>
-      <!-- END Businesses -->
-
-      <!-- Households -->
-      <div ng-class="{'disabled': overlay !== 'none'}" ng-show="show_residential" class="customer-type shaded">
-        <div class="locations-filter" ng-show="selectedFilter === 'residential'">
-          <form>
-            <div class="form-group">
-              <label>Income Level</label>
-              <select class="form-control" disabled>
-                <option>Select an income level</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Education Level</label>
-              <select class="form-control" disabled>
-                <option>Select an education level</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Credit Quality</label>
-              <select class="form-control" disabled>
-                <option>Select an option</option>
-              </select>
-            </div>
-          </form>
-        </div>
-        <div class="pull-right">
-          <a href="javascript:;" ng-click="toggleFilter('residential')" class="btn btn-default btn-xs locations-filter-btn">
-            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'residential'"></span>
-            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'residential'"></span>
-          </a>
-        </div>
-        <label class="pull-right">
-          <input type="checkbox" ng-model="show_households" value="households" ng-change="changeLocationsLayerOLD_DELETEMETODO('households')" ng-disabled="overlay !== 'none'">
-        </label>
-        <label style="margin-left:25px">{{households_description}}</label>
-      </div>
-      <div class="customer-type">
-        <div ng-repeat="category in household_categories" style="clear:both">
-          <div class="pull-left">
-            <img ng-src="{{mapIconFolder + 'households_' + category.name + '_default.png'}}" style="width:16px;margin-right:10px">
-          </div>
-          <label class="pull-right" style="margin-right: 22px">
-            <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="household_categories_selected[category.name]"></span>
-            <input type="checkbox" ng-model="household_categories_selected[category.name]" ng-change="changeLocationsLayerOLD_DELETEMETODO()" ng-disabled="!show_households">
-          </label>
-          <label style="font-weight:normal">{{category.description}}</label>
-        </div>
-      </div>
-      <!-- END Households -->
-
-      <!-- CellTowers -->
-      <div ng-if="towers.showInUi" ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
-        <div class="locations-filter" ng-show="selectedFilter === 'towers'">
-          <form>
-            <div class="form-group">
-              <label>Site Type</label>
-              <select class="form-control" disabled>
-                <option>Select a Site Type</option>
-              </select>
-            </div>
-          </form>
-        </div>
-        <div class="pull-right">
-          <a href="javascript:;" ng-click="toggleFilter('towers')" class="btn btn-default btn-xs locations-filter-btn">
-            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'towers'"></span>
-            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'towers'"></span>
-          </a>
-        </div>
-        <div class="pull-left">
-          <img ng-src="{{mapIconFolder + 'tower.png'}}" style="width:16px;margin-right:10px">
-        </div>
-        <label class="pull-right">
-          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="show_towers"></span>
-          <input type="checkbox" ng-model="show_towers" value="true" ng-change="changeLocationsLayerOLD_DELETEMETODO()" ng-disabled="overlay !== 'none'">
-        </label>
-        <label>{{towers.label}}</label>
-      </div>
-      <div ng-class="{'disabled': overlay !== 'none'}" class="customer-type shaded">
-        <div class="locations-filter" ng-show="selectedFilter === 'addCustomers'">
-          <form>
-            <div class="form-group">
-              <label>asdfasdf</label>
-              <select class="form-control" disabled>
-                <option>adfs</option>
-              </select>
-            </div>
-          </form>
-        </div>
-        <div class="pull-right" style="visibility:hidden">
-          <a href="javascript:;" ng-click="toggleFilter('addCustomers')" class="btn btn-default btn-xs locations-filter-btn">
-            <span class="fa fa-chevron-left" ng-show="selectedFilter === 'addCustomers'"></span>
-            <span class="fa fa-chevron-right" ng-show="selectedFilter !== 'addCustomers'"></span>
-          </a>
-        </div>
-        <label class="pull-right">
-          <input type="checkbox" ng-model="showUploadedCustomers" ng-change="changeLocationsLayerOLD_DELETEMETODO()" value="true" ng-disabled="overlay !== 'none'">
-        </label>
-        <label style="margin-left:25px">Uploaded Customers</label>
-      </div>
-      <!-- END CellTowers -->
     </form>
 
     <div ng-show="showUploadedCustomers" style="padding:10px; margin-left:25px; margin-right:30px">

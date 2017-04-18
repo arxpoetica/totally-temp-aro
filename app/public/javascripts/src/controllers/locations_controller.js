@@ -22,6 +22,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     $scope.defineGetterSetters()
   })
 
+  // Define getter setters (put this in a function as it is called after configuration has been loaded)
   $scope.defineGetterSetters = () => {
     // This function is a getter (when newValue is undefined) and setter (when newValue is defined)
     // for determining which location types to show (and optimize)
@@ -93,9 +94,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
     // Define getter/setter functions for different business categories. All data is stored to/from $scope.planState.optimizationOptions
     $scope.getSetDataSources = {
-      businesses: (value) => { return useGlobalDataSource('businesses', $scope.planState.optimizationOptions, value) },
-      households: (value) => { return useGlobalDataSource('households', $scope.planState.optimizationOptions, value) },
-      towers: (value) => { return useGlobalDataSource('towers', $scope.planState.optimizationOptions, value) }
+      businesses: (value) => { return useGlobalDataSource('business', $scope.planState.optimizationOptions, value) },
+      households: (value) => { return useGlobalDataSource('household', $scope.planState.optimizationOptions, value) },
+      towers: (value) => { return useGlobalDataSource('celltower', $scope.planState.optimizationOptions, value) }
     }
   }
 
@@ -121,24 +122,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
   })
 
-  //TODO: DELETE
-  // Load the location filters only after the configuration has been loaded
-  $scope.isLoadingConfiguration = true
-  $rootScope.$on('configuration_loaded', () => {
-    $scope.loadLocationFilters()
-    $scope.isLoadingConfiguration = false
-    // If we have a plan loaded in scope, reload selected locations layer as we now have icons for selected locations
-    if ($scope.plan) {
-      map.ready(() => {
-        selectedLocationsLayer.show()
-        selectedLocationsLayer.reloadData()
-        // select entity types used in optimization
-        selectLocations($scope.plan.location_types)
-      })
-    }
-  })
-  //END TODO: DELETE
-
   // The state.locations object will be updated after the configuration is loaded
   $scope.planState = state;
 
@@ -155,7 +138,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   $scope.business_categories_selected = {}
   $scope.household_categories_selected = {}
   $scope.households_description = ''
-
 
   var uploadedCustomersSelect = $('.uploadedCustomersSelect')
 
@@ -256,199 +238,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   map_layers.addFeatureLayer(selectedLocationsLayer)
   map_layers.addFeatureLayer(customerProfileLayer)
 
-  function whatLocationsAreShowing () {
-    if (!$scope.show_businesses && !$scope.show_households) {
-      locationsLayer.shows = []
-    } else if ($scope.show_businesses && $scope.show_households) {
-      locationsLayer.shows = ['businesses', 'households']
-    } else if ($scope.show_businesses) {
-      locationsLayer.shows = ['businesses']
-    } else if ($scope.show_households) {
-      locationsLayer.shows = ['households']
-    }
-  }
-  whatLocationsAreShowing()
-
-  $scope.loadLocationFilters = function() {
-    $http.get('/locations_filters').success((response) => {
-      $scope.industries = response.industries
-      $scope.customer_types = response.customer_types
-      $scope.employees_by_location = response.employees_by_location
-      var business_categories = response.business_categories
-      var household_categories = response.household_categories
-
-      $scope.towers = {
-        showInUi: configuration.locationCategories.celltower.show,
-        label: configuration.locationCategories.celltower.label
-      }
-
-      // Replace description in business categories with the description we get from our configuration service
-      $scope.business_categories = []
-      business_categories.forEach((businessCategory, index) => {
-        var segmentInfo = configuration.locationCategories.business.segments
-        var matchingSegment = null
-        for (var prop in segmentInfo) {
-          if (prop === businessCategory.name) {
-            matchingSegment = segmentInfo[prop]
-            break;
-          }
-        }
-        if (matchingSegment.show) {
-          // Only add items if the "show" flag is on
-          business_categories[index].description = matchingSegment.label
-          $scope.business_categories.push(business_categories[index])
-        }
-      })
-
-      // Replace description in household categories with the description we get from our configuration service
-      $scope.household_categories = []
-      // TODO: this is all going away
-      // household_categories.forEach((householdCategory, index) => {
-      //   var segmentInfo = configuration.locationCategories.households.segments
-      //   var matchingSegment = null
-      //   for (var prop in segmentInfo) {
-      //     if (prop === householdCategory.name) {
-      //       matchingSegment = segmentInfo[prop]
-      //       break;
-      //     }
-      //   }
-      //   if (matchingSegment.show) {
-      //     // Only add items if the "show" flag is on
-      //     household_categories[index].description = matchingSegment.label
-      //     $scope.household_categories.push(household_categories[index])
-      //   }
-      // })
-      // $scope.households_description = configuration.locationCategories.households.label
-
-      $scope.mapIconFolder = configuration.locationCategories.mapIconFolder
-      $scope.env_is_test = configuration.locationCategories.env_is_test
-
-      $scope.business_categories_selected = {}
-      $scope.business_categories.forEach((category) => {
-        //$scope.business_categories_selected[category.name] = true
-        category.fullName = `b_${category.name}`
-      })
-      $scope.business_categories_selected['2kplus'] = false
-      changeOptimization()
-
-      $scope.household_categories_selected = []
-      $scope.household_categories.forEach((category) => {
-        //$scope.household_categories_selected[category.name] = true
-        category.fullName = `h_${category.name}`
-      })
-
-      // industries
-      $('#create-location select.industries').select2({ placeholder: 'Select an industry' })
-
-      // customer_types
-      $('#create-location select.households_customer_types').select2({ placeholder: 'Select a customer type' })
-      $('#create-location select.businesses_customer_types').select2({ placeholder: 'Select a customer type' })
-
-      // filters
-      $scope.industries.forEach((industry) => {
-        industry.text = industry.industry_name
-      })
-      $scope.customer_types.forEach((customer_type) => {
-        customer_type.text = customer_type.name
-      })
-      $scope.employees_by_location.forEach((employee_by_location) => {
-        employee_by_location.text = employee_by_location.value_range
-      })
-
-      $('#locations_controller .select2-industries').select2({
-        placeholder: 'Any industry',
-        multiple: true,
-        data: $scope.industries
-      })
-
-      $('#locations_controller .select2-customer-types').select2({
-        placeholder: 'Any customer type',
-        multiple: true,
-        data: $scope.customer_types
-      })
-
-      $('#locations_controller .select2-number-of-employees').select2({
-        placeholder: 'Any number of employees',
-        multiple: true,
-        data: $scope.employees_by_location
-      })
-    })
-  }
-
-  $scope.changeLocationsLayerOLD_DELETEMETODO = (majorCategory) => {
-    tracker.track('Locations / ' + $scope.overlay)
-
-    customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
-
-    if (!$scope.show_businesses) {
-      $scope.business_categories_selected['large'] = false
-      $scope.business_categories_selected['medium'] = false
-    } else if (majorCategory === 'businesses') {
-      $scope.business_categories_selected['large'] = true
-      $scope.business_categories_selected['medium'] = true
-    }
-
-    if (!$scope.show_households) {
-      $scope.household_categories_selected['small'] = false
-      $scope.household_categories_selected['medium'] = false
-    } else if (majorCategory === 'households') {
-      $scope.household_categories_selected['small'] = true
-      $scope.household_categories_selected['medium'] = true
-    }
-
-    var selectedDatasources = uploadedCustomersSelect.select2('val')
-    var dataSources = $scope.show_towers ? [1] : []
-    if ($scope.showUploadedCustomers) {
-      dataSources = dataSources.concat(selectedDatasources)
-      $rootScope.$broadcast('datasource_selected_location_modal',dataSources)
-    }
-    optimization.datasources = dataSources.map((id) => +id)
-
-    const subcategories = (key) => {
-      var obj = $scope[`${key}_categories_selected`]
-      var categories = Object.keys(obj).filter((key) => obj[key])
-      return categories
-    }
-
-    if ($scope.overlay === 'none') {
-      var businessCategories = subcategories('business')
-      var householdCategories = subcategories('household')
-      if (!$scope.show_businesses) {
-        businessCategories = _.difference(businessCategories, ['medium', 'large'])
-      }
-      if (!$scope.show_households) {
-        householdCategories = []
-      }
-
-      var towers = ($scope.show_towers || ($scope.showUploadedCustomers && selectedDatasources.length > 0)) ? ['towers'] : []
-      if (businessCategories.length === 0 && householdCategories.length === 0 && towers.length === 0 && dataSources.length === 0) {
-        locationsLayer.hide()
-      } else {
-        var options = {
-          business_categories: businessCategories,
-          household_categories: householdCategories,
-          towers: towers,
-          dataSources: dataSources
-        }
-        locationsLayer.setApiEndpoint('/locations', options)
-        locationsLayer.show()
-      }
-    } else {
-      locationsLayer.hide()
-    }
-    whatLocationsAreShowing()
-    $rootScope.$broadcast('locations_layer_changed')
-
-    if ($scope.show_businesses && $scope.overlay === 'none') {
-      $('#locations_controller .business-filter').prop('disabled', false)
-    } else {
-      $('#locations_controller .business-filter').select2('val', [], true)
-      $('#locations_controller .business-filter').prop('disabled', true)
-    }
-
-    changeOptimization()
-  }
-
   $scope.changeLocationsLayer = (majorCategory) => {
     tracker.track('Locations / ' + $scope.overlay)
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
@@ -484,11 +273,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
         map.setOptions({ draggableCursor: null })
       }
     }
-  })
-
-  $rootScope.$on('route_planning_changed', () => {
-    // locationsLayer.reloadData(true)
-    // selectedLocationsLayer.reloadData(true)
   })
 
   $scope.create_location = () => {
@@ -676,15 +460,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     } else {
       locationsLayer.setThreshold(15)
     }
-  }
-
-  function changeOptimization () {
-    $rootScope.optimizeMedium = $scope.show_businesses && $scope.business_categories_selected['medium']
-    $rootScope.optimizeLarge = $scope.show_businesses && $scope.business_categories_selected['large']
-    $rootScope.optimizeSMB = $scope.business_categories_selected['small']
-    $rootScope.optimizeHouseholds = $scope.show_households
-    $rootScope.optimizeTowers = $scope.show_towers
-    $rootScope.optimize2kplus = $scope.business_categories_selected['2kplus']
   }
 
   $scope.selectedFilter = null
