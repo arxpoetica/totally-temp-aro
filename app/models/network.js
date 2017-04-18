@@ -358,14 +358,7 @@ module.exports = class Network {
     var financialConstraints = body.financialConstraints = { years: 10 }
     if (options.budget) financialConstraints.budget = options.budget
     if (options.discountRate) financialConstraints.discountRate = options.discountRate
-    if (options.irrThreshold) {
-        if(algorithm == "IRR_THRESH"){
-          delete financialConstraints.budget;
-          financialConstraints.preIrrThreshold = options.irrThreshold
-        }else {
-          body.threshold = options.irrThreshold
-        }
-    }
+    if (options.irrThreshold) body.threshold = options.irrThreshold
 
 
 

@@ -367,8 +367,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }else if(algorithm === "COVERAGE"){
       delete changes.budget
       delete changes.irrThreshold
-
       changes.threshold = $scope.coverageThreshold / 100;
+    }else if (algorithm === "IRR_THRESH") {
+        delete  changes.budget;
+        changes.discountRate = changes.irrThreshold;
+        delete changes.irrThreshold;
     }
 
     changes.fiberNetworkConstraints={};
