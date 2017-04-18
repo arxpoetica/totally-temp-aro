@@ -22,13 +22,15 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
 
     service.planId = INVALID_PLAN_ID    // The plan ID that is currently selected
     service.GLOBAL_DATASOURCE_ID = 1
-    service.allLocationTypes = []          // A list of location types to show in the locations layer
 
-    // The optimization options object should be constructed such that it can be passed directly
-    // to the optimization engine
-    service.optimizationOptions = {
-      locationTypes: [],
-      locationDataSources: {}
+    // A list of location types to show in the locations layer
+    service.locationTypes = []
+    // A list of location data sources to show in the locations layer
+    service.locationDataSources = {
+      useGlobalBusiness: false,
+      useGlobalHousehold: false,
+      useGlobalCellTower: false,
+      useUploaded: []
     }
 
     // Iterate over the business segments in the configuration
@@ -36,10 +38,11 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
       Object.keys(configuration.locationCategories.business.segments).forEach((key) => {
         var segment = configuration.locationCategories.business.segments[key];
         if (segment.show) {
-          service.allLocationTypes.push({
+          service.locationTypes.push({
             type: 'business',
             key: key,
             label: segment.label,
+            checked: false,
             icon: configuration.locationCategories.mapIconFolder + 'businesses_' + key + '_default.png'
           })
         }
@@ -49,10 +52,11 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     // Show residential/household units
     if (configuration && configuration.locationCategories && configuration.locationCategories.household) {
       if (configuration.locationCategories.household.show) {
-        service.allLocationTypes.push({
+        service.locationTypes.push({
           type: 'household',
           key: 'household',
           label: configuration.locationCategories.household.label,
+          checked: false,
           icon: configuration.locationCategories.mapIconFolder + 'households_default.png'
         })
       }
@@ -61,10 +65,11 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     // Show Towers
     if (configuration && configuration.locationCategories && configuration.locationCategories.celltower) {
       if (configuration.locationCategories.celltower.show) {
-        service.allLocationTypes.push({
+        service.locationTypes.push({
           type: 'celltower',
           key: 'celltower',
           label: configuration.locationCategories.celltower.label,
+          checked: false,
           icon: configuration.locationCategories.mapIconFolder + 'tower.png'
         })
       }
