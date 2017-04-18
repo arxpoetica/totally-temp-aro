@@ -327,9 +327,11 @@ module.exports = class Network {
       'TARGET_IRR': 'IRR',
       'BUDGET_IRR': 'IRR',
       'IRR': 'IRR',
+      'IRR_THRESH':'IRR',
       'TABC': 'CUSTOM'
     }
-    options.algorithm = algorithms[options.algorithm] || options.algorithm
+    var algorithm = options.algorithm;
+    options.algorithm = algorithms[algorithm] || algorithm;
     options.locationTypes = Array.isArray(options.locationTypes) ? options.locationTypes : []
     var body = {
       planId: plan_id,
@@ -356,7 +358,16 @@ module.exports = class Network {
     var financialConstraints = body.financialConstraints = { years: 10 }
     if (options.budget) financialConstraints.budget = options.budget
     if (options.discountRate) financialConstraints.discountRate = options.discountRate
-    if (options.irrThreshold) body.threshold = options.irrThreshold
+    if (options.irrThreshold) {
+        if(algorithm == "IRR_THRESH"){
+          delete financialConstraints.budget;
+          financialConstraints.preIrrThreshold = options.irrThreshold
+        }else {
+          body.threshold = options.irrThreshold
+        }
+    }
+
+
 
     return Promise.all([
       database.findOne('SELECT * FROM client.plan_links WHERE plan_id = $1 LIMIT 1', [plan_id]),
