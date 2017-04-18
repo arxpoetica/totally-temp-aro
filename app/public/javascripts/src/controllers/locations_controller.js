@@ -18,42 +18,85 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     }
   ]
 
-  // This function is a getter (when newValue is undefined) and setter (when newValue is defined)
-  // for determining whether we use a particular data source in optimization
-  var useGlobalLocationType = (locationType, optimizationOptions, newValue) => {
-    if (typeof newValue === 'undefined') {
-      // Function is called as a getter. Return true if the global datasource ID exists in the array of datasource ids for this locationType
-      return optimizationOptions
-             && optimizationOptions.locationDataSources
-             && optimizationOptions.locationDataSources[locationType]
-             && optimizationOptions.locationDataSources[locationType].indexOf($scope.planState.GLOBAL_DATASOURCE_ID) >= 0
-    } else {
-      // Function is called as a setter
-      // Make sure that we have an array for this locationType in optimization options
-      if (!optimizationOptions.locationDataSources[locationType]) {
-        optimizationOptions.locationDataSources[locationType] = []
-      }
+  $rootScope.$on('configuration_loaded', () => {
+    $scope.defineGetterSetters()
+  })
 
-      var indexOfGlobalDataSourceId = optimizationOptions.locationDataSources[locationType].indexOf($scope.planState.GLOBAL_DATASOURCE_ID)
-      if (newValue) {
-        // Add the global data source to the array if it doesn't already exist
-        if (indexOfGlobalDataSourceId < 0) {
-          $scope.planState.optimizationOptions.locationDataSources[locationType].push($scope.planState.GLOBAL_DATASOURCE_ID)
-        }
+  $scope.defineGetterSetters = () => {
+    // This function is a getter (when newValue is undefined) and setter (when newValue is defined)
+    // for determining which location types to show (and optimize)
+    var useGlobalLocationType = (locationType, optimizationOptions, newValue) => {
+      if (typeof newValue === 'undefined') {
+        // Function is called as a getter. Return true if the location type exists in the array of selected locationTypes
+        return optimizationOptions
+              && optimizationOptions.locationTypes
+              && optimizationOptions.locationTypes.indexOf(locationType) >= 0
       } else {
-        // Remove the global data source to the array if it exists in the array
-        if (indexOfGlobalDataSourceId >= 0) {
-          optimizationOptions.locationDataSources[locationType].splice(indexOfGlobalDataSourceId, 1)
+        // Function is called as a setter
+
+        var indexOfLocationType = optimizationOptions.locationTypes.indexOf(locationType)
+        if (newValue) {
+          // Add the global data source to the array if it doesn't already exist
+          if (indexOfLocationType < 0) {
+            optimizationOptions.locationTypes.push(locationType)
+          }
+        } else {
+          // Remove the global data source to the array if it exists in the array
+          if (indexOfLocationType >= 0) {
+            optimizationOptions.locationTypes.splice(indexOfLocationType, 1)
+          }
         }
       }
     }
-  }
 
-  // Define getter/setter functions for different business categories. All data is stored to/from $scope.planState.optimizationOptions
-  $scope.getSetDataSources = {
-    businesses: (value) => { return useGlobalLocationType('businesses', $scope.planState.optimizationOptions, value) },
-    households: (value) => { return useGlobalLocationType('households', $scope.planState.optimizationOptions, value) },
-    towers: (value) => { return useGlobalLocationType('towers', $scope.planState.optimizationOptions, value) }
+    // Define getter/setter functions for different location types. All data is stored to/from $scope.planState.optimizationOptions
+    $scope.getSetLocationTypes = {
+      household: (value) => { return useGlobalLocationType('household', $scope.planState.optimizationOptions, value) },
+      celltower: (value) => { return useGlobalLocationType('celltower', $scope.planState.optimizationOptions, value) }
+    }
+    // For businesses, add a getter/setter for each business size
+    $scope.planState.allLocationTypes.forEach((locationType) => {
+      $scope.getSetLocationTypes[locationType.key] =
+        (value) => { return useGlobalLocationType(locationType.key, $scope.planState.optimizationOptions, value) }
+    })
+
+    // This function is a getter (when newValue is undefined) and setter (when newValue is defined)
+    // for determining whether we use a particular data source in optimization
+    var useGlobalDataSource = (locationType, optimizationOptions, newValue) => {
+      if (typeof newValue === 'undefined') {
+        // Function is called as a getter. Return true if the global datasource ID exists in the array of datasource ids for this locationType
+        return optimizationOptions
+              && optimizationOptions.locationDataSources
+              && optimizationOptions.locationDataSources[locationType]
+              && optimizationOptions.locationDataSources[locationType].indexOf($scope.planState.GLOBAL_DATASOURCE_ID) >= 0
+      } else {
+        // Function is called as a setter
+        // Make sure that we have an array for this locationType in optimization options
+        if (!optimizationOptions.locationDataSources[locationType]) {
+          optimizationOptions.locationDataSources[locationType] = []
+        }
+
+        var indexOfGlobalDataSourceId = optimizationOptions.locationDataSources[locationType].indexOf($scope.planState.GLOBAL_DATASOURCE_ID)
+        if (newValue) {
+          // Add the global data source to the array if it doesn't already exist
+          if (indexOfGlobalDataSourceId < 0) {
+            optimizationOptions.locationDataSources[locationType].push($scope.planState.GLOBAL_DATASOURCE_ID)
+          }
+        } else {
+          // Remove the global data source to the array if it exists in the array
+          if (indexOfGlobalDataSourceId >= 0) {
+            optimizationOptions.locationDataSources[locationType].splice(indexOfGlobalDataSourceId, 1)
+          }
+        }
+      }
+    }
+
+    // Define getter/setter functions for different business categories. All data is stored to/from $scope.planState.optimizationOptions
+    $scope.getSetDataSources = {
+      businesses: (value) => { return useGlobalDataSource('businesses', $scope.planState.optimizationOptions, value) },
+      households: (value) => { return useGlobalDataSource('households', $scope.planState.optimizationOptions, value) },
+      towers: (value) => { return useGlobalDataSource('towers', $scope.planState.optimizationOptions, value) }
+    }
   }
 
   $scope.overlay = 'none'
@@ -235,14 +278,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       var household_categories = response.household_categories
 
       $scope.towers = {
-        showInUi: configuration.locationCategories.towers.show,
-        label: configuration.locationCategories.towers.label
+        showInUi: configuration.locationCategories.celltower.show,
+        label: configuration.locationCategories.celltower.label
       }
 
       // Replace description in business categories with the description we get from our configuration service
       $scope.business_categories = []
       business_categories.forEach((businessCategory, index) => {
-        var segmentInfo = configuration.locationCategories.businesses.segments
+        var segmentInfo = configuration.locationCategories.business.segments
         var matchingSegment = null
         for (var prop in segmentInfo) {
           if (prop === businessCategory.name) {
@@ -412,7 +455,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
     // Select the business categories
     var business_categories = []
-    $scope.planState.locationTypes.forEach((locationType) => {
+    $scope.planState.allLocationTypes.forEach((locationType) => {
       if ((locationType.type === 'business') && (locationType.checked)) {
         business_categories.push(locationType.key)
       }

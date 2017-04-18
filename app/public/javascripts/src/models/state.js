@@ -22,52 +22,50 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
 
     service.planId = INVALID_PLAN_ID    // The plan ID that is currently selected
     service.GLOBAL_DATASOURCE_ID = 1
-    service.locationTypes = []          // A list of location types to show in the locations layer
+    service.allLocationTypes = []          // A list of location types to show in the locations layer
 
     // The optimization options object should be constructed such that it can be passed directly
     // to the optimization engine
     service.optimizationOptions = {
+      locationTypes: [],
       locationDataSources: {}
     }
 
     // Iterate over the business segments in the configuration
-    if (configuration && configuration.locationCategories && configuration.locationCategories.businesses && configuration.locationCategories.businesses.segments) {
-      Object.keys(configuration.locationCategories.businesses.segments).forEach((key) => {
-        var segment = configuration.locationCategories.businesses.segments[key];
+    if (configuration && configuration.locationCategories && configuration.locationCategories.business && configuration.locationCategories.business.segments) {
+      Object.keys(configuration.locationCategories.business.segments).forEach((key) => {
+        var segment = configuration.locationCategories.business.segments[key];
         if (segment.show) {
-          service.locationTypes.push({
+          service.allLocationTypes.push({
             type: 'business',
             key: key,
             label: segment.label,
-            icon: configuration.locationCategories.mapIconFolder + 'businesses_' + key + '_default.png',
-            checked: false
+            icon: configuration.locationCategories.mapIconFolder + 'businesses_' + key + '_default.png'
           })
         }
       })
     }
 
     // Show residential/household units
-    if (configuration && configuration.locationCategories && configuration.locationCategories.households) {
-      if (configuration.locationCategories.households.show) {
-        service.locationTypes.push({
+    if (configuration && configuration.locationCategories && configuration.locationCategories.household) {
+      if (configuration.locationCategories.household.show) {
+        service.allLocationTypes.push({
           type: 'household',
-          key: 'households',
-          label: configuration.locationCategories.households.label,
-          icon: configuration.locationCategories.mapIconFolder + 'households_default.png',
-          checked: false
+          key: 'household',
+          label: configuration.locationCategories.household.label,
+          icon: configuration.locationCategories.mapIconFolder + 'households_default.png'
         })
       }
     }
 
     // Show Towers
-    if (configuration && configuration.locationCategories && configuration.locationCategories.towers) {
-      if (configuration.locationCategories.towers.show) {
-        service.locationTypes.push({
-          type: 'tower',
-          key: 'towers',
-          label: configuration.locationCategories.towers.label,
-          icon: configuration.locationCategories.mapIconFolder + 'tower.png',
-          checked: false
+    if (configuration && configuration.locationCategories && configuration.locationCategories.celltower) {
+      if (configuration.locationCategories.celltower.show) {
+        service.allLocationTypes.push({
+          type: 'celltower',
+          key: 'celltower',
+          label: configuration.locationCategories.celltower.label,
+          icon: configuration.locationCategories.mapIconFolder + 'tower.png'
         })
       }
     }

@@ -73,7 +73,7 @@
       <div class="customer-type shaded">
         <label>Locations</label>
       </div>
-      <div ng-repeat="locationType in planState.locationTypes" style="clear:both" class="customer-type">
+      <div ng-repeat="locationType in planState.allLocationTypes" style="clear:both" class="customer-type">
         <div class="locations-filter" ng-show="selectedFilter === 'f_'+locationType.key">
           <form>
             <div class="form-group">
@@ -96,7 +96,9 @@
         </div>
         <label class="pull-right">
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected[locationType.key]"></span>
-          <input type="checkbox" ng-model="locationType.checked" ng-change="changeLocationsLayer()">
+          <input type="checkbox"
+                 ng-model="getSetLocationTypes[locationType.key]"
+                 ng-model-options="{ getterSetter: true }">
         </label>
         <div class="pull-left">
           <img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px">
