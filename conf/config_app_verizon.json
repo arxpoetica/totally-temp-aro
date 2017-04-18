@@ -17,6 +17,7 @@
   "ui": {
     "title": "OneFiber",
     "layout": "accordion",
+    "defaultSearch":"Seattle, WA, USA",
     "map_tools": {
       "layerVisibilityThresh" : 13,
       "locations": {
