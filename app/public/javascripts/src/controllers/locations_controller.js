@@ -169,7 +169,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
         household_categories.push('medium')
       } else if ((locationType.type === 'celltower') && locationType.checked) {
         towers.push('towers')
-        dataSources.add(1)  // Pushing towers only works if we also have the global data source id in there
       }
     })
 
@@ -183,6 +182,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     if ($scope.planState.locationDataSources.useGlobalCellTower) {
       dataSources.add(1)
     }
+    $scope.planState.locationDataSources.useUploaded.forEach((uploadedDataSource) => {
+      dataSources.add(uploadedDataSource.dataSourceId)
+    })
 
     // Set the selected options in the API endpoint that will show locations in the layer
     var options = {
@@ -259,10 +261,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   })
 
   $scope.datasources = []
+  $scope.allUploadedDataSources =[]
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     if (!$scope.heatmapOn) $scope.toggleHeatmap()
     $scope.datasources = []
+    $scope.allUploadedDataSources = []
     optimization.datasources = []
 
     // unselect all entity types
@@ -279,13 +283,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     }
 
     uploadedCustomersSelect.select2('val', [])
-    $scope.changeLocationsLayer()
     reloadDatasources()
+    $scope.changeLocationsLayer()
   })
 
   function reloadDatasources (callback) {
     $http.get('/datasources').success((response) => {
       $scope.datasources = response
+      $scope.allUploadedDataSources = response
+      console.log($scope.allUploadedDataSources)
       uploadedCustomersSelect.select2({
         placeholder: 'Select one or more datasets',
         escapeMarkup: (m) => m,
