@@ -75,7 +75,9 @@ module.exports = class Location {
       )
     `
     var params = [dataSources, businesses, households, default_businesses_datasource];
-    if(plan_id)params.push(plan_id);
+    if(plan_id) {
+      params.push(plan_id);
+    }
     return database.points(sql, params, true, viewport)
   }
 

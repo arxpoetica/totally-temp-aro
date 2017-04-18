@@ -11,10 +11,6 @@ exports.configure = (api, middleware) => {
   var check_owner_permission = middleware.check_owner_permission
   var check_loggedin = middleware.check_loggedin
 
-  function findLocation(plan_id , filters , viewport) {
-      return models.Location.findLocations(plan_id, filters, viewport);
-  }
-
   api.get('/locations/:plan_id', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = +request.params.plan_id
@@ -28,7 +24,7 @@ exports.configure = (api, middleware) => {
       }
       filters[key] = value
     })
-      findLocation(plan_id , filters , viewport)
+      models.Location.findLocations(plan_id , filters , viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -45,7 +41,7 @@ exports.configure = (api, middleware) => {
             filters[key] = value
         });
 
-         findLocation(false , filters , viewport)
+         models.Location.findLocations(false , filters , viewport)
             .then(jsonSuccess(response, next))
             .catch(next)
     })
