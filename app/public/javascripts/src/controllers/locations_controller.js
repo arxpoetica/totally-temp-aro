@@ -42,18 +42,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   // The state.locations object will be updated after the configuration is loaded
   $scope.planState = state;
 
-  $scope.user_id = user_id
-
-  $scope.show_commercial = config.ui.map_tools.locations.view.indexOf('commercial') >= 0
-  $scope.show_residential = config.ui.map_tools.locations.view.indexOf('residential') >= 0
-
-  $scope.show_businesses =  $scope.show_commercial
-  $scope.show_households = $scope.show_residential
-  $scope.show_towers = false
   $scope.new_location_data = null
-  $scope.industries = []
-
-  var uploadedCustomersSelect = $('.uploadedCustomersSelect')
 
   var locationStyles = {
     normal: {
@@ -260,19 +249,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       })
   })
 
-  $scope.datasources = []
   $scope.allUploadedDataSources =[]
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     if (!$scope.heatmapOn) $scope.toggleHeatmap()
-    $scope.datasources = []
     $scope.allUploadedDataSources = []
     optimization.datasources = []
-
-    // unselect all entity types
-    $scope.show_towers = false
-    $scope.show_businesses = true
-    $scope.show_households = false
 
     if (plan) {
       plan.location_types = plan.location_types || []
@@ -282,7 +264,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       })
     }
 
-    uploadedCustomersSelect.select2('val', [])
     reloadDatasources()
     $scope.changeLocationsLayer()
   })
@@ -291,25 +272,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     $http.get('/datasources').success((response) => {
       $scope.datasources = response
       $scope.allUploadedDataSources = response
-      console.log($scope.allUploadedDataSources)
-      uploadedCustomersSelect.select2({
-        placeholder: 'Select one or more datasets',
-        escapeMarkup: (m) => m,
-        data: response.map((item) => ({ id: item.dataSourceId, text: item.name })),
-        multiple: true
-      })
       callback && callback(response)
     })
   }
 
-  $rootScope.$on('uploaded_customers', (e, info) => {
-    reloadDatasources((response) => {
-      var dataset = response.find((item) => item.id === info.id)
-      if (!dataset) return
-      var val = uploadedCustomersSelect.select2('val')
-      val.push(String(dataset.dataSourceId))
-      uploadedCustomersSelect.select2('val', val, true)
-    })
+  $rootScope.$on('uploaded_data_sources', (e, info) => {
+    reloadDatasources()
   })
 
   $scope.overlay_is_loading = () => {

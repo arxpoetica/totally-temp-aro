@@ -55,7 +55,7 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
         return swal('Error', data.error || 'Unknown error', 'error')
       }
       $scope.editingDataset.id = data.id
-      $rootScope.$broadcast('uploaded_customers', $scope.editingDataset)
+      $rootScope.$broadcast('uploaded_data_sources', $scope.editingDataset)
       $('#upload_customers_modal').modal('hide')
     })
     xhr.send(formData)
