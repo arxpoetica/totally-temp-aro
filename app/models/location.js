@@ -49,69 +49,9 @@ module.exports = class Location {
             ST_Intersects(vw.geog, l.geog)
         AND l.state IN (select stusps from states)
 
-        LEFT JOIN client.plan_targets pt
+        ${plan_id ? `LEFT JOIN client.plan_targets pt
           ON pt.location_id = l.id
-          AND pt.plan_id = $1
-
-        LEFT JOIN aro.towers t
-          ON t.location_id = l.id
-          AND t.data_source_id IN ($2)
-
-        LEFT JOIN client.basic_classified_business b
-          ON b.location_id = l.id
-          AND b.category_name IN ($3) and b.data_source_id IN ($5)
-
-       LEFT JOIN client.basic_classified_business bu
-          ON bu.location_id = l.id
-          AND bu.data_source_id > $5 
-          AND bu.data_source_id IN ($2)   
-
-        LEFT JOIN client.basic_classified_household h
-          ON h.location_id = l.id
-          AND h.category_name IN ($4)
-
-        WHERE (t.id IS NOT NULL OR b.id IS NOT NULL OR bu.id IS NOT NULL OR h.id IS NOT NULL) AND pt.location_id IS NULL
-        GROUP BY 1,2
-      )
-    `
-    var params = [plan_id, dataSources, businesses, households, default_businesses_datasource]
-    return database.points(sql, params, true, viewport)
-  }
-
-  static findLocationsNoPlan (filters, viewport) {
-    var businesses = filters.business_categories
-    var households = filters.household_categories
-    var dataSources = (filters.dataSources || []).map((id) => +id || -1)
-    var default_businesses_datasource = 1
-
-    if (businesses.length === 0) businesses = ['']
-    if (households.length === 0) households = ['']
-    if (dataSources.length === 0) dataSources = [-1]
-
-    var sql = `
-      WITH view_window AS (
-        SELECT ST_SetSRID(ST_MakePolygon(ST_GeomFromText('${viewport.linestring}')), 4326) AS geog
-      ),
-      states AS (
-        SELECT st.stusps
-        FROM aro.states st
-        JOIN view_window vw
-          ON ST_Intersects(cast(vw.geog AS GEOMETRY), st.geom)
-      ),
-      features AS (
-        SELECT l.id, l.geom,
-          array_remove(array_agg(DISTINCT 'b_' || b.category_name::text)
-            || array_agg(DISTINCT 'h_' || h.category_name::text)
-            || array_agg(distinct CASE WHEN t.id IS NULL THEN NULL ELSE 'towers' END)
-            || array_agg(distinct case when bu.data_source_id is null then null else 'b_uploaded' end),
-          NULL) AS entity_categories
-        FROM aro.locations l
-          INNER JOIN states st
-              ON st.stusps = l.state
-          INNER JOIN
-          view_window vw ON
-            ST_Intersects(vw.geog, l.geog)
-        AND l.state IN (select stusps from states)
+          AND pt.plan_id = $5` : ''}
 
         LEFT JOIN aro.towers t
           ON t.location_id = l.id
@@ -130,14 +70,15 @@ module.exports = class Location {
           ON h.location_id = l.id
           AND h.category_name IN ($3)
 
-        WHERE (t.id IS NOT NULL OR b.id IS NOT NULL OR bu.id IS NOT NULL OR h.id IS NOT NULL)
+        WHERE (t.id IS NOT NULL OR b.id IS NOT NULL OR bu.id IS NOT NULL OR h.id IS NOT NULL) ${plan_id ? `AND pt.location_id IS NULL` : ''}
         GROUP BY 1,2
       )
     `
-    var params = [dataSources, businesses, households, default_businesses_datasource]
+    var params = [dataSources, businesses, households, default_businesses_datasource];
+    if(plan_id)params.push(plan_id);
     return database.points(sql, params, true, viewport)
   }
-  
+
   static findVisibleLocations(plan_id, filters) {
 
 	 var uploadedDataSources = filters.uploaded_datasources
