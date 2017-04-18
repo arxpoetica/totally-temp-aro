@@ -135,9 +135,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   $scope.show_towers = false
   $scope.new_location_data = null
   $scope.industries = []
-  $scope.business_categories_selected = {}
-  $scope.household_categories_selected = {}
-  $scope.households_description = ''
 
   var uploadedCustomersSelect = $('.uploadedCustomersSelect')
 
@@ -242,19 +239,27 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     tracker.track('Locations / ' + $scope.overlay)
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
-    // Select the business categories
+    // Select the business, household, celltower categories to show
     var business_categories = []
+    var household_categories = []
+    var towers = []
+    var locationTypesToDisplay = $scope.planState.optimizationOptions.locationTypes
     $scope.planState.allLocationTypes.forEach((locationType) => {
-      if ((locationType.type === 'business') && (locationType.checked)) {
+      if ((locationType.type === 'business') && (locationTypesToDisplay.indexOf(locationType.key) >= 0)) {
         business_categories.push(locationType.key)
+      } else if ((locationType.type === 'household') && (locationTypesToDisplay.indexOf(locationType.key) >= 0)) {
+        household_categories.push('small')
+        household_categories.push('medium')
+      } else if ((locationType.type === 'celltower') && (locationTypesToDisplay.indexOf(locationType.key) >= 0)) {
+        towers.push(1)
       }
     })
 
     // Set the selected options in the API endpoint that will show locations in the layer
     var options = {
       business_categories: business_categories,
-      household_categories: [],
-      towers: [],
+      household_categories: household_categories,
+      towers: towers,
       dataSources: [1]
     }
     locationsLayer.setApiEndpoint('/locations/:plan_id', options)
@@ -335,16 +340,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     $scope.show_towers = false
     $scope.show_businesses = true
     $scope.show_households = false
-    $scope.business_categories_selected = {}
-    $scope.household_categories_selected = {}
 
     if (plan) {
       plan.location_types = plan.location_types || []
       map.ready(() => {
         selectedLocationsLayer.show()
         selectedLocationsLayer.reloadData()
-        // select entity types used in optimization
-        selectLocations(plan.location_types)
       })
     }
 
@@ -375,26 +376,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       uploadedCustomersSelect.select2('val', val, true)
     })
   })
-
-  $rootScope.$on('select_locations', (e, locationTypes) => {
-    selectLocations(locationTypes)
-  })
-
-  function selectLocations (locationTypes) {
-    var businessTypes = {
-      medium: 'medium',
-      large: 'large',
-      small: 'small',
-      mrcgte2000: '2kplus'
-    }
-    Object.keys(businessTypes).forEach((type) => {
-      $scope.business_categories_selected[businessTypes[type]] = locationTypes.indexOf(type) >= 0
-    })
-    $scope.show_towers = locationTypes.indexOf('celltower') >= 0
-    $scope.show_households = locationTypes.indexOf('household') >= 0
-    //$scope.show_businesses = Object.keys($scope.business_categories_selected).reduce((total, item) => total || $scope.business_categories_selected[item], false)
-    $scope.changeLocationsLayer()
-  }
 
   $scope.overlay_is_loading = () => {
     return customerProfileLayer.is_loading

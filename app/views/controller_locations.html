@@ -78,7 +78,8 @@
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected[locationType.key]"></span>
           <input type="checkbox"
                  ng-model="getSetLocationTypes[locationType.key]"
-                 ng-model-options="{ getterSetter: true }">
+                 ng-model-options="{ getterSetter: true }"
+                 ng-change="changeLocationsLayer()">
         </label>
         <div class="pull-left">
           <img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px">
