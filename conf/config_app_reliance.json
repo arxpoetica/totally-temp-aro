@@ -18,6 +18,7 @@
     "title": "ARO",
     "layout": "default",
     "map_tools": {
+      "layerVisibilityThresh" : 13,
       "locations": {
         "view": ["commercial", "residential"],
         "overlay": ["density"],
