@@ -4,7 +4,7 @@
     ng-model="optimizationType"
     ng-options="item.id as item.label for item in optimizationTypeOptions">
   </select>
-  <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR'">
+  <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR' || optimizationType === 'IRR_THRESH'">
     <br>
     <p><strong>IRR Threshold</strong></p>
     <div class="row">
@@ -21,15 +21,17 @@
       </div>
     </div>
   </div>
-  <div ng-show="optimizationType === 'BUDGET_IRR' || optimizationType === 'IRR'">
+  <div ng-show="optimizationType === 'BUDGET_IRR' || optimizationType === 'IRR' || optimizationType === 'IRR_THRESH'">
     <br>
-    <p><strong>Target Capital</strong></p>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="form-group form-group-sm">
-          <div class="input-group input-group-sm">
-            <div class="input-group-addon"><%- config.currency_symbol %></div>
-            <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+    <div ng-hide="optimizationType === 'IRR_THRESH'">
+      <p><strong>Target Capital</strong></p>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group form-group-sm">
+            <div class="input-group input-group-sm">
+              <div class="input-group-addon"><%- config.currency_symbol %></div>
+              <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+            </div>
           </div>
         </div>
       </div>
