@@ -12,11 +12,7 @@ exports.configure = (api, middleware) => {
   var check_loggedin = middleware.check_loggedin
 
   function findLocation(plan_id , filters , viewport) {
-      if (plan_id){
-          return models.Location.findLocations(plan_id, filters, viewport);
-      }else {
-          return models.Location.findLocationsNoPlan(filters, viewport);
-      }
+      return models.Location.findLocations(plan_id, filters, viewport);
   }
 
   api.get('/locations/:plan_id', check_any_permission, middleware.viewport, (request, response, next) => {
