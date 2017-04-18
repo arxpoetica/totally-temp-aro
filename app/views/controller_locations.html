@@ -96,10 +96,7 @@
         </div>
         <label class="pull-right">
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected[locationType.key]"></span>
-          <!--<input type="checkbox" ng-model="locationType.checked" ng-change="changeLocationsLayer()">-->
-          <input type="checkbox"
-                 ng-model="getSetLocationTypes[locationType.type + '_' + locationType.key]"
-                 ng-model-options="{ getterSetter: true }" ng-change="changeLocationsLayer()">
+          <input type="checkbox" ng-model="locationType.checked" ng-change="changeLocationsLayer()">
         </label>
         <div class="pull-left">
           <img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px">
@@ -114,21 +111,27 @@
       </div>
       <div class="customer-type">
         <label class="pull-right">
-          <input type="checkbox" ng-model="planState.locations.dataSources.globalBusinesses" ng-change="changeLocationsLayer()">
+          <input type="checkbox"
+                 ng-model="getSetDataSources['businesses']"
+                 ng-model-options="{ getterSetter: true }">
         </label>
         <label>Global Businesses</label>
       </div>
       <!-- Global residential -->
       <div class="customer-type">
         <label class="pull-right">
-          <input type="checkbox" ng-model="planState.locations.dataSources.globalResidential" ng-change="changeLocationsLayer()">
+          <input type="checkbox"
+                 ng-model="getSetDataSources['households']"
+                 ng-model-options="{ getterSetter: true }">
         </label>
-        <label>Global Residential</label>
+        <label>Global Households</label>
       </div>
       <!-- Global towers -->
       <div class="customer-type">
         <label class="pull-right">
-          <input type="checkbox" ng-model="planState.locations.dataSources.globalTowers" ng-change="changeLocationsLayer()">
+          <input type="checkbox"
+                 ng-model="getSetDataSources['towers']"
+                 ng-model-options="{ getterSetter: true }">
         </label>
         <label>Global Towers</label>
       </div>

@@ -19,8 +19,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   ]
 
   // This function is a getter (when newValue is undefined) and setter (when newValue is defined)
-  // for determining whether we use a particular location type in optimization (and show those
-  // locations in the UI)
+  // for determining whether we use a particular data source in optimization
   var useGlobalLocationType = (locationType, optimizationOptions, newValue) => {
     if (typeof newValue === 'undefined') {
       // Function is called as a getter. Return true if the global datasource ID exists in the array of datasource ids for this locationType
@@ -47,15 +46,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
           optimizationOptions.locationDataSources[locationType].splice(indexOfGlobalDataSourceId, 1)
         }
       }
-      console.log(optimizationOptions)
     }
   }
 
-  // Define getter/setter functions for different business categories
-  $scope.getSetLocationTypes = {
-    business_small: (value) => { return useGlobalLocationType('businesses', $scope.planState.optimizationOptions, value) }
+  // Define getter/setter functions for different business categories. All data is stored to/from $scope.planState.optimizationOptions
+  $scope.getSetDataSources = {
+    businesses: (value) => { return useGlobalLocationType('businesses', $scope.planState.optimizationOptions, value) },
+    households: (value) => { return useGlobalLocationType('households', $scope.planState.optimizationOptions, value) },
+    towers: (value) => { return useGlobalLocationType('towers', $scope.planState.optimizationOptions, value) }
   }
-
 
   $scope.overlay = 'none'
   $scope.heatmapVisible = false
