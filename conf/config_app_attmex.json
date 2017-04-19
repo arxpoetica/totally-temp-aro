@@ -16,7 +16,9 @@
   "ui": {
     "title": "ARO",
     "layout": "default",
+    "defaultSearch":"Mexico City, CDMX, Mexico",
     "map_tools": {
+      "layerVisibilityThresh" : 13,
       "locations": {
         "view": ["commercial", "residential"],
         "overlay": ["density"],
